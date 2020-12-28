@@ -1,0 +1,57 @@
+# Default values for mongodb-editor-options.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# List options
+version: 3.4.17
+
+# Standalone, Replicaset, Sharded
+mode: Standalone
+replicas: 3
+replicaSet:
+  name: rs0
+shardTopology:
+  shard:
+    replicas: 3
+    shards: 3
+    persistence:
+      size: 10Gi
+  configServer:
+    replicas: 3
+    persistence:
+      size: 2Gi
+  mongos:
+    replicas: 3
+
+# "keyFile", "sendKeyFile", "sendX509", "x509"
+clusterAuthMode: keyFile
+
+# "disabled", "allowSSL", "preferSSL", "requireSSL"
+sslMode: disabled
+
+terminationPolicy: WipeOut
+
+storageClass:
+  name: standard
+
+persistence:
+  size: 10Gi
+
+machine: db.t.micro
+
+resources:
+
+authSecret:
+  create: true
+  annotations: {}
+  name: ""
+  password: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
