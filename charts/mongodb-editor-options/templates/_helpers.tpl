@@ -1,8 +1,7 @@
-{{/* vim: set filetype=mustache: */}}
 {{/*
 Expand the name of the chart.
 */}}
-{{- define "identity-server.name" -}}
+{{- define "mongodb-editor-options.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
@@ -11,7 +10,7 @@ Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 If release name contains chart name it will be used as a full name.
 */}}
-{{- define "identity-server.fullname" -}}
+{{- define "mongodb-editor-options.fullname" -}}
 {{- if .Values.fullnameOverride }}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
 {{- else }}
@@ -27,16 +26,16 @@ If release name contains chart name it will be used as a full name.
 {{/*
 Create chart name and version as used by the chart label.
 */}}
-{{- define "identity-server.chart" -}}
+{{- define "mongodb-editor-options.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
 Common labels
 */}}
-{{- define "identity-server.labels" -}}
-helm.sh/chart: {{ include "identity-server.chart" . }}
-{{ include "identity-server.selectorLabels" . }}
+{{- define "mongodb-editor-options.labels" -}}
+helm.sh/chart: {{ include "mongodb-editor-options.chart" . }}
+{{ include "mongodb-editor-options.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
@@ -46,17 +45,17 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{/*
 Selector labels
 */}}
-{{- define "identity-server.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "identity-server.name" . }}
+{{- define "mongodb-editor-options.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "mongodb-editor-options.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
 Create the name of the service account to use
 */}}
-{{- define "identity-server.serviceAccountName" -}}
+{{- define "mongodb-editor-options.serviceAccountName" -}}
 {{- if .Values.serviceAccount.create }}
-{{- default (include "identity-server.fullname" .) .Values.serviceAccount.name }}
+{{- default (include "mongodb-editor-options.fullname" .) .Values.serviceAccount.name }}
 {{- else }}
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}

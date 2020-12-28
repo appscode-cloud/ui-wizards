@@ -45,7 +45,7 @@ jobs:
     needs: build
     strategy:
       matrix:
-        k8s: [v1.14.10, v1.15.11, v1.16.9, v1.17.5, v1.18.8, v1.19.4, v1.20.0]
+        k8s: [v1.16.9, v1.17.5, v1.18.8, v1.19.4, v1.20.0]
     steps:
       - name: Check out code into the Go module directory
         uses: actions/checkout@v1
@@ -77,6 +77,7 @@ jobs:
       - name: Test charts
         run: |
           export KUBECONFIG="$HOME/.kube/config"
-          make ct TEST_CHARTS=charts/identity-server
+          kubectl create -f https://github.com/kubedb/apimachinery/raw/master/crds/kubedb.com_mongodbs.v1.yaml
+          make ct
           echo
           kubectl delete crds --all
