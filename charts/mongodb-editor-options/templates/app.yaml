@@ -1,0 +1,67 @@
+apiVersion: app.k8s.io/v1beta1
+kind: Application
+metadata:
+  name: {{ include "mongodb-editor-options.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels: {{- include "mongodb-editor-options.labels" . | nindent 4 }}
+  annotations:
+    kubepack.com/package: '{"kind":"ApplicationPackage","apiVersion":"kubepack.com/v1alpha1","chart":{"name":"{{ .Chart.Name }}","url":"https://bundles.byte.builders/ui/","version":"{{ .Chart.Version }}"},"channel":"Regular"}'
+spec:
+  descriptor:
+    description: {{ .Chart.Description }}
+    icons:
+      {{- with .Chart.Icon }}
+        {{- $imgtype := "application/octet-stream" }}
+        {{- if hasSuffix ".png" . }}
+          {{ $imgtype = "image/png" }}
+        {{- else}}{{if or (hasSuffix ".jpg" .) hasSuffix ".jpeg" . }}
+          {{ $imgtype = "image/jpeg" }}
+        {{- else}}{{if hasSuffix ".svg" . }}
+          {{ $imgtype = "image/svg+xml" }}
+        {{- end}}{{end}}{{end}}
+      - src: {{ . }}
+        type: {{ $imgtype }}
+      {{- end }}
+    links:
+      {{- with .Chart.Home }}
+      - description: website
+        url: {{ . }}
+      {{- end }}
+    maintainers:
+      {{- range .Chart.Maintainers }}
+      - email: {{ .Email }}
+        name: {{ .Name }}
+      {{- end }}
+    # TODO: Fix This
+    type: MongoDB
+    version: {{ .Chart.Version }}
+  selector:
+    matchLabels:
+      kubedb.com/kind: MongoDB
+      kubedb.com/name: {{ include "mongodb-editor-options.fullname" . }}
+  componentKinds:
+    - group: ""
+      kind: Secret
+    - group: ""
+      kind: Service
+    - group: apps
+      kind: StatefulSet
+    - group: grafana.searchlight.dev
+      kind: Dashboard
+    - group: kubedb.com
+      kind: MongoDB
+    - group: monitoring.coreos.com
+      kind: ServiceMonitor
+    - group: policy
+      kind: PodDisruptionBudget
+    - group: policy
+      kind: PodSecurityPolicy
+    - group: rbac.authorization.k8s.io
+      kind: Role
+    - group: rbac.authorization.k8s.io
+      kind: RoleBinding
+    - group: stash.appscode.com
+      kind: BackupConfiguration
+    - group: stash.appscode.com
+      kind: Repository
+  assemblyPhase: Ready

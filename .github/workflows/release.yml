@@ -44,6 +44,8 @@ jobs:
           cd $RUNNER_WORKSPACE/$(basename $CHART_REPOSITORY)
           GIT_TAG=${GITHUB_REF#"refs/tags/"}
           if [[ $GIT_TAG =~ "-alpha." ]] || [[ $GIT_TAG =~ "-beta." ]]; then
-            export REPO_DIR=testing
+            export REPO_DIR=ui-testing
+          else
+            export REPO_DIR=ui
           fi
           ./hack/scripts/open-pr.sh $GITHUB_WORKSPACE
