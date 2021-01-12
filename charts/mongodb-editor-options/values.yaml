@@ -2,56 +2,64 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-# List options
-version: 3.4.17
+metadata:
+  release:
+    # Release name
+    name:
+    # Release namespace
+    namespace:
 
-# Standalone, Replicaset, Sharded
-mode: Standalone
-replicas: 3
-replicaSet:
-  name: rs0
-shardTopology:
-  shard:
-    replicas: 3
-    shards: 3
-    persistence:
-      size: 10Gi
-  configServer:
-    replicas: 3
-    persistence:
-      size: 2Gi
-  mongos:
-    replicas: 3
+spec:
+  # List options
+  version: 3.4.17
 
-# "keyFile", "sendKeyFile", "sendX509", "x509"
-clusterAuthMode: keyFile
+  # Standalone, Replicaset, Sharded
+  mode: Standalone
+  replicas: 3
+  replicaSet:
+    name: rs0
+  shardTopology:
+    shard:
+      replicas: 3
+      shards: 3
+      persistence:
+        size: 10Gi
+    configServer:
+      replicas: 3
+      persistence:
+        size: 2Gi
+    mongos:
+      replicas: 3
 
-# "disabled", "allowSSL", "preferSSL", "requireSSL"
-sslMode: disabled
+  # "keyFile", "sendKeyFile", "sendX509", "x509"
+  clusterAuthMode: keyFile
 
-terminationPolicy: WipeOut
+  # "disabled", "allowSSL", "preferSSL", "requireSSL"
+  sslMode: disabled
 
-storageClass:
-  name: standard
+  terminationPolicy: WipeOut
 
-persistence:
-  size: 10Gi
+  storageClass:
+    name: standard
 
-machine: db.t.micro
+  persistence:
+    size: 10Gi
 
-resources:
+  machine: db.t.micro
 
-authSecret:
-  create: true
-  annotations: {}
-  name: ""
-  password: ""
+  resources:
 
-serviceAccount:
-  # Specifies whether a service account should be created
-  create: true
-  # Annotations to add to the service account
-  annotations: {}
-  # The name of the service account to use.
-  # If not set and create is true, a name is generated using the fullname template
-  name: ""
+  authSecret:
+    create: true
+    annotations: {}
+    name: ""
+    password: ""
+
+  serviceAccount:
+    # Specifies whether a service account should be created
+    create: true
+    # Annotations to add to the service account
+    annotations: {}
+    # The name of the service account to use.
+    # If not set and create is true, a name is generated using the fullname template
+    name: ""
