@@ -1,7 +1,7 @@
-{{- $res := .Values.resources -}}
+{{- $res := .Values.spec.resources -}}
 {{- $machines := .Files.Get "data/machines.yaml" | fromYaml -}}
-{{- if and .Values.machine (hasKey $machines .Values.machine) }}
-  {{- $res = get (get $machines .Values.machine) "resources" }}
+{{- if and .Values.spec.machine (hasKey $machines .Values.spec.machine) }}
+  {{- $res = get (get $machines .Values.spec.machine) "resources" }}
 {{- else }}
   {{- $res = get (get $machines "db.t.micro") "resources" }}
 {{- end }}
@@ -14,45 +14,45 @@ metadata:
   labels:
     {{- include "mongodb-editor-options.labels" . | nindent 4 }}
 spec:
-  version: {{ .Values.version | quote }}
-{{- if or (eq .Values.mode "Standalone") (eq .Values.mode "Replicaset") }}
-  replicas: {{ .Values.replicas }}
+  version: {{ .Values.spec.version | quote }}
+{{- if or (eq .Values.spec.mode "Standalone") (eq .Values.spec.mode "Replicaset") }}
+  replicas: {{ .Values.spec.replicas }}
   storageType: Durable
   storage:
-    storageClassName: {{ .Values.storageClass.name }}
+    storageClassName: {{ .Values.spec.storageClass.name }}
     accessModes:
     - ReadWriteOnce
     resources:
       requests:
-        storage: {{ .Values.persistence.size }}
+        storage: {{ .Values.spec.persistence.size }}
 {{- end }}
-{{- if eq .Values.mode "Replicaset" }}
+{{- if eq .Values.spec.mode "Replicaset" }}
   replicaSet:
-    name: {{ .Values.replicaset.name }}
+    name: {{ .Values.spec.replicaset.name }}
 {{- end }}
-{{- if eq .Values.mode "Sharded" }}
+{{- if eq .Values.spec.mode "Sharded" }}
   shardTopology:
     configServer:
-      replicas: {{ .Values.shardTopology.configServer.replicas }}
+      replicas: {{ .Values.spec.shardTopology.configServer.replicas }}
       storage:
         resources:
           requests:
-            storage: {{ .Values.shardTopology.configServer.persistence.size }}
-        storageClassName: {{ .Values.storageClass.name }}
+            storage: {{ .Values.spec.shardTopology.configServer.persistence.size }}
+        storageClassName: {{ .Values.spec.storageClass.name }}
     mongos:
-      replicas: {{ .Values.shardTopology.mongos.replicas }}
+      replicas: {{ .Values.spec.shardTopology.mongos.replicas }}
     shard:
-      shards: {{ .Values.shardTopology.shard.shards }}
-      replicas: {{ .Values.shardTopology.shard.replicas }}
+      shards: {{ .Values.spec.shardTopology.shard.shards }}
+      replicas: {{ .Values.spec.shardTopology.shard.replicas }}
       storage:
         resources:
           requests:
-            storage: {{ .Values.shardTopology.shard.persistence.size }}
-        storageClassName: {{ .Values.storageClass.name }}
+            storage: {{ .Values.spec.shardTopology.shard.persistence.size }}
+        storageClassName: {{ .Values.spec.storageClass.name }}
 {{- end }}
-  terminationPolicy: {{ .Values.terminationPolicy }}
-  clusterAuthMode: {{ .Values.clusterAuthMode }}
-  sslMode: {{ .Values.sslMode }}
+  terminationPolicy: {{ .Values.spec.terminationPolicy }}
+  clusterAuthMode: {{ .Values.spec.clusterAuthMode }}
+  sslMode: {{ .Values.spec.sslMode }}
   podTemplate:
     spec:
       resources:

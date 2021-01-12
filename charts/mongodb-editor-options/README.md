@@ -44,38 +44,40 @@ The command removes all the Kubernetes components associated with the chart and 
 
 The following table lists the configurable parameters of the `mongodb-editor-options` chart and their default values.
 
-|                  Parameter                  |                                                      Description                                                       |   Default    |
-|---------------------------------------------|------------------------------------------------------------------------------------------------------------------------|--------------|
-| version                                     | List options                                                                                                           | `3.4.17`     |
-| mode                                        | Standalone, Replicaset, Sharded                                                                                        | `Standalone` |
-| replicas                                    |                                                                                                                        | `3`          |
-| replicaSet.name                             |                                                                                                                        | `rs0`        |
-| shardTopology.shard.replicas                |                                                                                                                        | `3`          |
-| shardTopology.shard.shards                  |                                                                                                                        | `3`          |
-| shardTopology.shard.persistence.size        |                                                                                                                        | `10Gi`       |
-| shardTopology.configServer.replicas         |                                                                                                                        | `3`          |
-| shardTopology.configServer.persistence.size |                                                                                                                        | `2Gi`        |
-| shardTopology.mongos.replicas               |                                                                                                                        | `3`          |
-| clusterAuthMode                             | "keyFile", "sendKeyFile", "sendX509", "x509"                                                                           | `keyFile`    |
-| sslMode                                     | "disabled", "allowSSL", "preferSSL", "requireSSL"                                                                      | `disabled`   |
-| terminationPolicy                           |                                                                                                                        | `WipeOut`    |
-| storageClass.name                           |                                                                                                                        | `standard`   |
-| persistence.size                            |                                                                                                                        | `10Gi`       |
-| machine                                     |                                                                                                                        | `db.t.micro` |
-| resources                                   |                                                                                                                        | ``           |
-| authSecret.create                           |                                                                                                                        | `true`       |
-| authSecret.annotations                      |                                                                                                                        | `{}`         |
-| authSecret.name                             |                                                                                                                        | `""`         |
-| authSecret.password                         |                                                                                                                        | `""`         |
-| serviceAccount.create                       | Specifies whether a service account should be created                                                                  | `true`       |
-| serviceAccount.annotations                  | Annotations to add to the service account                                                                              | `{}`         |
-| serviceAccount.name                         | The name of the service account to use. If not set and create is true, a name is generated using the fullname template | `""`         |
+|                    Parameter                     |                                                      Description                                                       |   Default    |
+|--------------------------------------------------|------------------------------------------------------------------------------------------------------------------------|--------------|
+| metadata.release.name                            | Release name                                                                                                           | ``           |
+| metadata.release.namespace                       | Release namespace                                                                                                      | ``           |
+| spec.version                                     | List options                                                                                                           | `3.4.17`     |
+| spec.mode                                        | Standalone, Replicaset, Sharded                                                                                        | `Standalone` |
+| spec.replicas                                    |                                                                                                                        | `3`          |
+| spec.replicaSet.name                             |                                                                                                                        | `rs0`        |
+| spec.shardTopology.shard.replicas                |                                                                                                                        | `3`          |
+| spec.shardTopology.shard.shards                  |                                                                                                                        | `3`          |
+| spec.shardTopology.shard.persistence.size        |                                                                                                                        | `10Gi`       |
+| spec.shardTopology.configServer.replicas         |                                                                                                                        | `3`          |
+| spec.shardTopology.configServer.persistence.size |                                                                                                                        | `2Gi`        |
+| spec.shardTopology.mongos.replicas               |                                                                                                                        | `3`          |
+| spec.clusterAuthMode                             | "keyFile", "sendKeyFile", "sendX509", "x509"                                                                           | `keyFile`    |
+| spec.sslMode                                     | "disabled", "allowSSL", "preferSSL", "requireSSL"                                                                      | `disabled`   |
+| spec.terminationPolicy                           |                                                                                                                        | `WipeOut`    |
+| spec.storageClass.name                           |                                                                                                                        | `standard`   |
+| spec.persistence.size                            |                                                                                                                        | `10Gi`       |
+| spec.machine                                     |                                                                                                                        | `db.t.micro` |
+| spec.resources                                   |                                                                                                                        | ``           |
+| spec.authSecret.create                           |                                                                                                                        | `true`       |
+| spec.authSecret.annotations                      |                                                                                                                        | `{}`         |
+| spec.authSecret.name                             |                                                                                                                        | `""`         |
+| spec.authSecret.password                         |                                                                                                                        | `""`         |
+| spec.serviceAccount.create                       | Specifies whether a service account should be created                                                                  | `true`       |
+| spec.serviceAccount.annotations                  | Annotations to add to the service account                                                                              | `{}`         |
+| spec.serviceAccount.name                         | The name of the service account to use. If not set and create is true, a name is generated using the fullname template | `""`         |
 
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:
 
 ```console
-$ helm install mongodb-editor-options bytebuilders-ui/mongodb-editor-options -n kube-system --set version=3.4.17
+$ helm install mongodb-editor-options bytebuilders-ui/mongodb-editor-options -n kube-system --set spec.version=3.4.17
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
