@@ -35,6 +35,11 @@ type MongodbEditorOptions struct {
 
 // MongodbEditorOptionsSpec is the schema for MongoDB profile values file
 type MongodbEditorOptionsSpec struct {
+	Metadata `json:"metadata,omitempty"`
+	Spec     MongodbEditorOptionsSpecSpec `json:"spec"`
+}
+
+type MongodbEditorOptionsSpecSpec struct {
 	Version           string                    `json:"version"`
 	Mode              MongodbMode               `json:"mode"`
 	Replicas          int                       `json:"replicas"`
