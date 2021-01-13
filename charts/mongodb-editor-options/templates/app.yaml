@@ -33,11 +33,11 @@ spec:
         name: {{ .Name }}
       {{- end }}
     # TODO: Fix This
-    type: mongodbs.kubedb.com
+    type: {{ include "mongodb-editor-options.appname" . }}
     # version: {{ .Chart.Version }}
   selector:
     matchLabels:
-      app.kubernetes.io/name: mongodbs.kubedb.com
+      app.kubernetes.io/name: {{ include "mongodb-editor-options.appname" . }}
       app.kubernetes.io/instance: {{ include "mongodb-editor-options.fullname" . }}
   componentKinds:
     - group: ""
