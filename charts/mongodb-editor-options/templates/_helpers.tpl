@@ -18,6 +18,13 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 {{- end }}
 
 {{/*
+Name of the application installed by the chart.
+*/}}
+{{- define "mongodb-editor-options.appname" -}}
+mongodbs.kubedb.com
+{{- end }}
+
+{{/*
 Create chart name and version as used by the chart label.
 */}}
 {{- define "mongodb-editor-options.chart" -}}
@@ -36,7 +43,7 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 Selector labels
 */}}
 {{- define "mongodb-editor-options.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "mongodb-editor-options.name" . }}
+app.kubernetes.io/name: {{ include "mongodb-editor-options.appname" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
