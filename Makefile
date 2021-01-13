@@ -219,6 +219,9 @@ gen-values-schema: $(BUILD_DIRS)
 	@for dir in charts/*/; do \
 		dir=$${dir%*/}; \
 		dir=$${dir##*/}; \
+		if [[ $$dir != *options ]]; then \
+			continue; \
+		fi; \
 		crd=$$(echo $$dir | tr -d '-'); \
 		yq r crds/wizards.ui.bytebuilders.dev_$${crd}s.yaml spec.versions[0].schema.openAPIV3Schema.properties.spec > bin/values.openapiv3_schema.yaml; \
 		yq d bin/values.openapiv3_schema.yaml description > charts/$${dir}/values.openapiv3_schema.yaml; \
