@@ -46,6 +46,11 @@ The following table lists the configurable parameters of the `mongodb-editor-opt
 
 |                    Parameter                     |                                                      Description                                                       |   Default    |
 |--------------------------------------------------|------------------------------------------------------------------------------------------------------------------------|--------------|
+| metadata.resource.group                          |                                                                                                                        | `kubedb.com` |
+| metadata.resource.kind                           |                                                                                                                        | `MongoDB`    |
+| metadata.resource.name                           |                                                                                                                        | `mongodbs`   |
+| metadata.resource.scope                          |                                                                                                                        | `Namespaced` |
+| metadata.resource.version                        |                                                                                                                        | `v1alpha2`   |
 | metadata.release.name                            | Release name                                                                                                           | ``           |
 | metadata.release.namespace                       | Release namespace                                                                                                      | ``           |
 | spec.version                                     | List options                                                                                                           | `3.4.17`     |
@@ -77,7 +82,7 @@ The following table lists the configurable parameters of the `mongodb-editor-opt
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:
 
 ```console
-$ helm install mongodb-editor-options bytebuilders-ui/mongodb-editor-options -n kube-system --set spec.version=3.4.17
+$ helm install mongodb-editor-options bytebuilders-ui/mongodb-editor-options -n kube-system --set metadata.resource.group=kubedb.com
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while

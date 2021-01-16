@@ -16,8 +16,13 @@ limitations under the License.
 
 package v1alpha1
 
+import (
+	"kmodules.xyz/resource-metadata/apis/meta/v1alpha1"
+)
+
 type Metadata struct {
-	Release ReleaseMetadata `json:"release"`
+	Resoure v1alpha1.ResourceID `json:"resource"`
+	Release ReleaseMetadata     `json:"release"`
 }
 
 type ReleaseMetadata struct {
