@@ -5,6 +5,7 @@ go 1.12
 require (
 	k8s.io/api v0.18.9
 	k8s.io/apimachinery v0.18.9
+	kmodules.xyz/resource-metadata v0.4.7
 	kmodules.xyz/schema-checker v0.1.0
 )
 
