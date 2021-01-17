@@ -1,5 +1,5 @@
 /*
-Copyright The Kubepack Authors.
+Copyright AppsCode Inc. and Contributors
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -34,9 +34,14 @@ const (
 )
 
 const (
-	LabelChartURL           = "helm.sh/chart-url"
-	LabelChartName          = "helm.sh/chart-name"
-	LabelChartVersion       = "helm.sh/chart-version"
-	LabelChartFirstDeployed = "helm.sh/first-deployed"
-	LabelChartLastDeployed  = "helm.sh/last-deployed"
+	LabelChartURL           = "meta.helm.sh/chart-url"
+	LabelChartName          = "meta.helm.sh/chart-name"
+	LabelChartVersion       = "meta.helm.sh/chart-version"
+	LabelChartFirstDeployed = "meta.helm.sh/first-deployed"
+	LabelChartLastDeployed  = "meta.helm.sh/last-deployed"
+)
+
+const (
+	YAMLHost   = "https://pkg.bytebuilders.xyz"
+	YAMLBucket = "gs://pkg.bytebuilders.xyz"
 )

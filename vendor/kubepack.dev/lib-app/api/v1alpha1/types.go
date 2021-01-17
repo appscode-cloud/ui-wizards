@@ -1,16 +1,33 @@
+/*
+Copyright AppsCode Inc. and Contributors
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
 package v1alpha1
 
 import (
+	"kubepack.dev/kubepack/apis/kubepack/v1alpha1"
+
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
-	"kubepack.dev/kubepack/apis/kubepack/v1alpha1"
 )
 
 type ChartOrder struct {
 	v1alpha1.ChartRepoRef `json:",inline"`
 
-	ReleaseName string                 `json:"releaseName,omitempty"`
-	Namespace   string                 `json:"namespace,omitempty"`
+	ReleaseName string                     `json:"releaseName,omitempty"`
+	Namespace   string                     `json:"namespace,omitempty"`
 	Values      *unstructured.Unstructured `json:"values,omitempty"`
 }
 
@@ -88,7 +105,7 @@ type ChartTemplateOutput struct {
 
 type EditorTemplate struct {
 	Manifest  []byte                       `json:"manifest,omitempty"`
-	Values   *unstructured.Unstructured      `json:"values,omitempty"`
+	Values    *unstructured.Unstructured   `json:"values,omitempty"`
 	Resources []*unstructured.Unstructured `json:"resources,omitempty"`
 }
 
