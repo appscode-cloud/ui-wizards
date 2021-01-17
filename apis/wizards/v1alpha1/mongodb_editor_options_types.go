@@ -19,6 +19,7 @@ package v1alpha1
 import (
 	core "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	api "kubepack.dev/lib-app/api/v1alpha1"
 )
 
 // MongodbEditorOptions defines the schama for MongoDB Editor UI Options.
@@ -35,8 +36,8 @@ type MongodbEditorOptions struct {
 
 // MongodbEditorOptionsSpec is the schema for MongoDB profile values file
 type MongodbEditorOptionsSpec struct {
-	Metadata `json:"metadata,omitempty"`
-	Spec     MongodbEditorOptionsSpecSpec `json:"spec"`
+	api.Metadata `json:"metadata,omitempty"`
+	Spec         MongodbEditorOptionsSpecSpec `json:"spec"`
 }
 
 type MongodbEditorOptionsSpecSpec struct {
