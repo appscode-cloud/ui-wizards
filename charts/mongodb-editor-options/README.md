@@ -51,8 +51,8 @@ The following table lists the configurable parameters of the `mongodb-editor-opt
 | metadata.resource.name                           |                                                                                                                        | `mongodbs`   |
 | metadata.resource.scope                          |                                                                                                                        | `Namespaced` |
 | metadata.resource.version                        |                                                                                                                        | `v1alpha2`   |
-| metadata.release.name                            | Release name                                                                                                           | ``           |
-| metadata.release.namespace                       | Release namespace                                                                                                      | ``           |
+| metadata.release.name                            | Release name                                                                                                           | `""`         |
+| metadata.release.namespace                       | Release namespace                                                                                                      | `""`         |
 | spec.version                                     | List options                                                                                                           | `3.4.17`     |
 | spec.mode                                        | Standalone, Replicaset, Sharded                                                                                        | `Standalone` |
 | spec.replicas                                    |                                                                                                                        | `3`          |
