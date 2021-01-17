@@ -5,7 +5,9 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels: {{- include "mongodb-editor-options.labels" . | nindent 4 }}
   annotations:
-    kubepack.com/package: '{"kind":"ApplicationPackage","apiVersion":"kubepack.com/v1alpha1","chart":{"name":"mongodb-editor","url":"https://bundles.byte.builders/ui/","version":"{{ .Chart.Version }}"},"channel":"Regular"}'
+    helm.sh/chart-url: "https://bundles.byte.builders/ui/"
+    helm.sh/chart-name: "{{ trimSuffix "-options" .Chart.Name }}"
+    helm.sh/chart-version: "{{ .Chart.Version }}"
 spec:
   descriptor:
     description: {{ .Chart.Description }}
