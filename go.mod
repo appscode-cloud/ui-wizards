@@ -6,7 +6,7 @@ require (
 	k8s.io/api v0.18.9
 	k8s.io/apimachinery v0.18.9
 	kmodules.xyz/schema-checker v0.1.0
-	kubepack.dev/lib-app v0.0.0-20210117074128-f72b996fcc76
+	kubepack.dev/lib-app v0.0.1
 )
 
 replace bitbucket.org/ww/goautoneg => gomodules.xyz/goautoneg v0.0.0-20120707110453-a547fc61f48d
