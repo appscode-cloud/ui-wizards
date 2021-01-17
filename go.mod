@@ -1,12 +1,12 @@
 module go.bytebuilders.dev/ui-wizards
 
-go 1.12
+go 1.15
 
 require (
 	k8s.io/api v0.18.9
 	k8s.io/apimachinery v0.18.9
-	kmodules.xyz/resource-metadata v0.4.7
 	kmodules.xyz/schema-checker v0.1.0
+	kubepack.dev/lib-app v0.0.0-20210117074128-f72b996fcc76
 )
 
 replace bitbucket.org/ww/goautoneg => gomodules.xyz/goautoneg v0.0.0-20120707110453-a547fc61f48d
@@ -81,6 +81,8 @@ replace google.golang.org/genproto => google.golang.org/genproto v0.0.0-20191115
 
 replace google.golang.org/grpc => google.golang.org/grpc v1.26.0
 
+replace helm.sh/helm/v3 => github.com/kubepack/helm/v3 v3.3.5-0.20201117014452-f6732bc03450
+
 replace k8s.io/api => github.com/kmodules/api v0.18.10-0.20200922195318-d60fe725dea0
 
 replace k8s.io/apimachinery => github.com/kmodules/apimachinery v0.19.0-alpha.0.0.20200922195535-0c9a1b86beec
@@ -95,6 +97,10 @@ replace k8s.io/component-base => k8s.io/component-base v0.18.9
 
 replace k8s.io/kube-openapi => k8s.io/kube-openapi v0.0.0-20200410145947-61e04a5be9a6
 
+replace k8s.io/kubectl => k8s.io/kubectl v0.18.9
+
 replace k8s.io/kubernetes => github.com/kmodules/kubernetes v1.19.0-alpha.0.0.20200922200158-8b13196d8dc4
 
 replace k8s.io/utils => k8s.io/utils v0.0.0-20200324210504-a9aa75ae1b89
+
+replace sigs.k8s.io/application => github.com/kmodules/application v0.8.4-0.20200705202912-9d241d6484e3
