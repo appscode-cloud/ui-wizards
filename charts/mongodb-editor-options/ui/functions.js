@@ -1,4 +1,4 @@
-export function isEqualToModelPathValue(
+function isEqualToModelPathValue(
   { model, getValue, watchDependency },
   value,
   modelPath
@@ -8,3 +8,7 @@ export function isEqualToModelPathValue(
   watchDependency(modelName, "model#" + modelPath);
   return modelPathValue === value;
 }
+
+return {
+  isEqualToModelPathValue,
+};
