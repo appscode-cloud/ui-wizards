@@ -1,4 +1,4 @@
-function isEqualToModelPathValue(
+export function isEqualToModelPathValue(
   { model, getValue, watchDependency },
   value,
   modelPath
@@ -8,13 +8,3 @@ function isEqualToModelPathValue(
   watchDependency(modelName, "model#" + modelPath);
   return modelPathValue === value;
 }
-
-async function showElement({ axios }) {
-  const resp = await axios.get("https://jsonplaceholder.typicode.com/posts");
-  return resp.data.length === 10;
-}
-
-return {
-  isEqualToModelPathValue,
-  showElement,
-};
