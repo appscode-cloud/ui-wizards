@@ -1,0 +1,239 @@
+steps:
+  - form:
+      elements:
+        - label:
+            text: labels.basic_info
+            hasLine: true
+          type: label-element
+        - label:
+            text: labels.database.name
+          type: input
+          schema:
+            $ref: "schema#/properties/databaseName"
+        - label:
+            text: labels.namespace
+          options:
+            - value: sample-mongo-db
+              text: sample-mongo-db
+            - value: sample-namespace-1
+              text: sample-namespace-1
+            - value: sample-namespace-2
+              text: sample-namespace-2
+          type: select
+          schema:
+            $ref: "schema#/properties/namespace"
+        - label:
+            text: labels.database.version
+          options:
+            - value: 4.2.3-v1
+              text: 4.2.3-v1
+          type: select
+          schema:
+            $ref: "schema#/properties/version"
+        - isArray: true
+          schema:
+            $ref: "schema#/properties/labels"
+          keys:
+            label:
+              text: labels.labels.key
+          label:
+            text: labels.labels.label
+          type: key-value-input-form
+          values:
+            label:
+              text: labels.labels.value
+            type: input
+            schema:
+              $ref: "schema#/properties/labels/additionalProperties"
+        - isArray: true
+          schema:
+            $ref: "schema#/properties/annotations"
+          keys:
+            label:
+              text: labels.annotations.key
+          label:
+            text: labels.annotations.label
+          type: key-value-input-form
+          values:
+            label:
+              text: labels.annotations.value
+            type: input
+            schema:
+              $ref: "schema#/properties/annotations/additionalProperties"
+        - label:
+            text: labels.database.mode
+          schema:
+            $ref: "schema#/properties/mode"
+          type: radio
+          hasDescription: true
+          options:
+            - value: Standalone
+              text: options.database.mode.Standalone.label
+              description: options.database.mode.Standalone.description
+            - text: options.database.mode.Replicaset.label
+              value: Replicaset
+              description: options.database.mode.Replicaset.description
+            - text: options.database.mode.Sharded.label
+              value: Sharded
+              description: options.database.mode.Sharded.description
+        - if: isEqualToModelPathValue|Replicaset|/mode
+          elements:
+            - label:
+                text: labels.replicaset.name
+              type: input
+              schema:
+                $ref: "schema#/properties/replicaSet/properties/name"
+            - label:
+                text: labels.replicaset.number
+              type: input
+              schema:
+                $ref: "schema#/properties/replicas"
+        - if: isEqualToModelPathValue|Standalone|/mode
+          label:
+            text: labels.storage.size
+          type: input
+          schema:
+            $ref: "schema#/properties/persistence/properties/size"
+        - if: isEqualToModelPathValue|Replicaset|/mode
+          label:
+            text: labels.storage.size
+          type: input
+          schema:
+            $ref: "schema#/properties/persistence/properties/size"
+        - label:
+            text: labels.storage.class
+          options:
+            - value: standard
+              text: options.storageClass.standard.label
+          type: select
+          schema:
+            $ref: "schema#/properties/storageClass/properties/name"
+        - if: isEqualToModelPathValue|Sharded|/mode
+          elements:
+            - label:
+                text: labels.shardNodes
+                hasLine: true
+              type: label-element
+            - label:
+                text: labels.shards
+              type: input
+              schema:
+                $ref: "schema#/properties/shardTopology/properties/shard/properties/shards"
+            - label:
+                text: labels.storage.size
+              type: input
+              schema:
+                $ref: "schema#/properties/shardTopology/properties/shard/properties/persistence/properties/size"
+            - label:
+                text: labels.configServer
+                hasLine: true
+              type: label-element
+            - label:
+                text: labels.storage.size
+              type: input
+              schema:
+                $ref: "schema#/properties/shardTopology/properties/configServer/properties/persistence/properties/size"
+        - label:
+            text: labels.terminalPolicy
+          schema:
+            $ref: "schema#/properties/terminationPolicy"
+          type: radio
+          hasDescription: true
+          options:
+            - value: delete
+              text: options.terminalPolicy.delete.label
+              description: options.terminalPolicy.delete.description
+            - value: halt
+              text: options.terminalPolicy.halt.label
+              description: options.terminalPolicy.halt.description
+            - value: wipe-out
+              text: options.terminalPolicy.wipeOut.label
+              description: options.terminalPolicy.wipeOut.description
+            - value: do-not-terminate
+              text: options.terminalPolicy.doNotTerminate.label
+              description: options.terminalPolicy.doNotTerminate.description
+        - label:
+            text: labels.database.secret
+            hasLine: true
+          type: label-element
+        - schema:
+            $ref: "schema#/properties/databaseSecretType"
+          type: radio
+          options:
+            - value: existing-secret
+              text: options.database.secret.existingSecret.label
+            - value: custom-secret
+              text: options.database.secret.customSecret.label
+        - if: isEqualToModelPathValue|existing-secret|/databaseSecretType
+          label:
+            text: labels.secret
+          options:
+            - value: mongo-custom-auth
+              text: mongo-custom-auth
+            - value: sample-custom-auth-1
+              text: sample-custom-auth-1
+            - value: sample-custom-auth-2
+              text: sample-custom-auth-2
+          type: select
+          schema:
+            $ref: "schema#/properties/existingSecret"
+        - if: isEqualToModelPathValue|custom-secret|/databaseSecretType
+          label:
+            text: labels.password
+          type: input
+          schema:
+            $ref: "schema#/properties/password"
+        - label:
+            text: labels.configOptions
+            hasLine: true
+          type: label-element
+        - hasDescription: true
+          hasDependencies: true
+          options:
+            - text: options.configOptions.topology.label
+              value: topology
+              description: options.configOptions.topology.description
+            - text: options.configOptions.tls.label
+              value: tls
+              description: options.configOptions.tls.description
+              dependencies:
+                - name: Cert-Manager
+                  url: "https://cert-manager.io/docs/"
+                - name: Cert-Manager
+                  url: "https://cert-manager.io/docs/"
+                - name: Cert-Manager
+                  url: "https://cert-manager.io/docs/"
+                - name: Cert-Manager
+                  url: "https://cert-manager.io/docs/"
+                - name: Cert-Manager
+                  url: "https://cert-manager.io/docs/"
+            - text: options.configOptions.initialization.label
+              value: initialization
+              description: options.configOptions.initialization.description
+            - disabled: true
+              text: options.configOptions.backup.label
+              value: backup
+              description: options.configOptions.backup.description
+              dependencies:
+                - name: Stash
+                  url: "https://stash.run/"
+            - text: options.configOptions.networking.label
+              value: networking
+              description: options.configOptions.networking.description
+            - text: options.configOptions.monitoring.label
+              value: monitoring
+              description: options.configOptions.monitoring.description
+            - text: options.configOptions.customConfig.label
+              value: custom-config
+              description: options.configOptions.customConfig.description
+            - text: options.configOptions.podTemplate.label
+              value: pod-template
+              description: options.configOptions.podTemplate.description
+          type: configure-options
+          schema:
+            $ref: "schema#/properties/configurationOptions"
+      type: single-step-form
+    title: steps.0.label
+    id: basic_info
+type: multi-step-form
+hasPreviewPanel: true
