@@ -9,30 +9,22 @@ steps:
             text: labels.database.name
           type: input
           schema:
-            $ref: "schema#/properties/databaseName"
+            $ref: "schema#/properties/metadata/properties/release/properties/name"
         - label:
             text: labels.namespace
-          options:
-            - value: sample-mongo-db
-              text: sample-mongo-db
-            - value: sample-namespace-1
-              text: sample-namespace-1
-            - value: sample-namespace-2
-              text: sample-namespace-2
+          fetch: getResources|core|v1|namespaces
           type: select
           schema:
-            $ref: "schema#/properties/namespace"
+            $ref: "schema#/properties/metadata/properties/release/properties/namespace"
         - label:
             text: labels.database.version
-          options:
-            - value: 4.2.3-v1
-              text: 4.2.3-v1
+          fetch: getMongoDbVersions|catalog.kubedb.com|v1alpha1|mongodbversions
           type: select
           schema:
-            $ref: "schema#/properties/version"
+            $ref: "schema#/properties/spec/properties/version"
         - isArray: true
           schema:
-            $ref: "schema#/properties/labels"
+            $ref: "schema#/properties/spec/properties/labels"
           keys:
             label:
               text: labels.labels.key
@@ -44,10 +36,10 @@ steps:
               text: labels.labels.value
             type: input
             schema:
-              $ref: "schema#/properties/labels/additionalProperties"
+              $ref: "schema#/properties/spec/properties/labels/additionalProperties"
         - isArray: true
           schema:
-            $ref: "schema#/properties/annotations"
+            $ref: "schema#/properties/spec/properties/annotations"
           keys:
             label:
               text: labels.annotations.key
@@ -59,11 +51,11 @@ steps:
               text: labels.annotations.value
             type: input
             schema:
-              $ref: "schema#/properties/annotations/additionalProperties"
+              $ref: "schema#/properties/spec/properties/annotations/additionalProperties"
         - label:
             text: labels.database.mode
           schema:
-            $ref: "schema#/properties/mode"
+            $ref: "schema#/properties/spec/properties/mode"
           type: radio
           hasDescription: true
           options:
@@ -76,39 +68,37 @@ steps:
             - text: options.database.mode.Sharded.label
               value: Sharded
               description: options.database.mode.Sharded.description
-        - if: isEqualToModelPathValue|Replicaset|/mode
+        - if: isEqualToModelPathValue|Replicaset|/spec/mode
           elements:
             - label:
                 text: labels.replicaset.name
               type: input
               schema:
-                $ref: "schema#/properties/replicaSet/properties/name"
+                $ref: "schema#/properties/spec/properties/replicaSet/properties/name"
             - label:
                 text: labels.replicaset.number
               type: input
               schema:
-                $ref: "schema#/properties/replicas"
-        - if: isEqualToModelPathValue|Standalone|/mode
+                $ref: "schema#/properties/spec/properties/replicas"
+        - if: isEqualToModelPathValue|Standalone|/spec/mode
           label:
             text: labels.storage.size
           type: input
           schema:
-            $ref: "schema#/properties/persistence/properties/size"
-        - if: isEqualToModelPathValue|Replicaset|/mode
+            $ref: "schema#/properties/spec/properties/persistence/properties/size"
+        - if: isEqualToModelPathValue|Replicaset|/spec/mode
           label:
             text: labels.storage.size
           type: input
           schema:
-            $ref: "schema#/properties/persistence/properties/size"
+            $ref: "schema#/properties/spec/properties/persistence/properties/size"
         - label:
             text: labels.storage.class
-          options:
-            - value: standard
-              text: options.storageClass.standard.label
+          fetch: getResources|storage.k8s.io|v1|storageclasses
           type: select
           schema:
-            $ref: "schema#/properties/storageClass/properties/name"
-        - if: isEqualToModelPathValue|Sharded|/mode
+            $ref: "schema#/properties/spec/properties/storageClass/properties/name"
+        - if: isEqualToModelPathValue|Sharded|/spec/mode
           elements:
             - label:
                 text: labels.shardNodes
@@ -118,12 +108,12 @@ steps:
                 text: labels.shards
               type: input
               schema:
-                $ref: "schema#/properties/shardTopology/properties/shard/properties/shards"
+                $ref: "schema#/properties/spec/properties/shardTopology/properties/shard/properties/shards"
             - label:
                 text: labels.storage.size
               type: input
               schema:
-                $ref: "schema#/properties/shardTopology/properties/shard/properties/persistence/properties/size"
+                $ref: "schema#/properties/spec/properties/shardTopology/properties/shard/properties/persistence/properties/size"
             - label:
                 text: labels.configServer
                 hasLine: true
@@ -132,11 +122,20 @@ steps:
                 text: labels.storage.size
               type: input
               schema:
-                $ref: "schema#/properties/shardTopology/properties/configServer/properties/persistence/properties/size"
+                $ref: "schema#/properties/spec/properties/shardTopology/properties/configServer/properties/persistence/properties/size"
+            - label:
+                text: labels.mongos
+                hasLine: true
+              type: label-element
+            - label:
+                text: labels.replicaset.number
+              type: input
+              schema:
+                $ref: "schema#/properties/spec/properties/shardTopology/properties/mongos/properties/replicas"
         - label:
             text: labels.terminalPolicy
           schema:
-            $ref: "schema#/properties/terminationPolicy"
+            $ref: "schema#/properties/spec/properties/terminationPolicy"
           type: radio
           hasDescription: true
           options:
@@ -157,38 +156,42 @@ steps:
             hasLine: true
           type: label-element
         - schema:
-            $ref: "schema#/properties/databaseSecretType"
+            $ref: "schema#/properties/spec/properties/authSecret/properties/create"
           type: radio
           options:
-            - value: existing-secret
+            - value: false
               text: options.database.secret.existingSecret.label
-            - value: custom-secret
+            - value: true
               text: options.database.secret.customSecret.label
-        - if: isEqualToModelPathValue|existing-secret|/databaseSecretType
-          label:
-            text: labels.secret
-          options:
-            - value: mongo-custom-auth
-              text: mongo-custom-auth
-            - value: sample-custom-auth-1
-              text: sample-custom-auth-1
-            - value: sample-custom-auth-2
-              text: sample-custom-auth-2
-          type: select
-          schema:
-            $ref: "schema#/properties/existingSecret"
-        - if: isEqualToModelPathValue|custom-secret|/databaseSecretType
+        - if: showAuthSecretField
+          elements:
+            - if: hasExistingSecret
+              label:
+                text: labels.secret
+              fetch: getSecrets
+              type: select
+              schema:
+                $ref: "schema#/properties/spec/properties/authSecret/properties/name"
+            - if: hasNoExistingSecret
+              label:
+                text: labels.secret
+              type: input
+              schema:
+                $ref: "schema#/properties/spec/properties/authSecret/properties/name"
+        - if: showAuthPasswordField
           label:
             text: labels.password
           type: input
           schema:
-            $ref: "schema#/properties/password"
+            $ref: "schema#/properties/spec/properties/authSecret/properties/password"
         - label:
             text: labels.configOptions
             hasLine: true
           type: label-element
         - hasDescription: true
           hasDependencies: true
+          owner: appscode
+          cluster: appscode-ninja
           options:
             - text: options.configOptions.topology.label
               value: topology
@@ -199,30 +202,33 @@ steps:
               dependencies:
                 - name: Cert-Manager
                   url: "https://cert-manager.io/docs/"
-                - name: Cert-Manager
-                  url: "https://cert-manager.io/docs/"
-                - name: Cert-Manager
-                  url: "https://cert-manager.io/docs/"
-                - name: Cert-Manager
-                  url: "https://cert-manager.io/docs/"
-                - name: Cert-Manager
-                  url: "https://cert-manager.io/docs/"
+                  group: cert-manager.io
+                  version: v1
+                  resource: issuers
             - text: options.configOptions.initialization.label
               value: initialization
               description: options.configOptions.initialization.description
-            - disabled: true
-              text: options.configOptions.backup.label
+            - text: options.configOptions.backup.label
               value: backup
               description: options.configOptions.backup.description
               dependencies:
                 - name: Stash
                   url: "https://stash.run/"
+                  group: stash.appscode.com
+                  version: v1beta1
+                  resource: backupconfigurations
             - text: options.configOptions.networking.label
               value: networking
               description: options.configOptions.networking.description
             - text: options.configOptions.monitoring.label
               value: monitoring
               description: options.configOptions.monitoring.description
+              dependencies:
+                - name: Prometheus Operator
+                  url: "https://github.com/prometheus-operator"
+                  group: monitoring.coreos.com
+                  version: v1
+                  resource: servicemonitors
             - text: options.configOptions.customConfig.label
               value: custom-config
               description: options.configOptions.customConfig.description
@@ -231,9 +237,8 @@ steps:
               description: options.configOptions.podTemplate.description
           type: configure-options
           schema:
-            $ref: "schema#/properties/configurationOptions"
+            $ref: "schema#/properties/spec/properties/configurationOptions"
       type: single-step-form
     title: steps.0.label
-    id: basic_info
 type: multi-step-form
 hasPreviewPanel: true
