@@ -1,4 +1,4 @@
-export function isEqualToModelPathValue(
+function isEqualToModelPathValue(
   { model, getValue, watchDependency },
   value,
   modelPath
@@ -9,22 +9,17 @@ export function isEqualToModelPathValue(
   return modelPathValue === value;
 }
 
-export function showAuthPasswordField({ model, getValue, watchDependency }) {
+function showAuthPasswordField({ model, getValue, watchDependency }) {
   const modelPathValue = getValue(model, "/spec/authSecret/create");
   watchDependency(modelPathValue, "model#/spec/authSecret/create");
   return modelPathValue;
 }
 
-export function showAuthSecretField({ model, getValue, watchDependency }) {
+function showAuthSecretField({ model, getValue, watchDependency }) {
   return !this.showAuthPasswordField({ model, getValue, watchDependency });
 }
 
-export async function getResources(
-  { axios, storeGet },
-  group,
-  version,
-  resource
-) {
+async function getResources({ axios, storeGet }, group, version, resource) {
   const owner = storeGet("/user/username");
   const cluster = storeGet("/clusterInfo/name");
 
@@ -46,7 +41,7 @@ export async function getResources(
   return resources;
 }
 
-export async function getMongoDbVersions(
+async function getMongoDbVersions(
   { axios, storeGet },
   group,
   version,
@@ -78,7 +73,7 @@ export async function getMongoDbVersions(
   return resources;
 }
 
-export async function getSecrets({
+async function getSecrets({
   storeGet,
   axios,
   model,
@@ -115,7 +110,7 @@ export async function getSecrets({
   return filteredSecrets;
 }
 
-export async function hasExistingSecret({
+async function hasExistingSecret({
   storeGet,
   axios,
   model,
@@ -132,7 +127,7 @@ export async function hasExistingSecret({
   return !!(resp && resp.length);
 }
 
-export async function hasNoExistingSecret({
+async function hasNoExistingSecret({
   storeGet,
   axios,
   model,
@@ -148,3 +143,14 @@ export async function hasNoExistingSecret({
   });
   return !resp;
 }
+
+return {
+  isEqualToModelPathValue,
+  showAuthPasswordField,
+  showAuthSecretField,
+  getResources,
+  getMongoDbVersions,
+  getSecrets,
+  hasExistingSecret,
+  hasNoExistingSecret,
+};
