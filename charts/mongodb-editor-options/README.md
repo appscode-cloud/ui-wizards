@@ -55,7 +55,7 @@ The following table lists the configurable parameters of the `mongodb-editor-opt
 | metadata.release.namespace                       | Release namespace                                                                                                      | `""`         |
 | spec.version                                     | List options                                                                                                           | `3.4.17`     |
 | spec.mode                                        | Standalone, Replicaset, Sharded                                                                                        | `Standalone` |
-| spec.replicas                                    |                                                                                                                        | `3`          |
+| spec.replicas                                    |                                                                                                                        | `1`          |
 | spec.replicaSet.name                             |                                                                                                                        | `rs0`        |
 | spec.shardTopology.shard.replicas                |                                                                                                                        | `3`          |
 | spec.shardTopology.shard.shards                  |                                                                                                                        | `3`          |
