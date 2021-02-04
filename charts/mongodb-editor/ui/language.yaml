@@ -56,12 +56,39 @@ en:
       class: Storage Class
     terminalPolicy: Terminal Policy
     issuer_ref: Issuer Reference
+    api_group: API Group
+    kind: Kind
+    name: Name
+    certificates: Certificates
+    certificate: Certificate
+    alias: Alias
+    secret_name: Secret Name
+    duration: Duration
+    renew_before: Renew Before
+    subject: Subject
+    organizations: Organizations
+    countries: Countries
+    organizational_units: Organizational Units
+    provinces: Provinces
+    dns_names: DNS Names
+    ip_addresses: IP Addresses
+    organization: Organization
+    country: Country
+    organizational_unit: Organizational Unit
+    province: Province
+    dns_name: DNS Name
+    ip_address: IP Address
   steps:
     - label: Basic Information
     - label: Topology
     - label: TLS Configuration
   options:
     database:
+      secret:
+        existingSecret:
+          label: Use Existing Secret
+        customSecret:
+          label: New Secret
       mode:
         Standalone:
           label: Standalone
@@ -72,3 +99,44 @@ en:
         Sharded:
           label: Sharded Cluster
           description: MongoDB sharded cluster for high performance and high availability.
+    configOptions:
+      topology:
+        label: Topology
+        description: Configure your cluster topology.
+      tls:
+        label: TLS
+        description: Secure database with TLS.
+      initialization:
+        label: Initialization
+        description: Initialize database from backup or script.
+      backup:
+        label: Backup
+        description: Schedule periodic backup via Stash.
+      networking:
+        label: Networking
+        description: Customize Services for the database.
+      monitoring:
+        label: Monitoring
+        description: Setup Prometheus monitoring for the database.
+      customConfig:
+        label: Custom Config
+        description: Configure MongoDB with configuration files.
+      podTemplate:
+        label: Pod Template
+        description: Customize runtime options for the database pods.
+    storageClass:
+      standard:
+        label: Standard
+    terminalPolicy:
+      delete:
+        label: Delete
+        description: Keep only database Secrets and backed up data.
+      halt:
+        label: Halt
+        description: Keep PVCs, database Secrets and backed up data.
+      wipeOut:
+        label: WipeOut
+        description: Delete everything including backed up data.
+      doNotTerminate:
+        label: DoNotTerminate
+        description: Prevent deletion of the MongoDB CRD.

@@ -4,14 +4,13 @@ function isEqualToModelPathValue(
   modelPath
 ) {
   const modelPathValue = getValue(model, modelPath);
-  const modelName = modelPath.split("/").pop();
-  watchDependency(modelName, "model#" + modelPath);
+  watchDependency("model#" + modelPath);
   return modelPathValue === value;
 }
 
 function showAuthPasswordField({ model, getValue, watchDependency }) {
   const modelPathValue = getValue(model, "/spec/authSecret/create");
-  watchDependency(modelPathValue, "model#/spec/authSecret/create");
+  watchDependency("model#/spec/authSecret/create");
   return modelPathValue;
 }
 
@@ -51,7 +50,12 @@ async function getMongoDbVersions(
   const cluster = storeGet("/clusterInfo/name");
 
   const queryParams = {
-    filter: { items: { metadata: { name: null }, spec: { version: null } } },
+    filter: {
+      items: {
+        metadata: { name: null },
+        spec: { version: null, deprecated: null },
+      },
+    },
   };
 
   const resp = await axios.get(
@@ -63,14 +67,19 @@ async function getMongoDbVersions(
 
   const resources = (resp && resp.data && resp.data.items) || [];
 
-  resources.map((item) => {
+  // keep only non deprecated versions
+  const filteredMongoDbVersions = resources.filter(
+    (item) => item.spec && !item.spec.deprecated
+  );
+
+  filteredMongoDbVersions.map((item) => {
     const name = (item.metadata && item.metadata.name) || "";
     const specVersion = (item.spec && item.spec.version) || "";
     item.text = `${name} (${specVersion})`;
     item.value = name;
     return true;
   });
-  return resources;
+  return filteredMongoDbVersions;
 }
 
 async function getSecrets({
@@ -83,7 +92,7 @@ async function getSecrets({
   const owner = storeGet("/user/username");
   const cluster = storeGet("/clusterInfo/name");
   const namespace = getValue(model, "/namespace");
-  watchDependency("namespace", "model#/namespace");
+  watchDependency("model#/namespace");
 
   const resp = await axios.get(
     `/clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}/secrets`,
