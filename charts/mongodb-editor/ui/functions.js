@@ -163,77 +163,24 @@ function isEqualToDatabaseMode(
   return mode === value;
 }
 
-//
-// async function getSecrets({
-//   storeGet,
-//   axios,
-//   model,
-//   getValue,
-//   watchDependency,
-// }) {
-//   const owner = storeGet("/user/username");
-//   const cluster = storeGet("/clusterInfo/name");
-//   const namespace = getValue(model, "/namespace");
-//   watchDependency("namespace", "model#/namespace");
-//
-//   const resp = await axios.get(
-//     `/clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}/secrets`,
-//     {
-//       params: {
-//         filter: { items: { metadata: { name: null }, type: null } },
-//       },
-//     }
-//   );
-//
-//   const secrets = (resp && resp.data && resp.data.items) || [];
-//
-//   const filteredSecrets = secrets.filter((item) => {
-//     const validType = ["kubernetes.io/service-account-token", "Opaque"];
-//     return validType.includes(item.type);
-//   });
-//
-//   filteredSecrets.map((item) => {
-//     const name = (item.metadata && item.metadata.name) || "";
-//     item.text = name;
-//     item.value = name;
-//     return true;
-//   });
-//   return filteredSecrets;
-// }
-//
-// async function hasExistingSecret({
-//   storeGet,
-//   axios,
-//   model,
-//   getValue,
-//   watchDependency,
-// }) {
-//   const resp = await this.getSecrets({
-//     storeGet,
-//     axios,
-//     model,
-//     getValue,
-//     watchDependency,
-//   });
-//   return !!(resp && resp.length);
-// }
-//
-// async function hasNoExistingSecret({
-//   storeGet,
-//   axios,
-//   model,
-//   getValue,
-//   watchDependency,
-// }) {
-//   const resp = await this.hasExistingSecret({
-//     storeGet,
-//     axios,
-//     model,
-//     getValue,
-//     watchDependency,
-//   });
-//   return !resp;
-// }
+function labelsDisablityChecker({ itemCtx }) {
+  switch (itemCtx.key) {
+    case "app.kubernetes.io/name":
+      return true;
+      break;
+    case "app.kubernetes.io/instance":
+      return true;
+      break;
+    case "app.kubernetes.io/managed-by":
+      return true;
+      break;
+    case /^\w*\.kubedb\.com\/\w*$/g:
+      return true;
+      break;
+    default:
+      return false;
+  }
+}
 
 return {
   isEqualToModelPathValue,
@@ -244,4 +191,6 @@ return {
   showTlsConfigureSection,
   onTlsConfigureChange,
   isEqualToDatabaseMode,
+
+  labelsDisablityChecker,
 };
