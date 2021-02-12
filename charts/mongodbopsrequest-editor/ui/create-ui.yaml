@@ -1,0 +1,67 @@
+steps:
+  - form:
+      type: single-step-form
+      elements:
+        - label:
+            text: labels.basic_info
+            hasLine: true
+          type: label-element
+        - type: input
+          label:
+            text: labels.op_req_name
+          schema:
+            $ref: "schema#/properties/metadata/properties/name"
+        - type: select
+          label:
+            text: labels.namespace
+          schema:
+            $ref: "schema#/properties/metadata/properties/namespace"
+          fetch: getNamespaces
+        - type: select
+          label:
+            text: labels.databaseRef
+          schema:
+            $ref: "schema#/properties/spec/properties/databaseRef/properties/name"
+          fetch: getMongoDbs
+        - label:
+            text: labels.config_ops_request
+            hasLine: true
+          type: label-element
+        - type: radio
+          label:
+            text: labels.ops_request_type
+          schema:
+            $ref: "schema#/properties/spec/properties/type"
+          hasDescription: true
+          options:
+            - value: Upgrade
+              text: options.Upgrade.text
+              description: options.Upgrade.description
+            - value: HorizontalScaling
+              text: options.HorizontalScaling.text
+              description: options.HorizontalScaling.description
+            - value: VerticalScaling
+              text: options.VerticalScaling.text
+              description: options.VerticalScaling.description
+            - value: VolumeExpansion
+              text: options.VolumeExpansion.text
+              description: options.VolumeExpansion.description
+            - value: Restart
+              text: options.Restart.text
+              description: options.Restart.description
+            - value: Reconfigure
+              text: options.Reconfigure.text
+              description: options.Reconfigure.description
+            - value: ReconfigureTLS
+              text: options.ReconfigureTLS.text
+              description: options.ReconfigureTLS.description
+        - type: select
+          if: ifRequestTypeEqualsTo|Upgrade
+          label:
+            text: labels.targetVersion
+          schema:
+            $ref: "schema#/properties/spec/properties/upgrade/properties/targetVersion"
+          fetch: getMongoDbVersions
+    id: basic
+    title: steps.0.label
+type: multi-step-form
