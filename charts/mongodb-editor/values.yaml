@@ -1,20 +1,20 @@
 metadata:
-  release:
-    name: RELEASE-NAME
-    namespace: default
   resource:
     group: kubedb.com
     version: v1alpha2
     name: mongodbs
     kind: MongoDB
     scope: Namespaced
+  release:
+    name: RELEASE-NAME
+    namespace: default
 resources:
   appApplication: # +doc-gen:break
     apiVersion: app.k8s.io/v1beta1
     kind: Application
     metadata:
       name: mongodb-editor
-      namespace: default
+      namespace: demo
     spec:
       assemblyPhase: Ready
       componentKinds:
@@ -23,13 +23,19 @@ resources:
         - group: kubedb.com
           kind: MongoDB
         - group: ""
+          kind: Secret
+        - group: ""
           kind: ServiceAccount
+        - group: cert-manager.io
+          kind: Issuer
+        - group: monitoring.coreos.com
+          kind: ServiceMonitor
+        - group: stash.appscode.com
+          kind: Repository
         - group: stash.appscode.com
           kind: BackupConfiguration
         - group: stash.appscode.com
-          kind: Repository
-        - group: ""
-          kind: Secret
+          kind: RestoreSession
       descriptor:
         description: MongoDB Editor UI Options
         icons:
@@ -46,94 +52,154 @@ resources:
         matchLabels:
           app.kubernetes.io/instance: mongodb-editor
           app.kubernetes.io/name: mongodbs.kubedb.com
+  certManagerIoIssuer: # +doc-gen:break
+    apiVersion: cert-manager.io/v1
+    kind: Issuer
+    metadata:
+      name: mongodb-editor
+      namespace: demo
+    spec:
+      ca:
+        secretName: mongodb-editor-ca
   kubedbComMongoDB: # +doc-gen:break
     apiVersion: kubedb.com/v1alpha2
     kind: MongoDB
     metadata:
       name: mongodb-editor
-      namespace: default
+      namespace: demo
     spec:
-      clusterAuthMode: keyFile
-      shardTopology:
-        configServer:
-          replicas: 3
-          storage:
-            accessModes:
-              - ReadWriteOnce
+      authSecret:
+        name: mongodb-editor-auth
+      configSecret:
+        name: mongodb-editor-config
+      init:
+        waitForInitialRestore: true
+      monitor:
+        agent: prometheus.io
+        prometheus:
+          exporter:
             resources:
+              limits:
+                cpu: 100m
+                memory: 128Mi
               requests:
-                storage: 10Gi
-        mongos:
-          replicas: 2
-        shard:
-          replicas: 3
-          shards: 3
-          storage:
-            accessModes:
-              - ReadWriteOnce
-            resources:
-              requests:
-                storage: 10Gi
-      sslMode: disabled
+                cpu: 100m
+                memory: 128Mi
+      sslMode: requireSSL
       storage:
-        accessModes:
-          - ReadWriteOnce
         resources:
           requests:
-            storage: 10Gi
+            storage: 1Gi
+        storageClassName: standard
       storageType: Durable
       terminationPolicy: WipeOut
-      version: 3.4.17
-  secret: # +doc-gen:break
+      tls:
+        issuerRef:
+          apiGroup: cert-manager.io
+          kind: Issuer
+          name: mongo-ca
+      version: 4.2.3
+  monitoringCoreosComServiceMonitor: # +doc-gen:break
+    apiVersion: monitoring.coreos.com/v1
+    kind: ServiceMonitor
+    metadata:
+      name: mongodb-editor
+      namespace: demo
+    spec:
+      endpoints:
+        - honorLabels: true
+          interval: 30s
+          path: /metrics
+          port: metrics
+      namespaceSelector:
+        matchNames:
+          - demo
+      selector:
+        matchLabels:
+          app.kubernetes.io/instance: mongodb-editor
+          app.kubernetes.io/name: mongodbs.kubedb.com
+  secretAuth: # +doc-gen:break
     apiVersion: v1
-    data: null
     kind: Secret
     metadata:
-      name: mongodb-editor
-      namespace: default
+      name: mongodb-editor-auth
+      namespace: demo
+    stringData:
+      password: thisIs1StrongPassword
+      username: root
     type: Opaque
-  serviceAccount: # +doc-gen:break
+  secretConfig: # +doc-gen:break
     apiVersion: v1
-    kind: ServiceAccount
+    kind: Secret
     metadata:
-      name: mongodb-editor
-      namespace: default
+      name: mongodb-editor-config
+      namespace: demo
+    stringData:
+      mongod.conf: |
+        net:
+          maxIncomingConnections: 20000
+    type: Opaque
   stashAppscodeComBackupConfiguration: # +doc-gen:break
     apiVersion: stash.appscode.com/v1beta1
     kind: BackupConfiguration
     metadata:
       name: mongodb-editor
-      namespace: default
+      namespace: demo
     spec:
       repository:
-        name: mongodb-editor
+        name: mongodb-editor-repo
       retentionPolicy:
         keepLast: 5
         name: keep-last-5
         prune: true
-      runtimeSettings:
-        container:
-          resources: {}
-          securityContext: {}
-        pod:
-          securityContext: {}
-      schedule: 0 */8 * * *
+      schedule: '*/5 * * * *'
       target:
         ref:
           apiVersion: appcatalog.appscode.com/v1alpha1
           kind: AppBinding
           name: mongodb-editor
       task:
-        name: mongodb-backup-3.4.17
-  stashAppscodeComRepository: # +doc-gen:break
+        name: mongodb-backup-4.2.3-v5
+  stashAppscodeComRepositoryInitRepo: # +doc-gen:break
     apiVersion: stash.appscode.com/v1alpha1
     kind: Repository
     metadata:
-      name: mongodb-editor
-      namespace: default
+      name: mongodb-editor-init-repo
+      namespace: demo
     spec:
       backend:
-        s3:
-          bucket: kubedb-demo
-          prefix: /profiles
-        storageSecretName: mongodb-editor
+        gcs:
+          bucket: stash-testing
+          prefix: /demo/mongodb-editor
+        storageSecretName: gcs-secret
+  stashAppscodeComRepositoryRepo: # +doc-gen:break
+    apiVersion: stash.appscode.com/v1alpha1
+    kind: Repository
+    metadata:
+      name: mongodb-editor-repo
+      namespace: demo
+    spec:
+      backend:
+        gcs:
+          bucket: stash-testing
+          prefix: /demo/mongodb-editor
+        storageSecretName: gcs-secret
+  stashAppscodeComRestoreSessionInit: # +doc-gen:break
+    apiVersion: stash.appscode.com/v1beta1
+    kind: RestoreSession
+    metadata:
+      name: mongodb-editor-init
+      namespace: demo
+    spec:
+      repository:
+        name: mongodb-editor-init-repo
+      rules:
+        - snapshots:
+            - latest
+      target:
+        ref:
+          apiVersion: appcatalog.appscode.com/v1alpha1
+          kind: AppBinding
+          name: mongodb-editor
+      task:
+        name: mongodb-restore-4.2.3-v5
