@@ -95,9 +95,21 @@ function ifRequestTypeEqualsTo({ model, getValue, watchDependency }, type) {
   return selectedType === type;
 }
 
+export function initNamespace({ route }) {
+  const { namespace } = route.query || {};
+  return namespace;
+}
+
+export function initDatabaseRef({ route }) {
+  const { name } = route.query || {};
+  return name;
+}
+
 return {
   getNamespaces,
   getMongoDbs,
   getMongoDbVersions,
   ifRequestTypeEqualsTo,
+  initNamespace,
+  initDatabaseRef,
 };
