@@ -1,0 +1,392 @@
+steps:
+  - form:
+      elements:
+        - label:
+            text: labels.basic_info
+            hasLine: true
+          type: label-element
+        - label:
+            text: labels.database.name
+          type: input
+          schema:
+            "$ref": schema#/properties/metadata/properties/release/properties/name
+        - label:
+            text: labels.namespace
+          fetch: getResources|core|v1|namespaces
+          type: select
+          schema:
+            "$ref": schema#/properties/metadata/properties/release/properties/namespace
+        - label:
+            text: labels.database.version
+          fetch: getMongoDbVersions|catalog.kubedb.com|v1alpha1|mongodbversions
+          type: select
+          schema:
+            "$ref": schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/version
+        - isArray: true
+          schema:
+            "$ref": schema#/properties/resources/properties/kubedbComMongoDB/properties/metadata/properties/labels
+          keys:
+            label:
+              text: labels.labels.key
+          label:
+            text: labels.labels.label
+          type: key-value-input-form
+          values:
+            label:
+              text: labels.labels.value
+            type: input
+            schema:
+              "$ref": schema#/properties/resources/properties/kubedbComMongoDB/properties/metadata/properties/labels/additionalProperties
+        - isArray: true
+          schema:
+            "$ref": schema#/properties/resources/properties/kubedbComMongoDB/properties/metadata/properties/annotations
+          keys:
+            label:
+              text: labels.annotations.key
+          label:
+            text: labels.annotations.label
+          type: key-value-input-form
+          values:
+            label:
+              text: labels.annotations.value
+            type: input
+            schema:
+              "$ref": schema#/properties/resources/properties/kubedbComMongoDB/properties/metadata/properties/annotations/additionalProperties
+        - label:
+            text: labels.terminalPolicy
+          schema:
+            "$ref": schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/terminationPolicy
+          type: radio
+          hasDescription: true
+          options:
+            - value: Delete
+              text: options.terminalPolicy.delete.label
+              description: options.terminalPolicy.delete.description
+            - value: Halt
+              text: options.terminalPolicy.halt.label
+              description: options.terminalPolicy.halt.description
+            - value: WipeOut
+              text: options.terminalPolicy.wipeOut.label
+              description: options.terminalPolicy.wipeOut.description
+            - value: DoNotTerminate
+              text: options.terminalPolicy.doNotTerminate.label
+              description: options.terminalPolicy.doNotTerminate.description
+        - disabled: true
+          label:
+            text: labels.database.secret
+          type: input
+          schema:
+            "$ref": schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/authSecret/properties/name
+      type: single-step-form
+    id: basic
+    title: steps.0.label
+  - form:
+      elements:
+        - label:
+            text: labels.database.mode
+          computed: setDatabaseMode
+          onChange: deleteDatabaseModePath
+          type: radio
+          schema:
+            "$ref": discriminator#/activeDatabaseMode
+          hasDescription: true
+          options:
+            - value: Standalone
+              text: options.database.mode.Standalone.label
+              description: options.database.mode.Standalone.description
+            - text: options.database.mode.Replicaset.label
+              value: Replicaset
+              description: options.database.mode.Replicaset.description
+            - text: options.database.mode.Sharded.label
+              value: Sharded
+              description: options.database.mode.Sharded.description
+        - if: isEqualToDatabaseMode|Replicaset
+          elements:
+            - label:
+                text: labels.replicaset.name
+              type: input
+              schema:
+                "$ref": schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/replicaSet/properties/name
+            - label:
+                text: labels.replicaset.number
+              type: input
+              schema:
+                "$ref": schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/replicas
+        - if: isEqualToDatabaseMode|Standalone
+          label:
+            text: labels.storage.size
+          type: input
+          schema:
+            "$ref": schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/storage/properties/resources/properties/requests/properties/storage
+        - if: isEqualToDatabaseMode|Replicaset
+          label:
+            text: labels.storage.size
+          type: input
+          schema:
+            "$ref": schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/storage/properties/resources/properties/requests/properties/storage
+        - label:
+            text: labels.storage.class
+          fetch: getResources|storage.k8s.io|v1|storageclasses
+          type: select
+          schema:
+            "$ref": schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/storage/properties/storageClassName
+        - if: isEqualToDatabaseMode|Sharded
+          elements:
+            - label:
+                text: labels.shardNodes
+                hasLine: true
+              type: label-element
+            - label:
+                text: labels.shards
+              type: input
+              schema:
+                "$ref": schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/shardTopology/properties/shard/properties/shards
+            - label:
+                text: labels.storage.size
+              type: input
+              schema:
+                "$ref": schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/shardTopology/properties/shard/properties/storage/properties/resources/properties/requests/properties/storage
+            - label:
+                text: labels.configServer
+                hasLine: true
+              type: label-element
+            - label:
+                text: labels.storage.size
+              type: input
+              schema:
+                "$ref": schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/shardTopology/properties/configServer/properties/storage/properties/resources/properties/requests/properties/storage
+            - label:
+                text: labels.mongos
+                hasLine: true
+              type: label-element
+            - label:
+                text: labels.replicaset.number
+              type: input
+              schema:
+                "$ref": schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/shardTopology/properties/mongos/properties/replicas
+      discriminator:
+        activeDatabaseMode:
+          type: string
+          default: Standalone
+      type: single-step-form
+    title: steps.1.label
+    id: topology
+  - form:
+      elements:
+        - type: switch
+          label:
+            text: Configure TLS
+          schema:
+            "$ref": discriminator#/configureTLS
+          onChange: onTlsConfigureChange
+        - if: showTlsConfigureSection
+          type: single-step-form
+          label:
+            text: TLS configure element
+          elements:
+            - label:
+                text: labels.issuer_ref
+              type: label-element
+              customClass: mb-0
+            - label:
+                text: labels.api_group
+              type: input
+              schema:
+                "$ref": schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/issuerRef/properties/apiGroup
+            - label:
+                text: labels.kind
+              type: input
+              schema:
+                "$ref": schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/issuerRef/properties/kind
+            - label:
+                text: labels.name
+              type: input
+              schema:
+                "$ref": schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/issuerRef/properties/name
+            - type: single-step-form-array
+              label:
+                text: labels.certificates
+              addFormLabel: labels.certificate
+              schema:
+                "$ref": schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/certificates
+              tableContents:
+                - type: value
+                  typeOfValue: string
+                  inTableColumn: true
+                  label:
+                    text: labels.alias
+                  path: alias
+                - type: value
+                  typeOfValue: string
+                  inTableColumn: true
+                  label:
+                    text: labels.secret_name
+                  path: secretName
+                - type: value
+                  typeOfValue: string
+                  inTableColumn: true
+                  label:
+                    text: labels.duration
+                  path: duration
+                - type: value
+                  typeOfValue: string
+                  inTableColumn: true
+                  label:
+                    text: labels.renew_before
+                  path: renewBefore
+                - type: label
+                  label:
+                    text: labels.subject
+                    hasLine: true
+                - type: value
+                  typeOfValue: array
+                  label:
+                    text: labels.organizations
+                    isSubsection: true
+                  path: subject/organizations
+                - type: value
+                  typeOfValue: array
+                  label:
+                    text: labels.countries
+                    isSubsection: true
+                  path: subject/countries
+                - type: value
+                  typeOfValue: array
+                  label:
+                    text: labels.organizational_units
+                    isSubsection: true
+                  path: subject/organizationalUnits
+                - type: value
+                  typeOfValue: array
+                  label:
+                    text: labels.provinces
+                    isSubsection: true
+                  path: subject/provinces
+                - type: value
+                  typeOfValue: array
+                  label:
+                    text: labels.dns_names
+                    hasLine: true
+                  path: dnsNames
+                - type: value
+                  typeOfValue: array
+                  label:
+                    text: labels.ip_addresses
+                    hasLine: true
+                  path: ipAddresses
+              element:
+                label:
+                  text: labels.certificate
+                elements:
+                  - label:
+                      text: labels.alias
+                    type: input
+                    schema:
+                      "$ref": schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/certificates/items/properties/alias
+                  - label:
+                      text: labels.secret_name
+                    type: input
+                    schema:
+                      "$ref": schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/certificates/items/properties/secretName
+                  - label:
+                      text: labels.duration
+                    type: input
+                    schema:
+                      "$ref": schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/certificates/items/properties/duration
+                  - label:
+                      text: labels.renew_before
+                    type: input
+                    schema:
+                      "$ref": schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/certificates/items/properties/renewBefore
+                  - label:
+                      text: labels.subject
+                      hasLine: true
+                    type: label-element
+                    customClass: mb-15
+                  - schema:
+                      "$ref": schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/certificates/items/properties/subject
+                    type: single-step-form
+                    elements:
+                      - schema:
+                          "$ref": schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/certificates/items/properties/subject/properties/organizations
+                        type: list-input-form
+                        element:
+                          label:
+                            text: labels.organization
+                          schema:
+                            "$ref": schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/certificates/items/properties/subject/properties/organizations/items
+                          type: input
+                        label:
+                          text: labels.organizations
+                          isSubsection: true
+                      - schema:
+                          "$ref": schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/certificates/items/properties/subject/properties/countries
+                        type: list-input-form
+                        element:
+                          label:
+                            text: labels.country
+                          schema:
+                            "$ref": schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/certificates/items/properties/subject/properties/countries/items
+                          type: input
+                        label:
+                          text: labels.countries
+                          isSubsection: true
+                      - schema:
+                          "$ref": schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/certificates/items/properties/subject/properties/organizationalUnits
+                        type: list-input-form
+                        element:
+                          label:
+                            text: labels.organizational_unit
+                          schema:
+                            "$ref": schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/certificates/items/properties/subject/properties/organizationalUnits/items
+                          type: input
+                        label:
+                          text: labels.organizational_units
+                          isSubsection: true
+                      - schema:
+                          "$ref": schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/certificates/items/properties/subject/properties/provinces
+                        type: list-input-form
+                        element:
+                          label:
+                            text: labels.province
+                          schema:
+                            "$ref": schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/certificates/items/properties/subject/properties/provinces/items
+                          type: input
+                        label:
+                          text: labels.provinces
+                          isSubsection: true
+                  - schema:
+                      "$ref": schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/certificates/items/properties/dnsNames
+                    hasLineLabel: true
+                    type: list-input-form
+                    element:
+                      label:
+                        text: labels.dns_name
+                      schema:
+                        "$ref": schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/certificates/items/properties/dnsNames/items
+                      type: input
+                    label:
+                      text: labels.dns_names
+                      hasLine: true
+                  - schema:
+                      "$ref": schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/certificates/items/properties/ipAddresses
+                    type: list-input-form
+                    element:
+                      label:
+                        text: labels.ip_address
+                      schema:
+                        "$ref": schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/certificates/items/properties/ipAddresses/items
+                      type: input
+                    label:
+                      text: labels.ip_addresses
+                      hasLine: true
+                type: single-step-form
+      discriminator:
+        configureTLS:
+          type: boolean
+          default: false
+      type: single-step-form
+    id: tls
+    title: steps.2.label
+type: multi-step-form
+hasPreviewPanel: true
