@@ -26,7 +26,7 @@ import (
 
 func TestDefaultValues(t *testing.T) {
 	checker := schemachecker.New("../../..", []interface{}{
-		v1alpha1.MongodbEditorOptionsSpec{},
+		v1alpha1.KubedbcomMongodbEditorOptionsSpec{},
 	})
 	checker.TestAll(t)
 }
