@@ -40,4 +40,27 @@ $ helm delete stashappscodecom-backupconfiguration-editor -n default
 
 The command removes all the Kubernetes components associated with the chart and deletes the release.
 
+## Configuration
 
+The following table lists the configurable parameters of the `stashappscodecom-backupconfiguration-editor` chart and their default values.
+
+|     Parameter      | Description |           Default            |
+|--------------------|-------------|------------------------------|
+| apiVersion         |             | `stash.appscode.com/v1beta1` |
+| kind               |             | `BackupConfiguration`        |
+| metadata.name      |             | `backupconfiguration`        |
+| metadata.namespace |             | `default`                    |
+
+
+Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:
+
+```console
+$ helm install stashappscodecom-backupconfiguration-editor bytebuilders-ui/stashappscodecom-backupconfiguration-editor -n default --version=v0.1.0 --set apiVersion=stash.appscode.com/v1beta1
+```
+
+Alternatively, a YAML file that specifies the values for the parameters can be provided while
+installing the chart. For example:
+
+```console
+$ helm install stashappscodecom-backupconfiguration-editor bytebuilders-ui/stashappscodecom-backupconfiguration-editor -n default --version=v0.1.0 --values values.yaml
+```
