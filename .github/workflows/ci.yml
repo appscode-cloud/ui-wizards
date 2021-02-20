@@ -77,7 +77,7 @@ jobs:
       - name: Test charts
         run: |
           export KUBECONFIG="$HOME/.kube/config"
-          kubectl create -f https://github.com/kubedb/apimachinery/raw/master/crds/kubedb.com_mongodbs.v1.yaml
-          make ct
+          kubectl create ns demo
+          ./hack/scripts/ct.sh
           echo
           kubectl delete crds --all
