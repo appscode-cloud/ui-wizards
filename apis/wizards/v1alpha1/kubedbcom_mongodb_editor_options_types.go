@@ -22,25 +22,25 @@ import (
 	api "kubepack.dev/lib-app/api/v1alpha1"
 )
 
-// MongodbEditorOptions defines the schama for MongoDB Editor UI Options.
+// KubedbcomMongodbEditorOptions defines the schama for MongoDB Editor UI Options.
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
 // +kubebuilder:object:root=true
-// +kubebuilder:resource:path=mongodbeditoroptionss,singular=mongodbeditoroptions
-type MongodbEditorOptions struct {
+// +kubebuilder:resource:path=KubedbcomMongodbEditorOptionss,singular=KubedbcomMongodbEditorOptions
+type KubedbcomMongodbEditorOptions struct {
 	metav1.TypeMeta   `json:",inline,omitempty"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	Spec              MongodbEditorOptionsSpec `json:"spec,omitempty"`
+	Spec              KubedbcomMongodbEditorOptionsSpec `json:"spec,omitempty"`
 }
 
-// MongodbEditorOptionsSpec is the schema for MongoDB profile values file
-type MongodbEditorOptionsSpec struct {
+// KubedbcomMongodbEditorOptionsSpec is the schema for MongoDB profile values file
+type KubedbcomMongodbEditorOptionsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
-	Spec         MongodbEditorOptionsSpecSpec `json:"spec"`
+	Spec         KubedbcomMongodbEditorOptionsSpecSpec `json:"spec"`
 }
 
-type MongodbEditorOptionsSpecSpec struct {
+type KubedbcomMongodbEditorOptionsSpecSpec struct {
 	Version           string                    `json:"version"`
 	Mode              MongodbMode               `json:"mode"`
 	Replicas          int                       `json:"replicas"`
@@ -120,10 +120,10 @@ type ServiceAccount struct {
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
-// MongodbEditorOptionsList is a list of MongodbEditorOptionss
-type MongodbEditorOptionsList struct {
+// KubedbcomMongodbEditorOptionsList is a list of KubedbcomMongodbEditorOptionss
+type KubedbcomMongodbEditorOptionsList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	// Items is a list of MongodbEditorOptions CRD objects
-	Items []MongodbEditorOptions `json:"items,omitempty"`
+	// Items is a list of KubedbcomMongodbEditorOptions CRD objects
+	Items []KubedbcomMongodbEditorOptions `json:"items,omitempty"`
 }
