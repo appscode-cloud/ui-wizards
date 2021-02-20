@@ -342,12 +342,18 @@ unit-tests: $(BUILD_DIRS)
 	        ./hack/test.sh $(SRC_PKGS)                          \
 	    "
 
-TEST_CHARTS ?=
+CT_COMMAND     ?= lint-and-install
+TEST_CHARTS    ?=
+KUBE_NAMESPACE ?=
+
+ifeq ($(CT_COMMAND),lint-and-install)
+	ct_namespace = --namespace=$(KUBE_NAMESPACE)
+endif
 
 ifeq ($(strip $(TEST_CHARTS)),)
-	CT_ARGS = --all
+	CT_ARGS = --all $(ct_namespace)
 else
-	CT_ARGS = --charts=$(TEST_CHARTS)
+	CT_ARGS = --charts=$(TEST_CHARTS) $(ct_namespace)
 endif
 
 .PHONY: ct
@@ -368,7 +374,7 @@ ct: $(BUILD_DIRS)
 	    --env HTTPS_PROXY=$(HTTPS_PROXY)                        \
 	    --env KUBECONFIG=$(subst $(HOME),,$(KUBECONFIG))        \
 	    $(CHART_TEST_IMAGE)                                     \
-	    ct lint-and-install --debug $(CT_ARGS)
+	    ct $(CT_COMMAND) --debug $(CT_ARGS)
 
 ADDTL_LINTERS   := goconst,gofmt,goimports,unparam
 
@@ -398,7 +404,7 @@ $(BUILD_DIRS):
 dev: gen fmt
 
 .PHONY: verify
-verify: verify-modules verify-gen
+verify: verify-gen verify-modules
 
 .PHONY: verify-modules
 verify-modules:
