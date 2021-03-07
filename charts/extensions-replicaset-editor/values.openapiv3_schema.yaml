@@ -7,7 +7,23 @@ properties:
     description: 'Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
     type: string
   metadata:
-    description: 'If the Labels of a ReplicaSet are empty, they are defaulted to be the same as the Pod(s) that the ReplicaSet manages. Standard object''s metadata. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata'
+    properties:
+      annotations:
+        additionalProperties:
+          type: string
+        description: 'Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects. More info: http://kubernetes.io/docs/user-guide/annotations'
+        type: object
+      labels:
+        additionalProperties:
+          type: string
+        description: 'Map of string keys and values that can be used to organize and categorize (scope and select) objects. May match selectors of replication controllers and services. More info: http://kubernetes.io/docs/user-guide/labels'
+        type: object
+      name:
+        description: 'Name must be unique within a namespace. Is required when creating resources, although some resources may allow a client to request the generation of an appropriate name automatically. Name is primarily intended for creation idempotence and configuration definition. Cannot be updated. More info: http://kubernetes.io/docs/user-guide/identifiers#names'
+        type: string
+      namespace:
+        description: "Namespace defines the space within which each name must be unique. An empty namespace is equivalent to the \"default\" namespace, but \"default\" is the canonical representation. Not all objects are required to be scoped to a namespace - the value of this field for those objects will be empty. \n Must be a DNS_LABEL. Cannot be updated. More info: http://kubernetes.io/docs/user-guide/namespaces"
+        type: string
     type: object
   spec:
     description: 'Spec defines the specification of the desired behavior of the ReplicaSet. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#spec-and-status'
@@ -3636,57 +3652,5 @@ properties:
             - containers
             type: object
         type: object
-    type: object
-  status:
-    description: 'Status is the most recently observed status of the ReplicaSet. This data may be out of date by some window of time. Populated by the system. Read-only. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#spec-and-status'
-    properties:
-      availableReplicas:
-        description: The number of available replicas (ready for at least minReadySeconds) for this replica set.
-        format: int32
-        type: integer
-      conditions:
-        description: Represents the latest available observations of a replica set's current state.
-        items:
-          description: ReplicaSetCondition describes the state of a replica set at a certain point.
-          properties:
-            lastTransitionTime:
-              description: The last time the condition transitioned from one status to another.
-              format: date-time
-              type: string
-            message:
-              description: A human readable message indicating details about the transition.
-              type: string
-            reason:
-              description: The reason for the condition's last transition.
-              type: string
-            status:
-              description: Status of the condition, one of True, False, Unknown.
-              type: string
-            type:
-              description: Type of replica set condition.
-              type: string
-          required:
-          - status
-          - type
-          type: object
-        type: array
-      fullyLabeledReplicas:
-        description: The number of pods that have labels matching the labels of the pod template of the replicaset.
-        format: int32
-        type: integer
-      observedGeneration:
-        description: ObservedGeneration reflects the generation of the most recently observed ReplicaSet.
-        format: int64
-        type: integer
-      readyReplicas:
-        description: The number of ready replicas for this replica set.
-        format: int32
-        type: integer
-      replicas:
-        description: 'Replicas is the most recently oberved number of replicas. More info: https://kubernetes.io/docs/concepts/workloads/controllers/replicationcontroller/#what-is-a-replicationcontroller'
-        format: int32
-        type: integer
-    required:
-    - replicas
     type: object
 type: object

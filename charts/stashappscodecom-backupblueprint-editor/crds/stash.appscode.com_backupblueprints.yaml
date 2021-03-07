@@ -2151,6 +2151,7 @@ spec:
                 description: Task specify the Task crd that specifies steps for backup process
                 properties:
                   name:
+                    description: Name specifies the name of the Task to use for backup/restore purpose. If your database has been deployed with KubeDB, then keep this field empty. Stash will read the Task info from the respective AppBinding.
                     type: string
                   params:
                     description: Params specifies a list of parameter to pass to the Task. Stash will use this parameters to resolve the task.
@@ -2166,8 +2167,6 @@ spec:
                       - value
                       type: object
                     type: array
-                required:
-                - name
                 type: object
               tempDir:
                 description: Temp directory configuration for functions/sidecar An `EmptyDir` will always be mounted at /tmp with this settings

@@ -31,12 +31,14 @@ spec:
                 format: int32
                 type: integer
               driver:
+                default: Restic
                 description: Driver indicates the name of the agent to use to backup the target. Supported values are "Restic", "VolumeSnapshotter". Default value is "Restic".
                 enum:
                 - Restic
                 - VolumeSnapshotter
                 type: string
               executionOrder:
+                default: Parallel
                 description: ExecutionOrder indicate whether to backup the members in the sequential order as they appear in the members list. The default value is "Parallel" which means the members will be backed up in parallel.
                 type: string
               hooks:
@@ -1820,6 +1822,7 @@ spec:
                       description: Task specify the Task crd that specifies the steps to take backup
                       properties:
                         name:
+                          description: Name specifies the name of the Task to use for backup/restore purpose. If your database has been deployed with KubeDB, then keep this field empty. Stash will read the Task info from the respective AppBinding.
                           type: string
                         params:
                           description: Params specifies a list of parameter to pass to the Task. Stash will use this parameters to resolve the task.
@@ -1835,8 +1838,6 @@ spec:
                             - value
                             type: object
                           type: array
-                      required:
-                      - name
                       type: object
                     tempDir:
                       description: Temp directory configuration for functions/sidecar An `EmptyDir` will always be mounted at /tmp with this settings
@@ -2930,95 +2931,6 @@ spec:
                 type: string
             required:
             - retentionPolicy
-            type: object
-          status:
-            properties:
-              conditions:
-                description: Conditions shows current backup setup condition of the BackupBatch.
-                items:
-                  properties:
-                    lastTransitionTime:
-                      description: Last time the condition transitioned from one status to another. This should be when the underlying condition changed.  If that is not known, then using the time when the API field changed is acceptable.
-                      format: date-time
-                      type: string
-                    message:
-                      description: A human readable message indicating details about the transition. This field may be empty.
-                      type: string
-                    observedGeneration:
-                      description: If set, this represents the .metadata.generation that the condition was set based upon. For instance, if .metadata.generation is currently 12, but the .status.condition[x].observedGeneration is 9, the condition is out of date with respect to the current state of the instance.
-                      format: int64
-                      type: integer
-                    reason:
-                      description: The reason for the condition's last transition in CamelCase. The specific API may choose whether or not this field is considered a guaranteed API. This field may not be empty.
-                      type: string
-                    status:
-                      description: Status of the condition, one of True, False, Unknown.
-                      type: string
-                    type:
-                      description: Type of condition in CamelCase or in foo.example.com/CamelCase. Many .condition.type values are consistent across resources like Available, but because arbitrary conditions can be useful (see .node.status.conditions), the ability to deconflict is important.
-                      type: string
-                  required:
-                  - lastTransitionTime
-                  - message
-                  - reason
-                  - status
-                  - type
-                  type: object
-                type: array
-              memberConditions:
-                description: MemberConditions shows current backup setup condition of the members of the BackupBatch.
-                items:
-                  properties:
-                    conditions:
-                      description: Conditions shows current backup setup condition of this member.
-                      items:
-                        properties:
-                          lastTransitionTime:
-                            description: Last time the condition transitioned from one status to another. This should be when the underlying condition changed.  If that is not known, then using the time when the API field changed is acceptable.
-                            format: date-time
-                            type: string
-                          message:
-                            description: A human readable message indicating details about the transition. This field may be empty.
-                            type: string
-                          observedGeneration:
-                            description: If set, this represents the .metadata.generation that the condition was set based upon. For instance, if .metadata.generation is currently 12, but the .status.condition[x].observedGeneration is 9, the condition is out of date with respect to the current state of the instance.
-                            format: int64
-                            type: integer
-                          reason:
-                            description: The reason for the condition's last transition in CamelCase. The specific API may choose whether or not this field is considered a guaranteed API. This field may not be empty.
-                            type: string
-                          status:
-                            description: Status of the condition, one of True, False, Unknown.
-                            type: string
-                          type:
-                            description: Type of condition in CamelCase or in foo.example.com/CamelCase. Many .condition.type values are consistent across resources like Available, but because arbitrary conditions can be useful (see .node.status.conditions), the ability to deconflict is important.
-                            type: string
-                        required:
-                        - lastTransitionTime
-                        - message
-                        - reason
-                        - status
-                        - type
-                        type: object
-                      type: array
-                    target:
-                      description: Target is the reference to the respective target whose condition is shown here.
-                      properties:
-                        apiVersion:
-                          type: string
-                        kind:
-                          type: string
-                        name:
-                          type: string
-                      type: object
-                  required:
-                  - target
-                  type: object
-                type: array
-              observedGeneration:
-                description: ObservedGeneration is the most recent generation observed for this BackupBatch. It corresponds to the BackupBatch's generation, which is updated on mutation by the API Server.
-                format: int64
-                type: integer
             type: object
         type: object
     served: true

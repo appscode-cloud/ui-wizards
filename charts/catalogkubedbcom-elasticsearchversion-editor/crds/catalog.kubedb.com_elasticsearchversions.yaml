@@ -26,9 +26,9 @@ spec:
             properties:
               authPlugin:
                 enum:
+                - OpenDistro
                 - SearchGuard
                 - X-Pack
-                - OpenDistro
                 type: string
               db:
                 properties:
@@ -39,6 +39,12 @@ spec:
                 type: object
               deprecated:
                 type: boolean
+              distribution:
+                enum:
+                - ElasticStack
+                - OpenDistro
+                - SearchGuard
+                type: string
               exporter:
                 properties:
                   image:
@@ -63,12 +69,52 @@ spec:
                 required:
                 - databasePolicyName
                 type: object
-              tools:
+              stash:
                 properties:
-                  image:
-                    type: string
-                required:
-                - image
+                  addon:
+                    properties:
+                      backupTask:
+                        properties:
+                          name:
+                            type: string
+                          params:
+                            items:
+                              properties:
+                                name:
+                                  type: string
+                                value:
+                                  type: string
+                              required:
+                              - name
+                              - value
+                              type: object
+                            type: array
+                        required:
+                        - name
+                        type: object
+                      restoreTask:
+                        properties:
+                          name:
+                            type: string
+                          params:
+                            items:
+                              properties:
+                                name:
+                                  type: string
+                                value:
+                                  type: string
+                              required:
+                              - name
+                              - value
+                              type: object
+                            type: array
+                        required:
+                        - name
+                        type: object
+                    required:
+                    - backupTask
+                    - restoreTask
+                    type: object
                 type: object
               version:
                 type: string

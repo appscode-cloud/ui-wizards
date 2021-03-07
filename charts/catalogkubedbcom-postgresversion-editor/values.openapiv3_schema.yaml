@@ -7,6 +7,13 @@ properties:
     type: object
   spec:
     properties:
+      coordinator:
+        properties:
+          image:
+            type: string
+        required:
+        - image
+        type: object
       db:
         properties:
           image:
@@ -16,7 +23,19 @@ properties:
         type: object
       deprecated:
         type: boolean
+      distribution:
+        enum:
+        - PostgreSQL
+        - TimescaleDB
+        type: string
       exporter:
+        properties:
+          image:
+            type: string
+        required:
+        - image
+        type: object
+      initContainer:
         properties:
           image:
             type: string
@@ -30,12 +49,52 @@ properties:
         required:
         - databasePolicyName
         type: object
-      tools:
+      stash:
         properties:
-          image:
-            type: string
-        required:
-        - image
+          addon:
+            properties:
+              backupTask:
+                properties:
+                  name:
+                    type: string
+                  params:
+                    items:
+                      properties:
+                        name:
+                          type: string
+                        value:
+                          type: string
+                      required:
+                      - name
+                      - value
+                      type: object
+                    type: array
+                required:
+                - name
+                type: object
+              restoreTask:
+                properties:
+                  name:
+                    type: string
+                  params:
+                    items:
+                      properties:
+                        name:
+                          type: string
+                        value:
+                          type: string
+                      required:
+                      - name
+                      - value
+                      type: object
+                    type: array
+                required:
+                - name
+                type: object
+            required:
+            - backupTask
+            - restoreTask
+            type: object
         type: object
       version:
         type: string
@@ -43,7 +102,6 @@ properties:
     - db
     - exporter
     - podSecurityPolicies
-    - tools
     - version
     type: object
 type: object
