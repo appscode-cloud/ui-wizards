@@ -7,7 +7,20 @@ properties:
     description: 'Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
     type: string
   metadata:
-    description: 'Standard object''s metadata. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata'
+    properties:
+      annotations:
+        additionalProperties:
+          type: string
+        description: 'Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects. More info: http://kubernetes.io/docs/user-guide/annotations'
+        type: object
+      labels:
+        additionalProperties:
+          type: string
+        description: 'Map of string keys and values that can be used to organize and categorize (scope and select) objects. May match selectors of replication controllers and services. More info: http://kubernetes.io/docs/user-guide/labels'
+        type: object
+      name:
+        description: 'Name must be unique within a namespace. Is required when creating resources, although some resources may allow a client to request the generation of an appropriate name automatically. Name is primarily intended for creation idempotence and configuration definition. Cannot be updated. More info: http://kubernetes.io/docs/user-guide/identifiers#names'
+        type: string
     type: object
   spec:
     description: 'Spec defines a specification of a persistent volume owned by the cluster. Provisioned by an administrator. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#persistent-volumes'
@@ -698,18 +711,5 @@ properties:
         required:
         - volumePath
         type: object
-    type: object
-  status:
-    description: 'Status represents the current information/status for the persistent volume. Populated by the system. Read-only. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#persistent-volumes'
-    properties:
-      message:
-        description: A human-readable message indicating details about why the volume is in this state.
-        type: string
-      phase:
-        description: 'Phase indicates if a volume is available, bound to a claim, or released by a claim. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#phase'
-        type: string
-      reason:
-        description: Reason is a brief CamelCase string that describes any failure and is meant for machine parsing and tidy display in the CLI.
-        type: string
     type: object
 type: object

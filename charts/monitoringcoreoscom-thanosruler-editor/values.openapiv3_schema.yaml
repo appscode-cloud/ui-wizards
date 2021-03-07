@@ -7,6 +7,23 @@ properties:
     description: 'Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
     type: string
   metadata:
+    properties:
+      annotations:
+        additionalProperties:
+          type: string
+        description: 'Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects. More info: http://kubernetes.io/docs/user-guide/annotations'
+        type: object
+      labels:
+        additionalProperties:
+          type: string
+        description: 'Map of string keys and values that can be used to organize and categorize (scope and select) objects. May match selectors of replication controllers and services. More info: http://kubernetes.io/docs/user-guide/labels'
+        type: object
+      name:
+        description: 'Name must be unique within a namespace. Is required when creating resources, although some resources may allow a client to request the generation of an appropriate name automatically. Name is primarily intended for creation idempotence and configuration definition. Cannot be updated. More info: http://kubernetes.io/docs/user-guide/identifiers#names'
+        type: string
+      namespace:
+        description: "Namespace defines the space within which each name must be unique. An empty namespace is equivalent to the \"default\" namespace, but \"default\" is the canonical representation. Not all objects are required to be scoped to a namespace - the value of this field for those objects will be empty. \n Must be a DNS_LABEL. Cannot be updated. More info: http://kubernetes.io/docs/user-guide/namespaces"
+        type: string
     type: object
   spec:
     description: 'Specification of the desired behavior of the ThanosRuler cluster. More info: https://github.com/kubernetes/community/blob/master/contributors/devel/sig-architecture/api-conventions.md#spec-and-status'
@@ -3202,35 +3219,6 @@ properties:
           - name
           type: object
         type: array
-    type: object
-  status:
-    description: 'Most recent observed status of the ThanosRuler cluster. Read-only. Not included when requesting from the apiserver, only from the ThanosRuler Operator API itself. More info: https://github.com/kubernetes/community/blob/master/contributors/devel/sig-architecture/api-conventions.md#spec-and-status'
-    properties:
-      availableReplicas:
-        description: Total number of available pods (ready for at least minReadySeconds) targeted by this ThanosRuler deployment.
-        format: int32
-        type: integer
-      paused:
-        description: Represents whether any actions on the underlying managed objects are being performed. Only delete actions will be performed.
-        type: boolean
-      replicas:
-        description: Total number of non-terminated pods targeted by this ThanosRuler deployment (their labels match the selector).
-        format: int32
-        type: integer
-      unavailableReplicas:
-        description: Total number of unavailable pods targeted by this ThanosRuler deployment.
-        format: int32
-        type: integer
-      updatedReplicas:
-        description: Total number of non-terminated pods targeted by this ThanosRuler deployment that have the desired version spec.
-        format: int32
-        type: integer
-    required:
-    - availableReplicas
-    - paused
-    - replicas
-    - unavailableReplicas
-    - updatedReplicas
     type: object
 required:
 - spec

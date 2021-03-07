@@ -7,6 +7,23 @@ properties:
     description: 'Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
     type: string
   metadata:
+    properties:
+      annotations:
+        additionalProperties:
+          type: string
+        description: 'Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects. More info: http://kubernetes.io/docs/user-guide/annotations'
+        type: object
+      labels:
+        additionalProperties:
+          type: string
+        description: 'Map of string keys and values that can be used to organize and categorize (scope and select) objects. May match selectors of replication controllers and services. More info: http://kubernetes.io/docs/user-guide/labels'
+        type: object
+      name:
+        description: 'Name must be unique within a namespace. Is required when creating resources, although some resources may allow a client to request the generation of an appropriate name automatically. Name is primarily intended for creation idempotence and configuration definition. Cannot be updated. More info: http://kubernetes.io/docs/user-guide/identifiers#names'
+        type: string
+      namespace:
+        description: "Namespace defines the space within which each name must be unique. An empty namespace is equivalent to the \"default\" namespace, but \"default\" is the canonical representation. Not all objects are required to be scoped to a namespace - the value of this field for those objects will be empty. \n Must be a DNS_LABEL. Cannot be updated. More info: http://kubernetes.io/docs/user-guide/namespaces"
+        type: string
     type: object
   spec:
     description: ApplicationSpec defines the specification for an Application.
@@ -293,68 +310,5 @@ properties:
             description: matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels map is equivalent to an element of matchExpressions, whose key field is "key", the operator is "In", and the values array contains only "value". The requirements are ANDed.
             type: object
         type: object
-    type: object
-  status:
-    description: ApplicationStatus defines controller's the observed state of Application
-    properties:
-      components:
-        description: Object status array for all matching objects
-        items:
-          description: ObjectStatus is a generic status holder for objects
-          properties:
-            group:
-              description: Object group
-              type: string
-            kind:
-              description: Kind of object
-              type: string
-            link:
-              description: Link to object
-              type: string
-            name:
-              description: Name of object
-              type: string
-            status:
-              description: 'Status. Values: InProgress, Ready, Unknown'
-              type: string
-          type: object
-        type: array
-      componentsReady:
-        description: 'ComponentsReady: status of the components in the format ready/total'
-        type: string
-      conditions:
-        description: Conditions represents the latest state of the object
-        items:
-          description: Condition describes the state of an object at a certain point.
-          properties:
-            lastTransitionTime:
-              description: Last time the condition transitioned from one status to another.
-              format: date-time
-              type: string
-            lastUpdateTime:
-              description: Last time the condition was probed
-              format: date-time
-              type: string
-            message:
-              description: A human readable message indicating details about the transition.
-              type: string
-            reason:
-              description: The reason for the condition's last transition.
-              type: string
-            status:
-              description: Status of the condition, one of True, False, Unknown.
-              type: string
-            type:
-              description: Type of condition.
-              type: string
-          required:
-          - status
-          - type
-          type: object
-        type: array
-      observedGeneration:
-        description: ObservedGeneration is the most recent generation observed. It corresponds to the Object's generation, which is updated on mutation by the API Server.
-        format: int64
-        type: integer
     type: object
 type: object

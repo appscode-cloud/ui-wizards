@@ -23,10 +23,28 @@ spec:
             description: 'Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
             type: string
           metadata:
+            properties:
+              annotations:
+                additionalProperties:
+                  type: string
+                description: 'Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects. More info: http://kubernetes.io/docs/user-guide/annotations'
+                type: object
+              labels:
+                additionalProperties:
+                  type: string
+                description: 'Map of string keys and values that can be used to organize and categorize (scope and select) objects. May match selectors of replication controllers and services. More info: http://kubernetes.io/docs/user-guide/labels'
+                type: object
+              name:
+                description: 'Name must be unique within a namespace. Is required when creating resources, although some resources may allow a client to request the generation of an appropriate name automatically. Name is primarily intended for creation idempotence and configuration definition. Cannot be updated. More info: http://kubernetes.io/docs/user-guide/identifiers#names'
+                type: string
+              namespace:
+                description: "Namespace defines the space within which each name must be unique. An empty namespace is equivalent to the \"default\" namespace, but \"default\" is the canonical representation. Not all objects are required to be scoped to a namespace - the value of this field for those objects will be empty. \n Must be a DNS_LABEL. Cannot be updated. More info: http://kubernetes.io/docs/user-guide/namespaces"
+                type: string
             type: object
           spec:
             properties:
               driver:
+                default: Restic
                 description: Driver indicates the name of the agent to use to restore the target. Supported values are "Restic", "VolumeSnapshotter". Default value is "Restic".
                 enum:
                 - Restic
@@ -1829,6 +1847,7 @@ spec:
                 description: Task specify the Task crd that specifies the steps for recovery process
                 properties:
                   name:
+                    description: Name specifies the name of the Task to use for backup/restore purpose. If your database has been deployed with KubeDB, then keep this field empty. Stash will read the Task info from the respective AppBinding.
                     type: string
                   params:
                     description: Params specifies a list of parameter to pass to the Task. Stash will use this parameters to resolve the task.
@@ -1844,8 +1863,6 @@ spec:
                       - value
                       type: object
                     type: array
-                required:
-                - name
                 type: object
               tempDir:
                 description: Temp directory configuration for functions/sidecar An `EmptyDir` will always be mounted at /tmp with this settings
@@ -1863,79 +1880,6 @@ spec:
                     pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
                     x-kubernetes-int-or-string: true
                 type: object
-            type: object
-          status:
-            properties:
-              conditions:
-                description: Conditions shows current restore condition of the RestoreSession.
-                items:
-                  properties:
-                    lastTransitionTime:
-                      description: Last time the condition transitioned from one status to another. This should be when the underlying condition changed.  If that is not known, then using the time when the API field changed is acceptable.
-                      format: date-time
-                      type: string
-                    message:
-                      description: A human readable message indicating details about the transition. This field may be empty.
-                      type: string
-                    observedGeneration:
-                      description: If set, this represents the .metadata.generation that the condition was set based upon. For instance, if .metadata.generation is currently 12, but the .status.condition[x].observedGeneration is 9, the condition is out of date with respect to the current state of the instance.
-                      format: int64
-                      type: integer
-                    reason:
-                      description: The reason for the condition's last transition in CamelCase. The specific API may choose whether or not this field is considered a guaranteed API. This field may not be empty.
-                      type: string
-                    status:
-                      description: Status of the condition, one of True, False, Unknown.
-                      type: string
-                    type:
-                      description: Type of condition in CamelCase or in foo.example.com/CamelCase. Many .condition.type values are consistent across resources like Available, but because arbitrary conditions can be useful (see .node.status.conditions), the ability to deconflict is important.
-                      type: string
-                  required:
-                  - lastTransitionTime
-                  - message
-                  - reason
-                  - status
-                  - type
-                  type: object
-                type: array
-              phase:
-                description: Phase indicates the overall phase of the restore process for this RestoreSession. Phase will be "Succeeded" only if phase of all hosts are "Succeeded". If any of the host fail to complete restore, Phase will be "Failed".
-                enum:
-                - Pending
-                - Running
-                - Succeeded
-                - Failed
-                - Unknown
-                type: string
-              sessionDuration:
-                description: SessionDuration specify total time taken to complete current restore session (sum of restore duration of all hosts)
-                type: string
-              stats:
-                description: Stats shows statistics of individual hosts for this restore session
-                items:
-                  properties:
-                    duration:
-                      description: Duration indicates total time taken to complete restore for this hosts
-                      type: string
-                    error:
-                      description: Error indicates string value of error in case of restore failure
-                      type: string
-                    hostname:
-                      description: Hostname indicate name of the host that has been restored
-                      type: string
-                    phase:
-                      description: Phase indicates restore phase of this host
-                      enum:
-                      - Succeeded
-                      - Failed
-                      - Unknown
-                      type: string
-                  type: object
-                type: array
-              totalHosts:
-                description: TotalHosts specifies total number of hosts that will be restored for this RestoreSession
-                format: int32
-                type: integer
             type: object
         type: object
     served: true

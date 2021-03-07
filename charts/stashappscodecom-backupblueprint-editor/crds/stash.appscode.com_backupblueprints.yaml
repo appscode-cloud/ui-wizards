@@ -23,6 +23,20 @@ spec:
             description: 'Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
             type: string
           metadata:
+            properties:
+              annotations:
+                additionalProperties:
+                  type: string
+                description: 'Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects. More info: http://kubernetes.io/docs/user-guide/annotations'
+                type: object
+              labels:
+                additionalProperties:
+                  type: string
+                description: 'Map of string keys and values that can be used to organize and categorize (scope and select) objects. May match selectors of replication controllers and services. More info: http://kubernetes.io/docs/user-guide/labels'
+                type: object
+              name:
+                description: 'Name must be unique within a namespace. Is required when creating resources, although some resources may allow a client to request the generation of an appropriate name automatically. Name is primarily intended for creation idempotence and configuration definition. Cannot be updated. More info: http://kubernetes.io/docs/user-guide/identifiers#names'
+                type: string
             type: object
           spec:
             properties:
@@ -2151,6 +2165,7 @@ spec:
                 description: Task specify the Task crd that specifies steps for backup process
                 properties:
                   name:
+                    description: Name specifies the name of the Task to use for backup/restore purpose. If your database has been deployed with KubeDB, then keep this field empty. Stash will read the Task info from the respective AppBinding.
                     type: string
                   params:
                     description: Params specifies a list of parameter to pass to the Task. Stash will use this parameters to resolve the task.
@@ -2166,8 +2181,6 @@ spec:
                       - value
                       type: object
                     type: array
-                required:
-                - name
                 type: object
               tempDir:
                 description: Temp directory configuration for functions/sidecar An `EmptyDir` will always be mounted at /tmp with this settings
