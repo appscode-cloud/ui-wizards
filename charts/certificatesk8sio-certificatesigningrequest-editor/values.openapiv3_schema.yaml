@@ -7,6 +7,20 @@ properties:
     description: 'Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
     type: string
   metadata:
+    properties:
+      annotations:
+        additionalProperties:
+          type: string
+        description: 'Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects. More info: http://kubernetes.io/docs/user-guide/annotations'
+        type: object
+      labels:
+        additionalProperties:
+          type: string
+        description: 'Map of string keys and values that can be used to organize and categorize (scope and select) objects. May match selectors of replication controllers and services. More info: http://kubernetes.io/docs/user-guide/labels'
+        type: object
+      name:
+        description: 'Name must be unique within a namespace. Is required when creating resources, although some resources may allow a client to request the generation of an appropriate name automatically. Name is primarily intended for creation idempotence and configuration definition. Cannot be updated. More info: http://kubernetes.io/docs/user-guide/identifiers#names'
+        type: string
     type: object
   spec:
     description: The certificate request itself and any additional information.
@@ -45,34 +59,5 @@ properties:
         type: string
     required:
     - request
-    type: object
-  status:
-    description: Derived information about the request.
-    properties:
-      certificate:
-        description: If request was approved, the controller will place the issued certificate here.
-        format: byte
-        type: string
-      conditions:
-        description: Conditions applied to the request, such as approval or denial.
-        items:
-          properties:
-            lastUpdateTime:
-              description: timestamp for the last update to this condition
-              format: date-time
-              type: string
-            message:
-              description: human readable message with details about the request state
-              type: string
-            reason:
-              description: brief reason for the request state
-              type: string
-            type:
-              description: request approval state, currently Approved or Denied.
-              type: string
-          required:
-          - type
-          type: object
-        type: array
     type: object
 type: object
