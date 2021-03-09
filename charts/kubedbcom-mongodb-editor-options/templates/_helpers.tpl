@@ -37,6 +37,9 @@ Common labels
 {{- define "kubedbcom-mongodb-editor-options.labels" -}}
 {{ include "kubedbcom-mongodb-editor-options.selectorLabels" . }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- range $k, $v := .Values.spec.labels }}
+{{ $k }}: "{{ $v }}"
+{{- end -}}
 {{- end }}
 
 {{/*
@@ -56,4 +59,13 @@ Create the name of the service account to use
 {{- else }}
 {{- default "default" .Values.spec.serviceAccount.name }}
 {{- end }}
+{{- end }}
+
+{{/*
+Common annotations
+*/}}
+{{- define "kubedbcom-mongodb-editor-options.annotations" -}}
+{{- range $k, $v := .Values.spec.annotations }}
+{{ $k }}: "{{ $v }}"
+{{- end -}}
 {{- end }}
