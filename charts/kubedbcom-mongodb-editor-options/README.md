@@ -54,6 +54,8 @@ The following table lists the configurable parameters of the `kubedbcom-mongodb-
 | metadata.release.name                            | Release name                                                                                                           | `""`         |
 | metadata.release.namespace                       | Release namespace                                                                                                      | `""`         |
 | spec.version                                     | List options                                                                                                           | `3.4.17`     |
+| spec.annotations                                 | Annotations to add to the database custom resource                                                                     | `{}`         |
+| spec.labels                                      | Labels to add to all the template objects                                                                              | `{}`         |
 | spec.mode                                        | Standalone, Replicaset, Sharded                                                                                        | `Standalone` |
 | spec.replicas                                    |                                                                                                                        | `1`          |
 | spec.replicaSet.name                             |                                                                                                                        | `rs0`        |
@@ -71,11 +73,9 @@ The following table lists the configurable parameters of the `kubedbcom-mongodb-
 | spec.machine                                     |                                                                                                                        | `db.t.micro` |
 | spec.resources                                   |                                                                                                                        | ``           |
 | spec.authSecret.create                           |                                                                                                                        | `true`       |
-| spec.authSecret.annotations                      |                                                                                                                        | `{}`         |
 | spec.authSecret.name                             |                                                                                                                        | `""`         |
 | spec.authSecret.password                         |                                                                                                                        | `""`         |
 | spec.serviceAccount.create                       | Specifies whether a service account should be created                                                                  | `true`       |
-| spec.serviceAccount.annotations                  | Annotations to add to the service account                                                                              | `{}`         |
 | spec.serviceAccount.name                         | The name of the service account to use. If not set and create is true, a name is generated using the fullname template | `""`         |
 
 

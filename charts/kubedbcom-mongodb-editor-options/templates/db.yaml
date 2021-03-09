@@ -13,6 +13,10 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "kubedbcom-mongodb-editor-options.labels" . | nindent 4 }}
+{{- if .Values.spec.annotations }}
+  annotations:
+    {{- include "kubedbcom-mongodb-editor-options.annotations" . | nindent 4 }}
+{{- end }}
 spec:
   version: {{ .Values.spec.version | quote }}
 {{- if or (eq .Values.spec.mode "Standalone") (eq .Values.spec.mode "Replicaset") }}

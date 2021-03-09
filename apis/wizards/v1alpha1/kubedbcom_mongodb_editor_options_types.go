@@ -41,6 +41,8 @@ type KubedbcomMongodbEditorOptionsSpec struct {
 }
 
 type KubedbcomMongodbEditorOptionsSpecSpec struct {
+	Annotations       map[string]string         `json:"annotations"`
+	Labels            map[string]string         `json:"labels"`
 	Version           string                    `json:"version"`
 	Mode              MongodbMode               `json:"mode"`
 	Replicas          int                       `json:"replicas"`
@@ -106,16 +108,14 @@ type StorageClass struct {
 }
 
 type AuthSecret struct {
-	Create      bool              `json:"create"`
-	Annotations map[string]string `json:"annotations"`
-	Name        string            `json:"name"`
-	Password    string            `json:"password"`
+	Create   bool   `json:"create"`
+	Name     string `json:"name"`
+	Password string `json:"password"`
 }
 
 type ServiceAccount struct {
-	Create      bool              `json:"create"`
-	Annotations map[string]string `json:"annotations"`
-	Name        string            `json:"name"`
+	Create bool   `json:"create"`
+	Name   string `json:"name"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
