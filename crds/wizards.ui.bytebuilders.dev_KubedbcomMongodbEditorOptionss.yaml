@@ -79,12 +79,12 @@ spec:
                 type: object
               spec:
                 properties:
+                  annotations:
+                    additionalProperties:
+                      type: string
+                    type: object
                   authSecret:
                     properties:
-                      annotations:
-                        additionalProperties:
-                          type: string
-                        type: object
                       create:
                         type: boolean
                       name:
@@ -92,7 +92,6 @@ spec:
                       password:
                         type: string
                     required:
-                    - annotations
                     - create
                     - name
                     - password
@@ -104,6 +103,10 @@ spec:
                     - sendX509
                     - x509
                     type: string
+                  labels:
+                    additionalProperties:
+                      type: string
+                    type: object
                   machine:
                     enum:
                     - db.t.micro
@@ -181,16 +184,11 @@ spec:
                     type: object
                   serviceAccount:
                     properties:
-                      annotations:
-                        additionalProperties:
-                          type: string
-                        type: object
                       create:
                         type: boolean
                       name:
                         type: string
                     required:
-                    - annotations
                     - create
                     - name
                     type: object
@@ -265,8 +263,10 @@ spec:
                   version:
                     type: string
                 required:
+                - annotations
                 - authSecret
                 - clusterAuthMode
+                - labels
                 - machine
                 - mode
                 - persistence
