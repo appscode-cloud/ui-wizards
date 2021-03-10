@@ -44,12 +44,12 @@ properties:
     type: object
   spec:
     properties:
+      annotations:
+        additionalProperties:
+          type: string
+        type: object
       authSecret:
         properties:
-          annotations:
-            additionalProperties:
-              type: string
-            type: object
           create:
             type: boolean
           name:
@@ -57,7 +57,6 @@ properties:
           password:
             type: string
         required:
-        - annotations
         - create
         - name
         - password
@@ -69,6 +68,10 @@ properties:
         - sendX509
         - x509
         type: string
+      labels:
+        additionalProperties:
+          type: string
+        type: object
       machine:
         enum:
         - db.t.micro
@@ -145,16 +148,11 @@ properties:
         type: object
       serviceAccount:
         properties:
-          annotations:
-            additionalProperties:
-              type: string
-            type: object
           create:
             type: boolean
           name:
             type: string
         required:
-        - annotations
         - create
         - name
         type: object
@@ -229,8 +227,10 @@ properties:
       version:
         type: string
     required:
+    - annotations
     - authSecret
     - clusterAuthMode
+    - labels
     - machine
     - mode
     - persistence
