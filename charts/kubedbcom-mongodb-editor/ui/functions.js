@@ -219,7 +219,7 @@ function setDatabaseMode({ model, getValue, watchDependency }) {
   const modelPathValue = getValue(model, "/resources/kubedbComMongoDB/spec");
   watchDependency("model#/resources/kubedbComMongoDB/spec");
   if (modelPathValue.shardTopology) return "Sharded";
-  else if (modelPathValue.replicaset) return "Replicaset";
+  else if (modelPathValue.replicaSet) return "Replicaset";
   else return "Standalone";
 }
 
@@ -229,7 +229,7 @@ function deleteDatabaseModePath({ discriminator, getValue, commit, model }) {
   if (mode === "Sharded") {
     commit(
       "wizard/model$delete",
-      "/resources/kubedbComMongoDB/spec/replicaset"
+      "/resources/kubedbComMongoDB/spec/replicaSet"
     );
     commit("wizard/model$delete", "/resources/kubedbComMongoDB/spec/replicas");
 
@@ -269,9 +269,9 @@ function deleteDatabaseModePath({ discriminator, getValue, commit, model }) {
       "/resources/kubedbComMongoDB/spec/shardTopology"
     );
 
-    if (!modelSpec.replicaset) {
+    if (!modelSpec.replicaSet) {
       commit("wizard/model$update", {
-        path: "/resources/kubedbComMongoDB/spec/replicaset",
+        path: "/resources/kubedbComMongoDB/spec/replicaSet",
         value: { name: "" },
         force: true,
       });
@@ -289,7 +289,7 @@ function deleteDatabaseModePath({ discriminator, getValue, commit, model }) {
 
     commit(
       "wizard/model$delete",
-      "/resources/kubedbComMongoDB/spec/replicaset"
+      "/resources/kubedbComMongoDB/spec/replicaSet"
     );
     commit("wizard/model$delete", "/resources/kubedbComMongoDB/spec/replicas");
   }
