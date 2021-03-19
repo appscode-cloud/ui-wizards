@@ -41,7 +41,9 @@ type KubedbcomMongodbEditorOptionsSpec struct {
 }
 
 type KubedbcomMongodbEditorOptionsSpecSpec struct {
-	Annotations       map[string]string         `json:"annotations"`
+	// +optional
+	Annotations map[string]string `json:"annotations"`
+	// +optional
 	Labels            map[string]string         `json:"labels"`
 	Version           string                    `json:"version"`
 	Mode              MongodbMode               `json:"mode"`
@@ -56,7 +58,6 @@ type KubedbcomMongodbEditorOptionsSpecSpec struct {
 	Machine           MachineType               `json:"machine"`
 	Resources         core.ResourceRequirements `json:"resources"`
 	AuthSecret        AuthSecret                `json:"authSecret"`
-	ServiceAccount    ServiceAccount            `json:"serviceAccount"`
 }
 
 // +kubebuilder:validation:Enum=db.t.micro;db.t.small;db.t.medium;db.t.large;db.t.xlarge;db.t.2xlarge;db.m.small;db.m.large;db.m.xlarge;db.m.2xlarge;db.m.4xlarge;db.m.8xlarge;db.m.12xlarge;db.m.16xlarge;db.m.24xlarge;db.r.large;db.r.xlarge;db.r.2xlarge;db.r.4xlarge;db.r.8xlarge;db.r.12xlarge;db.r.16xlarge;db.r.24xlarge
@@ -111,11 +112,6 @@ type AuthSecret struct {
 	Create   bool   `json:"create"`
 	Name     string `json:"name"`
 	Password string `json:"password"`
-}
-
-type ServiceAccount struct {
-	Create bool   `json:"create"`
-	Name   string `json:"name"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
