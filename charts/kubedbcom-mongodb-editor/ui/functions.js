@@ -1863,6 +1863,41 @@ function isValueExistInModel({ model, getValue }, path) {
   return !!modelValue;
 }
 
+function onAgentChange({ commit, model, getValue }) {
+  const agent = getValue(
+      model,
+      "/resources/kubedbComMongoDB/spec/monitor/agent"
+  );
+  const name = getValue(model, "/metadata/release/name");
+  const namespace = getValue(model, "/metadata/release/namespace");
+  if (agent === "prometheus.io") {
+    commit("wizard/model$update", {
+      path: "/resources/monitoringCoreosComServiceMonitor",
+      value: {
+        apiVersion: "monitoring.coreos.com/v1",
+        kind: "ServiceMonitor",
+        metadata: {
+          name: `${name}`,
+          namespace: `${namespace}`,
+          labels: {
+            "app.kubernetes.io/instance": `${name}`,
+            "app.kubernetes.io/name": "mongodbs.kubedb.com",
+          },
+        },
+        spec: {
+          endpoints: []
+        }
+      },
+      force: true,
+    });
+  } else {
+    commit(
+        "wizard/model$delete",
+        "/resources/monitoringCoreosComServiceMonitor"
+    );
+  }
+}
+
 return {
   disableLableChecker,
   isEqualToModelPathValue,
@@ -1957,4 +1992,5 @@ return {
   unNamespacedResourceNames,
   getImagePullSecrets,
   isValueExistInModel,
+  onAgentChange
 };
