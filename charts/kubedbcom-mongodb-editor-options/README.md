@@ -70,9 +70,9 @@ The following table lists the configurable parameters of the `kubedbcom-mongodb-
 | spec.terminationPolicy                           |                                                    | `WipeOut`    |
 | spec.storageClass.name                           |                                                    | `standard`   |
 | spec.persistence.size                            |                                                    | `10Gi`       |
-| spec.machine                                     |                                                    | `db.t.micro` |
-| spec.resources                                   |                                                    | ``           |
-| spec.authSecret.create                           |                                                    | `true`       |
+| spec.machine                                     |                                                    | `""`         |
+| spec.resources.limits.cpu                        |                                                    | `".5"`       |
+| spec.resources.limits.memory                     |                                                    | `1024Mi`     |
 | spec.authSecret.name                             |                                                    | `""`         |
 | spec.authSecret.password                         |                                                    | `""`         |
 
