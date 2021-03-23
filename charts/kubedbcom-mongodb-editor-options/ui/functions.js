@@ -1,7 +1,7 @@
-function showAuthPasswordField({ model, getValue, watchDependency }) {
-  const modelPathValue = getValue(model, "/spec/authSecret/create");
-  watchDependency("model#/spec/authSecret/create");
-  return modelPathValue;
+function showAuthPasswordField({ discriminator, getValue, watchDependency }) {
+  const modelPathValue = getValue(discriminator, "/createAuthSecret");
+  watchDependency("discriminator#/createAuthSecret");
+  return !!modelPathValue;
 }
 
 function isEqualToModelPathValue(
@@ -14,8 +14,12 @@ function isEqualToModelPathValue(
   return modelPathValue === value;
 }
 
-function showAuthSecretField({ model, getValue, watchDependency }) {
-  return !this.showAuthPasswordField({ model, getValue, watchDependency });
+function showAuthSecretField({ discriminator, getValue, watchDependency }) {
+  return !this.showAuthPasswordField({
+    discriminator,
+    getValue,
+    watchDependency,
+  });
 }
 
 function showStorageSizeField({ model, getValue, watchDependency }) {
