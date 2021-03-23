@@ -150,13 +150,13 @@ steps:
             hasLine: true
           type: label-element
         - schema:
-            $ref: 'schema#/properties/spec/properties/authSecret/properties/create'
+            $ref: 'discriminator#/createAuthSecret'
           type: radio
           options:
-            - value: false
-              text: options.database.secret.existingSecret.label
             - value: true
               text: options.database.secret.customSecret.label
+            - value: false
+              text: options.database.secret.existingSecret.label
         - if: showAuthSecretField
           elements:
             - if: hasExistingSecret
@@ -234,6 +234,10 @@ steps:
           type: configure-options
           schema:
             $ref: 'schema#/properties/spec/properties/configurationOptions'
+      discriminator:
+        createAuthSecret:
+          type: boolean
+          default: true
       type: single-step-form
     title: steps.0.label
 type: multi-step-form

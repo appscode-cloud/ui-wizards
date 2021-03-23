@@ -9,22 +9,22 @@ steps:
             text: labels.database.name
           type: input
           schema:
-            $ref: "schema#/properties/metadata/properties/release/properties/name"
+            $ref: 'schema#/properties/metadata/properties/release/properties/name'
         - label:
             text: labels.namespace
           fetch: getResources|core|v1|namespaces
           type: select
           schema:
-            $ref: "schema#/properties/metadata/properties/release/properties/namespace"
+            $ref: 'schema#/properties/metadata/properties/release/properties/namespace'
         - label:
             text: labels.database.version
           fetch: getMongoDbVersions|catalog.kubedb.com|v1alpha1|mongodbversions
           type: select
           schema:
-            $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/version"
+            $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/version'
         - isArray: true
           schema:
-            $ref: "schema#/properties/resources/properties/appApplication/properties/metadata/properties/labels"
+            $ref: 'schema#/properties/resources/properties/appApplication/properties/metadata/properties/labels'
           keys:
             label:
               text: labels.labels.key
@@ -36,11 +36,11 @@ steps:
               text: labels.labels.value
             type: input
             schema:
-              $ref: "schema#/properties/resources/properties/appApplication/properties/metadata/properties/labels/additionalProperties"
+              $ref: 'schema#/properties/resources/properties/appApplication/properties/metadata/properties/labels/additionalProperties'
           individualItemDisabilityCheck: disableLableChecker
         - isArray: true
           schema:
-            $ref: "schema#/properties/resources/properties/appApplication/properties/metadata/properties/annotations"
+            $ref: 'schema#/properties/resources/properties/appApplication/properties/metadata/properties/annotations'
           keys:
             label:
               text: labels.annotations.key
@@ -52,11 +52,11 @@ steps:
               text: labels.annotations.value
             type: input
             schema:
-              $ref: "schema#/properties/resources/properties/appApplication/properties/metadata/properties/annotations/additionalProperties"
+              $ref: 'schema#/properties/resources/properties/appApplication/properties/metadata/properties/annotations/additionalProperties'
         - label:
             text: labels.terminationPolicy
           schema:
-            $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/terminationPolicy"
+            $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/terminationPolicy'
           type: radio
           hasDescription: true
           options:
@@ -84,23 +84,23 @@ steps:
               fetch: getSecrets
               type: select
               schema:
-                $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/authSecret/properties/name"
+                $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/authSecret/properties/name'
             - if: hasNoExistingSecret
               label:
                 text: labels.secret
               type: input
               schema:
-                $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/authSecret/properties/name"
+                $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/authSecret/properties/name'
         - if: showAuthPasswordField
           label:
             text: labels.database.secret
           type: input
           schema:
-            $ref: "schema#/properties/resources/properties/secretAuth/properties/metadata/properties/name"
+            $ref: 'schema#/properties/resources/properties/secretAuth/properties/metadata/properties/name'
         - if: showNewSecretCreateField
           type: single-step-form
           schema:
-            $ref: "schema#/properties/resources/properties/secretAuth/properties/data"
+            $ref: 'schema#/properties/resources/properties/secretAuth/properties/data'
           elements:
             - label:
                 text: labels.new_secret_password
@@ -111,7 +111,7 @@ steps:
                 text: labels.password
               type: input
               schema:
-                $ref: "schema#/properties/resources/properties/secretAuth/properties/data/properties/password"
+                $ref: 'schema#/properties/resources/properties/secretAuth/properties/data/properties/password'
       type: single-step-form
     id: basic
     title: steps.0.label
@@ -123,7 +123,7 @@ steps:
           onChange: deleteDatabaseModePath
           type: radio
           schema:
-            $ref: "discriminator#/activeDatabaseMode"
+            $ref: 'discriminator#/activeDatabaseMode'
           hasDescription: true
           options:
             - value: Standalone
@@ -141,12 +141,12 @@ steps:
                 text: labels.replicaset.name
               type: input
               schema:
-                $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/replicaSet/properties/name"
+                $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/replicaSet/properties/name'
             - label:
                 text: labels.replicaset.number
               type: input
               schema:
-                $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/replicas"
+                $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/replicas'
         - if: showCommonStorageClassAndSizeField
           type: single-step-form
           elements:
@@ -155,12 +155,12 @@ steps:
               fetch: getResources|storage.k8s.io|v1|storageclasses
               type: select
               schema:
-                $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/storage/properties/storageClassName"
+                $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/storage/properties/storageClassName'
             - label:
                 text: labels.storage.size
               type: input
               schema:
-                $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/storage/properties/resources/properties/requests/properties/storage"
+                $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/storage/properties/resources/properties/requests/properties/storage'
         - if: isEqualToDatabaseMode|Sharded
           elements:
             - label:
@@ -168,7 +168,7 @@ steps:
               fetch: getResources|storage.k8s.io|v1|storageclasses
               type: select
               schema:
-                $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/shardTopology/properties/shard/properties/storage/properties/storageClassName"
+                $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/shardTopology/properties/shard/properties/storage/properties/storageClassName'
             - label:
                 text: labels.shardNodes
                 hasLine: true
@@ -177,12 +177,12 @@ steps:
                 text: labels.shards
               type: input
               schema:
-                $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/shardTopology/properties/shard/properties/shards"
+                $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/shardTopology/properties/shard/properties/shards'
             - label:
                 text: labels.storage.size
               type: input
               schema:
-                $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/shardTopology/properties/shard/properties/storage/properties/resources/properties/requests/properties/storage"
+                $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/shardTopology/properties/shard/properties/storage/properties/resources/properties/requests/properties/storage'
             - label:
                 text: labels.configServer
                 hasLine: true
@@ -191,7 +191,7 @@ steps:
                 text: labels.storage.size
               type: input
               schema:
-                $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/shardTopology/properties/configServer/properties/storage/properties/resources/properties/requests/properties/storage"
+                $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/shardTopology/properties/configServer/properties/storage/properties/resources/properties/requests/properties/storage'
             - label:
                 text: labels.mongos
                 hasLine: true
@@ -200,7 +200,7 @@ steps:
                 text: labels.replicaset.number
               type: input
               schema:
-                $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/shardTopology/properties/mongos/properties/replicas"
+                $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/shardTopology/properties/mongos/properties/replicas'
       discriminator:
         activeDatabaseMode:
           type: string
@@ -214,7 +214,7 @@ steps:
           label:
             text: labels.enable_tls
           schema:
-            $ref: "discriminator#/configureTLS"
+            $ref: 'discriminator#/configureTLS'
           computed: isValueExistInModel|/resources/kubedbComMongoDB/spec/tls
           onChange: onTlsConfigureChange
         - if: showTlsConfigureSection
@@ -225,7 +225,7 @@ steps:
               type: label-element
             - type: single-step-form
               schema:
-                $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/issuerRef"
+                $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/issuerRef'
               elements:
                 - label:
                     text: labels.api_group
@@ -233,7 +233,7 @@ steps:
                   computed: setApiGroup
                   type: input
                   schema:
-                    $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/issuerRef/properties/apiGroup"
+                    $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/issuerRef/properties/apiGroup'
                 - label:
                     text: labels.kind
                   options:
@@ -243,26 +243,26 @@ steps:
                       value: ClusterIssuer
                   type: select
                   schema:
-                    $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/issuerRef/properties/kind"
+                    $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/issuerRef/properties/kind'
                 - if: hasIssuerRefName
                   label:
                     text: labels.name
                   fetch: getIssuerRefsName
                   type: select
                   schema:
-                    $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/issuerRef/properties/name"
+                    $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/issuerRef/properties/name'
                 - if: hasNoIssuerRefName
                   label:
                     text: labels.name
                   type: input
                   schema:
-                    $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/issuerRef/properties/name"
+                    $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/issuerRef/properties/name'
             - type: single-step-form-array
               label:
                 text: labels.certificates
               addFormLabel: labels.certificate
               schema:
-                $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/certificates"
+                $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/certificates'
               tableContents:
                 - type: value
                   typeOfValue: string
@@ -336,100 +336,100 @@ steps:
                       text: labels.alias
                     type: input
                     schema:
-                      $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/certificates/items/properties/alias"
+                      $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/certificates/items/properties/alias'
                   - label:
                       text: labels.secret_name
                     type: input
                     schema:
-                      $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/certificates/items/properties/secretName"
+                      $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/certificates/items/properties/secretName'
                   - label:
                       text: labels.duration
                     type: input
                     schema:
-                      $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/certificates/items/properties/duration"
+                      $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/certificates/items/properties/duration'
                   - label:
                       text: labels.renew_before
                     type: input
                     schema:
-                      $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/certificates/items/properties/renewBefore"
+                      $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/certificates/items/properties/renewBefore'
                   - label:
                       text: labels.subject
                       hasLine: true
                     type: label-element
                     customClass: mb-15
                   - schema:
-                      $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/certificates/items/properties/subject"
+                      $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/certificates/items/properties/subject'
                     type: single-step-form
                     elements:
                       - schema:
-                          $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/certificates/items/properties/subject/properties/organizations"
+                          $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/certificates/items/properties/subject/properties/organizations'
                         type: list-input-form
                         element:
                           label:
                             text: labels.organization
                           schema:
-                            $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/certificates/items/properties/subject/properties/organizations/items"
+                            $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/certificates/items/properties/subject/properties/organizations/items'
                           type: input
                         label:
                           text: labels.organizations
                           isSubsection: true
                       - schema:
-                          $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/certificates/items/properties/subject/properties/countries"
+                          $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/certificates/items/properties/subject/properties/countries'
                         type: list-input-form
                         element:
                           label:
                             text: labels.country
                           schema:
-                            $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/certificates/items/properties/subject/properties/countries/items"
+                            $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/certificates/items/properties/subject/properties/countries/items'
                           type: input
                         label:
                           text: labels.countries
                           isSubsection: true
                       - schema:
-                          $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/certificates/items/properties/subject/properties/organizationalUnits"
+                          $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/certificates/items/properties/subject/properties/organizationalUnits'
                         type: list-input-form
                         element:
                           label:
                             text: labels.organizational_unit
                           schema:
-                            $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/certificates/items/properties/subject/properties/organizationalUnits/items"
+                            $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/certificates/items/properties/subject/properties/organizationalUnits/items'
                           type: input
                         label:
                           text: labels.organizational_units
                           isSubsection: true
                       - schema:
-                          $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/certificates/items/properties/subject/properties/provinces"
+                          $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/certificates/items/properties/subject/properties/provinces'
                         type: list-input-form
                         element:
                           label:
                             text: labels.province
                           schema:
-                            $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/certificates/items/properties/subject/properties/provinces/items"
+                            $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/certificates/items/properties/subject/properties/provinces/items'
                           type: input
                         label:
                           text: labels.provinces
                           isSubsection: true
                   - schema:
-                      $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/certificates/items/properties/dnsNames"
+                      $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/certificates/items/properties/dnsNames'
                     hasLineLabel: true
                     type: list-input-form
                     element:
                       label:
                         text: labels.dns_name
                       schema:
-                        $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/certificates/items/properties/dnsNames/items"
+                        $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/certificates/items/properties/dnsNames/items'
                       type: input
                     label:
                       text: labels.dns_names
                       hasLine: true
                   - schema:
-                      $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/certificates/items/properties/ipAddresses"
+                      $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/certificates/items/properties/ipAddresses'
                     type: list-input-form
                     element:
                       label:
                         text: labels.ip_address
                       schema:
-                        $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/certificates/items/properties/ipAddresses/items"
+                        $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/certificates/items/properties/ipAddresses/items'
                       type: input
                     label:
                       text: labels.ip_addresses
@@ -452,12 +452,12 @@ steps:
           label:
             text: labels.prePopulateDatabase
           schema:
-            $ref: "discriminator#/properties/prePopulateDatabase"
+            $ref: 'discriminator#/properties/prePopulateDatabase'
           options:
             - text: options.yesOrNo.yes.text
-              value: "yes"
+              value: 'yes'
             - text: options.yesOrNo.no.text
-              value: "no"
+              value: 'no'
           computed: initPrePopulateDatabase
           onChange: onPrePopulateDatabaseChange
         - if: showInitializationForm
@@ -470,7 +470,7 @@ steps:
               label:
                 text: labels.dataSource
               schema:
-                $ref: "discriminator#/properties/dataSource"
+                $ref: 'discriminator#/properties/dataSource'
               options:
                 - text: options.dataSource.script.text
                   value: script
@@ -488,7 +488,7 @@ steps:
                   label:
                     text: labels.script.path
                   schema:
-                    $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/init/properties/script/properties/scriptPath"
+                    $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/init/properties/script/properties/scriptPath'
                 - label:
                     text: labels.script.volume
                     hasLine: true
@@ -497,7 +497,7 @@ steps:
                   label:
                     text: labels.script.volumeType
                   schema:
-                    $ref: "discriminator#/properties/sourceVolumeType"
+                    $ref: 'discriminator#/properties/sourceVolumeType'
                   options:
                     - text: options.scriptSourceVolumeType.configMap.text
                       value: configMap
@@ -510,14 +510,14 @@ steps:
                   label:
                     text: labels.script.volumeName
                   schema:
-                    $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/init/properties/script/properties/configMap/properties/name"
+                    $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/init/properties/script/properties/configMap/properties/name'
                   fetch: resourceNames|core|v1|configmaps
                 - if: showConfigMapOrSecretName|secret
                   type: select
                   label:
                     text: labels.script.volumeName
                   schema:
-                    $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/init/properties/script/properties/secret/properties/secretName"
+                    $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/init/properties/script/properties/secret/properties/secretName'
                   fetch: resourceNames|core|v1|secrets
             - if: showScriptOrStashForm|stashBackup
               type: single-step-form
@@ -530,19 +530,19 @@ steps:
                   label:
                     text: labels.restoreSession.name
                   schema:
-                    $ref: "schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/metadata/properties/name"
+                    $ref: 'schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/metadata/properties/name'
                 - disabled: true
                   type: input
                   label:
                     text: labels.namespace
                   schema:
-                    $ref: "schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/metadata/properties/namespace"
+                    $ref: 'schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/metadata/properties/namespace'
                   computed: initializeNamespace
                 - type: input
                   label:
                     text: labels.restoreSession.snapshot
                   schema:
-                    $ref: "schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/rules/properties/0/properties/snapshots/properties/0"
+                    $ref: 'schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/rules/properties/0/properties/snapshots/properties/0'
                 - type: single-step-form
                   discriminator:
                     repositoryChoise:
@@ -559,14 +559,14 @@ steps:
                         - text: options.createOrSelect.create.text
                           value: create
                       schema:
-                        $ref: "discriminator#/properties/repositoryChoise"
+                        $ref: 'discriminator#/properties/repositoryChoise'
                       onChange: onInitRepositoryChoiseChange
                     - if: showRepositorySelectOrCreate|select
                       type: select
                       label:
                         text: labels.repositories.name
                       schema:
-                        $ref: "schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/repository/properties/name"
+                        $ref: 'schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/repository/properties/name'
                       fetch: resourceNames|stash.appscode.com|v1alpha1|repositories
                     - if: showRepositorySelectOrCreate|create
                       type: single-step-form
@@ -578,14 +578,14 @@ steps:
                           label:
                             text: labels.repositories.name
                           schema:
-                            $ref: "schema#/properties/resources/properties/stashAppscodeComRepositoryInitRepo/properties/metadata/properties/name"
+                            $ref: 'schema#/properties/resources/properties/stashAppscodeComRepositoryInitRepo/properties/metadata/properties/name'
                           onChange: onInitRepositoryNameChange
                         - disabled: true
                           type: input
                           label:
                             text: labels.namespace
                           schema:
-                            $ref: "schema#/properties/resources/properties/stashAppscodeComRepositoryInitRepo/properties/metadata/properties/namespace"
+                            $ref: 'schema#/properties/resources/properties/stashAppscodeComRepositoryInitRepo/properties/metadata/properties/namespace'
                           computed: initializeNamespace
                         - type: label-element
                           label:
@@ -594,7 +594,7 @@ steps:
                           label:
                             text: labels.repositories.backend.type
                           schema:
-                            $ref: "discriminator#/properties/backendType"
+                            $ref: 'discriminator#/properties/backendType'
                           options:
                             - text: Azure
                               value: azure
@@ -619,17 +619,17 @@ steps:
                               label:
                                 text: labels.repositories.backend.container
                               schema:
-                                $ref: "schema#/properties/resources/properties/stashAppscodeComRepositoryInitRepo/properties/spec/properties/backend/properties/azure/properties/container"
+                                $ref: 'schema#/properties/resources/properties/stashAppscodeComRepositoryInitRepo/properties/spec/properties/backend/properties/azure/properties/container'
                             - type: input
                               label:
                                 text: labels.repositories.backend.prefix
                               schema:
-                                $ref: "schema#/properties/resources/properties/stashAppscodeComRepositoryInitRepo/properties/spec/properties/backend/properties/azure/properties/prefix"
+                                $ref: 'schema#/properties/resources/properties/stashAppscodeComRepositoryInitRepo/properties/spec/properties/backend/properties/azure/properties/prefix'
                             - type: input
                               label:
                                 text: labels.repositories.backend.maxConnections
                               schema:
-                                $ref: "schema#/properties/resources/properties/stashAppscodeComRepositoryInitRepo/properties/spec/properties/backend/properties/azure/properties/maxConnections"
+                                $ref: 'schema#/properties/resources/properties/stashAppscodeComRepositoryInitRepo/properties/spec/properties/backend/properties/azure/properties/maxConnections'
                         - type: single-step-form
                           if: showBackendForm|b2
                           elements:
@@ -637,17 +637,17 @@ steps:
                               label:
                                 text: labels.repositories.backend.bucket
                               schema:
-                                $ref: "schema#/properties/resources/properties/stashAppscodeComRepositoryInitRepo/properties/spec/properties/backend/properties/b2/properties/bucket"
+                                $ref: 'schema#/properties/resources/properties/stashAppscodeComRepositoryInitRepo/properties/spec/properties/backend/properties/b2/properties/bucket'
                             - type: input
                               label:
                                 text: labels.repositories.backend.prefix
                               schema:
-                                $ref: "schema#/properties/resources/properties/stashAppscodeComRepositoryInitRepo/properties/spec/properties/backend/properties/b2/properties/prefix"
+                                $ref: 'schema#/properties/resources/properties/stashAppscodeComRepositoryInitRepo/properties/spec/properties/backend/properties/b2/properties/prefix'
                             - type: input
                               label:
                                 text: labels.repositories.backend.maxConnections
                               schema:
-                                $ref: "schema#/properties/resources/properties/stashAppscodeComRepositoryInitRepo/properties/spec/properties/backend/properties/b2/properties/maxConnections"
+                                $ref: 'schema#/properties/resources/properties/stashAppscodeComRepositoryInitRepo/properties/spec/properties/backend/properties/b2/properties/maxConnections'
                         - type: single-step-form
                           if: showBackendForm|gcs
                           elements:
@@ -655,17 +655,17 @@ steps:
                               label:
                                 text: labels.repositories.backend.bucket
                               schema:
-                                $ref: "schema#/properties/resources/properties/stashAppscodeComRepositoryInitRepo/properties/spec/properties/backend/properties/gcs/properties/bucket"
+                                $ref: 'schema#/properties/resources/properties/stashAppscodeComRepositoryInitRepo/properties/spec/properties/backend/properties/gcs/properties/bucket'
                             - type: input
                               label:
                                 text: labels.repositories.backend.prefix
                               schema:
-                                $ref: "schema#/properties/resources/properties/stashAppscodeComRepositoryInitRepo/properties/spec/properties/backend/properties/gcs/properties/prefix"
+                                $ref: 'schema#/properties/resources/properties/stashAppscodeComRepositoryInitRepo/properties/spec/properties/backend/properties/gcs/properties/prefix'
                             - type: input
                               label:
                                 text: labels.repositories.backend.maxConnections
                               schema:
-                                $ref: "schema#/properties/resources/properties/stashAppscodeComRepositoryInitRepo/properties/spec/properties/backend/properties/gcs/properties/maxConnections"
+                                $ref: 'schema#/properties/resources/properties/stashAppscodeComRepositoryInitRepo/properties/spec/properties/backend/properties/gcs/properties/maxConnections'
                         - type: single-step-form
                           if: showBackendForm|local
                           discriminator:
@@ -676,7 +676,7 @@ steps:
                               label:
                                 text: labels.repositories.backend.volumeSource
                               schema:
-                                $ref: "discriminator#/properties/volumeSource"
+                                $ref: 'discriminator#/properties/volumeSource'
                               options:
                                 - text: Host Path
                                   value: hostPath
@@ -695,17 +695,17 @@ steps:
                                   label:
                                     text: labels.repositories.backend.path
                                   schema:
-                                    $ref: "schema#/properties/resources/properties/stashAppscodeComRepositoryInitRepo/properties/spec/properties/backend/properties/local/properties/hostPath/properties/path"
+                                    $ref: 'schema#/properties/resources/properties/stashAppscodeComRepositoryInitRepo/properties/spec/properties/backend/properties/local/properties/hostPath/properties/path'
                                 - type: input
                                   label:
                                     text: labels.repositories.backend.mountPath
                                   schema:
-                                    $ref: "schema#/properties/resources/properties/stashAppscodeComRepositoryInitRepo/properties/spec/properties/backend/properties/local/properties/hostPath/properties/mountPath"
+                                    $ref: 'schema#/properties/resources/properties/stashAppscodeComRepositoryInitRepo/properties/spec/properties/backend/properties/local/properties/hostPath/properties/mountPath'
                                 - type: input
                                   label:
                                     text: labels.repositories.backend.subPath
                                   schema:
-                                    $ref: "schema#/properties/resources/properties/stashAppscodeComRepositoryInitRepo/properties/spec/properties/backend/properties/local/properties/hostPath/properties/subPath"
+                                    $ref: 'schema#/properties/resources/properties/stashAppscodeComRepositoryInitRepo/properties/spec/properties/backend/properties/local/properties/hostPath/properties/subPath'
                             - if: showVolumeSourceForm|nfs
                               type: single-step-form
                               label:
@@ -715,22 +715,22 @@ steps:
                                   label:
                                     text: labels.repositories.backend.server
                                   schema:
-                                    $ref: "schema#/properties/resources/properties/stashAppscodeComRepositoryInitRepo/properties/spec/properties/backend/properties/local/properties/nfs/properties/server"
+                                    $ref: 'schema#/properties/resources/properties/stashAppscodeComRepositoryInitRepo/properties/spec/properties/backend/properties/local/properties/nfs/properties/server'
                                 - type: input
                                   label:
                                     text: labels.repositories.backend.path
                                   schema:
-                                    $ref: "schema#/properties/resources/properties/stashAppscodeComRepositoryInitRepo/properties/spec/properties/backend/properties/local/properties/nfs/properties/path"
+                                    $ref: 'schema#/properties/resources/properties/stashAppscodeComRepositoryInitRepo/properties/spec/properties/backend/properties/local/properties/nfs/properties/path'
                                 - type: input
                                   label:
                                     text: labels.repositories.backend.mountPath
                                   schema:
-                                    $ref: "schema#/properties/resources/properties/stashAppscodeComRepositoryInitRepo/properties/spec/properties/backend/properties/local/properties/nfs/properties/mountPath"
+                                    $ref: 'schema#/properties/resources/properties/stashAppscodeComRepositoryInitRepo/properties/spec/properties/backend/properties/local/properties/nfs/properties/mountPath'
                                 - type: input
                                   label:
                                     text: labels.repositories.backend.subPath
                                   schema:
-                                    $ref: "schema#/properties/resources/properties/stashAppscodeComRepositoryInitRepo/properties/spec/properties/backend/properties/local/properties/nfs/properties/subPath"
+                                    $ref: 'schema#/properties/resources/properties/stashAppscodeComRepositoryInitRepo/properties/spec/properties/backend/properties/local/properties/nfs/properties/subPath'
                             - if: showVolumeSourceForm|persistentVolumeClaim
                               type: single-step-form
                               label:
@@ -740,18 +740,18 @@ steps:
                                   label:
                                     text: labels.repositories.backend.pvcName
                                   schema:
-                                    $ref: "schema#/properties/resources/properties/stashAppscodeComRepositoryInitRepo/properties/spec/properties/backend/properties/local/properties/persistentVolumeClaim/properties/claimName"
+                                    $ref: 'schema#/properties/resources/properties/stashAppscodeComRepositoryInitRepo/properties/spec/properties/backend/properties/local/properties/persistentVolumeClaim/properties/claimName'
                                   fetch: resourceNames|core|v1|persistentvolumeclaims
                                 - type: input
                                   label:
                                     text: labels.repositories.backend.mountPath
                                   schema:
-                                    $ref: "schema#/properties/resources/properties/stashAppscodeComRepositoryInitRepo/properties/spec/properties/backend/properties/local/properties/persistentVolumeClaim/properties/mountPath"
+                                    $ref: 'schema#/properties/resources/properties/stashAppscodeComRepositoryInitRepo/properties/spec/properties/backend/properties/local/properties/persistentVolumeClaim/properties/mountPath'
                                 - type: input
                                   label:
                                     text: labels.repositories.backend.subPath
                                   schema:
-                                    $ref: "schema#/properties/resources/properties/stashAppscodeComRepositoryInitRepo/properties/spec/properties/backend/properties/local/properties/persistentVolumeClaim/properties/subPath"
+                                    $ref: 'schema#/properties/resources/properties/stashAppscodeComRepositoryInitRepo/properties/spec/properties/backend/properties/local/properties/persistentVolumeClaim/properties/subPath'
                         - type: single-step-form
                           if: showBackendForm|rest
                           elements:
@@ -759,7 +759,7 @@ steps:
                               label:
                                 text: labels.repositories.backend.url
                               schema:
-                                $ref: "schema#/properties/resources/properties/stashAppscodeComRepositoryInitRepo/properties/spec/properties/backend/properties/rest/properties/url"
+                                $ref: 'schema#/properties/resources/properties/stashAppscodeComRepositoryInitRepo/properties/spec/properties/backend/properties/rest/properties/url'
                         - type: single-step-form
                           if: showBackendForm|s3
                           elements:
@@ -767,22 +767,22 @@ steps:
                               label:
                                 text: labels.repositories.backend.endPoint
                               schema:
-                                $ref: "schema#/properties/resources/properties/stashAppscodeComRepositoryInitRepo/properties/spec/properties/backend/properties/s3/properties/endpoint"
+                                $ref: 'schema#/properties/resources/properties/stashAppscodeComRepositoryInitRepo/properties/spec/properties/backend/properties/s3/properties/endpoint'
                             - type: input
                               label:
                                 text: labels.repositories.backend.bucket
                               schema:
-                                $ref: "schema#/properties/resources/properties/stashAppscodeComRepositoryInitRepo/properties/spec/properties/backend/properties/s3/properties/bucket"
+                                $ref: 'schema#/properties/resources/properties/stashAppscodeComRepositoryInitRepo/properties/spec/properties/backend/properties/s3/properties/bucket'
                             - type: input
                               label:
                                 text: labels.repositories.backend.prefix
                               schema:
-                                $ref: "schema#/properties/resources/properties/stashAppscodeComRepositoryInitRepo/properties/spec/properties/backend/properties/s3/properties/prefix"
+                                $ref: 'schema#/properties/resources/properties/stashAppscodeComRepositoryInitRepo/properties/spec/properties/backend/properties/s3/properties/prefix'
                             - type: input
                               label:
                                 text: labels.repositories.backend.region
                               schema:
-                                $ref: "schema#/properties/resources/properties/stashAppscodeComRepositoryInitRepo/properties/spec/properties/backend/properties/s3/properties/region"
+                                $ref: 'schema#/properties/resources/properties/stashAppscodeComRepositoryInitRepo/properties/spec/properties/backend/properties/s3/properties/region'
                         - type: single-step-form
                           if: showBackendForm|swift
                           elements:
@@ -790,17 +790,17 @@ steps:
                               label:
                                 text: labels.repositories.backend.container
                               schema:
-                                $ref: "schema#/properties/resources/properties/stashAppscodeComRepositoryInitRepo/properties/spec/properties/backend/properties/swift/properties/container"
+                                $ref: 'schema#/properties/resources/properties/stashAppscodeComRepositoryInitRepo/properties/spec/properties/backend/properties/swift/properties/container'
                             - type: input
                               label:
                                 text: labels.repositories.backend.prefix
                               schema:
-                                $ref: "schema#/properties/resources/properties/stashAppscodeComRepositoryInitRepo/properties/spec/properties/backend/properties/swift/properties/prefix"
+                                $ref: 'schema#/properties/resources/properties/stashAppscodeComRepositoryInitRepo/properties/spec/properties/backend/properties/swift/properties/prefix'
                         - type: select
                           label:
                             text: labels.repositories.backend.secret
                           schema:
-                            $ref: "schema#/properties/resources/properties/stashAppscodeComRepositoryInitRepo/properties/spec/properties/backend/properties/storageSecretName"
+                            $ref: 'schema#/properties/resources/properties/stashAppscodeComRepositoryInitRepo/properties/spec/properties/backend/properties/storageSecretName'
                           fetch: resourceNames|core|v1|secrets
                 - type: single-step-form
                   discriminator:
@@ -812,11 +812,11 @@ steps:
                         text: labels.runtimeSettings.choise
                       options:
                         - text: options.yesOrNo.yes.text
-                          value: "yes"
+                          value: 'yes'
                         - text: options.yesOrNo.no.text
-                          value: "no"
+                          value: 'no'
                       schema:
-                        $ref: "discriminator#/properties/customizeRestoreJobRuntimeSettings"
+                        $ref: 'discriminator#/properties/customizeRestoreJobRuntimeSettings'
                       computed: initCustomizeRestoreJobRuntimeSettings
                       onChange: onCustomizeRestoreJobRuntimeSettingsChange
                     - if: showRuntimeForm|yes
@@ -834,14 +834,14 @@ steps:
                               label:
                                 text: labels.runtimeSettings.pod.serviceAccountName
                               schema:
-                                $ref: "schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/pod/properties/serviceAccountName"
+                                $ref: 'schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/pod/properties/serviceAccountName'
                               fetch: resourceNames|core|v1|serviceaccounts
                             - label:
                                 text: labels.runtimeSettings.pod.imagePullSecrets
                               type: multiselect
                               fetch: getImagePullSecrets
                               schema:
-                                $ref: "schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/pod/properties/imagePullSecrets"
+                                $ref: 'schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/pod/properties/imagePullSecrets'
                             - label:
                                 text: labels.runtimeSettings.securityContext.title
                                 hasLine: true
@@ -850,22 +850,22 @@ steps:
                                 text: labels.runtimeSettings.securityContext.fsGroup
                               type: input
                               schema:
-                                $ref: "schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/pod/properties/securityContext/properties/fsGroup"
+                                $ref: 'schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/pod/properties/securityContext/properties/fsGroup'
                             - type: switch
                               label:
                                 text: labels.runtimeSettings.securityContext.runAsNonRoot
                               schema:
-                                $ref: "schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/pod/properties/securityContext/properties/runAsNonRoot"
+                                $ref: 'schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/pod/properties/securityContext/properties/runAsNonRoot'
                             - label:
                                 text: labels.runtimeSettings.securityContext.runAsUser
                               type: input
                               schema:
-                                $ref: "schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/pod/properties/securityContext/properties/runAsUser"
+                                $ref: 'schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/pod/properties/securityContext/properties/runAsUser'
                             - label:
                                 text: labels.runtimeSettings.securityContext.runAsGroup
                               type: input
                               schema:
-                                $ref: "schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/pod/properties/securityContext/properties/runAsGroup"
+                                $ref: 'schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/pod/properties/securityContext/properties/runAsGroup'
                             - label:
                                 text: labels.runtimeSettings.securityContext.seLinuxOptions.title
                                 isSubsection: true
@@ -874,22 +874,22 @@ steps:
                                 text: labels.runtimeSettings.securityContext.seLinuxOptions.level
                               type: input
                               schema:
-                                $ref: "schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/pod/properties/securityContext/properties/seLinuxOptions/properties/level"
+                                $ref: 'schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/pod/properties/securityContext/properties/seLinuxOptions/properties/level'
                             - label:
                                 text: labels.runtimeSettings.securityContext.seLinuxOptions.role
                               type: input
                               schema:
-                                $ref: "schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/pod/properties/securityContext/properties/seLinuxOptions/properties/role"
+                                $ref: 'schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/pod/properties/securityContext/properties/seLinuxOptions/properties/role'
                             - label:
                                 text: labels.runtimeSettings.securityContext.seLinuxOptions.type
                               type: input
                               schema:
-                                $ref: "schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/pod/properties/securityContext/properties/seLinuxOptions/properties/type"
+                                $ref: 'schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/pod/properties/securityContext/properties/seLinuxOptions/properties/type'
                             - label:
                                 text: labels.runtimeSettings.securityContext.seLinuxOptions.user
                               type: input
                               schema:
-                                $ref: "schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/pod/properties/securityContext/properties/seLinuxOptions/properties/user"
+                                $ref: 'schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/pod/properties/securityContext/properties/seLinuxOptions/properties/user'
                         - type: single-step-form
                           label:
                             text: Container runtime settings
@@ -914,12 +914,12 @@ steps:
                                   label:
                                     text: labels.runtimeSettings.container.resources.cpu
                                   schema:
-                                    $ref: "schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/container/properties/resources/properties/requests/properties/cpu"
+                                    $ref: 'schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/container/properties/resources/properties/requests/properties/cpu'
                                 - type: input
                                   label:
                                     text: labels.runtimeSettings.container.resources.memory
                                   schema:
-                                    $ref: "schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/container/properties/resources/properties/requests/properties/memory"
+                                    $ref: 'schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/container/properties/resources/properties/requests/properties/memory'
                                 - type: label-element
                                   label:
                                     text: labels.runtimeSettings.container.resources.limits
@@ -928,12 +928,12 @@ steps:
                                   label:
                                     text: labels.runtimeSettings.container.resources.cpu
                                   schema:
-                                    $ref: "schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/container/properties/resources/properties/limits/properties/cpu"
+                                    $ref: 'schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/container/properties/resources/properties/limits/properties/cpu'
                                 - type: input
                                   label:
                                     text: labels.runtimeSettings.container.resources.memory
                                   schema:
-                                    $ref: "schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/container/properties/resources/properties/limits/properties/memory"
+                                    $ref: 'schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/container/properties/resources/properties/limits/properties/memory'
                             - type: single-step-form
                               label:
                                 text: Nice
@@ -946,7 +946,7 @@ steps:
                                   label:
                                     text: labels.runtimeSettings.container.nice.adjustment
                                   schema:
-                                    $ref: "schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/container/properties/nice/properties/adjustment"
+                                    $ref: 'schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/container/properties/nice/properties/adjustment'
                             - type: single-step-form
                               label:
                                 text: Ionice
@@ -959,12 +959,12 @@ steps:
                                   label:
                                     text: labels.runtimeSettings.container.ionice.class
                                   schema:
-                                    $ref: "schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/container/properties/ionice/properties/class"
+                                    $ref: 'schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/container/properties/ionice/properties/class'
                                 - type: input
                                   label:
                                     text: labels.runtimeSettings.container.ionice.classData
                                   schema:
-                                    $ref: "schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/container/properties/ionice/properties/classData"
+                                    $ref: 'schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/container/properties/ionice/properties/classData'
                             - type: single-step-form
                               label:
                                 text: Security Context
@@ -977,22 +977,22 @@ steps:
                                     text: labels.runtimeSettings.securityContext.privileged
                                   type: switch
                                   schema:
-                                    $ref: "schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/container/properties/securityContext/properties/privileged"
+                                    $ref: 'schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/container/properties/securityContext/properties/privileged'
                                 - type: switch
                                   label:
                                     text: labels.runtimeSettings.securityContext.runAsNonRoot
                                   schema:
-                                    $ref: "schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/container/properties/securityContext/properties/runAsNonRoot"
+                                    $ref: 'schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/container/properties/securityContext/properties/runAsNonRoot'
                                 - label:
                                     text: labels.runtimeSettings.securityContext.runAsUser
                                   type: input
                                   schema:
-                                    $ref: "schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/container/properties/securityContext/properties/runAsUser"
+                                    $ref: 'schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/container/properties/securityContext/properties/runAsUser'
                                 - label:
                                     text: labels.runtimeSettings.securityContext.runAsGroup
                                   type: input
                                   schema:
-                                    $ref: "schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/container/properties/securityContext/properties/runAsGroup"
+                                    $ref: 'schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/container/properties/securityContext/properties/runAsGroup'
                                 - type: single-step-form
                                   label:
                                     text: SE linuxt options
@@ -1005,28 +1005,28 @@ steps:
                                         text: labels.runtimeSettings.securityContext.seLinuxOptions.level
                                       type: input
                                       schema:
-                                        $ref: "schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/container/properties/securityContext/properties/seLinuxOptions/properties/level"
+                                        $ref: 'schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/container/properties/securityContext/properties/seLinuxOptions/properties/level'
                                     - label:
                                         text: labels.runtimeSettings.securityContext.seLinuxOptions.role
                                       type: input
                                       schema:
-                                        $ref: "schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/container/properties/securityContext/properties/seLinuxOptions/properties/role"
+                                        $ref: 'schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/container/properties/securityContext/properties/seLinuxOptions/properties/role'
                                     - label:
                                         text: labels.runtimeSettings.securityContext.seLinuxOptions.type
                                       type: input
                                       schema:
-                                        $ref: "schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/container/properties/securityContext/properties/seLinuxOptions/properties/type"
+                                        $ref: 'schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/container/properties/securityContext/properties/seLinuxOptions/properties/type'
                                     - label:
                                         text: labels.runtimeSettings.securityContext.seLinuxOptions.user
                                       type: input
                                       schema:
-                                        $ref: "schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/container/properties/securityContext/properties/seLinuxOptions/properties/user"
+                                        $ref: 'schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/container/properties/securityContext/properties/seLinuxOptions/properties/user'
                             - type: single-step-form-array
                               label:
                                 text: labels.environment_variables
                               addFormLabel: labels.environment_variable
                               schema:
-                                $ref: "schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/container/properties/env"
+                                $ref: 'schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/container/properties/env'
                               tableContents:
                                 - type: value
                                   typeOfValue: string
@@ -1061,11 +1061,11 @@ steps:
                                       text: labels.name
                                     type: input
                                     schema:
-                                      $ref: "schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/container/properties/env/items/properties/name"
+                                      $ref: 'schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/container/properties/env/items/properties/name'
                                   - label:
                                       text: Value From
                                     schema:
-                                      $ref: "discriminator#/valueFromType"
+                                      $ref: 'discriminator#/valueFromType'
                                     type: radio
                                     computed: setValueFrom
                                     onChange: onValueFromChange
@@ -1081,19 +1081,19 @@ steps:
                                       text: labels.value
                                     type: input
                                     schema:
-                                      $ref: "schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/container/properties/env/items/properties/value"
+                                      $ref: 'schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/container/properties/env/items/properties/value'
                                   - type: single-step-form
                                     label:
                                       text: configMapOrSecret
                                     schema:
-                                      $ref: "schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/container/properties/env/items/properties/valueFrom"
+                                      $ref: 'schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/container/properties/env/items/properties/valueFrom'
                                     elements:
                                       - if: isEqualToValueFromType|configMap
                                         type: single-step-form
                                         label:
                                           text: configMap
                                         schema:
-                                          $ref: "schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/container/properties/env/items/properties/valueFrom/properties/configMapKeyRef"
+                                          $ref: 'schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/container/properties/env/items/properties/valueFrom/properties/configMapKeyRef'
                                         elements:
                                           - if: showConfigMapSelectField
                                             label:
@@ -1101,32 +1101,32 @@ steps:
                                             type: select
                                             fetch: resourceNames|core|v1|configmaps
                                             schema:
-                                              $ref: "schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/container/properties/env/items/properties/valueFrom/properties/configMapKeyRef/properties/name"
+                                              $ref: 'schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/container/properties/env/items/properties/valueFrom/properties/configMapKeyRef/properties/name'
                                           - if: showConfigMapInputField
                                             label:
                                               text: labels.config_map_name
                                             type: input
                                             schema:
-                                              $ref: "schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/container/properties/env/items/properties/valueFrom/properties/configMapKeyRef/properties/name"
+                                              $ref: 'schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/container/properties/env/items/properties/valueFrom/properties/configMapKeyRef/properties/name'
                                           - if: hasConfigMapKeys
                                             label:
                                               text: labels.config_map_key
                                             fetch: getConfigMapKeys
                                             type: select
                                             schema:
-                                              $ref: "schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/container/properties/env/items/properties/valueFrom/properties/configMapKeyRef/properties/key"
+                                              $ref: 'schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/container/properties/env/items/properties/valueFrom/properties/configMapKeyRef/properties/key'
                                           - if: hasNoConfigMapKeys
                                             label:
                                               text: labels.config_map_key
                                             type: input
                                             schema:
-                                              $ref: "schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/container/properties/env/items/properties/valueFrom/properties/configMapKeyRef/properties/key"
+                                              $ref: 'schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/container/properties/env/items/properties/valueFrom/properties/configMapKeyRef/properties/key'
                                       - if: isEqualToValueFromType|secret
                                         type: single-step-form
                                         label:
                                           text: secret
                                         schema:
-                                          $ref: "schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/container/properties/env/items/properties/valueFrom/properties/secretKeyRef"
+                                          $ref: 'schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/container/properties/env/items/properties/valueFrom/properties/secretKeyRef'
                                         elements:
                                           - if: hasExistingSecret
                                             label:
@@ -1134,26 +1134,26 @@ steps:
                                             type: select
                                             fetch: resourceNames|core|v1|secrets
                                             schema:
-                                              $ref: "schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/container/properties/env/items/properties/valueFrom/properties/secretKeyRef/properties/name"
+                                              $ref: 'schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/container/properties/env/items/properties/valueFrom/properties/secretKeyRef/properties/name'
                                           - if: hasNoExistingSecret
                                             label:
                                               text: labels.secret_name
                                             type: input
                                             schema:
-                                              $ref: "schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/container/properties/env/items/properties/valueFrom/properties/secretKeyRef/properties/name"
+                                              $ref: 'schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/container/properties/env/items/properties/valueFrom/properties/secretKeyRef/properties/name'
                                           - if: hasSecretKeys
                                             label:
                                               text: labels.secret_key
                                             type: select
                                             fetch: getSecretKeys
                                             schema:
-                                              $ref: "schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/container/properties/env/items/properties/valueFrom/properties/secretKeyRef/properties/key"
+                                              $ref: 'schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/container/properties/env/items/properties/valueFrom/properties/secretKeyRef/properties/key'
                                           - if: hasNoSecretKeys
                                             label:
                                               text: labels.secret_key
                                             type: input
                                             schema:
-                                              $ref: "schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/container/properties/env/items/properties/valueFrom/properties/secretKeyRef/properties/key"
+                                              $ref: 'schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/container/properties/env/items/properties/valueFrom/properties/secretKeyRef/properties/key'
                                     discriminator:
                                       dis1:
                                         type: string
@@ -1168,7 +1168,7 @@ steps:
                                 text: labels.environmentVariablesFrom
                               addFormLabel: labels.environmentVariablesFrom
                               schema:
-                                $ref: "schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/container/properties/envFrom"
+                                $ref: 'schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/container/properties/envFrom'
                               tableContents:
                                 - type: value
                                   typeOfValue: string
@@ -1194,7 +1194,7 @@ steps:
                                   - label:
                                       text: Value From
                                     schema:
-                                      $ref: "discriminator#/refType"
+                                      $ref: 'discriminator#/refType'
                                     type: radio
                                     computed: initializeRefType
                                     onChange: onRefTypeChange
@@ -1208,32 +1208,32 @@ steps:
                                     label:
                                       text: envFrom configMap
                                     schema:
-                                      $ref: "schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/container/properties/envFrom/items/properties/configMapRef"
+                                      $ref: 'schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/container/properties/envFrom/items/properties/configMapRef'
                                     elements:
                                       - label:
                                           text: Select ConfigMap
                                         type: select
                                         fetch: resourceNames|core|v1|configmaps
                                         schema:
-                                          $ref: "schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/container/properties/envFrom/items/properties/configMapRef/properties/name"
+                                          $ref: 'schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/container/properties/envFrom/items/properties/configMapRef/properties/name'
                                   - type: single-step-form
                                     if: showRefSelect|secret
                                     label:
                                       text: envFrom secret
                                     schema:
-                                      $ref: "schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/container/properties/envFrom/items/properties/secretRef"
+                                      $ref: 'schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/container/properties/envFrom/items/properties/secretRef'
                                     elements:
                                       - label:
                                           text: Select Secret
                                         type: select
                                         fetch: resourceNames|core|v1|secrets
                                         schema:
-                                          $ref: "schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/container/properties/envFrom/items/properties/secretRef/properties/name"
+                                          $ref: 'schema#/properties/resources/properties/stashAppscodeComRestoreSessionInit/properties/spec/properties/runtimeSettings/properties/container/properties/envFrom/items/properties/secretRef/properties/name'
             - type: switch
               label:
                 text: labels.waitForInitialRestore
               schema:
-                $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/init/properties/waitForInitialRestore"
+                $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/init/properties/waitForInitialRestore'
     id: initialization
     title: steps.3.label
   - form:
@@ -1246,12 +1246,12 @@ steps:
           label:
             text: labels.backup.title
           schema:
-            $ref: "discriminator#/properties/scheduleBackup"
+            $ref: 'discriminator#/properties/scheduleBackup'
           options:
             - text: options.yesOrNo.yes.text
-              value: "yes"
+              value: 'yes'
             - text: options.yesOrNo.no.text
-              value: "no"
+              value: 'no'
           computed: initScheduleBackup
           onChange: onScheduleBackupChange
         - type: single-step-form
@@ -1266,7 +1266,7 @@ steps:
               label:
                 text: labels.backup.invoker
               schema:
-                $ref: "discriminator#/properties/backupInvoker"
+                $ref: 'discriminator#/properties/backupInvoker'
               options:
                 - text: Backup Configuration
                   value: backupConfiguration
@@ -1290,13 +1290,13 @@ steps:
                   label:
                     text: labels.name
                   schema:
-                    $ref: "schema#/properties/resources/properties/stashAppscodeComBackupConfiguration/properties/metadata/properties/name"
+                    $ref: 'schema#/properties/resources/properties/stashAppscodeComBackupConfiguration/properties/metadata/properties/name'
                 - disabled: true
                   type: input
                   label:
                     text: labels.namespace
                   schema:
-                    $ref: "schema#/properties/resources/properties/stashAppscodeComBackupConfiguration/properties/metadata/properties/namespace"
+                    $ref: 'schema#/properties/resources/properties/stashAppscodeComBackupConfiguration/properties/metadata/properties/namespace'
                   computed: initializeNamespace
                 - type: single-step-form
                   discriminator:
@@ -1310,7 +1310,7 @@ steps:
                         isSubsection: true
                     - type: radio
                       schema:
-                        $ref: "discriminator#/properties/repositoryChoise"
+                        $ref: 'discriminator#/properties/repositoryChoise'
                       options:
                         - text: options.createOrSelect.select.text
                           value: select
@@ -1323,7 +1323,7 @@ steps:
                       label:
                         text: labels.repositories.title
                       schema:
-                        $ref: "schema#/properties/resources/properties/stashAppscodeComBackupConfiguration/properties/spec/properties/repository/properties/name"
+                        $ref: 'schema#/properties/resources/properties/stashAppscodeComBackupConfiguration/properties/spec/properties/repository/properties/name'
                       fetch: resourceNames|stash.appscode.com|v1alpha1|repositories
                     - if: showRepositorySelectOrCreate|create
                       type: single-step-form
@@ -1335,14 +1335,14 @@ steps:
                           label:
                             text: labels.repositories.name
                           schema:
-                            $ref: "schema#/properties/resources/properties/stashAppscodeComRepositoryRepo/properties/metadata/properties/name"
+                            $ref: 'schema#/properties/resources/properties/stashAppscodeComRepositoryRepo/properties/metadata/properties/name'
                           onChange: onRepositoryNameChange
                         - disabled: true
                           type: input
                           label:
                             text: labels.namespace
                           schema:
-                            $ref: "schema#/properties/resources/properties/stashAppscodeComRepositoryRepo/properties/metadata/properties/namespace"
+                            $ref: 'schema#/properties/resources/properties/stashAppscodeComRepositoryRepo/properties/metadata/properties/namespace'
                           computed: initializeNamespace
                         - type: label-element
                           label:
@@ -1352,7 +1352,7 @@ steps:
                           label:
                             text: labels.repositories.backend.type
                           schema:
-                            $ref: "discriminator#/properties/backendType"
+                            $ref: 'discriminator#/properties/backendType'
                           options:
                             - text: Azure
                               value: azure
@@ -1377,17 +1377,17 @@ steps:
                               label:
                                 text: labels.repositories.backend.container
                               schema:
-                                $ref: "schema#/properties/resources/properties/stashAppscodeComRepositoryRepo/properties/spec/properties/backend/properties/azure/properties/container"
+                                $ref: 'schema#/properties/resources/properties/stashAppscodeComRepositoryRepo/properties/spec/properties/backend/properties/azure/properties/container'
                             - type: input
                               label:
                                 text: labels.repositories.backend.prefix
                               schema:
-                                $ref: "schema#/properties/resources/properties/stashAppscodeComRepositoryRepo/properties/spec/properties/backend/properties/azure/properties/prefix"
+                                $ref: 'schema#/properties/resources/properties/stashAppscodeComRepositoryRepo/properties/spec/properties/backend/properties/azure/properties/prefix'
                             - type: input
                               label:
                                 text: labels.repositories.backend.maxConnections
                               schema:
-                                $ref: "schema#/properties/resources/properties/stashAppscodeComRepositoryRepo/properties/spec/properties/backend/properties/azure/properties/maxConnections"
+                                $ref: 'schema#/properties/resources/properties/stashAppscodeComRepositoryRepo/properties/spec/properties/backend/properties/azure/properties/maxConnections'
                         - type: single-step-form
                           if: showBackendForm|b2
                           elements:
@@ -1395,17 +1395,17 @@ steps:
                               label:
                                 text: labels.repositories.backend.bucket
                               schema:
-                                $ref: "schema#/properties/resources/properties/stashAppscodeComRepositoryRepo/properties/spec/properties/backend/properties/b2/properties/bucket"
+                                $ref: 'schema#/properties/resources/properties/stashAppscodeComRepositoryRepo/properties/spec/properties/backend/properties/b2/properties/bucket'
                             - type: input
                               label:
                                 text: labels.repositories.backend.prefix
                               schema:
-                                $ref: "schema#/properties/resources/properties/stashAppscodeComRepositoryRepo/properties/spec/properties/backend/properties/b2/properties/prefix"
+                                $ref: 'schema#/properties/resources/properties/stashAppscodeComRepositoryRepo/properties/spec/properties/backend/properties/b2/properties/prefix'
                             - type: input
                               label:
                                 text: labels.repositories.backend.maxConnections
                               schema:
-                                $ref: "schema#/properties/resources/properties/stashAppscodeComRepositoryRepo/properties/spec/properties/backend/properties/b2/properties/maxConnections"
+                                $ref: 'schema#/properties/resources/properties/stashAppscodeComRepositoryRepo/properties/spec/properties/backend/properties/b2/properties/maxConnections'
                         - type: single-step-form
                           if: showBackendForm|gcs
                           elements:
@@ -1413,17 +1413,17 @@ steps:
                               label:
                                 text: labels.repositories.backend.bucket
                               schema:
-                                $ref: "schema#/properties/resources/properties/stashAppscodeComRepositoryRepo/properties/spec/properties/backend/properties/gcs/properties/bucket"
+                                $ref: 'schema#/properties/resources/properties/stashAppscodeComRepositoryRepo/properties/spec/properties/backend/properties/gcs/properties/bucket'
                             - type: input
                               label:
                                 text: labels.repositories.backend.prefix
                               schema:
-                                $ref: "schema#/properties/resources/properties/stashAppscodeComRepositoryRepo/properties/spec/properties/backend/properties/gcs/properties/prefix"
+                                $ref: 'schema#/properties/resources/properties/stashAppscodeComRepositoryRepo/properties/spec/properties/backend/properties/gcs/properties/prefix'
                             - type: input
                               label:
                                 text: labels.repositories.backend.maxConnections
                               schema:
-                                $ref: "schema#/properties/resources/properties/stashAppscodeComRepositoryRepo/properties/spec/properties/backend/properties/gcs/properties/maxConnections"
+                                $ref: 'schema#/properties/resources/properties/stashAppscodeComRepositoryRepo/properties/spec/properties/backend/properties/gcs/properties/maxConnections'
                         - type: single-step-form
                           if: showBackendForm|local
                           discriminator:
@@ -1434,7 +1434,7 @@ steps:
                               label:
                                 text: labels.repositories.backend.volumeSource
                               schema:
-                                $ref: "discriminator#/properties/volumeSource"
+                                $ref: 'discriminator#/properties/volumeSource'
                               options:
                                 - text: Host Path
                                   value: hostPath
@@ -1453,17 +1453,17 @@ steps:
                                   label:
                                     text: labels.repositories.backend.path
                                   schema:
-                                    $ref: "schema#/properties/resources/properties/stashAppscodeComRepositoryRepo/properties/spec/properties/backend/properties/local/properties/hostPath/properties/path"
+                                    $ref: 'schema#/properties/resources/properties/stashAppscodeComRepositoryRepo/properties/spec/properties/backend/properties/local/properties/hostPath/properties/path'
                                 - type: input
                                   label:
                                     text: labels.repositories.backend.mountPath
                                   schema:
-                                    $ref: "schema#/properties/resources/properties/stashAppscodeComRepositoryRepo/properties/spec/properties/backend/properties/local/properties/hostPath/properties/mountPath"
+                                    $ref: 'schema#/properties/resources/properties/stashAppscodeComRepositoryRepo/properties/spec/properties/backend/properties/local/properties/hostPath/properties/mountPath'
                                 - type: input
                                   label:
                                     text: labels.repositories.backend.subPath
                                   schema:
-                                    $ref: "schema#/properties/resources/properties/stashAppscodeComRepositoryRepo/properties/spec/properties/backend/properties/local/properties/hostPath/properties/subPath"
+                                    $ref: 'schema#/properties/resources/properties/stashAppscodeComRepositoryRepo/properties/spec/properties/backend/properties/local/properties/hostPath/properties/subPath'
                             - if: showVolumeSourceForm|nfs
                               type: single-step-form
                               label:
@@ -1473,22 +1473,22 @@ steps:
                                   label:
                                     text: labels.repositories.backend.server
                                   schema:
-                                    $ref: "schema#/properties/resources/properties/stashAppscodeComRepositoryRepo/properties/spec/properties/backend/properties/local/properties/nfs/properties/server"
+                                    $ref: 'schema#/properties/resources/properties/stashAppscodeComRepositoryRepo/properties/spec/properties/backend/properties/local/properties/nfs/properties/server'
                                 - type: input
                                   label:
                                     text: labels.repositories.backend.path
                                   schema:
-                                    $ref: "schema#/properties/resources/properties/stashAppscodeComRepositoryRepo/properties/spec/properties/backend/properties/local/properties/nfs/properties/path"
+                                    $ref: 'schema#/properties/resources/properties/stashAppscodeComRepositoryRepo/properties/spec/properties/backend/properties/local/properties/nfs/properties/path'
                                 - type: input
                                   label:
                                     text: labels.repositories.backend.mountPath
                                   schema:
-                                    $ref: "schema#/properties/resources/properties/stashAppscodeComRepositoryRepo/properties/spec/properties/backend/properties/local/properties/nfs/properties/mountPath"
+                                    $ref: 'schema#/properties/resources/properties/stashAppscodeComRepositoryRepo/properties/spec/properties/backend/properties/local/properties/nfs/properties/mountPath'
                                 - type: input
                                   label:
                                     text: labels.repositories.backend.subPath
                                   schema:
-                                    $ref: "schema#/properties/resources/properties/stashAppscodeComRepositoryRepo/properties/spec/properties/backend/properties/local/properties/nfs/properties/subPath"
+                                    $ref: 'schema#/properties/resources/properties/stashAppscodeComRepositoryRepo/properties/spec/properties/backend/properties/local/properties/nfs/properties/subPath'
                             - if: showVolumeSourceForm|persistentVolumeClaim
                               type: single-step-form
                               label:
@@ -1498,18 +1498,18 @@ steps:
                                   label:
                                     text: labels.repositories.backend.pvcName
                                   schema:
-                                    $ref: "schema#/properties/resources/properties/stashAppscodeComRepositoryRepo/properties/spec/properties/backend/properties/local/properties/persistentVolumeClaim/properties/claimName"
+                                    $ref: 'schema#/properties/resources/properties/stashAppscodeComRepositoryRepo/properties/spec/properties/backend/properties/local/properties/persistentVolumeClaim/properties/claimName'
                                   fetch: resourceNames|core|v1|persistentvolumeclaims
                                 - type: input
                                   label:
                                     text: labels.repositories.backend.mountPath
                                   schema:
-                                    $ref: "schema#/properties/resources/properties/stashAppscodeComRepositoryRepo/properties/spec/properties/backend/properties/local/properties/persistentVolumeClaim/properties/mountPath"
+                                    $ref: 'schema#/properties/resources/properties/stashAppscodeComRepositoryRepo/properties/spec/properties/backend/properties/local/properties/persistentVolumeClaim/properties/mountPath'
                                 - type: input
                                   label:
                                     text: labels.repositories.backend.subPath
                                   schema:
-                                    $ref: "schema#/properties/resources/properties/stashAppscodeComRepositoryRepo/properties/spec/properties/backend/properties/local/properties/persistentVolumeClaim/properties/subPath"
+                                    $ref: 'schema#/properties/resources/properties/stashAppscodeComRepositoryRepo/properties/spec/properties/backend/properties/local/properties/persistentVolumeClaim/properties/subPath'
                         - type: single-step-form
                           if: showBackendForm|rest
                           elements:
@@ -1517,7 +1517,7 @@ steps:
                               label:
                                 text: labels.repositories.backend.url
                               schema:
-                                $ref: "schema#/properties/resources/properties/stashAppscodeComRepositoryRepo/properties/spec/properties/backend/properties/rest/properties/url"
+                                $ref: 'schema#/properties/resources/properties/stashAppscodeComRepositoryRepo/properties/spec/properties/backend/properties/rest/properties/url'
                         - type: single-step-form
                           if: showBackendForm|s3
                           elements:
@@ -1525,22 +1525,22 @@ steps:
                               label:
                                 text: labels.repositories.backend.endPoint
                               schema:
-                                $ref: "schema#/properties/resources/properties/stashAppscodeComRepositoryRepo/properties/spec/properties/backend/properties/s3/properties/endpoint"
+                                $ref: 'schema#/properties/resources/properties/stashAppscodeComRepositoryRepo/properties/spec/properties/backend/properties/s3/properties/endpoint'
                             - type: input
                               label:
                                 text: labels.repositories.backend.bucket
                               schema:
-                                $ref: "schema#/properties/resources/properties/stashAppscodeComRepositoryRepo/properties/spec/properties/backend/properties/s3/properties/bucket"
+                                $ref: 'schema#/properties/resources/properties/stashAppscodeComRepositoryRepo/properties/spec/properties/backend/properties/s3/properties/bucket'
                             - type: input
                               label:
                                 text: labels.repositories.backend.prefix
                               schema:
-                                $ref: "schema#/properties/resources/properties/stashAppscodeComRepositoryRepo/properties/spec/properties/backend/properties/s3/properties/prefix"
+                                $ref: 'schema#/properties/resources/properties/stashAppscodeComRepositoryRepo/properties/spec/properties/backend/properties/s3/properties/prefix'
                             - type: input
                               label:
                                 text: labels.repositories.backend.region
                               schema:
-                                $ref: "schema#/properties/resources/properties/stashAppscodeComRepositoryRepo/properties/spec/properties/backend/properties/s3/properties/region"
+                                $ref: 'schema#/properties/resources/properties/stashAppscodeComRepositoryRepo/properties/spec/properties/backend/properties/s3/properties/region'
                         - type: single-step-form
                           if: showBackendForm|swift
                           elements:
@@ -1548,17 +1548,17 @@ steps:
                               label:
                                 text: labels.repositories.backend.container
                               schema:
-                                $ref: "schema#/properties/resources/properties/stashAppscodeComRepositoryRepo/properties/spec/properties/backend/properties/swift/properties/container"
+                                $ref: 'schema#/properties/resources/properties/stashAppscodeComRepositoryRepo/properties/spec/properties/backend/properties/swift/properties/container'
                             - type: input
                               label:
                                 text: labels.repositories.backend.prefix
                               schema:
-                                $ref: "schema#/properties/resources/properties/stashAppscodeComRepositoryRepo/properties/spec/properties/backend/properties/swift/properties/prefix"
+                                $ref: 'schema#/properties/resources/properties/stashAppscodeComRepositoryRepo/properties/spec/properties/backend/properties/swift/properties/prefix'
                         - type: select
                           label:
                             text: labels.repositories.backend.secret
                           schema:
-                            $ref: "schema#/properties/resources/properties/stashAppscodeComRepositoryRepo/properties/spec/properties/backend/properties/storageSecretName"
+                            $ref: 'schema#/properties/resources/properties/stashAppscodeComRepositoryRepo/properties/spec/properties/backend/properties/storageSecretName'
                           fetch: resourceNames|core|v1|secrets
                 - label:
                     text: labels.backupConfiguration.targetReference.title
@@ -1569,26 +1569,26 @@ steps:
                   label:
                     text: labels.backupConfiguration.targetReference.apiVersion
                   schema:
-                    $ref: "schema#/properties/resources/properties/stashAppscodeComBackupConfiguration/properties/spec/properties/target/properties/ref/properties/apiVersion"
+                    $ref: 'schema#/properties/resources/properties/stashAppscodeComBackupConfiguration/properties/spec/properties/target/properties/ref/properties/apiVersion'
                   disabled: true
                 - type: input
                   label:
                     text: labels.backupConfiguration.targetReference.kind
                   schema:
-                    $ref: "schema#/properties/resources/properties/stashAppscodeComBackupConfiguration/properties/spec/properties/target/properties/ref/properties/kind"
+                    $ref: 'schema#/properties/resources/properties/stashAppscodeComBackupConfiguration/properties/spec/properties/target/properties/ref/properties/kind'
                   disabled: true
                 - type: input
                   label:
                     text: labels.backupConfiguration.targetReference.name
                   schema:
-                    $ref: "schema#/properties/resources/properties/stashAppscodeComBackupConfiguration/properties/spec/properties/target/properties/ref/properties/name"
+                    $ref: 'schema#/properties/resources/properties/stashAppscodeComBackupConfiguration/properties/spec/properties/target/properties/ref/properties/name'
                   computed: initalizeTargetReferenceName
                   disabled: true
                 - type: input
                   label:
                     text: labels.backupConfiguration.taskName
                   schema:
-                    $ref: "schema#/properties/resources/properties/stashAppscodeComBackupConfiguration/properties/spec/properties/task/properties/name"
+                    $ref: 'schema#/properties/resources/properties/stashAppscodeComBackupConfiguration/properties/spec/properties/task/properties/name'
                 - label:
                     text: labels.backupConfiguration.retentionPolicy.title
                     hasLine: true
@@ -1598,22 +1598,22 @@ steps:
                   label:
                     text: labels.backupConfiguration.retentionPolicy.name
                   schema:
-                    $ref: "schema#/properties/resources/properties/stashAppscodeComBackupConfiguration/properties/spec/properties/retentionPolicy/properties/name"
+                    $ref: 'schema#/properties/resources/properties/stashAppscodeComBackupConfiguration/properties/spec/properties/retentionPolicy/properties/name'
                 - type: input
                   label:
                     text: labels.backupConfiguration.retentionPolicy.keepLast
                   schema:
-                    $ref: "schema#/properties/resources/properties/stashAppscodeComBackupConfiguration/properties/spec/properties/retentionPolicy/properties/keepLast"
+                    $ref: 'schema#/properties/resources/properties/stashAppscodeComBackupConfiguration/properties/spec/properties/retentionPolicy/properties/keepLast'
                 - type: switch
                   label:
                     text: labels.backupConfiguration.retentionPolicy.prune
                   schema:
-                    $ref: "schema#/properties/resources/properties/stashAppscodeComBackupConfiguration/properties/spec/properties/retentionPolicy/properties/prune"
+                    $ref: 'schema#/properties/resources/properties/stashAppscodeComBackupConfiguration/properties/spec/properties/retentionPolicy/properties/prune'
                 - type: input
                   label:
                     text: labels.backupConfiguration.schedule
                   schema:
-                    $ref: "schema#/properties/resources/properties/stashAppscodeComBackupConfiguration/properties/spec/properties/schedule"
+                    $ref: 'schema#/properties/resources/properties/stashAppscodeComBackupConfiguration/properties/spec/properties/schedule'
             - if: showInvokerForm|backupBlueprint
               type: single-step-form
               label:
@@ -1636,7 +1636,7 @@ steps:
                   label:
                     text: labels.backupBlueprint.name
                   schema:
-                    $ref: "discriminator#/properties/backupBlueprintName"
+                    $ref: 'discriminator#/properties/backupBlueprintName'
                   computed: initFromAnnotationValue|stash.appscode.com/backup-blueprint
                   onChange: onBackupBlueprintNameChange
                   fetch: unNamespacedResourceNames|stash.appscode.com|v1beta1|backupblueprints
@@ -1644,14 +1644,14 @@ steps:
                   label:
                     text: labels.backupBlueprint.schedule
                   schema:
-                    $ref: "discriminator#/properties/schedule"
+                    $ref: 'discriminator#/properties/schedule'
                   computed: initFromAnnotationValue|stash.appscode.com/schedule
                   onChange: onBackupBlueprintScheduleChange
                 - type: key-value-input-form
                   label:
                     text: labels.backupBlueprint.taskParameters
                   schema:
-                    $ref: "discriminator#/properties/taskParameters"
+                    $ref: 'discriminator#/properties/taskParameters'
                   keys:
                     label:
                       text: Key
@@ -1660,7 +1660,7 @@ steps:
                     label:
                       text: Value
                     schema:
-                      $ref: "discriminator#/properties/taskParameters/additionalProperties"
+                      $ref: 'discriminator#/properties/taskParameters/additionalProperties'
                   isArray: true
                   computed: initFromAnnotationKeyValue|params.stash.appscode.com/
                   onChange: onTaskParametersChange
@@ -1672,7 +1672,7 @@ steps:
           label:
             text: labels.enable_monitoring
           schema:
-            $ref: "discriminator#/enableMonitoring"
+            $ref: 'discriminator#/enableMonitoring'
           computed: isValueExistInModel|/resources/kubedbComMongoDB/spec/monitor
           onChange: onEnableMonitoringChange
         - if: showMonitoringSection
@@ -1681,8 +1681,9 @@ steps:
             - label:
                 text: labels.agent
               schema:
-                $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/agent"
+                $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/agent'
               type: radio
+              onChange: onAgentChange
               hasDescription: true
               options:
                 - value: prometheus.io/operator
@@ -1704,7 +1705,7 @@ steps:
                   customClass: mb-10
                 - isArray: true
                   schema:
-                    $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/serviceMonitor/properties/labels"
+                    $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/serviceMonitor/properties/labels'
                   keys:
                     label:
                       text: labels.labels.key
@@ -1717,12 +1718,12 @@ steps:
                       text: labels.labels.value
                     type: input
                     schema:
-                      $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/serviceMonitor/properties/labels/additionalProperties"
+                      $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/serviceMonitor/properties/labels/additionalProperties'
                 - label:
                     text: labels.scrapping_interval
                   type: input
                   schema:
-                    $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/serviceMonitor/properties/interval"
+                    $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/serviceMonitor/properties/interval'
             - if: isEqualToModelPathValue|prometheus.io|/resources/kubedbComMongoDB/spec/monitor/agent
               type: single-step-form
               elements:
@@ -1733,7 +1734,7 @@ steps:
                   customClass: mb-10
                 - type: single-step-form-array
                   schema:
-                    $ref: "schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/endpoints"
+                    $ref: 'schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/endpoints'
                   label:
                     text: labels.endpoints
                   addFormLabel: labels.endpoint
@@ -1767,39 +1768,38 @@ steps:
                       - type: switch
                         label:
                           text: labels.honor_labels
-                        computed: setHonorLabels
                         schema:
-                          $ref: "schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/endpoints/items/properties/honorLabels"
+                          $ref: 'schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/endpoints/items/properties/honorLabels'
                       - label:
                           text: labels.interval
                         type: input
                         schema:
-                          $ref: "schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/endpoints/items/properties/interval"
+                          $ref: 'schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/endpoints/items/properties/interval'
                       - label:
                           text: labels.path
                         type: input
                         schema:
-                          $ref: "schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/endpoints/items/properties/path"
+                          $ref: 'schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/endpoints/items/properties/path'
                       - label:
                           text: labels.port
                         type: input
                         schema:
-                          $ref: "schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/endpoints/items/properties/port"
+                          $ref: 'schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/endpoints/items/properties/port'
                     type: single-step-form
                 - type: single-step-form
                   schema:
-                    $ref: "schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/namespaceSelector"
+                    $ref: 'schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/namespaceSelector'
                   elements:
                     - type: select
                       fetch: getResources|core|v1|namespaces
                       computed: setValueFromModel|/metadata/release/namespace
                       schema:
-                        $ref: "schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/namespaceSelector/properties/matchNames"
+                        $ref: 'schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/namespaceSelector/properties/matchNames'
                 - type: single-step-form
                   elements:
                     - isArray: true
                       schema:
-                        $ref: "schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/selector/properties/matchLabels"
+                        $ref: 'schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/selector/properties/matchLabels'
                       keys:
                         label:
                           text: labels.labels.key
@@ -1811,7 +1811,7 @@ steps:
                           text: labels.labels.value
                         type: input
                         schema:
-                          $ref: "schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/selector/properties/matchLabels/additionalProperties"
+                          $ref: 'schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/selector/properties/matchLabels/additionalProperties'
             - label:
                 text: labels.exporter_configuration
                 hasLine: true
@@ -1820,7 +1820,7 @@ steps:
               label:
                 text: labels.customize_exporter
               schema:
-                $ref: "discriminator#/customizeExporter"
+                $ref: 'discriminator#/customizeExporter'
               onChange: onCustomizeExporterChange
             - if: showCustomizeExporterSection
               type: single-step-form
@@ -1829,16 +1829,16 @@ steps:
                     text: labels.port
                   type: input
                   schema:
-                    $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/port"
+                    $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/port'
                 - schema:
-                    $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/args"
+                    $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/args'
                   type: list-input-form
                   element:
                     label:
                       text: labels.args
                       isSubsection: true
                     schema:
-                      $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/args/items"
+                      $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/args/items'
                     type: input
                   label:
                     text: labels.args
@@ -1847,7 +1847,7 @@ steps:
                     text: labels.environment_variables
                   addFormLabel: labels.environment_variable
                   schema:
-                    $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env"
+                    $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env'
                   tableContents:
                     - type: value
                       typeOfValue: string
@@ -1882,11 +1882,11 @@ steps:
                           text: labels.name
                         type: input
                         schema:
-                          $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env/items/properties/name"
+                          $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env/items/properties/name'
                       - label:
                           text: Value From
                         schema:
-                          $ref: "discriminator#/valueFromType"
+                          $ref: 'discriminator#/valueFromType'
                         type: radio
                         computed: setValueFrom
                         onChange: onValueFromChange
@@ -1902,19 +1902,19 @@ steps:
                           text: labels.value
                         type: input
                         schema:
-                          $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env/items/properties/value"
+                          $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env/items/properties/value'
                       - type: single-step-form
                         label:
                           text: configMapOrSecret
                         schema:
-                          $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env/items/properties/valueFrom"
+                          $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env/items/properties/valueFrom'
                         elements:
                           - if: isEqualToValueFromType|configMap
                             type: single-step-form
                             label:
                               text: configMap
                             schema:
-                              $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env/items/properties/valueFrom/properties/configMapKeyRef"
+                              $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env/items/properties/valueFrom/properties/configMapKeyRef'
                             elements:
                               - if: showConfigMapSelectField
                                 label:
@@ -1922,32 +1922,32 @@ steps:
                                 type: select
                                 fetch: getConfigMapName
                                 schema:
-                                  $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env/items/properties/valueFrom/properties/configMapKeyRef/properties/name"
+                                  $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env/items/properties/valueFrom/properties/configMapKeyRef/properties/name'
                               - if: showConfigMapInputField
                                 label:
                                   text: labels.config_map_name
                                 type: input
                                 schema:
-                                  $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env/items/properties/valueFrom/properties/configMapKeyRef/properties/name"
+                                  $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env/items/properties/valueFrom/properties/configMapKeyRef/properties/name'
                               - if: hasConfigMapKeys
                                 label:
                                   text: labels.config_map_key
                                 fetch: getConfigMapKeys
                                 type: select
                                 schema:
-                                  $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env/items/properties/valueFrom/properties/configMapKeyRef/properties/key"
+                                  $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env/items/properties/valueFrom/properties/configMapKeyRef/properties/key'
                               - if: hasNoConfigMapKeys
                                 label:
                                   text: labels.config_map_key
                                 type: input
                                 schema:
-                                  $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env/items/properties/valueFrom/properties/configMapKeyRef/properties/key"
+                                  $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env/items/properties/valueFrom/properties/configMapKeyRef/properties/key'
                           - if: isEqualToValueFromType|secret
                             type: single-step-form
                             label:
                               text: secret
                             schema:
-                              $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env/items/properties/valueFrom/properties/secretKeyRef"
+                              $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env/items/properties/valueFrom/properties/secretKeyRef'
                             elements:
                               - if: hasExistingSecret
                                 label:
@@ -1955,26 +1955,26 @@ steps:
                                 type: select
                                 fetch: getSecrets
                                 schema:
-                                  $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env/items/properties/valueFrom/properties/secretKeyRef/properties/name"
+                                  $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env/items/properties/valueFrom/properties/secretKeyRef/properties/name'
                               - if: hasNoExistingSecret
                                 label:
                                   text: labels.secret_name
                                 type: input
                                 schema:
-                                  $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env/items/properties/valueFrom/properties/secretKeyRef/properties/name"
+                                  $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env/items/properties/valueFrom/properties/secretKeyRef/properties/name'
                               - if: hasSecretKeys
                                 label:
                                   text: labels.secret_key
                                 type: select
                                 fetch: getSecretKeys
                                 schema:
-                                  $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env/items/properties/valueFrom/properties/secretKeyRef/properties/key"
+                                  $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env/items/properties/valueFrom/properties/secretKeyRef/properties/key'
                               - if: hasNoSecretKeys
                                 label:
                                   text: labels.secret_key
                                 type: input
                                 schema:
-                                  $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env/items/properties/valueFrom/properties/secretKeyRef/properties/key"
+                                  $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env/items/properties/valueFrom/properties/secretKeyRef/properties/key'
                         discriminator:
                           dis1:
                             type: string
@@ -1998,12 +1998,12 @@ steps:
                     text: labels.cpu
                   type: input
                   schema:
-                    $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/resources/properties/requests/properties/cpu"
+                    $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/resources/properties/requests/properties/cpu'
                 - label:
                     text: labels.memory
                   type: input
                   schema:
-                    $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/resources/properties/requests/properties/memory"
+                    $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/resources/properties/requests/properties/memory'
                 - label:
                     text: labels.limit
                     hasLine: true
@@ -2013,12 +2013,12 @@ steps:
                     text: labels.cpu
                   type: input
                   schema:
-                    $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/resources/properties/limits/properties/cpu"
+                    $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/resources/properties/limits/properties/cpu'
                 - label:
                     text: labels.memory
                   type: input
                   schema:
-                    $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/resources/properties/limits/properties/memory"
+                    $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/resources/properties/limits/properties/memory'
                 - label:
                     text: labels.security_context
                     hasLine: true
@@ -2027,13 +2027,13 @@ steps:
                     text: labels.run_as_user
                   type: input
                   schema:
-                    $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/securityContext/properties/runAsUser"
+                    $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/securityContext/properties/runAsUser'
                 - label:
                     text: labels.run_as_group
                   customClass: mb-0
                   type: input
                   schema:
-                    $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/securityContext/properties/runAsGroup"
+                    $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/securityContext/properties/runAsGroup'
           discriminator:
             customizeExporter:
               type: boolean
@@ -2053,7 +2053,7 @@ steps:
           type: label-element
         - isArray: true
           schema:
-            $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/metadata/properties/annotations"
+            $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/metadata/properties/annotations'
           keys:
             label:
               text: labels.labels.key
@@ -2065,10 +2065,10 @@ steps:
               text: labels.labels.value
             type: input
             schema:
-              $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/metadata/properties/annotations/additionalProperties"
+              $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/metadata/properties/annotations/additionalProperties'
         - isArray: true
           schema:
-            $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/controller/properties/annotations"
+            $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/controller/properties/annotations'
           keys:
             label:
               text: labels.labels.key
@@ -2080,7 +2080,7 @@ steps:
               text: labels.labels.value
             type: input
             schema:
-              $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/controller/properties/annotations/additionalProperties"
+              $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/controller/properties/annotations/additionalProperties'
         - label:
             text: labels.pod_spec
           customClass: mb-5
@@ -2090,7 +2090,7 @@ steps:
             text: labels.preferred_during_scheduling_ignored_during_execution
           addFormLabel: labels.preferred_during_scheduling_ignored_during_execution
           schema:
-            $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/affinity/properties/nodeAffinity/properties/preferredDuringSchedulingIgnoredDuringExecution"
+            $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/affinity/properties/nodeAffinity/properties/preferredDuringSchedulingIgnoredDuringExecution'
           customClass: mb-20
           tableContents:
             - type: value
@@ -2153,14 +2153,14 @@ steps:
             elements:
               - type: single-step-form
                 schema:
-                  $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/affinity/properties/nodeAffinity/properties/preferredDuringSchedulingIgnoredDuringExecution/items/properties/preference"
+                  $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/affinity/properties/nodeAffinity/properties/preferredDuringSchedulingIgnoredDuringExecution/items/properties/preference'
                 elements:
                   - type: single-step-form-array
                     label:
                       text: labels.match_expressions
                     addFormLabel: labels.match_expression
                     schema:
-                      $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/affinity/properties/nodeAffinity/properties/preferredDuringSchedulingIgnoredDuringExecution/items/properties/preference/properties/matchExpressions"
+                      $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/affinity/properties/nodeAffinity/properties/preferredDuringSchedulingIgnoredDuringExecution/items/properties/preference/properties/matchExpressions'
                     tableContents:
                       - type: value
                         typeOfValue: string
@@ -2186,20 +2186,20 @@ steps:
                             text: labels.key
                           type: input
                           schema:
-                            $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/affinity/properties/nodeAffinity/properties/preferredDuringSchedulingIgnoredDuringExecution/items/properties/preference/properties/matchExpressions/items/properties/key"
+                            $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/affinity/properties/nodeAffinity/properties/preferredDuringSchedulingIgnoredDuringExecution/items/properties/preference/properties/matchExpressions/items/properties/key'
                         - label:
                             text: labels.operator
                           type: input
                           schema:
-                            $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/affinity/properties/nodeAffinity/properties/preferredDuringSchedulingIgnoredDuringExecution/items/properties/preference/properties/matchExpressions/items/properties/operator"
+                            $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/affinity/properties/nodeAffinity/properties/preferredDuringSchedulingIgnoredDuringExecution/items/properties/preference/properties/matchExpressions/items/properties/operator'
                         - schema:
-                            $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/affinity/properties/nodeAffinity/properties/preferredDuringSchedulingIgnoredDuringExecution/items/properties/preference/properties/matchExpressions/items/properties/values"
+                            $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/affinity/properties/nodeAffinity/properties/preferredDuringSchedulingIgnoredDuringExecution/items/properties/preference/properties/matchExpressions/items/properties/values'
                           type: list-input-form
                           element:
                             label:
                               text: labels.value
                             schema:
-                              $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/affinity/properties/nodeAffinity/properties/preferredDuringSchedulingIgnoredDuringExecution/items/properties/preference/properties/matchExpressions/items/properties/values/items"
+                              $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/affinity/properties/nodeAffinity/properties/preferredDuringSchedulingIgnoredDuringExecution/items/properties/preference/properties/matchExpressions/items/properties/values/items'
                             type: input
                           label:
                             text: labels.values
@@ -2209,7 +2209,7 @@ steps:
                       text: labels.match_fields
                     addFormLabel: labels.match_field
                     schema:
-                      $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/affinity/properties/nodeAffinity/properties/preferredDuringSchedulingIgnoredDuringExecution/items/properties/preference/properties/matchFields"
+                      $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/affinity/properties/nodeAffinity/properties/preferredDuringSchedulingIgnoredDuringExecution/items/properties/preference/properties/matchFields'
                     tableContents:
                       - type: value
                         typeOfValue: string
@@ -2235,20 +2235,20 @@ steps:
                             text: labels.key
                           type: input
                           schema:
-                            $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/affinity/properties/nodeAffinity/properties/preferredDuringSchedulingIgnoredDuringExecution/items/properties/preference/properties/matchFields/items/properties/key"
+                            $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/affinity/properties/nodeAffinity/properties/preferredDuringSchedulingIgnoredDuringExecution/items/properties/preference/properties/matchFields/items/properties/key'
                         - label:
                             text: labels.operator
                           type: input
                           schema:
-                            $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/affinity/properties/nodeAffinity/properties/preferredDuringSchedulingIgnoredDuringExecution/items/properties/preference/properties/matchFields/items/properties/operator"
+                            $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/affinity/properties/nodeAffinity/properties/preferredDuringSchedulingIgnoredDuringExecution/items/properties/preference/properties/matchFields/items/properties/operator'
                         - schema:
-                            $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/affinity/properties/nodeAffinity/properties/preferredDuringSchedulingIgnoredDuringExecution/items/properties/preference/properties/matchFields/items/properties/values"
+                            $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/affinity/properties/nodeAffinity/properties/preferredDuringSchedulingIgnoredDuringExecution/items/properties/preference/properties/matchFields/items/properties/values'
                           type: list-input-form
                           element:
                             label:
                               text: labels.value
                             schema:
-                              $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/affinity/properties/nodeAffinity/properties/preferredDuringSchedulingIgnoredDuringExecution/items/properties/preference/properties/matchFields/items/properties/values/items"
+                              $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/affinity/properties/nodeAffinity/properties/preferredDuringSchedulingIgnoredDuringExecution/items/properties/preference/properties/matchFields/items/properties/values/items'
                             type: input
                           label:
                             text: labels.values
@@ -2257,14 +2257,14 @@ steps:
                   text: labels.weight
                 type: input
                 schema:
-                  $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/affinity/properties/nodeAffinity/properties/preferredDuringSchedulingIgnoredDuringExecution/items/properties/weight"
+                  $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/affinity/properties/nodeAffinity/properties/preferredDuringSchedulingIgnoredDuringExecution/items/properties/weight'
             type: single-step-form
         - type: single-step-form-array
           label:
             text: labels.node_selector_terms
           addFormLabel: labels.node_selector_terms
           schema:
-            $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/affinity/properties/nodeAffinity/properties/requiredDuringSchedulingIgnoredDuringExecution/properties/nodeSelectorTerms"
+            $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/affinity/properties/nodeAffinity/properties/requiredDuringSchedulingIgnoredDuringExecution/properties/nodeSelectorTerms'
           tableContents:
             - type: value
               typeOfValue: key-operator-values-array
@@ -2323,7 +2323,7 @@ steps:
                   text: labels.match_expressions
                 addFormLabel: labels.match_expression
                 schema:
-                  $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/affinity/properties/nodeAffinity/properties/requiredDuringSchedulingIgnoredDuringExecution/properties/nodeSelectorTerms/items/properties/matchExpressions"
+                  $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/affinity/properties/nodeAffinity/properties/requiredDuringSchedulingIgnoredDuringExecution/properties/nodeSelectorTerms/items/properties/matchExpressions'
                 tableContents:
                   - type: value
                     typeOfValue: string
@@ -2349,20 +2349,20 @@ steps:
                         text: labels.key
                       type: input
                       schema:
-                        $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/affinity/properties/nodeAffinity/properties/requiredDuringSchedulingIgnoredDuringExecution/properties/nodeSelectorTerms/items/properties/matchExpressions/items/properties/key"
+                        $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/affinity/properties/nodeAffinity/properties/requiredDuringSchedulingIgnoredDuringExecution/properties/nodeSelectorTerms/items/properties/matchExpressions/items/properties/key'
                     - label:
                         text: labels.operator
                       type: input
                       schema:
-                        $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/affinity/properties/nodeAffinity/properties/requiredDuringSchedulingIgnoredDuringExecution/properties/nodeSelectorTerms/items/properties/matchExpressions/items/properties/operator"
+                        $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/affinity/properties/nodeAffinity/properties/requiredDuringSchedulingIgnoredDuringExecution/properties/nodeSelectorTerms/items/properties/matchExpressions/items/properties/operator'
                     - schema:
-                        $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/affinity/properties/nodeAffinity/properties/requiredDuringSchedulingIgnoredDuringExecution/properties/nodeSelectorTerms/items/properties/matchExpressions/items/properties/values"
+                        $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/affinity/properties/nodeAffinity/properties/requiredDuringSchedulingIgnoredDuringExecution/properties/nodeSelectorTerms/items/properties/matchExpressions/items/properties/values'
                       type: list-input-form
                       element:
                         label:
                           text: labels.value
                         schema:
-                          $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/affinity/properties/nodeAffinity/properties/requiredDuringSchedulingIgnoredDuringExecution/properties/nodeSelectorTerms/items/properties/matchExpressions/items/properties/values/items"
+                          $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/affinity/properties/nodeAffinity/properties/requiredDuringSchedulingIgnoredDuringExecution/properties/nodeSelectorTerms/items/properties/matchExpressions/items/properties/values/items'
                         type: input
                       label:
                         text: labels.values
@@ -2372,7 +2372,7 @@ steps:
                   text: labels.match_fields
                 addFormLabel: labels.match_field
                 schema:
-                  $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/affinity/properties/nodeAffinity/properties/requiredDuringSchedulingIgnoredDuringExecution/properties/nodeSelectorTerms/items/properties/matchFields"
+                  $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/affinity/properties/nodeAffinity/properties/requiredDuringSchedulingIgnoredDuringExecution/properties/nodeSelectorTerms/items/properties/matchFields'
                 tableContents:
                   - type: value
                     typeOfValue: string
@@ -2398,20 +2398,20 @@ steps:
                         text: labels.key
                       type: input
                       schema:
-                        $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/affinity/properties/nodeAffinity/properties/requiredDuringSchedulingIgnoredDuringExecution/properties/nodeSelectorTerms/items/properties/matchFields/items/properties/key"
+                        $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/affinity/properties/nodeAffinity/properties/requiredDuringSchedulingIgnoredDuringExecution/properties/nodeSelectorTerms/items/properties/matchFields/items/properties/key'
                     - label:
                         text: labels.operator
                       type: input
                       schema:
-                        $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/affinity/properties/nodeAffinity/properties/requiredDuringSchedulingIgnoredDuringExecution/properties/nodeSelectorTerms/items/properties/matchFields/items/properties/operator"
+                        $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/affinity/properties/nodeAffinity/properties/requiredDuringSchedulingIgnoredDuringExecution/properties/nodeSelectorTerms/items/properties/matchFields/items/properties/operator'
                     - schema:
-                        $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/affinity/properties/nodeAffinity/properties/requiredDuringSchedulingIgnoredDuringExecution/properties/nodeSelectorTerms/items/properties/matchFields/items/properties/values"
+                        $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/affinity/properties/nodeAffinity/properties/requiredDuringSchedulingIgnoredDuringExecution/properties/nodeSelectorTerms/items/properties/matchFields/items/properties/values'
                       type: list-input-form
                       element:
                         label:
                           text: labels.value
                         schema:
-                          $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/affinity/properties/nodeAffinity/properties/requiredDuringSchedulingIgnoredDuringExecution/properties/nodeSelectorTerms/items/properties/matchFields/items/properties/values/items"
+                          $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/affinity/properties/nodeAffinity/properties/requiredDuringSchedulingIgnoredDuringExecution/properties/nodeSelectorTerms/items/properties/matchFields/items/properties/values/items'
                         type: input
                       label:
                         text: labels.values
@@ -2422,9 +2422,9 @@ steps:
           type: multiselect
           fetch: getImagePullSecrets
           schema:
-            $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/imagePullSecrets"
+            $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/imagePullSecrets'
         - schema:
-            $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/nodeSelector"
+            $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/nodeSelector'
           keys:
             label:
               text: labels.labels.key
@@ -2436,7 +2436,7 @@ steps:
               text: labels.labels.value
             type: input
             schema:
-              $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/nodeSelector/additionalProperties"
+              $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/nodeSelector/additionalProperties'
         - label:
             text: labels.security_context
             hasLine: true
@@ -2445,22 +2445,22 @@ steps:
           label:
             text: labels.run_as_non_root
           schema:
-            $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/securityContext/properties/runAsNonRoot"
+            $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/securityContext/properties/runAsNonRoot'
         - label:
             text: labels.fs_group
           type: input
           schema:
-            $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/securityContext/properties/fsGroup"
+            $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/securityContext/properties/fsGroup'
         - label:
             text: labels.run_as_group
           type: input
           schema:
-            $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/securityContext/properties/runAsGroup"
+            $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/securityContext/properties/runAsGroup'
         - label:
             text: labels.run_as_user
           type: input
           schema:
-            $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/securityContext/properties/runAsUser"
+            $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/securityContext/properties/runAsUser'
         - label:
             text: labels.se_linux_options
             hasLine: true
@@ -2470,27 +2470,27 @@ steps:
             text: labels.level
           type: input
           schema:
-            $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/securityContext/properties/seLinuxOptions/properties/level"
+            $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/securityContext/properties/seLinuxOptions/properties/level'
         - label:
             text: labels.role
           type: input
           schema:
-            $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/securityContext/properties/seLinuxOptions/properties/role"
+            $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/securityContext/properties/seLinuxOptions/properties/role'
         - label:
             text: labels.type
           type: input
           schema:
-            $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/securityContext/properties/seLinuxOptions/properties/type"
+            $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/securityContext/properties/seLinuxOptions/properties/type'
         - label:
             text: labels.user
           type: input
           schema:
-            $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/securityContext/properties/seLinuxOptions/properties/user"
+            $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/securityContext/properties/seLinuxOptions/properties/user'
         - label:
             text: labels.service_account_name
           type: input
           schema:
-            $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/serviceAccountName"
+            $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/serviceAccountName'
         - label:
             text: labels.resources
             hasLine: true
@@ -2505,12 +2505,12 @@ steps:
             text: labels.cpu
           type: input
           schema:
-            $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/resources/properties/requests/properties/cpu"
+            $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/resources/properties/requests/properties/cpu'
         - label:
             text: labels.memory
           type: input
           schema:
-            $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/resources/properties/requests/properties/memory"
+            $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/resources/properties/requests/properties/memory'
         - label:
             text: labels.limit
             hasLine: true
@@ -2520,15 +2520,15 @@ steps:
             text: labels.cpu
           type: input
           schema:
-            $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/resources/properties/limits/properties/cpu"
+            $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/resources/properties/limits/properties/cpu'
         - label:
             text: labels.memory
           type: input
           schema:
-            $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/resources/properties/limits/properties/memory"
+            $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/resources/properties/limits/properties/memory'
         - type: single-step-form-array
           schema:
-            $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/tolerations"
+            $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/tolerations'
           label:
             text: labels.tolerations
           customClass: mb-20
@@ -2570,34 +2570,34 @@ steps:
                   text: labels.effect
                 type: input
                 schema:
-                  $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/tolerations/items/properties/effect"
+                  $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/tolerations/items/properties/effect'
               - label:
                   text: labels.key
                 type: input
                 schema:
-                  $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/tolerations/items/properties/key"
+                  $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/tolerations/items/properties/key'
               - label:
                   text: labels.operator
                 type: input
                 schema:
-                  $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/tolerations/items/properties/operator"
+                  $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/tolerations/items/properties/operator'
               - label:
                   text: labels.toleration_seconds
                 type: input
                 schema:
-                  $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/tolerations/items/properties/tolerationSeconds"
+                  $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/tolerations/items/properties/tolerationSeconds'
               - label:
                   text: labels.value
                 type: input
                 schema:
-                  $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/tolerations/items/properties/value"
+                  $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/tolerations/items/properties/value'
             type: single-step-form
         - type: single-step-form-array
           label:
             text: labels.environment_variables
           addFormLabel: labels.environment_variable
           schema:
-            $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/env"
+            $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/env'
           tableContents:
             - type: value
               typeOfValue: string
@@ -2632,11 +2632,11 @@ steps:
                   text: labels.name
                 type: input
                 schema:
-                  $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/env/items/properties/name"
+                  $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/env/items/properties/name'
               - label:
                   text: Value From
                 schema:
-                  $ref: "discriminator#/valueFromType"
+                  $ref: 'discriminator#/valueFromType'
                 type: radio
                 computed: setValueFrom
                 onChange: onValueFromChange
@@ -2652,19 +2652,19 @@ steps:
                   text: labels.value
                 type: input
                 schema:
-                  $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/env/items/properties/value"
+                  $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/env/items/properties/value'
               - type: single-step-form
                 label:
                   text: configMapOrSecret
                 schema:
-                  $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/env/items/properties/valueFrom"
+                  $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/env/items/properties/valueFrom'
                 elements:
                   - if: isEqualToValueFromType|configMap
                     type: single-step-form
                     label:
                       text: configMap
                     schema:
-                      $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/env/items/properties/valueFrom/properties/configMapKeyRef"
+                      $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/env/items/properties/valueFrom/properties/configMapKeyRef'
                     elements:
                       - if: showConfigMapSelectField
                         label:
@@ -2672,32 +2672,32 @@ steps:
                         type: select
                         fetch: getConfigMapName
                         schema:
-                          $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/env/items/properties/valueFrom/properties/configMapKeyRef/properties/name"
+                          $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/env/items/properties/valueFrom/properties/configMapKeyRef/properties/name'
                       - if: showConfigMapInputField
                         label:
                           text: labels.config_map_name
                         type: input
                         schema:
-                          $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/env/items/properties/valueFrom/properties/configMapKeyRef/properties/name"
+                          $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/env/items/properties/valueFrom/properties/configMapKeyRef/properties/name'
                       - if: hasConfigMapKeys
                         label:
                           text: labels.config_map_key
                         fetch: getConfigMapKeys
                         type: select
                         schema:
-                          $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/env/items/properties/valueFrom/properties/configMapKeyRef/properties/key"
+                          $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/env/items/properties/valueFrom/properties/configMapKeyRef/properties/key'
                       - if: hasNoConfigMapKeys
                         label:
                           text: labels.config_map_key
                         type: input
                         schema:
-                          $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/env/items/properties/valueFrom/properties/configMapKeyRef/properties/key"
+                          $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/env/items/properties/valueFrom/properties/configMapKeyRef/properties/key'
                   - if: isEqualToValueFromType|secret
                     type: single-step-form
                     label:
                       text: secret
                     schema:
-                      $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/env/items/properties/valueFrom/properties/secretKeyRef"
+                      $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/env/items/properties/valueFrom/properties/secretKeyRef'
                     elements:
                       - if: hasExistingSecret
                         label:
@@ -2705,26 +2705,26 @@ steps:
                         type: select
                         fetch: getSecrets
                         schema:
-                          $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/env/items/properties/valueFrom/properties/secretKeyRef/properties/name"
+                          $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/env/items/properties/valueFrom/properties/secretKeyRef/properties/name'
                       - if: hasNoExistingSecret
                         label:
                           text: labels.secret_name
                         type: input
                         schema:
-                          $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/env/items/properties/valueFrom/properties/secretKeyRef/properties/name"
+                          $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/env/items/properties/valueFrom/properties/secretKeyRef/properties/name'
                       - if: hasSecretKeys
                         label:
                           text: labels.secret_key
                         type: select
                         fetch: getSecretKeys
                         schema:
-                          $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/env/items/properties/valueFrom/properties/secretKeyRef/properties/key"
+                          $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/env/items/properties/valueFrom/properties/secretKeyRef/properties/key'
                       - if: hasNoSecretKeys
                         label:
                           text: labels.secret_key
                         type: input
                         schema:
-                          $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/env/items/properties/valueFrom/properties/secretKeyRef/properties/key"
+                          $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate/properties/spec/properties/env/items/properties/valueFrom/properties/secretKeyRef/properties/key'
                 discriminator:
                   dis1:
                     type: string
@@ -2744,7 +2744,7 @@ steps:
             text: labels.service_templates
           addFormLabel: labels.service_template
           schema:
-            $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/serviceTemplates"
+            $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/serviceTemplates'
           tableContents:
             - type: value
               typeOfValue: string
@@ -2837,14 +2837,14 @@ steps:
                   text: labels.alias
                 type: input
                 schema:
-                  $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/serviceTemplates/items/properties/alias"
+                  $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/serviceTemplates/items/properties/alias'
               - type: single-step-form
                 schema:
-                  $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/serviceTemplates/items/properties/metadata"
+                  $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/serviceTemplates/items/properties/metadata'
                 elements:
                   - isArray: true
                     schema:
-                      $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/serviceTemplates/items/properties/metadata/properties/annotations"
+                      $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/serviceTemplates/items/properties/metadata/properties/annotations'
                     keys:
                       label:
                         text: labels.labels.key
@@ -2856,24 +2856,24 @@ steps:
                         text: labels.labels.value
                       type: input
                       schema:
-                        $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/serviceTemplates/items/properties/metadata/properties/annotations/additionalProperties"
+                        $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/serviceTemplates/items/properties/metadata/properties/annotations/additionalProperties'
               - type: single-step-form
                 schema:
-                  $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/serviceTemplates/items/properties/spec"
+                  $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/serviceTemplates/items/properties/spec'
                 elements:
                   - label:
                       text: labels.cluster_ip
                     type: input
                     schema:
-                      $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/serviceTemplates/items/properties/spec/properties/clusterIP"
+                      $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/serviceTemplates/items/properties/spec/properties/clusterIP'
                   - schema:
-                      $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/serviceTemplates/items/properties/spec/properties/externalIPs"
+                      $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/serviceTemplates/items/properties/spec/properties/externalIPs'
                     type: list-input-form
                     element:
                       label:
                         text: labels.external_ip
                       schema:
-                        $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/serviceTemplates/items/properties/spec/properties/externalIPs/items"
+                        $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/serviceTemplates/items/properties/spec/properties/externalIPs/items'
                       type: input
                     label:
                       text: labels.external_ips
@@ -2881,25 +2881,25 @@ steps:
                       text: labels.external_traffic_policy
                     type: input
                     schema:
-                      $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/serviceTemplates/items/properties/spec/properties/externalTrafficPolicy"
+                      $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/serviceTemplates/items/properties/spec/properties/externalTrafficPolicy'
                   - label:
                       text: labels.health_check_node_port
                     type: input
                     schema:
-                      $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/serviceTemplates/items/properties/spec/properties/healthCheckNodePort"
+                      $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/serviceTemplates/items/properties/spec/properties/healthCheckNodePort'
                   - label:
                       text: labels.load_balancer_ip
                     type: input
                     schema:
-                      $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/serviceTemplates/items/properties/spec/properties/loadBalancerIP"
+                      $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/serviceTemplates/items/properties/spec/properties/loadBalancerIP'
                   - schema:
-                      $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/serviceTemplates/items/properties/spec/properties/loadBalancerSourceRanges"
+                      $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/serviceTemplates/items/properties/spec/properties/loadBalancerSourceRanges'
                     type: list-input-form
                     element:
                       label:
                         text: labels.load_balancer_source_range
                       schema:
-                        $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/serviceTemplates/items/properties/spec/properties/loadBalancerSourceRanges/items"
+                        $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/serviceTemplates/items/properties/spec/properties/loadBalancerSourceRanges/items'
                       type: input
                     label:
                       text: labels.load_balancer_source_ranges
@@ -2908,7 +2908,7 @@ steps:
                       text: labels.ports
                     addFormLabel: labels.port
                     schema:
-                      $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/serviceTemplates/items/properties/spec/properties/ports"
+                      $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/serviceTemplates/items/properties/spec/properties/ports'
                     customClass: mb-20
                     tableContents:
                       - type: value
@@ -2937,36 +2937,36 @@ steps:
                             text: labels.name
                           type: input
                           schema:
-                            $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/serviceTemplates/items/properties/spec/properties/ports/items/properties/name"
+                            $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/serviceTemplates/items/properties/spec/properties/ports/items/properties/name'
                         - label:
                             text: labels.node_port
                           type: input
                           schema:
-                            $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/serviceTemplates/items/properties/spec/properties/ports/items/properties/nodePort"
+                            $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/serviceTemplates/items/properties/spec/properties/ports/items/properties/nodePort'
                         - label:
                             text: labels.port
                           type: input
                           schema:
-                            $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/serviceTemplates/items/properties/spec/properties/ports/items/properties/port"
+                            $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/serviceTemplates/items/properties/spec/properties/ports/items/properties/port'
                       type: single-step-form
                   - type: single-step-form
                     schema:
-                      $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/serviceTemplates/items/properties/spec/properties/sessionAffinityConfig"
+                      $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/serviceTemplates/items/properties/spec/properties/sessionAffinityConfig'
                     elements:
                       - type: single-step-form
                         schema:
-                          $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/serviceTemplates/items/properties/spec/properties/sessionAffinityConfig/properties/clientIP"
+                          $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/serviceTemplates/items/properties/spec/properties/sessionAffinityConfig/properties/clientIP'
                         elements:
                           - label:
                               text: labels.timeout_seconds
                             type: input
                             schema:
-                              $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/serviceTemplates/items/properties/spec/properties/sessionAffinityConfig/properties/clientIP/properties/timeoutSeconds"
+                              $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/serviceTemplates/items/properties/spec/properties/sessionAffinityConfig/properties/clientIP/properties/timeoutSeconds'
                   - label:
                       text: labels.type
                     type: input
                     schema:
-                      $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/serviceTemplates/items/properties/spec/properties/type"
+                      $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/serviceTemplates/items/properties/spec/properties/type'
             type: single-step-form
       type: single-step-form
     id: networking
@@ -2977,7 +2977,7 @@ steps:
             text: labels.configuration_source
           type: radio
           schema:
-            $ref: "discriminator#/configurationSource"
+            $ref: 'discriminator#/configurationSource'
           options:
             - text: options.configuration_source.use_existing_config.label
               value: use-existing-config
@@ -2989,7 +2989,7 @@ steps:
           type: select
           fetch: getSecrets
           schema:
-            $ref: "schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/configSecret/properties/name"
+            $ref: 'schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/configSecret/properties/name'
         - if: isEqualToDiscriminatorPath|create-new-config|/configurationSource
           type: single-step-form
           elements:
@@ -2998,17 +2998,17 @@ steps:
               type: input
               onChange: onConfigSecretNameChange
               schema:
-                $ref: "schema#/properties/resources/properties/secretConfig/properties/metadata/properties/name"
+                $ref: 'schema#/properties/resources/properties/secretConfig/properties/metadata/properties/name'
             - if: returnFalse
               label:
                 text: labels.namespace
               type: input
               computed: setValueFromModel|/metadata/release/namespace
               schema:
-                $ref: "schema#/properties/resources/properties/secretConfig/properties/metadata/properties/namespace"
+                $ref: 'schema#/properties/resources/properties/secretConfig/properties/metadata/properties/namespace'
             - isArray: true
               schema:
-                $ref: "schema#/properties/resources/properties/secretConfig/properties/stringData/"
+                $ref: 'schema#/properties/resources/properties/secretConfig/properties/stringData/'
               keys:
                 label:
                   text: labels.labels.key
@@ -3020,7 +3020,7 @@ steps:
                   text: labels.labels.value
                 type: input
                 schema:
-                  $ref: "schema#/properties/resources/properties/secretConfig/properties/stringData/additionalProperties"
+                  $ref: 'schema#/properties/resources/properties/secretConfig/properties/stringData/additionalProperties'
       discriminator:
         configurationSource:
           type: string
