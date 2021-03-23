@@ -1,28 +1,20 @@
-function showAuthPasswordField({
-                                        discriminator,
-                                        getValue,
-                                        watchDependency,
-                                      }) {
+function showAuthPasswordField({ discriminator, getValue, watchDependency }) {
   const modelPathValue = getValue(discriminator, "/createAuthSecret");
   watchDependency("discriminator#/createAuthSecret");
   return !!modelPathValue;
 }
 
 function isEqualToModelPathValue(
-    { model, getValue, watchDependency },
-    value,
-    modelPath
+  { model, getValue, watchDependency },
+  value,
+  modelPath
 ) {
   const modelPathValue = getValue(model, modelPath);
   watchDependency("model#" + modelPath);
   return modelPathValue === value;
 }
 
-function showAuthSecretField({
-                                      discriminator,
-                                      getValue,
-                                      watchDependency,
-                                    }) {
+function showAuthSecretField({ discriminator, getValue, watchDependency }) {
   return !this.showAuthPasswordField({
     discriminator,
     getValue,
@@ -37,20 +29,15 @@ function showStorageSizeField({ model, getValue, watchDependency }) {
   return validType.includes(modelPathValue);
 }
 
-async function getResources(
-    { axios, storeGet },
-    group,
-    version,
-    resource
-) {
+async function getResources({ axios, storeGet }, group, version, resource) {
   const owner = storeGet("/user/username");
   const cluster = storeGet("/clusterInfo/name");
 
   const resp = await axios.get(
-      `/clusters/${owner}/${cluster}/proxy/${group}/${version}/${resource}`,
-      {
-        params: { filter: { items: { metadata: { name: null } } } },
-      }
+    `/clusters/${owner}/${cluster}/proxy/${group}/${version}/${resource}`,
+    {
+      params: { filter: { items: { metadata: { name: null } } } },
+    }
   );
 
   const resources = (resp && resp.data && resp.data.items) || [];
@@ -65,10 +52,10 @@ async function getResources(
 }
 
 async function getMongoDbVersions(
-    { axios, storeGet },
-    group,
-    version,
-    resource
+  { axios, storeGet },
+  group,
+  version,
+  resource
 ) {
   const owner = storeGet("/user/username");
   const cluster = storeGet("/clusterInfo/name");
@@ -83,17 +70,17 @@ async function getMongoDbVersions(
   };
 
   const resp = await axios.get(
-      `/clusters/${owner}/${cluster}/proxy/${group}/${version}/${resource}`,
-      {
-        params: queryParams,
-      }
+    `/clusters/${owner}/${cluster}/proxy/${group}/${version}/${resource}`,
+    {
+      params: queryParams,
+    }
   );
 
   const resources = (resp && resp.data && resp.data.items) || [];
 
   // keep only non deprecated versions
   const filteredMongoDbVersions = resources.filter(
-      (item) => item.spec && !item.spec.deprecated
+    (item) => item.spec && !item.spec.deprecated
   );
 
   filteredMongoDbVersions.map((item) => {
@@ -107,24 +94,24 @@ async function getMongoDbVersions(
 }
 
 async function getSecrets({
-                                   storeGet,
-                                   axios,
-                                   model,
-                                   getValue,
-                                   watchDependency,
-                                 }) {
+  storeGet,
+  axios,
+  model,
+  getValue,
+  watchDependency,
+}) {
   const owner = storeGet("/user/username");
   const cluster = storeGet("/clusterInfo/name");
   const namespace = getValue(model, "/metadata/release/namespace");
   watchDependency("model#/metadata/release/namespace");
 
   const resp = await axios.get(
-      `/clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}/secrets`,
-      {
-        params: {
-          filter: { items: { metadata: { name: null }, type: null } },
-        },
-      }
+    `/clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}/secrets`,
+    {
+      params: {
+        filter: { items: { metadata: { name: null }, type: null } },
+      },
+    }
   );
 
   const secrets = (resp && resp.data && resp.data.items) || [];
@@ -144,12 +131,12 @@ async function getSecrets({
 }
 
 async function hasExistingSecret({
-                                          storeGet,
-                                          axios,
-                                          model,
-                                          getValue,
-                                          watchDependency,
-                                        }) {
+  storeGet,
+  axios,
+  model,
+  getValue,
+  watchDependency,
+}) {
   const resp = await this.getSecrets({
     storeGet,
     axios,
@@ -161,12 +148,12 @@ async function hasExistingSecret({
 }
 
 async function hasNoExistingSecret({
-                                            storeGet,
-                                            axios,
-                                            model,
-                                            getValue,
-                                            watchDependency,
-                                          }) {
+  storeGet,
+  axios,
+  model,
+  getValue,
+  watchDependency,
+}) {
   const resp = await this.hasExistingSecret({
     storeGet,
     axios,
