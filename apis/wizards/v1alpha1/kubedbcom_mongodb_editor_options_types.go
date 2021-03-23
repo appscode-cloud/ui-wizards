@@ -112,6 +112,7 @@ type AuthSecret struct {
 	// +optional
 	Name string `json:"name"`
 	// +optional
+	// +kubebuilder:validation:Format:=password
 	Password string `json:"password"`
 }
 
