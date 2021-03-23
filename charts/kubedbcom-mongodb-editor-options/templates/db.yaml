@@ -2,8 +2,6 @@
 {{- $machines := .Files.Get "data/machines.yaml" | fromYaml -}}
 {{- if and .Values.spec.machine (hasKey $machines .Values.spec.machine) }}
   {{- $res = get (get $machines .Values.spec.machine) "resources" }}
-{{- else }}
-  {{- $res = get (get $machines "db.t.micro") "resources" }}
 {{- end }}
 
 apiVersion: kubedb.com/v1alpha2
@@ -61,3 +59,7 @@ spec:
     spec:
       resources:
         {{- toYaml $res | nindent 8 }}
+{{- if .Values.spec.authSecret.name }}
+  authSecret:
+    name: {{ .Values.spec.authSecret.name }}
+{{- end }}

@@ -109,8 +109,9 @@ type StorageClass struct {
 }
 
 type AuthSecret struct {
-	Create   bool   `json:"create"`
-	Name     string `json:"name"`
+	// +optional
+	Name string `json:"name"`
+	// +optional
 	Password string `json:"password"`
 }
 
