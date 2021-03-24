@@ -247,7 +247,7 @@ gen-chart-doc-%:
 manifests: gen-crds gen-values-schema
 
 .PHONY: gen
-gen: clientset manifests gen-chart-doc package-charts
+gen: clientset manifests gen-chart-doc
 
 CHART_REGISTRY     ?= appscode
 CHART_REGISTRY_URL ?= https://charts.appscode.com/stable/
