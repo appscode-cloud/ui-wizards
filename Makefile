@@ -244,10 +244,10 @@ gen-chart-doc-%:
 		chart-doc-gen -d ./charts/$*/doc.yaml -v ./charts/$*/values.yaml > ./charts/$*/README.md
 
 .PHONY: manifests
-manifests: gen-crds gen-values-schema gen-chart-doc
+manifests: gen-crds gen-values-schema
 
 .PHONY: gen
-gen: clientset manifests
+gen: clientset manifests gen-chart-doc package-charts
 
 CHART_REGISTRY     ?= appscode
 CHART_REGISTRY_URL ?= https://charts.appscode.com/stable/
@@ -270,6 +270,22 @@ chart-contents-%:
 		yq w -i ./charts/$*/Chart.yaml appVersion --tag '!!str' $(APP_VERSION);   \
 		yq w -i ./charts/$*/values.yaml image.tag --tag '!!str' $(APP_VERSION);   \
 	fi
+
+.PHONY: package-charts
+package-charts:
+	@docker run                                                 \
+	    -i                                                      \
+	    --rm                                                    \
+	    -u $$(id -u):$$(id -g)                                  \
+	    -v $$(pwd):/src                                         \
+	    -w /src                                                 \
+	    -v $$(pwd)/.go/bin/$(OS)_$(ARCH):/go/bin                \
+	    -v $$(pwd)/.go/bin/$(OS)_$(ARCH):/go/bin/$(OS)_$(ARCH)  \
+	    -v $$(pwd)/.go/cache:/.cache                            \
+	    --env HTTP_PROXY=$(HTTP_PROXY)                          \
+	    --env HTTPS_PROXY=$(HTTPS_PROXY)                        \
+	    $(BUILD_IMAGE)                                          \
+	    ./hack/scripts/update-repo.sh
 
 fmt: $(BUILD_DIRS)
 	@docker run                                                 \
