@@ -66,6 +66,7 @@ async function getMongoDetails({
   const cluster = storeGet("/clusterInfo/name");
 
   const namespace = getValue(model, "/metadata/namespace");
+  watchDependency("model#/metadata/namespace");
   const name = getValue(model, "/spec/databaseRef/name");
   watchDependency("model#/spec/databaseRef/name");
 
@@ -203,7 +204,6 @@ async function disableOpsRequest({
 
 function initNamespace({ route }) {
   const { namespace } = route.query || {};
-  console.log({ namespace });
   return namespace;
 }
 
