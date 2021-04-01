@@ -25,6 +25,7 @@ en:
         class: Storage Class Name
         size: Storage Size
       terminalPolicy: Terminal Policy
+      terminationPolicy: Termination Policy
   labels:
     agent: Select a Monitoring Method
     alias: Alias
@@ -72,6 +73,10 @@ en:
     country: Country
     cpu: CPU
     customize_exporter: Customize Exporter Sidecar
+    custom_config_not_allowed: 'Specifying ConfigSecret here is not allowed for sharded cluster. Please, use shard specific ConfigSecret from the Topology section.'
+    customize_config_server_pod_template: Customize Config Server Pod Template
+    customize_mongos_pod_template: Customize Mongos Pod Template
+    customize_shards_pod_template: Customize Shard Pod Template
     database:
       mode: Database Mode
       name: Database Name
@@ -118,6 +123,7 @@ en:
     match_expressions: Match Expressions
     match_field: Match Field
     match_fields: Match Fields
+    matchNames: Match Names
     memory: Memory
     mongos: Mongos
     name: Name
@@ -136,6 +142,7 @@ en:
     pod_annotations: Pod Annotations
     pod_spec: Pod Spec
     pod_template: Pod Template
+    pod_template_not_allowed: 'Specifying PodTemplate here is not allowed for sharded cluster. Please, use shard specific PodTemplate from the Topology section.'
     port: Port
     ports: Ports
     preferred_during_scheduling_ignored_during_execution: Preferred During Scheduling Ignored During Execution
@@ -227,7 +234,7 @@ en:
     service_monitor: Service Monitor
     service_monitor_configuration: ServiceMonitor Configuration
     service_template: Service Template
-    service_template_annotations: Service Template Annotations
+    service_template_annotations: Annotations
     service_templates: Service Templates
     shardNodes: Shard Nodes
     shards: Shards
@@ -236,6 +243,7 @@ en:
       size: Storage Size
     subject: Subject
     terminalPolicy: Terminal Policy
+    terminationPolicy: Termination Policy
     timeout_seconds: Timeout Seconds
     toleration: Toleration
     toleration_seconds: Toleration in seconds
@@ -248,8 +256,8 @@ en:
   options:
     agent:
       prometheus:
-        description: Only injects the metric exporter sidecar
-        label: Use Custom Scrapper
+        description: Injects the metric exporter sidecar and let you customize service monitor
+        label: Custom Service Monitor
       prometheus_builtin:
         description: Inject metric exporter sidecar and add Prometheus annotations to the stats Service
         label: Manually Deployed Prometheus Scrapper
@@ -304,9 +312,9 @@ en:
           label: Standalone
       secret:
         customSecret:
-          label: New Secret
+          label: Auto-generate auth secret
         existingSecret:
-          label: Use Existing Secret
+          label: Use existing auth secret
     dataSource:
       script:
         text: Script

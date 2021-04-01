@@ -179,6 +179,40 @@ steps:
           schema:
             $ref: 'schema#/properties/spec/properties/authSecret/properties/password'
         - label:
+            text: Machine Info
+            hasLine: true
+          type: label-element
+        - label:
+            text: Machine
+          fetch: getMachineListForOptions
+          type: select
+          onChange: setResourceLimit
+          schema:
+            $ref: 'schema#/properties/spec/properties/machine'
+        - label:
+            text: labels.resources
+            hasLine: true
+          type: label-element
+          customClass: mb-10 mt-20
+        - label:
+            text: labels.limit
+            isSubsection: true
+          type: label-element
+        - disabled: disableLimit
+          label:
+            text: labels.cpu
+          computed: setLimitsCpuOrMem|cpu
+          type: input
+          schema:
+            $ref: 'schema#/properties/spec/properties/resources/properties/limits/properties/cpu'
+        - disabled: disableLimit
+          label:
+            text: labels.memory
+          computed: setLimitsCpuOrMem|memory
+          type: input
+          schema:
+            $ref: 'schema#/properties/spec/properties/resources/properties/limits/properties/memory'
+        - label:
             text: labels.configOptions
             hasLine: true
           type: label-element
