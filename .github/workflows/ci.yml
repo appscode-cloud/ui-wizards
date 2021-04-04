@@ -35,9 +35,16 @@ jobs:
           chmod +x ./kubectl
           sudo mv ./kubectl /usr/local/bin/kubectl
 
+      - name: Install uibuilder-schema-checker
+        run: |
+          curl -fsSL -o uibuilder-schema-checker https://github.com/kmodules/uibuilder-schema-checker/releases/download/v0.0.1/uibuilder-schema-checker-linux-amd64
+          chmod +x uibuilder-schema-checker
+          sudo mv ./uibuilder-schema-checker /usr/local/bin/uibuilder-schema-checker
+
       - name: Run checks
         run: |
           make ci
+          uibuilder-schema-checker --wizard-dir=./charts
 
   kubernetes:
     name: Kubernetes
