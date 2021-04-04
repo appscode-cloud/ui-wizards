@@ -1,62 +1,62 @@
 steps:
-  - form:
-      elements:
-        - label:
-            text: labels.basic_info
-            hasLine: true
-          type: "label-element"
-        - label:
-            text: labels.database.name
-          type: input
-          schema:
-            "$ref": schema#/properties/metadata/properties/release/properties/name
-          disabled: true
-        - label:
-            text: labels.namespace
-          fetch: getResources|core|v1|namespaces
-          type: select
-          disabled: true
-          schema:
-            "$ref": schema#/properties/metadata/properties/release/properties/namespace
-        - label:
-            text: labels.database.version
-          fetch: getMongoDbVersions|catalog.kubedb.com|v1alpha1|mongodbversions
-          type: select
-          schema:
-            "$ref": schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/version
-          disabled: true
-        - isArray: true
-          schema:
-            "$ref": schema#/properties/resources/properties/kubedbComMongoDB/properties/metadata/properties/labels
-          keys:
-            label:
-              text: labels.labels.key
-          label:
-            text: labels.labels.label
-          type: key-value-input-form
-          values:
-            label:
-              text: labels.labels.value
-            type: input
-            schema:
-              "$ref": schema#/properties/resources/properties/kubedbComMongoDB/properties/metadata/properties/labels/additionalProperties
-          individualItemDisabilityCheck: labelsDisablityChecker
-        - isArray: true
-          schema:
-            "$ref": schema#/properties/resources/properties/kubedbComMongoDB/properties/metadata/properties/annotations
-          keys:
-            label:
-              text: labels.annotations.key
-          label:
-            text: labels.annotations.label
-          type: key-value-input-form
-          values:
-            label:
-              text: labels.annotations.value
-            type: input
-            schema:
-              "$ref": schema#/properties/resources/properties/kubedbComMongoDB/properties/metadata/properties/annotations/additionalProperties
-      type: single-step-form
-    id: basic
-    title: "steps.0.label"
-type: "multi-step-form"
+- form:
+    elements:
+    - label:
+        hasLine: true
+        text: labels.basic_info
+      type: label-element
+    - disabled: true
+      label:
+        text: labels.database.name
+      schema:
+        $ref: schema#/properties/metadata/properties/release/properties/name
+      type: input
+    - disabled: true
+      fetch: getResources|core|v1|namespaces
+      label:
+        text: labels.namespace
+      schema:
+        $ref: schema#/properties/metadata/properties/release/properties/namespace
+      type: select
+    - disabled: true
+      fetch: getMongoDbVersions|catalog.kubedb.com|v1alpha1|mongodbversions
+      label:
+        text: labels.database.version
+      schema:
+        $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/version
+      type: select
+    - individualItemDisabilityCheck: labelsDisablityChecker
+      isArray: true
+      keys:
+        label:
+          text: labels.labels.key
+      label:
+        text: labels.labels.label
+      schema:
+        $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/metadata/properties/labels
+      type: key-value-input-form
+      values:
+        label:
+          text: labels.labels.value
+        schema:
+          $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/metadata/properties/labels/additionalProperties
+        type: input
+    - isArray: true
+      keys:
+        label:
+          text: labels.annotations.key
+      label:
+        text: labels.annotations.label
+      schema:
+        $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/metadata/properties/annotations
+      type: key-value-input-form
+      values:
+        label:
+          text: labels.annotations.value
+        schema:
+          $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/metadata/properties/annotations/additionalProperties
+        type: input
+    type: single-step-form
+  id: basic
+  title: steps.0.label
+type: multi-step-form
