@@ -83,12 +83,31 @@ resources:
               requests:
                 cpu: 100m
                 memory: 128Mi
+      shardTopology:
+        configServer:
+          configSecret:
+            name: mongodb-configserver-config
+          replicas: 3
+          storage:
+            resources:
+              requests:
+                storage: 1Gi
+            storageClassName: standard
+        mongos:
+          configSecret:
+            name: mongodb-mongos-config
+          replicas: 2
+        shard:
+          configSecret:
+            name: mongodb-shard-config
+          replicas: 3
+          shards: 2
+          storage:
+            resources:
+              requests:
+                storage: 1Gi
+            storageClassName: standard
       sslMode: requireSSL
-      storage:
-        resources:
-          requests:
-            storage: 1Gi
-        storageClassName: standard
       storageType: Durable
       terminationPolicy: WipeOut
       tls:
@@ -135,7 +154,40 @@ resources:
     stringData:
       mongod.conf: |
         net:
+          maxIncomingConnections: 40000
+    type: Opaque
+  secret_configserver_config: # +doc-gen:break
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: mongodb-configserver-config
+      namespace: demo
+    stringData:
+      mongod.conf: |
+        net:
           maxIncomingConnections: 20000
+    type: Opaque
+  secret_mongos_config: # +doc-gen:break
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: mongodb-mongos-config
+      namespace: demo
+    stringData:
+      mongod.conf: |
+        net:
+          maxIncomingConnections: 30000
+    type: Opaque
+  secret_shard_config: # +doc-gen:break
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: mongodb-shard-config
+      namespace: demo
+    stringData:
+      mongod.conf: |
+        net:
+          maxIncomingConnections: 40000
     type: Opaque
   stashAppscodeComBackupConfiguration: # +doc-gen:break
     apiVersion: stash.appscode.com/v1beta1
