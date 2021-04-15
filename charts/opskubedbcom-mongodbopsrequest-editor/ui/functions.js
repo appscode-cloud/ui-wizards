@@ -70,11 +70,12 @@ async function getMongoDetails({
   const name = getValue(model, "/spec/databaseRef/name");
   watchDependency("model#/spec/databaseRef/name");
 
-  const resp = await axios.get(
-    `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/mongodbs/${name}`
-  );
-
-  return resp.data || {};
+  if (namespace && name) {
+    const resp = await axios.get(
+      `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/mongodbs/${name}`
+    );
+    return resp.data || {};
+  } else return {};
 }
 
 async function getMongoDbVersions({ axios, storeGet }) {
