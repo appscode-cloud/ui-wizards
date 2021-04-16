@@ -115,7 +115,10 @@ async function getMongoDbVersions({ axios, storeGet }) {
   });
 }
 
-function ifRequestTypeEqualsTo({ model, getValue, watchDependency }, type) {
+function ifRequestTypeEqualsTo(
+  { model, getValue, watchDependency },
+  type
+) {
   const selectedType = getValue(model, "/spec/type");
   watchDependency("model#/spec/type");
 
@@ -841,6 +844,38 @@ function onReconfigurationTypeChange(
     );
   }
 }
+async function disableReconfigurationType(
+  { axios, storeGet, model, getValue, watchDependency, itemCtx },
+  dbType,
+  prop
+) {
+  const dbDetails = await getMongoDetails({
+    axios,
+    storeGet,
+    model,
+    getValue,
+    watchDependency,
+  });
+
+  const { spec } = dbDetails || {};
+  if (dbType === "standalone" || dbType === "replicaSet") {
+    if (itemCtx.value === "inlineConfig" || itemCtx.value === "remove") {
+      if (spec.configSecret) return false;
+      else return true;
+    } else return false;
+  } else {
+    const { shardTopology } = spec || {};
+    if (itemCtx.value === "inlineConfig" || itemCtx.value === "remove") {
+      if (
+        shardTopology &&
+        shardTopology[prop] &&
+        shardTopology[prop].configSecret
+      )
+        return false;
+      else return true;
+    } else return false;
+  }
+}
 
 // for tls
 async function hasTlsField({
@@ -983,51 +1018,62 @@ function showIssuerRefAndCertificates({
   return verd;
 }
 
-return {
-  returnFalse,
-  ifRequestTypeEqualsTo,
-  onRequestTypeChange,
-  initNamespace,
-  initDatabaseRef,
-  showPodTemplate,
-  isEqualToValueFromType,
-  showSecretSelectField,
-  showSecretInputField,
-  getValueFrom,
-  getRefName,
-  getKeyOrValue,
-  setValueFrom,
-  onValueFromChange,
-  ifReconfigurationTypeEqualsTo,
-  onReconfigurationTypeChange,
-  initIssuerRefApiGroup,
-  initTlsOperation,
-  onTlsOperationChange,
-  showIssuerRefAndCertificates,
+// return {
+//   getNamespaces,
+//   getMongoDbs,
+//   getMongoDbVersions,
+// };
 
-  getNamespaces,
-  getMongoDbs,
-  getMongoDetails,
-  getMongoDbVersions,
-  disableOpsRequest,
-  ifDbTypeEqualsTo,
-  getConfigSecrets,
-  resourceNames,
-  unNamespacedResourceNames,
-  showConfigMapSelectField,
-  showConfigMapInputField,
-  getSecretKeys,
-  hasSecretKeys,
-  hasNoSecretKeys,
-  getConfigMapKeys,
-  hasConfigMapKeys,
-  hasNoConfigMapKeys,
-  getSecrets,
-  hasExistingSecret,
-  hasNoExistingSecret,
-  getImagePullSecrets,
-  hasTlsField,
-  getIssuerRefsName,
-  hasIssuerRefName,
-  hasNoIssuerRefName,
-};
+
+return {
+	returnFalse,
+	getNamespaces,
+	getMongoDbs,
+	getMongoDetails,
+	getMongoDbVersions,
+	ifRequestTypeEqualsTo,
+	onRequestTypeChange,
+	getDbTls,
+	getDbType,
+	disableOpsRequest,
+	initNamespace,
+	initDatabaseRef,
+	ifDbTypeEqualsTo,
+	getConfigSecrets,
+	showPodTemplate,
+	isEqualToValueFromType,
+	getNamespacedResourceList,
+	getResourceList,
+	resourceNames,
+	unNamespacedResourceNames,
+	showConfigMapSelectField,
+	showConfigMapInputField,
+	showSecretSelectField,
+	showSecretInputField,
+	getSecretKeys,
+	hasSecretKeys,
+	hasNoSecretKeys,
+	getConfigMapKeys,
+	hasConfigMapKeys,
+	hasNoConfigMapKeys,
+	getSecrets,
+	hasExistingSecret,
+	hasNoExistingSecret,
+	getImagePullSecrets,
+	getValueFrom,
+	getRefName,
+	getKeyOrValue,
+	setValueFrom,
+	onValueFromChange,
+	ifReconfigurationTypeEqualsTo,
+	onReconfigurationTypeChange,
+	disableReconfigurationType,
+	hasTlsField,
+	initIssuerRefApiGroup,
+	getIssuerRefsName,
+	hasIssuerRefName,
+	hasNoIssuerRefName,
+	initTlsOperation,
+	onTlsOperationChange,
+	showIssuerRefAndCertificates
+}
