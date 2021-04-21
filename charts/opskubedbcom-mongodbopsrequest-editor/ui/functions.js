@@ -896,8 +896,13 @@ async function hasTlsField({
   return !!tls;
 }
 
-function initIssuerRefApiGroup() {
-  return "cert-manager.io";
+function initIssuerRefApiGroup({ getValue, model, watchDependency }) {
+  const kind = getValue(model, "/spec/tls/issuerRef/kind");
+  watchDependency("model#/spec/tls/issuerRef/kind");
+
+  if (kind) {
+    return "cert-manager.io";
+  } else return undefined;
 }
 
 async function getIssuerRefsName({
@@ -985,13 +990,7 @@ function onTlsOperationChange({ discriminator, getValue, commit }) {
 
   commit("wizard/model$delete", "/spec/tls");
 
-  if (tlsOperation === "update") {
-    commit("wizard/model$update", {
-      path: "/spec/tls/issuerRef/apiGroup",
-      value: "cert-manager.io",
-      force: true,
-    });
-  } else if (tlsOperation === "rotate") {
+  if (tlsOperation === "rotate") {
     commit("wizard/model$update", {
       path: "/spec/tls/rotateCertificates",
       value: true,
@@ -1016,6 +1015,24 @@ function showIssuerRefAndCertificates({
   const verd = tlsOperation !== "remove" && tlsOperation !== "rotate";
 
   return verd;
+}
+
+async function isIssuerRefRequired({
+  axios,
+  storeGet,
+  model,
+  getValue,
+  watchDependency,
+}) {
+  const hasTls = await hasTlsField({
+    axios,
+    storeGet,
+    model,
+    getValue,
+    watchDependency,
+  });
+
+  return !hasTls;
 }
 
 // return {
@@ -1075,5 +1092,6 @@ return {
 	hasNoIssuerRefName,
 	initTlsOperation,
 	onTlsOperationChange,
-	showIssuerRefAndCertificates
+	showIssuerRefAndCertificates,
+	isIssuerRefRequired
 }

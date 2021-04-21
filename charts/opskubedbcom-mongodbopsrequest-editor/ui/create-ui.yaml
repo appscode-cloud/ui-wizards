@@ -7,6 +7,7 @@ steps:
           type: label-element
         - label:
             text: labels.op_req_name
+          required: true
           schema:
             $ref: schema#/properties/metadata/properties/name
           type: input
@@ -14,6 +15,7 @@ steps:
           fetch: getNamespaces
           label:
             text: labels.namespace
+          required: true
           schema:
             $ref: schema#/properties/metadata/properties/namespace
           type: select
@@ -21,6 +23,7 @@ steps:
           fetch: getMongoDbs
           label:
             text: labels.databaseRef
+          required: true
           schema:
             $ref: schema#/properties/spec/properties/databaseRef/properties/name
           type: select
@@ -125,7 +128,7 @@ steps:
                   type: single-step-form
               if: ifDbTypeEqualsTo|sharded|horizontalScaling
               label:
-                text: "Sharded horizontal scaling "
+                text: 'Sharded horizontal scaling '
               type: single-step-form
           if: ifRequestTypeEqualsTo|HorizontalScaling
           label:
@@ -175,7 +178,7 @@ steps:
                   type: single-step-form
               if: ifDbTypeEqualsTo|standalone|verticalScaling
               label:
-                text: "Standalone vertical scaling "
+                text: 'Standalone vertical scaling '
               schema:
                 $ref: schema#/properties/spec/properties/verticalScaling/properties/standalone
               type: single-step-form
@@ -222,7 +225,7 @@ steps:
                   type: single-step-form
               if: ifDbTypeEqualsTo|replicaSet|verticalScaling
               label:
-                text: "Replicaset vertical scaling "
+                text: 'Replicaset vertical scaling '
               schema:
                 $ref: schema#/properties/spec/properties/verticalScaling/properties/replicaSet
               type: single-step-form
@@ -367,7 +370,7 @@ steps:
                   type: single-step-form
               if: ifDbTypeEqualsTo|sharded|verticalScaling
               label:
-                text: "Sharded vertical scaling "
+                text: 'Sharded vertical scaling '
               type: single-step-form
           if: ifRequestTypeEqualsTo|VerticalScaling
           label:
@@ -4418,6 +4421,7 @@ steps:
                       value: Issuer
                     - text: ClusterIssuer
                       value: ClusterIssuer
+                  required: isIssuerRefRequired
                   schema:
                     $ref: schema#/properties/spec/properties/tls/properties/issuerRef/properties/kind
                   type: select
@@ -4425,12 +4429,14 @@ steps:
                   if: hasIssuerRefName
                   label:
                     text: labels.name
+                  required: isIssuerRefRequired
                   schema:
                     $ref: schema#/properties/spec/properties/tls/properties/issuerRef/properties/name
                   type: select
                 - if: hasNoIssuerRefName
                   label:
                     text: labels.name
+                  required: isIssuerRefRequired
                   schema:
                     $ref: schema#/properties/spec/properties/tls/properties/issuerRef/properties/name
                   type: input
