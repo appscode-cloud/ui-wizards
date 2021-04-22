@@ -445,9 +445,15 @@ function setResourceLimit({ commit, model, getValue, watchDependency }) {
   const modelPathValue = getValue(model, "/spec/machine");
   watchDependency("model#/spec/machine");
   if (modelPathValue && modelPathValue !== "custom") {
+    // to avoiding set value by reference, cpu and memory set separately
     commit("wizard/model$update", {
-      path: "/spec/resources/limits",
-      value: machines[modelPathValue].resources.limits,
+      path: "/spec/resources/limits/cpu",
+      value: machines[modelPathValue].resources.limits.cpu,
+      force: true,
+    });
+    commit("wizard/model$update", {
+      path: "/spec/resources/limits/memory",
+      value: machines[modelPathValue].resources.limits.memory,
       force: true,
     });
   }

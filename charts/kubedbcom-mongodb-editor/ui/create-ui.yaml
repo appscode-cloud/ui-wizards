@@ -224,31 +224,43 @@ steps:
               type: label-element
             - elements:
                 - elements:
-                    - label:
-                        text: labels.storage.size
+                    - elements:
+                        - elements:
+                            - label:
+                                text: labels.storage.size
+                              schema:
+                                $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/shardTopology/properties/configServer/properties/storage/properties/resources/properties/requests/properties/storage
+                              type: input
+                          schema:
+                            $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/shardTopology/properties/configServer/properties/storage/properties/resources/properties/requests
+                          type: single-step-form
                       schema:
-                        $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/shardTopology/properties/configServer/properties/storage/properties/resources/properties/requests/properties/storage
-                      type: input
+                        $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/shardTopology/properties/configServer/properties/storage/properties/resources
+                      type: single-step-form
                   schema:
-                    $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/shardTopology/properties/configServer/properties/storage/properties/resources/properties/requests
+                    $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/shardTopology/properties/configServer/properties/storage
                   type: single-step-form
+                - label:
+                    text: labels.replicaset.number
+                  schema:
+                    $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/shardTopology/properties/configServer/properties/replicas
+                  type: input
               schema:
-                $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/shardTopology/properties/configServer/properties/storage/properties/resources
+                $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/shardTopology/properties/configServer
               type: single-step-form
-            - label:
-                text: labels.replicaset.number
-              schema:
-                $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/shardTopology/properties/configServer/properties/replicas
-              type: input
             - label:
                 hasLine: true
                 text: labels.mongos
               type: label-element
-            - label:
-                text: labels.replicaset.number
+            - elements:
+                - label:
+                    text: labels.replicaset.number
+                  schema:
+                    $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/shardTopology/properties/mongos/properties/replicas
+                  type: input
               schema:
-                $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/shardTopology/properties/mongos/properties/replicas
-              type: input
+                $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/shardTopology/properties/mongos
+              type: single-step-form
           if: isEqualToDatabaseMode|Sharded
           type: single-step-form
       type: single-step-form
@@ -1652,7 +1664,7 @@ steps:
                     - computed: initCustomizeRestoreJobRuntimeSettingsForBackup
                       label:
                         isSubsection: true
-                        text: labels.runtimeSettings.choise
+                        text: labels.runtimeSettings.choiseForBackup
                       onChange: onCustomizeRestoreJobRuntimeSettingsChangeForBackup
                       options:
                         - text: options.yesOrNo.yes.text
