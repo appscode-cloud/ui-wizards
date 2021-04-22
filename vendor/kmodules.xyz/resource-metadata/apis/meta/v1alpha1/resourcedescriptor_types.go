@@ -46,11 +46,13 @@ type ResourceDescriptor struct {
 }
 
 type ResourceDescriptorSpec struct {
-	Resource    ResourceID                   `json:"resource"`
-	Columns     []ResourceColumnDefinition   `json:"columns,omitempty"`
+	Resource ResourceID                 `json:"resource"`
+	Columns  []ResourceColumnDefinition `json:"columns,omitempty"`
+	// For array type fields of the resource
 	SubTables   []ResourceSubTableDefinition `json:"subTables,omitempty"`
 	Connections []ResourceConnection         `json:"connections,omitempty"`
-	KeyTargets  []metav1.TypeMeta            `json:"keyTargets,omitempty"`
+	Pages       []RelatedResourcePage        `json:"pages,omitempty"`
+	Status      *StatusCodes                 `json:"status,omitempty"`
 
 	// validation describes the schema used for validation and pruning of the custom resource.
 	// If present, this validation schema is used to validate all versions.
@@ -108,6 +110,42 @@ type ResourceRequirements struct {
 	Shards string `json:"shards,omitempty"`
 	// Json path to resources of type core.ResourceRequirements
 	Resources string `json:"resources,omitempty"`
+}
+
+type RelatedResourcePage struct {
+	Name      string            `json:"name"`
+	Resources []ResourceSection `json:"resources"`
+}
+
+type ResourceSection struct {
+	Ref         GroupVersionResource `json:"ref"`
+	DisplayMode ResourceDisplayMode  `json:"displayMode"`
+	Actions     ResourceActions      `json:"actions"`
+}
+
+type ResourceDisplayMode string
+
+const (
+	DisplayModeList  = "List"
+	DisplayModeField = "Field"
+)
+
+type ResourceActions struct {
+	Create ResourceAction `json:"create"`
+}
+
+type ResourceAction string
+
+const (
+	ActionNever   = "Never"
+	ActionAlways  = "Always"
+	ActionIfEmpty = "IfEmpty"
+)
+
+type StatusCodes struct {
+	Success []string `json:"success,omitempty"`
+	Danger  []string `json:"danger,omitempty"`
+	Warning []string `json:"warning,omitempty"`
 }
 
 type UIParameters struct {
