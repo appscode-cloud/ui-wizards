@@ -281,11 +281,16 @@ function setDatabaseMode({ model, getValue, watchDependency, commit }) {
 }
 
 async function getStorageClassNames(
-  { axios, storeGet, commit, model, getValue },
+  { axios, storeGet, commit, model, getValue, watchDependency, discriminator },
   mode
 ) {
   const owner = storeGet("/user/username");
   const cluster = storeGet("/clusterInfo/name");
+
+  watchDependency("discriminator#/activeDatabaseMode");
+
+  const databaseModeShard =
+    getValue(discriminator, "/activeDatabaseMode") === "Sharded";
 
   const resp = await axios.get(
     `/clusters/${owner}/${cluster}/proxy/storage.k8s.io/v1/storageclasses`,
@@ -317,7 +322,7 @@ async function getStorageClassNames(
       );
 
       if (mode === "shard") {
-        if (!shardClassName) {
+        if (!shardClassName && databaseModeShard) {
           commit("wizard/model$update", {
             path:
               "/resources/kubedbComMongoDB/spec/shardTopology/shard/storage/storageClassName",
@@ -325,7 +330,7 @@ async function getStorageClassNames(
             force: true,
           });
         }
-        if (!configServerClassName) {
+        if (!configServerClassName && databaseModeShard) {
           commit("wizard/model$update", {
             path:
               "/resources/kubedbComMongoDB/spec/shardTopology/configServer/storage/storageClassName",
@@ -338,7 +343,7 @@ async function getStorageClassNames(
           model,
           "/resources/kubedbComMongoDB/spec/storage/storageClassName"
         );
-        if (!className) {
+        if (!className && !databaseModeShard) {
           commit("wizard/model$update", {
             path: "/resources/kubedbComMongoDB/spec/storage/storageClassName",
             value: name,
@@ -355,17 +360,22 @@ async function getStorageClassNames(
   return resources;
 }
 
-function setStorageClass({ getValue, commit, model }) {
+function setStorageClass({ getValue, commit, model, discriminator }) {
   const storageClassName = getValue(
     model,
     "/resources/kubedbComMongoDB/spec/shardTopology/shard/storage/storageClassName"
   );
-  commit("wizard/model$update", {
-    path:
-      "/resources/kubedbComMongoDB/spec/shardTopology/configServer/storage/storageClassName",
-    value: storageClassName,
-    force: true,
-  });
+
+  const mode = getValue(discriminator, "/activeDatabaseMode");
+
+  if (mode === "Sharded" && storageClassName) {
+    commit("wizard/model$update", {
+      path:
+        "/resources/kubedbComMongoDB/spec/shardTopology/configServer/storage/storageClassName",
+      value: storageClassName,
+      force: true,
+    });
+  }
 }
 
 function deleteDatabaseModePath({
@@ -393,6 +403,8 @@ function deleteDatabaseModePath({
     );
 
     this.configPodTemplateSteps({ commit }, true);
+
+    commit("wizard/model$delete", "/resources/secret_config");
 
     if (!modelSpec.shardTopology) {
       commit("wizard/model$update", {
@@ -432,6 +444,10 @@ function deleteDatabaseModePath({
       "/resources/kubedbComMongoDB/spec/shardTopology"
     );
 
+    commit("wizard/model$delete", "/resources/secret_shard_config");
+    commit("wizard/model$delete", "/resources/secret_configserver_config");
+    commit("wizard/model$delete", "/resources/secret_mongos_config");
+
     this.configPodTemplateSteps({ commit }, false);
 
     if (!modelSpec.replicaSet) {
@@ -457,6 +473,10 @@ function deleteDatabaseModePath({
       "/resources/kubedbComMongoDB/spec/replicaSet"
     );
     commit("wizard/model$delete", "/resources/kubedbComMongoDB/spec/replicas");
+
+    commit("wizard/model$delete", "/resources/secret_shard_config");
+    commit("wizard/model$delete", "/resources/secret_configserver_config");
+    commit("wizard/model$delete", "/resources/secret_mongos_config");
 
     this.configPodTemplateSteps({ commit }, false);
   }
@@ -2518,11 +2538,25 @@ function onConfigurationSourceChange({
   }
 }
 
-function onConfigurationChange({ getValue, commit, discriminator }) {
+function onConfigurationChange({
+  getValue,
+  commit,
+  discriminator,
+  model,
+}) {
   const value = getValue(discriminator, "/configuration");
   commit("wizard/model$update", {
     path: "/resources/secret_config/stringData/mongod.conf",
     value: value,
+    force: true,
+  });
+  const configSecretName = `${getValue(
+    model,
+    "/metadata/release/name"
+  )}-config`;
+  commit("wizard/model$update", {
+    path: "/resources/kubedbComMongoDB/spec/configSecret/name",
+    value: configSecretName,
     force: true,
   });
 }
@@ -2826,19 +2860,26 @@ function onConfigurationSourceConfigServerChange({
 }
 
 function transferConfigSecret({ commit, model, getValue }, src, des) {
-  commit("wizard/model$update", {
-    path: `/resources/kubedbComMongoDB/spec/shardTopology/${
-      des === "configserver" ? "configServer" : des
-    }/configSecret/name`,
-    value: getValue(
-      model,
-      `/resources/kubedbComMongoDB/spec/shardTopology/${
-        src === "configserver" ? "configServer" : src
-      }/configSecret/name`
-    ),
-    force: true,
-  });
-  commit("wizard/model$delete", `/resources/secret_${des}_config`);
+  const isShardedMode = getValue(
+    model,
+    "/resources/kubedbComMongoDB/spec/shardTopology"
+  );
+  if (isShardedMode) {
+    commit("wizard/model$update", {
+      path: `/resources/kubedbComMongoDB/spec/shardTopology/${
+        des === "configserver" ? "configServer" : des
+      }/configSecret/name`,
+      value: getValue(
+        model,
+        `/resources/kubedbComMongoDB/spec/shardTopology/${
+          src === "configserver" ? "configServer" : src
+        }/configSecret/name`
+      ),
+      force: true,
+    });
+
+    commit("wizard/model$delete", `/resources/secret_${des}_config`);
+  }
 }
 
 function onConfigSecretModelChange(
