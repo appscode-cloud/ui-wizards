@@ -2,7 +2,7 @@
 Expand the name of the chart.
 */}}
 {{- define "kubedbcom-mongodb-editor-options.name" -}}
-{{- default .Chart.Name .Values.spec.nameOverride | trunc 63 | trimSuffix "-" }}
+{{- .Chart.Name | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
@@ -10,11 +10,7 @@ Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 */}}
 {{- define "kubedbcom-mongodb-editor-options.fullname" -}}
-{{- if .Values.spec.fullnameOverride }}
-{{- .Values.spec.fullnameOverride | trunc 63 | trimSuffix "-" }}
-{{- else }}
 {{- .Release.Name | trunc 63 | trimSuffix "-" }}
-{{- end }}
 {{- end }}
 
 {{/*
@@ -47,7 +43,7 @@ Selector labels
 */}}
 {{- define "kubedbcom-mongodb-editor-options.selectorLabels" -}}
 app.kubernetes.io/name: {{ include "kubedbcom-mongodb-editor-options.appname" . }}
-app.kubernetes.io/instance: {{ .Release.Name }}
+app.kubernetes.io/instance: {{ include "kubedbcom-mongodb-editor-options.fullname" . }}
 {{- end }}
 
 {{/*

@@ -40,8 +40,7 @@ spec:
     # version: {{ .Chart.Version }}
   selector:
     matchLabels:
-      app.kubernetes.io/name: {{ include "kubedbcom-mongodb-editor-options.appname" . }}
-      app.kubernetes.io/instance: {{ include "kubedbcom-mongodb-editor-options.fullname" . }}
+      {{- include "kubedbcom-mongodb-editor-options.selectorLabels" . | nindent 6 }}
   componentKinds:
     - group: app.k8s.io
       kind: Application
