@@ -36,6 +36,10 @@ spec:
   shardTopology:
     configServer:
       replicas: {{ .Values.spec.shardTopology.configServer.replicas }}
+      podTemplate:
+        spec:
+          resources:
+            {{- toYaml $res | nindent 8 }}
       storage:
         resources:
           requests:
@@ -43,22 +47,31 @@ spec:
         storageClassName: {{ .Values.spec.storageClass.name }}
     mongos:
       replicas: {{ .Values.spec.shardTopology.mongos.replicas }}
+      podTemplate:
+        spec:
+          resources:
+            {{- toYaml $res | nindent 8 }}
     shard:
       shards: {{ .Values.spec.shardTopology.shard.shards }}
       replicas: {{ .Values.spec.shardTopology.shard.replicas }}
+      podTemplate:
+        spec:
+          resources:
+            {{- toYaml $res | nindent 8 }}
       storage:
         resources:
           requests:
             storage: {{ .Values.spec.shardTopology.shard.persistence.size }}
         storageClassName: {{ .Values.spec.storageClass.name }}
-{{- end }}
-  terminationPolicy: {{ .Values.spec.terminationPolicy }}
-  clusterAuthMode: {{ .Values.spec.clusterAuthMode }}
-  sslMode: {{ .Values.spec.sslMode }}
+{{- else }}
   podTemplate:
     spec:
       resources:
         {{- toYaml $res | nindent 8 }}
+{{- end }}
+  terminationPolicy: {{ .Values.spec.terminationPolicy }}
+  clusterAuthMode: {{ .Values.spec.clusterAuthMode }}
+  sslMode: {{ .Values.spec.sslMode }}
 {{- if .Values.spec.authSecret.name }}
   authSecret:
     name: {{ .Values.spec.authSecret.name }}
