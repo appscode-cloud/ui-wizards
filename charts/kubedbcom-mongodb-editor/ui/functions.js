@@ -2163,7 +2163,10 @@ function onNamespaceChange({ commit, model, getValue }) {
 }
 
 function onLabelChange({ commit, model, getValue }) {
-  const labels = getValue(model, "/resources/kubedbComMongoDB/metadata/labels");
+  const labels = getValue(
+    model,
+    "/resources/appApplication/spec/selector/matchLabels"
+  );
 
   const agent = getValue(
     model,
@@ -2183,6 +2186,25 @@ function onLabelChange({ commit, model, getValue }) {
 function onNameChange({ commit, model, getValue }) {
   const dbName = getValue(model, "/metadata/release/name");
 
+  const agent = getValue(
+    model,
+    "/resources/kubedbComMongoDB/spec/monitor/agent"
+  );
+
+  const labels = getValue(
+    model,
+    "/resources/appApplication/spec/selector/matchLabels"
+  );
+
+  if (agent === "prometheus.io") {
+    commit("wizard/model$update", {
+      path:
+        "/resources/monitoringCoreosComServiceMonitor/spec/selector/matchLabels",
+      value: labels,
+      force: true,
+    });
+  }
+
   const scheduleBackup = getValue(
     model,
     "/resources/stashAppscodeComBackupConfiguration"
@@ -2195,6 +2217,18 @@ function onNameChange({ commit, model, getValue }) {
       value: dbName,
       force: true,
     });
+    const creatingNewRepo = getValue(
+      model,
+      "/resources/stashAppscodeComRepository_repo"
+    );
+    if (creatingNewRepo) {
+      commit("wizard/model$update", {
+        path:
+          "/resources/stashAppscodeComBackupConfiguration/spec/repository/name",
+        value: `${dbName}-repo`,
+        force: true,
+      });
+    }
   }
 
   const prePopulateDatabase = getValue(
@@ -2207,6 +2241,70 @@ function onNameChange({ commit, model, getValue }) {
       path:
         "/resources/stashAppscodeComRestoreSession_init/spec/target/ref/name",
       value: dbName,
+      force: true,
+    });
+    const creatingNewRepo = getValue(
+      model,
+      "/resources/stashAppscodeComRepository_init_repo"
+    );
+    if (creatingNewRepo) {
+      commit("wizard/model$update", {
+        path:
+          "/resources/stashAppscodeComRestoreSession_init/spec/repository/name",
+        value: `${dbName}-init-repo`,
+        force: true,
+      });
+    }
+  }
+
+  // to reset configSecret name field
+  const hasSecretConfig = getValue(model, "/resources/secret_config");
+  if (hasSecretConfig) {
+    commit("wizard/model$update", {
+      path: "/resources/kubedbComMongoDB/spec/configSecret/name",
+      value: `${dbName}-config`,
+      force: true,
+    });
+  }
+
+  // to reset shard configSecret name field
+  const hasSecretShardConfig = getValue(
+    model,
+    "/resources/secret_shard_config"
+  );
+  if (hasSecretShardConfig) {
+    commit("wizard/model$update", {
+      path:
+        "/resources/kubedbComMongoDB/spec/shardTopology/shard/configSecret/name",
+      value: `${dbName}-shard-config`,
+      force: true,
+    });
+  }
+
+  // to reset shard configSecret name field
+  const hasSecretConfigServerConfig = getValue(
+    model,
+    "/resources/secret_configserver_config"
+  );
+  if (hasSecretConfigServerConfig) {
+    commit("wizard/model$update", {
+      path:
+        "/resources/kubedbComMongoDB/spec/shardTopology/configServer/configSecret/name",
+      value: `${dbName}-configserver-config`,
+      force: true,
+    });
+  }
+
+  // to reset mongos configSecret name field
+  const hasSecretMongosConfig = getValue(
+    model,
+    "/resources/secret_mongos_config"
+  );
+  if (hasSecretMongosConfig) {
+    commit("wizard/model$update", {
+      path:
+        "/resources/kubedbComMongoDB/spec/shardTopology/mongos/configSecret/name",
+      value: `${dbName}-mongos-config`,
       force: true,
     });
   }
