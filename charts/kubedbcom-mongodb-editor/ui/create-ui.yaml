@@ -2313,6 +2313,23 @@ steps:
               schema:
                 $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec
               type: single-step-form
+            - if: isEqualToModelPathValue|prometheus.io|/resources/kubedbComMongoDB/spec/monitor/agent
+              individualItemDisabilityCheck: disableLableChecker
+              isArray: true
+              keys:
+                label:
+                  text: labels.labels.key
+              label:
+                text: labels.labels.label
+              schema:
+                $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/metadata/properties/labels
+              type: key-value-input-form
+              values:
+                label:
+                  text: labels.labels.value
+                schema:
+                  $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/metadata/properties/labels/additionalProperties
+                type: input
             - label:
                 hasLine: true
                 text: labels.exporter_configuration

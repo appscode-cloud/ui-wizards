@@ -24,7 +24,7 @@ function showAuthPasswordField({ model, getValue, watchDependency }) {
     modelPathValue.secret &&
     modelPathValue.secret.metadata &&
     modelPathValue.secret.metadata.name &&
-    !this.showAuthSecretField({ model, getValue, watchDependency })
+    !showAuthSecretField({ model, getValue, watchDependency })
   );
 }
 
@@ -45,8 +45,8 @@ function showNewSecretCreateField({
   commit,
 }) {
   const resp =
-    !this.showAuthSecretField({ model, getValue, watchDependency }) &&
-    !this.showAuthPasswordField({ model, getValue, watchDependency });
+    !showAuthSecretField({ model, getValue, watchDependency }) &&
+    !showAuthPasswordField({ model, getValue, watchDependency });
   const secret = getValue(model, "/resources/secret_auth");
   if (resp && !secret) {
     commit("wizard/model$update", {
@@ -133,7 +133,7 @@ async function hasIssuerRefName({
   model,
   watchDependency,
 }) {
-  const resp = await this.getIssuerRefsName({
+  const resp = await getIssuerRefsName({
     axios,
     storeGet,
     getValue,
@@ -151,7 +151,7 @@ async function hasNoIssuerRefName({
   model,
   watchDependency,
 }) {
-  const resp = await this.hasIssuerRefName({
+  const resp = await hasIssuerRefName({
     axios,
     storeGet,
     getValue,
@@ -269,13 +269,13 @@ function setDatabaseMode({ model, getValue, watchDependency, commit }) {
 
   watchDependency("model#/resources/kubedbComMongoDB/spec");
   if (modelPathValue.shardTopology) {
-    this.configPodTemplateSteps({ commit }, true);
+    configPodTemplateSteps({ commit }, true);
     return "Sharded";
   } else if (modelPathValue.replicaSet) {
-    this.configPodTemplateSteps({ commit }, false);
+    configPodTemplateSteps({ commit }, false);
     return "Replicaset";
   } else {
-    this.configPodTemplateSteps({ commit }, false);
+    configPodTemplateSteps({ commit }, false);
     return "Standalone";
   }
 }
@@ -402,7 +402,7 @@ function deleteDatabaseModePath({
       "/resources/kubedbComMongoDB/spec/configSecret"
     );
 
-    this.configPodTemplateSteps({ commit }, true);
+    configPodTemplateSteps({ commit }, true);
 
     commit("wizard/model$delete", "/resources/secret_config");
 
@@ -448,7 +448,7 @@ function deleteDatabaseModePath({
     commit("wizard/model$delete", "/resources/secret_configserver_config");
     commit("wizard/model$delete", "/resources/secret_mongos_config");
 
-    this.configPodTemplateSteps({ commit }, false);
+    configPodTemplateSteps({ commit }, false);
 
     if (!modelSpec.replicaSet) {
       commit("wizard/model$update", {
@@ -478,7 +478,7 @@ function deleteDatabaseModePath({
     commit("wizard/model$delete", "/resources/secret_configserver_config");
     commit("wizard/model$delete", "/resources/secret_mongos_config");
 
-    this.configPodTemplateSteps({ commit }, false);
+    configPodTemplateSteps({ commit }, false);
   }
 }
 
@@ -644,8 +644,8 @@ function isSecretTypeValueFrom({ rootModel }) {
 
 function isInputTypeValueFrom({ rootModel }) {
   return (
-    !this.isConfigMapTypeValueFrom({ rootModel }) &&
-    !this.isSecretTypeValueFrom({ rootModel })
+    !isConfigMapTypeValueFrom({ rootModel }) &&
+    !isSecretTypeValueFrom({ rootModel })
   );
 }
 
@@ -697,7 +697,7 @@ async function showConfigMapInputField({
   watchDependency,
   axios,
 }) {
-  const resp = await this.showConfigMapSelectField({
+  const resp = await showConfigMapSelectField({
     storeGet,
     model,
     getValue,
@@ -714,7 +714,7 @@ async function showSecretSelectField({
   getValue,
   watchDependency,
 }) {
-  const resp = await this.getSecrets({
+  const resp = await getSecrets({
     storeGet,
     axios,
     model,
@@ -731,7 +731,7 @@ async function showSecretInputField({
   getValue,
   watchDependency,
 }) {
-  const resp = await this.showSecretSelectField({
+  const resp = await showSecretSelectField({
     storeGet,
     axios,
     model,
@@ -790,7 +790,7 @@ async function hasSecretKeys({
   watchDependency,
   rootModel,
 }) {
-  const resp = await this.getSecretKeys({
+  const resp = await getSecretKeys({
     storeGet,
     axios,
     model,
@@ -809,7 +809,7 @@ async function hasNoSecretKeys({
   watchDependency,
   rootModel,
 }) {
-  const resp = await this.hasSecretKeys({
+  const resp = await hasSecretKeys({
     storeGet,
     axios,
     model,
@@ -869,7 +869,7 @@ async function hasConfigMapKeys({
   watchDependency,
   rootModel,
 }) {
-  const resp = await this.getConfigMapKeys({
+  const resp = await getConfigMapKeys({
     storeGet,
     axios,
     model,
@@ -888,7 +888,7 @@ async function hasNoConfigMapKeys({
   watchDependency,
   rootModel,
 }) {
-  const resp = await this.hasConfigMapKeys({
+  const resp = await hasConfigMapKeys({
     storeGet,
     axios,
     model,
@@ -2326,8 +2326,8 @@ function onAgentChange({ commit, model, getValue }) {
       force: true,
     });
 
-    this.onNamespaceChange({ commit, model, getValue });
-    this.onLabelChange({ commit, model, getValue });
+    onNamespaceChange({ commit, model, getValue });
+    onLabelChange({ commit, model, getValue });
   } else {
     commit(
       "wizard/model$delete",
@@ -2374,7 +2374,7 @@ function getDatabaseSecretStatus({ model, getValue, watchDependency }) {
 
 function getCreateAuthSecret({ model, getValue }) {
   return (
-    this.getInitialCreateAuthSecretStatus({ model, getValue }) !==
+    getInitialCreateAuthSecretStatus({ model, getValue }) !==
     "has-existing-secret"
   );
 }
@@ -2384,7 +2384,7 @@ function isEqualToDatabaseSecretStatus(
   value
 ) {
   return (
-    this.getDatabaseSecretStatus({ model, getValue, watchDependency }) === value
+    getDatabaseSecretStatus({ model, getValue, watchDependency }) === value
   );
 }
 
@@ -2503,7 +2503,7 @@ async function hasExistingSecret({
   getValue,
   watchDependency,
 }) {
-  const resp = await this.getSecrets({
+  const resp = await getSecrets({
     storeGet,
     axios,
     model,
@@ -2520,7 +2520,7 @@ async function hasNoExistingSecret({
   getValue,
   watchDependency,
 }) {
-  const resp = await this.hasExistingSecret({
+  const resp = await hasExistingSecret({
     storeGet,
     axios,
     model,
@@ -2675,7 +2675,7 @@ function showShardedCustomConfig({
   watchDependency,
   commit,
 }) {
-  const resp = !this.showCustomConfig({ model, getValue, watchDependency });
+  const resp = !showCustomConfig({ model, getValue, watchDependency });
   if (resp) {
     commit(
       "wizard/model$delete",
@@ -2797,7 +2797,7 @@ function onConfigurationSourceMongosChange({
   )}-mongos-config`;
   if (configurationSource === "use-existing-config") {
     commit("wizard/model$delete", "/resources/secret_mongos_config");
-    this.onConfigSecretModelChange(
+    onConfigSecretModelChange(
       { commit, model, getValue, discriminator },
       "mongos",
       configurationSource,
@@ -2818,20 +2818,16 @@ function onConfigurationSourceMongosChange({
       value: configSecretName,
       force: true,
     });
-    this.onConfigSecretModelChange(
+    onConfigSecretModelChange(
       { commit, model, getValue, discriminator },
       "mongos",
       configurationSource,
       "/configurationMongos"
     );
   } else if (configurationSource === "same-as-shard-config-secret") {
-    this.transferConfigSecret({ commit, model, getValue }, "shard", "mongos");
+    transferConfigSecret({ commit, model, getValue }, "shard", "mongos");
   } else if (configurationSource === "same-as-configserver-config-secret") {
-    this.transferConfigSecret(
-      { commit, model, getValue },
-      "configserver",
-      "mongos"
-    );
+    transferConfigSecret({ commit, model, getValue }, "configserver", "mongos");
   }
 }
 
@@ -2851,7 +2847,7 @@ function onConfigurationSourceShardChange({
   )}-shard-config`;
   if (configurationSource === "use-existing-config") {
     commit("wizard/model$delete", "/resources/secret_shard_config");
-    this.onConfigSecretModelChange(
+    onConfigSecretModelChange(
       { commit, model, getValue, discriminator },
       "shard",
       configurationSource,
@@ -2872,20 +2868,16 @@ function onConfigurationSourceShardChange({
       value: configSecretName,
       force: true,
     });
-    this.onConfigSecretModelChange(
+    onConfigSecretModelChange(
       { commit, model, getValue, discriminator },
       "shard",
       configurationSource,
       "/configurationShard"
     );
   } else if (configurationSource === "same-as-configserver-config-secret") {
-    this.transferConfigSecret(
-      { commit, model, getValue },
-      "configserver",
-      "shard"
-    );
+    transferConfigSecret({ commit, model, getValue }, "configserver", "shard");
   } else if (configurationSource === "same-as-mongos-config-secret") {
-    this.transferConfigSecret({ commit, model, getValue }, "mongos", "shard");
+    transferConfigSecret({ commit, model, getValue }, "mongos", "shard");
   }
 }
 
@@ -2905,7 +2897,7 @@ function onConfigurationSourceConfigServerChange({
   )}-configserver-config`;
   if (configurationSource === "use-existing-config") {
     commit("wizard/model$delete", "/resources/secret_configserver_config");
-    this.onConfigSecretModelChange(
+    onConfigSecretModelChange(
       { commit, model, getValue, discriminator },
       "configserver",
       configurationSource,
@@ -2926,7 +2918,7 @@ function onConfigurationSourceConfigServerChange({
       value: configSecretName,
       force: true,
     });
-    this.onConfigSecretModelChange(
+    onConfigSecretModelChange(
       { commit, model, getValue, discriminator },
       "configserver",
       configurationSource,
@@ -2937,7 +2929,7 @@ function onConfigurationSourceConfigServerChange({
       discriminator,
       "/configurationSourceShard"
     );
-    this.transferConfigSecret(
+    transferConfigSecret(
       { commit, model, getValue },
       "shard",
       "configserver",
@@ -2948,7 +2940,7 @@ function onConfigurationSourceConfigServerChange({
       discriminator,
       "/configurationSourceMongos"
     );
-    this.transferConfigSecret(
+    transferConfigSecret(
       { commit, model, getValue },
       "mongos",
       "configserver",
@@ -3002,21 +2994,17 @@ function onConfigSecretModelChange(
   const configSrcMongos = getValue(discriminator, "/configurationSourceMongos");
 
   if (configSrcShard === `same-as-${configType}-config-secret`) {
-    this.transferConfigSecret({ commit, model, getValue }, configType, "shard");
+    transferConfigSecret({ commit, model, getValue }, configType, "shard");
   }
   if (configSrcConfigServer === `same-as-${configType}-config-secret`) {
-    this.transferConfigSecret(
+    transferConfigSecret(
       { commit, model, getValue },
       configType,
       "configserver"
     );
   }
   if (configSrcMongos === `same-as-${configType}-config-secret`) {
-    this.transferConfigSecret(
-      { commit, model, getValue },
-      configType,
-      "mongos"
-    );
+    transferConfigSecret({ commit, model, getValue }, configType, "mongos");
   }
 }
 
