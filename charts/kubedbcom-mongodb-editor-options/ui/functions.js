@@ -237,7 +237,7 @@ function showAuthSecretField({
   getValue,
   watchDependency,
 }) {
-  return !this.showAuthPasswordField({
+  return !showAuthPasswordField({
     discriminator,
     getValue,
     watchDependency,
@@ -401,7 +401,7 @@ async function hasExistingSecret({
   getValue,
   watchDependency,
 }) {
-  const resp = await this.getSecrets({
+  const resp = await getSecrets({
     storeGet,
     axios,
     model,
@@ -418,7 +418,7 @@ async function hasNoExistingSecret({
   getValue,
   watchDependency,
 }) {
-  const resp = await this.hasExistingSecret({
+  const resp = await hasExistingSecret({
     storeGet,
     axios,
     model,
