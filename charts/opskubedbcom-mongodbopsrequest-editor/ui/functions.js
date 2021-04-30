@@ -441,7 +441,7 @@ async function showConfigMapInputField({
   watchDependency,
   axios,
 }) {
-  return !this.showConfigMapSelectField({
+  return !showConfigMapSelectField({
     storeGet,
     model,
     getValue,
@@ -457,7 +457,7 @@ function showSecretSelectField({
   getValue,
   watchDependency,
 }) {
-  const resp = this.getSecrets({
+  const resp = getSecrets({
     storeGet,
     axios,
     model,
@@ -474,7 +474,7 @@ function showSecretInputField({
   getValue,
   watchDependency,
 }) {
-  return !this.showSecretSelectField({
+  return !showSecretSelectField({
     storeGet,
     axios,
     model,
@@ -526,7 +526,7 @@ async function hasSecretKeys({
   watchDependency,
   rootModel,
 }) {
-  const resp = await this.getSecretKeys({
+  const resp = await getSecretKeys({
     storeGet,
     axios,
     model,
@@ -545,7 +545,7 @@ async function hasNoSecretKeys({
   watchDependency,
   rootModel,
 }) {
-  const resp = await this.hasSecretKeys({
+  const resp = await hasSecretKeys({
     storeGet,
     axios,
     model,
@@ -599,7 +599,7 @@ async function hasConfigMapKeys({
   watchDependency,
   rootModel,
 }) {
-  const resp = await this.getConfigMapKeys({
+  const resp = await getConfigMapKeys({
     storeGet,
     axios,
     model,
@@ -618,7 +618,7 @@ async function hasNoConfigMapKeys({
   watchDependency,
   rootModel,
 }) {
-  const resp = await this.hasConfigMapKeys({
+  const resp = await hasConfigMapKeys({
     storeGet,
     axios,
     model,
@@ -673,7 +673,7 @@ async function hasExistingSecret({
   getValue,
   watchDependency,
 }) {
-  const resp = await this.getSecrets({
+  const resp = await getSecrets({
     storeGet,
     axios,
     model,
@@ -690,7 +690,7 @@ async function hasNoExistingSecret({
   getValue,
   watchDependency,
 }) {
-  const resp = await this.hasExistingSecret({
+  const resp = await hasExistingSecret({
     storeGet,
     axios,
     model,
@@ -953,7 +953,7 @@ async function hasIssuerRefName({
   model,
   watchDependency,
 }) {
-  const resp = await this.getIssuerRefsName({
+  const resp = await getIssuerRefsName({
     axios,
     storeGet,
     getValue,
@@ -971,7 +971,7 @@ async function hasNoIssuerRefName({
   model,
   watchDependency,
 }) {
-  const resp = await this.hasIssuerRefName({
+  const resp = await hasIssuerRefName({
     axios,
     storeGet,
     getValue,
