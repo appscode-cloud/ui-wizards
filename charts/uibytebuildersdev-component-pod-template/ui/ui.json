@@ -1,0 +1,596 @@
+{
+  "type": "single-step-form",
+  "$schema": {
+    "$ref": "schema#/"
+  },
+  "elements": [
+    {
+      "label": {
+        "text": "labels.pod_template",
+        "hasLine": true
+      },
+      "type": "label-element"
+    },
+    {
+      "type": "single-step-form",
+      "schema": {
+        "$ref": "schema#/properties/metadata"
+      },
+      "elements": [
+        {
+          "isArray": true,
+          "schema": {
+            "$ref": "schema#/properties/metadata/properties/annotations"
+          },
+          "keys": {
+            "label": {
+              "text": "labels.labels.key"
+            }
+          },
+          "label": {
+            "text": "labels.pod_annotations"
+          },
+          "type": "key-value-input-form",
+          "values": {
+            "label": {
+              "text": "labels.labels.value"
+            },
+            "type": "input",
+            "schema": {
+              "$ref": "schema#/properties/metadata/properties/annotations/additionalProperties"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "single-step-form",
+      "schema": {
+        "$ref": "schema#/properties/controller"
+      },
+      "elements": [
+        {
+          "isArray": true,
+          "schema": {
+            "$ref": "schema#/properties/controller/properties/annotations"
+          },
+          "keys": {
+            "label": {
+              "text": "labels.labels.key"
+            }
+          },
+          "label": {
+            "text": "labels.controller_annotations"
+          },
+          "type": "key-value-input-form",
+          "values": {
+            "label": {
+              "text": "labels.labels.value"
+            },
+            "type": "input",
+            "schema": {
+              "$ref": "schema#/properties/controller/properties/annotations/additionalProperties"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "single-step-form",
+      "schema": {
+        "$ref": "schema#/properties/spec"
+      },
+      "elements": [
+        {
+          "label": {
+            "text": "labels.pod_spec"
+          },
+          "customClass": "mb-5",
+          "type": "label-element"
+        },
+        {
+          "type": "reusable-element",
+          "alias": "reusable_pod_template_reources",
+          "schema": {
+            "$ref": "schema#/properties/resources"
+          },
+          "moduleResolver": "fetchJsons|resources"
+        },
+        {
+          "type": "single-step-form",
+          "schema": {
+            "$ref": "schema#/properties/spec/properties/securityContext"
+          },
+          "elements": [
+            {
+              "label": {
+                "text": "labels.security_context",
+                "hasLine": true
+              },
+              "type": "label-element"
+            },
+            {
+              "type": "switch",
+              "label": {
+                "text": "labels.run_as_non_root"
+              },
+              "schema": {
+                "$ref": "schema#/properties/spec/properties/securityContext/properties/runAsNonRoot"
+              }
+            },
+            {
+              "label": {
+                "text": "labels.fs_group"
+              },
+              "type": "input",
+              "schema": {
+                "$ref": "schema#/properties/spec/properties/securityContext/properties/fsGroup"
+              }
+            },
+            {
+              "label": {
+                "text": "labels.run_as_group"
+              },
+              "type": "input",
+              "schema": {
+                "$ref": "schema#/properties/spec/properties/securityContext/properties/runAsGroup"
+              }
+            },
+            {
+              "label": {
+                "text": "labels.run_as_user"
+              },
+              "type": "input",
+              "schema": {
+                "$ref": "schema#/properties/spec/properties/securityContext/properties/runAsUser"
+              }
+            },
+            {
+              "type": "reusable-element",
+              "alias": "reusable__podTemplate_linux_options",
+              "schema": {
+                "$ref": "schema#/properties/spec/properties/securityContext/properties/seLinuxOptions"
+              },
+              "moduleResolver": "fetchJsons|se-linux-options"
+            }
+          ]
+        },
+        {
+          "type": "reusable-element",
+          "alias": "reusable_env_variables",
+          "schema": {
+            "$ref": "schema#/properties/env"
+          },
+          "dataContext": {
+            "namespace": {
+              "$ref": "schema#/properties/metadata/properties/release/properties/namespace"
+            }
+          },
+          "moduleResolver": "fetchJsons|env"
+        },
+        {
+          "type": "single-step-form-array",
+          "schema": {
+            "$ref": "schema#/properties/spec/properties/tolerations"
+          },
+          "label": {
+            "text": "labels.tolerations"
+          },
+          "customClass": "mb-20",
+          "addFormLabel": "labels.toleration",
+          "tableContents": [
+            {
+              "type": "value",
+              "typeOfValue": "string",
+              "inTableColumn": true,
+              "label": {
+                "text": "labels.effect"
+              },
+              "path": "effect"
+            },
+            {
+              "type": "value",
+              "typeOfValue": "string",
+              "inTableColumn": true,
+              "label": {
+                "text": "labels.key"
+              },
+              "path": "key"
+            },
+            {
+              "type": "value",
+              "typeOfValue": "string",
+              "inTableColumn": true,
+              "label": {
+                "text": "labels.operator"
+              },
+              "path": "operator"
+            },
+            {
+              "type": "value",
+              "typeOfValue": "string",
+              "inTableColumn": true,
+              "label": {
+                "text": "labels.toleration_seconds"
+              },
+              "path": "tolerationSeconds"
+            },
+            {
+              "type": "value",
+              "typeOfValue": "string",
+              "inTableColumn": true,
+              "label": {
+                "text": "labels.value"
+              },
+              "path": "value"
+            }
+          ],
+          "element": {
+            "elements": [
+              {
+                "label": {
+                  "text": "labels.effect"
+                },
+                "type": "input",
+                "schema": {
+                  "$ref": "schema#/properties/spec/properties/tolerations/items/properties/effect"
+                }
+              },
+              {
+                "label": {
+                  "text": "labels.key"
+                },
+                "type": "input",
+                "schema": {
+                  "$ref": "schema#/properties/spec/properties/tolerations/items/properties/key"
+                }
+              },
+              {
+                "label": {
+                  "text": "labels.operator"
+                },
+                "type": "select",
+                "fetch": "getOperatorsList",
+                "schema": {
+                  "$ref": "schema#/properties/spec/properties/tolerations/items/properties/operator"
+                }
+              },
+              {
+                "label": {
+                  "text": "labels.toleration_seconds"
+                },
+                "type": "input",
+                "schema": {
+                  "$ref": "schema#/properties/spec/properties/tolerations/items/properties/tolerationSeconds"
+                }
+              },
+              {
+                "label": {
+                  "text": "labels.value"
+                },
+                "type": "input",
+                "schema": {
+                  "$ref": "schema#/properties/spec/properties/tolerations/items/properties/value"
+                }
+              }
+            ],
+            "type": "single-step-form"
+          }
+        },
+        {
+          "schema": {
+            "$ref": "schema#/properties/spec/properties/nodeSelector"
+          },
+          "keys": {
+            "label": {
+              "text": "labels.labels.key"
+            }
+          },
+          "label": {
+            "text": "labels.node_selector"
+          },
+          "type": "key-value-input-form",
+          "values": {
+            "label": {
+              "text": "labels.labels.value"
+            },
+            "type": "input",
+            "schema": {
+              "$ref": "schema#/properties/spec/properties/nodeSelector/additionalProperties"
+            }
+          }
+        },
+        {
+          "type": "single-step-form",
+          "schema": {
+            "$ref": "schema#/properties/spec/properties/affinity"
+          },
+          "elements": [
+            {
+              "type": "single-step-form",
+              "schema": {
+                "$ref": "schema#/properties/spec/properties/affinity/properties/nodeAffinity"
+              },
+              "elements": [
+                {
+                  "type": "single-step-form",
+                  "schema": {
+                    "$ref": "schema#/properties/spec/properties/affinity/properties/nodeAffinity/properties/requiredDuringSchedulingIgnoredDuringExecution"
+                  },
+                  "elements": [
+                    {
+                      "required": false,
+                      "type": "single-step-form-array",
+                      "label": {
+                        "text": "labels.node_selector_terms"
+                      },
+                      "addFormLabel": "labels.node_selector_terms",
+                      "schema": {
+                        "$ref": "schema#/properties/spec/properties/affinity/properties/nodeAffinity/properties/requiredDuringSchedulingIgnoredDuringExecution/properties/nodeSelectorTerms"
+                      },
+                      "customClass": "mb-20",
+                      "tableContents": [
+                        {
+                          "type": "value",
+                          "typeOfValue": "key-operator-values-array",
+                          "inTableColumn": true,
+                          "label": {
+                            "text": "labels.match_expressions"
+                          },
+                          "path": "matchExpressions",
+                          "tableContents": [
+                            {
+                              "type": "value",
+                              "typeOfValue": "string",
+                              "inTableColumn": true,
+                              "label": {
+                                "text": "labels.key"
+                              },
+                              "path": "key"
+                            },
+                            {
+                              "type": "value",
+                              "typeOfValue": "string",
+                              "inTableColumn": true,
+                              "label": {
+                                "text": "labels.operator"
+                              },
+                              "path": "operator"
+                            },
+                            {
+                              "type": "value",
+                              "typeOfValue": "array",
+                              "inTableColumn": true,
+                              "label": {
+                                "text": "labels.values"
+                              },
+                              "path": "values"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "value",
+                          "typeOfValue": "key-operator-values-array",
+                          "inTableColumn": true,
+                          "label": {
+                            "text": "labels.match_fields"
+                          },
+                          "path": "matchFields",
+                          "tableContents": [
+                            {
+                              "type": "value",
+                              "typeOfValue": "string",
+                              "inTableColumn": true,
+                              "label": {
+                                "text": "labels.key"
+                              },
+                              "path": "key"
+                            },
+                            {
+                              "type": "value",
+                              "typeOfValue": "string",
+                              "inTableColumn": true,
+                              "label": {
+                                "text": "labels.operator"
+                              },
+                              "path": "operator"
+                            },
+                            {
+                              "type": "value",
+                              "typeOfValue": "array",
+                              "inTableColumn": true,
+                              "label": {
+                                "text": "labels.values"
+                              },
+                              "path": "values"
+                            }
+                          ]
+                        }
+                      ],
+                      "element": {
+                        "elements": [
+                          {
+                            "type": "reusable-element",
+                            "alias": "reusable_node_selector_terms_match_expressions",
+                            "schema": {
+                              "$ref": "schema#/properties/spec/properties/affinity/properties/nodeAffinity/properties/requiredDuringSchedulingIgnoredDuringExecution/properties/nodeSelectorTerms/items/properties/matchExpressions"
+                            },
+                            "moduleResolver": "fetchJsons|match-expressions"
+                          },
+                          {
+                            "type": "reusable-element",
+                            "alias": "reusable_node_selector_terms_match_fields",
+                            "schema": {
+                              "$ref": "schema#/properties/spec/properties/affinity/properties/nodeAffinity/properties/requiredDuringSchedulingIgnoredDuringExecution/properties/nodeSelectorTerms/items/properties/matchFields"
+                            },
+                            "moduleResolver": "fetchJsons|match-fields"
+                          }
+                        ],
+                        "type": "single-step-form"
+                      }
+                    }
+                  ]
+                },
+                {
+                  "type": "single-step-form-array",
+                  "label": {
+                    "text": "labels.preferred_during_scheduling_ignored_during_execution"
+                  },
+                  "addFormLabel": "labels.preferred_during_scheduling_ignored_during_execution",
+                  "schema": {
+                    "$ref": "schema#/properties/spec/properties/affinity/properties/nodeAffinity/properties/preferredDuringSchedulingIgnoredDuringExecution"
+                  },
+                  "customClass": "mb-20",
+                  "tableContents": [
+                    {
+                      "type": "value",
+                      "typeOfValue": "string",
+                      "inTableColumn": true,
+                      "label": {
+                        "text": "labels.weight"
+                      },
+                      "path": "weight"
+                    },
+                    {
+                      "type": "value",
+                      "typeOfValue": "key-operator-values-array",
+                      "inTableColumn": true,
+                      "label": {
+                        "text": "labels.match_expressions"
+                      },
+                      "path": "preference/matchExpressions",
+                      "tableContents": [
+                        {
+                          "type": "value",
+                          "typeOfValue": "string",
+                          "inTableColumn": true,
+                          "label": {
+                            "text": "labels.key"
+                          },
+                          "path": "key"
+                        },
+                        {
+                          "type": "value",
+                          "typeOfValue": "string",
+                          "inTableColumn": true,
+                          "label": {
+                            "text": "labels.operator"
+                          },
+                          "path": "operator"
+                        },
+                        {
+                          "type": "value",
+                          "typeOfValue": "array",
+                          "inTableColumn": true,
+                          "label": {
+                            "text": "labels.values"
+                          },
+                          "path": "values"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "value",
+                      "typeOfValue": "key-operator-values-array",
+                      "inTableColumn": true,
+                      "label": {
+                        "text": "labels.match_fields"
+                      },
+                      "path": "preference/matchFields",
+                      "tableContents": [
+                        {
+                          "type": "value",
+                          "typeOfValue": "string",
+                          "inTableColumn": true,
+                          "label": {
+                            "text": "labels.key"
+                          },
+                          "path": "key"
+                        },
+                        {
+                          "type": "value",
+                          "typeOfValue": "string",
+                          "inTableColumn": true,
+                          "label": {
+                            "text": "labels.operator"
+                          },
+                          "path": "operator"
+                        },
+                        {
+                          "type": "value",
+                          "typeOfValue": "array",
+                          "inTableColumn": true,
+                          "label": {
+                            "text": "labels.values"
+                          },
+                          "path": "values"
+                        }
+                      ]
+                    }
+                  ],
+                  "element": {
+                    "elements": [
+                      {
+                        "type": "single-step-form",
+                        "schema": {
+                          "$ref": "schema#/properties/spec/properties/affinity/properties/nodeAffinity/properties/preferredDuringSchedulingIgnoredDuringExecution/items/properties/preference"
+                        },
+                        "elements": [
+                          {
+                            "type": "reusable-element",
+                            "alias": "reusable_preferred_match_expressions",
+                            "schema": {
+                              "$ref": "schema#/properties/spec/properties/affinity/properties/nodeAffinity/properties/preferredDuringSchedulingIgnoredDuringExecution/items/properties/preference/properties/matchExpressions"
+                            },
+                            "moduleResolver": "fetchJsons|match-expressions"
+                          },
+                          {
+                            "type": "reusable-element",
+                            "alias": "reusable_preferred_match_fields",
+                            "schema": {
+                              "$ref": "schema#/properties/spec/properties/affinity/properties/nodeAffinity/properties/preferredDuringSchedulingIgnoredDuringExecution/items/properties/preference/properties/matchFields"
+                            },
+                            "moduleResolver": "fetchJsons|match-fields"
+                          }
+                        ]
+                      },
+                      {
+                        "label": {
+                          "text": "labels.weight"
+                        },
+                        "type": "input",
+                        "schema": {
+                          "$ref": "schema#/properties/spec/properties/affinity/properties/nodeAffinity/properties/preferredDuringSchedulingIgnoredDuringExecution/items/properties/weight"
+                        }
+                      }
+                    ],
+                    "type": "single-step-form"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "label": {
+            "text": "labels.image_pull_secrets"
+          },
+          "type": "multiselect",
+          "fetch": "getImagePullSecrets",
+          "schema": {
+            "$ref": "schema#/properties/spec/properties/imagePullSecrets"
+          }
+        },
+        {
+          "label": {
+            "text": "labels.service_account_name"
+          },
+          "type": "input",
+          "schema": {
+            "$ref": "schema#/properties/spec/properties/serviceAccountName"
+          }
+        }
+      ]
+    }
+  ]
+}
