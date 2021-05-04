@@ -1,0 +1,108 @@
+{
+  "type": "single-step-form-array",
+  "label": {
+    "text": "labels.environmentVariablesFrom"
+  },
+  "addFormLabel": "labels.environmentVariablesFrom",
+  "schema": {
+    "$ref": "schema#/"
+  },
+  "tableContents": [
+    {
+      "type": "value",
+      "typeOfValue": "string",
+      "inTableColumn": true,
+      "label": {
+        "text": "Ref Type"
+      },
+      "path": "refType",
+      "computed": "showRefType"
+    },
+    {
+      "type": "value",
+      "typeOfValue": "string",
+      "inTableColumn": true,
+      "label": {
+        "text": "Ref Name"
+      },
+      "path": "refName",
+      "computed": "showRefName"
+    }
+  ],
+  "element": {
+    "type": "single-step-form",
+    "discriminator": {
+      "refType": {
+        "type": "string",
+        "default": "secret"
+      }
+    },
+    "elements": [
+      {
+        "label": {
+          "text": "Value From"
+        },
+        "schema": {
+          "$ref": "discriminator#/refType"
+        },
+        "type": "radio",
+        "computed": "initializeRefType",
+        "onChange": "onRefTypeChange",
+        "options": [
+          {
+            "text": "Secret",
+            "value": "secret"
+          },
+          {
+            "text": "ConfigMap",
+            "value": "configMap"
+          }
+        ]
+      },
+      {
+        "type": "single-step-form",
+        "if": "showRefSelect|configMap",
+        "label": {
+          "text": "envFrom configMap"
+        },
+        "schema": {
+          "$ref": "schema#/items/properties/configMapRef"
+        },
+        "elements": [
+          {
+            "label": {
+              "text": "Select ConfigMap"
+            },
+            "type": "select",
+            "fetch": "resourceNames|core|v1|configmaps",
+            "schema": {
+              "$ref": "schema#/items/properties/configMapRef/properties/name"
+            }
+          }
+        ]
+      },
+      {
+        "type": "single-step-form",
+        "if": "showRefSelect|secret",
+        "label": {
+          "text": "envFrom secret"
+        },
+        "schema": {
+          "$ref": "schema#/items/properties/secretRef"
+        },
+        "elements": [
+          {
+            "label": {
+              "text": "Select Secret"
+            },
+            "type": "select",
+            "fetch": "resourceNames|core|v1|secrets",
+            "schema": {
+              "$ref": "schema#/items/properties/secretRef/properties/name"
+            }
+          }
+        ]
+      }
+    ]
+  }
+}

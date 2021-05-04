@@ -1,0 +1,81 @@
+{
+  "type": "single-step-form-array",
+  "label": {
+    "text": "labels.match_expressions"
+  },
+  "addFormLabel": "labels.match_expression",
+  "schema": {
+    "$ref": "schema#/"
+  },
+  "tableContents": [
+    {
+      "type": "value",
+      "typeOfValue": "string",
+      "inTableColumn": true,
+      "label": {
+        "text": "labels.key"
+      },
+      "path": "key"
+    },
+    {
+      "type": "value",
+      "typeOfValue": "string",
+      "inTableColumn": true,
+      "label": {
+        "text": "labels.operator"
+      },
+      "path": "operator"
+    },
+    {
+      "type": "value",
+      "typeOfValue": "array",
+      "inTableColumn": true,
+      "label": {
+        "text": "labels.values"
+      },
+      "path": "values"
+    }
+  ],
+  "element": {
+    "elements": [
+      {
+        "label": {
+          "text": "labels.key"
+        },
+        "type": "input",
+        "schema": {
+          "$ref": "schema#/items/properties/key"
+        }
+      },
+      {
+        "label": {
+          "text": "labels.operator"
+        },
+        "type": "select",
+        "fetch": "getOperatorsList",
+        "schema": {
+          "$ref": "schema#/items/properties/operator"
+        }
+      },
+      {
+        "schema": {
+          "$ref": "schema#/items/properties/values"
+        },
+        "type": "list-input-form",
+        "element": {
+          "label": {
+            "text": "labels.value"
+          },
+          "schema": {
+            "$ref": "schema#/items/properties/values/items"
+          },
+          "type": "input"
+        },
+        "label": {
+          "text": "labels.values"
+        }
+      }
+    ],
+    "type": "single-step-form"
+  }
+}
