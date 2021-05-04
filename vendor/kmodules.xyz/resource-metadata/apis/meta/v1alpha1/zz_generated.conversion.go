@@ -978,7 +978,7 @@ func autoConvert_v1alpha1_ResourceColumnDefinition_To_meta_ResourceColumnDefinit
 	out.Format = in.Format
 	out.Description = in.Description
 	out.Priority = in.Priority
-	out.JSONPath = in.JSONPath
+	out.PathTemplate = in.PathTemplate
 	return nil
 }
 
@@ -993,7 +993,7 @@ func autoConvert_meta_ResourceColumnDefinition_To_v1alpha1_ResourceColumnDefinit
 	out.Format = in.Format
 	out.Description = in.Description
 	out.Priority = in.Priority
-	out.JSONPath = in.JSONPath
+	out.PathTemplate = in.PathTemplate
 	return nil
 }
 
@@ -1140,8 +1140,7 @@ func autoConvert_v1alpha1_ResourceDescriptorSpec_To_meta_ResourceDescriptorSpec(
 	if in.Validation != nil {
 		in, out := &in.Validation, &out.Validation
 		*out = new(apiextensions.CustomResourceValidation)
-		// TODO: Inefficient conversion - can we improve it?
-		if err := s.Convert(*in, *out, 0); err != nil {
+		if err := apiextensionsv1.Convert_v1_CustomResourceValidation_To_apiextensions_CustomResourceValidation(*in, *out, s); err != nil {
 			return err
 		}
 	} else {
@@ -1173,8 +1172,7 @@ func autoConvert_meta_ResourceDescriptorSpec_To_v1alpha1_ResourceDescriptorSpec(
 	if in.Validation != nil {
 		in, out := &in.Validation, &out.Validation
 		*out = new(apiextensionsv1.CustomResourceValidation)
-		// TODO: Inefficient conversion - can we improve it?
-		if err := s.Convert(*in, *out, 0); err != nil {
+		if err := apiextensionsv1.Convert_apiextensions_CustomResourceValidation_To_v1_CustomResourceValidation(*in, *out, s); err != nil {
 			return err
 		}
 	} else {
@@ -1421,6 +1419,7 @@ func Convert_meta_TableRow_To_v1alpha1_TableRow(in *meta.TableRow, out *TableRow
 func autoConvert_v1alpha1_UIParameters_To_meta_UIParameters(in *UIParameters, out *meta.UIParameters, s conversion.Scope) error {
 	out.Options = (*meta.ChartRepoRef)(unsafe.Pointer(in.Options))
 	out.Editor = (*meta.ChartRepoRef)(unsafe.Pointer(in.Editor))
+	out.InstanceLabelPaths = *(*[]string)(unsafe.Pointer(&in.InstanceLabelPaths))
 	return nil
 }
 
@@ -1432,6 +1431,7 @@ func Convert_v1alpha1_UIParameters_To_meta_UIParameters(in *UIParameters, out *m
 func autoConvert_meta_UIParameters_To_v1alpha1_UIParameters(in *meta.UIParameters, out *UIParameters, s conversion.Scope) error {
 	out.Options = (*ChartRepoRef)(unsafe.Pointer(in.Options))
 	out.Editor = (*ChartRepoRef)(unsafe.Pointer(in.Editor))
+	out.InstanceLabelPaths = *(*[]string)(unsafe.Pointer(&in.InstanceLabelPaths))
 	return nil
 }
 
