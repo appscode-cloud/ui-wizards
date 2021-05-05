@@ -14,7 +14,7 @@ const volumeSourceMap = {
   persistentVolumeClaim: { claimName: "", mountPath: "", subPath: "" },
 };
 
-export async function resourceNames(
+async function resourceNames(
   { axios, watchDependency, storeGet, reusableElementCtx },
   group,
   version,
@@ -47,7 +47,7 @@ export async function resourceNames(
   });
 }
 
-export async function getNamespacedResourceList(
+async function getNamespacedResourceList(
   axios,
   storeGet,
   { namespace, group, version, resource }
@@ -74,13 +74,13 @@ export async function getNamespacedResourceList(
   return ans;
 }
 
-export function valueExists(value, getValue, path) {
+function valueExists(value, getValue, path) {
   const val = getValue(value, path);
   if (val) return true;
   else return false;
 }
 
-export function initBackendType({ model, getValue }) {
+function initBackendType({ model, getValue }) {
   const backend = getValue(model, "/");
   const selectedBackend = Object.keys(repoBackendMap).find((key) => {
     const value = backend && backend[key];
@@ -90,7 +90,7 @@ export function initBackendType({ model, getValue }) {
   return selectedBackend || "gcs";
 }
 
-export function onBackendTypeChange({
+function onBackendTypeChange({
   commit,
   getValue,
   discriminator,
@@ -115,7 +115,7 @@ export function onBackendTypeChange({
   }
 }
 
-export function showBackendForm(
+function showBackendForm(
   { getValue, discriminator, watchDependency },
   value
 ) {
@@ -124,7 +124,7 @@ export function showBackendForm(
   return backendType === value;
 }
 
-export function showVolumeSourceForm(
+function showVolumeSourceForm(
   { getValue, discriminator, watchDependency },
   value
 ) {
@@ -133,7 +133,7 @@ export function showVolumeSourceForm(
   return volumeSource === value;
 }
 
-export function initVolumeSource({ getValue, model }) {
+function initVolumeSource({ getValue, model }) {
   const selectedVolumeSource = Object.keys(volumeSourceMap).find((key) => {
     const value = getValue(model, `/local/${key}`);
 
@@ -142,7 +142,7 @@ export function initVolumeSource({ getValue, model }) {
   return selectedVolumeSource || "hostPath";
 }
 
-export function onVolumeSourceChange({
+function onVolumeSourceChange({
   commit,
   getValue,
   discriminator,
@@ -175,3 +175,16 @@ export function onVolumeSourceChange({
 //   initVolumeSource,
 //   onVolumeSourceChange,
 // };
+
+
+return {
+	resourceNames,
+	getNamespacedResourceList,
+	valueExists,
+	initBackendType,
+	onBackendTypeChange,
+	showBackendForm,
+	showVolumeSourceForm,
+	initVolumeSource,
+	onVolumeSourceChange
+}

@@ -1,4 +1,4 @@
-export async function resourceNames(
+async function resourceNames(
   { axios, getValue, watchDependency, storeGet, reusableElementCtx },
   group,
   version,
@@ -30,7 +30,7 @@ export async function resourceNames(
   });
 }
 
-export async function getNamespacedResourceList(
+async function getNamespacedResourceList(
   axios,
   storeGet,
   { namespace, group, version, resource }
@@ -57,7 +57,7 @@ export async function getNamespacedResourceList(
   return ans;
 }
 
-export function getValueFrom({ itemCtx }) {
+function getValueFrom({ itemCtx }) {
   if (itemCtx.valueFrom && itemCtx.valueFrom.configMapKeyRef) {
     return "ConfigMap";
   } else if (itemCtx.valueFrom && itemCtx.valueFrom.secretKeyRef) {
@@ -67,7 +67,7 @@ export function getValueFrom({ itemCtx }) {
   }
 }
 
-export function getRefName({ itemCtx }) {
+function getRefName({ itemCtx }) {
   if (itemCtx.valueFrom && itemCtx.valueFrom.configMapKeyRef) {
     return itemCtx.valueFrom.configMapKeyRef.name;
   } else if (itemCtx.valueFrom && itemCtx.valueFrom.secretKeyRef) {
@@ -77,7 +77,7 @@ export function getRefName({ itemCtx }) {
   }
 }
 
-export function getKeyOrValue({ itemCtx }) {
+function getKeyOrValue({ itemCtx }) {
   if (itemCtx.valueFrom && itemCtx.valueFrom.configMapKeyRef) {
     return itemCtx.valueFrom.configMapKeyRef.key;
   } else if (itemCtx.valueFrom && itemCtx.valueFrom.secretKeyRef) {
@@ -87,7 +87,7 @@ export function getKeyOrValue({ itemCtx }) {
   }
 }
 
-export function setValueFrom({ rootModel }) {
+function setValueFrom({ rootModel }) {
   if (isConfigMapTypeValueFrom({ rootModel })) {
     return "configMap";
   } else if (isSecretTypeValueFrom({ rootModel })) {
@@ -97,7 +97,7 @@ export function setValueFrom({ rootModel }) {
   }
 }
 
-export function isEqualToValueFromType(
+function isEqualToValueFromType(
   { discriminator, getValue, watchDependency },
   value
 ) {
@@ -106,24 +106,24 @@ export function isEqualToValueFromType(
   return valueFrom === value;
 }
 
-export function isConfigMapTypeValueFrom({ rootModel }) {
+function isConfigMapTypeValueFrom({ rootModel }) {
   const valueFrom = rootModel.valueFrom;
   return !!(valueFrom && valueFrom.configMapKeyRef);
 }
 
-export function isSecretTypeValueFrom({ rootModel }) {
+function isSecretTypeValueFrom({ rootModel }) {
   const valueFrom = rootModel.valueFrom;
   return !!(valueFrom && valueFrom.secretKeyRef);
 }
 
-export function isInputTypeValueFrom({ rootModel }) {
+function isInputTypeValueFrom({ rootModel }) {
   return (
     !isConfigMapTypeValueFrom({ rootModel }) &&
     !isSecretTypeValueFrom({ rootModel })
   );
 }
 
-export function onValueFromChange({
+function onValueFromChange({
   rootModel,
   discriminator,
   getValue,
@@ -148,40 +148,7 @@ export function onValueFromChange({
   }
 }
 
-export async function showConfigMapSelectField({
-  storeGet,
-  getValue,
-  watchDependency,
-  axios,
-  reusableElementCtx,
-}) {
-  const resp = await resourceNames(
-    { axios, getValue, watchDependency, storeGet, reusableElementCtx },
-    "core",
-    "v1",
-    "configmaps"
-  );
-  return !!(resp && resp.length);
-}
-
-export async function showConfigMapInputField({
-  storeGet,
-  getValue,
-  watchDependency,
-  axios,
-  reusableElementCtx,
-}) {
-  const resp = await showConfigMapSelectField({
-    storeGet,
-    getValue,
-    watchDependency,
-    axios,
-    reusableElementCtx,
-  });
-  return !resp;
-}
-
-export async function getSecrets({
+async function getSecrets({
   storeGet,
   axios,
   getValue,
@@ -224,75 +191,7 @@ export async function getSecrets({
   }
 }
 
-export async function hasExistingSecret({
-  storeGet,
-  axios,
-  getValue,
-  watchDependency,
-  reusableElementCtx,
-}) {
-  const resp = await getSecrets({
-    storeGet,
-    axios,
-    getValue,
-    watchDependency,
-    reusableElementCtx,
-  });
-  return !!(resp && resp.length);
-}
-
-export async function hasNoExistingSecret({
-  storeGet,
-  axios,
-  getValue,
-  watchDependency,
-  reusableElementCtx,
-}) {
-  const resp = await hasExistingSecret({
-    storeGet,
-    axios,
-    getValue,
-    watchDependency,
-    reusableElementCtx,
-  });
-  return !resp;
-}
-
-export async function showSecretSelectField({
-  storeGet,
-  axios,
-  getValue,
-  watchDependency,
-  reusableElementCtx,
-}) {
-  const resp = await getSecrets({
-    storeGet,
-    axios,
-    getValue,
-    watchDependency,
-    reusableElementCtx,
-  });
-  return !!(resp && resp.length);
-}
-
-export async function showSecretInputField({
-  storeGet,
-  axios,
-  getValue,
-  watchDependency,
-  reusableElementCtx,
-}) {
-  const resp = await showSecretSelectField({
-    storeGet,
-    axios,
-    getValue,
-    watchDependency,
-    reusableElementCtx,
-  });
-  return !resp;
-}
-
-export async function getSecretKeys({
+async function getSecretKeys({
   storeGet,
   axios,
   getValue,
@@ -333,45 +232,7 @@ export async function getSecretKeys({
   }
 }
 
-export async function hasSecretKeys({
-  storeGet,
-  axios,
-  getValue,
-  watchDependency,
-  rootModel,
-  reusableElementCtx,
-}) {
-  const resp = await getSecretKeys({
-    storeGet,
-    axios,
-    getValue,
-    watchDependency,
-    rootModel,
-    reusableElementCtx,
-  });
-  return !!(resp && resp.length);
-}
-
-export async function hasNoSecretKeys({
-  storeGet,
-  axios,
-  getValue,
-  watchDependency,
-  rootModel,
-  reusableElementCtx,
-}) {
-  const resp = await hasSecretKeys({
-    storeGet,
-    axios,
-    getValue,
-    watchDependency,
-    rootModel,
-    reusableElementCtx,
-  });
-  return !resp;
-}
-
-export async function getConfigMapKeys({
+async function getConfigMapKeys({
   storeGet,
   axios,
   getValue,
@@ -412,40 +273,20 @@ export async function getConfigMapKeys({
   }
 }
 
-export async function hasConfigMapKeys({
-  storeGet,
-  axios,
-  getValue,
-  watchDependency,
-  rootModel,
-  reusableElementCtx,
-}) {
-  const resp = await getConfigMapKeys({
-    storeGet,
-    axios,
-    getValue,
-    watchDependency,
-    rootModel,
-    reusableElementCtx,
-  });
-  return !!(resp && resp.length);
-}
 
-export async function hasNoConfigMapKeys({
-  storeGet,
-  axios,
-  getValue,
-  watchDependency,
-  rootModel,
-  reusableElementCtx,
-}) {
-  const resp = await hasConfigMapKeys({
-    storeGet,
-    axios,
-    getValue,
-    watchDependency,
-    rootModel,
-    reusableElementCtx,
-  });
-  return !resp;
+return {
+	resourceNames,
+	getNamespacedResourceList,
+	getValueFrom,
+	getRefName,
+	getKeyOrValue,
+	setValueFrom,
+	isEqualToValueFromType,
+	isConfigMapTypeValueFrom,
+	isSecretTypeValueFrom,
+	isInputTypeValueFrom,
+	onValueFromChange,
+	getSecrets,
+	getSecretKeys,
+	getConfigMapKeys
 }
