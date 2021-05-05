@@ -164,22 +164,14 @@ steps:
           schema:
             $ref: discriminator#/createAuthSecret
           type: radio
-        - elements:
-            - fetch: getSecrets
-              if: hasExistingSecret
-              label:
-                text: labels.secret
-              schema:
-                $ref: schema#/properties/spec/properties/authSecret/properties/name
-              type: select
-            - if: hasNoExistingSecret
-              label:
-                text: labels.secret
-              schema:
-                $ref: schema#/properties/spec/properties/authSecret/properties/name
-              type: input
+        - allowUserDefinedOption: true
+          fetch: getSecrets
           if: showAuthSecretField
-          type: single-step-form
+          label:
+            text: labels.secret
+          schema:
+            $ref: schema#/properties/spec/properties/authSecret/properties/name
+          type: select
         - if: showAuthPasswordField
           label:
             text: labels.password

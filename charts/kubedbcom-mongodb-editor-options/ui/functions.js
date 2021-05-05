@@ -394,40 +394,6 @@ async function getSecrets({
   return filteredSecrets;
 }
 
-async function hasExistingSecret({
-  storeGet,
-  axios,
-  model,
-  getValue,
-  watchDependency,
-}) {
-  const resp = await getSecrets({
-    storeGet,
-    axios,
-    model,
-    getValue,
-    watchDependency,
-  });
-  return !!(resp && resp.length);
-}
-
-async function hasNoExistingSecret({
-  storeGet,
-  axios,
-  model,
-  getValue,
-  watchDependency,
-}) {
-  const resp = await hasExistingSecret({
-    storeGet,
-    axios,
-    model,
-    getValue,
-    watchDependency,
-  });
-  return !resp;
-}
-
 function disableLimit({ model, getValue, watchDependency }) {
   const modelPathValue = getValue(model, "/spec/machine");
   watchDependency("model#/spec/machine");
@@ -490,8 +456,6 @@ return {
 	getStorageClassNames,
 	getMongoDbVersions,
 	getSecrets,
-	hasExistingSecret,
-	hasNoExistingSecret,
 	disableLimit,
 	getMachineListForOptions,
 	setResourceLimit,
