@@ -1,27 +1,31 @@
-export async function fetchJsons({}, url) {
+async function fetchJsons({ axios, itemCtx }) {
   let ui = {};
   let language = {};
   let functions = {};
+  const { name, url, version } = itemCtx.chart;
+  const urlPrefix = "/chart/packageview/files/ui";
   try {
-    ui = await import("@/jsons/mongodbs/reusable-elements/" + url + "/ui.json");
-    language = await import(
-      "@/jsons/mongodbs/reusable-elements/" + url + "/language.json"
+    ui = await axios.get(
+      `${urlPrefix}/create-ui.yaml?name=${name}&url=${url}&version=${version}&format=json`
     );
-    functions = await import(
-      "@/jsons/mongodbs/reusable-elements/" + url + "/functions.js"
+    language = await axios.get(
+      `${urlPrefix}/language.yaml?name=${name}&url=${url}&version=${version}&format=json`
+    );
+    functions = await axios.get(
+      `${urlPrefix}/functions.js?name=${name}&url=${url}&version=${version}`
     );
   } catch (e) {
     console.log(e);
   }
 
   return {
-    ui: ui.default || {},
-    language: language.default || {},
+    ui: ui.data || {},
+    language: language.data || {},
     functions,
   };
 }
 
-export async function getImagePullSecrets({
+async function getImagePullSecrets({
   getValue,
   model,
   watchDependency,
@@ -52,7 +56,7 @@ export async function getImagePullSecrets({
   });
 }
 
-export async function resourceNames(
+async function resourceNames(
   { axios, watchDependency, storeGet, reusableElementCtx },
   group,
   version,
@@ -85,7 +89,7 @@ export async function resourceNames(
   });
 }
 
-export async function getNamespacedResourceList(
+async function getNamespacedResourceList(
   axios,
   storeGet,
   { namespace, group, version, resource }
@@ -115,3 +119,11 @@ export async function getNamespacedResourceList(
 // return {
 //   fetchJsons,
 // };
+
+
+return {
+	fetchJsons,
+	getImagePullSecrets,
+	resourceNames,
+	getNamespacedResourceList
+}
