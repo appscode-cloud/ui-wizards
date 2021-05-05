@@ -1,4 +1,4 @@
-export async function resourceNames(
+async function resourceNames(
   { axios, getValue, watchDependency, storeGet, reusableElementCtx },
   group,
   version,
@@ -30,7 +30,7 @@ export async function resourceNames(
   });
 }
 
-export async function getNamespacedResourceList(
+async function getNamespacedResourceList(
   axios,
   storeGet,
   { namespace, group, version, resource }
@@ -57,19 +57,19 @@ export async function getNamespacedResourceList(
   return ans;
 }
 
-export function valueExists(value, getValue, path) {
+function valueExists(value, getValue, path) {
   const val = getValue(value, path);
   if (val) return true;
   else return false;
 }
 
-export function showRefType({ itemCtx }) {
+function showRefType({ itemCtx }) {
   if (itemCtx.configMapRef) return "ConfigMap";
   else if (itemCtx.secretRef) return "Secret";
   else return "-";
 }
 
-export function showRefName({ itemCtx }) {
+function showRefName({ itemCtx }) {
   if (itemCtx.configMapRef) {
     return itemCtx.configMapRef.name;
   } else if (itemCtx.secretRef) {
@@ -79,12 +79,12 @@ export function showRefName({ itemCtx }) {
   }
 }
 
-export function initializeRefType({ rootModel }) {
+function initializeRefType({ rootModel }) {
   if (rootModel.configMapRef) return "configMap";
   else return "secret";
 }
 
-export function onRefTypeChange({
+function onRefTypeChange({
   rootModel,
   getValue,
   discriminator,
@@ -108,7 +108,7 @@ export function onRefTypeChange({
   }
 }
 
-export function showRefSelect(
+function showRefSelect(
   { discriminator, getValue, watchDependency },
   value
 ) {
@@ -126,3 +126,15 @@ export function showRefSelect(
 //   onRefTypeChange,
 //   showRefSelect,
 // };
+
+
+return {
+	resourceNames,
+	getNamespacedResourceList,
+	valueExists,
+	showRefType,
+	showRefName,
+	initializeRefType,
+	onRefTypeChange,
+	showRefSelect
+}
