@@ -13,9 +13,12 @@ async function fetchJsons({ axios, itemCtx }) {
     language = await axios.get(
       `${urlPrefix}/language.yaml?name=${name}&url=${url}&version=${version}&format=json`
     );
-    functions = await axios.get(
+    const functionString = await axios.get(
       `${urlPrefix}/functions.js?name=${name}&url=${url}&version=${version}`
     );
+    // declare evaluate the functionString to get the functions Object
+    const evalFunc = new Function(functionString.data || "");
+    functions = evalFunc();
   } catch (e) {
     console.log(e);
   }
