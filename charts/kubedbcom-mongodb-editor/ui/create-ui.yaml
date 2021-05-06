@@ -327,184 +327,14 @@ steps:
               schema:
                 $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/issuerRef
               type: single-step-form
-            - addFormLabel: labels.certificate
-              element:
-                elements:
-                  - label:
-                      text: labels.alias
-                    schema:
-                      $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/certificates/items/properties/alias
-                    type: input
-                  - label:
-                      text: labels.secret_name
-                    schema:
-                      $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/certificates/items/properties/secretName
-                    type: input
-                  - label:
-                      text: labels.duration
-                    schema:
-                      $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/certificates/items/properties/duration
-                    type: input
-                  - label:
-                      text: labels.renew_before
-                    schema:
-                      $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/certificates/items/properties/renewBefore
-                    type: input
-                  - customClass: mb-15
-                    label:
-                      hasLine: true
-                      text: labels.subject
-                    type: label-element
-                  - elements:
-                      - element:
-                          label:
-                            text: labels.organization
-                          schema:
-                            $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/certificates/items/properties/subject/properties/organizations/items
-                          type: input
-                        label:
-                          isSubsection: true
-                          text: labels.organizations
-                        schema:
-                          $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/certificates/items/properties/subject/properties/organizations
-                        type: list-input-form
-                      - element:
-                          label:
-                            text: labels.country
-                          schema:
-                            $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/certificates/items/properties/subject/properties/countries/items
-                          type: input
-                        label:
-                          isSubsection: true
-                          text: labels.countries
-                        schema:
-                          $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/certificates/items/properties/subject/properties/countries
-                        type: list-input-form
-                      - element:
-                          label:
-                            text: labels.organizational_unit
-                          schema:
-                            $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/certificates/items/properties/subject/properties/organizationalUnits/items
-                          type: input
-                        label:
-                          isSubsection: true
-                          text: labels.organizational_units
-                        schema:
-                          $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/certificates/items/properties/subject/properties/organizationalUnits
-                        type: list-input-form
-                      - element:
-                          label:
-                            text: labels.province
-                          schema:
-                            $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/certificates/items/properties/subject/properties/provinces/items
-                          type: input
-                        label:
-                          isSubsection: true
-                          text: labels.provinces
-                        schema:
-                          $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/certificates/items/properties/subject/properties/provinces
-                        type: list-input-form
-                    schema:
-                      $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/certificates/items/properties/subject
-                    type: single-step-form
-                  - element:
-                      label:
-                        text: labels.dns_name
-                      schema:
-                        $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/certificates/items/properties/dnsNames/items
-                      type: input
-                    hasLineLabel: true
-                    label:
-                      hasLine: true
-                      text: labels.dns_names
-                    schema:
-                      $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/certificates/items/properties/dnsNames
-                    type: list-input-form
-                  - element:
-                      label:
-                        text: labels.ip_address
-                      schema:
-                        $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/certificates/items/properties/ipAddresses/items
-                      type: input
-                    label:
-                      hasLine: true
-                      text: labels.ip_addresses
-                    schema:
-                      $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/certificates/items/properties/ipAddresses
-                    type: list-input-form
-                label:
-                  text: labels.certificate
-                type: single-step-form
-              label:
-                text: labels.certificates
+            - alias: reusable_certificates
+              chart:
+                name: uibytebuildersdev-component-certificates
+                version: v0.1.0
+              moduleResolver: fetchJsons
               schema:
                 $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/certificates
-              tableContents:
-                - inTableColumn: true
-                  label:
-                    text: labels.alias
-                  path: alias
-                  type: value
-                  typeOfValue: string
-                - inTableColumn: true
-                  label:
-                    text: labels.secret_name
-                  path: secretName
-                  type: value
-                  typeOfValue: string
-                - inTableColumn: true
-                  label:
-                    text: labels.duration
-                  path: duration
-                  type: value
-                  typeOfValue: string
-                - inTableColumn: true
-                  label:
-                    text: labels.renew_before
-                  path: renewBefore
-                  type: value
-                  typeOfValue: string
-                - label:
-                    hasLine: true
-                    text: labels.subject
-                  type: label
-                - label:
-                    isSubsection: true
-                    text: labels.organizations
-                  path: subject/organizations
-                  type: value
-                  typeOfValue: array
-                - label:
-                    isSubsection: true
-                    text: labels.countries
-                  path: subject/countries
-                  type: value
-                  typeOfValue: array
-                - label:
-                    isSubsection: true
-                    text: labels.organizational_units
-                  path: subject/organizationalUnits
-                  type: value
-                  typeOfValue: array
-                - label:
-                    isSubsection: true
-                    text: labels.provinces
-                  path: subject/provinces
-                  type: value
-                  typeOfValue: array
-                - label:
-                    hasLine: true
-                    text: labels.dns_names
-                  path: dnsNames
-                  type: value
-                  typeOfValue: array
-                - label:
-                    hasLine: true
-                    text: labels.ip_addresses
-                  path: ipAddresses
-                  type: value
-                  typeOfValue: array
-              type: single-step-form-array
+              type: reusable-element
           if: showTlsConfigureSection
           type: single-step-form
       type: single-step-form
@@ -1094,6 +924,11 @@ steps:
                 $ref: discriminator#/customizeExporter
               type: switch
             - elements:
+                - customClass: mb-10
+                  label:
+                    hasLine: true
+                    text: labels.resources
+                  type: label-element
                 - alias: reusable_monitoring_reources
                   chart:
                     name: uibytebuildersdev-component-resources
