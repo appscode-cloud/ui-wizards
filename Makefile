@@ -21,7 +21,7 @@ BIN      := ui-wizards
 # Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
 CRD_OPTIONS          ?= "crd:trivialVersions=true,preserveUnknownFields=false,crdVersions={v1}"
 # https://github.com/appscodelabs/gengo-builder
-CODE_GENERATOR_IMAGE ?= appscode/gengo:release-1.18
+CODE_GENERATOR_IMAGE ?= appscode/gengo:release-1.21
 API_GROUPS           ?= wizards:v1alpha1
 
 # This version-strategy uses git tags to set the version string
@@ -232,16 +232,18 @@ gen-values-schema: $(BUILD_DIRS)
 gen-chart-doc: $(shell find $$(pwd)/charts -maxdepth 1 -mindepth 1 -type d -printf 'gen-chart-doc-%f ')
 
 gen-chart-doc-%:
-	@echo "Generate $* chart docs"
-	@docker run --rm 	                                 \
-		-u $$(id -u):$$(id -g)                           \
-		-v /tmp:/.cache                                  \
-		-v $$(pwd):$(DOCKER_REPO_ROOT)                   \
-		-w $(DOCKER_REPO_ROOT)                           \
-		--env HTTP_PROXY=$(HTTP_PROXY)                   \
-		--env HTTPS_PROXY=$(HTTPS_PROXY)                 \
-		$(BUILD_IMAGE)                                   \
-		chart-doc-gen -d ./charts/$*/doc.yaml -v ./charts/$*/values.yaml > ./charts/$*/README.md
+	@if test -f "./charts/$*/doc.yaml"; then \
+		echo "Generate $* chart docs";                       \
+		docker run --rm 	                                 \
+			-u $$(id -u):$$(id -g)                           \
+			-v /tmp:/.cache                                  \
+			-v $$(pwd):$(DOCKER_REPO_ROOT)                   \
+			-w $(DOCKER_REPO_ROOT)                           \
+			--env HTTP_PROXY=$(HTTP_PROXY)                   \
+			--env HTTPS_PROXY=$(HTTPS_PROXY)                 \
+			$(BUILD_IMAGE)                                   \
+			chart-doc-gen -d ./charts/$*/doc.yaml -v ./charts/$*/values.yaml > ./charts/$*/README.md ;  \
+	fi
 
 .PHONY: manifests
 manifests: gen-crds gen-values-schema

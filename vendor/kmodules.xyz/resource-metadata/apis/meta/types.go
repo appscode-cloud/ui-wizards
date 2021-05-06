@@ -97,8 +97,9 @@ type StatusCodes struct {
 }
 
 type UIParameters struct {
-	Options *ChartRepoRef
-	Editor  *ChartRepoRef
+	Options            *ChartRepoRef
+	Editor             *ChartRepoRef
+	InstanceLabelPaths []string
 }
 
 type DeploymentParameters struct {
@@ -178,8 +179,8 @@ type ResourceColumnDefinition struct {
 	// numbers are considered higher priority. Columns that may be omitted in limited space scenarios
 	// should be given a higher priority.
 	Priority int32
-	// JSONPath is a simple JSON path, i.e. without array notation.
-	JSONPath string
+	// PathTemplate is a Go text template that will be evaluated to determine cell value.
+	PathTemplate string
 }
 
 type ResourceSubTableDefinition struct {
@@ -246,7 +247,7 @@ type Path struct {
 	Source   GroupVersionResource
 	Target   GroupVersionResource
 	Distance uint64
-	Edges    []Edge
+	Edges    []*Edge
 }
 
 type Edge struct {
@@ -270,7 +271,7 @@ type GraphRequest struct {
 
 type GraphResponse struct {
 	Source      GroupVersionResource
-	Connections []Edge
+	Connections []*Edge
 }
 
 type Table struct {
