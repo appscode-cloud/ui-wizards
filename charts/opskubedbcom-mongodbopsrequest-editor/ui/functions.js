@@ -1,3 +1,33 @@
+async function fetchJsons({ axios, itemCtx }) {
+  let ui = {};
+  let language = {};
+  let functions = {};
+  const { name, url, version } = itemCtx.chart;
+  const urlPrefix = "/chart/packageview/files/ui";
+  try {
+    ui = await axios.get(
+      `${urlPrefix}/create-ui.yaml?name=${name}&url=${url}&version=${version}&format=json`
+    );
+    language = await axios.get(
+      `${urlPrefix}/language.yaml?name=${name}&url=${url}&version=${version}&format=json`
+    );
+    const functionString = await axios.get(
+      `${urlPrefix}/functions.js?name=${name}&url=${url}&version=${version}`
+    );
+    // declare evaluate the functionString to get the functions Object
+    const evalFunc = new Function(functionString.data || "");
+    functions = evalFunc();
+  } catch (e) {
+    console.log(e);
+  }
+
+  return {
+    ui: ui.data || {},
+    language: language.data || {},
+    functions,
+  };
+}
+
 function returnFalse() {
   return false;
 }
@@ -142,7 +172,13 @@ function onRequestTypeChange({ model, getValue, commit }) {
   });
 }
 
-async function getDbTls({ axios, storeGet, model, getValue, watchDependency }) {
+async function getDbTls({
+  axios,
+  storeGet,
+  model,
+  getValue,
+  watchDependency,
+}) {
   const mongoDbDetails = await getMongoDetails({
     axios,
     storeGet,
@@ -337,7 +373,11 @@ async function getNamespacedResourceList(
 
   return ans;
 }
-async function getResourceList(axios, storeGet, { group, version, resource }) {
+async function getResourceList(
+  axios,
+  storeGet,
+  { group, version, resource }
+) {
   const owner = storeGet("/user/username");
   const cluster = storeGet("/clusterInfo/name");
 
@@ -1035,14 +1075,9 @@ async function isIssuerRefRequired({
   return !hasTls;
 }
 
-// return {
-//   getNamespaces,
-//   getMongoDbs,
-//   getMongoDbVersions,
-// };
-
 
 return {
+	fetchJsons,
 	returnFalse,
 	getNamespaces,
 	getMongoDbs,
@@ -1055,6 +1090,7 @@ return {
 	disableOpsRequest,
 	initNamespace,
 	initDatabaseRef,
+	clearOpsReqSpec,
 	ifDbTypeEqualsTo,
 	getConfigSecrets,
 	showPodTemplate,
@@ -1079,6 +1115,8 @@ return {
 	getImagePullSecrets,
 	getValueFrom,
 	getRefName,
+	isConfigMapTypeValueFrom,
+	isSecretTypeValueFrom,
 	getKeyOrValue,
 	setValueFrom,
 	onValueFromChange,
