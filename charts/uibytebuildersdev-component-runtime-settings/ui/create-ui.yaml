@@ -76,52 +76,19 @@ elements:
           hasLine: true
           text: labels.runtimeSettings.container.title
         type: label-element
-      - elements:
-          - label:
-              hasLine: true
-              text: labels.runtimeSettings.container.resources.title
-            type: label-element
-          - elements:
-              - label:
-                  isSubsection: true
-                  text: labels.runtimeSettings.container.resources.requests
-                type: label-element
-              - label:
-                  text: labels.runtimeSettings.container.resources.cpu
-                schema:
-                  $ref: schema#/properties/container/properties/resources/properties/requests/properties/cpu
-                type: input
-              - label:
-                  text: labels.runtimeSettings.container.resources.memory
-                schema:
-                  $ref: schema#/properties/container/properties/resources/properties/requests/properties/memory
-                type: input
-            schema:
-              $ref: schema#/properties/container/properties/resources/properties/requests
-            type: single-step-form
-          - elements:
-              - label:
-                  isSubsection: true
-                  text: labels.runtimeSettings.container.resources.limits
-                type: label-element
-              - label:
-                  text: labels.runtimeSettings.container.resources.cpu
-                schema:
-                  $ref: schema#/properties/container/properties/resources/properties/limits/properties/cpu
-                type: input
-              - label:
-                  text: labels.runtimeSettings.container.resources.memory
-                schema:
-                  $ref: schema#/properties/container/properties/resources/properties/limits/properties/memory
-                type: input
-            schema:
-              $ref: schema#/properties/container/properties/resources/properties/limits
-            type: single-step-form
+      - customClass: mb-10
         label:
-          text: Resources
+          hasLine: true
+          text: labels.resources
+        type: label-element
+      - alias: reusable_runtime_settings_reources
+        chart:
+          name: uibytebuildersdev-component-resources
+          version: v0.1.0
+        moduleResolver: fetchJsons
         schema:
-          $ref: schema#/properties/container/properties/resources
-        type: single-step-form
+          $ref: schema##/properties/container/properties/resources
+        type: reusable-element
       - elements:
           - label:
               hasLine: true
