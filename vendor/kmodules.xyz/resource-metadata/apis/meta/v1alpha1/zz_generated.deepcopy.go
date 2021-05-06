@@ -182,9 +182,13 @@ func (in *GraphResponse) DeepCopyInto(out *GraphResponse) {
 	out.Source = in.Source
 	if in.Connections != nil {
 		in, out := &in.Connections, &out.Connections
-		*out = make([]Edge, len(*in))
+		*out = make([]*Edge, len(*in))
 		for i := range *in {
-			(*in)[i].DeepCopyInto(&(*out)[i])
+			if (*in)[i] != nil {
+				in, out := &(*in)[i], &(*out)[i]
+				*out = new(Edge)
+				(*in).DeepCopyInto(*out)
+			}
 		}
 	}
 	return
@@ -331,9 +335,13 @@ func (in *Path) DeepCopyInto(out *Path) {
 	out.Target = in.Target
 	if in.Edges != nil {
 		in, out := &in.Edges, &out.Edges
-		*out = make([]Edge, len(*in))
+		*out = make([]*Edge, len(*in))
 		for i := range *in {
-			(*in)[i].DeepCopyInto(&(*out)[i])
+			if (*in)[i] != nil {
+				in, out := &(*in)[i], &(*out)[i]
+				*out = new(Edge)
+				(*in).DeepCopyInto(*out)
+			}
 		}
 	}
 	return
@@ -1039,6 +1047,11 @@ func (in *UIParameters) DeepCopyInto(out *UIParameters) {
 		in, out := &in.Editor, &out.Editor
 		*out = new(ChartRepoRef)
 		**out = **in
+	}
+	if in.InstanceLabelPaths != nil {
+		in, out := &in.InstanceLabelPaths, &out.InstanceLabelPaths
+		*out = make([]string, len(*in))
+		copy(*out, *in)
 	}
 	return
 }
