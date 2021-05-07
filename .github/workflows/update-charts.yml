@@ -1,0 +1,36 @@
+name: update-charts
+
+on:
+  push:
+    branches: [ master ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Prepare Host
+        run: |
+          curl -LO https://github.com/kubepack/helm/releases/download/ac-1.21.0/helm
+          chmod +x ./helm
+          sudo mv ./helm /usr/local/bin/helm
+
+      - name: Prepare git
+        env:
+          GITHUB_USER: 1gtm
+          GITHUB_TOKEN: ${{ secrets.LGTM_GITHUB_TOKEN }}
+        run: |
+          echo $GITHUB_SERVER_URL
+          git config user.name "${GITHUB_USER}"
+          git config user.email "${GITHUB_USER}@appscode.com"
+          git remote set-url origin "https://${GITHUB_USER}:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git remote -v
+
+      - name: Update charts
+        run: |
+          ./hack/scripts/trigger.sh
