@@ -35,7 +35,7 @@ repo_uptodate() {
 echo "Update chart repo"
 ./hack/scripts/update-repo.sh
 
-if repo_uptodate ; then
+if repo_uptodate; then
     echo "Repository is up-to-date."
     exit 0
 fi
