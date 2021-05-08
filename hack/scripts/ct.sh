@@ -19,9 +19,8 @@ set -eou pipefail
 for dir in charts/*/; do
     dir=${dir%*/}
     dir=${dir##*/}
-    num_files=$(find charts/${dir}/templates -type f | wc -l)
     echo $dir
-    if [ $num_files -le 1 ]; then
+    if [ ! -d "charts/${dir}/templates" ] || [ $(find charts/${dir}/templates -type f | wc -l) -le 1 ]; then
         make ct CT_COMMAND=lint TEST_CHARTS=charts/$dir
     else
         make ct TEST_CHARTS=charts/$dir
