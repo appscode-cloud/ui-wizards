@@ -9,47 +9,6 @@ metadata:
     name: RELEASE-NAME
     namespace: default
 resources:
-  appApplication: # +doc-gen:break
-    apiVersion: app.k8s.io/v1beta1
-    kind: Application
-    metadata:
-      name: mongodb
-      namespace: demo
-    spec:
-      assemblyPhase: Ready
-      componentKinds:
-        - group: app.k8s.io
-          kind: Application
-        - group: kubedb.com
-          kind: MongoDB
-        - group: ""
-          kind: Secret
-        - group: cert-manager.io
-          kind: Issuer
-        - group: monitoring.coreos.com
-          kind: ServiceMonitor
-        - group: stash.appscode.com
-          kind: Repository
-        - group: stash.appscode.com
-          kind: BackupConfiguration
-        - group: stash.appscode.com
-          kind: RestoreSession
-      descriptor:
-        description: MongoDB Editor UI Options
-        icons:
-          - src: https://cdn.appscode.com/images/products/kubedb/kubedb-community-icon.png
-            type: image/png
-        links:
-          - description: website
-            url: https://byte.builders
-        maintainers:
-          - email: support@appscode.com
-            name: appscode
-        type: mongodbs.kubedb.com
-      selector:
-        matchLabels:
-          app.kubernetes.io/instance: mongodb
-          app.kubernetes.io/name: mongodbs.kubedb.com
   certManagerIoIssuer: # +doc-gen:break
     apiVersion: cert-manager.io/v1
     kind: Issuer
@@ -124,13 +83,13 @@ resources:
       namespace: demo
     spec:
       endpoints:
-        - honorLabels: true
-          interval: 30s
-          path: /metrics
-          port: metrics
+      - honorLabels: true
+        interval: 30s
+        path: /metrics
+        port: metrics
       namespaceSelector:
         matchNames:
-          - demo
+        - demo
       selector:
         matchLabels:
           app.kubernetes.io/instance: mongodb
@@ -244,8 +203,8 @@ resources:
       repository:
         name: mongodb-init-repo
       rules:
-        - snapshots:
-            - latest
+      - snapshots:
+        - latest
       target:
         ref:
           apiVersion: appcatalog.appscode.com/v1alpha1
