@@ -1,14 +1,12 @@
 module go.bytebuilders.dev/ui-wizards
 
-go 1.15
+go 1.16
 
 require (
 	k8s.io/api v0.21.0
 	k8s.io/apimachinery v0.21.0
-	kmodules.xyz/resource-metadata v0.5.3 // indirect
 	kmodules.xyz/schema-checker v0.1.2
-	kubepack.dev/kubepack v0.3.4-0.20210506045442-d90c54c3862a // indirect
-	kubepack.dev/lib-app v0.0.5-0.20210504072423-d909fb07009a
+	kubepack.dev/lib-app v0.0.5-0.20210519234912-5a1a1373c75f
 )
 
 replace github.com/go-macaron/binding => github.com/gomodules/binding v0.0.0-20200811095614-c752727d2156
@@ -99,7 +97,7 @@ replace google.golang.org/grpc => google.golang.org/grpc v1.27.1
 
 replace gopkg.in/yaml.v2 => gopkg.in/yaml.v2 v2.3.0
 
-replace helm.sh/helm/v3 => github.com/kubepack/helm/v3 v3.1.0-rc.1.0.20210503022716-7e2d4913a125
+replace helm.sh/helm/v3 => github.com/kubepack/helm/v3 v3.6.0-rc.1.0.20210518225915-c3e0ce48dd1b
 
 replace k8s.io/api => k8s.io/api v0.21.0
 
