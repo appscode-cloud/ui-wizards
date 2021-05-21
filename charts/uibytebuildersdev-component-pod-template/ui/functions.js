@@ -28,6 +28,10 @@ async function fetchJsons({ axios, itemCtx }) {
   };
 }
 
+function getOperatorsList() {
+  return ["In", "NotIn", "Exists", "DoesNotExist", "Gt", "Lt"];
+}
+
 async function getImagePullSecrets({
   getValue,
   watchDependency,
@@ -93,6 +97,7 @@ async function getNamespacedResourceList(
 
 return {
 	fetchJsons,
+	getOperatorsList,
 	getImagePullSecrets,
 	getNamespacedResourceList
 }

@@ -24,52 +24,66 @@ elements:
           hasLine: true
           text: labels.runtimeSettings.securityContext.title
         type: label-element
-      - label:
-          text: labels.runtimeSettings.securityContext.fsGroup
+      - elements:
+          - label:
+              text: labels.runtimeSettings.securityContext.fsGroup
+            schema:
+              $ref: schema#/properties/pod/properties/securityContext/properties/fsGroup
+            type: input
+          - label:
+              text: labels.runtimeSettings.securityContext.runAsNonRoot
+            schema:
+              $ref: schema#/properties/pod/properties/securityContext/properties/runAsNonRoot
+            type: switch
+          - label:
+              text: labels.runtimeSettings.securityContext.runAsUser
+            schema:
+              $ref: schema#/properties/pod/properties/securityContext/properties/runAsUser
+            type: input
+          - label:
+              text: labels.runtimeSettings.securityContext.runAsGroup
+            schema:
+              $ref: schema#/properties/pod/properties/securityContext/properties/runAsGroup
+            type: input
+          - label:
+              isSubsection: true
+              text: labels.runtimeSettings.securityContext.seLinuxOptions.title
+            type: label-element
+          - elements:
+              - label:
+                  text: labels.runtimeSettings.securityContext.seLinuxOptions.level
+                schema:
+                  $ref: schema#/properties/pod/properties/securityContext/properties/seLinuxOptions/properties/level
+                type: input
+              - label:
+                  text: labels.runtimeSettings.securityContext.seLinuxOptions.role
+                schema:
+                  $ref: schema#/properties/pod/properties/securityContext/properties/seLinuxOptions/properties/role
+                type: input
+              - label:
+                  text: labels.runtimeSettings.securityContext.seLinuxOptions.type
+                schema:
+                  $ref: schema#/properties/pod/properties/securityContext/properties/seLinuxOptions/properties/type
+                type: input
+              - label:
+                  text: labels.runtimeSettings.securityContext.seLinuxOptions.user
+                schema:
+                  $ref: schema#/properties/pod/properties/securityContext/properties/seLinuxOptions/properties/user
+                type: input
+            label:
+              text: Pod SE Linux options
+            schema:
+              $ref: schema#/properties/pod/properties/securityContext/properties/seLinuxOptions
+            type: single-step-form
+        label:
+          text: Pod security context
         schema:
-          $ref: schema#/properties/pod/properties/securityContext/properties/fsGroup
-        type: input
-      - label:
-          text: labels.runtimeSettings.securityContext.runAsNonRoot
-        schema:
-          $ref: schema#/properties/pod/properties/securityContext/properties/runAsNonRoot
-        type: switch
-      - label:
-          text: labels.runtimeSettings.securityContext.runAsUser
-        schema:
-          $ref: schema#/properties/pod/properties/securityContext/properties/runAsUser
-        type: input
-      - label:
-          text: labels.runtimeSettings.securityContext.runAsGroup
-        schema:
-          $ref: schema#/properties/pod/properties/securityContext/properties/runAsGroup
-        type: input
-      - label:
-          isSubsection: true
-          text: labels.runtimeSettings.securityContext.seLinuxOptions.title
-        type: label-element
-      - label:
-          text: labels.runtimeSettings.securityContext.seLinuxOptions.level
-        schema:
-          $ref: schema#/properties/pod/properties/securityContext/properties/seLinuxOptions/properties/level
-        type: input
-      - label:
-          text: labels.runtimeSettings.securityContext.seLinuxOptions.role
-        schema:
-          $ref: schema#/properties/pod/properties/securityContext/properties/seLinuxOptions/properties/role
-        type: input
-      - label:
-          text: labels.runtimeSettings.securityContext.seLinuxOptions.type
-        schema:
-          $ref: schema#/properties/pod/properties/securityContext/properties/seLinuxOptions/properties/type
-        type: input
-      - label:
-          text: labels.runtimeSettings.securityContext.seLinuxOptions.user
-        schema:
-          $ref: schema#/properties/pod/properties/securityContext/properties/seLinuxOptions/properties/user
-        type: input
+          $ref: schema#/properties/pod/properties/securityContext
+        type: single-step-form
     label:
       text: Pod runtime settings
+    schema:
+      $ref: schema#/properties/pod
     type: single-step-form
   - elements:
       - label:
@@ -87,7 +101,7 @@ elements:
           version: v0.1.0
         moduleResolver: fetchJsons
         schema:
-          $ref: schema##/properties/container/properties/resources
+          $ref: schema#/properties/container/properties/resources
         type: reusable-element
       - elements:
           - label:
@@ -101,6 +115,8 @@ elements:
             type: input
         label:
           text: Nice
+        schema:
+          $ref: schema#/properties/container/properties/nice
         type: single-step-form
       - elements:
           - label:
@@ -119,6 +135,8 @@ elements:
             type: input
         label:
           text: Ionice
+        schema:
+          $ref: schema#/properties/container/properties/ionice
         type: single-step-form
       - elements:
           - label:
@@ -172,9 +190,13 @@ elements:
                 type: input
             label:
               text: SE linuxt options
+            schema:
+              $ref: schema#/properties/container/properties/securityContext/properties/seLinuxOptions
             type: single-step-form
         label:
           text: Security Context
+        schema:
+          $ref: schema#/properties/container/properties/securityContext
         type: single-step-form
       - alias: reusable_env_variables
         chart:
@@ -185,7 +207,7 @@ elements:
             $ref: data#/properties/namespace
         moduleResolver: fetchJsons
         schema:
-          $ref: schema#/properties/env
+          $ref: schema#/properties/container/properties/env
         type: reusable-element
       - alias: reusable_env_from
         chart:
@@ -196,9 +218,11 @@ elements:
             $ref: data#/properties/namespace
         moduleResolver: fetchJsons
         schema:
-          $ref: schema#/properties/envFrom
+          $ref: schema#/properties/container/properties/envFrom
         type: reusable-element
     label:
       text: Container runtime settings
+    schema:
+      $ref: schema#/properties/container
     type: single-step-form
 type: single-step-form
