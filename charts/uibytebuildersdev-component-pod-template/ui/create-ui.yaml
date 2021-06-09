@@ -1,10 +1,4 @@
-schema:
-  $ref: schema#/
 elements:
-  - label:
-      hasLine: true
-      text: labels.pod_template
-    type: label-element
   - elements:
       - isArray: true
         keys:
@@ -44,28 +38,17 @@ elements:
       $ref: schema#/properties/controller
     type: single-step-form
   - elements:
-      - customClass: mb-5
-        label:
-          text: labels.pod_spec
-        type: label-element
-      - customClass: mb-10
-        label:
-          hasLine: true
-          text: labels.resources
-        type: label-element
       - alias: reusable_pod_template_reources
         chart:
           name: uibytebuildersdev-component-resources
-          version: v0.1.0
+          version: v0.2.0
+        label:
+          text: labels.resources
         moduleResolver: fetchJsons
         schema:
           $ref: schema#/properties/spec/properties/resources
         type: reusable-element
       - elements:
-          - label:
-              hasLine: true
-              text: labels.security_context
-            type: label-element
           - label:
               text: labels.run_as_non_root
             schema:
@@ -89,18 +72,20 @@ elements:
           - alias: reusable__podTemplate_linux_options
             chart:
               name: uibytebuildersdev-component-se-linux-options
-              version: v0.1.0
+              version: v0.2.0
             moduleResolver: fetchJsons
             schema:
               $ref: schema#/properties/spec/properties/securityContext/properties/seLinuxOptions
             type: reusable-element
+        label:
+          text: labels.security_context
         schema:
           $ref: schema#/properties/spec/properties/securityContext
         type: single-step-form
       - alias: reusable_env_variables
         chart:
           name: uibytebuildersdev-component-env
-          version: v0.1.0
+          version: v0.2.0
         dataContext:
           namespace:
             $ref: schema#/properties/metadata/properties/release/properties/namespace
@@ -199,7 +184,7 @@ elements:
                         - alias: reusable_node_selector_terms_match_expressions
                           chart:
                             name: uibytebuildersdev-component-match-expressions
-                            version: v0.1.0
+                            version: v0.2.0
                           moduleResolver: fetchJsons
                           schema:
                             $ref: schema#/properties/spec/properties/affinity/properties/nodeAffinity/properties/requiredDuringSchedulingIgnoredDuringExecution/properties/nodeSelectorTerms/items/properties/matchExpressions
@@ -207,7 +192,7 @@ elements:
                         - alias: reusable_node_selector_terms_match_fields
                           chart:
                             name: uibytebuildersdev-component-match-fields
-                            version: v0.1.0
+                            version: v0.2.0
                           moduleResolver: fetchJsons
                           schema:
                             $ref: schema#/properties/spec/properties/affinity/properties/nodeAffinity/properties/requiredDuringSchedulingIgnoredDuringExecution/properties/nodeSelectorTerms/items/properties/matchFields
@@ -280,7 +265,7 @@ elements:
                         - alias: reusable_preferred_match_expressions
                           chart:
                             name: uibytebuildersdev-component-match-expressions
-                            version: v0.1.0
+                            version: v0.2.0
                           moduleResolver: fetchJsons
                           schema:
                             $ref: schema#/properties/spec/properties/affinity/properties/nodeAffinity/properties/preferredDuringSchedulingIgnoredDuringExecution/items/properties/preference/properties/matchExpressions
@@ -288,7 +273,7 @@ elements:
                         - alias: reusable_preferred_match_fields
                           chart:
                             name: uibytebuildersdev-component-match-fields
-                            version: v0.1.0
+                            version: v0.2.0
                           moduleResolver: fetchJsons
                           schema:
                             $ref: schema#/properties/spec/properties/affinity/properties/nodeAffinity/properties/preferredDuringSchedulingIgnoredDuringExecution/items/properties/preference/properties/matchFields
@@ -382,7 +367,13 @@ elements:
         schema:
           $ref: schema#/properties/spec/properties/serviceAccountName
         type: input
+    label:
+      text: labels.pod_spec
     schema:
       $ref: schema#/properties/spec
     type: single-step-form
+label:
+  text: labels.pod_template
+schema:
+  $ref: schema#/
 type: single-step-form

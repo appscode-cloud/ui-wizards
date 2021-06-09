@@ -258,7 +258,7 @@ async function getResources(
   resource
 ) {
   const owner = storeGet("/user/username");
-  const cluster = storeGet("/clusterInfo/name");
+  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
 
   const resp = await axios.get(
     `/clusters/${owner}/${cluster}/proxy/${group}/${version}/${resource}`,
@@ -280,7 +280,7 @@ async function getResources(
 
 async function getStorageClassNames({ axios, storeGet, commit }) {
   const owner = storeGet("/user/username");
-  const cluster = storeGet("/clusterInfo/name");
+  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
 
   const resp = await axios.get(
     `/clusters/${owner}/${cluster}/proxy/storage.k8s.io/v1/storageclasses`,
@@ -322,7 +322,7 @@ async function getMongoDbVersions(
   resource
 ) {
   const owner = storeGet("/user/username");
-  const cluster = storeGet("/clusterInfo/name");
+  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
 
   const queryParams = {
     filter: {
@@ -365,7 +365,7 @@ async function getSecrets({
   watchDependency,
 }) {
   const owner = storeGet("/user/username");
-  const cluster = storeGet("/clusterInfo/name");
+  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
   const namespace = getValue(model, "/metadata/release/namespace");
   watchDependency("model#/metadata/release/namespace");
 
