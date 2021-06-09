@@ -1,11 +1,5 @@
-schema:
-  $ref: schema#/
 elements:
   - elements:
-      - label:
-          hasLine: true
-          text: labels.runtimeSettings.pod.title
-        type: label-element
       - allowUserDefinedOption: true
         fetch: resourceNames|core|v1|serviceaccounts
         label:
@@ -20,10 +14,6 @@ elements:
         schema:
           $ref: schema#/properties/pod/properties/imagePullSecrets
         type: multiselect
-      - label:
-          hasLine: true
-          text: labels.runtimeSettings.securityContext.title
-        type: label-element
       - elements:
           - label:
               text: labels.runtimeSettings.securityContext.fsGroup
@@ -45,10 +35,6 @@ elements:
             schema:
               $ref: schema#/properties/pod/properties/securityContext/properties/runAsGroup
             type: input
-          - label:
-              isSubsection: true
-              text: labels.runtimeSettings.securityContext.seLinuxOptions.title
-            type: label-element
           - elements:
               - label:
                   text: labels.runtimeSettings.securityContext.seLinuxOptions.level
@@ -81,48 +67,33 @@ elements:
           $ref: schema#/properties/pod/properties/securityContext
         type: single-step-form
     label:
-      text: Pod runtime settings
+      text: labels.runtimeSettings.pod.title
     schema:
       $ref: schema#/properties/pod
     type: single-step-form
   - elements:
-      - label:
-          hasLine: true
-          text: labels.runtimeSettings.container.title
-        type: label-element
-      - customClass: mb-10
-        label:
-          hasLine: true
-          text: labels.resources
-        type: label-element
       - alias: reusable_runtime_settings_reources
         chart:
           name: uibytebuildersdev-component-resources
-          version: v0.1.0
+          version: v0.2.0
+        label:
+          text: labels.resources
         moduleResolver: fetchJsons
         schema:
           $ref: schema#/properties/container/properties/resources
         type: reusable-element
       - elements:
           - label:
-              hasLine: true
-              text: labels.runtimeSettings.container.nice.title
-            type: label-element
-          - label:
               text: labels.runtimeSettings.container.nice.adjustment
             schema:
               $ref: schema#/properties/container/properties/nice/properties/adjustment
             type: input
         label:
-          text: Nice
+          text: labels.runtimeSettings.container.nice.title
         schema:
           $ref: schema#/properties/container/properties/nice
         type: single-step-form
       - elements:
-          - label:
-              hasLine: true
-              text: labels.runtimeSettings.container.ionice.title
-            type: label-element
           - label:
               text: labels.runtimeSettings.container.ionice.class
             schema:
@@ -134,15 +105,11 @@ elements:
               $ref: schema#/properties/container/properties/ionice/properties/classData
             type: input
         label:
-          text: Ionice
+          text: labels.runtimeSettings.container.ionice.title
         schema:
           $ref: schema#/properties/container/properties/ionice
         type: single-step-form
       - elements:
-          - label:
-              hasLine: true
-              text: labels.runtimeSettings.securityContext.title
-            type: label-element
           - label:
               text: labels.runtimeSettings.securityContext.privileged
             schema:
@@ -165,10 +132,6 @@ elements:
             type: input
           - elements:
               - label:
-                  isSubsection: true
-                  text: labels.runtimeSettings.securityContext.seLinuxOptions.title
-                type: label-element
-              - label:
                   text: labels.runtimeSettings.securityContext.seLinuxOptions.level
                 schema:
                   $ref: schema#/properties/container/properties/securityContext/properties/seLinuxOptions/properties/level
@@ -189,19 +152,19 @@ elements:
                   $ref: schema#/properties/container/properties/securityContext/properties/seLinuxOptions/properties/user
                 type: input
             label:
-              text: SE linuxt options
+              text: labels.runtimeSettings.securityContext.seLinuxOptions.title
             schema:
               $ref: schema#/properties/container/properties/securityContext/properties/seLinuxOptions
             type: single-step-form
         label:
-          text: Security Context
+          text: labels.runtimeSettings.securityContext.title
         schema:
           $ref: schema#/properties/container/properties/securityContext
         type: single-step-form
       - alias: reusable_env_variables
         chart:
           name: uibytebuildersdev-component-env
-          version: v0.1.0
+          version: v0.2.0
         dataContext:
           namespace:
             $ref: data#/properties/namespace
@@ -212,7 +175,7 @@ elements:
       - alias: reusable_env_from
         chart:
           name: uibytebuildersdev-component-env-from
-          version: v0.1.0
+          version: v0.2.0
         dataContext:
           namespace:
             $ref: data#/properties/namespace
@@ -221,8 +184,10 @@ elements:
           $ref: schema#/properties/container/properties/envFrom
         type: reusable-element
     label:
-      text: Container runtime settings
+      text: labels.runtimeSettings.container.title
     schema:
       $ref: schema#/properties/container
     type: single-step-form
+schema:
+  $ref: schema#/
 type: single-step-form

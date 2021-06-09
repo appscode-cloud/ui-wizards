@@ -2,10 +2,6 @@ hasPreviewPanel: true
 steps:
 - form:
     elements:
-    - label:
-        hasLine: true
-        text: labels.basic_info
-      type: label-element
     - disabled: true
       label:
         text: labels.database.name
@@ -161,7 +157,6 @@ steps:
               $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/shardTopology/properties/shard/properties/storage/properties/storageClassName
             type: select
           - label:
-              hasLine: true
               text: labels.shardNodes
             type: label-element
           - elements:
@@ -189,7 +184,6 @@ steps:
             $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/shardTopology/properties/shard/properties/replicas
           type: input
         - label:
-            hasLine: true
             text: labels.configServer
           type: label-element
         - elements:
@@ -219,7 +213,6 @@ steps:
             $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/shardTopology/properties/configServer
           type: single-step-form
         - label:
-            hasLine: true
             text: labels.mongos
           type: label-element
         - elements:
@@ -280,9 +273,6 @@ steps:
         schema:
           $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/sslMode
         type: radio
-      - label:
-          text: labels.issuer_ref
-        type: label-element
       - elements:
         - computed: setApiGroup
           disabled: true
@@ -308,13 +298,15 @@ steps:
           schema:
             $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/issuerRef/properties/name
           type: select
+        label:
+          text: labels.issuer_ref
         schema:
           $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/issuerRef
         type: single-step-form
       - alias: reusable_certificates
         chart:
           name: uibytebuildersdev-component-certificates
-          version: v0.1.0
+          version: v0.2.0
         moduleResolver: fetchJsons
         schema:
           $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/certificates
@@ -369,7 +361,6 @@ steps:
               $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/init/properties/script/properties/scriptPath
             type: input
           - label:
-              hasLine: true
               text: labels.script.volume
             type: label-element
           - computed: initVolumeType
@@ -413,7 +404,6 @@ steps:
                 type: string
             elements:
             - label:
-                hasLine: true
                 text: labels.repositories.title
               type: label-element
             - computed: setInitialRestoreSessionRepo
@@ -437,14 +427,14 @@ steps:
             - alias: repository_create_init
               chart:
                 name: uibytebuildersdev-component-repository-create
-                version: v0.1.0
+                version: v0.2.0
               dataContext:
                 namespace:
                   $ref: schema#/properties/metadata/properties/release/properties/namespace
               if: showRepositorySelectOrCreate|create
               moduleResolver: fetchJsons
               schema:
-                $ref: schema#/properties/resources/properties/stashAppscodeComRepository_init_repo/properties/spec
+                $ref: schema#/properties/resources/properties/stashAppscodeComRepository_init_repo/properties/spec/properties/backend
               type: reusable-element
             type: single-step-form
           - if: returnFalse
@@ -473,7 +463,7 @@ steps:
             - alias: runtime_settings_init
               chart:
                 name: uibytebuildersdev-component-runtime-settings
-                version: v0.1.0
+                version: v0.2.0
               dataContext:
                 namespace:
                   $ref: schema#/properties/metadata/properties/release/properties/namespace
@@ -539,7 +529,6 @@ steps:
               type: string
           elements:
           - label:
-              hasLine: true
               isSubsection: true
               text: labels.repositories.title
             type: label-element
@@ -564,7 +553,7 @@ steps:
           - alias: repository_create_backup
             chart:
               name: uibytebuildersdev-component-repository-create
-              version: v0.1.0
+              version: v0.2.0
             dataContext:
               namespace:
                 $ref: schema#/properties/metadata/properties/release/properties/namespace
@@ -586,7 +575,6 @@ steps:
             $ref: schema#/properties/resources/properties/stashAppscodeComBackupConfiguration/properties/spec/properties/schedule
           type: input
         - label:
-            hasLine: true
             isSubsection: true
             text: labels.backupConfiguration.retentionPolicy.title
           type: label-element
@@ -651,7 +639,7 @@ steps:
           - alias: runtime_settings_backup
             chart:
               name: uibytebuildersdev-component-runtime-settings
-              version: v0.1.0
+              version: v0.2.0
             dataContext:
               namespace:
                 $ref: schema#/properties/metadata/properties/release/properties/namespace
@@ -676,7 +664,6 @@ steps:
             type: object
         elements:
         - label:
-            hasLine: true
             text: labels.backupBlueprint.title
           type: label-element
         - allowUserDefinedOption: true
@@ -759,11 +746,6 @@ steps:
           $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/agent
         type: radio
       - elements:
-        - customClass: mb-10
-          label:
-            hasLine: true
-            text: labels.service_monitor_configuration
-          type: label-element
         - isArray: true
           keys:
             label:
@@ -786,15 +768,11 @@ steps:
             $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/serviceMonitor/properties/interval
           type: input
         if: isEqualToModelPathValue|prometheus.io/operator|/resources/kubedbComMongoDB/spec/monitor/agent
+        label:
+          text: labels.service_monitor_configuration
         type: single-step-form
       - elements:
-        - customClass: mb-10
-          label:
-            hasLine: true
-            text: labels.service_monitor
-          type: label-element
         - addFormLabel: labels.endpoint
-          customClass: mb-20
           element:
             elements:
             - label:
@@ -880,6 +858,8 @@ steps:
             $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/selector
           type: single-step-form
         if: isEqualToModelPathValue|prometheus.io|/resources/kubedbComMongoDB/spec/monitor/agent
+        label:
+          text: labels.service_monitor
         schema:
           $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec
         type: single-step-form
@@ -901,7 +881,6 @@ steps:
             $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/metadata/properties/labels/additionalProperties
           type: input
       - label:
-          hasLine: true
           text: labels.exporter_configuration
         type: label-element
       - label:
@@ -911,15 +890,12 @@ steps:
           $ref: discriminator#/customizeExporter
         type: switch
       - elements:
-        - customClass: mb-10
-          label:
-            hasLine: true
-            text: labels.resources
-          type: label-element
         - alias: reusable_monitoring_reources
           chart:
             name: uibytebuildersdev-component-resources
-            version: v0.1.0
+            version: v0.2.0
+          label:
+            text: labels.resources
           moduleResolver: fetchJsons
           schema:
             $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/resources
@@ -958,7 +934,7 @@ steps:
         - alias: reusable_env
           chart:
             name: uibytebuildersdev-component-env
-            version: v0.1.0
+            version: v0.2.0
           dataContext:
             namespace:
               $ref: schema#/properties/metadata/properties/release/properties/namespace
@@ -980,7 +956,7 @@ steps:
       - alias: pod_template_standalone
         chart:
           name: uibytebuildersdev-component-pod-template
-          version: v0.1.0
+          version: v0.2.0
         dataContext:
           namespace:
             $ref: schema#/properties/metadata/properties/release/properties/namespace
@@ -1002,7 +978,7 @@ steps:
           - alias: pod_template_shard
             chart:
               name: uibytebuildersdev-component-pod-template
-              version: v0.1.0
+              version: v0.2.0
             dataContext:
               namespace:
                 $ref: schema#/properties/metadata/properties/release/properties/namespace
@@ -1021,7 +997,7 @@ steps:
           - alias: pod_template_configserver
             chart:
               name: uibytebuildersdev-component-pod-template
-              version: v0.1.0
+              version: v0.2.0
             dataContext:
               namespace:
                 $ref: schema#/properties/metadata/properties/release/properties/namespace
@@ -1040,7 +1016,7 @@ steps:
           - alias: pod_template_mongos
             chart:
               name: uibytebuildersdev-component-pod-template
-              version: v0.1.0
+              version: v0.2.0
             dataContext:
               namespace:
                 $ref: schema#/properties/metadata/properties/release/properties/namespace
@@ -1211,8 +1187,6 @@ steps:
           schema:
             $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/serviceTemplates/items/properties/spec
           type: single-step-form
-        label:
-          text: labels.service_template
         type: single-step-form
       label:
         text: labels.service_templates
@@ -1360,7 +1334,6 @@ steps:
             type: string
         elements:
         - label:
-            hasLine: true
             text: labels.shardNodes
           type: label-element
         - computed: setConfigurationSourceShard
@@ -1396,7 +1369,6 @@ steps:
             $ref: discriminator#/properties/configurationShard
           type: editor
         - label:
-            hasLine: true
             text: labels.configServerNodes
           type: label-element
         - computed: setConfigurationSourceConfigServer
@@ -1432,7 +1404,6 @@ steps:
             $ref: discriminator#/properties/configurationConfigServer
           type: editor
         - label:
-            hasLine: true
             text: labels.mongosNodes
           type: label-element
         - computed: setConfigurationSourceMongos

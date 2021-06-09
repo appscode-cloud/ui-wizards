@@ -53,7 +53,7 @@ async function getResources(
   resource
 ) {
   const owner = storeGet("/user/username");
-  const cluster = storeGet("/clusterInfo/name");
+  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
 
   try {
     const resp = await axios.get(
@@ -124,7 +124,7 @@ async function getNamespacedResourceList(
   { namespace, group, version, resource }
 ) {
   const owner = storeGet("/user/username");
-  const cluster = storeGet("/clusterInfo/name");
+  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
 
   const url = `/clusters/${owner}/${cluster}/proxy/${group}/${version}/namespaces/${namespace}/${resource}`;
 
@@ -151,7 +151,7 @@ async function getResourceList(
   { group, version, resource }
 ) {
   const owner = storeGet("/user/username");
-  const cluster = storeGet("/clusterInfo/name");
+  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
 
   const url = `/clusters/${owner}/${cluster}/proxy/${group}/${version}/${resource}`;
 
@@ -240,7 +240,7 @@ async function getMongoDbVersions(
   resource
 ) {
   const owner = storeGet("/user/username");
-  const cluster = storeGet("/clusterInfo/name");
+  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
 
   const queryParams = {
     filter: {
@@ -356,7 +356,7 @@ async function getStorageClassNames(
   mode
 ) {
   const owner = storeGet("/user/username");
-  const cluster = storeGet("/clusterInfo/name");
+  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
 
   watchDependency("discriminator#/activeDatabaseMode");
 
@@ -409,6 +409,10 @@ async function getStorageClassNames(
             force: true,
           });
         }
+        commit(
+          "wizard/model$delete",
+          "/resources/kubedbComMongoDB/spec/storage"
+        );
       } else {
         const className = getValue(
           model,
@@ -570,7 +574,7 @@ async function getIssuerRefsName({
   watchDependency,
 }) {
   const owner = storeGet("/user/username");
-  const cluster = storeGet("/clusterInfo/name");
+  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
   watchDependency(
     "model#/resources/kubedbComMongoDB/spec/tls/issuerRef/apiGroup"
   );
@@ -1981,7 +1985,7 @@ async function getSecrets({
   watchDependency,
 }) {
   const owner = storeGet("/user/username");
-  const cluster = storeGet("/clusterInfo/name");
+  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
   const namespace = getValue(model, "/metadata/release/namespace");
   watchDependency("model#/metadata/release/namespace");
 

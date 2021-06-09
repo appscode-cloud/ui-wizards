@@ -5,9 +5,9 @@
 ## TL;DR;
 
 ```console
-$ helm repo add bytebuilders-ui https://bundles.bytebuilders.dev/ui/
+$ helm repo add bytebuilders-ui-dev https://raw.githubusercontent.com/bytebuilders/ui-wizards/
 $ helm repo update
-$ helm install coordinationk8sio-lease-editor bytebuilders-ui/coordinationk8sio-lease-editor -n default --version=v0.1.0
+$ helm install coordinationk8sio-lease-editor bytebuilders-ui-dev/coordinationk8sio-lease-editor -n default
 ```
 
 ## Introduction
@@ -23,7 +23,7 @@ This chart deploys a Lease Editor on a [Kubernetes](http://kubernetes.io) cluste
 To install the chart with the release name `coordinationk8sio-lease-editor`:
 
 ```console
-$ helm install coordinationk8sio-lease-editor bytebuilders-ui/coordinationk8sio-lease-editor -n default --version=v0.1.0
+$ helm install coordinationk8sio-lease-editor bytebuilders-ui-dev/coordinationk8sio-lease-editor -n default
 ```
 
 The command deploys a Lease Editor on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
@@ -55,12 +55,12 @@ The following table lists the configurable parameters of the `coordinationk8sio-
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:
 
 ```console
-$ helm install coordinationk8sio-lease-editor bytebuilders-ui/coordinationk8sio-lease-editor -n default --version=v0.1.0 --set apiVersion=coordination.k8s.io/v1
+$ helm install coordinationk8sio-lease-editor bytebuilders-ui-dev/coordinationk8sio-lease-editor -n default --set apiVersion=coordination.k8s.io/v1
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
 installing the chart. For example:
 
 ```console
-$ helm install coordinationk8sio-lease-editor bytebuilders-ui/coordinationk8sio-lease-editor -n default --version=v0.1.0 --values values.yaml
+$ helm install coordinationk8sio-lease-editor bytebuilders-ui-dev/coordinationk8sio-lease-editor -n default --values values.yaml
 ```

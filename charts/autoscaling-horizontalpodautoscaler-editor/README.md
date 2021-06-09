@@ -5,9 +5,9 @@
 ## TL;DR;
 
 ```console
-$ helm repo add bytebuilders-ui https://bundles.bytebuilders.dev/ui/
+$ helm repo add bytebuilders-ui-dev https://raw.githubusercontent.com/bytebuilders/ui-wizards/
 $ helm repo update
-$ helm install autoscaling-horizontalpodautoscaler-editor bytebuilders-ui/autoscaling-horizontalpodautoscaler-editor -n default --version=v0.1.0
+$ helm install autoscaling-horizontalpodautoscaler-editor bytebuilders-ui-dev/autoscaling-horizontalpodautoscaler-editor -n default
 ```
 
 ## Introduction
@@ -23,7 +23,7 @@ This chart deploys a HorizontalPodAutoscaler Editor on a [Kubernetes](http://kub
 To install the chart with the release name `autoscaling-horizontalpodautoscaler-editor`:
 
 ```console
-$ helm install autoscaling-horizontalpodautoscaler-editor bytebuilders-ui/autoscaling-horizontalpodautoscaler-editor -n default --version=v0.1.0
+$ helm install autoscaling-horizontalpodautoscaler-editor bytebuilders-ui-dev/autoscaling-horizontalpodautoscaler-editor -n default
 ```
 
 The command deploys a HorizontalPodAutoscaler Editor on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
@@ -55,12 +55,12 @@ The following table lists the configurable parameters of the `autoscaling-horizo
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:
 
 ```console
-$ helm install autoscaling-horizontalpodautoscaler-editor bytebuilders-ui/autoscaling-horizontalpodautoscaler-editor -n default --version=v0.1.0 --set apiVersion=autoscaling/v2beta2
+$ helm install autoscaling-horizontalpodautoscaler-editor bytebuilders-ui-dev/autoscaling-horizontalpodautoscaler-editor -n default --set apiVersion=autoscaling/v2beta2
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
 installing the chart. For example:
 
 ```console
-$ helm install autoscaling-horizontalpodautoscaler-editor bytebuilders-ui/autoscaling-horizontalpodautoscaler-editor -n default --version=v0.1.0 --values values.yaml
+$ helm install autoscaling-horizontalpodautoscaler-editor bytebuilders-ui-dev/autoscaling-horizontalpodautoscaler-editor -n default --values values.yaml
 ```

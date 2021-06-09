@@ -5,9 +5,9 @@
 ## TL;DR;
 
 ```console
-$ helm repo add bytebuilders-ui https://bundles.bytebuilders.dev/ui/
+$ helm repo add bytebuilders-ui-dev https://raw.githubusercontent.com/bytebuilders/ui-wizards/
 $ helm repo update
-$ helm install core-persistentvolume-editor bytebuilders-ui/core-persistentvolume-editor -n default --version=v0.1.0
+$ helm install core-persistentvolume-editor bytebuilders-ui-dev/core-persistentvolume-editor -n default
 ```
 
 ## Introduction
@@ -23,7 +23,7 @@ This chart deploys a PersistentVolume Editor on a [Kubernetes](http://kubernetes
 To install the chart with the release name `core-persistentvolume-editor`:
 
 ```console
-$ helm install core-persistentvolume-editor bytebuilders-ui/core-persistentvolume-editor -n default --version=v0.1.0
+$ helm install core-persistentvolume-editor bytebuilders-ui-dev/core-persistentvolume-editor -n default
 ```
 
 The command deploys a PersistentVolume Editor on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
@@ -54,12 +54,12 @@ The following table lists the configurable parameters of the `core-persistentvol
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:
 
 ```console
-$ helm install core-persistentvolume-editor bytebuilders-ui/core-persistentvolume-editor -n default --version=v0.1.0 --set apiVersion=/v1
+$ helm install core-persistentvolume-editor bytebuilders-ui-dev/core-persistentvolume-editor -n default --set apiVersion=/v1
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
 installing the chart. For example:
 
 ```console
-$ helm install core-persistentvolume-editor bytebuilders-ui/core-persistentvolume-editor -n default --version=v0.1.0 --values values.yaml
+$ helm install core-persistentvolume-editor bytebuilders-ui-dev/core-persistentvolume-editor -n default --values values.yaml
 ```

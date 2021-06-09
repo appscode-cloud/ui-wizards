@@ -251,8 +251,8 @@ manifests: gen-crds gen-values-schema
 .PHONY: gen
 gen: clientset manifests gen-chart-doc
 
-CHART_REGISTRY     ?= appscode
-CHART_REGISTRY_URL ?= https://charts.appscode.com/stable/
+CHART_REGISTRY     ?= bytebuilders-ui-dev
+CHART_REGISTRY_URL ?= https://raw.githubusercontent.com/bytebuilders/ui-wizards/
 CHART_VERSION      ?=
 APP_VERSION        ?= $(CHART_VERSION)
 
@@ -263,14 +263,15 @@ chart-%:
 	@$(MAKE) chart-contents-$* gen-chart-doc-$* --no-print-directory
 
 chart-contents-%:
-	@yq w -i ./charts/$*/doc.yaml repository.name --tag '!!str' $(CHART_REGISTRY)
-	@yq w -i ./charts/$*/doc.yaml repository.url --tag '!!str' $(CHART_REGISTRY_URL)
+	@if test -f "./charts/$*/doc.yaml"; then \
+		yq w -i ./charts/$*/doc.yaml repository.name --tag '!!str' $(CHART_REGISTRY); \
+		yq w -i ./charts/$*/doc.yaml repository.url --tag '!!str' $(CHART_REGISTRY_URL); \
+	fi
 	@if [ ! -z "$(CHART_VERSION)" ]; then                                         \
 		yq w -i ./charts/$*/Chart.yaml version --tag '!!str' $(CHART_VERSION);    \
 	fi
 	@if [ ! -z "$(APP_VERSION)" ]; then                                           \
 		yq w -i ./charts/$*/Chart.yaml appVersion --tag '!!str' $(APP_VERSION);   \
-		yq w -i ./charts/$*/values.yaml image.tag --tag '!!str' $(APP_VERSION);   \
 	fi
 
 .PHONY: package-charts

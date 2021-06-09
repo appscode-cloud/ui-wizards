@@ -2,10 +2,6 @@ steps:
 - form:
     elements:
     - label:
-        hasLine: true
-        text: labels.basic_info
-      type: label-element
-    - label:
         text: labels.op_req_name
       required: true
       schema:
@@ -28,7 +24,6 @@ steps:
         $ref: schema#/properties/spec/properties/databaseRef/properties/name
       type: select
     - label:
-        hasLine: true
         text: labels.config_ops_request
       type: label-element
     - hasDescription: true
@@ -78,7 +73,6 @@ steps:
       - elements:
         - elements:
           - label:
-              hasLine: true
               text: labels.configServer
             type: label-element
           - label:
@@ -93,7 +87,6 @@ steps:
           type: single-step-form
         - elements:
           - label:
-              hasLine: true
               text: labels.mongos
             type: label-element
           - label:
@@ -108,7 +101,6 @@ steps:
           type: single-step-form
         - elements:
           - label:
-              hasLine: true
               text: labels.shard
             type: label-element
           - label:
@@ -136,95 +128,75 @@ steps:
       type: single-step-form
     - elements:
       - elements:
-        - label:
-            hasLine: true
-            text: labels.standalone
-          type: label-element
         - alias: reusable_standalone_reources
           chart:
             name: uibytebuildersdev-component-resources
-            version: v0.1.0
+            version: v0.2.0
+          label:
+            text: Standalone vertical scaling
           moduleResolver: fetchJsons
           schema:
             $ref: schema#/properties/spec/properties/verticalScaling/properties/standalone
           type: reusable-element
         if: ifDbTypeEqualsTo|standalone|verticalScaling
-        label:
-          text: 'Standalone vertical scaling '
         schema:
           $ref: schema#/properties/spec/properties/verticalScaling/properties/standalone
         type: single-step-form
       - elements:
-        - label:
-            hasLine: true
-            text: labels.replicaSet
-          type: label-element
         - alias: reusable_replicaset_reources
           chart:
             name: uibytebuildersdev-component-resources
-            version: v0.1.0
+            version: v0.2.0
+          label:
+            text: 'Replicaset vertical scaling '
           moduleResolver: fetchJsons
           schema:
             $ref: schema#/properties/spec/properties/verticalScaling/properties/replicaSet
           type: reusable-element
         if: ifDbTypeEqualsTo|replicaSet|verticalScaling
-        label:
-          text: 'Replicaset vertical scaling '
         schema:
           $ref: schema#/properties/spec/properties/verticalScaling/properties/replicaSet
         type: single-step-form
       - elements:
         - elements:
-          - label:
-              hasLine: true
-              text: labels.configServer
-            type: label-element
           - alias: reusable_configserver_reources
             chart:
               name: uibytebuildersdev-component-resources
-              version: v0.1.0
+              version: v0.2.0
+            label:
+              text: Config Server Vertical Scaling
             moduleResolver: fetchJsons
             schema:
               $ref: schema#/properties/spec/properties/verticalScaling/properties/configServer
             type: reusable-element
-          label:
-            text: Config Server Vertical Scaling
           schema:
             $ref: schema#/properties/spec/properties/verticalScaling/properties/configServer
           type: single-step-form
         - elements:
-          - label:
-              hasLine: true
-              text: labels.mongos
-            type: label-element
           - alias: reusable_mongos_reources
             chart:
               name: uibytebuildersdev-component-resources
-              version: v0.1.0
+              version: v0.2.0
+            label:
+              text: Mongos Vertical Scaling
             moduleResolver: fetchJsons
             schema:
               $ref: schema#/properties/spec/properties/verticalScaling/properties/mongos
             type: reusable-element
-          label:
-            text: Mongos Vertical Scaling
           schema:
             $ref: schema#/properties/spec/properties/verticalScaling/properties/mongos
           type: single-step-form
         - elements:
-          - label:
-              hasLine: true
-              text: labels.shard
-            type: label-element
           - alias: reusable_shard_reources
             chart:
               name: uibytebuildersdev-component-resources
-              version: v0.1.0
+              version: v0.2.0
+            label:
+              text: Shard Vertical Scaling
             moduleResolver: fetchJsons
             schema:
               $ref: schema#/properties/spec/properties/verticalScaling/properties/shard
             type: reusable-element
-          label:
-            text: Shard Vertical Scaling
           schema:
             $ref: schema#/properties/spec/properties/verticalScaling/properties/shard
           type: single-step-form
@@ -233,8 +205,6 @@ steps:
           text: 'Sharded vertical scaling '
         type: single-step-form
       if: ifRequestTypeEqualsTo|VerticalScaling
-      label:
-        text: Vertical Scaling Form
       type: single-step-form
     - elements:
       - if: ifDbTypeEqualsTo|standalone|volumeExpansion
@@ -266,17 +236,13 @@ steps:
         type: single-step-form
       if: ifRequestTypeEqualsTo|VolumeExpansion
       label:
-        text: Vaolume Expansion Form
+        text: Volume Expansion Form
       type: single-step-form
     - elements:
       - discriminator:
           reconfigurationType:
             type: string
         elements:
-        - label:
-            hasLine: true
-            text: labels.standalone
-          type: label-element
         - individualItemDisabilityCheck: disableReconfigurationType|standalone
           label:
             text: labels.reconfigurationType
@@ -319,7 +285,7 @@ steps:
         - alias: pod_template_standalone
           chart:
             name: uibytebuildersdev-component-pod-template
-            version: v0.1.0
+            version: v0.2.0
           dataContext:
             namespace:
               $ref: schema#/properties/metadata/properties/namespace
@@ -330,7 +296,7 @@ steps:
           type: reusable-element
         if: ifDbTypeEqualsTo|standalone|configuration
         label:
-          text: Standalone Configuration
+          text: labels.standalone
         schema:
           $ref: schema#/properties/spec/properties/configuration/properties/standalone
         type: single-step-form
@@ -338,10 +304,6 @@ steps:
           reconfigurationType:
             type: string
         elements:
-        - label:
-            hasLine: true
-            text: labels.replicaSet
-          type: label-element
         - individualItemDisabilityCheck: disableReconfigurationType|replicaSet
           label:
             text: labels.reconfigurationType
@@ -384,7 +346,7 @@ steps:
         - alias: pod_template_replicaset
           chart:
             name: uibytebuildersdev-component-pod-template
-            version: v0.1.0
+            version: v0.2.0
           dataContext:
             namespace:
               $ref: schema#/properties/metadata/properties/namespace
@@ -395,7 +357,7 @@ steps:
           type: reusable-element
         if: ifDbTypeEqualsTo|replicaSet|configuration
         label:
-          text: Replica Set Configuration
+          text: labels.replicaSet
         schema:
           $ref: schema#/properties/spec/properties/configuration/properties/replicaSet
         type: single-step-form
@@ -404,10 +366,6 @@ steps:
             reconfigurationType:
               type: string
           elements:
-          - label:
-              hasLine: true
-              text: labels.configServer
-            type: label-element
           - individualItemDisabilityCheck: disableReconfigurationType|sharded|configServer
             label:
               text: labels.reconfigurationType
@@ -430,8 +388,6 @@ steps:
                 $ref: schema#/properties/spec/properties/configuration/properties/configServer/properties/configSecret/properties/name
               type: select
             if: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
-            label:
-              text: Replica Set configuration config secret
             schema:
               $ref: schema#/properties/spec/properties/configuration/properties/configServer/properties/configSecret
             type: single-step-form
@@ -450,7 +406,7 @@ steps:
           - alias: pod_template_configserver
             chart:
               name: uibytebuildersdev-component-pod-template
-              version: v0.1.0
+              version: v0.2.0
             dataContext:
               namespace:
                 $ref: schema#/properties/metadata/properties/namespace
@@ -460,7 +416,7 @@ steps:
               $ref: schema#/properties/spec/properties/configuration/properties/configServer/properties/podTemplate
             type: reusable-element
           label:
-            text: Config Server Configuration
+            text: labels.configServer
           schema:
             $ref: schema#/properties/spec/properties/configuration/properties/configServer
           type: single-step-form
@@ -468,10 +424,6 @@ steps:
             reconfigurationType:
               type: string
           elements:
-          - label:
-              hasLine: true
-              text: labels.mongos
-            type: label-element
           - individualItemDisabilityCheck: disableReconfigurationType|sharded|mongos
             label:
               text: labels.reconfigurationType
@@ -494,8 +446,6 @@ steps:
                 $ref: schema#/properties/spec/properties/configuration/properties/mongos/properties/configSecret/properties/name
               type: select
             if: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
-            label:
-              text: Replica Set configuration config secret
             schema:
               $ref: schema#/properties/spec/properties/configuration/properties/mongos/properties/configSecret
             type: single-step-form
@@ -514,7 +464,7 @@ steps:
           - alias: pod_template_mongos
             chart:
               name: uibytebuildersdev-component-pod-template
-              version: v0.1.0
+              version: v0.2.0
             dataContext:
               namespace:
                 $ref: schema#/properties/metadata/properties/namespace
@@ -524,7 +474,7 @@ steps:
               $ref: schema#/properties/spec/properties/configuration/properties/mongos/properties/podTemplate
             type: reusable-element
           label:
-            text: Mongos Configuration
+            text: labels.mongos
           schema:
             $ref: schema#/properties/spec/properties/configuration/properties/mongos
           type: single-step-form
@@ -532,10 +482,6 @@ steps:
             reconfigurationType:
               type: string
           elements:
-          - label:
-              hasLine: true
-              text: labels.shard
-            type: label-element
           - individualItemDisabilityCheck: disableReconfigurationType|sharded|shard
             label:
               text: labels.reconfigurationType
@@ -558,8 +504,6 @@ steps:
                 $ref: schema#/properties/spec/properties/configuration/properties/shard/properties/configSecret/properties/name
               type: select
             if: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
-            label:
-              text: Replica Set configuration config secret
             schema:
               $ref: schema#/properties/spec/properties/configuration/properties/shard/properties/configSecret
             type: single-step-form
@@ -578,7 +522,7 @@ steps:
           - alias: pod_template_shard
             chart:
               name: uibytebuildersdev-component-pod-template
-              version: v0.1.0
+              version: v0.2.0
             dataContext:
               namespace:
                 $ref: schema#/properties/metadata/properties/namespace
@@ -588,7 +532,7 @@ steps:
               $ref: schema#/properties/spec/properties/configuration/properties/shard/properties/podTemplate
             type: reusable-element
           label:
-            text: Shard Configuration
+            text: labels.shard
           schema:
             $ref: schema#/properties/spec/properties/configuration/properties/shard
           type: single-step-form
@@ -604,10 +548,6 @@ steps:
         tlsOperation:
           type: string
       elements:
-      - label:
-          hasLine: true
-          text: labels.tls
-        type: label-element
       - computed: initTlsOperation
         if: hasTlsField
         label:
@@ -672,13 +612,15 @@ steps:
       - alias: reusable_certificates
         chart:
           name: uibytebuildersdev-component-certificates
-          version: v0.1.0
+          version: v0.2.0
         if: showIssuerRefAndCertificates
         moduleResolver: fetchJsons
         schema:
           $ref: schema#/properties/spec/properties/tls/properties/certificates
         type: reusable-element
       if: ifRequestTypeEqualsTo|ReconfigureTLS
+      label:
+        text: labels.tls
       schema:
         $ref: schema#/properties/spec/properties/tls
       type: single-step-form
