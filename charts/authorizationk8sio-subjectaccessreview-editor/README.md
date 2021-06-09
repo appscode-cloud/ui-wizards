@@ -5,9 +5,9 @@
 ## TL;DR;
 
 ```console
-$ helm repo add bytebuilders-ui https://bundles.bytebuilders.dev/ui/
+$ helm repo add bytebuilders-ui-dev https://raw.githubusercontent.com/bytebuilders/ui-wizards/
 $ helm repo update
-$ helm install authorizationk8sio-subjectaccessreview-editor bytebuilders-ui/authorizationk8sio-subjectaccessreview-editor -n default --version=v0.1.0
+$ helm install authorizationk8sio-subjectaccessreview-editor bytebuilders-ui-dev/authorizationk8sio-subjectaccessreview-editor -n default
 ```
 
 ## Introduction
@@ -23,7 +23,7 @@ This chart deploys a SubjectAccessReview Editor on a [Kubernetes](http://kuberne
 To install the chart with the release name `authorizationk8sio-subjectaccessreview-editor`:
 
 ```console
-$ helm install authorizationk8sio-subjectaccessreview-editor bytebuilders-ui/authorizationk8sio-subjectaccessreview-editor -n default --version=v0.1.0
+$ helm install authorizationk8sio-subjectaccessreview-editor bytebuilders-ui-dev/authorizationk8sio-subjectaccessreview-editor -n default
 ```
 
 The command deploys a SubjectAccessReview Editor on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
@@ -54,12 +54,12 @@ The following table lists the configurable parameters of the `authorizationk8sio
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:
 
 ```console
-$ helm install authorizationk8sio-subjectaccessreview-editor bytebuilders-ui/authorizationk8sio-subjectaccessreview-editor -n default --version=v0.1.0 --set apiVersion=authorization.k8s.io/v1
+$ helm install authorizationk8sio-subjectaccessreview-editor bytebuilders-ui-dev/authorizationk8sio-subjectaccessreview-editor -n default --set apiVersion=authorization.k8s.io/v1
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
 installing the chart. For example:
 
 ```console
-$ helm install authorizationk8sio-subjectaccessreview-editor bytebuilders-ui/authorizationk8sio-subjectaccessreview-editor -n default --version=v0.1.0 --values values.yaml
+$ helm install authorizationk8sio-subjectaccessreview-editor bytebuilders-ui-dev/authorizationk8sio-subjectaccessreview-editor -n default --values values.yaml
 ```

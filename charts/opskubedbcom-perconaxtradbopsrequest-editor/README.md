@@ -5,9 +5,9 @@
 ## TL;DR;
 
 ```console
-$ helm repo add bytebuilders-ui https://bundles.bytebuilders.dev/ui/
+$ helm repo add bytebuilders-ui-dev https://raw.githubusercontent.com/bytebuilders/ui-wizards/
 $ helm repo update
-$ helm install opskubedbcom-perconaxtradbopsrequest-editor bytebuilders-ui/opskubedbcom-perconaxtradbopsrequest-editor -n default --version=v0.1.0
+$ helm install opskubedbcom-perconaxtradbopsrequest-editor bytebuilders-ui-dev/opskubedbcom-perconaxtradbopsrequest-editor -n default
 ```
 
 ## Introduction
@@ -23,7 +23,7 @@ This chart deploys a PerconaXtraDBOpsRequest Editor on a [Kubernetes](http://kub
 To install the chart with the release name `opskubedbcom-perconaxtradbopsrequest-editor`:
 
 ```console
-$ helm install opskubedbcom-perconaxtradbopsrequest-editor bytebuilders-ui/opskubedbcom-perconaxtradbopsrequest-editor -n default --version=v0.1.0
+$ helm install opskubedbcom-perconaxtradbopsrequest-editor bytebuilders-ui-dev/opskubedbcom-perconaxtradbopsrequest-editor -n default
 ```
 
 The command deploys a PerconaXtraDBOpsRequest Editor on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
@@ -55,12 +55,12 @@ The following table lists the configurable parameters of the `opskubedbcom-perco
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:
 
 ```console
-$ helm install opskubedbcom-perconaxtradbopsrequest-editor bytebuilders-ui/opskubedbcom-perconaxtradbopsrequest-editor -n default --version=v0.1.0 --set apiVersion=ops.kubedb.com/v1alpha1
+$ helm install opskubedbcom-perconaxtradbopsrequest-editor bytebuilders-ui-dev/opskubedbcom-perconaxtradbopsrequest-editor -n default --set apiVersion=ops.kubedb.com/v1alpha1
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
 installing the chart. For example:
 
 ```console
-$ helm install opskubedbcom-perconaxtradbopsrequest-editor bytebuilders-ui/opskubedbcom-perconaxtradbopsrequest-editor -n default --version=v0.1.0 --values values.yaml
+$ helm install opskubedbcom-perconaxtradbopsrequest-editor bytebuilders-ui-dev/opskubedbcom-perconaxtradbopsrequest-editor -n default --values values.yaml
 ```
