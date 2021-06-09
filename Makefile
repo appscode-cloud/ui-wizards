@@ -393,7 +393,7 @@ ct: $(BUILD_DIRS)
 	    --env HTTPS_PROXY=$(HTTPS_PROXY)                        \
 	    --env KUBECONFIG=$(subst $(HOME),,$(KUBECONFIG))        \
 	    $(CHART_TEST_IMAGE)                                     \
-	    ct $(CT_COMMAND) --debug $(CT_ARGS)
+	    ct $(CT_COMMAND) --debug --validate-maintainers=false $(CT_ARGS)
 
 ADDTL_LINTERS   := goconst,gofmt,goimports,unparam
 
