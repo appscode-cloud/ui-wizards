@@ -5,9 +5,9 @@
 ## TL;DR;
 
 ```console
-$ helm repo add bytebuilders-ui https://bundles.bytebuilders.dev/ui/
+$ helm repo add bytebuilders-ui-dev https://raw.githubusercontent.com/bytebuilders/ui-wizards/
 $ helm repo update
-$ helm install apiregistrationk8sio-apiservice-editor bytebuilders-ui/apiregistrationk8sio-apiservice-editor -n default --version=v0.1.0
+$ helm install apiregistrationk8sio-apiservice-editor bytebuilders-ui-dev/apiregistrationk8sio-apiservice-editor -n default
 ```
 
 ## Introduction
@@ -23,7 +23,7 @@ This chart deploys a APIService Editor on a [Kubernetes](http://kubernetes.io) c
 To install the chart with the release name `apiregistrationk8sio-apiservice-editor`:
 
 ```console
-$ helm install apiregistrationk8sio-apiservice-editor bytebuilders-ui/apiregistrationk8sio-apiservice-editor -n default --version=v0.1.0
+$ helm install apiregistrationk8sio-apiservice-editor bytebuilders-ui-dev/apiregistrationk8sio-apiservice-editor -n default
 ```
 
 The command deploys a APIService Editor on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
@@ -54,12 +54,12 @@ The following table lists the configurable parameters of the `apiregistrationk8s
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:
 
 ```console
-$ helm install apiregistrationk8sio-apiservice-editor bytebuilders-ui/apiregistrationk8sio-apiservice-editor -n default --version=v0.1.0 --set apiVersion=apiregistration.k8s.io/v1
+$ helm install apiregistrationk8sio-apiservice-editor bytebuilders-ui-dev/apiregistrationk8sio-apiservice-editor -n default --set apiVersion=apiregistration.k8s.io/v1
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
 installing the chart. For example:
 
 ```console
-$ helm install apiregistrationk8sio-apiservice-editor bytebuilders-ui/apiregistrationk8sio-apiservice-editor -n default --version=v0.1.0 --values values.yaml
+$ helm install apiregistrationk8sio-apiservice-editor bytebuilders-ui-dev/apiregistrationk8sio-apiservice-editor -n default --values values.yaml
 ```

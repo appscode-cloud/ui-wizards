@@ -5,9 +5,9 @@
 ## TL;DR;
 
 ```console
-$ helm repo add bytebuilders-ui https://bundles.bytebuilders.dev/ui/
+$ helm repo add bytebuilders-ui-dev https://raw.githubusercontent.com/bytebuilders/ui-wizards/
 $ helm repo update
-$ helm install flowcontrolapiserverk8sio-flowschema-editor bytebuilders-ui/flowcontrolapiserverk8sio-flowschema-editor -n default --version=v0.1.0
+$ helm install flowcontrolapiserverk8sio-flowschema-editor bytebuilders-ui-dev/flowcontrolapiserverk8sio-flowschema-editor -n default
 ```
 
 ## Introduction
@@ -23,7 +23,7 @@ This chart deploys a FlowSchema Editor on a [Kubernetes](http://kubernetes.io) c
 To install the chart with the release name `flowcontrolapiserverk8sio-flowschema-editor`:
 
 ```console
-$ helm install flowcontrolapiserverk8sio-flowschema-editor bytebuilders-ui/flowcontrolapiserverk8sio-flowschema-editor -n default --version=v0.1.0
+$ helm install flowcontrolapiserverk8sio-flowschema-editor bytebuilders-ui-dev/flowcontrolapiserverk8sio-flowschema-editor -n default
 ```
 
 The command deploys a FlowSchema Editor on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
@@ -44,23 +44,23 @@ The command removes all the Kubernetes components associated with the chart and 
 
 The following table lists the configurable parameters of the `flowcontrolapiserverk8sio-flowschema-editor` chart and their default values.
 
-|     Parameter      | Description |                 Default                 |
-|--------------------|-------------|-----------------------------------------|
-| apiVersion         |             | `flowcontrol.apiserver.k8s.io/v1alpha1` |
-| kind               |             | `FlowSchema`                            |
-| metadata.name      |             | `flowschema`                            |
-| metadata.namespace |             | `default`                               |
+|     Parameter      | Description |                Default                 |
+|--------------------|-------------|----------------------------------------|
+| apiVersion         |             | `flowcontrol.apiserver.k8s.io/v1beta1` |
+| kind               |             | `FlowSchema`                           |
+| metadata.name      |             | `flowschema`                           |
+| metadata.namespace |             | `default`                              |
 
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:
 
 ```console
-$ helm install flowcontrolapiserverk8sio-flowschema-editor bytebuilders-ui/flowcontrolapiserverk8sio-flowschema-editor -n default --version=v0.1.0 --set apiVersion=flowcontrol.apiserver.k8s.io/v1alpha1
+$ helm install flowcontrolapiserverk8sio-flowschema-editor bytebuilders-ui-dev/flowcontrolapiserverk8sio-flowschema-editor -n default --set apiVersion=flowcontrol.apiserver.k8s.io/v1beta1
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
 installing the chart. For example:
 
 ```console
-$ helm install flowcontrolapiserverk8sio-flowschema-editor bytebuilders-ui/flowcontrolapiserverk8sio-flowschema-editor -n default --version=v0.1.0 --values values.yaml
+$ helm install flowcontrolapiserverk8sio-flowschema-editor bytebuilders-ui-dev/flowcontrolapiserverk8sio-flowschema-editor -n default --values values.yaml
 ```

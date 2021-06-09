@@ -5,9 +5,9 @@
 ## TL;DR;
 
 ```console
-$ helm repo add bytebuilders-ui https://bundles.bytebuilders.dev/ui/
+$ helm repo add bytebuilders-ui-dev https://raw.githubusercontent.com/bytebuilders/ui-wizards/
 $ helm repo update
-$ helm install certificatesk8sio-certificatesigningrequest-editor bytebuilders-ui/certificatesk8sio-certificatesigningrequest-editor -n default --version=v0.1.0
+$ helm install certificatesk8sio-certificatesigningrequest-editor bytebuilders-ui-dev/certificatesk8sio-certificatesigningrequest-editor -n default
 ```
 
 ## Introduction
@@ -23,7 +23,7 @@ This chart deploys a CertificateSigningRequest Editor on a [Kubernetes](http://k
 To install the chart with the release name `certificatesk8sio-certificatesigningrequest-editor`:
 
 ```console
-$ helm install certificatesk8sio-certificatesigningrequest-editor bytebuilders-ui/certificatesk8sio-certificatesigningrequest-editor -n default --version=v0.1.0
+$ helm install certificatesk8sio-certificatesigningrequest-editor bytebuilders-ui-dev/certificatesk8sio-certificatesigningrequest-editor -n default
 ```
 
 The command deploys a CertificateSigningRequest Editor on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
@@ -44,22 +44,23 @@ The command removes all the Kubernetes components associated with the chart and 
 
 The following table lists the configurable parameters of the `certificatesk8sio-certificatesigningrequest-editor` chart and their default values.
 
-|   Parameter   | Description |            Default            |
-|---------------|-------------|-------------------------------|
-| apiVersion    |             | `certificates.k8s.io/v1beta1` |
-| kind          |             | `CertificateSigningRequest`   |
-| metadata.name |             | `certificatesigningrequest`   |
+|     Parameter      | Description |           Default           |
+|--------------------|-------------|-----------------------------|
+| apiVersion         |             | `certificates.k8s.io/v1`    |
+| kind               |             | `CertificateSigningRequest` |
+| metadata.name      |             | `certificatesigningrequest` |
+| metadata.namespace |             | `default`                   |
 
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:
 
 ```console
-$ helm install certificatesk8sio-certificatesigningrequest-editor bytebuilders-ui/certificatesk8sio-certificatesigningrequest-editor -n default --version=v0.1.0 --set apiVersion=certificates.k8s.io/v1beta1
+$ helm install certificatesk8sio-certificatesigningrequest-editor bytebuilders-ui-dev/certificatesk8sio-certificatesigningrequest-editor -n default --set apiVersion=certificates.k8s.io/v1
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
 installing the chart. For example:
 
 ```console
-$ helm install certificatesk8sio-certificatesigningrequest-editor bytebuilders-ui/certificatesk8sio-certificatesigningrequest-editor -n default --version=v0.1.0 --values values.yaml
+$ helm install certificatesk8sio-certificatesigningrequest-editor bytebuilders-ui-dev/certificatesk8sio-certificatesigningrequest-editor -n default --values values.yaml
 ```

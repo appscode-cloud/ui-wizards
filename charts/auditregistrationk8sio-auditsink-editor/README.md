@@ -5,9 +5,9 @@
 ## TL;DR;
 
 ```console
-$ helm repo add bytebuilders-ui https://bundles.bytebuilders.dev/ui/
+$ helm repo add bytebuilders-ui-dev https://raw.githubusercontent.com/bytebuilders/ui-wizards/
 $ helm repo update
-$ helm install auditregistrationk8sio-auditsink-editor bytebuilders-ui/auditregistrationk8sio-auditsink-editor -n default --version=v0.1.0
+$ helm install auditregistrationk8sio-auditsink-editor bytebuilders-ui-dev/auditregistrationk8sio-auditsink-editor -n default
 ```
 
 ## Introduction
@@ -23,7 +23,7 @@ This chart deploys a AuditSink Editor on a [Kubernetes](http://kubernetes.io) cl
 To install the chart with the release name `auditregistrationk8sio-auditsink-editor`:
 
 ```console
-$ helm install auditregistrationk8sio-auditsink-editor bytebuilders-ui/auditregistrationk8sio-auditsink-editor -n default --version=v0.1.0
+$ helm install auditregistrationk8sio-auditsink-editor bytebuilders-ui-dev/auditregistrationk8sio-auditsink-editor -n default
 ```
 
 The command deploys a AuditSink Editor on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
@@ -55,12 +55,12 @@ The following table lists the configurable parameters of the `auditregistrationk
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:
 
 ```console
-$ helm install auditregistrationk8sio-auditsink-editor bytebuilders-ui/auditregistrationk8sio-auditsink-editor -n default --version=v0.1.0 --set apiVersion=auditregistration.k8s.io/v1alpha1
+$ helm install auditregistrationk8sio-auditsink-editor bytebuilders-ui-dev/auditregistrationk8sio-auditsink-editor -n default --set apiVersion=auditregistration.k8s.io/v1alpha1
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
 installing the chart. For example:
 
 ```console
-$ helm install auditregistrationk8sio-auditsink-editor bytebuilders-ui/auditregistrationk8sio-auditsink-editor -n default --version=v0.1.0 --values values.yaml
+$ helm install auditregistrationk8sio-auditsink-editor bytebuilders-ui-dev/auditregistrationk8sio-auditsink-editor -n default --values values.yaml
 ```

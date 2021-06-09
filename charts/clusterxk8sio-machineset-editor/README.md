@@ -5,9 +5,9 @@
 ## TL;DR;
 
 ```console
-$ helm repo add bytebuilders-ui https://bundles.bytebuilders.dev/ui/
+$ helm repo add bytebuilders-ui-dev https://raw.githubusercontent.com/bytebuilders/ui-wizards/
 $ helm repo update
-$ helm install clusterxk8sio-machineset-editor bytebuilders-ui/clusterxk8sio-machineset-editor -n default --version=v0.1.0
+$ helm install clusterxk8sio-machineset-editor bytebuilders-ui-dev/clusterxk8sio-machineset-editor -n default
 ```
 
 ## Introduction
@@ -23,7 +23,7 @@ This chart deploys a MachineSet Editor on a [Kubernetes](http://kubernetes.io) c
 To install the chart with the release name `clusterxk8sio-machineset-editor`:
 
 ```console
-$ helm install clusterxk8sio-machineset-editor bytebuilders-ui/clusterxk8sio-machineset-editor -n default --version=v0.1.0
+$ helm install clusterxk8sio-machineset-editor bytebuilders-ui-dev/clusterxk8sio-machineset-editor -n default
 ```
 
 The command deploys a MachineSet Editor on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
@@ -55,12 +55,12 @@ The following table lists the configurable parameters of the `clusterxk8sio-mach
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:
 
 ```console
-$ helm install clusterxk8sio-machineset-editor bytebuilders-ui/clusterxk8sio-machineset-editor -n default --version=v0.1.0 --set apiVersion=cluster.x-k8s.io/v1alpha3
+$ helm install clusterxk8sio-machineset-editor bytebuilders-ui-dev/clusterxk8sio-machineset-editor -n default --set apiVersion=cluster.x-k8s.io/v1alpha3
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
 installing the chart. For example:
 
 ```console
-$ helm install clusterxk8sio-machineset-editor bytebuilders-ui/clusterxk8sio-machineset-editor -n default --version=v0.1.0 --values values.yaml
+$ helm install clusterxk8sio-machineset-editor bytebuilders-ui-dev/clusterxk8sio-machineset-editor -n default --values values.yaml
 ```
