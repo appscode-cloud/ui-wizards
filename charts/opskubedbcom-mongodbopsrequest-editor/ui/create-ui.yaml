@@ -1,630 +1,638 @@
 steps:
-- form:
-    elements:
-    - label:
-        text: labels.op_req_name
-      required: true
-      schema:
-        $ref: schema#/properties/metadata/properties/name
-      type: input
-    - computed: initNamespace
-      fetch: getNamespaces
-      label:
-        text: labels.namespace
-      required: true
-      schema:
-        $ref: schema#/properties/metadata/properties/namespace
-      type: select
-    - computed: initDatabaseRef
-      fetch: getMongoDbs
-      label:
-        text: labels.databaseRef
-      required: true
-      schema:
-        $ref: schema#/properties/spec/properties/databaseRef/properties/name
-      type: select
-    - label:
-        text: labels.config_ops_request
-      type: label-element
-    - hasDescription: true
-      individualItemDisabilityCheck: disableOpsRequest
-      label:
-        text: labels.ops_request_type
-      onChange: onRequestTypeChange
-      options:
-      - description: options.Upgrade.description
-        text: options.Upgrade.text
-        value: Upgrade
-      - description: options.HorizontalScaling.description
-        text: options.HorizontalScaling.text
-        value: HorizontalScaling
-      - description: options.VerticalScaling.description
-        text: options.VerticalScaling.text
-        value: VerticalScaling
-      - description: options.VolumeExpansion.description
-        text: options.VolumeExpansion.text
-        value: VolumeExpansion
-      - description: options.Restart.description
-        text: options.Restart.text
-        value: Restart
-      - description: options.Reconfigure.description
-        text: options.Reconfigure.text
-        value: Reconfigure
-      - description: options.ReconfigureTLS.description
-        text: options.ReconfigureTLS.text
-        value: ReconfigureTLS
-      schema:
-        $ref: schema#/properties/spec/properties/type
-      type: radio
-    - fetch: getMongoDbVersions
-      if: ifRequestTypeEqualsTo|Upgrade
-      label:
-        text: labels.targetVersion
-      schema:
-        $ref: schema#/properties/spec/properties/upgrade/properties/targetVersion
-      type: select
-    - elements:
-      - if: ifDbTypeEqualsTo|replicaSet|horizontalScaling
-        label:
-          text: labels.replicas
-        schema:
-          $ref: schema#/properties/spec/properties/horizontalScaling/properties/replicas
-        type: input
-      - elements:
-        - elements:
-          - label:
-              text: labels.configServer
-            type: label-element
-          - label:
-              text: labels.replicas
-            schema:
-              $ref: schema#/properties/spec/properties/horizontalScaling/properties/configServer/properties/replicas
-            type: input
-          label:
-            text: Config Server horizontal Scaling
-          schema:
-            $ref: schema#/properties/spec/properties/horizontalScaling/properties/configServer
-          type: single-step-form
-        - elements:
-          - label:
-              text: labels.mongos
-            type: label-element
-          - label:
-              text: labels.replicas
-            schema:
-              $ref: schema#/properties/spec/properties/horizontalScaling/properties/mongos/properties/replicas
-            type: input
-          label:
-            text: Mongos horizontal Scaling
-          schema:
-            $ref: schema#/properties/spec/properties/horizontalScaling/properties/mongos
-          type: single-step-form
-        - elements:
-          - label:
-              text: labels.shard
-            type: label-element
-          - label:
-              text: labels.replicas
-            schema:
-              $ref: schema#/properties/spec/properties/horizontalScaling/properties/shard/properties/replicas
-            type: input
-          - label:
-              text: labels.shards
-            schema:
-              $ref: schema#/properties/spec/properties/horizontalScaling/properties/shard/properties/shards
-            type: input
-          label:
-            text: Shard horizontal Scaling
-          schema:
-            $ref: schema#/properties/spec/properties/horizontalScaling/properties/shard
-          type: single-step-form
-        if: ifDbTypeEqualsTo|sharded|horizontalScaling
-        label:
-          text: 'Sharded horizontal scaling '
-        type: single-step-form
-      if: ifRequestTypeEqualsTo|HorizontalScaling
-      label:
-        text: Horizontal Scaling Form
-      type: single-step-form
-    - elements:
-      - elements:
-        - alias: reusable_standalone_reources
-          chart:
-            name: uibytebuildersdev-component-resources
-            version: v0.2.0-alpha.0
-          label:
-            text: Standalone vertical scaling
-          moduleResolver: fetchJsons
-          schema:
-            $ref: schema#/properties/spec/properties/verticalScaling/properties/standalone
-          type: reusable-element
-        if: ifDbTypeEqualsTo|standalone|verticalScaling
-        schema:
-          $ref: schema#/properties/spec/properties/verticalScaling/properties/standalone
-        type: single-step-form
-      - elements:
-        - alias: reusable_replicaset_reources
-          chart:
-            name: uibytebuildersdev-component-resources
-            version: v0.2.0-alpha.0
-          label:
-            text: 'Replicaset vertical scaling '
-          moduleResolver: fetchJsons
-          schema:
-            $ref: schema#/properties/spec/properties/verticalScaling/properties/replicaSet
-          type: reusable-element
-        if: ifDbTypeEqualsTo|replicaSet|verticalScaling
-        schema:
-          $ref: schema#/properties/spec/properties/verticalScaling/properties/replicaSet
-        type: single-step-form
-      - elements:
-        - elements:
-          - alias: reusable_configserver_reources
-            chart:
-              name: uibytebuildersdev-component-resources
-              version: v0.2.0-alpha.0
-            label:
-              text: Config Server Vertical Scaling
-            moduleResolver: fetchJsons
-            schema:
-              $ref: schema#/properties/spec/properties/verticalScaling/properties/configServer
-            type: reusable-element
-          schema:
-            $ref: schema#/properties/spec/properties/verticalScaling/properties/configServer
-          type: single-step-form
-        - elements:
-          - alias: reusable_mongos_reources
-            chart:
-              name: uibytebuildersdev-component-resources
-              version: v0.2.0-alpha.0
-            label:
-              text: Mongos Vertical Scaling
-            moduleResolver: fetchJsons
-            schema:
-              $ref: schema#/properties/spec/properties/verticalScaling/properties/mongos
-            type: reusable-element
-          schema:
-            $ref: schema#/properties/spec/properties/verticalScaling/properties/mongos
-          type: single-step-form
-        - elements:
-          - alias: reusable_shard_reources
-            chart:
-              name: uibytebuildersdev-component-resources
-              version: v0.2.0-alpha.0
-            label:
-              text: Shard Vertical Scaling
-            moduleResolver: fetchJsons
-            schema:
-              $ref: schema#/properties/spec/properties/verticalScaling/properties/shard
-            type: reusable-element
-          schema:
-            $ref: schema#/properties/spec/properties/verticalScaling/properties/shard
-          type: single-step-form
-        if: ifDbTypeEqualsTo|sharded|verticalScaling
-        label:
-          text: 'Sharded vertical scaling '
-        type: single-step-form
-      if: ifRequestTypeEqualsTo|VerticalScaling
-      type: single-step-form
-    - elements:
-      - if: ifDbTypeEqualsTo|standalone|volumeExpansion
-        label:
-          text: labels.standalone
-        schema:
-          $ref: schema#/properties/spec/properties/volumeExpansion/properties/standalone
-        type: input
-      - if: ifDbTypeEqualsTo|replicaSet|volumeExpansion
-        label:
-          text: labels.replicaSet
-        schema:
-          $ref: schema#/properties/spec/properties/volumeExpansion/properties/replicaSet
-        type: input
-      - elements:
-        - label:
-            text: labels.configServer
-          schema:
-            $ref: schema#/properties/spec/properties/volumeExpansion/properties/configServer
-          type: input
-        - label:
-            text: labels.shard
-          schema:
-            $ref: schema#/properties/spec/properties/volumeExpansion/properties/shard
-          type: input
-        if: ifDbTypeEqualsTo|sharded|volumeExpansion
-        label:
-          text: Sharded volume expansion
-        type: single-step-form
-      if: ifRequestTypeEqualsTo|VolumeExpansion
-      label:
-        text: Volume Expansion Form
-      type: single-step-form
-    - elements:
-      - discriminator:
-          reconfigurationType:
-            type: string
-        elements:
-        - individualItemDisabilityCheck: disableReconfigurationType|standalone
-          label:
-            text: labels.reconfigurationType
-          onChange: onReconfigurationTypeChange|standalone
-          options:
-          - text: Select New Config Secret
-            value: selectNewConfigSecret
-          - text: Inline Config
-            value: inlineConfig
-          - text: Remove
-            value: remove
-          schema:
-            $ref: discriminator#/properties/reconfigurationType
-          type: radio
-        - elements:
-          - fetch: getConfigSecrets
-            label:
-              text: labels.configSecret
-            schema:
-              $ref: schema#/properties/spec/properties/configuration/properties/standalone/properties/configSecret/properties/name
-            type: select
-          if: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
-          label:
-            text: Standalone configuration config secret
-          schema:
-            $ref: schema#/properties/spec/properties/configuration/properties/standalone/properties/configSecret
-          type: single-step-form
-        - if: ifReconfigurationTypeEqualsTo|inlineConfig
-          label:
-            text: labels.inlineConfig
-          schema:
-            $ref: schema#/properties/spec/properties/configuration/properties/standalone/properties/inlineConfig
-          type: input
-        - if: returnFalse
-          label:
-            text: labels.removeCustomConfig
-          schema:
-            $ref: schema#/properties/spec/properties/configuration/properties/standalone/properties/removeCustomConfig
-          type: switch
-        - alias: pod_template_standalone
-          chart:
-            name: uibytebuildersdev-component-pod-template
-            version: v0.2.0-alpha.0
-          dataContext:
-            namespace:
-              $ref: schema#/properties/metadata/properties/namespace
-          if: showPodTemplate
-          moduleResolver: fetchJsons
-          schema:
-            $ref: schema#/properties/spec/properties/configuration/properties/standalone/properties/podTemplate
-          type: reusable-element
-        if: ifDbTypeEqualsTo|standalone|configuration
-        label:
-          text: labels.standalone
-        schema:
-          $ref: schema#/properties/spec/properties/configuration/properties/standalone
-        type: single-step-form
-      - discriminator:
-          reconfigurationType:
-            type: string
-        elements:
-        - individualItemDisabilityCheck: disableReconfigurationType|replicaSet
-          label:
-            text: labels.reconfigurationType
-          onChange: onReconfigurationTypeChange|replicaSet
-          options:
-          - text: Select New Config Secret
-            value: selectNewConfigSecret
-          - text: Inline Config
-            value: inlineConfig
-          - text: Remove
-            value: remove
-          schema:
-            $ref: discriminator#/properties/reconfigurationType
-          type: radio
-        - elements:
-          - fetch: getConfigSecrets
-            label:
-              text: labels.configSecret
-            schema:
-              $ref: schema#/properties/spec/properties/configuration/properties/replicaSet/properties/configSecret/properties/name
-            type: select
-          if: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
-          label:
-            text: Replica Set configuration config secret
-          schema:
-            $ref: schema#/properties/spec/properties/configuration/properties/replicaSet/properties/configSecret
-          type: single-step-form
-        - if: ifReconfigurationTypeEqualsTo|inlineConfig
-          label:
-            text: labels.inlineConfig
-          schema:
-            $ref: schema#/properties/spec/properties/configuration/properties/replicaSet/properties/inlineConfig
-          type: input
-        - if: returnFalse
-          label:
-            text: labels.removeCustomConfig
-          schema:
-            $ref: schema#/properties/spec/properties/configuration/properties/replicaSet/properties/removeCustomConfig
-          type: switch
-        - alias: pod_template_replicaset
-          chart:
-            name: uibytebuildersdev-component-pod-template
-            version: v0.2.0-alpha.0
-          dataContext:
-            namespace:
-              $ref: schema#/properties/metadata/properties/namespace
-          if: showPodTemplate
-          moduleResolver: fetchJsons
-          schema:
-            $ref: schema#/properties/spec/properties/configuration/properties/replicaSet/properties/podTemplate
-          type: reusable-element
-        if: ifDbTypeEqualsTo|replicaSet|configuration
-        label:
-          text: labels.replicaSet
-        schema:
-          $ref: schema#/properties/spec/properties/configuration/properties/replicaSet
-        type: single-step-form
-      - elements:
-        - discriminator:
-            reconfigurationType:
-              type: string
-          elements:
-          - individualItemDisabilityCheck: disableReconfigurationType|sharded|configServer
-            label:
-              text: labels.reconfigurationType
-            onChange: onReconfigurationTypeChange|configServer
-            options:
-            - text: Select New Config Secret
-              value: selectNewConfigSecret
-            - text: Inline Config
-              value: inlineConfig
-            - text: Remove
-              value: remove
-            schema:
-              $ref: discriminator#/properties/reconfigurationType
-            type: radio
-          - elements:
-            - fetch: getConfigSecrets
-              label:
-                text: labels.configSecret
-              schema:
-                $ref: schema#/properties/spec/properties/configuration/properties/configServer/properties/configSecret/properties/name
-              type: select
-            if: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
-            schema:
-              $ref: schema#/properties/spec/properties/configuration/properties/configServer/properties/configSecret
-            type: single-step-form
-          - if: ifReconfigurationTypeEqualsTo|inlineConfig
-            label:
-              text: labels.inlineConfig
-            schema:
-              $ref: schema#/properties/spec/properties/configuration/properties/configServer/properties/inlineConfig
-            type: input
-          - if: returnFalse
-            label:
-              text: labels.removeCustomConfig
-            schema:
-              $ref: schema#/properties/spec/properties/configuration/properties/configServer/properties/removeCustomConfig
-            type: switch
-          - alias: pod_template_configserver
-            chart:
-              name: uibytebuildersdev-component-pod-template
-              version: v0.2.0-alpha.0
-            dataContext:
-              namespace:
-                $ref: schema#/properties/metadata/properties/namespace
-            if: showPodTemplate
-            moduleResolver: fetchJsons
-            schema:
-              $ref: schema#/properties/spec/properties/configuration/properties/configServer/properties/podTemplate
-            type: reusable-element
-          label:
-            text: labels.configServer
-          schema:
-            $ref: schema#/properties/spec/properties/configuration/properties/configServer
-          type: single-step-form
-        - discriminator:
-            reconfigurationType:
-              type: string
-          elements:
-          - individualItemDisabilityCheck: disableReconfigurationType|sharded|mongos
-            label:
-              text: labels.reconfigurationType
-            onChange: onReconfigurationTypeChange|mongos
-            options:
-            - text: Select New Config Secret
-              value: selectNewConfigSecret
-            - text: Inline Config
-              value: inlineConfig
-            - text: Remove
-              value: remove
-            schema:
-              $ref: discriminator#/properties/reconfigurationType
-            type: radio
-          - elements:
-            - fetch: getConfigSecrets
-              label:
-                text: labels.configSecret
-              schema:
-                $ref: schema#/properties/spec/properties/configuration/properties/mongos/properties/configSecret/properties/name
-              type: select
-            if: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
-            schema:
-              $ref: schema#/properties/spec/properties/configuration/properties/mongos/properties/configSecret
-            type: single-step-form
-          - if: ifReconfigurationTypeEqualsTo|inlineConfig
-            label:
-              text: labels.inlineConfig
-            schema:
-              $ref: schema#/properties/spec/properties/configuration/properties/mongos/properties/inlineConfig
-            type: input
-          - if: returnFalse
-            label:
-              text: labels.removeCustomConfig
-            schema:
-              $ref: schema#/properties/spec/properties/configuration/properties/mongos/properties/removeCustomConfig
-            type: switch
-          - alias: pod_template_mongos
-            chart:
-              name: uibytebuildersdev-component-pod-template
-              version: v0.2.0-alpha.0
-            dataContext:
-              namespace:
-                $ref: schema#/properties/metadata/properties/namespace
-            if: showPodTemplate
-            moduleResolver: fetchJsons
-            schema:
-              $ref: schema#/properties/spec/properties/configuration/properties/mongos/properties/podTemplate
-            type: reusable-element
-          label:
-            text: labels.mongos
-          schema:
-            $ref: schema#/properties/spec/properties/configuration/properties/mongos
-          type: single-step-form
-        - discriminator:
-            reconfigurationType:
-              type: string
-          elements:
-          - individualItemDisabilityCheck: disableReconfigurationType|sharded|shard
-            label:
-              text: labels.reconfigurationType
-            onChange: onReconfigurationTypeChange|shard
-            options:
-            - text: Select New Config Secret
-              value: selectNewConfigSecret
-            - text: Inline Config
-              value: inlineConfig
-            - text: Remove
-              value: remove
-            schema:
-              $ref: discriminator#/properties/reconfigurationType
-            type: radio
-          - elements:
-            - fetch: getConfigSecrets
-              label:
-                text: labels.configSecret
-              schema:
-                $ref: schema#/properties/spec/properties/configuration/properties/shard/properties/configSecret/properties/name
-              type: select
-            if: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
-            schema:
-              $ref: schema#/properties/spec/properties/configuration/properties/shard/properties/configSecret
-            type: single-step-form
-          - if: ifReconfigurationTypeEqualsTo|inlineConfig
-            label:
-              text: labels.inlineConfig
-            schema:
-              $ref: schema#/properties/spec/properties/configuration/properties/shard/properties/inlineConfig
-            type: input
-          - if: returnFalse
-            label:
-              text: labels.removeCustomConfig
-            schema:
-              $ref: schema#/properties/spec/properties/configuration/properties/shard/properties/removeCustomConfig
-            type: switch
-          - alias: pod_template_shard
-            chart:
-              name: uibytebuildersdev-component-pod-template
-              version: v0.2.0-alpha.0
-            dataContext:
-              namespace:
-                $ref: schema#/properties/metadata/properties/namespace
-            if: showPodTemplate
-            moduleResolver: fetchJsons
-            schema:
-              $ref: schema#/properties/spec/properties/configuration/properties/shard/properties/podTemplate
-            type: reusable-element
-          label:
-            text: labels.shard
-          schema:
-            $ref: schema#/properties/spec/properties/configuration/properties/shard
-          type: single-step-form
-        if: ifDbTypeEqualsTo|sharded|configuration
-        label:
-          text: Sharded Reconfigure form
-        type: single-step-form
-      if: ifRequestTypeEqualsTo|Reconfigure
-      label:
-        text: Reconfigure Form
-      type: single-step-form
-    - discriminator:
-        tlsOperation:
-          type: string
+  - form:
       elements:
-      - computed: initTlsOperation
-        if: hasTlsField
-        label:
-          text: labels.tlsOperation
-        onChange: onTlsOperationChange
-        options:
-        - text: Update
-          value: update
-        - text: Rotate
-          value: rotate
-        - text: Remove
-          value: remove
-        schema:
-          $ref: discriminator#/properties/tlsOperation
-        type: radio
-      - if: returnFalse
-        schema:
-          $ref: schema#/properties/spec/properties/tls/properties/remove
-        type: switch
-      - if: returnFalse
-        schema:
-          $ref: schema#/properties/spec/properties/tls/properties/rotateCertificates
-        type: switch
-      - elements:
-        - computed: initIssuerRefApiGroup
-          disabled: true
-          label:
-            text: labels.api_group
-          schema:
-            $ref: schema#/properties/spec/properties/tls/properties/issuerRef/properties/apiGroup
-          type: input
         - label:
-            text: labels.kind
-          options:
-          - text: Issuer
-            value: Issuer
-          - text: ClusterIssuer
-            value: ClusterIssuer
-          required: isIssuerRefRequired
+            text: labels.op_req_name
+          required: true
           schema:
-            $ref: schema#/properties/spec/properties/tls/properties/issuerRef/properties/kind
-          type: select
-        - fetch: getIssuerRefsName
-          if: hasIssuerRefName
-          label:
-            text: labels.name
-          required: isIssuerRefRequired
-          schema:
-            $ref: schema#/properties/spec/properties/tls/properties/issuerRef/properties/name
-          type: select
-        - if: hasNoIssuerRefName
-          label:
-            text: labels.name
-          required: isIssuerRefRequired
-          schema:
-            $ref: schema#/properties/spec/properties/tls/properties/issuerRef/properties/name
+            $ref: schema#/properties/metadata/properties/name
           type: input
-        if: showIssuerRefAndCertificates
-        schema:
-          $ref: schema#/properties/spec/properties/tls/properties/issuerRef
-        type: single-step-form
-      - alias: reusable_certificates
-        chart:
-          name: uibytebuildersdev-component-certificates
-          version: v0.2.0-alpha.0
-        if: showIssuerRefAndCertificates
-        moduleResolver: fetchJsons
-        schema:
-          $ref: schema#/properties/spec/properties/tls/properties/certificates
-        type: reusable-element
-      if: ifRequestTypeEqualsTo|ReconfigureTLS
-      label:
-        text: labels.tls
-      schema:
-        $ref: schema#/properties/spec/properties/tls
+        - computed: initNamespace
+          fetch: getNamespaces
+          label:
+            text: labels.namespace
+          required: true
+          schema:
+            $ref: schema#/properties/metadata/properties/namespace
+          type: select
+        - computed: initDatabaseRef
+          fetch: getMongoDbs
+          label:
+            text: labels.databaseRef
+          required: true
+          schema:
+            $ref: schema#/properties/spec/properties/databaseRef/properties/name
+          type: select
+        - label:
+            text: labels.config_ops_request
+          type: label-element
+        - hasDescription: true
+          individualItemDisabilityCheck: disableOpsRequest
+          label:
+            text: labels.ops_request_type
+          onChange: onRequestTypeChange
+          options:
+            - description: options.Upgrade.description
+              text: options.Upgrade.text
+              value: Upgrade
+            - description: options.HorizontalScaling.description
+              text: options.HorizontalScaling.text
+              value: HorizontalScaling
+            - description: options.VerticalScaling.description
+              text: options.VerticalScaling.text
+              value: VerticalScaling
+            - description: options.VolumeExpansion.description
+              text: options.VolumeExpansion.text
+              value: VolumeExpansion
+            - description: options.Restart.description
+              text: options.Restart.text
+              value: Restart
+            - description: options.Reconfigure.description
+              text: options.Reconfigure.text
+              value: Reconfigure
+            - description: options.ReconfigureTLS.description
+              text: options.ReconfigureTLS.text
+              value: ReconfigureTLS
+          schema:
+            $ref: schema#/properties/spec/properties/type
+          type: radio
+        - fetch: getMongoDbVersions
+          if: ifRequestTypeEqualsTo|Upgrade
+          label:
+            text: labels.targetVersion
+          schema:
+            $ref: schema#/properties/spec/properties/upgrade/properties/targetVersion
+          type: select
+        - elements:
+            - if: ifDbTypeEqualsTo|replicaSet|horizontalScaling
+              label:
+                text: labels.replicas
+              schema:
+                $ref: schema#/properties/spec/properties/horizontalScaling/properties/replicas
+              type: input
+            - elements:
+                - elements:
+                    - label:
+                        text: labels.configServer
+                      type: label-element
+                    - label:
+                        text: labels.replicas
+                      schema:
+                        $ref: schema#/properties/spec/properties/horizontalScaling/properties/configServer/properties/replicas
+                      type: input
+                  label:
+                    text: Config Server horizontal Scaling
+                  schema:
+                    $ref: schema#/properties/spec/properties/horizontalScaling/properties/configServer
+                  type: single-step-form
+                - elements:
+                    - label:
+                        text: labels.mongos
+                      type: label-element
+                    - label:
+                        text: labels.replicas
+                      schema:
+                        $ref: schema#/properties/spec/properties/horizontalScaling/properties/mongos/properties/replicas
+                      type: input
+                  label:
+                    text: Mongos horizontal Scaling
+                  schema:
+                    $ref: schema#/properties/spec/properties/horizontalScaling/properties/mongos
+                  type: single-step-form
+                - elements:
+                    - label:
+                        text: labels.shard
+                      type: label-element
+                    - label:
+                        text: labels.replicas
+                      schema:
+                        $ref: schema#/properties/spec/properties/horizontalScaling/properties/shard/properties/replicas
+                      type: input
+                    - label:
+                        text: labels.shards
+                      schema:
+                        $ref: schema#/properties/spec/properties/horizontalScaling/properties/shard/properties/shards
+                      type: input
+                  label:
+                    text: Shard horizontal Scaling
+                  schema:
+                    $ref: schema#/properties/spec/properties/horizontalScaling/properties/shard
+                  type: single-step-form
+              if: ifDbTypeEqualsTo|sharded|horizontalScaling
+              label:
+                text: 'Sharded horizontal scaling '
+              type: single-step-form
+          if: ifRequestTypeEqualsTo|HorizontalScaling
+          label:
+            text: Horizontal Scaling Form
+          type: single-step-form
+        - elements:
+            - elements:
+                - alias: reusable_standalone_reources
+                  chart:
+                    name: uibytebuildersdev-component-resources
+                    version: v0.2.0-alpha.0
+                  label:
+                    text: Standalone vertical scaling
+                  moduleResolver: fetchJsons
+                  schema:
+                    $ref: schema#/properties/spec/properties/verticalScaling/properties/standalone
+                  show_label: true
+                  type: reusable-element
+              if: ifDbTypeEqualsTo|standalone|verticalScaling
+              schema:
+                $ref: schema#/properties/spec/properties/verticalScaling/properties/standalone
+              type: single-step-form
+            - elements:
+                - alias: reusable_replicaset_reources
+                  chart:
+                    name: uibytebuildersdev-component-resources
+                    version: v0.2.0-alpha.0
+                  label:
+                    text: 'Replicaset vertical scaling '
+                  moduleResolver: fetchJsons
+                  schema:
+                    $ref: schema#/properties/spec/properties/verticalScaling/properties/replicaSet
+                  show_label: true
+                  type: reusable-element
+              if: ifDbTypeEqualsTo|replicaSet|verticalScaling
+              schema:
+                $ref: schema#/properties/spec/properties/verticalScaling/properties/replicaSet
+              type: single-step-form
+            - elements:
+                - elements:
+                    - alias: reusable_configserver_reources
+                      chart:
+                        name: uibytebuildersdev-component-resources
+                        version: v0.2.0-alpha.0
+                      label:
+                        text: Config Server Vertical Scaling
+                      moduleResolver: fetchJsons
+                      schema:
+                        $ref: schema#/properties/spec/properties/verticalScaling/properties/configServer
+                      show_label: true
+                      type: reusable-element
+                  schema:
+                    $ref: schema#/properties/spec/properties/verticalScaling/properties/configServer
+                  type: single-step-form
+                - elements:
+                    - alias: reusable_mongos_reources
+                      chart:
+                        name: uibytebuildersdev-component-resources
+                        version: v0.2.0-alpha.0
+                      label:
+                        text: Mongos Vertical Scaling
+                      moduleResolver: fetchJsons
+                      schema:
+                        $ref: schema#/properties/spec/properties/verticalScaling/properties/mongos
+                      show_label: true
+                      type: reusable-element
+                  schema:
+                    $ref: schema#/properties/spec/properties/verticalScaling/properties/mongos
+                  type: single-step-form
+                - elements:
+                    - alias: reusable_shard_reources
+                      chart:
+                        name: uibytebuildersdev-component-resources
+                        version: v0.2.0-alpha.0
+                      label:
+                        text: Shard Vertical Scaling
+                      moduleResolver: fetchJsons
+                      schema:
+                        $ref: schema#/properties/spec/properties/verticalScaling/properties/shard
+                      show_label: true
+                      type: reusable-element
+                  schema:
+                    $ref: schema#/properties/spec/properties/verticalScaling/properties/shard
+                  type: single-step-form
+              if: ifDbTypeEqualsTo|sharded|verticalScaling
+              label:
+                text: 'Sharded vertical scaling '
+              type: single-step-form
+          if: ifRequestTypeEqualsTo|VerticalScaling
+          type: single-step-form
+        - elements:
+            - if: ifDbTypeEqualsTo|standalone|volumeExpansion
+              label:
+                text: labels.standalone
+              schema:
+                $ref: schema#/properties/spec/properties/volumeExpansion/properties/standalone
+              type: input
+            - if: ifDbTypeEqualsTo|replicaSet|volumeExpansion
+              label:
+                text: labels.replicaSet
+              schema:
+                $ref: schema#/properties/spec/properties/volumeExpansion/properties/replicaSet
+              type: input
+            - elements:
+                - label:
+                    text: labels.configServer
+                  schema:
+                    $ref: schema#/properties/spec/properties/volumeExpansion/properties/configServer
+                  type: input
+                - label:
+                    text: labels.shard
+                  schema:
+                    $ref: schema#/properties/spec/properties/volumeExpansion/properties/shard
+                  type: input
+              if: ifDbTypeEqualsTo|sharded|volumeExpansion
+              label:
+                text: Sharded volume expansion
+              type: single-step-form
+          if: ifRequestTypeEqualsTo|VolumeExpansion
+          label:
+            text: Volume Expansion Form
+          type: single-step-form
+        - elements:
+            - discriminator:
+                reconfigurationType:
+                  type: string
+              elements:
+                - individualItemDisabilityCheck: disableReconfigurationType|standalone
+                  label:
+                    text: labels.reconfigurationType
+                  onChange: onReconfigurationTypeChange|standalone
+                  options:
+                    - text: Select New Config Secret
+                      value: selectNewConfigSecret
+                    - text: Inline Config
+                      value: inlineConfig
+                    - text: Remove
+                      value: remove
+                  schema:
+                    $ref: discriminator#/properties/reconfigurationType
+                  type: radio
+                - elements:
+                    - fetch: getConfigSecrets
+                      label:
+                        text: labels.configSecret
+                      schema:
+                        $ref: schema#/properties/spec/properties/configuration/properties/standalone/properties/configSecret/properties/name
+                      type: select
+                  if: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
+                  label:
+                    text: Standalone configuration config secret
+                  schema:
+                    $ref: schema#/properties/spec/properties/configuration/properties/standalone/properties/configSecret
+                  type: single-step-form
+                - if: ifReconfigurationTypeEqualsTo|inlineConfig
+                  label:
+                    text: labels.inlineConfig
+                  schema:
+                    $ref: schema#/properties/spec/properties/configuration/properties/standalone/properties/inlineConfig
+                  type: input
+                - if: returnFalse
+                  label:
+                    text: labels.removeCustomConfig
+                  schema:
+                    $ref: schema#/properties/spec/properties/configuration/properties/standalone/properties/removeCustomConfig
+                  type: switch
+                - alias: pod_template_standalone
+                  chart:
+                    name: uibytebuildersdev-component-pod-template
+                    version: v0.2.0-alpha.0
+                  dataContext:
+                    namespace:
+                      $ref: schema#/properties/metadata/properties/namespace
+                  if: showPodTemplate
+                  moduleResolver: fetchJsons
+                  schema:
+                    $ref: schema#/properties/spec/properties/configuration/properties/standalone/properties/podTemplate
+                  type: reusable-element
+              if: ifDbTypeEqualsTo|standalone|configuration
+              label:
+                text: labels.standalone
+              schema:
+                $ref: schema#/properties/spec/properties/configuration/properties/standalone
+              show_label: true
+              type: single-step-form
+            - discriminator:
+                reconfigurationType:
+                  type: string
+              elements:
+                - individualItemDisabilityCheck: disableReconfigurationType|replicaSet
+                  label:
+                    text: labels.reconfigurationType
+                  onChange: onReconfigurationTypeChange|replicaSet
+                  options:
+                    - text: Select New Config Secret
+                      value: selectNewConfigSecret
+                    - text: Inline Config
+                      value: inlineConfig
+                    - text: Remove
+                      value: remove
+                  schema:
+                    $ref: discriminator#/properties/reconfigurationType
+                  type: radio
+                - elements:
+                    - fetch: getConfigSecrets
+                      label:
+                        text: labels.configSecret
+                      schema:
+                        $ref: schema#/properties/spec/properties/configuration/properties/replicaSet/properties/configSecret/properties/name
+                      type: select
+                  if: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
+                  label:
+                    text: Replica Set configuration config secret
+                  schema:
+                    $ref: schema#/properties/spec/properties/configuration/properties/replicaSet/properties/configSecret
+                  type: single-step-form
+                - if: ifReconfigurationTypeEqualsTo|inlineConfig
+                  label:
+                    text: labels.inlineConfig
+                  schema:
+                    $ref: schema#/properties/spec/properties/configuration/properties/replicaSet/properties/inlineConfig
+                  type: input
+                - if: returnFalse
+                  label:
+                    text: labels.removeCustomConfig
+                  schema:
+                    $ref: schema#/properties/spec/properties/configuration/properties/replicaSet/properties/removeCustomConfig
+                  type: switch
+                - alias: pod_template_replicaset
+                  chart:
+                    name: uibytebuildersdev-component-pod-template
+                    version: v0.2.0-alpha.0
+                  dataContext:
+                    namespace:
+                      $ref: schema#/properties/metadata/properties/namespace
+                  if: showPodTemplate
+                  moduleResolver: fetchJsons
+                  schema:
+                    $ref: schema#/properties/spec/properties/configuration/properties/replicaSet/properties/podTemplate
+                  type: reusable-element
+              if: ifDbTypeEqualsTo|replicaSet|configuration
+              label:
+                text: labels.replicaSet
+              schema:
+                $ref: schema#/properties/spec/properties/configuration/properties/replicaSet
+              show_label: true
+              type: single-step-form
+            - elements:
+                - discriminator:
+                    reconfigurationType:
+                      type: string
+                  elements:
+                    - individualItemDisabilityCheck: disableReconfigurationType|sharded|configServer
+                      label:
+                        text: labels.reconfigurationType
+                      onChange: onReconfigurationTypeChange|configServer
+                      options:
+                        - text: Select New Config Secret
+                          value: selectNewConfigSecret
+                        - text: Inline Config
+                          value: inlineConfig
+                        - text: Remove
+                          value: remove
+                      schema:
+                        $ref: discriminator#/properties/reconfigurationType
+                      type: radio
+                    - elements:
+                        - fetch: getConfigSecrets
+                          label:
+                            text: labels.configSecret
+                          schema:
+                            $ref: schema#/properties/spec/properties/configuration/properties/configServer/properties/configSecret/properties/name
+                          type: select
+                      if: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
+                      schema:
+                        $ref: schema#/properties/spec/properties/configuration/properties/configServer/properties/configSecret
+                      type: single-step-form
+                    - if: ifReconfigurationTypeEqualsTo|inlineConfig
+                      label:
+                        text: labels.inlineConfig
+                      schema:
+                        $ref: schema#/properties/spec/properties/configuration/properties/configServer/properties/inlineConfig
+                      type: input
+                    - if: returnFalse
+                      label:
+                        text: labels.removeCustomConfig
+                      schema:
+                        $ref: schema#/properties/spec/properties/configuration/properties/configServer/properties/removeCustomConfig
+                      type: switch
+                    - alias: pod_template_configserver
+                      chart:
+                        name: uibytebuildersdev-component-pod-template
+                        version: v0.2.0-alpha.0
+                      dataContext:
+                        namespace:
+                          $ref: schema#/properties/metadata/properties/namespace
+                      if: showPodTemplate
+                      moduleResolver: fetchJsons
+                      schema:
+                        $ref: schema#/properties/spec/properties/configuration/properties/configServer/properties/podTemplate
+                      type: reusable-element
+                  label:
+                    text: labels.configServer
+                  schema:
+                    $ref: schema#/properties/spec/properties/configuration/properties/configServer
+                  type: single-step-form
+                - discriminator:
+                    reconfigurationType:
+                      type: string
+                  elements:
+                    - individualItemDisabilityCheck: disableReconfigurationType|sharded|mongos
+                      label:
+                        text: labels.reconfigurationType
+                      onChange: onReconfigurationTypeChange|mongos
+                      options:
+                        - text: Select New Config Secret
+                          value: selectNewConfigSecret
+                        - text: Inline Config
+                          value: inlineConfig
+                        - text: Remove
+                          value: remove
+                      schema:
+                        $ref: discriminator#/properties/reconfigurationType
+                      type: radio
+                    - elements:
+                        - fetch: getConfigSecrets
+                          label:
+                            text: labels.configSecret
+                          schema:
+                            $ref: schema#/properties/spec/properties/configuration/properties/mongos/properties/configSecret/properties/name
+                          type: select
+                      if: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
+                      schema:
+                        $ref: schema#/properties/spec/properties/configuration/properties/mongos/properties/configSecret
+                      type: single-step-form
+                    - if: ifReconfigurationTypeEqualsTo|inlineConfig
+                      label:
+                        text: labels.inlineConfig
+                      schema:
+                        $ref: schema#/properties/spec/properties/configuration/properties/mongos/properties/inlineConfig
+                      type: input
+                    - if: returnFalse
+                      label:
+                        text: labels.removeCustomConfig
+                      schema:
+                        $ref: schema#/properties/spec/properties/configuration/properties/mongos/properties/removeCustomConfig
+                      type: switch
+                    - alias: pod_template_mongos
+                      chart:
+                        name: uibytebuildersdev-component-pod-template
+                        version: v0.2.0-alpha.0
+                      dataContext:
+                        namespace:
+                          $ref: schema#/properties/metadata/properties/namespace
+                      if: showPodTemplate
+                      moduleResolver: fetchJsons
+                      schema:
+                        $ref: schema#/properties/spec/properties/configuration/properties/mongos/properties/podTemplate
+                      type: reusable-element
+                  label:
+                    text: labels.mongos
+                  schema:
+                    $ref: schema#/properties/spec/properties/configuration/properties/mongos
+                  type: single-step-form
+                - discriminator:
+                    reconfigurationType:
+                      type: string
+                  elements:
+                    - individualItemDisabilityCheck: disableReconfigurationType|sharded|shard
+                      label:
+                        text: labels.reconfigurationType
+                      onChange: onReconfigurationTypeChange|shard
+                      options:
+                        - text: Select New Config Secret
+                          value: selectNewConfigSecret
+                        - text: Inline Config
+                          value: inlineConfig
+                        - text: Remove
+                          value: remove
+                      schema:
+                        $ref: discriminator#/properties/reconfigurationType
+                      type: radio
+                    - elements:
+                        - fetch: getConfigSecrets
+                          label:
+                            text: labels.configSecret
+                          schema:
+                            $ref: schema#/properties/spec/properties/configuration/properties/shard/properties/configSecret/properties/name
+                          type: select
+                      if: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
+                      schema:
+                        $ref: schema#/properties/spec/properties/configuration/properties/shard/properties/configSecret
+                      type: single-step-form
+                    - if: ifReconfigurationTypeEqualsTo|inlineConfig
+                      label:
+                        text: labels.inlineConfig
+                      schema:
+                        $ref: schema#/properties/spec/properties/configuration/properties/shard/properties/inlineConfig
+                      type: input
+                    - if: returnFalse
+                      label:
+                        text: labels.removeCustomConfig
+                      schema:
+                        $ref: schema#/properties/spec/properties/configuration/properties/shard/properties/removeCustomConfig
+                      type: switch
+                    - alias: pod_template_shard
+                      chart:
+                        name: uibytebuildersdev-component-pod-template
+                        version: v0.2.0-alpha.0
+                      dataContext:
+                        namespace:
+                          $ref: schema#/properties/metadata/properties/namespace
+                      if: showPodTemplate
+                      moduleResolver: fetchJsons
+                      schema:
+                        $ref: schema#/properties/spec/properties/configuration/properties/shard/properties/podTemplate
+                      type: reusable-element
+                  label:
+                    text: labels.shard
+                  schema:
+                    $ref: schema#/properties/spec/properties/configuration/properties/shard
+                  type: single-step-form
+              if: ifDbTypeEqualsTo|sharded|configuration
+              label:
+                text: Sharded Reconfigure form
+              show_label: true
+              type: single-step-form
+          if: ifRequestTypeEqualsTo|Reconfigure
+          label:
+            text: Reconfigure Form
+          type: single-step-form
+        - discriminator:
+            tlsOperation:
+              type: string
+          elements:
+            - computed: initTlsOperation
+              if: hasTlsField
+              label:
+                text: labels.tlsOperation
+              onChange: onTlsOperationChange
+              options:
+                - text: Update
+                  value: update
+                - text: Rotate
+                  value: rotate
+                - text: Remove
+                  value: remove
+              schema:
+                $ref: discriminator#/properties/tlsOperation
+              type: radio
+            - if: returnFalse
+              schema:
+                $ref: schema#/properties/spec/properties/tls/properties/remove
+              type: switch
+            - if: returnFalse
+              schema:
+                $ref: schema#/properties/spec/properties/tls/properties/rotateCertificates
+              type: switch
+            - elements:
+                - computed: initIssuerRefApiGroup
+                  disabled: true
+                  label:
+                    text: labels.api_group
+                  schema:
+                    $ref: schema#/properties/spec/properties/tls/properties/issuerRef/properties/apiGroup
+                  type: input
+                - label:
+                    text: labels.kind
+                  options:
+                    - text: Issuer
+                      value: Issuer
+                    - text: ClusterIssuer
+                      value: ClusterIssuer
+                  required: isIssuerRefRequired
+                  schema:
+                    $ref: schema#/properties/spec/properties/tls/properties/issuerRef/properties/kind
+                  type: select
+                - fetch: getIssuerRefsName
+                  if: hasIssuerRefName
+                  label:
+                    text: labels.name
+                  required: isIssuerRefRequired
+                  schema:
+                    $ref: schema#/properties/spec/properties/tls/properties/issuerRef/properties/name
+                  type: select
+                - if: hasNoIssuerRefName
+                  label:
+                    text: labels.name
+                  required: isIssuerRefRequired
+                  schema:
+                    $ref: schema#/properties/spec/properties/tls/properties/issuerRef/properties/name
+                  type: input
+              if: showIssuerRefAndCertificates
+              schema:
+                $ref: schema#/properties/spec/properties/tls/properties/issuerRef
+              type: single-step-form
+            - alias: reusable_certificates
+              chart:
+                name: uibytebuildersdev-component-certificates
+                version: v0.2.0-alpha.0
+              if: showIssuerRefAndCertificates
+              moduleResolver: fetchJsons
+              schema:
+                $ref: schema#/properties/spec/properties/tls/properties/certificates
+              type: reusable-element
+          if: ifRequestTypeEqualsTo|ReconfigureTLS
+          label:
+            text: labels.tls
+          schema:
+            $ref: schema#/properties/spec/properties/tls
+          type: single-step-form
       type: single-step-form
-    type: single-step-form
-  id: basic
-  title: steps.0.label
+    id: basic
+    title: steps.0.label
 type: multi-step-form
