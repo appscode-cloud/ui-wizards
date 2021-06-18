@@ -19,7 +19,7 @@ set -eou pipefail
 SCRIPT_ROOT=$(realpath $(dirname "${BASH_SOURCE[0]}"))
 SCRIPT_NAME=$(basename "${BASH_SOURCE[0]}")
 
-PR_BRANCH=master
+PR_BRANCH=autofixer-$(date +%s)
 COMMIT_MSG="Update charts"
 
 skip_trigger() {
@@ -56,6 +56,11 @@ if repo_uptodate; then
     exit 0
 fi
 
+git checkout -b $pr_branch
 git add --all
 git commit -a -s -m "$COMMIT_MSG" -m "/skip-trigger"
-git push -u origin $PR_BRANCH
+git push -u origin HEAD
+hub pull-request \
+    --labels automerge \
+    --message "$COMMIT_MSG" \
+    --message "$(git show -s --format=%b)"
