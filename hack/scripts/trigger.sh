@@ -56,7 +56,7 @@ if repo_uptodate; then
     exit 0
 fi
 
-git checkout -b $pr_branch
+git checkout -b $PR_BRANCH
 git add --all
 git commit -a -s -m "$COMMIT_MSG" -m "/skip-trigger"
 git push -u origin HEAD
