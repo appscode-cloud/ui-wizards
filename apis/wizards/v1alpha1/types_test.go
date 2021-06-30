@@ -26,7 +26,13 @@ import (
 
 func TestDefaultValues(t *testing.T) {
 	checker := schemachecker.New("../../..", []interface{}{
+		v1alpha1.KubedbcomElasticsearchEditorOptionsSpec{},
+		v1alpha1.KubedbcomMariadbEditorOptionsSpec{},
+		v1alpha1.KubedbcomMemcachedEditorOptionsSpec{},
 		v1alpha1.KubedbcomMongodbEditorOptionsSpec{},
+		v1alpha1.KubedbcomMysqlEditorOptionsSpec{},
+		v1alpha1.KubedbcomPostgresEditorOptionsSpec{},
+		v1alpha1.KubedbcomRedisEditorOptionsSpec{},
 	})
 	checker.TestAll(t)
 }
