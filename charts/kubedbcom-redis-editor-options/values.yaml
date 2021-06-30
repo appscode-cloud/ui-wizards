@@ -1,0 +1,69 @@
+# Default values for kubedbcom-redis-editor-options.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+metadata:
+  resource:
+    group: kubedb.com
+    kind: Redis
+    name: rediss
+    scope: Namespaced
+    version: v1alpha2
+  release:
+    # Release name
+    name: ""
+    # Release namespace
+    namespace: ""
+
+spec:
+  # List options
+  version: 3.4.17
+
+  # Annotations to add to the database custom resource
+  annotations: {}
+
+  # Labels to add to all the template objects
+  labels: {}
+
+  # Standalone, Replicaset, Sharded
+  mode: Standalone
+  replicas: 1
+  replicaSet:
+    name: rs0
+  shardTopology:
+    shard:
+      replicas: 3
+      shards: 3
+      persistence:
+        size: 10Gi
+    configServer:
+      replicas: 3
+      persistence:
+        size: 2Gi
+    mongos:
+      replicas: 3
+
+  # "keyFile", "sendKeyFile", "sendX509", "x509"
+  clusterAuthMode: keyFile
+
+  # "disabled", "allowSSL", "preferSSL", "requireSSL"
+  sslMode: disabled
+
+  terminationPolicy: WipeOut
+
+  storageClass:
+    name: standard
+
+  persistence:
+    size: 10Gi
+
+  machine: ""
+
+  resources:
+    limits:
+      cpu: ".5"
+      memory: 1024Mi
+
+  authSecret:
+    name: ""
+    password: ""
