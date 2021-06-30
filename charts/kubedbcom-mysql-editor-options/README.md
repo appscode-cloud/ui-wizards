@@ -47,8 +47,8 @@ The following table lists the configurable parameters of the `kubedbcom-mysql-ed
 |                    Parameter                     |                    Description                     |   Default    |
 |--------------------------------------------------|----------------------------------------------------|--------------|
 | metadata.resource.group                          |                                                    | `kubedb.com` |
-| metadata.resource.kind                           |                                                    | `MySQL`    |
-| metadata.resource.name                           |                                                    | `mysqls`   |
+| metadata.resource.kind                           |                                                    | `MySQL`      |
+| metadata.resource.name                           |                                                    | `mysqls`     |
 | metadata.resource.scope                          |                                                    | `Namespaced` |
 | metadata.resource.version                        |                                                    | `v1alpha2`   |
 | metadata.release.name                            | Release name                                       | `""`         |
