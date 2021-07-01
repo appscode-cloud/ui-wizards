@@ -56,7 +56,7 @@ type KubedbcomPostgresEditorOptionsSpecSpec struct {
 	AuthSecret        AuthSecret                `json:"authSecret"`
 }
 
-// +kubebuilder:validation:Enum=Standalone;Replicaset;Sharded
+// +kubebuilder:validation:Enum=Standalone;Cluster
 type PostgresMode string
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

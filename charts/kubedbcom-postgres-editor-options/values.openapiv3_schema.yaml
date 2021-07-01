@@ -53,13 +53,6 @@ properties:
             format: password
             type: string
         type: object
-      clusterAuthMode:
-        enum:
-        - keyFile
-        - sendKeyFile
-        - sendX509
-        - x509
-        type: string
       labels:
         additionalProperties:
           type: string
@@ -93,8 +86,7 @@ properties:
       mode:
         enum:
         - Standalone
-        - Replicaset
-        - Sharded
+        - Cluster
         type: string
       persistence:
         properties:
@@ -102,13 +94,6 @@ properties:
             type: string
         required:
         - size
-        type: object
-      replicaSet:
-        properties:
-          name:
-            type: string
-        required:
-        - name
         type: object
       replicas:
         type: integer
@@ -138,60 +123,6 @@ properties:
               value. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
             type: object
         type: object
-      shardTopology:
-        properties:
-          configServer:
-            properties:
-              persistence:
-                properties:
-                  size:
-                    type: string
-                required:
-                - size
-                type: object
-              replicas:
-                type: integer
-            required:
-            - persistence
-            - replicas
-            type: object
-          mongos:
-            properties:
-              replicas:
-                type: integer
-            required:
-            - replicas
-            type: object
-          shard:
-            properties:
-              persistence:
-                properties:
-                  size:
-                    type: string
-                required:
-                - size
-                type: object
-              replicas:
-                type: integer
-              shards:
-                type: integer
-            required:
-            - persistence
-            - replicas
-            - shards
-            type: object
-        required:
-        - configServer
-        - mongos
-        - shard
-        type: object
-      sslMode:
-        enum:
-        - disabled
-        - allowSSL
-        - preferSSL
-        - requireSSL
-        type: string
       storageClass:
         properties:
           name:
@@ -210,15 +141,11 @@ properties:
         type: string
     required:
     - authSecret
-    - clusterAuthMode
     - machine
     - mode
     - persistence
-    - replicaSet
     - replicas
     - resources
-    - shardTopology
-    - sslMode
     - storageClass
     - terminationPolicy
     - version

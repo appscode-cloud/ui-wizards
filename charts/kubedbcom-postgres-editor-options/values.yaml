@@ -17,7 +17,7 @@ metadata:
 
 spec:
   # List options
-  version: 3.4.17
+  version: 13.2-debian
 
   # Annotations to add to the database custom resource
   annotations: {}
@@ -25,29 +25,9 @@ spec:
   # Labels to add to all the template objects
   labels: {}
 
-  # Standalone, Replicaset, Sharded
-  mode: Standalone
-  replicas: 1
-  replicaSet:
-    name: rs0
-  shardTopology:
-    shard:
-      replicas: 3
-      shards: 3
-      persistence:
-        size: 10Gi
-    configServer:
-      replicas: 3
-      persistence:
-        size: 2Gi
-    mongos:
-      replicas: 3
-
-  # "keyFile", "sendKeyFile", "sendX509", "x509"
-  clusterAuthMode: keyFile
-
-  # "disabled", "allowSSL", "preferSSL", "requireSSL"
-  sslMode: disabled
+  # Standalone, Cluster
+  mode: Cluster
+  replicas: 3
 
   terminationPolicy: WipeOut
 
