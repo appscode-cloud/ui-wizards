@@ -46,12 +46,12 @@ type KubedbcomMongodbEditorOptionsSpecSpec struct {
 	// +optional
 	Labels            map[string]string         `json:"labels"`
 	Version           string                    `json:"version"`
-	Mode              MongodbMode               `json:"mode"`
+	Mode              MongoDBMode               `json:"mode"`
 	Replicas          int                       `json:"replicas"`
-	ReplicaSet        ReplicaSet                `json:"replicaSet"`
-	ShardTopology     ShardTopology             `json:"shardTopology"`
-	ClusterAuthMode   ClusterAuthMode           `json:"clusterAuthMode"`
-	SslMode           SSLMode                   `json:"sslMode"`
+	ReplicaSet        MongoDBReplicaSet         `json:"replicaSet"`
+	ShardTopology     MongoDBShardTopology      `json:"shardTopology"`
+	ClusterAuthMode   MongoDBClusterAuthMode    `json:"clusterAuthMode"`
+	SslMode           MongoDBSSLMode            `json:"sslMode"`
 	TerminationPolicy TerminationPolicy         `json:"terminationPolicy"`
 	StorageClass      StorageClass              `json:"storageClass"`
 	Persistence       Persistence               `json:"persistence"`
@@ -60,60 +60,38 @@ type KubedbcomMongodbEditorOptionsSpecSpec struct {
 	AuthSecret        AuthSecret                `json:"authSecret"`
 }
 
-// +kubebuilder:validation:Enum=db.t.micro;db.t.small;db.t.medium;db.t.large;db.t.xlarge;db.t.2xlarge;db.m.small;db.m.large;db.m.xlarge;db.m.2xlarge;db.m.4xlarge;db.m.8xlarge;db.m.12xlarge;db.m.16xlarge;db.m.24xlarge;db.r.large;db.r.xlarge;db.r.2xlarge;db.r.4xlarge;db.r.8xlarge;db.r.12xlarge;db.r.16xlarge;db.r.24xlarge
-type MachineType string
-
-// +kubebuilder:validation:Enum=Halt;Delete;WipeOut;DoNotTerminate
-type TerminationPolicy string
-
 // +kubebuilder:validation:Enum=Standalone;Replicaset;Sharded
-type MongodbMode string
+type MongoDBMode string
 
 // +kubebuilder:validation:Enum=keyFile;sendKeyFile;sendX509;x509
-type ClusterAuthMode string
+type MongoDBClusterAuthMode string
 
 // +kubebuilder:validation:Enum=disabled;allowSSL;preferSSL;requireSSL
-type SSLMode string
+type MongoDBSSLMode string
 
-type ReplicaSet struct {
+type MongoDBReplicaSet struct {
 	Name string `json:"name"`
 }
 
-type Persistence struct {
-	Size string `json:"size"`
-}
-
-type Shard struct {
+type MongoDBShard struct {
 	Replicas    int         `json:"replicas"`
 	Shards      int         `json:"shards"`
 	Persistence Persistence `json:"persistence"`
 }
 
-type ConfigServer struct {
+type MongoDBConfigServer struct {
 	Replicas    int         `json:"replicas"`
 	Persistence Persistence `json:"persistence"`
 }
 
-type Mongos struct {
+type MongoDBMongos struct {
 	Replicas int `json:"replicas"`
 }
 
-type ShardTopology struct {
-	Shard        Shard        `json:"shard"`
-	ConfigServer ConfigServer `json:"configServer"`
-	Mongos       Mongos       `json:"mongos"`
-}
-
-type StorageClass struct {
-	Name string `json:"name"`
-}
-
-type AuthSecret struct {
-	// +optional
-	Name string `json:"name"`
-	// +optional
-	// +kubebuilder:validation:Format:=password
-	Password string `json:"password"`
+type MongoDBShardTopology struct {
+	Shard        MongoDBShard        `json:"shard"`
+	ConfigServer MongoDBConfigServer `json:"configServer"`
+	Mongos       MongoDBMongos       `json:"mongos"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
