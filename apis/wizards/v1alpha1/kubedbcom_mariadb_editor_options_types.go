@@ -46,7 +46,6 @@ type KubedbcomMariadbEditorOptionsSpecSpec struct {
 	// +optional
 	Labels            map[string]string         `json:"labels"`
 	Version           string                    `json:"version"`
-	Mode              MariadbMode               `json:"mode"`
 	Replicas          int                       `json:"replicas"`
 	TerminationPolicy TerminationPolicy         `json:"terminationPolicy"`
 	StorageClass      StorageClass              `json:"storageClass"`
@@ -55,9 +54,6 @@ type KubedbcomMariadbEditorOptionsSpecSpec struct {
 	Resources         core.ResourceRequirements `json:"resources"`
 	AuthSecret        AuthSecret                `json:"authSecret"`
 }
-
-// +kubebuilder:validation:Enum=Standalone;Replicaset;Sharded
-type MariadbMode string
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
