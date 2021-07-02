@@ -48,7 +48,7 @@ The following table lists the configurable parameters of the `kubedbcom-redis-ed
 |--------------------------------------------------|----------------------------------------------------|--------------|
 | metadata.resource.group                          |                                                    | `kubedb.com` |
 | metadata.resource.kind                           |                                                    | `Redis`      |
-| metadata.resource.name                           |                                                    | `redises`     |
+| metadata.resource.name                           |                                                    | `redises`    |
 | metadata.resource.scope                          |                                                    | `Namespaced` |
 | metadata.resource.version                        |                                                    | `v1alpha2`   |
 | metadata.release.name                            | Release name                                       | `""`         |
