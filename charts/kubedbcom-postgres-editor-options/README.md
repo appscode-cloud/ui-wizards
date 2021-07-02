@@ -48,7 +48,7 @@ The following table lists the configurable parameters of the `kubedbcom-postgres
 |--------------------------------------------------|----------------------------------------------------|--------------|
 | metadata.resource.group                          |                                                    | `kubedb.com` |
 | metadata.resource.kind                           |                                                    | `Postgres`   |
-| metadata.resource.name                           |                                                    | `postgress`  |
+| metadata.resource.name                           |                                                    | `postgreses`  |
 | metadata.resource.scope                          |                                                    | `Namespaced` |
 | metadata.resource.version                        |                                                    | `v1alpha2`   |
 | metadata.release.name                            | Release name                                       | `""`         |

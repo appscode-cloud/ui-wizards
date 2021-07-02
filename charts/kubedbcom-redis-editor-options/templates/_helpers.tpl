@@ -35,7 +35,7 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 Selector labels
 */}}
 {{- define "kubedbcom-redis-editor-options.selectorLabels" -}}
-app.kubernetes.io/name: rediss.kubedb.com
+app.kubernetes.io/name: redises.kubedb.com
 app.kubernetes.io/instance: {{ include "kubedbcom-redis-editor-options.fullname" . }}
 {{- end }}
 
