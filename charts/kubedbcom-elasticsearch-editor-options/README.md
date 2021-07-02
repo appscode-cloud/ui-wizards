@@ -48,7 +48,7 @@ The following table lists the configurable parameters of the `kubedbcom-elastics
 |--------------------------------------------------|----------------------------------------------------|------------------|
 | metadata.resource.group                          |                                                    | `kubedb.com`     |
 | metadata.resource.kind                           |                                                    | `Elasticsearch`  |
-| metadata.resource.name                           |                                                    | `elasticsearchs` |
+| metadata.resource.name                           |                                                    | `elasticsearches` |
 | metadata.resource.scope                          |                                                    | `Namespaced`     |
 | metadata.resource.version                        |                                                    | `v1alpha2`       |
 | metadata.release.name                            | Release name                                       | `""`             |

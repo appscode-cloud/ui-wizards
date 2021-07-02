@@ -35,7 +35,7 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 Selector labels
 */}}
 {{- define "kubedbcom-elasticsearch-editor-options.selectorLabels" -}}
-app.kubernetes.io/name: elasticsearchs.kubedb.com
+app.kubernetes.io/name: elasticsearches.kubedb.com
 app.kubernetes.io/instance: {{ include "kubedbcom-elasticsearch-editor-options.fullname" . }}
 {{- end }}
 

@@ -35,7 +35,7 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 Selector labels
 */}}
 {{- define "kubedbcom-postgres-editor-options.selectorLabels" -}}
-app.kubernetes.io/name: postgress.kubedb.com
+app.kubernetes.io/name: postgreses.kubedb.com
 app.kubernetes.io/instance: {{ include "kubedbcom-postgres-editor-options.fullname" . }}
 {{- end }}
 
