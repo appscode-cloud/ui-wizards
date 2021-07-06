@@ -3,6 +3,7 @@
 {{- if and .Values.spec.machine (hasKey $machines .Values.spec.machine) }}
   {{- $res = get (get $machines .Values.spec.machine) "resources" }}
 {{- end }}
+{{- $pgv := (split "." .Values.spec.version)._0 | atoi -}}
 
 apiVersion: kubedb.com/v1alpha2
 kind: Postgres
@@ -21,7 +22,11 @@ spec:
   authSecret:
     name: {{ .Values.spec.authSecret.name }}
 {{- end }}
+{{- if ge $pgv 11 }}
   clientAuthMode: scram
+{{- else }}
+  clientAuthMode: md5
+{{- end }}
 {{- if eq .Values.spec.mode "Cluster" }}
   replicas: {{ .Values.spec.replicas }}
   standbyMode: Hot
