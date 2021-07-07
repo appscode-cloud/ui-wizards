@@ -1,5 +1,289 @@
-apiVersion: kubedb.com/v1alpha2
-kind: Elasticsearch
 metadata:
-  name: elasticsearch
-  namespace: default
+  resource:
+    group: kubedb.com
+    version: v1alpha2
+    name: elasticsearches
+    kind: Elasticsearch
+    scope: Namespaced
+  release:
+    name: RELEASE-NAME
+    namespace: default
+resources:
+  certManagerIoIssuer: # +doc-gen:break
+    apiVersion: cert-manager.io/v1
+    kind: Issuer
+    metadata:
+      name: elasticsearch
+      namespace: demo
+    spec:
+      selfSigned: {}
+  kubedbComElasticsearch: # +doc-gen:break
+    apiVersion: kubedb.com/v1alpha2
+    kind: Elasticsearch
+    metadata:
+      name: elasticsearch
+      namespace: demo
+    spec:
+      storageType: Durable
+      topology:
+        data:
+          replicas: 1
+          storage:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 1Gi
+            storageClassName: linode-block-storage
+        dataCold:
+          replicas: 1
+          storage:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 1Gi
+            storageClassName: linode-block-storage
+        dataContent:
+          replicas: 1
+          storage:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 1Gi
+            storageClassName: linode-block-storage
+        dataFrozen:
+          replicas: 1
+          storage:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 1Gi
+            storageClassName: linode-block-storage
+        dataHot:
+          replicas: 1
+          storage:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 1Gi
+            storageClassName: linode-block-storage
+        dataWarm:
+          replicas: 1
+          storage:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 1Gi
+            storageClassName: linode-block-storage
+        ingest:
+          replicas: 2
+          storage:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 1Gi
+            storageClassName: linode-block-storage
+        master:
+          replicas: 3
+          storage:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 1Gi
+            storageClassName: linode-block-storage
+        ml:
+          replicas: 1
+          storage:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 1Gi
+            storageClassName: linode-block-storage
+        transform:
+          replicas: 1
+          storage:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 1Gi
+            storageClassName: linode-block-storage
+      version: xpack-7.13.2
+  secret_admin_cred: # +doc-gen:break
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: elasticsearch-admin-cred
+      namespace: demo
+    stringData:
+      password: WeakPassword
+      username: kibanaserver
+    type: kubernetes.io/basic-auth
+  secret_auth: # +doc-gen:break
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: elasticsearch-auth
+      namespace: demo
+    stringData:
+      password: thisIs1StrongPassword
+      username: elastic
+    type: Opaque
+  secret_config: # +doc-gen:break
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: elasticsearch-config
+      namespace: demo
+    stringData:
+      elasticsearch.yml: 'node.processors: 2'
+  secret_kibanaro_cred: # +doc-gen:break
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: elasticsearch-kibanaro-cred
+      namespace: demo
+    stringData:
+      password: WeakPassword
+      username: kibanaserver
+    type: kubernetes.io/basic-auth
+  secret_kibanaserver_cred: # +doc-gen:break
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: elasticsearch-kibanaserver-cred
+      namespace: demo
+    stringData:
+      password: WeakPassword
+      username: kibanaserver
+    type: kubernetes.io/basic-auth
+  secret_logstash_cred: # +doc-gen:break
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: elasticsearch-logstash-cred
+      namespace: demo
+    stringData:
+      password: WeakPassword
+      username: kibanaserver
+    type: kubernetes.io/basic-auth
+  secret_readall_cred: # +doc-gen:break
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: elasticsearch-readall-cred
+      namespace: demo
+    stringData:
+      password: WeakPassword
+      username: kibanaserver
+    type: kubernetes.io/basic-auth
+  secret_snapshotrestore_cred: # +doc-gen:break
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: elasticsearch-snapshotrestore-cred
+      namespace: demo
+    stringData:
+      password: WeakPassword
+      username: kibanaserver
+    type: kubernetes.io/basic-auth
+  stashAppscodeComBackupConfiguration: # +doc-gen:break
+    apiVersion: stash.appscode.com/v1beta1
+    kind: BackupConfiguration
+    metadata:
+      name: elasticsearch
+      namespace: demo
+    spec:
+      interimVolumeTemplate:
+        metadata:
+          name: elasticsearch-backup-tmp-storage
+        spec:
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 1Gi
+          storageClassName: linode-block-storage
+      repository:
+        name: elasticsearch-repo
+      retentionPolicy:
+        keepLast: 5
+        name: keep-last-5
+        prune: true
+      runtimeSettings:
+        container:
+          securityContext:
+            runAsGroup: 0
+            runAsUser: 0
+      schedule: '*/5 * * * *'
+      target:
+        ref:
+          apiVersion: appcatalog.appscode.com/v1alpha1
+          kind: AppBinding
+          name: elasticsearch
+      task:
+        name: elasticsearch-backup-7.3.2
+  stashAppscodeComRepository_init_repo: # +doc-gen:break
+    apiVersion: stash.appscode.com/v1alpha1
+    kind: Repository
+    metadata:
+      name: elasticsearch-init-repo
+      namespace: demo
+    spec:
+      backend:
+        gcs:
+          bucket: kubedb-testing
+          prefix: /elasticsearch
+        storageSecretName: gcs-secret
+  stashAppscodeComRepository_repo: # +doc-gen:break
+    apiVersion: stash.appscode.com/v1alpha1
+    kind: Repository
+    metadata:
+      name: elasticsearch-repo
+      namespace: demo
+    spec:
+      backend:
+        gcs:
+          bucket: kubedb-testing
+          prefix: /elasticsearch
+        storageSecretName: gcs-secret
+  stashAppscodeComRestoreSession_init: # +doc-gen:break
+    apiVersion: stash.appscode.com/v1beta1
+    kind: RestoreSession
+    metadata:
+      name: elasticsearch-init
+      namespace: demo
+    spec:
+      interimVolumeTemplate:
+        metadata:
+          name: elasticsearch-init-tmp-storage
+        spec:
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 1Gi
+          storageClassName: linode-block-storage
+      repository:
+        name: elasticsearch-init-repo
+      rules:
+        - snapshots:
+            - latest
+      runtimeSettings:
+        container:
+          securityContext:
+            runAsGroup: 0
+            runAsUser: 0
+      target:
+        ref:
+          apiVersion: appcatalog.appscode.com/v1alpha1
+          kind: AppBinding
+          name: elasticsearch
