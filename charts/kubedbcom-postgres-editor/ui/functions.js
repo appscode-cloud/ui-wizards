@@ -377,6 +377,7 @@ function deleteDatabaseModePath({
   } else if (mode === "Standalone") {
     commit("wizard/model$delete", "/resources/kubedbComPostgres/spec/replicas");  
     commit("wizard/model$delete", "/resources/kubedbComPostgres/spec/standbyMode");
+    commit("wizard/model$delete", "/resources/kubedbComPostgres/spec/leaderElectiion");
   }
 }
 

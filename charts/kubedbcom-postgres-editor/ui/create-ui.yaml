@@ -113,6 +113,18 @@ steps:
       schema:
         $ref: schema#/properties/resources/properties/secret_auth
       type: single-step-form
+    - label:
+        text: labels.client_auth_mode
+      options:
+      - text: options.client_auth_mode.md5
+        value: md5
+      - text: options.client_auth_mode.scram
+        value: scram
+      - text: options.client_auth_mode.cert
+        value: cert
+      schema:
+        $ref: schema#/properties/resources/properties/kubedbComPostgres/properties/spec/properties/clientAuthMode
+      type: radio
     type: single-step-form
   id: basic
   title: steps.0.label
@@ -148,6 +160,32 @@ steps:
         schema:
           $ref: schema#/properties/resources/properties/kubedbComPostgres/properties/spec/properties/standbyMode
         type: radio
+      - elements:
+        - label: 
+            text: labels.electionTick
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComPostgres/properties/spec/properties/leaderElection/properties/electionTick
+          type: input
+        - label: 
+            text: labels.heartbeatTick
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComPostgres/properties/spec/properties/leaderElection/properties/heartbeatTick
+          type: input
+        - label: 
+            text: labels.maximumLagBeforeFailover
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComPostgres/properties/spec/properties/leaderElection/properties/maximumLagBeforeFailover
+          type: input
+        - label: 
+            text: labels.period
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComPostgres/properties/spec/properties/leaderElection/properties/period
+          type: input
+        label:
+          text: labels.leaderElection
+        schema:
+          $ref: schema#/properties/resources/properties/kubedbComPostgres/properties/spec/properties/leaderElection
+        type: single-step-form
       - label:
           text: labels.replicaset.number
         schema:
