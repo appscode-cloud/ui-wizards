@@ -5,9 +5,9 @@
 ## TL;DR;
 
 ```console
-$ helm repo add bytebuilders-ui-dev https://raw.githubusercontent.com/bytebuilders/ui-wizards/
+$ helm repo add bytebuilders-ui https://bundles.bytebuilders.dev/ui/
 $ helm repo update
-$ helm install stashappscodecom-restorebatch-editor bytebuilders-ui-dev/stashappscodecom-restorebatch-editor -n default
+$ helm install stashappscodecom-restorebatch-editor bytebuilders-ui/stashappscodecom-restorebatch-editor -n default
 ```
 
 ## Introduction
@@ -16,14 +16,14 @@ This chart deploys a RestoreBatch Editor on a [Kubernetes](http://kubernetes.io)
 
 ## Prerequisites
 
-- Kubernetes 1.14+
+- Kubernetes 1.16+
 
 ## Installing the Chart
 
 To install the chart with the release name `stashappscodecom-restorebatch-editor`:
 
 ```console
-$ helm install stashappscodecom-restorebatch-editor bytebuilders-ui-dev/stashappscodecom-restorebatch-editor -n default
+$ helm install stashappscodecom-restorebatch-editor bytebuilders-ui/stashappscodecom-restorebatch-editor -n default
 ```
 
 The command deploys a RestoreBatch Editor on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
@@ -55,12 +55,12 @@ The following table lists the configurable parameters of the `stashappscodecom-r
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:
 
 ```console
-$ helm install stashappscodecom-restorebatch-editor bytebuilders-ui-dev/stashappscodecom-restorebatch-editor -n default --set apiVersion=stash.appscode.com/v1beta1
+$ helm install stashappscodecom-restorebatch-editor bytebuilders-ui/stashappscodecom-restorebatch-editor -n default --set apiVersion=stash.appscode.com/v1beta1
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
 installing the chart. For example:
 
 ```console
-$ helm install stashappscodecom-restorebatch-editor bytebuilders-ui-dev/stashappscodecom-restorebatch-editor -n default --values values.yaml
+$ helm install stashappscodecom-restorebatch-editor bytebuilders-ui/stashappscodecom-restorebatch-editor -n default --values values.yaml
 ```

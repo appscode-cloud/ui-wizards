@@ -5,9 +5,9 @@
 ## TL;DR;
 
 ```console
-$ helm repo add bytebuilders-ui-dev https://raw.githubusercontent.com/bytebuilders/ui-wizards/
+$ helm repo add bytebuilders-ui https://bundles.bytebuilders.dev/ui/
 $ helm repo update
-$ helm install apiextensionsk8sio-customresourcedefinition-editor bytebuilders-ui-dev/apiextensionsk8sio-customresourcedefinition-editor -n default
+$ helm install apiextensionsk8sio-customresourcedefinition-editor bytebuilders-ui/apiextensionsk8sio-customresourcedefinition-editor -n default
 ```
 
 ## Introduction
@@ -16,14 +16,14 @@ This chart deploys a CustomResourceDefinition Editor on a [Kubernetes](http://ku
 
 ## Prerequisites
 
-- Kubernetes 1.14+
+- Kubernetes 1.16+
 
 ## Installing the Chart
 
 To install the chart with the release name `apiextensionsk8sio-customresourcedefinition-editor`:
 
 ```console
-$ helm install apiextensionsk8sio-customresourcedefinition-editor bytebuilders-ui-dev/apiextensionsk8sio-customresourcedefinition-editor -n default
+$ helm install apiextensionsk8sio-customresourcedefinition-editor bytebuilders-ui/apiextensionsk8sio-customresourcedefinition-editor -n default
 ```
 
 The command deploys a CustomResourceDefinition Editor on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
@@ -54,12 +54,12 @@ The following table lists the configurable parameters of the `apiextensionsk8sio
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:
 
 ```console
-$ helm install apiextensionsk8sio-customresourcedefinition-editor bytebuilders-ui-dev/apiextensionsk8sio-customresourcedefinition-editor -n default --set apiVersion=apiextensions.k8s.io/v1
+$ helm install apiextensionsk8sio-customresourcedefinition-editor bytebuilders-ui/apiextensionsk8sio-customresourcedefinition-editor -n default --set apiVersion=apiextensions.k8s.io/v1
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
 installing the chart. For example:
 
 ```console
-$ helm install apiextensionsk8sio-customresourcedefinition-editor bytebuilders-ui-dev/apiextensionsk8sio-customresourcedefinition-editor -n default --values values.yaml
+$ helm install apiextensionsk8sio-customresourcedefinition-editor bytebuilders-ui/apiextensionsk8sio-customresourcedefinition-editor -n default --values values.yaml
 ```
