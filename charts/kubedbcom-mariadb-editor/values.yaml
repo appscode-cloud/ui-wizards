@@ -9,15 +9,15 @@ metadata:
     name: RELEASE-NAME
     namespace: default
 resources:
-  certManagerIoIssuer_issuer: # +doc-gen:break
+  certManagerIoIssuer_ca: # +doc-gen:break
     apiVersion: cert-manager.io/v1beta1
     kind: Issuer
     metadata:
-      name: mariadb-issuer
+      name: mariadb-ca
       namespace: demo
     spec:
       ca:
-        secretName: md-ca
+        secretName: mariadb-ca
   kubedbComMariaDB: # +doc-gen:break
     apiVersion: kubedb.com/v1alpha2
     kind: MariaDB
@@ -40,6 +40,17 @@ resources:
               requests:
                 cpu: 100m
                 memory: 128Mi
+      podTemplate:
+        spec:
+          args:
+            - --character-set-server=utf8mb4
+          env:
+            - name: MYSQL_DATABASE
+              value: mdDB
+          resources:
+            requests:
+              cpu: 250m
+              memory: 1Gi
       replicas: 1
       requireSSL: true
       storage:
@@ -64,7 +75,7 @@ resources:
         issuerRef:
           apiGroup: cert-manager.io
           kind: Issuer
-          name: mariadb-issuer
+          name: mariadb-ca
       version: 10.5.8
   monitoringCoreosComServiceMonitor: # +doc-gen:break
     apiVersion: monitoring.coreos.com/v1
