@@ -5,9 +5,9 @@
 ## TL;DR;
 
 ```console
-$ helm repo add bytebuilders-ui-dev https://raw.githubusercontent.com/bytebuilders/ui-wizards/
+$ helm repo add bytebuilders-ui https://bundles.bytebuilders.dev/ui/
 $ helm repo update
-$ helm install stashappscodecom-backupconfiguration-editor bytebuilders-ui-dev/stashappscodecom-backupconfiguration-editor -n default
+$ helm install stashappscodecom-backupconfiguration-editor bytebuilders-ui/stashappscodecom-backupconfiguration-editor -n default
 ```
 
 ## Introduction
@@ -16,14 +16,14 @@ This chart deploys a BackupConfiguration Editor on a [Kubernetes](http://kuberne
 
 ## Prerequisites
 
-- Kubernetes 1.14+
+- Kubernetes 1.16+
 
 ## Installing the Chart
 
 To install the chart with the release name `stashappscodecom-backupconfiguration-editor`:
 
 ```console
-$ helm install stashappscodecom-backupconfiguration-editor bytebuilders-ui-dev/stashappscodecom-backupconfiguration-editor -n default
+$ helm install stashappscodecom-backupconfiguration-editor bytebuilders-ui/stashappscodecom-backupconfiguration-editor -n default
 ```
 
 The command deploys a BackupConfiguration Editor on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
@@ -55,12 +55,12 @@ The following table lists the configurable parameters of the `stashappscodecom-b
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:
 
 ```console
-$ helm install stashappscodecom-backupconfiguration-editor bytebuilders-ui-dev/stashappscodecom-backupconfiguration-editor -n default --set apiVersion=stash.appscode.com/v1beta1
+$ helm install stashappscodecom-backupconfiguration-editor bytebuilders-ui/stashappscodecom-backupconfiguration-editor -n default --set apiVersion=stash.appscode.com/v1beta1
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
 installing the chart. For example:
 
 ```console
-$ helm install stashappscodecom-backupconfiguration-editor bytebuilders-ui-dev/stashappscodecom-backupconfiguration-editor -n default --values values.yaml
+$ helm install stashappscodecom-backupconfiguration-editor bytebuilders-ui/stashappscodecom-backupconfiguration-editor -n default --values values.yaml
 ```
