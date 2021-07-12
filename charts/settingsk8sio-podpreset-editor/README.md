@@ -5,9 +5,9 @@
 ## TL;DR;
 
 ```console
-$ helm repo add bytebuilders-ui-dev https://raw.githubusercontent.com/bytebuilders/ui-wizards/
+$ helm repo add bytebuilders-ui https://bundles.bytebuilders.dev/ui/
 $ helm repo update
-$ helm install settingsk8sio-podpreset-editor bytebuilders-ui-dev/settingsk8sio-podpreset-editor -n default
+$ helm install settingsk8sio-podpreset-editor bytebuilders-ui/settingsk8sio-podpreset-editor -n default
 ```
 
 ## Introduction
@@ -16,14 +16,14 @@ This chart deploys a PodPreset Editor on a [Kubernetes](http://kubernetes.io) cl
 
 ## Prerequisites
 
-- Kubernetes 1.14+
+- Kubernetes 1.16+
 
 ## Installing the Chart
 
 To install the chart with the release name `settingsk8sio-podpreset-editor`:
 
 ```console
-$ helm install settingsk8sio-podpreset-editor bytebuilders-ui-dev/settingsk8sio-podpreset-editor -n default
+$ helm install settingsk8sio-podpreset-editor bytebuilders-ui/settingsk8sio-podpreset-editor -n default
 ```
 
 The command deploys a PodPreset Editor on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
@@ -55,12 +55,12 @@ The following table lists the configurable parameters of the `settingsk8sio-podp
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:
 
 ```console
-$ helm install settingsk8sio-podpreset-editor bytebuilders-ui-dev/settingsk8sio-podpreset-editor -n default --set apiVersion=settings.k8s.io/v1alpha1
+$ helm install settingsk8sio-podpreset-editor bytebuilders-ui/settingsk8sio-podpreset-editor -n default --set apiVersion=settings.k8s.io/v1alpha1
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
 installing the chart. For example:
 
 ```console
-$ helm install settingsk8sio-podpreset-editor bytebuilders-ui-dev/settingsk8sio-podpreset-editor -n default --values values.yaml
+$ helm install settingsk8sio-podpreset-editor bytebuilders-ui/settingsk8sio-podpreset-editor -n default --values values.yaml
 ```
