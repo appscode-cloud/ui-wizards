@@ -92,13 +92,7 @@ steps:
       type: input
     - label:
         text: labels.client_auth_mode
-      options:
-      - text: options.client_auth_mode.md5
-        value: md5
-      - text: options.client_auth_mode.scram
-        value: scram
-      - text: options.client_auth_mode.cert
-        value: cert
+      fetch: getClientAuthModes
       schema:
         $ref: schema#/properties/resources/properties/kubedbComPostgres/properties/spec/properties/clientAuthMode
       type: radio
@@ -128,6 +122,25 @@ steps:
         schema:
           $ref: discriminator#/activeDatabaseMode
         type: radio
+      - if: isEqualToDatabaseMode|Cluster
+        label:
+          text: labels.replicaset.number
+        schema:
+          $ref: schema#/properties/resources/properties/kubedbComPostgres/properties/spec/properties/replicas
+        type: input
+      - elements:
+        - fetch: getStorageClassNames|common
+          label:
+            text: labels.storage.class
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComPostgres/properties/spec/properties/storage/properties/storageClassName
+          type: select
+        - label:
+            text: labels.storage.size
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComPostgres/properties/spec/properties/storage/properties/resources/properties/requests/properties/storage
+          type: input
+        type: single-step-form
       - elements:
         - label:
             text: labels.standbyMode
@@ -140,7 +153,8 @@ steps:
             $ref: schema#/properties/resources/properties/kubedbComPostgres/properties/spec/properties/standbyMode
           type: radio
         - elements:
-          - label:
+          - customClass: mt-10
+            label: 
               text: labels.electionTick
             schema:
               $ref: schema#/properties/resources/properties/kubedbComPostgres/properties/spec/properties/leaderElection/properties/electionTick
@@ -162,28 +176,12 @@ steps:
             type: input
           label:
             text: labels.leaderElection
+          show_label: true
+          hideFrom: true
           schema:
             $ref: schema#/properties/resources/properties/kubedbComPostgres/properties/spec/properties/leaderElection
           type: single-step-form
-        - label:
-            text: labels.replicaset.number
-          schema:
-            $ref: schema#/properties/resources/properties/kubedbComPostgres/properties/spec/properties/replicas
-          type: input
         if: isEqualToDatabaseMode|Cluster
-        type: single-step-form
-      - elements:
-        - fetch: getStorageClassNames|common
-          label:
-            text: labels.storage.class
-          schema:
-            $ref: schema#/properties/resources/properties/kubedbComPostgres/properties/spec/properties/storage/properties/storageClassName
-          type: select
-        - label:
-            text: labels.storage.size
-          schema:
-            $ref: schema#/properties/resources/properties/kubedbComPostgres/properties/spec/properties/storage/properties/resources/properties/requests/properties/storage
-          type: input
         type: single-step-form
       type: single-step-form
     type: single-step-form
@@ -220,7 +218,7 @@ steps:
           value: verify-full
         schema:
           $ref: schema#/properties/resources/properties/kubedbComPostgres/properties/spec/properties/sslMode
-        type: radio
+        type: select
       - elements:
         - computed: setApiGroup
           disabled: true
@@ -1178,6 +1176,8 @@ steps:
         elements:
         - computed: setConfigurationSource
           disabled: true
+          label:
+            text: labels.custom_config
           onChange: onConfigurationSourceChange
           options:
           - text: options.configuration_source.use_existing_config.label

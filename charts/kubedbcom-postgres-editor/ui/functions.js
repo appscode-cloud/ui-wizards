@@ -206,6 +206,14 @@ async function unNamespacedResourceNames(
   });
 }
 
+function returnTrue() {
+  return true;
+}
+
+function returnStringYes() {
+  return "yes";
+}
+
 // ************************* Basic Info **********************************************
 async function getPostgresVersions(
   { axios, storeGet },
@@ -299,6 +307,42 @@ function showNewSecretCreateField({
     });
   }
   return resp;
+}
+
+function getClientAuthModes({
+  model,
+  getValue,
+  watchDependency,
+}) {
+  watchDependency("model#/resources/kubedbComPostgres/spec/version");
+
+  const version = getValue(model, "/resources/kubedbComPostgres/spec/version")
+  // major version section from version
+  const major = parseInt(version && version.split(".")[0]);
+
+  const options = ["md5", "cert"];
+
+  if(major >= 11) {
+    options.push("scram");
+  }
+
+  return options.map((item) => ({text: item, value: item }));
+}
+
+function onVersionChange({
+  model,
+  getValue,
+  commit,
+}) {
+  const version = getValue(model, "/resources/kubedbComPostgres/spec/version");
+  const major = parseInt(version && version.split(".")[0]);
+  const defaultValue = major >= 11 ? "scram" : "md5";
+
+  commit("wizard/model$update", {
+    path: "/resources/kubedbComPostgres/spec/clientAuthMode",
+    value: defaultValue,
+    force: true,
+  });
 }
 
 // ********************* Database Mode ***********************
@@ -1970,11 +2014,15 @@ return {
 	getNamespacedResourceList,
 	getResourceList,
 	resourceNames,
-	unNamespacedResourceNames,
+  unNamespacedResourceNames,
+  returnTrue,
+  returnStringYes,
 	getPostgresVersions,
 	showAuthPasswordField,
 	showAuthSecretField,
 	showNewSecretCreateField,
+  getClientAuthModes,
+  onVersionChange,
 	setDatabaseMode,
 	getStorageClassNames,
 	deleteDatabaseModePath,
