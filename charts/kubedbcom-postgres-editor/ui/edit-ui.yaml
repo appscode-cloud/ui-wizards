@@ -90,9 +90,9 @@ steps:
       schema:
         $ref: schema#/properties/resources/properties/secret_auth/properties/data/properties/username
       type: input
-    - label:
+    - fetch: getClientAuthModes
+      label:
         text: labels.client_auth_mode
-      fetch: getClientAuthModes
       schema:
         $ref: schema#/properties/resources/properties/kubedbComPostgres/properties/spec/properties/clientAuthMode
       type: radio
@@ -154,7 +154,7 @@ steps:
           type: radio
         - elements:
           - customClass: mt-10
-            label: 
+            label:
               text: labels.electionTick
             schema:
               $ref: schema#/properties/resources/properties/kubedbComPostgres/properties/spec/properties/leaderElection/properties/electionTick
@@ -174,12 +174,12 @@ steps:
             schema:
               $ref: schema#/properties/resources/properties/kubedbComPostgres/properties/spec/properties/leaderElection/properties/period
             type: input
+          hideFrom: true
           label:
             text: labels.leaderElection
-          show_label: true
-          hideFrom: true
           schema:
             $ref: schema#/properties/resources/properties/kubedbComPostgres/properties/spec/properties/leaderElection
+          show_label: true
           type: single-step-form
         if: isEqualToDatabaseMode|Cluster
         type: single-step-form
