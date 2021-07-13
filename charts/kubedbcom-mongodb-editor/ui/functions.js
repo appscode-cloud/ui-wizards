@@ -232,6 +232,14 @@ async function unNamespacedResourceNames(
   });
 }
 
+function returnTrue() {
+  return true;
+}
+
+function returnStringYes() {
+  return "yes";
+}
+
 // ************************* Basic Info **********************************************
 async function getMongoDbVersions(
   { axios, storeGet },
@@ -2527,7 +2535,9 @@ return {
 	getNamespacedResourceList,
 	getResourceList,
 	resourceNames,
-	unNamespacedResourceNames,
+  unNamespacedResourceNames,
+  returnTrue,
+  returnStringYes,
 	getMongoDbVersions,
 	showAuthPasswordField,
 	showAuthSecretField,
