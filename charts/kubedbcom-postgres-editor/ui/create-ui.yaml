@@ -114,9 +114,9 @@ steps:
       schema:
         $ref: schema#/properties/resources/properties/secret_auth
       type: single-step-form
-    - label:
+    - fetch: getClientAuthModes
+      label:
         text: labels.client_auth_mode
-      fetch: getClientAuthModes
       schema:
         $ref: schema#/properties/resources/properties/kubedbComPostgres/properties/spec/properties/clientAuthMode
       type: radio
@@ -162,7 +162,7 @@ steps:
         schema:
           $ref: schema#/properties/resources/properties/kubedbComPostgres/properties/spec/properties/storage/properties/resources/properties/requests/properties/storage
         type: input
-      type: single-step-form  
+      type: single-step-form
     - elements:
       - label:
           text: labels.standbyMode
@@ -176,7 +176,7 @@ steps:
         type: radio
       - elements:
         - customClass: mt-10
-          label: 
+          label:
             text: labels.electionTick
           schema:
             $ref: schema#/properties/resources/properties/kubedbComPostgres/properties/spec/properties/leaderElection/properties/electionTick
@@ -196,16 +196,15 @@ steps:
           schema:
             $ref: schema#/properties/resources/properties/kubedbComPostgres/properties/spec/properties/leaderElection/properties/period
           type: input
+        hideForm: true
         label:
           text: labels.leaderElection
-        show_label: true
-        hideForm: true
         schema:
           $ref: schema#/properties/resources/properties/kubedbComPostgres/properties/spec/properties/leaderElection
+        show_label: true
         type: single-step-form
       if: isEqualToDatabaseMode|Cluster
       type: single-step-form
-    
     type: single-step-form
   id: topology
   title: steps.1.label
