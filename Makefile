@@ -223,9 +223,7 @@ gen-values-schema: $(BUILD_DIRS)
 		if [ ! -f $${crd_file} ]; then \
 			continue; \
 		fi; \
-		yq r $${crd_file} spec.versions[0].schema.openAPIV3Schema.properties.spec > bin/values.openapiv3_schema.yaml; \
-		yq d bin/values.openapiv3_schema.yaml description > charts/$${dir}/values.openapiv3_schema.yaml; \
-		rm -rf bin/values.openapiv3_schema.yaml; \
+		yq -y --indentless '.spec.versions[0].schema.openAPIV3Schema.properties.spec | del(.description)' $${crd_file} > charts/$${dir}/values.openapiv3_schema.yaml; \
 	done
 
 .PHONY: gen-chart-doc
@@ -264,14 +262,14 @@ chart-%:
 
 chart-contents-%:
 	@if test -f "./charts/$*/doc.yaml"; then \
-		yq w -i ./charts/$*/doc.yaml repository.name --tag '!!str' $(CHART_REGISTRY); \
-		yq w -i ./charts/$*/doc.yaml repository.url --tag '!!str' $(CHART_REGISTRY_URL); \
+	  yq -y --indentless -i '.repository.name="$(CHART_REGISTRY)"' ./charts/$*/doc.yaml; \
+	  yq -y --indentless -i '.repository.url="$(CHART_REGISTRY_URL)"' ./charts/$*/doc.yaml; \
 	fi
-	@if [ ! -z "$(CHART_VERSION)" ]; then                                         \
-		yq w -i ./charts/$*/Chart.yaml version --tag '!!str' $(CHART_VERSION);    \
+	@if [ -n "$(CHART_VERSION)" ]; then \
+		yq -y --indentless -i '.version="$(CHART_VERSION)"' ./charts/$*/Chart.yaml; \
 	fi
-	@if [ ! -z "$(APP_VERSION)" ]; then                                           \
-		yq w -i ./charts/$*/Chart.yaml appVersion --tag '!!str' $(APP_VERSION);   \
+	@if [ -n "$(APP_VERSION)" ]; then \
+		yq -y --indentless -i '.appVersion="$(APP_VERSION)"' ./charts/$*/Chart.yaml; \
 	fi
 
 .PHONY: package-charts
