@@ -44,25 +44,27 @@ The command removes all the Kubernetes components associated with the chart and 
 
 The following table lists the configurable parameters of the `kubedbcom-mariadb-editor-options` chart and their default values.
 
-|          Parameter           |    Description    |   Default    |
-|------------------------------|-------------------|--------------|
-| metadata.resource.group      |                   | `kubedb.com` |
-| metadata.resource.kind       |                   | `MariaDB`    |
-| metadata.resource.name       |                   | `mariadbs`   |
-| metadata.resource.scope      |                   | `Namespaced` |
-| metadata.resource.version    |                   | `v1alpha2`   |
-| metadata.release.name        | Release name      | `""`         |
-| metadata.release.namespace   | Release namespace | `""`         |
-| spec.version                 | List options      | `10.5.8`     |
-| spec.replicas                |                   | `1`          |
-| spec.terminationPolicy       |                   | `WipeOut`    |
-| spec.storageClass.name       |                   | `standard`   |
-| spec.persistence.size        |                   | `10Gi`       |
-| spec.machine                 |                   | `""`         |
-| spec.resources.limits.cpu    |                   | `".5"`       |
-| spec.resources.limits.memory |                   | `1024Mi`     |
-| spec.authSecret.name         |                   | `""`         |
-| spec.authSecret.password     |                   | `""`         |
+|          Parameter           |                    Description                     |   Default    |
+|------------------------------|----------------------------------------------------|--------------|
+| metadata.resource.group      |                                                    | `kubedb.com` |
+| metadata.resource.kind       |                                                    | `MariaDB`    |
+| metadata.resource.name       |                                                    | `mariadbs`   |
+| metadata.resource.scope      |                                                    | `Namespaced` |
+| metadata.resource.version    |                                                    | `v1alpha2`   |
+| metadata.release.name        | Release name                                       | `""`         |
+| metadata.release.namespace   | Release namespace                                  | `""`         |
+| spec.version                 | List options                                       | `10.5.8`     |
+| spec.annotations             | Annotations to add to the database custom resource | `{}`         |
+| spec.labels                  | Labels to add to all the template objects          | `{}`         |
+| spec.replicas                |                                                    | `1`          |
+| spec.terminationPolicy       |                                                    | `WipeOut`    |
+| spec.storageClass.name       |                                                    | `standard`   |
+| spec.persistence.size        |                                                    | `10Gi`       |
+| spec.machine                 |                                                    | `""`         |
+| spec.resources.limits.cpu    |                                                    | `".5"`       |
+| spec.resources.limits.memory |                                                    | `1024Mi`     |
+| spec.authSecret.name         |                                                    | `""`         |
+| spec.authSecret.password     |                                                    | `""`         |
 
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:
