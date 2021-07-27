@@ -1556,7 +1556,7 @@ function onNamespaceChange({ commit, model, getValue }) {
 function onLabelChange({ commit, model, getValue }) {
   const labels = getValue(
     model,
-    "/resources/appApplication/spec/selector/matchLabels"
+    "/resources/kubedbComPostgres/spec/metadata/labels"
   );
 
   const agent = getValue(
@@ -1584,7 +1584,7 @@ function onNameChange({ commit, model, getValue }) {
 
   const labels = getValue(
     model,
-    "/resources/appApplication/spec/selector/matchLabels"
+    "/resources/kubedbComPostgres/spec/metadata/labels"
   );
 
   if (agent === "prometheus.io") {

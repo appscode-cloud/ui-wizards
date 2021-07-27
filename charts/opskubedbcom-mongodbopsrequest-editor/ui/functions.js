@@ -1075,6 +1075,11 @@ async function isIssuerRefRequired({
   return !hasTls;
 }
 
+function getRequestTypeFromRoute({ route }) {
+  const { query } = route || {};
+  const { requestType } = query || {};
+  return requestType || "";
+}
 
 return {
 	fetchJsons,
@@ -1131,5 +1136,6 @@ return {
 	initTlsOperation,
 	onTlsOperationChange,
 	showIssuerRefAndCertificates,
-	isIssuerRefRequired
+  isIssuerRefRequired,
+  getRequestTypeFromRoute
 }
