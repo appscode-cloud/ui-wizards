@@ -666,6 +666,11 @@ async function getClientAuthModes({
   return options.map((item) => ({text: item, value: item }));
 }
 
+function getRequestTypeFromRoute({ route }) {
+  const { query } = route || {};
+  const { requestType } = query || {};
+  return requestType || "";
+}
 
 return {
 	fetchJsons,
@@ -702,4 +707,5 @@ return {
 	showIssuerRefAndCertificates,
 	isIssuerRefRequired,
   getClientAuthModes,
+  getRequestTypeFromRoute,
 }

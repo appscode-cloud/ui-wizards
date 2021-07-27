@@ -26,7 +26,8 @@ steps:
     - label:
         text: labels.config_ops_request
       type: label-element
-    - hasDescription: true
+    - computed: getRequestTypeFromRoute
+      hasDescription: true
       individualItemDisabilityCheck: disableOpsRequest
       label:
         text: labels.ops_request_type
@@ -287,18 +288,6 @@ steps:
           schema:
             $ref: schema#/properties/spec/properties/configuration/properties/standalone/properties/removeCustomConfig
           type: switch
-        - alias: pod_template_standalone
-          chart:
-            name: uibytebuildersdev-component-pod-template
-            version: v0.2.0-alpha.0
-          dataContext:
-            namespace:
-              $ref: schema#/properties/metadata/properties/namespace
-          if: showPodTemplate
-          moduleResolver: fetchJsons
-          schema:
-            $ref: schema#/properties/spec/properties/configuration/properties/standalone/properties/podTemplate
-          type: reusable-element
         if: ifDbTypeEqualsTo|standalone|configuration
         label:
           text: labels.standalone
@@ -349,18 +338,6 @@ steps:
           schema:
             $ref: schema#/properties/spec/properties/configuration/properties/replicaSet/properties/removeCustomConfig
           type: switch
-        - alias: pod_template_replicaset
-          chart:
-            name: uibytebuildersdev-component-pod-template
-            version: v0.2.0-alpha.0
-          dataContext:
-            namespace:
-              $ref: schema#/properties/metadata/properties/namespace
-          if: showPodTemplate
-          moduleResolver: fetchJsons
-          schema:
-            $ref: schema#/properties/spec/properties/configuration/properties/replicaSet/properties/podTemplate
-          type: reusable-element
         if: ifDbTypeEqualsTo|replicaSet|configuration
         label:
           text: labels.replicaSet
@@ -410,18 +387,6 @@ steps:
             schema:
               $ref: schema#/properties/spec/properties/configuration/properties/configServer/properties/removeCustomConfig
             type: switch
-          - alias: pod_template_configserver
-            chart:
-              name: uibytebuildersdev-component-pod-template
-              version: v0.2.0-alpha.0
-            dataContext:
-              namespace:
-                $ref: schema#/properties/metadata/properties/namespace
-            if: showPodTemplate
-            moduleResolver: fetchJsons
-            schema:
-              $ref: schema#/properties/spec/properties/configuration/properties/configServer/properties/podTemplate
-            type: reusable-element
           label:
             text: labels.configServer
           schema:
@@ -468,18 +433,6 @@ steps:
             schema:
               $ref: schema#/properties/spec/properties/configuration/properties/mongos/properties/removeCustomConfig
             type: switch
-          - alias: pod_template_mongos
-            chart:
-              name: uibytebuildersdev-component-pod-template
-              version: v0.2.0-alpha.0
-            dataContext:
-              namespace:
-                $ref: schema#/properties/metadata/properties/namespace
-            if: showPodTemplate
-            moduleResolver: fetchJsons
-            schema:
-              $ref: schema#/properties/spec/properties/configuration/properties/mongos/properties/podTemplate
-            type: reusable-element
           label:
             text: labels.mongos
           schema:
@@ -526,18 +479,6 @@ steps:
             schema:
               $ref: schema#/properties/spec/properties/configuration/properties/shard/properties/removeCustomConfig
             type: switch
-          - alias: pod_template_shard
-            chart:
-              name: uibytebuildersdev-component-pod-template
-              version: v0.2.0-alpha.0
-            dataContext:
-              namespace:
-                $ref: schema#/properties/metadata/properties/namespace
-            if: showPodTemplate
-            moduleResolver: fetchJsons
-            schema:
-              $ref: schema#/properties/spec/properties/configuration/properties/shard/properties/podTemplate
-            type: reusable-element
           label:
             text: labels.shard
           schema:

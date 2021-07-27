@@ -95,13 +95,43 @@ steps:
   title: steps.0.label
 - form:
     elements:
-    - disabled: true
-      discriminator:
+    - discriminator:
         activeDatabaseMode:
           default: Standalone
           type: string
       elements:
+      - if: isNotStandaloneMode
+        label:
+          text: labels.to_update_replicas
+        type: label-element
+      - customClass: mb-20
+        if: isNotStandaloneMode
+        label:
+          text: labels.create_opsrequest
+        type: anchor
+        url:
+          params:
+            cluster:
+              $ref: store#/cluster/clusterDefinition/spec/name
+            dbname:
+              $ref: model#/metadata/release/name
+            domain:
+              $ref: store#/domain
+            namespace:
+              $ref: model#/metadata/release/namespace
+            owner:
+              $ref: store#/user/username
+            group:
+              $ref: model#/metadata/resource/group
+            version:
+              $ref: model#/metadata/resource/version
+            resource:
+              $ref: model#/metadata/resource/name
+            kind:
+              $ref: model#/metadata/resource/kind
+          path: '${domain}/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/mongodbopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=HorizontalScaling'
       - computed: setDatabaseMode
+        disabled: true
         hasDescription: true
         label:
           text: labels.database.mode
@@ -119,7 +149,8 @@ steps:
         schema:
           $ref: discriminator#/activeDatabaseMode
         type: radio
-      - elements:
+      - disabled: true
+        elements:
         - label:
             text: labels.replicaset.name
           schema:
@@ -132,7 +163,8 @@ steps:
           type: input
         if: isEqualToDatabaseMode|Replicaset
         type: single-step-form
-      - elements:
+      - disabled: true
+        elements:
         - fetch: getStorageClassNames|common
           label:
             text: labels.storage.class
@@ -146,7 +178,8 @@ steps:
           type: input
         if: showCommonStorageClassAndSizeField
         type: single-step-form
-      - elements:
+      - disabled: true
+        elements:
         - elements:
           - fetch: getStorageClassNames|shard
             label:
@@ -235,15 +268,44 @@ steps:
         default: true
         type: boolean
     elements:
+    - label:
+        text: labels.to_update_tls
+      type: label-element
+    - customClass: mb-20
+      label:
+        text: labels.create_opsrequest
+      type: anchor
+      url:
+        params:
+          cluster:
+            $ref: store#/cluster/clusterDefinition/spec/name
+          dbname:
+            $ref: model#/metadata/release/name
+          domain:
+            $ref: store#/domain
+          namespace:
+            $ref: model#/metadata/release/namespace
+          owner:
+            $ref: store#/user/username
+          group:
+            $ref: model#/metadata/resource/group
+          version:
+            $ref: model#/metadata/resource/version
+          resource:
+            $ref: model#/metadata/resource/name
+          kind:
+            $ref: model#/metadata/resource/kind
+        path: '${domain}/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/mongodbopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=ReconfigureTLS'
     - computed: isValueExistInModel|/resources/kubedbComMongoDB/spec/tls
-      disabled: isValueExistInModel|/resources/kubedbComMongoDB/spec/tls
+      disabled: true
       label:
         text: labels.enable_tls
       onChange: onTlsConfigureChange
       schema:
         $ref: discriminator#/configureTLS
       type: switch
-    - elements:
+    - disabled: true
+      elements:
       - computed: setClusterAuthMode
         label:
           text: labels.cluster_auth_mode
@@ -1283,17 +1345,42 @@ steps:
   title: steps.8.label
 - form:
     elements:
+    - label:
+        text: labels.to_update_config
+      type: label-element
+    - customClass: mb-20
+      label:
+        text: labels.create_opsrequest
+      type: anchor
+      url:
+        params:
+          cluster:
+            $ref: store#/cluster/clusterDefinition/spec/name
+          dbname:
+            $ref: model#/metadata/release/name
+          domain:
+            $ref: store#/domain
+          namespace:
+            $ref: model#/metadata/release/namespace
+          owner:
+            $ref: store#/user/username
+          group:
+            $ref: model#/metadata/resource/group
+          version:
+            $ref: model#/metadata/resource/version
+          resource:
+            $ref: model#/metadata/resource/name
+          kind:
+            $ref: model#/metadata/resource/kind
+        path: '${domain}/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/mongodbopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=Reconfigure'
     - disabled: true
       elements:
       - discriminator:
-          configuration:
-            type: string
           configurationSource:
             default: use-existing-config
             type: string
         elements:
-        - computed: setConfigurationSource
-          onChange: onConfigurationSourceChange
+        - onChange: onConfigurationSourceChange
           options:
           - text: options.configuration_source.use_existing_config.label
             value: use-existing-config
@@ -1304,41 +1391,32 @@ steps:
           type: radio
         - allowUserDefinedOption: true
           fetch: getSecrets
-          if: isEqualToDiscriminatorPath|use-existing-config|/configurationSource
           label:
             text: labels.name
           schema:
             $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/configSecret/properties/name
           type: select
-        - computed: setConfiguration
-          if: isEqualToDiscriminatorPath|create-new-config|/configurationSource
-          label:
-            text: labels.mongo_conf
-          onChange: onConfigurationChange
-          schema:
-            $ref: discriminator#/properties/configuration
-          type: editor
         if: isNotShardModeSelected
         type: single-step-form
       - discriminator:
-          configurationConfigServer:
-            type: string
-          configurationMongos:
-            type: string
-          configurationShard:
-            type: string
           configurationSourceConfigServer:
+            default: use-existing-config
             type: string
           configurationSourceMongos:
+            default: use-existing-config
             type: string
           configurationSourceShard:
+            default: use-existing-config
             type: string
         elements:
-        - label:
+        - customClass: mb-10
+          label:
             text: labels.shardNodes
           type: label-element
         - computed: setConfigurationSourceShard
           individualItemDisabilityCheck: disableConfigSourceOption
+          label:
+            text: labels.custom_config
           onChange: onConfigurationSourceShardChange
           options:
           - text: options.configuration_source.use_existing_config.label
@@ -1351,7 +1429,7 @@ steps:
             value: same-as-mongos-config-secret
           schema:
             $ref: discriminator#/configurationSourceShard
-          type: radio
+          type: select
         - allowUserDefinedOption: true
           fetch: getSecrets
           if: isEqualToDiscriminatorPath|use-existing-config|/configurationSourceShard
@@ -1361,19 +1439,14 @@ steps:
           schema:
             $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/shardTopology/properties/shard/properties/configSecret/properties/name
           type: select
-        - computed: setConfigurationShard
-          if: isEqualToDiscriminatorPath|create-new-config|/configurationSourceShard
+        - customClass: mb-10
           label:
-            text: labels.mongo_conf
-          onChange: onConfigSecretModelChange|shard|create-new-config|/configurationShard
-          schema:
-            $ref: discriminator#/properties/configurationShard
-          type: editor
-        - label:
             text: labels.configServerNodes
           type: label-element
         - computed: setConfigurationSourceConfigServer
           individualItemDisabilityCheck: disableConfigSourceOption
+          label:
+            text: labels.custom_config
           onChange: onConfigurationSourceConfigServerChange
           options:
           - text: options.configuration_source.use_existing_config.label
@@ -1386,7 +1459,7 @@ steps:
             value: same-as-mongos-config-secret
           schema:
             $ref: discriminator#/configurationSourceConfigServer
-          type: radio
+          type: select
         - allowUserDefinedOption: true
           fetch: getSecrets
           if: isEqualToDiscriminatorPath|use-existing-config|/configurationSourceConfigServer
@@ -1396,19 +1469,14 @@ steps:
           schema:
             $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/shardTopology/properties/configServer/properties/configSecret/properties/name
           type: select
-        - computed: setConfigurationConfigServer
-          if: isEqualToDiscriminatorPath|create-new-config|/configurationSourceConfigServer
+        - customClass: mb-10
           label:
-            text: labels.mongo_conf
-          onChange: onConfigSecretModelChange|configserver|create-new-config|/configurationConfigServer
-          schema:
-            $ref: discriminator#/properties/configurationConfigServer
-          type: editor
-        - label:
             text: labels.mongosNodes
           type: label-element
         - computed: setConfigurationSourceMongos
           individualItemDisabilityCheck: disableConfigSourceOption
+          label:
+            text: labels.custom_config
           onChange: onConfigurationSourceMongosChange
           options:
           - text: options.configuration_source.use_existing_config.label
@@ -1421,7 +1489,7 @@ steps:
             value: same-as-configserver-config-secret
           schema:
             $ref: discriminator#/configurationSourceMongos
-          type: radio
+          type: select
         - allowUserDefinedOption: true
           fetch: getSecrets
           if: isEqualToDiscriminatorPath|use-existing-config|/configurationSourceMongos
@@ -1431,14 +1499,6 @@ steps:
           schema:
             $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/shardTopology/properties/mongos/properties/configSecret/properties/name
           type: select
-        - computed: setConfigurationMongos
-          if: isEqualToDiscriminatorPath|create-new-config|/configurationSourceMongos
-          label:
-            text: labels.mongo_conf
-          onChange: onConfigSecretModelChange|mongos|create-new-config|/configurationMongos
-          schema:
-            $ref: discriminator#/properties/configurationMongos
-          type: editor
         if: isShardModeSelected
         type: single-step-form
       type: single-step-form
