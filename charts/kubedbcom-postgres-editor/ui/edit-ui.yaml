@@ -100,89 +100,120 @@ steps:
   id: basic
   title: steps.0.label
 - form:
+    discriminator:
+      activeDatabaseMode:
+        default: Standalone
+        type: string
     elements:
+    - if: isEqualToDatabaseMode|Cluster
+      label:
+        text: labels.to_update_replicas
+      type: label-element
+    - customClass: mb-20
+      if: isEqualToDatabaseMode|Cluster
+      label:
+        text: labels.create_opsrequest
+      type: anchor
+      url:
+        params:
+          cluster:
+            $ref: store#/cluster/clusterDefinition/spec/name
+          dbname:
+            $ref: model#/metadata/release/name
+          domain:
+            $ref: store#/domain
+          namespace:
+            $ref: model#/metadata/release/namespace
+          owner:
+            $ref: store#/user/username
+          group:
+            $ref: model#/metadata/resource/group
+          version:
+            $ref: model#/metadata/resource/version
+          resource:
+            $ref: model#/metadata/resource/name
+          kind:
+            $ref: model#/metadata/resource/kind
+        path: '${domain}/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/postgresopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=HorizontalScaling'
+    - computed: setDatabaseMode
+      disabled: true
+      hasDescription: true
+      label:
+        text: labels.database.mode
+      onChange: deleteDatabaseModePath
+      options:
+      - description: options.database.mode.Standalone.description
+        text: options.database.mode.Standalone.label
+        value: Standalone
+      - description: options.database.mode.Cluster.description
+        text: options.database.mode.Cluster.label
+        value: Cluster
+      schema:
+        $ref: discriminator#/activeDatabaseMode
+      type: radio
     - disabled: true
-      discriminator:
-        activeDatabaseMode:
-          default: Standalone
-          type: string
+      if: isEqualToDatabaseMode|Cluster
+      label:
+        text: labels.replicaset.number
+      schema:
+        $ref: schema#/properties/resources/properties/kubedbComPostgres/properties/spec/properties/replicas
+      type: input
+    - disabled: true
       elements:
-      - computed: setDatabaseMode
-        hasDescription: true
+      - fetch: getStorageClassNames
         label:
-          text: labels.database.mode
-        onChange: deleteDatabaseModePath
-        options:
-        - description: options.database.mode.Standalone.description
-          text: options.database.mode.Standalone.label
-          value: Standalone
-        - description: options.database.mode.Cluster.description
-          text: options.database.mode.Cluster.label
-          value: Cluster
+          text: labels.storage.class
         schema:
-          $ref: discriminator#/activeDatabaseMode
-        type: radio
-      - if: isEqualToDatabaseMode|Cluster
-        label:
-          text: labels.replicaset.number
+          $ref: schema#/properties/resources/properties/kubedbComPostgres/properties/spec/properties/storage/properties/storageClassName
+        type: select
+      - label:
+          text: labels.storage.size
         schema:
-          $ref: schema#/properties/resources/properties/kubedbComPostgres/properties/spec/properties/replicas
+          $ref: schema#/properties/resources/properties/kubedbComPostgres/properties/spec/properties/storage/properties/resources/properties/requests/properties/storage
         type: input
+      type: single-step-form
+    - disabled: true
+      elements:
+      - label:
+          text: labels.standbyMode
+        options:
+        - text: options.standbyMode.hot
+          value: Hot
+        - text: options.standbyMode.warm
+          value: Warm
+        schema:
+          $ref: schema#/properties/resources/properties/kubedbComPostgres/properties/spec/properties/standbyMode
+        type: radio
       - elements:
-        - fetch: getStorageClassNames|common
+        - customClass: mt-10
           label:
-            text: labels.storage.class
+            text: labels.electionTick
           schema:
-            $ref: schema#/properties/resources/properties/kubedbComPostgres/properties/spec/properties/storage/properties/storageClassName
-          type: select
-        - label:
-            text: labels.storage.size
-          schema:
-            $ref: schema#/properties/resources/properties/kubedbComPostgres/properties/spec/properties/storage/properties/resources/properties/requests/properties/storage
+            $ref: schema#/properties/resources/properties/kubedbComPostgres/properties/spec/properties/leaderElection/properties/electionTick
           type: input
-        type: single-step-form
-      - elements:
         - label:
-            text: labels.standbyMode
-          options:
-          - text: options.standbyMode.hot
-            value: Hot
-          - text: options.standbyMode.warm
-            value: Warm
+            text: labels.heartbeatTick
           schema:
-            $ref: schema#/properties/resources/properties/kubedbComPostgres/properties/spec/properties/standbyMode
-          type: radio
-        - elements:
-          - customClass: mt-10
-            label:
-              text: labels.electionTick
-            schema:
-              $ref: schema#/properties/resources/properties/kubedbComPostgres/properties/spec/properties/leaderElection/properties/electionTick
-            type: input
-          - label:
-              text: labels.heartbeatTick
-            schema:
-              $ref: schema#/properties/resources/properties/kubedbComPostgres/properties/spec/properties/leaderElection/properties/heartbeatTick
-            type: input
-          - label:
-              text: labels.maximumLagBeforeFailover
-            schema:
-              $ref: schema#/properties/resources/properties/kubedbComPostgres/properties/spec/properties/leaderElection/properties/maximumLagBeforeFailover
-            type: input
-          - label:
-              text: labels.period
-            schema:
-              $ref: schema#/properties/resources/properties/kubedbComPostgres/properties/spec/properties/leaderElection/properties/period
-            type: input
-          hideFrom: true
-          label:
-            text: labels.leaderElection
+            $ref: schema#/properties/resources/properties/kubedbComPostgres/properties/spec/properties/leaderElection/properties/heartbeatTick
+          type: input
+        - label:
+            text: labels.maximumLagBeforeFailover
           schema:
-            $ref: schema#/properties/resources/properties/kubedbComPostgres/properties/spec/properties/leaderElection
-          show_label: true
-          type: single-step-form
-        if: isEqualToDatabaseMode|Cluster
+            $ref: schema#/properties/resources/properties/kubedbComPostgres/properties/spec/properties/leaderElection/properties/maximumLagBeforeFailover
+          type: input
+        - label:
+            text: labels.period
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComPostgres/properties/spec/properties/leaderElection/properties/period
+          type: input
+        hideForm: true
+        label:
+          text: labels.leaderElection
+        schema:
+          $ref: schema#/properties/resources/properties/kubedbComPostgres/properties/spec/properties/leaderElection
+        show_label: true
         type: single-step-form
+      if: isEqualToDatabaseMode|Cluster
       type: single-step-form
     type: single-step-form
   id: topology
@@ -193,15 +224,44 @@ steps:
         default: true
         type: boolean
     elements:
+    - label:
+        text: labels.to_update_tls
+      type: label-element
+    - customClass: mb-20
+      label:
+        text: labels.create_opsrequest
+      type: anchor
+      url:
+        params:
+          cluster:
+            $ref: store#/cluster/clusterDefinition/spec/name
+          dbname:
+            $ref: model#/metadata/release/name
+          domain:
+            $ref: store#/domain
+          namespace:
+            $ref: model#/metadata/release/namespace
+          owner:
+            $ref: store#/user/username
+          group:
+            $ref: model#/metadata/resource/group
+          version:
+            $ref: model#/metadata/resource/version
+          resource:
+            $ref: model#/metadata/resource/name
+          kind:
+            $ref: model#/metadata/resource/kind
+        path: '${domain}/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/postgresopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=ReconfigureTLS'
     - computed: isValueExistInModel|/resources/kubedbComPostgres/spec/tls
-      disabled: isValueExistInModel|/resources/kubedbComPostgres/spec/tls
+      disabled: true
       label:
         text: labels.enable_tls
       onChange: onTlsConfigureChange
       schema:
         $ref: discriminator#/configureTLS
       type: switch
-    - elements:
+    - disabled: true
+      elements:
       - computed: setSSLMode
         label:
           text: labels.ssl_mode
@@ -899,11 +959,10 @@ steps:
   title: steps.5.label
 - form:
     elements:
-    - disabled: true
-      elements:
+    - elements:
       - alias: pod_template_standalone
         chart:
-          name: uibytebuildersdev-component-pod-template
+          name: uibytebuildersdev-component-pod-template-edit
           version: v0.2.0-alpha.0
         dataContext:
           namespace:
@@ -1174,8 +1233,35 @@ steps:
             default: use-existing-config
             type: string
         elements:
-        - computed: setConfigurationSource
-          disabled: true
+        - label:
+            text: labels.to_update_config
+          type: label-element
+        - customClass: mb-20
+          label:
+            text: labels.create_opsrequest
+          type: anchor
+          url:
+            params:
+              cluster:
+                $ref: store#/cluster/clusterDefinition/spec/name
+              dbname:
+                $ref: model#/metadata/release/name
+              domain:
+                $ref: store#/domain
+              namespace:
+                $ref: model#/metadata/release/namespace
+              owner:
+                $ref: store#/user/username
+              group:
+                $ref: model#/metadata/resource/group
+              version:
+                $ref: model#/metadata/resource/version
+              resource:
+                $ref: model#/metadata/resource/name
+              kind:
+                $ref: model#/metadata/resource/kind
+            path: '${domain}/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/postgresopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=Reconfigure'
+        - disabled: true
           label:
             text: labels.custom_config
           onChange: onConfigurationSourceChange
@@ -1196,14 +1282,6 @@ steps:
           schema:
             $ref: schema#/properties/resources/properties/kubedbComPostgres/properties/spec/properties/configSecret/properties/name
           type: select
-        - computed: setConfigurationFiles
-          if: isEqualToDiscriminatorPath|create-new-config|/configurationSource
-          label:
-            text: labels.user_conf
-          onChange: onConfigurationChange
-          schema:
-            $ref: discriminator#/properties/configuration
-          type: editor
         type: single-step-form
       type: single-step-form
     type: single-step-form

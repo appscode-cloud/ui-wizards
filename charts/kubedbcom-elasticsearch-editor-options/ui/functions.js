@@ -315,7 +315,7 @@ async function getStorageClassNames({ axios, storeGet, commit }) {
   return resources;
 }
 
-async function getMongoDbVersions(
+async function getElasticSearchVersions(
   { axios, storeGet },
   group,
   version,
@@ -343,18 +343,18 @@ async function getMongoDbVersions(
   const resources = (resp && resp.data && resp.data.items) || [];
 
   // keep only non deprecated versions
-  const filteredMongoDbVersions = resources.filter(
+  const filteredElasticSearchVersions = resources.filter(
     (item) => item.spec && !item.spec.deprecated
   );
 
-  filteredMongoDbVersions.map((item) => {
+  filteredElasticSearchVersions.map((item) => {
     const name = (item.metadata && item.metadata.name) || "";
     const specVersion = (item.spec && item.spec.version) || "";
     item.text = `${name} (${specVersion})`;
     item.value = name;
     return true;
   });
-  return filteredMongoDbVersions;
+  return filteredElasticSearchVersions;
 }
 
 async function getSecrets({
@@ -454,7 +454,7 @@ return {
 	showStorageSizeField,
 	getResources,
 	getStorageClassNames,
-	getMongoDbVersions,
+	getElasticSearchVersions,
 	getSecrets,
 	disableLimit,
 	getMachineListForOptions,

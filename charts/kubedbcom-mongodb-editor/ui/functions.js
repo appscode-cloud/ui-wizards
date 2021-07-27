@@ -336,6 +336,16 @@ function showNewSecretCreateField({
 }
 
 // ********************* Database Mode ***********************
+function isNotStandaloneMode({
+  discriminator,
+  getValue,
+  watchDependency,
+}) {
+  watchDependency("discriminator#/activeDatabaseMode");
+  const mode = getValue(discriminator, "/activeDatabaseMode");
+  return mode !== "Standalone";
+}
+
 function showCommonStorageClassAndSizeField({
   discriminator,
   getValue,
@@ -1702,7 +1712,7 @@ function onNamespaceChange({ commit, model, getValue }) {
 function onLabelChange({ commit, model, getValue }) {
   const labels = getValue(
     model,
-    "/resources/appApplication/spec/selector/matchLabels"
+    "/resources/kubedbComMongoDB/spec/metadata/labels"
   );
 
   const agent = getValue(
@@ -1730,7 +1740,7 @@ function onNameChange({ commit, model, getValue }) {
 
   const labels = getValue(
     model,
-    "/resources/appApplication/spec/selector/matchLabels"
+    "/resources/kubedbComMongoDB/spec/metadata/labels"
   );
 
   if (agent === "prometheus.io") {
@@ -2542,6 +2552,7 @@ return {
 	showAuthPasswordField,
 	showAuthSecretField,
 	showNewSecretCreateField,
+  isNotStandaloneMode,
 	showCommonStorageClassAndSizeField,
 	setDatabaseMode,
 	getStorageClassNames,
