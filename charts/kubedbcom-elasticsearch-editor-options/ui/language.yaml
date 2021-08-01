@@ -72,12 +72,15 @@ en:
     country: Country
     cpu: CPU
     customize_exporter: Customize Exporter Sidecar
+    data_nodes: Data Nodes
     dataSource: Data Source
     database:
+      admin_secret: Admin Secret
       mode: Database Mode
       name: Database Name
       secret: Database Secret
       version: Database Version
+    disable_security_question: Disable Security?
     dns_name: DNS Name
     dns_names: DNS Names
     duration: Duration
@@ -98,6 +101,7 @@ en:
     honor_labels: Honor labels
     image_pull_secrets: Image Pull Secrets
     initialization: Pre-populate your Elasticsearch from backup/another database
+    ingest_nodes: Ingest Nodes
     interval: Interval
     ip_address: IP Address
     ip_addresses: IP Addresses
@@ -114,6 +118,7 @@ en:
     load_balancer_source_range: Load Balancer Source Range
     load_balancer_source_ranges: Load Balancer Source Ranges
     machine_profile: Machine Profile
+    master_nodes: Master Nodes
     match_expression: Match Expression
     match_expressions: Match Expressions
     match_field: Match Field
@@ -229,8 +234,6 @@ en:
     service_template: Service Template
     service_template_annotations: Service Template Annotations
     service_templates: Service Templates
-    shardNodes: Shard Nodes
-    shards: Shards
     storage:
       class: Storage Class
       size: Storage Size
@@ -267,6 +270,15 @@ en:
       initialization:
         description: Initialize database from backup or script.
         label: Initialization
+      internalUsers:
+        description: Description
+        label: Internal Users
+      kernelSettings:
+        description: Description
+        label: Kernel Setings
+      rolesMapping:
+        description: Description
+        label: Roles Mapping
       monitoring:
         description: Setup Prometheus monitoring for the database.
         label: Monitoring
@@ -277,7 +289,7 @@ en:
         description: Customize runtime options for the database pods.
         label: Pod Template
       tls:
-        description: Secure database with TLS.
+        description: Secure database with TLS. Recommended to install cert-manager. otherwise validity will be 1 year.
         label: TLS
       topology:
         description: Configure your cluster topology.
@@ -299,15 +311,12 @@ en:
         text: Stash Backup
     database:
       mode:
-        Replicaset:
-          description: Elasticsearch ReplicaSet for high availability.
-          label: Replicated Cluster
-        Sharded:
-          description: Elasticsearch sharded cluster for high performance and high availability.
-          label: Sharded Cluster
-        Standalone:
-          description: Single node Elasticsearch without high availability and sharding.
-          label: Standalone
+        Combined:
+          description: Single node elasticsearch cluster with all node role enabled.
+          label: Combined Cluster
+        Topology:
+          description: Elasticsearch cluster with dedicated node role.
+          label: Topology Cluster
       secret:
         customSecret:
           label: Auto-generate auth secret
@@ -340,12 +349,5 @@ en:
       'yes':
         text: 'Yes'
   steps:
-    - label: Basic Information
-    - label: Topology
-    - label: TLS Configuration
-    - label: Initialization
-    - label: Backup
-    - label: Monitoring
-    - label: Pod Template
-    - label: Networking
-    - label: Custom Config
+  - label: Basic Information
+  

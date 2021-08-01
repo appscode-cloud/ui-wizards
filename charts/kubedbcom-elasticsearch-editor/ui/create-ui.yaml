@@ -247,6 +247,164 @@ steps:
   title: steps.1.label
 - form:
     discriminator:
+      internalUsers:
+        type: array
+    elements:
+    - addFormLabel: labels.user
+      computed: setInternalUsers
+      element:
+        discriminator:
+          users:
+            emitAs: internalUsers
+            type: array
+        elements:
+        - disabled: disableUsername
+          required: true
+          label:
+            text: labels.username
+          schema:
+            $ref: discriminator#/properties/users/items/properties/username
+          type: input
+        - isArray: true
+          keys:
+            label:
+              text: labels.annotations.key
+          label:
+            text: labels.attributes
+          schema:
+            $ref: discriminator#/properties/users/items/properties/attributes
+          type: key-value-input-form
+          values:
+            label:
+              text: labels.annotations.value
+            schema:
+              $ref: discriminator#/properties/users/items/properties/attributes/additionalProperties
+            type: input
+        - element:
+            label:
+              text: labels.role
+            schema:
+              $ref: discriminator#/properties/users/items/properties/backendRoles/items
+            type: input
+          label:
+            text: labels.backendRoles
+          schema:
+            $ref: discriminator#/properties/users/items/properties/backendRoles
+          type: list-input-form
+        - label:
+            text: labels.description
+          schema:
+            $ref: discriminator#/properties/users/items/properties/description
+          type: textarea
+        - label:
+            text: labels.hidden
+          schema:
+            $ref: discriminator#/properties/users/items/properties/hidden
+          type: switch
+        - element:
+            label:
+              text: labels.role
+            schema:
+              $ref: discriminator#/properties/users/items/properties/opendistroSecurityRoles/items
+            type: input
+          label:
+            text: labels.opendistro_security_roles
+          schema:
+            $ref: discriminator#/properties/users/items/properties/opendistroSecurityRoles
+          type: list-input-form
+        - label:
+            text: labels.reserved
+          schema:
+            $ref: discriminator#/properties/users/items/properties/reserved
+          type: switch
+        - element:
+            label:
+              text: labels.role
+            schema:
+              $ref: discriminator#/properties/users/items/properties/searchGuardRoles/items
+            type: input
+          label:
+            text: labels.search_guard_roles
+          schema:
+            $ref: discriminator#/properties/users/items/properties/searchGuardRoles
+          type: list-input-form
+        - label:
+            text: labels.secret_name
+          schema:
+            $ref: discriminator#/properties/users/items/properties/secretName
+          type: input
+        type: single-step-form
+      individualItemDisabilityCheck: disableUserEdit
+      newItemValidator: validateNewUser
+      onChange: onInternalUsersChange
+      label:
+        text: labels.internal_users
+      schema:
+        $ref: discriminator#/properties/internalUsers
+      tableContents:
+      - inTableColumn: true
+        label:
+          text: labels.username
+        path: username
+        type: value
+        typeOfValue: string
+      - inTableColumn: false
+        label:
+          text: labels.attributes
+        path: attributes
+        type: value
+        typeOfValue: key-value
+      - inTableColumn: true
+        label:
+          isSubsection: true
+          text: labels.backendRoles
+        path: backendRoles
+        type: value
+        typeOfValue: array
+      - inTableColumn: false
+        label:
+          text: labels.description
+        path: description
+        type: value
+        typeOfValue: string
+      - inTableColumn: false
+        label:
+          text: labels.hidden
+        path: hidden
+        type: value
+        typeOfValue: string
+      - inTableColumn: false
+        label:
+          isSubsection: true
+          text: labels.opendistro_security_roles
+        path: opendistroSecurityRoles
+        type: value
+        typeOfValue: array
+      - inTableColumn: true
+        label:
+          text: labels.reserved
+        path: reserved
+        type: value
+        typeOfValue: string
+      - inTableColumn: false
+        label:
+          isSubsection: true
+          text: labels.search_guard_roles
+        path: searchGuardRoles
+        type: value
+        typeOfValue: array
+      - inTableColumn: true
+        label:
+          text: labels.secret_name
+        path: secretName
+        type: value
+        typeOfValue: string
+      type: single-step-form-array
+    type: single-step-form
+  id: internal-users
+  title: steps.2.label
+- form:
+    discriminator:
       configureTLS:
         default: true
         type: boolean
@@ -329,7 +487,7 @@ steps:
       type: single-step-form
     type: single-step-form
   id: tls
-  title: steps.2.label
+  title: steps.3.label
 - form:
     discriminator:
       prePopulateDatabase:
@@ -497,7 +655,7 @@ steps:
       type: single-step-form
     type: single-step-form
   id: initialization
-  title: steps.3.label
+  title: steps.4.label
 - form:
     discriminator:
       scheduleBackup:
@@ -720,7 +878,7 @@ steps:
       type: single-step-form
     type: single-step-form
   id: backupconfiguration
-  title: steps.4.label
+  title: steps.5.label
 - form:
     discriminator:
       enableMonitoring:
@@ -962,7 +1120,7 @@ steps:
       type: single-step-form
     type: single-step-form
   id: monitoring
-  title: steps.5.label
+  title: steps.6.label
 - form:
     elements:
     - alias: pod_template_standalone
@@ -978,61 +1136,6 @@ steps:
       type: reusable-element
     type: single-step-form
   id: pod-template
-  if: isNotShardModeSelected
-  title: steps.6.label
-- form:
-    steps:
-    - form:
-        elements:
-        - alias: pod_template_shard
-          chart:
-            name: uibytebuildersdev-component-pod-template
-            version: v0.2.0-alpha.0
-          dataContext:
-            namespace:
-              $ref: schema#/properties/metadata/properties/release/properties/namespace
-          moduleResolver: fetchJsons
-          schema:
-            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/shardTopology/properties/shard/properties/podTemplate
-          type: reusable-element
-        type: single-step-form
-      id: pod-template-shard
-      title: labels.shard
-    - form:
-        elements:
-        - alias: pod_template_configserver
-          chart:
-            name: uibytebuildersdev-component-pod-template
-            version: v0.2.0-alpha.0
-          dataContext:
-            namespace:
-              $ref: schema#/properties/metadata/properties/release/properties/namespace
-          moduleResolver: fetchJsons
-          schema:
-            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/shardTopology/properties/configServer/properties/podTemplate
-          type: reusable-element
-        type: single-step-form
-      id: pod-template-config-server
-      title: labels.configServer
-    - form:
-        elements:
-        - alias: pod_template_mongos
-          chart:
-            name: uibytebuildersdev-component-pod-template
-            version: v0.2.0-alpha.0
-          dataContext:
-            namespace:
-              $ref: schema#/properties/metadata/properties/release/properties/namespace
-          moduleResolver: fetchJsons
-          schema:
-            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/shardTopology/properties/mongos/properties/podTemplate
-          type: reusable-element
-        type: single-step-form
-      id: pod-template-mongos
-      title: labels.mongos
-    type: multi-step-form
-  id: pod-template-sharded-topology
-  if: isShardModeSelected
   title: steps.7.label
 - form:
     elements:
@@ -1319,130 +1422,180 @@ steps:
         schema:
           $ref: discriminator#/properties/configuration
         type: editor
-      if: isNotShardModeSelected
-      type: single-step-form
-    - discriminator:
-        configurationConfigServer:
-          type: string
-        configurationMongos:
-          type: string
-        configurationShard:
-          type: string
-        configurationSourceConfigServer:
-          type: string
-        configurationSourceMongos:
-          type: string
-        configurationSourceShard:
-          type: string
-      elements:
-      - label:
-          text: labels.shardNodes
-        type: label-element
-      - computed: setConfigurationSourceShard
-        individualItemDisabilityCheck: disableConfigSourceOption
-        onChange: onConfigurationSourceShardChange
-        options:
-        - text: options.configuration_source.use_existing_config.label
-          value: use-existing-config
-        - text: options.configuration_source.create_new_config.label
-          value: create-new-config
-        - text: options.configuration_source.same_as_config_server.label
-          value: same-as-configserver-config-secret
-        - text: options.configuration_source.same_as_mongos.label
-          value: same-as-mongos-config-secret
-        schema:
-          $ref: discriminator#/configurationSourceShard
-        type: radio
-      - allowUserDefinedOption: true
-        fetch: getSecrets
-        if: isEqualToDiscriminatorPath|use-existing-config|/configurationSourceShard
-        label:
-          text: labels.config_secret
-        onChange: onConfigSecretModelChange|shard|use-existing-config
-        schema:
-          $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/shardTopology/properties/shard/properties/configSecret/properties/name
-        type: select
-      - computed: setConfigurationShard
-        if: isEqualToDiscriminatorPath|create-new-config|/configurationSourceShard
-        label:
-          text: labels.mongo_conf
-        onChange: onConfigSecretModelChange|shard|create-new-config|/configurationShard
-        schema:
-          $ref: discriminator#/properties/configurationShard
-        type: editor
-      - label:
-          text: labels.configServerNodes
-        type: label-element
-      - computed: setConfigurationSourceConfigServer
-        individualItemDisabilityCheck: disableConfigSourceOption
-        onChange: onConfigurationSourceConfigServerChange
-        options:
-        - text: options.configuration_source.use_existing_config.label
-          value: use-existing-config
-        - text: options.configuration_source.create_new_config.label
-          value: create-new-config
-        - text: options.configuration_source.same_as_shard.label
-          value: same-as-shard-config-secret
-        - text: options.configuration_source.same_as_mongos.label
-          value: same-as-mongos-config-secret
-        schema:
-          $ref: discriminator#/configurationSourceConfigServer
-        type: radio
-      - allowUserDefinedOption: true
-        fetch: getSecrets
-        if: isEqualToDiscriminatorPath|use-existing-config|/configurationSourceConfigServer
-        label:
-          text: labels.config_secret
-        onChange: onConfigSecretModelChange|configserver|use-existing-config
-        schema:
-          $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/shardTopology/properties/configServer/properties/configSecret/properties/name
-        type: select
-      - computed: setConfigurationConfigServer
-        if: isEqualToDiscriminatorPath|create-new-config|/configurationSourceConfigServer
-        label:
-          text: labels.mongo_conf
-        onChange: onConfigSecretModelChange|configserver|create-new-config|/configurationConfigServer
-        schema:
-          $ref: discriminator#/properties/configurationConfigServer
-        type: editor
-      - label:
-          text: labels.mongosNodes
-        type: label-element
-      - computed: setConfigurationSourceMongos
-        individualItemDisabilityCheck: disableConfigSourceOption
-        onChange: onConfigurationSourceMongosChange
-        options:
-        - text: options.configuration_source.use_existing_config.label
-          value: use-existing-config
-        - text: options.configuration_source.create_new_config.label
-          value: create-new-config
-        - text: options.configuration_source.same_as_shard.label
-          value: same-as-shard-config-secret
-        - text: options.configuration_source.same_as_config_server.label
-          value: same-as-configserver-config-secret
-        schema:
-          $ref: discriminator#/configurationSourceMongos
-        type: radio
-      - allowUserDefinedOption: true
-        fetch: getSecrets
-        if: isEqualToDiscriminatorPath|use-existing-config|/configurationSourceMongos
-        label:
-          text: labels.config_secret
-        onChange: onConfigSecretModelChange|mongos|use-existing-config
-        schema:
-          $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/shardTopology/properties/mongos/properties/configSecret/properties/name
-        type: select
-      - computed: setConfigurationMongos
-        if: isEqualToDiscriminatorPath|create-new-config|/configurationSourceMongos
-        label:
-          text: labels.mongo_conf
-        onChange: onConfigSecretModelChange|mongos|create-new-config|/configurationMongos
-        schema:
-          $ref: discriminator#/properties/configurationMongos
-        type: editor
-      if: isShardModeSelected
       type: single-step-form
     type: single-step-form
   id: custom-config
   title: steps.9.label
+- form:
+    elements:
+    - label:
+        text: labels.privileged_question
+      schema:
+        $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/kernelSettings/properties/privileged
+      type: switch
+    - addFormLabel: labels.sysctl
+      element:
+        elements:
+        - label:
+            text: labels.name
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/kernelSettings/properties/sysctls/items/properties/name
+          type: input
+        - label:
+            text: labels.value
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/kernelSettings/properties/sysctls/items/properties/value
+          type: input
+        type: single-step-form
+      label:
+        text: labels.sysctls
+      schema:
+        $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/kernelSettings/properties/sysctls
+      tableContents:
+      - inTableColumn: true
+        label:
+          text: labels.name
+        path: name
+        type: value
+        typeOfValue: string
+      - inTableColumn: true
+        label:
+          text: labels.value
+        path: value
+        type: value
+        typeOfValue: string
+      type: single-step-form-array
+    type: single-step-form
+  id: kernel-settings
+  title: steps.10.label
+- form:
+    discriminator:
+      rolesMapping:
+        type: array
+    elements:
+    - addFormLabel: labels.role
+      computed: setRolesMapping
+      element:
+        discriminator:
+          roles:
+            emitAs: rolesMapping
+            type: array
+        elements:
+        - required: true
+          label:
+            text: labels.role_name
+          schema:
+            $ref: discriminator#/properties/roles/items/properties/roleName
+          type: input
+        - element:
+            label:
+              text: labels.role
+            schema:
+              $ref: discriminator#/properties/roles/items/properties/andBackendRoles/items
+            type: input
+          label:
+            text: labels.andBackendRoles
+          schema:
+            $ref: discriminator#/properties/roles/items/properties/andBackendRoles
+          type: list-input-form
+        - element:
+            label:
+              text: labels.role
+            schema:
+              $ref: discriminator#/properties/roles/items/properties/backendRoles/items
+            type: input
+          label:
+            text: labels.backendRoles
+          schema:
+            $ref: discriminator#/properties/roles/items/properties/backendRoles
+          type: list-input-form
+        - label:
+            text: labels.hidden
+          schema:
+            $ref: discriminator#/properties/roles/items/properties/hidden
+          type: switch
+        - element:
+            label:
+              text: labels.host
+            schema:
+              $ref: discriminator#/properties/roles/items/properties/hosts/items
+            type: input
+          label:
+            text: labels.hosts
+          schema:
+            $ref: discriminator#/properties/roles/items/properties/hosts
+          type: list-input-form
+        - label:
+            text: labels.reserved
+          schema:
+            $ref: discriminator#/properties/roles/items/properties/reserved
+          type: switch
+        - element:
+            label:
+              text: labels.user
+            schema:
+              $ref: discriminator#/properties/roles/items/properties/users/items
+            type: input
+          label:
+            text: labels.users
+          schema:
+            $ref: discriminator#/properties/roles/items/properties/users
+          type: list-input-form
+        type: single-step-form
+      onChange: onRolesMappingChange
+      label:
+        text: labels.roles_mapping
+      schema:
+        $ref: discriminator#/properties/rolesMapping
+      tableContents:
+      - inTableColumn: true
+        label:
+          text: labels.role_name
+        path: roleName
+        type: value
+        typeOfValue: string
+      - inTableColumn: true
+        label:
+          isSubsection: true
+          text: labels.backendRoles
+        path: backendRoles
+        type: value
+        typeOfValue: array
+      - inTableColumn: true
+        label:
+          text: labels.hidden
+        path: hidden
+        type: value
+        typeOfValue: string
+      - inTableColumn: false
+        label:
+          isSubsection: true
+          text: labels.andBackendRoles
+        path: andBackendRoles
+        type: value
+        typeOfValue: array
+      - inTableColumn: false
+        label:
+          isSubsection: true
+          text: labels.hosts
+        path: hosts
+        type: value
+        typeOfValue: array
+      - inTableColumn: true
+        label:
+          isSubsection: true
+          text: labels.users
+        path: users
+        type: value
+        typeOfValue: array
+      - inTableColumn: false
+        label:
+          text: labels.reserved
+        path: reserved
+        type: value
+        typeOfValue: string
+      type: single-step-form-array
+    type: single-step-form
+  id: roles-mapping
+  title: steps.11.label
 type: multi-step-form

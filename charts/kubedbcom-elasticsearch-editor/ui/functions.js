@@ -573,7 +573,95 @@ function isEqualToDatabaseMode(
   return mode === value;
 }
 
-// ************************** TLS ******************************88
+// ************************** Internal Users ********************************
+
+const defaultUsers = ["admin", "kibanaro", "kibanaserver", "logstash", "readall", "snapshotrestore"];
+
+function onInternalUsersChange({ discriminator, getValue, commit }) {
+  const users = getValue(discriminator, "/internalUsers");
+  
+  const internalUsers = {};
+
+  if(users) {
+      users.forEach((item) => {
+          const { username, ...obj } = item;
+          internalUsers[username] = obj;
+      });
+  }
+  
+  commit("wizard/model$update", {
+    path: "/resources/kubedbComElasticsearch/spec/internalUsers",
+    value: internalUsers,
+    force: true,
+  });
+}
+
+function setInternalUsers({ model, getValue }) {
+  const internalUsers = getValue(model, "/resources/kubedbComElasticsearch/spec/internalUsers");
+
+  const users = [];
+
+  for (const item in internalUsers) {
+      internalUsers[item].username = item;
+      users.push(internalUsers[item]);
+  }
+
+  return users;
+}
+
+function validateNewUser({itemCtx}) {
+  if(defaultUsers.includes(itemCtx.username) && itemCtx.isCreate) {
+      return {"isInvalid": true, "message": "Can't use this username"};
+  }
+  return {};
+}
+
+function disableUsername({rootModel}) {
+  return defaultUsers.includes(rootModel && rootModel.username);
+}
+
+function disableUserEdit({itemCtx}) {
+  if(defaultUsers.includes(itemCtx.username)) {
+      return {"isEditDisabled": false, "isDeleteDisabled": true};
+  }
+  return {};
+}
+
+// ************************** Roles Mapping ********************************
+
+function onRolesMappingChange({ discriminator, getValue, commit }) {
+  const roles = getValue(discriminator, "/rolesMapping");
+  
+  const rolesMapping = {};
+
+  if(roles) {
+    roles.forEach((item) => {
+          const { roleName, ...obj } = item;
+          rolesMapping[roleName] = obj;
+      });
+  }
+  
+  commit("wizard/model$update", {
+    path: "/resources/kubedbComElasticsearch/spec/rolesMapping",
+    value: rolesMapping,
+    force: true,
+  });
+}
+
+function setRolesMapping({ model, getValue }) {
+  const rolesMapping = getValue(model, "/resources/kubedbComElasticsearch/spec/rolesMapping");
+
+  const roles = [];
+
+  for (const item in rolesMapping) {
+      rolesMapping[item].roleName = item;
+      roles.push(internalUsers[item]);
+  }
+
+  return roles;
+}
+
+// ************************** TLS *******************************************
 
 function setApiGroup() {
   return "cert-manager.io";
@@ -2553,7 +2641,14 @@ return {
 	getStorageClassNames,
 	setStorageClass,
 	deleteDatabaseModePath,
-	isEqualToDatabaseMode,
+  isEqualToDatabaseMode,
+  onInternalUsersChange,
+  setInternalUsers,
+  validateNewUser,
+  disableUsername,
+  disableUserEdit,
+  onRolesMappingChange,
+  setRolesMapping,
 	setApiGroup,
 	getIssuerRefsName,
 	hasIssuerRefName,

@@ -278,7 +278,7 @@ async function getResources(
   return resources;
 }
 
-async function getStorageClassNames({ axios, storeGet, commit }) {
+async function getStorageClassNames({ axios, storeGet, commit }, path) {
   const owner = storeGet("/user/username");
   const cluster = storeGet("/cluster/clusterDefinition/spec/name");
 
@@ -302,7 +302,7 @@ async function getStorageClassNames({ axios, storeGet, commit }) {
 
     if (isDefault) {
       commit("wizard/model$update", {
-        path: "/spec/storageClass/name",
+        path: path,
         value: name,
         force: true,
       });
@@ -328,7 +328,7 @@ async function getElasticSearchVersions(
     filter: {
       items: {
         metadata: { name: null },
-        spec: { version: null, deprecated: null },
+        spec: { version: null, deprecated: null, distribution: null },
       },
     },
   };
@@ -446,6 +446,18 @@ function setMachineToCustom() {
   return "custom";
 }
 
+function disableConfigureOption({model, getValue, watchDependency, itemCtx}) {
+  if(itemCtx.value === "tls") {
+      return !isSecurityEnabled({model, getValue, watchDependency});
+  }
+  return false;
+}
+
+function isSecurityEnabled({model, getValue, watchDependency}) {
+  watchDependency("model#/spec/disableSecurity");
+  const value = getValue(model, "/spec/disableSecurity");
+  return !value;
+}
 
 return {
 	showAuthPasswordField,
@@ -460,5 +472,7 @@ return {
 	getMachineListForOptions,
 	setResourceLimit,
 	setLimitsCpuOrMem,
-	setMachineToCustom
+	setMachineToCustom,
+  disableConfigureOption,
+  isSecurityEnabled,
 }
