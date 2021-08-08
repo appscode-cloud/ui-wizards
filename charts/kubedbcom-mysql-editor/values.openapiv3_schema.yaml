@@ -4504,6 +4504,9 @@ properties:
                             required:
                             - port
                             type: object
+                          terminationGracePeriodSeconds:
+                            format: int64
+                            type: integer
                           timeoutSeconds:
                             format: int32
                             type: integer
@@ -4575,6 +4578,9 @@ properties:
                             required:
                             - port
                             type: object
+                          terminationGracePeriodSeconds:
+                            format: int64
+                            type: integer
                           timeoutSeconds:
                             format: int32
                             type: integer
@@ -4637,6 +4643,15 @@ properties:
                                 type: string
                               user:
                                 type: string
+                            type: object
+                          seccompProfile:
+                            properties:
+                              localhostProfile:
+                                type: string
+                              type:
+                                type: string
+                            required:
+                            - type
                             type: object
                           windowsOptions:
                             properties:
@@ -4774,6 +4789,29 @@ properties:
                                                 type: string
                                               type: object
                                           type: object
+                                        namespaceSelector:
+                                          properties:
+                                            matchExpressions:
+                                              items:
+                                                properties:
+                                                  key:
+                                                    type: string
+                                                  operator:
+                                                    type: string
+                                                  values:
+                                                    items:
+                                                      type: string
+                                                    type: array
+                                                required:
+                                                - key
+                                                - operator
+                                                type: object
+                                              type: array
+                                            matchLabels:
+                                              additionalProperties:
+                                                type: string
+                                              type: object
+                                          type: object
                                         namespaces:
                                           items:
                                             type: string
@@ -4795,6 +4833,29 @@ properties:
                                 items:
                                   properties:
                                     labelSelector:
+                                      properties:
+                                        matchExpressions:
+                                          items:
+                                            properties:
+                                              key:
+                                                type: string
+                                              operator:
+                                                type: string
+                                              values:
+                                                items:
+                                                  type: string
+                                                type: array
+                                            required:
+                                            - key
+                                            - operator
+                                            type: object
+                                          type: array
+                                        matchLabels:
+                                          additionalProperties:
+                                            type: string
+                                          type: object
+                                      type: object
+                                    namespaceSelector:
                                       properties:
                                         matchExpressions:
                                           items:
@@ -4858,6 +4919,29 @@ properties:
                                                 type: string
                                               type: object
                                           type: object
+                                        namespaceSelector:
+                                          properties:
+                                            matchExpressions:
+                                              items:
+                                                properties:
+                                                  key:
+                                                    type: string
+                                                  operator:
+                                                    type: string
+                                                  values:
+                                                    items:
+                                                      type: string
+                                                    type: array
+                                                required:
+                                                - key
+                                                - operator
+                                                type: object
+                                              type: array
+                                            matchLabels:
+                                              additionalProperties:
+                                                type: string
+                                              type: object
+                                          type: object
                                         namespaces:
                                           items:
                                             type: string
@@ -4879,6 +4963,29 @@ properties:
                                 items:
                                   properties:
                                     labelSelector:
+                                      properties:
+                                        matchExpressions:
+                                          items:
+                                            properties:
+                                              key:
+                                                type: string
+                                              operator:
+                                                type: string
+                                              values:
+                                                items:
+                                                  type: string
+                                                type: array
+                                            required:
+                                            - key
+                                            - operator
+                                            type: object
+                                          type: array
+                                        matchLabels:
+                                          additionalProperties:
+                                            type: string
+                                          type: object
+                                      type: object
+                                    namespaceSelector:
                                       properties:
                                         matchExpressions:
                                           items:
@@ -4973,6 +5080,15 @@ properties:
                                 type: string
                               user:
                                 type: string
+                            type: object
+                          seccompProfile:
+                            properties:
+                              localhostProfile:
+                                type: string
+                              type:
+                                type: string
+                            required:
+                            - type
                             type: object
                           supplementalGroups:
                             items:
@@ -5341,6 +5457,100 @@ properties:
                             pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
                             x-kubernetes-int-or-string: true
                         type: object
+                      ephemeral:
+                        properties:
+                          volumeClaimTemplate:
+                            properties:
+                              metadata:
+                                properties:
+                                  annotations:
+                                    additionalProperties:
+                                      type: string
+                                    type: object
+                                  finalizers:
+                                    items:
+                                      type: string
+                                    type: array
+                                  labels:
+                                    additionalProperties:
+                                      type: string
+                                    type: object
+                                  name:
+                                    type: string
+                                  namespace:
+                                    type: string
+                                type: object
+                              spec:
+                                properties:
+                                  accessModes:
+                                    items:
+                                      type: string
+                                    type: array
+                                  dataSource:
+                                    properties:
+                                      apiGroup:
+                                        type: string
+                                      kind:
+                                        type: string
+                                      name:
+                                        type: string
+                                    required:
+                                    - kind
+                                    - name
+                                    type: object
+                                  resources:
+                                    properties:
+                                      limits:
+                                        additionalProperties:
+                                          anyOf:
+                                          - type: integer
+                                          - type: string
+                                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                          x-kubernetes-int-or-string: true
+                                        type: object
+                                      requests:
+                                        additionalProperties:
+                                          anyOf:
+                                          - type: integer
+                                          - type: string
+                                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                          x-kubernetes-int-or-string: true
+                                        type: object
+                                    type: object
+                                  selector:
+                                    properties:
+                                      matchExpressions:
+                                        items:
+                                          properties:
+                                            key:
+                                              type: string
+                                            operator:
+                                              type: string
+                                            values:
+                                              items:
+                                                type: string
+                                              type: array
+                                          required:
+                                          - key
+                                          - operator
+                                          type: object
+                                        type: array
+                                      matchLabels:
+                                        additionalProperties:
+                                          type: string
+                                        type: object
+                                    type: object
+                                  storageClassName:
+                                    type: string
+                                  volumeMode:
+                                    type: string
+                                  volumeName:
+                                    type: string
+                                type: object
+                            required:
+                            - spec
+                            type: object
+                        type: object
                       fc:
                         properties:
                           fsType:
@@ -5615,8 +5825,6 @@ properties:
                                   type: object
                               type: object
                             type: array
-                        required:
-                        - sources
                         type: object
                       quobyte:
                         properties:
@@ -6017,6 +6225,100 @@ properties:
                             pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
                             x-kubernetes-int-or-string: true
                         type: object
+                      ephemeral:
+                        properties:
+                          volumeClaimTemplate:
+                            properties:
+                              metadata:
+                                properties:
+                                  annotations:
+                                    additionalProperties:
+                                      type: string
+                                    type: object
+                                  finalizers:
+                                    items:
+                                      type: string
+                                    type: array
+                                  labels:
+                                    additionalProperties:
+                                      type: string
+                                    type: object
+                                  name:
+                                    type: string
+                                  namespace:
+                                    type: string
+                                type: object
+                              spec:
+                                properties:
+                                  accessModes:
+                                    items:
+                                      type: string
+                                    type: array
+                                  dataSource:
+                                    properties:
+                                      apiGroup:
+                                        type: string
+                                      kind:
+                                        type: string
+                                      name:
+                                        type: string
+                                    required:
+                                    - kind
+                                    - name
+                                    type: object
+                                  resources:
+                                    properties:
+                                      limits:
+                                        additionalProperties:
+                                          anyOf:
+                                          - type: integer
+                                          - type: string
+                                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                          x-kubernetes-int-or-string: true
+                                        type: object
+                                      requests:
+                                        additionalProperties:
+                                          anyOf:
+                                          - type: integer
+                                          - type: string
+                                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                          x-kubernetes-int-or-string: true
+                                        type: object
+                                    type: object
+                                  selector:
+                                    properties:
+                                      matchExpressions:
+                                        items:
+                                          properties:
+                                            key:
+                                              type: string
+                                            operator:
+                                              type: string
+                                            values:
+                                              items:
+                                                type: string
+                                              type: array
+                                          required:
+                                          - key
+                                          - operator
+                                          type: object
+                                        type: array
+                                      matchLabels:
+                                        additionalProperties:
+                                          type: string
+                                        type: object
+                                    type: object
+                                  storageClassName:
+                                    type: string
+                                  volumeMode:
+                                    type: string
+                                  volumeName:
+                                    type: string
+                                type: object
+                            required:
+                            - spec
+                            type: object
+                        type: object
                       fc:
                         properties:
                           fsType:
@@ -6291,8 +6593,6 @@ properties:
                                   type: object
                               type: object
                             type: array
-                        required:
-                        - sources
                         type: object
                       quobyte:
                         properties:
@@ -7116,6 +7416,9 @@ properties:
                             required:
                             - port
                             type: object
+                          terminationGracePeriodSeconds:
+                            format: int64
+                            type: integer
                           timeoutSeconds:
                             format: int32
                             type: integer
@@ -7187,6 +7490,9 @@ properties:
                             required:
                             - port
                             type: object
+                          terminationGracePeriodSeconds:
+                            format: int64
+                            type: integer
                           timeoutSeconds:
                             format: int32
                             type: integer
@@ -7249,6 +7555,15 @@ properties:
                                 type: string
                               user:
                                 type: string
+                            type: object
+                          seccompProfile:
+                            properties:
+                              localhostProfile:
+                                type: string
+                              type:
+                                type: string
+                            required:
+                            - type
                             type: object
                           windowsOptions:
                             properties:
@@ -7386,6 +7701,29 @@ properties:
                                                 type: string
                                               type: object
                                           type: object
+                                        namespaceSelector:
+                                          properties:
+                                            matchExpressions:
+                                              items:
+                                                properties:
+                                                  key:
+                                                    type: string
+                                                  operator:
+                                                    type: string
+                                                  values:
+                                                    items:
+                                                      type: string
+                                                    type: array
+                                                required:
+                                                - key
+                                                - operator
+                                                type: object
+                                              type: array
+                                            matchLabels:
+                                              additionalProperties:
+                                                type: string
+                                              type: object
+                                          type: object
                                         namespaces:
                                           items:
                                             type: string
@@ -7407,6 +7745,29 @@ properties:
                                 items:
                                   properties:
                                     labelSelector:
+                                      properties:
+                                        matchExpressions:
+                                          items:
+                                            properties:
+                                              key:
+                                                type: string
+                                              operator:
+                                                type: string
+                                              values:
+                                                items:
+                                                  type: string
+                                                type: array
+                                            required:
+                                            - key
+                                            - operator
+                                            type: object
+                                          type: array
+                                        matchLabels:
+                                          additionalProperties:
+                                            type: string
+                                          type: object
+                                      type: object
+                                    namespaceSelector:
                                       properties:
                                         matchExpressions:
                                           items:
@@ -7470,6 +7831,29 @@ properties:
                                                 type: string
                                               type: object
                                           type: object
+                                        namespaceSelector:
+                                          properties:
+                                            matchExpressions:
+                                              items:
+                                                properties:
+                                                  key:
+                                                    type: string
+                                                  operator:
+                                                    type: string
+                                                  values:
+                                                    items:
+                                                      type: string
+                                                    type: array
+                                                required:
+                                                - key
+                                                - operator
+                                                type: object
+                                              type: array
+                                            matchLabels:
+                                              additionalProperties:
+                                                type: string
+                                              type: object
+                                          type: object
                                         namespaces:
                                           items:
                                             type: string
@@ -7491,6 +7875,29 @@ properties:
                                 items:
                                   properties:
                                     labelSelector:
+                                      properties:
+                                        matchExpressions:
+                                          items:
+                                            properties:
+                                              key:
+                                                type: string
+                                              operator:
+                                                type: string
+                                              values:
+                                                items:
+                                                  type: string
+                                                type: array
+                                            required:
+                                            - key
+                                            - operator
+                                            type: object
+                                          type: array
+                                        matchLabels:
+                                          additionalProperties:
+                                            type: string
+                                          type: object
+                                      type: object
+                                    namespaceSelector:
                                       properties:
                                         matchExpressions:
                                           items:
@@ -7585,6 +7992,15 @@ properties:
                                 type: string
                               user:
                                 type: string
+                            type: object
+                          seccompProfile:
+                            properties:
+                              localhostProfile:
+                                type: string
+                              type:
+                                type: string
+                            required:
+                            - type
                             type: object
                           supplementalGroups:
                             items:
