@@ -44,18 +44,18 @@ The command removes all the Kubernetes components associated with the chart and 
 
 The following table lists the configurable parameters of the `voyagerappscodecom-ingress-editor` chart and their default values.
 
-|     Parameter      | Description |            Default             |
-|--------------------|-------------|--------------------------------|
-| apiVersion         |             | `voyager.appscode.com/v1beta1` |
-| kind               |             | `Ingress`                      |
-| metadata.name      |             | `ingress`                      |
-| metadata.namespace |             | `default`                      |
+|     Parameter      | Description |          Default          |
+|--------------------|-------------|---------------------------|
+| apiVersion         |             | `voyager.appscode.com/v1` |
+| kind               |             | `Ingress`                 |
+| metadata.name      |             | `ingress`                 |
+| metadata.namespace |             | `default`                 |
 
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:
 
 ```console
-$ helm install voyagerappscodecom-ingress-editor bytebuilders-ui/voyagerappscodecom-ingress-editor -n default --set apiVersion=voyager.appscode.com/v1beta1
+$ helm install voyagerappscodecom-ingress-editor bytebuilders-ui/voyagerappscodecom-ingress-editor -n default --set apiVersion=voyager.appscode.com/v1
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
