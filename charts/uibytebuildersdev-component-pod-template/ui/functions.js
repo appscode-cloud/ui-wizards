@@ -39,7 +39,7 @@ async function getImagePullSecrets({
   storeGet,
   reusableElementCtx,
 }) {
-  const namespace = getValue(reusableElementCtx, "/data/namespace");
+  const namespace = getValue(reusableElementCtx, "/dataContext/namespace");
   watchDependency("data#/namespace");
 
   let resources = await getNamespacedResourceList(axios, storeGet, {
@@ -90,14 +90,25 @@ async function getNamespacedResourceList(
   return ans;
 }
 
-// return {
-//   fetchJsons,
-// };
+function showResources({ reusableElementCtx, getValue, watchDependency }) {
+  watchDependency("data#/topology");
+  const topology = getValue(reusableElementCtx, "/dataContext/topology");
+  
+  return !topology;
+}
 
+function disableSpec({ reusableElementCtx }) {
+  const { functionCallbacks } = reusableElementCtx || {};
+  const { isEditWizard } = functionCallbacks || {};
+
+  return !!isEditWizard();
+}
 
 return {
 	fetchJsons,
 	getOperatorsList,
 	getImagePullSecrets,
-	getNamespacedResourceList
+  getNamespacedResourceList,
+  showResources,
+  disableSpec,
 }

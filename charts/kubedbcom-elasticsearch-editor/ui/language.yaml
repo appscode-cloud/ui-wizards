@@ -71,6 +71,8 @@ en:
     certificates: Certificates
     cluster_auth_mode: Cluster Authentication Mode
     cluster_ip: Cluster IP
+    config_file: Configuration File
+    config_files: Configuration Files
     configOptions: Configuration Options
     configServer: Config Server
     configServerNodes: Config Server Nodes
@@ -80,6 +82,7 @@ en:
     configuration_files: Configuration
     configuration_source: Configuration Source
     controller_annotations: Controller Annotations
+    coordinating_nodes: Co-ordinating Nodes
     countries: Countries
     country: Country
     cpu: CPU
@@ -87,10 +90,14 @@ en:
     custom_config: Custom Config Type
     custom_config_type: Select Custom Config Type
     custom_config_not_allowed: 'Specifying ConfigSecret here is not allowed for sharded cluster. Please, use shard specific ConfigSecret from the Topology section.'
-    customize_config_server_pod_template: Customize Config Server Pod Template
     customize_exporter: Customize Exporter Sidecar
-    customize_mongos_pod_template: Customize Mongos Pod Template
-    customize_shards_pod_template: Customize Shard Pod Template
+    onCustomizeKernelSettingChange: Do you want to customize your kernelSettings?
+    data_cold_nodes: Data Cold Nodes
+    data_content_nodes: Data Content Nodes
+    data_frozen_nodes: Data Frozen Nodes
+    data_hot_nodes: Data Hot Nodes
+    data_nodes: Data Nodes
+    data_warm_nodes: Data Warm Nodes
     dataSource: Data Source
     database:
       mode: Database Mode
@@ -98,11 +105,14 @@ en:
       secret: Database Secret
       version: Database Version
     description: Description
+    disable_security_question: Disable Security?
     dns_name: DNS Name
     dns_names: DNS Names
     duration: Duration
     effect: Effect
+    elasticsearch_yml: elasticsearch.yml
     enable_monitoring: Enable Monitoring
+    enable_ssl_question: Enable SSL?
     enable_tls: Enable TLS
     endpoint: Endpoint
     endpoints: Endpoints
@@ -121,6 +131,7 @@ en:
     hosts: Hosts
     image_pull_secrets: Image Pull Secrets
     initialization: Pre-populate your MongoDB from backup/another database
+    ingest_nodes: Ingest Nodes
     internal_users: Internal Users
     interval: Interval
     ip_address: IP Address
@@ -132,17 +143,21 @@ en:
       key: Key
       label: Labels
       value: Value
+    filename: File Name
     level: Level
     limit: Limit
     load_balancer_ip: Load Balancer IP
     load_balancer_source_range: Load Balancer Source Range
     load_balancer_source_ranges: Load Balancer Source Ranges
+    master_nodes: Master Nodes
     matchNames: Match Namespaces
+    max_unavailable: Max unavailable
     match_expression: Match Expression
     match_expressions: Match Expressions
     match_field: Match Field
     match_fields: Match Fields
     memory: Memory
+    ml_nodes: ML Nodes
     mongo_conf: mongod.conf
     mongos: Mongos
     mongosNodes: Mongos Nodes
@@ -263,6 +278,7 @@ en:
     service_template: Service Template
     service_template_annotations: Annotations
     service_templates: Service Templates
+    setCustomConfig: Do you want to set custom config?
     shard: Shard
     shardNodes: Shard Nodes
     shards: Shards
@@ -271,6 +287,7 @@ en:
       class: Storage Class
       size: Storage Size
     subject: Subject
+    suffix: Suffix
     sysctl: sysctl
     sysctls: sysctls
     terminalPolicy: Terminal Policy
@@ -282,6 +299,7 @@ en:
     to_update_config: To update this section go to Create OpsRequest
     to_update_replicas: To update replicas go to Create OpsRequest
     to_update_tls: To update this section go to Create OpsRequest
+    transform_nodes: Transform Nodes
     type: Type
     user: User
     users: Users
@@ -349,20 +367,20 @@ en:
         text: Stash Backup
     database:
       mode:
-        Replicaset:
-          description: MongoDB ReplicaSet for high availability.
-          label: Replicated Cluster
-        Sharded:
-          description: MongoDB sharded cluster for high performance and high availability.
-          label: Sharded Cluster
-        Standalone:
-          description: Single node MongoDB without high availability and sharding.
-          label: Standalone
+        Combined:
+          description: Elasticsearch cluster with all node-role enabled.
+          label: Combined Cluster
+        Topology:
+          description: Elasticsearch cluster with dedicated node-role.
+          label: Topology Cluster
       secret:
         customSecret:
           label: Auto-generate auth secret
         existingSecret:
           label: Use existing auth secret
+    kernelSettings:
+      disable: Disable
+      'no': No (Default settings will be applied)
     scriptSourceVolumeType:
       configMap:
         text: ConfigMap
@@ -391,7 +409,7 @@ en:
         text: 'Yes'
   steps:
   - label: Basic Information
-  - label: Topology
+  - label: Configure Cluster
   - label: Internal Users
   - label: TLS Configuration
   - label: Initialization

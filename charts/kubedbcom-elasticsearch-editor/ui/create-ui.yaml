@@ -20,6 +20,7 @@ steps:
     - fetch: getElasticSearchVersions|catalog.kubedb.com|v1alpha1|elasticsearchversions
       label:
         text: labels.database.version
+      onChange: onVersionChange
       schema:
         $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/version
       type: select
@@ -75,43 +76,52 @@ steps:
         $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/terminationPolicy
       type: radio
     - label:
-        text: labels.database.secret
-      type: label-element
-    - computed: getCreateAuthSecret
-      onChange: onCreateAuthSecretChange
-      options:
-      - text: options.database.secret.existingSecret.label
-        value: false
-      - text: options.database.secret.customSecret.label
-        value: true
+        text: labels.disable_security_question
+      onChange: onDisableSecurityChange
+      type: switch
       schema:
-        $ref: discriminator#/createAuthSecret
-      type: radio
-    - allowUserDefinedOption: true
-      fetch: getSecrets
-      if: isEqualToDatabaseSecretStatus|has-existing-secret
-      label:
-        text: labels.secret
-      schema:
-        $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/authSecret/properties/name
-      type: select
+        $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/disableSecurity
     - elements:
-      - elements:
-        - decoder: decodePassword
-          disabled: true
-          encoder: encodePassword
-          hideValue: true
-          label:
-            text: Password
-          schema:
-            $ref: schema#/properties/resources/properties/secret_auth/properties/data/properties/password
-          type: input
+      - label:
+          text: labels.database.secret
+        type: label-element
+      - computed: getCreateAuthSecret
+        onChange: onCreateAuthSecretChange
+        options:
+        - text: options.database.secret.existingSecret.label
+          value: false
+        - text: options.database.secret.customSecret.label
+          value: true
         schema:
-          $ref: schema#/properties/resources/properties/secret_auth/properties/data
+          $ref: discriminator#/createAuthSecret
+        type: radio
+      - allowUserDefinedOption: true
+        fetch: getSecrets
+        if: isEqualToDatabaseSecretStatus|has-existing-secret
+        label:
+          text: labels.secret
+        schema:
+          $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/authSecret/properties/name
+        type: select
+      - elements:
+        - elements:
+          - decoder: decodePassword
+            disabled: true
+            encoder: encodePassword
+            hideValue: true
+            label:
+              text: Password
+            schema:
+              $ref: schema#/properties/resources/properties/secret_auth/properties/data/properties/password
+            type: input
+          schema:
+            $ref: schema#/properties/resources/properties/secret_auth/properties/data
+          type: single-step-form
+        if: showPasswordSection
+        schema:
+          $ref: schema#/properties/resources/properties/secret_auth
         type: single-step-form
-      if: showPasswordSection
-      schema:
-        $ref: schema#/properties/resources/properties/secret_auth
+      if: isSecurityEnabled
       type: single-step-form
     type: single-step-form
   id: basic
@@ -119,7 +129,6 @@ steps:
 - form:
     discriminator:
       activeDatabaseMode:
-        default: Standalone
         type: string
     elements:
     - computed: setDatabaseMode
@@ -128,119 +137,645 @@ steps:
         text: labels.database.mode
       onChange: deleteDatabaseModePath
       options:
-      - description: options.database.mode.Standalone.description
-        text: options.database.mode.Standalone.label
-        value: Standalone
-      - description: options.database.mode.Replicaset.description
-        text: options.database.mode.Replicaset.label
-        value: Replicaset
-      - description: options.database.mode.Sharded.description
-        text: options.database.mode.Sharded.label
-        value: Sharded
+      - description: options.database.mode.Combined.description
+        text: options.database.mode.Combined.label
+        value: Combined
+      - description: options.database.mode.Topology.description
+        text: options.database.mode.Topology.label
+        value: Topology
       schema:
         $ref: discriminator#/activeDatabaseMode
       type: radio
     - elements:
       - label:
-          text: labels.replicaset.name
-        schema:
-          $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/replicaSet/properties/name
-        type: input
-      - label:
           text: labels.replicaset.number
         schema:
           $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/replicas
         type: input
-      if: isEqualToDatabaseMode|Replicaset
-      type: single-step-form
-    - elements:
-      - fetch: getStorageClassNames|common
-        label:
-          text: labels.storage.class
+      - label:
+          text: labels.max_unavailable
+        fetch: getMaxUnavailableOptions|/resources/kubedbComElasticsearch/spec
         schema:
-          $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/storage/properties/storageClassName
+          $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/maxUnavailable
         type: select
       - label:
           text: labels.storage.size
         schema:
           $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/storage/properties/resources/properties/requests/properties/storage
         type: input
-      if: showCommonStorageClassAndSizeField
+      - fetch: getStorageClassNames|/resources/kubedbComElasticsearch/spec/storage/storageClassName
+        label:
+          text: labels.storage.class
+        schema:
+          $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/storage/properties/storageClassName
+        type: select
+      if: isEqualToDatabaseMode|Combined
       type: single-step-form
-    - elements:
+    - discriminator:
+        storageClasses:
+          type: array
+        selectedVersionDistribution:
+          type: string
+          default: SearchGaurd
+      elements:
+      - computed: getStorageClassNames
+        if: returnFalse
+        schema:
+          $ref: discriminator#/properties/storageClasses
+        type: input
+      - computed: getSelectedVersionDistribution|/selectedVersionDistribution
+        if: returnFalse
+        schema:
+          $ref: discriminator#/properties/selectedVersionDistribution
+        type: input
       - elements:
-        - fetch: getStorageClassNames|shard
-          label:
-            text: labels.storage.class
-          onChange: setStorageClass
-          schema:
-            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/shardTopology/properties/shard/properties/storage/properties/storageClassName
-          type: select
         - label:
-            text: labels.shardNodes
-          type: label-element
-        - elements:
-          - elements:
-            - label:
-                text: labels.storage.size
-              schema:
-                $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/shardTopology/properties/shard/properties/storage/properties/resources/properties/requests/properties/storage
-              type: input
-            schema:
-              $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/shardTopology/properties/shard/properties/storage/properties/resources/properties/requests
-            type: single-step-form
+            text: labels.replicaset.number
           schema:
-            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/shardTopology/properties/shard/properties/storage/properties/resources
-          type: single-step-form
-        type: single-step-form
-      - label:
-          text: labels.shards
-        schema:
-          $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/shardTopology/properties/shard/properties/shards
-        type: input
-      - label:
-          text: labels.replicaset.number
-        schema:
-          $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/shardTopology/properties/shard/properties/replicas
-        type: input
-      - label:
-          text: labels.configServer
-        type: label-element
-      - elements:
+            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/master/properties/replicas
+          type: input
+        - label:
+            text: labels.max_unavailable
+          fetch: getMaxUnavailableOptions|/resources/kubedbComElasticsearch/spec/topology/master
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/master/properties/maxUnavailable
+          type: select
         - elements:
           - elements:
             - elements:
               - label:
                   text: labels.storage.size
                 schema:
-                  $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/shardTopology/properties/configServer/properties/storage/properties/resources/properties/requests/properties/storage
+                  $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/master/properties/storage/properties/resources/properties/requests/properties/storage
                 type: input
               schema:
-                $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/shardTopology/properties/configServer/properties/storage/properties/resources/properties/requests
+                $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/master/properties/storage/properties/resources/properties/requests
               type: single-step-form
             schema:
-              $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/shardTopology/properties/configServer/properties/storage/properties/resources
+              $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/master/properties/storage/properties/resources
             type: single-step-form
+          - fetch: getStorageClassNamesFromDiscriminator|/resources/kubedbComElasticsearch/spec/topology/master/storage/storageClassName
+            label:
+              text: labels.storage.class
+            schema:
+              $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/master/properties/storage/properties/storageClassName
+            type: select  
           schema:
-            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/shardTopology/properties/configServer/properties/storage
+              $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/master/properties/storage
           type: single-step-form
         - label:
-            text: labels.replicaset.number
+            text: labels.suffix
           schema:
-            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/shardTopology/properties/configServer/properties/replicas
+            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/master/properties/suffix
           type: input
+        - alias: reusable_reources
+          chart:
+            name: uibytebuildersdev-component-resources
+            version: v0.2.0-alpha.0
+          label:
+            text: labels.resources
+          moduleResolver: fetchJsons
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/master/properties/resources
+          show_label: true
+          type: reusable-element
+        hideForm: true
+        label:
+          text: labels.master_nodes
+        show_label: true
+        schema:
+          $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/master
         type: single-step-form
-      - label:
-          text: labels.mongos
-        type: label-element
       - elements:
         - label:
             text: labels.replicaset.number
           schema:
-            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/shardTopology/properties/mongos/properties/replicas
+            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/data/properties/replicas
           type: input
+        - label:
+            text: labels.max_unavailable
+          fetch: getMaxUnavailableOptions|/resources/kubedbComElasticsearch/spec/topology/data
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/data/properties/maxUnavailable
+          type: select
+        - elements:
+          - elements:
+            - elements:
+              - label:
+                  text: labels.storage.size
+                schema:
+                  $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/data/properties/storage/properties/resources/properties/requests/properties/storage
+                type: input
+              schema:
+                $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/data/properties/storage/properties/resources/properties/requests
+              type: single-step-form
+            schema:
+              $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/data/properties/storage/properties/resources
+            type: single-step-form
+          - fetch: getStorageClassNamesFromDiscriminator|/resources/kubedbComElasticsearch/spec/topology/data/storage/storageClassName
+            label:
+              text: labels.storage.class
+            schema:
+              $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/data/properties/storage/properties/storageClassName
+            type: select  
+          schema:
+              $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/data/properties/storage
+          type: single-step-form
+        - label:
+            text: labels.suffix
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/data/properties/suffix
+          type: input
+        - alias: reusable_reources
+          chart:
+            name: uibytebuildersdev-component-resources
+            version: v0.2.0-alpha.0
+          label:
+            text: labels.resources
+          moduleResolver: fetchJsons
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/data/properties/resources
+          show_label: true
+          type: reusable-element
+        hideForm: true
+        label:
+          text: labels.data_nodes
+        show_label: true
+        schema:
+          $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/data
         type: single-step-form
-      if: isEqualToDatabaseMode|Sharded
+      - elements:
+        - label:
+            text: labels.replicaset.number
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/ingest/properties/replicas
+          type: input
+        - label:
+            text: labels.max_unavailable
+          fetch: getMaxUnavailableOptions|/resources/kubedbComElasticsearch/spec/topology/ingest
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/ingest/properties/maxUnavailable
+          type: select
+        - elements:
+          - elements:
+            - elements:
+              - label:
+                  text: labels.storage.size
+                schema:
+                  $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/ingest/properties/storage/properties/resources/properties/requests/properties/storage
+                type: input
+              schema:
+                $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/ingest/properties/storage/properties/resources/properties/requests
+              type: single-step-form
+            schema:
+              $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/ingest/properties/storage/properties/resources
+            type: single-step-form
+          - fetch: getStorageClassNamesFromDiscriminator|/resources/kubedbComElasticsearch/spec/topology/ingest/storage/storageClassName
+            label:
+              text: labels.storage.class
+            schema:
+              $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/ingest/properties/storage/properties/storageClassName
+            type: select  
+          schema:
+              $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/ingest/properties/storage
+          type: single-step-form
+        - label:
+            text: labels.suffix
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/ingest/properties/suffix
+          type: input
+        - alias: reusable_reources
+          chart:
+            name: uibytebuildersdev-component-resources
+            version: v0.2.0-alpha.0
+          label:
+            text: labels.resources
+          moduleResolver: fetchJsons
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/ingest/properties/resources
+          show_label: true
+          type: reusable-element
+        hideForm: true
+        label:
+          text: labels.ingest_nodes
+        show_label: true
+        schema:
+          $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/ingest
+        type: single-step-form
+      - elements:
+        - label:
+            text: labels.replicaset.number
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/ml/properties/replicas
+          type: input
+        - label:
+            text: labels.max_unavailable
+          fetch: getMaxUnavailableOptions|/resources/kubedbComElasticsearch/spec/topology/ml
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/ml/properties/maxUnavailable
+          type: select
+        - elements:
+          - elements:
+            - elements:
+              - label:
+                  text: labels.storage.size
+                schema:
+                  $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/ml/properties/storage/properties/resources/properties/requests/properties/storage
+                type: input
+              schema:
+                $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/ml/properties/storage/properties/resources/properties/requests
+              type: single-step-form
+            schema:
+              $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/ml/properties/storage/properties/resources
+            type: single-step-form
+          - fetch: getStorageClassNamesFromDiscriminator|/resources/kubedbComElasticsearch/spec/topology/ml/storage/storageClassName
+            label:
+              text: labels.storage.class
+            schema:
+              $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/ml/properties/storage/properties/storageClassName
+            type: select  
+          schema:
+              $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/ml/properties/storage
+          type: single-step-form
+        - label:
+            text: labels.suffix
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/ml/properties/suffix
+          type: input
+        - alias: reusable_reources
+          chart:
+            name: uibytebuildersdev-component-resources
+            version: v0.2.0-alpha.0
+          label:
+            text: labels.resources
+          moduleResolver: fetchJsons
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/ml/properties/resources
+          show_label: true
+          type: reusable-element
+        hideForm: true
+        if: isDiscriminatorEqualTo|/selectedVersionDistribution|ElasticStack
+        label:
+          text: labels.ml_nodes
+        show_label: true
+        schema:
+          $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/ml
+        type: single-step-form
+      - elements:
+        - label:
+            text: labels.replicaset.number
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/transform/properties/replicas
+          type: input
+        - label:
+            text: labels.max_unavailable
+          fetch: getMaxUnavailableOptions|/resources/kubedbComElasticsearch/spec/topology/transform
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/transform/properties/maxUnavailable
+          type: select
+        - elements:
+          - elements:
+            - elements:
+              - label:
+                  text: labels.storage.size
+                schema:
+                  $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/transform/properties/storage/properties/resources/properties/requests/properties/storage
+                type: input
+              schema:
+                $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/transform/properties/storage/properties/resources/properties/requests
+              type: single-step-form
+            schema:
+              $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/transform/properties/storage/properties/resources
+            type: single-step-form
+          - fetch: getStorageClassNamesFromDiscriminator|/resources/kubedbComElasticsearch/spec/topology/transform/storage/storageClassName
+            label:
+              text: labels.storage.class
+            schema:
+              $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/transform/properties/storage/properties/storageClassName
+            type: select  
+          schema:
+              $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/transform/properties/storage
+          type: single-step-form
+        - label:
+            text: labels.suffix
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/transform/properties/suffix
+          type: input
+        - alias: reusable_reources
+          chart:
+            name: uibytebuildersdev-component-resources
+            version: v0.2.0-alpha.0
+          label:
+            text: labels.resources
+          moduleResolver: fetchJsons
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/transform/properties/resources
+          show_label: true
+          type: reusable-element
+        hideForm: true
+        if: isDiscriminatorEqualTo|/selectedVersionDistribution|ElasticStack
+        label:
+          text: labels.transform_nodes
+        show_label: true
+        schema:
+          $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/transform
+        type: single-step-form
+      - elements:
+        - label:
+            text: labels.replicaset.number
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataCold/properties/replicas
+          type: input
+        - label:
+            text: labels.max_unavailable
+          fetch: getMaxUnavailableOptions|/resources/kubedbComElasticsearch/spec/topology/dataCold
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataCold/properties/maxUnavailable
+          type: select
+        - elements:
+          - elements:
+            - elements:
+              - label:
+                  text: labels.storage.size
+                schema:
+                  $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataCold/properties/storage/properties/resources/properties/requests/properties/storage
+                type: input
+              schema:
+                $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataCold/properties/storage/properties/resources/properties/requests
+              type: single-step-form
+            schema:
+              $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataCold/properties/storage/properties/resources
+            type: single-step-form
+          - fetch: getStorageClassNamesFromDiscriminator|/resources/kubedbComElasticsearch/spec/topology/dataCold/storage/storageClassName
+            label:
+              text: labels.storage.class
+            schema:
+              $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataCold/properties/storage/properties/storageClassName
+            type: select  
+          schema:
+              $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataCold/properties/storage
+          type: single-step-form
+        - label:
+            text: labels.suffix
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataCold/properties/suffix
+          type: input
+        - alias: reusable_reources
+          chart:
+            name: uibytebuildersdev-component-resources
+            version: v0.2.0-alpha.0
+          label:
+            text: labels.resources
+          moduleResolver: fetchJsons
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataCold/properties/resources
+          show_label: true
+          type: reusable-element
+        hideForm: true
+        if: isDiscriminatorEqualTo|/selectedVersionDistribution|ElasticStack
+        label:
+          text: labels.data_cold_nodes
+        show_label: true
+        schema:
+          $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataCold
+        type: single-step-form
+      - elements:
+        - label:
+            text: labels.replicaset.number
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataContent/properties/replicas
+          type: input
+        - label:
+            text: labels.max_unavailable
+          fetch: getMaxUnavailableOptions|/resources/kubedbComElasticsearch/spec/topology/dataContent
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataContent/properties/maxUnavailable
+          type: select
+        - elements:
+          - elements:
+            - elements:
+              - label:
+                  text: labels.storage.size
+                schema:
+                  $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataContent/properties/storage/properties/resources/properties/requests/properties/storage
+                type: input
+              schema:
+                $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataContent/properties/storage/properties/resources/properties/requests
+              type: single-step-form
+            schema:
+              $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataContent/properties/storage/properties/resources
+            type: single-step-form
+          - fetch: getStorageClassNamesFromDiscriminator|/resources/kubedbComElasticsearch/spec/topology/dataContent/storage/storageClassName
+            label:
+              text: labels.storage.class
+            schema:
+              $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataContent/properties/storage/properties/storageClassName
+            type: select  
+          schema:
+              $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataContent/properties/storage
+          type: single-step-form
+        - label:
+            text: labels.suffix
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataContent/properties/suffix
+          type: input
+        - alias: reusable_reources
+          chart:
+            name: uibytebuildersdev-component-resources
+            version: v0.2.0-alpha.0
+          label:
+            text: labels.resources
+          moduleResolver: fetchJsons
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataContent/properties/resources
+          show_label: true
+          type: reusable-element
+        hideForm: true
+        if: isDiscriminatorEqualTo|/selectedVersionDistribution|ElasticStack
+        label:
+          text: labels.data_content_nodes
+        show_label: true
+        schema:
+          $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataContent
+        type: single-step-form
+      - elements:
+        - label:
+            text: labels.replicaset.number
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataFrozen/properties/replicas
+          type: input
+        - label:
+            text: labels.max_unavailable
+          fetch: getMaxUnavailableOptions|/resources/kubedbComElasticsearch/spec/topology/dataFrozen
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataFrozen/properties/maxUnavailable
+          type: select
+        - elements:
+          - elements:
+            - elements:
+              - label:
+                  text: labels.storage.size
+                schema:
+                  $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataFrozen/properties/storage/properties/resources/properties/requests/properties/storage
+                type: input
+              schema:
+                $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataFrozen/properties/storage/properties/resources/properties/requests
+              type: single-step-form
+            schema:
+              $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataFrozen/properties/storage/properties/resources
+            type: single-step-form
+          - fetch: getStorageClassNamesFromDiscriminator|/resources/kubedbComElasticsearch/spec/topology/dataFrozen/storage/storageClassName
+            label:
+              text: labels.storage.class
+            schema:
+              $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataFrozen/properties/storage/properties/storageClassName
+            type: select  
+          schema:
+              $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataFrozen/properties/storage
+          type: single-step-form
+        - label:
+            text: labels.suffix
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataFrozen/properties/suffix
+          type: input
+        - alias: reusable_reources
+          chart:
+            name: uibytebuildersdev-component-resources
+            version: v0.2.0-alpha.0
+          label:
+            text: labels.resources
+          moduleResolver: fetchJsons
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataFrozen/properties/resources
+          show_label: true
+          type: reusable-element
+        hideForm: true
+        if: isDiscriminatorEqualTo|/selectedVersionDistribution|ElasticStack
+        label:
+          text: labels.data_frozen_nodes
+        show_label: true
+        schema:
+          $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataFrozen
+        type: single-step-form
+      - elements:
+        - label:
+            text: labels.replicaset.number
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataHot/properties/replicas
+          type: input
+        - label:
+            text: labels.max_unavailable
+          fetch: getMaxUnavailableOptions|/resources/kubedbComElasticsearch/spec/topology/dataHot
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataHot/properties/maxUnavailable
+          type: select
+        - elements:
+          - elements:
+            - elements:
+              - label:
+                  text: labels.storage.size
+                schema:
+                  $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataHot/properties/storage/properties/resources/properties/requests/properties/storage
+                type: input
+              schema:
+                $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataHot/properties/storage/properties/resources/properties/requests
+              type: single-step-form
+            schema:
+              $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataHot/properties/storage/properties/resources
+            type: single-step-form
+          - fetch: getStorageClassNamesFromDiscriminator|/resources/kubedbComElasticsearch/spec/topology/dataHot/storage/storageClassName
+            label:
+              text: labels.storage.class
+            schema:
+              $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataHot/properties/storage/properties/storageClassName
+            type: select  
+          schema:
+              $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataHot/properties/storage
+          type: single-step-form
+        - label:
+            text: labels.suffix
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataHot/properties/suffix
+          type: input
+        - alias: reusable_reources
+          chart:
+            name: uibytebuildersdev-component-resources
+            version: v0.2.0-alpha.0
+          label:
+            text: labels.resources
+          moduleResolver: fetchJsons
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataHot/properties/resources
+          show_label: true
+          type: reusable-element
+        hideForm: true
+        if: isDiscriminatorNotEqualTo|/selectedVersionDistribution|SearchGuard
+        label:
+          text: labels.data_hot_nodes
+        show_label: true
+        schema:
+          $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataHot
+        type: single-step-form
+      - elements:
+        - label:
+            text: labels.replicaset.number
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataWarm/properties/replicas
+          type: input
+        - label:
+            text: labels.max_unavailable
+          fetch: getMaxUnavailableOptions|/resources/kubedbComElasticsearch/spec/topology/dataWarm
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataWarm/properties/maxUnavailable
+          type: select
+        - elements:
+          - elements:
+            - elements:
+              - label:
+                  text: labels.storage.size
+                schema:
+                  $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataWarm/properties/storage/properties/resources/properties/requests/properties/storage
+                type: input
+              schema:
+                $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataWarm/properties/storage/properties/resources/properties/requests
+              type: single-step-form
+            schema:
+              $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataWarm/properties/storage/properties/resources
+            type: single-step-form
+          - fetch: getStorageClassNamesFromDiscriminator|/resources/kubedbComElasticsearch/spec/topology/dataWarm/storage/storageClassName
+            label:
+              text: labels.storage.class
+            schema:
+              $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataWarm/properties/storage/properties/storageClassName
+            type: select  
+          schema:
+              $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataWarm/properties/storage
+          type: single-step-form
+        - label:
+            text: labels.suffix
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataWarm/properties/suffix
+          type: input
+        - alias: reusable_reources
+          chart:
+            name: uibytebuildersdev-component-resources
+            version: v0.2.0-alpha.0
+          label:
+            text: labels.resources
+          moduleResolver: fetchJsons
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataWarm/properties/resources
+          show_label: true
+          type: reusable-element
+        hideForm: true
+        if: isDiscriminatorNotEqualTo|/selectedVersionDistribution|SearchGuard
+        label:
+          text: labels.data_warm_nodes
+        show_label: true
+        schema:
+          $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataWarm
+        type: single-step-form
+      if: isEqualToDatabaseMode|Topology
       type: single-step-form
     type: single-step-form
   id: topology
@@ -307,6 +842,7 @@ steps:
             schema:
               $ref: discriminator#/properties/users/items/properties/opendistroSecurityRoles/items
             type: input
+          if: isDistributionEqualTo|OpenDistro
           label:
             text: labels.opendistro_security_roles
           schema:
@@ -323,16 +859,19 @@ steps:
             schema:
               $ref: discriminator#/properties/users/items/properties/searchGuardRoles/items
             type: input
+          if: isDistributionEqualTo|SearchGuard
           label:
             text: labels.search_guard_roles
           schema:
             $ref: discriminator#/properties/users/items/properties/searchGuardRoles
           type: list-input-form
-        - label:
+        - allowUserDefinedOption: true
+          fetch: getSecrets
+          label:
             text: labels.secret_name
           schema:
             $ref: discriminator#/properties/users/items/properties/secretName
-          type: input
+          type: select
         type: single-step-form
       individualItemDisabilityCheck: disableUserEdit
       newItemValidator: validateNewUser
@@ -402,7 +941,201 @@ steps:
       type: single-step-form-array
     type: single-step-form
   id: internal-users
+  if: showInternalUsersAndRolesMapping
   title: steps.2.label
+- form:
+    discriminator:
+      rolesMapping:
+        type: array
+    elements:
+    - addFormLabel: labels.role
+      computed: setRolesMapping
+      element:
+        discriminator:
+          roles:
+            emitAs: rolesMapping
+            type: array
+        elements:
+        - required: true
+          label:
+            text: labels.role_name
+          schema:
+            $ref: discriminator#/properties/roles/items/properties/roleName
+          type: input
+        - element:
+            label:
+              text: labels.role
+            schema:
+              $ref: discriminator#/properties/roles/items/properties/andBackendRoles/items
+            type: input
+          label:
+            text: labels.andBackendRoles
+          schema:
+            $ref: discriminator#/properties/roles/items/properties/andBackendRoles
+          type: list-input-form
+        - element:
+            label:
+              text: labels.role
+            schema:
+              $ref: discriminator#/properties/roles/items/properties/backendRoles/items
+            type: input
+          label:
+            text: labels.backendRoles
+          schema:
+            $ref: discriminator#/properties/roles/items/properties/backendRoles
+          type: list-input-form
+        - label:
+            text: labels.hidden
+          schema:
+            $ref: discriminator#/properties/roles/items/properties/hidden
+          type: switch
+        - element:
+            label:
+              text: labels.host
+            schema:
+              $ref: discriminator#/properties/roles/items/properties/hosts/items
+            type: input
+          label:
+            text: labels.hosts
+          schema:
+            $ref: discriminator#/properties/roles/items/properties/hosts
+          type: list-input-form
+        - label:
+            text: labels.reserved
+          schema:
+            $ref: discriminator#/properties/roles/items/properties/reserved
+          type: switch
+        - allowUserDefinedOption: true
+          fetch: getInternalUsers
+          label:
+            text: labels.users
+          schema:
+            $ref: discriminator#/properties/roles/items/properties/users
+          type: multiselect
+        type: single-step-form
+      onChange: onRolesMappingChange
+      label:
+        text: labels.roles_mapping
+      schema:
+        $ref: discriminator#/properties/rolesMapping
+      tableContents:
+      - inTableColumn: true
+        label:
+          text: labels.role_name
+        path: roleName
+        type: value
+        typeOfValue: string
+      - inTableColumn: true
+        label:
+          isSubsection: true
+          text: labels.backendRoles
+        path: backendRoles
+        type: value
+        typeOfValue: array
+      - inTableColumn: true
+        label:
+          text: labels.hidden
+        path: hidden
+        type: value
+        typeOfValue: string
+      - inTableColumn: false
+        label:
+          isSubsection: true
+          text: labels.andBackendRoles
+        path: andBackendRoles
+        type: value
+        typeOfValue: array
+      - inTableColumn: false
+        label:
+          isSubsection: true
+          text: labels.hosts
+        path: hosts
+        type: value
+        typeOfValue: array
+      - inTableColumn: true
+        label:
+          isSubsection: true
+          text: labels.users
+        path: users
+        type: value
+        typeOfValue: array
+      - inTableColumn: false
+        label:
+          text: labels.reserved
+        path: reserved
+        type: value
+        typeOfValue: string
+      type: single-step-form-array
+    type: single-step-form
+  id: roles-mapping
+  if: showInternalUsersAndRolesMapping
+  title: steps.11.label
+- form:
+    elements:
+    - discriminator:
+        customizeKernelSettings:
+          type: string
+      elements:
+      - computed: returnStringYes
+        label:
+          text: labels.customizeKernelSettings
+        onChange: onCustomizeKernelSettingChange
+        options:
+        - text: options.yesOrNo.yes.text
+          value: "yes"
+        - text: options.kernelSettings.no
+          value: "no"
+        - text: options.kernelSettings.disable
+          value: disable
+        schema:
+          $ref: discriminator#/properties/customizeKernelSettings
+        type: radio
+      - if: isDiscriminatorEqualTo|/customizeKernelSettings|yes
+        label:
+          text: labels.privileged_question
+        schema:
+          $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/kernelSettings/properties/privileged
+        type: switch
+      - addFormLabel: labels.sysctl
+        if: isDiscriminatorEqualTo|/customizeKernelSettings|yes
+        element:
+          elements:
+          - label:
+              text: labels.name
+            schema:
+              $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/kernelSettings/properties/sysctls/items/properties/name
+            type: input
+          - label:
+              text: labels.value
+            schema:
+              $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/kernelSettings/properties/sysctls/items/properties/value
+            type: input
+          type: single-step-form
+        label:
+          text: labels.sysctls
+        schema:
+          $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/kernelSettings/properties/sysctls
+        tableContents:
+        - inTableColumn: true
+          label:
+            text: labels.name
+          path: name
+          type: value
+          typeOfValue: string
+        - inTableColumn: true
+          label:
+            text: labels.value
+          path: value
+          type: value
+          typeOfValue: string
+        type: single-step-form-array
+      keepEmpty: true
+      schema:
+        $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/kernelSettings
+      type: single-step-form
+    type: single-step-form
+  id: kernel-settings
+  title: steps.10.label
 - form:
     discriminator:
       configureTLS:
@@ -417,34 +1150,11 @@ steps:
         $ref: discriminator#/configureTLS
       type: switch
     - elements:
-      - computed: setClusterAuthMode
-        label:
-          text: labels.cluster_auth_mode
-        options:
-        - text: x509
-          value: x509
-        - text: sendX509
-          value: sendX509
-        - text: keyFile
-          value: keyFile
-        - text: sendKeyFile
-          value: sendKeyFile
+      - label:
+          text: labels.enable_ssl_question
         schema:
-          $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/clusterAuthMode
-        type: radio
-      - computed: setSSLMode
-        label:
-          text: labels.ssl_mode
-        options:
-        - text: requireSSL
-          value: requireSSL
-        - text: preferSSL
-          value: preferSSL
-        - text: allowSSL
-          value: allowSSL
-        schema:
-          $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/sslMode
-        type: radio
+          $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/enableSSL
+        type: switch
       - elements:
         - computed: setApiGroup
           disabled: true
@@ -487,6 +1197,7 @@ steps:
       type: single-step-form
     type: single-step-form
   id: tls
+  if: isSecurityEnabled
   title: steps.3.label
 - form:
     discriminator:
@@ -1128,8 +1839,11 @@ steps:
         name: uibytebuildersdev-component-pod-template
         version: v0.2.0-alpha.0
       dataContext:
-        namespace:
-          $ref: schema#/properties/metadata/properties/release/properties/namespace
+        topology:
+          $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology
+      functionCallbacks:
+        isEditWizard:
+          $ref: functions#/returnFalse
       moduleResolver: fetchJsons
       schema:
         $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/podTemplate
@@ -1388,214 +2102,92 @@ steps:
 - form:
     elements:
     - discriminator:
-        configuration:
+        configFiles:
           type: string
         configurationSource:
           default: use-existing-config
           type: string
+        setCustomConfig:
+          type: string
       elements:
-      - computed: setConfigurationSource
+      - computed: returnStringYes
         label:
-          text: labels.custom_config_type
-        onChange: onConfigurationSourceChange
+          text: labels.setCustomConfig
+        onChange: onSetCustomConfigChange
         options:
-        - text: options.configuration_source.use_existing_config.label
-          value: use-existing-config
-        - text: options.configuration_source.create_new_config.label
-          value: create-new-config
+        - text: options.yesOrNo.yes.text
+          value: "yes"
+        - text: options.yesOrNo.no.text
+          value: "no"
         schema:
-          $ref: discriminator#/configurationSource
+          $ref: discriminator#/properties/setCustomConfig
         type: radio
-      - allowUserDefinedOption: true
-        fetch: getSecrets
-        if: isEqualToDiscriminatorPath|use-existing-config|/configurationSource
-        label:
-          text: labels.name
-        schema:
-          $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/configSecret/properties/name
-        type: select
-      - computed: setConfiguration
-        if: isEqualToDiscriminatorPath|create-new-config|/configurationSource
-        label:
-          text: labels.mongo_conf
-        onChange: onConfigurationChange
-        schema:
-          $ref: discriminator#/properties/configuration
-        type: editor
+      - elements:
+        - computed: setConfigurationSource
+          label:
+            text: labels.custom_config_type
+          onChange: onConfigurationSourceChange
+          options:
+          - text: options.configuration_source.use_existing_config.label
+            value: use-existing-config
+          - text: options.configuration_source.create_new_config.label
+            value: create-new-config
+          schema:
+            $ref: discriminator#/configurationSource
+          type: radio
+        - allowUserDefinedOption: true
+          fetch: getSecrets
+          if: isEqualToDiscriminatorPath|use-existing-config|/configurationSource
+          label:
+            text: labels.name
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/configSecret/properties/name
+          type: select
+        - addFormLabel: labels.config_file
+          computed: setConfigFiles
+          element:
+            discriminator:
+              files:
+                emitAs: configFiles
+                type: array
+            elements:
+            - label:
+                text: labels.filename
+              required: true
+              schema:
+                $ref: discriminator#/properties/files/items/properties/key
+              type: input
+            - label:
+                text: labels.labels.value
+              required: true
+              schema:
+                $ref: discriminator#/properties/files/items/properties/value
+              type: editor
+            type: single-step-form
+          if: isEqualToDiscriminatorPath|create-new-config|/configurationSource
+          onChange: onConfigFilesChange
+          label:
+            text: labels.config_files
+          schema:
+            $ref: discriminator#/properties/configFiles
+          tableContents:
+          - inTableColumn: true
+            label:
+              text: labels.filename
+            path: key
+            type: value
+            typeOfValue: string
+          - inTableColumn: false
+            label:
+              text: labels.labels.value
+            path: value
+            type: value
+            typeOfValue: code
+          type: single-step-form-array
+        if: isDiscriminatorEqualTo|/setCustomConfig|yes
+        type: single-step-form
       type: single-step-form
     type: single-step-form
   id: custom-config
   title: steps.9.label
-- form:
-    elements:
-    - label:
-        text: labels.privileged_question
-      schema:
-        $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/kernelSettings/properties/privileged
-      type: switch
-    - addFormLabel: labels.sysctl
-      element:
-        elements:
-        - label:
-            text: labels.name
-          schema:
-            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/kernelSettings/properties/sysctls/items/properties/name
-          type: input
-        - label:
-            text: labels.value
-          schema:
-            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/kernelSettings/properties/sysctls/items/properties/value
-          type: input
-        type: single-step-form
-      label:
-        text: labels.sysctls
-      schema:
-        $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/kernelSettings/properties/sysctls
-      tableContents:
-      - inTableColumn: true
-        label:
-          text: labels.name
-        path: name
-        type: value
-        typeOfValue: string
-      - inTableColumn: true
-        label:
-          text: labels.value
-        path: value
-        type: value
-        typeOfValue: string
-      type: single-step-form-array
-    type: single-step-form
-  id: kernel-settings
-  title: steps.10.label
-- form:
-    discriminator:
-      rolesMapping:
-        type: array
-    elements:
-    - addFormLabel: labels.role
-      computed: setRolesMapping
-      element:
-        discriminator:
-          roles:
-            emitAs: rolesMapping
-            type: array
-        elements:
-        - required: true
-          label:
-            text: labels.role_name
-          schema:
-            $ref: discriminator#/properties/roles/items/properties/roleName
-          type: input
-        - element:
-            label:
-              text: labels.role
-            schema:
-              $ref: discriminator#/properties/roles/items/properties/andBackendRoles/items
-            type: input
-          label:
-            text: labels.andBackendRoles
-          schema:
-            $ref: discriminator#/properties/roles/items/properties/andBackendRoles
-          type: list-input-form
-        - element:
-            label:
-              text: labels.role
-            schema:
-              $ref: discriminator#/properties/roles/items/properties/backendRoles/items
-            type: input
-          label:
-            text: labels.backendRoles
-          schema:
-            $ref: discriminator#/properties/roles/items/properties/backendRoles
-          type: list-input-form
-        - label:
-            text: labels.hidden
-          schema:
-            $ref: discriminator#/properties/roles/items/properties/hidden
-          type: switch
-        - element:
-            label:
-              text: labels.host
-            schema:
-              $ref: discriminator#/properties/roles/items/properties/hosts/items
-            type: input
-          label:
-            text: labels.hosts
-          schema:
-            $ref: discriminator#/properties/roles/items/properties/hosts
-          type: list-input-form
-        - label:
-            text: labels.reserved
-          schema:
-            $ref: discriminator#/properties/roles/items/properties/reserved
-          type: switch
-        - element:
-            label:
-              text: labels.user
-            schema:
-              $ref: discriminator#/properties/roles/items/properties/users/items
-            type: input
-          label:
-            text: labels.users
-          schema:
-            $ref: discriminator#/properties/roles/items/properties/users
-          type: list-input-form
-        type: single-step-form
-      onChange: onRolesMappingChange
-      label:
-        text: labels.roles_mapping
-      schema:
-        $ref: discriminator#/properties/rolesMapping
-      tableContents:
-      - inTableColumn: true
-        label:
-          text: labels.role_name
-        path: roleName
-        type: value
-        typeOfValue: string
-      - inTableColumn: true
-        label:
-          isSubsection: true
-          text: labels.backendRoles
-        path: backendRoles
-        type: value
-        typeOfValue: array
-      - inTableColumn: true
-        label:
-          text: labels.hidden
-        path: hidden
-        type: value
-        typeOfValue: string
-      - inTableColumn: false
-        label:
-          isSubsection: true
-          text: labels.andBackendRoles
-        path: andBackendRoles
-        type: value
-        typeOfValue: array
-      - inTableColumn: false
-        label:
-          isSubsection: true
-          text: labels.hosts
-        path: hosts
-        type: value
-        typeOfValue: array
-      - inTableColumn: true
-        label:
-          isSubsection: true
-          text: labels.users
-        path: users
-        type: value
-        typeOfValue: array
-      - inTableColumn: false
-        label:
-          text: labels.reserved
-        path: reserved
-        type: value
-        typeOfValue: string
-      type: single-step-form-array
-    type: single-step-form
-  id: roles-mapping
-  title: steps.11.label
 type: multi-step-form

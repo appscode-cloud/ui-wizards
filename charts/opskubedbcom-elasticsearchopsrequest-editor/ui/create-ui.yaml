@@ -1,0 +1,432 @@
+steps:
+- form:
+    discriminator:
+      elasticsearchDetails:
+        type: object
+    elements:
+    - computed: getElasticsearchDetails
+      if: returnFalse
+      schema:
+        $ref: discriminator#/properties/elasticsearchDetails
+      type: input
+    - label:
+        text: labels.op_req_name
+      required: true
+      schema:
+        $ref: schema#/properties/metadata/properties/name
+      type: input
+    - computed: initNamespace
+      fetch: getNamespaces
+      label:
+        text: labels.namespace
+      required: true
+      schema:
+        $ref: schema#/properties/metadata/properties/namespace
+      type: select
+    - computed: initDatabaseRef
+      fetch: getElasticsearches
+      label:
+        text: labels.databaseRef
+      required: true
+      schema:
+        $ref: schema#/properties/spec/properties/databaseRef/properties/name
+      type: select
+    - label:
+        text: labels.config_ops_request
+      type: label-element
+    - computed: getRequestTypeFromRoute
+      hasDescription: true
+      label:
+        text: labels.ops_request_type
+      onChange: onRequestTypeChange
+      options:
+      - description: options.Upgrade.description
+        text: options.Upgrade.text
+        value: Upgrade
+      - description: options.HorizontalScaling.description
+        text: options.HorizontalScaling.text
+        value: HorizontalScaling
+      - description: options.VerticalScaling.description
+        text: options.VerticalScaling.text
+        value: VerticalScaling
+      - description: options.VolumeExpansion.description
+        text: options.VolumeExpansion.text
+        value: VolumeExpansion
+      - description: options.Restart.description
+        text: options.Restart.text
+        value: Restart
+      - description: options.ReconfigureTLS.description
+        text: options.ReconfigureTLS.text
+        value: ReconfigureTLS
+      schema:
+        $ref: schema#/properties/spec/properties/type
+      type: radio
+    - fetch: getElasticsearchVersions
+      if: ifRequestTypeEqualsTo|Upgrade
+      label:
+        text: labels.targetVersion
+      schema:
+        $ref: schema#/properties/spec/properties/upgrade/properties/targetVersion
+      type: select
+    - elements:
+      - if: ifDbTypeEqualsTo|combined|horizontalScaling
+        label:
+          text: labels.replicas
+        schema:
+          $ref: schema#/properties/spec/properties/horizontalScaling/properties/node
+        type: input
+      - if: ifDbTypeEqualsTo|topology|horizontalScaling
+        elements:
+        - label:
+            text: labels.master_node
+          schema:
+            $ref: schema#/properties/spec/properties/horizontalScaling/properties/topology/properties/master
+          type: input
+        - label:
+            text: labels.data_node
+          schema:
+            $ref: schema#/properties/spec/properties/horizontalScaling/properties/topology/properties/data
+          type: input
+        - label:
+            text: labels.ingest_node
+          schema:
+            $ref: schema#/properties/spec/properties/horizontalScaling/properties/topology/properties/ingest
+          type: input
+        - if: isDistributionEqualTo|ElasticStack
+          label:
+            text: labels.ml_node
+          schema:
+            $ref: schema#/properties/spec/properties/horizontalScaling/properties/topology/properties/ml
+          type: input
+        - if: isDistributionEqualTo|ElasticStack
+          label:
+            text: labels.transform_node
+          schema:
+            $ref: schema#/properties/spec/properties/horizontalScaling/properties/topology/properties/transform
+          type: input
+        - if: isDistributionEqualTo|ElasticStack
+          label:
+            text: labels.data_cold_node
+          schema:
+            $ref: schema#/properties/spec/properties/horizontalScaling/properties/topology/properties/dataCold
+          type: input
+        - if: isDistributionEqualTo|ElasticStack
+          label:
+            text: labels.data_content_node
+          schema:
+            $ref: schema#/properties/spec/properties/horizontalScaling/properties/topology/properties/dataContent
+          type: input
+        - if: isDistributionEqualTo|ElasticStack
+          label:
+            text: labels.data_frozen_node
+          schema:
+            $ref: schema#/properties/spec/properties/horizontalScaling/properties/topology/properties/dataFrozen
+          type: input
+        - if: isDistributionNotEqualTo|SearchGuard
+          label:
+            text: labels.data_hot_node
+          schema:
+            $ref: schema#/properties/spec/properties/horizontalScaling/properties/topology/properties/dataHot
+          type: input
+        - if: isDistributionNotEqualTo|SearchGuard
+          label:
+            text: labels.data_warm_node
+          schema:
+            $ref: schema#/properties/spec/properties/horizontalScaling/properties/topology/properties/dataWarm
+          type: input
+        label:
+          text: labels.replicas
+        schema:
+          $ref: schema#/properties/spec/properties/horizontalScaling/properties/topology
+        show_label: true
+        type: single-step-form
+      if: ifRequestTypeEqualsTo|HorizontalScaling
+      label:
+        text: Horizontal Scaling Form
+      type: single-step-form
+    - elements:
+      - elements:
+        - alias: reusable_master_reources
+          chart:
+            name: uibytebuildersdev-component-resources
+            version: v0.2.0-alpha.0
+          hideForm: true
+          label:
+            text: labels.master_node
+          moduleResolver: fetchJsons
+          schema:
+            $ref: schema#/properties/spec/properties/verticalScaling/properties/topology/properties/master
+          show_label: true
+          type: reusable-element
+        - alias: reusable_data_reources
+          chart:
+            name: uibytebuildersdev-component-resources
+            version: v0.2.0-alpha.0
+          hideForm: true
+          label:
+            text: labels.data_node
+          moduleResolver: fetchJsons
+          schema:
+            $ref: schema#/properties/spec/properties/verticalScaling/properties/topology/properties/data
+          show_label: true
+          type: reusable-element
+        - alias: reusable_ingest_reources
+          chart:
+            name: uibytebuildersdev-component-resources
+            version: v0.2.0-alpha.0
+          hideForm: true
+          label:
+            text: labels.ingest_node
+          moduleResolver: fetchJsons
+          schema:
+            $ref: schema#/properties/spec/properties/verticalScaling/properties/topology/properties/ingest
+          show_label: true
+          type: reusable-element
+        - alias: reusable_ml_reources
+          chart:
+            name: uibytebuildersdev-component-resources
+            version: v0.2.0-alpha.0
+          hideForm: true
+          if: isDistributionEqualTo|ElasticStack
+          label:
+            text: labels.ml_node
+          moduleResolver: fetchJsons
+          schema:
+            $ref: schema#/properties/spec/properties/verticalScaling/properties/topology/properties/ml
+          show_label: true
+          type: reusable-element
+        - alias: reusable_transform_reources
+          chart:
+            name: uibytebuildersdev-component-resources
+            version: v0.2.0-alpha.0
+          hideForm: true
+          if: isDistributionEqualTo|ElasticStack
+          label:
+            text: labels.transform_node
+          moduleResolver: fetchJsons
+          schema:
+            $ref: schema#/properties/spec/properties/verticalScaling/properties/topology/properties/transform
+          show_label: true
+          type: reusable-element
+        - alias: reusable_data_cold_reources
+          chart:
+            name: uibytebuildersdev-component-resources
+            version: v0.2.0-alpha.0
+          hideForm: true
+          if: isDistributionEqualTo|ElasticStack
+          label:
+            text: labels.data_cold_node
+          moduleResolver: fetchJsons
+          schema:
+            $ref: schema#/properties/spec/properties/verticalScaling/properties/topology/properties/dataCold
+          show_label: true
+          type: reusable-element
+        - alias: reusable_data_content_reources
+          chart:
+            name: uibytebuildersdev-component-resources
+            version: v0.2.0-alpha.0
+          hideForm: true
+          if: isDistributionEqualTo|ElasticStack
+          label:
+            text: labels.data_content_node
+          moduleResolver: fetchJsons
+          schema:
+            $ref: schema#/properties/spec/properties/verticalScaling/properties/topology/properties/dataContent
+          show_label: true
+          type: reusable-element
+        - alias: reusable_data_frozen_reources
+          chart:
+            name: uibytebuildersdev-component-resources
+            version: v0.2.0-alpha.0
+          hideForm: true
+          if: isDistributionEqualTo|ElasticStack
+          label:
+            text: labels.data_frozen_node
+          moduleResolver: fetchJsons
+          schema:
+            $ref: schema#/properties/spec/properties/verticalScaling/properties/topology/properties/dataFrozen
+          show_label: true
+          type: reusable-element
+        - alias: reusable_data_hot_reources
+          chart:
+            name: uibytebuildersdev-component-resources
+            version: v0.2.0-alpha.0
+          hideForm: true
+          if: isDistributionNotEqualTo|SearchGuard
+          label:
+            text: labels.data_hot_node
+          moduleResolver: fetchJsons
+          schema:
+            $ref: schema#/properties/spec/properties/verticalScaling/properties/topology/properties/dataHot
+          show_label: true
+          type: reusable-element
+        - alias: reusable_data_warm_reources
+          chart:
+            name: uibytebuildersdev-component-resources
+            version: v0.2.0-alpha.0
+          hideForm: true
+          if: isDistributionNotEqualTo|SearchGuard
+          label:
+            text: labels.data_warm_node
+          moduleResolver: fetchJsons
+          schema:
+            $ref: schema#/properties/spec/properties/verticalScaling/properties/topology/properties/dataWarm
+          show_label: true
+          type: reusable-element        
+        if: ifDbTypeEqualsTo|topology|verticalScaling
+        schema:
+          $ref: schema#/properties/spec/properties/verticalScaling/properties/topology
+        type: single-step-form
+      - alias: reusable_combined_reources
+        chart:
+          name: uibytebuildersdev-component-resources
+          version: v0.2.0-alpha.0
+        if: ifDbTypeEqualsTo|combined|verticalScaling
+        label:
+          text: labels.node
+        moduleResolver: fetchJsons
+        schema:
+          $ref: schema#/properties/spec/properties/verticalScaling/properties/properties/node
+        show_label: true
+        type: reusable-element
+      - alias: reusable_exporter_reources
+        chart:
+          name: uibytebuildersdev-component-resources
+          version: v0.2.0-alpha.0
+        label:
+          text: labels.exporter
+        moduleResolver: fetchJsons
+        schema:
+          $ref: schema#/properties/spec/properties/verticalScaling/properties/exporter
+        show_label: true
+        type: reusable-element
+      if: ifRequestTypeEqualsTo|VerticalScaling
+      type: single-step-form
+    - elements:
+      - if: ifDbTypeEqualsTo|combined|VolumeExpansion
+        label:
+          text: labels.storage.size
+        schema:
+          $ref: schema#/properties/spec/properties/volumeExpansion/properties/node
+        type: input
+      - elements:
+        - label:
+            text: labels.storage.master_size
+          schema:
+            $ref: schema#/properties/spec/properties/volumeExpansion/properties/topology/properties/master
+          type: input
+        - label:
+            text: labels.storage.data_size
+          schema:
+            $ref: schema#/properties/spec/properties/volumeExpansion/properties/topology/properties/data
+          type: input
+        - label:
+            text: labels.storage.ingest_size
+          schema:
+            $ref: schema#/properties/spec/properties/volumeExpansion/properties/topology/properties/ingest
+          type: input
+        - if: isDistributionEqualTo|ElasticStack
+          label:
+            text: labels.storage.ml_size
+          schema:
+            $ref: schema#/properties/spec/properties/volumeExpansion/properties/topology/properties/ml
+          type: input
+        - if: isDistributionEqualTo|ElasticStack
+          label:
+            text: labels.storage.transform_size
+          schema:
+            $ref: schema#/properties/spec/properties/volumeExpansion/properties/topology/properties/transform
+          type: input
+        - if: isDistributionEqualTo|ElasticStack
+          label:
+            text: labels.storage.data_cold_size
+          schema:
+            $ref: schema#/properties/spec/properties/volumeExpansion/properties/topology/properties/dataCold
+          type: input
+        - if: isDistributionEqualTo|ElasticStack
+          label:
+            text: labels.storage.data_content_size
+          schema:
+            $ref: schema#/properties/spec/properties/volumeExpansion/properties/topology/properties/dataContent
+          type: input
+        - if: isDistributionEqualTo|ElasticStack
+          label:
+            text: labels.storage.data_frozen_size
+          schema:
+            $ref: schema#/properties/spec/properties/volumeExpansion/properties/topology/properties/dataFrozen
+          type: input
+        - if: isDistributionNotEqualTo|SearchGuard
+          label:
+            text: labels.storage.data_hot_size
+          schema:
+            $ref: schema#/properties/spec/properties/volumeExpansion/properties/topology/properties/dataHot
+          type: input
+        - if: isDistributionNotEqualTo|SearchGuard
+          label:
+            text: labels.storage.data_warm_size
+          schema:
+            $ref: schema#/properties/spec/properties/volumeExpansion/properties/topology/properties/dataWarm
+          type: input
+        if: ifDbTypeEqualsTo|topology|VolumeExpansion
+        label:
+          text: labels.storage.size
+        schema:
+          $ref: schema#/properties/spec/properties/volumeExpansion/properties/topology
+        show_label: true
+        type: single-step-form
+      if: ifRequestTypeEqualsTo|VolumeExpansion
+      label:
+        text: Volume Expansion Form
+      type: single-step-form
+    - discriminator:
+        tlsOperation:
+          type: string
+      elements:
+      - computed: initTlsOperation
+        if: hasTlsField
+        label:
+          text: labels.tlsOperation
+        onChange: onTlsOperationChange
+        options:
+        - text: Update
+          value: update
+        - text: Rotate
+          value: rotate
+        - text: Remove
+          value: remove
+        schema:
+          $ref: discriminator#/properties/tlsOperation
+        type: radio
+      - if: returnFalse
+        schema:
+          $ref: schema#/properties/spec/properties/tls/properties/remove
+        type: switch
+      - if: returnFalse
+        schema:
+          $ref: schema#/properties/spec/properties/tls/properties/rotateCertificates
+        type: switch
+      - if: showIssuerRefAndCertificates
+        label:
+          text: labels.enable_ssl_question
+        schema:
+          $ref: schema#/properties/spec/properties/tls/properties/enableSSL
+        type: switch
+      - alias: reusable_certificates
+        chart:
+          name: uibytebuildersdev-component-certificates
+          version: v0.2.0-alpha.0
+        if: showIssuerRefAndCertificates
+        moduleResolver: fetchJsons
+        schema:
+          $ref: schema#/properties/spec/properties/tls/properties/certificates
+        type: reusable-element
+      if: ifRequestTypeEqualsTo|ReconfigureTLS
+      label:
+        text: labels.tls
+      schema:
+        $ref: schema#/properties/spec/properties/tls
+      type: single-step-form
+    type: single-step-form
+  id: basic
+  title: steps.0.label
+type: multi-step-form

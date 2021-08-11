@@ -1,6 +1,6 @@
 // *************************      common functions ********************************************
 // eslint-disable-next-line no-empty-pattern
-async function fetchJsons({ axios, itemCtx }) {
+async function fetchJsons({ axios, itemCtx, setDiscriminatorValue }, discriminatorPath) {
   let ui = {};
   let language = {};
   let functions = {};
@@ -21,6 +21,14 @@ async function fetchJsons({ axios, itemCtx }) {
     functions = evalFunc();
   } catch (e) {
     console.log(e);
+  }
+
+  if(discriminatorPath) {
+    setDiscriminatorValue(discriminatorPath, {
+      ui: ui.data || {},
+      language: language.data || {},
+      functions,
+    });
   }
 
   return {
@@ -90,32 +98,6 @@ function isEqualToDiscriminatorPath(
 
 function setValueFromModel({ getValue, model }, path) {
   return getValue(model, path);
-}
-
-function isNotShardModeSelected({ model, getValue, watchDependency }) {
-  watchDependency("model#/resources/kubedbComElasticsearch/spec");
-  const hasShardTopology = getValue(
-    model,
-    "/resources/kubedbComElasticsearch/spec/shardTopology"
-  );
-  return !hasShardTopology;
-}
-
-function isShardModeSelected({
-  model,
-  getValue,
-  watchDependency,
-  commit,
-}) {
-  const resp = !isNotShardModeSelected({ model, getValue, watchDependency });
-  if (resp) {
-    commit(
-      "wizard/model$delete",
-      "/resources/kubedbComElasticsearch/spec/configSecret"
-    );
-    commit("wizard/model$delete", "/resources/secret_config");
-  }
-  return resp;
 }
 
 async function getNamespacedResourceList(
@@ -240,7 +222,66 @@ function returnStringYes() {
   return "yes";
 }
 
+function isTopologyModeSelected({model, getValue, watchDependency}) {
+  watchDependency("model#/resources/kubedbComElasticsearch/spec");
+  isTopologySelected = getValue(model, "/resources/kubedbComElasticsearch/spec/topology");
+
+  return !!isTopologySelected;
+}
+
+function isCombinedModeSelected({model, getValue, watchDependency}) {
+  return !isTopologySelected({model, getValue, watchDependency});
+}
+
+function isDiscriminatorEqualTo({discriminator, getValue, watchDependency}, discriminatorPath, value) {
+  watchDependency("discriminator#" + discriminatorPath);
+  const pathValue = getValue(discriminator, discriminatorPath);
+
+  return value === pathValue;
+}
+
+function isDiscriminatorNotEqualTo({discriminator, getValue, watchDependency}, discriminatorPath, value) {
+  watchDependency("discriminator#" + discriminatorPath);
+  const pathValue = getValue(discriminator, discriminatorPath);
+
+  return value !== pathValue;
+}
+
+// required for outer form section. where discriminator can not be saved
+async function showInternalUsersAndRolesMapping({ model, getValue, watchDependency, axios, storeGet, setDiscriminatorValue , commit}) {
+  watchDependency("model#/resources/kubedbComElasticsearch/spec/disableSecurity");
+  watchDependency("model#/resources/kubedbComElasticsearch/spec/version");
+
+  const dist = await getSelectedVersionDistribution({ model, getValue, watchDependency, axios, storeGet, setDiscriminatorValue });
+
+  const ret =  ((dist === "OpenDistro" || dist === "SearchGuard") && isSecurityEnabled({model, getValue, watchDependency}));
+
+  if(ret) {
+    commit("wizard/showSteps$update", {
+      stepId: "internal-users",
+      show: true
+    });
+
+    commit("wizard/showSteps$update", {
+      stepId: "roles-mapping",
+      show: true
+    });
+  } else {
+    commit("wizard/showSteps$update", {
+      stepId: "internal-users",
+      show: false
+    });
+
+    commit("wizard/showSteps$update", {
+      stepId: "roles-mapping",
+      show: false
+    });
+  }
+  return ret;
+}
+
 // ************************* Basic Info **********************************************
+
 async function getElasticSearchVersions(
   { axios, storeGet },
   group,
@@ -254,7 +295,7 @@ async function getElasticSearchVersions(
     filter: {
       items: {
         metadata: { name: null },
-        spec: { version: null, deprecated: null },
+        spec: { version: null, deprecated: null, distribution: null },
       },
     },
   };
@@ -281,6 +322,67 @@ async function getElasticSearchVersions(
     return true;
   });
   return filteredElasticSearchVersions;
+}
+
+function isSecurityEnabled({model, getValue, watchDependency}) {
+  watchDependency("model#/resources/kubedbComElasticsearch/spec/disableSecurity");
+  const value = getValue(model, "/resources/kubedbComElasticsearch/spec/disableSecurity");
+  return !value;
+}
+
+function onDisableSecurityChange({ model, getValue, commit }) {
+  const disableSecurity = getValue(model, "/resources/kubedbComElasticsearch/spec/disableSecurity");
+
+  if(disableSecurity) {
+    commit(
+      "wizard/model$delete",
+      "/resources/kubedbComElasticsearch/spec/authSecret",
+    );
+    commit(
+      "wizard/model$delete",
+      "/resources/secret_auth"
+    );
+    commit("wizard/model$delete", "/resources/kubedbComElasticsearch/spec/internalUsers");
+    commit("wizard/model$delete", "/resources/kubedbComElasticsearch/spec/rolesMapping");
+    commit("wizard/model$delete", "/resources/kubedbComElasticsearch/spec/tls");
+  }
+}
+
+async function onVersionChange({ model, getValue, watchDependency, axios, storeGet, commit, setDiscriminatorValue }) {
+  
+  const dist = await getSelectedVersionDistribution({ model, getValue, watchDependency, axios, storeGet, setDiscriminatorValue });
+  
+  const isOpenDistro = dist === "OpenDistro";
+  const isSearchGuard = dist === "SearchGuard";
+  
+  if(!isOpenDistro && !isSearchGuard) {
+    commit("wizard/model$delete", "/resources/kubedbComElasticsearch/spec/internalUsers");
+    commit("wizard/model$delete", "/resources/kubedbComElasticsearch/spec/rolesMapping");
+  }
+  else {
+    if(!isOpenDistro) {
+      const internalUsers = getValue(model, "/resources/kubedbComElasticsearch/spec/internalUsers");
+
+      if(internalUsers) {
+        Object.keys(internalUsers).map((key) => {
+          if(internalUsers[key]?.opendistroSecurityRoles) delete internalUsers[key]?.opendistroSecurityRoles;
+        })
+      }
+
+      commit("wizard/model$update", {path: "/resources/kubedbComElasticsearch/spec/internalUsers", value: internalUsers, force: true });
+    }
+    if(!isSearchGuard) {
+      const internalUsers = getValue(model, "/resources/kubedbComElasticsearch/spec/internalUsers");
+
+      if(internalUsers) {
+      Object.keys(internalUsers).map((key) => {
+        if(internalUsers[key]?.searchGuardRoles) delete internalUsers[key]?.searchGuardRoles;
+      })
+      }
+
+      commit("wizard/model$update", {path: "/resources/kubedbComElasticsearch/spec/internalUsers", value: internalUsers, force: true });
+    }
+  }
 }
 
 // ************************* Auth Secret Field ******************************************
@@ -331,50 +433,33 @@ function showNewSecretCreateField({
 }
 
 // ********************* Database Mode ***********************
-function isNotStandaloneMode({
+function isNotCombinedMode({
   discriminator,
   getValue,
   watchDependency,
 }) {
   watchDependency("discriminator#/activeDatabaseMode");
   const mode = getValue(discriminator, "/activeDatabaseMode");
-  return mode !== "Standalone";
+  return mode !== "Combined";
 }
 
-function showCommonStorageClassAndSizeField({
-  discriminator,
-  getValue,
-  watchDependency,
-}) {
-  watchDependency("discriminator#/activeDatabaseMode");
-  const mode = getValue(discriminator, "/activeDatabaseMode");
-  const validType = ["Standalone", "Replicaset"];
-  return validType.includes(mode);
-}
 function setDatabaseMode({ model, getValue, watchDependency }) {
-  const modelPathValue = getValue(model, "/resources/kubedbComElasticsearch/spec");
+  const modelPathValue = getValue(model, "/resources/kubedbComElasticsearch/spec/");
 
   watchDependency("model#/resources/kubedbComElasticsearch/spec");
-  if (modelPathValue.shardTopology) {
-    return "Sharded";
-  } else if (modelPathValue.replicaSet) {
-    return "Replicaset";
+  if (isTopologyModeSelected({model, getValue, watchDependency})) {
+    return "Topology";
   } else {
-    return "Standalone";
+    return "Combined";
   }
 }
 
 async function getStorageClassNames(
-  { axios, storeGet, commit, model, getValue, watchDependency, discriminator },
-  mode
+  { axios, storeGet, commit, setDiscriminatorValue, discriminator },
+  path
 ) {
   const owner = storeGet("/user/username");
   const cluster = storeGet("/cluster/clusterDefinition/spec/name");
-
-  watchDependency("discriminator#/activeDatabaseMode");
-
-  const databaseModeShard =
-    getValue(discriminator, "/activeDatabaseMode") === "Sharded";
 
   const resp = await axios.get(
     `/clusters/${owner}/${cluster}/proxy/storage.k8s.io/v1/storageclasses`,
@@ -394,174 +479,61 @@ async function getStorageClassNames(
       item.metadata.annotations &&
       item.metadata.annotations["storageclass.kubernetes.io/is-default-class"];
 
-    if (isDefault) {
-      const shardClassName = getValue(
-        model,
-        "/resources/kubedbComElasticsearch/spec/shardTopology/shard/storage/storageClassName"
-      );
-
-      const configServerClassName = getValue(
-        model,
-        "/resources/kubedbComElasticsearch/spec/shardTopology/configServer/storage/storageClassName"
-      );
-
-      if (mode === "shard") {
-        if (!shardClassName && databaseModeShard) {
-          commit("wizard/model$update", {
-            path:
-              "/resources/kubedbComElasticsearch/spec/shardTopology/shard/storage/storageClassName",
-            value: name,
-            force: true,
-          });
-        }
-        if (!configServerClassName && databaseModeShard) {
-          commit("wizard/model$update", {
-            path:
-              "/resources/kubedbComElasticsearch/spec/shardTopology/configServer/storage/storageClassName",
-            value: name,
-            force: true,
-          });
-        }
-        commit(
-          "wizard/model$delete",
-          "/resources/kubedbComElasticsearch/spec/storage"
-        );
-      } else {
-        const className = getValue(
-          model,
-          "/resources/kubedbComElasticsearch/spec/storage/storageClassName"
-        );
-        if (!className && !databaseModeShard) {
-          commit("wizard/model$update", {
-            path: "/resources/kubedbComElasticsearch/spec/storage/storageClassName",
-            value: name,
-            force: true,
-          });
-        }
-      }
+    if (isDefault && path) {
+      commit("wizard/model$update", {
+        path: path,
+        value: name,
+        force: true,
+      });
     }
 
     item.text = name;
     item.value = name;
     return true;
   });
+
+  if(!path) setDiscriminatorValue("/storageClasses", resources);
+
   return resources;
-}
-
-function setStorageClass({ getValue, commit, model, discriminator }) {
-  const storageClassName = getValue(
-    model,
-    "/resources/kubedbComElasticsearch/spec/shardTopology/shard/storage/storageClassName"
-  );
-
-  const mode = getValue(discriminator, "/activeDatabaseMode");
-
-  if (mode === "Sharded" && storageClassName) {
-    commit("wizard/model$update", {
-      path:
-        "/resources/kubedbComElasticsearch/spec/shardTopology/configServer/storage/storageClassName",
-      value: storageClassName,
-      force: true,
-    });
-  }
 }
 
 function deleteDatabaseModePath({
   discriminator,
   getValue,
   commit,
-  model,
 }) {
   const mode = getValue(discriminator, "/activeDatabaseMode");
-  const modelSpec = getValue(model, "/resources/kubedbComElasticsearch/spec");
-  if (mode === "Sharded") {
-    commit(
-      "wizard/model$delete",
-      "/resources/kubedbComElasticsearch/spec/replicaSet"
-    );
+  if (mode === "Topology") {
     commit("wizard/model$delete", "/resources/kubedbComElasticsearch/spec/replicas");
     commit("wizard/model$delete", "/resources/kubedbComElasticsearch/spec/storage");
+    commit("wizard/model$delete", "/resources/kubedbComElasticsearch/spec/maxUnavailable");
     commit(
       "wizard/model$delete",
       "/resources/kubedbComElasticsearch/spec/podTemplate"
     );
+  } else if (mode === "Combined") {
     commit(
       "wizard/model$delete",
-      "/resources/kubedbComElasticsearch/spec/configSecret"
+      "/resources/kubedbComElasticsearch/spec/topology"
     );
-
-    commit("wizard/model$delete", "/resources/secret_config");
-
-    if (!modelSpec.shardTopology) {
-      commit("wizard/model$update", {
-        path: "/resources/kubedbComElasticsearch/spec/shardTopology",
-        value: {
-          configServer: {
-            replicas: 3,
-            storage: {
-              resources: {
-                requests: {
-                  storage: "",
-                },
-              },
-            },
-          },
-          mongos: {
-            replicas: 2,
-          },
-          shard: {
-            replicas: 3,
-            shards: 3,
-            storage: {
-              resources: {
-                requests: {
-                  storage: "",
-                },
-              },
-            },
-          },
-        },
-        force: true,
-      });
-    }
-  } else if (mode === "Replicaset") {
-    commit(
-      "wizard/model$delete",
-      "/resources/kubedbComElasticsearch/spec/shardTopology"
-    );
-
-    commit("wizard/model$delete", "/resources/secret_shard_config");
-    commit("wizard/model$delete", "/resources/secret_configserver_config");
-    commit("wizard/model$delete", "/resources/secret_mongos_config");
-
-    if (!modelSpec.replicaSet) {
-      commit("wizard/model$update", {
-        path: "/resources/kubedbComElasticsearch/spec/replicaSet",
-        value: { name: "" },
-        force: true,
-      });
-      commit("wizard/model$update", {
-        path: "/resources/kubedbComElasticsearch/spec/replicas",
-        value: 3,
-        force: true,
-      });
-    }
-  } else if (mode === "Standalone") {
-    commit(
-      "wizard/model$delete",
-      "/resources/kubedbComElasticsearch/spec/shardTopology"
-    );
-
-    commit(
-      "wizard/model$delete",
-      "/resources/kubedbComElasticsearch/spec/replicaSet"
-    );
-    commit("wizard/model$delete", "/resources/kubedbComElasticsearch/spec/replicas");
-
-    commit("wizard/model$delete", "/resources/secret_shard_config");
-    commit("wizard/model$delete", "/resources/secret_configserver_config");
-    commit("wizard/model$delete", "/resources/secret_mongos_config");
   }
+}
+
+function getMaxUnavailableOptions({model, getValue, watchDependency, commit}, path) {
+  path = path || "";
+  watchDependency(`model#${path}/replicas`);
+  const replicas = getValue(model, `${path}/replicas`);
+  const maxUnavailable = getValue(model, `${path}/maxUnavailable`);
+
+  if(maxUnavailable > replicas) {
+    commit("wizard/model$update", { path: `${path}/maxUnavailable`, value: replicas, force: true });
+  }
+
+  const options = [];
+  for(let i = 0; i <= replicas; i++) {
+    options.push({"text": i.toString(), "value": i});
+  }
+  return options;
 }
 
 function isEqualToDatabaseMode(
@@ -570,7 +542,50 @@ function isEqualToDatabaseMode(
 ) {
   watchDependency("discriminator#/activeDatabaseMode");
   const mode = getValue(discriminator, "/activeDatabaseMode");
+
   return mode === value;
+}
+
+function getStorageClassNamesFromDiscriminator({model, discriminator, getValue, watchDependency, commit}, path) {
+  watchDependency("discriminator#/storageClasses");
+  const options = getValue(discriminator, "/storageClasses") || [];
+
+  const val = getValue(model, path || "");
+
+  options.forEach((item) => {
+    const name = (item.metadata && item.metadata.name) || "";
+    const isDefault =
+      item.metadata &&
+      item.metadata.annotations &&
+      item.metadata.annotations["storageclass.kubernetes.io/is-default-class"];
+
+    if (isDefault && path && !val) {
+      commit("wizard/model$update", {
+        path: path,
+        value: name,
+        force: true,
+      });
+    }
+  });
+
+  return options;
+}
+
+async function getSelectedVersionDistribution({ model, getValue, watchDependency, axios, storeGet, setDiscriminatorValue }, path) {
+  watchDependency("model#/resources/kubedbComElasticsearch/spec/version");
+  const version = getValue(model, "/resources/kubedbComElasticsearch/spec/version") || "";
+
+  const elasticVersions = await getElasticSearchVersions({axios, storeGet}, "catalog.kubedb.com", "v1alpha1", "elasticsearchversions");
+
+  const selectedVersion = elasticVersions?.find((item) => item.value === version);
+  
+  const ret = selectedVersion?.spec?.distribution || ""; 
+
+  if(path) {
+    setDiscriminatorValue(path, ret);
+  }
+
+  return ret;
 }
 
 // ************************** Internal Users ********************************
@@ -589,14 +604,19 @@ function onInternalUsersChange({ discriminator, getValue, commit }) {
       });
   }
   
-  commit("wizard/model$update", {
-    path: "/resources/kubedbComElasticsearch/spec/internalUsers",
-    value: internalUsers,
-    force: true,
-  });
+  if(Object.keys(internalUsers).length) {
+    commit("wizard/model$update", {
+      path: "/resources/kubedbComElasticsearch/spec/internalUsers",
+      value: internalUsers,
+      force: true,
+    });
+  } else {
+    commit("wizard/model$delete", "/resources/kubedbComElasticsearch/spec/internalUsers");
+  }
 }
 
-function setInternalUsers({ model, getValue }) {
+function setInternalUsers({ model, getValue, watchDependency }) {
+  watchDependency("model#/resources/kubedbComElasticsearch/spec/internalUsers");
   const internalUsers = getValue(model, "/resources/kubedbComElasticsearch/spec/internalUsers");
 
   const users = [];
@@ -627,6 +647,11 @@ function disableUserEdit({itemCtx}) {
   return {};
 }
 
+async function isDistributionEqualTo({ model, getValue, watchDependency, axios, storeGet, setDiscriminatorValue }, distribution) {
+  const dist = await getSelectedVersionDistribution({ model, getValue, watchDependency, axios, storeGet, setDiscriminatorValue });
+  return (dist === distribution);
+}
+
 // ************************** Roles Mapping ********************************
 
 function onRolesMappingChange({ discriminator, getValue, commit }) {
@@ -641,24 +666,48 @@ function onRolesMappingChange({ discriminator, getValue, commit }) {
       });
   }
   
-  commit("wizard/model$update", {
-    path: "/resources/kubedbComElasticsearch/spec/rolesMapping",
-    value: rolesMapping,
-    force: true,
-  });
+  if(Object.keys(rolesMapping).length) {
+    commit("wizard/model$update", {
+      path: "/resources/kubedbComElasticsearch/spec/rolesMapping",
+      value: rolesMapping,
+      force: true,
+    });
+  } else {
+    commit("wizard/model$delete", "/resources/kubedbComElasticsearch/spec/rolesMapping");
+  }
 }
 
-function setRolesMapping({ model, getValue }) {
+function setRolesMapping({ model, getValue, watchDependency }) {
+  watchDependency("model#/resources/kubedbComElasticsearch/spec/rolesMapping");
   const rolesMapping = getValue(model, "/resources/kubedbComElasticsearch/spec/rolesMapping");
 
   const roles = [];
 
   for (const item in rolesMapping) {
       rolesMapping[item].roleName = item;
-      roles.push(internalUsers[item]);
+      roles.push(rolesMapping[item]);
   }
 
   return roles;
+}
+
+function getInternalUsers({ model, getValue, watchDependency }) {
+  watchDependency("model#/resources/kubedbComElasticsearch/spec/internalUsers");
+  const internalUsers = getValue(model, "/resources/kubedbComElasticsearch/spec/internalUsers");
+
+  return Object.keys(internalUsers);
+}
+
+// ************************* Kernel Settings *********************************
+
+function onCustomizeKernelSettingChange({discriminator, getValue, commit}) {
+  const customizeKernelSettings = getValue(discriminator, "/customizeKernelSettings");
+
+  if(customizeKernelSettings === "no") {
+    commit("wizard/model$delete", "/resources/kubedbComElasticsearch/spec/kernelSettings");
+  } else if(customizeKernelSettings === "disable") {
+    commit("wizard/model$update", { path: "/resources/kubedbComElasticsearch/spec/kernelSettings", value: {}, force: true });
+  }
 }
 
 // ************************** TLS *******************************************
@@ -2154,8 +2203,6 @@ async function hasNoExistingSecret({
   return !resp;
 }
 
-//////////////////////////////////////// Service Monitor //////////////////////////////////////////////////////
-
 //////////////////// service monitor ///////////////////
 
 function isEqualToServiceMonitorType(
@@ -2165,6 +2212,7 @@ function isEqualToServiceMonitorType(
   watchDependency("rootModel#/spec/type");
   return rootModel && rootModel.spec && rootModel.spec.type === value;
 }
+
 
 //////////////////// custom config /////////////////
 function onConfigurationSourceChange({
@@ -2176,6 +2224,7 @@ function onConfigurationSourceChange({
   const configurationSource = getValue(discriminator, "/configurationSource");
   if (configurationSource === "use-existing-config") {
     commit("wizard/model$delete", "/resources/secret_config");
+    commit("wizard/model$delete", "/resources/config_secret");
   } else {
     const value = getValue(model, "/resources/secret_config");
     if (!value) {
@@ -2197,29 +2246,6 @@ function onConfigurationSourceChange({
   }
 }
 
-function onConfigurationChange({
-  getValue,
-  commit,
-  discriminator,
-  model,
-}) {
-  const value = getValue(discriminator, "/configuration");
-  commit("wizard/model$update", {
-    path: "/resources/secret_config/stringData/mongod.conf",
-    value: value,
-    force: true,
-  });
-  const configSecretName = `${getValue(
-    model,
-    "/metadata/release/name"
-  )}-config`;
-  commit("wizard/model$update", {
-    path: "/resources/kubedbComElasticsearch/spec/configSecret/name",
-    value: configSecretName,
-    force: true,
-  });
-}
-
 function setConfigurationSource({ model, getValue }) {
   const modelValue = getValue(model, "/resources/secret_config");
   if (modelValue) {
@@ -2228,393 +2254,49 @@ function setConfigurationSource({ model, getValue }) {
   return "use-existing-config";
 }
 
-function setSecretConfigNamespace({ getValue, model, watchDependency }) {
-  watchDependency("model#/metadata/release/namespace");
-  const namespace = getValue(model, "/metadata/release/namespace");
-  return namespace;
-}
+function setConfigFiles({model, getValue, watchDependency}) {
+  watchDependency("model#/resources/secret_config/stringData");
+  const configFiles = getValue(model, "/resources/secret_config/stringData");
 
-//////////////////// custom config for sharded topology /////////////////
+  const files = [];
 
-function setConfigurationSourceShard({
-  model,
-  getValue,
-  discriminator,
-}) {
-  const src = getValue(discriminator, "/configurationSourceShard");
-  if (src) return src;
-  const value = getValue(model, "/resources/secret_shard_config");
-  return value ? "create-new-config" : "use-existing-config";
-}
-
-function setConfigurationSourceConfigServer({
-  model,
-  getValue,
-  discriminator,
-}) {
-  const src = getValue(discriminator, "/configurationSourceConfigServer");
-  if (src) return src;
-  const value = getValue(model, "/resources/secret_configserver_config");
-  return value ? "create-new-config" : "use-existing-config";
-}
-
-function setConfigurationSourceMongos({
-  model,
-  getValue,
-  discriminator,
-}) {
-  const src = getValue(discriminator, "/configurationSourceMongos");
-  if (src) return src;
-  const value = getValue(model, "/resources/secret_mongos_config");
-  return value ? "create-new-config" : "use-existing-config";
-}
-
-function isSchemaOf(schema) {
-  if (schema === "discriminator#/configurationSourceShard") {
-    return "shard";
-  } else if (schema === "discriminator#/configurationSourceConfigServer") {
-    return "configserver";
-  } else {
-    return "mongos";
+  for (const item in configFiles) {
+      const obj = {};
+      obj.key = item;
+      obj.value = configFiles[item];
+      files.push(obj);
   }
+
+  return files;
 }
 
-function disableConfigSourceOption({
-  itemCtx,
-  discriminator,
-  getValue,
-  watchDependency,
-  elementUi,
-}) {
-  watchDependency("discriminator#/configurationSourceShard");
-  watchDependency("discriminator#/configurationSourceConfigServer");
-  watchDependency("discriminator#/configurationSourceMongos");
-  const configSrcShard = getValue(discriminator, "/configurationSourceShard");
-  const configSrcConfigServer = getValue(
-    discriminator,
-    "/configurationSourceConfigServer"
-  );
-  const configSrcMongos = getValue(discriminator, "/configurationSourceMongos");
-  if (
-    itemCtx.value !== "use-existing-config" &&
-    itemCtx.value !== "create-new-config" &&
-    (configSrcShard ===
-      `same-as-${isSchemaOf(elementUi.schema.$ref)}-config-secret` ||
-      configSrcConfigServer ===
-        `same-as-${isSchemaOf(elementUi.schema.$ref)}-config-secret` ||
-      configSrcMongos ===
-        `same-as-${isSchemaOf(elementUi.schema.$ref)}-config-secret`)
-  ) {
-    return true;
-  }
-  if (
-    itemCtx.value === "same-as-shard-config-secret" &&
-    configSrcShard !== "use-existing-config" &&
-    configSrcShard !== "create-new-config"
-  ) {
-    return true;
-  }
-  if (
-    itemCtx.value === "same-as-configserver-config-secret" &&
-    configSrcConfigServer !== "use-existing-config" &&
-    configSrcConfigServer !== "create-new-config"
-  ) {
-    return true;
-  }
-  if (
-    itemCtx.value === "same-as-mongos-config-secret" &&
-    configSrcMongos !== "use-existing-config" &&
-    configSrcMongos !== "create-new-config"
-  ) {
-    return true;
-  }
-  return false;
-}
+function onConfigFilesChange({ discriminator, getValue, commit }) {
+  const files = getValue(discriminator, "/configFiles");
+  
+  const configFiles = {};
 
-function onConfigurationSourceMongosChange({
-  getValue,
-  discriminator,
-  commit,
-  model,
-}) {
-  const configurationSource = getValue(
-    discriminator,
-    "/configurationSourceMongos"
-  );
-  const configSecretName = `${getValue(
-    model,
-    "/metadata/release/name"
-  )}-mongos-config`;
-  if (configurationSource === "use-existing-config") {
-    commit("wizard/model$delete", "/resources/secret_mongos_config");
-    onConfigSecretModelChange(
-      { commit, model, getValue, discriminator },
-      "mongos",
-      configurationSource,
-      "/configurationMongos"
-    );
-  } else if (configurationSource === "create-new-config") {
-    const value = getValue(model, "/resources/secret_mongos_config");
-    if (!value) {
-      commit("wizard/model$update", {
-        path: "/resources/secret_mongos_config",
-        value: {},
-        force: true,
+  if(files) {
+      files.forEach((item) => {
+          const { key, value } = item;
+          configFiles[key] = value;
       });
-    }
-    commit("wizard/model$update", {
-      path:
-        "/resources/kubedbComElasticsearch/spec/shardTopology/mongos/configSecret/name",
-      value: configSecretName,
-      force: true,
-    });
-    onConfigSecretModelChange(
-      { commit, model, getValue, discriminator },
-      "mongos",
-      configurationSource,
-      "/configurationMongos"
-    );
-  } else if (configurationSource === "same-as-shard-config-secret") {
-    transferConfigSecret({ commit, model, getValue }, "shard", "mongos");
-  } else if (configurationSource === "same-as-configserver-config-secret") {
-    transferConfigSecret({ commit, model, getValue }, "configserver", "mongos");
+  }
+  
+  commit("wizard/model$update", {
+    path: "/resources/secret_config/stringData",
+    value: configFiles,
+    force: true,
+  });
+}
+
+function onSetCustomConfigChange({ discriminator, getValue, commit }) {
+  const value = getValue(discriminator, "/setCustomConfig");
+
+  if(value === "no") {
+    commit("wizard/model$delete", "/resources/kubedbComElasticsearch/spec/configSecret");
+    commit("wizard/model$delete", "/resources/secret_config");
   }
 }
-
-function onConfigurationSourceShardChange({
-  getValue,
-  discriminator,
-  commit,
-  model,
-}) {
-  const configurationSource = getValue(
-    discriminator,
-    "/configurationSourceShard"
-  );
-  const configSecretName = `${getValue(
-    model,
-    "/metadata/release/name"
-  )}-shard-config`;
-  if (configurationSource === "use-existing-config") {
-    commit("wizard/model$delete", "/resources/secret_shard_config");
-    onConfigSecretModelChange(
-      { commit, model, getValue, discriminator },
-      "shard",
-      configurationSource,
-      "/configurationShard"
-    );
-  } else if (configurationSource === "create-new-config") {
-    const value = getValue(model, "/resources/secret_shard_config");
-    if (!value) {
-      commit("wizard/model$update", {
-        path: "/resources/secret_shard_config",
-        value: {},
-        force: true,
-      });
-    }
-    commit("wizard/model$update", {
-      path:
-        "/resources/kubedbComElasticsearch/spec/shardTopology/shard/configSecret/name",
-      value: configSecretName,
-      force: true,
-    });
-    onConfigSecretModelChange(
-      { commit, model, getValue, discriminator },
-      "shard",
-      configurationSource,
-      "/configurationShard"
-    );
-  } else if (configurationSource === "same-as-configserver-config-secret") {
-    transferConfigSecret({ commit, model, getValue }, "configserver", "shard");
-  } else if (configurationSource === "same-as-mongos-config-secret") {
-    transferConfigSecret({ commit, model, getValue }, "mongos", "shard");
-  }
-}
-
-function onConfigurationSourceConfigServerChange({
-  getValue,
-  discriminator,
-  commit,
-  model,
-}) {
-  const configurationSource = getValue(
-    discriminator,
-    "/configurationSourceConfigServer"
-  );
-  const configSecretName = `${getValue(
-    model,
-    "/metadata/release/name"
-  )}-configserver-config`;
-  if (configurationSource === "use-existing-config") {
-    commit("wizard/model$delete", "/resources/secret_configserver_config");
-    onConfigSecretModelChange(
-      { commit, model, getValue, discriminator },
-      "configserver",
-      configurationSource,
-      "/configurationConfigServer"
-    );
-  } else if (configurationSource === "create-new-config") {
-    const value = getValue(model, "/resources/secret_configserver_config");
-    if (!value) {
-      commit("wizard/model$update", {
-        path: "/resources/secret_configserver_config",
-        value: {},
-        force: true,
-      });
-    }
-    commit("wizard/model$update", {
-      path:
-        "/resources/kubedbComElasticsearch/spec/shardTopology/configServer/configSecret/name",
-      value: configSecretName,
-      force: true,
-    });
-    onConfigSecretModelChange(
-      { commit, model, getValue, discriminator },
-      "configserver",
-      configurationSource,
-      "/configurationConfigServer"
-    );
-  } else if (configurationSource === "same-as-shard-config-secret") {
-    const configurationSourceReference = getValue(
-      discriminator,
-      "/configurationSourceShard"
-    );
-    transferConfigSecret(
-      { commit, model, getValue },
-      "shard",
-      "configserver",
-      configurationSourceReference
-    );
-  } else if (configurationSource === "same-as-mongos-config-secret") {
-    const configurationSourceReference = getValue(
-      discriminator,
-      "/configurationSourceMongos"
-    );
-    transferConfigSecret(
-      { commit, model, getValue },
-      "mongos",
-      "configserver",
-      configurationSourceReference
-    );
-  }
-}
-
-function transferConfigSecret({ commit, model, getValue }, src, des) {
-  const isShardedMode = getValue(
-    model,
-    "/resources/kubedbComElasticsearch/spec/shardTopology"
-  );
-  if (isShardedMode) {
-    commit("wizard/model$update", {
-      path: `/resources/kubedbComElasticsearch/spec/shardTopology/${
-        des === "configserver" ? "configServer" : des
-      }/configSecret/name`,
-      value: getValue(
-        model,
-        `/resources/kubedbComElasticsearch/spec/shardTopology/${
-          src === "configserver" ? "configServer" : src
-        }/configSecret/name`
-      ),
-      force: true,
-    });
-
-    commit("wizard/model$delete", `/resources/secret_${des}_config`);
-  }
-}
-
-function onConfigSecretModelChange(
-  { commit, model, getValue, discriminator },
-  configType,
-  configSrc,
-  discriminatorPath
-) {
-  if (configSrc === "create-new-config") {
-    const value = getValue(discriminator, discriminatorPath);
-    commit("wizard/model$update", {
-      path: `/resources/secret_${configType}_config/stringData/mongod.conf`,
-      value: value,
-      force: true,
-    });
-  }
-  const configSrcShard = getValue(discriminator, "/configurationSourceShard");
-  const configSrcConfigServer = getValue(
-    discriminator,
-    "/configurationSourceConfigServer"
-  );
-  const configSrcMongos = getValue(discriminator, "/configurationSourceMongos");
-
-  if (configSrcShard === `same-as-${configType}-config-secret`) {
-    transferConfigSecret({ commit, model, getValue }, configType, "shard");
-  }
-  if (configSrcConfigServer === `same-as-${configType}-config-secret`) {
-    transferConfigSecret(
-      { commit, model, getValue },
-      configType,
-      "configserver"
-    );
-  }
-  if (configSrcMongos === `same-as-${configType}-config-secret`) {
-    transferConfigSecret({ commit, model, getValue }, configType, "mongos");
-  }
-}
-
-function setConfiguration({ model, getValue }) {
-  return getValue(model, "/resources/secret_config/stringData/mongod.conf");
-}
-
-function setConfigurationShard({ model, getValue }) {
-  const value = getValue(
-    model,
-    "/resources/secret_shard_config/stringData/mongod.conf"
-  );
-  return value;
-}
-
-function setConfigurationConfigServer({ model, getValue }) {
-  const value = getValue(
-    model,
-    "/resources/secret_configserver_config/stringData/mongod.conf"
-  );
-  return value;
-}
-
-function setConfigurationMongos({ model, getValue }) {
-  const value = getValue(
-    model,
-    "/resources/secret_mongos_config/stringData/mongod.conf"
-  );
-  return value;
-}
-
-function setConfigurationFiles({ model, getValue }) {
-  const value = getValue(model, "/resources/secret_config/data/mongod.conf");
-  return atob(value);
-}
-
-function setConfigurationFilesShard({ model, getValue }) {
-  const value = getValue(
-    model,
-    "/resources/secret_shard_config/data/mongod.conf"
-  );
-  return atob(value);
-}
-
-function setConfigurationFilesConfigServer({ model, getValue }) {
-  const value = getValue(
-    model,
-    "/resources/secret_configserver_config/data/mongod.conf"
-  );
-  return atob(value);
-}
-
-function setConfigurationFilesMongos({ model, getValue }) {
-  const value = getValue(
-    model,
-    "/resources/secret_mongos_config/data/mongod.conf"
-  );
-  return atob(value);
-}
-
 
 return {
 	fetchJsons,
@@ -2623,32 +2305,40 @@ return {
 	getResources,
 	isEqualToDiscriminatorPath,
 	setValueFromModel,
-	isNotShardModeSelected,
-	isShardModeSelected,
 	getNamespacedResourceList,
 	getResourceList,
 	resourceNames,
   unNamespacedResourceNames,
   returnTrue,
   returnStringYes,
-	getElasticSearchVersions,
+  isTopologyModeSelected,
+  isCombinedModeSelected,
+  isDiscriminatorEqualTo,
+  isDiscriminatorNotEqualTo,
+  showInternalUsersAndRolesMapping,
+  getElasticSearchVersions,
+  isSecurityEnabled,
+  onDisableSecurityChange,
+  onVersionChange,
 	showAuthPasswordField,
 	showAuthSecretField,
 	showNewSecretCreateField,
-  isNotStandaloneMode,
-	showCommonStorageClassAndSizeField,
 	setDatabaseMode,
 	getStorageClassNames,
-	setStorageClass,
+  getStorageClassNamesFromDiscriminator,
 	deleteDatabaseModePath,
   isEqualToDatabaseMode,
+  getSelectedVersionDistribution,
   onInternalUsersChange,
   setInternalUsers,
   validateNewUser,
   disableUsername,
   disableUserEdit,
+  isDistributionEqualTo,
   onRolesMappingChange,
   setRolesMapping,
+  onCustomizeKernelSettingChange,
+  getInternalUsers,
 	setApiGroup,
 	getIssuerRefsName,
 	hasIssuerRefName,
@@ -2720,25 +2410,9 @@ return {
 	hasNoExistingSecret,
 	isEqualToServiceMonitorType,
 	onConfigurationSourceChange,
-	onConfigurationChange,
 	setConfigurationSource,
-	setSecretConfigNamespace,
-	setConfigurationSourceShard,
-	setConfigurationSourceConfigServer,
-	setConfigurationSourceMongos,
-	isSchemaOf,
-	disableConfigSourceOption,
-	onConfigurationSourceMongosChange,
-	onConfigurationSourceShardChange,
-	onConfigurationSourceConfigServerChange,
-	transferConfigSecret,
-	onConfigSecretModelChange,
-	setConfiguration,
-	setConfigurationShard,
-	setConfigurationConfigServer,
-	setConfigurationMongos,
-	setConfigurationFiles,
-	setConfigurationFilesShard,
-	setConfigurationFilesConfigServer,
-	setConfigurationFilesMongos
+  getMaxUnavailableOptions,
+  setConfigFiles,
+  onConfigFilesChange,
+  onSetCustomConfigChange,
 }
