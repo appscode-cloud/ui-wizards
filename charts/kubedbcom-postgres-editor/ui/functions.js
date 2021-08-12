@@ -1175,7 +1175,7 @@ function getBackupConfigsAndAnnotations(getValue, model) {
   };
 }
 
-function deleteKubeDbComMongDbAnnotation(getValue, model, commit) {
+function deleteKubeDbComPostgresDbAnnotation(getValue, model, commit) {
   const annotations =
     getValue(model, "/resources/kubedbComPostgres/metadata/annotations") || {};
   const filteredKeyList =
@@ -1195,7 +1195,7 @@ function deleteKubeDbComMongDbAnnotation(getValue, model, commit) {
   });
 }
 
-function addKubeDbComMongDbAnnotation(
+function addKubeDbComPostgresDbAnnotation(
   getValue,
   model,
   commit,
@@ -1245,7 +1245,7 @@ function onScheduleBackupChange({
     );
     commit("wizard/model$delete", "/resources/stashAppscodeComRepository_repo");
     // delete annotation from kubedbComPostgres annotation
-    deleteKubeDbComMongDbAnnotation(getValue, model, commit);
+    deleteKubeDbComPostgresDbAnnotation(getValue, model, commit);
   } else {
     const { isBluePrint } = getBackupConfigsAndAnnotations(getValue, model);
 
@@ -1306,7 +1306,7 @@ function onBackupInvokerChange({
 
   if (backupInvoker === "backupConfiguration") {
     // delete annotation and create backup config object
-    deleteKubeDbComMongDbAnnotation(getValue, model, commit);
+    deleteKubeDbComPostgresDbAnnotation(getValue, model, commit);
     const dbName = getValue(model, "/metadata/release/name");
 
     if (
@@ -1333,7 +1333,7 @@ function onBackupInvokerChange({
       "wizard/model$delete",
       "/resources/stashAppscodeComBackupConfiguration"
     );
-    addKubeDbComMongDbAnnotation(
+    addKubeDbComPostgresDbAnnotation(
       getValue,
       model,
       commit,
@@ -1458,7 +1458,7 @@ function onBackupBlueprintNameChange({
   model,
 }) {
   const backupBlueprintName = getValue(discriminator, "/backupBlueprintName");
-  addKubeDbComMongDbAnnotation(
+  addKubeDbComPostgresDbAnnotation(
     getValue,
     model,
     commit,
@@ -1475,7 +1475,7 @@ function onBackupBlueprintScheduleChange({
   model,
 }) {
   const backupBlueprintSchedule = getValue(discriminator, "/schedule");
-  addKubeDbComMongDbAnnotation(
+  addKubeDbComPostgresDbAnnotation(
     getValue,
     model,
     commit,
@@ -2058,8 +2058,8 @@ return {
 	showRuntimeForm,
 	getImagePullSecrets,
 	getBackupConfigsAndAnnotations,
-	deleteKubeDbComMongDbAnnotation,
-	addKubeDbComMongDbAnnotation,
+	deleteKubeDbComPostgresDbAnnotation,
+	addKubeDbComPostgresDbAnnotation,
 	initScheduleBackup,
 	onScheduleBackupChange,
 	showBackupForm,

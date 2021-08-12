@@ -35,6 +35,7 @@ steps:
         text: labels.config_ops_request
       type: label-element
     - computed: getRequestTypeFromRoute
+      disabled: isDbDetailsLoading
       hasDescription: true
       label:
         text: labels.ops_request_type
@@ -61,7 +62,8 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/type
       type: radio
-    - fetch: getElasticsearchVersions
+    - computed: setValueFromDbDetails|/spec/version
+      fetch: getElasticsearchVersions
       if: ifRequestTypeEqualsTo|Upgrade
       label:
         text: labels.targetVersion
@@ -69,7 +71,8 @@ steps:
         $ref: schema#/properties/spec/properties/upgrade/properties/targetVersion
       type: select
     - elements:
-      - if: ifDbTypeEqualsTo|combined|horizontalScaling
+      - computed: setValueFromDbDetails|/spec/replicas
+        if: ifDbTypeEqualsTo|combined|horizontalScaling
         label:
           text: labels.replicas
         schema:
@@ -77,58 +80,68 @@ steps:
         type: input
       - if: ifDbTypeEqualsTo|topology|horizontalScaling
         elements:
-        - label:
+        - computed: setValueFromDbDetails|/spec/topology/master/replicas
+          label:
             text: labels.master_node
           schema:
             $ref: schema#/properties/spec/properties/horizontalScaling/properties/topology/properties/master
           type: input
-        - label:
+        - computed: setValueFromDbDetails|/spec/topology/data/replicas
+          label:
             text: labels.data_node
           schema:
             $ref: schema#/properties/spec/properties/horizontalScaling/properties/topology/properties/data
           type: input
-        - label:
+        - computed: setValueFromDbDetails|/spec/topology/ingest/replicas
+          label:
             text: labels.ingest_node
           schema:
             $ref: schema#/properties/spec/properties/horizontalScaling/properties/topology/properties/ingest
           type: input
-        - if: isDistributionEqualTo|ElasticStack
+        - computed: setValueFromDbDetails|/spec/topology/ml/replicas
+          if: isDistributionEqualTo|ElasticStack
           label:
             text: labels.ml_node
           schema:
             $ref: schema#/properties/spec/properties/horizontalScaling/properties/topology/properties/ml
           type: input
-        - if: isDistributionEqualTo|ElasticStack
+        - computed: setValueFromDbDetails|/spec/topology/transform/replicas
+          if: isDistributionEqualTo|ElasticStack
           label:
             text: labels.transform_node
           schema:
             $ref: schema#/properties/spec/properties/horizontalScaling/properties/topology/properties/transform
           type: input
-        - if: isDistributionEqualTo|ElasticStack
+        - computed: setValueFromDbDetails|/spec/topology/dataCold/replicas
+          if: isDistributionEqualTo|ElasticStack
           label:
             text: labels.data_cold_node
           schema:
             $ref: schema#/properties/spec/properties/horizontalScaling/properties/topology/properties/dataCold
           type: input
-        - if: isDistributionEqualTo|ElasticStack
+        - computed: setValueFromDbDetails|/spec/topology/dataContent/replicas
+          if: isDistributionEqualTo|ElasticStack
           label:
             text: labels.data_content_node
           schema:
             $ref: schema#/properties/spec/properties/horizontalScaling/properties/topology/properties/dataContent
           type: input
-        - if: isDistributionEqualTo|ElasticStack
+        - computed: setValueFromDbDetails|/spec/topology/dataFrozen/replicas
+          if: isDistributionEqualTo|ElasticStack
           label:
             text: labels.data_frozen_node
           schema:
             $ref: schema#/properties/spec/properties/horizontalScaling/properties/topology/properties/dataFrozen
           type: input
-        - if: isDistributionNotEqualTo|SearchGuard
+        - computed: setValueFromDbDetails|/spec/topology/dataHot/replicas
+          if: isDistributionNotEqualTo|SearchGuard
           label:
             text: labels.data_hot_node
           schema:
             $ref: schema#/properties/spec/properties/horizontalScaling/properties/topology/properties/dataHot
           type: input
-        - if: isDistributionNotEqualTo|SearchGuard
+        - computed: setValueFromDbDetails|/spec/topology/dataWarm/replicas
+          if: isDistributionNotEqualTo|SearchGuard
           label:
             text: labels.data_warm_node
           schema:
@@ -150,7 +163,7 @@ steps:
           chart:
             name: uibytebuildersdev-component-resources
             version: v0.2.0-alpha.0
-          hideForm: true
+          computed: setValueFromDbDetails|/spec/topology/master/resources|/spec/verticalScaling/topology/master
           label:
             text: labels.master_node
           moduleResolver: fetchJsons
@@ -162,6 +175,7 @@ steps:
           chart:
             name: uibytebuildersdev-component-resources
             version: v0.2.0-alpha.0
+          computed: setValueFromDbDetails|/spec/topology/data/resources|/spec/verticalScaling/topology/data
           hideForm: true
           label:
             text: labels.data_node
@@ -174,6 +188,7 @@ steps:
           chart:
             name: uibytebuildersdev-component-resources
             version: v0.2.0-alpha.0
+          computed: setValueFromDbDetails|/spec/topology/ingest/resources|/spec/verticalScaling/topology/ingest
           hideForm: true
           label:
             text: labels.ingest_node
@@ -186,6 +201,7 @@ steps:
           chart:
             name: uibytebuildersdev-component-resources
             version: v0.2.0-alpha.0
+          computed: setValueFromDbDetails|/spec/topology/ml/resources|/spec/verticalScaling/topology/ml
           hideForm: true
           if: isDistributionEqualTo|ElasticStack
           label:
@@ -199,6 +215,7 @@ steps:
           chart:
             name: uibytebuildersdev-component-resources
             version: v0.2.0-alpha.0
+          computed: setValueFromDbDetails|/spec/topology/transform/resources|/spec/verticalScaling/topology/transform
           hideForm: true
           if: isDistributionEqualTo|ElasticStack
           label:
@@ -212,6 +229,7 @@ steps:
           chart:
             name: uibytebuildersdev-component-resources
             version: v0.2.0-alpha.0
+          computed: setValueFromDbDetails|/spec/topology/dataCold/resources|/spec/verticalScaling/topology/dataCold
           hideForm: true
           if: isDistributionEqualTo|ElasticStack
           label:
@@ -225,6 +243,7 @@ steps:
           chart:
             name: uibytebuildersdev-component-resources
             version: v0.2.0-alpha.0
+          computed: setValueFromDbDetails|/spec/topology/dataContent/resources|/spec/verticalScaling/topology/dataContent
           hideForm: true
           if: isDistributionEqualTo|ElasticStack
           label:
@@ -238,6 +257,7 @@ steps:
           chart:
             name: uibytebuildersdev-component-resources
             version: v0.2.0-alpha.0
+          computed: setValueFromDbDetails|/spec/topology/dataFrozen/resources|/spec/verticalScaling/topology/dataFrozen
           hideForm: true
           if: isDistributionEqualTo|ElasticStack
           label:
@@ -251,6 +271,7 @@ steps:
           chart:
             name: uibytebuildersdev-component-resources
             version: v0.2.0-alpha.0
+          computed: setValueFromDbDetails|/spec/topology/dataHot/resources|/spec/verticalScaling/topology/dataHot
           hideForm: true
           if: isDistributionNotEqualTo|SearchGuard
           label:
@@ -264,6 +285,7 @@ steps:
           chart:
             name: uibytebuildersdev-component-resources
             version: v0.2.0-alpha.0
+          computed: setValueFromDbDetails|/spec/topology/dataWarm/resources|/spec/verticalScaling/topology/dataWarm
           hideForm: true
           if: isDistributionNotEqualTo|SearchGuard
           label:
@@ -281,18 +303,21 @@ steps:
         chart:
           name: uibytebuildersdev-component-resources
           version: v0.2.0-alpha.0
+        computed: setValueFromDbDetails|/spec/podTemplate/spec/resources|/spec/verticalScaling/node
         if: ifDbTypeEqualsTo|combined|verticalScaling
         label:
           text: labels.node
         moduleResolver: fetchJsons
         schema:
-          $ref: schema#/properties/spec/properties/verticalScaling/properties/properties/node
+          $ref: schema#/properties/spec/properties/verticalScaling/properties/node
         show_label: true
         type: reusable-element
       - alias: reusable_exporter_reources
         chart:
           name: uibytebuildersdev-component-resources
           version: v0.2.0-alpha.0
+        computed: setValueFromDbDetails|/spec/monitor/prometheus/exporter/resources|/spec/verticalScaling/exporter
+        hideForm: true
         label:
           text: labels.exporter
         moduleResolver: fetchJsons
@@ -303,65 +328,76 @@ steps:
       if: ifRequestTypeEqualsTo|VerticalScaling
       type: single-step-form
     - elements:
-      - if: ifDbTypeEqualsTo|combined|VolumeExpansion
+      - computed: setValueFromDbDetails|/spec/storage/resources/requests/storage
+        if: ifDbTypeEqualsTo|combined|VolumeExpansion
         label:
           text: labels.storage.size
         schema:
           $ref: schema#/properties/spec/properties/volumeExpansion/properties/node
         type: input
       - elements:
-        - label:
+        - computed: setValueFromDbDetails|/spec/topology/master/storage/resources/requests/storage
+          label:
             text: labels.storage.master_size
           schema:
             $ref: schema#/properties/spec/properties/volumeExpansion/properties/topology/properties/master
           type: input
-        - label:
+        - computed: setValueFromDbDetails|/spec/topology/data/storage/resources/requests/storage
+          label:
             text: labels.storage.data_size
           schema:
             $ref: schema#/properties/spec/properties/volumeExpansion/properties/topology/properties/data
           type: input
-        - label:
+        - computed: setValueFromDbDetails|/spec/topology/ingest/storage/resources/requests/storage
+          label:
             text: labels.storage.ingest_size
           schema:
             $ref: schema#/properties/spec/properties/volumeExpansion/properties/topology/properties/ingest
           type: input
-        - if: isDistributionEqualTo|ElasticStack
+        - computed: setValueFromDbDetails|/spec/topology/ml/storage/resources/requests/storage
+          if: isDistributionEqualTo|ElasticStack
           label:
             text: labels.storage.ml_size
           schema:
             $ref: schema#/properties/spec/properties/volumeExpansion/properties/topology/properties/ml
           type: input
-        - if: isDistributionEqualTo|ElasticStack
+        - computed: setValueFromDbDetails|/spec/topology/transform/storage/resources/requests/storage
+          if: isDistributionEqualTo|ElasticStack
           label:
             text: labels.storage.transform_size
           schema:
             $ref: schema#/properties/spec/properties/volumeExpansion/properties/topology/properties/transform
           type: input
-        - if: isDistributionEqualTo|ElasticStack
+        - computed: setValueFromDbDetails|/spec/topology/dataCold/storage/resources/requests/storage
+          if: isDistributionEqualTo|ElasticStack
           label:
             text: labels.storage.data_cold_size
           schema:
             $ref: schema#/properties/spec/properties/volumeExpansion/properties/topology/properties/dataCold
           type: input
-        - if: isDistributionEqualTo|ElasticStack
+        - computed: setValueFromDbDetails|/spec/topology/dataContent/storage/resources/requests/storage
+          if: isDistributionEqualTo|ElasticStack
           label:
             text: labels.storage.data_content_size
           schema:
             $ref: schema#/properties/spec/properties/volumeExpansion/properties/topology/properties/dataContent
           type: input
-        - if: isDistributionEqualTo|ElasticStack
+        - computed: setValueFromDbDetails|/spec/topology/dataFrozen/storage/resources/requests/storage
+          if: isDistributionEqualTo|ElasticStack
           label:
             text: labels.storage.data_frozen_size
           schema:
             $ref: schema#/properties/spec/properties/volumeExpansion/properties/topology/properties/dataFrozen
           type: input
-        - if: isDistributionNotEqualTo|SearchGuard
+        - computed: setValueFromDbDetails|/spec/topology/dataHot/storage/resources/requests/storage
+          if: isDistributionNotEqualTo|SearchGuard
           label:
             text: labels.storage.data_hot_size
           schema:
             $ref: schema#/properties/spec/properties/volumeExpansion/properties/topology/properties/dataHot
           type: input
-        - if: isDistributionNotEqualTo|SearchGuard
+        - computed: setValueFromDbDetails|/spec/topology/dataWarm/storage/resources/requests/storage
+          if: isDistributionNotEqualTo|SearchGuard
           label:
             text: labels.storage.data_warm_size
           schema:
@@ -405,16 +441,11 @@ steps:
         schema:
           $ref: schema#/properties/spec/properties/tls/properties/rotateCertificates
         type: switch
-      - if: showIssuerRefAndCertificates
-        label:
-          text: labels.enable_ssl_question
-        schema:
-          $ref: schema#/properties/spec/properties/tls/properties/enableSSL
-        type: switch
       - alias: reusable_certificates
         chart:
           name: uibytebuildersdev-component-certificates
           version: v0.2.0-alpha.0
+        computed: setValueFromDbDetails|/spec/tls/certificates|/spec/tls/certificates
         if: showIssuerRefAndCertificates
         moduleResolver: fetchJsons
         schema:

@@ -91,6 +91,7 @@ async function getElasticsearchDetails({
   model,
   getValue,
   watchDependency,
+  discriminator,
   setDiscriminatorValue
 }) {
   const owner = storeGet("/user/username");
@@ -107,9 +108,9 @@ async function getElasticsearchDetails({
     );
 
     const { version } = resp?.data?.spec || {};
-    const elasticVersions = await getElasticsearchVersions({axios, storeGet});
+    const elasticVersions = await getElasticsearchVersions({axios, storeGet, discriminator, getValue, watchDependency});
     const selectedVersion = elasticVersions?.find((item) => item.value === version);
-  
+
     if(resp?.data?.spec) {
       resp.data.spec.distribution = selectedVersion?.distribution || "";
     }
@@ -120,7 +121,8 @@ async function getElasticsearchDetails({
   } else return {};
 }
 
-async function getElasticsearchVersions({ axios, storeGet }) {
+async function getElasticsearchVersions({ axios, storeGet, discriminator, getValue, watchDependency }) {
+  watchDependency("discriminator#/elasticsearchDetails");
   const owner = storeGet("/user/username");
   const cluster = storeGet("/cluster/clusterDefinition/spec/name");
 
@@ -142,9 +144,12 @@ async function getElasticsearchVersions({ axios, storeGet }) {
 
   const resources = (resp && resp.data && resp.data.items) || [];
 
+  const elasticsearchDetails = getValue(discriminator, "/elasticsearchDetails");
+  const dist = elasticsearchDetails?.spec?.distribution || "";
+
   // keep only non deprecated versions
   const filteredElasticsearchVersions = resources.filter(
-    (item) => item.spec && !item.spec.deprecated
+    (item) => item.spec && !item.spec.deprecated && (!dist || item.spec.distribution === dist)
   );
 
   return filteredElasticsearchVersions.map((item) => {
@@ -471,7 +476,7 @@ function onReconfigurationTypeChange(
   }
 }
 async function disableReconfigurationType(
-  { axios, storeGet, model, getValue, watchDependency, itemCtx },
+  { axios, storeGet, model, getValue, watchDependency, discriminator, setDiscriminatorValue, itemCtx },
 ) {
   const dbDetails = await getElasticsearchDetails({
     axios,
@@ -479,6 +484,8 @@ async function disableReconfigurationType(
     model,
     getValue,
     watchDependency,
+    discriminator,
+    setDiscriminatorValue
   });
 
   const { spec } = dbDetails || {};
@@ -567,12 +574,16 @@ function onTlsOperationChange({ discriminator, getValue, commit }) {
       value: true,
       force: true,
     });
+    commit("wizard/model$delete", "/spec/tls/certificates");
+    commit("wizard/model$delete", "/spec/tls/remove");
   } else if (tlsOperation === "remove") {
     commit("wizard/model$update", {
       path: "/spec/tls/remove",
       value: true,
       force: true,
     });
+    commit("wizard/model$delete", "/spec/tls/certificates");
+    commit("wizard/model$delete", "/spec/tls/rotateCertificates");
   }
 }
 
@@ -606,6 +617,37 @@ function getRequestTypeFromRoute({ route }) {
   const { query } = route || {};
   const { requestType } = query || {};
   return requestType || "";
+}
+
+// ************************************** Set db details *****************************************
+
+function isDbDetailsLoading({discriminator, getValue, watchDependency}) {
+  watchDependency("discriminator#/elasticsearchDetails");
+  const elasticsearchDetails = getValue(discriminator, "/elasticsearchDetails");
+  
+  return !elasticsearchDetails;
+}
+
+function setValueFromDbDetails({discriminator, getValue, watchDependency, commit}, path, commitPath) {
+  watchDependency("discriminator#/elasticsearchDetails");
+  const retValue = getValue(discriminator, `/elasticsearchDetails${path}`);
+
+  if(commitPath) {
+    const tlsOperation = getValue(discriminator, "/tlsOperation");
+    
+    if(commitPath === "/spec/tls/certificates" && tlsOperation !== "update")
+      return undefined; 
+
+    // direct model update required for reusable element.
+    // computed property is not applicable for reusable element
+    commit("wizard/model$update", {
+      path: commitPath,
+      value: retValue,
+      force: true
+    });
+  }
+
+  return retValue || undefined;
 }
 
 return {
@@ -642,4 +684,6 @@ return {
 	showIssuerRefAndCertificates,
 	isIssuerRefRequired,
   getRequestTypeFromRoute,
+  isDbDetailsLoading,
+  setValueFromDbDetails,
 }

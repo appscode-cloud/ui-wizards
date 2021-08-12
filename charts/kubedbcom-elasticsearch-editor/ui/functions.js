@@ -354,6 +354,7 @@ async function onVersionChange({ model, getValue, watchDependency, axios, storeG
   
   const isOpenDistro = dist === "OpenDistro";
   const isSearchGuard = dist === "SearchGuard";
+  const isXpack = dist === "ElasticStack"
   
   if(!isOpenDistro && !isSearchGuard) {
     commit("wizard/model$delete", "/resources/kubedbComElasticsearch/spec/internalUsers");
@@ -370,6 +371,8 @@ async function onVersionChange({ model, getValue, watchDependency, axios, storeG
       }
 
       commit("wizard/model$update", {path: "/resources/kubedbComElasticsearch/spec/internalUsers", value: internalUsers, force: true });
+      commit("wizard/model$delete", "/resources/kubedbComElasticsearch/spec/topology/dataHot");
+      commit("wizard/model$delete", "/resources/kubedbComElasticsearch/spec/topology/dataWarm");
     }
     if(!isSearchGuard) {
       const internalUsers = getValue(model, "/resources/kubedbComElasticsearch/spec/internalUsers");
@@ -381,6 +384,14 @@ async function onVersionChange({ model, getValue, watchDependency, axios, storeG
       }
 
       commit("wizard/model$update", {path: "/resources/kubedbComElasticsearch/spec/internalUsers", value: internalUsers, force: true });
+    }
+
+    if(!isXpack) {
+      commit("wizard/model$delete", "/resources/kubedbComElasticsearch/spec/topology/dataCold");
+      commit("wizard/model$delete", "/resources/kubedbComElasticsearch/spec/topology/dataContent");
+      commit("wizard/model$delete", "/resources/kubedbComElasticsearch/spec/topology/dataFrozen");
+      commit("wizard/model$delete", "/resources/kubedbComElasticsearch/spec/topology/ml");
+      commit("wizard/model$delete", "/resources/kubedbComElasticsearch/spec/topology/transform");
     }
   }
 }
@@ -1463,7 +1474,7 @@ function getBackupConfigsAndAnnotations(getValue, model) {
   };
 }
 
-function deleteKubeDbComMongDbAnnotation(getValue, model, commit) {
+function deleteKubedbComElasticsearchDbAnnotation(getValue, model, commit) {
   const annotations =
     getValue(model, "/resources/kubedbComElasticsearch/metadata/annotations") || {};
   const filteredKeyList =
@@ -1483,7 +1494,7 @@ function deleteKubeDbComMongDbAnnotation(getValue, model, commit) {
   });
 }
 
-function addKubeDbComMongDbAnnotation(
+function addKubedbComElasticsearchDbAnnotation(
   getValue,
   model,
   commit,
@@ -1533,7 +1544,7 @@ function onScheduleBackupChange({
     );
     commit("wizard/model$delete", "/resources/stashAppscodeComRepository_repo");
     // delete annotation from kubedbComElasticsearch annotation
-    deleteKubeDbComMongDbAnnotation(getValue, model, commit);
+    deleteKubedbComElasticsearchDbAnnotation(getValue, model, commit);
   } else {
     const { isBluePrint } = getBackupConfigsAndAnnotations(getValue, model);
 
@@ -1594,7 +1605,7 @@ function onBackupInvokerChange({
 
   if (backupInvoker === "backupConfiguration") {
     // delete annotation and create backup config object
-    deleteKubeDbComMongDbAnnotation(getValue, model, commit);
+    deleteKubedbComElasticsearchDbAnnotation(getValue, model, commit);
     const dbName = getValue(model, "/metadata/release/name");
 
     if (
@@ -1621,7 +1632,7 @@ function onBackupInvokerChange({
       "wizard/model$delete",
       "/resources/stashAppscodeComBackupConfiguration"
     );
-    addKubeDbComMongDbAnnotation(
+    addKubedbComElasticsearchDbAnnotation(
       getValue,
       model,
       commit,
@@ -1746,7 +1757,7 @@ function onBackupBlueprintNameChange({
   model,
 }) {
   const backupBlueprintName = getValue(discriminator, "/backupBlueprintName");
-  addKubeDbComMongDbAnnotation(
+  addKubedbComElasticsearchDbAnnotation(
     getValue,
     model,
     commit,
@@ -1763,7 +1774,7 @@ function onBackupBlueprintScheduleChange({
   model,
 }) {
   const backupBlueprintSchedule = getValue(discriminator, "/schedule");
-  addKubeDbComMongDbAnnotation(
+  addKubedbComElasticsearchDbAnnotation(
     getValue,
     model,
     commit,
@@ -1942,48 +1953,6 @@ function onNameChange({ commit, model, getValue }) {
     commit("wizard/model$update", {
       path: "/resources/kubedbComElasticsearch/spec/configSecret/name",
       value: `${dbName}-config`,
-      force: true,
-    });
-  }
-
-  // to reset shard configSecret name field
-  const hasSecretShardConfig = getValue(
-    model,
-    "/resources/secret_shard_config"
-  );
-  if (hasSecretShardConfig) {
-    commit("wizard/model$update", {
-      path:
-        "/resources/kubedbComElasticsearch/spec/shardTopology/shard/configSecret/name",
-      value: `${dbName}-shard-config`,
-      force: true,
-    });
-  }
-
-  // to reset shard configSecret name field
-  const hasSecretConfigServerConfig = getValue(
-    model,
-    "/resources/secret_configserver_config"
-  );
-  if (hasSecretConfigServerConfig) {
-    commit("wizard/model$update", {
-      path:
-        "/resources/kubedbComElasticsearch/spec/shardTopology/configServer/configSecret/name",
-      value: `${dbName}-configserver-config`,
-      force: true,
-    });
-  }
-
-  // to reset mongos configSecret name field
-  const hasSecretMongosConfig = getValue(
-    model,
-    "/resources/secret_mongos_config"
-  );
-  if (hasSecretMongosConfig) {
-    commit("wizard/model$update", {
-      path:
-        "/resources/kubedbComElasticsearch/spec/shardTopology/mongos/configSecret/name",
-      value: `${dbName}-mongos-config`,
       force: true,
     });
   }
@@ -2371,8 +2340,8 @@ return {
 	showRuntimeForm,
 	getImagePullSecrets,
 	getBackupConfigsAndAnnotations,
-	deleteKubeDbComMongDbAnnotation,
-	addKubeDbComMongDbAnnotation,
+	deleteKubedbComElasticsearchDbAnnotation,
+	addKubedbComElasticsearchDbAnnotation,
 	initScheduleBackup,
 	onScheduleBackupChange,
 	showBackupForm,
