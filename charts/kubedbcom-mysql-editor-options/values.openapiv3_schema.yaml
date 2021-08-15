@@ -53,6 +53,28 @@ properties:
             format: password
             type: string
         type: object
+      group:
+        properties:
+          replicas:
+            type: integer
+        required:
+        - replicas
+        type: object
+      innoDBCluster:
+        properties:
+          replicas:
+            type: integer
+          router:
+            properties:
+              replicas:
+                type: integer
+            required:
+            - replicas
+            type: object
+        required:
+        - replicas
+        - router
+        type: object
       labels:
         additionalProperties:
           type: string
@@ -86,8 +108,8 @@ properties:
       mode:
         enum:
         - Standalone
-        - Replicaset
-        - Sharded
+        - GroupReplication
+        - InnoDBCluster
         type: string
       persistence:
         properties:
@@ -145,7 +167,6 @@ properties:
     - machine
     - mode
     - persistence
-    - replicas
     - resources
     - storageClass
     - terminationPolicy

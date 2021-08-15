@@ -53,6 +53,16 @@ properties:
             format: password
             type: string
         type: object
+      cluster:
+        properties:
+          master:
+            type: integer
+          replicas:
+            type: integer
+        required:
+        - master
+        - replicas
+        type: object
       labels:
         additionalProperties:
           type: string
@@ -86,8 +96,7 @@ properties:
       mode:
         enum:
         - Standalone
-        - Replicaset
-        - Sharded
+        - Cluster
         type: string
       persistence:
         properties:
@@ -145,7 +154,6 @@ properties:
     - machine
     - mode
     - persistence
-    - replicas
     - resources
     - storageClass
     - terminationPolicy
