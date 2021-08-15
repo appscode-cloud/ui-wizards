@@ -17,9 +17,9 @@ metadata:
 {{- end }}
 spec:
   version: {{ .Values.spec.version | quote }}
-{{- if or (eq .Values.spec.mode "Standalone") (eq .Values.spec.mode "Replicaset") }}
-  replicas: {{ .Values.spec.replicas }}
   storageType: Durable
+{{- if eq .Values.spec.mode "Combined" }}
+  replicas: {{ .Values.spec.replicas }}
   storage:
     storageClassName: {{ .Values.spec.storageClass.name }}
     accessModes:
@@ -27,51 +27,164 @@ spec:
     resources:
       requests:
         storage: {{ .Values.spec.persistence.size }}
-{{- end }}
-{{- if eq .Values.spec.mode "Replicaset" }}
-  replicaSet:
-    name: {{ .Values.spec.replicaSet.name }}
-{{- end }}
-{{- if eq .Values.spec.mode "Sharded" }}
-  shardTopology:
-    configServer:
-      replicas: {{ .Values.spec.shardTopology.configServer.replicas }}
-      podTemplate:
-        spec:
-          resources:
-            {{- toYaml $res | nindent 12 }}
-      storage:
-        resources:
-          requests:
-            storage: {{ .Values.spec.shardTopology.configServer.persistence.size }}
-        storageClassName: {{ .Values.spec.storageClass.name }}
-    mongos:
-      replicas: {{ .Values.spec.shardTopology.mongos.replicas }}
-      podTemplate:
-        spec:
-          resources:
-            {{- toYaml $res | nindent 12 }}
-    shard:
-      shards: {{ .Values.spec.shardTopology.shard.shards }}
-      replicas: {{ .Values.spec.shardTopology.shard.replicas }}
-      podTemplate:
-        spec:
-          resources:
-            {{- toYaml $res | nindent 12 }}
-      storage:
-        resources:
-          requests:
-            storage: {{ .Values.spec.shardTopology.shard.persistence.size }}
-        storageClassName: {{ .Values.spec.storageClass.name }}
-{{- else }}
   podTemplate:
     spec:
       resources:
         {{- toYaml $res | nindent 8 }}
+{{- else if eq .Values.spec.mode "Dedicated" }}
+  topology:
+    master:
+      replicas: {{ .Values.spec.topology.master.replicas }}
+      resources:
+        {{- $resMaster := .Values.spec.resources -}}
+        {{- if and .Values.spec.topology.master.machine (hasKey $machines .Values.spec.topology.master.machine) }}
+          {{- $resMaster = get (get $machines .Values.spec.topology.master.machine) "resources" }}
+        {{- end }}
+        {{- toYaml $resMaster | nindent 8 }}
+      storage:
+        storageClassName: {{ .Values.spec.storageClass.name }}
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: {{ .Values.spec.topology.master.persistence.size }}
+    data:
+      replicas: {{ .Values.spec.topology.data.replicas }}
+      resources:
+        {{- $resData := .Values.spec.resources -}}
+        {{- if and .Values.spec.topology.data.machine (hasKey $machines .Values.spec.topology.data.machine) }}
+          {{- $resData = get (get $machines .Values.spec.topology.data.machine) "resources" }}
+        {{- end }}
+        {{- toYaml $resData | nindent 8 }}
+      storage:
+        storageClassName: {{ .Values.spec.storageClass.name }}
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: {{ .Values.spec.topology.data.persistence.size }}
+    dataContent:
+      replicas: {{ .Values.spec.topology.dataContent.replicas }}
+      resources:
+        {{- $resDataContent := .Values.spec.resources -}}
+        {{- if and .Values.spec.topology.dataContent.machine (hasKey $machines .Values.spec.topology.dataContent.machine) }}
+          {{- $resDataContent = get (get $machines .Values.spec.topology.dataContent.machine) "resources" }}
+        {{- end }}
+        {{- toYaml $resDataContent | nindent 8 }}
+      storage:
+        storageClassName: {{ .Values.spec.storageClass.name }}
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: {{ .Values.spec.topology.dataContent.persistence.size }}
+    dataHot:
+      replicas: {{ .Values.spec.topology.dataHot.replicas }}
+      resources:
+        {{- $resDataHot := .Values.spec.resources -}}
+        {{- if and .Values.spec.topology.dataHot.machine (hasKey $machines .Values.spec.topology.dataHot.machine) }}
+          {{- $resDataHot = get (get $machines .Values.spec.topology.dataHot.machine) "resources" }}
+        {{- end }}
+        {{- toYaml $resDataHot | nindent 8 }}
+      storage:
+        storageClassName: {{ .Values.spec.storageClass.name }}
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: {{ .Values.spec.topology.dataHot.persistence.size }}
+    dataWarm:
+      replicas: {{ .Values.spec.topology.dataWarm.replicas }}
+      resources:
+        {{- $resDataWarm := .Values.spec.resources -}}
+        {{- if and .Values.spec.topology.dataWarm.machine (hasKey $machines .Values.spec.topology.dataWarm.machine) }}
+          {{- $resDataWarm = get (get $machines .Values.spec.topology.dataWarm.machine) "resources" }}
+        {{- end }}
+        {{- toYaml $resDataWarm | nindent 8 }}
+      storage:
+        storageClassName: {{ .Values.spec.storageClass.name }}
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: {{ .Values.spec.topology.dataWarm.persistence.size }}
+    dataCold:
+      replicas: {{ .Values.spec.topology.dataCold.replicas }}
+      resources:
+        {{- $resDataCold := .Values.spec.resources -}}
+        {{- if and .Values.spec.topology.dataCold.machine (hasKey $machines .Values.spec.topology.dataCold.machine) }}
+          {{- $resDataCold = get (get $machines .Values.spec.topology.dataCold.machine) "resources" }}
+        {{- end }}
+        {{- toYaml $resDataCold | nindent 8 }}
+      storage:
+        storageClassName: {{ .Values.spec.storageClass.name }}
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: {{ .Values.spec.topology.dataCold.persistence.size }}
+    dataFrozen:
+      replicas: {{ .Values.spec.topology.dataFrozen.replicas }}
+      resources:
+        {{- $resDataFrozen := .Values.spec.resources -}}
+        {{- if and .Values.spec.topology.dataFrozen.machine (hasKey $machines .Values.spec.topology.dataFrozen.machine) }}
+          {{- $resDataFrozen = get (get $machines .Values.spec.topology.dataFrozen.machine) "resources" }}
+        {{- end }}
+        {{- toYaml $resDataFrozen | nindent 8 }}
+      storage:
+        storageClassName: {{ .Values.spec.storageClass.name }}
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: {{ .Values.spec.topology.dataFrozen.persistence.size }}
+    ingest:
+      replicas: {{ .Values.spec.topology.ingest.replicas }}
+      resources:
+        {{- $resIngest := .Values.spec.resources -}}
+        {{- if and .Values.spec.topology.ingest.machine (hasKey $machines .Values.spec.topology.ingest.machine) }}
+          {{- $resIngest = get (get $machines .Values.spec.topology.ingest.machine) "resources" }}
+        {{- end }}
+        {{- toYaml $resIngest | nindent 8 }}
+      storage:
+        storageClassName: {{ .Values.spec.storageClass.name }}
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: {{ .Values.spec.topology.ingest.persistence.size }}
+    ml:
+      replicas: {{ .Values.spec.topology.ml.replicas }}
+      resources:
+         {{- $resMl := .Values.spec.resources -}}
+        {{- if and .Values.spec.topology.ml.machine (hasKey $machines .Values.spec.topology.ml.machine) }}
+          {{- $resMl = get (get $machines .Values.spec.topology.ml.machine) "resources" }}
+        {{- end }}
+        {{- toYaml $resMl | nindent 8 }}
+      storage:
+        storageClassName: {{ .Values.spec.storageClass.name }}
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: {{ .Values.spec.topology.ml.persistence.size }}
+    transform:
+      replicas: {{ .Values.spec.topology.transform.replicas }}
+      resources:
+        {{- $resTransform := .Values.spec.resources -}}
+        {{- if and .Values.spec.topology.transform.machine (hasKey $machines .Values.spec.topology.transform.machine) }}
+          {{- $resTransform = get (get $machines .Values.spec.topology.transform.machine) "resources" }}
+        {{- end }}
+        {{- toYaml $resTransform | nindent 8 }}
+      storage:
+        storageClassName: {{ .Values.spec.storageClass.name }}
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: {{ .Values.spec.topology.transform.persistence.size }}
 {{- end }}
   terminationPolicy: {{ .Values.spec.terminationPolicy }}
-  clusterAuthMode: {{ .Values.spec.clusterAuthMode }}
-  sslMode: {{ .Values.spec.sslMode }}
 {{- if .Values.spec.authSecret.name }}
   authSecret:
     name: {{ .Values.spec.authSecret.name }}

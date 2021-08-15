@@ -39,3 +39,14 @@ helm install kubedbcom-mysql-editor-options charts/kubedbcom-mysql-editor-option
  --set spec.mode=InnoDBCluster
 helm uninstall kubedbcom-mysql-editor-options
 ```
+
+### Elasticsearch
+
+```bash
+helm install kubedbcom-elasticsearch-editor-options charts/kubedbcom-elasticsearch-editor-options
+helm uninstall kubedbcom-elasticsearch-editor-options
+
+helm install kubedbcom-elasticsearch-editor-options charts/kubedbcom-elasticsearch-editor-options \
+ --set spec.mode=Dedicated
+helm uninstall kubedbcom-elasticsearch-editor-options
+```

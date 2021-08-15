@@ -85,9 +85,8 @@ properties:
         type: string
       mode:
         enum:
-        - Standalone
-        - Replicaset
-        - Sharded
+        - Combined
+        - Dedicated
         type: string
       persistence:
         properties:
@@ -138,14 +137,205 @@ properties:
         - WipeOut
         - DoNotTerminate
         type: string
+      topology:
+        properties:
+          data:
+            properties:
+              machine:
+                type: string
+              persistence:
+                properties:
+                  size:
+                    type: string
+                required:
+                - size
+                type: object
+              replicas:
+                type: integer
+            required:
+            - machine
+            - persistence
+            - replicas
+            type: object
+          dataCold:
+            properties:
+              machine:
+                type: string
+              persistence:
+                properties:
+                  size:
+                    type: string
+                required:
+                - size
+                type: object
+              replicas:
+                type: integer
+            required:
+            - machine
+            - persistence
+            - replicas
+            type: object
+          dataContent:
+            properties:
+              machine:
+                type: string
+              persistence:
+                properties:
+                  size:
+                    type: string
+                required:
+                - size
+                type: object
+              replicas:
+                type: integer
+            required:
+            - machine
+            - persistence
+            - replicas
+            type: object
+          dataFrozen:
+            properties:
+              machine:
+                type: string
+              persistence:
+                properties:
+                  size:
+                    type: string
+                required:
+                - size
+                type: object
+              replicas:
+                type: integer
+            required:
+            - machine
+            - persistence
+            - replicas
+            type: object
+          dataHot:
+            properties:
+              machine:
+                type: string
+              persistence:
+                properties:
+                  size:
+                    type: string
+                required:
+                - size
+                type: object
+              replicas:
+                type: integer
+            required:
+            - machine
+            - persistence
+            - replicas
+            type: object
+          dataWarm:
+            properties:
+              machine:
+                type: string
+              persistence:
+                properties:
+                  size:
+                    type: string
+                required:
+                - size
+                type: object
+              replicas:
+                type: integer
+            required:
+            - machine
+            - persistence
+            - replicas
+            type: object
+          ingest:
+            properties:
+              machine:
+                type: string
+              persistence:
+                properties:
+                  size:
+                    type: string
+                required:
+                - size
+                type: object
+              replicas:
+                type: integer
+            required:
+            - machine
+            - persistence
+            - replicas
+            type: object
+          master:
+            properties:
+              machine:
+                type: string
+              persistence:
+                properties:
+                  size:
+                    type: string
+                required:
+                - size
+                type: object
+              replicas:
+                type: integer
+            required:
+            - machine
+            - persistence
+            - replicas
+            type: object
+          ml:
+            properties:
+              machine:
+                type: string
+              persistence:
+                properties:
+                  size:
+                    type: string
+                required:
+                - size
+                type: object
+              replicas:
+                type: integer
+            required:
+            - machine
+            - persistence
+            - replicas
+            type: object
+          transform:
+            properties:
+              machine:
+                type: string
+              persistence:
+                properties:
+                  size:
+                    type: string
+                required:
+                - size
+                type: object
+              replicas:
+                type: integer
+            required:
+            - machine
+            - persistence
+            - replicas
+            type: object
+        required:
+        - data
+        - dataCold
+        - dataContent
+        - dataFrozen
+        - dataHot
+        - dataWarm
+        - ingest
+        - master
+        - ml
+        - transform
+        type: object
       version:
         type: string
     required:
     - authSecret
-    - machine
     - mode
-    - persistence
-    - replicas
     - resources
     - storageClass
     - terminationPolicy
