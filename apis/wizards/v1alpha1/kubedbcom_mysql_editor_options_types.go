@@ -41,13 +41,18 @@ type KubedbcomMysqlEditorOptionsSpec struct {
 }
 
 type KubedbcomMysqlEditorOptionsSpecSpec struct {
+	Version string `json:"version"`
 	// +optional
 	Annotations map[string]string `json:"annotations"`
 	// +optional
-	Labels            map[string]string         `json:"labels"`
-	Version           string                    `json:"version"`
-	Mode              MysqlMode                 `json:"mode"`
-	Replicas          int                       `json:"replicas"`
+	Labels map[string]string `json:"labels"`
+	Mode   MysqlMode         `json:"mode"`
+	// +optional
+	Replicas int `json:"replicas,omitempty"`
+	// +optional
+	Group MySQLGroup `json:"group,omitempty"`
+	// +optional
+	InnoDBCluster     MySQLInnoDBCluster        `json:"innoDBCluster,omitempty"`
 	TerminationPolicy TerminationPolicy         `json:"terminationPolicy"`
 	StorageClass      StorageClass              `json:"storageClass"`
 	Persistence       Persistence               `json:"persistence"`
@@ -56,7 +61,20 @@ type KubedbcomMysqlEditorOptionsSpecSpec struct {
 	AuthSecret        AuthSecret                `json:"authSecret"`
 }
 
-// +kubebuilder:validation:Enum=Standalone;Replicaset;Sharded
+type MySQLGroup struct {
+	Replicas int `json:"replicas"`
+}
+
+type MySQLInnoDBCluster struct {
+	Replicas int         `json:"replicas"`
+	Router   MySQLRouter `json:"router"`
+}
+
+type MySQLRouter struct {
+	Replicas int `json:"replicas"`
+}
+
+// +kubebuilder:validation:Enum=Standalone;GroupReplication;InnoDBCluster
 type MysqlMode string
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

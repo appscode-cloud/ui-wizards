@@ -41,13 +41,16 @@ type KubedbcomRedisEditorOptionsSpec struct {
 }
 
 type KubedbcomRedisEditorOptionsSpecSpec struct {
+	Version string `json:"version"`
 	// +optional
 	Annotations map[string]string `json:"annotations"`
 	// +optional
-	Labels            map[string]string         `json:"labels"`
-	Version           string                    `json:"version"`
-	Mode              RedisMode                 `json:"mode"`
-	Replicas          int                       `json:"replicas"`
+	Labels map[string]string `json:"labels"`
+	Mode   RedisMode         `json:"mode"`
+	// +optional
+	Replicas int `json:"replicas,omitempty"`
+	// +optional
+	Cluster           RedisCluster              `json:"cluster,omitempty"`
 	TerminationPolicy TerminationPolicy         `json:"terminationPolicy"`
 	StorageClass      StorageClass              `json:"storageClass"`
 	Persistence       Persistence               `json:"persistence"`
@@ -56,7 +59,12 @@ type KubedbcomRedisEditorOptionsSpecSpec struct {
 	AuthSecret        AuthSecret                `json:"authSecret"`
 }
 
-// +kubebuilder:validation:Enum=Standalone;Replicaset;Sharded
+type RedisCluster struct {
+	Master   int `json:"master"`
+	Replicas int `json:"replicas"`
+}
+
+// +kubebuilder:validation:Enum=Standalone;Cluster
 type RedisMode string
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

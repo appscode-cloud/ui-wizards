@@ -41,22 +41,46 @@ type KubedbcomElasticsearchEditorOptionsSpec struct {
 }
 
 type KubedbcomElasticsearchEditorOptionsSpecSpec struct {
+	Version string `json:"version"`
 	// +optional
 	Annotations map[string]string `json:"annotations"`
 	// +optional
-	Labels            map[string]string         `json:"labels"`
-	Version           string                    `json:"version"`
-	Mode              ElasticsearchMode         `json:"mode"`
-	Replicas          int                       `json:"replicas"`
-	TerminationPolicy TerminationPolicy         `json:"terminationPolicy"`
-	StorageClass      StorageClass              `json:"storageClass"`
-	Persistence       Persistence               `json:"persistence"`
-	Machine           MachineType               `json:"machine"`
-	Resources         core.ResourceRequirements `json:"resources"`
-	AuthSecret        AuthSecret                `json:"authSecret"`
+	Labels map[string]string `json:"labels"`
+	Mode   ElasticsearchMode `json:"mode"`
+	// +optional
+	Replicas *int `json:"replicas,omitempty"`
+	// +optional
+	Topology          *ElasticsearchTopology `json:"topology,omitempty"`
+	TerminationPolicy TerminationPolicy      `json:"terminationPolicy"`
+	StorageClass      StorageClass           `json:"storageClass"`
+	// +optional
+	Persistence *Persistence `json:"persistence"`
+	// +optional
+	Machine    MachineType               `json:"machine"`
+	Resources  core.ResourceRequirements `json:"resources"`
+	AuthSecret AuthSecret                `json:"authSecret"`
 }
 
-// +kubebuilder:validation:Enum=Standalone;Replicaset;Sharded
+type ElasticsearchTopology struct {
+	Master      ElasticsearchNode `json:"master"`
+	Data        ElasticsearchNode `json:"data"`
+	DataContent ElasticsearchNode `json:"dataContent"`
+	DataHot     ElasticsearchNode `json:"dataHot"`
+	DataWarm    ElasticsearchNode `json:"dataWarm"`
+	DataCold    ElasticsearchNode `json:"dataCold"`
+	DataFrozen  ElasticsearchNode `json:"dataFrozen"`
+	Ingest      ElasticsearchNode `json:"ingest"`
+	Ml          ElasticsearchNode `json:"ml"`
+	Transform   ElasticsearchNode `json:"transform"`
+}
+
+type ElasticsearchNode struct {
+	Replicas    int         `json:"replicas"`
+	Machine     string      `json:"machine"`
+	Persistence Persistence `json:"persistence"`
+}
+
+// +kubebuilder:validation:Enum=Combined;Dedicated
 type ElasticsearchMode string
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

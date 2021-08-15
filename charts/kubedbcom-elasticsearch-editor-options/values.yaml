@@ -17,7 +17,7 @@ metadata:
 
 spec:
   # List options
-  version: 3.4.17
+  version: xpack-7.13.2
 
   # Annotations to add to the database custom resource
   annotations: {}
@@ -25,29 +25,60 @@ spec:
   # Labels to add to all the template objects
   labels: {}
 
-  # Standalone, Replicaset, Sharded
-  mode: Standalone
+  # Combined, Dedicated
+  mode: Combined
   replicas: 1
-  replicaSet:
-    name: rs0
-  shardTopology:
-    shard:
+  topology:
+    master:
       replicas: 3
-      shards: 3
-      persistence:
-        size: 10Gi
-    configServer:
-      replicas: 3
+      machine: ""
       persistence:
         size: 2Gi
-    mongos:
-      replicas: 3
-
-  # "keyFile", "sendKeyFile", "sendX509", "x509"
-  clusterAuthMode: keyFile
-
-  # "disabled", "allowSSL", "preferSSL", "requireSSL"
-  sslMode: disabled
+    data:
+      replicas: 1
+      machine: ""
+      persistence:
+        size: 2Gi
+    dataContent:
+      replicas: 1
+      machine: ""
+      persistence:
+        size: 2Gi
+    dataHot:
+      replicas: 1
+      machine: ""
+      persistence:
+        size: 2Gi
+    dataWarm:
+      replicas: 1
+      machine: ""
+      persistence:
+        size: 2Gi
+    dataCold:
+      replicas: 1
+      machine: ""
+      persistence:
+        size: 2Gi
+    dataFrozen:
+      replicas: 1
+      machine: ""
+      persistence:
+        size: 2Gi
+    ingest:
+      replicas: 2
+      machine: ""
+      persistence:
+        size: 2Gi
+    ml:
+      replicas: 1
+      machine: ""
+      persistence:
+        size: 2Gi
+    transform:
+      replicas: 1
+      machine: ""
+      persistence:
+        size: 2Gi
 
   terminationPolicy: WipeOut
 
