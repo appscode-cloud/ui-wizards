@@ -88,6 +88,8 @@ The following table lists the configurable parameters of the `kubedbcom-elastics
 | spec.topology.transform.replicas           |                                                    | `1`               |
 | spec.topology.transform.machine            |                                                    | `""`              |
 | spec.topology.transform.persistence.size   |                                                    | `2Gi`             |
+| spec.enableSSL                             |                                                    | `true`            |
+| spec.disableSecurity                       |                                                    | `false`           |
 | spec.terminationPolicy                     |                                                    | `WipeOut`         |
 | spec.storageClass.name                     |                                                    | `standard`        |
 | spec.persistence.size                      |                                                    | `10Gi`            |
