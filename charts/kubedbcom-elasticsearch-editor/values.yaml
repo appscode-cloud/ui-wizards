@@ -54,7 +54,7 @@ resources:
           - name: vm.max_map_count
             value: "262144"
       monitor:
-        agent: prometheus.io/builtin
+        agent: prometheus.io
         prometheus:
           exporter:
             resources:
@@ -64,21 +64,123 @@ resources:
               requests:
                 cpu: 100m
                 memory: 128Mi
-      replicas: 3
-      storage:
-        accessModes:
-          - ReadWriteOnce
-        resources:
-          requests:
-            storage: 1Gi
-        storageClassName: linode-block-storage
       storageType: Durable
       tls:
         issuerRef:
           apiGroup: cert-manager.io
           kind: Issuer
           name: elasticsearch-ca
+      topology:
+        data:
+          replicas: 1
+          storage:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 1Gi
+            storageClassName: linode-block-storage
+        dataCold:
+          replicas: 1
+          storage:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 1Gi
+            storageClassName: linode-block-storage
+        dataContent:
+          replicas: 1
+          storage:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 1Gi
+            storageClassName: linode-block-storage
+        dataFrozen:
+          replicas: 1
+          storage:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 1Gi
+            storageClassName: linode-block-storage
+        dataHot:
+          replicas: 1
+          storage:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 1Gi
+            storageClassName: linode-block-storage
+        dataWarm:
+          replicas: 1
+          storage:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 1Gi
+            storageClassName: linode-block-storage
+        ingest:
+          replicas: 2
+          storage:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 1Gi
+            storageClassName: linode-block-storage
+        master:
+          replicas: 3
+          storage:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 1Gi
+            storageClassName: linode-block-storage
+        ml:
+          replicas: 1
+          storage:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 1Gi
+            storageClassName: linode-block-storage
+        transform:
+          replicas: 1
+          storage:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 1Gi
+            storageClassName: linode-block-storage
       version: searchguard-7.10.2
+  monitoringCoreosComServiceMonitor: # +doc-gen:break
+    apiVersion: monitoring.coreos.com/v1
+    kind: ServiceMonitor
+    metadata:
+      name: elasticsearch
+      namespace: demo
+    spec:
+      endpoints:
+        - honorLabels: true
+          interval: 30s
+          path: /metrics
+          port: metrics
+      namespaceSelector:
+        matchNames:
+          - demo
+      selector:
+        matchLabels:
+          app.kubernetes.io/instance: elasticsearch
+          app.kubernetes.io/name: elasticsearches.kubedb.com
   secret_admin_cred: # +doc-gen:break
     apiVersion: v1
     kind: Secret
