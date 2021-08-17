@@ -60,7 +60,7 @@ type KubedbcomMysqlEditorOptionsSpecSpec struct {
 }
 
 type MySQLInnoDBCluster struct {
-	Router   MySQLRouter `json:"router"`
+	Router MySQLRouter `json:"router"`
 }
 
 type MySQLRouter struct {
