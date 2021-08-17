@@ -79,8 +79,7 @@ steps:
         schema:
           $ref: schema#/properties/spec/properties/horizontalScaling/properties/node
         type: input
-      - if: ifDbTypeEqualsTo|topology|horizontalScaling
-        elements:
+      - elements:
         - computed: setValueFromDbDetails|/spec/topology/master/replicas
           label:
             text: labels.master_node
@@ -148,6 +147,7 @@ steps:
           schema:
             $ref: schema#/properties/spec/properties/horizontalScaling/properties/topology/properties/dataWarm
           type: input
+        if: ifDbTypeEqualsTo|topology|horizontalScaling
         label:
           text: labels.replicas
         schema:
@@ -295,7 +295,7 @@ steps:
           schema:
             $ref: schema#/properties/spec/properties/verticalScaling/properties/topology/properties/dataWarm
           show_label: true
-          type: reusable-element        
+          type: reusable-element
         if: ifDbTypeEqualsTo|topology|verticalScaling
         schema:
           $ref: schema#/properties/spec/properties/verticalScaling/properties/topology
