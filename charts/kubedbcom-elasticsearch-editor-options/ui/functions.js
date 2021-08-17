@@ -278,7 +278,7 @@ async function getResources(
   return resources;
 }
 
-async function getStorageClassNames({ axios, storeGet, commit }) {
+async function getStorageClassNames({ axios, storeGet, commit }, path) {
   const owner = storeGet("/user/username");
   const cluster = storeGet("/cluster/clusterDefinition/spec/name");
 
@@ -302,7 +302,7 @@ async function getStorageClassNames({ axios, storeGet, commit }) {
 
     if (isDefault) {
       commit("wizard/model$update", {
-        path: "/spec/storageClass/name",
+        path: path,
         value: name,
         force: true,
       });
@@ -316,7 +316,7 @@ async function getStorageClassNames({ axios, storeGet, commit }) {
 }
 
 async function getElasticSearchVersions(
-  { axios, storeGet },
+  { axios, storeGet, setDiscriminatorValue },
   group,
   version,
   resource
@@ -328,7 +328,7 @@ async function getElasticSearchVersions(
     filter: {
       items: {
         metadata: { name: null },
-        spec: { version: null, deprecated: null },
+        spec: { version: null, deprecated: null, distribution: null },
       },
     },
   };
@@ -354,6 +354,9 @@ async function getElasticSearchVersions(
     item.value = name;
     return true;
   });
+
+  setDiscriminatorValue("/elasticVersions", filteredElasticSearchVersions);
+
   return filteredElasticSearchVersions;
 }
 
@@ -446,6 +449,39 @@ function setMachineToCustom() {
   return "custom";
 }
 
+function disableConfigureOption({ model, discriminator, getValue, watchDependency, itemCtx, axios, storeGet }) {
+  if(itemCtx.value === "tls") {
+      return !isSecurityEnabled({model, getValue, watchDependency});
+  }
+  else if(itemCtx.value === "internal-users" || itemCtx.value === "roles-mapping") {
+    watchDependency("model#/spec/version");
+    watchDependency("discriminator#/elasticVersions");
+
+    const version = getValue(model, "/spec/version");
+    const elasticVersions = getValue(discriminator, "/elasticVersions");
+    const selectedVersion = elasticVersions?.find((item) => item.value === version) || {};
+
+    return !isSecurityEnabled({model, getValue, watchDependency}) || selectedVersion.spec?.distribution === "ElasticStack";
+  }
+  return false;
+}
+
+function isSecurityEnabled({model, getValue, watchDependency}) {
+  watchDependency("model#/spec/disableSecurity");
+  const value = getValue(model, "/spec/disableSecurity");
+  return !value;
+}
+
+function onDisableSecurityChange({ model, getValue }) {
+  const disableSecurity = getValue(model, "/resources/kubedbComElasticsearch/spec/disableSecurity");
+
+  if(disableSecurity) {
+    commit(
+      "wizard/model$delete",
+      "/spec/authSecret",
+    );
+  }
+}
 
 return {
 	showAuthPasswordField,
@@ -460,5 +496,8 @@ return {
 	getMachineListForOptions,
 	setResourceLimit,
 	setLimitsCpuOrMem,
-	setMachineToCustom
+	setMachineToCustom,
+  disableConfigureOption,
+  isSecurityEnabled,
+  onDisableSecurityChange,
 }

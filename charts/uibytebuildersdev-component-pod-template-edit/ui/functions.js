@@ -39,7 +39,7 @@ async function getImagePullSecrets({
   storeGet,
   reusableElementCtx,
 }) {
-  const namespace = getValue(reusableElementCtx, "/data/namespace");
+  const namespace = getValue(reusableElementCtx, "/dataContext/namespace");
   watchDependency("data#/namespace");
 
   let resources = await getNamespacedResourceList(axios, storeGet, {
