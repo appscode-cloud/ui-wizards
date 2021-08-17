@@ -82,9 +82,9 @@ steps:
       label:
         text: labels.disable_security_question
       onChange: onDisableSecurityChange
-      type: switch
       schema:
         $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/disableSecurity
+      type: switch
     - elements:
       - label:
           text: labels.database.admin_secret
@@ -156,9 +156,9 @@ steps:
         schema:
           $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/replicas
         type: input
-      - label:
+      - fetch: getMaxUnavailableOptions|/resources/kubedbComElasticsearch/spec
+        label:
           text: labels.max_unavailable
-        fetch: getMaxUnavailableOptions|/resources/kubedbComElasticsearch/spec
         schema:
           $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/maxUnavailable
         type: select
@@ -178,11 +178,11 @@ steps:
       if: isEqualToDatabaseMode|Combined
       type: single-step-form
     - discriminator:
+        selectedVersionDistribution:
+          default: SearchGaurd
+          type: string
         storageClasses:
           type: array
-        selectedVersionDistribution:
-          type: string
-          default: SearchGaurd
       elements:
       - computed: getStorageClassNames
         if: returnFalse
@@ -201,9 +201,9 @@ steps:
           schema:
             $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/master/properties/replicas
           type: input
-        - label:
+        - fetch: getMaxUnavailableOptions|/resources/kubedbComElasticsearch/spec/topology/master
+          label:
             text: labels.max_unavailable
-          fetch: getMaxUnavailableOptions|/resources/kubedbComElasticsearch/spec/topology/master
           schema:
             $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/master/properties/maxUnavailable
           type: select
@@ -227,9 +227,9 @@ steps:
               text: labels.storage.class
             schema:
               $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/master/properties/storage/properties/storageClassName
-            type: select  
+            type: select
           schema:
-              $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/master/properties/storage
+            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/master/properties/storage
           type: single-step-form
         - disabled: true
           label:
@@ -252,9 +252,9 @@ steps:
         hideForm: true
         label:
           text: labels.master_nodes
-        show_label: true
         schema:
           $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/master
+        show_label: true
         type: single-step-form
       - elements:
         - disabled: true
@@ -263,9 +263,9 @@ steps:
           schema:
             $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/data/properties/replicas
           type: input
-        - label:
+        - fetch: getMaxUnavailableOptions|/resources/kubedbComElasticsearch/spec/topology/data
+          label:
             text: labels.max_unavailable
-          fetch: getMaxUnavailableOptions|/resources/kubedbComElasticsearch/spec/topology/data
           schema:
             $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/data/properties/maxUnavailable
           type: select
@@ -289,9 +289,9 @@ steps:
               text: labels.storage.class
             schema:
               $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/data/properties/storage/properties/storageClassName
-            type: select  
+            type: select
           schema:
-              $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/data/properties/storage
+            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/data/properties/storage
           type: single-step-form
         - disabled: true
           label:
@@ -314,9 +314,9 @@ steps:
         hideForm: true
         label:
           text: labels.data_nodes
-        show_label: true
         schema:
           $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/data
+        show_label: true
         type: single-step-form
       - elements:
         - disabled: true
@@ -325,9 +325,9 @@ steps:
           schema:
             $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/ingest/properties/replicas
           type: input
-        - label:
+        - fetch: getMaxUnavailableOptions|/resources/kubedbComElasticsearch/spec/topology/ingest
+          label:
             text: labels.max_unavailable
-          fetch: getMaxUnavailableOptions|/resources/kubedbComElasticsearch/spec/topology/ingest
           schema:
             $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/ingest/properties/maxUnavailable
           type: select
@@ -351,9 +351,9 @@ steps:
               text: labels.storage.class
             schema:
               $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/ingest/properties/storage/properties/storageClassName
-            type: select  
+            type: select
           schema:
-              $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/ingest/properties/storage
+            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/ingest/properties/storage
           type: single-step-form
         - disabled: true
           label:
@@ -376,9 +376,9 @@ steps:
         hideForm: true
         label:
           text: labels.ingest_nodes
-        show_label: true
         schema:
           $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/ingest
+        show_label: true
         type: single-step-form
       - elements:
         - disabled: true
@@ -387,9 +387,9 @@ steps:
           schema:
             $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/ml/properties/replicas
           type: input
-        - label:
+        - fetch: getMaxUnavailableOptions|/resources/kubedbComElasticsearch/spec/topology/ml
+          label:
             text: labels.max_unavailable
-          fetch: getMaxUnavailableOptions|/resources/kubedbComElasticsearch/spec/topology/ml
           schema:
             $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/ml/properties/maxUnavailable
           type: select
@@ -413,9 +413,9 @@ steps:
               text: labels.storage.class
             schema:
               $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/ml/properties/storage/properties/storageClassName
-            type: select  
+            type: select
           schema:
-              $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/ml/properties/storage
+            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/ml/properties/storage
           type: single-step-form
         - disabled: true
           label:
@@ -439,9 +439,9 @@ steps:
         if: isDiscriminatorEqualTo|/selectedVersionDistribution|ElasticStack
         label:
           text: labels.ml_nodes
-        show_label: true
         schema:
           $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/ml
+        show_label: true
         type: single-step-form
       - elements:
         - disabled: true
@@ -450,9 +450,9 @@ steps:
           schema:
             $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/transform/properties/replicas
           type: input
-        - label:
+        - fetch: getMaxUnavailableOptions|/resources/kubedbComElasticsearch/spec/topology/transform
+          label:
             text: labels.max_unavailable
-          fetch: getMaxUnavailableOptions|/resources/kubedbComElasticsearch/spec/topology/transform
           schema:
             $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/transform/properties/maxUnavailable
           type: select
@@ -476,9 +476,9 @@ steps:
               text: labels.storage.class
             schema:
               $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/transform/properties/storage/properties/storageClassName
-            type: select  
+            type: select
           schema:
-              $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/transform/properties/storage
+            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/transform/properties/storage
           type: single-step-form
         - disabled: true
           label:
@@ -502,9 +502,9 @@ steps:
         if: isDiscriminatorEqualTo|/selectedVersionDistribution|ElasticStack
         label:
           text: labels.transform_nodes
-        show_label: true
         schema:
           $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/transform
+        show_label: true
         type: single-step-form
       - elements:
         - disabled: true
@@ -513,9 +513,9 @@ steps:
           schema:
             $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataCold/properties/replicas
           type: input
-        - label:
+        - fetch: getMaxUnavailableOptions|/resources/kubedbComElasticsearch/spec/topology/dataCold
+          label:
             text: labels.max_unavailable
-          fetch: getMaxUnavailableOptions|/resources/kubedbComElasticsearch/spec/topology/dataCold
           schema:
             $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataCold/properties/maxUnavailable
           type: select
@@ -539,9 +539,9 @@ steps:
               text: labels.storage.class
             schema:
               $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataCold/properties/storage/properties/storageClassName
-            type: select  
+            type: select
           schema:
-              $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataCold/properties/storage
+            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataCold/properties/storage
           type: single-step-form
         - disabled: true
           label:
@@ -565,9 +565,9 @@ steps:
         if: isDiscriminatorEqualTo|/selectedVersionDistribution|ElasticStack
         label:
           text: labels.data_cold_nodes
-        show_label: true
         schema:
           $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataCold
+        show_label: true
         type: single-step-form
       - elements:
         - disabled: true
@@ -576,9 +576,9 @@ steps:
           schema:
             $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataContent/properties/replicas
           type: input
-        - label:
+        - fetch: getMaxUnavailableOptions|/resources/kubedbComElasticsearch/spec/topology/dataContent
+          label:
             text: labels.max_unavailable
-          fetch: getMaxUnavailableOptions|/resources/kubedbComElasticsearch/spec/topology/dataContent
           schema:
             $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataContent/properties/maxUnavailable
           type: select
@@ -602,9 +602,9 @@ steps:
               text: labels.storage.class
             schema:
               $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataContent/properties/storage/properties/storageClassName
-            type: select  
+            type: select
           schema:
-              $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataContent/properties/storage
+            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataContent/properties/storage
           type: single-step-form
         - disabled: true
           label:
@@ -628,9 +628,9 @@ steps:
         if: isDiscriminatorEqualTo|/selectedVersionDistribution|ElasticStack
         label:
           text: labels.data_content_nodes
-        show_label: true
         schema:
           $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataContent
+        show_label: true
         type: single-step-form
       - elements:
         - disabled: true
@@ -639,9 +639,9 @@ steps:
           schema:
             $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataFrozen/properties/replicas
           type: input
-        - label:
+        - fetch: getMaxUnavailableOptions|/resources/kubedbComElasticsearch/spec/topology/dataFrozen
+          label:
             text: labels.max_unavailable
-          fetch: getMaxUnavailableOptions|/resources/kubedbComElasticsearch/spec/topology/dataFrozen
           schema:
             $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataFrozen/properties/maxUnavailable
           type: select
@@ -665,9 +665,9 @@ steps:
               text: labels.storage.class
             schema:
               $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataFrozen/properties/storage/properties/storageClassName
-            type: select  
+            type: select
           schema:
-              $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataFrozen/properties/storage
+            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataFrozen/properties/storage
           type: single-step-form
         - disabled: true
           label:
@@ -691,9 +691,9 @@ steps:
         if: isDiscriminatorEqualTo|/selectedVersionDistribution|ElasticStack
         label:
           text: labels.data_frozen_nodes
-        show_label: true
         schema:
           $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataFrozen
+        show_label: true
         type: single-step-form
       - elements:
         - disabled: true
@@ -702,9 +702,9 @@ steps:
           schema:
             $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataHot/properties/replicas
           type: input
-        - label:
+        - fetch: getMaxUnavailableOptions|/resources/kubedbComElasticsearch/spec/topology/dataHot
+          label:
             text: labels.max_unavailable
-          fetch: getMaxUnavailableOptions|/resources/kubedbComElasticsearch/spec/topology/dataHot
           schema:
             $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataHot/properties/maxUnavailable
           type: select
@@ -728,9 +728,9 @@ steps:
               text: labels.storage.class
             schema:
               $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataHot/properties/storage/properties/storageClassName
-            type: select  
+            type: select
           schema:
-              $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataHot/properties/storage
+            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataHot/properties/storage
           type: single-step-form
         - disabled: true
           label:
@@ -754,9 +754,9 @@ steps:
         if: isDistributionNotSearchGuard
         label:
           text: labels.data_hot_nodes
-        show_label: true
         schema:
           $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataHot
+        show_label: true
         type: single-step-form
       - elements:
         - disabled: true
@@ -765,9 +765,9 @@ steps:
           schema:
             $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataWarm/properties/replicas
           type: input
-        - label:
+        - fetch: getMaxUnavailableOptions|/resources/kubedbComElasticsearch/spec/topology/dataWarm
+          label:
             text: labels.max_unavailable
-          fetch: getMaxUnavailableOptions|/resources/kubedbComElasticsearch/spec/topology/dataWarm
           schema:
             $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataWarm/properties/maxUnavailable
           type: select
@@ -791,9 +791,9 @@ steps:
               text: labels.storage.class
             schema:
               $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataWarm/properties/storage/properties/storageClassName
-            type: select  
+            type: select
           schema:
-              $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataWarm/properties/storage
+            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataWarm/properties/storage
           type: single-step-form
         - disabled: true
           label:
@@ -817,9 +817,9 @@ steps:
         if: isDistributionNotSearchGuard
         label:
           text: labels.data_warm_nodes
-        show_label: true
         schema:
           $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataWarm
+        show_label: true
         type: single-step-form
       if: isEqualToDatabaseMode|Dedicated
       type: single-step-form
@@ -840,9 +840,9 @@ steps:
             type: array
         elements:
         - disabled: disableUsername
-          required: true
           label:
             text: labels.username
+          required: true
           schema:
             $ref: discriminator#/properties/users/items/properties/username
           type: input
@@ -920,10 +920,10 @@ steps:
           type: select
         type: single-step-form
       individualItemDisabilityCheck: disableUserEdit
-      newItemValidator: validateNewUser
-      onChange: onInternalUsersChange
       label:
         text: labels.internal_users
+      newItemValidator: validateNewUser
+      onChange: onInternalUsersChange
       schema:
         $ref: discriminator#/properties/internalUsers
       tableContents:
@@ -1002,9 +1002,9 @@ steps:
             emitAs: rolesMapping
             type: array
         elements:
-        - required: true
-          label:
+        - label:
             text: labels.role_name
+          required: true
           schema:
             $ref: discriminator#/properties/roles/items/properties/roleName
           type: input
@@ -1059,9 +1059,9 @@ steps:
             $ref: discriminator#/properties/roles/items/properties/users
           type: multiselect
         type: single-step-form
-      onChange: onRolesMappingChange
       label:
         text: labels.roles_mapping
+      onChange: onRolesMappingChange
       schema:
         $ref: discriminator#/properties/rolesMapping
       tableContents:
@@ -1143,7 +1143,6 @@ steps:
           $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/kernelSettings/properties/privileged
         type: switch
       - addFormLabel: labels.sysctl
-        if: isDiscriminatorEqualTo|/customizeKernelSettings|yes
         element:
           elements:
           - label:
@@ -1157,6 +1156,7 @@ steps:
               $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/kernelSettings/properties/sysctls/items/properties/value
             type: input
           type: single-step-form
+        if: isDiscriminatorEqualTo|/customizeKernelSettings|yes
         label:
           text: labels.sysctls
         schema:
@@ -2274,9 +2274,9 @@ steps:
               type: editor
             type: single-step-form
           if: isEqualToDiscriminatorPath|create-new-config|/configurationSource
-          onChange: onConfigFilesChange
           label:
             text: labels.config_files
+          onChange: onConfigFilesChange
           schema:
             $ref: discriminator#/properties/configFiles
           tableContents:
