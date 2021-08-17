@@ -61,12 +61,18 @@ steps:
       - description: options.database.mode.Combined.description
         text: options.database.mode.Combined.label
         value: Combined
-      - description: options.database.mode.Topology.description
-        text: options.database.mode.Topology.label
-        value: Topology
+      - description: options.database.mode.Dedicated.description
+        text: options.database.mode.Dedicated.label
+        value: Dedicated
       schema:
         $ref: schema#/properties/spec/properties/mode
       type: radio
+    - fetch: getStorageClassNames|/spec/storageClass/name
+      label:
+        text: labels.storage.class
+      schema:
+        $ref: schema#/properties/spec/properties/storageClass/properties/name
+      type: select
     - elements:
       - label:
           text: labels.replicaset.number
@@ -78,12 +84,6 @@ steps:
         schema:
           $ref: schema#/properties/spec/properties/persistence/properties/size
         type: input
-      - fetch: getStorageClassNames|/spec/storageClass/name
-        label:
-          text: labels.storage.class
-        schema:
-          $ref: schema#/properties/spec/properties/storageClass/properties/name
-        type: select
       if: isEqualToModelPathValue|Combined|/spec/mode
       type: single-step-form
     - elements:
@@ -100,12 +100,6 @@ steps:
         schema:
           $ref: schema#/properties/spec/properties/topology/properties/master/properties/persistence/properties/size
         type: input
-      - fetch: getStorageClassNames|/spec/topology/master/storageClass/name
-        label:
-          text: labels.storage.class
-        schema:
-          $ref: schema#/properties/spec/properties/topology/properties/master/properties/storageClass/properties/name
-        type: select
       - label:
           text: labels.data_nodes
         type: label-element
@@ -119,12 +113,6 @@ steps:
         schema:
           $ref: schema#/properties/spec/properties/topology/properties/data/properties/persistence/properties/size
         type: input
-      - fetch: getStorageClassNames|/spec/topology/data/storageClass/name
-        label:
-          text: labels.storage.class
-        schema:
-          $ref: schema#/properties/spec/properties/topology/properties/data/properties/storageClass/properties/name
-        type: select
       - label:
           text: labels.ingest_nodes
         type: label-element
@@ -138,13 +126,7 @@ steps:
         schema:
           $ref: schema#/properties/spec/properties/topology/properties/ingest/properties/persistence/properties/size
         type: input
-      - fetch: getStorageClassNames|/spec/topology/ingest/storageClass/name
-        label:
-          text: labels.storage.class
-        schema:
-          $ref: schema#/properties/spec/properties/topology/properties/ingest/properties/storageClass/properties/name
-        type: select
-      if: isEqualToModelPathValue|Topology|/spec/mode
+      if: isEqualToModelPathValue|Dedicated|/spec/mode
       type: single-step-form
     - hasDescription: true
       label:

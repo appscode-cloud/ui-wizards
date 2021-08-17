@@ -222,15 +222,15 @@ function returnStringYes() {
   return "yes";
 }
 
-function isTopologyModeSelected({model, getValue, watchDependency}) {
+function isDedicatedModeSelected({model, getValue, watchDependency}) {
   watchDependency("model#/resources/kubedbComElasticsearch/spec");
-  isTopologySelected = getValue(model, "/resources/kubedbComElasticsearch/spec/topology");
+  isDedicatedSelected = getValue(model, "/resources/kubedbComElasticsearch/spec/topology");
 
-  return !!isTopologySelected;
+  return !!isDedicatedSelected;
 }
 
 function isCombinedModeSelected({model, getValue, watchDependency}) {
-  return !isTopologySelected({model, getValue, watchDependency});
+  return !isDedicatedSelected({model, getValue, watchDependency});
 }
 
 function isDiscriminatorEqualTo({discriminator, getValue, watchDependency}, discriminatorPath, value) {
@@ -240,11 +240,17 @@ function isDiscriminatorEqualTo({discriminator, getValue, watchDependency}, disc
   return value === pathValue;
 }
 
-function isDiscriminatorNotEqualTo({discriminator, getValue, watchDependency}, discriminatorPath, value) {
-  watchDependency("discriminator#" + discriminatorPath);
-  const pathValue = getValue(discriminator, discriminatorPath);
+function isDistributionNotSearchGuard({discriminator, getValue, watchDependency, commit}) {
+  watchDependency("discriminator#/selectedVersionDistribution");
+  const pathValue = getValue(discriminator, "/selectedVersionDistribution");
 
-  return value !== pathValue;
+  const ret = pathValue !== "SearchGuard" && pathValue !== "";
+
+  if(ret) {
+    commit("wizard/model$delete", "/resources/kubedbComElasticsearch/spec/topology/dataWarm");
+    commit("wizard/model$delete", "/resources/kubedbComElasticsearch/spec/topology/dataHot");
+  }
+  return ret;
 }
 
 // required for outer form section. where discriminator can not be saved
@@ -458,8 +464,8 @@ function setDatabaseMode({ model, getValue, watchDependency }) {
   const modelPathValue = getValue(model, "/resources/kubedbComElasticsearch/spec/");
 
   watchDependency("model#/resources/kubedbComElasticsearch/spec");
-  if (isTopologyModeSelected({model, getValue, watchDependency})) {
-    return "Topology";
+  if (isDedicatedModeSelected({model, getValue, watchDependency})) {
+    return "Dedicated";
   } else {
     return "Combined";
   }
@@ -514,7 +520,7 @@ function deleteDatabaseModePath({
   commit,
 }) {
   const mode = getValue(discriminator, "/activeDatabaseMode");
-  if (mode === "Topology") {
+  if (mode === "Dedicated") {
     commit("wizard/model$delete", "/resources/kubedbComElasticsearch/spec/replicas");
     commit("wizard/model$delete", "/resources/kubedbComElasticsearch/spec/storage");
     commit("wizard/model$delete", "/resources/kubedbComElasticsearch/spec/maxUnavailable");
@@ -2267,6 +2273,12 @@ function onSetCustomConfigChange({ discriminator, getValue, commit }) {
   }
 }
 
+function initSetCustomConfig({model, getValue}) {
+  const customConfig = getValue(model, "/resources/kubedbComElasticsearch/spec/configSecret");
+
+  return customConfig ? "yes" : "no";
+}
+
 return {
 	fetchJsons,
 	disableLableChecker,
@@ -2280,10 +2292,10 @@ return {
   unNamespacedResourceNames,
   returnTrue,
   returnStringYes,
-  isTopologyModeSelected,
+  isDedicatedModeSelected,
   isCombinedModeSelected,
   isDiscriminatorEqualTo,
-  isDiscriminatorNotEqualTo,
+  isDistributionNotSearchGuard,
   showInternalUsersAndRolesMapping,
   getElasticSearchVersions,
   isSecurityEnabled,
@@ -2384,4 +2396,5 @@ return {
   setConfigFiles,
   onConfigFilesChange,
   onSetCustomConfigChange,
+  initSetCustomConfig
 }

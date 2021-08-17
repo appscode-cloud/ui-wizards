@@ -83,7 +83,7 @@ steps:
       type: switch
     - elements:
       - label:
-          text: labels.database.secret
+          text: labels.database.admin_secret
         type: label-element
       - computed: getCreateAuthSecret
         onChange: onCreateAuthSecretChange
@@ -140,9 +140,9 @@ steps:
       - description: options.database.mode.Combined.description
         text: options.database.mode.Combined.label
         value: Combined
-      - description: options.database.mode.Topology.description
-        text: options.database.mode.Topology.label
-        value: Topology
+      - description: options.database.mode.Dedicated.description
+        text: options.database.mode.Dedicated.label
+        value: Dedicated
       schema:
         $ref: discriminator#/activeDatabaseMode
       type: radio
@@ -709,7 +709,7 @@ steps:
           show_label: true
           type: reusable-element
         hideForm: true
-        if: isDiscriminatorNotEqualTo|/selectedVersionDistribution|SearchGuard
+        if: isDistributionNotSearchGuard
         label:
           text: labels.data_hot_nodes
         schema:
@@ -768,14 +768,14 @@ steps:
           show_label: true
           type: reusable-element
         hideForm: true
-        if: isDiscriminatorNotEqualTo|/selectedVersionDistribution|SearchGuard
+        if: isDistributionNotSearchGuard
         label:
           text: labels.data_warm_nodes
         schema:
           $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataWarm
         show_label: true
         type: single-step-form
-      if: isEqualToDatabaseMode|Topology
+      if: isEqualToDatabaseMode|Dedicated
       type: single-step-form
     type: single-step-form
   id: topology
@@ -2094,11 +2094,6 @@ steps:
 - form:
     elements:
     - discriminator:
-        configFiles:
-          type: string
-        configurationSource:
-          default: use-existing-config
-          type: string
         setCustomConfig:
           type: string
       elements:
@@ -2114,7 +2109,13 @@ steps:
         schema:
           $ref: discriminator#/properties/setCustomConfig
         type: radio
-      - elements:
+      - discriminator:
+          configFiles:
+            type: string
+          configurationSource:
+            default: use-existing-config
+            type: string
+        elements:
         - computed: setConfigurationSource
           label:
             text: labels.custom_config_type

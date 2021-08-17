@@ -37,6 +37,7 @@ steps:
     - computed: getRequestTypeFromRoute
       disabled: isDbDetailsLoading
       hasDescription: true
+      individualItemDisabilityCheck: disableOpsRequest
       label:
         text: labels.ops_request_type
       onChange: onRequestTypeChange
@@ -441,6 +442,39 @@ steps:
         schema:
           $ref: schema#/properties/spec/properties/tls/properties/rotateCertificates
         type: switch
+      - elements:
+        - computed: initIssuerRefApiGroup
+          disabled: true
+          label:
+            text: labels.api_group
+          schema:
+            $ref: schema#/properties/spec/properties/tls/properties/issuerRef/properties/apiGroup
+          type: input
+        - computed: setValueFromDbDetails|/spec/tls/issuerRef/kind
+          label:
+            text: labels.kind
+          options:
+          - text: Issuer
+            value: Issuer
+          - text: ClusterIssuer
+            value: ClusterIssuer
+          required: isIssuerRefRequired
+          schema:
+            $ref: schema#/properties/spec/properties/tls/properties/issuerRef/properties/kind
+          type: select
+        - allowUserDefinedOption: true
+          computed: setValueFromDbDetails|/spec/tls/issuerRef/name
+          fetch: getIssuerRefsName
+          label:
+            text: labels.name
+          required: isIssuerRefRequired
+          schema:
+            $ref: schema#/properties/spec/properties/tls/properties/issuerRef/properties/name
+          type: select
+        if: showIssuerRefAndCertificates
+        schema:
+          $ref: schema#/properties/spec/properties/tls/properties/issuerRef
+        type: single-step-form
       - alias: reusable_certificates
         chart:
           name: uibytebuildersdev-component-certificates

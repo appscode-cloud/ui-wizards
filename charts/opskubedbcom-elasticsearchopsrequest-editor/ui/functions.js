@@ -515,6 +515,8 @@ function initIssuerRefApiGroup({ getValue, model, watchDependency }) {
   watchDependency("model#/spec/tls/issuerRef/kind");
 
   if (kind) {
+    const apiGroup = getValue(model, "/spec/tls/issuerRef/apiGroup");
+    if(apiGroup) return apiGroup;
     return "cert-manager.io";
   } else return undefined;
 }
@@ -640,14 +642,25 @@ function setValueFromDbDetails({discriminator, getValue, watchDependency, commit
 
     // direct model update required for reusable element.
     // computed property is not applicable for reusable element
-    commit("wizard/model$update", {
-      path: commitPath,
-      value: retValue,
-      force: true
-    });
+    if(retValue) {
+      commit("wizard/model$update", {
+        path: commitPath,
+        value: retValue,
+        force: true
+      });
+    }
   }
 
   return retValue || undefined;
+}
+
+function disableOpsRequest({itemCtx, discriminator, getValue, watchDependency}) {
+  if (itemCtx.value === "ReconfigureTls") {
+    const dbDetails = getValue(discriminator, "/elasticsearchDetails");
+    const { issuerRef } = dbDetails?.spec?.tls || {};
+    return !issuerRef;
+  }
+  return false;
 }
 
 return {
@@ -686,4 +699,5 @@ return {
   getRequestTypeFromRoute,
   isDbDetailsLoading,
   setValueFromDbDetails,
+  disableOpsRequest,
 }
