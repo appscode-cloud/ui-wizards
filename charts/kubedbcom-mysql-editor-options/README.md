@@ -57,9 +57,7 @@ The following table lists the configurable parameters of the `kubedbcom-mysql-ed
 | spec.annotations                   | Annotations to add to the database custom resource | `{}`         |
 | spec.labels                        | Labels to add to all the template objects          | `{}`         |
 | spec.mode                          | Standalone, GroupReplication, InnoDBCluster        | `Standalone` |
-| spec.replicas                      |                                                    | `1`          |
-| spec.group.replicas                |                                                    | `3`          |
-| spec.innoDBCluster.replicas        |                                                    | `3`          |
+| spec.replicas                      |                                                    | `3`          |
 | spec.innoDBCluster.router.replicas |                                                    | `3`          |
 | spec.terminationPolicy             |                                                    | `WipeOut`    |
 | spec.storageClass.name             |                                                    | `standard`   |

@@ -50,8 +50,6 @@ type KubedbcomMysqlEditorOptionsSpecSpec struct {
 	// +optional
 	Replicas int `json:"replicas,omitempty"`
 	// +optional
-	Group MySQLGroup `json:"group,omitempty"`
-	// +optional
 	InnoDBCluster     MySQLInnoDBCluster        `json:"innoDBCluster,omitempty"`
 	TerminationPolicy TerminationPolicy         `json:"terminationPolicy"`
 	StorageClass      StorageClass              `json:"storageClass"`
@@ -61,12 +59,7 @@ type KubedbcomMysqlEditorOptionsSpecSpec struct {
 	AuthSecret        AuthSecret                `json:"authSecret"`
 }
 
-type MySQLGroup struct {
-	Replicas int `json:"replicas"`
-}
-
 type MySQLInnoDBCluster struct {
-	Replicas int         `json:"replicas"`
 	Router   MySQLRouter `json:"router"`
 }
 
