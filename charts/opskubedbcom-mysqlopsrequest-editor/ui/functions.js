@@ -206,7 +206,7 @@ function getDbTls({
   const dbDetails = getValue(discriminator, "/dbDetails");
 
   const { spec } = dbDetails || {};
-  return spec.tls || undefined;
+  return spec?.tls || undefined;
 }
 
 function getDbType({
@@ -496,6 +496,8 @@ function initIssuerRefApiGroup({ getValue, model, watchDependency }) {
   watchDependency("model#/spec/tls/issuerRef/kind");
 
   if (kind) {
+    const apiGroup = getValue(model, "/spec/tls/issuerRef/apiGroup");
+    if(apiGroup) return apiGroup;
     return "cert-manager.io";
   } else return undefined;
 }
@@ -523,20 +525,24 @@ async function getIssuerRefsName({
     url = `/clusters/${owner}/${cluster}/proxy/${apiGroup}/v1/clusterissuers`;
   }
 
-  try {
-    const resp = await axios.get(url);
+  if(url && apiGroup && namespace) {
+    try {
+      const resp = await axios.get(url);
 
-    const resources = (resp && resp.data && resp.data.items) || [];
+      const resources = (resp && resp.data && resp.data.items) || [];
 
-    resources.map((item) => {
-      const name = (item.metadata && item.metadata.name) || "";
-      item.text = name;
-      item.value = name;
-      return true;
-    });
-    return resources;
-  } catch (e) {
+      resources.map((item) => {
+        const name = (item.metadata && item.metadata.name) || "";
+        item.text = name;
+        item.value = name;
+        return true;
+      });
+      return resources;
+    } catch (e) {
     console.log(e);
+    return [];
+    }
+  } else {
     return [];
   }
 }
@@ -611,12 +617,14 @@ function isDbDetailsLoading({discriminator, getValue, watchDependency}) {
 
 function setValueFromDbDetails({discriminator, getValue, watchDependency, commit}, path, commitPath) {
   watchDependency("discriminator#/dbDetails");
+
   const retValue = getValue(discriminator, `/dbDetails${path}`);
 
   if(commitPath) {
     const tlsOperation = getValue(discriminator, "/tlsOperation");
     
-    if(commitPath === "/spec/tls/certificates" && tlsOperation !== "update")
+    // computed called when tls fields is not visible
+    if(commitPath.includes("/spec/tls") && tlsOperation !== "update")
       return undefined; 
 
     // direct model update required for reusable element.
@@ -629,6 +637,22 @@ function setValueFromDbDetails({discriminator, getValue, watchDependency, commit
   }
 
   return retValue || undefined;
+}
+
+function setConfigFiles({model, getValue, watchDependency}) {
+  watchDependency("model#/resources/secret_config/stringData");
+  const configFiles = getValue(model, "/resources/secret_config/stringData");
+
+  const files = [];
+
+  for (const item in configFiles) {
+      const obj = {};
+      obj.key = item;
+      obj.value = configFiles[item];
+      files.push(obj);
+  }
+
+  return files;
 }
 
 return {

@@ -59,9 +59,12 @@ steps:
       - description: options.database.mode.Standalone.description
         text: options.database.mode.Standalone.label
         value: Standalone
-      - description: options.database.mode.Cluster.description
-        text: options.database.mode.Cluster.label
-        value: Cluster
+      - description: options.database.mode.GroupReplication.description
+        text: options.database.mode.GroupReplication.label
+        value: GroupReplication
+      - description: options.database.mode.InnoDBCluster.description
+        text: options.database.mode.InnoDBCluster.label
+        value: InnoDBCluster
       schema:
         $ref: schema#/properties/spec/properties/mode
       type: radio
@@ -71,7 +74,20 @@ steps:
         schema:
           $ref: schema#/properties/spec/properties/replicas
         type: input
-      if: isEqualToModelPathValue|Cluster|/spec/mode
+      if: isEqualToModelPathValue|GroupReplication|/spec/mode
+      type: single-step-form
+    - elements:
+      - label:
+          text: labels.replicaset.number
+        schema:
+          $ref: schema#/properties/spec/properties/replicas
+        type: input
+      - label:
+          text: labels.replicaset.router_number
+        schema:
+          $ref: schema#/properties/spec/properties/innoDBCluster/properties/router/properties/replicas
+        type: input
+      if: isEqualToModelPathValue|InnoDBCluster|/spec/mode
       type: single-step-form
     - label:
         text: labels.storage.size

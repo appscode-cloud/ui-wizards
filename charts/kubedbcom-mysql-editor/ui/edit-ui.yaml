@@ -90,12 +90,12 @@ steps:
         default: Standalone
         type: string
     elements:
-    - if: isEqualToDatabaseMode|Cluster
+    - if: isNotEqualToDatabaseMode|Standalone
       label:
         text: labels.to_update_disabled_section
       type: label-element
     - customClass: mb-20
-      if: isEqualToDatabaseMode|Cluster
+      if: isNotEqualToDatabaseMode|Standalone
       label:
         text: labels.create_opsrequest
       type: anchor
@@ -130,18 +130,28 @@ steps:
       - description: options.database.mode.Standalone.description
         text: options.database.mode.Standalone.label
         value: Standalone
-      - description: options.database.mode.Cluster.description
-        text: options.database.mode.Cluster.label
-        value: Cluster
+      - description: options.database.mode.GroupReplication.description
+        text: options.database.mode.GroupReplication.label
+        value: GroupReplication
+      - description: options.database.mode.InnoDBCluster.description
+        text: options.database.mode.InnoDBCluster.label
+        value: InnoDBCluster
       schema:
         $ref: discriminator#/activeDatabaseMode
       type: radio
     - disabled: true
-      if: isEqualToDatabaseMode|Cluster
+      if: isNotEqualToDatabaseMode|Standalone
       label:
         text: labels.replicaset.number
       schema:
         $ref: schema#/properties/resources/properties/kubedbComMySQL/properties/spec/properties/replicas
+      type: input
+    - disabled: true
+      if: isEqualToDatabaseMode|InnoDBCluster
+      label:
+        text: labels.replicaset.router_number
+      schema:
+        $ref: schema#/properties/resources/properties/kubedbComMySQL/properties/spec/properties/topology/properties/innoDBCluster/properties/router/properties/replicas
       type: input
     - disabled: true
       elements:
@@ -160,16 +170,6 @@ steps:
     - disabled: true
       elements:
       - label:
-          text: labels.mode
-        options:
-        - text: options.topologyMode.GroupReplication
-          value: GroupReplication
-        - text: options.topologyMode.InnoDBCluster
-          value: InnoDBCluster
-        schema:
-          $ref: schema#/properties/resources/properties/kubedbComMySQL/properties/spec/properties/topology/properties/mode
-        type: radio
-      - label:
           text: labels.group_name
         schema:
           $ref: schema#/properties/resources/properties/kubedbComMySQL/properties/spec/properties/topology/properties/group/properties/name
@@ -184,7 +184,7 @@ steps:
         schema:
           $ref: schema#/properties/resources/properties/kubedbComMySQL/properties/spec/properties/topology/properties/group/properties/mode
         type: radio
-      if: isEqualToDatabaseMode|Cluster
+      if: isEqualToDatabaseMode|GroupReplication
       label:
         text: labels.topology
       show_label: true
@@ -711,7 +711,7 @@ steps:
             $ref: model#/metadata/resource/name
           version:
             $ref: model#/metadata/resource/version
-        path: ${domain}/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/mysqlopsrequest/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=VerticalScaling
+        path: ${domain}/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/mysqlopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=VerticalScaling
     - computed: isValueExistInModel|/resources/kubedbComMySQL/spec/monitor
       label:
         text: labels.enable_monitoring
@@ -954,7 +954,7 @@ steps:
     - elements:
       - alias: pod_template_standalone
         chart:
-          name: uibytebuildersdev-component-pod-template-edit
+          name: uibytebuildersdev-component-pod-template
           version: v0.2.0-alpha.0
         dataContext:
           namespace:
@@ -987,8 +987,6 @@ steps:
     elements:
     - elements:
       - discriminator:
-          configuration:
-            type: string
           configurationSource:
             default: use-existing-config
             type: string

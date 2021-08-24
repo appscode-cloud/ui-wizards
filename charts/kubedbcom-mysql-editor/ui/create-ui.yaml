@@ -89,7 +89,7 @@ steps:
       type: radio
     - allowUserDefinedOption: true
       fetch: getSecrets
-      if: isEqualToDatabaseSecretStatus|has-existing-secret
+      if: showExistingSecretSection
       label:
         text: labels.secret
       schema:
@@ -113,7 +113,8 @@ steps:
       schema:
         $ref: schema#/properties/resources/properties/secret_auth
       type: single-step-form
-    - options:
+    - computed: setAddressType
+      options:
       - text: DNS
         value: DNS
       - text: IP
@@ -145,17 +146,26 @@ steps:
       - description: options.database.mode.Standalone.description
         text: options.database.mode.Standalone.label
         value: Standalone
-      - description: options.database.mode.Cluster.description
-        text: options.database.mode.Cluster.label
-        value: Cluster
+      - description: options.database.mode.GroupReplication.description
+        text: options.database.mode.GroupReplication.label
+        value: GroupReplication
+      - description: options.database.mode.InnoDBCluster.description
+        text: options.database.mode.InnoDBCluster.label
+        value: InnoDBCluster
       schema:
         $ref: discriminator#/activeDatabaseMode
       type: radio
-    - if: isEqualToDatabaseMode|Cluster
+    - if: isNotEqualToDatabaseMode|Standalone
       label:
         text: labels.replicaset.number
       schema:
         $ref: schema#/properties/resources/properties/kubedbComMySQL/properties/spec/properties/replicas
+      type: input
+    - if: isEqualToDatabaseMode|InnoDBCluster
+      label:
+        text: labels.replicaset.router_number
+      schema:
+        $ref: schema#/properties/resources/properties/kubedbComMySQL/properties/spec/properties/topology/properties/innoDBCluster/properties/router/properties/replicas
       type: input
     - elements:
       - fetch: getStorageClassNames
@@ -172,16 +182,6 @@ steps:
       type: single-step-form
     - elements:
       - label:
-          text: labels.mode
-        options:
-        - text: options.topologyMode.GroupReplication
-          value: GroupReplication
-        - text: options.topologyMode.InnoDBCluster
-          value: InnoDBCluster
-        schema:
-          $ref: schema#/properties/resources/properties/kubedbComMySQL/properties/spec/properties/topology/properties/mode
-        type: radio
-      - label:
           text: labels.group_name
         schema:
           $ref: schema#/properties/resources/properties/kubedbComMySQL/properties/spec/properties/topology/properties/group/properties/name
@@ -196,7 +196,7 @@ steps:
         schema:
           $ref: schema#/properties/resources/properties/kubedbComMySQL/properties/spec/properties/topology/properties/group/properties/mode
         type: radio
-      if: isEqualToDatabaseMode|Cluster
+      if: isEqualToDatabaseMode|GroupReplication
       label:
         text: labels.topology
       show_label: true
@@ -947,7 +947,7 @@ steps:
           $ref: discriminator#/properties/setCustomConfig
         type: radio
       - discriminator:
-          configuration:
+          configFiles:
             type: string
           configurationSource:
             default: use-existing-config
@@ -973,14 +973,46 @@ steps:
           schema:
             $ref: schema#/properties/resources/properties/kubedbComMySQL/properties/spec/properties/configSecret/properties/name
           type: select
-        - computed: setConfiguration
+        - addFormLabel: labels.config_file
+          computed: setConfigFiles
+          element:
+            discriminator:
+              files:
+                emitAs: configFiles
+                type: array
+            elements:
+            - label:
+                text: labels.filename
+              required: true
+              schema:
+                $ref: discriminator#/properties/files/items/properties/key
+              type: input
+            - label:
+                text: labels.labels.value
+              required: true
+              schema:
+                $ref: discriminator#/properties/files/items/properties/value
+              type: editor
+            type: single-step-form
           if: isEqualToDiscriminatorPath|create-new-config|/configurationSource
           label:
-            text: labels.user_conf
-          onChange: onConfigurationChange
+            text: labels.config_files
+          onChange: onConfigFilesChange
           schema:
-            $ref: discriminator#/properties/configuration
-          type: editor
+            $ref: discriminator#/properties/configFiles
+          tableContents:
+          - inTableColumn: true
+            label:
+              text: labels.filename
+            path: key
+            type: value
+            typeOfValue: string
+          - label:
+              text: labels.labels.value
+            path: value
+            type: value
+            typeOfValue: code
+          type: single-step-form-array
         if: isEqualToDiscriminatorPath|yes|/setCustomConfig
         type: single-step-form
       type: single-step-form

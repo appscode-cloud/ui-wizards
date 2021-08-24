@@ -213,6 +213,15 @@ function returnTrue() {
 function returnStringYes() {
   return "yes";
 }
+function setAddressType({model, getValue}) {
+  const value = getValue(model, "/resources/kubedbComMySQL/spec/useAddressType");
+
+  if(!value) {
+    return "DNS";
+  }
+
+  return value;
+}
 
 // ************************* Basic Info **********************************************
 async function getMySqlVersions(
@@ -262,80 +271,13 @@ async function getMySqlVersions(
   }
 }
 
-// ************************* Auth Secret Field ******************************************
-function showAuthPasswordField({ model, getValue, watchDependency }) {
-  watchDependency("model#/resources");
-  const modelPathValue = getValue(model, "/resources");
-  return !!(
-    modelPathValue &&
-    modelPathValue.secret &&
-    modelPathValue.secret.metadata &&
-    modelPathValue.secret.metadata.name &&
-    !showAuthSecretField({ model, getValue, watchDependency })
-  );
-}
-
-function showAuthSecretField({ model, getValue, watchDependency }) {
-  watchDependency("model#/resources/kubedbComMySQL/spec");
-  const modelPathValue = getValue(model, "/resources/kubedbComMySQL/spec");
-  return !!(
-    modelPathValue &&
-    modelPathValue.authSecret &&
-    modelPathValue.authSecret.name
-  );
-}
-
-function showNewSecretCreateField({
-  model,
-  getValue,
-  watchDependency,
-  commit,
-}) {
-  const resp =
-    !showAuthSecretField({ model, getValue, watchDependency }) &&
-    !showAuthPasswordField({ model, getValue, watchDependency });
-  const secret = getValue(model, "/resources/secret_auth");
-  if (resp && !secret) {
-    commit("wizard/model$update", {
-      path: "/resources/secret_auth",
-      value: {
-        data: {
-          password: "",
-        },
-      },
-      force: true,
-    });
-  }
-  return resp;
-}
-
-function getClientAuthModes({
-  model,
-  getValue,
-  watchDependency,
-}) {
-  watchDependency("model#/resources/kubedbComMySQL/spec/version");
-
-  const version = getValue(model, "/resources/kubedbComMySQL/spec/version")
-  // major version section from version
-  const major = parseInt(version && version.split(".")[0]);
-
-  const options = ["md5", "cert"];
-
-  if(major >= 11) {
-    options.push("scram");
-  }
-
-  return options.map((item) => ({text: item, value: item }));
-}
-
 // ********************* Database Mode ***********************
 function setDatabaseMode({ model, getValue, watchDependency }) {
-  const modelPathValue = getValue(model, "/resources/kubedbComMySQL/spec/replicas");
-  watchDependency("model#/resources/kubedbComMySQL/spec/replicas");
+  const modelPathValue = getValue(model, "/resources/kubedbComMySQL/spec/topology");
+  watchDependency("model#/resources/kubedbComMySQL/spec/topology");
 
-  if (modelPathValue > 1) {
-    return "Cluster";
+  if (modelPathValue?.mode) {
+    return modelPathValue.mode;
   } else {
     return "Standalone";
   }
@@ -393,7 +335,7 @@ function deleteDatabaseModePath({
   model,
 }) {
   const mode = getValue(discriminator, "/activeDatabaseMode");
-  if (mode === "Cluster") {
+  if (mode === "GroupReplication" || mode === "InnoDBCluster") {
     replicas = getValue(model, "/resources/kubedbComMySQL/spec/replicas");
     if(!replicas) {
       commit("wizard/model$update", {
@@ -402,10 +344,20 @@ function deleteDatabaseModePath({
         force: true,
       });
     }
+    commit("wizard/model$update", {
+      path: "/resources/kubedbComMySQL/spec/topology/mode",
+      value: mode,
+      force: true,
+    });
+    if(mode === "GroupReplication") commit("wizard/model$delete", "/resources/kubedbComMySQL/spec/topology/innoDBCluster");
+    else commit("wizard/model$delete", "/resources/kubedbComMySQL/spec/topology/group");
   } else if (mode === "Standalone") {
-    commit("wizard/model$delete", "/resources/kubedbComMySQL/spec/replicas");  
-    commit("wizard/model$delete", "/resources/kubedbComMySQL/spec/standbyMode");
-    commit("wizard/model$delete", "/resources/kubedbComMySQL/spec/leaderElectiion");
+    commit("wizard/model$update", {
+      path: "/resources/kubedbComMySQL/spec/replicas",
+      value: 1,
+      force: true,
+    });
+    commit("wizard/model$delete", "/resources/kubedbComMySQL/spec/topology");
   }
 }
 
@@ -416,6 +368,15 @@ function isEqualToDatabaseMode(
   watchDependency("discriminator#/activeDatabaseMode");
   const mode = getValue(discriminator, "/activeDatabaseMode");
   return mode === value;
+}
+
+function isNotEqualToDatabaseMode(
+  { getValue, watchDependency, discriminator },
+  value
+) {
+  watchDependency("discriminator#/activeDatabaseMode");
+  const mode = getValue(discriminator, "/activeDatabaseMode");
+  return mode !== value;
 }
 
 // ************************** TLS ******************************88
@@ -1718,7 +1679,7 @@ let initialCreateAuthSecretStatus = "";
 function getInitialCreateAuthSecretStatus({ model, getValue }) {
   const authSecret = getValue(
     model,
-    "/resources/kubedbComMySQL/spec/authSecret"
+    "/resources/kubedbComMySQL/spec/authSecret/name"
   );
   const secret_auth = getValue(model, "/resources/secret_auth");
   if (authSecret) initialCreateAuthSecretStatus = "has-existing-secret";
@@ -1731,10 +1692,10 @@ function getInitialCreateAuthSecretStatus({ model, getValue }) {
 function getDatabaseSecretStatus({ model, getValue, watchDependency }) {
   const authSecret = getValue(
     model,
-    "/resources/kubedbComMySQL/spec/authSecret"
+    "/resources/kubedbComMySQL/spec/authSecret/name"
   );
   const secret_auth = getValue(model, "/resources/secret_auth");
-  watchDependency("model#/resources/kubedbComMySQL/spec/authSecret");
+  watchDependency("model#/resources/kubedbComMySQL/spec/authSecret/name");
   watchDependency("model#/resources/secret_auth");
   if (authSecret) return "has-existing-secret";
   else if (secret_auth) return "custom-secret-with-password";
@@ -1742,10 +1703,12 @@ function getDatabaseSecretStatus({ model, getValue, watchDependency }) {
 }
 
 function getCreateAuthSecret({ model, getValue }) {
-  return (
-    getInitialCreateAuthSecretStatus({ model, getValue }) !==
-    "has-existing-secret"
+  const authSecret = getValue(
+    model,
+    "/resources/kubedbComMySQL/spec/authSecret/name"
   );
+
+  return !authSecret;
 }
 
 function isEqualToDatabaseSecretStatus(
@@ -1757,20 +1720,30 @@ function isEqualToDatabaseSecretStatus(
   );
 }
 
-function showPasswordSection({
+function showExistingSecretSection({
   getValue,
   watchDependency,
-  discriminator,
+  discriminator
 }) {
   watchDependency("discriminator#/createAuthSecret");
-  const currentCreateAuthSecretStatus = getValue(
+  const hasAuthSecretName = getValue(
     discriminator,
     "/createAuthSecret"
   );
-  return (
-    initialCreateAuthSecretStatus === "custom-secret-with-password" &&
-    currentCreateAuthSecretStatus
+  return !hasAuthSecretName;
+}
+
+function showPasswordSection({
+  getValue,
+  watchDependency,
+  model,
+}) {
+  watchDependency("model#/resources/secret_auth/data/password");
+  const hasSecretAuthData = getValue(
+    model,
+    "/resources/secret_auth/data/password"
   );
+  return !!hasSecretAuthData;
 }
 
 function disableInitializationSection({
@@ -1798,7 +1771,6 @@ function decodePassword({}, value) {
 
 function onCreateAuthSecretChange({
   discriminator,
-  model,
   getValue,
   commit,
 }) {
@@ -1808,18 +1780,11 @@ function onCreateAuthSecretChange({
       "wizard/model$delete",
       "/resources/kubedbComMySQL/spec/authSecret"
     );
-  } else {
-    const modelValue = getValue(
-      model,
-      "/resources/kubedbComMySQL/spec/authSecret"
+  } else if(createAuthSecret === false) {
+    commit(
+      "wizard/model$delete",
+      "/resources/secret_auth"
     );
-    if (!modelValue) {
-      commit("wizard/model$update", {
-        path: "/resources/kubedbComMySQL/spec/authSecret",
-        value: {},
-        force: true,
-      });
-    }
   }
 }
 
@@ -1835,34 +1800,36 @@ async function getSecrets({
   const namespace = getValue(model, "/metadata/release/namespace");
   watchDependency("model#/metadata/release/namespace");
 
-  try {
-    const resp = await axios.get(
-      `/clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}/secrets`,
-      {
-        params: {
-          filter: { items: { metadata: { name: null }, type: null } },
-        },
-      }
-    );
+  if(owner && cluster && namespace) {
+    try {
+      const resp = await axios.get(
+        `/clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}/secrets`,
+        {
+          params: {
+            filter: { items: { data: {username: null, password: null }, metadata: { name: null }, type: null } },
+          },
+        }
+      );
 
-    const secrets = (resp && resp.data && resp.data.items) || [];
+      const secrets = (resp && resp.data && resp.data.items) || [];
 
-    const filteredSecrets = secrets.filter((item) => {
-      const validType = ["kubernetes.io/service-account-token", "Opaque"];
-      return validType.includes(item.type);
-    });
+      const filteredSecrets = secrets.filter((item) => {
+        const validType = ["kubernetes.io/service-account-token", "Opaque", "kubernetes.io/basic-auth"];
+        return validType.includes(item.type) && item.data?.username && item.data?.password;
+      });
 
-    filteredSecrets.map((item) => {
-      const name = (item.metadata && item.metadata.name) || "";
-      item.text = name;
-      item.value = name;
-      return true;
-    });
-    return filteredSecrets;
-  } catch (e) {
-    console.log(e);
-    return [];
+      filteredSecrets.map((item) => {
+        const name = (item.metadata && item.metadata.name) || "";
+        item.text = name;
+        item.value = name;
+        return true;
+      });
+      return filteredSecrets;
+    } catch (e) {
+      console.log(e);
+    }
   }
+  return [];
 }
 
 async function hasExistingSecret({
@@ -1985,6 +1952,41 @@ function onSetCustomConfigChange({ discriminator, getValue, commit }) {
   }
 }
 
+function setConfigFiles({model, getValue, watchDependency}) {
+  watchDependency("model#/resources/secret_config/stringData");
+  const configFiles = getValue(model, "/resources/secret_config/stringData");
+
+  const files = [];
+
+  for (const item in configFiles) {
+      const obj = {};
+      obj.key = item;
+      obj.value = configFiles[item];
+      files.push(obj);
+  }
+
+  return files;
+}
+
+function onConfigFilesChange({ discriminator, getValue, commit }) {
+  const files = getValue(discriminator, "/configFiles");
+  
+  const configFiles = {};
+
+  if(files) {
+      files.forEach((item) => {
+          const { key, value } = item;
+          configFiles[key] = value;
+      });
+  }
+  
+  commit("wizard/model$update", {
+    path: "/resources/secret_config/stringData",
+    value: configFiles,
+    force: true,
+  });
+}
+
 return {
 	fetchJsons,
 	disableLableChecker,
@@ -1998,15 +2000,13 @@ return {
   unNamespacedResourceNames,
   returnTrue,
   returnStringYes,
+  setAddressType,
 	getMySqlVersions,
-	showAuthPasswordField,
-	showAuthSecretField,
-	showNewSecretCreateField,
-  getClientAuthModes,
 	setDatabaseMode,
 	getStorageClassNames,
 	deleteDatabaseModePath,
 	isEqualToDatabaseMode,
+	isNotEqualToDatabaseMode,
 	setApiGroup,
 	getIssuerRefsName,
 	hasIssuerRefName,
@@ -2067,6 +2067,7 @@ return {
 	getDatabaseSecretStatus,
 	getCreateAuthSecret,
 	isEqualToDatabaseSecretStatus,
+  showExistingSecretSection,
 	showPasswordSection,
 	disableInitializationSection,
 	encodePassword,
@@ -2082,4 +2083,6 @@ return {
 	setConfiguration,
 	setConfigurationFiles,
   onSetCustomConfigChange,
+  setConfigFiles,
+  onConfigFilesChange,
 }
