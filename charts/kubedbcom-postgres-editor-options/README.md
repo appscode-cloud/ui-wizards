@@ -57,7 +57,6 @@ The following table lists the configurable parameters of the `kubedbcom-postgres
 | spec.annotations             | Annotations to add to the database custom resource | `{}`          |
 | spec.labels                  | Labels to add to all the template objects          | `{}`          |
 | spec.mode                    | Standalone, Cluster                                | `Cluster`     |
-| spec.replicas                |                                                    | `3`           |
 | spec.terminationPolicy       |                                                    | `WipeOut`     |
 | spec.storageClass.name       |                                                    | `standard`    |
 | spec.persistence.size        |                                                    | `10Gi`        |

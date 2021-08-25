@@ -83,6 +83,11 @@ properties:
         - db.r.16xlarge
         - db.r.24xlarge
         type: string
+      mode:
+        enum:
+        - Standalone
+        - Cluster
+        type: string
       persistence:
         properties:
           size:
@@ -90,8 +95,6 @@ properties:
         required:
         - size
         type: object
-      replicas:
-        type: integer
       resources:
         description: ResourceRequirements describes the compute resource requirements.
         properties:
@@ -137,8 +140,8 @@ properties:
     required:
     - authSecret
     - machine
+    - mode
     - persistence
-    - replicas
     - resources
     - storageClass
     - terminationPolicy
