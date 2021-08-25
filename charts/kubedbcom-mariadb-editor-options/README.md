@@ -56,7 +56,7 @@ The following table lists the configurable parameters of the `kubedbcom-mariadb-
 | spec.version                 | List options                                       | `10.5.8`     |
 | spec.annotations             | Annotations to add to the database custom resource | `{}`         |
 | spec.labels                  | Labels to add to all the template objects          | `{}`         |
-| spec.replicas                |                                                    | `1`          |
+| spec.mode                    | Standalone, Cluster                                | `Cluster`    |
 | spec.terminationPolicy       |                                                    | `WipeOut`    |
 | spec.storageClass.name       |                                                    | `standard`   |
 | spec.persistence.size        |                                                    | `10Gi`       |
