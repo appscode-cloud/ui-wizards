@@ -28,13 +28,15 @@ spec:
   clientAuthMode: md5
 {{- end }}
 {{- if eq .Values.spec.mode "Cluster" }}
-  replicas: {{ .Values.spec.replicas }}
+  replicas: 3
   standbyMode: Hot
   leaderElection:
     electionTick: 10
     heartbeatTick: 1
     maximumLagBeforeFailover: 33554432
     period: 100ms
+{{- else }}
+  replicas: 1
 {{- end }}
   podTemplate:
     spec:

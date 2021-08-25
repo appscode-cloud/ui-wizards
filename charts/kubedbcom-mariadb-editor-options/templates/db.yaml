@@ -21,7 +21,11 @@ spec:
   authSecret:
     name: {{ .Values.spec.authSecret.name }}
 {{- end }}
-  replicas: {{ .Values.spec.replicas }}
+{{- if eq .Values.spec.mode "Cluster" }}
+  replicas: 3
+{{- else }}
+  replicas: 1
+{{- end }}
   storage:
     accessModes:
     - ReadWriteOnce
