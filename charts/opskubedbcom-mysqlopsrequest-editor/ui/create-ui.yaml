@@ -1,0 +1,266 @@
+steps:
+- form:
+    discriminator:
+      dbDetails:
+        type: object
+    elements:
+    - computed: getDbDetails
+      if: returnFalse
+      schema:
+        $ref: discriminator#/properties/dbDetails
+      type: input
+    - label:
+        text: labels.op_req_name
+      required: true
+      schema:
+        $ref: schema#/properties/metadata/properties/name
+      type: input
+    - computed: initNamespace
+      fetch: getNamespaces
+      label:
+        text: labels.namespace
+      required: true
+      schema:
+        $ref: schema#/properties/metadata/properties/namespace
+      type: select
+    - computed: initDatabaseRef
+      fetch: getDbs
+      label:
+        text: labels.databaseRef
+      required: true
+      schema:
+        $ref: schema#/properties/spec/properties/databaseRef/properties/name
+      type: select
+    - label:
+        text: labels.config_ops_request
+      type: label-element
+    - computed: getRequestTypeFromRoute
+      disabled: isDbDetailsLoading
+      hasDescription: true
+      individualItemDisabilityCheck: disableOpsRequest
+      label:
+        text: labels.ops_request_type
+      onChange: onRequestTypeChange
+      options:
+      - description: options.Upgrade.description
+        text: options.Upgrade.text
+        value: Upgrade
+      - description: options.HorizontalScaling.description
+        text: options.HorizontalScaling.text
+        value: HorizontalScaling
+      - description: options.VerticalScaling.description
+        text: options.VerticalScaling.text
+        value: VerticalScaling
+      - description: options.VolumeExpansion.description
+        text: options.VolumeExpansion.text
+        value: VolumeExpansion
+      - description: options.Restart.description
+        text: options.Restart.text
+        value: Restart
+      - description: options.Reconfigure.description
+        text: options.Reconfigure.text
+        value: Reconfigure
+      - description: options.ReconfigureTLS.description
+        text: options.ReconfigureTLS.text
+        value: ReconfigureTLS
+      schema:
+        $ref: schema#/properties/spec/properties/type
+      type: radio
+    - computed: setValueFromDbDetails|/spec/version
+      fetch: getDbVersions
+      if: ifRequestTypeEqualsTo|Upgrade
+      label:
+        text: labels.targetVersion
+      schema:
+        $ref: schema#/properties/spec/properties/upgrade/properties/targetVersion
+      type: select
+    - elements:
+      - computed: setValueFromDbDetails|/spec/replicas
+        if: ifDbTypeEqualsTo|cluster|horizontalScaling
+        label:
+          text: labels.replicas
+        schema:
+          $ref: schema#/properties/spec/properties/horizontalScaling/properties/member
+        type: input
+      if: ifRequestTypeEqualsTo|HorizontalScaling
+      label:
+        text: Horizontal Scaling Form
+      type: single-step-form
+    - elements:
+      - alias: reusable_mysql_reources
+        chart:
+          name: uibytebuildersdev-component-resources
+          version: v0.2.0-alpha.0
+        computed: setValueFromDbDetails|/spec/podTemplate/spec/resources|/spec/verticalScaling/mysql
+        label:
+          text: labels.resources
+        moduleResolver: fetchJsons
+        schema:
+          $ref: schema#/properties/spec/properties/verticalScaling/properties/mysql
+        show_label: true
+        type: reusable-element
+      - alias: reusable_exporter_reources
+        chart:
+          name: uibytebuildersdev-component-resources
+          version: v0.2.0-alpha.0
+        computed: setValueFromDbDetails|/spec/monitor/prometheus/exporter/resources|/spec/verticalScaling/exporter
+        label:
+          text: labels.exporter
+        moduleResolver: fetchJsons
+        schema:
+          $ref: schema#/properties/spec/properties/verticalScaling/properties/exporter
+        show_label: true
+        type: reusable-element
+      if: ifRequestTypeEqualsTo|VerticalScaling
+      type: single-step-form
+    - elements:
+      - computed: setValueFromDbDetails|/spec/storage/resources/requests/storage
+        label:
+          text: labels.storage.size
+        schema:
+          $ref: schema#/properties/spec/properties/volumeExpansion/properties/mysql
+        type: input
+      if: ifRequestTypeEqualsTo|VolumeExpansion
+      label:
+        text: Volume Expansion Form
+      type: single-step-form
+    - elements:
+      - discriminator:
+          reconfigurationType:
+            type: string
+        elements:
+        - individualItemDisabilityCheck: disableReconfigurationType
+          label:
+            text: labels.reconfigurationType
+          onChange: onReconfigurationTypeChange
+          options:
+          - text: Select New Config Secret
+            value: selectNewConfigSecret
+          - text: Inline Config
+            value: inlineConfig
+          - text: Remove
+            value: remove
+          schema:
+            $ref: discriminator#/properties/reconfigurationType
+          type: radio
+        - elements:
+          - fetch: getConfigSecrets
+            label:
+              text: labels.configSecret
+            schema:
+              $ref: schema#/properties/spec/properties/configuration/properties/configSecret/properties/name
+            type: select
+          if: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
+          label:
+            text: Configuration config secret
+          schema:
+            $ref: schema#/properties/spec/properties/configuration/properties/configSecret
+          type: single-step-form
+        - if: ifReconfigurationTypeEqualsTo|inlineConfig
+          label:
+            text: labels.inlineConfig
+          schema:
+            $ref: schema#/properties/spec/properties/configuration/properties/inlineConfig
+          type: editor
+        - if: returnFalse
+          label:
+            text: labels.removeCustomConfig
+          schema:
+            $ref: schema#/properties/spec/properties/configuration/properties/removeCustomConfig
+          type: switch
+        label:
+          text: labels.configuration
+        schema:
+          $ref: schema#/properties/spec/properties/configuration
+        show_label: true
+        type: single-step-form
+      if: ifRequestTypeEqualsTo|Reconfigure
+      label:
+        text: Reconfigure Form
+      type: single-step-form
+    - discriminator:
+        tlsOperation:
+          type: string
+      elements:
+      - computed: initTlsOperation
+        if: hasTlsField
+        label:
+          text: labels.tlsOperation
+        onChange: onTlsOperationChange
+        options:
+        - text: Update
+          value: update
+        - text: Rotate
+          value: rotate
+        - text: Remove
+          value: remove
+        schema:
+          $ref: discriminator#/properties/tlsOperation
+        type: radio
+      - if: returnFalse
+        schema:
+          $ref: schema#/properties/spec/properties/tls/properties/remove
+        type: switch
+      - if: returnFalse
+        schema:
+          $ref: schema#/properties/spec/properties/tls/properties/rotateCertificates
+        type: switch
+      - elements:
+        - computed: setValueFromDbDetails|/spec/tls/requireSSL
+          label:
+            text: labels.require_ssl_question
+          schema:
+            $ref: schema#/properties/spec/properties/tls/properties/requireSSL
+          type: switch
+        - computed: initIssuerRefApiGroup
+          disabled: true
+          label:
+            text: labels.api_group
+          schema:
+            $ref: schema#/properties/spec/properties/tls/properties/issuerRef/properties/apiGroup
+          type: input
+        - computed: setValueFromDbDetails|/spec/tls/issuerRef/kind
+          label:
+            text: labels.kind
+          options:
+          - text: Issuer
+            value: Issuer
+          - text: ClusterIssuer
+            value: ClusterIssuer
+          required: isIssuerRefRequired
+          schema:
+            $ref: schema#/properties/spec/properties/tls/properties/issuerRef/properties/kind
+          type: select
+        - allowUserDefinedOption: true
+          computed: setValueFromDbDetails|/spec/tls/issuerRef/name
+          fetch: getIssuerRefsName
+          label:
+            text: labels.name
+          required: isIssuerRefRequired
+          schema:
+            $ref: schema#/properties/spec/properties/tls/properties/issuerRef/properties/name
+          type: select
+        if: showIssuerRefAndCertificates
+        schema:
+          $ref: schema#/properties/spec/properties/tls/properties/issuerRef
+        type: single-step-form
+      - alias: reusable_certificates
+        computed: setValueFromDbDetails|/spec/tls/certificates|/spec/tls/certificates
+        chart:
+          name: uibytebuildersdev-component-certificates
+          version: v0.2.0-alpha.0
+        if: showIssuerRefAndCertificates
+        moduleResolver: fetchJsons
+        schema:
+          $ref: schema#/properties/spec/properties/tls/properties/certificates
+        type: reusable-element
+      if: ifRequestTypeEqualsTo|ReconfigureTLS
+      label:
+        text: labels.tls
+      schema:
+        $ref: schema#/properties/spec/properties/tls
+      type: single-step-form
+    type: single-step-form
+  id: basic
+  title: steps.0.label
+type: multi-step-form

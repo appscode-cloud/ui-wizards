@@ -244,13 +244,6 @@ function showAuthSecretField({
   });
 }
 
-function showStorageSizeField({ model, getValue, watchDependency }) {
-  const modelPathValue = getValue(model, "/spec/mode");
-  watchDependency("model#/spec/mode");
-  const validType = ["Standalone", "Replicaset"];
-  return validType.includes(modelPathValue);
-}
-
 async function getResources(
   { axios, storeGet },
   group,
@@ -315,7 +308,7 @@ async function getStorageClassNames({ axios, storeGet, commit }) {
   return resources;
 }
 
-async function getMongoDbVersions(
+async function getMySqlVersions(
   { axios, storeGet },
   group,
   version,
@@ -343,18 +336,18 @@ async function getMongoDbVersions(
   const resources = (resp && resp.data && resp.data.items) || [];
 
   // keep only non deprecated versions
-  const filteredMongoDbVersions = resources.filter(
+  const filteredMySqlVersions = resources.filter(
     (item) => item.spec && !item.spec.deprecated
   );
 
-  filteredMongoDbVersions.map((item) => {
+  filteredMySqlVersions.map((item) => {
     const name = (item.metadata && item.metadata.name) || "";
     const specVersion = (item.spec && item.spec.version) || "";
     item.text = `${name} (${specVersion})`;
     item.value = name;
     return true;
   });
-  return filteredMongoDbVersions;
+  return filteredMySqlVersions;
 }
 
 async function getSecrets({
@@ -369,29 +362,36 @@ async function getSecrets({
   const namespace = getValue(model, "/metadata/release/namespace");
   watchDependency("model#/metadata/release/namespace");
 
-  const resp = await axios.get(
-    `/clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}/secrets`,
-    {
-      params: {
-        filter: { items: { metadata: { name: null }, type: null } },
-      },
+  if(owner && cluster && namespace) {
+    try {
+      const resp = await axios.get(
+        `/clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}/secrets`,
+        {
+          params: {
+            filter: { items: { data: {username: null, password: null }, metadata: { name: null }, type: null } },
+          },
+        }
+      );
+
+      const secrets = (resp && resp.data && resp.data.items) || [];
+
+      const filteredSecrets = secrets.filter((item) => {
+        const validType = ["kubernetes.io/service-account-token", "Opaque", "kubernetes.io/basic-auth"];
+        return validType.includes(item.type) && item.data?.username && item.data?.password;
+      });
+
+      filteredSecrets.map((item) => {
+        const name = (item.metadata && item.metadata.name) || "";
+        item.text = name;
+        item.value = name;
+        return true;
+      });
+      return filteredSecrets;
+    } catch (e) {
+      console.log(e);
     }
-  );
-
-  const secrets = (resp && resp.data && resp.data.items) || [];
-
-  const filteredSecrets = secrets.filter((item) => {
-    const validType = ["kubernetes.io/service-account-token", "Opaque"];
-    return validType.includes(item.type);
-  });
-
-  filteredSecrets.map((item) => {
-    const name = (item.metadata && item.metadata.name) || "";
-    item.text = name;
-    item.value = name;
-    return true;
-  });
-  return filteredSecrets;
+  }
+  return [];
 }
 
 function disableLimit({ model, getValue, watchDependency }) {
@@ -451,10 +451,9 @@ return {
 	showAuthPasswordField,
 	isEqualToModelPathValue,
 	showAuthSecretField,
-	showStorageSizeField,
 	getResources,
 	getStorageClassNames,
-	getMongoDbVersions,
+	getMySqlVersions,
 	getSecrets,
 	disableLimit,
 	getMachineListForOptions,
