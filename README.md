@@ -50,3 +50,25 @@ helm install kubedbcom-elasticsearch-editor-options charts/kubedbcom-elasticsear
  --set spec.mode=Dedicated
 helm uninstall kubedbcom-elasticsearch-editor-options
 ```
+
+### MariaDB
+
+```bash
+helm install kubedbcom-mariadb-editor-options charts/kubedbcom-mariadb-editor-options
+helm uninstall kubedbcom-mariadb-editor-options
+
+helm install kubedbcom-mariadb-editor-options charts/kubedbcom-mariadb-editor-options \
+ --set spec.mode=Cluster
+helm uninstall kubedbcom-mariadb-editor-options
+```
+
+### Postgres
+
+```bash
+helm install kubedbcom-postgres-editor-options charts/kubedbcom-postgres-editor-options
+helm uninstall kubedbcom-postgres-editor-options
+
+helm install kubedbcom-postgres-editor-options charts/kubedbcom-postgres-editor-options \
+ --set spec.mode=Cluster
+helm uninstall kubedbcom-postgres-editor-options
+```
