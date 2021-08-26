@@ -416,10 +416,7 @@ func (in *KubedbcomMemcachedEditorOptionsSpecSpec) DeepCopyInto(out *KubedbcomMe
 			(*out)[key] = val
 		}
 	}
-	out.StorageClass = in.StorageClass
-	out.Persistence = in.Persistence
 	in.Resources.DeepCopyInto(&out.Resources)
-	out.AuthSecret = in.AuthSecret
 	return
 }
 
