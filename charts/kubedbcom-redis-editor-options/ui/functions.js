@@ -244,13 +244,6 @@ function showAuthSecretField({
   });
 }
 
-function showStorageSizeField({ model, getValue, watchDependency }) {
-  const modelPathValue = getValue(model, "/spec/mode");
-  watchDependency("model#/spec/mode");
-  const validType = ["Standalone", "Replicaset"];
-  return validType.includes(modelPathValue);
-}
-
 async function getResources(
   { axios, storeGet },
   group,
@@ -315,7 +308,7 @@ async function getStorageClassNames({ axios, storeGet, commit }) {
   return resources;
 }
 
-async function getMongoDbVersions(
+async function getRedisVersions(
   { axios, storeGet },
   group,
   version,
@@ -343,18 +336,18 @@ async function getMongoDbVersions(
   const resources = (resp && resp.data && resp.data.items) || [];
 
   // keep only non deprecated versions
-  const filteredMongoDbVersions = resources.filter(
+  const filteredRedisVersions = resources.filter(
     (item) => item.spec && !item.spec.deprecated
   );
 
-  filteredMongoDbVersions.map((item) => {
+  filteredRedisVersions.map((item) => {
     const name = (item.metadata && item.metadata.name) || "";
     const specVersion = (item.spec && item.spec.version) || "";
     item.text = `${name} (${specVersion})`;
     item.value = name;
     return true;
   });
-  return filteredMongoDbVersions;
+  return filteredRedisVersions;
 }
 
 async function getSecrets({
@@ -451,10 +444,9 @@ return {
 	showAuthPasswordField,
 	isEqualToModelPathValue,
 	showAuthSecretField,
-	showStorageSizeField,
 	getResources,
 	getStorageClassNames,
-	getMongoDbVersions,
+	getRedisVersions,
 	getSecrets,
 	disableLimit,
 	getMachineListForOptions,
