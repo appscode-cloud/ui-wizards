@@ -18,13 +18,6 @@ helm repo update
 
 ## Test Charts
 
-### Redis
-
-```bash
-helm install kubedbcom-redis-editor-options charts/kubedbcom-redis-editor-options
-helm install kubedbcom-redis-editor-options charts/kubedbcom-redis-editor-options --set spec.mode=Cluster
-```
-
 ### MySQL
 
 ```bash
