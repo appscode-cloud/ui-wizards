@@ -17,62 +17,9 @@ metadata:
 {{- end }}
 spec:
   version: {{ .Values.spec.version | quote }}
-{{- if or (eq .Values.spec.mode "Standalone") (eq .Values.spec.mode "Replicaset") }}
   replicas: {{ .Values.spec.replicas }}
-  storageType: Durable
-  storage:
-    storageClassName: {{ .Values.spec.storageClass.name }}
-    accessModes:
-    - ReadWriteOnce
-    resources:
-      requests:
-        storage: {{ .Values.spec.persistence.size }}
-{{- end }}
-{{- if eq .Values.spec.mode "Replicaset" }}
-  replicaSet:
-    name: {{ .Values.spec.replicaSet.name }}
-{{- end }}
-{{- if eq .Values.spec.mode "Sharded" }}
-  shardTopology:
-    configServer:
-      replicas: {{ .Values.spec.shardTopology.configServer.replicas }}
-      podTemplate:
-        spec:
-          resources:
-            {{- toYaml $res | nindent 12 }}
-      storage:
-        resources:
-          requests:
-            storage: {{ .Values.spec.shardTopology.configServer.persistence.size }}
-        storageClassName: {{ .Values.spec.storageClass.name }}
-    mongos:
-      replicas: {{ .Values.spec.shardTopology.mongos.replicas }}
-      podTemplate:
-        spec:
-          resources:
-            {{- toYaml $res | nindent 12 }}
-    shard:
-      shards: {{ .Values.spec.shardTopology.shard.shards }}
-      replicas: {{ .Values.spec.shardTopology.shard.replicas }}
-      podTemplate:
-        spec:
-          resources:
-            {{- toYaml $res | nindent 12 }}
-      storage:
-        resources:
-          requests:
-            storage: {{ .Values.spec.shardTopology.shard.persistence.size }}
-        storageClassName: {{ .Values.spec.storageClass.name }}
-{{- else }}
   podTemplate:
     spec:
       resources:
         {{- toYaml $res | nindent 8 }}
-{{- end }}
   terminationPolicy: {{ .Values.spec.terminationPolicy }}
-  clusterAuthMode: {{ .Values.spec.clusterAuthMode }}
-  sslMode: {{ .Values.spec.sslMode }}
-{{- if .Values.spec.authSecret.name }}
-  authSecret:
-    name: {{ .Values.spec.authSecret.name }}
-{{- end }}

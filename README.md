@@ -72,3 +72,21 @@ helm install kubedbcom-postgres-editor-options charts/kubedbcom-postgres-editor-
  --set spec.mode=Cluster
 helm uninstall kubedbcom-postgres-editor-options
 ```
+
+### Redis
+
+```bash
+helm install kubedbcom-redis-editor-options charts/kubedbcom-redis-editor-options
+helm uninstall kubedbcom-redis-editor-options
+
+helm install kubedbcom-redis-editor-options charts/kubedbcom-redis-editor-options \
+ --set spec.mode=Cluster
+helm uninstall kubedbcom-redis-editor-options
+```
+
+### Memcached
+
+```bash
+helm install kubedbcom-memcached-editor-options charts/kubedbcom-memcached-editor-options
+helm uninstall kubedbcom-memcached-editor-options
+```
