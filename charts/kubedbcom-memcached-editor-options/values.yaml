@@ -17,7 +17,7 @@ metadata:
 
 spec:
   # List options
-  version: 3.4.17
+  version: 1.5.4-v1
 
   # Annotations to add to the database custom resource
   annotations: {}
@@ -25,37 +25,11 @@ spec:
   # Labels to add to all the template objects
   labels: {}
 
-  # Standalone, Replicaset, Sharded
+  # Standalone
   mode: Standalone
   replicas: 1
-  replicaSet:
-    name: rs0
-  shardTopology:
-    shard:
-      replicas: 3
-      shards: 3
-      persistence:
-        size: 10Gi
-    configServer:
-      replicas: 3
-      persistence:
-        size: 2Gi
-    mongos:
-      replicas: 3
-
-  # "keyFile", "sendKeyFile", "sendX509", "x509"
-  clusterAuthMode: keyFile
-
-  # "disabled", "allowSSL", "preferSSL", "requireSSL"
-  sslMode: disabled
 
   terminationPolicy: WipeOut
-
-  storageClass:
-    name: standard
-
-  persistence:
-    size: 10Gi
 
   machine: ""
 
@@ -63,7 +37,3 @@ spec:
     limits:
       cpu: ".5"
       memory: 1024Mi
-
-  authSecret:
-    name: ""
-    password: ""

@@ -45,14 +45,6 @@ properties:
         additionalProperties:
           type: string
         type: object
-      authSecret:
-        properties:
-          name:
-            type: string
-          password:
-            format: password
-            type: string
-        type: object
       labels:
         additionalProperties:
           type: string
@@ -83,19 +75,6 @@ properties:
         - db.r.16xlarge
         - db.r.24xlarge
         type: string
-      mode:
-        enum:
-        - Standalone
-        - Replicaset
-        - Sharded
-        type: string
-      persistence:
-        properties:
-          size:
-            type: string
-        required:
-        - size
-        type: object
       replicas:
         type: integer
       resources:
@@ -124,13 +103,6 @@ properties:
               value. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
             type: object
         type: object
-      storageClass:
-        properties:
-          name:
-            type: string
-        required:
-        - name
-        type: object
       terminationPolicy:
         enum:
         - Halt
@@ -141,13 +113,9 @@ properties:
       version:
         type: string
     required:
-    - authSecret
     - machine
-    - mode
-    - persistence
     - replicas
     - resources
-    - storageClass
     - terminationPolicy
     - version
     type: object
