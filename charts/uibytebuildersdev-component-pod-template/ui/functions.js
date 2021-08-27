@@ -101,7 +101,7 @@ function disableSpec({ reusableElementCtx }) {
   const { functionCallbacks } = reusableElementCtx || {};
   const { isEditWizard } = functionCallbacks || {};
 
-  return !!isEditWizard();
+  return isEditWizard && !!isEditWizard();
 }
 
 return {
