@@ -1905,7 +1905,7 @@ function onConfigurationChange({
 }) {
   const value = getValue(discriminator, "/configuration");
   commit("wizard/model$update", {
-    path: "/resources/secret_config/stringData/user.conf",
+    path: "/resources/secret_config/stringData/my-config.cnf",
     value: value,
     force: true,
   });
@@ -1935,11 +1935,11 @@ function setSecretConfigNamespace({ getValue, model, watchDependency }) {
 }
 
 function setConfiguration({ model, getValue }) {
-  return getValue(model, "/resources/secret_config/stringData/user.conf");
+  return getValue(model, "/resources/secret_config/stringData/my-config.cnf");
 }
 
 function setConfigurationFiles({ model, getValue }) {
-  const value = getValue(model, "/resources/secret_config/data/user.conf");
+  const value = getValue(model, "/resources/secret_config/data/my-config.cnf");
   return atob(value);
 }
 
@@ -1950,41 +1950,6 @@ function onSetCustomConfigChange({ discriminator, getValue, commit }) {
     commit("wizard/model$delete", "/resources/kubedbComMySQL/spec/configSecret");
     commit("wizard/model$delete", "/resources/secret_config");
   }
-}
-
-function setConfigFiles({model, getValue, watchDependency}) {
-  watchDependency("model#/resources/secret_config/stringData");
-  const configFiles = getValue(model, "/resources/secret_config/stringData");
-
-  const files = [];
-
-  for (const item in configFiles) {
-      const obj = {};
-      obj.key = item;
-      obj.value = configFiles[item];
-      files.push(obj);
-  }
-
-  return files;
-}
-
-function onConfigFilesChange({ discriminator, getValue, commit }) {
-  const files = getValue(discriminator, "/configFiles");
-  
-  const configFiles = {};
-
-  if(files) {
-      files.forEach((item) => {
-          const { key, value } = item;
-          configFiles[key] = value;
-      });
-  }
-  
-  commit("wizard/model$update", {
-    path: "/resources/secret_config/stringData",
-    value: configFiles,
-    force: true,
-  });
 }
 
 return {
@@ -2083,6 +2048,4 @@ return {
 	setConfiguration,
 	setConfigurationFiles,
   onSetCustomConfigChange,
-  setConfigFiles,
-  onConfigFilesChange,
 }

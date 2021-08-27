@@ -941,7 +941,7 @@ steps:
           $ref: discriminator#/properties/setCustomConfig
         type: radio
       - discriminator:
-          configFiles:
+          configuration:
             type: string
           configurationSource:
             default: use-existing-config
@@ -967,46 +967,14 @@ steps:
           schema:
             $ref: schema#/properties/resources/properties/kubedbComMySQL/properties/spec/properties/configSecret/properties/name
           type: select
-        - addFormLabel: labels.config_file
-          computed: setConfigFiles
-          element:
-            discriminator:
-              files:
-                emitAs: configFiles
-                type: array
-            elements:
-            - label:
-                text: labels.filename
-              required: true
-              schema:
-                $ref: discriminator#/properties/files/items/properties/key
-              type: input
-            - label:
-                text: labels.labels.value
-              required: true
-              schema:
-                $ref: discriminator#/properties/files/items/properties/value
-              type: editor
-            type: single-step-form
+        - computed: setConfiguration
           if: isEqualToDiscriminatorPath|create-new-config|/configurationSource
           label:
-            text: labels.config_files
-          onChange: onConfigFilesChange
+            text: labels.my_config_cnf
+          onChange: onConfigurationChange
           schema:
-            $ref: discriminator#/properties/configFiles
-          tableContents:
-          - inTableColumn: true
-            label:
-              text: labels.filename
-            path: key
-            type: value
-            typeOfValue: string
-          - label:
-              text: labels.labels.value
-            path: value
-            type: value
-            typeOfValue: code
-          type: single-step-form-array
+            $ref: discriminator#/properties/configuration
+          type: editor
         if: isEqualToDiscriminatorPath|yes|/setCustomConfig
         type: single-step-form
       type: single-step-form

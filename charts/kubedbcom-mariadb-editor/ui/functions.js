@@ -214,13 +214,6 @@ function returnStringYes() {
   return "yes";
 }
 
-function isDiscriminatorEqualTo({discriminator, getValue, watchDependency}, discriminatorPath, value) {
-  watchDependency("discriminator#" + discriminatorPath);
-  const pathValue = getValue(discriminator, discriminatorPath);
-
-  return value === pathValue;
-}
-
 // ************************* Basic Info **********************************************
 async function getMariaDbVersions(
   { axios, storeGet },
@@ -2021,7 +2014,6 @@ return {
   unNamespacedResourceNames,
   returnTrue,
   returnStringYes,
-  isDiscriminatorEqualTo,
 	getMariaDbVersions,
 	showAuthPasswordField,
 	showAuthSecretField,
