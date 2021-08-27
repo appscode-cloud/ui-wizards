@@ -2004,6 +2004,15 @@ function setConfigurationFiles({ model, getValue }) {
   return atob(value);
 }
 
+function onSetCustomConfigChange({ discriminator, getValue, commit }) {
+  const value = getValue(discriminator, "/setCustomConfig");
+
+  if(value === "no") {
+    commit("wizard/model$delete", "/resources/kubedbComPostgres/spec/configSecret");
+    commit("wizard/model$delete", "/resources/secret_config");
+  }
+}
+
 return {
 	fetchJsons,
 	disableLableChecker,
@@ -2102,4 +2111,5 @@ return {
 	setSecretConfigNamespace,
 	setConfiguration,
 	setConfigurationFiles,
+  onSetCustomConfigChange
 }

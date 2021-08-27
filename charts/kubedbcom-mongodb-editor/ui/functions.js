@@ -2532,6 +2532,20 @@ function setConfigurationFilesMongos({ model, getValue }) {
   return atob(value);
 }
 
+function onSetCustomConfigChange({ discriminator, getValue, commit }) {
+  const value = getValue(discriminator, "/setCustomConfig");
+
+  if(value === "no") {
+    commit("wizard/model$delete", "/resources/kubedbComMongoDB/spec/configSecret");
+    commit("wizard/model$delete", "/resources/kubedbComMongoDB/spec/shardTopology/shard/configSecret");
+    commit("wizard/model$delete", "/resources/kubedbComMongoDB/spec/shardTopology/configServer/configSecret");
+    commit("wizard/model$delete", "/resources/kubedbComMongoDB/spec/shardTopology/mongos/configSecret");
+    commit("wizard/model$delete", "/resources/secret_config");
+    commit("wizard/model$delete", "/resources/secret_shard_config");
+    commit("wizard/model$delete", "/resources/secret_configserver_config");
+    commit("wizard/model$delete", "/resources/secret_mongos_config");
+  }
+}
 
 return {
 	fetchJsons,
@@ -2650,5 +2664,6 @@ return {
 	setConfigurationFiles,
 	setConfigurationFilesShard,
 	setConfigurationFilesConfigServer,
-	setConfigurationFilesMongos
+  setConfigurationFilesMongos,
+  onSetCustomConfigChange
 }
