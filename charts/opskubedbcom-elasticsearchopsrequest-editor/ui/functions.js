@@ -226,7 +226,7 @@ function getDbType({
 
 function initNamespace({ route }) {
   const { namespace } = route.query || {};
-  return namespace;
+  return namespace || null;
 }
 
 function initDatabaseRef({ route }) {
@@ -637,7 +637,7 @@ function setValueFromDbDetails({discriminator, getValue, watchDependency, commit
   if(commitPath) {
     const tlsOperation = getValue(discriminator, "/tlsOperation");
     
-    if(commitPath === "/spec/tls/certificates" && tlsOperation !== "update")
+    if(commitPath.includes("/spec/tls") && tlsOperation !== "update")
       return undefined; 
 
     // direct model update required for reusable element.
