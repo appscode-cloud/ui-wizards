@@ -882,6 +882,19 @@ const stashAppscodeComBackupConfiguration = {
   },
 };
 
+function disableInitializationSection({
+  model,
+  getValue,
+  watchDependency,
+}) {
+  const initialized = getValue(
+    model,
+    "/resources/kubedbComMongoDB/spec/init/initialized"
+  );
+  watchDependency("model#/resources/kubedbComMongoDB/spec/init/initialized");
+  return !!initialized;
+}
+
 function valueExists(value, getValue, path) {
   const val = getValue(value, path);
   if (val) return true;
@@ -1900,19 +1913,6 @@ function getInitialCreateAuthSecretStatus({ model, getValue }) {
   return initialCreateAuthSecretStatus;
 }
 
-function getDatabaseSecretStatus({ model, getValue, watchDependency }) {
-  const authSecret = getValue(
-    model,
-    "/resources/kubedbComMongoDB/spec/authSecret"
-  );
-  const secret_auth = getValue(model, "/resources/secret_auth");
-  watchDependency("model#/resources/kubedbComMongoDB/spec/authSecret");
-  watchDependency("model#/resources/secret_auth");
-  if (authSecret) return "has-existing-secret";
-  else if (secret_auth) return "custom-secret-with-password";
-  else return "custom-secret-without-password";
-}
-
 function getCreateAuthSecret({ model, getValue }) {
   return (
     getInitialCreateAuthSecretStatus({ model, getValue }) !==
@@ -1920,42 +1920,32 @@ function getCreateAuthSecret({ model, getValue }) {
   );
 }
 
-function isEqualToDatabaseSecretStatus(
-  { model, getValue, watchDependency },
-  value
-) {
-  return (
-    getDatabaseSecretStatus({ model, getValue, watchDependency }) === value
+function showExistingSecretSection({
+  getValue,
+  watchDependency,
+  discriminator
+}) {
+  watchDependency("discriminator#/createAuthSecret");
+  
+  const hasAuthSecretName = getValue(
+    discriminator,
+    "/createAuthSecret"
   );
+  return !hasAuthSecretName;
 }
 
 function showPasswordSection({
   getValue,
   watchDependency,
-  discriminator,
-}) {
-  watchDependency("discriminator#/createAuthSecret");
-  const currentCreateAuthSecretStatus = getValue(
-    discriminator,
-    "/createAuthSecret"
-  );
-  return (
-    initialCreateAuthSecretStatus === "custom-secret-with-password" &&
-    currentCreateAuthSecretStatus
-  );
-}
-
-function disableInitializationSection({
   model,
-  getValue,
-  watchDependency,
 }) {
-  const initialized = getValue(
+  watchDependency("model#/resources/secret_auth/data/password");
+
+  const hasSecretAuthData = getValue(
     model,
-    "/resources/kubedbComMongoDB/spec/init/initialized"
+    "/resources/secret_auth/data/password"
   );
-  watchDependency("model#/resources/kubedbComMongoDB/spec/init/initialized");
-  return !!initialized;
+  return !!hasSecretAuthData;
 }
 
 // eslint-disable-next-line no-empty-pattern
@@ -1970,7 +1960,6 @@ function decodePassword({}, value) {
 
 function onCreateAuthSecretChange({
   discriminator,
-  model,
   getValue,
   commit,
 }) {
@@ -1980,18 +1969,11 @@ function onCreateAuthSecretChange({
       "wizard/model$delete",
       "/resources/kubedbComMongoDB/spec/authSecret"
     );
-  } else {
-    const modelValue = getValue(
-      model,
-      "/resources/kubedbComMongoDB/spec/authSecret"
+  } else if(createAuthSecret === false) {
+    commit(
+      "wizard/model$delete",
+      "/resources/secret_auth"
     );
-    if (!modelValue) {
-      commit("wizard/model$update", {
-        path: "/resources/kubedbComMongoDB/spec/authSecret",
-        value: {},
-        force: true,
-      });
-    }
   }
 }
 
@@ -2035,40 +2017,6 @@ async function getSecrets({
     console.log(e);
     return [];
   }
-}
-
-async function hasExistingSecret({
-  storeGet,
-  axios,
-  model,
-  getValue,
-  watchDependency,
-}) {
-  const resp = await getSecrets({
-    storeGet,
-    axios,
-    model,
-    getValue,
-    watchDependency,
-  });
-  return !!(resp && resp.length);
-}
-
-async function hasNoExistingSecret({
-  storeGet,
-  axios,
-  model,
-  getValue,
-  watchDependency,
-}) {
-  const resp = await hasExistingSecret({
-    storeGet,
-    axios,
-    model,
-    getValue,
-    watchDependency,
-  });
-  return !resp;
 }
 
 //////////////////////////////////////// Service Monitor //////////////////////////////////////////////////////
@@ -2584,7 +2532,8 @@ return {
 	showMonitoringSection,
 	onEnableMonitoringChange,
 	showCustomizeExporterSection,
-	onCustomizeExporterChange,
+  onCustomizeExporterChange,
+  disableInitializationSection,
 	valueExists,
 	initPrePopulateDatabase,
 	onPrePopulateDatabaseChange,
@@ -2631,17 +2580,13 @@ return {
 	returnFalse,
 	onAgentChange,
 	getInitialCreateAuthSecretStatus,
-	getDatabaseSecretStatus,
-	getCreateAuthSecret,
-	isEqualToDatabaseSecretStatus,
+  getCreateAuthSecret,
+  showExistingSecretSection,
 	showPasswordSection,
-	disableInitializationSection,
 	encodePassword,
 	decodePassword,
 	onCreateAuthSecretChange,
 	getSecrets,
-	hasExistingSecret,
-	hasNoExistingSecret,
 	isEqualToServiceMonitorType,
 	onConfigurationSourceChange,
 	onConfigurationChange,

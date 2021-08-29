@@ -1,8 +1,5 @@
 steps:
 - form:
-    discriminator:
-      createAuthSecret:
-        type: boolean
     elements:
     - label:
         text: labels.database.name
@@ -81,7 +78,10 @@ steps:
       schema:
         $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/disableSecurity
       type: switch
-    - elements:
+    - discriminator:
+        createAuthSecret:
+          type: boolean
+      elements:
       - label:
           text: labels.database.admin_secret
         type: label-element
@@ -93,11 +93,11 @@ steps:
         - text: options.database.secret.customSecret.label
           value: true
         schema:
-          $ref: discriminator#/createAuthSecret
+          $ref: discriminator#/properties/createAuthSecret
         type: radio
       - allowUserDefinedOption: true
         fetch: getSecrets
-        if: isEqualToDatabaseSecretStatus|has-existing-secret
+        if: showExistingSecretSection
         label:
           text: labels.secret
         schema:

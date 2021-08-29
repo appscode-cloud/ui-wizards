@@ -1,9 +1,6 @@
 steps:
 - form:
     discriminator:
-      createAuthSecret:
-        default: true
-        type: boolean
       elasticVersions:
         type: array
     elements:
@@ -153,17 +150,22 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/disableSecurity
       type: switch
-    - elements:
+    - discriminator:
+        createAuthSecret:
+          default: true
+          type: boolean
+      elements:
       - label:
           text: labels.database.admin_secret
         type: label-element
-      - options:
+      - onChange: onCreateAuthSecretChange
+        options:
         - text: options.database.secret.customSecret.label
           value: true
         - text: options.database.secret.existingSecret.label
           value: false
         schema:
-          $ref: discriminator#/createAuthSecret
+          $ref: discriminator#/properties/createAuthSecret
         type: radio
       - allowUserDefinedOption: true
         fetch: getSecrets

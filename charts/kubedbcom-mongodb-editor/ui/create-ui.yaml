@@ -89,7 +89,7 @@ steps:
       type: radio
     - allowUserDefinedOption: true
       fetch: getSecrets
-      if: isEqualToDatabaseSecretStatus|has-existing-secret
+      if: showExistingSecretSection
       label:
         text: labels.secret
       schema:
@@ -1118,8 +1118,8 @@ steps:
               type: string
           elements:
           - label:
-              text: labels.shardNodes
               isSubsection: true
+              text: labels.shardNodes
             type: label-element
           - computed: setConfigurationSourceShard
             individualItemDisabilityCheck: disableConfigSourceOption
@@ -1154,8 +1154,8 @@ steps:
               $ref: discriminator#/properties/configurationShard
             type: editor
           - label:
-              text: labels.configServerNodes
               isSubsection: true
+              text: labels.configServerNodes
             type: label-element
           - computed: setConfigurationSourceConfigServer
             individualItemDisabilityCheck: disableConfigSourceOption
@@ -1190,8 +1190,8 @@ steps:
               $ref: discriminator#/properties/configurationConfigServer
             type: editor
           - label:
-              text: labels.mongosNodes
               isSubsection: true
+              text: labels.mongosNodes
             type: label-element
           - computed: setConfigurationSourceMongos
             individualItemDisabilityCheck: disableConfigSourceOption

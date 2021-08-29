@@ -1728,32 +1728,10 @@ function getInitialCreateAuthSecretStatus({ model, getValue }) {
   return initialCreateAuthSecretStatus;
 }
 
-function getDatabaseSecretStatus({ model, getValue, watchDependency }) {
-  const authSecret = getValue(
-    model,
-    "/resources/kubedbComMariaDB/spec/authSecret"
-  );
-  const secret_auth = getValue(model, "/resources/secret_auth");
-  watchDependency("model#/resources/kubedbComMariaDB/spec/authSecret");
-  watchDependency("model#/resources/secret_auth");
-  if (authSecret) return "has-existing-secret";
-  else if (secret_auth) return "custom-secret-with-password";
-  else return "custom-secret-without-password";
-}
-
 function getCreateAuthSecret({ model, getValue }) {
   return (
     getInitialCreateAuthSecretStatus({ model, getValue }) !==
     "has-existing-secret"
-  );
-}
-
-function isEqualToDatabaseSecretStatus(
-  { model, getValue, watchDependency },
-  value
-) {
-  return (
-    getDatabaseSecretStatus({ model, getValue, watchDependency }) === value
   );
 }
 
@@ -1869,43 +1847,7 @@ async function getSecrets({
   }
 }
 
-async function hasExistingSecret({
-  storeGet,
-  axios,
-  model,
-  getValue,
-  watchDependency,
-}) {
-  const resp = await getSecrets({
-    storeGet,
-    axios,
-    model,
-    getValue,
-    watchDependency,
-  });
-  return !!(resp && resp.length);
-}
-
-async function hasNoExistingSecret({
-  storeGet,
-  axios,
-  model,
-  getValue,
-  watchDependency,
-}) {
-  const resp = await hasExistingSecret({
-    storeGet,
-    axios,
-    model,
-    getValue,
-    watchDependency,
-  });
-  return !resp;
-}
-
 //////////////////////////////////////// Service Monitor //////////////////////////////////////////////////////
-
-//////////////////// service monitor ///////////////////
 
 function isEqualToServiceMonitorType(
   { rootModel, watchDependency },
@@ -2080,9 +2022,7 @@ return {
 	returnFalse,
 	onAgentChange,
 	getInitialCreateAuthSecretStatus,
-	getDatabaseSecretStatus,
 	getCreateAuthSecret,
-	isEqualToDatabaseSecretStatus,
   showExistingSecretSection,
 	showPasswordSection,
 	disableInitializationSection,
@@ -2090,8 +2030,6 @@ return {
 	decodePassword,
 	onCreateAuthSecretChange,
 	getSecrets,
-	hasExistingSecret,
-	hasNoExistingSecret,
 	isEqualToServiceMonitorType,
 	onConfigurationSourceChange,
 	onConfigurationChange,
