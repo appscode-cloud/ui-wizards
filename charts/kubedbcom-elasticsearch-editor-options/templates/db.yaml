@@ -86,3 +86,35 @@ spec:
   authSecret:
     name: {{ .Values.spec.authSecret.name }}
 {{- end }}
+{{ if not (eq .Values.spec.authPlugin "X-Pack") }}
+  internalUsers:
+    admin:
+      description: "Elasticsearch admin user"
+      backendRoles:
+      - admin
+      reserved: true
+      # secretName: {{ include "kubedbcom-elasticsearch-editor-options.fullname" . }}-admin-cred
+    kibanaro:
+      description: "Kibana user"
+      # secretName: {{ include "kubedbcom-elasticsearch-editor-options.fullname" . }}-kibanaro-cred
+    kibanaserver:
+      description: "Kibana server user"
+      reserved: true
+      # secretName: {{ include "kubedbcom-elasticsearch-editor-options.fullname" . }}-kibanaserver-cred
+    logstash:
+      description: "Logstash user"
+      # secretName: {{ include "kubedbcom-elasticsearch-editor-options.fullname" . }}-logstash-cred
+    metrics_exporter:
+      description: "Prometheus metrics exporter user"
+      # secretName: {{ include "kubedbcom-elasticsearch-editor-options.fullname" . }}-metrics-exporter-cred
+    readall:
+      description: "Elasticsearch readall user"
+      # secretName: {{ include "kubedbcom-elasticsearch-editor-options.fullname" . }}-readall-cred
+    snapshotrestore:
+      description: "Elasticsearch snapshot restore user"
+      # secretName: {{ include "kubedbcom-elasticsearch-editor-options.fullname" . }}-snapshotrestore-cred
+  rolesMapping:
+    readall_and_monitor:
+      users:
+      - metrics_exporter
+{{ end }}
