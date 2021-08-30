@@ -63,14 +63,7 @@ func (in *ElasticsearchTopology) DeepCopyInto(out *ElasticsearchTopology) {
 	*out = *in
 	out.Master = in.Master
 	out.Data = in.Data
-	out.DataContent = in.DataContent
-	out.DataHot = in.DataHot
-	out.DataWarm = in.DataWarm
-	out.DataCold = in.DataCold
-	out.DataFrozen = in.DataFrozen
 	out.Ingest = in.Ingest
-	out.Ml = in.Ml
-	out.Transform = in.Transform
 	return
 }
 
