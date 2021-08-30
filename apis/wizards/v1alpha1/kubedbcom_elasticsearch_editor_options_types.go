@@ -42,6 +42,8 @@ type KubedbcomElasticsearchEditorOptionsSpec struct {
 
 type KubedbcomElasticsearchEditorOptionsSpecSpec struct {
 	Version string `json:"version"`
+	// Authentication plugin used by Elasticsearch cluster
+	AuthPlugin ElasticsearchAuthPlugin `json:"authPlugin"`
 	// +optional
 	Annotations map[string]string `json:"annotations"`
 	// +optional
@@ -63,17 +65,20 @@ type KubedbcomElasticsearchEditorOptionsSpecSpec struct {
 	AuthSecret AuthSecret                `json:"authSecret"`
 }
 
+// +kubebuilder:validation:Enum=OpenDistro;OpenSearch;SearchGuard;X-Pack
+type ElasticsearchAuthPlugin string
+
+const (
+	ElasticsearchAuthPluginOpenDistro  ElasticsearchAuthPlugin = "OpenDistro"
+	ElasticsearchAuthPluginOpenSearch  ElasticsearchAuthPlugin = "OpenSearch"
+	ElasticsearchAuthPluginSearchGuard ElasticsearchAuthPlugin = "SearchGuard"
+	ElasticsearchAuthPluginXpack       ElasticsearchAuthPlugin = "X-Pack"
+)
+
 type ElasticsearchTopology struct {
-	Master      ElasticsearchNode `json:"master"`
-	Data        ElasticsearchNode `json:"data"`
-	DataContent ElasticsearchNode `json:"dataContent"`
-	DataHot     ElasticsearchNode `json:"dataHot"`
-	DataWarm    ElasticsearchNode `json:"dataWarm"`
-	DataCold    ElasticsearchNode `json:"dataCold"`
-	DataFrozen  ElasticsearchNode `json:"dataFrozen"`
-	Ingest      ElasticsearchNode `json:"ingest"`
-	Ml          ElasticsearchNode `json:"ml"`
-	Transform   ElasticsearchNode `json:"transform"`
+	Master ElasticsearchNode `json:"master"`
+	Data   ElasticsearchNode `json:"data"`
+	Ingest ElasticsearchNode `json:"ingest"`
 }
 
 type ElasticsearchNode struct {

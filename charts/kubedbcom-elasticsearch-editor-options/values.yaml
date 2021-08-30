@@ -19,6 +19,10 @@ spec:
   # List options
   version: xpack-7.13.2
 
+  # options UI sends there fields based on selected version
+  # possible values: OpenDistro;OpenSearch;SearchGuard;X-Pack
+  authPlugin: X-Pack
+
   # Annotations to add to the database custom resource
   annotations: {}
 
@@ -27,58 +31,23 @@ spec:
 
   # Combined, Dedicated
   mode: Combined
-  replicas: 1
+  replicas: 3
   topology:
     master:
       replicas: 3
       machine: ""
       persistence:
-        size: 2Gi
+        size: 1Gi
     data:
-      replicas: 1
+      replicas: 3
       machine: ""
       persistence:
-        size: 2Gi
-    dataContent:
-      replicas: 1
-      machine: ""
-      persistence:
-        size: 2Gi
-    dataHot:
-      replicas: 1
-      machine: ""
-      persistence:
-        size: 2Gi
-    dataWarm:
-      replicas: 1
-      machine: ""
-      persistence:
-        size: 2Gi
-    dataCold:
-      replicas: 1
-      machine: ""
-      persistence:
-        size: 2Gi
-    dataFrozen:
-      replicas: 1
-      machine: ""
-      persistence:
-        size: 2Gi
+        size: 10Gi
     ingest:
       replicas: 2
       machine: ""
       persistence:
-        size: 2Gi
-    ml:
-      replicas: 1
-      machine: ""
-      persistence:
-        size: 2Gi
-    transform:
-      replicas: 1
-      machine: ""
-      persistence:
-        size: 2Gi
+        size: 1Gi
 
   enableSSL: true
 
