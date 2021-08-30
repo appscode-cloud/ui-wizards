@@ -25,7 +25,7 @@ resources:
       namespace: demo
     spec:
       authSecret:
-        name: elasticsearch-auth
+        name: elasticsearch-admin-cred
       configSecret:
         name: elasticsearch-config
       enableSSL: true
@@ -191,16 +191,6 @@ resources:
       password: WeakPassword
       username: kibanaserver
     type: kubernetes.io/basic-auth
-  secret_auth: # +doc-gen:break
-    apiVersion: v1
-    kind: Secret
-    metadata:
-      name: elasticsearch-auth
-      namespace: demo
-    stringData:
-      password: thisIs1StrongPassword
-      username: elastic
-    type: Opaque
   secret_config: # +doc-gen:break
     apiVersion: v1
     kind: Secret
@@ -209,6 +199,16 @@ resources:
       namespace: demo
     stringData:
       elasticsearch.yml: 'node.processors: 2'
+  secret_elastic_cred: # +doc-gen:break
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: elasticsearch-elastic-cred
+      namespace: demo
+    stringData:
+      password: thisIs1StrongPassword
+      username: elastic
+    type: kubernetes.io/basic-auth
   secret_kibanaro_cred: # +doc-gen:break
     apiVersion: v1
     kind: Secret
@@ -239,6 +239,16 @@ resources:
       password: WeakPassword
       username: kibanaserver
     type: kubernetes.io/basic-auth
+  secret_metrics_exporter_cred: # +doc-gen:break
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: elasticsearch-metrics-exporter-cred
+      namespace: demo
+    stringData:
+      password: WeakPassword
+      username: kibanaserver
+    type: kubernetes.io/basic-auth
   secret_readall_cred: # +doc-gen:break
     apiVersion: v1
     kind: Secret
@@ -249,6 +259,14 @@ resources:
       password: WeakPassword
       username: kibanaserver
     type: kubernetes.io/basic-auth
+  secret_secure_config: # +doc-gen:break
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: elasticsearch-secure-config
+      namespace: demo
+    stringData:
+      elasticsearch.yml: 'node.processors: 2'
   secret_snapshotrestore_cred: # +doc-gen:break
     apiVersion: v1
     kind: Secret
