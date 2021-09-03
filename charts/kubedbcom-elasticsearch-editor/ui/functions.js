@@ -240,9 +240,9 @@ function isDiscriminatorEqualTo({discriminator, getValue, watchDependency}, disc
   return value === pathValue;
 }
 
-function isDistributionNotSearchGuard({discriminator, getValue, watchDependency, commit}) {
-  watchDependency("discriminator#/selectedVersionDistribution");
-  const pathValue = getValue(discriminator, "/selectedVersionDistribution");
+function isAuthPluginNotSearchGuard({discriminator, getValue, watchDependency, commit}) {
+  watchDependency("discriminator#/selectedVersionAuthPlugin");
+  const pathValue = getValue(discriminator, "/selectedVersionAuthPlugin");
 
   if(!pathValue) return false;
 
@@ -260,7 +260,7 @@ async function showInternalUsersAndRolesMapping({ model, getValue, watchDependen
   watchDependency("model#/resources/kubedbComElasticsearch/spec/disableSecurity");
   watchDependency("model#/resources/kubedbComElasticsearch/spec/version");
 
-  const dist = await getSelectedVersionDistribution({ model, getValue, watchDependency, axios, storeGet, setDiscriminatorValue });
+  const dist = await getSelectedVersionAuthPlugin({ model, getValue, watchDependency, axios, storeGet, setDiscriminatorValue });
 
   const ret =  ((dist === "OpenDistro" || dist === "SearchGuard") && isSecurityEnabled({model, getValue, watchDependency}));
 
@@ -292,9 +292,9 @@ async function showInternalUsersAndRolesMapping({ model, getValue, watchDependen
 async function showSecureCustomConfig({ model, getValue, watchDependency, axios, storeGet, setDiscriminatorValue , commit}) {
   watchDependency("model#/resources/kubedbComElasticsearch/spec/version");
 
-  const dist = await getSelectedVersionDistribution({ model, getValue, watchDependency, axios, storeGet, setDiscriminatorValue });
+  const dist = await getSelectedVersionAuthPlugin({ model, getValue, watchDependency, axios, storeGet, setDiscriminatorValue });
 
-  const ret =  (dist === "ElasticStack");
+  const ret =  (dist === "X-Pack");
 
   if(ret) {
     commit("wizard/showSteps$update", {
@@ -328,7 +328,7 @@ async function getElasticSearchVersions(
     filter: {
       items: {
         metadata: { name: null },
-        spec: { version: null, deprecated: null, distribution: null },
+        spec: { version: null, deprecated: null, authPlugin: null },
       },
     },
   };
@@ -383,11 +383,11 @@ function onDisableSecurityChange({ model, getValue, commit }) {
 
 async function onVersionChange({ model, getValue, watchDependency, axios, storeGet, commit, setDiscriminatorValue }) {
   
-  const dist = await getSelectedVersionDistribution({ model, getValue, watchDependency, axios, storeGet, setDiscriminatorValue });
+  const dist = await getSelectedVersionAuthPlugin({ model, getValue, watchDependency, axios, storeGet, setDiscriminatorValue });
   
   const isOpenDistro = dist === "OpenDistro";
   const isSearchGuard = dist === "SearchGuard";
-  const isXpack = dist === "ElasticStack"
+  const isXpack = dist === "X-Pack"
   
   if(!isOpenDistro && !isSearchGuard) {
     commit("wizard/model$delete", "/resources/kubedbComElasticsearch/spec/internalUsers");
@@ -468,11 +468,11 @@ function showPasswordSection({
 }
 
 function setAuthSecretPassword({ model, getValue, watchDependency, discriminator, commit }) {
-  watchDependency("discriminator#/selectedVersionDistribution");
+  watchDependency("discriminator#/selectedVersionAuthPlugin");
 
-  const dist = getValue(discriminator, "/selectedVersionDistribution");
+  const dist = getValue(discriminator, "/selectedVersionAuthPlugin");
   if(dist) {
-    if(dist === "ElasticStack") {
+    if(dist === "X-Pack") {
       const encodedPassword = getValue(model, "/resources/secret_elastic_cred/data/password");
       commit(
         "wizard/model$delete",
@@ -492,11 +492,11 @@ function setAuthSecretPassword({ model, getValue, watchDependency, discriminator
 
 function onAuthSecretPasswordChange({ getValue, discriminator, commit }) {
   const stringPassword = getValue(discriminator, "/password");
-  const dist = getValue(discriminator, "/selectedVersionDistribution");
+  const dist = getValue(discriminator, "/selectedVersionAuthPlugin");
 
   if(dist) {
     if(stringPassword) {
-      if(dist === "ElasticStack") {
+      if(dist === "X-Pack") {
       commit("wizard/model$update", {
         path: "/resources/secret_elastic_cred/data/password",
         value: encodePassword({}, stringPassword),
@@ -760,7 +760,7 @@ function getStorageClassNamesFromDiscriminator({model, discriminator, getValue, 
   return options;
 }
 
-async function getSelectedVersionDistribution({ model, getValue, watchDependency, axios, storeGet, setDiscriminatorValue }, path) {
+async function getSelectedVersionAuthPlugin({ model, getValue, watchDependency, axios, storeGet, setDiscriminatorValue }, path) {
   watchDependency("model#/resources/kubedbComElasticsearch/spec/version");
   const version = getValue(model, "/resources/kubedbComElasticsearch/spec/version") || "";
 
@@ -768,7 +768,7 @@ async function getSelectedVersionDistribution({ model, getValue, watchDependency
 
   const selectedVersion = elasticVersions?.find((item) => item.value === version);
   
-  const ret = selectedVersion?.spec?.distribution || ""; 
+  const ret = selectedVersion?.spec?.authPlugin || "";
 
   if(path) {
     setDiscriminatorValue(path, ret);
@@ -841,7 +841,7 @@ function setInternalUsers({ model, getValue, watchDependency }) {
 
   for (const item in internalUsers) {
       internalUsers[item].username = item;
-      const encodedPassword = getValue(model, `/resource/secret_${item}_cred/data/password`);
+      const encodedPassword = getValue(model, `/resources/secret_${item}_cred/data/password`);
       if(internalUsers[item].secretName) {
         internalUsers[item].createCred = "no";
       } else {
@@ -874,9 +874,9 @@ function disableUserEdit({itemCtx}) {
   return {};
 }
 
-async function isDistributionEqualTo({ model, getValue, watchDependency, axios, storeGet, setDiscriminatorValue }, distribution) {
-  const dist = await getSelectedVersionDistribution({ model, getValue, watchDependency, axios, storeGet, setDiscriminatorValue });
-  return (dist === distribution);
+async function isAuthPluginEqualTo({ model, getValue, watchDependency, axios, storeGet, setDiscriminatorValue }, authPlugin) {
+  const dist = await getSelectedVersionAuthPlugin({ model, getValue, watchDependency, axios, storeGet, setDiscriminatorValue });
+  return (dist === authPlugin);
 }
 
 // internal user cred
@@ -2452,7 +2452,7 @@ return {
   isDedicatedModeSelected,
   isCombinedModeSelected,
   isDiscriminatorEqualTo,
-  isDistributionNotSearchGuard,
+  isAuthPluginNotSearchGuard,
   showInternalUsersAndRolesMapping,
   showSecureCustomConfig,
   getElasticSearchVersions,
@@ -2464,7 +2464,7 @@ return {
   getStorageClassNamesFromDiscriminator,
 	deleteDatabaseModePath,
   isEqualToDatabaseMode,
-  getSelectedVersionDistribution,
+  getSelectedVersionAuthPlugin,
   onNodeSwitchFalse,
   onInternalUsersChange,
   disableRoleDeletion,
@@ -2472,7 +2472,7 @@ return {
   validateNewUser,
   disableUsername,
   disableUserEdit,
-  isDistributionEqualTo,
+  isAuthPluginEqualTo,
   showExistingCredSection,
   showPasswordCredSection,
   onRolesMappingChange,

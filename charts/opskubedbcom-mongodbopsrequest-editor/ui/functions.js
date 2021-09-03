@@ -623,8 +623,6 @@ function getRequestTypeFromRoute({ route }) {
 function isDbDetailsLoading({discriminator, getValue, watchDependency}) {
   watchDependency("discriminator#/dbDetails");
   const dbDetails = getValue(discriminator, "/dbDetails");
-
-  console.log(dbDetails);
   
   return !dbDetails;
 }

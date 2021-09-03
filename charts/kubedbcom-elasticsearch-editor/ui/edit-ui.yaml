@@ -178,7 +178,7 @@ steps:
       if: isEqualToDatabaseMode|Combined
       type: single-step-form
     - discriminator:
-        selectedVersionDistribution:
+        selectedVersionAuthPlugin:
           default: SearchGaurd
           type: string
         storageClasses:
@@ -189,10 +189,10 @@ steps:
         schema:
           $ref: discriminator#/properties/storageClasses
         type: input
-      - computed: getSelectedVersionDistribution|/selectedVersionDistribution
+      - computed: getSelectedVersionAuthPlugin|/selectedVersionAuthPlugin
         if: returnFalse
         schema:
-          $ref: discriminator#/properties/selectedVersionDistribution
+          $ref: discriminator#/properties/selectedVersionAuthPlugin
         type: input
       - elements:
         - disabled: true
@@ -436,7 +436,7 @@ steps:
           show_label: true
           type: reusable-element
         hideForm: true
-        if: isDiscriminatorEqualTo|/selectedVersionDistribution|X-Pack
+        if: isDiscriminatorEqualTo|/selectedVersionAuthPlugin|X-Pack
         label:
           text: labels.ml_nodes
         schema:
@@ -499,7 +499,7 @@ steps:
           show_label: true
           type: reusable-element
         hideForm: true
-        if: isDiscriminatorEqualTo|/selectedVersionDistribution|X-Pack
+        if: isDiscriminatorEqualTo|/selectedVersionAuthPlugin|X-Pack
         label:
           text: labels.transform_nodes
         schema:
@@ -562,7 +562,7 @@ steps:
           show_label: true
           type: reusable-element
         hideForm: true
-        if: isDiscriminatorEqualTo|/selectedVersionDistribution|X-Pack
+        if: isDiscriminatorEqualTo|/selectedVersionAuthPlugin|X-Pack
         label:
           text: labels.data_cold_nodes
         schema:
@@ -625,7 +625,7 @@ steps:
           show_label: true
           type: reusable-element
         hideForm: true
-        if: isDiscriminatorEqualTo|/selectedVersionDistribution|X-Pack
+        if: isDiscriminatorEqualTo|/selectedVersionAuthPlugin|X-Pack
         label:
           text: labels.data_content_nodes
         schema:
@@ -688,7 +688,7 @@ steps:
           show_label: true
           type: reusable-element
         hideForm: true
-        if: isDiscriminatorEqualTo|/selectedVersionDistribution|X-Pack
+        if: isDiscriminatorEqualTo|/selectedVersionAuthPlugin|X-Pack
         label:
           text: labels.data_frozen_nodes
         schema:
@@ -751,7 +751,7 @@ steps:
           show_label: true
           type: reusable-element
         hideForm: true
-        if: isDistributionNotSearchGuard
+        if: isAuthPluginNotSearchGuard
         label:
           text: labels.data_hot_nodes
         schema:
@@ -814,7 +814,7 @@ steps:
           show_label: true
           type: reusable-element
         hideForm: true
-        if: isDistributionNotSearchGuard
+        if: isAuthPluginNotSearchGuard
         label:
           text: labels.data_warm_nodes
         schema:
@@ -888,7 +888,7 @@ steps:
             schema:
               $ref: discriminator#/properties/users/items/properties/opendistroSecurityRoles/items
             type: input
-          if: isDistributionEqualTo|OpenDistro
+          if: isAuthPluginEqualTo|OpenDistro
           label:
             text: labels.opendistro_security_roles
           schema:
@@ -905,7 +905,7 @@ steps:
             schema:
               $ref: discriminator#/properties/users/items/properties/searchGuardRoles/items
             type: input
-          if: isDistributionEqualTo|SearchGuard
+          if: isAuthPluginEqualTo|SearchGuard
           label:
             text: labels.search_guard_roles
           schema:

@@ -333,7 +333,7 @@ async function getStorageClassNames({ axios, storeGet, commit }, path) {
 }
 
 async function getElasticSearchVersions(
-  { axios, storeGet, setDiscriminatorValue, discriminator, getValue, commit, model, watchDependency },
+  { axios, storeGet, setDiscriminatorValue },
   group,
   version,
   resource
@@ -345,7 +345,7 @@ async function getElasticSearchVersions(
     filter: {
       items: {
         metadata: { name: null },
-        spec: { version: null, deprecated: null, distribution: null, authPlugin: null },
+        spec: { version: null, deprecated: null, authPlugin: null },
       },
     },
   };
@@ -363,8 +363,6 @@ async function getElasticSearchVersions(
   const filteredElasticSearchVersions = resources.filter(
     (item) => item.spec && !item.spec.deprecated
   );
-
-  onVersionChange({discriminator, getValue, commit, model, watchDependency});
 
   filteredElasticSearchVersions.map((item) => {
     const name = (item.metadata && item.metadata.name) || "";
@@ -488,29 +486,18 @@ function setMachineToCustom() {
   return "custom";
 }
 
-function disableConfigureOption({ model, discriminator, getValue, watchDependency, itemCtx, axios, storeGet }) {
+function disableConfigureOption({ model, getValue, watchDependency, itemCtx }) {
+  watchDependency("model#/spec/authPlugin");
+  const authPlugin = getValue(model, "/spec/authPlugin");
+
   if(itemCtx.value === "tls") {
-      return !isSecurityEnabled({model, getValue, watchDependency});
+    return !isSecurityEnabled({model, getValue, watchDependency});
   }
-  else if(itemCtx.value === "internal-users" || itemCtx.value === "roles-mapping") {
-    watchDependency("model#/spec/version");
-    watchDependency("discriminator#/elasticVersions");
-
-    const version = getValue(model, "/spec/version");
-    const elasticVersions = getValue(discriminator, "/elasticVersions");
-    const selectedVersion = elasticVersions?.find((item) => item.value === version) || {};
-
-    return !isSecurityEnabled({model, getValue, watchDependency}) || selectedVersion.spec?.distribution === "ElasticStack";
+  else if(itemCtx.value === "internal-users" || itemCtx.value === "roles-mapping") {  
+    return !isSecurityEnabled({model, getValue, watchDependency}) || !authPlugin || authPlugin === "X-Pack";
   }
   else if(itemCtx.value === "secure-custom-config") {
-    watchDependency("model#/spec/version");
-    watchDependency("discriminator#/elasticVersions");
-
-    const version = getValue(model, "/spec/version");
-    const elasticVersions = getValue(discriminator, "/elasticVersions");
-    const selectedVersion = elasticVersions?.find((item) => item.value === version) || {};
-
-    return selectedVersion.spec?.distribution !== "ElasticStack";
+    return authPlugin !== "X-Pack";
   }
   return false;
 }
