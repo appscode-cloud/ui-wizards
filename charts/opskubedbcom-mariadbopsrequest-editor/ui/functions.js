@@ -639,22 +639,6 @@ function setValueFromDbDetails({discriminator, getValue, watchDependency, commit
   return retValue || undefined;
 }
 
-function setConfigFiles({model, getValue, watchDependency}) {
-  watchDependency("model#/resources/secret_config/stringData");
-  const configFiles = getValue(model, "/resources/secret_config/stringData");
-
-  const files = [];
-
-  for (const item in configFiles) {
-      const obj = {};
-      obj.key = item;
-      obj.value = configFiles[item];
-      files.push(obj);
-  }
-
-  return files;
-}
-
 return {
 	fetchJsons,
 	returnFalse,

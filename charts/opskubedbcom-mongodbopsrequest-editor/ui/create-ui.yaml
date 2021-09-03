@@ -1,6 +1,14 @@
 steps:
 - form:
+    discriminator:
+      dbDetails:
+        type: object
     elements:
+    - computed: getMongoDetails
+      if: returnFalse
+      schema:
+        $ref: discriminator#/properties/dbDetails
+      type: input
     - label:
         text: labels.op_req_name
       required: true
@@ -27,6 +35,7 @@ steps:
         text: labels.config_ops_request
       type: label-element
     - computed: getRequestTypeFromRoute
+      disabled: isDbDetailsLoading
       hasDescription: true
       individualItemDisabilityCheck: disableOpsRequest
       label:
@@ -57,7 +66,8 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/type
       type: radio
-    - fetch: getMongoDbVersions
+    - computed: setValueFromDbDetails|/spec/version
+      fetch: getMongoDbVersions
       if: ifRequestTypeEqualsTo|Upgrade
       label:
         text: labels.targetVersion
@@ -65,7 +75,8 @@ steps:
         $ref: schema#/properties/spec/properties/upgrade/properties/targetVersion
       type: select
     - elements:
-      - if: ifDbTypeEqualsTo|replicaSet|horizontalScaling
+      - computed: setValueFromDbDetails|/spec/replicas
+        if: ifDbTypeEqualsTo|replicaSet|horizontalScaling
         label:
           text: labels.replicas
         schema:
@@ -76,7 +87,8 @@ steps:
           - label:
               text: labels.configServer
             type: label-element
-          - label:
+          - computed: setValueFromDbDetails|/spec/shardTopology/configServer/replicas
+            label:
               text: labels.replicas
             schema:
               $ref: schema#/properties/spec/properties/horizontalScaling/properties/configServer/properties/replicas
@@ -90,7 +102,8 @@ steps:
           - label:
               text: labels.mongos
             type: label-element
-          - label:
+          - computed: setValueFromDbDetails|/spec/shardTopology/mongos/replicas
+            label:
               text: labels.replicas
             schema:
               $ref: schema#/properties/spec/properties/horizontalScaling/properties/mongos/properties/replicas
@@ -104,12 +117,14 @@ steps:
           - label:
               text: labels.shard
             type: label-element
-          - label:
+          - computed: setValueFromDbDetails|/spec/shardTopology/shard/replicas
+            label:
               text: labels.replicas
             schema:
               $ref: schema#/properties/spec/properties/horizontalScaling/properties/shard/properties/replicas
             type: input
-          - label:
+          - computed: setValueFromDbDetails|/spec/shardTopology/shard/shards
+            label:
               text: labels.shards
             schema:
               $ref: schema#/properties/spec/properties/horizontalScaling/properties/shard/properties/shards
@@ -133,6 +148,7 @@ steps:
           chart:
             name: uibytebuildersdev-component-resources
             version: v0.2.0-alpha.0
+          computed: setValueFromDbDetails|/spec/podTemplate/spec/resources|/spec/verticalScaling/standalone
           label:
             text: Standalone vertical scaling
           moduleResolver: fetchJsons
@@ -148,7 +164,8 @@ steps:
         - alias: reusable_replicaset_reources
           chart:
             name: uibytebuildersdev-component-resources
-            version: v0.2.0-alpha.0
+            version: v0.2.0-alpha.
+          computed: setValueFromDbDetails|/spec/podTemplate/spec/resources|/spec/verticalScaling/replicaSet
           label:
             text: 'Replicaset vertical scaling '
           moduleResolver: fetchJsons
@@ -166,6 +183,7 @@ steps:
             chart:
               name: uibytebuildersdev-component-resources
               version: v0.2.0-alpha.0
+            computed: setValueFromDbDetails|/spec/shardTopology/configServer/podTemplate/spec/resources|/spec/verticalScaling/configServer
             label:
               text: Config Server Vertical Scaling
             moduleResolver: fetchJsons
@@ -181,6 +199,7 @@ steps:
             chart:
               name: uibytebuildersdev-component-resources
               version: v0.2.0-alpha.0
+            computed: setValueFromDbDetails|/spec/shardTopology/mongos/podTemplate/spec/resources|/spec/verticalScaling/mongos
             label:
               text: Mongos Vertical Scaling
             moduleResolver: fetchJsons
@@ -196,6 +215,7 @@ steps:
             chart:
               name: uibytebuildersdev-component-resources
               version: v0.2.0-alpha.0
+            computed: setValueFromDbDetails|/spec/shardTopology/shard/podTemplate/spec/resources|/spec/verticalScaling/shard
             label:
               text: Shard Vertical Scaling
             moduleResolver: fetchJsons
@@ -213,25 +233,29 @@ steps:
       if: ifRequestTypeEqualsTo|VerticalScaling
       type: single-step-form
     - elements:
-      - if: ifDbTypeEqualsTo|standalone|volumeExpansion
+      - computed: setValueFromDbDetails|/spec/storage/resources/requests/storage
+        if: ifDbTypeEqualsTo|standalone|volumeExpansion
         label:
           text: labels.standalone
         schema:
           $ref: schema#/properties/spec/properties/volumeExpansion/properties/standalone
         type: input
-      - if: ifDbTypeEqualsTo|replicaSet|volumeExpansion
+      - computed: setValueFromDbDetails|/spec/storage/resources/requests/storage
+        if: ifDbTypeEqualsTo|replicaSet|volumeExpansion
         label:
           text: labels.replicaSet
         schema:
           $ref: schema#/properties/spec/properties/volumeExpansion/properties/replicaSet
         type: input
       - elements:
-        - label:
+        - computed: setValueFromDbDetails|/spec/shardTopology/configServer/storage/resources/requests/storage
+          label:
             text: labels.configServer
           schema:
             $ref: schema#/properties/spec/properties/volumeExpansion/properties/configServer
           type: input
-        - label:
+        - computed: setValueFromDbDetails|/spec/shardTopology/shard/storage/resources/requests/storage
+          label:
             text: labels.shard
           schema:
             $ref: schema#/properties/spec/properties/volumeExpansion/properties/shard
@@ -264,7 +288,8 @@ steps:
             $ref: discriminator#/properties/reconfigurationType
           type: radio
         - elements:
-          - fetch: getConfigSecrets
+          - computed: setValueFromDbDetails|/spec/configSecret/name
+            fetch: getConfigSecrets
             label:
               text: labels.configSecret
             schema:
@@ -314,7 +339,8 @@ steps:
             $ref: discriminator#/properties/reconfigurationType
           type: radio
         - elements:
-          - fetch: getConfigSecrets
+          - computed: setValueFromDbDetails|/spec/configSecret/name
+            fetch: getConfigSecrets
             label:
               text: labels.configSecret
             schema:
@@ -365,7 +391,8 @@ steps:
               $ref: discriminator#/properties/reconfigurationType
             type: radio
           - elements:
-            - fetch: getConfigSecrets
+            - computed: setValueFromDbDetails|/spec/shardTopology/configServer/configSecret/name
+              fetch: getConfigSecrets
               label:
                 text: labels.configSecret
               schema:
@@ -411,7 +438,8 @@ steps:
               $ref: discriminator#/properties/reconfigurationType
             type: radio
           - elements:
-            - fetch: getConfigSecrets
+            - computed: setValueFromDbDetails|/spec/shardTopology/mongos/configSecret/name
+              fetch: getConfigSecrets
               label:
                 text: labels.configSecret
               schema:
@@ -457,7 +485,8 @@ steps:
               $ref: discriminator#/properties/reconfigurationType
             type: radio
           - elements:
-            - fetch: getConfigSecrets
+            - computed: setValueFromDbDetails|/spec/shardTopology/shard/configSecret/name
+              fetch: getConfigSecrets
               label:
                 text: labels.configSecret
               schema:
@@ -528,7 +557,8 @@ steps:
           schema:
             $ref: schema#/properties/spec/properties/tls/properties/issuerRef/properties/apiGroup
           type: input
-        - label:
+        - computed: setValueFromDbDetails|/spec/tls/issuerRef/kind
+          label:
             text: labels.kind
           options:
           - text: Issuer
@@ -539,21 +569,15 @@ steps:
           schema:
             $ref: schema#/properties/spec/properties/tls/properties/issuerRef/properties/kind
           type: select
-        - fetch: getIssuerRefsName
-          if: hasIssuerRefName
+        - allowUserDefinedOption: true
+          computed: setValueFromDbDetails|/spec/tls/issuerRef/name
+          fetch: getIssuerRefsName
           label:
             text: labels.name
           required: isIssuerRefRequired
           schema:
             $ref: schema#/properties/spec/properties/tls/properties/issuerRef/properties/name
           type: select
-        - if: hasNoIssuerRefName
-          label:
-            text: labels.name
-          required: isIssuerRefRequired
-          schema:
-            $ref: schema#/properties/spec/properties/tls/properties/issuerRef/properties/name
-          type: input
         if: showIssuerRefAndCertificates
         schema:
           $ref: schema#/properties/spec/properties/tls/properties/issuerRef
@@ -562,6 +586,7 @@ steps:
         chart:
           name: uibytebuildersdev-component-certificates
           version: v0.2.0-alpha.0
+        computed: setValueFromDbDetails|/spec/tls/certificates|/spec/tls/certificates
         if: showIssuerRefAndCertificates
         moduleResolver: fetchJsons
         schema:

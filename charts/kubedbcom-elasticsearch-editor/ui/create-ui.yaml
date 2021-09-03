@@ -81,10 +81,19 @@ steps:
     - discriminator:
         createAuthSecret:
           type: boolean
+        password:
+          type: string
+        selectedVersionDistribution:
+          type: string
       elements:
       - label:
           text: labels.database.admin_secret
         type: label-element
+      - computed: getSelectedVersionDistribution|/selectedVersionDistribution
+        if: returnFalse
+        schema:
+          $ref: discriminator#/properties/selectedVersionDistribution
+        type: input
       - computed: getCreateAuthSecret
         onChange: onCreateAuthSecretChange
         options:
@@ -103,25 +112,16 @@ steps:
         schema:
           $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/authSecret/properties/name
         type: select
-      - elements:
-        - elements:
-          - decoder: decodePassword
-            disabled: true
-            encoder: encodePassword
-            hideValue: true
-            label:
-              text: Password
-            schema:
-              $ref: schema#/properties/resources/properties/secret_auth/properties/data/properties/password
-            type: input
-          schema:
-            $ref: schema#/properties/resources/properties/secret_auth/properties/data
-          type: single-step-form
+      - computed: setAuthSecretPassword
+        hideValue: true
         if: showPasswordSection
+        onChange: onAuthSecretPasswordChange
+        label:
+          text: Password
         schema:
-          $ref: schema#/properties/resources/properties/secret_auth
-        type: single-step-form
-      if: isSecurityEnabled
+          $ref: discriminator#/properties/password
+        type: input
+      if: showSecretSection
       type: single-step-form
     type: single-step-form
   id: basic
@@ -173,7 +173,6 @@ steps:
       type: single-step-form
     - discriminator:
         selectedVersionDistribution:
-          default: SearchGaurd
           type: string
         storageClasses:
           type: array
@@ -245,6 +244,11 @@ steps:
         schema:
           $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/master
         show_label: true
+        toggleOption:
+          disabled: true
+          id: master-switch
+          onStatusFalse: onNodeSwitchFalse|master
+          show: true
         type: single-step-form
       - elements:
         - label:
@@ -303,6 +307,11 @@ steps:
         schema:
           $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/data
         show_label: true
+        toggleOption:
+          disabled: true
+          id: data-switch
+          onStatusFalse: onNodeSwitchFalse|data
+          show: true
         type: single-step-form
       - elements:
         - label:
@@ -361,6 +370,11 @@ steps:
         schema:
           $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/ingest
         show_label: true
+        toggleOption:
+          disabled: true
+          id: ingest-switch
+          onStatusFalse: onNodeSwitchFalse|ingest
+          show: true
         type: single-step-form
       - elements:
         - label:
@@ -414,12 +428,17 @@ steps:
           show_label: true
           type: reusable-element
         hideForm: true
-        if: isDiscriminatorEqualTo|/selectedVersionDistribution|ElasticStack
+        if: isDiscriminatorEqualTo|/selectedVersionDistribution|X-Pack
         label:
           text: labels.ml_nodes
         schema:
           $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/ml
         show_label: true
+        toggleOption:
+          id: ml-switch
+          onStatusFalse: onNodeSwitchFalse|ml
+          setInitialStatusFalse: true
+          show: true
         type: single-step-form
       - elements:
         - label:
@@ -473,12 +492,17 @@ steps:
           show_label: true
           type: reusable-element
         hideForm: true
-        if: isDiscriminatorEqualTo|/selectedVersionDistribution|ElasticStack
+        if: isDiscriminatorEqualTo|/selectedVersionDistribution|X-Pack
         label:
           text: labels.transform_nodes
         schema:
           $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/transform
         show_label: true
+        toggleOption:
+          id: transform-switch
+          onStatusFalse: onNodeSwitchFalse|transform
+          setInitialStatusFalse: true
+          show: true
         type: single-step-form
       - elements:
         - label:
@@ -532,12 +556,17 @@ steps:
           show_label: true
           type: reusable-element
         hideForm: true
-        if: isDiscriminatorEqualTo|/selectedVersionDistribution|ElasticStack
+        if: isDiscriminatorEqualTo|/selectedVersionDistribution|X-Pack
         label:
           text: labels.data_cold_nodes
         schema:
           $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataCold
         show_label: true
+        toggleOption:
+          id: data-cold-switch
+          onStatusFalse: onNodeSwitchFalse|dataCold
+          setInitialStatusFalse: true
+          show: true
         type: single-step-form
       - elements:
         - label:
@@ -591,12 +620,17 @@ steps:
           show_label: true
           type: reusable-element
         hideForm: true
-        if: isDiscriminatorEqualTo|/selectedVersionDistribution|ElasticStack
+        if: isDiscriminatorEqualTo|/selectedVersionDistribution|X-Pack
         label:
           text: labels.data_content_nodes
         schema:
           $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataContent
         show_label: true
+        toggleOption:
+          id: data-content-switch
+          onStatusFalse: onNodeSwitchFalse|dataContent
+          setInitialStatusFalse: true
+          show: true
         type: single-step-form
       - elements:
         - label:
@@ -650,12 +684,17 @@ steps:
           show_label: true
           type: reusable-element
         hideForm: true
-        if: isDiscriminatorEqualTo|/selectedVersionDistribution|ElasticStack
-        label:
+        if: isDiscriminatorEqualTo|/selectedVersionDistribution|X-Pack
+        label: 
           text: labels.data_frozen_nodes
         schema:
           $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataFrozen
         show_label: true
+        toggleOption:
+          id: data-frozen-switch
+          onStatusFalse: onNodeSwitchFalse|dataFrozen
+          setInitialStatusFalse: true
+          show: true
         type: single-step-form
       - elements:
         - label:
@@ -715,6 +754,11 @@ steps:
         schema:
           $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataHot
         show_label: true
+        toggleOption:
+          id: data-hot-switch
+          onStatusFalse: onNodeSwitchFalse|dataHot
+          setInitialStatusFalse: true
+          show: true
         type: single-step-form
       - elements:
         - label:
@@ -774,6 +818,11 @@ steps:
         schema:
           $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/dataWarm
         show_label: true
+        toggleOption:
+          id: data-warm-switch
+          onStatusFalse: onNodeSwitchFalse|dataWarm
+          setInitialStatusFalse: true
+          show: true
         type: single-step-form
       if: isEqualToDatabaseMode|Dedicated
       type: single-step-form
@@ -821,6 +870,7 @@ steps:
             schema:
               $ref: discriminator#/properties/users/items/properties/backendRoles/items
             type: input
+          individualItemDisabilityCheck: disableRoleDeletion
           label:
             text: labels.backendRoles
           schema:
@@ -865,15 +915,35 @@ steps:
           schema:
             $ref: discriminator#/properties/users/items/properties/searchGuardRoles
           type: list-input-form
+        - label:
+            text: labels.secret
+          type: label-element
+        - options:
+          - text: options.database.secret.existingSecret.label
+            value: "no"
+          - text: options.database.secret.customSecret.label
+            value: "yes"
+          schema:
+            $ref: discriminator#/properties/users/items/properties/createCred
+          type: radio
         - allowUserDefinedOption: true
           fetch: getSecrets
+          if: showExistingCredSection
           label:
             text: labels.secret_name
           schema:
             $ref: discriminator#/properties/users/items/properties/secretName
           type: select
+        - hideValue: true
+          if: showPasswordCredSection
+          label:
+            text: Password
+          schema:
+            $ref: discriminator#/properties/users/items/properties/password
+          type: input
         type: single-step-form
       individualItemDisabilityCheck: disableUserEdit
+      isCreateDisabled: true
       label:
         text: labels.internal_users
       newItemValidator: validateNewUser
@@ -951,7 +1021,8 @@ steps:
             emitAs: rolesMapping
             type: array
         elements:
-        - label:
+        - disabled: disableRoleName
+          label:
             text: labels.role_name
           required: true
           schema:
@@ -1002,14 +1073,17 @@ steps:
           type: switch
         - allowUserDefinedOption: true
           fetch: getInternalUsers
+          individualItemDisabilityCheck: disableUserDeletion
           label:
             text: labels.users
           schema:
             $ref: discriminator#/properties/roles/items/properties/users
           type: multiselect
         type: single-step-form
+      individualItemDisabilityCheck: disableRolesEdit
       label:
         text: labels.roles_mapping
+      newItemValidator: validateNewRole
       onChange: onRolesMappingChange
       schema:
         $ref: discriminator#/properties/rolesMapping
@@ -1947,4 +2021,96 @@ steps:
     type: single-step-form
   id: custom-config
   title: steps.9.label
+- form:
+    elements:
+    - discriminator:
+        setSecretCustomConfig:
+          type: string
+      elements:
+      - computed: returnStringYes
+        label:
+          text: labels.setSecretCustomConfig
+        onChange: onSetSecretCustomConfigChange
+        options:
+        - text: options.yesOrNo.yes.text
+          value: "yes"
+        - text: options.yesOrNo.no.text
+          value: "no"
+        schema:
+          $ref: discriminator#/properties/setSecretCustomConfig
+        type: radio
+      - discriminator:
+          configFiles:
+            type: string
+          configurationSource:
+            default: use-existing-config
+            type: string
+        elements:
+        - computed: setSecretConfigurationSource
+          label:
+            text: labels.secret_custom_config_type
+          onChange: onSecretConfigurationSourceChange
+          options:
+          - text: options.configuration_source.use_existing_config.label
+            value: use-existing-config
+          - text: options.configuration_source.create_new_config.label
+            value: create-new-config
+          schema:
+            $ref: discriminator#/configurationSource
+          type: radio
+        - allowUserDefinedOption: true
+          fetch: getSecrets
+          if: isEqualToDiscriminatorPath|use-existing-config|/configurationSource
+          label:
+            text: labels.name
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/secureConfigSecret/properties/name
+          type: select
+        - addFormLabel: labels.config_file
+          computed: setSecretConfigFiles
+          element:
+            discriminator:
+              files:
+                emitAs: configFiles
+                type: array
+            elements:
+            - label:
+                text: labels.settings_key
+              required: true
+              schema:
+                $ref: discriminator#/properties/files/items/properties/key
+              type: input
+            - label:
+                text: labels.settings_value
+              required: true
+              schema:
+                $ref: discriminator#/properties/files/items/properties/value
+              type: editor
+            type: single-step-form
+          if: isEqualToDiscriminatorPath|create-new-config|/configurationSource
+          label:
+            text: labels.config_files
+          onChange: onSecretConfigFilesChange
+          schema:
+            $ref: discriminator#/properties/configFiles
+          tableContents:
+          - inTableColumn: true
+            label:
+              text: labels.settings_key
+            path: key
+            type: value
+            typeOfValue: string
+          - label:
+              text: labels.settings_value
+            path: value
+            type: value
+            typeOfValue: code
+          type: single-step-form-array
+        if: isDiscriminatorEqualTo|/setSecretCustomConfig|yes
+        type: single-step-form
+      type: single-step-form
+    type: single-step-form
+  id: secure-custom-config
+  if: showSecureCustomConfig
+  title: steps.12.label
 type: multi-step-form

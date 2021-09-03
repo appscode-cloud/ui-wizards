@@ -1,3 +1,20 @@
+function onVersionChange({discriminator, getValue, commit, model, watchDependency}) {
+  watchDependency("discriminator#/elasticVersions")
+  const versions = getValue(discriminator, "/elasticVersions");
+
+  const selectedVersion = getValue(model, "/spec/version");
+
+  const version = versions?.find((item) => item.value === selectedVersion) || {};
+
+  commit("wizard/model$update", {
+    path: "/spec/authPlugin",
+    value: version.authPlugin,
+    force: true
+  });
+
+  return selectedVersion;
+}
+
 const machines = {
   "db.t.micro": {
     resources: {
@@ -316,7 +333,7 @@ async function getStorageClassNames({ axios, storeGet, commit }, path) {
 }
 
 async function getElasticSearchVersions(
-  { axios, storeGet, setDiscriminatorValue },
+  { axios, storeGet, setDiscriminatorValue, discriminator, getValue, commit, model, watchDependency },
   group,
   version,
   resource
@@ -328,7 +345,7 @@ async function getElasticSearchVersions(
     filter: {
       items: {
         metadata: { name: null },
-        spec: { version: null, deprecated: null, distribution: null },
+        spec: { version: null, deprecated: null, distribution: null, authPlugin: null },
       },
     },
   };
@@ -347,11 +364,14 @@ async function getElasticSearchVersions(
     (item) => item.spec && !item.spec.deprecated
   );
 
+  onVersionChange({discriminator, getValue, commit, model, watchDependency});
+
   filteredElasticSearchVersions.map((item) => {
     const name = (item.metadata && item.metadata.name) || "";
     const specVersion = (item.spec && item.spec.version) || "";
     item.text = `${name} (${specVersion})`;
     item.value = name;
+    item.authPlugin = item.spec.authPlugin;
     return true;
   });
 
@@ -482,6 +502,16 @@ function disableConfigureOption({ model, discriminator, getValue, watchDependenc
 
     return !isSecurityEnabled({model, getValue, watchDependency}) || selectedVersion.spec?.distribution === "ElasticStack";
   }
+  else if(itemCtx.value === "secure-custom-config") {
+    watchDependency("model#/spec/version");
+    watchDependency("discriminator#/elasticVersions");
+
+    const version = getValue(model, "/spec/version");
+    const elasticVersions = getValue(discriminator, "/elasticVersions");
+    const selectedVersion = elasticVersions?.find((item) => item.value === version) || {};
+
+    return selectedVersion.spec?.distribution !== "ElasticStack";
+  }
   return false;
 }
 
@@ -503,6 +533,7 @@ function onDisableSecurityChange({ model, getValue }) {
 }
 
 return {
+  onVersionChange,
 	showAuthPasswordField,
 	isEqualToModelPathValue,
 	showAuthSecretField,

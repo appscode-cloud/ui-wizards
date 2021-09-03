@@ -15,7 +15,9 @@ steps:
       schema:
         $ref: schema#/properties/metadata/properties/release/properties/namespace
       type: select
-    - fetch: getElasticSearchVersions|catalog.kubedb.com|v1alpha1|elasticsearchversions
+    - computed: onVersionChange
+      fetch: getElasticSearchVersions|catalog.kubedb.com|v1alpha1|elasticsearchversions
+      onChange: onVersionChange
       label:
         text: labels.database.version
       schema:
@@ -84,46 +86,72 @@ steps:
       if: isEqualToModelPathValue|Combined|/spec/mode
       type: single-step-form
     - elements:
-      - label:
-          text: labels.master_nodes
-        type: label-element
-      - label:
-          text: labels.replicaset.number
+      - elements:
+        - label:
+            text: labels.master_nodes
+          type: label-element
+        - label:
+            text: labels.replicaset.number
+          schema:
+            $ref: schema#/properties/spec/properties/topology/properties/master/properties/replicas
+          type: input
+        - elements:
+          - label:
+              text: labels.storage.size
+            schema:
+              $ref: schema#/properties/spec/properties/topology/properties/master/properties/persistence/properties/size
+            type: input
+          schema:
+            $ref: schema#/properties/spec/properties/topology/properties/master/properties/persistence
+          type: single-step-form
         schema:
-          $ref: schema#/properties/spec/properties/topology/properties/master/properties/replicas
-        type: input
-      - label:
-          text: labels.storage.size
+          $ref: schema#/properties/spec/properties/topology/properties/master
+        type: single-step-form
+      - elements:
+        - label:
+            text: labels.data_nodes
+          type: label-element
+        - label:
+            text: labels.replicaset.number
+          schema:
+            $ref: schema#/properties/spec/properties/topology/properties/data/properties/replicas
+          type: input
+        - elements:
+          - label:
+              text: labels.storage.size
+            schema:
+              $ref: schema#/properties/spec/properties/topology/properties/data/properties/persistence/properties/size
+            type: input
+          schema:
+            $ref: schema#/properties/spec/properties/topology/properties/data/properties/persistence
+          type: single-step-form
         schema:
-          $ref: schema#/properties/spec/properties/topology/properties/master/properties/persistence/properties/size
-        type: input
-      - label:
-          text: labels.data_nodes
-        type: label-element
-      - label:
-          text: labels.replicaset.number
+          $ref: schema#/properties/spec/properties/topology/properties/data
+        type: single-step-form
+      - elements:
+        - label:
+            text: labels.ingest_nodes
+          type: label-element
+        - label:
+            text: labels.replicaset.number
+          schema:
+            $ref: schema#/properties/spec/properties/topology/properties/ingest/properties/replicas
+          type: input
+        - elements:
+          - label:
+              text: labels.storage.size
+            schema:
+              $ref: schema#/properties/spec/properties/topology/properties/ingest/properties/persistence/properties/size
+            type: input
+          schema:
+            $ref: schema#/properties/spec/properties/topology/properties/ingest/properties/persistence
+          type: single-step-form
         schema:
-          $ref: schema#/properties/spec/properties/topology/properties/data/properties/replicas
-        type: input
-      - label:
-          text: labels.storage.size
-        schema:
-          $ref: schema#/properties/spec/properties/topology/properties/data/properties/persistence/properties/size
-        type: input
-      - label:
-          text: labels.ingest_nodes
-        type: label-element
-      - label:
-          text: labels.replicaset.number
-        schema:
-          $ref: schema#/properties/spec/properties/topology/properties/ingest/properties/replicas
-        type: input
-      - label:
-          text: labels.storage.size
-        schema:
-          $ref: schema#/properties/spec/properties/topology/properties/ingest/properties/persistence/properties/size
-        type: input
+          $ref: schema#/properties/spec/properties/topology/properties/ingest
+        type: single-step-form
       if: isEqualToModelPathValue|Dedicated|/spec/mode
+      schema:
+        $ref: schema#/properties/spec/properties/topology
       type: single-step-form
     - hasDescription: true
       label:
@@ -259,6 +287,9 @@ steps:
       - description: options.configOptions.customConfig.description
         text: options.configOptions.customConfig.label
         value: custom-config
+      - description: options.configOptions.secureCustomConfig.description
+        text: options.configOptions.secureCustomConfig.label
+        value: secure-custom-config
       - description: options.configOptions.podTemplate.description
         text: options.configOptions.podTemplate.label
         value: pod-template
