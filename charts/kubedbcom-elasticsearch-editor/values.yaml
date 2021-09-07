@@ -27,7 +27,7 @@ resources:
       authSecret:
         name: elasticsearch-admin-cred
       configSecret:
-        name: elasticsearch-config
+        name: elasticsearch-user-config
       enableSSL: true
       init:
         waitForInitialRestore: true
@@ -191,14 +191,6 @@ resources:
       password: WeakPassword
       username: kibanaserver
     type: kubernetes.io/basic-auth
-  secret_config: # +doc-gen:break
-    apiVersion: v1
-    kind: Secret
-    metadata:
-      name: elasticsearch-config
-      namespace: demo
-    stringData:
-      elasticsearch.yml: 'node.processors: 2'
   secret_elastic_cred: # +doc-gen:break
     apiVersion: v1
     kind: Secret
@@ -277,6 +269,14 @@ resources:
       password: WeakPassword
       username: kibanaserver
     type: kubernetes.io/basic-auth
+  secret_user_config: # +doc-gen:break
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: elasticsearch-user-config
+      namespace: demo
+    stringData:
+      elasticsearch.yml: 'node.processors: 2'
   stashAppscodeComBackupConfiguration: # +doc-gen:break
     apiVersion: stash.appscode.com/v1beta1
     kind: BackupConfiguration
