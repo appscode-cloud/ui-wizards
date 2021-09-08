@@ -373,7 +373,11 @@ function onDisableSecurityChange({ model, getValue, commit }) {
     );
     commit(
       "wizard/model$delete",
-      "/resources/secret_auth"
+      "/resources/secret_admin_cred"
+    );
+    commit(
+      "wizard/model$delete",
+      "/resources/secret_elastic_cred"
     );
     commit("wizard/model$delete", "/resources/kubedbComElasticsearch/spec/internalUsers");
     commit("wizard/model$delete", "/resources/kubedbComElasticsearch/spec/rolesMapping");
@@ -448,9 +452,8 @@ function getCreateAuthSecret({ model, getValue }) {
     model,
     "/resources/kubedbComElasticsearch/spec/authSecret"
   );
-  const secret_auth = getValue(model, "/resources/secret_auth");
-  
-  return !secret_auth;
+ 
+  return !authSecret;
 }
 
 function showExistingSecretSection({

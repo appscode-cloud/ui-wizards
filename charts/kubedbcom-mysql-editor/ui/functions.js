@@ -1674,25 +1674,10 @@ function onAgentChange({ commit, model, getValue }) {
 
 /*************************************  Database Secret Section ********************************************/
 
-let initialCreateAuthSecretStatus = "";
-
-function getInitialCreateAuthSecretStatus({ model, getValue }) {
-  const authSecret = getValue(
-    model,
-    "/resources/kubedbComMySQL/spec/authSecret/name"
-  );
-  const secret_auth = getValue(model, "/resources/secret_auth");
-  if (authSecret) initialCreateAuthSecretStatus = "has-existing-secret";
-  else if (secret_auth)
-    initialCreateAuthSecretStatus = "custom-secret-with-password";
-  else initialCreateAuthSecretStatus = "custom-secret-without-password";
-  return initialCreateAuthSecretStatus;
-}
-
 function getCreateAuthSecret({ model, getValue }) {
   const authSecret = getValue(
     model,
-    "/resources/kubedbComMySQL/spec/authSecret/name"
+    "/resources/kubedbComMySQL/spec/authSecret"
   );
 
   return !authSecret;
@@ -1714,14 +1699,40 @@ function showExistingSecretSection({
 function showPasswordSection({
   getValue,
   watchDependency,
-  model,
+  discriminator
 }) {
-  watchDependency("model#/resources/secret_auth/data/password");
-  const hasSecretAuthData = getValue(
-    model,
-    "/resources/secret_auth/data/password"
-  );
-  return !!hasSecretAuthData;
+  return !showExistingSecretSection({
+    getValue,
+    watchDependency,
+    discriminator
+  })
+}
+
+function setAuthSecretPassword({ model, getValue }) {
+  const encodedPassword = getValue(model, "/resources/secret_auth/data/password");
+  return encodedPassword ? decodePassword({}, encodedPassword) : "";
+}
+
+function onAuthSecretPasswordChange({ getValue, discriminator, commit }) {
+  const stringPassword = getValue(discriminator, "/password");
+
+  if(stringPassword) {
+    commit("wizard/model$update", {
+      path: "/resources/secret_auth/data/password",
+      value: encodePassword({}, stringPassword),
+      force: true
+    });
+    commit("wizard/model$update", {
+      path: "/resources/secret_auth/data/username",
+      value: encodePassword({}, "root"),
+      force: true
+    });
+  } else {
+    commit(
+      "wizard/model$delete",
+      "/resources/secret_auth"
+    );
+  }
 }
 
 function disableInitializationSection({
@@ -1972,10 +1983,11 @@ return {
 	onNameChange,
 	returnFalse,
 	onAgentChange,
-	getInitialCreateAuthSecretStatus,
 	getCreateAuthSecret,
   showExistingSecretSection,
 	showPasswordSection,
+  setAuthSecretPassword,
+  onAuthSecretPasswordChange,
 	disableInitializationSection,
 	encodePassword,
 	decodePassword,

@@ -3,6 +3,8 @@ steps:
     discriminator:
       createAuthSecret:
         type: boolean
+      password:
+        type: string
     elements:
     - label:
         text: labels.database.name
@@ -96,24 +98,15 @@ steps:
       schema:
         $ref: schema#/properties/resources/properties/kubedbComPostgres/properties/spec/properties/authSecret/properties/name
       type: select
-    - elements:
-      - elements:
-        - decoder: decodePassword
-          disabled: true
-          encoder: encodePassword
-          hideValue: true
-          label:
-            text: Password
-          schema:
-            $ref: schema#/properties/resources/properties/secret_auth/properties/data/properties/password
-          type: input
-        schema:
-          $ref: schema#/properties/resources/properties/secret_auth/properties/data
-        type: single-step-form
+    - computed: setAuthSecretPassword
+      hideValue: true
       if: showPasswordSection
+      onChange: onAuthSecretPasswordChange
+      label:
+        text: Password
       schema:
-        $ref: schema#/properties/resources/properties/secret_auth
-      type: single-step-form
+        $ref: discriminator#/properties/password
+      type: input
     - fetch: getClientAuthModes
       label:
         text: labels.client_auth_mode

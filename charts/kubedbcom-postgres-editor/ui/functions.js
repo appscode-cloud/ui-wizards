@@ -1742,26 +1742,13 @@ function onAgentChange({ commit, model, getValue }) {
 
 /*************************************  Database Secret Section ********************************************/
 
-let initialCreateAuthSecretStatus = "";
-
-function getInitialCreateAuthSecretStatus({ model, getValue }) {
+function getCreateAuthSecret({ model, getValue }) {
   const authSecret = getValue(
     model,
     "/resources/kubedbComPostgres/spec/authSecret"
   );
-  const secret_auth = getValue(model, "/resources/secret_auth");
-  if (authSecret) initialCreateAuthSecretStatus = "has-existing-secret";
-  else if (secret_auth)
-    initialCreateAuthSecretStatus = "custom-secret-with-password";
-  else initialCreateAuthSecretStatus = "custom-secret-without-password";
-  return initialCreateAuthSecretStatus;
-}
 
-function getCreateAuthSecret({ model, getValue }) {
-  return (
-    getInitialCreateAuthSecretStatus({ model, getValue }) !==
-    "has-existing-secret"
-  );
+  return !authSecret;
 }
 
 function showExistingSecretSection({
@@ -1781,15 +1768,40 @@ function showExistingSecretSection({
 function showPasswordSection({
   getValue,
   watchDependency,
-  model,
+  discriminator
 }) {
-  watchDependency("model#/resources/secret_auth/data/password");
+  return !showExistingSecretSection({
+    getValue,
+    watchDependency,
+    discriminator
+  })
+}
 
-  const hasSecretAuthData = getValue(
-    model,
-    "/resources/secret_auth/data/password"
-  );
-  return !!hasSecretAuthData;
+function setAuthSecretPassword({ model, getValue }) {
+  const encodedPassword = getValue(model, "/resources/secret_auth/data/password");
+  return encodedPassword ? decodePassword({}, encodedPassword) : "";
+}
+
+function onAuthSecretPasswordChange({ getValue, discriminator, commit }) {
+  const stringPassword = getValue(discriminator, "/password");
+
+  if(stringPassword) {
+    commit("wizard/model$update", {
+      path: "/resources/secret_auth/data/password",
+      value: encodePassword({}, stringPassword),
+      force: true
+    });
+    commit("wizard/model$update", {
+      path: "/resources/secret_auth/data/username",
+      value: encodePassword({}, "postgres"),
+      force: true
+    });
+  } else {
+    commit(
+      "wizard/model$delete",
+      "/resources/secret_auth"
+    );
+  }
 }
 
 // eslint-disable-next-line no-empty-pattern
@@ -2041,10 +2053,11 @@ return {
 	onNameChange,
 	returnFalse,
 	onAgentChange,
-	getInitialCreateAuthSecretStatus,
 	getCreateAuthSecret,
   showExistingSecretSection,
 	showPasswordSection,
+  setAuthSecretPassword,
+  onAuthSecretPasswordChange,
 	encodePassword,
 	decodePassword,
 	onCreateAuthSecretChange,
