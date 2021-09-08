@@ -429,6 +429,18 @@ async function onVersionChange({ model, getValue, watchDependency, axios, storeG
   }
 }
 
+function onEnableSSLChange({model, getValue, commit}) {
+  const enabelSSL = getValue(model, "/resources/kubedbComElasticsearch/spec/enableSSL");
+  const certificates = getValue(model, "/resources/kubedbComElasticsearch/spec/tls/certificates");
+
+  const aliases = ["http"];
+
+  if(enabelSSL === false) {
+    const updatedCertificates = certificates.filter(item => !aliases.includes(item.alias));
+    commit("wizard/model$update", {path: "/resources/kubedbComElasticsearch/spec/tls/certificates", value: updatedCertificates, force: true});
+  }
+}
+
 /*************************************  Database Secret Section ********************************************/
 
 function getCreateAuthSecret({ model, getValue }) {
@@ -781,6 +793,13 @@ function onNodeSwitchFalse({commit}, node) {
   commit("wizard/model$delete", `/resources/kubedbComElasticsearch/spec/topology/${node}`)
 }
 
+function hasTopologyNode({model, getValue, watchDependency}, node) {
+  watchDependency(`model#/resources/kubedbComElasticsearch/spec/topology/${node}`);
+  const nodeValue = getValue(model, `/resources/kubedbComElasticsearch/spec/topology/${node}`)
+
+  return !!nodeValue;
+}
+
 // ************************** Internal Users ********************************
 
 const defaultUsers = ["admin", "kibanaro", "kibanaserver", "logstash", "readall", "snapshotrestore", "metrics_exporter"];
@@ -988,6 +1007,12 @@ function setApiGroup() {
   return "cert-manager.io";
 }
 
+function setApiGroupEdit({model, getValue}) {
+  const kind = getValue(model, "/resources/kubedbComElasticsearch/spec/tls/issuerRef/kind");
+  const name = getValue(model, "/resources/kubedbComElasticsearch/spec/tls/issuerRef/name");
+  return (kind && name) ? "cert-manager.io" : "";
+}
+
 async function getIssuerRefsName({
   axios,
   storeGet,
@@ -1111,6 +1136,27 @@ function onTlsConfigureChange({ discriminator, getValue, commit }) {
       "/resources/kubedbComElasticsearch/spec/clusterAuthMode"
     );
     commit("wizard/model$delete", "/resources/kubedbComElasticsearch/spec/sslMode");
+  }
+}
+
+async function showTlsRecommendation({axios, storeGet}) {
+  const owner = storeGet("/user/username");
+  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+
+  const url = `/clusters/${owner}/${cluster}/proxy/cert-manager.io/v1/issuers`;
+  
+  try {
+    await axios.get(url, {
+      params: { filter: { items: { metadata: { name: null } } } },
+    });
+    return false;
+  } catch (err) {
+    // if any error response status is 404 or not
+    if (err.response && err.response.status === 404) {
+      resp = false;
+    }
+    console.log(err);
+    return true;
   }
 }
 
@@ -2222,7 +2268,7 @@ function onNameChange({ commit, model, getValue }) {
   }
 
   // to reset configSecret name field
-  const hasSecretConfig = getValue(model, "/resources/secret_config");
+  const hasSecretConfig = getValue(model, "/resources/secret_user_config");
   if (hasSecretConfig) {
     commit("wizard/model$update", {
       path: "/resources/kubedbComElasticsearch/spec/configSecret/name",
@@ -2278,13 +2324,13 @@ function onConfigurationSourceChange({
 }) {
   const configurationSource = getValue(discriminator, "/configurationSource");
   if (configurationSource === "use-existing-config") {
-    commit("wizard/model$delete", "/resources/secret_config");
+    commit("wizard/model$delete", "/resources/secret_user_config");
     commit("wizard/model$delete", "/resources/config_secret");
   } else {
-    const value = getValue(model, "/resources/secret_config");
+    const value = getValue(model, "/resources/secret_user_config");
     if (!value) {
       commit("wizard/model$update", {
-        path: "/resources/secret_config",
+        path: "/resources/secret_user_config",
         value: {},
         force: true,
       });
@@ -2302,7 +2348,7 @@ function onConfigurationSourceChange({
 }
 
 function setConfigurationSource({ model, getValue }) {
-  const modelValue = getValue(model, "/resources/secret_config");
+  const modelValue = getValue(model, "/resources/secret_user_config");
   if (modelValue) {
     return "create-new-config";
   }
@@ -2310,8 +2356,8 @@ function setConfigurationSource({ model, getValue }) {
 }
 
 function setConfigFiles({model, getValue, watchDependency}) {
-  watchDependency("model#/resources/secret_config/stringData");
-  const configFiles = getValue(model, "/resources/secret_config/stringData");
+  watchDependency("model#/resources/secret_user_config/stringData");
+  const configFiles = getValue(model, "/resources/secret_user_config/stringData");
 
   const files = [];
 
@@ -2338,7 +2384,7 @@ function onConfigFilesChange({ discriminator, getValue, commit }) {
   }
   
   commit("wizard/model$update", {
-    path: "/resources/secret_config/stringData",
+    path: "/resources/secret_user_config/stringData",
     value: configFiles,
     force: true,
   });
@@ -2349,8 +2395,15 @@ function onSetCustomConfigChange({ discriminator, getValue, commit }) {
 
   if(value === "no") {
     commit("wizard/model$delete", "/resources/kubedbComElasticsearch/spec/configSecret");
-    commit("wizard/model$delete", "/resources/secret_config");
+    commit("wizard/model$delete", "/resources/secret_user_config");
   }
+}
+
+function initSetCustomConfig({model, getValue}) {
+  const configSecret = getValue(model, "/resources/kubedbComElasticsearch/spec/configSecret/name");
+
+  if(configSecret) return "yes";
+  else return "no";
 }
 
 //////////////////// secret custom config /////////////////
@@ -2436,6 +2489,13 @@ function onSetSecretCustomConfigChange({ discriminator, getValue, commit }) {
   }
 }
 
+function initSetSecureCustomConfig({model, getValue}) {
+  const configSecret = getValue(model, "/resources/kubedbComElasticsearch/spec/secureConfigSecret/name");
+
+  if(configSecret) return "yes";
+  else return "no";
+}
+
 return {
 	fetchJsons,
 	disableLableChecker,
@@ -2459,6 +2519,7 @@ return {
   isSecurityEnabled,
   onDisableSecurityChange,
   onVersionChange,
+  onEnableSSLChange,
 	setDatabaseMode,
 	getStorageClassNames,
   getStorageClassNamesFromDiscriminator,
@@ -2466,6 +2527,7 @@ return {
   isEqualToDatabaseMode,
   getSelectedVersionAuthPlugin,
   onNodeSwitchFalse,
+  hasTopologyNode,
   onInternalUsersChange,
   disableRoleDeletion,
   setInternalUsers,
@@ -2484,6 +2546,7 @@ return {
   onCustomizeKernelSettingChange,
   getInternalUsers,
 	setApiGroup,
+	setApiGroupEdit,
 	getIssuerRefsName,
 	hasIssuerRefName,
 	hasNoIssuerRefName,
@@ -2491,6 +2554,7 @@ return {
 	setSSLMode,
 	showTlsConfigureSection,
 	onTlsConfigureChange,
+  showTlsRecommendation,
 	showMonitoringSection,
 	onEnableMonitoringChange,
 	showCustomizeExporterSection,
@@ -2563,4 +2627,6 @@ return {
   setSecretConfigFiles,
   onSecretConfigFilesChange,
   onSetSecretCustomConfigChange,
+  initSetCustomConfig,
+  initSetSecureCustomConfig
 }

@@ -646,13 +646,25 @@ function setValueFromDbDetails({discriminator, getValue, watchDependency, commit
 }
 
 function disableOpsRequest({itemCtx, discriminator, getValue, watchDependency}) {
-  watchDependency("discriminator#/elasticsearchDetails")
+  watchDependency("discriminator#/elasticsearchDetails");
   if (itemCtx.value === "ReconfigureTls") {
     const dbDetails = getValue(discriminator, "/elasticsearchDetails");
     const { issuerRef } = dbDetails?.spec?.tls || {};
     return !issuerRef;
   }
   return false;
+}
+
+function hasResourceValue({discriminator, getValue, watchDependency}, node) {
+  watchDependency("discriminator#/elasticsearchDetails");
+  const nodeResource = getValue(discriminator, `/elasticsearchDetails/spec/topology/${node}/resources`);
+  return !!nodeResource;
+}
+
+function hasVolumeExpansion({discriminator, getValue, watchDependency}, node) {
+  watchDependency("discriminator#/elasticsearchDetails");
+  const nodeStorage = getValue(discriminator, `/elasticsearchDetails/spec/topology/${node}/storage/resources/requests/storage`);
+  return !!nodeStorage;
 }
 
 return {
@@ -691,4 +703,6 @@ return {
   isDbDetailsLoading,
   setValueFromDbDetails,
   disableOpsRequest,
+  hasResourceValue,
+  hasVolumeExpansion,
 }

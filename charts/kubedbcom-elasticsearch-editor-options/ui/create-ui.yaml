@@ -178,6 +178,12 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/disableSecurity
       type: switch
+    - label:
+        text: labels.enable_ssl_question
+      onChange: onEnableSSLChange
+      schema:
+        $ref: schema#/properties/spec/properties/enableSSL
+      type: switch
     - discriminator:
         createAuthSecret:
           default: true
@@ -257,7 +263,13 @@ steps:
       - description: options.configOptions.rolesMapping.description
         text: options.configOptions.rolesMapping.label
         value: roles-mapping
-      - description: options.configOptions.tls.description
+      - dependencies:
+        - group: cert-manager.io
+          name: Cert-Manager
+          resource: issuers
+          url: https://cert-manager.io/docs/
+          version: v1
+        description: options.configOptions.tls.description
         text: options.configOptions.tls.label
         value: tls
       - description: options.configOptions.initialization.description
