@@ -655,6 +655,10 @@ function setConfigFiles({model, getValue, watchDependency}) {
   return files;
 }
 
+function getAliasOptions() {
+  return ["server", "client", "metrics-exporter"];
+}
+
 return {
 	fetchJsons,
 	returnFalse,
@@ -690,4 +694,5 @@ return {
   getRequestTypeFromRoute,
   isDbDetailsLoading,
   setValueFromDbDetails,
+  getAliasOptions
 }

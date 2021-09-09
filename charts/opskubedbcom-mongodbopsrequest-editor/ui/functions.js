@@ -650,6 +650,10 @@ function setValueFromDbDetails({discriminator, getValue, watchDependency, commit
   return retValue || undefined;
 }
 
+function getAliasOptions() {
+  return ["server", "client", "metrics-exporter"];
+}
+
 return {
 	fetchJsons,
 	returnFalse,
@@ -685,4 +689,5 @@ return {
   getRequestTypeFromRoute,
   isDbDetailsLoading,
   setValueFromDbDetails,
+  getAliasOptions
 }

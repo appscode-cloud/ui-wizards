@@ -499,6 +499,11 @@ function onTlsConfigureChange({ discriminator, getValue, commit }) {
   }
 }
 
+function getAliasOptions() {
+  return ["server", "client", "metrics-exporter"];
+}
+
+
 /****** Monitoring *********/
 
 function showMonitoringSection({
@@ -1934,6 +1939,7 @@ return {
 	setSSLMode,
 	showTlsConfigureSection,
 	onTlsConfigureChange,
+  getAliasOptions,
 	showMonitoringSection,
 	onEnableMonitoringChange,
 	showCustomizeExporterSection,

@@ -396,6 +396,9 @@ async function onVersionChange({ model, getValue, watchDependency, axios, storeG
   if(!isOpenDistro && !isSearchGuard) {
     commit("wizard/model$delete", "/resources/kubedbComElasticsearch/spec/internalUsers");
     commit("wizard/model$delete", "/resources/kubedbComElasticsearch/spec/rolesMapping");
+    if(isXpack) {
+      removeCertificatesOfAliases({ model, getValue, commit }, ["admin"]);
+    }
   }
   else {
     if(!isOpenDistro) {
@@ -435,14 +438,20 @@ async function onVersionChange({ model, getValue, watchDependency, axios, storeG
 
 function onEnableSSLChange({model, getValue, commit}) {
   const enabelSSL = getValue(model, "/resources/kubedbComElasticsearch/spec/enableSSL");
-  const certificates = getValue(model, "/resources/kubedbComElasticsearch/spec/tls/certificates");
-
-  const aliases = ["http"];
-
+  
   if(enabelSSL === false) {
-    const updatedCertificates = certificates.filter(item => !aliases.includes(item.alias));
-    commit("wizard/model$update", {path: "/resources/kubedbComElasticsearch/spec/tls/certificates", value: updatedCertificates, force: true});
+    removeCertificatesOfAliases({ model, getValue, commit }, ["http", "archiver", "metrics-exporter"]);    
   }
+}
+
+function removeCertificatesOfAliases({ model, getValue, commit }, aliasesToRemove) {
+  const certificates = getValue(model, "/resources/kubedbComElasticsearch/spec/tls/certificates");
+  const updatedCertificates = certificates.filter(item => !aliasesToRemove.includes(item.alias));
+  commit("wizard/model$update", {
+    path: "/resources/kubedbComElasticsearch/spec/tls/certificates",
+    value: updatedCertificates,
+    force: true
+  });
 }
 
 /*************************************  Database Secret Section ********************************************/
@@ -1161,6 +1170,32 @@ async function showTlsRecommendation({axios, storeGet}) {
     console.log(err);
     return true;
   }
+}
+
+async function getAliasOptions({model, getValue, watchDependency, axios, storeGet, setDiscriminatorValue}) {
+  watchDependency("model#/resources/kubedbComElasticsearch/spec/enableSSL");
+  watchDependency("model#/resources/kubedbComElasticsearch/spec/monitor");
+
+  const enableSSL = getValue(model, "/resources/kubedbComElasticsearch/spec/enableSSL");
+  const monitor = getValue(model, "/resources/kubedbComElasticsearch/spec/monitor");
+  const authPlugin = await getSelectedVersionAuthPlugin({ model, getValue, watchDependency, axios, storeGet, setDiscriminatorValue });
+
+  // always include transport cert alias
+  const aliases = ["transport"];
+
+  if(authPlugin !== "X-Pack") {
+    aliases.push("admin");
+  }
+
+  if(enableSSL) {
+    aliases.push("http");
+    aliases.push("archiver");
+    if(monitor) {
+      aliases.push("metrics-exporter");
+    }
+  }
+  
+  return aliases;
 }
 
 /****** Monitoring *********/
@@ -2290,6 +2325,11 @@ function onAgentChange({ commit, model, getValue }) {
     model,
     "/resources/kubedbComElasticsearch/spec/monitor/agent"
   );
+
+  if(!agent) {
+    removeCertificatesOfAliases({ model, getValue, commit }, ["metrics-exporter"])
+  }
+
   if (agent === "prometheus.io") {
     commit("wizard/model$update", {
       path: "/resources/monitoringCoreosComServiceMonitor/spec/endpoints",
@@ -2523,6 +2563,7 @@ return {
   onDisableSecurityChange,
   onVersionChange,
   onEnableSSLChange,
+  removeCertificatesOfAliases,
 	setDatabaseMode,
 	getStorageClassNames,
   getStorageClassNamesFromDiscriminator,
@@ -2558,6 +2599,7 @@ return {
 	showTlsConfigureSection,
 	onTlsConfigureChange,
   showTlsRecommendation,
+  getAliasOptions,
 	showMonitoringSection,
 	onEnableMonitoringChange,
 	showCustomizeExporterSection,

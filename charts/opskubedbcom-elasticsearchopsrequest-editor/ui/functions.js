@@ -667,6 +667,31 @@ function hasVolumeExpansion({discriminator, getValue, watchDependency}, node) {
   return !!nodeStorage;
 }
 
+function getAliasOptions({discriminator, getValue, watchDependency}) {
+  watchDependency("discriminator#/elasticsearchDetails");
+
+  const enableSSL = getValue(discriminator, "/elasticsearchDetails/spec/enableSSL");
+  const authPlugin = getValue(discriminator, "/elasticsearchDetails/spec/authPlugin");
+  const monitor = getValue(discriminator, "/elasticsearchDetails/spec/monitor");
+
+  // always include transport cert alias
+  const aliases = ["transport"];
+
+  if(authPlugin !== "X-Pack") {
+    aliases.push("admin");
+  }
+
+  if(enableSSL) {
+    aliases.push("http");
+    aliases.push("archiver");
+    if(monitor) {
+      aliases.push("metrics-exporter");
+    }
+  }
+
+  return aliases;
+}
+
 return {
 	fetchJsons,
 	returnFalse,
@@ -705,4 +730,5 @@ return {
   disableOpsRequest,
   hasResourceValue,
   hasVolumeExpansion,
+  getAliasOptions,
 }
