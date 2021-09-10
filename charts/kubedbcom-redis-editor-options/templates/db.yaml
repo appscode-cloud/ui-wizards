@@ -18,12 +18,18 @@ metadata:
 spec:
   version: {{ .Values.spec.version | quote }}
 {{- if eq .Values.spec.mode "Standalone" }}
-  replicas: {{ .Values.spec.replicas }}
-{{- end }}
-{{- if eq .Values.spec.mode "Cluster" }}
+  replicas: 1
+{{- else if eq .Values.spec.mode "Cluster" }}
+  mode: Cluster
   cluster:
     master: {{ .Values.spec.cluster.master }}
     replicas: {{ .Values.spec.cluster.replicas }}
+{{- else if eq .Values.spec.mode "Sentinel" }}
+  mode: Sentinel
+  replicas: {{ .Values.spec.replicas }}
+  sentinelRef:
+    name: {{ default (include "kubedbcom-redis-editor-options.fullname" .) .Values.spec.sentinelRef.name }}
+    namespace: {{ default .Release.Namespace .Values.spec.sentinelRef.namespace }}
 {{- end }}
   storageType: Durable
   storage:
