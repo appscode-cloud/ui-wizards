@@ -56,10 +56,12 @@ The following table lists the configurable parameters of the `kubedbcom-redis-ed
 | spec.version                 | List options                                       | `6.0.6`      |
 | spec.annotations             | Annotations to add to the database custom resource | `{}`         |
 | spec.labels                  | Labels to add to all the template objects          | `{}`         |
-| spec.mode                    | Standalone, Cluster                                | `Standalone` |
-| spec.replicas                |                                                    | `1`          |
+| spec.mode                    | Standalone, Cluster, Sentinel                      | `Standalone` |
 | spec.cluster.master          |                                                    | `3`          |
 | spec.cluster.replicas        |                                                    | `1`          |
+| spec.sentinelRef.name        |                                                    | `""`         |
+| spec.sentinelRef.namespace   |                                                    | `""`         |
+| spec.replicas                |                                                    | `3`          |
 | spec.terminationPolicy       |                                                    | `WipeOut`    |
 | spec.storageClass.name       |                                                    | `standard`   |
 | spec.persistence.size        |                                                    | `10Gi`       |
