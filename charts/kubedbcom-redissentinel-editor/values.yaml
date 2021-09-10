@@ -1,5 +1,97 @@
-apiVersion: kubedb.com/v1alpha2
-kind: RedisSentinel
 metadata:
-  name: redissentinel
-  namespace: default
+  resource:
+    group: kubedb.com
+    version: v1alpha2
+    name: redissentinels
+    kind: RedisSentinel
+    scope: Namespaced
+  release:
+    name: RELEASE-NAME
+    namespace: default
+resources:
+  certManagerIoIssuer_redis_ca: # +doc-gen:break
+    apiVersion: cert-manager.io/v1
+    kind: Issuer
+    metadata:
+      name: redis-ca
+      namespace: demo
+    spec:
+      ca:
+        secretName: redis-ca
+  kubedbComRedisSentinel: # +doc-gen:break
+    apiVersion: kubedb.com/v1alpha2
+    kind: RedisSentinel
+    metadata:
+      name: redissentinel
+      namespace: demo
+    spec:
+      authSecret:
+        name: redissentinel-auth
+      configSecret:
+        name: redissentinel-config
+      monitor:
+        agent: prometheus.io
+        prometheus:
+          exporter:
+            resources:
+              limits:
+                cpu: 100m
+                memory: 128Mi
+              requests:
+                cpu: 100m
+                memory: 128Mi
+      replicas: 3
+      storage:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi
+        storageClassName: standard
+      terminationPolicy: WipeOut
+      tls:
+        issuerRef:
+          apiGroup: cert-manager.io
+          kind: Issuer
+          name: redis-ca
+      version: 6.2.5
+  monitoringCoreosComServiceMonitor_redis: # +doc-gen:break
+    apiVersion: monitoring.coreos.com/v1
+    kind: ServiceMonitor
+    metadata:
+      name: redis
+      namespace: demo
+    spec:
+      endpoints:
+        - honorLabels: true
+          interval: 30s
+          path: /metrics
+          port: metrics
+      namespaceSelector:
+        matchNames:
+          - demo
+      selector:
+        matchLabels:
+          app.kubernetes.io/instance: redis
+          app.kubernetes.io/name: redises.kubedb.com
+  secret_auth: # +doc-gen:break
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: redissentinel-auth
+      namespace: demo
+    stringData:
+      password: thisIs1StrongPassword
+      username: root
+    type: Opaque
+  secret_config: # +doc-gen:break
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: redissentinel-config
+      namespace: demo
+    stringData:
+      redis.conf: |
+        databases 10
+        maxclients 500
+    type: Opaque

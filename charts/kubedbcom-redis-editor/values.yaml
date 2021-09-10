@@ -1,5 +1,181 @@
-apiVersion: kubedb.com/v1alpha2
-kind: Redis
 metadata:
-  name: redis
-  namespace: default
+  resource:
+    group: kubedb.com
+    version: v1alpha2
+    name: redises
+    kind: Redis
+    scope: Namespaced
+  release:
+    name: RELEASE-NAME
+    namespace: default
+resources:
+  certManagerIoIssuer_ca: # +doc-gen:break
+    apiVersion: cert-manager.io/v1
+    kind: Issuer
+    metadata:
+      name: redis-ca
+      namespace: demo
+    spec:
+      ca:
+        secretName: redis-ca
+  kubedbComRedis: # +doc-gen:break
+    apiVersion: kubedb.com/v1alpha2
+    kind: Redis
+    metadata:
+      name: redis
+      namespace: demo
+    spec:
+      authSecret:
+        name: redis-auth
+      configSecret:
+        name: redis-config
+      init:
+        waitForInitialRestore: true
+      mode: Sentinel
+      monitor:
+        agent: prometheus.io
+        prometheus:
+          exporter:
+            resources:
+              limits:
+                cpu: 100m
+                memory: 128Mi
+              requests:
+                cpu: 100m
+                memory: 128Mi
+      replicas: 3
+      sentinelRef:
+        name: sentinel
+        namespace: demo
+      storage:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi
+        storageClassName: standard
+      terminationPolicy: WipeOut
+      tls:
+        issuerRef:
+          apiGroup: cert-manager.io
+          kind: Issuer
+          name: redis-ca
+      version: 6.2.5
+  kubedbComRedisSentinel_sentinel: # +doc-gen:break
+    apiVersion: kubedb.com/v1alpha2
+    kind: RedisSentinel
+    metadata:
+      name: sentinel
+      namespace: demo
+    spec:
+      replicas: 3
+      storage:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi
+        storageClassName: standard
+      storageType: Durable
+      terminationPolicy: WipeOut
+      version: 6.2.5
+  monitoringCoreosComServiceMonitor: # +doc-gen:break
+    apiVersion: monitoring.coreos.com/v1
+    kind: ServiceMonitor
+    metadata:
+      name: redis
+      namespace: demo
+    spec:
+      endpoints:
+        - honorLabels: true
+          interval: 30s
+          path: /metrics
+          port: metrics
+      namespaceSelector:
+        matchNames:
+          - demo
+      selector:
+        matchLabels:
+          app.kubernetes.io/instance: redis
+          app.kubernetes.io/name: redises.kubedb.com
+  secret_auth: # +doc-gen:break
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: redis-auth
+      namespace: demo
+    stringData:
+      password: thisIs1StrongPassword
+      username: root
+    type: Opaque
+  secret_config: # +doc-gen:break
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: redis-config
+      namespace: demo
+    stringData:
+      redis.conf: |
+        databases 10
+        maxclients 500
+    type: Opaque
+  stashAppscodeComBackupConfiguration: # +doc-gen:break
+    apiVersion: stash.appscode.com/v1beta1
+    kind: BackupConfiguration
+    metadata:
+      name: redis
+      namespace: demo
+    spec:
+      repository:
+        name: redis-repo
+      retentionPolicy:
+        keepLast: 5
+        name: keep-last-5
+        prune: true
+      schedule: '*/2 * * * *'
+      target:
+        ref:
+          apiVersion: appcatalog.appscode.com/v1alpha1
+          kind: AppBinding
+          name: redis
+  stashAppscodeComRepository_init_repo: # +doc-gen:break
+    apiVersion: stash.appscode.com/v1alpha1
+    kind: Repository
+    metadata:
+      name: redis-init-repo
+      namespace: demo
+    spec:
+      backend:
+        gcs:
+          bucket: stash-testing
+          prefix: /demo/redis
+        storageSecretName: gcs-secret
+  stashAppscodeComRepository_repo: # +doc-gen:break
+    apiVersion: stash.appscode.com/v1alpha1
+    kind: Repository
+    metadata:
+      name: redis-repo
+      namespace: demo
+    spec:
+      backend:
+        gcs:
+          bucket: stash-testing
+          prefix: /demo/redis
+        storageSecretName: gcs-secret
+  stashAppscodeComRestoreSession_init: # +doc-gen:break
+    apiVersion: stash.appscode.com/v1beta1
+    kind: RestoreSession
+    metadata:
+      name: redis-init
+      namespace: demo
+    spec:
+      repository:
+        name: redis-init-repo
+      rules:
+        - snapshots:
+            - latest
+      target:
+        ref:
+          apiVersion: appcatalog.appscode.com/v1alpha1
+          kind: AppBinding
+          name: redis
