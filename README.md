@@ -75,6 +75,10 @@ helm uninstall kubedbcom-redis-editor-options
 helm install kubedbcom-redis-editor-options charts/kubedbcom-redis-editor-options \
  --set spec.mode=Cluster
 helm uninstall kubedbcom-redis-editor-options
+
+helm install kubedbcom-redis-editor-options charts/kubedbcom-redis-editor-options \
+  --set spec.mode=Sentinel
+helm uninstall kubedbcom-redis-editor-options
 ```
 
 ### Memcached

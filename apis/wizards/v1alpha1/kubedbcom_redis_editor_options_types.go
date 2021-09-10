@@ -64,7 +64,7 @@ type RedisCluster struct {
 	Replicas int `json:"replicas"`
 }
 
-// +kubebuilder:validation:Enum=Standalone;Cluster
+// +kubebuilder:validation:Enum=Standalone;Cluster;Sentinel
 type RedisMode string
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
