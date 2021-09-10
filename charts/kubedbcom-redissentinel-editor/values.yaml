@@ -27,8 +27,6 @@ resources:
     spec:
       authSecret:
         name: redissentinel-auth
-      configSecret:
-        name: redissentinel-config
       monitor:
         agent: prometheus.io
         prometheus:
@@ -48,6 +46,7 @@ resources:
           requests:
             storage: 1Gi
         storageClassName: standard
+      storageType: Durable
       terminationPolicy: WipeOut
       tls:
         issuerRef:
@@ -83,15 +82,4 @@ resources:
     stringData:
       password: thisIs1StrongPassword
       username: root
-    type: Opaque
-  secret_config: # +doc-gen:break
-    apiVersion: v1
-    kind: Secret
-    metadata:
-      name: redissentinel-config
-      namespace: demo
-    stringData:
-      redis.conf: |
-        databases 10
-        maxclients 500
     type: Opaque
