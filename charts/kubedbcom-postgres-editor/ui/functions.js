@@ -554,6 +554,11 @@ function onTlsConfigureChange({ discriminator, getValue, commit }) {
   }
 }
 
+function getAliasOptions() {
+  return ["server", "client", "metrics-exporter"];
+}
+
+
 /****** Monitoring *********/
 
 function showMonitoringSection({
@@ -725,6 +730,19 @@ const stashAppscodeComBackupConfiguration = {
     },
   },
 };
+
+function disableInitializationSection({
+  model,
+  getValue,
+  watchDependency,
+}) {
+  const initialized = getValue(
+    model,
+    "/resources/kubedbComPostgres/spec/init/initialized"
+  );
+  watchDependency("model#/resources/kubedbComPostgres/spec/init/initialized");
+  return !!initialized;
+}
 
 function valueExists(value, getValue, path) {
   const val = getValue(value, path);
@@ -1729,77 +1747,66 @@ function onAgentChange({ commit, model, getValue }) {
 
 /*************************************  Database Secret Section ********************************************/
 
-let initialCreateAuthSecretStatus = "";
-
-function getInitialCreateAuthSecretStatus({ model, getValue }) {
-  const authSecret = getValue(
-    model,
-    "/resources/kubedbComPostgres/spec/authSecret"
-  );
-  const secret_auth = getValue(model, "/resources/secret_auth");
-  if (authSecret) initialCreateAuthSecretStatus = "has-existing-secret";
-  else if (secret_auth)
-    initialCreateAuthSecretStatus = "custom-secret-with-password";
-  else initialCreateAuthSecretStatus = "custom-secret-without-password";
-  return initialCreateAuthSecretStatus;
-}
-
-function getDatabaseSecretStatus({ model, getValue, watchDependency }) {
-  const authSecret = getValue(
-    model,
-    "/resources/kubedbComPostgres/spec/authSecret"
-  );
-  const secret_auth = getValue(model, "/resources/secret_auth");
-  watchDependency("model#/resources/kubedbComPostgres/spec/authSecret");
-  watchDependency("model#/resources/secret_auth");
-  if (authSecret) return "has-existing-secret";
-  else if (secret_auth) return "custom-secret-with-password";
-  else return "custom-secret-without-password";
-}
-
 function getCreateAuthSecret({ model, getValue }) {
-  return (
-    getInitialCreateAuthSecretStatus({ model, getValue }) !==
-    "has-existing-secret"
+  const authSecret = getValue(
+    model,
+    "/resources/kubedbComPostgres/spec/authSecret"
   );
+
+  return !authSecret;
 }
 
-function isEqualToDatabaseSecretStatus(
-  { model, getValue, watchDependency },
-  value
-) {
-  return (
-    getDatabaseSecretStatus({ model, getValue, watchDependency }) === value
+function showExistingSecretSection({
+  getValue,
+  watchDependency,
+  discriminator
+}) {
+  watchDependency("discriminator#/createAuthSecret");
+  
+  const hasAuthSecretName = getValue(
+    discriminator,
+    "/createAuthSecret"
   );
+  return !hasAuthSecretName;
 }
 
 function showPasswordSection({
   getValue,
   watchDependency,
-  discriminator,
+  discriminator
 }) {
-  watchDependency("discriminator#/createAuthSecret");
-  const currentCreateAuthSecretStatus = getValue(
-    discriminator,
-    "/createAuthSecret"
-  );
-  return (
-    initialCreateAuthSecretStatus === "custom-secret-with-password" &&
-    currentCreateAuthSecretStatus
-  );
+  return !showExistingSecretSection({
+    getValue,
+    watchDependency,
+    discriminator
+  })
 }
 
-function disableInitializationSection({
-  model,
-  getValue,
-  watchDependency,
-}) {
-  const initialized = getValue(
-    model,
-    "/resources/kubedbComPostgres/spec/init/initialized"
-  );
-  watchDependency("model#/resources/kubedbComPostgres/spec/init/initialized");
-  return !!initialized;
+function setAuthSecretPassword({ model, getValue }) {
+  const encodedPassword = getValue(model, "/resources/secret_auth/data/password");
+  return encodedPassword ? decodePassword({}, encodedPassword) : "";
+}
+
+function onAuthSecretPasswordChange({ getValue, discriminator, commit }) {
+  const stringPassword = getValue(discriminator, "/password");
+
+  if(stringPassword) {
+    commit("wizard/model$update", {
+      path: "/resources/secret_auth/data/password",
+      value: encodePassword({}, stringPassword),
+      force: true
+    });
+    commit("wizard/model$update", {
+      path: "/resources/secret_auth/data/username",
+      value: encodePassword({}, "postgres"),
+      force: true
+    });
+  } else {
+    commit(
+      "wizard/model$delete",
+      "/resources/secret_auth"
+    );
+  }
 }
 
 // eslint-disable-next-line no-empty-pattern
@@ -1814,7 +1821,6 @@ function decodePassword({}, value) {
 
 function onCreateAuthSecretChange({
   discriminator,
-  model,
   getValue,
   commit,
 }) {
@@ -1824,18 +1830,11 @@ function onCreateAuthSecretChange({
       "wizard/model$delete",
       "/resources/kubedbComPostgres/spec/authSecret"
     );
-  } else {
-    const modelValue = getValue(
-      model,
-      "/resources/kubedbComPostgres/spec/authSecret"
+  } else if(createAuthSecret === false) {
+    commit(
+      "wizard/model$delete",
+      "/resources/secret_auth"
     );
-    if (!modelValue) {
-      commit("wizard/model$update", {
-        path: "/resources/kubedbComPostgres/spec/authSecret",
-        value: {},
-        force: true,
-      });
-    }
   }
 }
 
@@ -1879,40 +1878,6 @@ async function getSecrets({
     console.log(e);
     return [];
   }
-}
-
-async function hasExistingSecret({
-  storeGet,
-  axios,
-  model,
-  getValue,
-  watchDependency,
-}) {
-  const resp = await getSecrets({
-    storeGet,
-    axios,
-    model,
-    getValue,
-    watchDependency,
-  });
-  return !!(resp && resp.length);
-}
-
-async function hasNoExistingSecret({
-  storeGet,
-  axios,
-  model,
-  getValue,
-  watchDependency,
-}) {
-  const resp = await hasExistingSecret({
-    storeGet,
-    axios,
-    model,
-    getValue,
-    watchDependency,
-  });
-  return !resp;
 }
 
 //////////////////////////////////////// Service Monitor //////////////////////////////////////////////////////
@@ -2004,6 +1969,15 @@ function setConfigurationFiles({ model, getValue }) {
   return atob(value);
 }
 
+function onSetCustomConfigChange({ discriminator, getValue, commit }) {
+  const value = getValue(discriminator, "/setCustomConfig");
+
+  if(value === "no") {
+    commit("wizard/model$delete", "/resources/kubedbComPostgres/spec/configSecret");
+    commit("wizard/model$delete", "/resources/secret_config");
+  }
+}
+
 return {
 	fetchJsons,
 	disableLableChecker,
@@ -2034,10 +2008,12 @@ return {
 	setSSLMode,
 	showTlsConfigureSection,
 	onTlsConfigureChange,
+  getAliasOptions,
 	showMonitoringSection,
 	onEnableMonitoringChange,
 	showCustomizeExporterSection,
-	onCustomizeExporterChange,
+  onCustomizeExporterChange,
+  disableInitializationSection,
 	valueExists,
 	initPrePopulateDatabase,
 	onPrePopulateDatabaseChange,
@@ -2083,18 +2059,15 @@ return {
 	onNameChange,
 	returnFalse,
 	onAgentChange,
-	getInitialCreateAuthSecretStatus,
-	getDatabaseSecretStatus,
 	getCreateAuthSecret,
-	isEqualToDatabaseSecretStatus,
+  showExistingSecretSection,
 	showPasswordSection,
-	disableInitializationSection,
+  setAuthSecretPassword,
+  onAuthSecretPasswordChange,
 	encodePassword,
 	decodePassword,
 	onCreateAuthSecretChange,
 	getSecrets,
-	hasExistingSecret,
-	hasNoExistingSecret,
 	isEqualToServiceMonitorType,
 	onConfigurationSourceChange,
 	onConfigurationChange,
@@ -2102,4 +2075,5 @@ return {
 	setSecretConfigNamespace,
 	setConfiguration,
 	setConfigurationFiles,
+  onSetCustomConfigChange
 }

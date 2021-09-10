@@ -214,13 +214,6 @@ function returnStringYes() {
   return "yes";
 }
 
-function isDiscriminatorEqualTo({discriminator, getValue, watchDependency}, discriminatorPath, value) {
-  watchDependency("discriminator#" + discriminatorPath);
-  const pathValue = getValue(discriminator, discriminatorPath);
-
-  return value === pathValue;
-}
-
 // ************************* Basic Info **********************************************
 async function getMariaDbVersions(
   { axios, storeGet },
@@ -543,6 +536,10 @@ function onTlsConfigureChange({ discriminator, getValue, commit }) {
     commit("wizard/model$delete", "/resources/kubedbComMariaDB/spec/tls");
     commit("wizard/model$delete", "/resources/kubedbComMariaDB/spec/sslMode");
   }
+}
+
+function getAliasOptions() {
+  return ["server", "client", "metrics-exporter"];
 }
 
 /****** Monitoring *********/
@@ -1720,48 +1717,13 @@ function onAgentChange({ commit, model, getValue }) {
 
 /*************************************  Database Secret Section ********************************************/
 
-let initialCreateAuthSecretStatus = "";
-
-function getInitialCreateAuthSecretStatus({ model, getValue }) {
-  const authSecret = getValue(
-    model,
-    "/resources/kubedbComMariaDB/spec/authSecret"
-  );
-  const secret_auth = getValue(model, "/resources/secret_auth");
-  if (authSecret) initialCreateAuthSecretStatus = "has-existing-secret";
-  else if (secret_auth)
-    initialCreateAuthSecretStatus = "custom-secret-with-password";
-  else initialCreateAuthSecretStatus = "custom-secret-without-password";
-  return initialCreateAuthSecretStatus;
-}
-
-function getDatabaseSecretStatus({ model, getValue, watchDependency }) {
-  const authSecret = getValue(
-    model,
-    "/resources/kubedbComMariaDB/spec/authSecret"
-  );
-  const secret_auth = getValue(model, "/resources/secret_auth");
-  watchDependency("model#/resources/kubedbComMariaDB/spec/authSecret");
-  watchDependency("model#/resources/secret_auth");
-  if (authSecret) return "has-existing-secret";
-  else if (secret_auth) return "custom-secret-with-password";
-  else return "custom-secret-without-password";
-}
-
 function getCreateAuthSecret({ model, getValue }) {
-  return (
-    getInitialCreateAuthSecretStatus({ model, getValue }) !==
-    "has-existing-secret"
+  const authSecret = getValue(
+    model,
+    "/resources/kubedbComMariaDB/spec/authSecret"
   );
-}
-
-function isEqualToDatabaseSecretStatus(
-  { model, getValue, watchDependency },
-  value
-) {
-  return (
-    getDatabaseSecretStatus({ model, getValue, watchDependency }) === value
-  );
+  
+  return !authSecret;
 }
 
 function showExistingSecretSection({
@@ -1781,14 +1743,40 @@ function showExistingSecretSection({
 function showPasswordSection({
   getValue,
   watchDependency,
-  model,
+  discriminator
 }) {
-  watchDependency("model#/resources/secret_auth/data/password");
-  const hasSecretAuthData = getValue(
-    model,
-    "/resources/secret_auth/data/password"
-  );
-  return !!hasSecretAuthData;
+  return !showExistingSecretSection({
+    getValue,
+    watchDependency,
+    discriminator
+  })
+}
+
+function setAuthSecretPassword({ model, getValue }) {
+  const encodedPassword = getValue(model, "/resources/secret_auth/data/password");
+  return encodedPassword ? decodePassword({}, encodedPassword) : "";
+}
+
+function onAuthSecretPasswordChange({ getValue, discriminator, commit }) {
+  const stringPassword = getValue(discriminator, "/password");
+
+  if(stringPassword) {
+    commit("wizard/model$update", {
+      path: "/resources/secret_auth/data/password",
+      value: encodePassword({}, stringPassword),
+      force: true
+    });
+    commit("wizard/model$update", {
+      path: "/resources/secret_auth/data/username",
+      value: encodePassword({}, "root"),
+      force: true
+    });
+  } else {
+    commit(
+      "wizard/model$delete",
+      "/resources/secret_auth"
+    );
+  }
 }
 
 function disableInitializationSection({
@@ -1876,43 +1864,7 @@ async function getSecrets({
   }
 }
 
-async function hasExistingSecret({
-  storeGet,
-  axios,
-  model,
-  getValue,
-  watchDependency,
-}) {
-  const resp = await getSecrets({
-    storeGet,
-    axios,
-    model,
-    getValue,
-    watchDependency,
-  });
-  return !!(resp && resp.length);
-}
-
-async function hasNoExistingSecret({
-  storeGet,
-  axios,
-  model,
-  getValue,
-  watchDependency,
-}) {
-  const resp = await hasExistingSecret({
-    storeGet,
-    axios,
-    model,
-    getValue,
-    watchDependency,
-  });
-  return !resp;
-}
-
 //////////////////////////////////////// Service Monitor //////////////////////////////////////////////////////
-
-//////////////////// service monitor ///////////////////
 
 function isEqualToServiceMonitorType(
   { rootModel, watchDependency },
@@ -2021,7 +1973,6 @@ return {
   unNamespacedResourceNames,
   returnTrue,
   returnStringYes,
-  isDiscriminatorEqualTo,
 	getMariaDbVersions,
 	showAuthPasswordField,
 	showAuthSecretField,
@@ -2038,6 +1989,7 @@ return {
 	setSSLMode,
 	showTlsConfigureSection,
 	onTlsConfigureChange,
+  getAliasOptions,
 	showMonitoringSection,
 	onEnableMonitoringChange,
 	showCustomizeExporterSection,
@@ -2087,19 +2039,16 @@ return {
 	onNameChange,
 	returnFalse,
 	onAgentChange,
-	getInitialCreateAuthSecretStatus,
-	getDatabaseSecretStatus,
 	getCreateAuthSecret,
-	isEqualToDatabaseSecretStatus,
   showExistingSecretSection,
 	showPasswordSection,
 	disableInitializationSection,
+  setAuthSecretPassword,
+  onAuthSecretPasswordChange,
 	encodePassword,
 	decodePassword,
 	onCreateAuthSecretChange,
 	getSecrets,
-	hasExistingSecret,
-	hasNoExistingSecret,
 	isEqualToServiceMonitorType,
 	onConfigurationSourceChange,
 	onConfigurationChange,

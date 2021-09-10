@@ -240,13 +240,15 @@ function isDiscriminatorEqualTo({discriminator, getValue, watchDependency}, disc
   return value === pathValue;
 }
 
-function isDistributionNotSearchGuard({discriminator, getValue, watchDependency, commit}) {
-  watchDependency("discriminator#/selectedVersionDistribution");
-  const pathValue = getValue(discriminator, "/selectedVersionDistribution");
+function isAuthPluginNotSearchGuard({discriminator, getValue, watchDependency, commit}) {
+  watchDependency("discriminator#/selectedVersionAuthPlugin");
+  const pathValue = getValue(discriminator, "/selectedVersionAuthPlugin");
+
+  if(!pathValue) return false;
 
   const ret = pathValue !== "SearchGuard" && pathValue !== "";
 
-  if(ret) {
+  if(!ret) {
     commit("wizard/model$delete", "/resources/kubedbComElasticsearch/spec/topology/dataWarm");
     commit("wizard/model$delete", "/resources/kubedbComElasticsearch/spec/topology/dataHot");
   }
@@ -258,7 +260,7 @@ async function showInternalUsersAndRolesMapping({ model, getValue, watchDependen
   watchDependency("model#/resources/kubedbComElasticsearch/spec/disableSecurity");
   watchDependency("model#/resources/kubedbComElasticsearch/spec/version");
 
-  const dist = await getSelectedVersionDistribution({ model, getValue, watchDependency, axios, storeGet, setDiscriminatorValue });
+  const dist = await getSelectedVersionAuthPlugin({ model, getValue, watchDependency, axios, storeGet, setDiscriminatorValue });
 
   const ret =  ((dist === "OpenDistro" || dist === "SearchGuard") && isSecurityEnabled({model, getValue, watchDependency}));
 
@@ -286,6 +288,31 @@ async function showInternalUsersAndRolesMapping({ model, getValue, watchDependen
   return ret;
 }
 
+// required for outer form section. where discriminator can not be saved
+async function showSecureCustomConfig({ model, getValue, watchDependency, axios, storeGet, setDiscriminatorValue , commit}) {
+  watchDependency("model#/resources/kubedbComElasticsearch/spec/version");
+
+  const dist = await getSelectedVersionAuthPlugin({ model, getValue, watchDependency, axios, storeGet, setDiscriminatorValue });
+
+  const ret =  (dist === "X-Pack");
+
+  if(ret) {
+    commit("wizard/showSteps$update", {
+      stepId: "secure-custom-config",
+      show: true
+    });
+  } else {
+    commit("wizard/showSteps$update", {
+      stepId: "secure-custom-config",
+      show: false
+    });
+
+    commit("wizard/model$delete", "/resources/kubedbComElasticsearch/spec/secureConfigSecret");
+    commit("wizard/model$delete", "/resources/secret_secure_config");
+  }
+  return ret;
+}
+
 // ************************* Basic Info **********************************************
 
 async function getElasticSearchVersions(
@@ -301,7 +328,7 @@ async function getElasticSearchVersions(
     filter: {
       items: {
         metadata: { name: null },
-        spec: { version: null, deprecated: null, distribution: null },
+        spec: { version: null, deprecated: null, authPlugin: null },
       },
     },
   };
@@ -346,7 +373,11 @@ function onDisableSecurityChange({ model, getValue, commit }) {
     );
     commit(
       "wizard/model$delete",
-      "/resources/secret_auth"
+      "/resources/secret_admin_cred"
+    );
+    commit(
+      "wizard/model$delete",
+      "/resources/secret_elastic_cred"
     );
     commit("wizard/model$delete", "/resources/kubedbComElasticsearch/spec/internalUsers");
     commit("wizard/model$delete", "/resources/kubedbComElasticsearch/spec/rolesMapping");
@@ -356,15 +387,18 @@ function onDisableSecurityChange({ model, getValue, commit }) {
 
 async function onVersionChange({ model, getValue, watchDependency, axios, storeGet, commit, setDiscriminatorValue }) {
   
-  const dist = await getSelectedVersionDistribution({ model, getValue, watchDependency, axios, storeGet, setDiscriminatorValue });
+  const dist = await getSelectedVersionAuthPlugin({ model, getValue, watchDependency, axios, storeGet, setDiscriminatorValue });
   
   const isOpenDistro = dist === "OpenDistro";
   const isSearchGuard = dist === "SearchGuard";
-  const isXpack = dist === "ElasticStack"
+  const isXpack = dist === "X-Pack"
   
   if(!isOpenDistro && !isSearchGuard) {
     commit("wizard/model$delete", "/resources/kubedbComElasticsearch/spec/internalUsers");
     commit("wizard/model$delete", "/resources/kubedbComElasticsearch/spec/rolesMapping");
+    if(isXpack) {
+      removeCertificatesOfAliases({ model, getValue, commit }, ["admin"]);
+    }
   }
   else {
     if(!isOpenDistro) {
@@ -402,51 +436,213 @@ async function onVersionChange({ model, getValue, watchDependency, axios, storeG
   }
 }
 
-// ************************* Auth Secret Field ******************************************
-function showAuthPasswordField({ model, getValue, watchDependency }) {
-  watchDependency("model#/resources");
-  const modelPathValue = getValue(model, "/resources");
-  return !!(
-    modelPathValue &&
-    modelPathValue.secret &&
-    modelPathValue.secret.metadata &&
-    modelPathValue.secret.metadata.name &&
-    !showAuthSecretField({ model, getValue, watchDependency })
-  );
+function onEnableSSLChange({model, getValue, commit}) {
+  const enabelSSL = getValue(model, "/resources/kubedbComElasticsearch/spec/enableSSL");
+  
+  if(enabelSSL === false) {
+    removeCertificatesOfAliases({ model, getValue, commit }, ["http", "archiver", "metrics-exporter"]);    
+  }
 }
 
-function showAuthSecretField({ model, getValue, watchDependency }) {
-  watchDependency("model#/resources/kubedbComElasticsearch/spec");
-  const modelPathValue = getValue(model, "/resources/kubedbComElasticsearch/spec");
-  return !!(
-    modelPathValue &&
-    modelPathValue.authSecret &&
-    modelPathValue.authSecret.name
-  );
+function removeCertificatesOfAliases({ model, getValue, commit }, aliasesToRemove) {
+  const certificates = getValue(model, "/resources/kubedbComElasticsearch/spec/tls/certificates");
+  const updatedCertificates = certificates.filter(item => !aliasesToRemove.includes(item.alias));
+  commit("wizard/model$update", {
+    path: "/resources/kubedbComElasticsearch/spec/tls/certificates",
+    value: updatedCertificates,
+    force: true
+  });
 }
 
-function showNewSecretCreateField({
+/*************************************  Database Secret Section ********************************************/
+
+function getCreateAuthSecret({ model, getValue }) {
+  const authSecret = getValue(
+    model,
+    "/resources/kubedbComElasticsearch/spec/authSecret"
+  );
+ 
+  return !authSecret;
+}
+
+function showExistingSecretSection({
+  getValue,
+  watchDependency,
+  discriminator
+}) {
+  watchDependency("discriminator#/createAuthSecret");
+  
+  const hasAuthSecretName = getValue(
+    discriminator,
+    "/createAuthSecret"
+  );
+  return !hasAuthSecretName;
+}
+
+function showPasswordSection({
+  getValue,
+  watchDependency,
+  discriminator
+}) {
+  return !showExistingSecretSection({
+    getValue,
+    watchDependency,
+    discriminator
+  })
+}
+
+function setAuthSecretPassword({ model, getValue, watchDependency, discriminator, commit }) {
+  watchDependency("discriminator#/selectedVersionAuthPlugin");
+
+  const dist = getValue(discriminator, "/selectedVersionAuthPlugin");
+  if(dist) {
+    if(dist === "X-Pack") {
+      const encodedPassword = getValue(model, "/resources/secret_elastic_cred/data/password");
+      commit(
+        "wizard/model$delete",
+        "/resources/secret_admin_cred"
+      );
+      return encodedPassword ? decodePassword({}, encodedPassword) : "";
+    } else {
+      const encodedPassword = getValue(model, "/resources/secret_admin_cred/data/password");
+      commit(
+        "wizard/model$delete",
+        "/resources/secret_elastic_cred"
+      );
+      return encodedPassword ? decodePassword({}, encodedPassword) : "";
+    }
+  }
+}
+
+function onAuthSecretPasswordChange({ getValue, discriminator, commit }) {
+  const stringPassword = getValue(discriminator, "/password");
+  const dist = getValue(discriminator, "/selectedVersionAuthPlugin");
+
+  if(dist) {
+    if(stringPassword) {
+      if(dist === "X-Pack") {
+      commit("wizard/model$update", {
+        path: "/resources/secret_elastic_cred/data/password",
+        value: encodePassword({}, stringPassword),
+        force: true
+      });
+      commit("wizard/model$update", {
+        path: "/resources/secret_elastic_cred/data/username",
+        value: encodePassword({}, "elastic"),
+        force: true
+      });
+      commit(
+        "wizard/model$delete",
+        "/resources/secret_admin_cred"
+      );
+      } else {
+      commit("wizard/model$update", {
+        path: "/resources/secret_admin_cred/data/password",
+        value: encodePassword({}, stringPassword),
+        force: true
+      });
+      commit("wizard/model$update", {
+        path: "/resources/secret_admin_cred/data/username",
+        value: encodePassword({}, "admin"),
+        force: true
+      });
+      commit(
+        "wizard/model$delete",
+        "/resources/secret_elastic_cred"
+      );
+      }
+    } else {
+      commit(
+        "wizard/model$delete",
+        "/resources/secret_admin_cred"
+      );
+      commit(
+        "wizard/model$delete",
+        "/resources/secret_elastic_cred"
+      );
+    }
+  }
+}
+
+// eslint-disable-next-line no-empty-pattern
+function encodePassword({}, value) {
+  return btoa(value);
+}
+
+// eslint-disable-next-line no-empty-pattern
+function decodePassword({}, value) {
+  return atob(value);
+}
+
+function onCreateAuthSecretChange({
+  discriminator,
+  getValue,
+  commit,
+}) {
+  const createAuthSecret = getValue(discriminator, "/createAuthSecret");
+  if (createAuthSecret) {
+    commit(
+      "wizard/model$delete",
+      "/resources/kubedbComElasticsearch/spec/authSecret"
+    );
+  } else if(createAuthSecret === false) {
+    commit(
+      "wizard/model$delete",
+      "/resources/secret_admin_cred"
+    );
+    commit(
+      "wizard/model$delete",
+      "/resources/secret_elastic_cred"
+    );
+  }
+}
+
+async function getSecrets({
+  storeGet,
+  axios,
   model,
   getValue,
   watchDependency,
-  commit,
 }) {
-  const resp =
-    !showAuthSecretField({ model, getValue, watchDependency }) &&
-    !showAuthPasswordField({ model, getValue, watchDependency });
-  const secret = getValue(model, "/resources/secret_auth");
-  if (resp && !secret) {
-    commit("wizard/model$update", {
-      path: "/resources/secret_auth",
-      value: {
-        data: {
-          password: "",
+  const owner = storeGet("/user/username");
+  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const namespace = getValue(model, "/metadata/release/namespace");
+  watchDependency("model#/metadata/release/namespace");
+
+  try {
+    const resp = await axios.get(
+      `/clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}/secrets`,
+      {
+        params: {
+          filter: { items: { metadata: { name: null }, type: null } },
         },
-      },
-      force: true,
+      }
+    );
+
+    const secrets = (resp && resp.data && resp.data.items) || [];
+
+    const filteredSecrets = secrets.filter((item) => {
+      const validType = ["kubernetes.io/service-account-token", "Opaque"];
+      return validType.includes(item.type);
     });
+
+    filteredSecrets.map((item) => {
+      const name = (item.metadata && item.metadata.name) || "";
+      item.text = name;
+      item.value = name;
+      return true;
+    });
+    return filteredSecrets;
+  } catch (e) {
+    console.log(e);
+    return [];
   }
-  return resp;
+}
+
+function showSecretSection({model, getValue, watchDependency, storeGet}) {
+  const steps = storeGet("/wizard/configureOptions");
+  
+  return !steps.includes("internal-users") && isSecurityEnabled({model, getValue, watchDependency});
 }
 
 // ********************* Database Mode ***********************
@@ -547,7 +743,7 @@ function getMaxUnavailableOptions({model, getValue, watchDependency, commit}, pa
   }
 
   const options = [];
-  for(let i = 0; i <= replicas; i++) {
+  for(let i = 0; i <= Math.min(replicas, 1000); i++) {
     options.push({"text": i.toString(), "value": i});
   }
   return options;
@@ -588,7 +784,7 @@ function getStorageClassNamesFromDiscriminator({model, discriminator, getValue, 
   return options;
 }
 
-async function getSelectedVersionDistribution({ model, getValue, watchDependency, axios, storeGet, setDiscriminatorValue }, path) {
+async function getSelectedVersionAuthPlugin({ model, getValue, watchDependency, axios, storeGet, setDiscriminatorValue }, path) {
   watchDependency("model#/resources/kubedbComElasticsearch/spec/version");
   const version = getValue(model, "/resources/kubedbComElasticsearch/spec/version") || "";
 
@@ -596,7 +792,7 @@ async function getSelectedVersionDistribution({ model, getValue, watchDependency
 
   const selectedVersion = elasticVersions?.find((item) => item.value === version);
   
-  const ret = selectedVersion?.spec?.distribution || ""; 
+  const ret = selectedVersion?.spec?.authPlugin || "";
 
   if(path) {
     setDiscriminatorValue(path, ret);
@@ -605,9 +801,20 @@ async function getSelectedVersionDistribution({ model, getValue, watchDependency
   return ret;
 }
 
+function onNodeSwitchFalse({commit}, node) {
+  commit("wizard/model$delete", `/resources/kubedbComElasticsearch/spec/topology/${node}`)
+}
+
+function hasTopologyNode({model, getValue, watchDependency}, node) {
+  watchDependency(`model#/resources/kubedbComElasticsearch/spec/topology/${node}`);
+  const nodeValue = getValue(model, `/resources/kubedbComElasticsearch/spec/topology/${node}`)
+
+  return !!nodeValue;
+}
+
 // ************************** Internal Users ********************************
 
-const defaultUsers = ["admin", "kibanaro", "kibanaserver", "logstash", "readall", "snapshotrestore"];
+const defaultUsers = ["admin", "kibanaro", "kibanaserver", "logstash", "readall", "snapshotrestore", "metrics_exporter"];
 
 function onInternalUsersChange({ discriminator, getValue, commit }) {
   const users = getValue(discriminator, "/internalUsers");
@@ -616,7 +823,26 @@ function onInternalUsersChange({ discriminator, getValue, commit }) {
 
   if(users) {
       users.forEach((item) => {
-          const { username, ...obj } = item;
+          const { username, createCred, secretName, password, ...obj } = item;
+          if(createCred === "no") {
+            obj.secretName = secretName;
+            commit("wizard/model$delete", `/resources/secret_${username}_cred`);
+          } else if (createCred === "yes") {
+            if(password) {
+              commit("wizard/model$update", {
+                path: `/resources/secret_${username}_cred/data/password`,
+                value: encodePassword({}, password),
+                force: true
+              });
+              commit("wizard/model$update", {
+                path: `/resources/secret_${username}_cred/data/username`,
+                value: encodePassword({}, username),
+                force: true
+              });
+            } else {
+              commit("wizard/model$delete", `/resources/secret_${username}_cred`);
+            }
+          }
           internalUsers[username] = obj;
       });
   }
@@ -628,7 +854,13 @@ function onInternalUsersChange({ discriminator, getValue, commit }) {
       force: true,
     });
   } else {
-    commit("wizard/model$delete", "/resources/kubedbComElasticsearch/spec/internalUsers");
+    // on initial call discriminator value is undefined
+    // to ignore model$delete for this case, 
+    // users value checking is required,
+    // model$delete will be executed only if users value is not falsy value (empty array)
+    // and internalUsers is emptyObject
+    if(users) 
+      commit("wizard/model$delete", "/resources/kubedbComElasticsearch/spec/internalUsers");
   }
 }
 
@@ -640,6 +872,15 @@ function setInternalUsers({ model, getValue, watchDependency }) {
 
   for (const item in internalUsers) {
       internalUsers[item].username = item;
+      const encodedPassword = getValue(model, `/resources/secret_${item}_cred/data/password`);
+      if(internalUsers[item].secretName) {
+        internalUsers[item].createCred = "no";
+      } else {
+        if(encodedPassword) {
+          internalUsers[item].password = decodePassword({}, encodedPassword);
+        }
+        internalUsers[item].createCred = "yes";
+      }
       users.push(internalUsers[item]);
   }
 
@@ -664,12 +905,30 @@ function disableUserEdit({itemCtx}) {
   return {};
 }
 
-async function isDistributionEqualTo({ model, getValue, watchDependency, axios, storeGet, setDiscriminatorValue }, distribution) {
-  const dist = await getSelectedVersionDistribution({ model, getValue, watchDependency, axios, storeGet, setDiscriminatorValue });
-  return (dist === distribution);
+async function isAuthPluginEqualTo({ model, getValue, watchDependency, axios, storeGet, setDiscriminatorValue }, authPlugin) {
+  const dist = await getSelectedVersionAuthPlugin({ model, getValue, watchDependency, axios, storeGet, setDiscriminatorValue });
+  return (dist === authPlugin);
+}
+
+// internal user cred
+function showPasswordCredSection({rootModel, getValue, watchDependency}) {
+  watchDependency("rootModel#/createCred");
+  const createCred = getValue(rootModel, "/createCred");
+
+  return createCred === "yes";
+}
+
+function showExistingCredSection({rootModel, getValue, watchDependency}) {
+  return !showPasswordCredSection({rootModel, getValue, watchDependency});
+}
+
+function disableRoleDeletion({itemCtx, rootModel}) {
+  return (itemCtx === "admin" && rootModel.username === "admin");
 }
 
 // ************************** Roles Mapping ********************************
+
+const defaultRoles = ["readall_and_monitor"];
 
 function onRolesMappingChange({ discriminator, getValue, commit }) {
   const roles = getValue(discriminator, "/rolesMapping");
@@ -690,7 +949,12 @@ function onRolesMappingChange({ discriminator, getValue, commit }) {
       force: true,
     });
   } else {
-    commit("wizard/model$delete", "/resources/kubedbComElasticsearch/spec/rolesMapping");
+    // on initial call discriminator value is undefined
+    // to ignore model$delete for this case, 
+    // roles value checking is required,
+    // model$delete will be executed only if roles value is not falsy value (empty array)
+    // and rolesMapping is emptyObject
+    if(roles) commit("wizard/model$delete", "/resources/kubedbComElasticsearch/spec/rolesMapping");
   }
 }
 
@@ -708,11 +972,33 @@ function setRolesMapping({ model, getValue, watchDependency }) {
   return roles;
 }
 
+function disableRolesEdit({itemCtx}) {
+  if(defaultRoles.includes(itemCtx.roleName)) {
+    return {"isEditDisabled": false, "isDeleteDisabled": true};
+  }
+  return {};
+}
+
+function disableRoleName({rootModel}) {
+  return defaultRoles.includes(rootModel && rootModel.roleName);
+}
+
+function validateNewRole({itemCtx}) {
+  if(defaultRoles.includes(itemCtx.roleName) && itemCtx.isCreate) {
+      return {"isInvalid": true, "message": "Can't use this role name"};
+  }
+  return {};
+}
+
 function getInternalUsers({ model, getValue, watchDependency }) {
   watchDependency("model#/resources/kubedbComElasticsearch/spec/internalUsers");
   const internalUsers = getValue(model, "/resources/kubedbComElasticsearch/spec/internalUsers");
 
   return Object.keys(internalUsers);
+}
+
+function disableUserDeletion({itemCtx, rootModel}) {
+  return (itemCtx.value === "metrics_exporter" && rootModel.roleName === "readall_and_monitor");
 }
 
 // ************************* Kernel Settings *********************************
@@ -731,6 +1017,12 @@ function onCustomizeKernelSettingChange({discriminator, getValue, commit}) {
 
 function setApiGroup() {
   return "cert-manager.io";
+}
+
+function setApiGroupEdit({model, getValue}) {
+  const kind = getValue(model, "/resources/kubedbComElasticsearch/spec/tls/issuerRef/kind");
+  const name = getValue(model, "/resources/kubedbComElasticsearch/spec/tls/issuerRef/name");
+  return (kind && name) ? "cert-manager.io" : "";
 }
 
 async function getIssuerRefsName({
@@ -857,6 +1149,53 @@ function onTlsConfigureChange({ discriminator, getValue, commit }) {
     );
     commit("wizard/model$delete", "/resources/kubedbComElasticsearch/spec/sslMode");
   }
+}
+
+async function showTlsRecommendation({axios, storeGet}) {
+  const owner = storeGet("/user/username");
+  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+
+  const url = `/clusters/${owner}/${cluster}/proxy/cert-manager.io/v1/issuers`;
+  
+  try {
+    await axios.get(url, {
+      params: { filter: { items: { metadata: { name: null } } } },
+    });
+    return false;
+  } catch (err) {
+    // if any error response status is 404 or not
+    if (err.response && err.response.status === 404) {
+      resp = false;
+    }
+    console.log(err);
+    return true;
+  }
+}
+
+async function getAliasOptions({model, getValue, watchDependency, axios, storeGet, setDiscriminatorValue}) {
+  watchDependency("model#/resources/kubedbComElasticsearch/spec/enableSSL");
+  watchDependency("model#/resources/kubedbComElasticsearch/spec/monitor");
+
+  const enableSSL = getValue(model, "/resources/kubedbComElasticsearch/spec/enableSSL");
+  const monitor = getValue(model, "/resources/kubedbComElasticsearch/spec/monitor");
+  const authPlugin = await getSelectedVersionAuthPlugin({ model, getValue, watchDependency, axios, storeGet, setDiscriminatorValue });
+
+  // always include transport cert alias
+  const aliases = ["transport"];
+
+  if(authPlugin !== "X-Pack") {
+    aliases.push("admin");
+  }
+
+  if(enableSSL) {
+    aliases.push("http");
+    aliases.push("archiver");
+    if(monitor) {
+      aliases.push("metrics-exporter");
+    }
+  }
+  
+  return aliases;
 }
 
 /****** Monitoring *********/
@@ -1030,6 +1369,19 @@ const stashAppscodeComBackupConfiguration = {
     },
   },
 };
+
+function disableInitializationSection({
+  model,
+  getValue,
+  watchDependency,
+}) {
+  const initialized = getValue(
+    model,
+    "/resources/kubedbComElasticsearch/spec/init/initialized"
+  );
+  watchDependency("model#/resources/kubedbComElasticsearch/spec/init/initialized");
+  return !!initialized;
+}
 
 function valueExists(value, getValue, path) {
   const val = getValue(value, path);
@@ -1954,7 +2306,7 @@ function onNameChange({ commit, model, getValue }) {
   }
 
   // to reset configSecret name field
-  const hasSecretConfig = getValue(model, "/resources/secret_config");
+  const hasSecretConfig = getValue(model, "/resources/secret_user_config");
   if (hasSecretConfig) {
     commit("wizard/model$update", {
       path: "/resources/kubedbComElasticsearch/spec/configSecret/name",
@@ -1973,6 +2325,11 @@ function onAgentChange({ commit, model, getValue }) {
     model,
     "/resources/kubedbComElasticsearch/spec/monitor/agent"
   );
+
+  if(!agent) {
+    removeCertificatesOfAliases({ model, getValue, commit }, ["metrics-exporter"])
+  }
+
   if (agent === "prometheus.io") {
     commit("wizard/model$update", {
       path: "/resources/monitoringCoreosComServiceMonitor/spec/endpoints",
@@ -1988,194 +2345,6 @@ function onAgentChange({ commit, model, getValue }) {
       "/resources/monitoringCoreosComServiceMonitor"
     );
   }
-}
-
-/*************************************  Database Secret Section ********************************************/
-
-let initialCreateAuthSecretStatus = "";
-
-function getInitialCreateAuthSecretStatus({ model, getValue }) {
-  const authSecret = getValue(
-    model,
-    "/resources/kubedbComElasticsearch/spec/authSecret"
-  );
-  const secret_auth = getValue(model, "/resources/secret_auth");
-  if (authSecret) initialCreateAuthSecretStatus = "has-existing-secret";
-  else if (secret_auth)
-    initialCreateAuthSecretStatus = "custom-secret-with-password";
-  else initialCreateAuthSecretStatus = "custom-secret-without-password";
-  return initialCreateAuthSecretStatus;
-}
-
-function getDatabaseSecretStatus({ model, getValue, watchDependency }) {
-  const authSecret = getValue(
-    model,
-    "/resources/kubedbComElasticsearch/spec/authSecret"
-  );
-  const secret_auth = getValue(model, "/resources/secret_auth");
-  watchDependency("model#/resources/kubedbComElasticsearch/spec/authSecret");
-  watchDependency("model#/resources/secret_auth");
-  if (authSecret) return "has-existing-secret";
-  else if (secret_auth) return "custom-secret-with-password";
-  else return "custom-secret-without-password";
-}
-
-function getCreateAuthSecret({ model, getValue }) {
-  return (
-    getInitialCreateAuthSecretStatus({ model, getValue }) !==
-    "has-existing-secret"
-  );
-}
-
-function isEqualToDatabaseSecretStatus(
-  { model, getValue, watchDependency },
-  value
-) {
-  return (
-    getDatabaseSecretStatus({ model, getValue, watchDependency }) === value
-  );
-}
-
-function showPasswordSection({
-  getValue,
-  watchDependency,
-  discriminator,
-}) {
-  watchDependency("discriminator#/createAuthSecret");
-  const currentCreateAuthSecretStatus = getValue(
-    discriminator,
-    "/createAuthSecret"
-  );
-  return (
-    initialCreateAuthSecretStatus === "custom-secret-with-password" &&
-    currentCreateAuthSecretStatus
-  );
-}
-
-function disableInitializationSection({
-  model,
-  getValue,
-  watchDependency,
-}) {
-  const initialized = getValue(
-    model,
-    "/resources/kubedbComElasticsearch/spec/init/initialized"
-  );
-  watchDependency("model#/resources/kubedbComElasticsearch/spec/init/initialized");
-  return !!initialized;
-}
-
-// eslint-disable-next-line no-empty-pattern
-function encodePassword({}, value) {
-  return btoa(value);
-}
-
-// eslint-disable-next-line no-empty-pattern
-function decodePassword({}, value) {
-  return atob(value);
-}
-
-function onCreateAuthSecretChange({
-  discriminator,
-  model,
-  getValue,
-  commit,
-}) {
-  const createAuthSecret = getValue(discriminator, "/createAuthSecret");
-  if (createAuthSecret) {
-    commit(
-      "wizard/model$delete",
-      "/resources/kubedbComElasticsearch/spec/authSecret"
-    );
-  } else {
-    const modelValue = getValue(
-      model,
-      "/resources/kubedbComElasticsearch/spec/authSecret"
-    );
-    if (!modelValue) {
-      commit("wizard/model$update", {
-        path: "/resources/kubedbComElasticsearch/spec/authSecret",
-        value: {},
-        force: true,
-      });
-    }
-  }
-}
-
-async function getSecrets({
-  storeGet,
-  axios,
-  model,
-  getValue,
-  watchDependency,
-}) {
-  const owner = storeGet("/user/username");
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
-  const namespace = getValue(model, "/metadata/release/namespace");
-  watchDependency("model#/metadata/release/namespace");
-
-  try {
-    const resp = await axios.get(
-      `/clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}/secrets`,
-      {
-        params: {
-          filter: { items: { metadata: { name: null }, type: null } },
-        },
-      }
-    );
-
-    const secrets = (resp && resp.data && resp.data.items) || [];
-
-    const filteredSecrets = secrets.filter((item) => {
-      const validType = ["kubernetes.io/service-account-token", "Opaque"];
-      return validType.includes(item.type);
-    });
-
-    filteredSecrets.map((item) => {
-      const name = (item.metadata && item.metadata.name) || "";
-      item.text = name;
-      item.value = name;
-      return true;
-    });
-    return filteredSecrets;
-  } catch (e) {
-    console.log(e);
-    return [];
-  }
-}
-
-async function hasExistingSecret({
-  storeGet,
-  axios,
-  model,
-  getValue,
-  watchDependency,
-}) {
-  const resp = await getSecrets({
-    storeGet,
-    axios,
-    model,
-    getValue,
-    watchDependency,
-  });
-  return !!(resp && resp.length);
-}
-
-async function hasNoExistingSecret({
-  storeGet,
-  axios,
-  model,
-  getValue,
-  watchDependency,
-}) {
-  const resp = await hasExistingSecret({
-    storeGet,
-    axios,
-    model,
-    getValue,
-    watchDependency,
-  });
-  return !resp;
 }
 
 //////////////////// service monitor ///////////////////
@@ -2198,13 +2367,13 @@ function onConfigurationSourceChange({
 }) {
   const configurationSource = getValue(discriminator, "/configurationSource");
   if (configurationSource === "use-existing-config") {
-    commit("wizard/model$delete", "/resources/secret_config");
+    commit("wizard/model$delete", "/resources/secret_user_config");
     commit("wizard/model$delete", "/resources/config_secret");
   } else {
-    const value = getValue(model, "/resources/secret_config");
+    const value = getValue(model, "/resources/secret_user_config");
     if (!value) {
       commit("wizard/model$update", {
-        path: "/resources/secret_config",
+        path: "/resources/secret_user_config",
         value: {},
         force: true,
       });
@@ -2222,7 +2391,7 @@ function onConfigurationSourceChange({
 }
 
 function setConfigurationSource({ model, getValue }) {
-  const modelValue = getValue(model, "/resources/secret_config");
+  const modelValue = getValue(model, "/resources/secret_user_config");
   if (modelValue) {
     return "create-new-config";
   }
@@ -2230,8 +2399,8 @@ function setConfigurationSource({ model, getValue }) {
 }
 
 function setConfigFiles({model, getValue, watchDependency}) {
-  watchDependency("model#/resources/secret_config/stringData");
-  const configFiles = getValue(model, "/resources/secret_config/stringData");
+  watchDependency("model#/resources/secret_user_config/stringData");
+  const configFiles = getValue(model, "/resources/secret_user_config/stringData");
 
   const files = [];
 
@@ -2258,7 +2427,7 @@ function onConfigFilesChange({ discriminator, getValue, commit }) {
   }
   
   commit("wizard/model$update", {
-    path: "/resources/secret_config/stringData",
+    path: "/resources/secret_user_config/stringData",
     value: configFiles,
     force: true,
   });
@@ -2269,14 +2438,105 @@ function onSetCustomConfigChange({ discriminator, getValue, commit }) {
 
   if(value === "no") {
     commit("wizard/model$delete", "/resources/kubedbComElasticsearch/spec/configSecret");
-    commit("wizard/model$delete", "/resources/secret_config");
+    commit("wizard/model$delete", "/resources/secret_user_config");
   }
 }
 
 function initSetCustomConfig({model, getValue}) {
-  const customConfig = getValue(model, "/resources/kubedbComElasticsearch/spec/configSecret");
+  const configSecret = getValue(model, "/resources/kubedbComElasticsearch/spec/configSecret/name");
 
-  return customConfig ? "yes" : "no";
+  if(configSecret) return "yes";
+  else return "no";
+}
+
+//////////////////// secret custom config /////////////////
+function onSecretConfigurationSourceChange({
+  getValue,
+  discriminator,
+  commit,
+  model,
+}) {
+  const configurationSource = getValue(discriminator, "/configurationSource");
+  if (configurationSource === "use-existing-config") {
+    commit("wizard/model$delete", "/resources/secret_secure_config");
+  } else {
+    const value = getValue(model, "/resources/secret_secure_config");
+    if (!value) {
+      commit("wizard/model$update", {
+        path: "/resources/secret_secure_config",
+        value: {},
+        force: true,
+      });
+    }
+    const configSecretName = `${getValue(
+      model,
+      "/metadata/release/name"
+    )}-secure-config`;
+    commit("wizard/model$update", {
+      path: "/resources/kubedbComElasticsearch/spec/secureConfigSecret/name",
+      value: configSecretName,
+      force: true,
+    });
+  }
+}
+
+function setSecretConfigurationSource({ model, getValue }) {
+  const modelValue = getValue(model, "/resources/secret_secure_config");
+  if (modelValue) {
+    return "create-new-config";
+  }
+  return "use-existing-config";
+}
+
+function setSecretConfigFiles({model, getValue, watchDependency}) {
+  watchDependency("model#/resources/secret_secure_config/stringData");
+  const configFiles = getValue(model, "/resources/secret_secure_config/stringData");
+
+  const files = [];
+
+  for (const item in configFiles) {
+      const obj = {};
+      obj.key = item;
+      obj.value = configFiles[item];
+      files.push(obj);
+  }
+
+  return files;
+}
+
+function onSecretConfigFilesChange({ discriminator, getValue, commit }) {
+  const files = getValue(discriminator, "/configFiles");
+  
+  const configFiles = {};
+
+  if(files) {
+      files.forEach((item) => {
+          const { key, value } = item;
+          configFiles[key] = value;
+      });
+  }
+  
+  commit("wizard/model$update", {
+    path: "/resources/secret_secure_config/stringData",
+    value: configFiles,
+    force: true,
+  });
+}
+
+function onSetSecretCustomConfigChange({ discriminator, getValue, commit }) {
+  const value = getValue(discriminator, "/setSecretCustomConfig");
+
+  if(value === "no") {
+    commit("wizard/model$delete", "/resources/kubedbComElasticsearch/spec/secureConfigSecret");
+    commit("wizard/model$delete", "/resources/secret_secure_config");
+  }
+}
+
+function initSetSecureCustomConfig({model, getValue}) {
+  const configSecret = getValue(model, "/resources/kubedbComElasticsearch/spec/secureConfigSecret/name");
+
+  if(configSecret) return "yes";
+  else return "no";
 }
 
 return {
@@ -2295,32 +2555,42 @@ return {
   isDedicatedModeSelected,
   isCombinedModeSelected,
   isDiscriminatorEqualTo,
-  isDistributionNotSearchGuard,
+  isAuthPluginNotSearchGuard,
   showInternalUsersAndRolesMapping,
+  showSecureCustomConfig,
   getElasticSearchVersions,
   isSecurityEnabled,
   onDisableSecurityChange,
   onVersionChange,
-	showAuthPasswordField,
-	showAuthSecretField,
-	showNewSecretCreateField,
+  onEnableSSLChange,
+  removeCertificatesOfAliases,
 	setDatabaseMode,
 	getStorageClassNames,
   getStorageClassNamesFromDiscriminator,
 	deleteDatabaseModePath,
   isEqualToDatabaseMode,
-  getSelectedVersionDistribution,
+  getSelectedVersionAuthPlugin,
+  onNodeSwitchFalse,
+  hasTopologyNode,
   onInternalUsersChange,
+  disableRoleDeletion,
   setInternalUsers,
   validateNewUser,
   disableUsername,
   disableUserEdit,
-  isDistributionEqualTo,
+  isAuthPluginEqualTo,
+  showExistingCredSection,
+  showPasswordCredSection,
   onRolesMappingChange,
   setRolesMapping,
+  disableRolesEdit,
+  disableRoleName,
+  validateNewRole,
+  disableUserDeletion,
   onCustomizeKernelSettingChange,
   getInternalUsers,
 	setApiGroup,
+	setApiGroupEdit,
 	getIssuerRefsName,
 	hasIssuerRefName,
 	hasNoIssuerRefName,
@@ -2328,10 +2598,13 @@ return {
 	setSSLMode,
 	showTlsConfigureSection,
 	onTlsConfigureChange,
+  showTlsRecommendation,
+  getAliasOptions,
 	showMonitoringSection,
 	onEnableMonitoringChange,
 	showCustomizeExporterSection,
-	onCustomizeExporterChange,
+  onCustomizeExporterChange,
+	disableInitializationSection,
 	valueExists,
 	initPrePopulateDatabase,
 	onPrePopulateDatabaseChange,
@@ -2377,18 +2650,16 @@ return {
 	onNameChange,
 	returnFalse,
 	onAgentChange,
-	getInitialCreateAuthSecretStatus,
-	getDatabaseSecretStatus,
 	getCreateAuthSecret,
-	isEqualToDatabaseSecretStatus,
+  showExistingSecretSection,
 	showPasswordSection,
-	disableInitializationSection,
 	encodePassword,
 	decodePassword,
 	onCreateAuthSecretChange,
+  setAuthSecretPassword,
+  onAuthSecretPasswordChange,
+  showSecretSection,
 	getSecrets,
-	hasExistingSecret,
-	hasNoExistingSecret,
 	isEqualToServiceMonitorType,
 	onConfigurationSourceChange,
 	setConfigurationSource,
@@ -2396,5 +2667,11 @@ return {
   setConfigFiles,
   onConfigFilesChange,
   onSetCustomConfigChange,
-  initSetCustomConfig
+  onSecretConfigurationSourceChange,
+  setSecretConfigurationSource,
+  setSecretConfigFiles,
+  onSecretConfigFilesChange,
+  onSetSecretCustomConfigChange,
+  initSetCustomConfig,
+  initSetSecureCustomConfig
 }

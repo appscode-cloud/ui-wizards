@@ -232,7 +232,7 @@ function getDbType({
 
 function initNamespace({ route }) {
   const { namespace } = route.query || {};
-  return namespace;
+  return namespace || null;
 }
 
 function initDatabaseRef({ route }) {
@@ -655,6 +655,10 @@ function setConfigFiles({model, getValue, watchDependency}) {
   return files;
 }
 
+function getAliasOptions() {
+  return ["server", "client", "metrics-exporter"];
+}
+
 return {
 	fetchJsons,
 	returnFalse,
@@ -690,4 +694,5 @@ return {
   getRequestTypeFromRoute,
   isDbDetailsLoading,
   setValueFromDbDetails,
+  getAliasOptions
 }

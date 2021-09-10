@@ -91,6 +91,7 @@ async function getMongoDetails({
   model,
   getValue,
   watchDependency,
+  setDiscriminatorValue
 }) {
   const owner = storeGet("/user/username");
   const cluster = storeGet("/cluster/clusterDefinition/spec/name");
@@ -104,6 +105,9 @@ async function getMongoDetails({
     const resp = await axios.get(
       `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/mongodbs/${name}`
     );
+
+    setDiscriminatorValue("/dbDetails", resp.data || {});
+
     return resp.data || {};
   } else return {};
 }
@@ -172,41 +176,27 @@ function onRequestTypeChange({ model, getValue, commit }) {
   });
 }
 
-async function getDbTls({
-  axios,
-  storeGet,
-  model,
+function getDbTls({
+  discriminator,
   getValue,
   watchDependency,
 }) {
-  const mongoDbDetails = await getMongoDetails({
-    axios,
-    storeGet,
-    model,
-    getValue,
-    watchDependency,
-  });
+  watchDependency("discriminator#/dbDetails");
+  const dbDetails = getValue(discriminator, "/dbDetails");
 
-  const { spec } = mongoDbDetails || {};
+  const { spec } = dbDetails || {};
   return spec.tls || undefined;
 }
 
-async function getDbType({
-  axios,
-  storeGet,
-  model,
+function getDbType({
+  discriminator,
   getValue,
   watchDependency,
 }) {
-  const mongoDbDetails = await getMongoDetails({
-    axios,
-    storeGet,
-    model,
-    getValue,
-    watchDependency,
-  });
+  watchDependency("discriminator#/dbDetails");
+  const dbDetails = getValue(discriminator, "/dbDetails");
 
-  const { spec } = mongoDbDetails || {};
+  const { spec } = dbDetails || {};
   const { shardTopology, replicaSet } = spec || {};
   let verd = "";
   if (shardTopology) {
@@ -220,19 +210,15 @@ async function getDbType({
   return verd;
 }
 
-async function disableOpsRequest({
+function disableOpsRequest({
   itemCtx,
-  axios,
-  storeGet,
-  model,
+  discriminator,
   getValue,
   watchDependency,
 }) {
   if (itemCtx.value === "HorizontalScaling") {
-    const dbType = await getDbType({
-      axios,
-      storeGet,
-      model,
+    const dbType = getDbType({
+      discriminator,
       getValue,
       watchDependency,
     });
@@ -244,7 +230,7 @@ async function disableOpsRequest({
 
 function initNamespace({ route }) {
   const { namespace } = route.query || {};
-  return namespace;
+  return namespace || null;
 }
 
 function initDatabaseRef({ route }) {
@@ -278,15 +264,13 @@ function clearOpsReqSpec(verd, opsReqType, commit) {
 }
 
 // vertical scaling
-async function ifDbTypeEqualsTo(
-  { axios, storeGet, model, getValue, watchDependency, commit },
+function ifDbTypeEqualsTo(
+  { discriminator, getValue, watchDependency, commit },
   value,
   opsReqType
 ) {
-  const verd = await getDbType({
-    axios,
-    storeGet,
-    model,
+  const verd = getDbType({
+    discriminator,
     getValue,
     watchDependency,
   });
@@ -328,14 +312,6 @@ async function getConfigSecrets({
     return true;
   });
   return filteredSecrets;
-}
-
-// pod template
-function showPodTemplate({ discriminator, getValue, watchDependency }) {
-  const reconfigurationType = getValue(discriminator, "/reconfigurationType");
-  watchDependency("discriminator#/reconfigurationType");
-
-  return reconfigurationType && reconfigurationType !== "remove";
 }
 
 function isEqualToValueFromType(
@@ -458,394 +434,6 @@ async function unNamespacedResourceNames(
   });
 }
 
-async function showConfigMapSelectField({
-  storeGet,
-  model,
-  getValue,
-  watchDependency,
-  axios,
-}) {
-  const resp = await resourceNames(
-    { axios, getValue, model, watchDependency, storeGet },
-    "core",
-    "v1",
-    "configmaps"
-  );
-  return !!(resp && resp.length);
-}
-
-async function showConfigMapInputField({
-  storeGet,
-  model,
-  getValue,
-  watchDependency,
-  axios,
-}) {
-  return !showConfigMapSelectField({
-    storeGet,
-    model,
-    getValue,
-    watchDependency,
-    axios,
-  });
-}
-
-function showSecretSelectField({
-  storeGet,
-  axios,
-  model,
-  getValue,
-  watchDependency,
-}) {
-  const resp = getSecrets({
-    storeGet,
-    axios,
-    model,
-    getValue,
-    watchDependency,
-  });
-  return !!resp.length;
-}
-
-function showSecretInputField({
-  storeGet,
-  axios,
-  model,
-  getValue,
-  watchDependency,
-}) {
-  return !showSecretSelectField({
-    storeGet,
-    axios,
-    model,
-    getValue,
-    watchDependency,
-  });
-}
-
-async function getSecretKeys({
-  storeGet,
-  axios,
-  model,
-  getValue,
-  watchDependency,
-  rootModel,
-}) {
-  const owner = storeGet("/user/username");
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
-  const namespace = getValue(model, "/metadata/namespace");
-  const secretName =
-    (rootModel &&
-      rootModel.valueFrom &&
-      rootModel.valueFrom.secretKeyRef &&
-      rootModel.valueFrom.secretKeyRef.name) ||
-    "";
-  watchDependency("model#/metadata/namespace");
-
-  if (!secretName) return [];
-
-  const resp = await axios.get(
-    `/clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}/secrets/${secretName}`
-  );
-
-  const secret = (resp && resp.data && resp.data.data) || {};
-
-  const secretKeys = Object.keys(secret).map((item) => ({
-    text: item,
-    value: item,
-  }));
-
-  return secretKeys;
-}
-
-async function hasSecretKeys({
-  storeGet,
-  axios,
-  model,
-  getValue,
-  watchDependency,
-  rootModel,
-}) {
-  const resp = await getSecretKeys({
-    storeGet,
-    axios,
-    model,
-    getValue,
-    watchDependency,
-    rootModel,
-  });
-  return !!(resp && resp.length);
-}
-
-async function hasNoSecretKeys({
-  storeGet,
-  axios,
-  model,
-  getValue,
-  watchDependency,
-  rootModel,
-}) {
-  const resp = await hasSecretKeys({
-    storeGet,
-    axios,
-    model,
-    getValue,
-    watchDependency,
-    rootModel,
-  });
-  return !resp;
-}
-
-async function getConfigMapKeys({
-  storeGet,
-  axios,
-  model,
-  getValue,
-  watchDependency,
-  rootModel,
-}) {
-  const owner = storeGet("/user/username");
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
-  const namespace = getValue(model, "/metadata/namespace");
-  const configMapName =
-    (rootModel &&
-      rootModel.valueFrom &&
-      rootModel.valueFrom.configMapKeyRef &&
-      rootModel.valueFrom.configMapKeyRef.name) ||
-    "";
-  watchDependency("model#/metadata/namespace");
-
-  if (!configMapName) return [];
-
-  const resp = await axios.get(
-    `/clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}/configmaps/${configMapName}`
-  );
-
-  const configMaps = (resp && resp.data && resp.data.data) || {};
-
-  const configMapKeys = Object.keys(configMaps).map((item) => ({
-    text: item,
-    value: item,
-  }));
-
-  return configMapKeys;
-}
-
-async function hasConfigMapKeys({
-  storeGet,
-  axios,
-  model,
-  getValue,
-  watchDependency,
-  rootModel,
-}) {
-  const resp = await getConfigMapKeys({
-    storeGet,
-    axios,
-    model,
-    getValue,
-    watchDependency,
-    rootModel,
-  });
-  return !!(resp && resp.length);
-}
-
-async function hasNoConfigMapKeys({
-  storeGet,
-  axios,
-  model,
-  getValue,
-  watchDependency,
-  rootModel,
-}) {
-  const resp = await hasConfigMapKeys({
-    storeGet,
-    axios,
-    model,
-    getValue,
-    watchDependency,
-    rootModel,
-  });
-  return !resp;
-}
-
-async function getSecrets({
-  storeGet,
-  axios,
-  model,
-  getValue,
-  watchDependency,
-}) {
-  const owner = storeGet("/user/username");
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
-  const namespace = getValue(model, "/metadata/namespace");
-  watchDependency("model#/metadata/namespace");
-
-  const resp = await axios.get(
-    `/clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}/secrets`,
-    {
-      params: {
-        filter: { items: { metadata: { name: null }, type: null } },
-      },
-    }
-  );
-
-  const secrets = (resp && resp.data && resp.data.items) || [];
-
-  const filteredSecrets = secrets.filter((item) => {
-    const validType = ["kubernetes.io/service-account-token", "Opaque"];
-    return validType.includes(item.type);
-  });
-
-  filteredSecrets.map((item) => {
-    const name = (item.metadata && item.metadata.name) || "";
-    item.text = name;
-    item.value = name;
-    return true;
-  });
-  return filteredSecrets;
-}
-
-async function hasExistingSecret({
-  storeGet,
-  axios,
-  model,
-  getValue,
-  watchDependency,
-}) {
-  const resp = await getSecrets({
-    storeGet,
-    axios,
-    model,
-    getValue,
-    watchDependency,
-  });
-  return !!(resp && resp.length);
-}
-
-async function hasNoExistingSecret({
-  storeGet,
-  axios,
-  model,
-  getValue,
-  watchDependency,
-}) {
-  const resp = await hasExistingSecret({
-    storeGet,
-    axios,
-    model,
-    getValue,
-    watchDependency,
-  });
-  return !resp;
-}
-
-async function getImagePullSecrets({
-  getValue,
-  model,
-  watchDependency,
-  axios,
-  storeGet,
-}) {
-  const namespace = getValue(model, "/metadata/namespace");
-  watchDependency("model#/metadata/namespace");
-
-  let resources = await getNamespacedResourceList(axios, storeGet, {
-    namespace,
-    group: "core",
-    version: "v1",
-    resource: "secrets",
-  });
-
-  resources = resources.filter((item) => {
-    const validType = ["kubernetes.io/dockerconfigjson"];
-    return validType.includes(item.type);
-  });
-
-  return resources.map((resource) => {
-    const name = (resource.metadata && resource.metadata.name) || "";
-    return {
-      text: name,
-      value: { name: name },
-    };
-  });
-}
-
-function getValueFrom({ itemCtx }) {
-  if (itemCtx.valueFrom && itemCtx.valueFrom.configMapKeyRef) {
-    return "ConfigMap";
-  } else if (itemCtx.valueFrom && itemCtx.valueFrom.secretKeyRef) {
-    return "Secret";
-  } else {
-    return "Input";
-  }
-}
-
-function getRefName({ itemCtx }) {
-  if (itemCtx.valueFrom && itemCtx.valueFrom.configMapKeyRef) {
-    return itemCtx.valueFrom.configMapKeyRef.name;
-  } else if (itemCtx.valueFrom && itemCtx.valueFrom.secretKeyRef) {
-    return itemCtx.valueFrom.secretKeyRef.name;
-  } else {
-    return "";
-  }
-}
-
-function isConfigMapTypeValueFrom({ rootModel }) {
-  const valueFrom = rootModel.valueFrom;
-  return !!(valueFrom && valueFrom.configMapKeyRef);
-}
-
-function isSecretTypeValueFrom({ rootModel }) {
-  const valueFrom = rootModel.valueFrom;
-  return !!(valueFrom && valueFrom.secretKeyRef);
-}
-
-function getKeyOrValue({ itemCtx }) {
-  if (itemCtx.valueFrom && itemCtx.valueFrom.configMapKeyRef) {
-    return itemCtx.valueFrom.configMapKeyRef.key;
-  } else if (itemCtx.valueFrom && itemCtx.valueFrom.secretKeyRef) {
-    return itemCtx.valueFrom.secretKeyRef.key;
-  } else {
-    return itemCtx.value;
-  }
-}
-
-function setValueFrom({ rootModel }) {
-  if (isConfigMapTypeValueFrom({ rootModel })) {
-    return "configMap";
-  } else if (isSecretTypeValueFrom({ rootModel })) {
-    return "secret";
-  } else {
-    return "input";
-  }
-}
-
-function onValueFromChange({
-  rootModel,
-  discriminator,
-  getValue,
-  updateModelValue,
-}) {
-  const valueFrom = getValue(discriminator, "/valueFromType");
-  if (valueFrom === "input") {
-    if (isConfigMapTypeValueFrom({ rootModel }))
-      updateModelValue("valueFrom/configMapKeyRef", true);
-    if (isSecretTypeValueFrom({ rootModel }))
-      updateModelValue("valueFrom/secretKeyRef", true);
-  } else if (valueFrom === "secret") {
-    if (!isSecretTypeValueFrom({ rootModel }))
-      updateModelValue("valueFrom/secretKeyRef", false, {});
-    if (isConfigMapTypeValueFrom({ rootModel }))
-      updateModelValue("valueFrom/configMapKeyRef", true);
-  } else if (valueFrom === "configMap") {
-    if (!isConfigMapTypeValueFrom({ rootModel }))
-      updateModelValue("valueFrom/configMapKeyRef", false, {});
-    if (isSecretTypeValueFrom({ rootModel }))
-      updateModelValue("valueFrom/secretKeyRef", true);
-  }
-}
-
 // reconfiguration type
 function ifReconfigurationTypeEqualsTo(
   { discriminator, getValue, watchDependency },
@@ -884,18 +472,13 @@ function onReconfigurationTypeChange(
     );
   }
 }
-async function disableReconfigurationType(
-  { axios, storeGet, model, getValue, watchDependency, itemCtx },
+function disableReconfigurationType(
+  { discriminator, getValue, watchDependency, itemCtx },
   dbType,
   prop
 ) {
-  const dbDetails = await getMongoDetails({
-    axios,
-    storeGet,
-    model,
-    getValue,
-    watchDependency,
-  });
+  watchDependency("discriminator#/dbDetails");
+  const dbDetails = getValue(discriminator, "/dbDetails");
 
   const { spec } = dbDetails || {};
   if (dbType === "standalone" || dbType === "replicaSet") {
@@ -918,17 +501,13 @@ async function disableReconfigurationType(
 }
 
 // for tls
-async function hasTlsField({
-  axios,
-  storeGet,
-  model,
+function hasTlsField({
+  discriminator,
   getValue,
   watchDependency,
 }) {
-  const tls = await getDbTls({
-    axios,
-    storeGet,
-    model,
+  const tls = getDbTls({
+    discriminator,
     getValue,
     watchDependency,
   });
@@ -986,42 +565,6 @@ async function getIssuerRefsName({
   }
 }
 
-async function hasIssuerRefName({
-  axios,
-  storeGet,
-  getValue,
-  model,
-  watchDependency,
-}) {
-  const resp = await getIssuerRefsName({
-    axios,
-    storeGet,
-    getValue,
-    model,
-    watchDependency,
-  });
-
-  return !!(resp && resp.length);
-}
-
-async function hasNoIssuerRefName({
-  axios,
-  storeGet,
-  getValue,
-  model,
-  watchDependency,
-}) {
-  const resp = await hasIssuerRefName({
-    axios,
-    storeGet,
-    getValue,
-    model,
-    watchDependency,
-  });
-
-  return !resp;
-}
-
 function initTlsOperation() {
   return "update";
 }
@@ -1057,17 +600,13 @@ function showIssuerRefAndCertificates({
   return verd;
 }
 
-async function isIssuerRefRequired({
-  axios,
-  storeGet,
-  model,
+function isIssuerRefRequired({
+  discriminator,
   getValue,
   watchDependency,
 }) {
-  const hasTls = await hasTlsField({
-    axios,
-    storeGet,
-    model,
+  const hasTls = hasTlsField({
+    discriminator,
     getValue,
     watchDependency,
   });
@@ -1079,6 +618,40 @@ function getRequestTypeFromRoute({ route }) {
   const { query } = route || {};
   const { requestType } = query || {};
   return requestType || "";
+}
+
+function isDbDetailsLoading({discriminator, getValue, watchDependency}) {
+  watchDependency("discriminator#/dbDetails");
+  const dbDetails = getValue(discriminator, "/dbDetails");
+  
+  return !dbDetails;
+}
+
+function setValueFromDbDetails({discriminator, getValue, watchDependency, commit}, path, commitPath) {
+  watchDependency("discriminator#/dbDetails");
+  const retValue = getValue(discriminator, `/dbDetails${path}`);
+
+  if(commitPath) {
+    const tlsOperation = getValue(discriminator, "/tlsOperation");
+    
+    // computed called when tls fields is not visible
+    if(commitPath.includes("/spec/tls") && tlsOperation !== "update")
+      return undefined; 
+
+    // direct model update required for reusable element.
+    // computed property is not applicable for reusable element
+    commit("wizard/model$update", {
+      path: commitPath,
+      value: retValue,
+      force: true
+    });
+  }
+
+  return retValue || undefined;
+}
+
+function getAliasOptions() {
+  return ["server", "client", "metrics-exporter"];
 }
 
 return {
@@ -1098,44 +671,23 @@ return {
 	clearOpsReqSpec,
 	ifDbTypeEqualsTo,
 	getConfigSecrets,
-	showPodTemplate,
 	isEqualToValueFromType,
 	getNamespacedResourceList,
 	getResourceList,
 	resourceNames,
 	unNamespacedResourceNames,
-	showConfigMapSelectField,
-	showConfigMapInputField,
-	showSecretSelectField,
-	showSecretInputField,
-	getSecretKeys,
-	hasSecretKeys,
-	hasNoSecretKeys,
-	getConfigMapKeys,
-	hasConfigMapKeys,
-	hasNoConfigMapKeys,
-	getSecrets,
-	hasExistingSecret,
-	hasNoExistingSecret,
-	getImagePullSecrets,
-	getValueFrom,
-	getRefName,
-	isConfigMapTypeValueFrom,
-	isSecretTypeValueFrom,
-	getKeyOrValue,
-	setValueFrom,
-	onValueFromChange,
 	ifReconfigurationTypeEqualsTo,
 	onReconfigurationTypeChange,
 	disableReconfigurationType,
 	hasTlsField,
 	initIssuerRefApiGroup,
 	getIssuerRefsName,
-	hasIssuerRefName,
-	hasNoIssuerRefName,
 	initTlsOperation,
 	onTlsOperationChange,
 	showIssuerRefAndCertificates,
   isIssuerRefRequired,
-  getRequestTypeFromRoute
+  getRequestTypeFromRoute,
+  isDbDetailsLoading,
+  setValueFromDbDetails,
+  getAliasOptions
 }

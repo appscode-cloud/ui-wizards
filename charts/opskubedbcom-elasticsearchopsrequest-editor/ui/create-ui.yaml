@@ -99,49 +99,49 @@ steps:
             $ref: schema#/properties/spec/properties/horizontalScaling/properties/topology/properties/ingest
           type: input
         - computed: setValueFromDbDetails|/spec/topology/ml/replicas
-          if: isDistributionEqualTo|ElasticStack
+          if: isAuthPluginEqualTo|X-Pack
           label:
             text: labels.ml_node
           schema:
             $ref: schema#/properties/spec/properties/horizontalScaling/properties/topology/properties/ml
           type: input
         - computed: setValueFromDbDetails|/spec/topology/transform/replicas
-          if: isDistributionEqualTo|ElasticStack
+          if: isAuthPluginEqualTo|X-Pack
           label:
             text: labels.transform_node
           schema:
             $ref: schema#/properties/spec/properties/horizontalScaling/properties/topology/properties/transform
           type: input
         - computed: setValueFromDbDetails|/spec/topology/dataCold/replicas
-          if: isDistributionEqualTo|ElasticStack
+          if: isAuthPluginEqualTo|X-Pack
           label:
             text: labels.data_cold_node
           schema:
             $ref: schema#/properties/spec/properties/horizontalScaling/properties/topology/properties/dataCold
           type: input
         - computed: setValueFromDbDetails|/spec/topology/dataContent/replicas
-          if: isDistributionEqualTo|ElasticStack
+          if: isAuthPluginEqualTo|X-Pack
           label:
             text: labels.data_content_node
           schema:
             $ref: schema#/properties/spec/properties/horizontalScaling/properties/topology/properties/dataContent
           type: input
         - computed: setValueFromDbDetails|/spec/topology/dataFrozen/replicas
-          if: isDistributionEqualTo|ElasticStack
+          if: isAuthPluginEqualTo|X-Pack
           label:
             text: labels.data_frozen_node
           schema:
             $ref: schema#/properties/spec/properties/horizontalScaling/properties/topology/properties/dataFrozen
           type: input
         - computed: setValueFromDbDetails|/spec/topology/dataHot/replicas
-          if: isDistributionNotEqualTo|SearchGuard
+          if: isAuthPluginNotEqualTo|SearchGuard
           label:
             text: labels.data_hot_node
           schema:
             $ref: schema#/properties/spec/properties/horizontalScaling/properties/topology/properties/dataHot
           type: input
         - computed: setValueFromDbDetails|/spec/topology/dataWarm/replicas
-          if: isDistributionNotEqualTo|SearchGuard
+          if: isAuthPluginNotEqualTo|SearchGuard
           label:
             text: labels.data_warm_node
           schema:
@@ -165,6 +165,7 @@ steps:
             name: uibytebuildersdev-component-resources
             version: v0.2.0-alpha.0
           computed: setValueFromDbDetails|/spec/topology/master/resources|/spec/verticalScaling/topology/master
+          if: hasResourceValue|master
           label:
             text: labels.master_node
           moduleResolver: fetchJsons
@@ -178,6 +179,7 @@ steps:
             version: v0.2.0-alpha.0
           computed: setValueFromDbDetails|/spec/topology/data/resources|/spec/verticalScaling/topology/data
           hideForm: true
+          if: hasResourceValue|data
           label:
             text: labels.data_node
           moduleResolver: fetchJsons
@@ -191,6 +193,7 @@ steps:
             version: v0.2.0-alpha.0
           computed: setValueFromDbDetails|/spec/topology/ingest/resources|/spec/verticalScaling/topology/ingest
           hideForm: true
+          if: hasResourceValue|ingest
           label:
             text: labels.ingest_node
           moduleResolver: fetchJsons
@@ -204,7 +207,7 @@ steps:
             version: v0.2.0-alpha.0
           computed: setValueFromDbDetails|/spec/topology/ml/resources|/spec/verticalScaling/topology/ml
           hideForm: true
-          if: isDistributionEqualTo|ElasticStack
+          if: hasResourceValue|ml
           label:
             text: labels.ml_node
           moduleResolver: fetchJsons
@@ -218,7 +221,7 @@ steps:
             version: v0.2.0-alpha.0
           computed: setValueFromDbDetails|/spec/topology/transform/resources|/spec/verticalScaling/topology/transform
           hideForm: true
-          if: isDistributionEqualTo|ElasticStack
+          if: hasResourceValue|transform
           label:
             text: labels.transform_node
           moduleResolver: fetchJsons
@@ -232,7 +235,7 @@ steps:
             version: v0.2.0-alpha.0
           computed: setValueFromDbDetails|/spec/topology/dataCold/resources|/spec/verticalScaling/topology/dataCold
           hideForm: true
-          if: isDistributionEqualTo|ElasticStack
+          if: hasResourceValue|dataCold
           label:
             text: labels.data_cold_node
           moduleResolver: fetchJsons
@@ -246,7 +249,7 @@ steps:
             version: v0.2.0-alpha.0
           computed: setValueFromDbDetails|/spec/topology/dataContent/resources|/spec/verticalScaling/topology/dataContent
           hideForm: true
-          if: isDistributionEqualTo|ElasticStack
+          if: hasResourceValue|dataContent
           label:
             text: labels.data_content_node
           moduleResolver: fetchJsons
@@ -260,7 +263,7 @@ steps:
             version: v0.2.0-alpha.0
           computed: setValueFromDbDetails|/spec/topology/dataFrozen/resources|/spec/verticalScaling/topology/dataFrozen
           hideForm: true
-          if: isDistributionEqualTo|ElasticStack
+          if: hasResourceValue|dataFrozen
           label:
             text: labels.data_frozen_node
           moduleResolver: fetchJsons
@@ -274,7 +277,7 @@ steps:
             version: v0.2.0-alpha.0
           computed: setValueFromDbDetails|/spec/topology/dataHot/resources|/spec/verticalScaling/topology/dataHot
           hideForm: true
-          if: isDistributionNotEqualTo|SearchGuard
+          if: hasResourceValue|dataHot
           label:
             text: labels.data_hot_node
           moduleResolver: fetchJsons
@@ -288,7 +291,7 @@ steps:
             version: v0.2.0-alpha.0
           computed: setValueFromDbDetails|/spec/topology/dataWarm/resources|/spec/verticalScaling/topology/dataWarm
           hideForm: true
-          if: isDistributionNotEqualTo|SearchGuard
+          if: hasResourceValue|dataWarm
           label:
             text: labels.data_warm_node
           moduleResolver: fetchJsons
@@ -338,67 +341,70 @@ steps:
         type: input
       - elements:
         - computed: setValueFromDbDetails|/spec/topology/master/storage/resources/requests/storage
+          if: hasVolumeExpansion|master
           label:
             text: labels.storage.master_size
           schema:
             $ref: schema#/properties/spec/properties/volumeExpansion/properties/topology/properties/master
           type: input
         - computed: setValueFromDbDetails|/spec/topology/data/storage/resources/requests/storage
+          if: hasVolumeExpansion|data
           label:
             text: labels.storage.data_size
           schema:
             $ref: schema#/properties/spec/properties/volumeExpansion/properties/topology/properties/data
           type: input
         - computed: setValueFromDbDetails|/spec/topology/ingest/storage/resources/requests/storage
+          if: hasVolumeExpansion|ingest
           label:
             text: labels.storage.ingest_size
           schema:
             $ref: schema#/properties/spec/properties/volumeExpansion/properties/topology/properties/ingest
           type: input
         - computed: setValueFromDbDetails|/spec/topology/ml/storage/resources/requests/storage
-          if: isDistributionEqualTo|ElasticStack
+          if: hasVolumeExpansion|ml
           label:
             text: labels.storage.ml_size
           schema:
             $ref: schema#/properties/spec/properties/volumeExpansion/properties/topology/properties/ml
           type: input
         - computed: setValueFromDbDetails|/spec/topology/transform/storage/resources/requests/storage
-          if: isDistributionEqualTo|ElasticStack
+          if: hasVolumeExpansion|transform
           label:
             text: labels.storage.transform_size
           schema:
             $ref: schema#/properties/spec/properties/volumeExpansion/properties/topology/properties/transform
           type: input
         - computed: setValueFromDbDetails|/spec/topology/dataCold/storage/resources/requests/storage
-          if: isDistributionEqualTo|ElasticStack
+          if: hasVolumeExpansion|dataCold
           label:
             text: labels.storage.data_cold_size
           schema:
             $ref: schema#/properties/spec/properties/volumeExpansion/properties/topology/properties/dataCold
           type: input
         - computed: setValueFromDbDetails|/spec/topology/dataContent/storage/resources/requests/storage
-          if: isDistributionEqualTo|ElasticStack
+          if: hasVolumeExpansion|dataContent
           label:
             text: labels.storage.data_content_size
           schema:
             $ref: schema#/properties/spec/properties/volumeExpansion/properties/topology/properties/dataContent
           type: input
         - computed: setValueFromDbDetails|/spec/topology/dataFrozen/storage/resources/requests/storage
-          if: isDistributionEqualTo|ElasticStack
+          if: hasVolumeExpansion|dataFrozen
           label:
             text: labels.storage.data_frozen_size
           schema:
             $ref: schema#/properties/spec/properties/volumeExpansion/properties/topology/properties/dataFrozen
           type: input
         - computed: setValueFromDbDetails|/spec/topology/dataHot/storage/resources/requests/storage
-          if: isDistributionNotEqualTo|SearchGuard
+          if: hasVolumeExpansion|dataHot
           label:
             text: labels.storage.data_hot_size
           schema:
             $ref: schema#/properties/spec/properties/volumeExpansion/properties/topology/properties/dataHot
           type: input
         - computed: setValueFromDbDetails|/spec/topology/dataWarm/storage/resources/requests/storage
-          if: isDistributionNotEqualTo|SearchGuard
+          if: hasVolumeExpansion|dataWarm
           label:
             text: labels.storage.data_warm_size
           schema:
@@ -479,6 +485,9 @@ steps:
         chart:
           name: uibytebuildersdev-component-certificates
           version: v0.2.0-alpha.0
+        functionCallbacks:
+          getAliasOptions:
+            $ref: functions#/getAliasOptions
         computed: setValueFromDbDetails|/spec/tls/certificates|/spec/tls/certificates
         if: showIssuerRefAndCertificates
         moduleResolver: fetchJsons
