@@ -91,6 +91,7 @@ async function getPostgresDetails({
   model,
   getValue,
   watchDependency,
+  setDiscriminatorValue
 }) {
   const owner = storeGet("/user/username");
   const cluster = storeGet("/cluster/clusterDefinition/spec/name");
@@ -104,6 +105,9 @@ async function getPostgresDetails({
     const resp = await axios.get(
       `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/postgreses/${name}`
     );
+
+    setDiscriminatorValue("/dbDetails", resp.data || {});
+
     return resp.data || {};
   } else return {};
 }
@@ -172,39 +176,25 @@ function onRequestTypeChange({ model, getValue, commit }) {
   });
 }
 
-async function getDbTls({
-  axios,
-  storeGet,
-  model,
+function getDbTls({
+  discriminator,
   getValue,
   watchDependency,
 }) {
-  const postgresDetails = await getPostgresDetails({
-    axios,
-    storeGet,
-    model,
-    getValue,
-    watchDependency,
-  });
+  watchDependency("discriminator#/dbDetails");
+  const dbDetails = getValue(discriminator, "/dbDetails");
 
-  const { spec } = postgresDetails || {};
-  return spec.tls || undefined;
+  const { spec } = dbDetails || {};
+  return spec?.tls || undefined;
 }
 
-async function getDbType({
-  axios,
-  storeGet,
-  model,
+function getDbType({
+  discriminator,
   getValue,
   watchDependency,
 }) {
-  const postgresDetails = await getPostgresDetails({
-    axios,
-    storeGet,
-    model,
-    getValue,
-    watchDependency,
-  });
+  watchDependency("discriminator#/dbDetails");
+  const postgresDetails = getValue(discriminator, "/dbDetails");
 
   const { spec } = postgresDetails || {};
   const { replicas } = spec || {};
@@ -218,19 +208,15 @@ async function getDbType({
   return verd;
 }
 
-async function disableOpsRequest({
+function disableOpsRequest({
   itemCtx,
-  axios,
-  storeGet,
-  model,
+  discriminator,
   getValue,
   watchDependency,
 }) {
   if (itemCtx.value === "HorizontalScaling") {
-    const dbType = await getDbType({
-      axios,
-      storeGet,
-      model,
+    const dbType = getDbType({
+      discriminator,
       getValue,
       watchDependency,
     });
@@ -242,7 +228,7 @@ async function disableOpsRequest({
 
 function initNamespace({ route }) {
   const { namespace } = route.query || {};
-  return namespace;
+  return namespace || null;
 }
 
 function initDatabaseRef({ route }) {
@@ -266,15 +252,13 @@ function clearOpsReqSpec(verd, opsReqType, commit) {
 }
 
 // vertical scaling
-async function ifDbTypeEqualsTo(
-  { axios, storeGet, model, getValue, watchDependency, commit },
+function ifDbTypeEqualsTo(
+  { discriminator, getValue, watchDependency, commit },
   value,
   opsReqType
 ) {
-  const verd = await getDbType({
-    axios,
-    storeGet,
-    model,
+  const verd = getDbType({
+    discriminator,
     getValue,
     watchDependency,
   });
@@ -316,14 +300,6 @@ async function getConfigSecrets({
     return true;
   });
   return filteredSecrets;
-}
-
-// pod template
-function showPodTemplate({ discriminator, getValue, watchDependency }) {
-  const reconfigurationType = getValue(discriminator, "/reconfigurationType");
-  watchDependency("discriminator#/reconfigurationType");
-
-  return reconfigurationType && reconfigurationType !== "remove";
 }
 
 function isEqualToValueFromType(
@@ -483,16 +459,11 @@ function onReconfigurationTypeChange(
     );
   }
 }
-async function disableReconfigurationType(
-  { axios, storeGet, model, getValue, watchDependency, itemCtx },
+function disableReconfigurationType(
+  { discriminator, getValue, watchDependency, itemCtx },
 ) {
-  const dbDetails = await getPostgresDetails({
-    axios,
-    storeGet,
-    model,
-    getValue,
-    watchDependency,
-  });
+  watchDependency("discriminator#/dbDetails");
+  const dbDetails = getValue(discriminator, "/dbDetails");
 
   const { spec } = dbDetails || {};
     if (itemCtx.value === "inlineConfig" || itemCtx.value === "remove") {
@@ -502,17 +473,13 @@ async function disableReconfigurationType(
 }
 
 // for tls
-async function hasTlsField({
-  axios,
-  storeGet,
-  model,
+function hasTlsField({
+  discriminator,
   getValue,
   watchDependency,
 }) {
-  const tls = await getDbTls({
-    axios,
-    storeGet,
-    model,
+  const tls = getDbTls({
+    discriminator,
     getValue,
     watchDependency,
   });
@@ -520,8 +487,25 @@ async function hasTlsField({
   return !!tls;
 }
 
-function setSSLMode() {
-  return "require";
+function setSSLMode({discriminator, getValue, watchDependency}) {
+  watchDependency("discriminator#/dbDetails");
+
+  const retValue = getValue(discriminator, `/dbDetails/spec/sslMode`);
+  return retValue || "require";
+}
+
+function setClientAuthMode({discriminator, getValue, watchDependency, commit}) {
+  watchDependency("discriminator#/dbDetails");
+
+  const retValue = getValue(discriminator, `/dbDetails/spec/clientAuthMode`);
+
+  commit("wizard/model$update", {
+    path: "/spec/tls/clientAuthMode",
+    value: retValue || "",
+    force: true
+  });
+
+  return retValue;
 }
 
 function initIssuerRefApiGroup({ getValue, model, watchDependency }) {
@@ -609,17 +593,13 @@ function showIssuerRefAndCertificates({
   return verd;
 }
 
-async function isIssuerRefRequired({
-  axios,
-  storeGet,
-  model,
+function isIssuerRefRequired({
+  discriminator,
   getValue,
   watchDependency,
 }) {
-  const hasTls = await hasTlsField({
-    axios,
-    storeGet,
-    model,
+  const hasTls = hasTlsField({
+    discriminator,
     getValue,
     watchDependency,
   });
@@ -627,21 +607,13 @@ async function isIssuerRefRequired({
   return !hasTls;
 }
 
-async function getClientAuthModes({
-  axios,
-  storeGet,
-  model,
+function getClientAuthModes({
   getValue,
   watchDependency,
   discriminator,
 }) {
-  const dbDetails = await getPostgresDetails({
-    axios,
-    storeGet,
-    model,
-    getValue,
-    watchDependency,
-  });
+  watchDependency("discriminator#/dbDetails");
+  const dbDetails = getValue(discriminator, "/dbDetails");
 
   const { spec } = dbDetails || {};
   const { version } = spec || {};
@@ -672,6 +644,40 @@ function getRequestTypeFromRoute({ route }) {
   return requestType || "";
 }
 
+function isDbDetailsLoading({discriminator, getValue, watchDependency}) {
+  watchDependency("discriminator#/dbDetails");
+  const dbDetails = getValue(discriminator, "/dbDetails");
+  
+  return !dbDetails;
+}
+
+function setValueFromDbDetails({discriminator, getValue, watchDependency, commit}, path, commitPath) {
+  watchDependency("discriminator#/dbDetails");
+  const retValue = getValue(discriminator, `/dbDetails${path}`);
+
+  if(commitPath) {
+    const tlsOperation = getValue(discriminator, "/tlsOperation");
+    
+    // computed called when tls fields is not visible
+    if(commitPath.includes("/spec/tls") && tlsOperation !== "update")
+      return undefined; 
+
+    // direct model update required for reusable element.
+    // computed property is not applicable for reusable element
+    commit("wizard/model$update", {
+      path: commitPath,
+      value: retValue,
+      force: true
+    });
+  }
+
+  return retValue || undefined;
+}
+
+function getAliasOptions() {
+  return ["server", "client", "metrics-exporter"];
+}
+
 return {
 	fetchJsons,
 	returnFalse,
@@ -683,6 +689,7 @@ return {
 	onRequestTypeChange,
 	getDbTls,
   setSSLMode,
+  setClientAuthMode,
 	getDbType,
 	disableOpsRequest,
 	initNamespace,
@@ -690,7 +697,6 @@ return {
 	clearOpsReqSpec,
 	ifDbTypeEqualsTo,
 	getConfigSecrets,
-	showPodTemplate,
 	isEqualToValueFromType,
 	getNamespacedResourceList,
 	getResourceList,
@@ -708,4 +714,7 @@ return {
 	isIssuerRefRequired,
   getClientAuthModes,
   getRequestTypeFromRoute,
+  isDbDetailsLoading,
+  setValueFromDbDetails,
+  getAliasOptions
 }

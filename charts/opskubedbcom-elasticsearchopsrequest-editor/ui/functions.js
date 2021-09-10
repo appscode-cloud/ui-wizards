@@ -112,7 +112,7 @@ async function getElasticsearchDetails({
     const selectedVersion = elasticVersions?.find((item) => item.value === version);
 
     if(resp?.data?.spec) {
-      resp.data.spec.distribution = selectedVersion?.distribution || "";
+      resp.data.spec.authPlugin = selectedVersion?.authPlugin || "";
     }
 
     setDiscriminatorValue("/elasticsearchDetails", resp.data || {});
@@ -130,7 +130,7 @@ async function getElasticsearchVersions({ axios, storeGet, discriminator, getVal
     filter: {
       items: {
         metadata: { name: null },
-        spec: { version: null, deprecated: null, distribution: null },
+        spec: { version: null, deprecated: null, authPlugin: null },
       },
     },
   };
@@ -145,21 +145,21 @@ async function getElasticsearchVersions({ axios, storeGet, discriminator, getVal
   const resources = (resp && resp.data && resp.data.items) || [];
 
   const elasticsearchDetails = getValue(discriminator, "/elasticsearchDetails");
-  const dist = elasticsearchDetails?.spec?.distribution || "";
+  const authPlugin = elasticsearchDetails?.spec?.authPlugin || "";
 
   // keep only non deprecated versions
   const filteredElasticsearchVersions = resources.filter(
-    (item) => item.spec && !item.spec.deprecated && (!dist || item.spec.distribution === dist)
+    (item) => item.spec && !item.spec.deprecated && (!authPlugin || item.spec.authPlugin === authPlugin)
   );
 
   return filteredElasticsearchVersions.map((item) => {
     const name = (item.metadata && item.metadata.name) || "";
     const specVersion = (item.spec && item.spec.version) || "";
-    const dist = (item.spec && item.spec.distribution) || "";
+    const authPlugin = (item.spec && item.spec.authPlugin) || "";
     return {
       text: `${name} (${specVersion})`,
       value: name,
-      distribution: dist,
+      authPlugin,
     };
   });
 }
@@ -226,7 +226,7 @@ function getDbType({
 
 function initNamespace({ route }) {
   const { namespace } = route.query || {};
-  return namespace;
+  return namespace || null;
 }
 
 function initDatabaseRef({ route }) {
@@ -265,22 +265,22 @@ function ifDbTypeEqualsTo(
   return value === verd;
 }
 
-function isDistributionNotEqualTo({discriminator, getValue, watchDependency}, value) {
+function isAuthPluginNotEqualTo({discriminator, getValue, watchDependency}, value) {
   watchDependency("discriminator#/elasticsearchDetails");
   const elasticsearchDetails = getValue(discriminator, "/elasticsearchDetails");
 
-  const dist = elasticsearchDetails?.spec?.distribution || "";
+  const authPlugin = elasticsearchDetails?.spec?.authPlugin || "";
 
-  return dist && dist !== value;
+  return authPlugin && authPlugin !== value;
 }
 
-function isDistributionEqualTo({discriminator, getValue, watchDependency}, value) {
+function isAuthPluginEqualTo({discriminator, getValue, watchDependency}, value) {
   watchDependency("discriminator#/elasticsearchDetails");
   const elasticsearchDetails = getValue(discriminator, "/elasticsearchDetails");
 
-  const dist = elasticsearchDetails?.spec?.distribution || "";
+  const authPlugin = elasticsearchDetails?.spec?.authPlugin || "";
 
-  return dist === value;
+  return authPlugin === value;
 }
 
 // for config secret
@@ -316,15 +316,6 @@ async function getConfigSecrets({
     return true;
   });
   return filteredSecrets;
-}
-
-function isEqualToValueFromType(
-  { discriminator, getValue, watchDependency },
-  value
-) {
-  watchDependency("discriminator#/valueFromType");
-  const valueFrom = getValue(discriminator, "/valueFromType");
-  return valueFrom === value;
 }
 
 async function getNamespacedResourceList(
@@ -637,7 +628,7 @@ function setValueFromDbDetails({discriminator, getValue, watchDependency, commit
   if(commitPath) {
     const tlsOperation = getValue(discriminator, "/tlsOperation");
     
-    if(commitPath === "/spec/tls/certificates" && tlsOperation !== "update")
+    if(commitPath.includes("/spec/tls") && tlsOperation !== "update")
       return undefined; 
 
     // direct model update required for reusable element.
@@ -655,12 +646,50 @@ function setValueFromDbDetails({discriminator, getValue, watchDependency, commit
 }
 
 function disableOpsRequest({itemCtx, discriminator, getValue, watchDependency}) {
+  watchDependency("discriminator#/elasticsearchDetails");
   if (itemCtx.value === "ReconfigureTls") {
     const dbDetails = getValue(discriminator, "/elasticsearchDetails");
     const { issuerRef } = dbDetails?.spec?.tls || {};
     return !issuerRef;
   }
   return false;
+}
+
+function hasResourceValue({discriminator, getValue, watchDependency}, node) {
+  watchDependency("discriminator#/elasticsearchDetails");
+  const nodeResource = getValue(discriminator, `/elasticsearchDetails/spec/topology/${node}/resources`);
+  return !!nodeResource;
+}
+
+function hasVolumeExpansion({discriminator, getValue, watchDependency}, node) {
+  watchDependency("discriminator#/elasticsearchDetails");
+  const nodeStorage = getValue(discriminator, `/elasticsearchDetails/spec/topology/${node}/storage/resources/requests/storage`);
+  return !!nodeStorage;
+}
+
+function getAliasOptions({discriminator, getValue, watchDependency}) {
+  watchDependency("discriminator#/elasticsearchDetails");
+
+  const enableSSL = getValue(discriminator, "/elasticsearchDetails/spec/enableSSL");
+  const authPlugin = getValue(discriminator, "/elasticsearchDetails/spec/authPlugin");
+  const monitor = getValue(discriminator, "/elasticsearchDetails/spec/monitor");
+
+  // always include transport cert alias
+  const aliases = ["transport"];
+
+  if(authPlugin !== "X-Pack") {
+    aliases.push("admin");
+  }
+
+  if(enableSSL) {
+    aliases.push("http");
+    aliases.push("archiver");
+    if(monitor) {
+      aliases.push("metrics-exporter");
+    }
+  }
+
+  return aliases;
 }
 
 return {
@@ -678,10 +707,9 @@ return {
 	initDatabaseRef,
 	clearOpsReqSpec,
 	ifDbTypeEqualsTo,
-  isDistributionEqualTo,
-  isDistributionNotEqualTo,
+  isAuthPluginEqualTo,
+  isAuthPluginNotEqualTo,
 	getConfigSecrets,
-	isEqualToValueFromType,
 	getNamespacedResourceList,
 	getResourceList,
 	resourceNames,
@@ -700,4 +728,7 @@ return {
   isDbDetailsLoading,
   setValueFromDbDetails,
   disableOpsRequest,
+  hasResourceValue,
+  hasVolumeExpansion,
+  getAliasOptions,
 }

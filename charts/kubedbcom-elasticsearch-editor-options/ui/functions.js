@@ -1,3 +1,20 @@
+function onVersionChange({discriminator, getValue, commit, model, watchDependency}) {
+  watchDependency("discriminator#/elasticVersions")
+  const versions = getValue(discriminator, "/elasticVersions");
+
+  const selectedVersion = getValue(model, "/spec/version");
+
+  const version = versions?.find((item) => item.value === selectedVersion) || {};
+
+  commit("wizard/model$update", {
+    path: "/spec/authPlugin",
+    value: version.authPlugin,
+    force: true
+  });
+
+  return selectedVersion;
+}
+
 const machines = {
   "db.t.micro": {
     resources: {
@@ -328,7 +345,7 @@ async function getElasticSearchVersions(
     filter: {
       items: {
         metadata: { name: null },
-        spec: { version: null, deprecated: null, distribution: null },
+        spec: { version: null, deprecated: null, authPlugin: null },
       },
     },
   };
@@ -352,12 +369,32 @@ async function getElasticSearchVersions(
     const specVersion = (item.spec && item.spec.version) || "";
     item.text = `${name} (${specVersion})`;
     item.value = name;
+    item.authPlugin = item.spec.authPlugin;
     return true;
   });
 
   setDiscriminatorValue("/elasticVersions", filteredElasticSearchVersions);
 
   return filteredElasticSearchVersions;
+}
+
+function onCreateAuthSecretChange({
+  discriminator,
+  getValue,
+  commit
+}) {
+  const createAuthSecret = getValue(discriminator, "/createAuthSecret");
+  if (createAuthSecret) {
+    commit(
+      "wizard/model$delete",
+      "/spec/authSecret/name"
+    );
+  } else if(createAuthSecret === false) {
+    commit(
+      "wizard/model$delete",
+      "/spec/authSecret/password"
+    );
+  }
 }
 
 async function getSecrets({
@@ -449,19 +486,18 @@ function setMachineToCustom() {
   return "custom";
 }
 
-function disableConfigureOption({ model, discriminator, getValue, watchDependency, itemCtx, axios, storeGet }) {
+function disableConfigureOption({ model, getValue, watchDependency, itemCtx }) {
+  watchDependency("model#/spec/authPlugin");
+  const authPlugin = getValue(model, "/spec/authPlugin");
+
   if(itemCtx.value === "tls") {
-      return !isSecurityEnabled({model, getValue, watchDependency});
+    return !isSecurityEnabled({model, getValue, watchDependency});
   }
-  else if(itemCtx.value === "internal-users" || itemCtx.value === "roles-mapping") {
-    watchDependency("model#/spec/version");
-    watchDependency("discriminator#/elasticVersions");
-
-    const version = getValue(model, "/spec/version");
-    const elasticVersions = getValue(discriminator, "/elasticVersions");
-    const selectedVersion = elasticVersions?.find((item) => item.value === version) || {};
-
-    return !isSecurityEnabled({model, getValue, watchDependency}) || selectedVersion.spec?.distribution === "ElasticStack";
+  else if(itemCtx.value === "internal-users" || itemCtx.value === "roles-mapping") {  
+    return !isSecurityEnabled({model, getValue, watchDependency}) || !authPlugin || authPlugin === "X-Pack";
+  }
+  else if(itemCtx.value === "secure-custom-config") {
+    return authPlugin !== "X-Pack";
   }
   return false;
 }
@@ -484,13 +520,15 @@ function onDisableSecurityChange({ model, getValue }) {
 }
 
 return {
+  onVersionChange,
 	showAuthPasswordField,
 	isEqualToModelPathValue,
 	showAuthSecretField,
 	showStorageSizeField,
 	getResources,
 	getStorageClassNames,
-	getElasticSearchVersions,
+  getElasticSearchVersions,
+  onCreateAuthSecretChange,
 	getSecrets,
 	disableLimit,
 	getMachineListForOptions,

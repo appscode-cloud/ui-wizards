@@ -1,6 +1,14 @@
 steps:
 - form:
+    discriminator:
+      dbDetails:
+        type: object
     elements:
+    - computed: getPostgresDetails
+      if: returnFalse
+      schema:
+        $ref: discriminator#/properties/dbDetails
+      type: input
     - label:
         text: labels.op_req_name
       required: true
@@ -27,6 +35,7 @@ steps:
         text: labels.config_ops_request
       type: label-element
     - computed: getRequestTypeFromRoute
+      disabled: isDbDetailsLoading
       hasDescription: true
       individualItemDisabilityCheck: disableOpsRequest
       label:
@@ -57,7 +66,8 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/type
       type: radio
-    - fetch: getPostgresVersions
+    - computed: setValueFromDbDetails|/spec/version
+      fetch: getPostgresVersions
       if: ifRequestTypeEqualsTo|Upgrade
       label:
         text: labels.targetVersion
@@ -65,7 +75,8 @@ steps:
         $ref: schema#/properties/spec/properties/upgrade/properties/targetVersion
       type: select
     - elements:
-      - if: ifDbTypeEqualsTo|cluster|horizontalScaling
+      - computed: setValueFromDbDetails|/spec/replicas
+        if: ifDbTypeEqualsTo|cluster|horizontalScaling
         label:
           text: labels.replicas
         schema:
@@ -81,6 +92,7 @@ steps:
           chart:
             name: uibytebuildersdev-component-resources
             version: v0.2.0-alpha.0
+          computed: setValueFromDbDetails|/spec/podTemplate/spec/resources|/spec/verticalScaling/postgres
           label:
             text: labels.postgres
           moduleResolver: fetchJsons
@@ -92,6 +104,7 @@ steps:
           chart:
             name: uibytebuildersdev-component-resources
             version: v0.2.0-alpha.0
+          computed: setValueFromDbDetails|/spec/monitor/prometheus/exporter/resources|/spec/verticalScaling/exporter
           label:
             text: labels.exporter
           moduleResolver: fetchJsons
@@ -106,7 +119,8 @@ steps:
       if: ifRequestTypeEqualsTo|VerticalScaling
       type: single-step-form
     - elements:
-      - label:
+      - computed: setValueFromDbDetails|/spec/storage/resources/requests/storage
+        label:
           text: labels.storage.size
         schema:
           $ref: schema#/properties/spec/properties/volumeExpansion/properties/postgres
@@ -135,7 +149,8 @@ steps:
             $ref: discriminator#/properties/reconfigurationType
           type: radio
         - elements:
-          - fetch: getConfigSecrets
+          - computed: setValueFromDbDetails|/spec/configSecret/name
+            fetch: getConfigSecrets
             label:
               text: labels.configSecret
             schema:
@@ -196,7 +211,8 @@ steps:
         schema:
           $ref: schema#/properties/spec/properties/tls/properties/rotateCertificates
         type: switch
-      - fetch: getClientAuthModes
+      - computed: setClientAuthMode
+        fetch: getClientAuthModes
         label:
           text: labels.client_auth_mode
         schema:
@@ -227,7 +243,8 @@ steps:
           schema:
             $ref: schema#/properties/spec/properties/tls/properties/issuerRef/properties/apiGroup
           type: input
-        - label:
+        - computed: setValueFromDbDetails|/spec/tls/issuerRef/kind
+          label:
             text: labels.kind
           options:
           - text: Issuer
@@ -239,6 +256,7 @@ steps:
             $ref: schema#/properties/spec/properties/tls/properties/issuerRef/properties/kind
           type: select
         - allowUserDefinedOption: true
+          computed: setValueFromDbDetails|/spec/tls/issuerRef/name
           fetch: getIssuerRefsName
           label:
             text: labels.name
@@ -254,6 +272,10 @@ steps:
         chart:
           name: uibytebuildersdev-component-certificates
           version: v0.2.0-alpha.0
+        functionCallbacks:
+          getAliasOptions:
+            $ref: functions#/getAliasOptions
+        computed: setValueFromDbDetails|/spec/tls/certificates|/spec/tls/certificates
         if: showIssuerRefAndCertificates
         moduleResolver: fetchJsons
         schema:

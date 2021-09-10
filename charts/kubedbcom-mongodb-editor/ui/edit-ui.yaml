@@ -1014,8 +1014,7 @@ steps:
   title: steps.5.label
 - form:
     elements:
-    - disabled: true
-      elements:
+    - elements:
       - alias: pod_template_standalone
         chart:
           name: uibytebuildersdev-component-pod-template
@@ -1023,6 +1022,9 @@ steps:
         dataContext:
           namespace:
             $ref: schema#/properties/metadata/properties/release/properties/namespace
+        functionCallbacks:
+          isEditWizard:
+            $ref: functions#/returnTrue
         moduleResolver: fetchJsons
         schema:
           $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate
@@ -1036,8 +1038,7 @@ steps:
     steps:
     - form:
         elements:
-        - disabled: true
-          elements:
+        - elements:
           - alias: pod_template_shard
             chart:
               name: uibytebuildersdev-component-pod-template
@@ -1045,6 +1046,9 @@ steps:
             dataContext:
               namespace:
                 $ref: schema#/properties/metadata/properties/release/properties/namespace
+            functionCallbacks:
+              isEditWizard:
+                $ref: functions#/returnTrue
             moduleResolver: fetchJsons
             schema:
               $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/shardTopology/properties/shard/properties/podTemplate
@@ -1055,8 +1059,7 @@ steps:
       title: labels.shard
     - form:
         elements:
-        - disabled: true
-          elements:
+        - elements:
           - alias: pod_template_configserver
             chart:
               name: uibytebuildersdev-component-pod-template
@@ -1064,6 +1067,9 @@ steps:
             dataContext:
               namespace:
                 $ref: schema#/properties/metadata/properties/release/properties/namespace
+            functionCallbacks:
+              isEditWizard:
+                $ref: functions#/returnTrue
             moduleResolver: fetchJsons
             schema:
               $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/shardTopology/properties/configServer/properties/podTemplate
@@ -1074,8 +1080,7 @@ steps:
       title: labels.configServer
     - form:
         elements:
-        - disabled: true
-          elements:
+        - elements:
           - alias: pod_template_mongos
             chart:
               name: uibytebuildersdev-component-pod-template
@@ -1083,6 +1088,9 @@ steps:
             dataContext:
               namespace:
                 $ref: schema#/properties/metadata/properties/release/properties/namespace
+            functionCallbacks:
+              isEditWizard:
+                $ref: functions#/returnTrue
             moduleResolver: fetchJsons
             schema:
               $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/shardTopology/properties/mongos/properties/podTemplate

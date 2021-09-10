@@ -3,6 +3,8 @@ steps:
     discriminator:
       createAuthSecret:
         type: boolean
+      password:
+        type: string
     elements:
     - label:
         text: labels.database.name
@@ -90,30 +92,21 @@ steps:
       type: radio
     - allowUserDefinedOption: true
       fetch: getSecrets
-      if: isEqualToDatabaseSecretStatus|has-existing-secret
+      if: showExistingSecretSection
       label:
         text: labels.secret
       schema:
         $ref: schema#/properties/resources/properties/kubedbComPostgres/properties/spec/properties/authSecret/properties/name
       type: select
-    - elements:
-      - elements:
-        - decoder: decodePassword
-          disabled: true
-          encoder: encodePassword
-          hideValue: true
-          label:
-            text: Password
-          schema:
-            $ref: schema#/properties/resources/properties/secret_auth/properties/data/properties/password
-          type: input
-        schema:
-          $ref: schema#/properties/resources/properties/secret_auth/properties/data
-        type: single-step-form
+    - computed: setAuthSecretPassword
+      hideValue: true
       if: showPasswordSection
+      onChange: onAuthSecretPasswordChange
+      label:
+        text: Password
       schema:
-        $ref: schema#/properties/resources/properties/secret_auth
-      type: single-step-form
+        $ref: discriminator#/properties/password
+      type: input
     - fetch: getClientAuthModes
       label:
         text: labels.client_auth_mode
@@ -273,6 +266,9 @@ steps:
         chart:
           name: uibytebuildersdev-component-certificates
           version: v0.2.0-alpha.0
+        functionCallbacks:
+          getAliasOptions:
+            $ref: functions#/getAliasOptions
         moduleResolver: fetchJsons
         schema:
           $ref: schema#/properties/resources/properties/kubedbComPostgres/properties/spec/properties/tls/properties/certificates
@@ -947,40 +943,58 @@ steps:
 - form:
     elements:
     - discriminator:
-        configuration:
-          type: string
-        configurationSource:
-          default: use-existing-config
+        setCustomConfig:
           type: string
       elements:
-      - computed: setConfigurationSource
+      - computed: returnStringYes
         label:
-          text: labels.custom_config
-        onChange: onConfigurationSourceChange
+          text: labels.setCustomConfig
+        onChange: onSetCustomConfigChange
         options:
-        - text: options.configuration_source.use_existing_config.label
-          value: use-existing-config
-        - text: options.configuration_source.create_new_config.label
-          value: create-new-config
+        - text: options.yesOrNo.yes.text
+          value: "yes"
+        - text: options.yesOrNo.no.text
+          value: "no"
         schema:
-          $ref: discriminator#/configurationSource
+          $ref: discriminator#/properties/setCustomConfig
         type: radio
-      - allowUserDefinedOption: true
-        fetch: getSecrets
-        if: isEqualToDiscriminatorPath|use-existing-config|/configurationSource
-        label:
-          text: labels.name
-        schema:
-          $ref: schema#/properties/resources/properties/kubedbComPostgres/properties/spec/properties/configSecret/properties/name
-        type: select
-      - computed: setConfiguration
-        if: isEqualToDiscriminatorPath|create-new-config|/configurationSource
-        label:
-          text: labels.user_conf
-        onChange: onConfigurationChange
-        schema:
-          $ref: discriminator#/properties/configuration
-        type: editor
+      - discriminator:
+          configuration:
+            type: string
+          configurationSource:
+            default: use-existing-config
+            type: string
+        elements:
+        - computed: setConfigurationSource
+          label:
+            text: labels.custom_config
+          onChange: onConfigurationSourceChange
+          options:
+          - text: options.configuration_source.use_existing_config.label
+            value: use-existing-config
+          - text: options.configuration_source.create_new_config.label
+            value: create-new-config
+          schema:
+            $ref: discriminator#/configurationSource
+          type: radio
+        - allowUserDefinedOption: true
+          fetch: getSecrets
+          if: isEqualToDiscriminatorPath|use-existing-config|/configurationSource
+          label:
+            text: labels.name
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComPostgres/properties/spec/properties/configSecret/properties/name
+          type: select
+        - computed: setConfiguration
+          if: isEqualToDiscriminatorPath|create-new-config|/configurationSource
+          label:
+            text: labels.user_conf
+          onChange: onConfigurationChange
+          schema:
+            $ref: discriminator#/properties/configuration
+          type: editor
+        if: isEqualToDiscriminatorPath|yes|/setCustomConfig
+        type: single-step-form
       type: single-step-form
     type: single-step-form
   id: custom-config

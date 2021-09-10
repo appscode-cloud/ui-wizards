@@ -350,6 +350,25 @@ async function getPostgresVersions(
   return filteredPostgresVersions;
 }
 
+function onCreateAuthSecretChange({
+  discriminator,
+  getValue,
+  commit
+}) {
+  const createAuthSecret = getValue(discriminator, "/createAuthSecret");
+  if (createAuthSecret) {
+    commit(
+      "wizard/model$delete",
+      "/spec/authSecret/name"
+    );
+  } else if(createAuthSecret === false) {
+    commit(
+      "wizard/model$delete",
+      "/spec/authSecret/password"
+    );
+  }
+}
+
 async function getSecrets({
   storeGet,
   axios,
@@ -446,7 +465,8 @@ return {
 	showAuthSecretField,
 	getResources,
 	getStorageClassNames,
-	getPostgresVersions,
+  getPostgresVersions,
+  onCreateAuthSecretChange,
 	getSecrets,
 	disableLimit,
 	getMachineListForOptions,

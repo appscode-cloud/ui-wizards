@@ -232,7 +232,7 @@ function getDbType({
 
 function initNamespace({ route }) {
   const { namespace } = route.query || {};
-  return namespace;
+  return namespace || null;
 }
 
 function initDatabaseRef({ route }) {
@@ -639,20 +639,8 @@ function setValueFromDbDetails({discriminator, getValue, watchDependency, commit
   return retValue || undefined;
 }
 
-function setConfigFiles({model, getValue, watchDependency}) {
-  watchDependency("model#/resources/secret_config/stringData");
-  const configFiles = getValue(model, "/resources/secret_config/stringData");
-
-  const files = [];
-
-  for (const item in configFiles) {
-      const obj = {};
-      obj.key = item;
-      obj.value = configFiles[item];
-      files.push(obj);
-  }
-
-  return files;
+function getAliasOptions() {
+  return ["server", "client", "metrics-exporter"];
 }
 
 return {
@@ -690,4 +678,5 @@ return {
   getRequestTypeFromRoute,
   isDbDetailsLoading,
   setValueFromDbDetails,
+  getAliasOptions
 }

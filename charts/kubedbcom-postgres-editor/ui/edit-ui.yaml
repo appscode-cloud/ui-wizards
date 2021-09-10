@@ -962,11 +962,14 @@ steps:
     - elements:
       - alias: pod_template_standalone
         chart:
-          name: uibytebuildersdev-component-pod-template-edit
+          name: uibytebuildersdev-component-pod-template
           version: v0.2.0-alpha.0
         dataContext:
           namespace:
             $ref: schema#/properties/metadata/properties/release/properties/namespace
+        functionCallbacks:
+          isEditWizard:
+            $ref: functions#/returnTrue
         moduleResolver: fetchJsons
         schema:
           $ref: schema#/properties/resources/properties/kubedbComPostgres/properties/spec/properties/podTemplate
