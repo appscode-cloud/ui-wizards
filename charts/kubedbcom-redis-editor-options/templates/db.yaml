@@ -28,7 +28,7 @@ spec:
   mode: Sentinel
   replicas: {{ .Values.spec.replicas }}
   sentinelRef:
-    name: {{ default (include "kubedbcom-redis-editor-options.fullname" .) .Values.spec.sentinelRef.name }}
+    name: {{ default (printf "%s-sentinel" (include "kubedbcom-redis-editor-options.fullname" .)) .Values.spec.sentinelRef.name }}
     namespace: {{ default .Release.Namespace .Values.spec.sentinelRef.namespace }}
 {{- end }}
   storageType: Durable
