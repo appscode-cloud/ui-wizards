@@ -61,7 +61,7 @@ The following table lists the configurable parameters of the `kubedbcom-redis-ed
 | spec.cluster.replicas        |                                                    | `1`          |
 | spec.sentinelRef.name        |                                                    | `""`         |
 | spec.sentinelRef.namespace   |                                                    | `""`         |
-| spec.replicas                |                                                    | `3`          |
+| spec.replicas                |                                                    | `2`          |
 | spec.terminationPolicy       |                                                    | `WipeOut`    |
 | spec.storageClass.name       |                                                    | `standard`   |
 | spec.persistence.size        |                                                    | `10Gi`       |
