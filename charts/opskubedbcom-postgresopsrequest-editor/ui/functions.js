@@ -638,10 +638,11 @@ function getClientAuthModes({
   return options.map((item) => ({text: item, value: item }));
 }
 
-function getRequestTypeFromRoute({ route }) {
+function getRequestTypeFromRoute({ route, discriminator, getValue, watchDependency }) {
+  const isDbloading = isDbDetailsLoading({discriminator, getValue, watchDependency});
   const { query } = route || {};
   const { requestType } = query || {};
-  return requestType || "";
+  return isDbloading ? "" : requestType || "";
 }
 
 function isDbDetailsLoading({discriminator, getValue, watchDependency}) {
