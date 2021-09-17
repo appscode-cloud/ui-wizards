@@ -75,20 +75,10 @@ steps:
         $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/terminationPolicy
       type: radio
     - disabled: true
-      if: isEqualToDatabaseSecretStatus|has-existing-secret
       label:
         text: labels.secret
       schema:
         $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/authSecret/properties/name
-      type: input
-    - decoder: decodePassword
-      disabled: true
-      encoder: encodePassword
-      if: isEqualToDatabaseSecretStatus|custom-secret
-      label:
-        text: labels.database.secret
-      schema:
-        $ref: schema#/properties/resources/properties/secret_auth/properties/data/properties/username
       type: input
     type: single-step-form
   id: basic
