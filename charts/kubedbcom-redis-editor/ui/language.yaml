@@ -25,6 +25,7 @@ en:
         class: Storage Class Name
         size: Storage Size
       terminalPolicy: Terminal Policy
+      terminationPolicy: Termination Policy
   labels:
     agent: Select a Monitoring Method
     alias: Alias
@@ -44,7 +45,12 @@ en:
       title: Backup Blueprint
     backupConfiguration:
       retentionPolicy:
+        keepDaily: Keep Daily
+        keepHourly: Keep Hourly
         keepLast: Keep Last
+        keepMonthly: Keep Monthly
+        keepWeekly: Keep Weekly
+        keepYearly: Keep Yearly
         name: Name
         prune: Prune
         title: Retention Policy
@@ -60,18 +66,27 @@ en:
     basic_info: Basic Information
     certificate: Certificate
     certificates: Certificates
+    client_auth_mode: Client Auth Mode
+    cluster_auth_mode: Cluster Authentication Mode
     cluster_ip: Cluster IP
     configOptions: Configuration Options
     configServer: Config Server
+    configServerNodes: Config Server Nodes
     config_map_key: ConfigMap Key
     config_map_name: ConfigMap Name
-    configuration_files: Configuration Files
+    config_secret: ConfigSecret
+    configuration_files: Configuration
     configuration_source: Configuration Source
     controller_annotations: Controller Annotations
     countries: Countries
     country: Country
     cpu: CPU
+    create_opsrequest: Create OpsRequest
+    custom_config: Select Custom Config Type
+    customize_config_server_pod_template: Customize Config Server Pod Template
     customize_exporter: Customize Exporter Sidecar
+    customize_mongos_pod_template: Customize Mongos Pod Template
+    customize_shards_pod_template: Customize Shard Pod Template
     dataSource: Data Source
     database:
       mode: Database Mode
@@ -82,6 +97,7 @@ en:
     dns_names: DNS Names
     duration: Duration
     effect: Effect
+    electionTick: Election Tick
     enable_monitoring: Enable Monitoring
     enable_tls: Enable TLS
     endpoint: Endpoint
@@ -95,6 +111,7 @@ en:
     external_traffic_policy: External Traffic Policy
     fs_group: Fs Group
     health_check_node_port: Health Check Node Port
+    heartbeatTick: Heartbeat Tick
     honor_labels: Honor labels
     image_pull_secrets: Image Pull Secrets
     initialization: Pre-populate your Redis from backup/another database
@@ -108,19 +125,23 @@ en:
       key: Key
       label: Labels
       value: Value
+    leaderElection: Leader Election
     level: Level
     limit: Limit
     load_balancer_ip: Load Balancer IP
     load_balancer_source_range: Load Balancer Source Range
     load_balancer_source_ranges: Load Balancer Source Ranges
-    machine_profile: Machine Profile
     master: Master
+    matchNames: Match Namespaces
     match_expression: Match Expression
     match_expressions: Match Expressions
     match_field: Match Field
     match_fields: Match Fields
+    maximumLagBeforeFailover: Maximum Lag Before Failover
     memory: Memory
+    redis_conf: redis.conf
     mongos: Mongos
+    mongosNodes: Mongos Nodes
     name: Name
     namespace: Namespace
     new_secret_password: New Database Secret
@@ -132,11 +153,13 @@ en:
     organizational_unit: Organizational Unit
     organizational_units: Organizational Units
     organizations: Organizations
-    password: Password (leave it blank to auto generate password)
+    password: Password (Keep it empty to autogenerate)
     path: Path
+    period: Period 
     pod_annotations: Pod Annotations
     pod_spec: Pod Spec
     pod_template: Pod Template
+    pod_template_not_allowed: 'Specifying PodTemplate here is not allowed for sharded cluster. Please, use shard specific PodTemplate from the Topology section.'
     port: Port
     ports: Ports
     prePopulateDatabase: Do you want to pre-populate your database?
@@ -170,6 +193,7 @@ en:
       name: Name
       title: Repository
     request: Request
+    require_ssl_question: Require SSL?
     resources: Resources
     restoreSession:
       name: Name
@@ -181,6 +205,7 @@ en:
     run_as_user: Run as User
     runtimeSettings:
       choise: Customize Restore Job Runtime Settings?
+      choiseForBackup: Customize Backup Job Runtime Settings?
       container:
         ionice:
           class: Class
@@ -219,29 +244,39 @@ en:
       volume: Source Volume
       volumeName: Name
       volumeType: Type
+    sentinel_section: Sentinel
     se_linux_options: SE Linux Options
     secret: Secret
     secret_key: Secret Key
     secret_name: Secret Name
     security_context: Security Context
-    sentinel_section: Sentinel Section
     service_account_name: Service Account Name
     service_monitor: Service Monitor
     service_monitor_configuration: ServiceMonitor Configuration
     service_template: Service Template
-    service_template_annotations: Service Template Annotations
+    service_template_annotations: Annotations
     service_templates: Service Templates
+    setCustomConfig: Do you want to set custom config?
+    shard: Shard
     shardNodes: Shard Nodes
     shards: Shards
+    ssl_mode: SSL Mode
+    standbyMode: Standby Mode
     storage:
       class: Storage Class
       size: Storage Size
     subject: Subject
+    terminalPolicy: Terminal Policy
     terminationPolicy: Termination Policy
     timeout_seconds: Timeout Seconds
     toleration: Toleration
     toleration_seconds: Toleration in seconds
     tolerations: Tolerations
+    to_update_config: To update this section go to Create OpsRequest
+    to_update_replicas: To update replicas go to Create OpsRequest
+    to_update_tls: To update this section go to Create OpsRequest
+    to_update_disabled_section: To update disabled section click on Create OpsRequest
+    to_update_exporter_resources: To update exporter resources click on Create OpsRequest
     type: Type
     user: User
     value: Value
@@ -251,14 +286,18 @@ en:
   options:
     agent:
       prometheus:
-        description: Only injects the metric exporter sidecar
-        label: Use Custom Scrapper
+        description: Injects the metric exporter sidecar and let you customize ServiceMonitor
+        label: Custom ServiceMonitor
       prometheus_builtin:
         description: Inject metric exporter sidecar and add Prometheus annotations to the stats Service
-        label: Manually Deployed Prometheus Scrapper
+        label: Custom Scrapper
       prometheus_operator:
         description: Inject metric exporter sidecar and creates a ServiceMonitor
         label: Prometheus Operator
+    client_auth_mode:
+      md5: md5
+      scram: scram
+      cert: cert
     configOptions:
       backup:
         description: Schedule periodic backup via Stash.
@@ -287,6 +326,12 @@ en:
     configuration_source:
       create_new_config:
         label: Create New Config
+      same_as_config_server:
+        label: Same as ConfigServer
+      same_as_mongos:
+        label: Same as Mongos
+      same_as_shard:
+        label: Same as Shard
       use_existing_config:
         label: Use Existing Config
     createOrSelect:
@@ -325,6 +370,9 @@ en:
         label: Use existing sentinel
       customSentinel:
         label: Create new sentinel
+    standbyMode:
+      hot: Hot
+      warm: Warm
     storageClass:
       standard:
         label: Standard

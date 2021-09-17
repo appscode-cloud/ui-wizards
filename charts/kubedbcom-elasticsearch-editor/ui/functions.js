@@ -445,7 +445,7 @@ function onEnableSSLChange({model, getValue, commit}) {
 }
 
 function removeCertificatesOfAliases({ model, getValue, commit }, aliasesToRemove) {
-  const certificates = getValue(model, "/resources/kubedbComElasticsearch/spec/tls/certificates");
+  const certificates = getValue(model, "/resources/kubedbComElasticsearch/spec/tls/certificates") || [];
   const updatedCertificates = certificates.filter(item => !aliasesToRemove.includes(item.alias));
   commit("wizard/model$update", {
     path: "/resources/kubedbComElasticsearch/spec/tls/certificates",

@@ -6,7 +6,7 @@ function fetchAliasOptions({reusableElementCtx}) {
 }
 
 function validateNewCertificates({model, itemCtx}) {
-  const addedAliases = model && model.map(item => item.alias);
+  const addedAliases = model && model.map(item => item.alias) || [];
 
   if(addedAliases.includes(itemCtx.alias) && itemCtx.isCreate) {
     return {"isInvalid": true, "message": "Alias already exists"};
