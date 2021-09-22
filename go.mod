@@ -3,10 +3,10 @@ module go.bytebuilders.dev/ui-wizards
 go 1.16
 
 require (
-	k8s.io/api v0.21.0
-	k8s.io/apimachinery v0.21.0
+	k8s.io/api v0.21.1
+	k8s.io/apimachinery v0.21.1
 	kmodules.xyz/schema-checker v0.1.2
-	kubepack.dev/lib-app v0.0.5-0.20210519234912-5a1a1373c75f
+	kubepack.dev/lib-app v0.0.5-0.20210922044853-dd50e0d8260a
 )
 
 replace github.com/go-macaron/binding => github.com/gomodules/binding v0.0.0-20200811095614-c752727d2156
