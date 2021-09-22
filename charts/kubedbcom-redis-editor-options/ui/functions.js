@@ -232,6 +232,16 @@ function isEqualToModelPathValue(
   return modelPathValue === value;
 }
 
+function isNotEqualToModelPathValue(
+  { model, getValue, watchDependency },
+  value,
+  modelPath
+) {
+  const modelPathValue = getValue(model, modelPath);
+  watchDependency("model#" + modelPath);
+  return modelPathValue !== value;
+}
+
 function showAuthSecretField({
   discriminator,
   getValue,
@@ -269,6 +279,43 @@ async function getResources(
     return true;
   });
   return resources;
+}
+
+async function getRedisSentinels(
+  { axios, storeGet, model, getValue, watchDependency }
+) {
+  const owner = storeGet("/user/username");
+  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const namespace = getValue(model, "/spec/sentinelRef/namespace");
+
+  watchDependency("model#/spec/sentinelRef/namespace");
+
+  if(owner && cluster && namespace) {
+    try {
+      const resp = await axios.get(
+        `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/redissentinels`,
+        {
+          params: { filter: { items: { metadata: { name: null } } } },
+        }
+      );
+
+      const resources = (resp && resp.data && resp.data.items) || [];
+
+      resources.map((item) => {
+        const name = (item.metadata && item.metadata.name) || "";
+        item.text = name;
+        item.value = name;
+        return true;
+      });
+
+      return resources;
+    } catch (err) {
+      console.log(err);
+      return [];
+    }
+  } else {
+    return [];
+  }
 }
 
 async function getStorageClassNames({ axios, storeGet, commit }) {
@@ -439,12 +486,38 @@ function setMachineToCustom() {
   return "custom";
 }
 
+function showSentinelNameAndNamespace({discriminator, getValue, watchDependency}) {
+  watchDependency("discriminator#/createSentinel");
+  const verd = getValue(discriminator, "/createSentinel");
+
+  return !verd;
+}
+
+function onCreateSentinelChange({discriminator, getValue, commit}) {
+  const verd = getValue(discriminator, "/createSentinel");
+
+  if(verd) {
+    commit("wizard/model$update", {
+      path: "/spec/sentinelRef/name",
+      value: "",
+      force: true,
+    });
+
+    commit("wizard/model$update", {
+      path: "/spec/sentinelRef/namespace",
+      value: "",
+      force: true,
+    })
+  }
+}
 
 return {
 	showAuthPasswordField,
 	isEqualToModelPathValue,
+  isNotEqualToModelPathValue,
 	showAuthSecretField,
 	getResources,
+  getRedisSentinels,
 	getStorageClassNames,
 	getRedisVersions,
 	getSecrets,
@@ -452,5 +525,7 @@ return {
 	getMachineListForOptions,
 	setResourceLimit,
 	setLimitsCpuOrMem,
-	setMachineToCustom
+	setMachineToCustom,
+  showSentinelNameAndNamespace,
+  onCreateSentinelChange
 }

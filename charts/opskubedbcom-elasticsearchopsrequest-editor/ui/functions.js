@@ -501,12 +501,12 @@ function hasTlsField({
   return !!tls;
 }
 
-function initIssuerRefApiGroup({ getValue, model, watchDependency }) {
+function initIssuerRefApiGroup({ getValue, model, watchDependency, discriminator }) {
   const kind = getValue(model, "/spec/tls/issuerRef/kind");
   watchDependency("model#/spec/tls/issuerRef/kind");
 
   if (kind) {
-    const apiGroup = getValue(model, "/spec/tls/issuerRef/apiGroup");
+    const apiGroup = getValue(discriminator, "/dbDetails/spec/tls/issuerRef/apiGroup");
     if(apiGroup) return apiGroup;
     return "cert-manager.io";
   } else return undefined;
@@ -606,10 +606,11 @@ function isIssuerRefRequired({
   return !hasTls;
 }
 
-function getRequestTypeFromRoute({ route }) {
+function getRequestTypeFromRoute({ route, discriminator, getValue, watchDependency }) {
+  const isDbloading = isDbDetailsLoading({discriminator, getValue, watchDependency});
   const { query } = route || {};
   const { requestType } = query || {};
-  return requestType || "";
+  return isDbloading ? "" : requestType || "";
 }
 
 // ************************************** Set db details *****************************************
