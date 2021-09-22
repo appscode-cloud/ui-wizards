@@ -216,6 +216,9 @@
                 "decoder": {
                     "type": "string"
                 },
+                "keepEmpty": {
+                    "type": "boolean"
+                },
                 "identifier": {
                     "type": "string"
                 },
@@ -240,6 +243,9 @@
                     "additionalProperties": {
                         "type": "string"
                     }
+                },
+                "toggleOption": {
+                    "$ref": "#/definitions/ToggleOption"
                 }
             },
             "required": [
@@ -403,6 +409,9 @@
                         },
                         "decoder": {
                             "type": "string"
+                        },
+                        "keepEmpty": {
+                            "type": "boolean"
                         }
                     },
                     "additionalProperties": false,
@@ -563,6 +572,9 @@
                         },
                         "decoder": {
                             "type": "string"
+                        },
+                        "keepEmpty": {
+                            "type": "boolean"
                         },
                         "tabs": {
                             "type": "array",
@@ -748,6 +760,9 @@
                         "decoder": {
                             "type": "string"
                         },
+                        "keepEmpty": {
+                            "type": "boolean"
+                        },
                         "target": {
                             "type": "string"
                         },
@@ -791,7 +806,6 @@
                         }
                     },
                     "required": [
-                        "target",
                         "type",
                         "url"
                     ],
@@ -951,8 +965,17 @@
                         "decoder": {
                             "type": "string"
                         },
+                        "keepEmpty": {
+                            "type": "boolean"
+                        },
                         "hideValue": {
                             "type": "boolean"
+                        },
+                        "minValue": {
+                            "type": "number"
+                        },
+                        "maxValue": {
+                            "type": "number"
                         }
                     },
                     "additionalProperties": false,
@@ -1113,6 +1136,9 @@
                         },
                         "decoder": {
                             "type": "string"
+                        },
+                        "keepEmpty": {
+                            "type": "boolean"
                         }
                     },
                     "required": [
@@ -1273,6 +1299,9 @@
                         },
                         "decoder": {
                             "type": "string"
+                        },
+                        "keepEmpty": {
+                            "type": "boolean"
                         },
                         "language": {
                             "type": "string",
@@ -1441,6 +1470,9 @@
                         "decoder": {
                             "type": "string"
                         },
+                        "keepEmpty": {
+                            "type": "boolean"
+                        },
                         "add_new_button": {
                             "type": "object",
                             "properties": {
@@ -1505,41 +1537,7 @@
                                         "type": "string"
                                     },
                                     {
-                                        "type": "object",
-                                        "properties": {
-                                            "text": {
-                                                "type": "string"
-                                            },
-                                            "value": {
-                                                "anyOf": [
-                                                    {
-                                                        "type": "string"
-                                                    },
-                                                    {
-                                                        "type": "number"
-                                                    },
-                                                    {
-                                                        "type": "boolean"
-                                                    },
-                                                    {
-                                                        "type": "object",
-                                                        "additionalProperties": {}
-                                                    },
-                                                    {
-                                                        "type": "array",
-                                                        "items": {}
-                                                    }
-                                                ]
-                                            },
-                                            "description": {
-                                                "type": "string"
-                                            }
-                                        },
-                                        "required": [
-                                            "text",
-                                            "value"
-                                        ],
-                                        "additionalProperties": false
+                                        "$ref": "#/definitions/Option"
                                     }
                                 ]
                             }
@@ -1704,6 +1702,9 @@
                         "decoder": {
                             "type": "string"
                         },
+                        "keepEmpty": {
+                            "type": "boolean"
+                        },
                         "add_new_button": {
                             "type": "object",
                             "properties": {
@@ -1768,41 +1769,7 @@
                                         "type": "string"
                                     },
                                     {
-                                        "type": "object",
-                                        "properties": {
-                                            "text": {
-                                                "type": "string"
-                                            },
-                                            "value": {
-                                                "anyOf": [
-                                                    {
-                                                        "type": "string"
-                                                    },
-                                                    {
-                                                        "type": "number"
-                                                    },
-                                                    {
-                                                        "type": "boolean"
-                                                    },
-                                                    {
-                                                        "type": "object",
-                                                        "additionalProperties": {}
-                                                    },
-                                                    {
-                                                        "type": "array",
-                                                        "items": {}
-                                                    }
-                                                ]
-                                            },
-                                            "description": {
-                                                "type": "string"
-                                            }
-                                        },
-                                        "required": [
-                                            "text",
-                                            "value"
-                                        ],
-                                        "additionalProperties": false
+                                        "$ref": "#/definitions/Option"
                                     }
                                 ]
                             }
@@ -1967,44 +1934,13 @@
                         "decoder": {
                             "type": "string"
                         },
+                        "keepEmpty": {
+                            "type": "boolean"
+                        },
                         "options": {
                             "type": "array",
                             "items": {
-                                "type": "object",
-                                "properties": {
-                                    "text": {
-                                        "type": "string"
-                                    },
-                                    "value": {
-                                        "anyOf": [
-                                            {
-                                                "type": "string"
-                                            },
-                                            {
-                                                "type": "number"
-                                            },
-                                            {
-                                                "type": "boolean"
-                                            },
-                                            {
-                                                "type": "object",
-                                                "additionalProperties": {}
-                                            },
-                                            {
-                                                "type": "array",
-                                                "items": {}
-                                            }
-                                        ]
-                                    },
-                                    "description": {
-                                        "type": "string"
-                                    }
-                                },
-                                "required": [
-                                    "text",
-                                    "value"
-                                ],
-                                "additionalProperties": false
+                                "$ref": "#/definitions/Option"
                             }
                         },
                         "hasDescription": {
@@ -2170,44 +2106,13 @@
                         "decoder": {
                             "type": "string"
                         },
+                        "keepEmpty": {
+                            "type": "boolean"
+                        },
                         "options": {
                             "type": "array",
                             "items": {
-                                "type": "object",
-                                "properties": {
-                                    "text": {
-                                        "type": "string"
-                                    },
-                                    "value": {
-                                        "anyOf": [
-                                            {
-                                                "type": "string"
-                                            },
-                                            {
-                                                "type": "number"
-                                            },
-                                            {
-                                                "type": "boolean"
-                                            },
-                                            {
-                                                "type": "object",
-                                                "additionalProperties": {}
-                                            },
-                                            {
-                                                "type": "array",
-                                                "items": {}
-                                            }
-                                        ]
-                                    },
-                                    "description": {
-                                        "type": "string"
-                                    }
-                                },
-                                "required": [
-                                    "text",
-                                    "value"
-                                ],
-                                "additionalProperties": false
+                                "$ref": "#/definitions/Option"
                             }
                         },
                         "hasDescription": {
@@ -2372,6 +2277,9 @@
                         },
                         "decoder": {
                             "type": "string"
+                        },
+                        "keepEmpty": {
+                            "type": "boolean"
                         }
                     },
                     "required": [
@@ -2532,6 +2440,9 @@
                         },
                         "decoder": {
                             "type": "string"
+                        },
+                        "keepEmpty": {
+                            "type": "boolean"
                         },
                         "isArray": {
                             "type": "boolean"
@@ -2728,6 +2639,9 @@
                         "decoder": {
                             "type": "string"
                         },
+                        "keepEmpty": {
+                            "type": "boolean"
+                        },
                         "isArray": {
                             "type": "boolean"
                         },
@@ -2923,6 +2837,9 @@
                         "decoder": {
                             "type": "string"
                         },
+                        "keepEmpty": {
+                            "type": "boolean"
+                        },
                         "element": {
                             "$ref": "#/definitions/FormElementType"
                         }
@@ -2934,266 +2851,7 @@
                     "additionalProperties": false
                 },
                 {
-                    "type": "object",
-                    "properties": {
-                        "type": {
-                            "type": "string",
-                            "const": "single-step-form-array"
-                        },
-                        "label": {
-                            "type": "object",
-                            "properties": {
-                                "isSubsection": {
-                                    "type": "boolean"
-                                },
-                                "text": {
-                                    "type": "string"
-                                }
-                            },
-                            "required": [
-                                "text"
-                            ],
-                            "additionalProperties": false
-                        },
-                        "customClass": {
-                            "type": "string"
-                        },
-                        "schema": {
-                            "type": "object",
-                            "properties": {
-                                "$ref": {
-                                    "type": "string"
-                                }
-                            },
-                            "required": [
-                                "$ref"
-                            ],
-                            "additionalProperties": false
-                        },
-                        "disabled": {
-                            "type": [
-                                "boolean",
-                                "string"
-                            ]
-                        },
-                        "required": {
-                            "type": [
-                                "boolean",
-                                "string"
-                            ]
-                        },
-                        "if": {
-                            "anyOf": [
-                                {
-                                    "type": "string"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "params": {
-                                            "type": "object",
-                                            "additionalProperties": {
-                                                "anyOf": [
-                                                    {
-                                                        "type": "string"
-                                                    },
-                                                    {
-                                                        "type": "number"
-                                                    },
-                                                    {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "$ref": {
-                                                                "type": "string"
-                                                            }
-                                                        },
-                                                        "required": [
-                                                            "$ref"
-                                                        ],
-                                                        "additionalProperties": false
-                                                    }
-                                                ]
-                                            }
-                                        },
-                                        "expression": {
-                                            "type": "string"
-                                        }
-                                    },
-                                    "required": [
-                                        "params",
-                                        "expression"
-                                    ],
-                                    "additionalProperties": false
-                                }
-                            ]
-                        },
-                        "fetch": {
-                            "anyOf": [
-                                {
-                                    "type": "string"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "path": {
-                                            "type": "string"
-                                        },
-                                        "params": {
-                                            "type": "object",
-                                            "additionalProperties": {
-                                                "anyOf": [
-                                                    {
-                                                        "type": "string"
-                                                    },
-                                                    {
-                                                        "type": "number"
-                                                    },
-                                                    {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "$ref": {
-                                                                "type": "string"
-                                                            }
-                                                        },
-                                                        "required": [
-                                                            "$ref"
-                                                        ],
-                                                        "additionalProperties": false
-                                                    }
-                                                ]
-                                            }
-                                        }
-                                    },
-                                    "required": [
-                                        "path",
-                                        "params"
-                                    ],
-                                    "additionalProperties": false
-                                }
-                            ]
-                        },
-                        "computed": {
-                            "type": "string"
-                        },
-                        "individualItemDisabilityCheck": {
-                            "type": "string"
-                        },
-                        "onChange": {
-                            "type": "string"
-                        },
-                        "encoder": {
-                            "type": "string"
-                        },
-                        "decoder": {
-                            "type": "string"
-                        },
-                        "addFormLabel": {
-                            "type": "string"
-                        },
-                        "hideForm": {
-                            "type": "boolean"
-                        },
-                        "element": {
-                            "$ref": "#/definitions/SingleStepFormInterface"
-                        },
-                        "tableContents": {
-                            "type": "array",
-                            "items": {
-                                "anyOf": [
-                                    {
-                                        "type": "object",
-                                        "properties": {
-                                            "label": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "isSubsection": {
-                                                        "type": "boolean"
-                                                    },
-                                                    "text": {
-                                                        "type": "string"
-                                                    }
-                                                },
-                                                "required": [
-                                                    "text"
-                                                ],
-                                                "additionalProperties": false
-                                            },
-                                            "type": {
-                                                "type": "string",
-                                                "const": "value"
-                                            },
-                                            "computed": {
-                                                "type": "string"
-                                            },
-                                            "inTableColumn": {
-                                                "type": "boolean"
-                                            },
-                                            "path": {
-                                                "type": "string"
-                                            },
-                                            "typeOfValue": {
-                                                "type": "string",
-                                                "enum": [
-                                                    "string",
-                                                    "array",
-                                                    "object-array",
-                                                    "key-operator-values-array"
-                                                ]
-                                            },
-                                            "tableContents": {
-                                                "type": "array",
-                                                "items": {
-                                                    "$ref": "#/definitions/alias-171705666-3287-3364-171705666-0-6007"
-                                                }
-                                            }
-                                        },
-                                        "required": [
-                                            "label",
-                                            "path",
-                                            "type",
-                                            "typeOfValue"
-                                        ],
-                                        "additionalProperties": false
-                                    },
-                                    {
-                                        "type": "object",
-                                        "properties": {
-                                            "label": {
-                                                "type": "object",
-                                                "properties": {
-                                                    "isSubsection": {
-                                                        "type": "boolean"
-                                                    },
-                                                    "text": {
-                                                        "type": "string"
-                                                    }
-                                                },
-                                                "required": [
-                                                    "text"
-                                                ],
-                                                "additionalProperties": false
-                                            },
-                                            "type": {
-                                                "type": "string",
-                                                "const": "label"
-                                            }
-                                        },
-                                        "required": [
-                                            "label",
-                                            "type"
-                                        ],
-                                        "additionalProperties": false
-                                    }
-                                ]
-                            }
-                        }
-                    },
-                    "required": [
-                        "element",
-                        "tableContents",
-                        "type"
-                    ],
-                    "additionalProperties": false
+                    "$ref": "#/definitions/SingleStepFormArrayInterface"
                 },
                 {
                     "type": "object",
@@ -3349,6 +3007,9 @@
                         "decoder": {
                             "type": "string"
                         },
+                        "keepEmpty": {
+                            "type": "boolean"
+                        },
                         "identifier": {
                             "type": "string"
                         },
@@ -3373,6 +3034,9 @@
                             "additionalProperties": {
                                 "type": "string"
                             }
+                        },
+                        "toggleOption": {
+                            "$ref": "#/definitions/ToggleOption"
                         },
                         "alias": {
                             "type": "string"
@@ -3439,168 +3103,107 @@
                     "$ref": "#/definitions/SingleStepFormInterface"
                 },
                 {
+                    "$ref": "#/definitions/ConfigureOptionsInterface"
+                }
+            ]
+        },
+        "Option": {
+            "type": "object",
+            "properties": {
+                "text": {
+                    "type": "string"
+                },
+                "value": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "number"
+                        },
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "object",
+                            "additionalProperties": {}
+                        },
+                        {
+                            "type": "array",
+                            "items": {}
+                        }
+                    ]
+                },
+                "description": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "text",
+                "value"
+            ],
+            "additionalProperties": false
+        },
+        "SingleStepFormArrayInterface": {
+            "type": "object",
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "const": "single-step-form-array"
+                },
+                "label": {
                     "type": "object",
                     "properties": {
-                        "type": {
-                            "type": "string",
-                            "const": "configure-options"
+                        "isSubsection": {
+                            "type": "boolean"
                         },
-                        "label": {
+                        "text": {
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "text"
+                    ],
+                    "additionalProperties": false
+                },
+                "customClass": {
+                    "type": "string"
+                },
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "$ref": {
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "$ref"
+                    ],
+                    "additionalProperties": false
+                },
+                "disabled": {
+                    "type": [
+                        "boolean",
+                        "string"
+                    ]
+                },
+                "required": {
+                    "type": [
+                        "boolean",
+                        "string"
+                    ]
+                },
+                "if": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
                             "type": "object",
                             "properties": {
-                                "isSubsection": {
-                                    "type": "boolean"
-                                },
-                                "text": {
-                                    "type": "string"
-                                }
-                            },
-                            "required": [
-                                "text"
-                            ],
-                            "additionalProperties": false
-                        },
-                        "customClass": {
-                            "type": "string"
-                        },
-                        "schema": {
-                            "type": "object",
-                            "properties": {
-                                "$ref": {
-                                    "type": "string"
-                                }
-                            },
-                            "required": [
-                                "$ref"
-                            ],
-                            "additionalProperties": false
-                        },
-                        "disabled": {
-                            "type": [
-                                "boolean",
-                                "string"
-                            ]
-                        },
-                        "required": {
-                            "type": [
-                                "boolean",
-                                "string"
-                            ]
-                        },
-                        "if": {
-                            "anyOf": [
-                                {
-                                    "type": "string"
-                                },
-                                {
+                                "params": {
                                     "type": "object",
-                                    "properties": {
-                                        "params": {
-                                            "type": "object",
-                                            "additionalProperties": {
-                                                "anyOf": [
-                                                    {
-                                                        "type": "string"
-                                                    },
-                                                    {
-                                                        "type": "number"
-                                                    },
-                                                    {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "$ref": {
-                                                                "type": "string"
-                                                            }
-                                                        },
-                                                        "required": [
-                                                            "$ref"
-                                                        ],
-                                                        "additionalProperties": false
-                                                    }
-                                                ]
-                                            }
-                                        },
-                                        "expression": {
-                                            "type": "string"
-                                        }
-                                    },
-                                    "required": [
-                                        "params",
-                                        "expression"
-                                    ],
-                                    "additionalProperties": false
-                                }
-                            ]
-                        },
-                        "fetch": {
-                            "anyOf": [
-                                {
-                                    "type": "string"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "path": {
-                                            "type": "string"
-                                        },
-                                        "params": {
-                                            "type": "object",
-                                            "additionalProperties": {
-                                                "anyOf": [
-                                                    {
-                                                        "type": "string"
-                                                    },
-                                                    {
-                                                        "type": "number"
-                                                    },
-                                                    {
-                                                        "type": "object",
-                                                        "properties": {
-                                                            "$ref": {
-                                                                "type": "string"
-                                                            }
-                                                        },
-                                                        "required": [
-                                                            "$ref"
-                                                        ],
-                                                        "additionalProperties": false
-                                                    }
-                                                ]
-                                            }
-                                        }
-                                    },
-                                    "required": [
-                                        "path",
-                                        "params"
-                                    ],
-                                    "additionalProperties": false
-                                }
-                            ]
-                        },
-                        "computed": {
-                            "type": "string"
-                        },
-                        "individualItemDisabilityCheck": {
-                            "type": "string"
-                        },
-                        "onChange": {
-                            "type": "string"
-                        },
-                        "encoder": {
-                            "type": "string"
-                        },
-                        "decoder": {
-                            "type": "string"
-                        },
-                        "options": {
-                            "type": "array",
-                            "items": {
-                                "type": "object",
-                                "properties": {
-                                    "text": {
-                                        "type": "string"
-                                    },
-                                    "value": {
+                                    "additionalProperties": {
                                         "anyOf": [
                                             {
                                                 "type": "string"
@@ -3609,177 +3212,128 @@
                                                 "type": "number"
                                             },
                                             {
-                                                "type": "boolean"
-                                            },
-                                            {
                                                 "type": "object",
-                                                "additionalProperties": {}
-                                            },
-                                            {
-                                                "type": "array",
-                                                "items": {}
+                                                "properties": {
+                                                    "$ref": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "required": [
+                                                    "$ref"
+                                                ],
+                                                "additionalProperties": false
                                             }
                                         ]
-                                    },
-                                    "description": {
-                                        "type": "string"
-                                    },
-                                    "dependencies": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "object",
-                                            "properties": {
-                                                "group": {
-                                                    "type": "string"
-                                                },
-                                                "version": {
-                                                    "type": "string"
-                                                },
-                                                "name": {
-                                                    "type": "string"
-                                                },
-                                                "resource": {
-                                                    "type": "string"
-                                                },
-                                                "url": {
-                                                    "type": "string"
-                                                }
-                                            },
-                                            "required": [
-                                                "group",
-                                                "version",
-                                                "name",
-                                                "resource",
-                                                "url"
-                                            ],
-                                            "additionalProperties": false
-                                        }
-                                    },
-                                    "dependingSteps": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "string"
-                                        }
                                     }
                                 },
-                                "additionalProperties": false,
-                                "required": [
-                                    "text",
-                                    "value"
-                                ]
-                            }
-                        },
-                        "hasDescription": {
-                            "type": "boolean"
-                        },
-                        "hasDependencies": {
-                            "type": "boolean"
-                        },
-                        "owner": {
-                            "anyOf": [
-                                {
-                                    "type": "string"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "$ref": {
-                                            "type": "string"
-                                        }
-                                    },
-                                    "required": [
-                                        "$ref"
-                                    ],
-                                    "additionalProperties": false
-                                }
-                            ]
-                        },
-                        "cluster": {
-                            "anyOf": [
-                                {
-                                    "type": "string"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "$ref": {
-                                            "type": "string"
-                                        }
-                                    },
-                                    "required": [
-                                        "$ref"
-                                    ],
-                                    "additionalProperties": false
-                                }
-                            ]
-                        }
-                    },
-                    "required": [
-                        "cluster",
-                        "options",
-                        "owner",
-                        "type"
-                    ],
-                    "additionalProperties": false
-                }
-            ]
-        },
-        "alias-171705666-3287-3364-171705666-0-6007": {
-            "anyOf": [
-                {
-                    "type": "object",
-                    "properties": {
-                        "label": {
-                            "type": "object",
-                            "properties": {
-                                "isSubsection": {
-                                    "type": "boolean"
-                                },
-                                "text": {
+                                "expression": {
                                     "type": "string"
                                 }
                             },
                             "required": [
-                                "text"
+                                "params",
+                                "expression"
                             ],
                             "additionalProperties": false
-                        },
-                        "type": {
-                            "type": "string",
-                            "const": "value"
-                        },
-                        "computed": {
-                            "type": "string"
-                        },
-                        "inTableColumn": {
-                            "type": "boolean"
-                        },
-                        "path": {
-                            "type": "string"
-                        },
-                        "typeOfValue": {
-                            "type": "string",
-                            "enum": [
-                                "string",
-                                "array",
-                                "object-array",
-                                "key-operator-values-array"
-                            ]
-                        },
-                        "tableContents": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/alias-171705666-3287-3364-171705666-0-6007"
-                            }
                         }
-                    },
-                    "required": [
-                        "label",
-                        "path",
-                        "type",
-                        "typeOfValue"
-                    ],
-                    "additionalProperties": false
+                    ]
+                },
+                "fetch": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "object",
+                            "properties": {
+                                "path": {
+                                    "type": "string"
+                                },
+                                "params": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "anyOf": [
+                                            {
+                                                "type": "string"
+                                            },
+                                            {
+                                                "type": "number"
+                                            },
+                                            {
+                                                "type": "object",
+                                                "properties": {
+                                                    "$ref": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "required": [
+                                                    "$ref"
+                                                ],
+                                                "additionalProperties": false
+                                            }
+                                        ]
+                                    }
+                                }
+                            },
+                            "required": [
+                                "path",
+                                "params"
+                            ],
+                            "additionalProperties": false
+                        }
+                    ]
+                },
+                "computed": {
+                    "type": "string"
+                },
+                "individualItemDisabilityCheck": {
+                    "type": "string"
+                },
+                "onChange": {
+                    "type": "string"
+                },
+                "encoder": {
+                    "type": "string"
+                },
+                "decoder": {
+                    "type": "string"
+                },
+                "keepEmpty": {
+                    "type": "boolean"
+                },
+                "addFormLabel": {
+                    "type": "string"
+                },
+                "hideForm": {
+                    "type": "boolean"
+                },
+                "isCreateDisabled": {
+                    "type": "boolean"
+                },
+                "element": {
+                    "$ref": "#/definitions/SingleStepFormInterface"
+                },
+                "newItemValidator": {
+                    "type": "string"
+                },
+                "tableContents": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/TableContent"
+                    }
+                }
+            },
+            "required": [
+                "element",
+                "tableContents",
+                "type"
+            ],
+            "additionalProperties": false
+        },
+        "TableContent": {
+            "anyOf": [
+                {
+                    "$ref": "#/definitions/TableContentValueInterface"
                 },
                 {
                     "type": "object",
@@ -3810,6 +3364,380 @@
                     ],
                     "additionalProperties": false
                 }
+            ]
+        },
+        "TableContentValueInterface": {
+            "type": "object",
+            "properties": {
+                "label": {
+                    "type": "object",
+                    "properties": {
+                        "isSubsection": {
+                            "type": "boolean"
+                        },
+                        "text": {
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "text"
+                    ],
+                    "additionalProperties": false
+                },
+                "type": {
+                    "type": "string",
+                    "const": "value"
+                },
+                "computed": {
+                    "type": "string"
+                },
+                "inTableColumn": {
+                    "type": "boolean"
+                },
+                "path": {
+                    "type": "string"
+                },
+                "typeOfValue": {
+                    "type": "string",
+                    "enum": [
+                        "string",
+                        "array",
+                        "object-array",
+                        "key-operator-values-array",
+                        "key-value",
+                        "code"
+                    ]
+                },
+                "tableContents": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/TableContent"
+                    }
+                }
+            },
+            "required": [
+                "label",
+                "path",
+                "type",
+                "typeOfValue"
+            ],
+            "additionalProperties": false
+        },
+        "ToggleOption": {
+            "type": "object",
+            "properties": {
+                "disabled": {
+                    "type": "boolean"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "onStatusFalse": {
+                    "type": "string"
+                },
+                "onStatusTrue": {
+                    "type": "string"
+                },
+                "setInitialStatusFalse": {
+                    "type": "boolean"
+                },
+                "show": {
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "id"
+            ],
+            "additionalProperties": false
+        },
+        "ConfigureOptionsInterface": {
+            "type": "object",
+            "properties": {
+                "type": {
+                    "type": "string",
+                    "const": "configure-options"
+                },
+                "label": {
+                    "type": "object",
+                    "properties": {
+                        "isSubsection": {
+                            "type": "boolean"
+                        },
+                        "text": {
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "text"
+                    ],
+                    "additionalProperties": false
+                },
+                "customClass": {
+                    "type": "string"
+                },
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "$ref": {
+                            "type": "string"
+                        }
+                    },
+                    "required": [
+                        "$ref"
+                    ],
+                    "additionalProperties": false
+                },
+                "disabled": {
+                    "type": [
+                        "boolean",
+                        "string"
+                    ]
+                },
+                "required": {
+                    "type": [
+                        "boolean",
+                        "string"
+                    ]
+                },
+                "if": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "object",
+                            "properties": {
+                                "params": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "anyOf": [
+                                            {
+                                                "type": "string"
+                                            },
+                                            {
+                                                "type": "number"
+                                            },
+                                            {
+                                                "type": "object",
+                                                "properties": {
+                                                    "$ref": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "required": [
+                                                    "$ref"
+                                                ],
+                                                "additionalProperties": false
+                                            }
+                                        ]
+                                    }
+                                },
+                                "expression": {
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "params",
+                                "expression"
+                            ],
+                            "additionalProperties": false
+                        }
+                    ]
+                },
+                "fetch": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "object",
+                            "properties": {
+                                "path": {
+                                    "type": "string"
+                                },
+                                "params": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "anyOf": [
+                                            {
+                                                "type": "string"
+                                            },
+                                            {
+                                                "type": "number"
+                                            },
+                                            {
+                                                "type": "object",
+                                                "properties": {
+                                                    "$ref": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "required": [
+                                                    "$ref"
+                                                ],
+                                                "additionalProperties": false
+                                            }
+                                        ]
+                                    }
+                                }
+                            },
+                            "required": [
+                                "path",
+                                "params"
+                            ],
+                            "additionalProperties": false
+                        }
+                    ]
+                },
+                "computed": {
+                    "type": "string"
+                },
+                "individualItemDisabilityCheck": {
+                    "type": "string"
+                },
+                "onChange": {
+                    "type": "string"
+                },
+                "encoder": {
+                    "type": "string"
+                },
+                "decoder": {
+                    "type": "string"
+                },
+                "keepEmpty": {
+                    "type": "boolean"
+                },
+                "options": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/ConfigureOption"
+                    }
+                },
+                "hasDescription": {
+                    "type": "boolean"
+                },
+                "hasDependencies": {
+                    "type": "boolean"
+                },
+                "owner": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "object",
+                            "properties": {
+                                "$ref": {
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "$ref"
+                            ],
+                            "additionalProperties": false
+                        }
+                    ]
+                },
+                "cluster": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "object",
+                            "properties": {
+                                "$ref": {
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "$ref"
+                            ],
+                            "additionalProperties": false
+                        }
+                    ]
+                }
+            },
+            "required": [
+                "cluster",
+                "options",
+                "owner",
+                "type"
+            ],
+            "additionalProperties": false
+        },
+        "ConfigureOption": {
+            "type": "object",
+            "properties": {
+                "text": {
+                    "type": "string"
+                },
+                "value": {
+                    "anyOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "number"
+                        },
+                        {
+                            "type": "boolean"
+                        },
+                        {
+                            "type": "object",
+                            "additionalProperties": {}
+                        },
+                        {
+                            "type": "array",
+                            "items": {}
+                        }
+                    ]
+                },
+                "description": {
+                    "type": "string"
+                },
+                "dependencies": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "group": {
+                                "type": "string"
+                            },
+                            "version": {
+                                "type": "string"
+                            },
+                            "name": {
+                                "type": "string"
+                            },
+                            "resource": {
+                                "type": "string"
+                            },
+                            "url": {
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "group",
+                            "version",
+                            "name",
+                            "resource",
+                            "url"
+                        ],
+                        "additionalProperties": false
+                    }
+                },
+                "dependingSteps": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            },
+            "additionalProperties": false,
+            "required": [
+                "text",
+                "value"
             ]
         }
     }
