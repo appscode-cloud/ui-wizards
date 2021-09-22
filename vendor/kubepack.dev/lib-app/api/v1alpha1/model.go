@@ -18,12 +18,12 @@ package v1alpha1
 
 import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	metaapi "kmodules.xyz/resource-metadata/apis/meta/v1alpha1"
+	kmapi "kmodules.xyz/client-go/api/v1"
 )
 
 type Metadata struct {
-	Resource metaapi.ResourceID `json:"resource"`
-	Release  ObjectMeta         `json:"release"`
+	Resource kmapi.ResourceID `json:"resource"`
+	Release  ObjectMeta       `json:"release"`
 }
 
 type ObjectMeta struct {
