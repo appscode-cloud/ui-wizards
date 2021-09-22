@@ -51,6 +51,7 @@ type KubedbcomRedisEditorOptionsSpecSpec struct {
 	Replicas int `json:"replicas,omitempty"`
 	// +optional
 	Cluster           RedisCluster              `json:"cluster,omitempty"`
+	SentinelRef       NamespacedName            `json:"sentinelRef,omitempty"`
 	TerminationPolicy TerminationPolicy         `json:"terminationPolicy"`
 	StorageClass      StorageClass              `json:"storageClass"`
 	Persistence       Persistence               `json:"persistence"`
@@ -62,6 +63,11 @@ type KubedbcomRedisEditorOptionsSpecSpec struct {
 type RedisCluster struct {
 	Master   int `json:"master"`
 	Replicas int `json:"replicas"`
+}
+
+type NamespacedName struct {
+	Name      string `json:"name"`
+	Namespace string `json:"namespace"`
 }
 
 // +kubebuilder:validation:Enum=Standalone;Cluster;Sentinel
