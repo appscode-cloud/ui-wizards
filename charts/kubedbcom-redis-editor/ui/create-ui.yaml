@@ -1,27 +1,30 @@
 steps:
 - form:
+    discriminator:
+      createAuthSecret:
+        type: boolean
+      password:
+        type: string
     elements:
-    - disabled: true
-      label:
+    - label:
         text: labels.database.name
       onChange: onNameChange
       schema:
         $ref: schema#/properties/metadata/properties/release/properties/name
       type: input
-    - disabled: true
-      fetch: getResources|core|v1|namespaces
+    - fetch: getResources|core|v1|namespaces
       label:
         text: labels.namespace
       onChange: onNamespaceChange
       schema:
         $ref: schema#/properties/metadata/properties/release/properties/namespace
       type: select
-    - disabled: true
-      fetch: getMariaDbVersions|catalog.kubedb.com|v1alpha1|mariadbversions
+    - fetch: getRedisVersions|catalog.kubedb.com|v1alpha1|redisversions
       label:
         text: labels.database.version
+      onChange: onVersionChange
       schema:
-        $ref: schema#/properties/resources/properties/kubedbComMariaDB/properties/spec/properties/version
+        $ref: schema#/properties/resources/properties/kubedbComRedis/properties/spec/properties/version
       type: select
     - individualItemDisabilityCheck: disableLableChecker
       isArray: true
@@ -32,13 +35,13 @@ steps:
         text: labels.labels.label
       onChange: onLabelChange
       schema:
-        $ref: schema#/properties/resources/properties/kubedbComMariaDB/properties/metadata/properties/labels
+        $ref: schema#/properties/resources/properties/kubedbComRedis/properties/metadata/properties/labels
       type: key-value-input-form
       values:
         label:
           text: labels.labels.value
         schema:
-          $ref: schema#/properties/resources/properties/kubedbComMariaDB/properties/metadata/properties/labels/additionalProperties
+          $ref: schema#/properties/resources/properties/kubedbComRedis/properties/metadata/properties/labels/additionalProperties
         type: input
     - isArray: true
       keys:
@@ -47,17 +50,18 @@ steps:
       label:
         text: labels.annotations.label
       schema:
-        $ref: schema#/properties/resources/properties/kubedbComMariaDB/properties/metadata/properties/annotations
+        $ref: schema#/properties/resources/properties/kubedbComRedis/properties/metadata/properties/annotations
       type: key-value-input-form
       values:
         label:
           text: labels.annotations.value
         schema:
-          $ref: schema#/properties/resources/properties/kubedbComMariaDB/properties/metadata/properties/annotations/additionalProperties
+          $ref: schema#/properties/resources/properties/kubedbComRedis/properties/metadata/properties/annotations/additionalProperties
         type: input
     - hasDescription: true
       label:
         text: labels.terminationPolicy
+      onChange: onTerminationPolicyChange
       options:
       - description: options.terminationPolicy.delete.description
         text: options.terminationPolicy.delete.label
@@ -72,55 +76,44 @@ steps:
         text: options.terminationPolicy.doNotTerminate.label
         value: DoNotTerminate
       schema:
-        $ref: schema#/properties/resources/properties/kubedbComMariaDB/properties/spec/properties/terminationPolicy
+        $ref: schema#/properties/resources/properties/kubedbComRedis/properties/spec/properties/terminationPolicy
       type: radio
-    - disabled: true
+    - label:
+        text: labels.database.secret
+      type: label-element
+    - computed: getCreateAuthSecret
+      onChange: onCreateAuthSecretChange
+      options:
+      - text: options.database.secret.existingSecret.label
+        value: false
+      - text: options.database.secret.customSecret.label
+        value: true
+      schema:
+        $ref: discriminator#/createAuthSecret
+      type: radio
+    - allowUserDefinedOption: true
+      fetch: getSecrets
+      if: showExistingSecretSection
       label:
         text: labels.secret
       schema:
-        $ref: schema#/properties/resources/properties/kubedbComMariaDB/properties/spec/properties/authSecret/properties/name
+        $ref: schema#/properties/resources/properties/kubedbComRedis/properties/spec/properties/authSecret/properties/name
+      type: select
+    - computed: setAuthSecretPassword
+      hideValue: true
+      if: showPasswordSection
+      label:
+        text: Password
+      onChange: onAuthSecretPasswordChange
+      schema:
+        $ref: discriminator#/properties/password
       type: input
     type: single-step-form
   id: basic
   title: steps.0.label
 - form:
-    discriminator:
-      activeDatabaseMode:
-        default: Standalone
-        type: string
     elements:
-    - if: isEqualToDatabaseMode|Cluster
-      label:
-        text: labels.to_update_disabled_section
-      type: label-element
-    - customClass: mb-20
-      if: isEqualToDatabaseMode|Cluster
-      label:
-        text: labels.create_opsrequest
-      type: anchor
-      url:
-        params:
-          cluster:
-            $ref: store#/cluster/clusterDefinition/spec/name
-          dbname:
-            $ref: model#/metadata/release/name
-          domain:
-            $ref: store#/domain
-          group:
-            $ref: model#/metadata/resource/group
-          kind:
-            $ref: model#/metadata/resource/kind
-          namespace:
-            $ref: model#/metadata/release/namespace
-          owner:
-            $ref: store#/user/username
-          resource:
-            $ref: model#/metadata/resource/name
-          version:
-            $ref: model#/metadata/resource/version
-        path: ${domain}/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/mariadbopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations
     - computed: setDatabaseMode
-      disabled: true
       hasDescription: true
       label:
         text: labels.database.mode
@@ -132,29 +125,85 @@ steps:
       - description: options.database.mode.Cluster.description
         text: options.database.mode.Cluster.label
         value: Cluster
+      - description: options.database.mode.Sentinel.description
+        text: options.database.mode.Sentinel.label
+        value: Sentinel
       schema:
-        $ref: discriminator#/activeDatabaseMode
+        $ref: schema#/properties/resources/properties/kubedbComRedis/properties/spec/properties/mode
       type: radio
-    - disabled: true
-      if: isEqualToDatabaseMode|Cluster
+    - elements:
+      - label:
+          text: labels.replicaset.number
+        schema:
+          $ref: schema#/properties/resources/properties/kubedbComRedis/properties/spec/properties/cluster/properties/replicas
+        type: input
+      - label:
+          text: labels.master
+        schema:
+          $ref: schema#/properties/resources/properties/kubedbComRedis/properties/spec/properties/cluster/properties/master
+        type: input
+      if: isEqualToModelPathValue|Cluster|/resources/kubedbComRedis/spec/mode
+      schema:
+        $ref: schema#/properties/resources/properties/kubedbComRedis/properties/spec/properties/cluster
+      type: single-step-form
+    - if: isEqualToModelPathValue|Sentinel|/resources/kubedbComRedis/spec/mode
       label:
         text: labels.replicaset.number
+      minValue: 2
       schema:
-        $ref: schema#/properties/resources/properties/kubedbComMariaDB/properties/spec/properties/replicas
+        $ref: schema#/properties/resources/properties/kubedbComRedis/properties/spec/properties/replicas
       type: input
-    - disabled: true
+    - discriminator:
+        createSentinel:
+          type: boolean
       elements:
+      - label:
+          text: labels.sentinel_section
+        type: label-element
+      - computed: setCreateSentinel
+        onChange: onCreateSentinelChange
+        options:
+        - text: options.sentinelType.existingSentinel.label
+          value: false
+        - text: options.sentinelType.customSentinel.label
+          value: true
+        schema:
+          $ref: discriminator#/properties/createSentinel
+        type: radio
+      - fetch: getResources|core|v1|namespaces
+        if: showSentinelNameAndNamespace
+        label:
+          text: labels.namespace
+        required: true
+        schema:
+          $ref: schema#/properties/resources/properties/kubedbComRedis/properties/spec/properties/sentinelRef/properties/namespace
+        type: select
+      - allowUserDefinedOption: true
+        fetch: getRedisSentinels
+        if: showSentinelNameAndNamespace
+        label:
+          text: labels.name
+        required: true
+        schema:
+          $ref: schema#/properties/resources/properties/kubedbComRedis/properties/spec/properties/sentinelRef/properties/name
+        type: select
+      if: isEqualToModelPathValue|Sentinel|/resources/kubedbComRedis/spec/mode
+      schema:
+        $ref: schema#/properties/resources/properties/kubedbComRedis/properties/spec/properties/sentinelRef
+      type: single-step-form
+    - elements:
       - fetch: getStorageClassNames
         label:
           text: labels.storage.class
         schema:
-          $ref: schema#/properties/resources/properties/kubedbComMariaDB/properties/spec/properties/storage/properties/storageClassName
+          $ref: schema#/properties/resources/properties/kubedbComRedis/properties/spec/properties/storage/properties/storageClassName
         type: select
       - label:
           text: labels.storage.size
         schema:
-          $ref: schema#/properties/resources/properties/kubedbComMariaDB/properties/spec/properties/storage/properties/resources/properties/requests/properties/storage
+          $ref: schema#/properties/resources/properties/kubedbComRedis/properties/spec/properties/storage/properties/resources/properties/requests/properties/storage
         type: input
+      if: isNotEqualToModelPathValue|Sentinel|/resources/kubedbComRedis/spec/mode
       type: single-step-form
     type: single-step-form
   id: topology
@@ -165,56 +214,21 @@ steps:
         default: true
         type: boolean
     elements:
-    - label:
-        text: labels.to_update_tls
-      type: label-element
-    - customClass: mb-20
-      label:
-        text: labels.create_opsrequest
-      type: anchor
-      url:
-        params:
-          cluster:
-            $ref: store#/cluster/clusterDefinition/spec/name
-          dbname:
-            $ref: model#/metadata/release/name
-          domain:
-            $ref: store#/domain
-          group:
-            $ref: model#/metadata/resource/group
-          kind:
-            $ref: model#/metadata/resource/kind
-          namespace:
-            $ref: model#/metadata/release/namespace
-          owner:
-            $ref: store#/user/username
-          resource:
-            $ref: model#/metadata/resource/name
-          version:
-            $ref: model#/metadata/resource/version
-        path: ${domain}/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/mariadbopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=ReconfigureTLS
-    - computed: isValueExistInModel|/resources/kubedbComMariaDB/spec/tls
-      disabled: true
+    - computed: returnTrue
       label:
         text: labels.enable_tls
       onChange: onTlsConfigureChange
       schema:
         $ref: discriminator#/configureTLS
       type: switch
-    - disabled: true
-      elements:
-      - label:
-          text: labels.require_ssl_question
-        schema:
-          $ref: schema#/properties/resources/properties/kubedbComMariaDB/properties/spec/properties/requireSSL
-        type: switch
+    - elements:
       - elements:
         - computed: setApiGroup
           disabled: true
           label:
             text: labels.api_group
           schema:
-            $ref: schema#/properties/resources/properties/kubedbComMariaDB/properties/spec/properties/tls/properties/issuerRef/properties/apiGroup
+            $ref: schema#/properties/resources/properties/kubedbComRedis/properties/spec/properties/tls/properties/issuerRef/properties/apiGroup
           type: input
         - label:
             text: labels.kind
@@ -224,27 +238,31 @@ steps:
           - text: ClusterIssuer
             value: ClusterIssuer
           schema:
-            $ref: schema#/properties/resources/properties/kubedbComMariaDB/properties/spec/properties/tls/properties/issuerRef/properties/kind
+            $ref: schema#/properties/resources/properties/kubedbComRedis/properties/spec/properties/tls/properties/issuerRef/properties/kind
           type: select
         - allowUserDefinedOption: true
           fetch: getIssuerRefsName
           label:
             text: labels.name
           schema:
-            $ref: schema#/properties/resources/properties/kubedbComMariaDB/properties/spec/properties/tls/properties/issuerRef/properties/name
+            $ref: schema#/properties/resources/properties/kubedbComRedis/properties/spec/properties/tls/properties/issuerRef/properties/name
           type: select
         label:
           text: labels.issuer_ref
+        onChange: onIssuerRefChange
         schema:
-          $ref: schema#/properties/resources/properties/kubedbComMariaDB/properties/spec/properties/tls/properties/issuerRef
+          $ref: schema#/properties/resources/properties/kubedbComRedis/properties/spec/properties/tls/properties/issuerRef
         type: single-step-form
       - alias: reusable_certificates
         chart:
           name: uibytebuildersdev-component-certificates
           version: v0.2.0-alpha.0
+        functionCallbacks:
+          getAliasOptions:
+            $ref: functions#/getAliasOptions
         moduleResolver: fetchJsons
         schema:
-          $ref: schema#/properties/resources/properties/kubedbComMariaDB/properties/spec/properties/tls/properties/certificates
+          $ref: schema#/properties/resources/properties/kubedbComRedis/properties/spec/properties/tls/properties/certificates
         type: reusable-element
       if: showTlsConfigureSection
       type: single-step-form
@@ -252,172 +270,169 @@ steps:
   id: tls
   title: steps.2.label
 - form:
+    discriminator:
+      prePopulateDatabase:
+        type: string
     elements:
-    - disabled: disableInitializationSection
-      discriminator:
-        prePopulateDatabase:
+    - computed: returnStringYes
+      label:
+        text: labels.prePopulateDatabase
+      onChange: onPrePopulateDatabaseChange
+      options:
+      - text: options.yesOrNo.yes.text
+        value: "yes"
+      - text: options.yesOrNo.no.text
+        value: "no"
+      schema:
+        $ref: discriminator#/properties/prePopulateDatabase
+      type: radio
+    - discriminator:
+        dataSource:
           type: string
       elements:
-      - computed: initPrePopulateDatabase
+      - computed: initDataSource
         label:
-          text: labels.prePopulateDatabase
-        onChange: onPrePopulateDatabaseChange
+          text: labels.dataSource
+        onChange: onDataSourceChange
         options:
-        - text: options.yesOrNo.yes.text
-          value: "yes"
-        - text: options.yesOrNo.no.text
-          value: "no"
+        - text: options.dataSource.script.text
+          value: script
+        - text: options.dataSource.stashBackup.text
+          value: stashBackup
         schema:
-          $ref: discriminator#/properties/prePopulateDatabase
-        type: radio
+          $ref: discriminator#/properties/dataSource
+        type: select
       - discriminator:
-          dataSource:
+          sourceVolumeType:
             type: string
         elements:
-        - computed: initDataSource
-          label:
-            text: labels.dataSource
-          onChange: onDataSourceChange
-          options:
-          - text: options.dataSource.script.text
-            value: script
-          - text: options.dataSource.stashBackup.text
-            value: stashBackup
+        - label:
+            text: labels.script.path
           schema:
-            $ref: discriminator#/properties/dataSource
+            $ref: schema#/properties/resources/properties/kubedbComRedis/properties/spec/properties/init/properties/script/properties/scriptPath
+          type: input
+        - label:
+            text: labels.script.volume
+          type: label-element
+        - computed: initVolumeType
+          label:
+            text: labels.script.volumeType
+          onChange: onVolumeTypeChange
+          options:
+          - text: options.scriptSourceVolumeType.configMap.text
+            value: configMap
+          - text: options.scriptSourceVolumeType.secret.text
+            value: secret
+          schema:
+            $ref: discriminator#/properties/sourceVolumeType
           type: select
+        - allowUserDefinedOption: true
+          fetch: resourceNames|core|v1|configmaps
+          if: showConfigMapOrSecretName|configMap
+          label:
+            text: labels.script.volumeName
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComRedis/properties/spec/properties/init/properties/script/properties/configMap/properties/name
+          type: select
+        - allowUserDefinedOption: true
+          fetch: resourceNames|core|v1|secrets
+          if: showConfigMapOrSecretName|secret
+          label:
+            text: labels.script.volumeName
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComRedis/properties/spec/properties/init/properties/script/properties/secret/properties/secretName
+          type: select
+        if: showScriptOrStashForm|script
+        type: single-step-form
+      - elements:
+        - label:
+            text: labels.restoreSession.snapshot
+          schema:
+            $ref: schema#/properties/resources/properties/stashAppscodeComRestoreSession_init/properties/spec/properties/rules/properties/0/properties/snapshots/properties/0
+          type: input
         - discriminator:
-            sourceVolumeType:
+            repositoryChoise:
               type: string
           elements:
           - label:
-              text: labels.script.path
-            schema:
-              $ref: schema#/properties/resources/properties/kubedbComMariaDB/properties/spec/properties/init/properties/script/properties/scriptPath
-            type: input
-          - label:
-              text: labels.script.volume
+              text: labels.repositories.title
             type: label-element
-          - computed: initVolumeType
-            label:
-              text: labels.script.volumeType
-            onChange: onVolumeTypeChange
+          - computed: setInitialRestoreSessionRepo
+            onChange: onInitRepositoryChoiseChange
             options:
-            - text: options.scriptSourceVolumeType.configMap.text
-              value: configMap
-            - text: options.scriptSourceVolumeType.secret.text
-              value: secret
+            - text: options.createOrSelect.select.text
+              value: select
+            - text: options.createOrSelect.create.text
+              value: create
             schema:
-              $ref: discriminator#/properties/sourceVolumeType
-            type: select
+              $ref: discriminator#/properties/repositoryChoise
+            type: radio
           - allowUserDefinedOption: true
-            fetch: resourceNames|core|v1|configmaps
-            if: showConfigMapOrSecretName|configMap
+            fetch: resourceNames|stash.appscode.com|v1alpha1|repositories
+            if: showRepositorySelectOrCreate|select
             label:
-              text: labels.script.volumeName
+              text: labels.repositories.name
             schema:
-              $ref: schema#/properties/resources/properties/kubedbComMariaDB/properties/spec/properties/init/properties/script/properties/configMap/properties/name
+              $ref: schema#/properties/resources/properties/stashAppscodeComRestoreSession_init/properties/spec/properties/repository/properties/name
             type: select
-          - allowUserDefinedOption: true
-            fetch: resourceNames|core|v1|secrets
-            if: showConfigMapOrSecretName|secret
-            label:
-              text: labels.script.volumeName
+          - alias: repository_create_init
+            chart:
+              name: uibytebuildersdev-component-repository-create
+              version: v0.2.0-alpha.0
+            dataContext:
+              namespace:
+                $ref: schema#/properties/metadata/properties/release/properties/namespace
+            if: showRepositorySelectOrCreate|create
+            moduleResolver: fetchJsons
             schema:
-              $ref: schema#/properties/resources/properties/kubedbComMariaDB/properties/spec/properties/init/properties/script/properties/secret/properties/secretName
-            type: select
-          if: showScriptOrStashForm|script
-          type: single-step-form
-        - elements:
-          - label:
-              text: labels.restoreSession.snapshot
-            schema:
-              $ref: schema#/properties/resources/properties/stashAppscodeComRestoreSession_init/properties/spec/properties/rules/properties/0/properties/snapshots/properties/0
-            type: input
-          - discriminator:
-              repositoryChoise:
-                type: string
-            elements:
-            - label:
-                text: labels.repositories.title
-              type: label-element
-            - computed: setInitialRestoreSessionRepo
-              onChange: onInitRepositoryChoiseChange
-              options:
-              - text: options.createOrSelect.select.text
-                value: select
-              - text: options.createOrSelect.create.text
-                value: create
-              schema:
-                $ref: discriminator#/properties/repositoryChoise
-              type: radio
-            - allowUserDefinedOption: true
-              fetch: resourceNames|stash.appscode.com|v1alpha1|repositories
-              if: showRepositorySelectOrCreate|select
-              label:
-                text: labels.repositories.name
-              schema:
-                $ref: schema#/properties/resources/properties/stashAppscodeComRestoreSession_init/properties/spec/properties/repository/properties/name
-              type: select
-            - alias: repository_create_init
-              chart:
-                name: uibytebuildersdev-component-repository-create
-                version: v0.2.0-alpha.0
-              dataContext:
-                namespace:
-                  $ref: schema#/properties/metadata/properties/release/properties/namespace
-              if: showRepositorySelectOrCreate|create
-              moduleResolver: fetchJsons
-              schema:
-                $ref: schema#/properties/resources/properties/stashAppscodeComRepository_init_repo/properties/spec/properties/backend
-              type: reusable-element
-            type: single-step-form
-          - if: returnFalse
-            label:
-              text: labels.backupConfiguration.targetReference.name
-            schema:
-              $ref: schema#/properties/resources/properties/stashAppscodeComRestoreSession_init/properties/spec/properties/target/properties/ref/properties/name
-            type: input
-          - discriminator:
-              customizeRestoreJobRuntimeSettings:
-                type: string
-            elements:
-            - computed: initCustomizeRestoreJobRuntimeSettings
-              label:
-                isSubsection: true
-                text: labels.runtimeSettings.choise
-              onChange: onCustomizeRestoreJobRuntimeSettingsChange
-              options:
-              - text: options.yesOrNo.yes.text
-                value: "yes"
-              - text: options.yesOrNo.no.text
-                value: "no"
-              schema:
-                $ref: discriminator#/properties/customizeRestoreJobRuntimeSettings
-              type: radio
-            - alias: runtime_settings_init
-              chart:
-                name: uibytebuildersdev-component-runtime-settings
-                version: v0.2.0-alpha.0
-              dataContext:
-                namespace:
-                  $ref: schema#/properties/metadata/properties/release/properties/namespace
-              if: showRuntimeForm|yes
-              moduleResolver: fetchJsons
-              schema:
-                $ref: schema#/properties/resources/properties/stashAppscodeComRestoreSession_init/properties/spec/properties/runtimeSettings
-              type: reusable-element
-            type: single-step-form
-          if: showScriptOrStashForm|stashBackup
+              $ref: schema#/properties/resources/properties/stashAppscodeComRepository_init_repo/properties/spec/properties/backend
+            type: reusable-element
           type: single-step-form
         - if: returnFalse
           label:
-            text: labels.waitForInitialRestore
+            text: labels.backupConfiguration.targetReference.name
           schema:
-            $ref: schema#/properties/resources/properties/kubedbComMariaDB/properties/spec/properties/init/properties/waitForInitialRestore
-          type: switch
-        if: showInitializationForm
+            $ref: schema#/properties/resources/properties/stashAppscodeComRestoreSession_init/properties/spec/properties/target/properties/ref/properties/name
+          type: input
+        - discriminator:
+            customizeRestoreJobRuntimeSettings:
+              type: string
+          elements:
+          - computed: initCustomizeRestoreJobRuntimeSettings
+            label:
+              isSubsection: true
+              text: labels.runtimeSettings.choise
+            onChange: onCustomizeRestoreJobRuntimeSettingsChange
+            options:
+            - text: options.yesOrNo.yes.text
+              value: "yes"
+            - text: options.yesOrNo.no.text
+              value: "no"
+            schema:
+              $ref: discriminator#/properties/customizeRestoreJobRuntimeSettings
+            type: radio
+          - alias: runtime_settings_init
+            chart:
+              name: uibytebuildersdev-component-runtime-settings
+              version: v0.2.0-alpha.0
+            dataContext:
+              namespace:
+                $ref: schema#/properties/metadata/properties/release/properties/namespace
+            if: showRuntimeForm|yes
+            moduleResolver: fetchJsons
+            schema:
+              $ref: schema#/properties/resources/properties/stashAppscodeComRestoreSession_init/properties/spec/properties/runtimeSettings
+            type: reusable-element
+          type: single-step-form
+        if: showScriptOrStashForm|stashBackup
         type: single-step-form
+      - if: returnFalse
+        label:
+          text: labels.waitForInitialRestore
+        schema:
+          $ref: schema#/properties/resources/properties/kubedbComRedis/properties/spec/properties/init/properties/waitForInitialRestore
+        type: switch
+      if: showInitializationForm
       type: single-step-form
     type: single-step-form
   id: initialization
@@ -425,9 +440,9 @@ steps:
 - form:
     discriminator:
       scheduleBackup:
-        type: boolean
+        type: string
     elements:
-    - computed: initScheduleBackup
+    - computed: returnStringYes
       label:
         text: labels.backup.title
       onChange: onScheduleBackupChange
@@ -495,7 +510,7 @@ steps:
             if: showRepositorySelectOrCreate|create
             moduleResolver: fetchJsons
             schema:
-              $ref: schema#/properties/resources/properties/stashAppscodeComRepository_repo/properties/spec
+              $ref: schema#/properties/resources/properties/stashAppscodeComRepository_repo/properties/spec/properties/backend
             type: reusable-element
           type: single-step-form
         - if: returnFalse
@@ -651,35 +666,7 @@ steps:
         default: true
         type: boolean
     elements:
-    - label:
-        text: labels.to_update_exporter_resources
-      type: label-element
-    - customClass: mb-20
-      label:
-        text: labels.create_opsrequest
-      type: anchor
-      url:
-        params:
-          cluster:
-            $ref: store#/cluster/clusterDefinition/spec/name
-          dbname:
-            $ref: model#/metadata/release/name
-          domain:
-            $ref: store#/domain
-          group:
-            $ref: model#/metadata/resource/group
-          kind:
-            $ref: model#/metadata/resource/kind
-          namespace:
-            $ref: model#/metadata/release/namespace
-          owner:
-            $ref: store#/user/username
-          resource:
-            $ref: model#/metadata/resource/name
-          version:
-            $ref: model#/metadata/resource/version
-        path: ${domain}/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/mariadbopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=VerticalScaling
-    - computed: isValueExistInModel|/resources/kubedbComMariaDB/spec/monitor
+    - computed: returnTrue
       label:
         text: labels.enable_monitoring
       onChange: onEnableMonitoringChange
@@ -706,7 +693,7 @@ steps:
           text: options.agent.prometheus_builtin.label
           value: prometheus.io/builtin
         schema:
-          $ref: schema#/properties/resources/properties/kubedbComMariaDB/properties/spec/properties/monitor/properties/agent
+          $ref: schema#/properties/resources/properties/kubedbComRedis/properties/spec/properties/monitor/properties/agent
         type: radio
       - elements:
         - isArray: true
@@ -717,20 +704,20 @@ steps:
           label:
             text: labels.labels.label
           schema:
-            $ref: schema#/properties/resources/properties/kubedbComMariaDB/properties/spec/properties/monitor/properties/prometheus/properties/serviceMonitor/properties/labels
+            $ref: schema#/properties/resources/properties/kubedbComRedis/properties/spec/properties/monitor/properties/prometheus/properties/serviceMonitor/properties/labels
           type: key-value-input-form
           values:
             label:
               text: labels.labels.value
             schema:
-              $ref: schema#/properties/resources/properties/kubedbComMariaDB/properties/spec/properties/monitor/properties/prometheus/properties/serviceMonitor/properties/labels/additionalProperties
+              $ref: schema#/properties/resources/properties/kubedbComRedis/properties/spec/properties/monitor/properties/prometheus/properties/serviceMonitor/properties/labels/additionalProperties
             type: input
         - label:
             text: labels.scrapping_interval
           schema:
-            $ref: schema#/properties/resources/properties/kubedbComMariaDB/properties/spec/properties/monitor/properties/prometheus/properties/serviceMonitor/properties/interval
+            $ref: schema#/properties/resources/properties/kubedbComRedis/properties/spec/properties/monitor/properties/prometheus/properties/serviceMonitor/properties/interval
           type: input
-        if: isEqualToModelPathValue|prometheus.io/operator|/resources/kubedbComMariaDB/spec/monitor/agent
+        if: isEqualToModelPathValue|prometheus.io/operator|/resources/kubedbComRedis/spec/monitor/agent
         label:
           text: labels.service_monitor_configuration
         show_label: true
@@ -821,14 +808,14 @@ steps:
           schema:
             $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/selector
           type: single-step-form
-        if: isEqualToModelPathValue|prometheus.io|/resources/kubedbComMariaDB/spec/monitor/agent
+        if: isEqualToModelPathValue|prometheus.io|/resources/kubedbComRedis/spec/monitor/agent
         label:
           text: labels.service_monitor
         schema:
           $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec
         show_label: true
         type: single-step-form
-      - if: isEqualToModelPathValue|prometheus.io|/resources/kubedbComMariaDB/spec/monitor/agent
+      - if: isEqualToModelPathValue|prometheus.io|/resources/kubedbComRedis/spec/monitor/agent
         individualItemDisabilityCheck: disableLableChecker
         isArray: true
         keys:
@@ -859,12 +846,12 @@ steps:
           chart:
             name: uibytebuildersdev-component-resources
             version: v0.2.0-alpha.0
-          disabled: true
           label:
             text: labels.resources
           moduleResolver: fetchJsons
           schema:
-            $ref: schema#/properties/resources/properties/kubedbComMariaDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/resources
+            $ref: schema#/properties/resources/properties/kubedbComRedis/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/resources
+          show_label: true
           type: reusable-element
         - label:
             text: labels.security_context
@@ -872,30 +859,30 @@ steps:
         - label:
             text: labels.run_as_user
           schema:
-            $ref: schema#/properties/resources/properties/kubedbComMariaDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/securityContext/properties/runAsUser
+            $ref: schema#/properties/resources/properties/kubedbComRedis/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/securityContext/properties/runAsUser
           type: input
         - customClass: mb-0
           label:
             text: labels.run_as_group
           schema:
-            $ref: schema#/properties/resources/properties/kubedbComMariaDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/securityContext/properties/runAsGroup
+            $ref: schema#/properties/resources/properties/kubedbComRedis/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/securityContext/properties/runAsGroup
           type: input
         - label:
             text: labels.port
           schema:
-            $ref: schema#/properties/resources/properties/kubedbComMariaDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/port
+            $ref: schema#/properties/resources/properties/kubedbComRedis/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/port
           type: input
         - element:
             label:
               isSubsection: true
               text: labels.args
             schema:
-              $ref: schema#/properties/resources/properties/kubedbComMariaDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/args/items
+              $ref: schema#/properties/resources/properties/kubedbComRedis/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/args/items
             type: input
           label:
             text: labels.args
           schema:
-            $ref: schema#/properties/resources/properties/kubedbComMariaDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/args
+            $ref: schema#/properties/resources/properties/kubedbComRedis/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/args
           type: list-input-form
         - alias: reusable_env
           chart:
@@ -906,7 +893,7 @@ steps:
               $ref: schema#/properties/metadata/properties/release/properties/namespace
           moduleResolver: fetchJsons
           schema:
-            $ref: schema#/properties/resources/properties/kubedbComMariaDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env
+            $ref: schema#/properties/resources/properties/kubedbComRedis/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env
           type: reusable-element
         if: showCustomizeExporterSection
         type: single-step-form
@@ -917,22 +904,17 @@ steps:
   title: steps.5.label
 - form:
     elements:
-    - elements:
-      - alias: pod_template_standalone
-        chart:
-          name: uibytebuildersdev-component-pod-template
-          version: v0.2.0-alpha.0
-        dataContext:
-          namespace:
-            $ref: schema#/properties/metadata/properties/release/properties/namespace
-        functionCallbacks:
-          isEditWizard:
-            $ref: functions#/returnTrue
-        moduleResolver: fetchJsons
-        schema:
-          $ref: schema#/properties/resources/properties/kubedbComMariaDB/properties/spec/properties/podTemplate
-        type: reusable-element
-      type: single-step-form
+    - alias: pod_template_standalone
+      chart:
+        name: uibytebuildersdev-component-pod-template
+        version: v0.2.0-alpha.0
+      dataContext:
+        namespace:
+          $ref: schema#/properties/metadata/properties/release/properties/namespace
+      moduleResolver: fetchJsons
+      schema:
+        $ref: schema#/properties/resources/properties/kubedbComRedis/properties/spec/properties/podTemplate
+      type: reusable-element
     type: single-step-form
   id: pod-template
   title: steps.6.label
@@ -944,14 +926,29 @@ steps:
         version: v0.2.0-alpha.0
       moduleResolver: fetchJsons
       schema:
-        $ref: schema#/properties/resources/properties/kubedbComMariaDB/properties/spec/properties/serviceTemplates
+        $ref: schema#/properties/resources/properties/kubedbComRedis/properties/spec/properties/serviceTemplates
       type: reusable-element
     type: single-step-form
   id: networking
   title: steps.7.label
 - form:
     elements:
-    - elements:
+    - discriminator:
+        setCustomConfig:
+          type: string
+      elements:
+      - computed: returnStringYes
+        label:
+          text: labels.setCustomConfig
+        onChange: onSetCustomConfigChange
+        options:
+        - text: options.yesOrNo.yes.text
+          value: "yes"
+        - text: options.yesOrNo.no.text
+          value: "no"
+        schema:
+          $ref: discriminator#/properties/setCustomConfig
+        type: radio
       - discriminator:
           configuration:
             type: string
@@ -959,35 +956,7 @@ steps:
             default: use-existing-config
             type: string
         elements:
-        - label:
-            text: labels.to_update_config
-          type: label-element
-        - customClass: mb-20
-          label:
-            text: labels.create_opsrequest
-          type: anchor
-          url:
-            params:
-              cluster:
-                $ref: store#/cluster/clusterDefinition/spec/name
-              dbname:
-                $ref: model#/metadata/release/name
-              domain:
-                $ref: store#/domain
-              group:
-                $ref: model#/metadata/resource/group
-              kind:
-                $ref: model#/metadata/resource/kind
-              namespace:
-                $ref: model#/metadata/release/namespace
-              owner:
-                $ref: store#/user/username
-              resource:
-                $ref: model#/metadata/resource/name
-              version:
-                $ref: model#/metadata/resource/version
-            path: ${domain}/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/mariadbopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=Reconfigure
-        - disabled: true
+        - computed: setConfigurationSource
           label:
             text: labels.custom_config
           onChange: onConfigurationSourceChange
@@ -1000,14 +969,22 @@ steps:
             $ref: discriminator#/configurationSource
           type: radio
         - allowUserDefinedOption: true
-          disabled: true
           fetch: getSecrets
           if: isEqualToDiscriminatorPath|use-existing-config|/configurationSource
           label:
             text: labels.name
           schema:
-            $ref: schema#/properties/resources/properties/kubedbComMariaDB/properties/spec/properties/configSecret/properties/name
+            $ref: schema#/properties/resources/properties/kubedbComRedis/properties/spec/properties/configSecret/properties/name
           type: select
+        - computed: setConfiguration
+          if: isEqualToDiscriminatorPath|create-new-config|/configurationSource
+          label:
+            text: labels.redis_conf
+          onChange: onConfigurationChange
+          schema:
+            $ref: discriminator#/properties/configuration
+          type: editor
+        if: isEqualToDiscriminatorPath|yes|/setCustomConfig
         type: single-step-form
       type: single-step-form
     type: single-step-form

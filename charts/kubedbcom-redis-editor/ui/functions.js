@@ -46,6 +46,16 @@ function isEqualToModelPathValue(
   return modelPathValue === value;
 }
 
+function isNotEqualToModelPathValue(
+  { model, getValue, watchDependency },
+  value,
+  modelPath
+) {
+  const modelPathValue = getValue(model, modelPath);
+  watchDependency("model#" + modelPath);
+  return modelPathValue !== value;
+}
+
 async function getResources(
   { axios, storeGet },
   group,
@@ -119,6 +129,42 @@ async function getNamespacedResourceList(
   return ans;
 }
 
+async function getRedisSentinels(
+  { axios, storeGet, model, getValue, watchDependency }
+) {
+  const owner = storeGet("/user/username");
+  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const namespace = getValue(model, "/resources/kubedbComRedis/spec/sentinelRef/namespace");
+
+  watchDependency("model#/resources/kubedbComRedis/spec/sentinelRef/namespace");
+
+  if(owner && cluster && namespace) {
+    try {
+      const resp = await axios.get(
+        `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/redissentinels`,
+        {
+          params: { filter: { items: { metadata: { name: null } } } },
+        }
+      );
+
+      const resources = (resp && resp.data && resp.data.items) || [];
+
+      resources.map((item) => {
+        const name = (item.metadata && item.metadata.name) || "";
+        item.text = name;
+        item.value = name;
+        return true;
+      });
+
+      return resources;
+    } catch (err) {
+      console.log(err);
+      return [];
+    }
+  } else {
+    return [];
+  }
+}
 async function getResourceList(
   axios,
   storeGet,
@@ -214,8 +260,14 @@ function returnStringYes() {
   return "yes";
 }
 
+function hasSentinelObject({model, getValue}) {
+  const sentinelObj = getValue(model, "/resources/kubedbComRedisSentinel_sentinel");
+
+  return !!sentinelObj;
+}
+
 // ************************* Basic Info **********************************************
-async function getMariaDbVersions(
+async function getRedisVersions(
   { axios, storeGet },
   group,
   version,
@@ -244,21 +296,45 @@ async function getMariaDbVersions(
     const resources = (resp && resp.data && resp.data.items) || [];
 
     // keep only non deprecated versions
-    const filteredMongoDbVersions = resources.filter(
+    const filteredRedisVersions = resources.filter(
       (item) => item.spec && !item.spec.deprecated
     );
 
-    filteredMongoDbVersions.map((item) => {
+    filteredRedisVersions.map((item) => {
       const name = (item.metadata && item.metadata.name) || "";
       const specVersion = (item.spec && item.spec.version) || "";
       item.text = `${name} (${specVersion})`;
       item.value = name;
       return true;
     });
-    return filteredMongoDbVersions;
+    return filteredRedisVersions;
   } catch (e) {
     console.log(e);
     return [];
+  }
+}
+
+function onVersionChange({model, getValue, commit}) {
+  const version = getValue(model, "/resources/kubedbComRedis/spec/version");
+
+  if(hasSentinelObject({model, getValue})) {
+    commit("wizard/model$update", {
+      path: "/resources/kubedbComRedisSentinel_sentinel/spec/version",
+      value: version,
+      force: true
+    });
+  }
+}
+
+function onTerminationPolicyChange({model, getValue, commit}) {
+  const terminationPolicy = getValue(model, "/resources/kubedbComRedis/spec/terminationPolicy");
+
+  if(hasSentinelObject({model, getValue})) {
+    commit("wizard/model$update", {
+      path: "/resources/kubedbComRedisSentinel_sentinel/spec/terminationPolicy",
+      value: terminationPolicy,
+      force: true
+    });
   }
 }
 
@@ -276,8 +352,8 @@ function showAuthPasswordField({ model, getValue, watchDependency }) {
 }
 
 function showAuthSecretField({ model, getValue, watchDependency }) {
-  watchDependency("model#/resources/kubedbComMariaDB/spec");
-  const modelPathValue = getValue(model, "/resources/kubedbComMariaDB/spec");
+  watchDependency("model#/resources/kubedbComRedis/spec");
+  const modelPathValue = getValue(model, "/resources/kubedbComRedis/spec");
   return !!(
     modelPathValue &&
     modelPathValue.authSecret &&
@@ -310,15 +386,10 @@ function showNewSecretCreateField({
 }
 
 // ********************* Database Mode ***********************
-function setDatabaseMode({ model, getValue, watchDependency }) {
-  const modelPathValue = getValue(model, "/resources/kubedbComMariaDB/spec/replicas");
-  watchDependency("model#/resources/kubedbComMariaDB/spec/replicas");
+function setDatabaseMode({model, getValue}) {
+  const mode = getValue(model, "/resources/kubedbComRedis/spec/mode");
 
-  if (modelPathValue > 1) {
-    return "Cluster";
-  } else {
-    return "Standalone";
-  }
+  return mode || "Standalone";
 }
 
 async function getStorageClassNames(
@@ -348,11 +419,11 @@ async function getStorageClassNames(
     if (isDefault) {
       const className = getValue(
         model,
-        "/resources/kubedbComMariaDB/spec/storage/storageClassName"
+        "/resources/kubedbComRedis/spec/storage/storageClassName"
       );
       if (!className) {
         commit("wizard/model$update", {
-          path: "/resources/kubedbComMariaDB/spec/storage/storageClassName",
+          path: "/resources/kubedbComRedis/spec/storage/storageClassName",
           value: name,
           force: true,
         });
@@ -367,35 +438,68 @@ async function getStorageClassNames(
 }
 
 function deleteDatabaseModePath({
-  discriminator,
   getValue,
   commit,
   model,
 }) {
-  const mode = getValue(discriminator, "/activeDatabaseMode");
+  const mode = getValue(model, "/resources/kubedbComRedis/spec/mode");
   if (mode === "Cluster") {
-    replicas = getValue(model, "/resources/kubedbComMariaDB/spec/replicas");
-    if(!replicas) {
-      commit("wizard/model$update", {
-        path: "/resources/kubedbComMariaDB/spec/replicas",
-        value: 3,
-        force: true,
-      });
-    }
+    commit("wizard/model$delete", "/resources/kubedbComRedis/spec/sentinelRef");
   } else if (mode === "Standalone") {
-    commit("wizard/model$delete", "/resources/kubedbComMariaDB/spec/replicas");  
+    commit("wizard/model$delete", "/resources/kubedbComRedis/spec/replicas");  
+    commit("wizard/model$delete", "/resources/kubedbComRedis/spec/sentinelRef");  
   }
 }
 
 function isEqualToDatabaseMode(
-  { getValue, watchDependency, discriminator },
+  { getValue, watchDependency, model },
   value
 ) {
-  watchDependency("discriminator#/activeDatabaseMode");
-  const mode = getValue(discriminator, "/activeDatabaseMode");
+  watchDependency("model#/activeDatabaseMode");
+  const mode = getValue(model, "/activeDatabaseMode");
   return mode === value;
 }
 
+function showSentinelNameAndNamespace({discriminator, getValue, watchDependency}) {
+  watchDependency("discriminator#/createSentinel");
+  const verd = getValue(discriminator, "/createSentinel");
+
+  return !verd;
+}
+
+function onCreateSentinelChange({discriminator, getValue, commit, model}) {
+  const verd = getValue(discriminator, "/createSentinel");
+
+  if(verd === true) {
+    const sentinelObj = getValue(model, "/resources/kubedbComRedisSentinel_sentinel");
+
+    if(!sentinelObj) {
+
+      const redisSpec = getValue(model, "/resources/kubedbComRedis/spec");
+
+      const {version, tls, storage, monitor, terminationPolicy} = redisSpec || {};
+
+      commit("wizard/model$update", {
+        path: "/resources/kubedbComRedisSentinel_sentinel/spec",
+        value: {
+          version,
+          tls,
+          storage,
+          monitor,
+          terminationPolicy
+        }
+      });
+    }
+  } else if(verd === false) {
+    commit("wizard/model$delete", "/resources/kubedbComRedisSentinel_sentinel");
+  }
+}
+
+function setCreateSentinel({model, getValue}) {
+  const sentinelObj = getValue(model, "/resources/kubedbComRedisSentinel_sentinel");
+
+  return !!sentinelObj;
+}
 // ************************** TLS ******************************88
 
 function setApiGroup() {
@@ -412,17 +516,17 @@ async function getIssuerRefsName({
   const owner = storeGet("/user/username");
   const cluster = storeGet("/cluster/clusterDefinition/spec/name");
   watchDependency(
-    "model#/resources/kubedbComMariaDB/spec/tls/issuerRef/apiGroup"
+    "model#/resources/kubedbComRedis/spec/tls/issuerRef/apiGroup"
   );
-  watchDependency("model#/resources/kubedbComMariaDB/spec/tls/issuerRef/kind");
+  watchDependency("model#/resources/kubedbComRedis/spec/tls/issuerRef/kind");
   watchDependency("model#/metadata/release/namespace");
   const apiGroup = getValue(
     model,
-    "/resources/kubedbComMariaDB/spec/tls/issuerRef/apiGroup"
+    "/resources/kubedbComRedis/spec/tls/issuerRef/apiGroup"
   );
   const kind = getValue(
     model,
-    "/resources/kubedbComMariaDB/spec/tls/issuerRef/kind"
+    "/resources/kubedbComRedis/spec/tls/issuerRef/kind"
   );
   const namespace = getValue(model, "/metadata/release/namespace");
 
@@ -451,44 +555,20 @@ async function getIssuerRefsName({
   }
 }
 
-async function hasIssuerRefName({
-  axios,
-  storeGet,
-  getValue,
-  model,
-  watchDependency,
-}) {
-  const resp = await getIssuerRefsName({
-    axios,
-    storeGet,
-    getValue,
-    model,
-    watchDependency,
-  });
+function onIssuerRefChange({model, getValue, commit}) {
+  const issuerRef = getValue(model, "/resources/kubedbComRedis/spec/tls/issuerRef");
 
-  return !!(resp && resp.length);
-}
-
-async function hasNoIssuerRefName({
-  axios,
-  storeGet,
-  getValue,
-  model,
-  watchDependency,
-}) {
-  const resp = await hasIssuerRefName({
-    axios,
-    storeGet,
-    getValue,
-    model,
-    watchDependency,
-  });
-
-  return !resp;
+  if(hasSentinelObject({model, getValue})) {
+    commit("wizard/model$update", {
+      path: "/resources/kubedbComRedisSentinel_sentinel/spec/tls/issuerRef",
+      value: issuerRef,
+      force: true
+    });
+  }
 }
 
 function setSSLMode({ model, getValue }) {
-  const val = getValue(model, "/resources/kubedbComMariaDB/spec/sslMode");
+  const val = getValue(model, "/resources/kubedbComRedis/spec/sslMode");
   return val || "require";
 }
 
@@ -506,13 +586,13 @@ function onTlsConfigureChange({ discriminator, getValue, commit }) {
   const configureStatus = getValue(discriminator, "/configureTLS");
   if (configureStatus) {
     commit("wizard/model$update", {
-      path: "/resources/kubedbComMariaDB/spec/tls",
+      path: "/resources/kubedbComRedis/spec/tls",
       value: { issuerRef: {}, certificates: [] },
       force: true,
     });
   } else {
-    commit("wizard/model$delete", "/resources/kubedbComMariaDB/spec/tls");
-    commit("wizard/model$delete", "/resources/kubedbComMariaDB/spec/sslMode");
+    commit("wizard/model$delete", "/resources/kubedbComRedis/spec/tls");
+    commit("wizard/model$delete", "/resources/kubedbComRedis/spec/sslMode");
   }
 }
 
@@ -536,12 +616,12 @@ function onEnableMonitoringChange({ discriminator, getValue, commit }) {
   const configureStatus = getValue(discriminator, "/enableMonitoring");
   if (configureStatus) {
     commit("wizard/model$update", {
-      path: "/resources/kubedbComMariaDB/spec/monitor",
+      path: "/resources/kubedbComRedis/spec/monitor",
       value: {},
       force: true,
     });
   } else {
-    commit("wizard/model$delete", "/resources/kubedbComMariaDB/spec/monitor");
+    commit("wizard/model$delete", "/resources/kubedbComRedis/spec/monitor");
   }
 }
 
@@ -559,14 +639,14 @@ function onCustomizeExporterChange({ discriminator, getValue, commit }) {
   const configureStatus = getValue(discriminator, "/customizeExporter");
   if (configureStatus) {
     commit("wizard/model$update", {
-      path: "/resources/kubedbComMariaDB/spec/monitor/prometheus/exporter",
+      path: "/resources/kubedbComRedis/spec/monitor/prometheus/exporter",
       value: {},
       force: true,
     });
   } else {
     commit(
       "wizard/model$delete",
-      "/resources/kubedbComMariaDB/spec/monitor/prometheus/exporter"
+      "/resources/kubedbComRedis/spec/monitor/prometheus/exporter"
     );
   }
 }
@@ -701,7 +781,7 @@ function valueExists(value, getValue, path) {
 function initPrePopulateDatabase({ getValue, model }) {
   const waitForInitialRestore = getValue(
     model,
-    "/resources/kubedbComMariaDB/spec/init/waitForInitialRestore"
+    "/resources/kubedbComRedis/spec/init/waitForInitialRestore"
   );
   const stashAppscodeComRestoreSession_init = getValue(
     model,
@@ -709,7 +789,7 @@ function initPrePopulateDatabase({ getValue, model }) {
   );
   const script = getValue(
     model,
-    "/resources/kubedbComMariaDB/spec/init/script"
+    "/resources/kubedbComRedis/spec/init/script"
   );
 
   return waitForInitialRestore ||
@@ -729,7 +809,7 @@ function onPrePopulateDatabaseChange({
   if (prePopulateDatabase === "no") {
     // delete related properties
     commit("wizard/model$update", {
-      path: "/resources/kubedbComMariaDB/spec/init/waitForInitialRestore",
+      path: "/resources/kubedbComRedis/spec/init/waitForInitialRestore",
       value: false,
     });
     commit(
@@ -738,7 +818,7 @@ function onPrePopulateDatabaseChange({
     );
     commit(
       "wizard/model$delete",
-      "/resources/kubedbComMariaDB/spec/init/script"
+      "/resources/kubedbComRedis/spec/init/script"
     );
     commit(
       "wizard/model$delete",
@@ -773,7 +853,7 @@ function onPrePopulateDatabaseChange({
 function initDataSource({ getValue, model }) {
   const script = getValue(
     model,
-    "/resources/kubedbComMariaDB/spec/init/script"
+    "/resources/kubedbComRedis/spec/init/script"
   );
   const stashAppscodeComRestoreSession_init = getValue(
     model,
@@ -789,7 +869,7 @@ function onDataSourceChange({ commit, getValue, discriminator, model }) {
   const dataSource = getValue(discriminator, "/dataSource");
 
   commit("wizard/model$update", {
-    path: "/resources/kubedbComMariaDB/spec/init/waitForInitialRestore",
+    path: "/resources/kubedbComRedis/spec/init/waitForInitialRestore",
     value: dataSource === "stashBackup",
     force: true,
   });
@@ -805,17 +885,17 @@ function onDataSourceChange({ commit, getValue, discriminator, model }) {
       !valueExists(
         model,
         getValue,
-        "/resources/kubedbComMariaDB/spec/init/script"
+        "/resources/kubedbComRedis/spec/init/script"
       )
     )
       commit("wizard/model$update", {
-        path: "/resources/kubedbComMariaDB/spec/init/script",
+        path: "/resources/kubedbComRedis/spec/init/script",
         value: initScript,
       });
   } else if (dataSource === "stashBackup") {
     commit(
       "wizard/model$delete",
-      "/resources/kubedbComMariaDB/spec/init/script"
+      "/resources/kubedbComRedis/spec/init/script"
     );
 
     // create a new stashAppscodeComRestoreSession_init if there is no stashAppscodeComRestoreSession_init property
@@ -847,11 +927,11 @@ function onDataSourceChange({ commit, getValue, discriminator, model }) {
 function initVolumeType({ getValue, model }) {
   const configMap = getValue(
     model,
-    "/resources/kubedbComMariaDB/spec/init/script/configMap/name"
+    "/resources/kubedbComRedis/spec/init/script/configMap/name"
   );
   const secret = getValue(
     model,
-    "/resources/kubedbComMariaDB/spec/init/script/secret/secretName"
+    "/resources/kubedbComRedis/spec/init/script/secret/secretName"
   );
 
   if (configMap) return "configMap";
@@ -865,18 +945,18 @@ function onVolumeTypeChange({ commit, getValue, discriminator, model }) {
     // add configMap object and delete secret object
     commit(
       "wizard/model$delete",
-      "/resources/kubedbComMariaDB/spec/init/script/secret"
+      "/resources/kubedbComRedis/spec/init/script/secret"
     );
 
     if (
       !valueExists(
         model,
         getValue,
-        "/resources/kubedbComMariaDB/spec/init/script/configMap"
+        "/resources/kubedbComRedis/spec/init/script/configMap"
       )
     ) {
       commit("wizard/model$update", {
-        path: "/resources/kubedbComMariaDB/spec/init/script/configMap",
+        path: "/resources/kubedbComRedis/spec/init/script/configMap",
         value: {
           name: "",
         },
@@ -886,18 +966,18 @@ function onVolumeTypeChange({ commit, getValue, discriminator, model }) {
     // delete configMap object and add secret object
     commit(
       "wizard/model$delete",
-      "/resources/kubedbComMariaDB/spec/init/script/configMap"
+      "/resources/kubedbComRedis/spec/init/script/configMap"
     );
 
     if (
       !valueExists(
         model,
         getValue,
-        "/resources/kubedbComMariaDB/spec/init/script/secret"
+        "/resources/kubedbComRedis/spec/init/script/secret"
       )
     ) {
       commit("wizard/model$update", {
-        path: "/resources/kubedbComMariaDB/spec/init/script/secret",
+        path: "/resources/kubedbComRedis/spec/init/script/secret",
         value: {
           secretName: "",
         },
@@ -1125,10 +1205,10 @@ function getBackupConfigsAndAnnotations(getValue, model) {
     model,
     "/resources/stashAppscodeComBackupConfiguration"
   );
-  const kubedbComMariaDBAnnotations =
-    getValue(model, "/resources/kubedbComMariaDB/metadata/annotations") || {};
+  const kubedbComRedisAnnotations =
+    getValue(model, "/resources/kubedbComRedis/metadata/annotations") || {};
 
-  const isBluePrint = Object.keys(kubedbComMariaDBAnnotations).some(
+  const isBluePrint = Object.keys(kubedbComRedisAnnotations).some(
     (k) =>
       k === "stash.appscode.com/backup-blueprint" ||
       k === "stash.appscode.com/schedule" ||
@@ -1141,9 +1221,9 @@ function getBackupConfigsAndAnnotations(getValue, model) {
   };
 }
 
-function deleteKubeDbComMariaDbAnnotation(getValue, model, commit) {
+function deletekubedbComRedisAnnotation(getValue, model, commit) {
   const annotations =
-    getValue(model, "/resources/kubedbComMariaDB/metadata/annotations") || {};
+    getValue(model, "/resources/kubedbComRedis/metadata/annotations") || {};
   const filteredKeyList =
     Object.keys(annotations).filter(
       (k) =>
@@ -1156,12 +1236,12 @@ function deleteKubeDbComMariaDbAnnotation(getValue, model, commit) {
     filteredAnnotations[k] = annotations[k];
   });
   commit("wizard/model$update", {
-    path: "/resources/kubedbComMariaDB/metadata/annotations",
+    path: "/resources/kubedbComRedis/metadata/annotations",
     value: filteredAnnotations,
   });
 }
 
-function addKubeDbComMariaDbAnnotation(
+function addkubedbComRedisAnnotation(
   getValue,
   model,
   commit,
@@ -1170,7 +1250,7 @@ function addKubeDbComMariaDbAnnotation(
   force
 ) {
   const annotations =
-    getValue(model, "/resources/kubedbComMariaDB/metadata/annotations") || {};
+    getValue(model, "/resources/kubedbComRedis/metadata/annotations") || {};
 
   if (annotations[key] === undefined) {
     annotations[key] = value;
@@ -1179,7 +1259,7 @@ function addKubeDbComMariaDbAnnotation(
   }
 
   commit("wizard/model$update", {
-    path: "/resources/kubedbComMariaDB/metadata/annotations",
+    path: "/resources/kubedbComRedis/metadata/annotations",
     value: annotations,
     force: true,
   });
@@ -1210,8 +1290,8 @@ function onScheduleBackupChange({
       "/resources/stashAppscodeComBackupConfiguration"
     );
     commit("wizard/model$delete", "/resources/stashAppscodeComRepository_repo");
-    // delete annotation from kubedbComMariaDB annotation
-    deleteKubeDbComMariaDbAnnotation(getValue, model, commit);
+    // delete annotation from kubedbComRedis annotation
+    deletekubedbComRedisAnnotation(getValue, model, commit);
   } else {
     const { isBluePrint } = getBackupConfigsAndAnnotations(getValue, model);
 
@@ -1272,7 +1352,7 @@ function onBackupInvokerChange({
 
   if (backupInvoker === "backupConfiguration") {
     // delete annotation and create backup config object
-    deleteKubeDbComMariaDbAnnotation(getValue, model, commit);
+    deletekubedbComRedisAnnotation(getValue, model, commit);
     const dbName = getValue(model, "/metadata/release/name");
 
     if (
@@ -1299,7 +1379,7 @@ function onBackupInvokerChange({
       "wizard/model$delete",
       "/resources/stashAppscodeComBackupConfiguration"
     );
-    addKubeDbComMariaDbAnnotation(
+    addkubedbComRedisAnnotation(
       getValue,
       model,
       commit,
@@ -1407,7 +1487,7 @@ function onRepositoryNameChange({ getValue, model, commit }) {
 function getMongoAnnotations(getValue, model) {
   const annotations = getValue(
     model,
-    "/resources/kubedbComMariaDB/metadata/annotations"
+    "/resources/kubedbComRedis/metadata/annotations"
   );
   return { ...annotations } || {};
 }
@@ -1424,7 +1504,7 @@ function onBackupBlueprintNameChange({
   model,
 }) {
   const backupBlueprintName = getValue(discriminator, "/backupBlueprintName");
-  addKubeDbComMariaDbAnnotation(
+  addkubedbComRedisAnnotation(
     getValue,
     model,
     commit,
@@ -1441,7 +1521,7 @@ function onBackupBlueprintScheduleChange({
   model,
 }) {
   const backupBlueprintSchedule = getValue(discriminator, "/schedule");
-  addKubeDbComMariaDbAnnotation(
+  addkubedbComRedisAnnotation(
     getValue,
     model,
     commit,
@@ -1475,7 +1555,7 @@ function onTaskParametersChange({
     (tp) => `params.stash.appscode.com/${tp}`
   );
   const oldAnnotations =
-    getValue(model, "/resources/kubedbComMariaDB/metadata/annotations") || {};
+    getValue(model, "/resources/kubedbComRedis/metadata/annotations") || {};
   const newAnnotations = {};
 
   const filteredAnnotationKeys = Object.keys(oldAnnotations).filter(
@@ -1493,7 +1573,7 @@ function onTaskParametersChange({
   });
 
   commit("wizard/model$update", {
-    path: "/resources/kubedbComMariaDB/metadata/annotations",
+    path: "/resources/kubedbComRedis/metadata/annotations",
     value: newAnnotations,
   });
 }
@@ -1507,7 +1587,7 @@ function onNamespaceChange({ commit, model, getValue }) {
   const namespace = getValue(model, "/metadata/release/namespace");
   const agent = getValue(
     model,
-    "/resources/kubedbComMariaDB/spec/monitor/agent"
+    "/resources/kubedbComRedis/spec/monitor/agent"
   );
   if (agent === "prometheus.io") {
     commit("wizard/model$update", {
@@ -1522,12 +1602,12 @@ function onNamespaceChange({ commit, model, getValue }) {
 function onLabelChange({ commit, model, getValue }) {
   const labels = getValue(
     model,
-    "/resources/kubedbComMariaDB/spec/metadata/labels"
+    "/resources/kubedbComRedis/spec/metadata/labels"
   );
 
   const agent = getValue(
     model,
-    "/resources/kubedbComMariaDB/spec/monitor/agent"
+    "/resources/kubedbComRedis/spec/monitor/agent"
   );
 
   if (agent === "prometheus.io") {
@@ -1545,12 +1625,12 @@ function onNameChange({ commit, model, getValue }) {
 
   const agent = getValue(
     model,
-    "/resources/kubedbComMariaDB/spec/monitor/agent"
+    "/resources/kubedbComRedis/spec/monitor/agent"
   );
 
   const labels = getValue(
     model,
-    "/resources/kubedbComMariaDB/spec/metadata/labels"
+    "/resources/kubedbComRedis/spec/metadata/labels"
   );
 
   if (agent === "prometheus.io") {
@@ -1618,7 +1698,7 @@ function onNameChange({ commit, model, getValue }) {
   const hasSecretConfig = getValue(model, "/resources/secret_config");
   if (hasSecretConfig) {
     commit("wizard/model$update", {
-      path: "/resources/kubedbComMariaDB/spec/configSecret/name",
+      path: "/resources/kubedbComRedis/spec/configSecret/name",
       value: `${dbName}-config`,
       force: true,
     });
@@ -1632,7 +1712,7 @@ function onNameChange({ commit, model, getValue }) {
   if (hasSecretShardConfig) {
     commit("wizard/model$update", {
       path:
-        "/resources/kubedbComMariaDB/spec/shardTopology/shard/configSecret/name",
+        "/resources/kubedbComRedis/spec/shardTopology/shard/configSecret/name",
       value: `${dbName}-shard-config`,
       force: true,
     });
@@ -1646,7 +1726,7 @@ function onNameChange({ commit, model, getValue }) {
   if (hasSecretConfigServerConfig) {
     commit("wizard/model$update", {
       path:
-        "/resources/kubedbComMariaDB/spec/shardTopology/configServer/configSecret/name",
+        "/resources/kubedbComRedis/spec/shardTopology/configServer/configSecret/name",
       value: `${dbName}-configserver-config`,
       force: true,
     });
@@ -1660,7 +1740,7 @@ function onNameChange({ commit, model, getValue }) {
   if (hasSecretMongosConfig) {
     commit("wizard/model$update", {
       path:
-        "/resources/kubedbComMariaDB/spec/shardTopology/mongos/configSecret/name",
+        "/resources/kubedbComRedis/spec/shardTopology/mongos/configSecret/name",
       value: `${dbName}-mongos-config`,
       force: true,
     });
@@ -1674,7 +1754,7 @@ function returnFalse() {
 function onAgentChange({ commit, model, getValue }) {
   const agent = getValue(
     model,
-    "/resources/kubedbComMariaDB/spec/monitor/agent"
+    "/resources/kubedbComRedis/spec/monitor/agent"
   );
   if (agent === "prometheus.io") {
     commit("wizard/model$update", {
@@ -1691,6 +1771,14 @@ function onAgentChange({ commit, model, getValue }) {
       "/resources/monitoringCoreosComServiceMonitor"
     );
   }
+
+  if(hasSentinelObject({model, getValue})) {
+    commit("wizard/model$update", {
+      path: "/resources/kubedbComRedisSentinel_sentinel/spec/monitor/agent",
+      value: agent,
+      force: true,
+    });
+  }
 }
 
 /*************************************  Database Secret Section ********************************************/
@@ -1698,7 +1786,7 @@ function onAgentChange({ commit, model, getValue }) {
 function getCreateAuthSecret({ model, getValue }) {
   const authSecret = getValue(
     model,
-    "/resources/kubedbComMariaDB/spec/authSecret"
+    "/resources/kubedbComRedis/spec/authSecret"
   );
   
   return !authSecret;
@@ -1764,9 +1852,9 @@ function disableInitializationSection({
 }) {
   const initialized = getValue(
     model,
-    "/resources/kubedbComMariaDB/spec/init/initialized"
+    "/resources/kubedbComRedis/spec/init/initialized"
   );
-  watchDependency("model#/resources/kubedbComMariaDB/spec/init/initialized");
+  watchDependency("model#/resources/kubedbComRedis/spec/init/initialized");
   return !!initialized;
 }
 
@@ -1789,7 +1877,7 @@ function onCreateAuthSecretChange({
   if (createAuthSecret) {
     commit(
       "wizard/model$delete",
-      "/resources/kubedbComMariaDB/spec/authSecret"
+      "/resources/kubedbComRedis/spec/authSecret"
     );
   } else if(createAuthSecret === false) {
     commit(
@@ -1876,7 +1964,7 @@ function onConfigurationSourceChange({
       "/metadata/release/name"
     )}-config`;
     commit("wizard/model$update", {
-      path: "/resources/kubedbComMariaDB/spec/configSecret/name",
+      path: "/resources/kubedbComRedis/spec/configSecret/name",
       value: configSecretName,
       force: true,
     });
@@ -1891,7 +1979,7 @@ function onConfigurationChange({
 }) {
   const value = getValue(discriminator, "/configuration");
   commit("wizard/model$update", {
-    path: "/resources/secret_config/stringData/md-config.cnf",
+    path: "/resources/secret_config/stringData/redis.conf",
     value: value,
     force: true,
   });
@@ -1900,7 +1988,7 @@ function onConfigurationChange({
     "/metadata/release/name"
   )}-config`;
   commit("wizard/model$update", {
-    path: "/resources/kubedbComMariaDB/spec/configSecret/name",
+    path: "/resources/kubedbComRedis/spec/configSecret/name",
     value: configSecretName,
     force: true,
   });
@@ -1921,11 +2009,11 @@ function setSecretConfigNamespace({ getValue, model, watchDependency }) {
 }
 
 function setConfiguration({ model, getValue }) {
-  return getValue(model, "/resources/secret_config/stringData/md-config.cnf");
+  return getValue(model, "/resources/secret_config/stringData/redis.conf");
 }
 
 function setConfigurationFiles({ model, getValue }) {
-  const value = getValue(model, "/resources/secret_config/data/md-config.cnf");
+  const value = getValue(model, "/resources/secret_config/data/redis.conf");
   return atob(value);
 }
 
@@ -1933,7 +2021,7 @@ function onSetCustomConfigChange({ discriminator, getValue, commit }) {
   const value = getValue(discriminator, "/setCustomConfig");
 
   if(value === "no") {
-    commit("wizard/model$delete", "/resources/kubedbComMariaDB/spec/configSecret");
+    commit("wizard/model$delete", "/resources/kubedbComRedis/spec/configSecret");
     commit("wizard/model$delete", "/resources/secret_config");
   }
 }
@@ -1942,27 +2030,34 @@ return {
 	fetchJsons,
 	disableLableChecker,
 	isEqualToModelPathValue,
+  isNotEqualToModelPathValue,
 	getResources,
 	isEqualToDiscriminatorPath,
 	setValueFromModel,
 	getNamespacedResourceList,
+  getRedisSentinels,
 	getResourceList,
 	resourceNames,
   unNamespacedResourceNames,
   returnTrue,
   returnStringYes,
-	getMariaDbVersions,
+  hasSentinelObject,
+	getRedisVersions,
+  onVersionChange,
+  onTerminationPolicyChange,
 	showAuthPasswordField,
 	showAuthSecretField,
 	showNewSecretCreateField,
-	setDatabaseMode,
+  showSentinelNameAndNamespace,
+  onCreateSentinelChange,
+  setCreateSentinel,
+  setDatabaseMode,
 	getStorageClassNames,
 	deleteDatabaseModePath,
 	isEqualToDatabaseMode,
 	setApiGroup,
 	getIssuerRefsName,
-	hasIssuerRefName,
-	hasNoIssuerRefName,
+  onIssuerRefChange,
 	setSSLMode,
 	showTlsConfigureSection,
 	onTlsConfigureChange,
@@ -1991,8 +2086,8 @@ return {
 	showRuntimeForm,
 	getImagePullSecrets,
 	getBackupConfigsAndAnnotations,
-	deleteKubeDbComMariaDbAnnotation,
-	addKubeDbComMariaDbAnnotation,
+	deletekubedbComRedisAnnotation,
+	addkubedbComRedisAnnotation,
 	initScheduleBackup,
 	onScheduleBackupChange,
 	showBackupForm,

@@ -75,28 +75,35 @@ steps:
         $ref: schema#/properties/spec/properties/upgrade/properties/targetVersion
       type: select
     - elements:
-      - computed: setValueFromDbDetails|/spec/replicas
-        if: ifDbTypeEqualsTo|cluster|horizontalScaling
+      - computed: setValueFromDbDetails|/spec/cluster/master
+        if: ifDbTypeEqualsTo|Cluster|horizontalScaling
+        label:
+          text: labels.master
+        schema:
+          $ref: schema#/properties/spec/properties/horizontalScaling/properties/master
+        type: input
+      - computed: setValueFromDbDetails|/spec/cluster/replicas
+        if: ifDbTypeEqualsTo|Cluster|horizontalScaling
         label:
           text: labels.replicas
         schema:
-          $ref: schema#/properties/spec/properties/horizontalScaling/properties/member
+          $ref: schema#/properties/spec/properties/horizontalScaling/properties/replicas
         type: input
       if: ifRequestTypeEqualsTo|HorizontalScaling
       label:
         text: Horizontal Scaling Form
       type: single-step-form
     - elements:
-      - alias: reusable_mariadb_reources
+      - alias: reusable_redis_reources
         chart:
           name: uibytebuildersdev-component-resources
           version: v0.2.0-alpha.0
-        computed: setValueFromDbDetails|/spec/podTemplate/spec/resources|/spec/verticalScaling/mariadb
+        computed: setValueFromDbDetails|/spec/podTemplate/spec/resources|/spec/verticalScaling/redis
         label:
           text: labels.resources
         moduleResolver: fetchJsons
         schema:
-          $ref: schema#/properties/spec/properties/verticalScaling/properties/mariadb
+          $ref: schema#/properties/spec/properties/verticalScaling/properties/redis
         show_label: true
         type: reusable-element
       - alias: reusable_exporter_reources
@@ -118,7 +125,7 @@ steps:
         label:
           text: labels.storage.size
         schema:
-          $ref: schema#/properties/spec/properties/volumeExpansion/properties/mariadb
+          $ref: schema#/properties/spec/properties/volumeExpansion/properties/redis
         type: input
       if: ifRequestTypeEqualsTo|VolumeExpansion
       label:
@@ -207,12 +214,6 @@ steps:
           $ref: schema#/properties/spec/properties/tls/properties/rotateCertificates
         type: switch
       - elements:
-        - computed: setValueFromDbDetails|/spec/requireSSL
-          label:
-            text: labels.require_ssl_question
-          schema:
-            $ref: schema#/properties/spec/properties/tls/properties/requireSSL
-          type: switch
         - computed: initIssuerRefApiGroup
           disabled: true
           label:

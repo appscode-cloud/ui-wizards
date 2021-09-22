@@ -62,6 +62,9 @@ steps:
       - description: options.database.mode.Cluster.description
         text: options.database.mode.Cluster.label
         value: Cluster
+      - description: options.database.mode.Sentinel.description
+        text: options.database.mode.Sentinel.label
+        value: Sentinel
       schema:
         $ref: schema#/properties/spec/properties/mode
       type: radio
@@ -77,12 +80,56 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/cluster/properties/replicas
       type: input
-    - label:
+    - discriminator:
+        createSentinel:
+          default: true
+          type: boolean
+      elements:
+      - label:
+          text: labels.sentinel_section
+        type: label-element
+      - onChange: onCreateSentinelChange
+        options:
+        - text: options.sentinelType.existingSentinel.label
+          value: false
+        - text: options.sentinelType.customSentinel.label
+          value: true
+        schema:
+          $ref: discriminator#/properties/createSentinel
+        type: radio
+      - fetch: getResources|core|v1|namespaces
+        if: showSentinelNameAndNamespace
+        keepEmpty: true
+        label:
+          text: labels.namespace
+        schema:
+          $ref: schema#/properties/spec/properties/sentinelRef/properties/namespace
+        type: select
+      - allowUserDefinedOption: true
+        fetch: getRedisSentinels
+        if: showSentinelNameAndNamespace
+        keepEmpty: true
+        label:
+          text: labels.name
+        schema:
+          $ref: schema#/properties/spec/properties/sentinelRef/properties/name
+        type: select
+      - label:
+          text: labels.replicaset.number
+        minValue: 2
+        schema:
+          $ref: schema#/properties/spec/properties/replicas
+        type: input
+      if: isEqualToModelPathValue|Sentinel|/spec/mode
+      type: single-step-form
+    - if: isNotEqualToModelPathValue|Sentinel|/spec/mode
+      label:
         text: labels.storage.size
       schema:
         $ref: schema#/properties/spec/properties/persistence/properties/size
       type: input
     - fetch: getStorageClassNames
+      if: isNotEqualToModelPathValue|Sentinel|/spec/mode
       label:
         text: labels.storage.class
       schema:
