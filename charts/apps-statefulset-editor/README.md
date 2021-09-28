@@ -5,7 +5,7 @@
 ## TL;DR;
 
 ```console
-$ helm repo add bytebuilders-ui https://bundles.bytebuilders.dev/ui/
+$ helm repo add bytebuilders-ui https://bundles.byte.builders/ui/
 $ helm repo update
 $ helm install apps-statefulset-editor bytebuilders-ui/apps-statefulset-editor -n default
 ```

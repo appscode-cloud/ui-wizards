@@ -5,7 +5,7 @@
 ## TL;DR;
 
 ```console
-$ helm repo add bytebuilders-ui https://bundles.bytebuilders.dev/ui/
+$ helm repo add bytebuilders-ui https://bundles.byte.builders/ui/
 $ helm repo update
 $ helm install authenticationk8sio-tokenreview-editor bytebuilders-ui/authenticationk8sio-tokenreview-editor -n default
 ```
