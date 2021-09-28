@@ -46,7 +46,7 @@ The following table lists the configurable parameters of the `core-componentstat
 
 |   Parameter   | Description |      Default      |
 |---------------|-------------|-------------------|
-| apiVersion    |             | `/v1`             |
+| apiVersion    |             | `v1`              |
 | kind          |             | `ComponentStatus` |
 | metadata.name |             | `componentstatus` |
 
@@ -54,7 +54,7 @@ The following table lists the configurable parameters of the `core-componentstat
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:
 
 ```console
-$ helm install core-componentstatus-editor bytebuilders-ui/core-componentstatus-editor -n default --set apiVersion=/v1
+$ helm install core-componentstatus-editor bytebuilders-ui/core-componentstatus-editor -n default --set apiVersion=v1
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while

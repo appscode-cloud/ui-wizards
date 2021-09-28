@@ -46,7 +46,7 @@ The following table lists the configurable parameters of the `core-ephemeralcont
 
 |     Parameter      | Description |        Default        |
 |--------------------|-------------|-----------------------|
-| apiVersion         |             | `/v1`                 |
+| apiVersion         |             | `v1`                  |
 | kind               |             | `EphemeralContainers` |
 | metadata.name      |             | `ephemeralcontainers` |
 | metadata.namespace |             | `default`             |
@@ -55,7 +55,7 @@ The following table lists the configurable parameters of the `core-ephemeralcont
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:
 
 ```console
-$ helm install core-ephemeralcontainers-editor bytebuilders-ui/core-ephemeralcontainers-editor -n default --set apiVersion=/v1
+$ helm install core-ephemeralcontainers-editor bytebuilders-ui/core-ephemeralcontainers-editor -n default --set apiVersion=v1
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
