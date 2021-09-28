@@ -46,7 +46,7 @@ The following table lists the configurable parameters of the `core-persistentvol
 
 |   Parameter   | Description |      Default       |
 |---------------|-------------|--------------------|
-| apiVersion    |             | `/v1`              |
+| apiVersion    |             | `v1`               |
 | kind          |             | `PersistentVolume` |
 | metadata.name |             | `persistentvolume` |
 
@@ -54,7 +54,7 @@ The following table lists the configurable parameters of the `core-persistentvol
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:
 
 ```console
-$ helm install core-persistentvolume-editor bytebuilders-ui/core-persistentvolume-editor -n default --set apiVersion=/v1
+$ helm install core-persistentvolume-editor bytebuilders-ui/core-persistentvolume-editor -n default --set apiVersion=v1
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
