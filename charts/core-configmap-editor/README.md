@@ -46,7 +46,7 @@ The following table lists the configurable parameters of the `core-configmap-edi
 
 |     Parameter      | Description |   Default   |
 |--------------------|-------------|-------------|
-| apiVersion         |             | `/v1`       |
+| apiVersion         |             | `v1`        |
 | kind               |             | `ConfigMap` |
 | metadata.name      |             | `configmap` |
 | metadata.namespace |             | `default`   |
@@ -55,7 +55,7 @@ The following table lists the configurable parameters of the `core-configmap-edi
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:
 
 ```console
-$ helm install core-configmap-editor bytebuilders-ui/core-configmap-editor -n default --set apiVersion=/v1
+$ helm install core-configmap-editor bytebuilders-ui/core-configmap-editor -n default --set apiVersion=v1
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while

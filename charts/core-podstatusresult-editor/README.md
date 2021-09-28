@@ -46,7 +46,7 @@ The following table lists the configurable parameters of the `core-podstatusresu
 
 |     Parameter      | Description |      Default      |
 |--------------------|-------------|-------------------|
-| apiVersion         |             | `/v1`             |
+| apiVersion         |             | `v1`              |
 | kind               |             | `PodStatusResult` |
 | metadata.name      |             | `podstatusresult` |
 | metadata.namespace |             | `default`         |
@@ -55,7 +55,7 @@ The following table lists the configurable parameters of the `core-podstatusresu
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:
 
 ```console
-$ helm install core-podstatusresult-editor bytebuilders-ui/core-podstatusresult-editor -n default --set apiVersion=/v1
+$ helm install core-podstatusresult-editor bytebuilders-ui/core-podstatusresult-editor -n default --set apiVersion=v1
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while

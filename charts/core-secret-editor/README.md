@@ -46,7 +46,7 @@ The following table lists the configurable parameters of the `core-secret-editor
 
 |     Parameter      | Description |  Default  |
 |--------------------|-------------|-----------|
-| apiVersion         |             | `/v1`     |
+| apiVersion         |             | `v1`      |
 | kind               |             | `Secret`  |
 | metadata.name      |             | `secret`  |
 | metadata.namespace |             | `default` |
@@ -55,7 +55,7 @@ The following table lists the configurable parameters of the `core-secret-editor
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:
 
 ```console
-$ helm install core-secret-editor bytebuilders-ui/core-secret-editor -n default --set apiVersion=/v1
+$ helm install core-secret-editor bytebuilders-ui/core-secret-editor -n default --set apiVersion=v1
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
