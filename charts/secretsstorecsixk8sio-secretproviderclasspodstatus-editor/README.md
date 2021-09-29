@@ -5,7 +5,7 @@
 ## TL;DR;
 
 ```console
-$ helm repo add bytebuilders-ui https://bundles.bytebuilders.dev/ui/
+$ helm repo add bytebuilders-ui https://bundles.byte.builders/ui/
 $ helm repo update
 $ helm install secretsstorecsixk8sio-secretproviderclasspodstatus-editor bytebuilders-ui/secretsstorecsixk8sio-secretproviderclasspodstatus-editor -n default
 ```

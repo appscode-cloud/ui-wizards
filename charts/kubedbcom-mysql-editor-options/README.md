@@ -5,9 +5,9 @@
 ## TL;DR;
 
 ```console
-$ helm repo add bytebuilders-ui-dev https://raw.githubusercontent.com/bytebuilders/ui-wizards/
+$ helm repo add bytebuilders-ui https://bundles.byte.builders/ui/
 $ helm repo update
-$ helm install kubedbcom-mysql-editor-options bytebuilders-ui-dev/kubedbcom-mysql-editor-options -n kube-system
+$ helm install kubedbcom-mysql-editor-options bytebuilders-ui/kubedbcom-mysql-editor-options -n kube-system
 ```
 
 ## Introduction
@@ -23,7 +23,7 @@ This chart deploys a MySQL Editor UI Options on a [Kubernetes](http://kubernetes
 To install the chart with the release name `kubedbcom-mysql-editor-options`:
 
 ```console
-$ helm install kubedbcom-mysql-editor-options bytebuilders-ui-dev/kubedbcom-mysql-editor-options -n kube-system
+$ helm install kubedbcom-mysql-editor-options bytebuilders-ui/kubedbcom-mysql-editor-options -n kube-system
 ```
 
 The command deploys a MySQL Editor UI Options on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
@@ -72,12 +72,12 @@ The following table lists the configurable parameters of the `kubedbcom-mysql-ed
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:
 
 ```console
-$ helm install kubedbcom-mysql-editor-options bytebuilders-ui-dev/kubedbcom-mysql-editor-options -n kube-system --set metadata.resource.group=kubedb.com
+$ helm install kubedbcom-mysql-editor-options bytebuilders-ui/kubedbcom-mysql-editor-options -n kube-system --set metadata.resource.group=kubedb.com
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
 installing the chart. For example:
 
 ```console
-$ helm install kubedbcom-mysql-editor-options bytebuilders-ui-dev/kubedbcom-mysql-editor-options -n kube-system --values values.yaml
+$ helm install kubedbcom-mysql-editor-options bytebuilders-ui/kubedbcom-mysql-editor-options -n kube-system --values values.yaml
 ```
