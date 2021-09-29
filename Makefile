@@ -262,8 +262,8 @@ chart-%:
 
 chart-contents-%:
 	@if test -f "./charts/$*/doc.yaml"; then \
-	  yq -y --indentless -i '.repository.name="$(CHART_REGISTRY)"' ./charts/$*/doc.yaml; \
-	  yq -y --indentless -i '.repository.url="$(CHART_REGISTRY_URL)"' ./charts/$*/doc.yaml; \
+		yq -y --indentless -i '.repository.name="$(CHART_REGISTRY)"' ./charts/$*/doc.yaml; \
+		yq -y --indentless -i '.repository.url="$(CHART_REGISTRY_URL)"' ./charts/$*/doc.yaml; \
 	fi
 	@if [ -n "$(CHART_VERSION)" ]; then \
 		yq -y --indentless -i '.version="$(CHART_VERSION)"' ./charts/$*/Chart.yaml; \
