@@ -5,7 +5,7 @@
 ## TL;DR;
 
 ```console
-$ helm repo add bytebuilders-ui https://bundles.bytebuilders.dev/ui/
+$ helm repo add bytebuilders-ui https://bundles.byte.builders/ui/
 $ helm repo update
 $ helm install autoscalingkubedbcom-mongodbautoscaler-editor bytebuilders-ui/autoscalingkubedbcom-mongodbautoscaler-editor -n default
 ```

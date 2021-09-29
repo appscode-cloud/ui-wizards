@@ -5,7 +5,7 @@
 ## TL;DR;
 
 ```console
-$ helm repo add bytebuilders-ui https://bundles.bytebuilders.dev/ui/
+$ helm repo add bytebuilders-ui https://bundles.byte.builders/ui/
 $ helm repo update
 $ helm install opskubedbcom-pgbounceropsrequest-editor bytebuilders-ui/opskubedbcom-pgbounceropsrequest-editor -n default
 ```
