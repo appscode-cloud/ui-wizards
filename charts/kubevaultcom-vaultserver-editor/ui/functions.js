@@ -262,160 +262,48 @@ async function getVaultServerVersions(
   }
 }
 
-// ************************* Auth Secret Field ******************************************
-function showAuthPasswordField({ model, getValue, watchDependency }) {
-  watchDependency("model#/resources");
-  const modelPathValue = getValue(model, "/resources");
-  return !!(
-    modelPathValue &&
-    modelPathValue.secret &&
-    modelPathValue.secret.metadata &&
-    modelPathValue.secret.metadata.name &&
-    !showAuthSecretField({ model, getValue, watchDependency })
-  );
-}
+function onVaultBackendTypeChange({discriminator, getValue, commit}) {
+  const backends = [
+    "azure",
+    "consul",
+    "dynamodb",
+    "etcd",
+    "file",
+    "gcs",
+    "inmem",
+    "mysql",
+    "postgresql",
+    "raft",
+    "s3",
+    "swift",
+  ];
 
-function showAuthSecretField({ model, getValue, watchDependency }) {
-  watchDependency("model#/resources/kubevaultComVaultServer/spec");
-  const modelPathValue = getValue(model, "/resources/kubevaultComVaultServer/spec");
-  return !!(
-    modelPathValue &&
-    modelPathValue.authSecret &&
-    modelPathValue.authSecret.name
-  );
-}
-
-function showNewSecretCreateField({
-  model,
-  getValue,
-  watchDependency,
-  commit,
-}) {
-  const resp =
-    !showAuthSecretField({ model, getValue, watchDependency }) &&
-    !showAuthPasswordField({ model, getValue, watchDependency });
-  const secret = getValue(model, "/resources/secret_auth");
-  if (resp && !secret) {
-    commit("wizard/model$update", {
-      path: "/resources/secret_auth",
-      value: {
-        data: {
-          password: "",
-        },
-      },
-      force: true,
-    });
-  }
-  return resp;
-}
-
-function getClientAuthModes({
-  model,
-  getValue,
-  watchDependency,
-}) {
-  watchDependency("model#/resources/kubevaultComVaultServer/spec/version");
-
-  const version = getValue(model, "/resources/kubevaultComVaultServer/spec/version")
-  // major version section from version
-  const major = parseInt(version && version.split(".")[0]);
-
-  const options = ["md5", "cert"];
-
-  if(major >= 11) {
-    options.push("scram");
-  }
-
-  return options.map((item) => ({text: item, value: item }));
-}
-
-// ********************* Database Mode ***********************
-function setDatabaseMode({ model, getValue, watchDependency }) {
-  const modelPathValue = getValue(model, "/resources/kubevaultComVaultServer/spec/replicas");
-  watchDependency("model#/resources/kubevaultComVaultServer/spec/replicas");
-
-  if (modelPathValue > 1) {
-    return "Cluster";
-  } else {
-    return "Standalone";
-  }
-}
-
-async function getStorageClassNames(
-  { axios, storeGet, commit, model, getValue }
-) {
-  const owner = storeGet("/user/username");
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
-
-  const resp = await axios.get(
-    `/clusters/${owner}/${cluster}/proxy/storage.k8s.io/v1/storageclasses`,
-    {
-      params: {
-        filter: { items: { metadata: { name: null, annotations: null } } },
-      },
+  const selectedBackend = getValue(discriminator, "/backend");
+  
+  backends.forEach((item) => {
+    if(item !== selectedBackend) {
+      commit("wizard/model$delete", `/resources/kubevaultComVaultServer/spec/backend/${item}`);
     }
-  );
-
-  const resources = (resp && resp.data && resp.data.items) || [];
-
-  resources.map((item) => {
-    const name = (item.metadata && item.metadata.name) || "";
-    const isDefault =
-      item.metadata &&
-      item.metadata.annotations &&
-      item.metadata.annotations["storageclass.kubernetes.io/is-default-class"];
-
-    if (isDefault) {
-      const className = getValue(
-        model,
-        "/resources/kubevaultComVaultServer/spec/storage/storageClassName"
-      );
-      if (!className) {
-        commit("wizard/model$update", {
-          path: "/resources/kubevaultComVaultServer/spec/storage/storageClassName",
-          value: name,
-          force: true,
-        });
-      }
-    }
-
-    item.text = name;
-    item.value = name;
-    return true;
   });
-  return resources;
+}
+        
+
+// ************************* Allowed Secret Engines **********************************************
+function setDefaultNamespaceFrom() {
+  return "Same";
 }
 
-function deleteDatabaseModePath({
-  discriminator,
-  getValue,
-  commit,
-  model,
-}) {
-  const mode = getValue(discriminator, "/activeDatabaseMode");
-  if (mode === "Cluster") {
-    replicas = getValue(model, "/resources/kubevaultComVaultServer/spec/replicas");
-    if(!replicas) {
-      commit("wizard/model$update", {
-        path: "/resources/kubevaultComVaultServer/spec/replicas",
-        value: 3,
-        force: true,
-      });
+// ************************* Unsealer **********************************************
+function onUnsealerModeChange({discriminator, getValue, commit}) {
+  const unsealerModes = ["awsKmsSsm", "azureKeyVault", "googleKmsGcs", "kubernetesSecret"];
+
+  const selectedMode = getValue(discriminator, "/mode");
+  
+  unsealerModes.forEach((item) => {
+    if(item !== selectedMode) {
+      commit("wizard/model$delete", `/resources/kubevaultComVaultServer/spec/unsealer/mode/${item}`);
     }
-  } else if (mode === "Standalone") {
-    commit("wizard/model$delete", "/resources/kubevaultComVaultServer/spec/replicas");  
-    commit("wizard/model$delete", "/resources/kubevaultComVaultServer/spec/standbyMode");
-    commit("wizard/model$delete", "/resources/kubevaultComVaultServer/spec/leaderElectiion");
-  }
-}
-
-function isEqualToDatabaseMode(
-  { getValue, watchDependency, discriminator },
-  value
-) {
-  watchDependency("discriminator#/activeDatabaseMode");
-  const mode = getValue(discriminator, "/activeDatabaseMode");
-  return mode === value;
+  });
 }
 
 // ************************** TLS ******************************88
@@ -1715,155 +1603,6 @@ function onAgentChange({ commit, model, getValue }) {
   }
 }
 
-/*************************************  Database Secret Section ********************************************/
-
-function getCreateAuthSecret({ model, getValue }) {
-  const authSecret = getValue(
-    model,
-    "/resources/kubevaultComVaultServer/spec/authSecret"
-  );
-  
-  return !authSecret;
-}
-
-function showExistingSecretSection({
-  getValue,
-  watchDependency,
-  discriminator
-}) {
-  watchDependency("discriminator#/createAuthSecret");
-  const hasAuthSecretName = getValue(
-    discriminator,
-    "/createAuthSecret"
-  );
-  return !hasAuthSecretName;
-}
-
-
-function showPasswordSection({
-  getValue,
-  watchDependency,
-  discriminator
-}) {
-  return !showExistingSecretSection({
-    getValue,
-    watchDependency,
-    discriminator
-  })
-}
-
-function setAuthSecretPassword({ model, getValue }) {
-  const encodedPassword = getValue(model, "/resources/secret_auth/data/password");
-  return encodedPassword ? decodePassword({}, encodedPassword) : "";
-}
-
-function onAuthSecretPasswordChange({ getValue, discriminator, commit }) {
-  const stringPassword = getValue(discriminator, "/password");
-
-  if(stringPassword) {
-    commit("wizard/model$update", {
-      path: "/resources/secret_auth/data/password",
-      value: encodePassword({}, stringPassword),
-      force: true
-    });
-    commit("wizard/model$update", {
-      path: "/resources/secret_auth/data/username",
-      value: encodePassword({}, "root"),
-      force: true
-    });
-  } else {
-    commit(
-      "wizard/model$delete",
-      "/resources/secret_auth"
-    );
-  }
-}
-
-function disableInitializationSection({
-  model,
-  getValue,
-  watchDependency,
-}) {
-  const initialized = getValue(
-    model,
-    "/resources/kubevaultComVaultServer/spec/init/initialized"
-  );
-  watchDependency("model#/resources/kubevaultComVaultServer/spec/init/initialized");
-  return !!initialized;
-}
-
-// eslint-disable-next-line no-empty-pattern
-function encodePassword({}, value) {
-  return btoa(value);
-}
-
-// eslint-disable-next-line no-empty-pattern
-function decodePassword({}, value) {
-  return atob(value);
-}
-
-function onCreateAuthSecretChange({
-  discriminator,
-  getValue,
-  commit,
-}) {
-  const createAuthSecret = getValue(discriminator, "/createAuthSecret");
-  if (createAuthSecret) {
-    commit(
-      "wizard/model$delete",
-      "/resources/kubevaultComVaultServer/spec/authSecret"
-    );
-  } else if(createAuthSecret === false) {
-    commit(
-      "wizard/model$delete",
-      "/resources/secret_auth"
-    );
-  }
-}
-
-
-async function getSecrets({
-  storeGet,
-  axios,
-  model,
-  getValue,
-  watchDependency,
-}) {
-  const owner = storeGet("/user/username");
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
-  const namespace = getValue(model, "/metadata/release/namespace");
-  watchDependency("model#/metadata/release/namespace");
-
-  try {
-    const resp = await axios.get(
-      `/clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}/secrets`,
-      {
-        params: {
-          filter: { items: { metadata: { name: null }, type: null } },
-        },
-      }
-    );
-
-    const secrets = (resp && resp.data && resp.data.items) || [];
-
-    const filteredSecrets = secrets.filter((item) => {
-      const validType = ["kubernetes.io/service-account-token", "Opaque"];
-      return validType.includes(item.type);
-    });
-
-    filteredSecrets.map((item) => {
-      const name = (item.metadata && item.metadata.name) || "";
-      item.text = name;
-      item.value = name;
-      return true;
-    });
-    return filteredSecrets;
-  } catch (e) {
-    console.log(e);
-    return [];
-  }
-}
-
 //////////////////////////////////////// Service Monitor //////////////////////////////////////////////////////
 
 function isEqualToServiceMonitorType(
@@ -1974,14 +1713,9 @@ return {
   returnTrue,
   returnStringYes,
 	getVaultServerVersions,
-	showAuthPasswordField,
-	showAuthSecretField,
-	showNewSecretCreateField,
-  getClientAuthModes,
-	setDatabaseMode,
-	getStorageClassNames,
-	deleteDatabaseModePath,
-	isEqualToDatabaseMode,
+  onVaultBackendTypeChange,
+  setDefaultNamespaceFrom,
+  onUnsealerModeChange,
 	setApiGroup,
 	getIssuerRefsName,
 	hasIssuerRefName,
@@ -2039,16 +1773,6 @@ return {
 	onNameChange,
 	returnFalse,
 	onAgentChange,
-	getCreateAuthSecret,
-  showExistingSecretSection,
-	showPasswordSection,
-	disableInitializationSection,
-  setAuthSecretPassword,
-  onAuthSecretPasswordChange,
-	encodePassword,
-	decodePassword,
-	onCreateAuthSecretChange,
-	getSecrets,
 	isEqualToServiceMonitorType,
 	onConfigurationSourceChange,
 	onConfigurationChange,
