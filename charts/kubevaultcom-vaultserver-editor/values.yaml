@@ -1,5 +1,66 @@
-apiVersion: kubevault.com/v1alpha1
-kind: VaultServer
 metadata:
-  name: vaultserver
-  namespace: default
+  resource:
+    group: kubevault.com
+    version: v1alpha1
+    name: vaultservers
+    kind: VaultServer
+    scope: Namespaced
+  release:
+    name: RELEASE-NAME
+    namespace: default
+resources:
+  kubevaultComVaultServer: # +doc-gen:break
+    apiVersion: kubevault.com/v1alpha1
+    kind: VaultServer
+    metadata:
+      name: vault
+      namespace: demo
+    spec:
+      backend:
+        mysql:
+          tlsCASecret: vault-backend-tls
+          userCredentialSecret: vault-backend-creds
+      replicas: 1
+      unsealer:
+        mode:
+          googleKmsGcs:
+            bucket: <bucket-name>
+            credentialSecret: vault-unsealer-creds
+            kmsCryptoKey: <kms-key>
+            kmsKeyRing: <kms-ring>
+            kmsLocation: <kms-location>
+            kmsProject: <project-name>
+        secretShares: 5
+        secretThreshold: 3
+      version: 1.8.2
+  secret_backend_creds: # +doc-gen:break
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: vault-backend-creds
+      namespace: demo
+    stringData:
+      password: <password>
+      username: <username>
+    type: Opaque
+  secret_backend_tls: # +doc-gen:break
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: vault-backend-tls
+      namespace: demo
+    stringData:
+      tls_ca_file: <tls-ca-file>
+    type: Opaque
+  secret_unsealer_creds: # +doc-gen:break
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: vault-unsealer-creds
+      namespace: demo
+    stringData:
+      sa.json: |-
+        {
+          "key": "value",
+        }
+    type: Opaque
