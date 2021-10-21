@@ -81,7 +81,7 @@ The following table lists the configurable parameters of the `kubevaultcom-vault
 | spec.backend.credentialSecret.swift.username                    |                                                    | `<username>`                              |
 | spec.backend.credentialSecret.swift.password                    |                                                    | `<password>`                              |
 | spec.backend.credentialSecret.swift.authToken                   |                                                    | `<auth-token>`                            |
-| spec.backend.provider.type                                      |                                                    | `""`                                      |
+| spec.backend.provider.type                                      |                                                    | `raft`                                    |
 | spec.backend.provider.azure.accountName                         |                                                    | `<account-name>`                          |
 | spec.backend.provider.consul.address                            |                                                    | `"http://consul-server.default.svc:8500"` |
 | spec.backend.provider.consul.path                               |                                                    | `"vault"`                                 |
