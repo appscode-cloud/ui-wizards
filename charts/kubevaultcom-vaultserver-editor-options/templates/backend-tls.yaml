@@ -1,0 +1,20 @@
+{{- if and (not .Values.spec.backend.tlsSecret.name) ( has .Values.spec.backend.provider.type ( list "consul" "mysql")) -}}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "kubevaultcom-vaultserver-editor-options.fullname" . }}-backend-tls
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kubevaultcom-vaultserver-editor-options.labels" . | nindent 4 }}
+type: Opaque
+data:
+{{- if eq .Values.spec.backend.provider.type "consul" }}
+  ca.crt: {{ .Values.spec.backend.tlsSecret.consul.caCrt | trim | quote }}
+  client.crt: {{ .Values.spec.backend.tlsSecret.consul.clientCrt | trim | quote }}
+  client.key: {{ .Values.spec.backend.tlsSecret.consul.clientKey | trim | quote }}
+
+{{- else if eq .Values.spec.backend.provider.type "mysql" }}
+  tls_ca_file: {{ .Values.spec.backend.tlsSecret.mysql.tlsCaFile | trim | quote }}
+
+{{- end }}
+{{- end }}

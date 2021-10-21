@@ -1,0 +1,42 @@
+{{- if and (not .Values.spec.backend.credentialSecret.name) ( has .Values.spec.backend.provider.type ( list "azure" "consul" "dynamodb" "gcs" "mysql" "postgresql" "s3" "swift")) -}}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "kubevaultcom-vaultserver-editor-options.fullname" . }}-backend-creds
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kubevaultcom-vaultserver-editor-options.labels" . | nindent 4 }}
+type: Opaque
+data:
+{{- if eq .Values.spec.backend.provider.type "azure" }}
+  account_key: {{ .Values.spec.backend.credentialSecret.azure.accountKey | trim | quote }}
+
+{{- else if eq .Values.spec.backend.provider.type "consul" }}
+  aclToken: {{ .Values.spec.backend.credentialSecret.consul.aclToken | trim | quote }}
+
+{{- else if eq .Values.spec.backend.provider.type "dynamodb" }}
+  access_key: {{ .Values.spec.backend.credentialSecret.dynamodb.accessKey | trim | quote }}
+  secret_key: {{ .Values.spec.backend.credentialSecret.dynamodb.secretKey | trim | quote }}
+  session_token: {{ .Values.spec.backend.credentialSecret.dynamodb.sessionToken | trim | quote }}
+
+{{- else if eq .Values.spec.backend.provider.type "gcs" }}
+  sa.json: {{ .Values.spec.backend.credentialSecret.gcs.saJson | trim | quote }}
+
+{{- else if eq .Values.spec.backend.provider.type "mysql" }}
+  username: {{ .Values.spec.backend.credentialSecret.mysql.username | trim | quote }}
+  password: {{ .Values.spec.backend.credentialSecret.mysql.password | trim | quote }}
+
+{{- else if eq .Values.spec.backend.provider.type "postgresql" }}
+  connection_url: {{ .Values.spec.backend.credentialSecret.postgresql.connectionURL | trim | quote }}
+
+{{- else if eq .Values.spec.backend.provider.type "s3" }}
+  access_key: {{ .Values.spec.backend.credentialSecret.s3.accessKey | trim | quote }}
+  secret_key: {{ .Values.spec.backend.credentialSecret.s3.secretKey | trim | quote }}
+
+{{- else if eq .Values.spec.backend.provider.type "swift" }}
+  username: {{ .Values.spec.backend.credentialSecret.swift.username | trim | quote }}
+  password: {{ .Values.spec.backend.credentialSecret.swift.password | trim | quote }}
+  auth_token: {{ .Values.spec.backend.credentialSecret.swift.authToken | trim | quote }}
+
+{{- end }}
+{{- end }}
