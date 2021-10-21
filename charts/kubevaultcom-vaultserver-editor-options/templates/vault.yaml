@@ -1,0 +1,117 @@
+{{- $res := .Values.spec.resources -}}
+{{- $machines := .Files.Get "data/machines.yaml" | fromYaml -}}
+{{- if and .Values.spec.machine (hasKey $machines .Values.spec.machine) }}
+  {{- $res = get (get $machines .Values.spec.machine) "resources" }}
+{{- end }}
+
+{{- $backendCreds  := default (printf "%s-backend-creds"  (include "kubevaultcom-vaultserver-editor-options.fullname" . )) .Values.spec.backend.credentialSecret.name -}}
+{{- $backendTLS    := default (printf "%s-backend-tls"    (include "kubevaultcom-vaultserver-editor-options.fullname" . )) .Values.spec.backend.tlsSecret.name -}}
+{{- $unsealerCreds := default (printf "%s-unsealer-creds" (include "kubevaultcom-vaultserver-editor-options.fullname" . )) .Values.spec.unsealer.credentialSecret.name -}}
+
+apiVersion: kubevault.com/v1alpha1
+kind: VaultServer
+metadata:
+  name: {{ include "kubevaultcom-vaultserver-editor-options.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kubevaultcom-vaultserver-editor-options.labels" . | nindent 4 }}
+{{- if .Values.spec.annotations }}
+  annotations:
+    {{- include "kubevaultcom-vaultserver-editor-options.annotations" . | nindent 4 }}
+{{- end }}
+spec:
+  version: {{ .Values.spec.version | quote }}
+  replicas: {{ .Values.spec.replicas }}
+  podTemplate:
+    spec:
+      resources:
+        {{- toYaml $res | nindent 8 }}
+  terminationPolicy: {{ .Values.spec.terminationPolicy }}
+  backend:
+{{- if eq .Values.spec.backend.provider.type "azure" }}
+    azure:
+      accountName:  {{ .Values.spec.backend.provider.azure.accountName }}
+      accountKeySecret: {{ $backendCreds }}
+
+{{- else if eq .Values.spec.backend.provider.type "consul" }}
+    consul:
+      address: {{ .Values.spec.backend.provider.consul.address }}
+      path: {{ .Values.spec.backend.provider.consul.path }}
+      aclTokenSecretName: {{ $backendCreds }}
+      tlsSecretName: {{ $backendTLS }}
+
+{{- else if eq .Values.spec.backend.provider.type "dynamodb" }}
+    dynamodb:
+      credentialSecret: {{ $backendCreds }}
+      sessionTokenSecret: {{ $backendCreds }}
+
+{{- else if eq .Values.spec.backend.provider.type "gcs" }}
+    gcs:
+      bucket: {{ .Values.spec.backend.provider.gcs.bucket }}
+      credentialSecret: {{ $backendCreds }}
+
+{{- else if eq .Values.spec.backend.provider.type "inmem" }}
+    inmem: {}
+
+{{- else if eq .Values.spec.backend.provider.type "mysql" }}
+    mysql:
+      userCredentialSecret: {{ $backendCreds }}
+      tlsCASecret: {{ $backendTLS }}
+
+{{- else if eq .Values.spec.backend.provider.type "postgresql" }}
+  backend:
+    postgresql:
+      connectionURLSecret: {{ $backendCreds }}
+
+{{- else if eq .Values.spec.backend.provider.type "raft" }}
+    raft:
+      path: "/vault/data"
+      storage:
+        storageClassName: {{ .Values.spec.backend.provider.raft.storageClass.name }}
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: {{ .Values.spec.backend.provider.raft.persistence.size }}
+
+{{- else if eq .Values.spec.backend.provider.type "s3" }}
+    s3:
+      bucket: {{ .Values.spec.backend.provider.s3.bucket }}
+      credentialSecret: {{ $backendCreds }}
+
+{{- else if eq .Values.spec.backend.provider.type "swift" }}
+    swift:
+      credentialSecret: {{ $backendCreds }}
+      authTokenSecret: {{ $backendCreds }}
+
+{{- end }}
+
+  unsealer:
+    secretShares: 5
+    secretThreshold: 3
+    mode:
+{{- if eq .Values.spec.unsealer.mode.type "awsKmsSsm" }}
+      awsKmsSsm:
+        credentialSecret: {{ $unsealerCreds }}
+        kmsKeyID: {{ .Values.spec.unsealer.mode.awsKmsSsm.kmsKeyID }}
+        region: {{ .Values.spec.unsealer.mode.awsKmsSsm.region }}
+
+{{- else if eq .Values.spec.unsealer.mode.type "azureKeyVault" }}
+      azureKeyVault:
+        vaultBaseURL: {{ .Values.spec.unsealer.mode.azureKeyVault.vaultBaseURL }}
+        clientCertSecret: {{ $unsealerCreds }}
+        aadClientSecret: {{ $unsealerCreds }}
+
+{{- else if eq .Values.spec.unsealer.mode.type "googleKmsGcs" }}
+      googleKmsGcs:
+        kmsCryptoKey: {{ .Values.spec.unsealer.mode.googleKmsGcs.kmsCryptoKey }}
+        kmsKeyRing: {{ .Values.spec.unsealer.mode.googleKmsGcs.kmsKeyRing }}
+        kmsLocation: {{ .Values.spec.unsealer.mode.googleKmsGcs.kmsLocation }}
+        kmsProject: {{ .Values.spec.unsealer.mode.googleKmsGcs.kmsProject }}
+        bucket: {{ .Values.spec.unsealer.mode.googleKmsGcs.bucket }}
+        credentialSecret: {{ $unsealerCreds }}
+
+{{- else if eq .Values.spec.unsealer.mode.type "kubernetesSecret" }}
+      kubernetesSecret:
+        secretName: {{ include "kubevaultcom-vaultserver-editor-options.fullname" . }}-keys
+{{- end }}

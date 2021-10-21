@@ -1,0 +1,25 @@
+{{- if and (not .Values.spec.unsealer.credentialSecret.name) ( not (eq .Values.spec.unsealer.mode.type "kubernetesSecret")) -}}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "kubevaultcom-vaultserver-editor-options.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kubevaultcom-vaultserver-editor-options.labels" . | nindent 4 }}
+type: Opaque
+stringData:
+{{- if eq .Values.spec.unsealer.mode.type "awsKmsSsm" }}
+  access_key: {{ .Values.spec.unsealer.credentialSecret.awsKmsSsm.accessKey | trim | quote }}
+  secret_key: {{ .Values.spec.unsealer.credentialSecret.awsKmsSsm.secretKey | trim | quote }}
+
+{{- else if eq .Values.spec.unsealer.mode.type "azureKeyVault" }}
+  client-id: {{ .Values.spec.unsealer.credentialSecret.azureKeyVault.clientId | trim | quote }}
+  client-secret: {{ .Values.spec.unsealer.credentialSecret.azureKeyVault.clientSecret | trim | quote }}
+  client-cert: {{ .Values.spec.unsealer.credentialSecret.azureKeyVault.clientCert | trim | quote }}
+  client-cert-password: {{ .Values.spec.unsealer.credentialSecret.azureKeyVault.clientCertPassword | trim | quote }}
+
+{{- else if eq .Values.spec.unsealer.mode.type "googleKmsGcs" }}
+  sa.json: {{ .Values.spec.unsealer.credentialSecret.googleKmsGcs.saJson | trim | quote }}
+
+{{- end }}
+{{- end }}
