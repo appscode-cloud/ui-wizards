@@ -1,0 +1,125 @@
+# Default values for kubevaultcom-vaultserver-editor-options.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+metadata:
+  resource:
+    group: kubevault.com
+    kind: VaultServer
+    name: vaultservers
+    scope: Namespaced
+    version: v1alpha2
+  release:
+    # Release name
+    name: ""
+    # Release namespace
+    namespace: ""
+
+spec:
+  # List options
+  version: 1.8.2
+
+  # Annotations to add to the database custom resource
+  annotations: {}
+
+  # Labels to add to all the template objects
+  labels: {}
+
+  replicas: 3
+
+  terminationPolicy: WipeOut
+
+  machine: ""
+
+  resources:
+    limits:
+      cpu: ".5"
+      memory: 1024Mi
+
+  backend:
+    tlsSecret:
+      name: ""
+      consul:
+        caCrt: <ca-cert>
+        clientCrt: <client-cert>
+        clientKey: <client-key>
+      mysql:
+        tlsCaFile: <tls-ca-file>
+
+    credentialSecret:
+      name: ""
+      azure:
+        accountKey: <account_key>
+      consul:
+        aclToken: <acl-token>
+      dynamodb:
+        accessKey: <access_key>
+        secretKey: <secret_key>
+        sessionToken: <session-token>
+      gcs:
+        saJson: <gcs-sa.json>
+      mysql:
+        username: <username>
+        password: <password>
+      postgresql:
+        connectionURL: <connection_url>
+      s3:
+        accessKey: <access_key>
+        secretKey: <secret_key>
+      swift:
+        username: <username>
+        password: <password>
+        authToken: <auth-token>
+
+    provider:
+      type: raft
+      azure:
+        accountName: <account-name>
+      consul:
+        address: "http://consul-server.default.svc:8500"
+        path: "vault"
+      dynamodb: {}
+      gcs:
+        bucket: <bucket-name>
+      inmem: {}
+      raft:
+        storageClass:
+          name: standard
+        persistence:
+          size: 10Gi
+      s3:
+        bucket: <bucket-name>
+        credentialSecret: vault-backend-creds
+      swift: {}
+
+  unsealer:
+    credentialSecret:
+      name: ""
+      awsKmsSsm:
+        accessKey: <access_key>
+        secretKey: <secret_key>
+      azureKeyVault:
+        clientId: <client-cert>
+        clientSecret: <client-secret>
+        clientCert: <client-cert>
+        clientCertPassword: <client-cert-password>
+      googleKmsGcs:
+        saJson: ""
+
+    mode:
+      type: kubernetesSecret
+      awsKmsSsm:
+        credentialSecret: vault-unsealer-creds
+        kmsKeyID: <kms-key-id>
+        region: <region>
+      azureKeyVault:
+        vaultBaseURL: <vault-base-url>
+        clientCertSecret: vault-unsealer-creds
+        aadClientSecret: vault-unsealer-creds
+      googleKmsGcs:
+        kmsCryptoKey: <kms-key>
+        kmsKeyRing: <kms-ring>
+        kmsLocation: <kms-location>
+        kmsProject: <project-name>
+        bucket: <bucket-name>
+        credentialSecret: vault-unsealer-creds
