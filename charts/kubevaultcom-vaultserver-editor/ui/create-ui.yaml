@@ -644,6 +644,135 @@ steps:
   id: basic
   title: steps.0.label
 - form:
+    elements:
+    - addFormLabel: labels.dataSources.button
+      element:
+        elements:
+        - elements:
+          - label: 
+              text: labels.dataSources.optional_question
+            schema:
+              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources/items/properties/configMap/properties/optional
+            type: switch
+          - label: 
+              text: labels.dataSources.name
+            schema:
+              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources/items/properties/configMap/properties/name
+            type: input
+          - label: 
+              text: labels.dataSources.defaultMode
+            schema:
+              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources/items/properties/configMap/properties/defaultMode
+            type: input
+          - alias: reusable_config_map_items
+            chart:
+              name: uibytebuildersdev-component-data-sources-items
+              version: v0.2.0-alpha.0
+            customClass: mb-10
+            moduleResolver: fetchJsons
+            schema:
+              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources/items/properties/configMap/properties/items
+            type: reusable-element
+          hideForm: true
+          label:
+            text: labels.dataSources.configMap
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources/items/properties/configMap
+          show_label: true
+          type: single-step-form
+        - elements:
+          - label: 
+              text: labels.dataSources.optional_question
+            schema:
+              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources/items/properties/secret/properties/optional
+            type: switch
+          - label: 
+              text: labels.dataSources.secretName
+            schema:
+              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources/items/properties/secret/properties/secretName
+            type: input
+          - label: 
+              text: labels.dataSources.defaultMode
+            schema:
+              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources/items/properties/secret/properties/defaultMode
+            type: input
+          - alias: reusable_secret_items
+            chart:
+              name: uibytebuildersdev-component-data-sources-items
+              version: v0.2.0-alpha.0
+            customClass: mb-10
+            moduleResolver: fetchJsons
+            schema:
+              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources/items/properties/secret/properties/items
+            type: reusable-element
+          hideForm: true
+          label:
+            text: labels.dataSources.secret
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources/items/properties/secret
+          show_label: true
+          type: single-step-form
+        type: single-step-form
+      label:
+        text: labels.dataSources.title
+      schema:
+        $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources
+      tableContents:
+      - inTableColumn: true
+        label:
+          text: labels.dataSources.name
+          isSubsection: true
+        path: configMap/name
+        type: value
+        typeOfValue: string
+      - label:
+          text: labels.dataSources.defaultMode
+          isSubsection: true
+        path: configMap/deafultMode
+        type: value
+        typeOfValue: string
+      - label:
+          text: labels.dataSources.optional_question
+          isSubsection: true
+        path: configMap/optional
+        type: value
+        typeOfValue: string
+      - label:
+          text: labels.dataSources.items
+          isSubsection: true
+        path: configMap/items
+        type: value
+        typeOfValue: object-array
+        tableContents:
+        - inTableColumn: true
+          label:
+            text: labels.dataSources.key
+          path: key
+          type: value
+          typeOfValue: string
+        - inTableColumn: true
+          label:
+            text: labels.dataSources.mode
+          path: mode
+          type: value
+          typeOfValue: string
+        - inTableColumn: true
+          label:
+            text: labels.dataources.path
+          path: path
+          type: value
+          typeOfValue: string
+      - inTableColumn: true
+        label:
+          text: labels.dataSources.secret
+        path: secret/secretName
+        type: value
+        typeOfValue: string
+      type: single-step-form-array
+    type: single-step-form
+  id: data-sources
+  title: steps.12.label
+- form:
     discriminator:
       mode:
         type: string
