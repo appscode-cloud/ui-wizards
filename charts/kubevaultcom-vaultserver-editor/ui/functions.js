@@ -262,13 +262,12 @@ async function getVaultServerVersions(
   }
 }
 
-function onVaultBackendTypeChange({discriminator, getValue, commit}) {
+function onVaultBackendTypeChange({discriminator, model, getValue, commit}) {
   const backends = [
     "azure",
     "consul",
     "dynamodb",
     "etcd",
-    "file",
     "gcs",
     "inmem",
     "mysql",
@@ -280,13 +279,18 @@ function onVaultBackendTypeChange({discriminator, getValue, commit}) {
 
   const selectedBackend = getValue(discriminator, "/backend");
   
-  backends.forEach((item) => {
-    if(item !== selectedBackend) {
-      commit("wizard/model$delete", `/resources/kubevaultComVaultServer/spec/backend/${item}`);
-    } else {
-      commit("wizard/model$update", { path: `/resources/kubevaultComVaultServer/spec/backend/${item}`, value: {}, force: true });
-    }
-  });
+  if(selectedBackend) {
+    backends.forEach((item) => {
+      if(item !== selectedBackend) {
+        commit("wizard/model$delete", `/resources/kubevaultComVaultServer/spec/backend/${item}`);
+      } else {
+        const backendObj = getValue(model, `/resources/kubevaultComVaultServer/spec/backend/${item}`);
+        if(!backendObj) {
+          commit("wizard/model$update", { path: `/resources/kubevaultComVaultServer/spec/backend/${item}`, value: {}, force: true });
+        }
+      }
+    });
+  }
 }
 
 function setVaultBackendType({ model, getValue }) {

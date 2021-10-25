@@ -89,7 +89,6 @@ steps:
         - consul
         - dynamodb
         - etcd
-        - file
         - gcs
         - inmem
         - mysql
@@ -712,12 +711,62 @@ steps:
             $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources/items/properties/secret
           show_label: true
           type: single-step-form
+        - elements:
+          - label:
+              text: labels.dataSources.readonly_question
+            schema:
+              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources/items/properties/csi/properties/readonly
+            type: switch
+          - isArray: true
+            keys:
+              label:
+                text: labels.labels.key
+            label:
+              text: labels.dataSources.volumeAttributes
+            schema:
+              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/metadata/properties/volumeAttributes
+            type: key-value-input-form
+            values:
+              label:
+                text: labels.labels.value
+              schema:
+                $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/metadata/properties/volumeAttributes/additionalProperties
+              type: input
+          - label:
+              text: labels.dataSources.driver
+            schema:
+              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources/items/properties/csi/properties/driver
+            type: input
+          - label:
+              text: labels.dataSources.fsType
+            schema:
+              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources/items/propertiescsi/properties/fsType
+            type: input
+          - elements:
+            - label:
+                text: labels.dataSources.nodePublishSecretRef
+              schema:
+                $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources/items/propertiescsi/properties/nodePublishSecretRef/properties/name
+              type: input
+            schema:
+              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources/items/propertiescsi/properties/nodePublishSecretRef
+            type: single-step-form
+          hideForm: true
+          label:
+            text: labels.dataSources.csi
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources/items/properties/csi
+          show_label: true
+          type: single-step-form
         type: single-step-form
       label:
         text: labels.dataSources.title
       schema:
         $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources
       tableContents:
+      - label:
+          text: labels.dataSources.configMap
+        type: label
       - inTableColumn: true
         label:
           text: labels.dataSources.name
@@ -728,7 +777,7 @@ steps:
       - label:
           text: labels.dataSources.defaultMode
           isSubsection: true
-        path: configMap/deafultMode
+        path: configMap/defaultMode
         type: value
         typeOfValue: string
       - label:
@@ -762,12 +811,44 @@ steps:
           path: path
           type: value
           typeOfValue: string
+      - label:
+          text: labels.dataSources.secret
+        type: label
       - inTableColumn: true
         label:
           text: labels.dataSources.secret
         path: secret/secretName
         type: value
         typeOfValue: string
+      - label:
+          text: labels.dataSources.items
+          isSubsection: true
+        path: secret/items
+        type: value
+        typeOfValue: object-array
+        tableContents:
+        - inTableColumn: true
+          label:
+            text: labels.dataSources.key
+          path: key
+          type: value
+          typeOfValue: string
+        - inTableColumn: true
+          label:
+            text: labels.dataSources.mode
+          path: mode
+          type: value
+          typeOfValue: string
+        - inTableColumn: true
+          label:
+            text: labels.dataources.path
+          path: path
+          type: value
+          typeOfValue: string
+      - label:
+          text: labels.dataSources.csi
+        type: label
+      - 
       type: single-step-form-array
     type: single-step-form
   id: data-sources

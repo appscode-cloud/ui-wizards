@@ -1,0 +1,376 @@
+steps:
+- form:
+    elements:
+    - label:
+        text: labels.vaultserver.name
+      schema:
+        $ref: schema#/properties/metadata/properties/release/properties/name
+      type: input
+    - fetch: getResources|core|v1|namespaces
+      label:
+        text: labels.namespace
+      schema:
+        $ref: schema#/properties/metadata/properties/release/properties/namespace
+      type: select
+    - fetch: getVaultServerVersions|catalog.kubevault.com|v1alpha1|vaultserverversions
+      label:
+        text: labels.vaultserver.version
+      schema:
+        $ref: schema#/properties/spec/properties/version
+      type: select
+    - isArray: true
+      keys:
+        label:
+          text: labels.labels.key
+      label:
+        text: labels.labels.label
+      schema:
+        $ref: schema#/properties/spec/properties/labels
+      type: key-value-input-form
+      values:
+        label:
+          text: labels.labels.value
+        schema:
+          $ref: schema#/properties/spec/properties/labels/additionalProperties
+        type: input
+    - isArray: true
+      keys:
+        label:
+          text: labels.annotations.key
+      label:
+        text: labels.annotations.label
+      schema:
+        $ref: schema#/properties/spec/properties/annotations
+      type: key-value-input-form
+      values:
+        label:
+          text: labels.annotations.value
+        schema:
+          $ref: schema#/properties/spec/properties/annotations/additionalProperties
+        type: input
+    - customClass: mt-10
+      label:
+        text: labels.replicaset.number
+      schema:
+        $ref: schema#/properties/spec/properties/replicas
+      type: input
+    - hasDescription: true
+      label:
+        text: labels.terminationPolicy
+      options:
+      - description: options.terminationPolicy.delete.description
+        text: options.terminationPolicy.delete.label
+        value: Delete
+      - description: options.terminationPolicy.halt.description
+        text: options.terminationPolicy.halt.label
+        value: Halt
+      - description: options.terminationPolicy.wipeOut.description
+        text: options.terminationPolicy.wipeOut.label
+        value: WipeOut
+      - description: options.terminationPolicy.doNotTerminate.description
+        text: options.terminationPolicy.doNotTerminate.label
+        value: DoNotTerminate
+      schema:
+        $ref: schema#/properties/spec/properties/terminationPolicy
+      type: radio
+    - label:
+        text: labels.machine_profile
+      type: label-element
+    - computed: setMachineToCustom
+      fetch: getMachineListForOptions
+      label:
+        text: Machine
+      onChange: setResourceLimit
+      schema:
+        $ref: schema#/properties/spec/properties/machine
+      type: select
+    - computed: setLimitsCpuOrMem|cpu
+      disabled: disableLimit
+      label:
+        text: labels.cpu
+      schema:
+        $ref: schema#/properties/spec/properties/resources/properties/limits/properties/cpu
+      type: input
+    - computed: setLimitsCpuOrMem|memory
+      disabled: disableLimit
+      label:
+        text: labels.memory
+      schema:
+        $ref: schema#/properties/spec/properties/resources/properties/limits/properties/memory
+      type: input
+    - elements:
+      - elements:
+        - label:
+            text: labels.backend.provider
+          options:
+          - azure
+          - consul
+          - dynamodb
+          - etcd
+          - gcs
+          - inmem
+          - mysql
+          - postgresql
+          - raft
+          - s3
+          - swift
+          schema:
+            $ref: schema#/properties/spec/properties/backend/properties/provider/properties/type
+          type: select
+        - elements:
+          - label:
+              text: labels.backend.accountName
+            schema:
+              $ref: schema#/properties/spec/properties/backend/properties/provider/properties/azure/properties/accountName
+            type: input
+          if: isEqualToModelPathValue|azure|/spec/backend/provider/type 
+          schema:
+            $ref: schema#/properties/spec/properties/backend/properties/provider/properties/azure
+          type: single-step-form
+        - elements:
+          - label:
+              text: labels.backend.address
+            schema:
+              $ref: schema#/properties/spec/properties/backend/properties/provider/properties/consul/properties/address
+            type: input
+          - label:
+              text: labels.backend.path
+            schema:
+              $ref: schema#/properties/spec/properties/backend/properties/provider/properties/consul/properties/path
+            type: input
+          if: isEqualToModelPathValue|consul|/spec/backend/provider/type 
+          schema:
+            $ref: schema#/properties/spec/properties/backend/properties/provider/properties/consul
+          type: single-step-form
+        - elements:
+          - label:
+              text: labels.backend.bucket
+            schema:
+              $ref: schema#/properties/spec/properties/backend/properties/provider/properties/gcs/properties/bucket
+            type: input
+          if: isEqualToModelPathValue|gcs|/spec/backend/provider/type 
+          schema:
+            $ref: schema#/properties/spec/properties/backend/properties/provider/properties/gcs
+          type: single-step-form
+        - elements:
+          - elements:
+            - label:
+                text: labels.backend.storageSize
+              schema:
+                $ref: schema#/properties/spec/properties/backend/properties/provider/properties/raft/properties/persistence/properties/size
+              type: input
+            schema:
+              $ref: schema#/properties/spec/properties/backend/properties/provider/properties/raft/properties/persistence
+            type: single-step-form
+          - elements:
+            - label:
+                text: labels.backend.storageClass
+              schema:
+                $ref: schema#/properties/spec/properties/backend/properties/provider/properties/raft/properties/storageClass/properties/name
+              type: input
+            schema:
+              $ref: schema#/properties/spec/properties/backend/properties/provider/properties/raft/properties/storageClass
+            type: single-step-form
+          if: isEqualToModelPathValue|raft|/spec/backend/provider/type 
+          schema:
+            $ref: schema#/properties/spec/properties/backend/properties/provider/properties/raft
+          type: single-step-form
+        - elements:
+          - label:
+              text: labels.backend.bucket
+            schema:
+              $ref: schema#/properties/spec/properties/backend/properties/provider/properties/s3/properties/bucket
+            type: input
+          - label:
+              text: labels.backend.credentialSecret
+            schema:
+              $ref: schema#/properties/spec/properties/backend/properties/provider/properties/s3/properties/credentialSecret
+            type: input
+          if: isEqualToModelPathValue|s3|/spec/backend/provider/type 
+          schema:
+            $ref: schema#/properties/spec/properties/backend/properties/provider/properties/s3
+          type: single-step-form
+        schema:
+          $ref: schema#/properties/spec/properties/backend/properties/provider
+        type: single-step-form
+      - discriminator:
+          createCredentialSecret:
+            type: string
+            default: false
+        elements:
+        - label:
+            text: labels.backend.credentialSecret
+          onChange: onCreateCredentialSecretChange
+          options:
+          - text: options.secret.existingSecret.label
+            value: false
+          - text: options.secret.customSecret.label
+            value: true
+          schema:
+            $ref: discriminator#/properties/createCredentialSecret
+          type: radio
+        - allowUserDefinedOption: true
+          fetch: getSecrets
+          if: showCredentialExistingSecretField
+          label:
+            text: labels.secret
+          schema:
+            $ref: schema#/properties/spec/properties/backend/properties/credentialSecret/properties/name
+          type: select
+        - elements:
+          - label:
+              text: labels.backend.accountKey
+            schema:
+              $ref: schema#/properties/spec/properties/backend/properties/tlsSecret/properties/azure/properties/accountKey
+            type: input  
+          if: showCredentialCreateSecretField|azure
+          schema:
+            $ref: schema#/properties/spec/properties/backend/properties/credentialSecret/properties/azure
+          type: single-step-form 
+        - elements:
+          - label:
+              text: labels.backend.aclToken
+            schema:
+              $ref: schema#/properties/spec/properties/backend/properties/tlsSecret/properties/consul/properties/aclToken
+            type: input  
+          if: showCredentialCreateSecretField|consul
+          schema:
+            $ref: schema#/properties/spec/properties/backend/properties/credentialSecret/properties/consul
+          type: single-step-form
+        - elements:
+          - label:
+              text: labels.backend.accessKey
+            schema:
+              $ref: schema#/properties/spec/properties/backend/properties/tlsSecret/properties/dynamodb/properties/accessKey
+            type: input
+          - label:
+              text: labels.backend.secretKey
+            schema:
+              $ref: schema#/properties/spec/properties/backend/properties/tlsSecret/properties/dynamodb/properties/secretKey
+            type: input
+          - label:
+              text: labels.backend.sessionToken
+            schema:
+              $ref: schema#/properties/spec/properties/backend/properties/tlsSecret/properties/dynamodb/properties/sessionToken
+            type: input
+          if: showCredentialCreateSecretField|dynamodb
+          schema:
+            $ref: schema#/properties/spec/properties/backend/properties/credentialSecret/properties/dynamodb
+          type: single-step-form
+        schema:
+          $ref: schema#/properties/spec/properties/backend/properties/credentialSecret
+        type: single-step-form
+      - discriminator:
+          createTlsSecret:
+            type: string
+            default: false
+        elements:
+        - label:
+            text: labels.backend.tlsSecret
+          onChange: onCreateTlsSecretChange
+          options:
+          - text: options.secret.existingSecret.label
+            value: false
+          - text: options.secret.customSecret.label
+            value: true
+          schema:
+            $ref: discriminator#/properties/createTlsSecret
+          type: radio
+        - allowUserDefinedOption: true
+          fetch: getSecrets
+          if: showTlsExistingSecretField
+          label:
+            text: labels.secret
+          schema:
+            $ref: schema#/properties/spec/properties/backend/properties/tlsSecret/properties/name
+          type: select
+        - elements:
+          - label:
+              text: labels.backend.tlsCaFile
+            schema:
+              $ref: schema#/properties/spec/properties/backend/properties/tlsSecret/properties/mysql/properties/tlsCaFile
+            type: input  
+          if: showTlsCreateSecretField|mysql
+          schema:
+            $ref: schema#/properties/spec/properties/backend/properties/tlsSecret/properties/mysql
+          type: single-step-form 
+        - elements:
+          - label:
+              text: labels.backend.caCert
+            schema:
+              $ref: schema#/properties/spec/properties/backend/properties/tlsSecret/properties/consul/properties/caCert
+            type: input
+          - label:
+              text: labels.backend.clientCrt
+            schema:
+              $ref: schema#/properties/spec/properties/backend/properties/tlsSecret/properties/consul/properties/clientCrt
+            type: input
+          - label:
+              text: labels.backend.clientKey
+            schema:
+              $ref: schema#/properties/spec/properties/backend/properties/tlsSecret/properties/consul/properties/clientKey
+            type: input
+          if: showTlsCreateSecretField|consul
+          schema:
+            $ref: schema#/properties/spec/properties/backend/properties/tlsSecret/properties/consul
+          type: single-step-form 
+        schema:
+          $ref: schema#/properties/spec/properties/backend/properties/tlsSecret
+        type: single-step-form
+      schema:
+        $ref: schema#/properties/spec/properties/backend
+      type: single-step-form
+    - label:
+        text: labels.configOptions
+      type: label-element
+    - cluster:
+        $ref: store#/cluster/clusterDefinition/spec/name
+      hasDependencies: true
+      hasDescription: true
+      options:
+      - description: options.configOptions.allowedSecretEngines.description
+        text: options.configOptions.allowedSecretEngines.label
+        value: allowed-secret-engines
+      - description: options.configOptions.authMethods.description
+        text: options.configOptions.authMethods.label
+        value: auth-methods
+      - description: options.configOptions.dataSources.description
+        text: options.configOptions.dataSources.label
+        value: data-sources
+      - description: options.configOptions.unsealer.description
+        text: options.configOptions.unsealer.label
+        value: unsealer
+      - dependencies:
+        - group: cert-manager.io
+          name: Cert-Manager
+          resource: issuers
+          url: https://cert-manager.io/docs/
+          version: v1
+        description: options.configOptions.tls.description
+        text: options.configOptions.tls.label
+        value: tls
+      - description: options.configOptions.networking.description
+        text: options.configOptions.networking.label
+        value: networking
+      - dependencies:
+        - group: monitoring.coreos.com
+          name: Prometheus Operator
+          resource: servicemonitors
+          url: https://github.com/prometheus-operator
+          version: v1
+        description: options.configOptions.monitoring.description
+        text: options.configOptions.monitoring.label
+        value: monitoring
+      - description: options.configOptions.customConfig.description
+        text: options.configOptions.customConfig.label
+        value: custom-config
+      - description: options.configOptions.podTemplate.description
+        text: options.configOptions.podTemplate.label
+        value: pod-template
+      owner:
+        $ref: store#/user/username
+      type: configure-options
+    type: single-step-form
+  id: options
+  title: steps.0.label
+type: multi-step-form
