@@ -50,7 +50,7 @@ The following table lists the configurable parameters of the `kubevaultcom-vault
 | metadata.resource.kind                                          |                                                    | `VaultServer`                             |
 | metadata.resource.name                                          |                                                    | `vaultservers`                            |
 | metadata.resource.scope                                         |                                                    | `Namespaced`                              |
-| metadata.resource.version                                       |                                                    | `v1alpha2`                                |
+| metadata.resource.version                                       |                                                    | `v1alpha1`                                |
 | metadata.release.name                                           | Release name                                       | `""`                                      |
 | metadata.release.namespace                                      | Release namespace                                  | `""`                                      |
 | spec.version                                                    | List options                                       | `1.8.2`                                   |
@@ -72,6 +72,8 @@ The following table lists the configurable parameters of the `kubevaultcom-vault
 | spec.backend.credentialSecret.dynamodb.accessKey                |                                                    | `<access_key>`                            |
 | spec.backend.credentialSecret.dynamodb.secretKey                |                                                    | `<secret_key>`                            |
 | spec.backend.credentialSecret.dynamodb.sessionToken             |                                                    | `<session-token>`                         |
+| spec.backend.credentialSecret.etcd.username                     |                                                    | `<username>`                              |
+| spec.backend.credentialSecret.etcd.password                     |                                                    | `<password>`                              |
 | spec.backend.credentialSecret.gcs.saJson                        |                                                    | `<gcs-sa.json>`                           |
 | spec.backend.credentialSecret.mysql.username                    |                                                    | `<username>`                              |
 | spec.backend.credentialSecret.mysql.password                    |                                                    | `<password>`                              |
@@ -86,6 +88,7 @@ The following table lists the configurable parameters of the `kubevaultcom-vault
 | spec.backend.provider.consul.address                            |                                                    | `"http://consul-server.default.svc:8500"` |
 | spec.backend.provider.consul.path                               |                                                    | `"vault"`                                 |
 | spec.backend.provider.dynamodb                                  |                                                    | `{}`                                      |
+| spec.backend.provider.etcd.address                              |                                                    | `<etcd-server-address>`                   |
 | spec.backend.provider.gcs.bucket                                |                                                    | `<bucket-name>`                           |
 | spec.backend.provider.inmem                                     |                                                    | `{}`                                      |
 | spec.backend.provider.raft.storageClass.name                    |                                                    | `standard`                                |
@@ -102,18 +105,14 @@ The following table lists the configurable parameters of the `kubevaultcom-vault
 | spec.unsealer.credentialSecret.azureKeyVault.clientCertPassword |                                                    | `<client-cert-password>`                  |
 | spec.unsealer.credentialSecret.googleKmsGcs.saJson              |                                                    | `""`                                      |
 | spec.unsealer.mode.type                                         |                                                    | `kubernetesSecret`                        |
-| spec.unsealer.mode.awsKmsSsm.credentialSecret                   |                                                    | `vault-unsealer-creds`                    |
 | spec.unsealer.mode.awsKmsSsm.kmsKeyID                           |                                                    | `<kms-key-id>`                            |
 | spec.unsealer.mode.awsKmsSsm.region                             |                                                    | `<region>`                                |
 | spec.unsealer.mode.azureKeyVault.vaultBaseURL                   |                                                    | `<vault-base-url>`                        |
-| spec.unsealer.mode.azureKeyVault.clientCertSecret               |                                                    | `vault-unsealer-creds`                    |
-| spec.unsealer.mode.azureKeyVault.aadClientSecret                |                                                    | `vault-unsealer-creds`                    |
 | spec.unsealer.mode.googleKmsGcs.kmsCryptoKey                    |                                                    | `<kms-key>`                               |
 | spec.unsealer.mode.googleKmsGcs.kmsKeyRing                      |                                                    | `<kms-ring>`                              |
 | spec.unsealer.mode.googleKmsGcs.kmsLocation                     |                                                    | `<kms-location>`                          |
 | spec.unsealer.mode.googleKmsGcs.kmsProject                      |                                                    | `<project-name>`                          |
 | spec.unsealer.mode.googleKmsGcs.bucket                          |                                                    | `<bucket-name>`                           |
-| spec.unsealer.mode.googleKmsGcs.credentialSecret                |                                                    | `vault-unsealer-creds`                    |
 
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:
