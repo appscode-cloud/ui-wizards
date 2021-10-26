@@ -19,6 +19,10 @@ data:
   secret_key: {{ .Values.spec.backend.credentialSecret.dynamodb.secretKey | trim | quote }}
   session_token: {{ .Values.spec.backend.credentialSecret.dynamodb.sessionToken | trim | quote }}
 
+{{- else if eq .Values.spec.backend.provider.type "etcd" }}
+  username: {{ .Values.spec.backend.credentialSecret.etcd.username | trim | quote }}
+  password: {{ .Values.spec.backend.credentialSecret.etcd.password | trim | quote }}
+
 {{- else if eq .Values.spec.backend.provider.type "gcs" }}
   sa.json: {{ .Values.spec.backend.credentialSecret.gcs.saJson | trim | quote }}
 
