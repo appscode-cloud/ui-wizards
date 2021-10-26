@@ -8,7 +8,7 @@ metadata:
     kind: VaultServer
     name: vaultservers
     scope: Namespaced
-    version: v1alpha2
+    version: v1alpha1
   release:
     # Release name
     name: ""
@@ -56,6 +56,9 @@ spec:
         accessKey: <access_key>
         secretKey: <secret_key>
         sessionToken: <session-token>
+      etcd:
+        username: <username>
+        password: <password>
       gcs:
         saJson: <gcs-sa.json>
       mysql:
@@ -79,6 +82,8 @@ spec:
         address: "http://consul-server.default.svc:8500"
         path: "vault"
       dynamodb: {}
+      etcd:
+        address: <etcd-server-address>
       gcs:
         bucket: <bucket-name>
       inmem: {}
@@ -109,17 +114,13 @@ spec:
     mode:
       type: kubernetesSecret
       awsKmsSsm:
-        credentialSecret: vault-unsealer-creds
         kmsKeyID: <kms-key-id>
         region: <region>
       azureKeyVault:
         vaultBaseURL: <vault-base-url>
-        clientCertSecret: vault-unsealer-creds
-        aadClientSecret: vault-unsealer-creds
       googleKmsGcs:
         kmsCryptoKey: <kms-key>
         kmsKeyRing: <kms-ring>
         kmsLocation: <kms-location>
         kmsProject: <project-name>
         bucket: <bucket-name>
-        credentialSecret: vault-unsealer-creds

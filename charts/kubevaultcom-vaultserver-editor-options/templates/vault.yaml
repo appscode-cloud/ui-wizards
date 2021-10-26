@@ -45,6 +45,11 @@ spec:
       credentialSecret: {{ $backendCreds }}
       sessionTokenSecret: {{ $backendCreds }}
 
+{{- else if eq .Values.spec.backend.provider.type "etcd" }}
+    etcd:
+      address: {{ .Values.spec.backend.provider.etcd.address }}
+      credentialSecretName: {{ $backendCreds }}
+
 {{- else if eq .Values.spec.backend.provider.type "gcs" }}
     gcs:
       bucket: {{ .Values.spec.backend.provider.gcs.bucket }}

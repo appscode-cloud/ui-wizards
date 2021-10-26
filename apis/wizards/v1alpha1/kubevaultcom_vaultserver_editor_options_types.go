@@ -62,6 +62,7 @@ type VaultserverBackend struct {
 }
 
 type VaultserverBackendTLSSecret struct {
+	// +optional
 	Name string `json:"name"`
 	// +optional
 	Consul VaultserverBackendTLSConsul `json:"consul"`
@@ -80,6 +81,7 @@ type VaultserverBackendTLSMysql struct {
 }
 
 type VaultserverBackendCredentialSecret struct {
+	// +optional
 	Name string `json:"name"`
 	// +optional
 	Azure VaultserverBackendCredentialAzure `json:"azure"`
@@ -87,6 +89,8 @@ type VaultserverBackendCredentialSecret struct {
 	Consul VaultserverBackendCredentialConsul `json:"consul"`
 	// +optional
 	Dynamodb VaultserverBackendCredentialDynamodb `json:"dynamodb"`
+	// +optional
+	Etcd VaultserverBackendCredentialEtcd `json:"etcd"`
 	// +optional
 	Gcs VaultserverBackendCredentialGcs `json:"gcs"`
 	// +optional
@@ -108,9 +112,15 @@ type VaultserverBackendCredentialConsul struct {
 }
 
 type VaultserverBackendCredentialDynamodb struct {
-	AccessKey    string `json:"accessKey"`
-	SecretKey    string `json:"secretKey"`
+	AccessKey string `json:"accessKey"`
+	SecretKey string `json:"secretKey"`
+	// +optional
 	SessionToken string `json:"sessionToken"`
+}
+
+type VaultserverBackendCredentialEtcd struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
 }
 
 type VaultserverBackendCredentialGcs struct {
@@ -137,7 +147,7 @@ type VaultserverBackendCredentialSecretSwift struct {
 	AuthToken string `json:"authToken"`
 }
 
-// +kubebuilder:validation:Enum=azure;consul;dynamodb;gcs;inmem;raft;s3;swift
+// +kubebuilder:validation:Enum=azure;consul;dynamodb;etcd;gcs;inmem;mysql;postgresql;raft;s3;swift
 type VaultserverBackendProviderType string
 
 type VaultserverBackendProvider struct {
@@ -148,6 +158,8 @@ type VaultserverBackendProvider struct {
 	Consul VaultserverBackendProviderConsul `json:"consul"`
 	// +optional
 	Dynamodb VaultserverBackendProviderDynamodb `json:"dynamodb"`
+	// +optional
+	Etcd VaultserverBackendProviderEtcd `json:"etcd"`
 	// +optional
 	Gcs VaultserverBackendProviderGcs `json:"gcs"`
 	// +optional
@@ -170,6 +182,10 @@ type VaultserverBackendProviderConsul struct {
 }
 
 type VaultserverBackendProviderDynamodb struct {
+}
+
+type VaultserverBackendProviderEtcd struct {
+	Address string `json:"address"`
 }
 
 type VaultserverBackendProviderGcs struct {
@@ -198,6 +214,7 @@ type VaultserverUnsealer struct {
 }
 
 type UnsealerCredentialSecret struct {
+	// +optional
 	Name string `json:"name"`
 	// +optional
 	AwsKmsSsm VaultserverCredentialAwsKmsSsm `json:"awsKmsSsm"`
@@ -207,7 +224,7 @@ type UnsealerCredentialSecret struct {
 	GoogleKmsGcs VaultserverCredentialSecretGoogleKmsGcs `json:"googleKmsGcs"`
 }
 
-// +kubebuilder:validation:Enum=awsKmsSsm;azureKeyVault;googleKmsGcs
+// +kubebuilder:validation:Enum=awsKmsSsm;azureKeyVault;googleKmsGcs;kubernetesSecret
 type VaultserverUnsealerModeType string
 
 type VaultserverUnsealerMode struct {
@@ -221,9 +238,8 @@ type VaultserverUnsealerMode struct {
 }
 
 type VaultserverUnsealerModeAwsKmsSsm struct {
-	CredentialSecret string `json:"credentialSecret"`
-	KmsKeyID         string `json:"kmsKeyID"`
-	Region           string `json:"region"`
+	KmsKeyID string `json:"kmsKeyID"`
+	Region   string `json:"region"`
 }
 
 type VaultserverCredentialAwsKmsSsm struct {
@@ -232,9 +248,7 @@ type VaultserverCredentialAwsKmsSsm struct {
 }
 
 type VaultserverUnsealerModeAzureKeyVault struct {
-	VaultBaseURL     string `json:"vaultBaseURL"`
-	ClientCertSecret string `json:"clientCertSecret"`
-	AadClientSecret  string `json:"aadClientSecret"`
+	VaultBaseURL string `json:"vaultBaseURL"`
 }
 
 type VaultserverCredentialAzureKeyVault struct {
@@ -245,12 +259,11 @@ type VaultserverCredentialAzureKeyVault struct {
 }
 
 type VaultserverUnsealerModeGoogleKmsGcs struct {
-	KmsCryptoKey     string `json:"kmsCryptoKey"`
-	KmsKeyRing       string `json:"kmsKeyRing"`
-	KmsLocation      string `json:"kmsLocation"`
-	KmsProject       string `json:"kmsProject"`
-	Bucket           string `json:"bucket"`
-	CredentialSecret string `json:"credentialSecret"`
+	KmsCryptoKey string `json:"kmsCryptoKey"`
+	KmsKeyRing   string `json:"kmsKeyRing"`
+	KmsLocation  string `json:"kmsLocation"`
+	KmsProject   string `json:"kmsProject"`
+	Bucket       string `json:"bucket"`
 }
 
 type VaultserverCredentialSecretGoogleKmsGcs struct {
