@@ -5,7 +5,7 @@ go 1.16
 require (
 	k8s.io/api v0.21.1
 	k8s.io/apimachinery v0.21.1
-	kmodules.xyz/client-go v0.0.0-20211025214134-69e942428bab // indirect
+	kmodules.xyz/client-go v0.0.0-20211028132207-0cf6ea46b030 // indirect
 	kmodules.xyz/schema-checker v0.1.2
 	kubepack.dev/lib-app v0.0.5-0.20210922044853-dd50e0d8260a
 )
