@@ -10,7 +10,6 @@ steps:
     - fetch: getResources|core|v1|namespaces
       label:
         text: labels.namespace
-      onChange: onNamespaceChange
       schema:
         $ref: schema#/properties/metadata/properties/release/properties/namespace
       type: select
@@ -482,6 +481,7 @@ steps:
             chart:
               name: uibytebuildersdev-component-selector
               version: v0.2.0-alpha.0
+            customClass: mb-10
             hideForm: true
             label:
               text: labels.backend.selector
@@ -715,7 +715,7 @@ steps:
           - label:
               text: labels.dataSources.readonly_question
             schema:
-              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources/items/properties/csi/properties/readonly
+              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources/items/properties/csi/properties/readOnly
             type: switch
           - isArray: true
             keys:
@@ -740,16 +740,16 @@ steps:
           - label:
               text: labels.dataSources.fsType
             schema:
-              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources/items/propertiescsi/properties/fsType
+              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources/items/properties/csi/properties/fsType
             type: input
           - elements:
             - label:
                 text: labels.dataSources.nodePublishSecretRef
               schema:
-                $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources/items/propertiescsi/properties/nodePublishSecretRef/properties/name
+                $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources/items/properties/csi/properties/nodePublishSecretRef/properties/name
               type: input
             schema:
-              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources/items/propertiescsi/properties/nodePublishSecretRef
+              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources/items/properties/csi/properties/nodePublishSecretRef
             type: single-step-form
           hideForm: true
           label:
@@ -848,7 +848,31 @@ steps:
       - label:
           text: labels.dataSources.csi
         type: label
-      - 
+      - label:
+          text: labels.dataSources.driver
+        path: csi/driver
+        type: value
+        typeOfValue: string
+      - label:
+          text: labels.dataSources.fsType
+        path: csi/fsType
+        type: value
+        typeOfValue: string
+      - label:
+          text: labels.dataSources.nodePublishSecretRef
+        path: csi/nodePublishSecretRef/name
+        type: value
+        typeOfValue: string
+      - label:
+          text: labels.dataSources.readonly_question
+        path: csi/readOnly
+        type: value
+        typeOfValue: string
+      - label:
+          text: labels.dataSources.volumeAttributes
+        path: csi/volumeAttributes
+        type: value
+        typeOfValue: key-value
       type: single-step-form-array
     type: single-step-form
   id: data-sources
@@ -1544,7 +1568,7 @@ steps:
         - computed: setConfiguration
           if: isEqualToDiscriminatorPath|create-new-config|/configurationSource
           label:
-            text: labels.md_config_cnf
+            text: labels.vault_hcl
           onChange: onConfigurationChange
           schema:
             $ref: discriminator#/properties/configuration

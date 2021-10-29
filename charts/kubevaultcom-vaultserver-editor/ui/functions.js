@@ -78,6 +78,48 @@ async function getResources(
   }
 }
 
+async function getSecrets({
+  storeGet,
+  axios,
+  model,
+  getValue,
+  watchDependency,
+}) {
+  const owner = storeGet("/user/username");
+  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const namespace = getValue(model, "/metadata/release/namespace");
+  watchDependency("model#/metadata/release/namespace");
+
+  try {
+    const resp = await axios.get(
+      `/clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}/secrets`,
+      {
+        params: {
+          filter: { items: { metadata: { name: null }, type: null } },
+        },
+      }
+    );
+
+    const secrets = (resp && resp.data && resp.data.items) || [];
+
+    const filteredSecrets = secrets.filter((item) => {
+      const validType = ["kubernetes.io/service-account-token", "Opaque"];
+      return validType.includes(item.type);
+    });
+
+    filteredSecrets.map((item) => {
+      const name = (item.metadata && item.metadata.name) || "";
+      item.text = name;
+      item.value = name;
+      return true;
+    });
+    return filteredSecrets;
+  } catch (e) {
+    console.log(e);
+    return [];
+  }
+}
+
 function isEqualToDiscriminatorPath(
   { discriminator, getValue, watchDependency },
   value,
@@ -564,7 +606,7 @@ function onConfigurationChange({
 }) {
   const value = getValue(discriminator, "/configuration");
   commit("wizard/model$update", {
-    path: "/resources/secret_config/stringData/md-config.cnf",
+    path: "/resources/secret_config/stringData/vault.hcl",
     value: value,
     force: true,
   });
@@ -594,11 +636,11 @@ function setSecretConfigNamespace({ getValue, model, watchDependency }) {
 }
 
 function setConfiguration({ model, getValue }) {
-  return getValue(model, "/resources/secret_config/stringData/md-config.cnf");
+  return getValue(model, "/resources/secret_config/stringData/vault.hcl");
 }
 
 function setConfigurationFiles({ model, getValue }) {
-  const value = getValue(model, "/resources/secret_config/data/md-config.cnf");
+  const value = getValue(model, "/resources/secret_config/data/vault.hcl");
   return atob(value);
 }
 
@@ -616,6 +658,7 @@ return {
 	disableLableChecker,
 	isEqualToModelPathValue,
 	getResources,
+  getSecrets,
 	isEqualToDiscriminatorPath,
 	setValueFromModel,
 	getNamespacedResourceList,

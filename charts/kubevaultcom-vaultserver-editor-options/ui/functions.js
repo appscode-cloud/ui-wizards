@@ -259,7 +259,7 @@ function showTlsCreateSecretField(
   return !showTlsExistingSecretField({ discriminator, getValue, watchDependency }) && selectedBackendType === backendType;
 }
 
-function onCreateTlsSecretChange({model, discriminator, commit, getValue}) {
+function onCreateTlsSecretChange({discriminator, commit, getValue}) {
   const createTlsSecret = getValue(discriminator, "/createTlsSecret");
 
   if(createTlsSecret) {
@@ -286,7 +286,34 @@ function showCredentialCreateSecretField(
   return !showCredentialExistingSecretField({ discriminator, getValue, watchDependency }) && selectedBackendType === backendType;
 }
 
-function onCreateCredentialSecretChange({model, discriminator, commit, getValue}) {
+function onCreateCredentialSecretChange({discriminator, commit, getValue}) {
+  const createCredentialSecret = getValue(discriminator, "/createCredentialSecret");
+
+  if(createCredentialSecret) {
+    commit("wizard/model$delete", "/spec/backend/credentialSecret/name");
+  } else {
+    commit("wizard/model$update", { path: "/spec/backend/credentialSecret", value: { name: "" }, force: true });
+  }
+}
+
+function showUnsealerCredentialExistingSecretField(
+  { discriminator, getValue, watchDependency },
+) {
+  const pathValue = getValue(discriminator, "/createCredentialSecret");
+  watchDependency("discriminator#/createCredentialSecret");
+  return !pathValue;
+}
+
+function showUnsealerCredentialCreateSecretField(
+  { discriminator, model, getValue, watchDependency },
+  unsealerMode
+) {
+  watchDependency("model#/spec/unsealer/mode/type");
+  const selectedUnsealerMode = getValue(model, "/spec/unsealer/mode/type");
+  return !showCredentialExistingSecretField({ discriminator, getValue, watchDependency }) && selectedUnsealerMode === unsealerMode;
+}
+
+function onCreateUnsealerCredentialSecretChange({discriminator, commit, getValue}) {
   const createCredentialSecret = getValue(discriminator, "/createCredentialSecret");
 
   if(createCredentialSecret) {
@@ -491,6 +518,50 @@ function setMachineToCustom() {
   return "custom";
 }
 
+function showCredentialSecret({model, getValue, watchDependency}) {
+  watchDependency("model#/spec/backend/provider/type");
+  const type = getValue(model ,"/spec/backend/provider/type");
+
+  const backendsForCredential = ["azure", "consul", "dynamodb", "etcd", "gcs", "mysql", "postgresql", "s3", "swift"];
+
+  return backendsForCredential.includes(type);
+}
+
+function showTlsSecret({model, getValue, watchDependency}) {
+  watchDependency("model#/spec/backend/provider/type");
+  const type = getValue(model ,"/spec/backend/provider/type");
+
+  const backendsForTls = ["consul", "mysql"];
+
+  return backendsForTls.includes(type);
+}
+
+function onBackendTypeChange({model, getValue, commit, watchDependency}) {
+  if(isLowAvailableStorageBackendSelected({model, getValue, watchDependency})) {
+    commit("wizard/model$update", {
+      path: "/spec/replicas",
+      value: 1,
+      force: true
+    })
+  }
+  else {    
+    commit("wizard/model$update", {
+      path: "/spec/replicas",
+      value: 3,
+      force: true
+    })
+  }
+}
+
+function isLowAvailableStorageBackendSelected({model, getValue, watchDependency}) {
+  watchDependency("model#/spec/backend/provider/type");
+  const backendType = getValue(model, "/spec/backend/provider/type");
+
+  const lowAvailableStorageBackends = ["azure", "inmem", "s3", "swift"];
+
+  return lowAvailableStorageBackends.includes(backendType);
+}
+
 return {
 	isEqualToModelPathValue,
   isNotEqualToModelPathValue,
@@ -509,5 +580,12 @@ return {
   onCreateTlsSecretChange,
   showCredentialCreateSecretField,
   showCredentialExistingSecretField,
-  onCreateCredentialSecretChange
+  onCreateCredentialSecretChange,
+  showUnsealerCredentialCreateSecretField,
+  showUnsealerCredentialExistingSecretField,
+  onCreateUnsealerCredentialSecretChange,
+  showCredentialSecret,
+  showTlsSecret,
+  onBackendTypeChange,
+  isLowAvailableStorageBackendSelected
 }
