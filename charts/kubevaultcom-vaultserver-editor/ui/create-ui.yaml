@@ -74,12 +74,16 @@ steps:
       schema:
         $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/terminationPolicy
       type: radio
+    type: single-step-form
+  id: basic
+  title: steps.0.label
+- form:
+    elements:
     - discriminator:
         backend:
           type: string
       elements:
       - computed: setVaultBackendType
-        customClass: mt-10
         label:
           text: labels.backend.backendType
         onChange: onVaultBackendTypeChange
@@ -430,7 +434,8 @@ steps:
           schema:
             $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/raft/properties/snapshotThreshold
           type: input
-        - elements:
+        - customClass: mb-10
+          elements:
           - element:
               label:
                 text: labels.backend.accessMode
@@ -628,25 +633,34 @@ steps:
           schema:
             $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/swift/properties/trustID
           type: input
-          
         if: isEqualToDiscriminatorPath|swift|/backend
         schema:
           $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/swift
         type: single-step-form
-      label:
-        text: labels.backend.title
       schema:
         $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend
-      show_label: true
       type: single-step-form
     type: single-step-form
-  id: basic
-  title: steps.0.label
+  id: backend
+  title: steps.13.label
 - form:
     elements:
     - addFormLabel: labels.dataSources.button
       element:
+        discriminator:
+          dataSource:
+            type: string
         elements:
+        - computed: setDataSourceTypeForEdit
+          label:
+            text: labels.dataSources.dataSourceType
+          options:
+          - ConfigMap 
+          - Secret 
+          - CSI
+          schema:
+            $ref: discriminator#/properties/dataSource
+          type: select
         - elements:
           - label: 
               text: labels.dataSources.optional_question
@@ -672,12 +686,9 @@ steps:
             schema:
               $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources/items/properties/configMap/properties/items
             type: reusable-element
-          hideForm: true
-          label:
-            text: labels.dataSources.configMap
+          if: isEqualToDiscriminatorPath|ConfigMap|/dataSource
           schema:
             $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources/items/properties/configMap
-          show_label: true
           type: single-step-form
         - elements:
           - label: 
@@ -704,12 +715,9 @@ steps:
             schema:
               $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources/items/properties/secret/properties/items
             type: reusable-element
-          hideForm: true
-          label:
-            text: labels.dataSources.secret
+          if: isEqualToDiscriminatorPath|Secret|/dataSource
           schema:
             $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources/items/properties/secret
-          show_label: true
           type: single-step-form
         - elements:
           - label:
@@ -751,12 +759,9 @@ steps:
             schema:
               $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources/items/properties/csi/properties/nodePublishSecretRef
             type: single-step-form
-          hideForm: true
-          label:
-            text: labels.dataSources.csi
+          if: isEqualToDiscriminatorPath|CSI|/dataSource
           schema:
             $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources/items/properties/csi
-          show_label: true
           type: single-step-form
         type: single-step-form
       label:
@@ -764,11 +769,21 @@ steps:
       schema:
         $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources
       tableContents:
-      - label:
-          text: labels.dataSources.configMap
-        type: label
-      - inTableColumn: true
+      - computed: setDataSourceName
+        inTableColumn: true
         label:
+          text: labels.dataSources.name
+        path: dataSourceName
+        type: value
+        typeOfValue: string
+      - computed: setDataSourceType
+        inTableColumn: true
+        label:
+          text: labels.dataSources.dataSourceType
+        path: dataSourceType
+        type: value
+        typeOfValue: string
+      - label:
           text: labels.dataSources.name
           isSubsection: true
         path: configMap/name

@@ -364,6 +364,20 @@ function setUnsealerMode({ model, getValue }) {
   return Object.keys(unsealerMode).find(key => key);
 }
 
+// *************************** Data Source *************************
+
+function setDataSourceName() {
+  return "name";
+}
+
+function setDataSourceType({itemCtx}) {
+  return Object.keys(itemCtx).find(key => key);
+}
+
+function setDataSourceTypeForEdit({itemCtx}) {
+  return setDataSourceType({itemCtx});
+}
+
 // ************************** TLS ******************************88
 
 function setApiGroup() {
@@ -673,6 +687,9 @@ return {
   setDefaultNamespaceFrom,
   onUnsealerModeChange,
   setUnsealerMode,
+  setDataSourceName,
+  setDataSourceType,
+  setDataSourceTypeForEdit,
 	setApiGroup,
 	getIssuerRefsName,
 	hasIssuerRefName,
