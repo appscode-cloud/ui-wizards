@@ -83,7 +83,7 @@ steps:
         backend:
           type: string
       elements:
-      - computed: setVaultBackendType
+      - computed: getVaultBackendType
         label:
           text: labels.backend.backendType
         onChange: onVaultBackendTypeChange
@@ -102,12 +102,205 @@ steps:
         schema:
           $ref: discriminator#/properties/backend
         type: select
+      - discriminator:
+          createCredentialSecret:
+            type: string
+          secretName:
+            type: string
+          data:
+            type: object
+        elements:
+          - computed: setCreateCredentialSecretStatus
+            label:
+              text: labels.backend.credentialSecret
+            onChange: onCreateCredentialSecretChange
+            options:
+              - text: options.secret.existingSecret.label
+                value: false
+              - text: options.secret.customSecret.label
+                value: true
+            schema:
+              $ref: discriminator#/properties/createCredentialSecret
+            type: radio
+          - computed: setCredSecretName
+            fetch: getSecrets
+            if: showBackendExistingCredentialSecretSection
+            label:
+              text: labels.backend.credentialSecret
+            onChange: onCredSecretNameChange
+            schema:
+              $ref: discriminator#/properties/secretName
+            type: select
+          - computed: setCredSecretData
+            keepEmpty: true
+            elements:
+              - if: showCredentialCreateSecretField|azure
+                label:
+                  text: labels.backend.accountKey
+                schema:
+                  $ref: discriminator#/properties/data/properties/accountKey
+                type: input
+              - if: showCredentialCreateSecretField|consul
+                label:
+                  text: labels.backend.aclToken
+                schema:
+                  $ref: discriminator#/properties/data/properties/aclToken
+                type: input
+              - if: showCredentialCreateSecretField|dynamodb
+                label:
+                  text: labels.backend.accessKey
+                schema:
+                  $ref: discriminator#/properties/data/properties/accessKey
+                type: input
+              - if: showCredentialCreateSecretField|dynamodb
+                label:
+                  text: labels.backend.secretKey
+                schema:
+                  $ref: discriminator#/properties/data/properties/secretKey
+                type: input
+              - if: showCredentialCreateSecretField|dynamodb
+                label:
+                  text: labels.backend.sessionToken
+                schema:
+                  $ref: discriminator#/properties/data/properties/sessionToken
+                type: input
+              - if: showCredentialCreateSecretField|etcd
+                label:
+                  text: labels.backend.username
+                schema:
+                  $ref: discriminator#/properties/data/properties/username
+                type: input
+              - if: showCredentialCreateSecretField|etcd
+                label:
+                  text: labels.backend.password
+                schema:
+                  $ref: discriminator#/properties/data/properties/password
+                type: input
+              - if: showCredentialCreateSecretField|gcs
+                label:
+                  text: labels.backend.saJson
+                schema:
+                  $ref: discriminator#/properties/data/properties/saJson
+                type: input
+              - if: showCredentialCreateSecretField|mysql
+                label:
+                  text: labels.backend.username
+                schema:
+                  $ref: discriminator#/properties/data/properties/username
+                type: input
+              - if: showCredentialCreateSecretField|mysql
+                label:
+                  text: labels.backend.password
+                schema:
+                  $ref: discriminator#/properties/data/properties/password
+                type: input
+              - if: showCredentialCreateSecretField|postgresql
+                label:
+                  text: labels.backend.connectionURL
+                schema:
+                  $ref: discriminator#/properties/data/properties/connectionURL
+                type: input
+              - if: showCredentialCreateSecretField|s3
+                label:
+                  text: labels.backend.accessKey
+                schema:
+                  $ref: discriminator#/properties/data/properties/accessKey
+                type: input
+              - if: showCredentialCreateSecretField|s3
+                label:
+                  text: labels.backend.secretKey
+                schema:
+                  $ref: discriminator#/properties/data/properties/secretKey
+                type: input
+              - if: showCredentialCreateSecretField|swift
+                label:
+                  text: labels.backend.username
+                schema:
+                  $ref: discriminator#/properties/data/properties/username
+                type: input
+              - if: showCredentialCreateSecretField|swift
+                label:
+                  text: labels.backend.password
+                schema:
+                  $ref: discriminator#/properties/data/properties/password
+                type: input
+              - if: showCredentialCreateSecretField|swift
+                label:
+                  text: labels.backend.authToken
+                schema:
+                  $ref: discriminator#/properties/data/properties/authToken
+                type: input
+            if: showBackendCreateCredentialSecretSection
+            onChange: onCredSecretDataChange
+            schema:
+              $ref: discriminator#/properties/data
+            type: single-step-form
+        if: showCredentialSecretField
+        type: single-step-form
+      - discriminator:
+          createTlsSecret:
+            type: string
+          secretName:
+            type: string
+          data:
+            type: object
+        elements:
+          - computed: setCreateTlsSecretStatus
+            label:
+              text: labels.backend.tlsSecret
+            onChange: onCreateTlsSecretChange
+            options:
+              - text: options.secret.existingSecret.label
+                value: false
+              - text: options.secret.customSecret.label
+                value: true
+            schema:
+              $ref: discriminator#/properties/createTlsSecret
+            type: radio
+          - computed: setTlsSecretName
+            fetch: getSecrets
+            if: showBackendExistingTlsSecretSection
+            label:
+              text: labels.backend.tlsSecret
+            onChange: onTlsSecretNameChange
+            schema:
+              $ref: discriminator#/properties/secretName
+            type: select
+          - computed: setTlsSecretData
+            keepEmpty: true
+            elements:
+              - if: showTlsCreateSecretField|consul
+                label:
+                  text: labels.backend.caCrt
+                schema:
+                  $ref: discriminator#/properties/data/properties/caCrt
+                type: input
+              - if: showTlsCreateSecretField|consul
+                label:
+                  text: labels.backend.clientCrt
+                schema:
+                  $ref: discriminator#/properties/data/properties/clientCrt
+                type: input
+              - if: showTlsCreateSecretField|consul
+                label:
+                  text: labels.backend.clientKey
+                schema:
+                  $ref: discriminator#/properties/data/properties/clientKey
+                type: input
+              - if: showTlsCreateSecretField|mysql
+                label:
+                  text: labels.backend.tlsCaFile
+                schema:
+                  $ref: discriminator#/properties/data/properties/tlsCaFile
+                type: input
+            if: showBackendCreateTlsSecretSection
+            onChange: onTlsSecretDataChange
+            schema:
+              $ref: discriminator#/properties/data
+            type: single-step-form
+        if: showTlsSecretField
+        type: single-step-form
       - elements:
-        - label:
-            text: labels.backend.accountKeySecret
-          schema:
-            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/azure/properties/accountKeySecret
-          type: input
         - label:
             text: labels.backend.accountName
           schema:
@@ -133,11 +326,6 @@ steps:
           schema:
             $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/consul/properties/tlsSkipVerify
           type: switch
-        - label:
-            text: labels.backend.aclTokenSecretName
-          schema:
-            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/consul/properties/aclTokenSecretName
-          type: input
         - label:
             text: labels.backend.address
           schema:
@@ -219,11 +407,6 @@ steps:
             $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/dynamodb/properties/haEnabled
           type: switch
         - label:
-            text: labels.backend.credentialSecret
-          schema:
-            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/dynamodb/properties/credentialSecret
-          type: input
-        - label:
             text: labels.backend.endpoint
           schema:
             $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/dynamodb/properties/endpoint
@@ -279,11 +462,6 @@ steps:
             $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/etcd/properties/address
           type: input
         - label:
-            text: labels.backend.credentialSecretName
-          schema:
-            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/etcd/properties/credentialSecretName
-          type: input
-        - label:
             text: labels.backend.discoverySrv
           schema:
             $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/etcd/properties/discoverySrv
@@ -309,16 +487,6 @@ steps:
         type: single-step-form
       - elements:
         - label:
-            text: labels.backend.path
-          schema:
-            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/file/properties/path
-          type: input
-        if: isEqualToDiscriminatorPath|file|/backend
-        schema:
-          $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/file
-        type: single-step-form
-      - elements:
-        - label:
             text: labels.backend.haEnabled_question
           schema:
             $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/gcs/properties/haEnabled
@@ -332,11 +500,6 @@ steps:
             text: labels.backend.chunkSize
           schema:
             $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/gcs/properties/chunkSize
-          type: input
-        - label:
-            text: labels.backend.credentialSecret
-          schema:
-            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/gcs/properties/credentialSecret
           type: input
         - label:
             text: labels.backend.maxParallel
@@ -374,26 +537,11 @@ steps:
           schema:
             $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/mysql/properties/table
           type: input
-        - label:
-            text: labels.backend.tlsCASecret
-          schema:
-            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/mysql/properties/tlsCASecret
-          type: input
-        - label:
-            text: labels.backend.userCredentialSecret
-          schema:
-            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/mysql/properties/userCredentialSecret
-          type: input
         if: isEqualToDiscriminatorPath|mysql|/backend
         schema:
           $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/mysql
         type: single-step-form
       - elements:
-        - label:
-            text: labels.backend.connectionURLSecret
-          schema:
-            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/postgresql/properties/connectionURLSecret
-          type: input
         - label:
             text: labels.backend.maxParallel
           schema:
@@ -533,11 +681,6 @@ steps:
             $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/s3/properties/bucket
           type: input
         - label:
-            text: labels.backend.credentialSecret
-          schema:
-            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/s3/properties/credentialSecret
-          type: input
-        - label:
             text: labels.backend.disableSSL_question
           schema:
             $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/s3/properties/disableSSL
@@ -567,7 +710,6 @@ steps:
           schema:
             $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/s3/properties/sessionTokenSecret
           type: input
-          
         if: isEqualToDiscriminatorPath|s3|/backend
         schema:
           $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/s3
@@ -587,11 +729,6 @@ steps:
             text: labels.backend.container
           schema:
             $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/swift/properties/container
-          type: input
-        - label:
-            text: labels.backend.credentialSecret
-          schema:
-            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/swift/properties/credentialSecret
           type: input
         - label:
             text: labels.backend.domain
@@ -897,7 +1034,7 @@ steps:
       mode:
         type: string
     elements:
-    - computed: setUnsealerMode
+    - computed: getUnsealerMode
       label:
         text: labels.unsealer.mode
       onChange: onUnsealerModeChange
@@ -914,12 +1051,88 @@ steps:
         $ref: discriminator#/properties/mode
       type: select
     - elements:
-      - elements:
-        - label:
+      - discriminator:
+          createCredentialSecret:
+            type: string
+          secretName:
+            type: string
+          data:
+            type: object
+        elements:
+        - computed: setCreateUnsealerCredentialSecretStatus
+          label:
             text: labels.unsealer.credentialSecret
+          onChange: onCreateUnsealerCredentialSecretChange
+          options:
+          - text: options.secret.existingSecret.label
+            value: false
+          - text: options.secret.customSecret.label
+            value: true
           schema:
-            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/unsealer/properties/mode/properties/awsKmsSsm/properties/credentialSecret
-          type: input
+            $ref: discriminator#/properties/createCredentialSecret
+          type: radio
+        - computed: setUnsealerCredSecretName
+          fetch: getSecrets
+          if: showUnsealerExistingCredentialSecretSection
+          label:
+            text: labels.unsealer.credentialSecret
+          onChange: onUnsealerCredSecretNameChange
+          schema:
+            $ref: discriminator#/properties/secretName
+          type: select
+        - computed: setUnsealerCredSecretData
+          keepEmpty: true
+          elements:
+          - if: showUnsealerCredentialCreateSecretField|awsKmsSsm
+            label:
+              text: labels.backend.accessKey
+            schema:
+              $ref: discriminator#/properties/data/properties/accessKey
+            type: input
+          - if: showUnsealerCredentialCreateSecretField|awsKmsSsm
+            label:
+              text: labels.backend.secretKey
+            schema:
+              $ref: discriminator#/properties/data/properties/secretKey
+            type: input
+          - if: showUnsealerCredentialCreateSecretField|azureKeyVault
+            label:
+              text: labels.backend.clientCert
+            schema:
+              $ref: discriminator#/properties/data/properties/clientCert
+            type: input
+          - if: showUnsealerCredentialCreateSecretField|azureKeyVault
+            label:
+              text: labels.backend.clientCertPassword
+            schema:
+              $ref: discriminator#/properties/data/properties/clientCertPassword
+            type: input
+          - if: showUnsealerCredentialCreateSecretField|azureKeyVault
+            label:
+              text: labels.backend.clientId
+            schema:
+              $ref: discriminator#/properties/data/properties/clientId
+            type: input
+          - if: showUnsealerCredentialCreateSecretField|azureKeyVault
+            label:
+              text: labels.backend.clientSecret
+            schema:
+              $ref: discriminator#/properties/data/properties/clientSecret
+            type: input
+          - if: showUnsealerCredentialCreateSecretField|googleKmsGcs
+            label:
+              text: labels.backend.saJson
+            schema:
+              $ref: discriminator#/properties/data/properties/saJson
+            type: input
+          if: showUnsealerCreateCredentialSecretSection
+          onChange: onUnsealerCredSecretDataChange
+          schema:
+            $ref: discriminator#/properties/data
+          type: single-step-form
+        if: showUnsealerCredentialSecretField
+        type: single-step-form 
+      - elements:
         - label:
             text: labels.unsealer.endpoint
           schema:
@@ -951,11 +1164,6 @@ steps:
             $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/unsealer/properties/mode/properties/azureKeyVault/properties/aadClientSecret
           type: input
         - label:
-            text: labels.unsealer.clientCertSecret
-          schema:
-            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/unsealer/properties/mode/properties/azureKeyVault/properties/clientCertSecret
-          type: input
-        - label:
             text: labels.unsealer.cloud
           schema:
             $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/unsealer/properties/mode/properties/azureKeyVault/properties/cloud
@@ -984,11 +1192,6 @@ steps:
             text: labels.unsealer.bucket
           schema:
             $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/unsealer/properties/mode/properties/googleKmsGcs/properties/bucket
-          type: input
-        - label:
-            text: labels.unsealer.credentialSecret
-          schema:
-            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/unsealer/properties/mode/properties/googleKmsGcs/properties/credentialSecret
           type: input
         - label:
             text: labels.unsealer.kmsCryptoKey
@@ -1024,6 +1227,7 @@ steps:
         schema:
           $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/unsealer/properties/mode/properties/kubernetesSecret
         type: single-step-form
+      keepEmpty: true
       schema:
         $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/unsealer/properties/mode
       type: single-step-form
