@@ -443,6 +443,14 @@ const hasTlsSecret = [
   "mysql"
 ];
 
+const lowAvailableStorageBackends = ["azure", "inmem", "s3", "swift"];
+
+function isLowAvailableStorageBackendSelected({model, getValue, watchDependency}) {
+  watchDependency("model#/resources/kubevaultComVaultServer/spec/backend");
+  const backendType = getVaultBackendType({model, getValue});
+  return lowAvailableStorageBackends.includes(backendType);
+}
+
 function onVaultBackendTypeChange({discriminator, model, getValue, commit}) {
   const backends = [
     "azure",
@@ -459,7 +467,7 @@ function onVaultBackendTypeChange({discriminator, model, getValue, commit}) {
   ];
 
   const selectedBackend = getValue(discriminator, "/backend");
-  
+
   if(selectedBackend) {
     backends.forEach((item) => {
       if(item !== selectedBackend) {
@@ -503,6 +511,14 @@ function onVaultBackendTypeChange({discriminator, model, getValue, commit}) {
       commit("wizard/model$delete", `/resources/kubevaultComVaultServer/spec/backend`);
       commit("wizard/model$delete", `/resources/secret_backend_creds`);
       commit("wizard/model$delete", `/resources/secret_backend_tls`);
+  }
+
+  if(lowAvailableStorageBackends.includes(selectedBackend)) {
+    commit("wizard/model$update", {
+      path: "/resources/kubevaultComVaultServer/spec/replicas",
+      value: 1,
+      force: true
+    })
   }
 }
 
@@ -1038,6 +1054,7 @@ return {
   returnTrue,
   returnStringYes,
 	getVaultServerVersions,
+  isLowAvailableStorageBackendSelected,
   onVaultBackendTypeChange,
   getVaultBackendType,
   setCreateCredentialSecretStatus,
