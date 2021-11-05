@@ -350,7 +350,7 @@ const backendSecretObj = {
   azure: {
     secretNamePaths: ["accountKeySecret"],
     secretObjectPaths: [
-      "accountKey"
+      "account_key"
     ]
   },
   consul: {
@@ -360,9 +360,9 @@ const backendSecretObj = {
     ],
     tlsSecretNamePaths: ["tlsSecretName"],
     tlsObjectPaths: [
-      "caCrt",
-      "clientCrt",
-      "clientKey"
+      "ca.crt",
+      "client.crt",
+      "client.key"
     ]
   },
   dynamodb: {
@@ -371,9 +371,9 @@ const backendSecretObj = {
       "sessionTokenSecret"
     ],
     secretObjectPaths: [
-      "accessKey",
-      "secretKey",
-      "sessionToken"
+      "access_key",
+      "secret_key",
+      "session_token"
     ],
   },
   etcd: {
@@ -386,7 +386,7 @@ const backendSecretObj = {
   gcs: {
     secretNamePaths: ["credentialSecret"],
     secretObjectPaths: [
-      "saJson"
+      "sa.json"
     ],
   },
   mysql: {
@@ -397,20 +397,20 @@ const backendSecretObj = {
     ],
     tlsSecretNamePaths: ["tlsCASecret"],
     tlsObjectPaths: [
-      "tlsCaFile"
+      "tls_ca_file"
     ]
   },
   postgresql: {
     secretNamePaths: ["connectionURLSecret"],
     secretObjectPaths: [
-      "connectionURL"
+      "connection_url"
     ],
   },
   s3: {
     secretNamePaths: ["credentialSecret"],
     secretObjectPaths: [
-      "accessKey",
-      "secretKey"
+      "access_key",
+      "secret_key"
     ],
   },
   swift: {
@@ -419,7 +419,7 @@ const backendSecretObj = {
       "credentialSecret"
     ],
     secretObjectPaths: [
-      "authToken",
+      "auth_token",
       "password",
       "username"
     ],

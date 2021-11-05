@@ -139,7 +139,7 @@ steps:
                 label:
                   text: labels.backend.accountKey
                 schema:
-                  $ref: discriminator#/properties/data/properties/accountKey
+                  $ref: discriminator#/properties/data/properties/account_key
                 type: input
               - if: showCredentialCreateSecretField|consul
                 label:
@@ -151,19 +151,19 @@ steps:
                 label:
                   text: labels.backend.accessKey
                 schema:
-                  $ref: discriminator#/properties/data/properties/accessKey
+                  $ref: discriminator#/properties/data/properties/access_key
                 type: input
               - if: showCredentialCreateSecretField|dynamodb
                 label:
                   text: labels.backend.secretKey
                 schema:
-                  $ref: discriminator#/properties/data/properties/secretKey
+                  $ref: discriminator#/properties/data/properties/secret_key
                 type: input
               - if: showCredentialCreateSecretField|dynamodb
                 label:
                   text: labels.backend.sessionToken
                 schema:
-                  $ref: discriminator#/properties/data/properties/sessionToken
+                  $ref: discriminator#/properties/data/properties/session_token
                 type: input
               - if: showCredentialCreateSecretField|etcd
                 label:
@@ -181,7 +181,7 @@ steps:
                 label:
                   text: labels.backend.saJson
                 schema:
-                  $ref: discriminator#/properties/data/properties/saJson
+                  $ref: discriminator#/properties/data/properties/sa_json
                 type: input
               - if: showCredentialCreateSecretField|mysql
                 label:
@@ -199,19 +199,19 @@ steps:
                 label:
                   text: labels.backend.connectionURL
                 schema:
-                  $ref: discriminator#/properties/data/properties/connectionURL
+                  $ref: discriminator#/properties/data/properties/connection_url
                 type: input
               - if: showCredentialCreateSecretField|s3
                 label:
                   text: labels.backend.accessKey
                 schema:
-                  $ref: discriminator#/properties/data/properties/accessKey
+                  $ref: discriminator#/properties/data/properties/access_key
                 type: input
               - if: showCredentialCreateSecretField|s3
                 label:
                   text: labels.backend.secretKey
                 schema:
-                  $ref: discriminator#/properties/data/properties/secretKey
+                  $ref: discriminator#/properties/data/properties/secret_key
                 type: input
               - if: showCredentialCreateSecretField|swift
                 label:
@@ -229,7 +229,7 @@ steps:
                 label:
                   text: labels.backend.authToken
                 schema:
-                  $ref: discriminator#/properties/data/properties/authToken
+                  $ref: discriminator#/properties/data/properties/auth_token
                 type: input
             if: showBackendCreateCredentialSecretSection
             onChange: onCredSecretDataChange
@@ -274,25 +274,25 @@ steps:
                 label:
                   text: labels.backend.caCrt
                 schema:
-                  $ref: discriminator#/properties/data/properties/caCrt
+                  $ref: discriminator#/properties/data/properties/ca.crt
                 type: input
               - if: showTlsCreateSecretField|consul
                 label:
                   text: labels.backend.clientCrt
                 schema:
-                  $ref: discriminator#/properties/data/properties/clientCrt
+                  $ref: discriminator#/properties/data/properties/client.crt
                 type: input
               - if: showTlsCreateSecretField|consul
                 label:
                   text: labels.backend.clientKey
                 schema:
-                  $ref: discriminator#/properties/data/properties/clientKey
+                  $ref: discriminator#/properties/data/properties/client.key
                 type: input
               - if: showTlsCreateSecretField|mysql
                 label:
                   text: labels.backend.tlsCaFile
                 schema:
-                  $ref: discriminator#/properties/data/properties/tlsCaFile
+                  $ref: discriminator#/properties/data/properties/tls_ca_file
                 type: input
             if: showBackendCreateTlsSecretSection
             onChange: onTlsSecretDataChange
@@ -427,11 +427,7 @@ steps:
           schema:
             $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/dynamodb/properties/region
           type: input
-        - label:
-            text: labels.backend.sessionTokenSecret
-          schema:
-            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/dynamodb/properties/sessionTokenSecret
-          type: input
+
         - label:
             text: labels.backend.table
           schema:
@@ -706,7 +702,8 @@ steps:
           schema:
             $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/s3/properties/region
           type: input
-        - label:
+        - fetch: getSecrets
+          label:
             text: labels.backend.sessionTokenSecret
           schema:
             $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/s3/properties/sessionTokenSecret
@@ -716,11 +713,6 @@ steps:
           $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/s3
         type: single-step-form
       - elements:
-        - label:
-            text: labels.backend.authTokenSecret
-          schema:
-            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/swift/properties/authTokenSecret
-          type: input
         - label:
             text: labels.backend.authURL
           schema:
