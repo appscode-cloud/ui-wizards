@@ -350,7 +350,7 @@ async function getResources(
   return resources;
 }
 
-async function getStorageClassNames({ axios, storeGet, commit }) {
+async function getStorageClassNames({ axios, storeGet, commit }, path) {
   const owner = storeGet("/user/username");
   const cluster = storeGet("/cluster/clusterDefinition/spec/name");
 
@@ -374,7 +374,7 @@ async function getStorageClassNames({ axios, storeGet, commit }) {
 
     if (isDefault) {
       commit("wizard/model$update", {
-        path: "/spec/storageClass/name",
+        path: path,
         value: name,
         force: true,
       });

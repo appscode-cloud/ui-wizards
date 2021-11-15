@@ -640,11 +640,12 @@ steps:
               $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/raft/properties/storage/properties/selector
             show_label: true
             type: reusable-element
-          - label:
+          - fetch: getStorageClassNames|/resources/kubevaultComVaultServer/spec/backend/raft/storage/storageClassName
+            label:
               text: labels.backend.storageClassName
             schema:
               $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/raft/properties/storage/properties/storageClassName
-            type: input
+            type: select
           - label:
               text: labels.backend.volumeMode
             schema:
@@ -781,9 +782,10 @@ steps:
           dataSource:
             type: string
         elements:
-        - computed: setDataSourceTypeForEdit
+        - computed: getDataSourceTypeForEdit
           label:
             text: labels.dataSources.dataSourceType
+          onChange: onDataSourceChange
           options:
           - ConfigMap 
           - Secret 
@@ -797,11 +799,12 @@ steps:
             schema:
               $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources/items/properties/configMap/properties/optional
             type: switch
-          - label: 
+          - fetch: resourceNames|core|v1|configmaps
+            label: 
               text: labels.dataSources.name
             schema:
               $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources/items/properties/configMap/properties/name
-            type: input
+            type: select
           - label: 
               text: labels.dataSources.defaultMode
             schema:
@@ -826,11 +829,12 @@ steps:
             schema:
               $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources/items/properties/secret/properties/optional
             type: switch
-          - label: 
+          - fetch: getSecrets
+            label: 
               text: labels.dataSources.secretName
             schema:
               $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources/items/properties/secret/properties/secretName
-            type: input
+            type: select
           - label: 
               text: labels.dataSources.defaultMode
             schema:
@@ -906,32 +910,29 @@ steps:
         path: dataSourceName
         type: value
         typeOfValue: string
-      - computed: setDataSourceType
+      - computed: getDataSourceType
         inTableColumn: true
         label:
           text: labels.dataSources.dataSourceType
         path: dataSourceType
         type: value
         typeOfValue: string
-      - label:
-          text: labels.dataSources.name
-          isSubsection: true
-        path: configMap/name
-        type: value
-        typeOfValue: string
-      - label:
+      - if: isDataSourceTypeEqualTo|configMap
+        label:
           text: labels.dataSources.defaultMode
           isSubsection: true
         path: configMap/defaultMode
         type: value
         typeOfValue: string
-      - label:
+      - if: isDataSourceTypeEqualTo|configMap
+        label:
           text: labels.dataSources.optional_question
           isSubsection: true
         path: configMap/optional
         type: value
         typeOfValue: string
-      - label:
+      - if: isDataSourceTypeEqualTo|configMap
+        label:
           text: labels.dataSources.items
           isSubsection: true
         path: configMap/items
@@ -956,16 +957,14 @@ steps:
           path: path
           type: value
           typeOfValue: string
-      - label:
-          text: labels.dataSources.secret
-        type: label
-      - inTableColumn: true
+      - if: isDataSourceTypeEqualTo|secret
         label:
           text: labels.dataSources.secret
         path: secret/secretName
         type: value
         typeOfValue: string
-      - label:
+      - if: isDataSourceTypeEqualTo|secret
+        label:
           text: labels.dataSources.items
           isSubsection: true
         path: secret/items
@@ -990,30 +989,32 @@ steps:
           path: path
           type: value
           typeOfValue: string
-      - label:
-          text: labels.dataSources.csi
-        type: label
-      - label:
+      - if: isDataSourceTypeEqualTo|csi
+        label:
           text: labels.dataSources.driver
         path: csi/driver
         type: value
         typeOfValue: string
-      - label:
+      - if: isDataSourceTypeEqualTo|csi
+        label:
           text: labels.dataSources.fsType
         path: csi/fsType
         type: value
         typeOfValue: string
-      - label:
+      - if: isDataSourceTypeEqualTo|csi
+        label:
           text: labels.dataSources.nodePublishSecretRef
         path: csi/nodePublishSecretRef/name
         type: value
         typeOfValue: string
-      - label:
+      - if: isDataSourceTypeEqualTo|csi
+        label:
           text: labels.dataSources.readonly_question
         path: csi/readOnly
         type: value
         typeOfValue: string
-      - label:
+      - if: isDataSourceTypeEqualTo|csi
+        label:
           text: labels.dataSources.volumeAttributes
         path: csi/volumeAttributes
         type: value

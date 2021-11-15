@@ -752,16 +752,53 @@ function getUnsealerMode({ model, getValue }) {
 
 // *************************** Data Source *************************
 
-function setDataSourceName() {
-  return "name";
+dataSourceObj = {
+  configMap: {
+    name: "ConfigMap"
+  },
+  secret: {
+    name: "Secret"
+  },
+  csi: {
+    name: "CSI"
+  },
+};
+
+function setDataSourceName({itemCtx}) {
+  const dataSource = getDataSourceType({itemCtx});
+  if(dataSource === "ConfigMap") return itemCtx?.configMap?.name || "";
+  else if(dataSource === "Secret") return itemCtx?.secret?.secretName || "";
+  else if(dataSource === "CSI") return itemCtx?.csi?.driver || "";
 }
 
-function setDataSourceType({itemCtx}) {
-  return Object.keys(itemCtx).find(key => key);
+function getDataSourceType({itemCtx}) {
+  if(!itemCtx) return "";
+  const dataSource = Object.keys(itemCtx).find(key => key);
+  console.log(dataSourceObj[dataSource]?.name);
+  return dataSourceObj[dataSource]?.name;
 }
 
-function setDataSourceTypeForEdit({itemCtx}) {
-  return setDataSourceType({itemCtx});
+function getDataSourceTypeForEdit({rootModel}) {
+  if(!rootModel) return "";
+  const dataSource = Object.keys(rootModel).find(key => key);
+  return dataSourceObj[dataSource]?.name;
+}
+
+function isDataSourceEqualTo({itemCtx}, type) {
+  const dataSource = getDataSourceType({itemCtx});
+  return dataSource === type;
+}
+
+function onDataSourceChange({discriminator, getValue, updateModelValue}) {
+  const selectedDataSource = getValue(discriminator, "/dataSource");
+
+  Object.keys(dataSourceObj).forEach((key) => {
+    if (dataSourceObj[key].name === selectedDataSource) {
+      updateModelValue(key, false, {});
+    } else {
+      updateModelValue(key, true);
+    }                                           
+  });
 }
 
 // ************************** TLS ******************************88
@@ -1081,8 +1118,9 @@ return {
   onUnsealerModeChange,
   getUnsealerMode,
   setDataSourceName,
-  setDataSourceType,
-  setDataSourceTypeForEdit,
+  getDataSourceType,
+  isDataSourceEqualTo,
+  onDataSourceChange,
 	setApiGroup,
 	getIssuerRefsName,
 	hasIssuerRefName,
