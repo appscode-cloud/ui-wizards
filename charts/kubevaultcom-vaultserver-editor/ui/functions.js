@@ -220,6 +220,43 @@ async function resourceNames(
   });
 }
 
+async function getStorageClassNames({ axios, storeGet, commit }, path) {
+  const owner = storeGet("/user/username");
+  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+
+  const resp = await axios.get(
+    `/clusters/${owner}/${cluster}/proxy/storage.k8s.io/v1/storageclasses`,
+    {
+      params: {
+        filter: { items: { metadata: { name: null, annotations: null } } },
+      },
+    }
+  );
+
+  const resources = (resp && resp.data && resp.data.items) || [];
+
+  resources.map((item) => {
+    const name = (item.metadata && item.metadata.name) || "";
+    const isDefault =
+      item.metadata &&
+      item.metadata.annotations &&
+      item.metadata.annotations["storageclass.kubernetes.io/is-default-class"];
+
+    if (isDefault) {
+      commit("wizard/model$update", {
+        path: path,
+        value: name,
+        force: true,
+      });
+    }
+
+    item.text = name;
+    item.value = name;
+    return true;
+  });
+  return resources;
+}
+
 async function unNamespacedResourceNames(
   { axios, storeGet },
   group,
@@ -426,6 +463,17 @@ const backendSecretObj = {
   },
 }
 
+dottedToDiscriminatorPath = {
+  "sa.json": "sa_json",
+  "ca.crt": "ca_crt",
+  "client.crt": "client_crt",
+  "client.key": "client_key",
+  "client-cert": "client_cert",
+  "client-cert-password": "client_cert_password",
+  "client-id": "client_id",
+  "client-secret": "client_secret",
+};
+
 const hasCredentialSecret = [
   "azure",
   "consul",
@@ -600,7 +648,7 @@ function onCredSecretDataChange({commit, getValue, discriminator, model}) {
     backendSecretObj[backend]?.secretObjectPaths.forEach(path => {
       commit("wizard/model$update", {
         path: `/resources/secret_backend_creds/data/${path}`,
-        value: data[path] || "",
+        value: data[dottedToDiscriminatorPath[path] || path] || "",
         force: true
       });
     });
@@ -619,10 +667,16 @@ function setCredSecretName({model, getValue}) {
 
 function setCredSecretData({setDiscriminatorValue, model, discriminator, getValue}) {
   const data = getValue(model, "/resources/secret_backend_creds/data");
+
+  const modifiedData = Object.keys(data).reduce((acc, key) => {
+    acc[dottedToDiscriminatorPath[key] || key] = data[key];
+    return acc;
+  }, {});
+
   const createCred = getValue(discriminator, "/createCredentialSecret");
   if(createCred) {
     if(data) {
-      setDiscriminatorValue("/data", data);
+      setDiscriminatorValue("/data", modifiedData);
     } else return setDiscriminatorValue("/data", {});
   }
 }
@@ -700,7 +754,7 @@ function onTlsSecretDataChange({commit, getValue, discriminator, model}) {
     backendSecretObj[backend]?.tlsObjectPaths.forEach(path => {
       commit("wizard/model$update", {
         path: `/resources/secret_backend_tls/data/${path}`,
-        value: data[path] || "",
+        value: data[dottedToDiscriminatorPath[path] || path] || "",
         force: true
       });
     });
@@ -719,10 +773,15 @@ function setTlsSecretName({model, getValue}) {
 
 function setTlsSecretData({setDiscriminatorValue, model, discriminator, getValue}) {
   const data = getValue(model, "/resources/secret_backend_tls/data");
+  
+  const modifiedData = Object.keys(data).reduce((acc, key) => {
+    acc[dottedToDiscriminatorPath[key] || key] = data[key];
+    return acc;
+  }, {});
   const createTls = getValue(discriminator, "/createTlsSecret");
   if(createTls) {
     if(data) {
-      setDiscriminatorValue("/data", data);
+      setDiscriminatorValue("/data", modifiedData);
     } else return setDiscriminatorValue("/data", {});
   }
 }
@@ -733,6 +792,38 @@ function setDefaultNamespaceFrom() {
 }
 
 // ************************* Unsealer **********************************************
+
+const unsealerSecretObj = {
+  awsKmsSsm: {
+    secretNamePaths: ["credentialSecret"],
+    secretObjectPaths: [
+      "access_key",
+      "secret_key",
+    ]
+  },
+  azureKeyVault: {
+    secretNamePaths: ["aadClientSecret"],
+    secretObjectPaths: [
+      "client-cert",
+      "client-cert-password",
+      "client-id",
+      "client-secret",
+    ]
+  },
+  googleKmsGcs: {
+    secretNamePaths: ["credentialSecret"],
+    secretObjectPaths: [
+      "sa.json"
+    ]
+  },
+}
+
+const hasUnsealerCredentialSecret = [
+  "awsKmsSsm",
+  "azureKeyVault",
+  "googleKmsGcs"
+];
+
 function onUnsealerModeChange({discriminator, getValue, commit}) {
   const unsealerModes = ["awsKmsSsm", "azureKeyVault", "googleKmsGcs", "kubernetesSecret"];
 
@@ -748,6 +839,110 @@ function onUnsealerModeChange({discriminator, getValue, commit}) {
 function getUnsealerMode({ model, getValue }) {
   const unsealerMode = getValue(model, "/resources/kubevaultComVaultServer/spec/unsealer/mode");
   return Object.keys(unsealerMode).find(key => key);
+}
+
+function setCreateUnsealerCredentialSecretStatus({model, getValue}) {
+  const unsealerCreds = getValue(model, "/resources/secret_unsealer_creds");
+
+  return !!unsealerCreds;
+}
+
+function onCreateUnsealerCredentialSecretChange({discriminator, model,  getValue, commit}) {
+  const createCredSecretStatus = getValue(discriminator, "/createCredentialSecret");
+  const unsealerMode = getValue(discriminator, "/mode");
+  const vsName = getValue(model, "/metadata/release/name");
+  
+  if(createCredSecretStatus) {
+    unsealerSecretObj[unsealerMode].secretNamePaths.forEach(item => {
+      commit("wizard/model$update", {
+        path: `/resources/kubevaultComVaultServer/spec/unsealer/mode/${unsealerMode}/${item}`,
+        value: `${vsName}-unsealer-creds`,
+        force: true
+      });
+    });
+  } else {
+    commit("wizard/model$delete", "/resources/secret_unsealer_creds");
+  }
+}
+
+function showUnsealerCredentialSecretField({discriminator, getValue, watchDependency}) {
+  watchDependency("discriminator#/mode");
+  const unsealerMode = getValue(discriminator, "/mode");
+  return hasUnsealerCredentialSecret.includes(unsealerMode);
+}
+
+function showUnsealerExistingCredentialSecretSection({discriminator, getValue, watchDependency}) {
+  watchDependency("discriminator#/createCredentialSecret");
+  const createCredSecret = getValue(discriminator, "/createCredentialSecret");
+  return !createCredSecret;
+}
+
+function showUnsealerCreateCredentialSecretSection({discriminator, getValue, watchDependency}) {
+  return !showUnsealerExistingCredentialSecretSection({discriminator, getValue, watchDependency});
+}
+
+function showUnsealerCredentialCreateSecretField({discriminator, getValue, watchDependency}, value) {
+  watchDependency("discriminator#/mode");
+  const mode = getValue(discriminator, "/mode");
+  
+  return value === mode;
+}
+
+function onUnsealerCredSecretNameChange({model, commit, getValue, discriminator}) {
+  const secretName = getValue(discriminator, "/secretName");
+  const unsealerMode = getUnsealerMode({model, getValue});
+
+  if(unsealerMode && secretName) { 
+    unsealerSecretObj[unsealerMode].secretNamePaths.forEach((item) => {
+      commit("wizard/model$update", {
+        path: `/resources/kubevaultComVaultServer/spec/unsealer/mode/${unsealerMode}/${item}`,
+        value: secretName,
+        force: true
+      });
+    });
+  }
+}
+
+function onUnsealerCredSecretDataChange({commit, getValue, discriminator, model}) {
+  const data = getValue(discriminator, "/data");
+  const mode = getUnsealerMode({model, getValue});
+
+  if(data) {
+    commit("wizard/model$delete", `/resources/secret_unsealer_creds/data`);
+    unsealerSecretObj[mode]?.secretObjectPaths.forEach(path => {
+      commit("wizard/model$update", {
+        path: `/resources/secret_unsealer_creds/stringData/${path}`,
+        value: data[dottedToDiscriminatorPath[path] || path] || "",
+        force: true
+      });
+    });
+  }
+}
+
+function setUnsealerCredSecretName({model, getValue}) {
+  const unsealerMode = getUnsealerMode({model, getValue});
+  let secretName;
+  if(unsealerMode) {
+    const secretNamePath = unsealerSecretObj[unsealerMode].secretNamePaths[0];
+    secretName = getValue(model, `/resources/kubevaultComVaultServer/spec/unsealer/mode/${unsealerMode}/${secretNamePath}`);
+  }
+  return secretName || "";
+}
+
+function setUnsealerCredSecretData({setDiscriminatorValue, model, discriminator, getValue}) {
+  const data = getValue(model, "/resources/secret_unsealer_creds/stringData");
+
+  const modifiedData = Object.keys(data).reduce((acc, key) => {
+    acc[dottedToDiscriminatorPath[key] || key] = data[key];
+    return acc;
+  }, {});
+
+  const createCred = getValue(discriminator, "/createCredentialSecret");
+  if(createCred) {
+    if(data) {
+      setDiscriminatorValue("/data", modifiedData);
+    } else return setDiscriminatorValue("/data", {});
+  }
 }
 
 // *************************** Data Source *************************
@@ -1088,6 +1283,7 @@ return {
 	getResourceList,
 	resourceNames,
   unNamespacedResourceNames,
+  getStorageClassNames,
   returnTrue,
   returnStringYes,
 	getVaultServerVersions,
@@ -1117,6 +1313,16 @@ return {
   setDefaultNamespaceFrom,
   onUnsealerModeChange,
   getUnsealerMode,
+  setCreateUnsealerCredentialSecretStatus,
+  onCreateUnsealerCredentialSecretChange,
+  showUnsealerCredentialSecretField,
+  showUnsealerExistingCredentialSecretSection,
+  showUnsealerCreateCredentialSecretSection,
+  showUnsealerCredentialCreateSecretField,
+  onUnsealerCredSecretNameChange,
+  onUnsealerCredSecretDataChange,
+  setUnsealerCredSecretName,
+  setUnsealerCredSecretData,
   setDataSourceName,
   getDataSourceType,
   isDataSourceEqualTo,
