@@ -5,9 +5,9 @@
 ## TL;DR;
 
 ```console
-$ helm repo add bytebuilders-ui-dev https://raw.githubusercontent.com/bytebuilders/ui-wizards/
+$ helm repo add bytebuilders-ui https://bundles.byte.builders/ui/
 $ helm repo update
-$ helm install kubevaultcom-vaultserver-editor-options bytebuilders-ui-dev/kubevaultcom-vaultserver-editor-options -n kube-system
+$ helm install kubevaultcom-vaultserver-editor-options bytebuilders-ui/kubevaultcom-vaultserver-editor-options -n kube-system
 ```
 
 ## Introduction
@@ -23,7 +23,7 @@ This chart deploys a VaultServer Editor UI Options on a [Kubernetes](http://kube
 To install the chart with the release name `kubevaultcom-vaultserver-editor-options`:
 
 ```console
-$ helm install kubevaultcom-vaultserver-editor-options bytebuilders-ui-dev/kubevaultcom-vaultserver-editor-options -n kube-system
+$ helm install kubevaultcom-vaultserver-editor-options bytebuilders-ui/kubevaultcom-vaultserver-editor-options -n kube-system
 ```
 
 The command deploys a VaultServer Editor UI Options on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
@@ -118,12 +118,12 @@ The following table lists the configurable parameters of the `kubevaultcom-vault
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:
 
 ```console
-$ helm install kubevaultcom-vaultserver-editor-options bytebuilders-ui-dev/kubevaultcom-vaultserver-editor-options -n kube-system --set metadata.resource.group=kubevault.com
+$ helm install kubevaultcom-vaultserver-editor-options bytebuilders-ui/kubevaultcom-vaultserver-editor-options -n kube-system --set metadata.resource.group=kubevault.com
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
 installing the chart. For example:
 
 ```console
-$ helm install kubevaultcom-vaultserver-editor-options bytebuilders-ui-dev/kubevaultcom-vaultserver-editor-options -n kube-system --values values.yaml
+$ helm install kubevaultcom-vaultserver-editor-options bytebuilders-ui/kubevaultcom-vaultserver-editor-options -n kube-system --values values.yaml
 ```
