@@ -44,12 +44,12 @@ The command removes all the Kubernetes components associated with the chart and 
 
 The following table lists the configurable parameters of the `networkingk8sio-ingress-editor` chart and their default values.
 
-|     Parameter      | Description |        Default         |
-|--------------------|-------------|------------------------|
-| apiVersion         |             | `networking.k8s.io/v1` |
-| kind               |             | `Ingress`              |
-| metadata.name      |             | `ingress`              |
-| metadata.namespace |             | `default`              |
+|     Parameter      | Description |              Default              |
+|--------------------|-------------|-----------------------------------|
+| apiVersion         |             | <code>networking.k8s.io/v1</code> |
+| kind               |             | <code>Ingress</code>              |
+| metadata.name      |             | <code>ingress</code>              |
+| metadata.namespace |             | <code>default</code>              |
 
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:

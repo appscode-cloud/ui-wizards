@@ -44,11 +44,11 @@ The command removes all the Kubernetes components associated with the chart and 
 
 The following table lists the configurable parameters of the `stashappscodecom-task-editor` chart and their default values.
 
-|   Parameter   | Description |           Default            |
-|---------------|-------------|------------------------------|
-| apiVersion    |             | `stash.appscode.com/v1beta1` |
-| kind          |             | `Task`                       |
-| metadata.name |             | `task`                       |
+|   Parameter   | Description |                 Default                 |
+|---------------|-------------|-----------------------------------------|
+| apiVersion    |             | <code>stash.appscode.com/v1beta1</code> |
+| kind          |             | <code>Task</code>                       |
+| metadata.name |             | <code>task</code>                       |
 
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:

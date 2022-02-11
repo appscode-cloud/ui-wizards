@@ -44,12 +44,12 @@ The command removes all the Kubernetes components associated with the chart and 
 
 The following table lists the configurable parameters of the `autoscalingk8sio-verticalpodautoscalercheckpoint-editor` chart and their default values.
 
-|     Parameter      | Description |              Default              |
-|--------------------|-------------|-----------------------------------|
-| apiVersion         |             | `autoscaling.k8s.io/v1`           |
-| kind               |             | `VerticalPodAutoscalerCheckpoint` |
-| metadata.name      |             | `verticalpodautoscalercheckpoint` |
-| metadata.namespace |             | `default`                         |
+|     Parameter      | Description |                   Default                    |
+|--------------------|-------------|----------------------------------------------|
+| apiVersion         |             | <code>autoscaling.k8s.io/v1</code>           |
+| kind               |             | <code>VerticalPodAutoscalerCheckpoint</code> |
+| metadata.name      |             | <code>verticalpodautoscalercheckpoint</code> |
+| metadata.namespace |             | <code>default</code>                         |
 
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:

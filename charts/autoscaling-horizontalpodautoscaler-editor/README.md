@@ -44,12 +44,12 @@ The command removes all the Kubernetes components associated with the chart and 
 
 The following table lists the configurable parameters of the `autoscaling-horizontalpodautoscaler-editor` chart and their default values.
 
-|     Parameter      | Description |          Default          |
-|--------------------|-------------|---------------------------|
-| apiVersion         |             | `autoscaling/v2beta2`     |
-| kind               |             | `HorizontalPodAutoscaler` |
-| metadata.name      |             | `horizontalpodautoscaler` |
-| metadata.namespace |             | `default`                 |
+|     Parameter      | Description |               Default                |
+|--------------------|-------------|--------------------------------------|
+| apiVersion         |             | <code>autoscaling/v2beta2</code>     |
+| kind               |             | <code>HorizontalPodAutoscaler</code> |
+| metadata.name      |             | <code>horizontalpodautoscaler</code> |
+| metadata.namespace |             | <code>default</code>                 |
 
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:

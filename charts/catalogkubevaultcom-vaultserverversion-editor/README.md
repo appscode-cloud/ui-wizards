@@ -44,11 +44,11 @@ The command removes all the Kubernetes components associated with the chart and 
 
 The following table lists the configurable parameters of the `catalogkubevaultcom-vaultserverversion-editor` chart and their default values.
 
-|   Parameter   | Description |             Default              |
-|---------------|-------------|----------------------------------|
-| apiVersion    |             | `catalog.kubevault.com/v1alpha1` |
-| kind          |             | `VaultServerVersion`             |
-| metadata.name |             | `vaultserverversion`             |
+|   Parameter   | Description |                   Default                   |
+|---------------|-------------|---------------------------------------------|
+| apiVersion    |             | <code>catalog.kubevault.com/v1alpha1</code> |
+| kind          |             | <code>VaultServerVersion</code>             |
+| metadata.name |             | <code>vaultserverversion</code>             |
 
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:

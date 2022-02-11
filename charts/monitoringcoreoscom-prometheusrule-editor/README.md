@@ -44,12 +44,12 @@ The command removes all the Kubernetes components associated with the chart and 
 
 The following table lists the configurable parameters of the `monitoringcoreoscom-prometheusrule-editor` chart and their default values.
 
-|     Parameter      | Description |          Default           |
-|--------------------|-------------|----------------------------|
-| apiVersion         |             | `monitoring.coreos.com/v1` |
-| kind               |             | `PrometheusRule`           |
-| metadata.name      |             | `prometheusrule`           |
-| metadata.namespace |             | `default`                  |
+|     Parameter      | Description |                Default                |
+|--------------------|-------------|---------------------------------------|
+| apiVersion         |             | <code>monitoring.coreos.com/v1</code> |
+| kind               |             | <code>PrometheusRule</code>           |
+| metadata.name      |             | <code>prometheusrule</code>           |
+| metadata.namespace |             | <code>default</code>                  |
 
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:

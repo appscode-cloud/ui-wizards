@@ -44,12 +44,12 @@ The command removes all the Kubernetes components associated with the chart and 
 
 The following table lists the configurable parameters of the `flowcontrolapiserverk8sio-flowschema-editor` chart and their default values.
 
-|     Parameter      | Description |                Default                 |
-|--------------------|-------------|----------------------------------------|
-| apiVersion         |             | `flowcontrol.apiserver.k8s.io/v1beta1` |
-| kind               |             | `FlowSchema`                           |
-| metadata.name      |             | `flowschema`                           |
-| metadata.namespace |             | `default`                              |
+|     Parameter      | Description |                      Default                      |
+|--------------------|-------------|---------------------------------------------------|
+| apiVersion         |             | <code>flowcontrol.apiserver.k8s.io/v1beta1</code> |
+| kind               |             | <code>FlowSchema</code>                           |
+| metadata.name      |             | <code>flowschema</code>                           |
+| metadata.namespace |             | <code>default</code>                              |
 
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:

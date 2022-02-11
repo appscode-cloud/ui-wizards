@@ -44,12 +44,12 @@ The command removes all the Kubernetes components associated with the chart and 
 
 The following table lists the configurable parameters of the `policykubevaultcom-vaultpolicybinding-editor` chart and their default values.
 
-|     Parameter      | Description |             Default             |
-|--------------------|-------------|---------------------------------|
-| apiVersion         |             | `policy.kubevault.com/v1alpha1` |
-| kind               |             | `VaultPolicyBinding`            |
-| metadata.name      |             | `vaultpolicybinding`            |
-| metadata.namespace |             | `default`                       |
+|     Parameter      | Description |                  Default                   |
+|--------------------|-------------|--------------------------------------------|
+| apiVersion         |             | <code>policy.kubevault.com/v1alpha1</code> |
+| kind               |             | <code>VaultPolicyBinding</code>            |
+| metadata.name      |             | <code>vaultpolicybinding</code>            |
+| metadata.namespace |             | <code>default</code>                       |
 
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:

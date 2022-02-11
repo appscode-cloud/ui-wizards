@@ -44,12 +44,12 @@ The command removes all the Kubernetes components associated with the chart and 
 
 The following table lists the configurable parameters of the `acmecertmanagerio-order-editor` chart and their default values.
 
-|     Parameter      | Description |          Default          |
-|--------------------|-------------|---------------------------|
-| apiVersion         |             | `acme.cert-manager.io/v1` |
-| kind               |             | `Order`                   |
-| metadata.name      |             | `order`                   |
-| metadata.namespace |             | `default`                 |
+|     Parameter      | Description |               Default                |
+|--------------------|-------------|--------------------------------------|
+| apiVersion         |             | <code>acme.cert-manager.io/v1</code> |
+| kind               |             | <code>Order</code>                   |
+| metadata.name      |             | <code>order</code>                   |
+| metadata.namespace |             | <code>default</code>                 |
 
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:

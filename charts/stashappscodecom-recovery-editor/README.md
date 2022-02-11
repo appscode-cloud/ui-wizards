@@ -44,12 +44,12 @@ The command removes all the Kubernetes components associated with the chart and 
 
 The following table lists the configurable parameters of the `stashappscodecom-recovery-editor` chart and their default values.
 
-|     Parameter      | Description |            Default            |
-|--------------------|-------------|-------------------------------|
-| apiVersion         |             | `stash.appscode.com/v1alpha1` |
-| kind               |             | `Recovery`                    |
-| metadata.name      |             | `recovery`                    |
-| metadata.namespace |             | `default`                     |
+|     Parameter      | Description |                 Default                  |
+|--------------------|-------------|------------------------------------------|
+| apiVersion         |             | <code>stash.appscode.com/v1alpha1</code> |
+| kind               |             | <code>Recovery</code>                    |
+| metadata.name      |             | <code>recovery</code>                    |
+| metadata.namespace |             | <code>default</code>                     |
 
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:

@@ -44,12 +44,12 @@ The command removes all the Kubernetes components associated with the chart and 
 
 The following table lists the configurable parameters of the `batch-jobtemplate-editor` chart and their default values.
 
-|     Parameter      | Description |     Default     |
-|--------------------|-------------|-----------------|
-| apiVersion         |             | `batch/v1beta1` |
-| kind               |             | `JobTemplate`   |
-| metadata.name      |             | `jobtemplate`   |
-| metadata.namespace |             | `default`       |
+|     Parameter      | Description |          Default           |
+|--------------------|-------------|----------------------------|
+| apiVersion         |             | <code>batch/v1beta1</code> |
+| kind               |             | <code>JobTemplate</code>   |
+| metadata.name      |             | <code>jobtemplate</code>   |
+| metadata.namespace |             | <code>default</code>       |
 
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:

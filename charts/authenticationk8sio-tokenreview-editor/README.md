@@ -44,11 +44,11 @@ The command removes all the Kubernetes components associated with the chart and 
 
 The following table lists the configurable parameters of the `authenticationk8sio-tokenreview-editor` chart and their default values.
 
-|   Parameter   | Description |          Default           |
-|---------------|-------------|----------------------------|
-| apiVersion    |             | `authentication.k8s.io/v1` |
-| kind          |             | `TokenReview`              |
-| metadata.name |             | `tokenreview`              |
+|   Parameter   | Description |                Default                |
+|---------------|-------------|---------------------------------------|
+| apiVersion    |             | <code>authentication.k8s.io/v1</code> |
+| kind          |             | <code>TokenReview</code>              |
+| metadata.name |             | <code>tokenreview</code>              |
 
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:

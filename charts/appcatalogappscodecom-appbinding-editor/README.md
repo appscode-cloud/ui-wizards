@@ -44,12 +44,12 @@ The command removes all the Kubernetes components associated with the chart and 
 
 The following table lists the configurable parameters of the `appcatalogappscodecom-appbinding-editor` chart and their default values.
 
-|     Parameter      | Description |              Default               |
-|--------------------|-------------|------------------------------------|
-| apiVersion         |             | `appcatalog.appscode.com/v1alpha1` |
-| kind               |             | `AppBinding`                       |
-| metadata.name      |             | `appbinding`                       |
-| metadata.namespace |             | `default`                          |
+|     Parameter      | Description |                    Default                    |
+|--------------------|-------------|-----------------------------------------------|
+| apiVersion         |             | <code>appcatalog.appscode.com/v1alpha1</code> |
+| kind               |             | <code>AppBinding</code>                       |
+| metadata.name      |             | <code>appbinding</code>                       |
+| metadata.namespace |             | <code>default</code>                          |
 
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:

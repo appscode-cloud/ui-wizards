@@ -44,12 +44,12 @@ The command removes all the Kubernetes components associated with the chart and 
 
 The following table lists the configurable parameters of the `opskubedbcom-elasticsearchopsrequest-editor` chart and their default values.
 
-|     Parameter      | Description |          Default          |
-|--------------------|-------------|---------------------------|
-| apiVersion         |             | `ops.kubedb.com/v1alpha1` |
-| kind               |             | `ElasticsearchOpsRequest` |
-| metadata.name      |             | `elasticsearchopsrequest` |
-| metadata.namespace |             | `default`                 |
+|     Parameter      | Description |               Default                |
+|--------------------|-------------|--------------------------------------|
+| apiVersion         |             | <code>ops.kubedb.com/v1alpha1</code> |
+| kind               |             | <code>ElasticsearchOpsRequest</code> |
+| metadata.name      |             | <code>elasticsearchopsrequest</code> |
+| metadata.namespace |             | <code>default</code>                 |
 
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:
