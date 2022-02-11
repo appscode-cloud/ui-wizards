@@ -44,40 +44,40 @@ The command removes all the Kubernetes components associated with the chart and 
 
 The following table lists the configurable parameters of the `kubedbcom-elasticsearch-editor-options` chart and their default values.
 
-|               Parameter               |                                                    Description                                                    |      Default      |
-|---------------------------------------|-------------------------------------------------------------------------------------------------------------------|-------------------|
-| metadata.resource.group               |                                                                                                                   | `kubedb.com`      |
-| metadata.resource.kind                |                                                                                                                   | `Elasticsearch`   |
-| metadata.resource.name                |                                                                                                                   | `elasticsearches` |
-| metadata.resource.scope               |                                                                                                                   | `Namespaced`      |
-| metadata.resource.version             |                                                                                                                   | `v1alpha2`        |
-| metadata.release.name                 | Release name                                                                                                      | `""`              |
-| metadata.release.namespace            | Release namespace                                                                                                 | `""`              |
-| spec.version                          | List options                                                                                                      | `xpack-7.13.2`    |
-| spec.authPlugin                       | options UI sends there fields based on selected version possible values: OpenDistro;OpenSearch;SearchGuard;X-Pack | `X-Pack`          |
-| spec.annotations                      | Annotations to add to the database custom resource                                                                | `{}`              |
-| spec.labels                           | Labels to add to all the template objects                                                                         | `{}`              |
-| spec.mode                             | Combined, Dedicated                                                                                               | `Combined`        |
-| spec.replicas                         |                                                                                                                   | `3`               |
-| spec.topology.master.replicas         |                                                                                                                   | `3`               |
-| spec.topology.master.machine          |                                                                                                                   | `""`              |
-| spec.topology.master.persistence.size |                                                                                                                   | `1Gi`             |
-| spec.topology.data.replicas           |                                                                                                                   | `3`               |
-| spec.topology.data.machine            |                                                                                                                   | `""`              |
-| spec.topology.data.persistence.size   |                                                                                                                   | `10Gi`            |
-| spec.topology.ingest.replicas         |                                                                                                                   | `2`               |
-| spec.topology.ingest.machine          |                                                                                                                   | `""`              |
-| spec.topology.ingest.persistence.size |                                                                                                                   | `1Gi`             |
-| spec.enableSSL                        |                                                                                                                   | `true`            |
-| spec.disableSecurity                  |                                                                                                                   | `false`           |
-| spec.terminationPolicy                |                                                                                                                   | `WipeOut`         |
-| spec.storageClass.name                |                                                                                                                   | `standard`        |
-| spec.persistence.size                 |                                                                                                                   | `10Gi`            |
-| spec.machine                          |                                                                                                                   | `""`              |
-| spec.resources.limits.cpu             |                                                                                                                   | `".5"`            |
-| spec.resources.limits.memory          |                                                                                                                   | `1024Mi`          |
-| spec.authSecret.name                  |                                                                                                                   | `""`              |
-| spec.authSecret.password              |                                                                                                                   | `""`              |
+|               Parameter               |                                                    Description                                                    |           Default            |
+|---------------------------------------|-------------------------------------------------------------------------------------------------------------------|------------------------------|
+| metadata.resource.group               |                                                                                                                   | <code>kubedb.com</code>      |
+| metadata.resource.kind                |                                                                                                                   | <code>Elasticsearch</code>   |
+| metadata.resource.name                |                                                                                                                   | <code>elasticsearches</code> |
+| metadata.resource.scope               |                                                                                                                   | <code>Namespaced</code>      |
+| metadata.resource.version             |                                                                                                                   | <code>v1alpha2</code>        |
+| metadata.release.name                 | Release name                                                                                                      | <code>""</code>              |
+| metadata.release.namespace            | Release namespace                                                                                                 | <code>""</code>              |
+| spec.version                          | List options                                                                                                      | <code>xpack-7.13.2</code>    |
+| spec.authPlugin                       | options UI sends there fields based on selected version possible values: OpenDistro;OpenSearch;SearchGuard;X-Pack | <code>X-Pack</code>          |
+| spec.annotations                      | Annotations to add to the database custom resource                                                                | <code>{}</code>              |
+| spec.labels                           | Labels to add to all the template objects                                                                         | <code>{}</code>              |
+| spec.mode                             | Combined, Dedicated                                                                                               | <code>Combined</code>        |
+| spec.replicas                         |                                                                                                                   | <code>3</code>               |
+| spec.topology.master.replicas         |                                                                                                                   | <code>3</code>               |
+| spec.topology.master.machine          |                                                                                                                   | <code>""</code>              |
+| spec.topology.master.persistence.size |                                                                                                                   | <code>1Gi</code>             |
+| spec.topology.data.replicas           |                                                                                                                   | <code>3</code>               |
+| spec.topology.data.machine            |                                                                                                                   | <code>""</code>              |
+| spec.topology.data.persistence.size   |                                                                                                                   | <code>10Gi</code>            |
+| spec.topology.ingest.replicas         |                                                                                                                   | <code>2</code>               |
+| spec.topology.ingest.machine          |                                                                                                                   | <code>""</code>              |
+| spec.topology.ingest.persistence.size |                                                                                                                   | <code>1Gi</code>             |
+| spec.enableSSL                        |                                                                                                                   | <code>true</code>            |
+| spec.disableSecurity                  |                                                                                                                   | <code>false</code>           |
+| spec.terminationPolicy                |                                                                                                                   | <code>WipeOut</code>         |
+| spec.storageClass.name                |                                                                                                                   | <code>standard</code>        |
+| spec.persistence.size                 |                                                                                                                   | <code>10Gi</code>            |
+| spec.machine                          |                                                                                                                   | <code>""</code>              |
+| spec.resources.limits.cpu             |                                                                                                                   | <code>".5"</code>            |
+| spec.resources.limits.memory          |                                                                                                                   | <code>1024Mi</code>          |
+| spec.authSecret.name                  |                                                                                                                   | <code>""</code>              |
+| spec.authSecret.password              |                                                                                                                   | <code>""</code>              |
 
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:

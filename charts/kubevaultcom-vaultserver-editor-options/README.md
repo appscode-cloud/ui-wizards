@@ -44,75 +44,75 @@ The command removes all the Kubernetes components associated with the chart and 
 
 The following table lists the configurable parameters of the `kubevaultcom-vaultserver-editor-options` chart and their default values.
 
-|                            Parameter                            |                    Description                     |                  Default                  |
-|-----------------------------------------------------------------|----------------------------------------------------|-------------------------------------------|
-| metadata.resource.group                                         |                                                    | `kubevault.com`                           |
-| metadata.resource.kind                                          |                                                    | `VaultServer`                             |
-| metadata.resource.name                                          |                                                    | `vaultservers`                            |
-| metadata.resource.scope                                         |                                                    | `Namespaced`                              |
-| metadata.resource.version                                       |                                                    | `v1alpha1`                                |
-| metadata.release.name                                           | Release name                                       | `""`                                      |
-| metadata.release.namespace                                      | Release namespace                                  | `""`                                      |
-| spec.version                                                    | List options                                       | `1.8.2`                                   |
-| spec.annotations                                                | Annotations to add to the database custom resource | `{}`                                      |
-| spec.labels                                                     | Labels to add to all the template objects          | `{}`                                      |
-| spec.replicas                                                   |                                                    | `3`                                       |
-| spec.terminationPolicy                                          |                                                    | `WipeOut`                                 |
-| spec.machine                                                    |                                                    | `""`                                      |
-| spec.resources.limits.cpu                                       |                                                    | `".5"`                                    |
-| spec.resources.limits.memory                                    |                                                    | `1024Mi`                                  |
-| spec.backend.tlsSecret.name                                     |                                                    | `""`                                      |
-| spec.backend.tlsSecret.consul.caCrt                             |                                                    | `<ca-cert>`                               |
-| spec.backend.tlsSecret.consul.clientCrt                         |                                                    | `<client-cert>`                           |
-| spec.backend.tlsSecret.consul.clientKey                         |                                                    | `<client-key>`                            |
-| spec.backend.tlsSecret.mysql.tlsCaFile                          |                                                    | `<tls-ca-file>`                           |
-| spec.backend.credentialSecret.name                              |                                                    | `""`                                      |
-| spec.backend.credentialSecret.azure.accountKey                  |                                                    | `<account_key>`                           |
-| spec.backend.credentialSecret.consul.aclToken                   |                                                    | `<acl-token>`                             |
-| spec.backend.credentialSecret.dynamodb.accessKey                |                                                    | `<access_key>`                            |
-| spec.backend.credentialSecret.dynamodb.secretKey                |                                                    | `<secret_key>`                            |
-| spec.backend.credentialSecret.dynamodb.sessionToken             |                                                    | `<session-token>`                         |
-| spec.backend.credentialSecret.etcd.username                     |                                                    | `<username>`                              |
-| spec.backend.credentialSecret.etcd.password                     |                                                    | `<password>`                              |
-| spec.backend.credentialSecret.gcs.saJson                        |                                                    | `<gcs-sa.json>`                           |
-| spec.backend.credentialSecret.mysql.username                    |                                                    | `<username>`                              |
-| spec.backend.credentialSecret.mysql.password                    |                                                    | `<password>`                              |
-| spec.backend.credentialSecret.postgresql.connectionURL          |                                                    | `<connection_url>`                        |
-| spec.backend.credentialSecret.s3.accessKey                      |                                                    | `<access_key>`                            |
-| spec.backend.credentialSecret.s3.secretKey                      |                                                    | `<secret_key>`                            |
-| spec.backend.credentialSecret.swift.username                    |                                                    | `<username>`                              |
-| spec.backend.credentialSecret.swift.password                    |                                                    | `<password>`                              |
-| spec.backend.credentialSecret.swift.authToken                   |                                                    | `<auth-token>`                            |
-| spec.backend.provider.type                                      |                                                    | `raft`                                    |
-| spec.backend.provider.azure.accountName                         |                                                    | `<account-name>`                          |
-| spec.backend.provider.consul.address                            |                                                    | `"http://consul-server.default.svc:8500"` |
-| spec.backend.provider.consul.path                               |                                                    | `"vault"`                                 |
-| spec.backend.provider.dynamodb                                  |                                                    | `{}`                                      |
-| spec.backend.provider.etcd.address                              |                                                    | `<etcd-server-address>`                   |
-| spec.backend.provider.gcs.bucket                                |                                                    | `<bucket-name>`                           |
-| spec.backend.provider.inmem                                     |                                                    | `{}`                                      |
-| spec.backend.provider.raft.storageClass.name                    |                                                    | `standard`                                |
-| spec.backend.provider.raft.persistence.size                     |                                                    | `10Gi`                                    |
-| spec.backend.provider.s3.bucket                                 |                                                    | `<bucket-name>`                           |
-| spec.backend.provider.s3.credentialSecret                       |                                                    | `vault-backend-creds`                     |
-| spec.backend.provider.swift                                     |                                                    | `{}`                                      |
-| spec.unsealer.credentialSecret.name                             |                                                    | `""`                                      |
-| spec.unsealer.credentialSecret.awsKmsSsm.accessKey              |                                                    | `<access_key>`                            |
-| spec.unsealer.credentialSecret.awsKmsSsm.secretKey              |                                                    | `<secret_key>`                            |
-| spec.unsealer.credentialSecret.azureKeyVault.clientId           |                                                    | `<client-cert>`                           |
-| spec.unsealer.credentialSecret.azureKeyVault.clientSecret       |                                                    | `<client-secret>`                         |
-| spec.unsealer.credentialSecret.azureKeyVault.clientCert         |                                                    | `<client-cert>`                           |
-| spec.unsealer.credentialSecret.azureKeyVault.clientCertPassword |                                                    | `<client-cert-password>`                  |
-| spec.unsealer.credentialSecret.googleKmsGcs.saJson              |                                                    | `""`                                      |
-| spec.unsealer.mode.type                                         |                                                    | `kubernetesSecret`                        |
-| spec.unsealer.mode.awsKmsSsm.kmsKeyID                           |                                                    | `<kms-key-id>`                            |
-| spec.unsealer.mode.awsKmsSsm.region                             |                                                    | `<region>`                                |
-| spec.unsealer.mode.azureKeyVault.vaultBaseURL                   |                                                    | `<vault-base-url>`                        |
-| spec.unsealer.mode.googleKmsGcs.kmsCryptoKey                    |                                                    | `<kms-key>`                               |
-| spec.unsealer.mode.googleKmsGcs.kmsKeyRing                      |                                                    | `<kms-ring>`                              |
-| spec.unsealer.mode.googleKmsGcs.kmsLocation                     |                                                    | `<kms-location>`                          |
-| spec.unsealer.mode.googleKmsGcs.kmsProject                      |                                                    | `<project-name>`                          |
-| spec.unsealer.mode.googleKmsGcs.bucket                          |                                                    | `<bucket-name>`                           |
+|                            Parameter                            |                    Description                     |                       Default                        |
+|-----------------------------------------------------------------|----------------------------------------------------|------------------------------------------------------|
+| metadata.resource.group                                         |                                                    | <code>kubevault.com</code>                           |
+| metadata.resource.kind                                          |                                                    | <code>VaultServer</code>                             |
+| metadata.resource.name                                          |                                                    | <code>vaultservers</code>                            |
+| metadata.resource.scope                                         |                                                    | <code>Namespaced</code>                              |
+| metadata.resource.version                                       |                                                    | <code>v1alpha1</code>                                |
+| metadata.release.name                                           | Release name                                       | <code>""</code>                                      |
+| metadata.release.namespace                                      | Release namespace                                  | <code>""</code>                                      |
+| spec.version                                                    | List options                                       | <code>1.8.2</code>                                   |
+| spec.annotations                                                | Annotations to add to the database custom resource | <code>{}</code>                                      |
+| spec.labels                                                     | Labels to add to all the template objects          | <code>{}</code>                                      |
+| spec.replicas                                                   |                                                    | <code>3</code>                                       |
+| spec.terminationPolicy                                          |                                                    | <code>WipeOut</code>                                 |
+| spec.machine                                                    |                                                    | <code>""</code>                                      |
+| spec.resources.limits.cpu                                       |                                                    | <code>".5"</code>                                    |
+| spec.resources.limits.memory                                    |                                                    | <code>1024Mi</code>                                  |
+| spec.backend.tlsSecret.name                                     |                                                    | <code>""</code>                                      |
+| spec.backend.tlsSecret.consul.caCrt                             |                                                    | <code><ca-cert></code>                               |
+| spec.backend.tlsSecret.consul.clientCrt                         |                                                    | <code><client-cert></code>                           |
+| spec.backend.tlsSecret.consul.clientKey                         |                                                    | <code><client-key></code>                            |
+| spec.backend.tlsSecret.mysql.tlsCaFile                          |                                                    | <code><tls-ca-file></code>                           |
+| spec.backend.credentialSecret.name                              |                                                    | <code>""</code>                                      |
+| spec.backend.credentialSecret.azure.accountKey                  |                                                    | <code><account_key></code>                           |
+| spec.backend.credentialSecret.consul.aclToken                   |                                                    | <code><acl-token></code>                             |
+| spec.backend.credentialSecret.dynamodb.accessKey                |                                                    | <code><access_key></code>                            |
+| spec.backend.credentialSecret.dynamodb.secretKey                |                                                    | <code><secret_key></code>                            |
+| spec.backend.credentialSecret.dynamodb.sessionToken             |                                                    | <code><session-token></code>                         |
+| spec.backend.credentialSecret.etcd.username                     |                                                    | <code><username></code>                              |
+| spec.backend.credentialSecret.etcd.password                     |                                                    | <code><password></code>                              |
+| spec.backend.credentialSecret.gcs.saJson                        |                                                    | <code><gcs-sa.json></code>                           |
+| spec.backend.credentialSecret.mysql.username                    |                                                    | <code><username></code>                              |
+| spec.backend.credentialSecret.mysql.password                    |                                                    | <code><password></code>                              |
+| spec.backend.credentialSecret.postgresql.connectionURL          |                                                    | <code><connection_url></code>                        |
+| spec.backend.credentialSecret.s3.accessKey                      |                                                    | <code><access_key></code>                            |
+| spec.backend.credentialSecret.s3.secretKey                      |                                                    | <code><secret_key></code>                            |
+| spec.backend.credentialSecret.swift.username                    |                                                    | <code><username></code>                              |
+| spec.backend.credentialSecret.swift.password                    |                                                    | <code><password></code>                              |
+| spec.backend.credentialSecret.swift.authToken                   |                                                    | <code><auth-token></code>                            |
+| spec.backend.provider.type                                      |                                                    | <code>raft</code>                                    |
+| spec.backend.provider.azure.accountName                         |                                                    | <code><account-name></code>                          |
+| spec.backend.provider.consul.address                            |                                                    | <code>"http://consul-server.default.svc:8500"</code> |
+| spec.backend.provider.consul.path                               |                                                    | <code>"vault"</code>                                 |
+| spec.backend.provider.dynamodb                                  |                                                    | <code>{}</code>                                      |
+| spec.backend.provider.etcd.address                              |                                                    | <code><etcd-server-address></code>                   |
+| spec.backend.provider.gcs.bucket                                |                                                    | <code><bucket-name></code>                           |
+| spec.backend.provider.inmem                                     |                                                    | <code>{}</code>                                      |
+| spec.backend.provider.raft.storageClass.name                    |                                                    | <code>standard</code>                                |
+| spec.backend.provider.raft.persistence.size                     |                                                    | <code>10Gi</code>                                    |
+| spec.backend.provider.s3.bucket                                 |                                                    | <code><bucket-name></code>                           |
+| spec.backend.provider.s3.credentialSecret                       |                                                    | <code>vault-backend-creds</code>                     |
+| spec.backend.provider.swift                                     |                                                    | <code>{}</code>                                      |
+| spec.unsealer.credentialSecret.name                             |                                                    | <code>""</code>                                      |
+| spec.unsealer.credentialSecret.awsKmsSsm.accessKey              |                                                    | <code><access_key></code>                            |
+| spec.unsealer.credentialSecret.awsKmsSsm.secretKey              |                                                    | <code><secret_key></code>                            |
+| spec.unsealer.credentialSecret.azureKeyVault.clientId           |                                                    | <code><client-cert></code>                           |
+| spec.unsealer.credentialSecret.azureKeyVault.clientSecret       |                                                    | <code><client-secret></code>                         |
+| spec.unsealer.credentialSecret.azureKeyVault.clientCert         |                                                    | <code><client-cert></code>                           |
+| spec.unsealer.credentialSecret.azureKeyVault.clientCertPassword |                                                    | <code><client-cert-password></code>                  |
+| spec.unsealer.credentialSecret.googleKmsGcs.saJson              |                                                    | <code>""</code>                                      |
+| spec.unsealer.mode.type                                         |                                                    | <code>kubernetesSecret</code>                        |
+| spec.unsealer.mode.awsKmsSsm.kmsKeyID                           |                                                    | <code><kms-key-id></code>                            |
+| spec.unsealer.mode.awsKmsSsm.region                             |                                                    | <code><region></code>                                |
+| spec.unsealer.mode.azureKeyVault.vaultBaseURL                   |                                                    | <code><vault-base-url></code>                        |
+| spec.unsealer.mode.googleKmsGcs.kmsCryptoKey                    |                                                    | <code><kms-key></code>                               |
+| spec.unsealer.mode.googleKmsGcs.kmsKeyRing                      |                                                    | <code><kms-ring></code>                              |
+| spec.unsealer.mode.googleKmsGcs.kmsLocation                     |                                                    | <code><kms-location></code>                          |
+| spec.unsealer.mode.googleKmsGcs.kmsProject                      |                                                    | <code><project-name></code>                          |
+| spec.unsealer.mode.googleKmsGcs.bucket                          |                                                    | <code><bucket-name></code>                           |
 
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:

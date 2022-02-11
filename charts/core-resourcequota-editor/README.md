@@ -44,12 +44,12 @@ The command removes all the Kubernetes components associated with the chart and 
 
 The following table lists the configurable parameters of the `core-resourcequota-editor` chart and their default values.
 
-|     Parameter      | Description |     Default     |
-|--------------------|-------------|-----------------|
-| apiVersion         |             | `v1`            |
-| kind               |             | `ResourceQuota` |
-| metadata.name      |             | `resourcequota` |
-| metadata.namespace |             | `default`       |
+|     Parameter      | Description |          Default           |
+|--------------------|-------------|----------------------------|
+| apiVersion         |             | <code>v1</code>            |
+| kind               |             | <code>ResourceQuota</code> |
+| metadata.name      |             | <code>resourcequota</code> |
+| metadata.namespace |             | <code>default</code>       |
 
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:

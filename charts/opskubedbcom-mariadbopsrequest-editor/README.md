@@ -44,12 +44,12 @@ The command removes all the Kubernetes components associated with the chart and 
 
 The following table lists the configurable parameters of the `opskubedbcom-mariadbopsrequest-editor` chart and their default values.
 
-|     Parameter      | Description |          Default          |
-|--------------------|-------------|---------------------------|
-| apiVersion         |             | `ops.kubedb.com/v1alpha1` |
-| kind               |             | `MariaDBOpsRequest`       |
-| metadata.name      |             | `mariadbopsrequest`       |
-| metadata.namespace |             | `default`                 |
+|     Parameter      | Description |               Default                |
+|--------------------|-------------|--------------------------------------|
+| apiVersion         |             | <code>ops.kubedb.com/v1alpha1</code> |
+| kind               |             | <code>MariaDBOpsRequest</code>       |
+| metadata.name      |             | <code>mariadbopsrequest</code>       |
+| metadata.namespace |             | <code>default</code>                 |
 
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:

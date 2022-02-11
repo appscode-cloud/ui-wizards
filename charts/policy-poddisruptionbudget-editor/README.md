@@ -44,12 +44,12 @@ The command removes all the Kubernetes components associated with the chart and 
 
 The following table lists the configurable parameters of the `policy-poddisruptionbudget-editor` chart and their default values.
 
-|     Parameter      | Description |        Default        |
-|--------------------|-------------|-----------------------|
-| apiVersion         |             | `policy/v1beta1`      |
-| kind               |             | `PodDisruptionBudget` |
-| metadata.name      |             | `poddisruptionbudget` |
-| metadata.namespace |             | `default`             |
+|     Parameter      | Description |             Default              |
+|--------------------|-------------|----------------------------------|
+| apiVersion         |             | <code>policy/v1beta1</code>      |
+| kind               |             | <code>PodDisruptionBudget</code> |
+| metadata.name      |             | <code>poddisruptionbudget</code> |
+| metadata.namespace |             | <code>default</code>             |
 
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:

@@ -44,24 +44,24 @@ The command removes all the Kubernetes components associated with the chart and 
 
 The following table lists the configurable parameters of the `kubedbcom-memcached-editor-options` chart and their default values.
 
-|          Parameter           |                    Description                     |   Default    |
-|------------------------------|----------------------------------------------------|--------------|
-| metadata.resource.group      |                                                    | `kubedb.com` |
-| metadata.resource.kind       |                                                    | `Memcached`  |
-| metadata.resource.name       |                                                    | `memcacheds` |
-| metadata.resource.scope      |                                                    | `Namespaced` |
-| metadata.resource.version    |                                                    | `v1alpha2`   |
-| metadata.release.name        | Release name                                       | `""`         |
-| metadata.release.namespace   | Release namespace                                  | `""`         |
-| spec.version                 | List options                                       | `1.5.4-v1`   |
-| spec.annotations             | Annotations to add to the database custom resource | `{}`         |
-| spec.labels                  | Labels to add to all the template objects          | `{}`         |
-| spec.mode                    | Standalone                                         | `Standalone` |
-| spec.replicas                |                                                    | `1`          |
-| spec.terminationPolicy       |                                                    | `WipeOut`    |
-| spec.machine                 |                                                    | `""`         |
-| spec.resources.limits.cpu    |                                                    | `".5"`       |
-| spec.resources.limits.memory |                                                    | `1024Mi`     |
+|          Parameter           |                    Description                     |         Default         |
+|------------------------------|----------------------------------------------------|-------------------------|
+| metadata.resource.group      |                                                    | <code>kubedb.com</code> |
+| metadata.resource.kind       |                                                    | <code>Memcached</code>  |
+| metadata.resource.name       |                                                    | <code>memcacheds</code> |
+| metadata.resource.scope      |                                                    | <code>Namespaced</code> |
+| metadata.resource.version    |                                                    | <code>v1alpha2</code>   |
+| metadata.release.name        | Release name                                       | <code>""</code>         |
+| metadata.release.namespace   | Release namespace                                  | <code>""</code>         |
+| spec.version                 | List options                                       | <code>1.5.4-v1</code>   |
+| spec.annotations             | Annotations to add to the database custom resource | <code>{}</code>         |
+| spec.labels                  | Labels to add to all the template objects          | <code>{}</code>         |
+| spec.mode                    | Standalone                                         | <code>Standalone</code> |
+| spec.replicas                |                                                    | <code>1</code>          |
+| spec.terminationPolicy       |                                                    | <code>WipeOut</code>    |
+| spec.machine                 |                                                    | <code>""</code>         |
+| spec.resources.limits.cpu    |                                                    | <code>".5"</code>       |
+| spec.resources.limits.memory |                                                    | <code>1024Mi</code>     |
 
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:

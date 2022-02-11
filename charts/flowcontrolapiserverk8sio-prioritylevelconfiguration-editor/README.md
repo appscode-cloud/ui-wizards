@@ -44,12 +44,12 @@ The command removes all the Kubernetes components associated with the chart and 
 
 The following table lists the configurable parameters of the `flowcontrolapiserverk8sio-prioritylevelconfiguration-editor` chart and their default values.
 
-|     Parameter      | Description |                Default                 |
-|--------------------|-------------|----------------------------------------|
-| apiVersion         |             | `flowcontrol.apiserver.k8s.io/v1beta1` |
-| kind               |             | `PriorityLevelConfiguration`           |
-| metadata.name      |             | `prioritylevelconfiguration`           |
-| metadata.namespace |             | `default`                              |
+|     Parameter      | Description |                      Default                      |
+|--------------------|-------------|---------------------------------------------------|
+| apiVersion         |             | <code>flowcontrol.apiserver.k8s.io/v1beta1</code> |
+| kind               |             | <code>PriorityLevelConfiguration</code>           |
+| metadata.name      |             | <code>prioritylevelconfiguration</code>           |
+| metadata.namespace |             | <code>default</code>                              |
 
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:

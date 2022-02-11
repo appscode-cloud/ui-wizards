@@ -44,12 +44,12 @@ The command removes all the Kubernetes components associated with the chart and 
 
 The following table lists the configurable parameters of the `core-serviceaccount-editor` chart and their default values.
 
-|     Parameter      | Description |     Default      |
-|--------------------|-------------|------------------|
-| apiVersion         |             | `v1`             |
-| kind               |             | `ServiceAccount` |
-| metadata.name      |             | `serviceaccount` |
-| metadata.namespace |             | `default`        |
+|     Parameter      | Description |           Default           |
+|--------------------|-------------|-----------------------------|
+| apiVersion         |             | <code>v1</code>             |
+| kind               |             | <code>ServiceAccount</code> |
+| metadata.name      |             | <code>serviceaccount</code> |
+| metadata.namespace |             | <code>default</code>        |
 
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:

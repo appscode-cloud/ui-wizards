@@ -44,12 +44,12 @@ The command removes all the Kubernetes components associated with the chart and 
 
 The following table lists the configurable parameters of the `coordinationk8sio-lease-editor` chart and their default values.
 
-|     Parameter      | Description |         Default          |
-|--------------------|-------------|--------------------------|
-| apiVersion         |             | `coordination.k8s.io/v1` |
-| kind               |             | `Lease`                  |
-| metadata.name      |             | `lease`                  |
-| metadata.namespace |             | `default`                |
+|     Parameter      | Description |               Default               |
+|--------------------|-------------|-------------------------------------|
+| apiVersion         |             | <code>coordination.k8s.io/v1</code> |
+| kind               |             | <code>Lease</code>                  |
+| metadata.name      |             | <code>lease</code>                  |
+| metadata.namespace |             | <code>default</code>                |
 
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:

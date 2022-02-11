@@ -44,12 +44,12 @@ The command removes all the Kubernetes components associated with the chart and 
 
 The following table lists the configurable parameters of the `auditregistrationk8sio-auditsink-editor` chart and their default values.
 
-|     Parameter      | Description |               Default               |
-|--------------------|-------------|-------------------------------------|
-| apiVersion         |             | `auditregistration.k8s.io/v1alpha1` |
-| kind               |             | `AuditSink`                         |
-| metadata.name      |             | `auditsink`                         |
-| metadata.namespace |             | `default`                           |
+|     Parameter      | Description |                    Default                     |
+|--------------------|-------------|------------------------------------------------|
+| apiVersion         |             | <code>auditregistration.k8s.io/v1alpha1</code> |
+| kind               |             | <code>AuditSink</code>                         |
+| metadata.name      |             | <code>auditsink</code>                         |
+| metadata.namespace |             | <code>default</code>                           |
 
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:

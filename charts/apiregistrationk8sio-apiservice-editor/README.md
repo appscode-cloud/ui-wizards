@@ -44,11 +44,11 @@ The command removes all the Kubernetes components associated with the chart and 
 
 The following table lists the configurable parameters of the `apiregistrationk8sio-apiservice-editor` chart and their default values.
 
-|   Parameter   | Description |           Default           |
-|---------------|-------------|-----------------------------|
-| apiVersion    |             | `apiregistration.k8s.io/v1` |
-| kind          |             | `APIService`                |
-| metadata.name |             | `apiservice`                |
+|   Parameter   | Description |                Default                 |
+|---------------|-------------|----------------------------------------|
+| apiVersion    |             | <code>apiregistration.k8s.io/v1</code> |
+| kind          |             | <code>APIService</code>                |
+| metadata.name |             | <code>apiservice</code>                |
 
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:

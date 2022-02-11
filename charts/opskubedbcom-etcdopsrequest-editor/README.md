@@ -44,12 +44,12 @@ The command removes all the Kubernetes components associated with the chart and 
 
 The following table lists the configurable parameters of the `opskubedbcom-etcdopsrequest-editor` chart and their default values.
 
-|     Parameter      | Description |          Default          |
-|--------------------|-------------|---------------------------|
-| apiVersion         |             | `ops.kubedb.com/v1alpha1` |
-| kind               |             | `EtcdOpsRequest`          |
-| metadata.name      |             | `etcdopsrequest`          |
-| metadata.namespace |             | `default`                 |
+|     Parameter      | Description |               Default                |
+|--------------------|-------------|--------------------------------------|
+| apiVersion         |             | <code>ops.kubedb.com/v1alpha1</code> |
+| kind               |             | <code>EtcdOpsRequest</code>          |
+| metadata.name      |             | <code>etcdopsrequest</code>          |
+| metadata.namespace |             | <code>default</code>                 |
 
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:

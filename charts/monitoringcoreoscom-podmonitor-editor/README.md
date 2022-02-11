@@ -44,12 +44,12 @@ The command removes all the Kubernetes components associated with the chart and 
 
 The following table lists the configurable parameters of the `monitoringcoreoscom-podmonitor-editor` chart and their default values.
 
-|     Parameter      | Description |          Default           |
-|--------------------|-------------|----------------------------|
-| apiVersion         |             | `monitoring.coreos.com/v1` |
-| kind               |             | `PodMonitor`               |
-| metadata.name      |             | `podmonitor`               |
-| metadata.namespace |             | `default`                  |
+|     Parameter      | Description |                Default                |
+|--------------------|-------------|---------------------------------------|
+| apiVersion         |             | <code>monitoring.coreos.com/v1</code> |
+| kind               |             | <code>PodMonitor</code>               |
+| metadata.name      |             | <code>podmonitor</code>               |
+| metadata.namespace |             | <code>default</code>                  |
 
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:

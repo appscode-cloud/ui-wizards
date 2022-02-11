@@ -44,12 +44,12 @@ The command removes all the Kubernetes components associated with the chart and 
 
 The following table lists the configurable parameters of the `stashappscodecom-backupbatch-editor` chart and their default values.
 
-|     Parameter      | Description |           Default            |
-|--------------------|-------------|------------------------------|
-| apiVersion         |             | `stash.appscode.com/v1beta1` |
-| kind               |             | `BackupBatch`                |
-| metadata.name      |             | `backupbatch`                |
-| metadata.namespace |             | `default`                    |
+|     Parameter      | Description |                 Default                 |
+|--------------------|-------------|-----------------------------------------|
+| apiVersion         |             | <code>stash.appscode.com/v1beta1</code> |
+| kind               |             | <code>BackupBatch</code>                |
+| metadata.name      |             | <code>backupbatch</code>                |
+| metadata.namespace |             | <code>default</code>                    |
 
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:

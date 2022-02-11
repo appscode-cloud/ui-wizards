@@ -44,11 +44,11 @@ The command removes all the Kubernetes components associated with the chart and 
 
 The following table lists the configurable parameters of the `storagek8sio-volumeattachment-editor` chart and their default values.
 
-|   Parameter   | Description |       Default       |
-|---------------|-------------|---------------------|
-| apiVersion    |             | `storage.k8s.io/v1` |
-| kind          |             | `VolumeAttachment`  |
-| metadata.name |             | `volumeattachment`  |
+|   Parameter   | Description |            Default             |
+|---------------|-------------|--------------------------------|
+| apiVersion    |             | <code>storage.k8s.io/v1</code> |
+| kind          |             | <code>VolumeAttachment</code>  |
+| metadata.name |             | <code>volumeattachment</code>  |
 
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:
