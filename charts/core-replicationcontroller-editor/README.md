@@ -44,12 +44,12 @@ The command removes all the Kubernetes components associated with the chart and 
 
 The following table lists the configurable parameters of the `core-replicationcontroller-editor` chart and their default values.
 
-|     Parameter      | Description |         Default         |
-|--------------------|-------------|-------------------------|
-| apiVersion         |             | `v1`                    |
-| kind               |             | `ReplicationController` |
-| metadata.name      |             | `replicationcontroller` |
-| metadata.namespace |             | `default`               |
+|     Parameter      | Description |              Default               |
+|--------------------|-------------|------------------------------------|
+| apiVersion         |             | <code>v1</code>                    |
+| kind               |             | <code>ReplicationController</code> |
+| metadata.name      |             | <code>replicationcontroller</code> |
+| metadata.namespace |             | <code>default</code>               |
 
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:

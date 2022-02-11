@@ -44,11 +44,11 @@ The command removes all the Kubernetes components associated with the chart and 
 
 The following table lists the configurable parameters of the `core-persistentvolume-editor` chart and their default values.
 
-|   Parameter   | Description |      Default       |
-|---------------|-------------|--------------------|
-| apiVersion    |             | `v1`               |
-| kind          |             | `PersistentVolume` |
-| metadata.name |             | `persistentvolume` |
+|   Parameter   | Description |            Default            |
+|---------------|-------------|-------------------------------|
+| apiVersion    |             | <code>v1</code>               |
+| kind          |             | <code>PersistentVolume</code> |
+| metadata.name |             | <code>persistentvolume</code> |
 
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:

@@ -44,12 +44,12 @@ The command removes all the Kubernetes components associated with the chart and 
 
 The following table lists the configurable parameters of the `extensions-deployment-editor` chart and their default values.
 
-|     Parameter      | Description |       Default        |
-|--------------------|-------------|----------------------|
-| apiVersion         |             | `extensions/v1beta1` |
-| kind               |             | `Deployment`         |
-| metadata.name      |             | `deployment`         |
-| metadata.namespace |             | `default`            |
+|     Parameter      | Description |             Default             |
+|--------------------|-------------|---------------------------------|
+| apiVersion         |             | <code>extensions/v1beta1</code> |
+| kind               |             | <code>Deployment</code>         |
+| metadata.name      |             | <code>deployment</code>         |
+| metadata.namespace |             | <code>default</code>            |
 
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:

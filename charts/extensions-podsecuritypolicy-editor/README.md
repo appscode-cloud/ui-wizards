@@ -44,11 +44,11 @@ The command removes all the Kubernetes components associated with the chart and 
 
 The following table lists the configurable parameters of the `extensions-podsecuritypolicy-editor` chart and their default values.
 
-|   Parameter   | Description |       Default        |
-|---------------|-------------|----------------------|
-| apiVersion    |             | `extensions/v1beta1` |
-| kind          |             | `PodSecurityPolicy`  |
-| metadata.name |             | `podsecuritypolicy`  |
+|   Parameter   | Description |             Default             |
+|---------------|-------------|---------------------------------|
+| apiVersion    |             | <code>extensions/v1beta1</code> |
+| kind          |             | <code>PodSecurityPolicy</code>  |
+| metadata.name |             | <code>podsecuritypolicy</code>  |
 
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:

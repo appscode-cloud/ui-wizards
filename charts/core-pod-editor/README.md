@@ -44,12 +44,12 @@ The command removes all the Kubernetes components associated with the chart and 
 
 The following table lists the configurable parameters of the `core-pod-editor` chart and their default values.
 
-|     Parameter      | Description |  Default  |
-|--------------------|-------------|-----------|
-| apiVersion         |             | `v1`      |
-| kind               |             | `Pod`     |
-| metadata.name      |             | `pod`     |
-| metadata.namespace |             | `default` |
+|     Parameter      | Description |       Default        |
+|--------------------|-------------|----------------------|
+| apiVersion         |             | <code>v1</code>      |
+| kind               |             | <code>Pod</code>     |
+| metadata.name      |             | <code>pod</code>     |
+| metadata.namespace |             | <code>default</code> |
 
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:

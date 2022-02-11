@@ -44,11 +44,11 @@ The command removes all the Kubernetes components associated with the chart and 
 
 The following table lists the configurable parameters of the `apiextensionsk8sio-customresourcedefinition-editor` chart and their default values.
 
-|   Parameter   | Description |          Default           |
-|---------------|-------------|----------------------------|
-| apiVersion    |             | `apiextensions.k8s.io/v1`  |
-| kind          |             | `CustomResourceDefinition` |
-| metadata.name |             | `customresourcedefinition` |
+|   Parameter   | Description |                Default                |
+|---------------|-------------|---------------------------------------|
+| apiVersion    |             | <code>apiextensions.k8s.io/v1</code>  |
+| kind          |             | <code>CustomResourceDefinition</code> |
+| metadata.name |             | <code>customresourcedefinition</code> |
 
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:

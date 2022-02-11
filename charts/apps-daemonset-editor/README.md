@@ -44,12 +44,12 @@ The command removes all the Kubernetes components associated with the chart and 
 
 The following table lists the configurable parameters of the `apps-daemonset-editor` chart and their default values.
 
-|     Parameter      | Description |   Default   |
-|--------------------|-------------|-------------|
-| apiVersion         |             | `apps/v1`   |
-| kind               |             | `DaemonSet` |
-| metadata.name      |             | `daemonset` |
-| metadata.namespace |             | `default`   |
+|     Parameter      | Description |        Default         |
+|--------------------|-------------|------------------------|
+| apiVersion         |             | <code>apps/v1</code>   |
+| kind               |             | <code>DaemonSet</code> |
+| metadata.name      |             | <code>daemonset</code> |
+| metadata.namespace |             | <code>default</code>   |
 
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:

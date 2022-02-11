@@ -44,37 +44,37 @@ The command removes all the Kubernetes components associated with the chart and 
 
 The following table lists the configurable parameters of the `kubedbcom-mongodb-editor-options` chart and their default values.
 
-|                    Parameter                     |                    Description                     |   Default    |
-|--------------------------------------------------|----------------------------------------------------|--------------|
-| metadata.resource.group                          |                                                    | `kubedb.com` |
-| metadata.resource.kind                           |                                                    | `MongoDB`    |
-| metadata.resource.name                           |                                                    | `mongodbs`   |
-| metadata.resource.scope                          |                                                    | `Namespaced` |
-| metadata.resource.version                        |                                                    | `v1alpha2`   |
-| metadata.release.name                            | Release name                                       | `""`         |
-| metadata.release.namespace                       | Release namespace                                  | `""`         |
-| spec.version                                     | List options                                       | `3.4.17`     |
-| spec.annotations                                 | Annotations to add to the database custom resource | `{}`         |
-| spec.labels                                      | Labels to add to all the template objects          | `{}`         |
-| spec.mode                                        | Standalone, Replicaset, Sharded                    | `Standalone` |
-| spec.replicas                                    |                                                    | `1`          |
-| spec.replicaSet.name                             |                                                    | `rs0`        |
-| spec.shardTopology.shard.replicas                |                                                    | `3`          |
-| spec.shardTopology.shard.shards                  |                                                    | `3`          |
-| spec.shardTopology.shard.persistence.size        |                                                    | `10Gi`       |
-| spec.shardTopology.configServer.replicas         |                                                    | `3`          |
-| spec.shardTopology.configServer.persistence.size |                                                    | `2Gi`        |
-| spec.shardTopology.mongos.replicas               |                                                    | `3`          |
-| spec.clusterAuthMode                             | "keyFile", "sendKeyFile", "sendX509", "x509"       | `keyFile`    |
-| spec.sslMode                                     | "disabled", "allowSSL", "preferSSL", "requireSSL"  | `disabled`   |
-| spec.terminationPolicy                           |                                                    | `WipeOut`    |
-| spec.storageClass.name                           |                                                    | `standard`   |
-| spec.persistence.size                            |                                                    | `10Gi`       |
-| spec.machine                                     |                                                    | `""`         |
-| spec.resources.limits.cpu                        |                                                    | `".5"`       |
-| spec.resources.limits.memory                     |                                                    | `1024Mi`     |
-| spec.authSecret.name                             |                                                    | `""`         |
-| spec.authSecret.password                         |                                                    | `""`         |
+|                    Parameter                     |                    Description                     |         Default         |
+|--------------------------------------------------|----------------------------------------------------|-------------------------|
+| metadata.resource.group                          |                                                    | <code>kubedb.com</code> |
+| metadata.resource.kind                           |                                                    | <code>MongoDB</code>    |
+| metadata.resource.name                           |                                                    | <code>mongodbs</code>   |
+| metadata.resource.scope                          |                                                    | <code>Namespaced</code> |
+| metadata.resource.version                        |                                                    | <code>v1alpha2</code>   |
+| metadata.release.name                            | Release name                                       | <code>""</code>         |
+| metadata.release.namespace                       | Release namespace                                  | <code>""</code>         |
+| spec.version                                     | List options                                       | <code>3.4.17</code>     |
+| spec.annotations                                 | Annotations to add to the database custom resource | <code>{}</code>         |
+| spec.labels                                      | Labels to add to all the template objects          | <code>{}</code>         |
+| spec.mode                                        | Standalone, Replicaset, Sharded                    | <code>Standalone</code> |
+| spec.replicas                                    |                                                    | <code>1</code>          |
+| spec.replicaSet.name                             |                                                    | <code>rs0</code>        |
+| spec.shardTopology.shard.replicas                |                                                    | <code>3</code>          |
+| spec.shardTopology.shard.shards                  |                                                    | <code>3</code>          |
+| spec.shardTopology.shard.persistence.size        |                                                    | <code>10Gi</code>       |
+| spec.shardTopology.configServer.replicas         |                                                    | <code>3</code>          |
+| spec.shardTopology.configServer.persistence.size |                                                    | <code>2Gi</code>        |
+| spec.shardTopology.mongos.replicas               |                                                    | <code>3</code>          |
+| spec.clusterAuthMode                             | "keyFile", "sendKeyFile", "sendX509", "x509"       | <code>keyFile</code>    |
+| spec.sslMode                                     | "disabled", "allowSSL", "preferSSL", "requireSSL"  | <code>disabled</code>   |
+| spec.terminationPolicy                           |                                                    | <code>WipeOut</code>    |
+| spec.storageClass.name                           |                                                    | <code>standard</code>   |
+| spec.persistence.size                            |                                                    | <code>10Gi</code>       |
+| spec.machine                                     |                                                    | <code>""</code>         |
+| spec.resources.limits.cpu                        |                                                    | <code>".5"</code>       |
+| spec.resources.limits.memory                     |                                                    | <code>1024Mi</code>     |
+| spec.authSecret.name                             |                                                    | <code>""</code>         |
+| spec.authSecret.password                         |                                                    | <code>""</code>         |
 
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:

@@ -44,12 +44,12 @@ The command removes all the Kubernetes components associated with the chart and 
 
 The following table lists the configurable parameters of the `enginekubevaultcom-elasticsearchrole-editor` chart and their default values.
 
-|     Parameter      | Description |             Default             |
-|--------------------|-------------|---------------------------------|
-| apiVersion         |             | `engine.kubevault.com/v1alpha1` |
-| kind               |             | `ElasticsearchRole`             |
-| metadata.name      |             | `elasticsearchrole`             |
-| metadata.namespace |             | `default`                       |
+|     Parameter      | Description |                  Default                   |
+|--------------------|-------------|--------------------------------------------|
+| apiVersion         |             | <code>engine.kubevault.com/v1alpha1</code> |
+| kind               |             | <code>ElasticsearchRole</code>             |
+| metadata.name      |             | <code>elasticsearchrole</code>             |
+| metadata.namespace |             | <code>default</code>                       |
 
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:

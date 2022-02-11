@@ -44,11 +44,11 @@ The command removes all the Kubernetes components associated with the chart and 
 
 The following table lists the configurable parameters of the `rbacauthorizationk8sio-clusterrolebinding-editor` chart and their default values.
 
-|   Parameter   | Description |            Default             |
-|---------------|-------------|--------------------------------|
-| apiVersion    |             | `rbac.authorization.k8s.io/v1` |
-| kind          |             | `ClusterRoleBinding`           |
-| metadata.name |             | `clusterrolebinding`           |
+|   Parameter   | Description |                  Default                  |
+|---------------|-------------|-------------------------------------------|
+| apiVersion    |             | <code>rbac.authorization.k8s.io/v1</code> |
+| kind          |             | <code>ClusterRoleBinding</code>           |
+| metadata.name |             | <code>clusterrolebinding</code>           |
 
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:

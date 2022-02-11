@@ -44,11 +44,11 @@ The command removes all the Kubernetes components associated with the chart and 
 
 The following table lists the configurable parameters of the `storagek8sio-storageclass-editor` chart and their default values.
 
-|   Parameter   | Description |       Default       |
-|---------------|-------------|---------------------|
-| apiVersion    |             | `storage.k8s.io/v1` |
-| kind          |             | `StorageClass`      |
-| metadata.name |             | `storageclass`      |
+|   Parameter   | Description |            Default             |
+|---------------|-------------|--------------------------------|
+| apiVersion    |             | <code>storage.k8s.io/v1</code> |
+| kind          |             | <code>StorageClass</code>      |
+| metadata.name |             | <code>storageclass</code>      |
 
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:

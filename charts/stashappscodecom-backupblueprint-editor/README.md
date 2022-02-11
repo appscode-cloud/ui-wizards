@@ -44,11 +44,11 @@ The command removes all the Kubernetes components associated with the chart and 
 
 The following table lists the configurable parameters of the `stashappscodecom-backupblueprint-editor` chart and their default values.
 
-|   Parameter   | Description |           Default            |
-|---------------|-------------|------------------------------|
-| apiVersion    |             | `stash.appscode.com/v1beta1` |
-| kind          |             | `BackupBlueprint`            |
-| metadata.name |             | `backupblueprint`            |
+|   Parameter   | Description |                 Default                 |
+|---------------|-------------|-----------------------------------------|
+| apiVersion    |             | <code>stash.appscode.com/v1beta1</code> |
+| kind          |             | <code>BackupBlueprint</code>            |
+| metadata.name |             | <code>backupblueprint</code>            |
 
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:

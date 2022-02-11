@@ -44,12 +44,12 @@ The command removes all the Kubernetes components associated with the chart and 
 
 The following table lists the configurable parameters of the `imagepolicyk8sio-imagereview-editor` chart and their default values.
 
-|     Parameter      | Description |            Default            |
-|--------------------|-------------|-------------------------------|
-| apiVersion         |             | `imagepolicy.k8s.io/v1alpha1` |
-| kind               |             | `ImageReview`                 |
-| metadata.name      |             | `imagereview`                 |
-| metadata.namespace |             | `default`                     |
+|     Parameter      | Description |                 Default                  |
+|--------------------|-------------|------------------------------------------|
+| apiVersion         |             | <code>imagepolicy.k8s.io/v1alpha1</code> |
+| kind               |             | <code>ImageReview</code>                 |
+| metadata.name      |             | <code>imagereview</code>                 |
+| metadata.namespace |             | <code>default</code>                     |
 
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:
