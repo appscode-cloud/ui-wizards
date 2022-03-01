@@ -4,10 +4,11 @@
 
 ## TL;DR;
 
-```console
+```bash
 $ helm repo add bytebuilders-ui https://bundles.byte.builders/ui/
 $ helm repo update
-$ helm install kubedbcom-redissentinel-editor bytebuilders-ui/kubedbcom-redissentinel-editor -n default
+$ helm search repo bytebuilders-ui/kubedbcom-redissentinel-editor --version=v0.3.0
+$ helm upgrade -i kubedbcom-redissentinel-editor bytebuilders-ui/kubedbcom-redissentinel-editor -n default --create-namespace --version=v0.3.0
 ```
 
 ## Introduction
@@ -20,10 +21,10 @@ This chart deploys a RedisSentinel Editor on a [Kubernetes](http://kubernetes.io
 
 ## Installing the Chart
 
-To install the chart with the release name `kubedbcom-redissentinel-editor`:
+To install/upgrade the chart with the release name `kubedbcom-redissentinel-editor`:
 
-```console
-$ helm install kubedbcom-redissentinel-editor bytebuilders-ui/kubedbcom-redissentinel-editor -n default
+```bash
+$ helm upgrade -i kubedbcom-redissentinel-editor bytebuilders-ui/kubedbcom-redissentinel-editor -n default --create-namespace --version=v0.3.0
 ```
 
 The command deploys a RedisSentinel Editor on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
@@ -32,10 +33,10 @@ The command deploys a RedisSentinel Editor on the Kubernetes cluster in the defa
 
 ## Uninstalling the Chart
 
-To uninstall/delete the `kubedbcom-redissentinel-editor`:
+To uninstall the `kubedbcom-redissentinel-editor`:
 
-```console
-$ helm delete kubedbcom-redissentinel-editor -n default
+```bash
+$ helm uninstall kubedbcom-redissentinel-editor -n default
 ```
 
 The command removes all the Kubernetes components associated with the chart and deletes the release.
@@ -59,15 +60,15 @@ The following table lists the configurable parameters of the `kubedbcom-redissen
 | resources.secret_auth                             |             | <code>{"apiVersion":"v1","kind":"Secret","metadata":{"name":"redissentinel-auth","namespace":"demo"},"stringData":{"password":"thisIs1StrongPassword","username":"root"},"type":"Opaque"}</code>                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 
 
-Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:
+Specify each parameter using the `--set key=value[,key=value]` argument to `helm upgrade -i`. For example:
 
-```console
-$ helm install kubedbcom-redissentinel-editor bytebuilders-ui/kubedbcom-redissentinel-editor -n default --set metadata.resource.group=kubedb.com
+```bash
+$ helm upgrade -i kubedbcom-redissentinel-editor bytebuilders-ui/kubedbcom-redissentinel-editor -n default --create-namespace --version=v0.3.0 --set metadata.resource.group=kubedb.com
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
 installing the chart. For example:
 
-```console
-$ helm install kubedbcom-redissentinel-editor bytebuilders-ui/kubedbcom-redissentinel-editor -n default --values values.yaml
+```bash
+$ helm upgrade -i kubedbcom-redissentinel-editor bytebuilders-ui/kubedbcom-redissentinel-editor -n default --create-namespace --version=v0.3.0 --values values.yaml
 ```

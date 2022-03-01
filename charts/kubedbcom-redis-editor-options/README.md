@@ -4,10 +4,11 @@
 
 ## TL;DR;
 
-```console
+```bash
 $ helm repo add bytebuilders-ui https://bundles.byte.builders/ui/
 $ helm repo update
-$ helm install kubedbcom-redis-editor-options bytebuilders-ui/kubedbcom-redis-editor-options -n kube-system
+$ helm search repo bytebuilders-ui/kubedbcom-redis-editor-options --version=v0.3.0
+$ helm upgrade -i kubedbcom-redis-editor-options bytebuilders-ui/kubedbcom-redis-editor-options -n kube-system --create-namespace --version=v0.3.0
 ```
 
 ## Introduction
@@ -20,10 +21,10 @@ This chart deploys a Redis Editor UI Options on a [Kubernetes](http://kubernetes
 
 ## Installing the Chart
 
-To install the chart with the release name `kubedbcom-redis-editor-options`:
+To install/upgrade the chart with the release name `kubedbcom-redis-editor-options`:
 
-```console
-$ helm install kubedbcom-redis-editor-options bytebuilders-ui/kubedbcom-redis-editor-options -n kube-system
+```bash
+$ helm upgrade -i kubedbcom-redis-editor-options bytebuilders-ui/kubedbcom-redis-editor-options -n kube-system --create-namespace --version=v0.3.0
 ```
 
 The command deploys a Redis Editor UI Options on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
@@ -32,10 +33,10 @@ The command deploys a Redis Editor UI Options on the Kubernetes cluster in the d
 
 ## Uninstalling the Chart
 
-To uninstall/delete the `kubedbcom-redis-editor-options`:
+To uninstall the `kubedbcom-redis-editor-options`:
 
-```console
-$ helm delete kubedbcom-redis-editor-options -n kube-system
+```bash
+$ helm uninstall kubedbcom-redis-editor-options -n kube-system
 ```
 
 The command removes all the Kubernetes components associated with the chart and deletes the release.
@@ -72,15 +73,15 @@ The following table lists the configurable parameters of the `kubedbcom-redis-ed
 | spec.authSecret.password     |                                                    | <code>""</code>         |
 
 
-Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:
+Specify each parameter using the `--set key=value[,key=value]` argument to `helm upgrade -i`. For example:
 
-```console
-$ helm install kubedbcom-redis-editor-options bytebuilders-ui/kubedbcom-redis-editor-options -n kube-system --set metadata.resource.group=kubedb.com
+```bash
+$ helm upgrade -i kubedbcom-redis-editor-options bytebuilders-ui/kubedbcom-redis-editor-options -n kube-system --create-namespace --version=v0.3.0 --set metadata.resource.group=kubedb.com
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
 installing the chart. For example:
 
-```console
-$ helm install kubedbcom-redis-editor-options bytebuilders-ui/kubedbcom-redis-editor-options -n kube-system --values values.yaml
+```bash
+$ helm upgrade -i kubedbcom-redis-editor-options bytebuilders-ui/kubedbcom-redis-editor-options -n kube-system --create-namespace --version=v0.3.0 --values values.yaml
 ```

@@ -181,8 +181,7 @@ type VaultserverBackendProviderConsul struct {
 	Path    string `json:"path"`
 }
 
-type VaultserverBackendProviderDynamodb struct {
-}
+type VaultserverBackendProviderDynamodb struct{}
 
 type VaultserverBackendProviderEtcd struct {
 	Address string `json:"address"`
@@ -192,8 +191,7 @@ type VaultserverBackendProviderGcs struct {
 	Bucket string `json:"bucket"`
 }
 
-type VaultserverBackendProviderInmem struct {
-}
+type VaultserverBackendProviderInmem struct{}
 
 type VaultserverBackendProviderRaft struct {
 	StorageClass StorageClass `json:"storageClass"`
@@ -205,8 +203,7 @@ type VaultserverBackendProviderS3 struct {
 	CredentialSecret string `json:"credentialSecret"`
 }
 
-type VaultserverBackendProviderSwift struct {
-}
+type VaultserverBackendProviderSwift struct{}
 
 type VaultserverUnsealer struct {
 	CredentialSecret UnsealerCredentialSecret `json:"credentialSecret"`

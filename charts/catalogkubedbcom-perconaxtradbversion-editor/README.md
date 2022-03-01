@@ -4,10 +4,11 @@
 
 ## TL;DR;
 
-```console
+```bash
 $ helm repo add bytebuilders-ui https://bundles.byte.builders/ui/
 $ helm repo update
-$ helm install catalogkubedbcom-perconaxtradbversion-editor bytebuilders-ui/catalogkubedbcom-perconaxtradbversion-editor -n default
+$ helm search repo bytebuilders-ui/catalogkubedbcom-perconaxtradbversion-editor --version=v0.3.0
+$ helm upgrade -i catalogkubedbcom-perconaxtradbversion-editor bytebuilders-ui/catalogkubedbcom-perconaxtradbversion-editor -n default --create-namespace --version=v0.3.0
 ```
 
 ## Introduction
@@ -20,10 +21,10 @@ This chart deploys a PerconaXtraDBVersion Editor on a [Kubernetes](http://kubern
 
 ## Installing the Chart
 
-To install the chart with the release name `catalogkubedbcom-perconaxtradbversion-editor`:
+To install/upgrade the chart with the release name `catalogkubedbcom-perconaxtradbversion-editor`:
 
-```console
-$ helm install catalogkubedbcom-perconaxtradbversion-editor bytebuilders-ui/catalogkubedbcom-perconaxtradbversion-editor -n default
+```bash
+$ helm upgrade -i catalogkubedbcom-perconaxtradbversion-editor bytebuilders-ui/catalogkubedbcom-perconaxtradbversion-editor -n default --create-namespace --version=v0.3.0
 ```
 
 The command deploys a PerconaXtraDBVersion Editor on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
@@ -32,10 +33,10 @@ The command deploys a PerconaXtraDBVersion Editor on the Kubernetes cluster in t
 
 ## Uninstalling the Chart
 
-To uninstall/delete the `catalogkubedbcom-perconaxtradbversion-editor`:
+To uninstall the `catalogkubedbcom-perconaxtradbversion-editor`:
 
-```console
-$ helm delete catalogkubedbcom-perconaxtradbversion-editor -n default
+```bash
+$ helm uninstall catalogkubedbcom-perconaxtradbversion-editor -n default
 ```
 
 The command removes all the Kubernetes components associated with the chart and deletes the release.
@@ -51,15 +52,15 @@ The following table lists the configurable parameters of the `catalogkubedbcom-p
 | metadata.name |             | <code>perconaxtradbversion</code>        |
 
 
-Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:
+Specify each parameter using the `--set key=value[,key=value]` argument to `helm upgrade -i`. For example:
 
-```console
-$ helm install catalogkubedbcom-perconaxtradbversion-editor bytebuilders-ui/catalogkubedbcom-perconaxtradbversion-editor -n default --set apiVersion=catalog.kubedb.com/v1alpha1
+```bash
+$ helm upgrade -i catalogkubedbcom-perconaxtradbversion-editor bytebuilders-ui/catalogkubedbcom-perconaxtradbversion-editor -n default --create-namespace --version=v0.3.0 --set apiVersion=catalog.kubedb.com/v1alpha1
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
 installing the chart. For example:
 
-```console
-$ helm install catalogkubedbcom-perconaxtradbversion-editor bytebuilders-ui/catalogkubedbcom-perconaxtradbversion-editor -n default --values values.yaml
+```bash
+$ helm upgrade -i catalogkubedbcom-perconaxtradbversion-editor bytebuilders-ui/catalogkubedbcom-perconaxtradbversion-editor -n default --create-namespace --version=v0.3.0 --values values.yaml
 ```
