@@ -4,10 +4,11 @@
 
 ## TL;DR;
 
-```console
+```bash
 $ helm repo add bytebuilders-ui https://bundles.byte.builders/ui/
 $ helm repo update
-$ helm install kubedbcom-mysql-editor bytebuilders-ui/kubedbcom-mysql-editor -n default
+$ helm search repo bytebuilders-ui/kubedbcom-mysql-editor --version=v0.3.0
+$ helm upgrade -i kubedbcom-mysql-editor bytebuilders-ui/kubedbcom-mysql-editor -n default --create-namespace --version=v0.3.0
 ```
 
 ## Introduction
@@ -20,10 +21,10 @@ This chart deploys a MySQL Editor on a [Kubernetes](http://kubernetes.io) cluste
 
 ## Installing the Chart
 
-To install the chart with the release name `kubedbcom-mysql-editor`:
+To install/upgrade the chart with the release name `kubedbcom-mysql-editor`:
 
-```console
-$ helm install kubedbcom-mysql-editor bytebuilders-ui/kubedbcom-mysql-editor -n default
+```bash
+$ helm upgrade -i kubedbcom-mysql-editor bytebuilders-ui/kubedbcom-mysql-editor -n default --create-namespace --version=v0.3.0
 ```
 
 The command deploys a MySQL Editor on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
@@ -32,10 +33,10 @@ The command deploys a MySQL Editor on the Kubernetes cluster in the default conf
 
 ## Uninstalling the Chart
 
-To uninstall/delete the `kubedbcom-mysql-editor`:
+To uninstall the `kubedbcom-mysql-editor`:
 
-```console
-$ helm delete kubedbcom-mysql-editor -n default
+```bash
+$ helm uninstall kubedbcom-mysql-editor -n default
 ```
 
 The command removes all the Kubernetes components associated with the chart and deletes the release.
@@ -64,15 +65,15 @@ The following table lists the configurable parameters of the `kubedbcom-mysql-ed
 | resources.stashAppscodeComRestoreSession_init  |             | <code>{"apiVersion":"stash.appscode.com/v1beta1","kind":"RestoreSession","metadata":{"name":"mysql-init","namespace":"demo"},"spec":{"repository":{"name":"mysql-init-repo"},"rules":[{"snapshots":["latest"]}],"target":{"ref":{"apiVersion":"appcatalog.appscode.com/v1alpha1","kind":"AppBinding","name":"mysql"}},"task":{"name":"mysql-restore-8.0.21"}}}</code>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 
 
-Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:
+Specify each parameter using the `--set key=value[,key=value]` argument to `helm upgrade -i`. For example:
 
-```console
-$ helm install kubedbcom-mysql-editor bytebuilders-ui/kubedbcom-mysql-editor -n default --set metadata.resource.group=kubedb.com
+```bash
+$ helm upgrade -i kubedbcom-mysql-editor bytebuilders-ui/kubedbcom-mysql-editor -n default --create-namespace --version=v0.3.0 --set metadata.resource.group=kubedb.com
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
 installing the chart. For example:
 
-```console
-$ helm install kubedbcom-mysql-editor bytebuilders-ui/kubedbcom-mysql-editor -n default --values values.yaml
+```bash
+$ helm upgrade -i kubedbcom-mysql-editor bytebuilders-ui/kubedbcom-mysql-editor -n default --create-namespace --version=v0.3.0 --values values.yaml
 ```

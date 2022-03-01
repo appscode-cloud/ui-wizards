@@ -4,10 +4,11 @@
 
 ## TL;DR;
 
-```console
+```bash
 $ helm repo add bytebuilders-ui https://bundles.byte.builders/ui/
 $ helm repo update
-$ helm install autoscalingkubedbcom-verticalautoscalercheckpoint-editor bytebuilders-ui/autoscalingkubedbcom-verticalautoscalercheckpoint-editor -n default
+$ helm search repo bytebuilders-ui/autoscalingkubedbcom-verticalautoscalercheckpoint-editor --version=v0.3.0
+$ helm upgrade -i autoscalingkubedbcom-verticalautoscalercheckpoint-editor bytebuilders-ui/autoscalingkubedbcom-verticalautoscalercheckpoint-editor -n default --create-namespace --version=v0.3.0
 ```
 
 ## Introduction
@@ -20,10 +21,10 @@ This chart deploys a VerticalAutoscalerCheckpoint Editor on a [Kubernetes](http:
 
 ## Installing the Chart
 
-To install the chart with the release name `autoscalingkubedbcom-verticalautoscalercheckpoint-editor`:
+To install/upgrade the chart with the release name `autoscalingkubedbcom-verticalautoscalercheckpoint-editor`:
 
-```console
-$ helm install autoscalingkubedbcom-verticalautoscalercheckpoint-editor bytebuilders-ui/autoscalingkubedbcom-verticalautoscalercheckpoint-editor -n default
+```bash
+$ helm upgrade -i autoscalingkubedbcom-verticalautoscalercheckpoint-editor bytebuilders-ui/autoscalingkubedbcom-verticalautoscalercheckpoint-editor -n default --create-namespace --version=v0.3.0
 ```
 
 The command deploys a VerticalAutoscalerCheckpoint Editor on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
@@ -32,10 +33,10 @@ The command deploys a VerticalAutoscalerCheckpoint Editor on the Kubernetes clus
 
 ## Uninstalling the Chart
 
-To uninstall/delete the `autoscalingkubedbcom-verticalautoscalercheckpoint-editor`:
+To uninstall the `autoscalingkubedbcom-verticalautoscalercheckpoint-editor`:
 
-```console
-$ helm delete autoscalingkubedbcom-verticalautoscalercheckpoint-editor -n default
+```bash
+$ helm uninstall autoscalingkubedbcom-verticalautoscalercheckpoint-editor -n default
 ```
 
 The command removes all the Kubernetes components associated with the chart and deletes the release.
@@ -52,15 +53,15 @@ The following table lists the configurable parameters of the `autoscalingkubedbc
 | metadata.namespace |             | <code>default</code>                         |
 
 
-Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:
+Specify each parameter using the `--set key=value[,key=value]` argument to `helm upgrade -i`. For example:
 
-```console
-$ helm install autoscalingkubedbcom-verticalautoscalercheckpoint-editor bytebuilders-ui/autoscalingkubedbcom-verticalautoscalercheckpoint-editor -n default --set apiVersion=autoscaling.kubedb.com/v1alpha1
+```bash
+$ helm upgrade -i autoscalingkubedbcom-verticalautoscalercheckpoint-editor bytebuilders-ui/autoscalingkubedbcom-verticalautoscalercheckpoint-editor -n default --create-namespace --version=v0.3.0 --set apiVersion=autoscaling.kubedb.com/v1alpha1
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
 installing the chart. For example:
 
-```console
-$ helm install autoscalingkubedbcom-verticalautoscalercheckpoint-editor bytebuilders-ui/autoscalingkubedbcom-verticalautoscalercheckpoint-editor -n default --values values.yaml
+```bash
+$ helm upgrade -i autoscalingkubedbcom-verticalautoscalercheckpoint-editor bytebuilders-ui/autoscalingkubedbcom-verticalautoscalercheckpoint-editor -n default --create-namespace --version=v0.3.0 --values values.yaml
 ```

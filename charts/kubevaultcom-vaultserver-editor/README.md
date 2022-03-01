@@ -4,10 +4,11 @@
 
 ## TL;DR;
 
-```console
+```bash
 $ helm repo add bytebuilders-ui https://bundles.byte.builders/ui/
 $ helm repo update
-$ helm install kubevaultcom-vaultserver-editor bytebuilders-ui/kubevaultcom-vaultserver-editor -n default
+$ helm search repo bytebuilders-ui/kubevaultcom-vaultserver-editor --version=v0.3.0
+$ helm upgrade -i kubevaultcom-vaultserver-editor bytebuilders-ui/kubevaultcom-vaultserver-editor -n default --create-namespace --version=v0.3.0
 ```
 
 ## Introduction
@@ -20,10 +21,10 @@ This chart deploys a VaultServer Editor on a [Kubernetes](http://kubernetes.io) 
 
 ## Installing the Chart
 
-To install the chart with the release name `kubevaultcom-vaultserver-editor`:
+To install/upgrade the chart with the release name `kubevaultcom-vaultserver-editor`:
 
-```console
-$ helm install kubevaultcom-vaultserver-editor bytebuilders-ui/kubevaultcom-vaultserver-editor -n default
+```bash
+$ helm upgrade -i kubevaultcom-vaultserver-editor bytebuilders-ui/kubevaultcom-vaultserver-editor -n default --create-namespace --version=v0.3.0
 ```
 
 The command deploys a VaultServer Editor on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
@@ -32,10 +33,10 @@ The command deploys a VaultServer Editor on the Kubernetes cluster in the defaul
 
 ## Uninstalling the Chart
 
-To uninstall/delete the `kubevaultcom-vaultserver-editor`:
+To uninstall the `kubevaultcom-vaultserver-editor`:
 
-```console
-$ helm delete kubevaultcom-vaultserver-editor -n default
+```bash
+$ helm uninstall kubevaultcom-vaultserver-editor -n default
 ```
 
 The command removes all the Kubernetes components associated with the chart and deletes the release.
@@ -60,15 +61,15 @@ The following table lists the configurable parameters of the `kubevaultcom-vault
 | resources.secret_unsealer_creds   |             | <code>{"apiVersion":"v1","kind":"Secret","metadata":{"name":"vault-unsealer-creds","namespace":"demo"},"stringData":{"access_key":"\u003caccess_key\u003e","secret_key":"\u003csecret_key\u003e"},"type":"Opaque"}</code>                                                                                                                                                                                                                                                                                                                                           |
 
 
-Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:
+Specify each parameter using the `--set key=value[,key=value]` argument to `helm upgrade -i`. For example:
 
-```console
-$ helm install kubevaultcom-vaultserver-editor bytebuilders-ui/kubevaultcom-vaultserver-editor -n default --set metadata.resource.group=kubevault.com
+```bash
+$ helm upgrade -i kubevaultcom-vaultserver-editor bytebuilders-ui/kubevaultcom-vaultserver-editor -n default --create-namespace --version=v0.3.0 --set metadata.resource.group=kubevault.com
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
 installing the chart. For example:
 
-```console
-$ helm install kubevaultcom-vaultserver-editor bytebuilders-ui/kubevaultcom-vaultserver-editor -n default --values values.yaml
+```bash
+$ helm upgrade -i kubevaultcom-vaultserver-editor bytebuilders-ui/kubevaultcom-vaultserver-editor -n default --create-namespace --version=v0.3.0 --values values.yaml
 ```

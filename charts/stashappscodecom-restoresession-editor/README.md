@@ -4,10 +4,11 @@
 
 ## TL;DR;
 
-```console
+```bash
 $ helm repo add bytebuilders-ui https://bundles.byte.builders/ui/
 $ helm repo update
-$ helm install stashappscodecom-restoresession-editor bytebuilders-ui/stashappscodecom-restoresession-editor -n default
+$ helm search repo bytebuilders-ui/stashappscodecom-restoresession-editor --version=v0.3.0
+$ helm upgrade -i stashappscodecom-restoresession-editor bytebuilders-ui/stashappscodecom-restoresession-editor -n default --create-namespace --version=v0.3.0
 ```
 
 ## Introduction
@@ -20,10 +21,10 @@ This chart deploys a RestoreSession Editor on a [Kubernetes](http://kubernetes.i
 
 ## Installing the Chart
 
-To install the chart with the release name `stashappscodecom-restoresession-editor`:
+To install/upgrade the chart with the release name `stashappscodecom-restoresession-editor`:
 
-```console
-$ helm install stashappscodecom-restoresession-editor bytebuilders-ui/stashappscodecom-restoresession-editor -n default
+```bash
+$ helm upgrade -i stashappscodecom-restoresession-editor bytebuilders-ui/stashappscodecom-restoresession-editor -n default --create-namespace --version=v0.3.0
 ```
 
 The command deploys a RestoreSession Editor on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
@@ -32,10 +33,10 @@ The command deploys a RestoreSession Editor on the Kubernetes cluster in the def
 
 ## Uninstalling the Chart
 
-To uninstall/delete the `stashappscodecom-restoresession-editor`:
+To uninstall the `stashappscodecom-restoresession-editor`:
 
-```console
-$ helm delete stashappscodecom-restoresession-editor -n default
+```bash
+$ helm uninstall stashappscodecom-restoresession-editor -n default
 ```
 
 The command removes all the Kubernetes components associated with the chart and deletes the release.
@@ -52,15 +53,15 @@ The following table lists the configurable parameters of the `stashappscodecom-r
 | metadata.namespace |             | <code>default</code>                    |
 
 
-Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:
+Specify each parameter using the `--set key=value[,key=value]` argument to `helm upgrade -i`. For example:
 
-```console
-$ helm install stashappscodecom-restoresession-editor bytebuilders-ui/stashappscodecom-restoresession-editor -n default --set apiVersion=stash.appscode.com/v1beta1
+```bash
+$ helm upgrade -i stashappscodecom-restoresession-editor bytebuilders-ui/stashappscodecom-restoresession-editor -n default --create-namespace --version=v0.3.0 --set apiVersion=stash.appscode.com/v1beta1
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
 installing the chart. For example:
 
-```console
-$ helm install stashappscodecom-restoresession-editor bytebuilders-ui/stashappscodecom-restoresession-editor -n default --values values.yaml
+```bash
+$ helm upgrade -i stashappscodecom-restoresession-editor bytebuilders-ui/stashappscodecom-restoresession-editor -n default --create-namespace --version=v0.3.0 --values values.yaml
 ```

@@ -4,10 +4,11 @@
 
 ## TL;DR;
 
-```console
+```bash
 $ helm repo add bytebuilders-ui https://bundles.byte.builders/ui/
 $ helm repo update
-$ helm install monitoringcoreoscom-probe-editor bytebuilders-ui/monitoringcoreoscom-probe-editor -n default
+$ helm search repo bytebuilders-ui/monitoringcoreoscom-probe-editor --version=v0.3.0
+$ helm upgrade -i monitoringcoreoscom-probe-editor bytebuilders-ui/monitoringcoreoscom-probe-editor -n default --create-namespace --version=v0.3.0
 ```
 
 ## Introduction
@@ -20,10 +21,10 @@ This chart deploys a Probe Editor on a [Kubernetes](http://kubernetes.io) cluste
 
 ## Installing the Chart
 
-To install the chart with the release name `monitoringcoreoscom-probe-editor`:
+To install/upgrade the chart with the release name `monitoringcoreoscom-probe-editor`:
 
-```console
-$ helm install monitoringcoreoscom-probe-editor bytebuilders-ui/monitoringcoreoscom-probe-editor -n default
+```bash
+$ helm upgrade -i monitoringcoreoscom-probe-editor bytebuilders-ui/monitoringcoreoscom-probe-editor -n default --create-namespace --version=v0.3.0
 ```
 
 The command deploys a Probe Editor on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
@@ -32,10 +33,10 @@ The command deploys a Probe Editor on the Kubernetes cluster in the default conf
 
 ## Uninstalling the Chart
 
-To uninstall/delete the `monitoringcoreoscom-probe-editor`:
+To uninstall the `monitoringcoreoscom-probe-editor`:
 
-```console
-$ helm delete monitoringcoreoscom-probe-editor -n default
+```bash
+$ helm uninstall monitoringcoreoscom-probe-editor -n default
 ```
 
 The command removes all the Kubernetes components associated with the chart and deletes the release.
@@ -52,15 +53,15 @@ The following table lists the configurable parameters of the `monitoringcoreosco
 | metadata.namespace |             | <code>default</code>                  |
 
 
-Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:
+Specify each parameter using the `--set key=value[,key=value]` argument to `helm upgrade -i`. For example:
 
-```console
-$ helm install monitoringcoreoscom-probe-editor bytebuilders-ui/monitoringcoreoscom-probe-editor -n default --set apiVersion=monitoring.coreos.com/v1
+```bash
+$ helm upgrade -i monitoringcoreoscom-probe-editor bytebuilders-ui/monitoringcoreoscom-probe-editor -n default --create-namespace --version=v0.3.0 --set apiVersion=monitoring.coreos.com/v1
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
 installing the chart. For example:
 
-```console
-$ helm install monitoringcoreoscom-probe-editor bytebuilders-ui/monitoringcoreoscom-probe-editor -n default --values values.yaml
+```bash
+$ helm upgrade -i monitoringcoreoscom-probe-editor bytebuilders-ui/monitoringcoreoscom-probe-editor -n default --create-namespace --version=v0.3.0 --values values.yaml
 ```
