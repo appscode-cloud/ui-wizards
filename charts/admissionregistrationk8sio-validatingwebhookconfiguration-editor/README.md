@@ -4,10 +4,11 @@
 
 ## TL;DR;
 
-```console
+```bash
 $ helm repo add bytebuilders-ui https://bundles.byte.builders/ui/
 $ helm repo update
-$ helm install admissionregistrationk8sio-validatingwebhookconfiguration-editor bytebuilders-ui/admissionregistrationk8sio-validatingwebhookconfiguration-editor -n default
+$ helm search repo bytebuilders-ui/admissionregistrationk8sio-validatingwebhookconfiguration-editor --version=v0.3.0
+$ helm upgrade -i admissionregistrationk8sio-validatingwebhookconfiguration-editor bytebuilders-ui/admissionregistrationk8sio-validatingwebhookconfiguration-editor -n default --create-namespace --version=v0.3.0
 ```
 
 ## Introduction
@@ -20,10 +21,10 @@ This chart deploys a ValidatingWebhookConfiguration Editor on a [Kubernetes](htt
 
 ## Installing the Chart
 
-To install the chart with the release name `admissionregistrationk8sio-validatingwebhookconfiguration-editor`:
+To install/upgrade the chart with the release name `admissionregistrationk8sio-validatingwebhookconfiguration-editor`:
 
-```console
-$ helm install admissionregistrationk8sio-validatingwebhookconfiguration-editor bytebuilders-ui/admissionregistrationk8sio-validatingwebhookconfiguration-editor -n default
+```bash
+$ helm upgrade -i admissionregistrationk8sio-validatingwebhookconfiguration-editor bytebuilders-ui/admissionregistrationk8sio-validatingwebhookconfiguration-editor -n default --create-namespace --version=v0.3.0
 ```
 
 The command deploys a ValidatingWebhookConfiguration Editor on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
@@ -32,10 +33,10 @@ The command deploys a ValidatingWebhookConfiguration Editor on the Kubernetes cl
 
 ## Uninstalling the Chart
 
-To uninstall/delete the `admissionregistrationk8sio-validatingwebhookconfiguration-editor`:
+To uninstall the `admissionregistrationk8sio-validatingwebhookconfiguration-editor`:
 
-```console
-$ helm delete admissionregistrationk8sio-validatingwebhookconfiguration-editor -n default
+```bash
+$ helm uninstall admissionregistrationk8sio-validatingwebhookconfiguration-editor -n default
 ```
 
 The command removes all the Kubernetes components associated with the chart and deletes the release.
@@ -51,15 +52,15 @@ The following table lists the configurable parameters of the `admissionregistrat
 | metadata.name |             | <code>validatingwebhookconfiguration</code>  |
 
 
-Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:
+Specify each parameter using the `--set key=value[,key=value]` argument to `helm upgrade -i`. For example:
 
-```console
-$ helm install admissionregistrationk8sio-validatingwebhookconfiguration-editor bytebuilders-ui/admissionregistrationk8sio-validatingwebhookconfiguration-editor -n default --set apiVersion=admissionregistration.k8s.io/v1
+```bash
+$ helm upgrade -i admissionregistrationk8sio-validatingwebhookconfiguration-editor bytebuilders-ui/admissionregistrationk8sio-validatingwebhookconfiguration-editor -n default --create-namespace --version=v0.3.0 --set apiVersion=admissionregistration.k8s.io/v1
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
 installing the chart. For example:
 
-```console
-$ helm install admissionregistrationk8sio-validatingwebhookconfiguration-editor bytebuilders-ui/admissionregistrationk8sio-validatingwebhookconfiguration-editor -n default --values values.yaml
+```bash
+$ helm upgrade -i admissionregistrationk8sio-validatingwebhookconfiguration-editor bytebuilders-ui/admissionregistrationk8sio-validatingwebhookconfiguration-editor -n default --create-namespace --version=v0.3.0 --values values.yaml
 ```

@@ -4,10 +4,11 @@
 
 ## TL;DR;
 
-```console
+```bash
 $ helm repo add bytebuilders-ui https://bundles.byte.builders/ui/
 $ helm repo update
-$ helm install apiregistrationk8sio-apiservice-editor bytebuilders-ui/apiregistrationk8sio-apiservice-editor -n default
+$ helm search repo bytebuilders-ui/apiregistrationk8sio-apiservice-editor --version=v0.3.0
+$ helm upgrade -i apiregistrationk8sio-apiservice-editor bytebuilders-ui/apiregistrationk8sio-apiservice-editor -n default --create-namespace --version=v0.3.0
 ```
 
 ## Introduction
@@ -20,10 +21,10 @@ This chart deploys a APIService Editor on a [Kubernetes](http://kubernetes.io) c
 
 ## Installing the Chart
 
-To install the chart with the release name `apiregistrationk8sio-apiservice-editor`:
+To install/upgrade the chart with the release name `apiregistrationk8sio-apiservice-editor`:
 
-```console
-$ helm install apiregistrationk8sio-apiservice-editor bytebuilders-ui/apiregistrationk8sio-apiservice-editor -n default
+```bash
+$ helm upgrade -i apiregistrationk8sio-apiservice-editor bytebuilders-ui/apiregistrationk8sio-apiservice-editor -n default --create-namespace --version=v0.3.0
 ```
 
 The command deploys a APIService Editor on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
@@ -32,10 +33,10 @@ The command deploys a APIService Editor on the Kubernetes cluster in the default
 
 ## Uninstalling the Chart
 
-To uninstall/delete the `apiregistrationk8sio-apiservice-editor`:
+To uninstall the `apiregistrationk8sio-apiservice-editor`:
 
-```console
-$ helm delete apiregistrationk8sio-apiservice-editor -n default
+```bash
+$ helm uninstall apiregistrationk8sio-apiservice-editor -n default
 ```
 
 The command removes all the Kubernetes components associated with the chart and deletes the release.
@@ -51,15 +52,15 @@ The following table lists the configurable parameters of the `apiregistrationk8s
 | metadata.name |             | <code>apiservice</code>                |
 
 
-Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:
+Specify each parameter using the `--set key=value[,key=value]` argument to `helm upgrade -i`. For example:
 
-```console
-$ helm install apiregistrationk8sio-apiservice-editor bytebuilders-ui/apiregistrationk8sio-apiservice-editor -n default --set apiVersion=apiregistration.k8s.io/v1
+```bash
+$ helm upgrade -i apiregistrationk8sio-apiservice-editor bytebuilders-ui/apiregistrationk8sio-apiservice-editor -n default --create-namespace --version=v0.3.0 --set apiVersion=apiregistration.k8s.io/v1
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
 installing the chart. For example:
 
-```console
-$ helm install apiregistrationk8sio-apiservice-editor bytebuilders-ui/apiregistrationk8sio-apiservice-editor -n default --values values.yaml
+```bash
+$ helm upgrade -i apiregistrationk8sio-apiservice-editor bytebuilders-ui/apiregistrationk8sio-apiservice-editor -n default --create-namespace --version=v0.3.0 --values values.yaml
 ```

@@ -4,10 +4,11 @@
 
 ## TL;DR;
 
-```console
+```bash
 $ helm repo add bytebuilders-ui https://bundles.byte.builders/ui/
 $ helm repo update
-$ helm install batch-cronjob-editor bytebuilders-ui/batch-cronjob-editor -n default
+$ helm search repo bytebuilders-ui/batch-cronjob-editor --version=v0.3.0
+$ helm upgrade -i batch-cronjob-editor bytebuilders-ui/batch-cronjob-editor -n default --create-namespace --version=v0.3.0
 ```
 
 ## Introduction
@@ -20,10 +21,10 @@ This chart deploys a CronJob Editor on a [Kubernetes](http://kubernetes.io) clus
 
 ## Installing the Chart
 
-To install the chart with the release name `batch-cronjob-editor`:
+To install/upgrade the chart with the release name `batch-cronjob-editor`:
 
-```console
-$ helm install batch-cronjob-editor bytebuilders-ui/batch-cronjob-editor -n default
+```bash
+$ helm upgrade -i batch-cronjob-editor bytebuilders-ui/batch-cronjob-editor -n default --create-namespace --version=v0.3.0
 ```
 
 The command deploys a CronJob Editor on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
@@ -32,10 +33,10 @@ The command deploys a CronJob Editor on the Kubernetes cluster in the default co
 
 ## Uninstalling the Chart
 
-To uninstall/delete the `batch-cronjob-editor`:
+To uninstall the `batch-cronjob-editor`:
 
-```console
-$ helm delete batch-cronjob-editor -n default
+```bash
+$ helm uninstall batch-cronjob-editor -n default
 ```
 
 The command removes all the Kubernetes components associated with the chart and deletes the release.
@@ -52,15 +53,15 @@ The following table lists the configurable parameters of the `batch-cronjob-edit
 | metadata.namespace |             | <code>default</code>  |
 
 
-Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:
+Specify each parameter using the `--set key=value[,key=value]` argument to `helm upgrade -i`. For example:
 
-```console
-$ helm install batch-cronjob-editor bytebuilders-ui/batch-cronjob-editor -n default --set apiVersion=batch/v1
+```bash
+$ helm upgrade -i batch-cronjob-editor bytebuilders-ui/batch-cronjob-editor -n default --create-namespace --version=v0.3.0 --set apiVersion=batch/v1
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
 installing the chart. For example:
 
-```console
-$ helm install batch-cronjob-editor bytebuilders-ui/batch-cronjob-editor -n default --values values.yaml
+```bash
+$ helm upgrade -i batch-cronjob-editor bytebuilders-ui/batch-cronjob-editor -n default --create-namespace --version=v0.3.0 --values values.yaml
 ```
