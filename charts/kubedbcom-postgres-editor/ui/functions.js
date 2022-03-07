@@ -4,17 +4,17 @@ async function fetchJsons({ axios, itemCtx }) {
   let ui = {};
   let language = {};
   let functions = {};
-  const { name, url, version } = itemCtx.chart;
-  const urlPrefix = "/chart/packageview/files/ui";
+  const { name, url, version, packageviewUrlPrefix } = itemCtx.chart;
+  
   try {
     ui = await axios.get(
-      `${urlPrefix}/create-ui.yaml?name=${name}&url=${url}&version=${version}&format=json`
+      `${packageviewUrlPrefix}/create-ui.yaml?name=${name}&url=${url}&version=${version}&format=json`
     );
     language = await axios.get(
-      `${urlPrefix}/language.yaml?name=${name}&url=${url}&version=${version}&format=json`
+      `${packageviewUrlPrefix}/language.yaml?name=${name}&url=${url}&version=${version}&format=json`
     );
     const functionString = await axios.get(
-      `${urlPrefix}/functions.js?name=${name}&url=${url}&version=${version}`
+      `${packageviewUrlPrefix}/functions.js?name=${name}&url=${url}&version=${version}`
     );
     // declare evaluate the functionString to get the functions Object
     const evalFunc = new Function(functionString.data || "");
