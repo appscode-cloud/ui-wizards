@@ -5,64 +5,64 @@ element:
       default: secret
       type: string
   elements:
-    - computed: initializeRefType
+  - computed: initializeRefType
+    label:
+      text: Value From
+    onChange: onRefTypeChange
+    options:
+    - text: Secret
+      value: secret
+    - text: ConfigMap
+      value: configMap
+    schema:
+      $ref: discriminator#/refType
+    type: radio
+  - elements:
+    - allowUserDefinedOption: true
+      fetch: resourceNames|core|v1|configmaps
       label:
-        text: Value From
-      onChange: onRefTypeChange
-      options:
-        - text: Secret
-          value: secret
-        - text: ConfigMap
-          value: configMap
+        text: Select ConfigMap
       schema:
-        $ref: discriminator#/refType
-      type: radio
-    - elements:
-        - allowUserDefinedOption: true
-          fetch: resourceNames|core|v1|configmaps
-          label:
-            text: Select ConfigMap
-          schema:
-            $ref: schema#/items/properties/configMapRef/properties/name
-          type: select
-      if: showRefSelect|configMap
+        $ref: schema#/items/properties/configMapRef/properties/name
+      type: select
+    if: showRefSelect|configMap
+    label:
+      text: envFrom configMap
+    schema:
+      $ref: schema#/items/properties/configMapRef
+    type: single-step-form
+  - elements:
+    - allowUserDefinedOption: true
+      fetch: resourceNames|core|v1|secrets
       label:
-        text: envFrom configMap
+        text: Select Secret
       schema:
-        $ref: schema#/items/properties/configMapRef
-      type: single-step-form
-    - elements:
-        - allowUserDefinedOption: true
-          fetch: resourceNames|core|v1|secrets
-          label:
-            text: Select Secret
-          schema:
-            $ref: schema#/items/properties/secretRef/properties/name
-          type: select
-      if: showRefSelect|secret
-      label:
-        text: envFrom secret
-      schema:
-        $ref: schema#/items/properties/secretRef
-      type: single-step-form
+        $ref: schema#/items/properties/secretRef/properties/name
+      type: select
+    if: showRefSelect|secret
+    label:
+      text: envFrom secret
+    schema:
+      $ref: schema#/items/properties/secretRef
+    type: single-step-form
   type: single-step-form
 label:
   text: labels.environmentVariablesFrom
 schema:
   $ref: schema#/
 tableContents:
-  - computed: showRefType
-    inTableColumn: true
-    label:
-      text: Ref Type
-    path: refType
-    type: value
-    typeOfValue: string
-  - computed: showRefName
-    inTableColumn: true
-    label:
-      text: Ref Name
-    path: refName
-    type: value
-    typeOfValue: string
+- computed: showRefType
+  inTableColumn: true
+  label:
+    text: Ref Type
+  path: refType
+  type: value
+  typeOfValue: string
+- computed: showRefName
+  inTableColumn: true
+  label:
+    text: Ref Name
+  path: refName
+  type: value
+  typeOfValue: string
 type: single-step-form-array

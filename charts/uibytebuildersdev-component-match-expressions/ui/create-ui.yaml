@@ -1,50 +1,50 @@
 addFormLabel: labels.match_expression
 element:
   elements:
-    - label:
-        text: labels.key
+  - label:
+      text: labels.key
+    schema:
+      $ref: schema#/items/properties/key
+    type: input
+  - fetch: getOperatorsList
+    label:
+      text: labels.operator
+    schema:
+      $ref: schema#/items/properties/operator
+    type: select
+  - element:
+      label:
+        text: labels.value
       schema:
-        $ref: schema#/items/properties/key
+        $ref: schema#/items/properties/values/items
       type: input
-    - fetch: getOperatorsList
-      label:
-        text: labels.operator
-      schema:
-        $ref: schema#/items/properties/operator
-      type: select
-    - element:
-        label:
-          text: labels.value
-        schema:
-          $ref: schema#/items/properties/values/items
-        type: input
-      label:
-        text: labels.values
-      schema:
-        $ref: schema#/items/properties/values
-      type: list-input-form
+    label:
+      text: labels.values
+    schema:
+      $ref: schema#/items/properties/values
+    type: list-input-form
   type: single-step-form
 label:
   text: labels.match_expressions
 schema:
   $ref: schema#/
 tableContents:
-  - inTableColumn: true
-    label:
-      text: labels.key
-    path: key
-    type: value
-    typeOfValue: string
-  - inTableColumn: true
-    label:
-      text: labels.operator
-    path: operator
-    type: value
-    typeOfValue: string
-  - inTableColumn: true
-    label:
-      text: labels.values
-    path: values
-    type: value
-    typeOfValue: array
+- inTableColumn: true
+  label:
+    text: labels.key
+  path: key
+  type: value
+  typeOfValue: string
+- inTableColumn: true
+  label:
+    text: labels.operator
+  path: operator
+  type: value
+  typeOfValue: string
+- inTableColumn: true
+  label:
+    text: labels.values
+  path: values
+  type: value
+  typeOfValue: array
 type: single-step-form-array

@@ -2,220 +2,220 @@ discriminator:
   backendType:
     type: string
 elements:
-  - computed: initBackendType
+- computed: initBackendType
+  label:
+    text: labels.repositories.backend.type
+  onChange: onBackendTypeChange
+  options:
+  - text: Azure Blob Storage
+    value: azure
+  - text: Backblaze B2
+    value: b2
+  - text: Google Cloud Service
+    value: gcs
+  - text: Kubernetes Persistent Volume
+    value: local
+  - text: Rest
+    value: rest
+  - text: AWS S3
+    value: s3
+  - text: OpenStack Swift
+    value: swift
+  schema:
+    $ref: discriminator#/properties/backendType
+  type: select
+- elements:
+  - label:
+      text: labels.repositories.backend.container
+    schema:
+      $ref: schema#/properties/azure/properties/container
+    type: input
+  - label:
+      text: labels.repositories.backend.prefix
+    schema:
+      $ref: schema#/properties/azure/properties/prefix
+    type: input
+  - label:
+      text: labels.repositories.backend.maxConnections
+    schema:
+      $ref: schema#/properties/azure/properties/maxConnections
+    type: input
+  if: showBackendForm|azure
+  schema:
+    $ref: schema#/properties/azure
+  type: single-step-form
+- elements:
+  - label:
+      text: labels.repositories.backend.bucket
+    schema:
+      $ref: schema#/properties/b2/properties/bucket
+    type: input
+  - label:
+      text: labels.repositories.backend.prefix
+    schema:
+      $ref: schema#/properties/b2/properties/prefix
+    type: input
+  - label:
+      text: labels.repositories.backend.maxConnections
+    schema:
+      $ref: schema#/properties/b2/properties/maxConnections
+    type: input
+  if: showBackendForm|b2
+  schema:
+    $ref: schema#/properties/b2
+  type: single-step-form
+- elements:
+  - label:
+      text: labels.repositories.backend.bucket
+    schema:
+      $ref: schema#/properties/gcs/properties/bucket
+    type: input
+  - label:
+      text: labels.repositories.backend.prefix
+    schema:
+      $ref: schema#/properties/gcs/properties/prefix
+    type: input
+  - label:
+      text: labels.repositories.backend.maxConnections
+    schema:
+      $ref: schema#/properties/gcs/properties/maxConnections
+    type: input
+  if: showBackendForm|gcs
+  schema:
+    $ref: schema#/properties/gcs
+  type: single-step-form
+- discriminator:
+    volumeSource:
+      type: string
+  elements:
+  - computed: initVolumeSource|/resources/stashAppscodeComRepository_init_repo
     label:
-      text: labels.repositories.backend.type
-    onChange: onBackendTypeChange
+      text: labels.repositories.backend.volumeSource
+    onChange: onVolumeSourceChange|/resources/stashAppscodeComRepository_init_repo
     options:
-      - text: Azure Blob Storage
-        value: azure
-      - text: Backblaze B2
-        value: b2
-      - text: Google Cloud Service
-        value: gcs
-      - text: Kubernetes Persistent Volume
-        value: local
-      - text: Rest
-        value: rest
-      - text: AWS S3
-        value: s3
-      - text: OpenStack Swift
-        value: swift
+    - text: Host Path
+      value: hostPath
+    - text: NFS
+      value: nfs
+    - text: Persistant Volume Claim
+      value: persistentVolumeClaim
     schema:
-      $ref: discriminator#/properties/backendType
+      $ref: discriminator#/properties/volumeSource
     type: select
   - elements:
-      - label:
-          text: labels.repositories.backend.container
-        schema:
-          $ref: schema#/properties/azure/properties/container
-        type: input
-      - label:
-          text: labels.repositories.backend.prefix
-        schema:
-          $ref: schema#/properties/azure/properties/prefix
-        type: input
-      - label:
-          text: labels.repositories.backend.maxConnections
-        schema:
-          $ref: schema#/properties/azure/properties/maxConnections
-        type: input
-    if: showBackendForm|azure
-    schema:
-      $ref: schema#/properties/azure
-    type: single-step-form
-  - elements:
-      - label:
-          text: labels.repositories.backend.bucket
-        schema:
-          $ref: schema#/properties/b2/properties/bucket
-        type: input
-      - label:
-          text: labels.repositories.backend.prefix
-        schema:
-          $ref: schema#/properties/b2/properties/prefix
-        type: input
-      - label:
-          text: labels.repositories.backend.maxConnections
-        schema:
-          $ref: schema#/properties/b2/properties/maxConnections
-        type: input
-    if: showBackendForm|b2
-    schema:
-      $ref: schema#/properties/b2
-    type: single-step-form
-  - elements:
-      - label:
-          text: labels.repositories.backend.bucket
-        schema:
-          $ref: schema#/properties/gcs/properties/bucket
-        type: input
-      - label:
-          text: labels.repositories.backend.prefix
-        schema:
-          $ref: schema#/properties/gcs/properties/prefix
-        type: input
-      - label:
-          text: labels.repositories.backend.maxConnections
-        schema:
-          $ref: schema#/properties/gcs/properties/maxConnections
-        type: input
-    if: showBackendForm|gcs
-    schema:
-      $ref: schema#/properties/gcs
-    type: single-step-form
-  - discriminator:
-      volumeSource:
-        type: string
-    elements:
-      - computed: initVolumeSource|/resources/stashAppscodeComRepository_init_repo
-        label:
-          text: labels.repositories.backend.volumeSource
-        onChange: onVolumeSourceChange|/resources/stashAppscodeComRepository_init_repo
-        options:
-          - text: Host Path
-            value: hostPath
-          - text: NFS
-            value: nfs
-          - text: Persistant Volume Claim
-            value: persistentVolumeClaim
-        schema:
-          $ref: discriminator#/properties/volumeSource
-        type: select
-      - elements:
-          - label:
-              text: labels.repositories.backend.path
-            schema:
-              $ref: schema#/properties/local/properties/hostPath/properties/path
-            type: input
-        if: showVolumeSourceForm|hostPath
-        label:
-          text: Host Path form
-        schema:
-          $ref: schema#/properties/local/properties/hostPath
-        type: single-step-form
-      - elements:
-          - label:
-              text: labels.repositories.backend.server
-            schema:
-              $ref: schema#/properties/local/properties/nfs/properties/server
-            type: input
-          - label:
-              text: labels.repositories.backend.path
-            schema:
-              $ref: schema#/properties/local/properties/nfs/properties/path
-            type: input
-        if: showVolumeSourceForm|nfs
-        label:
-          text: NFS form
-        schema:
-          $ref: schema#/properties/local/properties/nfs
-        type: single-step-form
-      - elements:
-          - allowUserDefinedOption: true
-            fetch: resourceNames|core|v1|persistentvolumeclaims
-            label:
-              text: labels.repositories.backend.pvcName
-            schema:
-              $ref: schema#/properties/local/properties/persistentVolumeClaim/properties/claimName
-            type: select
-        if: showVolumeSourceForm|persistentVolumeClaim
-        label:
-          text: Persistant Volume Claim form
-        schema:
-          $ref: schema#/properties/local/properties/persistentVolumeClaim
-        type: single-step-form
-      - label:
-          text: labels.repositories.backend.mountPath
-        schema:
-          $ref: schema#/properties/local/properties/mountPath
-        type: input
-      - label:
-          text: labels.repositories.backend.subPath
-        schema:
-          $ref: schema#/properties/local/properties/subPath
-        type: input
-    if: showBackendForm|local
-    schema:
-      $ref: schema#/properties/local
-    type: single-step-form
-  - elements:
-      - label:
-          text: labels.repositories.backend.url
-        schema:
-          $ref: schema#/properties/rest/properties/url
-        type: input
-    if: showBackendForm|rest
-    schema:
-      $ref: schema#/properties/rest
-    type: single-step-form
-  - elements:
-      - label:
-          text: labels.repositories.backend.endPoint
-        schema:
-          $ref: schema#/properties/s3/properties/endpoint
-        type: input
-      - label:
-          text: labels.repositories.backend.bucket
-        schema:
-          $ref: schema#/properties/s3/properties/bucket
-        type: input
-      - label:
-          text: labels.repositories.backend.prefix
-        schema:
-          $ref: schema#/properties/s3/properties/prefix
-        type: input
-      - label:
-          text: labels.repositories.backend.region
-        schema:
-          $ref: schema#/properties/s3/properties/region
-        type: input
-    if: showBackendForm|s3
-    schema:
-      $ref: schema#/properties/s3
-    type: single-step-form
-  - elements:
-      - label:
-          text: labels.repositories.backend.container
-        schema:
-          $ref: schema#/properties/swift/properties/container
-        type: input
-      - label:
-          text: labels.repositories.backend.prefix
-        schema:
-          $ref: schema#/properties/swift/properties/prefix
-        type: input
-    if: showBackendForm|swift
-    schema:
-      $ref: schema#/properties/swift
-    type: single-step-form
-  - allowUserDefinedOption: true
-    fetch: resourceNames|core|v1|secrets
+    - label:
+        text: labels.repositories.backend.path
+      schema:
+        $ref: schema#/properties/local/properties/hostPath/properties/path
+      type: input
+    if: showVolumeSourceForm|hostPath
     label:
-      text: labels.repositories.backend.secret
+      text: Host Path form
     schema:
-      $ref: schema#/properties/storageSecretName
-    type: select
+      $ref: schema#/properties/local/properties/hostPath
+    type: single-step-form
+  - elements:
+    - label:
+        text: labels.repositories.backend.server
+      schema:
+        $ref: schema#/properties/local/properties/nfs/properties/server
+      type: input
+    - label:
+        text: labels.repositories.backend.path
+      schema:
+        $ref: schema#/properties/local/properties/nfs/properties/path
+      type: input
+    if: showVolumeSourceForm|nfs
+    label:
+      text: NFS form
+    schema:
+      $ref: schema#/properties/local/properties/nfs
+    type: single-step-form
+  - elements:
+    - allowUserDefinedOption: true
+      fetch: resourceNames|core|v1|persistentvolumeclaims
+      label:
+        text: labels.repositories.backend.pvcName
+      schema:
+        $ref: schema#/properties/local/properties/persistentVolumeClaim/properties/claimName
+      type: select
+    if: showVolumeSourceForm|persistentVolumeClaim
+    label:
+      text: Persistant Volume Claim form
+    schema:
+      $ref: schema#/properties/local/properties/persistentVolumeClaim
+    type: single-step-form
+  - label:
+      text: labels.repositories.backend.mountPath
+    schema:
+      $ref: schema#/properties/local/properties/mountPath
+    type: input
+  - label:
+      text: labels.repositories.backend.subPath
+    schema:
+      $ref: schema#/properties/local/properties/subPath
+    type: input
+  if: showBackendForm|local
+  schema:
+    $ref: schema#/properties/local
+  type: single-step-form
+- elements:
+  - label:
+      text: labels.repositories.backend.url
+    schema:
+      $ref: schema#/properties/rest/properties/url
+    type: input
+  if: showBackendForm|rest
+  schema:
+    $ref: schema#/properties/rest
+  type: single-step-form
+- elements:
+  - label:
+      text: labels.repositories.backend.endPoint
+    schema:
+      $ref: schema#/properties/s3/properties/endpoint
+    type: input
+  - label:
+      text: labels.repositories.backend.bucket
+    schema:
+      $ref: schema#/properties/s3/properties/bucket
+    type: input
+  - label:
+      text: labels.repositories.backend.prefix
+    schema:
+      $ref: schema#/properties/s3/properties/prefix
+    type: input
+  - label:
+      text: labels.repositories.backend.region
+    schema:
+      $ref: schema#/properties/s3/properties/region
+    type: input
+  if: showBackendForm|s3
+  schema:
+    $ref: schema#/properties/s3
+  type: single-step-form
+- elements:
+  - label:
+      text: labels.repositories.backend.container
+    schema:
+      $ref: schema#/properties/swift/properties/container
+    type: input
+  - label:
+      text: labels.repositories.backend.prefix
+    schema:
+      $ref: schema#/properties/swift/properties/prefix
+    type: input
+  if: showBackendForm|swift
+  schema:
+    $ref: schema#/properties/swift
+  type: single-step-form
+- allowUserDefinedOption: true
+  fetch: resourceNames|core|v1|secrets
+  label:
+    text: labels.repositories.backend.secret
+  schema:
+    $ref: schema#/properties/storageSecretName
+  type: select
 label:
   isSubsection: true
   text: labels.repositories.backend.title
