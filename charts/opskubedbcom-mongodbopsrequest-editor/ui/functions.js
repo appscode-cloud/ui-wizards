@@ -33,7 +33,7 @@ function returnFalse() {
 }
 
 async function getNamespaces({ axios, storeGet }) {
-  const owner = storeGet("/user/username");
+  const owner = storeGet("/route/params/user");
   const cluster = storeGet("/cluster/clusterDefinition/spec/name");
 
   const resp = await axios.get(
@@ -61,7 +61,7 @@ async function getMongoDbs({
   getValue,
   watchDependency,
 }) {
-  const owner = storeGet("/user/username");
+  const owner = storeGet("/route/params/user");
   const cluster = storeGet("/cluster/clusterDefinition/spec/name");
 
   const namespace = getValue(model, "/metadata/namespace");
@@ -93,7 +93,7 @@ async function getMongoDetails({
   watchDependency,
   setDiscriminatorValue
 }) {
-  const owner = storeGet("/user/username");
+  const owner = storeGet("/route/params/user");
   const cluster = storeGet("/cluster/clusterDefinition/spec/name");
 
   const namespace = getValue(model, "/metadata/namespace");
@@ -113,7 +113,7 @@ async function getMongoDetails({
 }
 
 async function getMongoDbVersions({ axios, storeGet }) {
-  const owner = storeGet("/user/username");
+  const owner = storeGet("/route/params/user");
   const cluster = storeGet("/cluster/clusterDefinition/spec/name");
 
   const queryParams = {
@@ -287,7 +287,7 @@ async function getConfigSecrets({
   getValue,
   watchDependency,
 }) {
-  const owner = storeGet("/user/username");
+  const owner = storeGet("/route/params/user");
   const cluster = storeGet("/cluster/clusterDefinition/spec/name");
   const namespace = getValue(model, "/metadata/namespace");
   watchDependency("model#/metadata/namespace");
@@ -328,7 +328,7 @@ async function getNamespacedResourceList(
   storeGet,
   { namespace, group, version, resource }
 ) {
-  const owner = storeGet("/user/username");
+  const owner = storeGet("/route/params/user");
   const cluster = storeGet("/cluster/clusterDefinition/spec/name");
 
   const url = `/clusters/${owner}/${cluster}/proxy/${group}/${version}/namespaces/${namespace}/${resource}`;
@@ -354,7 +354,7 @@ async function getResourceList(
   storeGet,
   { group, version, resource }
 ) {
-  const owner = storeGet("/user/username");
+  const owner = storeGet("/route/params/user");
   const cluster = storeGet("/cluster/clusterDefinition/spec/name");
 
   const url = `/clusters/${owner}/${cluster}/proxy/${group}/${version}/${resource}`;
@@ -531,7 +531,7 @@ async function getIssuerRefsName({
   model,
   watchDependency,
 }) {
-  const owner = storeGet("/user/username");
+  const owner = storeGet("/route/params/user");
   const cluster = storeGet("/cluster/clusterDefinition/spec/name");
   watchDependency("model#/spec/tls/issuerRef/apiGroup");
   watchDependency("model#/spec/tls/issuerRef/kind");

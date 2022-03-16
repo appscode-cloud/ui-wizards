@@ -257,7 +257,7 @@ async function getResources(
   version,
   resource
 ) {
-  const owner = storeGet("/user/username");
+  const owner = storeGet("/route/params/user");
   const cluster = storeGet("/cluster/clusterDefinition/spec/name");
 
   const resp = await axios.get(
@@ -279,7 +279,7 @@ async function getResources(
 }
 
 async function getStorageClassNames({ axios, storeGet, commit }) {
-  const owner = storeGet("/user/username");
+  const owner = storeGet("/route/params/user");
   const cluster = storeGet("/cluster/clusterDefinition/spec/name");
 
   const resp = await axios.get(
@@ -321,7 +321,7 @@ async function getMongoDbVersions(
   version,
   resource
 ) {
-  const owner = storeGet("/user/username");
+  const owner = storeGet("/route/params/user");
   const cluster = storeGet("/cluster/clusterDefinition/spec/name");
 
   const queryParams = {
@@ -383,7 +383,7 @@ async function getSecrets({
   getValue,
   watchDependency,
 }) {
-  const owner = storeGet("/user/username");
+  const owner = storeGet("/route/params/user");
   const cluster = storeGet("/cluster/clusterDefinition/spec/name");
   const namespace = getValue(model, "/metadata/release/namespace");
   watchDependency("model#/metadata/release/namespace");
