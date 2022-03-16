@@ -62,7 +62,7 @@ async function getResources(
   version,
   resource
 ) {
-  const owner = storeGet("/user/username");
+  const owner = storeGet("/route/params/user");
   const cluster = storeGet("/cluster/clusterDefinition/spec/name");
 
   try {
@@ -107,7 +107,7 @@ async function getNamespacedResourceList(
   storeGet,
   { namespace, group, version, resource }
 ) {
-  const owner = storeGet("/user/username");
+  const owner = storeGet("/route/params/user");
   const cluster = storeGet("/cluster/clusterDefinition/spec/name");
 
   const url = `/clusters/${owner}/${cluster}/proxy/${group}/${version}/namespaces/${namespace}/${resource}`;
@@ -132,7 +132,7 @@ async function getNamespacedResourceList(
 async function getRedisSentinels(
   { axios, storeGet, model, getValue, watchDependency }
 ) {
-  const owner = storeGet("/user/username");
+  const owner = storeGet("/route/params/user");
   const cluster = storeGet("/cluster/clusterDefinition/spec/name");
   const namespace = getValue(model, "/resources/kubedbComRedis/spec/sentinelRef/namespace");
 
@@ -170,7 +170,7 @@ async function getResourceList(
   storeGet,
   { group, version, resource }
 ) {
-  const owner = storeGet("/user/username");
+  const owner = storeGet("/route/params/user");
   const cluster = storeGet("/cluster/clusterDefinition/spec/name");
 
   const url = `/clusters/${owner}/${cluster}/proxy/${group}/${version}/${resource}`;
@@ -273,7 +273,7 @@ async function getRedisVersions(
   version,
   resource
 ) {
-  const owner = storeGet("/user/username");
+  const owner = storeGet("/route/params/user");
   const cluster = storeGet("/cluster/clusterDefinition/spec/name");
 
   const queryParams = {
@@ -395,7 +395,7 @@ function setDatabaseMode({model, getValue}) {
 async function getStorageClassNames(
   { axios, storeGet, commit, model, getValue }
 ) {
-  const owner = storeGet("/user/username");
+  const owner = storeGet("/route/params/user");
   const cluster = storeGet("/cluster/clusterDefinition/spec/name");
 
   const resp = await axios.get(
@@ -513,7 +513,7 @@ async function getIssuerRefsName({
   model,
   watchDependency,
 }) {
-  const owner = storeGet("/user/username");
+  const owner = storeGet("/route/params/user");
   const cluster = storeGet("/cluster/clusterDefinition/spec/name");
   watchDependency(
     "model#/resources/kubedbComRedis/spec/tls/issuerRef/apiGroup"
@@ -1895,7 +1895,7 @@ async function getSecrets({
   getValue,
   watchDependency,
 }) {
-  const owner = storeGet("/user/username");
+  const owner = storeGet("/route/params/user");
   const cluster = storeGet("/cluster/clusterDefinition/spec/name");
   const namespace = getValue(model, "/metadata/release/namespace");
   watchDependency("model#/metadata/release/namespace");
