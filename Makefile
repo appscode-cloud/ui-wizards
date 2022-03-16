@@ -288,7 +288,7 @@ package-charts:
 	    $(BUILD_IMAGE)                                          \
 	    ./hack/scripts/update-repo.sh
 
-fmt: $(BUILD_DIRS)
+fmt: $(BUILD_DIRS) uibuilder-tools
 	@docker run                                                 \
 	    -i                                                      \
 	    --rm                                                    \
@@ -305,6 +305,7 @@ fmt: $(BUILD_DIRS)
 	        REPO_PKG=$(GO_PKG)                                  \
 	        ./hack/fmt.sh $(SRC_DIRS)                           \
 	    "
+	$(UIBUILDER_TOOLS) check --wizard-dir=./charts --fmt-only
 
 build: $(OUTBIN)
 
@@ -470,10 +471,10 @@ ci: check-license lint build unit-tests #verify cover
 clean:
 	rm -rf .go bin
 
-UIBUILDER_TOOLS = /usr/local/bin/uibuilder-tools
+UIBUILDER_TOOLS = $(shell pwd)/bin/uibuilder-tools
 .PHONY: uibuilder-tools
-uibuilder-tools: ## Download hugo-tools locally if necessary.
-	$(call go-get-tool,$(HUGO_TOOLS),bytebuilders/uibuilder-tools,v0.0.1)
+uibuilder-tools: ## Download uibuilder-tools locally if necessary.
+	$(call go-get-tool,$(UIBUILDER_TOOLS),bytebuilders/uibuilder-tools,v0.0.1)
 
 # go-get-tool will 'curl' binary from GH repo $2 with version $3 and install it to $1.
 PROJECT_DIR := $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST))))
@@ -492,7 +493,7 @@ case $$ARCH in \
   i686) ARCH="386";; \
   i386) ARCH="386";; \
 esac; \
-bin=hugo-tools-$${OS}-$${ARCH}; \
+bin=uibuilder-tools-$${OS}-$${ARCH}; \
 echo "Downloading $${bin}" ;\
 mkdir -p $(PROJECT_DIR)/bin; \
 curl -fsSL -o $(1) https://github.com/$(2)/releases/download/$(3)/$${bin}; \
