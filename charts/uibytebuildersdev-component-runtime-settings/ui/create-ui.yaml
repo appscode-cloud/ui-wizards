@@ -1,202 +1,202 @@
 elements:
-  - elements:
-      - allowUserDefinedOption: true
-        fetch: resourceNames|core|v1|serviceaccounts
-        label:
-          text: labels.runtimeSettings.pod.serviceAccountName
-        schema:
-          $ref: schema#/properties/pod/properties/serviceAccountName
-        type: select
-      - allowUserDefinedOption: true
-        fetch: getImagePullSecrets
-        label:
-          text: labels.runtimeSettings.pod.imagePullSecrets
-        schema:
-          $ref: schema#/properties/pod/properties/imagePullSecrets
-        type: multiselect
-      - elements:
-          - label:
-              text: labels.runtimeSettings.securityContext.fsGroup
-            schema:
-              $ref: schema#/properties/pod/properties/securityContext/properties/fsGroup
-            type: input
-          - label:
-              text: labels.runtimeSettings.securityContext.runAsNonRoot
-            schema:
-              $ref: schema#/properties/pod/properties/securityContext/properties/runAsNonRoot
-            type: switch
-          - label:
-              text: labels.runtimeSettings.securityContext.runAsUser
-            schema:
-              $ref: schema#/properties/pod/properties/securityContext/properties/runAsUser
-            type: input
-          - label:
-              text: labels.runtimeSettings.securityContext.runAsGroup
-            schema:
-              $ref: schema#/properties/pod/properties/securityContext/properties/runAsGroup
-            type: input
-          - elements:
-              - label:
-                  text: labels.runtimeSettings.securityContext.seLinuxOptions.level
-                schema:
-                  $ref: schema#/properties/pod/properties/securityContext/properties/seLinuxOptions/properties/level
-                type: input
-              - label:
-                  text: labels.runtimeSettings.securityContext.seLinuxOptions.role
-                schema:
-                  $ref: schema#/properties/pod/properties/securityContext/properties/seLinuxOptions/properties/role
-                type: input
-              - label:
-                  text: labels.runtimeSettings.securityContext.seLinuxOptions.type
-                schema:
-                  $ref: schema#/properties/pod/properties/securityContext/properties/seLinuxOptions/properties/type
-                type: input
-              - label:
-                  text: labels.runtimeSettings.securityContext.seLinuxOptions.user
-                schema:
-                  $ref: schema#/properties/pod/properties/securityContext/properties/seLinuxOptions/properties/user
-                type: input
-            label:
-              text: Pod SE Linux options
-            schema:
-              $ref: schema#/properties/pod/properties/securityContext/properties/seLinuxOptions
-            show_label: true
-            type: single-step-form
-        label:
-          text: Pod security context
-        schema:
-          $ref: schema#/properties/pod/properties/securityContext
-        show_label: true
-        type: single-step-form
+- elements:
+  - allowUserDefinedOption: true
+    fetch: resourceNames|core|v1|serviceaccounts
     label:
-      text: labels.runtimeSettings.pod.title
+      text: labels.runtimeSettings.pod.serviceAccountName
     schema:
-      $ref: schema#/properties/pod
+      $ref: schema#/properties/pod/properties/serviceAccountName
+    type: select
+  - allowUserDefinedOption: true
+    fetch: getImagePullSecrets
+    label:
+      text: labels.runtimeSettings.pod.imagePullSecrets
+    schema:
+      $ref: schema#/properties/pod/properties/imagePullSecrets
+    type: multiselect
+  - elements:
+    - label:
+        text: labels.runtimeSettings.securityContext.fsGroup
+      schema:
+        $ref: schema#/properties/pod/properties/securityContext/properties/fsGroup
+      type: input
+    - label:
+        text: labels.runtimeSettings.securityContext.runAsNonRoot
+      schema:
+        $ref: schema#/properties/pod/properties/securityContext/properties/runAsNonRoot
+      type: switch
+    - label:
+        text: labels.runtimeSettings.securityContext.runAsUser
+      schema:
+        $ref: schema#/properties/pod/properties/securityContext/properties/runAsUser
+      type: input
+    - label:
+        text: labels.runtimeSettings.securityContext.runAsGroup
+      schema:
+        $ref: schema#/properties/pod/properties/securityContext/properties/runAsGroup
+      type: input
+    - elements:
+      - label:
+          text: labels.runtimeSettings.securityContext.seLinuxOptions.level
+        schema:
+          $ref: schema#/properties/pod/properties/securityContext/properties/seLinuxOptions/properties/level
+        type: input
+      - label:
+          text: labels.runtimeSettings.securityContext.seLinuxOptions.role
+        schema:
+          $ref: schema#/properties/pod/properties/securityContext/properties/seLinuxOptions/properties/role
+        type: input
+      - label:
+          text: labels.runtimeSettings.securityContext.seLinuxOptions.type
+        schema:
+          $ref: schema#/properties/pod/properties/securityContext/properties/seLinuxOptions/properties/type
+        type: input
+      - label:
+          text: labels.runtimeSettings.securityContext.seLinuxOptions.user
+        schema:
+          $ref: schema#/properties/pod/properties/securityContext/properties/seLinuxOptions/properties/user
+        type: input
+      label:
+        text: Pod SE Linux options
+      schema:
+        $ref: schema#/properties/pod/properties/securityContext/properties/seLinuxOptions
+      show_label: true
+      type: single-step-form
+    label:
+      text: Pod security context
+    schema:
+      $ref: schema#/properties/pod/properties/securityContext
+    show_label: true
+    type: single-step-form
+  label:
+    text: labels.runtimeSettings.pod.title
+  schema:
+    $ref: schema#/properties/pod
+  show_label: true
+  type: single-step-form
+- elements:
+  - alias: reusable_runtime_settings_reources
+    chart:
+      name: uibytebuildersdev-component-resources
+      version: v0.4.1
+    label:
+      text: labels.resources
+    moduleResolver: fetchJsons
+    schema:
+      $ref: schema#/properties/container/properties/resources
+    show_label: true
+    type: reusable-element
+  - elements:
+    - label:
+        text: labels.runtimeSettings.container.nice.adjustment
+      schema:
+        $ref: schema#/properties/container/properties/nice/properties/adjustment
+      type: input
+    label:
+      text: labels.runtimeSettings.container.nice.title
+    schema:
+      $ref: schema#/properties/container/properties/nice
     show_label: true
     type: single-step-form
   - elements:
-      - alias: reusable_runtime_settings_reources
-        chart:
-          name: uibytebuildersdev-component-resources
-          version: v0.4.1
-        label:
-          text: labels.resources
-        moduleResolver: fetchJsons
-        schema:
-          $ref: schema#/properties/container/properties/resources
-        show_label: true
-        type: reusable-element
-      - elements:
-          - label:
-              text: labels.runtimeSettings.container.nice.adjustment
-            schema:
-              $ref: schema#/properties/container/properties/nice/properties/adjustment
-            type: input
-        label:
-          text: labels.runtimeSettings.container.nice.title
-        schema:
-          $ref: schema#/properties/container/properties/nice
-        show_label: true
-        type: single-step-form
-      - elements:
-          - label:
-              text: labels.runtimeSettings.container.ionice.class
-            schema:
-              $ref: schema#/properties/container/properties/ionice/properties/class
-            type: input
-          - label:
-              text: labels.runtimeSettings.container.ionice.classData
-            schema:
-              $ref: schema#/properties/container/properties/ionice/properties/classData
-            type: input
-        label:
-          text: labels.runtimeSettings.container.ionice.title
-        schema:
-          $ref: schema#/properties/container/properties/ionice
-        show_label: true
-        type: single-step-form
-      - elements:
-          - label:
-              text: labels.runtimeSettings.securityContext.privileged
-            schema:
-              $ref: schema#/properties/container/properties/securityContext/properties/privileged
-            type: switch
-          - label:
-              text: labels.runtimeSettings.securityContext.runAsNonRoot
-            schema:
-              $ref: schema#/properties/container/properties/securityContext/properties/runAsNonRoot
-            type: switch
-          - label:
-              text: labels.runtimeSettings.securityContext.runAsUser
-            schema:
-              $ref: schema#/properties/container/properties/securityContext/properties/runAsUser
-            type: input
-          - label:
-              text: labels.runtimeSettings.securityContext.runAsGroup
-            schema:
-              $ref: schema#/properties/container/properties/securityContext/properties/runAsGroup
-            type: input
-          - elements:
-              - label:
-                  text: labels.runtimeSettings.securityContext.seLinuxOptions.level
-                schema:
-                  $ref: schema#/properties/container/properties/securityContext/properties/seLinuxOptions/properties/level
-                type: input
-              - label:
-                  text: labels.runtimeSettings.securityContext.seLinuxOptions.role
-                schema:
-                  $ref: schema#/properties/container/properties/securityContext/properties/seLinuxOptions/properties/role
-                type: input
-              - label:
-                  text: labels.runtimeSettings.securityContext.seLinuxOptions.type
-                schema:
-                  $ref: schema#/properties/container/properties/securityContext/properties/seLinuxOptions/properties/type
-                type: input
-              - label:
-                  text: labels.runtimeSettings.securityContext.seLinuxOptions.user
-                schema:
-                  $ref: schema#/properties/container/properties/securityContext/properties/seLinuxOptions/properties/user
-                type: input
-            label:
-              text: labels.runtimeSettings.securityContext.seLinuxOptions.title
-            schema:
-              $ref: schema#/properties/container/properties/securityContext/properties/seLinuxOptions
-            show_label: true
-            type: single-step-form
-        label:
-          text: labels.runtimeSettings.securityContext.title
-        schema:
-          $ref: schema#/properties/container/properties/securityContext
-        show_label: true
-        type: single-step-form
-      - alias: reusable_env_variables
-        chart:
-          name: uibytebuildersdev-component-env
-          version: v0.4.1
-        dataContext:
-          namespace:
-            $ref: data#/properties/namespace
-        moduleResolver: fetchJsons
-        schema:
-          $ref: schema#/properties/container/properties/env
-        type: reusable-element
-      - alias: reusable_env_from
-        chart:
-          name: uibytebuildersdev-component-env-from
-          version: v0.4.1
-        dataContext:
-          namespace:
-            $ref: data#/properties/namespace
-        moduleResolver: fetchJsons
-        schema:
-          $ref: schema#/properties/container/properties/envFrom
-        type: reusable-element
+    - label:
+        text: labels.runtimeSettings.container.ionice.class
+      schema:
+        $ref: schema#/properties/container/properties/ionice/properties/class
+      type: input
+    - label:
+        text: labels.runtimeSettings.container.ionice.classData
+      schema:
+        $ref: schema#/properties/container/properties/ionice/properties/classData
+      type: input
     label:
-      text: labels.runtimeSettings.container.title
+      text: labels.runtimeSettings.container.ionice.title
     schema:
-      $ref: schema#/properties/container
+      $ref: schema#/properties/container/properties/ionice
     show_label: true
     type: single-step-form
+  - elements:
+    - label:
+        text: labels.runtimeSettings.securityContext.privileged
+      schema:
+        $ref: schema#/properties/container/properties/securityContext/properties/privileged
+      type: switch
+    - label:
+        text: labels.runtimeSettings.securityContext.runAsNonRoot
+      schema:
+        $ref: schema#/properties/container/properties/securityContext/properties/runAsNonRoot
+      type: switch
+    - label:
+        text: labels.runtimeSettings.securityContext.runAsUser
+      schema:
+        $ref: schema#/properties/container/properties/securityContext/properties/runAsUser
+      type: input
+    - label:
+        text: labels.runtimeSettings.securityContext.runAsGroup
+      schema:
+        $ref: schema#/properties/container/properties/securityContext/properties/runAsGroup
+      type: input
+    - elements:
+      - label:
+          text: labels.runtimeSettings.securityContext.seLinuxOptions.level
+        schema:
+          $ref: schema#/properties/container/properties/securityContext/properties/seLinuxOptions/properties/level
+        type: input
+      - label:
+          text: labels.runtimeSettings.securityContext.seLinuxOptions.role
+        schema:
+          $ref: schema#/properties/container/properties/securityContext/properties/seLinuxOptions/properties/role
+        type: input
+      - label:
+          text: labels.runtimeSettings.securityContext.seLinuxOptions.type
+        schema:
+          $ref: schema#/properties/container/properties/securityContext/properties/seLinuxOptions/properties/type
+        type: input
+      - label:
+          text: labels.runtimeSettings.securityContext.seLinuxOptions.user
+        schema:
+          $ref: schema#/properties/container/properties/securityContext/properties/seLinuxOptions/properties/user
+        type: input
+      label:
+        text: labels.runtimeSettings.securityContext.seLinuxOptions.title
+      schema:
+        $ref: schema#/properties/container/properties/securityContext/properties/seLinuxOptions
+      show_label: true
+      type: single-step-form
+    label:
+      text: labels.runtimeSettings.securityContext.title
+    schema:
+      $ref: schema#/properties/container/properties/securityContext
+    show_label: true
+    type: single-step-form
+  - alias: reusable_env_variables
+    chart:
+      name: uibytebuildersdev-component-env
+      version: v0.4.1
+    dataContext:
+      namespace:
+        $ref: data#/properties/namespace
+    moduleResolver: fetchJsons
+    schema:
+      $ref: schema#/properties/container/properties/env
+    type: reusable-element
+  - alias: reusable_env_from
+    chart:
+      name: uibytebuildersdev-component-env-from
+      version: v0.4.1
+    dataContext:
+      namespace:
+        $ref: data#/properties/namespace
+    moduleResolver: fetchJsons
+    schema:
+      $ref: schema#/properties/container/properties/envFrom
+    type: reusable-element
+  label:
+    text: labels.runtimeSettings.container.title
+  schema:
+    $ref: schema#/properties/container
+  show_label: true
+  type: single-step-form
 schema:
   $ref: schema#/
 type: single-step-form

@@ -6,104 +6,104 @@ element:
       default: input
       type: string
   elements:
-    - label:
-        text: labels.name
-      schema:
-        $ref: schema#/items/properties/name
-      type: input
-    - computed: setValueFrom
-      label:
-        text: Value From
-      onChange: onValueFromChange
-      options:
-        - text: Input
-          value: input
-        - text: Secret
-          value: secret
-        - text: ConfigMap
-          value: configMap
-      schema:
-        $ref: discriminator#/valueFromType
-      type: radio
-    - if: isEqualToValueFromType|input
-      label:
-        text: labels.value
-      schema:
-        $ref: schema#/items/properties/value
-      type: input
+  - label:
+      text: labels.name
+    schema:
+      $ref: schema#/items/properties/name
+    type: input
+  - computed: setValueFrom
+    label:
+      text: Value From
+    onChange: onValueFromChange
+    options:
+    - text: Input
+      value: input
+    - text: Secret
+      value: secret
+    - text: ConfigMap
+      value: configMap
+    schema:
+      $ref: discriminator#/valueFromType
+    type: radio
+  - if: isEqualToValueFromType|input
+    label:
+      text: labels.value
+    schema:
+      $ref: schema#/items/properties/value
+    type: input
+  - elements:
     - elements:
-        - elements:
-            - allowUserDefinedOption: true
-              fetch: resourceNames|core|v1|configmaps
-              label:
-                text: labels.config_map_name
-              schema:
-                $ref: schema#/items/properties/valueFrom/properties/configMapKeyRef/properties/name
-              type: select
-            - allowUserDefinedOption: true
-              fetch: getConfigMapKeys
-              label:
-                text: labels.config_map_key
-              schema:
-                $ref: schema#/items/properties/valueFrom/properties/configMapKeyRef/properties/key
-              type: select
-          if: isEqualToValueFromType|configMap
-          schema:
-            $ref: schema#/items/properties/valueFrom/properties/configMapKeyRef
-          type: single-step-form
-        - elements:
-            - allowUserDefinedOption: true
-              fetch: getSecrets
-              label:
-                text: labels.secret_name
-              schema:
-                $ref: schema#/items/properties/valueFrom/properties/secretKeyRef/properties/name
-              type: select
-            - allowUserDefinedOption: true
-              fetch: getSecretKeys
-              label:
-                text: labels.secret_key
-              schema:
-                $ref: schema#/items/properties/valueFrom/properties/secretKeyRef/properties/key
-              type: select
-          if: isEqualToValueFromType|secret
-          schema:
-            $ref: schema#/items/properties/valueFrom/properties/secretKeyRef
-          type: single-step-form
+      - allowUserDefinedOption: true
+        fetch: resourceNames|core|v1|configmaps
+        label:
+          text: labels.config_map_name
+        schema:
+          $ref: schema#/items/properties/valueFrom/properties/configMapKeyRef/properties/name
+        type: select
+      - allowUserDefinedOption: true
+        fetch: getConfigMapKeys
+        label:
+          text: labels.config_map_key
+        schema:
+          $ref: schema#/items/properties/valueFrom/properties/configMapKeyRef/properties/key
+        type: select
+      if: isEqualToValueFromType|configMap
       schema:
-        $ref: schema#/items/properties/valueFrom
+        $ref: schema#/items/properties/valueFrom/properties/configMapKeyRef
       type: single-step-form
+    - elements:
+      - allowUserDefinedOption: true
+        fetch: getSecrets
+        label:
+          text: labels.secret_name
+        schema:
+          $ref: schema#/items/properties/valueFrom/properties/secretKeyRef/properties/name
+        type: select
+      - allowUserDefinedOption: true
+        fetch: getSecretKeys
+        label:
+          text: labels.secret_key
+        schema:
+          $ref: schema#/items/properties/valueFrom/properties/secretKeyRef/properties/key
+        type: select
+      if: isEqualToValueFromType|secret
+      schema:
+        $ref: schema#/items/properties/valueFrom/properties/secretKeyRef
+      type: single-step-form
+    schema:
+      $ref: schema#/items/properties/valueFrom
+    type: single-step-form
   type: single-step-form
 label:
   text: labels.environment_variables
 schema:
   $ref: schema#/
 tableContents:
-  - inTableColumn: true
-    label:
-      text: labels.name
-    path: name
-    type: value
-    typeOfValue: string
-  - computed: getValueFrom
-    inTableColumn: true
-    label:
-      text: Value From
-    path: valueFrom/type
-    type: value
-    typeOfValue: string
-  - computed: getRefName
-    inTableColumn: true
-    label:
-      text: RefName
-    path: refName
-    type: value
-    typeOfValue: string
-  - computed: getKeyOrValue
-    inTableColumn: true
-    label:
-      text: Key/Value
-    path: keyOrValue
-    type: value
-    typeOfValue: string
+- inTableColumn: true
+  label:
+    text: labels.name
+  path: name
+  type: value
+  typeOfValue: string
+- computed: getValueFrom
+  inTableColumn: true
+  label:
+    text: Value From
+  path: valueFrom/type
+  type: value
+  typeOfValue: string
+- computed: getRefName
+  inTableColumn: true
+  label:
+    text: RefName
+  path: refName
+  type: value
+  typeOfValue: string
+- computed: getKeyOrValue
+  inTableColumn: true
+  label:
+    text: Key/Value
+  path: keyOrValue
+  type: value
+  typeOfValue: string
 type: single-step-form-array
