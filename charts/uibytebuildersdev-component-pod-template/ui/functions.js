@@ -68,7 +68,7 @@ async function getNamespacedResourceList(
   storeGet,
   { namespace, group, version, resource }
 ) {
-  const owner = storeGet("/user/username");
+  const owner = storeGet("/route/params/user");
   const cluster = storeGet("/cluster/clusterDefinition/spec/name");
 
   const url = `/clusters/${owner}/${cluster}/proxy/${group}/${version}/namespaces/${namespace}/${resource}`;

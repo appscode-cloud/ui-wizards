@@ -52,7 +52,7 @@ async function getResources(
   version,
   resource
 ) {
-  const owner = storeGet("/user/username");
+  const owner = storeGet("/route/params/user");
   const cluster = storeGet("/cluster/clusterDefinition/spec/name");
 
   try {
@@ -97,7 +97,7 @@ async function getNamespacedResourceList(
   storeGet,
   { namespace, group, version, resource }
 ) {
-  const owner = storeGet("/user/username");
+  const owner = storeGet("/route/params/user");
   const cluster = storeGet("/cluster/clusterDefinition/spec/name");
 
   const url = `/clusters/${owner}/${cluster}/proxy/${group}/${version}/namespaces/${namespace}/${resource}`;
@@ -124,7 +124,7 @@ async function getResourceList(
   storeGet,
   { group, version, resource }
 ) {
-  const owner = storeGet("/user/username");
+  const owner = storeGet("/route/params/user");
   const cluster = storeGet("/cluster/clusterDefinition/spec/name");
 
   const url = `/clusters/${owner}/${cluster}/proxy/${group}/${version}/${resource}`;
@@ -221,7 +221,7 @@ async function getPostgresVersions(
   version,
   resource
 ) {
-  const owner = storeGet("/user/username");
+  const owner = storeGet("/route/params/user");
   const cluster = storeGet("/cluster/clusterDefinition/spec/name");
 
   const queryParams = {
@@ -360,7 +360,7 @@ function setDatabaseMode({ model, getValue, watchDependency }) {
 async function getStorageClassNames(
   { axios, storeGet, commit, model, getValue }
 ) {
-  const owner = storeGet("/user/username");
+  const owner = storeGet("/route/params/user");
   const cluster = storeGet("/cluster/clusterDefinition/spec/name");
 
   const resp = await axios.get(
@@ -447,7 +447,7 @@ async function getIssuerRefsName({
   model,
   watchDependency,
 }) {
-  const owner = storeGet("/user/username");
+  const owner = storeGet("/route/params/user");
   const cluster = storeGet("/cluster/clusterDefinition/spec/name");
   watchDependency(
     "model#/resources/kubedbComPostgres/spec/tls/issuerRef/apiGroup"
@@ -1845,7 +1845,7 @@ async function getSecrets({
   getValue,
   watchDependency,
 }) {
-  const owner = storeGet("/user/username");
+  const owner = storeGet("/route/params/user");
   const cluster = storeGet("/cluster/clusterDefinition/spec/name");
   const namespace = getValue(model, "/metadata/release/namespace");
   watchDependency("model#/metadata/release/namespace");
