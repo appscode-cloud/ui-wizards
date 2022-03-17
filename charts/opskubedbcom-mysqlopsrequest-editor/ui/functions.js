@@ -660,6 +660,16 @@ function getAliasOptions() {
   return ["server", "client", "metrics-exporter"];
 }
 
+function isNamespaceDisabled({ route }) {
+  const { namespace } = route.query || {};
+  return !!namespace;
+}
+
+function isDatabaseRefDisabled({ route }) {
+  const { name } = route.query || {};
+  return !!name;
+}
+
 return {
 	fetchJsons,
 	returnFalse,
@@ -695,5 +705,7 @@ return {
   getRequestTypeFromRoute,
   isDbDetailsLoading,
   setValueFromDbDetails,
-  getAliasOptions
+  getAliasOptions,
+  isDatabaseRefDisabled,
+  isNamespaceDisabled
 }

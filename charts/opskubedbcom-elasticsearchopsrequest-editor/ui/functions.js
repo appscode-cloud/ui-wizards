@@ -693,6 +693,16 @@ function getAliasOptions({discriminator, getValue, watchDependency}) {
   return aliases;
 }
 
+function isNamespaceDisabled({ route }) {
+  const { namespace } = route.query || {};
+  return !!namespace;
+}
+
+function isDatabaseRefDisabled({ route }) {
+  const { name } = route.query || {};
+  return !!name;
+}
+
 return {
 	fetchJsons,
 	returnFalse,
@@ -732,4 +742,6 @@ return {
   hasResourceValue,
   hasVolumeExpansion,
   getAliasOptions,
+  isNamespaceDisabled,
+  isDatabaseRefDisabled
 }
