@@ -3,6 +3,7 @@ module go.bytebuilders.dev/ui-wizards
 go 1.16
 
 require (
+	github.com/json-iterator/go v1.1.12 // indirect
 	k8s.io/api v0.21.1
 	k8s.io/apimachinery v0.21.1
 	kmodules.xyz/client-go v0.0.0-20211028132207-0cf6ea46b030 // indirect
