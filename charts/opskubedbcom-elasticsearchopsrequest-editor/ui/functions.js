@@ -91,7 +91,6 @@ async function getElasticsearchDetails({
   model,
   getValue,
   watchDependency,
-  discriminator,
   setDiscriminatorValue
 }) {
   const owner = storeGet("/route/params/user");
@@ -108,11 +107,11 @@ async function getElasticsearchDetails({
     );
 
     const { version } = resp?.data?.spec || {};
-    const elasticVersions = await getElasticsearchVersions({axios, storeGet, discriminator, getValue, watchDependency});
-    const selectedVersion = elasticVersions?.find((item) => item.value === version);
+    const elasticVersions = await elasticVersions$api({ axios, storeGet });
+    const selectedVersion = elasticVersions?.find((item) => item?.metadata?.name === version);
 
     if(resp?.data?.spec) {
-      resp.data.spec.authPlugin = selectedVersion?.authPlugin || "";
+      resp.data.spec.authPlugin = selectedVersion?.spec?.authPlugin || "";
     }
 
     setDiscriminatorValue("/elasticsearchDetails", resp.data || {});
@@ -121,8 +120,7 @@ async function getElasticsearchDetails({
   } else return {};
 }
 
-async function getElasticsearchVersions({ axios, storeGet, discriminator, getValue, watchDependency }) {
-  watchDependency("discriminator#/elasticsearchDetails");
+async function elasticVersions$api({ axios, storeGet }) {
   const owner = storeGet("/route/params/user");
   const cluster = storeGet("/cluster/clusterDefinition/spec/name");
 
@@ -134,15 +132,25 @@ async function getElasticsearchVersions({ axios, storeGet, discriminator, getVal
       },
     },
   };
+  try {
 
-  const resp = await axios.get(
-    `/clusters/${owner}/${cluster}/proxy/catalog.kubedb.com/v1alpha1/elasticsearchversions`,
-    {
-      params: queryParams,
-    }
-  );
+    const resp = await axios.get(
+      `/clusters/${owner}/${cluster}/proxy/catalog.kubedb.com/v1alpha1/elasticsearchversions`,
+      {
+        params: queryParams,
+      }
+    );
+    return (resp && resp.data && resp.data.items) || [];
+  } catch (e) {
+    console.log(e);
+    return [];
+  }
+}
 
-  const resources = (resp && resp.data && resp.data.items) || [];
+async function getElasticsearchVersions({ axios, storeGet, discriminator, getValue, watchDependency }) {
+  watchDependency("discriminator#/elasticsearchDetails");
+
+  const resources = await elasticVersions$api({ axios, storeGet });
 
   const elasticsearchDetails = getValue(discriminator, "/elasticsearchDetails");
   const authPlugin = elasticsearchDetails?.spec?.authPlugin || "";
@@ -467,7 +475,7 @@ function onReconfigurationTypeChange(
   }
 }
 async function disableReconfigurationType(
-  { axios, storeGet, model, getValue, watchDependency, discriminator, setDiscriminatorValue, itemCtx },
+  { axios, storeGet, model, getValue, watchDependency, setDiscriminatorValue, itemCtx },
 ) {
   const dbDetails = await getElasticsearchDetails({
     axios,
@@ -475,7 +483,6 @@ async function disableReconfigurationType(
     model,
     getValue,
     watchDependency,
-    discriminator,
     setDiscriminatorValue
   });
 
@@ -709,6 +716,7 @@ return {
 	getNamespaces,
 	getElasticsearches,
 	getElasticsearchDetails,
+  elasticVersions$api,
 	getElasticsearchVersions,
 	ifRequestTypeEqualsTo,
 	onRequestTypeChange,
