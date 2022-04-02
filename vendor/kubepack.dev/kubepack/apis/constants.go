@@ -16,6 +16,12 @@ limitations under the License.
 
 package apis
 
+import (
+	core "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/sets"
+)
+
 const (
 	BundleRepoURL = "https://kubernetes-charts.storage.googleapis.com"
 
@@ -46,3 +52,9 @@ const (
 	YAMLHost   = "https://pkg.bytebuilders.xyz"
 	YAMLBucket = "gs://pkg.bytebuilders.xyz"
 )
+
+const (
+	DefaultKubernetesVersion = "1.22.0"
+)
+
+var BuiltinNamespaces = sets.NewString(core.NamespaceDefault, core.NamespaceNodeLease, metav1.NamespaceSystem)

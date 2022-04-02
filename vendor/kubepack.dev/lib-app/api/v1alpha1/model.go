@@ -27,8 +27,8 @@ type Metadata struct {
 }
 
 type ObjectMeta struct {
-	Name      string `json:"name,omitempty"`
-	Namespace string `json:"namespace,omitempty"`
+	Name      string `json:"name"`
+	Namespace string `json:"namespace"`
 }
 
 type ModelMetadata struct {
