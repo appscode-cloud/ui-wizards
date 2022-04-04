@@ -17,6 +17,7 @@ limitations under the License.
 package v1alpha1_test
 
 import (
+	"os"
 	"testing"
 
 	"go.bytebuilders.dev/ui-wizards/apis/wizards/v1alpha1"
@@ -25,7 +26,7 @@ import (
 )
 
 func TestDefaultValues(t *testing.T) {
-	checker := schemachecker.New("../../..", []interface{}{
+	checker := schemachecker.New(os.DirFS("../../.."),
 		v1alpha1.KubedbcomElasticsearchEditorOptionsSpec{},
 		v1alpha1.KubedbcomMariadbEditorOptionsSpec{},
 		v1alpha1.KubedbcomMemcachedEditorOptionsSpec{},
@@ -33,6 +34,6 @@ func TestDefaultValues(t *testing.T) {
 		v1alpha1.KubedbcomMysqlEditorOptionsSpec{},
 		v1alpha1.KubedbcomPostgresEditorOptionsSpec{},
 		v1alpha1.KubedbcomRedisEditorOptionsSpec{},
-	})
+	)
 	checker.TestAll(t)
 }
