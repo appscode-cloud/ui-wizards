@@ -60,8 +60,8 @@ The following table lists the configurable parameters of the `kubevaultcom-vault
 | spec.replicas                                                   |                                                    | <code>3</code>                                       |
 | spec.terminationPolicy                                          |                                                    | <code>WipeOut</code>                                 |
 | spec.machine                                                    |                                                    | <code>""</code>                                      |
-| spec.resources.limits.cpu                                       |                                                    | <code>".5"</code>                                    |
-| spec.resources.limits.memory                                    |                                                    | <code>1024Mi</code>                                  |
+| spec.resources.limits.cpu                                       |                                                    | <code>500m</code>                                    |
+| spec.resources.limits.memory                                    |                                                    | <code>1Gi</code>                                     |
 | spec.backend.tlsSecret.name                                     |                                                    | <code>""</code>                                      |
 | spec.backend.tlsSecret.consul.caCrt                             |                                                    | <code><ca-cert></code>                               |
 | spec.backend.tlsSecret.consul.clientCrt                         |                                                    | <code><client-cert></code>                           |

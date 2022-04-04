@@ -62,8 +62,8 @@ The following table lists the configurable parameters of the `kubedbcom-mariadb-
 | spec.storageClass.name       |                                                    | <code>standard</code>   |
 | spec.persistence.size        |                                                    | <code>10Gi</code>       |
 | spec.machine                 |                                                    | <code>""</code>         |
-| spec.resources.limits.cpu    |                                                    | <code>".5"</code>       |
-| spec.resources.limits.memory |                                                    | <code>1024Mi</code>     |
+| spec.resources.limits.cpu    |                                                    | <code>500m</code>       |
+| spec.resources.limits.memory |                                                    | <code>1Gi</code>        |
 | spec.authSecret.name         |                                                    | <code>""</code>         |
 | spec.authSecret.password     |                                                    | <code>""</code>         |
 
