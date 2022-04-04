@@ -57,12 +57,11 @@ The following table lists the configurable parameters of the `kubedbcom-memcache
 | spec.version                 | List options                                       | <code>1.5.4-v1</code>   |
 | spec.annotations             | Annotations to add to the database custom resource | <code>{}</code>         |
 | spec.labels                  | Labels to add to all the template objects          | <code>{}</code>         |
-| spec.mode                    | Standalone                                         | <code>Standalone</code> |
-| spec.replicas                |                                                    | <code>1</code>          |
+| spec.replicas                | Standalone mode: Standalone                        | <code>1</code>          |
 | spec.terminationPolicy       |                                                    | <code>WipeOut</code>    |
 | spec.machine                 |                                                    | <code>""</code>         |
-| spec.resources.limits.cpu    |                                                    | <code>".5"</code>       |
-| spec.resources.limits.memory |                                                    | <code>1024Mi</code>     |
+| spec.resources.limits.cpu    |                                                    | <code>500m</code>       |
+| spec.resources.limits.memory |                                                    | <code>1Gi</code>        |
 
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm upgrade -i`. For example:
