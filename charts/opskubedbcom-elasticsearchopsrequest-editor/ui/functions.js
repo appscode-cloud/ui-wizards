@@ -237,7 +237,8 @@ function initNamespace({ route }) {
   return namespace || null;
 }
 
-function initDatabaseRef({ route }) {
+function initDatabaseRef({ route, watchDependency }) {
+  watchDependency("model#/metadata/namespace");
   const { name } = route.query || {};
   return name;
 }
@@ -613,8 +614,8 @@ function isIssuerRefRequired({
   return !hasTls;
 }
 
-function getRequestTypeFromRoute({ route, discriminator, getValue, watchDependency }) {
-  const isDbloading = isDbDetailsLoading({discriminator, getValue, watchDependency});
+function getRequestTypeFromRoute({ route, discriminator, model, getValue, watchDependency }) {
+  const isDbloading = isDbDetailsLoading({discriminator, model, getValue, watchDependency});
   const { query } = route || {};
   const { requestType } = query || {};
   return isDbloading ? "" : requestType || "";
@@ -622,11 +623,13 @@ function getRequestTypeFromRoute({ route, discriminator, getValue, watchDependen
 
 // ************************************** Set db details *****************************************
 
-function isDbDetailsLoading({discriminator, getValue, watchDependency}) {
+function isDbDetailsLoading({discriminator, model, getValue, watchDependency}) {
   watchDependency("discriminator#/elasticsearchDetails");
+  watchDependency("model#/spec/databaseRef/name");
   const elasticsearchDetails = getValue(discriminator, "/elasticsearchDetails");
+  const dbName = getValue(model, "/spec/databaseRef/name");
   
-  return !elasticsearchDetails;
+  return !elasticsearchDetails || !dbName;
 }
 
 function setValueFromDbDetails({discriminator, getValue, watchDependency, commit}, path, commitPath) {
@@ -710,6 +713,14 @@ function isDatabaseRefDisabled({ route }) {
   return !!name;
 }
 
+function onNamespaceChange({commit}) {
+  commit("wizard/model$delete", "/spec/type");
+}
+
+function onDbChange({commit}) {
+  commit("wizard/model$delete", "/spec/type");
+}
+
 return {
 	fetchJsons,
 	returnFalse,
@@ -751,5 +762,7 @@ return {
   hasVolumeExpansion,
   getAliasOptions,
   isNamespaceDisabled,
-  isDatabaseRefDisabled
+  isDatabaseRefDisabled,
+  onNamespaceChange,
+  onDbChange,
 }

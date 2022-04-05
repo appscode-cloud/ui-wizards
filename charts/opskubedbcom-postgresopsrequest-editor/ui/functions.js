@@ -231,7 +231,8 @@ function initNamespace({ route }) {
   return namespace || null;
 }
 
-function initDatabaseRef({ route }) {
+function initDatabaseRef({ route, watchDependency }) {
+  watchDependency("model#/metadata/namespace");
   const { name } = route.query || {};
   return name;
 }
@@ -638,18 +639,20 @@ function getClientAuthModes({
   return options.map((item) => ({text: item, value: item }));
 }
 
-function getRequestTypeFromRoute({ route, discriminator, getValue, watchDependency }) {
-  const isDbloading = isDbDetailsLoading({discriminator, getValue, watchDependency});
+function getRequestTypeFromRoute({ route, model, discriminator, getValue, watchDependency }) {
+  const isDbloading = isDbDetailsLoading({discriminator, model, getValue, watchDependency});
   const { query } = route || {};
   const { requestType } = query || {};
   return isDbloading ? "" : requestType || "";
 }
 
-function isDbDetailsLoading({discriminator, getValue, watchDependency}) {
+function isDbDetailsLoading({discriminator, model, getValue, watchDependency}) {
   watchDependency("discriminator#/dbDetails");
+  watchDependency("model#/spec/databaseRef/name");
   const dbDetails = getValue(discriminator, "/dbDetails");
+  const dbName = getValue(model, "/spec/databaseRef/name");
   
-  return !dbDetails;
+  return !dbDetails || !dbName;
 }
 
 function setValueFromDbDetails({discriminator, getValue, watchDependency, commit}, path, commitPath) {
@@ -687,6 +690,14 @@ function isNamespaceDisabled({ route }) {
 function isDatabaseRefDisabled({ route }) {
   const { name } = route.query || {};
   return !!name;
+}
+
+function onNamespaceChange({commit}) {
+  commit("wizard/model$delete", "/spec/type");
+}
+
+function onDbChange({commit}) {
+  commit("wizard/model$delete", "/spec/type");
 }
 
 return {
@@ -729,5 +740,7 @@ return {
   setValueFromDbDetails,
   getAliasOptions,
   isDatabaseRefDisabled,
-  isNamespaceDisabled
+  isNamespaceDisabled,
+  onNamespaceChange,
+  onDbChange,
 }
