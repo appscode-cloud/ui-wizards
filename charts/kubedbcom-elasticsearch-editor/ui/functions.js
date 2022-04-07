@@ -667,7 +667,7 @@ function setDatabaseMode({ model, getValue, watchDependency }) {
 }
 
 async function getStorageClassNames(
-  { axios, storeGet, commit, setDiscriminatorValue, discriminator },
+  { axios, storeGet, commit, setDiscriminatorValue, getValue, model },
   path
 ) {
   const owner = storeGet("/route/params/user");
@@ -692,11 +692,14 @@ async function getStorageClassNames(
       item.metadata.annotations["storageclass.kubernetes.io/is-default-class"];
 
     if (isDefault && path) {
-      commit("wizard/model$update", {
-        path: path,
-        value: name,
-        force: true,
-      });
+      const className = getValue(model, path);
+      if (!className) {
+        commit("wizard/model$update", {
+          path: path,
+          value: name,
+          force: true,
+        });
+      }
     }
 
     item.text = name;
