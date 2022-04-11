@@ -235,7 +235,8 @@ function initNamespace({ route }) {
   return namespace || null;
 }
 
-function initDatabaseRef({ route }) {
+function initDatabaseRef({ route, watchDependency }) {
+  watchDependency("model#/metadata/namespace");
   const { name } = route.query || {};
   return name;
 }
@@ -600,8 +601,8 @@ function isIssuerRefRequired({
   return !hasTls;
 }
 
-function getRequestTypeFromRoute({ route, discriminator, getValue, watchDependency }) {
-  const isDbloading = isDbDetailsLoading({discriminator, getValue, watchDependency});
+function getRequestTypeFromRoute({ route, model, discriminator, getValue, watchDependency }) {
+  const isDbloading = isDbDetailsLoading({discriminator, model, getValue, watchDependency});
   const { query } = route || {};
   const { requestType } = query || {};
   return isDbloading ? "" : requestType || "";
@@ -609,11 +610,13 @@ function getRequestTypeFromRoute({ route, discriminator, getValue, watchDependen
 
 // ************************************** Set db details *****************************************
 
-function isDbDetailsLoading({discriminator, getValue, watchDependency}) {
+function isDbDetailsLoading({discriminator, model, getValue, watchDependency}) {
   watchDependency("discriminator#/dbDetails");
+  watchDependency("model#/spec/databaseRef/name");
   const dbDetails = getValue(discriminator, "/dbDetails");
-  
-  return !dbDetails;
+  const dbName = getValue(model, "/spec/databaseRef/name");
+
+  return !dbDetails || !dbName;
 }
 
 function setValueFromDbDetails({discriminator, getValue, watchDependency, commit}, path, commitPath) {
@@ -621,7 +624,7 @@ function setValueFromDbDetails({discriminator, getValue, watchDependency, commit
 
   const retValue = getValue(discriminator, `/dbDetails${path}`);
 
-  if(commitPath) {
+  if(commitPath && retValue) {
     const tlsOperation = getValue(discriminator, "/tlsOperation");
     
     // computed called when tls fields is not visible
@@ -652,6 +655,14 @@ function isNamespaceDisabled({ route }) {
 function isDatabaseRefDisabled({ route }) {
   const { name } = route.query || {};
   return !!name;
+}
+
+function onNamespaceChange({commit}) {
+  commit("wizard/model$delete", "/spec/type");
+}
+
+function onDbChange({commit}) {
+  commit("wizard/model$delete", "/spec/type");
 }
 
 return {
@@ -691,5 +702,7 @@ return {
   setValueFromDbDetails,
   getAliasOptions,
   isNamespaceDisabled,
-  isDatabaseRefDisabled
+  isDatabaseRefDisabled,
+  onNamespaceChange,
+  onDbChange,
 }
