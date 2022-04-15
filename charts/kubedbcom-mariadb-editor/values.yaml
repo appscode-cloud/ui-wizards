@@ -77,6 +77,32 @@ resources:
           kind: Issuer
           name: mariadb-ca
       version: 10.5.8
+  monitoringCoreosComPrometheusRule: # +doc-gen:break
+    apiVersion: monitoring.coreos.com/v1
+    kind: PrometheusRule
+    metadata:
+      name: mariadb
+      namespace: demo
+    spec:
+      groups:
+        - name: mariadb.database.default.release-name.rules
+          rules:
+            - alert: MySQLInstanceDown
+              annotations:
+                description: |-
+                  MySQL instance is down on {{ $labels.pod }}
+                    VALUE = {{ $value }}
+                    LABELS = {{ $labels }}
+                summary: MySQL instance down (instance {{ $labels.pod }})
+              expr: mysql_up{job="release-name-stats",namespace="default"} == 0
+              for: 0m
+              labels:
+                k8s-group: kubedb.com
+                k8s-kind: MariaDB
+                k8s-name: release-name
+                k8s-namespace: default
+                k8s-resource: mariadbs
+                severity: critical
   monitoringCoreosComServiceMonitor: # +doc-gen:break
     apiVersion: monitoring.coreos.com/v1
     kind: ServiceMonitor

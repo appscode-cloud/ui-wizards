@@ -71,6 +71,29 @@ resources:
           kind: Issuer
           name: postgres-ca
       version: 13.2-debian
+  monitoringCoreosComPrometheusRule: # +doc-gen:break
+    apiVersion: monitoring.coreos.com/v1
+    kind: PrometheusRule
+    metadata:
+      name: postgres
+      namespace: demo
+    spec:
+      groups:
+        - name: postgres.database.default.release-name.rules
+          rules:
+            - alert: PostgresqlDown
+              annotations:
+                description: |-
+                  MySQL instance is down on {{ $labels.pod }}
+                    VALUE = {{ $value }}
+                    LABELS = {{ $labels }}
+                summary: Postgres instance down (instance {{ $labels.pod }})
+              expr: pg_up{job="-stats",namespace="default" == 0
+              for: 0m
+              labels:
+                alertname: postgres_instance_down
+                app: postgres
+                severity: critical
   monitoringCoreosComServiceMonitor: # +doc-gen:break
     apiVersion: monitoring.coreos.com/v1
     kind: ServiceMonitor

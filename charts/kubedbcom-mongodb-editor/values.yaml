@@ -75,6 +75,32 @@ resources:
           kind: Issuer
           name: mongo-ca
       version: 4.2.3
+  monitoringCoreosComPrometheusRule: # +doc-gen:break
+    apiVersion: monitoring.coreos.com/v1
+    kind: PrometheusRule
+    metadata:
+      name: mongodb
+      namespace: demo
+    spec:
+      groups:
+        - name: mongodb.database.default.release-name.rules
+          rules:
+            - alert: MongodbVirtualMemoryUsage
+              annotations:
+                description: |-
+                  High memory usage
+                    VALUE = {{ $value }}
+                    LABELS = {{ $labels }}
+                summary: MongoDB virtual memory usage (instance {{ $labels.instance }})
+              expr: sum(mongodb_memory{type="virtual",job="release-name-stats",namespace="default"}) BY (job) > 2.097152e+06
+              for: 1m
+              labels:
+                k8s-group: kubedb.com
+                k8s-kind: MongoDB
+                k8s-name: release-name
+                k8s-namespace: default
+                k8s-resource: mongodbs
+                severity: warning
   monitoringCoreosComServiceMonitor: # +doc-gen:break
     apiVersion: monitoring.coreos.com/v1
     kind: ServiceMonitor
