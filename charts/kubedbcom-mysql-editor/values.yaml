@@ -81,6 +81,32 @@ resources:
           name: dc002fc3-c412-4d18-b1d4-66c1fbfbbc9b
         mode: GroupReplication
       version: 8.0.23-v1
+  monitoringCoreosComPrometheusRule: # +doc-gen:break
+    apiVersion: monitoring.coreos.com/v1
+    kind: PrometheusRule
+    metadata:
+      name: mysql
+      namespace: demo
+    spec:
+      groups:
+        - name: mysql.database.default.release-name.rules
+          rules:
+            - alert: MySQLInstanceDown
+              annotations:
+                description: |-
+                  MySQL instance is down on {{ $labels.pod }}
+                    VALUE = {{ $value }}
+                    LABELS = {{ $labels }}
+                summary: MySQL instance down (instance {{ $labels.pod }})
+              expr: mysql_up{job="release-name-stats",namespace="default"} == 0
+              for: 0m
+              labels:
+                k8s-group: kubedb.com
+                k8s-kind: MySQL
+                k8s-name: release-name
+                k8s-namespace: default
+                k8s-resource: mysqls
+                severity: critical
   monitoringCoreosComServiceMonitor: # +doc-gen:break
     apiVersion: monitoring.coreos.com/v1
     kind: ServiceMonitor

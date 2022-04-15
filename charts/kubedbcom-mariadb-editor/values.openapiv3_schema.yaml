@@ -911,6 +911,70 @@ properties:
             type: object
           spec:
             properties:
+              allowedSchemas:
+                default:
+                  namespaces:
+                    from: Same
+                properties:
+                  namespaces:
+                    default:
+                      from: Same
+                    properties:
+                      from:
+                        default: Same
+                        enum:
+                        - All
+                        - Selector
+                        - Same
+                        type: string
+                      selector:
+                        properties:
+                          matchExpressions:
+                            items:
+                              properties:
+                                key:
+                                  type: string
+                                operator:
+                                  type: string
+                                values:
+                                  items:
+                                    type: string
+                                  type: array
+                              required:
+                              - key
+                              - operator
+                              type: object
+                            type: array
+                          matchLabels:
+                            additionalProperties:
+                              type: string
+                            type: object
+                        type: object
+                    type: object
+                  selector:
+                    properties:
+                      matchExpressions:
+                        items:
+                          properties:
+                            key:
+                              type: string
+                            operator:
+                              type: string
+                            values:
+                              items:
+                                type: string
+                              type: array
+                          required:
+                          - key
+                          - operator
+                          type: object
+                        type: array
+                      matchLabels:
+                        additionalProperties:
+                          type: string
+                        type: object
+                    type: object
+                type: object
               authSecret:
                 properties:
                   name:
@@ -1866,10 +1930,18 @@ properties:
                         additionalProperties:
                           type: string
                         type: object
+                      labels:
+                        additionalProperties:
+                          type: string
+                        type: object
                     type: object
                   metadata:
                     properties:
                       annotations:
+                        additionalProperties:
+                          type: string
+                        type: object
+                      labels:
                         additionalProperties:
                           type: string
                         type: object
@@ -3316,6 +3388,10 @@ properties:
                           additionalProperties:
                             type: string
                           type: object
+                        labels:
+                          additionalProperties:
+                            type: string
+                          type: object
                       type: object
                     spec:
                       properties:
@@ -3550,6 +3626,73 @@ properties:
             required:
             - version
             type: object
+        type: object
+      monitoringCoreosComPrometheusRule:
+        properties:
+          apiVersion:
+            type: string
+          kind:
+            type: string
+          metadata:
+            properties:
+              annotations:
+                additionalProperties:
+                  type: string
+                type: object
+              labels:
+                additionalProperties:
+                  type: string
+                type: object
+              name:
+                type: string
+              namespace:
+                type: string
+            type: object
+          spec:
+            properties:
+              groups:
+                items:
+                  properties:
+                    interval:
+                      type: string
+                    name:
+                      type: string
+                    partial_response_strategy:
+                      type: string
+                    rules:
+                      items:
+                        properties:
+                          alert:
+                            type: string
+                          annotations:
+                            additionalProperties:
+                              type: string
+                            type: object
+                          expr:
+                            anyOf:
+                            - type: integer
+                            - type: string
+                            x-kubernetes-int-or-string: true
+                          for:
+                            type: string
+                          labels:
+                            additionalProperties:
+                              type: string
+                            type: object
+                          record:
+                            type: string
+                        required:
+                        - expr
+                        type: object
+                      type: array
+                  required:
+                  - name
+                  - rules
+                  type: object
+                type: array
+            type: object
+        required:
+        - spec
         type: object
       monitoringCoreosComServiceMonitor:
         properties:
@@ -4266,6 +4409,10 @@ properties:
                 properties:
                   name:
                     type: string
+                  namespace:
+                    type: string
+                required:
+                - name
                 type: object
               retentionPolicy:
                 properties:
@@ -5092,6 +5239,10 @@ properties:
                         additionalProperties:
                           type: string
                         type: object
+                      podAnnotations:
+                        additionalProperties:
+                          type: string
+                        type: object
                       priority:
                         format: int32
                         type: integer
@@ -5172,6 +5323,10 @@ properties:
                                 type: string
                             type: object
                         type: object
+                      serviceAccountAnnotations:
+                        additionalProperties:
+                          type: string
+                        type: object
                       serviceAccountName:
                         type: string
                       tolerations:
@@ -5198,6 +5353,10 @@ properties:
                 properties:
                   alias:
                     type: string
+                  args:
+                    items:
+                      type: string
+                    type: array
                   exclude:
                     items:
                       type: string
@@ -6039,6 +6198,42 @@ properties:
                         type: string
                     type: object
                 type: object
+              usagePolicy:
+                properties:
+                  allowedNamespaces:
+                    properties:
+                      from:
+                        default: Same
+                        enum:
+                        - All
+                        - Selector
+                        - Same
+                        type: string
+                      selector:
+                        properties:
+                          matchExpressions:
+                            items:
+                              properties:
+                                key:
+                                  type: string
+                                operator:
+                                  type: string
+                                values:
+                                  items:
+                                    type: string
+                                  type: array
+                              required:
+                              - key
+                              - operator
+                              type: object
+                            type: array
+                          matchLabels:
+                            additionalProperties:
+                              type: string
+                            type: object
+                        type: object
+                    type: object
+                type: object
               wipeOut:
                 type: boolean
             type: object
@@ -6807,6 +7002,42 @@ properties:
                         type: string
                     type: object
                 type: object
+              usagePolicy:
+                properties:
+                  allowedNamespaces:
+                    properties:
+                      from:
+                        default: Same
+                        enum:
+                        - All
+                        - Selector
+                        - Same
+                        type: string
+                      selector:
+                        properties:
+                          matchExpressions:
+                            items:
+                              properties:
+                                key:
+                                  type: string
+                                operator:
+                                  type: string
+                                values:
+                                  items:
+                                    type: string
+                                  type: array
+                              required:
+                              - key
+                              - operator
+                              type: object
+                            type: array
+                          matchLabels:
+                            additionalProperties:
+                              type: string
+                            type: object
+                        type: object
+                    type: object
+                type: object
               wipeOut:
                 type: boolean
             type: object
@@ -7185,6 +7416,10 @@ properties:
                 properties:
                   name:
                     type: string
+                  namespace:
+                    type: string
+                required:
+                - name
                 type: object
               rules:
                 items:
@@ -8004,6 +8239,10 @@ properties:
                         additionalProperties:
                           type: string
                         type: object
+                      podAnnotations:
+                        additionalProperties:
+                          type: string
+                        type: object
                       priority:
                         format: int32
                         type: integer
@@ -8084,6 +8323,10 @@ properties:
                                 type: string
                             type: object
                         type: object
+                      serviceAccountAnnotations:
+                        additionalProperties:
+                          type: string
+                        type: object
                       serviceAccountName:
                         type: string
                       tolerations:
@@ -8108,6 +8351,10 @@ properties:
                 properties:
                   alias:
                     type: string
+                  args:
+                    items:
+                      type: string
+                    type: array
                   ref:
                     properties:
                       apiVersion:

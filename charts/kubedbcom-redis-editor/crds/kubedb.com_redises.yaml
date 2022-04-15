@@ -24,6 +24,70 @@ spec:
             type: object
           spec:
             properties:
+              allowedSchemas:
+                default:
+                  namespaces:
+                    from: Same
+                properties:
+                  namespaces:
+                    default:
+                      from: Same
+                    properties:
+                      from:
+                        default: Same
+                        enum:
+                        - All
+                        - Selector
+                        - Same
+                        type: string
+                      selector:
+                        properties:
+                          matchExpressions:
+                            items:
+                              properties:
+                                key:
+                                  type: string
+                                operator:
+                                  type: string
+                                values:
+                                  items:
+                                    type: string
+                                  type: array
+                              required:
+                              - key
+                              - operator
+                              type: object
+                            type: array
+                          matchLabels:
+                            additionalProperties:
+                              type: string
+                            type: object
+                        type: object
+                    type: object
+                  selector:
+                    properties:
+                      matchExpressions:
+                        items:
+                          properties:
+                            key:
+                              type: string
+                            operator:
+                              type: string
+                            values:
+                              items:
+                                type: string
+                              type: array
+                          required:
+                          - key
+                          - operator
+                          type: object
+                        type: array
+                      matchLabels:
+                        additionalProperties:
+                          type: string
+                        type: object
+                    type: object
+                type: object
               authSecret:
                 properties:
                   name:
@@ -124,6 +188,8 @@ spec:
                         type: object
                     type: object
                 type: object
+              disableAuth:
+                type: boolean
               halted:
                 type: boolean
               init:
@@ -994,10 +1060,18 @@ spec:
                         additionalProperties:
                           type: string
                         type: object
+                      labels:
+                        additionalProperties:
+                          type: string
+                        type: object
                     type: object
                   metadata:
                     properties:
                       annotations:
+                        additionalProperties:
+                          type: string
+                        type: object
+                      labels:
                         additionalProperties:
                           type: string
                         type: object
@@ -2446,6 +2520,10 @@ spec:
                     metadata:
                       properties:
                         annotations:
+                          additionalProperties:
+                            type: string
+                          type: object
+                        labels:
                           additionalProperties:
                             type: string
                           type: object

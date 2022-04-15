@@ -24,6 +24,70 @@ spec:
             type: object
           spec:
             properties:
+              allowedSchemas:
+                default:
+                  namespaces:
+                    from: Same
+                properties:
+                  namespaces:
+                    default:
+                      from: Same
+                    properties:
+                      from:
+                        default: Same
+                        enum:
+                        - All
+                        - Selector
+                        - Same
+                        type: string
+                      selector:
+                        properties:
+                          matchExpressions:
+                            items:
+                              properties:
+                                key:
+                                  type: string
+                                operator:
+                                  type: string
+                                values:
+                                  items:
+                                    type: string
+                                  type: array
+                              required:
+                              - key
+                              - operator
+                              type: object
+                            type: array
+                          matchLabels:
+                            additionalProperties:
+                              type: string
+                            type: object
+                        type: object
+                    type: object
+                  selector:
+                    properties:
+                      matchExpressions:
+                        items:
+                          properties:
+                            key:
+                              type: string
+                            operator:
+                              type: string
+                            values:
+                              items:
+                                type: string
+                              type: array
+                          required:
+                          - key
+                          - operator
+                          type: object
+                        type: array
+                      matchLabels:
+                        additionalProperties:
+                          type: string
+                        type: object
+                    type: object
+                type: object
               authSecret:
                 properties:
                   name:
@@ -121,6 +185,17 @@ spec:
                             type: string
                         type: object
                     type: object
+                type: object
+              ephemeralStorage:
+                properties:
+                  medium:
+                    type: string
+                  sizeLimit:
+                    anyOf:
+                    - type: integer
+                    - type: string
+                    pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                    x-kubernetes-int-or-string: true
                 type: object
               halted:
                 type: boolean
@@ -991,10 +1066,18 @@ spec:
                         additionalProperties:
                           type: string
                         type: object
+                      labels:
+                        additionalProperties:
+                          type: string
+                        type: object
                     type: object
                   metadata:
                     properties:
                       annotations:
+                        additionalProperties:
+                          type: string
+                        type: object
+                      labels:
                         additionalProperties:
                           type: string
                         type: object
@@ -2446,6 +2529,10 @@ spec:
                           additionalProperties:
                             type: string
                           type: object
+                        labels:
+                          additionalProperties:
+                            type: string
+                          type: object
                       type: object
                     spec:
                       properties:
@@ -2506,6 +2593,17 @@ spec:
                           name:
                             type: string
                         type: object
+                      ephemeralStorage:
+                        properties:
+                          medium:
+                            type: string
+                          sizeLimit:
+                            anyOf:
+                            - type: integer
+                            - type: string
+                            pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                            x-kubernetes-int-or-string: true
+                        type: object
                       podTemplate:
                         properties:
                           controller:
@@ -2514,10 +2612,18 @@ spec:
                                 additionalProperties:
                                   type: string
                                 type: object
+                              labels:
+                                additionalProperties:
+                                  type: string
+                                type: object
                             type: object
                           metadata:
                             properties:
                               annotations:
+                                additionalProperties:
+                                  type: string
+                                type: object
+                              labels:
                                 additionalProperties:
                                   type: string
                                 type: object
@@ -4034,10 +4140,18 @@ spec:
                                 additionalProperties:
                                   type: string
                                 type: object
+                              labels:
+                                additionalProperties:
+                                  type: string
+                                type: object
                             type: object
                           metadata:
                             properties:
                               annotations:
+                                additionalProperties:
+                                  type: string
+                                type: object
+                              labels:
                                 additionalProperties:
                                   type: string
                                 type: object
@@ -5479,6 +5593,17 @@ spec:
                           name:
                             type: string
                         type: object
+                      ephemeralStorage:
+                        properties:
+                          medium:
+                            type: string
+                          sizeLimit:
+                            anyOf:
+                            - type: integer
+                            - type: string
+                            pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                            x-kubernetes-int-or-string: true
+                        type: object
                       podTemplate:
                         properties:
                           controller:
@@ -5487,10 +5612,18 @@ spec:
                                 additionalProperties:
                                   type: string
                                 type: object
+                              labels:
+                                additionalProperties:
+                                  type: string
+                                type: object
                             type: object
                           metadata:
                             properties:
                               annotations:
+                                additionalProperties:
+                                  type: string
+                                type: object
+                              labels:
                                 additionalProperties:
                                   type: string
                                 type: object
