@@ -58,6 +58,8 @@ type KubedbcomMongodbEditorOptionsSpecSpec struct {
 	Machine           MachineType               `json:"machine"`
 	Resources         core.ResourceRequirements `json:"resources"`
 	AuthSecret        AuthSecret                `json:"authSecret"`
+	Monitoring        Monitoring                `json:"monitoring"`
+	Alert             MongoDBAlert              `json:"alert"`
 }
 
 // +kubebuilder:validation:Enum=Standalone;Replicaset;Sharded
@@ -93,6 +95,45 @@ type MongoDBShardTopology struct {
 	ConfigServer MongoDBConfigServer `json:"configServer"`
 	Mongos       MongoDBMongos       `json:"mongos"`
 }
+
+// *** Alerts *** //
+
+type MongoDBAlert struct {
+	Enabled              bool               `json:"enabled"`
+	Labels               map[string]string  `json:"labels"`
+	Annotations          map[string]string  `json:"annotations"`
+	AdditionalRuleLabels map[string]string  `json:"additionalRuleLabels"`
+	Groups               MongoDBAlertGroups `json:"groups"`
+}
+
+type MongoDBAlertGroups struct {
+	Database      MongoDBDatabaseAlert `json:"database"`
+	Provisioner   ProvisionerAlert     `json:"provisioner"`
+	OpsManager    OpsManagerAlert      `json:"opsManager"`
+	Stash         StashAlert           `json:"stash"`
+	SchemaManager SchemaManagerAlert   `json:"schemaManager"`
+}
+
+type MongoDBDatabaseAlert struct {
+	Enabled bool                      `json:"enabled"`
+	Rules   MongoDBDatabaseAlertRules `json:"rules"`
+}
+
+type MongoDBDatabaseAlertRules struct {
+	MongodbVirtualMemoryUsage        IntValAlert `json:"mongodbVirtualMemoryUsage"`
+	MongodbReplicationLag            IntValAlert `json:"mongodbReplicationLag"`
+	MongodbNumberCursorsOpen         IntValAlert `json:"mongodbNumberCursorsOpen"`
+	MongodbCursorsTimeouts           IntValAlert `json:"mongodbCursorsTimeouts"`
+	MongodbTooManyConnections        IntValAlert `json:"mongodbTooManyConnections"`
+	MongoDBPhaseCritical             FixedAlert  `json:"mongoDBPhaseCritical"`
+	MongoDBDown                      FixedAlert  `json:"mongoDBDown"`
+	MongodbHighLatency               IntValAlert `json:"mongodbHighLatency"`
+	MongodbHighTicketUtilization     IntValAlert `json:"mongodbHighTicketUtilization"`
+	MongodbRecurrentCursorTimeout    IntValAlert `json:"mongodbRecurrentCursorTimeout"`
+	MongodbRecurrentMemoryPageFaults IntValAlert `json:"mongodbRecurrentMemoryPageFaults"`
+}
+
+// *** Alerts *** //
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 

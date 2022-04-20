@@ -53,6 +53,7 @@ type KubevaultcomVaultserverEditorOptionsSpecSpec struct {
 	Resources         core.ResourceRequirements `json:"resources"`
 	Backend           VaultserverBackend        `json:"backend"`
 	Unsealer          VaultserverUnsealer       `json:"unsealer"`
+	Monitoring        Monitoring                `json:"monitoring"`
 }
 
 type VaultserverBackend struct {

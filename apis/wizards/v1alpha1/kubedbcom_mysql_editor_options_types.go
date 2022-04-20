@@ -57,6 +57,8 @@ type KubedbcomMysqlEditorOptionsSpecSpec struct {
 	Machine           MachineType               `json:"machine"`
 	Resources         core.ResourceRequirements `json:"resources"`
 	AuthSecret        AuthSecret                `json:"authSecret"`
+	Monitoring        Monitoring                `json:"monitoring"`
+	Alert             MySQLAlert                `json:"alert"`
 }
 
 type MySQLInnoDBCluster struct {
@@ -66,6 +68,58 @@ type MySQLInnoDBCluster struct {
 type MySQLRouter struct {
 	Replicas int `json:"replicas"`
 }
+
+// *** Alerts *** //
+
+type MySQLAlert struct {
+	Enabled              bool              `json:"enabled"`
+	Labels               map[string]string `json:"labels"`
+	Annotations          map[string]string `json:"annotations"`
+	AdditionalRuleLabels map[string]string `json:"additionalRuleLabels"`
+	Groups               MySQLAlertGroups  `json:"groups"`
+}
+
+type MySQLAlertGroups struct {
+	Database      MySQLDatabaseAlert `json:"database"`
+	Group         MySQLGroupAlert    `json:"group"`
+	Provisioner   ProvisionerAlert   `json:"provisioner"`
+	OpsManager    OpsManagerAlert    `json:"opsManager"`
+	Stash         StashAlert         `json:"stash"`
+	SchemaManager SchemaManagerAlert `json:"schemaManager"`
+}
+
+type MySQLDatabaseAlert struct {
+	Enabled bool                    `json:"enabled"`
+	Rules   MySQLDatabaseAlertRules `json:"rules"`
+}
+
+type MySQLDatabaseAlertRules struct {
+	MySQLInstanceDown       FixedAlert  `json:"mySQLInstanceDown"`
+	MySQLServiceDown        FixedAlert  `json:"mySQLServiceDown"`
+	MySQLTooManyConnections IntValAlert `json:"mySQLTooManyConnections"`
+	MySQLHighThreadsRunning IntValAlert `json:"mySQLHighThreadsRunning"`
+	MySQLSlowQueries        FixedAlert  `json:"mySQLSlowQueries"`
+	MySQLInnoDBLogWaits     IntValAlert `json:"mySQLInnoDBLogWaits"`
+	MySQLRestarted          IntValAlert `json:"mySQLRestarted"`
+	MySQLHighQPS            IntValAlert `json:"mySQLHighQPS"`
+	MySQLHighIncomingBytes  IntValAlert `json:"mySQLHighIncomingBytes"`
+	MySQLHighOutgoingBytes  IntValAlert `json:"mySQLHighOutgoingBytes"`
+	MySQLTooManyOpenFiles   IntValAlert `json:"mySQLTooManyOpenFiles"`
+}
+
+type MySQLGroupAlert struct {
+	Enabled bool                 `json:"enabled"`
+	Rules   MySQLGroupAlertRules `json:"rules"`
+}
+
+type MySQLGroupAlertRules struct {
+	MySQLHighReplicationDelay           FloatValAlertConfig `json:"mySQLHighReplicationDelay"`
+	MySQLHighReplicationTransportTime   FloatValAlertConfig `json:"mySQLHighReplicationTransportTime"`
+	MySQLHighReplicationApplyTime       FloatValAlertConfig `json:"mySQLHighReplicationApplyTime"`
+	MySQLReplicationHighTransactionTime FloatValAlertConfig `json:"mySQLReplicationHighTransactionTime"`
+}
+
+// *** Alerts *** //
 
 // +kubebuilder:validation:Enum=Standalone;GroupReplication;InnoDBCluster
 type MysqlMode string

@@ -18,7 +18,7 @@ GO_PKG   := go.bytebuilders.dev
 REPO     := $(notdir $(shell pwd))
 BIN      := ui-wizards
 
-CRD_OPTIONS          ?= "crd:crdVersions={v1}"
+CRD_OPTIONS          ?= "crd:allowDangerousTypes=true"
 # https://github.com/appscodelabs/gengo-builder
 CODE_GENERATOR_IMAGE ?= appscode/gengo:release-1.21
 API_GROUPS           ?= wizards:v1alpha1
