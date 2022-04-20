@@ -53,10 +53,61 @@ type KubedbcomMariadbEditorOptionsSpecSpec struct {
 	Machine           MachineType               `json:"machine"`
 	Resources         core.ResourceRequirements `json:"resources"`
 	AuthSecret        AuthSecret                `json:"authSecret"`
+	Monitoring        Monitoring                `json:"monitoring"`
+	Alert             MariaDBAlert              `json:"alert"`
 }
 
 // +kubebuilder:validation:Enum=Standalone;Cluster
 type MariaDBMode string
+
+// *** Alerts *** //
+
+type MariaDBAlert struct {
+	Enabled              bool               `json:"enabled"`
+	Labels               map[string]string  `json:"labels"`
+	Annotations          map[string]string  `json:"annotations"`
+	AdditionalRuleLabels map[string]string  `json:"additionalRuleLabels"`
+	Groups               MariaDBAlertGroups `json:"groups"`
+}
+
+type MariaDBAlertGroups struct {
+	Database      MariaDBDatabaseAlert `json:"database"`
+	Cluster       MariaDBClusterAlert  `json:"cluster"`
+	Provisioner   ProvisionerAlert     `json:"provisioner"`
+	OpsManager    OpsManagerAlert      `json:"opsManager"`
+	Stash         StashAlert           `json:"stash"`
+	SchemaManager SchemaManagerAlert   `json:"schemaManager"`
+}
+
+type MariaDBDatabaseAlert struct {
+	Enabled bool                      `json:"enabled"`
+	Rules   MariaDBDatabaseAlertRules `json:"rules"`
+}
+
+type MariaDBDatabaseAlertRules struct {
+	MySQLInstanceDown       FixedAlert  `json:"mySQLInstanceDown"`
+	MySQLServiceDown        FixedAlert  `json:"mySQLServiceDown"`
+	MySQLTooManyConnections IntValAlert `json:"mySQLTooManyConnections"`
+	MySQLHighThreadsRunning IntValAlert `json:"mySQLHighThreadsRunning"`
+	MySQLSlowQueries        FixedAlert  `json:"mySQLSlowQueries"`
+	MySQLInnoDBLogWaits     IntValAlert `json:"mySQLInnoDBLogWaits"`
+	MySQLRestarted          IntValAlert `json:"mySQLRestarted"`
+	MySQLHighQPS            IntValAlert `json:"mySQLHighQPS"`
+	MySQLHighIncomingBytes  IntValAlert `json:"mySQLHighIncomingBytes"`
+	MySQLHighOutgoingBytes  IntValAlert `json:"mySQLHighOutgoingBytes"`
+	MySQLTooManyOpenFiles   IntValAlert `json:"mySQLTooManyOpenFiles"`
+}
+
+type MariaDBClusterAlert struct {
+	Enabled bool                     `json:"enabled"`
+	Rules   MariaDBClusterAlertRules `json:"rules"`
+}
+
+type MariaDBClusterAlertRules struct {
+	GaleraReplicationLatencyTooLong FloatValAlertConfig `json:"galeraReplicationLatencyTooLong"`
+}
+
+// *** Alerts *** //
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 

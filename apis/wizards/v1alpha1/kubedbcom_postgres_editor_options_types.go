@@ -53,7 +53,46 @@ type KubedbcomPostgresEditorOptionsSpecSpec struct {
 	Machine           MachineType               `json:"machine"`
 	Resources         core.ResourceRequirements `json:"resources"`
 	AuthSecret        AuthSecret                `json:"authSecret"`
+	Monitoring        Monitoring                `json:"monitoring"`
+	Alert             PostgresAlert             `json:"alert"`
 }
+
+// *** Alerts *** //
+
+type PostgresAlert struct {
+	Enabled              bool                `json:"enabled"`
+	Labels               map[string]string   `json:"labels"`
+	Annotations          map[string]string   `json:"annotations"`
+	AdditionalRuleLabels map[string]string   `json:"additionalRuleLabels"`
+	Groups               PostgresAlertGroups `json:"groups"`
+}
+
+type PostgresAlertGroups struct {
+	Database      PostgresDatabaseAlert `json:"database"`
+	Provisioner   ProvisionerAlert      `json:"provisioner"`
+	OpsManager    OpsManagerAlert       `json:"opsManager"`
+	Stash         StashAlert            `json:"stash"`
+	SchemaManager SchemaManagerAlert    `json:"schemaManager"`
+}
+
+type PostgresDatabaseAlert struct {
+	Enabled bool                       `json:"enabled"`
+	Rules   PostgresDatabaseAlertRules `json:"rules"`
+}
+
+type PostgresDatabaseAlertRules struct {
+	PostgresInstanceDown           FixedAlert          `json:"postgresInstanceDown"`
+	PostgresRestarted              FixedAlert          `json:"postgresRestarted"`
+	PostgresTooManyConnections     IntValAlert         `json:"postgresTooManyConnections"`
+	PostgresqlNotEnoughConnections IntValAlert         `json:"postgresqlNotEnoughConnections"`
+	PostgresSlowQueries            FixedAlert          `json:"postgresSlowQueries"`
+	PostgresqlReplicationLag       StringValAlert      `json:"postgresqlReplicationLag"`
+	PostgresqlHighRollbackRate     FloatValAlertConfig `json:"postgresqlHighRollbackRate"`
+	PostgresqlSplitBrain           FixedAlert          `json:"postgresqlSplitBrain"`
+	PostgresqlTooManyLocksAcquired FloatValAlertConfig `json:"postgresqlTooManyLocksAcquired"`
+}
+
+// *** Alerts *** //
 
 // +kubebuilder:validation:Enum=Standalone;Cluster
 type PostgresMode string

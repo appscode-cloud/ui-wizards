@@ -50,7 +50,11 @@ type KubedbcomMemcachedEditorOptionsSpecSpec struct {
 	TerminationPolicy TerminationPolicy         `json:"terminationPolicy"`
 	Machine           MachineType               `json:"machine"`
 	Resources         core.ResourceRequirements `json:"resources"`
+	Monitoring        Monitoring                `json:"monitoring"`
 }
+
+// *** Alerts *** //
+// *** Alerts *** //
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 

@@ -37,3 +37,100 @@ type AuthSecret struct {
 	// +kubebuilder:validation:Format:=password
 	Password string `json:"password"`
 }
+
+// *** Monitoring *** //
+
+// +kubebuilder:validation:Enum=prometheus.io;prometheus.io/operator;prometheus.io/builtin
+type MonitoringAgent string
+
+type Monitoring struct {
+	Agent          MonitoringAgent       `json:"agent"`
+	ServiceMonitor *ServiceMonitorLabels `json:"serviceMonitor"`
+}
+
+type ServiceMonitorLabels struct {
+	// +optional
+	Labels map[string]string `json:"labels"`
+}
+
+// *** Monitoring *** //
+
+// *** Alerts *** //
+
+type FixedAlert struct {
+	Enabled  bool   `json:"enabled"`
+	Duration string `json:"duration"`
+	Severity string `json:"severity"`
+}
+
+type StringValAlert struct {
+	Enabled  bool   `json:"enabled"`
+	Duration string `json:"duration"`
+	Val      string `json:"val"`
+	Severity string `json:"severity"`
+}
+
+type IntValAlert struct {
+	Enabled  bool   `json:"enabled"`
+	Duration string `json:"duration"`
+	Val      int    `json:"val"`
+	Severity string `json:"severity"`
+}
+
+type FloatValAlertConfig struct {
+	Enabled  bool    `json:"enabled"`
+	Duration string  `json:"duration"`
+	Val      float64 `json:"val"`
+	Severity string  `json:"severity"`
+}
+
+type ProvisionerAlert struct {
+	Enabled bool                  `json:"enabled"`
+	Rules   ProvisionerAlertRules `json:"rules"`
+}
+
+type ProvisionerAlertRules struct {
+	AppPhaseNotReady FixedAlert `json:"appPhaseNotReady"`
+	AppPhaseCritical FixedAlert `json:"appPhaseCritical"`
+}
+
+type OpsManagerAlert struct {
+	Enabled bool                 `json:"enabled"`
+	Rules   OpsManagerAlertRules `json:"rules"`
+}
+
+type OpsManagerAlertRules struct {
+	OpsRequestOnProgress              FixedAlert `json:"opsRequestOnProgress"`
+	OpsRequestStatusProgressingToLong FixedAlert `json:"opsRequestStatusProgressingToLong"`
+	OpsRequestFailed                  FixedAlert `json:"opsRequestFailed"`
+}
+
+type StashAlert struct {
+	Enabled bool            `json:"enabled"`
+	Rules   StashAlertRules `json:"rules"`
+}
+
+type StashAlertRules struct {
+	BackupSessionFailed         FixedAlert  `json:"backupSessionFailed"`
+	RestoreSessionFailed        FixedAlert  `json:"restoreSessionFailed"`
+	NoBackupSessionForTooLong   IntValAlert `json:"noBackupSessionForTooLong"`
+	RepositoryCorrupted         FixedAlert  `json:"repositoryCorrupted"`
+	RepositoryStorageRunningLow IntValAlert `json:"repositoryStorageRunningLow"`
+	BackupSessionPeriodTooLong  IntValAlert `json:"backupSessionPeriodTooLong"`
+	RestoreSessionPeriodTooLong IntValAlert `json:"restoreSessionPeriodTooLong"`
+}
+
+type SchemaManagerAlert struct {
+	Enabled bool                    `json:"enabled"`
+	Rules   SchemaManagerAlertRules `json:"rules"`
+}
+
+type SchemaManagerAlertRules struct {
+	SchemaPendingForTooLong     FixedAlert `json:"schemaPendingForTooLong"`
+	SchemaInProgressForTooLong  FixedAlert `json:"schemaInProgressForTooLong"`
+	SchemaTerminatingForTooLong FixedAlert `json:"schemaTerminatingForTooLong"`
+	SchemaFailed                FixedAlert `json:"schemaFailed"`
+	SchemaExpired               FixedAlert `json:"schemaExpired"`
+}
+
+// *** Alerts *** //
