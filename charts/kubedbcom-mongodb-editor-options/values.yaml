@@ -67,3 +67,183 @@ spec:
   authSecret:
     name: ""
     password: ""
+
+  monitoring:
+    # Name of monitoring agent (one of "prometheus.io", "prometheus.io/operator", "prometheus.io/builtin")
+    agent: prometheus.io/operator
+    serviceMonitor:
+      # Specify the labels for ServiceMonitor.
+      # Prometheus crd will select ServiceMonitor using these labels.
+      # Only usable when monitoring agent is `prometheus.io/webhook server`.
+      labels: # +doc-gen:break
+        release: kube-prometheus-stack
+
+  alert:
+    ## Enable PrometheusRule alerts
+    enabled: true
+
+    ## Labels for default rules
+    labels: # +doc-gen:break
+      release: kube-prometheus-stack
+
+    ## Annotations for default rules
+    annotations: {}
+
+    ## Additional labels for PrometheusRule alerts
+    additionalRuleLabels: {}
+
+    ## Prefix for runbook URLs. Use this to override the first part of the runbookURLs that is common to all rules.
+    # runbookUrl: "https://runbooks.prometheus-operator.dev/runbooks"
+
+    groups:
+      database:
+        enabled: true
+        rules:
+          # Sepcifies the alert configuration for virtual memory usage.
+          mongodbVirtualMemoryUsage:
+            enabled: true
+            val: 2097152 # 2GB
+            duration: "1m"
+            severity: warning
+          # Sepcifies the alert configuration for replication lag.
+          mongodbReplicationLag:
+            enabled: true
+            val: 10
+            duration: "0m"
+            severity: crititcal
+          # Sepcifies the alert configuration for number of opened cursors are more than a specified amount.
+          mongodbNumberCursorsOpen:
+            enabled: true
+            val: 10000
+            duration: "2m"
+            severity: warning
+          # Sepcifies the alert configuration for timed out cursors.
+          mongodbCursorsTimeouts:
+            enabled: true
+            val: 100
+            duration: "2m"
+            severity: warning
+          # Sepcifies the alert configuration for too many connections are opened.
+          mongodbTooManyConnections:
+            enabled: true
+            val: 80 # percentage
+            duration: "2m"
+            severity: warning
+          # Sepcifies the alert configuration for database is in Critical phase, that means one or more of the nodes are down but the database read/write are not hampered.
+          mongoDBPhaseCritical:
+            enabled: true
+            duration: "3m"
+            severity: warning
+          # Sepcifies the alert configuration for database is in NotReady phase, that means the database is not accepting connections, read/write are hampered.
+          mongoDBDown:
+            enabled: true
+            duration: "30s"
+            severity: crititcal
+          # Sepcifies the alert configuration for high latency.
+          mongodbHighLatency:
+            enabled: true
+            val: 250000
+            duration: "10m"
+            severity: warning
+          # Sepcifies the alert configuration for high ticket utilizations.
+          mongodbHighTicketUtilization:
+            enabled: true
+            val: 75 # percentage
+            duration: "10m"
+            severity: warning
+          # Sepcifies the alert configuration for recurrent cursor timeout.
+          mongodbRecurrentCursorTimeout:
+            enabled: true
+            val: 0
+            duration: "30m"
+            severity: warning
+          # Sepcifies the alert configuration for recurrent memory page faults.
+          mongodbRecurrentMemoryPageFaults:
+            enabled: true
+            val: 0
+            duration: "30m"
+            severity: warning
+      provisioner:
+        enabled: true
+        rules:
+          appPhaseNotReady:
+            enabled: true
+            duration: "1m"
+            severity: critical
+          appPhaseCritical:
+            enabled: true
+            duration: "15m"
+            severity: warning
+      opsManager:
+        enabled: true
+        rules:
+          opsRequestOnProgress:
+            enabled: true
+            duration: "0m"
+            severity: warning
+          opsRequestStatusProgressingToLong:
+            enabled: true
+            duration: "30m"
+            severity: critical
+          opsRequestFailed:
+            enabled: true
+            duration: "0m"
+            severity: critical
+      stash:
+        enabled: true
+        rules:
+          backupSessionFailed:
+            enabled: true
+            duration: "0m"
+            severity: critical
+          restoreSessionFailed:
+            enabled: true
+            duration: "0m"
+            severity: critical
+          noBackupSessionForTooLong:
+            enabled: true
+            duration: "0m"
+            val: 18000
+            severity: warning
+          repositoryCorrupted:
+            enabled: true
+            duration: "5m"
+            severity: critical
+          repositoryStorageRunningLow:
+            enabled: true
+            duration: "5m"
+            val: 10737418240 # 10GB
+            severity: waring
+          backupSessionPeriodTooLong:
+            enabled: true
+            duration: "0m"
+            val: 1800 # 30 minute
+            severity: waring
+          restoreSessionPeriodTooLong:
+            enabled: true
+            duration: "0m"
+            val: 1800 # 30 minute
+            severity: waring
+      schemaManager:
+        enabled: true
+        rules:
+          schemaPendingForTooLong:
+            enabled: true
+            duration: "30m"
+            severity: warning
+          schemaInProgressForTooLong:
+            enabled: true
+            duration: "30m"
+            severity: warning
+          schemaTerminatingForTooLong:
+            enabled: true
+            duration: "30m"
+            severity: warning
+          schemaFailed:
+            enabled: true
+            duration: "0m"
+            severity: warning
+          schemaExpired:
+            enabled: true
+            duration: "0m"
+            severity: warning

@@ -118,3 +118,18 @@ spec:
       users:
       - metrics_exporter
 {{ end }}
+{{ if .Values.spec.monitoring }}
+spec:
+  monitor:
+    agent: {{ .Values.spec.monitoring.agent }}
+    prometheus:
+      exporter:
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+      serviceMonitor:
+        interval: 30s
+        labels:
+          {{- toYaml .Values.spec.monitoring.serviceMonitor.labels | nindent 10 }}
+{{ end }}

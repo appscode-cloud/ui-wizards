@@ -63,6 +63,8 @@ type KubedbcomElasticsearchEditorOptionsSpecSpec struct {
 	Machine    MachineType               `json:"machine"`
 	Resources  core.ResourceRequirements `json:"resources"`
 	AuthSecret AuthSecret                `json:"authSecret"`
+	Monitoring Monitoring                `json:"monitoring"`
+	Alert      ElasticsearchAlert        `json:"alert"`
 }
 
 // +kubebuilder:validation:Enum=OpenDistro;OpenSearch;SearchGuard;X-Pack
@@ -86,6 +88,46 @@ type ElasticsearchNode struct {
 	Machine     string      `json:"machine"`
 	Persistence Persistence `json:"persistence"`
 }
+
+// *** Alerts //
+
+type ElasticsearchAlert struct {
+	Enabled              bool                     `json:"enabled"`
+	Labels               map[string]string        `json:"labels"`
+	Annotations          map[string]string        `json:"annotations"`
+	AdditionalRuleLabels map[string]string        `json:"additionalRuleLabels"`
+	Groups               ElasticsearchAlertGroups `json:"groups"`
+}
+
+type ElasticsearchAlertGroups struct {
+	Database    ElasticsearchDatabaseAlert `json:"database"`
+	Provisioner ProvisionerAlert           `json:"provisioner"`
+	OpsManager  OpsManagerAlert            `json:"opsManager"`
+	Stash       StashAlert                 `json:"stash"`
+}
+
+type ElasticsearchDatabaseAlert struct {
+	Enabled bool                            `json:"enabled"`
+	Rules   ElasticsearchDatabaseAlertRules `json:"rules"`
+}
+
+type ElasticsearchDatabaseAlertRules struct {
+	ElasticsearchHeapUsageTooHigh   IntValAlert `json:"elasticsearchHeapUsageTooHigh"`
+	ElasticsearchHeapUsageWarning   IntValAlert `json:"elasticsearchHeapUsageWarning"`
+	ElasticsearchDiskOutOfSpace     IntValAlert `json:"elasticsearchDiskOutOfSpace"`
+	ElasticsearchDiskSpaceLow       IntValAlert `json:"elasticsearchDiskSpaceLow"`
+	ElasticsearchClusterRed         FixedAlert  `json:"elasticsearchClusterRed"`
+	ElasticsearchClusterYellow      FixedAlert  `json:"elasticsearchClusterYellow"`
+	ElasticsearchHealthyNodes       IntValAlert `json:"elasticsearchHealthyNodes"`
+	ElasticsearchHealthyDataNodes   IntValAlert `json:"elasticsearchHealthyDataNodes"`
+	ElasticsearchRelocatingShards   FixedAlert  `json:"elasticsearchRelocatingShards"`
+	ElasticsearchInitializingShards FixedAlert  `json:"elasticsearchInitializingShards"`
+	ElasticsearchUnassignedShards   FixedAlert  `json:"elasticsearchUnassignedShards"`
+	ElasticsearchPendingTasks       FixedAlert  `json:"elasticsearchPendingTasks"`
+	ElasticsearchNoNewDocuments10M  FixedAlert  `json:"elasticsearchNoNewDocuments10m"`
+}
+
+// *** Alerts //
 
 // +kubebuilder:validation:Enum=Combined;Dedicated
 type ElasticsearchMode string

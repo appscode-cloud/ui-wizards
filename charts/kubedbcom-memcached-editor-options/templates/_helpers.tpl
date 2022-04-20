@@ -58,3 +58,17 @@ Common annotations
 {{ $k }}: "{{ $v }}"
 {{- end -}}
 {{- end }}
+
+{{/*
+Alert labels
+*/}}
+{{- define "kubedbcom-memcached-editor-options.alertLabels" -}}
+k8s-group: {{ .Values.metadata.resource.group }}
+k8s-kind: {{ .Values.metadata.resource.kind }}
+k8s-resource: {{ .Values.metadata.resource.name }}
+k8s-name: {{ include "kubedbcom-memcached-editor-options.fullname" . }}
+k8s-namespace: {{ .Release.Namespace }}
+{{- if .Values.spec.alert.additionalRuleLabels }}
+{{- toYaml .Values.spec.alert.additionalRuleLabels }}
+{{- end }}
+{{- end }}

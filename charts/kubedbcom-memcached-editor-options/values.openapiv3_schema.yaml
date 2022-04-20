@@ -78,6 +78,25 @@ properties:
         - db.r.16xlarge
         - db.r.24xlarge
         type: string
+      monitoring:
+        properties:
+          agent:
+            enum:
+            - prometheus.io
+            - prometheus.io/operator
+            - prometheus.io/builtin
+            type: string
+          serviceMonitor:
+            properties:
+              labels:
+                additionalProperties:
+                  type: string
+                type: object
+            type: object
+        required:
+        - agent
+        - serviceMonitor
+        type: object
       replicas:
         type: integer
       resources:
@@ -117,6 +136,7 @@ properties:
         type: string
     required:
     - machine
+    - monitoring
     - replicas
     - resources
     - terminationPolicy

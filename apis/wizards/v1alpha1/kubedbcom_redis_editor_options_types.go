@@ -58,6 +58,8 @@ type KubedbcomRedisEditorOptionsSpecSpec struct {
 	Machine           MachineType               `json:"machine"`
 	Resources         core.ResourceRequirements `json:"resources"`
 	AuthSecret        AuthSecret                `json:"authSecret"`
+	Monitoring        Monitoring                `json:"monitoring"`
+	Alert             RedisAlert                `json:"alert"`
 }
 
 type RedisCluster struct {
@@ -69,6 +71,42 @@ type NamespacedName struct {
 	Name      string `json:"name"`
 	Namespace string `json:"namespace"`
 }
+
+// *** Alerts *** //
+
+type RedisAlert struct {
+	Enabled              bool              `json:"enabled"`
+	Labels               map[string]string `json:"labels"`
+	Annotations          map[string]string `json:"annotations"`
+	AdditionalRuleLabels map[string]string `json:"additionalRuleLabels"`
+	Groups               RedisAlertGroups  `json:"groups"`
+}
+
+type RedisAlertGroups struct {
+	Database    RedisDatabaseAlert `json:"database"`
+	Provisioner ProvisionerAlert   `json:"provisioner"`
+	OpsManager  OpsManagerAlert    `json:"opsManager"`
+	Stash       StashAlert         `json:"stash"`
+}
+
+type RedisDatabaseAlert struct {
+	Enabled bool                    `json:"enabled"`
+	Rules   RedisDatabaseAlertRules `json:"rules"`
+}
+
+type RedisDatabaseAlertRules struct {
+	RedisInstanceDown           FixedAlert          `json:"redisInstanceDown"`
+	RedisRestarted              FixedAlert          `json:"redisRestarted"`
+	RedisTooManyConnections     IntValAlert         `json:"redisTooManyConnections"`
+	RedisqlNotEnoughConnections IntValAlert         `json:"redisqlNotEnoughConnections"`
+	RedisSlowQueries            FixedAlert          `json:"redisSlowQueries"`
+	RedisqlReplicationLag       StringValAlert      `json:"redisqlReplicationLag"`
+	RedisqlHighRollbackRate     FloatValAlertConfig `json:"redisqlHighRollbackRate"`
+	RedisqlSplitBrain           FixedAlert          `json:"redisqlSplitBrain"`
+	RedisqlTooManyLocksAcquired FloatValAlertConfig `json:"redisqlTooManyLocksAcquired"`
+}
+
+// *** Alerts *** //
 
 // +kubebuilder:validation:Enum=Standalone;Cluster;Sentinel
 type RedisMode string
