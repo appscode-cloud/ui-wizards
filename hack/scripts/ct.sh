@@ -20,10 +20,5 @@ for dir in charts/*/; do
     dir=${dir%*/}
     dir=${dir##*/}
     echo $dir
-    # if [ ! -d "charts/${dir}/templates" ] || [ $(find charts/${dir}/templates -type f | wc -l) -le 1 ] || [[ ! ${dir} =~ *-options ]]; then
-    if [ ! -d "charts/${dir}/templates" ] || [ $(find charts/${dir}/templates -type f | wc -l) -le 1 ]; then
-        make ct CT_COMMAND=lint TEST_CHARTS=charts/$dir
-    else
-        make ct TEST_CHARTS=charts/$dir
-    fi
+    make ct CT_COMMAND=lint TEST_CHARTS=charts/$dir
 done
