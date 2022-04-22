@@ -677,26 +677,7 @@ steps:
         text: labels.create_opsrequest
       type: anchor
       url:
-        params:
-          cluster:
-            $ref: store#/cluster/clusterDefinition/spec/name
-          dbname:
-            $ref: model#/metadata/release/name
-          domain:
-            $ref: store#/domain
-          group:
-            $ref: model#/metadata/resource/group
-          kind:
-            $ref: model#/metadata/resource/kind
-          namespace:
-            $ref: model#/metadata/release/namespace
-          owner:
-            $ref: store#/route/params/user
-          resource:
-            $ref: model#/metadata/resource/name
-          version:
-            $ref: model#/metadata/resource/version
-        path: ${domain}/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/mariadbopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=VerticalScaling
+        function: getOpsRequestUrl|VerticalScaling
     - computed: isValueExistInModel|/resources/kubedbComMariaDB/spec/monitor
       label:
         text: labels.enable_monitoring
