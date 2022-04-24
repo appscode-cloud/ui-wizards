@@ -63,12 +63,12 @@ Common annotations
 Alert labels
 */}}
 {{- define "kubedbcom-redis-editor-options.alertLabels" -}}
-k8s-group: {{ .Values.metadata.resource.group }}
-k8s-kind: {{ .Values.metadata.resource.kind }}
-k8s-resource: {{ .Values.metadata.resource.name }}
-k8s-name: {{ include "kubedbcom-redis-editor-options.fullname" . }}
-k8s-namespace: {{ .Release.Namespace }}
-{{- if .Values.spec.alert.additionalRuleLabels }}
-{{- toYaml .Values.spec.alert.additionalRuleLabels }}
+k8s_group: {{ .Values.metadata.resource.group }}
+k8s_kind: {{ .Values.metadata.resource.kind }}
+k8s_resource: {{ .Values.metadata.resource.name }}
+app: {{ include "kubedbcom-redis-editor-options.fullname" . }}
+app_namespace: {{ .Release.Namespace }}
+{{- if .Values.form.alert.additionalRuleLabels }}
+{{- toYaml .Values.form.alert.additionalRuleLabels }}
 {{- end }}
 {{- end }}

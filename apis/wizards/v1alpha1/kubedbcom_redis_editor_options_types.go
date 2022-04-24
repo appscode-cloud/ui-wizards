@@ -38,6 +38,7 @@ type KubedbcomRedisEditorOptions struct {
 type KubedbcomRedisEditorOptionsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Spec         KubedbcomRedisEditorOptionsSpecSpec `json:"spec"`
+	Form         KubedbcomRedisEditorOptionsSpecForm `json:"form"`
 }
 
 type KubedbcomRedisEditorOptionsSpecSpec struct {
@@ -59,7 +60,10 @@ type KubedbcomRedisEditorOptionsSpecSpec struct {
 	Resources         core.ResourceRequirements `json:"resources"`
 	AuthSecret        AuthSecret                `json:"authSecret"`
 	Monitoring        Monitoring                `json:"monitoring"`
-	Alert             RedisAlert                `json:"alert"`
+}
+
+type KubedbcomRedisEditorOptionsSpecForm struct {
+	Alert RedisAlert `json:"alert"`
 }
 
 type RedisCluster struct {

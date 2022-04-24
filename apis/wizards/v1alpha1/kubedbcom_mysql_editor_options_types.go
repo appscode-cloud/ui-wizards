@@ -38,6 +38,7 @@ type KubedbcomMysqlEditorOptions struct {
 type KubedbcomMysqlEditorOptionsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Spec         KubedbcomMysqlEditorOptionsSpecSpec `json:"spec"`
+	Form         KubedbcomMysqlEditorOptionsSpecForm `json:"form"`
 }
 
 type KubedbcomMysqlEditorOptionsSpecSpec struct {
@@ -58,7 +59,10 @@ type KubedbcomMysqlEditorOptionsSpecSpec struct {
 	Resources         core.ResourceRequirements `json:"resources"`
 	AuthSecret        AuthSecret                `json:"authSecret"`
 	Monitoring        Monitoring                `json:"monitoring"`
-	Alert             MySQLAlert                `json:"alert"`
+}
+
+type KubedbcomMysqlEditorOptionsSpecForm struct {
+	Alert MySQLAlert `json:"alert"`
 }
 
 type MySQLInnoDBCluster struct {

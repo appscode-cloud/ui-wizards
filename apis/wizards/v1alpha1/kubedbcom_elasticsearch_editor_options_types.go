@@ -38,6 +38,7 @@ type KubedbcomElasticsearchEditorOptions struct {
 type KubedbcomElasticsearchEditorOptionsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Spec         KubedbcomElasticsearchEditorOptionsSpecSpec `json:"spec"`
+	Form         KubedbcomElasticsearchEditorOptionsSpecForm `json:"form"`
 }
 
 type KubedbcomElasticsearchEditorOptionsSpecSpec struct {
@@ -64,7 +65,10 @@ type KubedbcomElasticsearchEditorOptionsSpecSpec struct {
 	Resources  core.ResourceRequirements `json:"resources"`
 	AuthSecret AuthSecret                `json:"authSecret"`
 	Monitoring Monitoring                `json:"monitoring"`
-	Alert      ElasticsearchAlert        `json:"alert"`
+}
+
+type KubedbcomElasticsearchEditorOptionsSpecForm struct {
+	Alert ElasticsearchAlert `json:"alert"`
 }
 
 // +kubebuilder:validation:Enum=OpenDistro;OpenSearch;SearchGuard;X-Pack
