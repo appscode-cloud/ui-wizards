@@ -1,6 +1,6 @@
 {{ $app := (include "kubedbcom-redis-editor-options.fullname" .) }}
 
-{{ if .Values.spec.alert.enabled }}
+{{ if .Values.form.alert.enabled }}
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
@@ -8,48 +8,48 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "kubedbcom-redis-editor-options.labels" . | nindent 4 }}
-{{- if .Values.spec.alert.labels }}
-    {{- toYaml .Values.spec.alert.labels | nindent 4 }}
+{{- if .Values.form.alert.labels }}
+    {{- toYaml .Values.form.alert.labels | nindent 4 }}
 {{- end }}
-{{- if .Values.spec.alert.annotations }}
+{{- if .Values.form.alert.annotations }}
   annotations:
-    {{- toYaml .Values.spec.alert.annotations | nindent 4 }}
+    {{- toYaml .Values.form.alert.annotations | nindent 4 }}
 {{- end }}
 spec:
   groups:
-  {{ if .Values.spec.alert.groups.database.enabled -}}
+  {{ if .Values.form.alert.groups.database.enabled -}}
   - name: redis.database.{{ .Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if .Values.spec.alert.groups.database.rules.redisInstanceDown -}}
+    {{ if .Values.form.alert.groups.database.rules.redisInstanceDown -}}
     - alert: RedisqlDown
       expr: pg_up{job="{{- .Values.dbName -}}-stats",namespace="{{ .Release.Namespace }}" == 0
-      for: {{ .Values.spec.alert.groups.database.rules.redisInstanceDown.duration }}
+      for: {{ .Values.form.alert.groups.database.rules.redisInstanceDown.duration }}
       labels:
-        severity: {{ .Values.spec.alert.groups.database.rules.redisInstanceDown.severity }}
+        severity: {{ .Values.form.alert.groups.database.rules.redisInstanceDown.severity }}
         app: redis
         alertname: redis_instance_down
       annotations:
         summary: Redis instance down (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "MySQL instance is down on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{end -}}
-    {{ if .Values.spec.alert.groups.database.rules.redisTooManyConnections.enabled -}}
+    {{ if .Values.form.alert.groups.database.rules.redisTooManyConnections.enabled -}}
     - alert: RedisTooManyConnections
-      expr: sum by (datname) (pg_stat_activity_count{job="{{- .Values.dbName -}}-stats",namespace="{{ .Release.Namespace }}"}) > (pg_settings_max_connections{job="{{- .Values.dbName -}}-stats",namespace="{{ .Release.Namespace }}"} * {{.Values.spec.alert.groups.database.rules.redisTooManyConnections.val}})
-      for: {{ .Values.spec.alert.groups.database.rules.redisTooManyConnections.duration }}
+      expr: sum by (datname) (pg_stat_activity_count{job="{{- .Values.dbName -}}-stats",namespace="{{ .Release.Namespace }}"}) > (pg_settings_max_connections{job="{{- .Values.dbName -}}-stats",namespace="{{ .Release.Namespace }}"} * {{.Values.form.alert.groups.database.rules.redisTooManyConnections.val}})
+      for: {{ .Values.form.alert.groups.database.rules.redisTooManyConnections.duration }}
       labels:
-        severity: {{ .Values.spec.alert.groups.database.rules.redisTooManyConnections.severity }}
+        severity: {{ .Values.form.alert.groups.database.rules.redisTooManyConnections.severity }}
         app: redis
         alertname: redis_too_many_connections
       annotations:
         summary: Redisql too many connections (instance {{`{{`}} $labels.pod {{`}}`}})
-        description: "Redis instance has too many connections . {{.Values.spec.alert.groups.database.rules.redisTooManyConnections.val}}% of Redis connections are in use on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        description: "Redis instance has too many connections . {{.Values.form.alert.groups.database.rules.redisTooManyConnections.val}}% of Redis connections are in use on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if .Values.spec.alert.groups.database.rules.redisSlowQueries.enabled -}}
+    {{ if .Values.form.alert.groups.database.rules.redisSlowQueries.enabled -}}
     - alert: RedisqlSlowQueries
       expr: pg_slow_queries{job="{{- .Values.dbName -}}-stats",namespace="{{ .Release.Namespace }}"} > 0
-      for: {{ .Values.spec.alert.groups.database.rules.redisSlowQueries.duration }}
+      for: {{ .Values.form.alert.groups.database.rules.redisSlowQueries.duration }}
       labels:
-        severity: {{ .Values.spec.alert.groups.database.rules.redisSlowQueries.severity }}
+        severity: {{ .Values.form.alert.groups.database.rules.redisSlowQueries.severity }}
         app: redis
         alertname: redis_slow_queries
       annotations:
@@ -57,147 +57,147 @@ spec:
         description: "Redis executes slow queries\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
   {{end -}}
-  {{ if .Values.spec.alert.groups.provisioner.enabled -}}
+  {{ if .Values.form.alert.groups.provisioner.enabled -}}
   - name: redis.provisioner.{{ .Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if .Values.spec.alert.groups.provisioner.rules.appPhaseNotReady.enabled -}}
+    {{ if .Values.form.alert.groups.provisioner.rules.appPhaseNotReady.enabled -}}
     - alert: KubeDBRedisPhaseNotReady
       expr: kubedb_redis_status_phase{phase="NotReady",redis="{{ $app }}",namespace="{{ .Release.Namespace }}"} == 1
-      for: {{ .Values.spec.alert.groups.provisioner.rules.appPhaseNotReady.duration }}
+      for: {{ .Values.form.alert.groups.provisioner.rules.appPhaseNotReady.duration }}
       labels:
-        severity: {{ .Values.spec.alert.groups.provisioner.rules.appPhaseNotReady.severity }}
+        severity: {{ .Values.form.alert.groups.provisioner.rules.appPhaseNotReady.severity }}
         {{- include "kubedbcom-redis-editor-options.alertLabels" . | nindent 8 }}
       annotations:
         summary: KubeDB Redis Phase NotReady (redis {{`{{`}} $labels.redis {{`}}`}})
         description: "KubeDB Redis Phase not ready on {{`{{`}} $labels.redis {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if .Values.spec.alert.groups.provisioner.rules.appPhaseCritical.enabled -}}
+    {{ if .Values.form.alert.groups.provisioner.rules.appPhaseCritical.enabled -}}
     - alert: KubeDBRedisPhaseCritical
       expr: kubedb_redis_status_phase{phase="Critical",redis="{{ $app }}",namespace="{{ .Release.Namespace }}"} == 1
-      for: {{ .Values.spec.alert.groups.provisioner.rules.appPhaseCritical.duration }}
+      for: {{ .Values.form.alert.groups.provisioner.rules.appPhaseCritical.duration }}
       labels:
-        severity: {{ .Values.spec.alert.groups.provisioner.rules.appPhaseCritical.severity }}
+        severity: {{ .Values.form.alert.groups.provisioner.rules.appPhaseCritical.severity }}
         {{- include "kubedbcom-redis-editor-options.alertLabels" . | nindent 8 }}
       annotations:
         summary: KubeDB Redis Phase Critical (redis {{`{{`}} $labels.redis {{`}}`}})
         description: "KubeDB Redis Phase Critical {{`{{`}} $labels.redis {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
   {{ end -}}
-  {{ if .Values.spec.alert.groups.opsManager.enabled -}}
+  {{ if .Values.form.alert.groups.opsManager.enabled -}}
   - name: redis.opsManager.{{ .Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if .Values.spec.alert.groups.opsManager.rules.opsRequestOnProgress.enabled -}}
+    {{ if .Values.form.alert.groups.opsManager.rules.opsRequestOnProgress.enabled -}}
     - alert: KubeDBRedisOpsRequestOnProgress
       expr: kubedb_redis_opsrequest_status_phase{phase="Progressing",database_ref="{{ $app }}",namespace="{{ .Release.Namespace }}"} == 1
-      for: {{ .Values.spec.alert.groups.opsManager.rules.opsRequestOnProgress.duration }}
+      for: {{ .Values.form.alert.groups.opsManager.rules.opsRequestOnProgress.duration }}
       labels:
-        severity: {{ .Values.spec.alert.groups.opsManager.rules.opsRequestOnProgress.severity }}
+        severity: {{ .Values.form.alert.groups.opsManager.rules.opsRequestOnProgress.severity }}
         {{- include "kubedbcom-redis-editor-options.alertLabels" . | nindent 8 }}
       annotations:
         summary: RedisOpsRequest on progress (redisopsrequest {{`{{`}} $labels.redisopsrequest {{`}}`}})
         description: "MaraiDBOpsRequest {{`{{`}} $labels.redisopsrequest {{`}}`}} is in progressressing status\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if .Values.spec.alert.groups.opsManager.rules.opsRequestStatusProgressingToLong.enabled -}}
+    {{ if .Values.form.alert.groups.opsManager.rules.opsRequestStatusProgressingToLong.enabled -}}
     - alert: KubeDBRedisOpsRequestStatusProgressingToLong
       expr: kubedb_redis_opsrequest_status_phase{phase="Progressing",database_ref="{{ $app }}",namespace="{{ .Release.Namespace }}"} == 1
-      for: {{ .Values.spec.alert.groups.opsManager.rules.opsRequestStatusProgressingToLong.duration }}
+      for: {{ .Values.form.alert.groups.opsManager.rules.opsRequestStatusProgressingToLong.duration }}
       labels:
-        severity: {{ .Values.spec.alert.groups.opsManager.rules.opsRequestStatusProgressingToLong.severity }}
+        severity: {{ .Values.form.alert.groups.opsManager.rules.opsRequestStatusProgressingToLong.severity }}
         {{- include "kubedbcom-redis-editor-options.alertLabels" . | nindent 8 }}
       annotations:
         summary: RedisOpsRequest is in progressing status for too long (redisopsrequest {{`{{`}} $labels.redisopsrequest {{`}}`}})
         description: "MaraiDBOpsRequest {{`{{`}} $labels.redisopsrequest {{`}}`}} is in progressing status for too long\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if .Values.spec.alert.groups.opsManager.rules.opsRequestFailed.enabled -}}
+    {{ if .Values.form.alert.groups.opsManager.rules.opsRequestFailed.enabled -}}
     - alert: KubeDBRedisOpsRequestFailed
       expr: kubedb_redis_opsrequest_status_phase{phase="Failed",database_ref="{{ $app }}",namespace="{{ .Release.Namespace }}"} == 1
-      for: {{ .Values.spec.alert.groups.opsManager.rules.opsRequestFailed.duration }}
+      for: {{ .Values.form.alert.groups.opsManager.rules.opsRequestFailed.duration }}
       labels:
-        severity: {{ .Values.spec.alert.groups.opsManager.rules.opsRequestFailed.severity }}
+        severity: {{ .Values.form.alert.groups.opsManager.rules.opsRequestFailed.severity }}
         {{- include "kubedbcom-redis-editor-options.alertLabels" . | nindent 8 }}
       annotations:
         summary: RedisOpsRequest failed (redisopsrequest {{`{{`}} $labels.redisopsrequest {{`}}`}})
         description: "MaraiDBOpsRequest {{`{{`}} $labels.redisopsrequest {{`}}`}} failed \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
   {{ end -}}
-  {{ if .Values.spec.alert.groups.stash.enabled -}}
+  {{ if .Values.form.alert.groups.stash.enabled -}}
   - name: redis.stash.{{ .Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if .Values.spec.alert.groups.stash.rules.backupSessionFailed.enabled -}}
+    {{ if .Values.form.alert.groups.stash.rules.backupSessionFailed.enabled -}}
     - alert: RedisStashBackupSessionFailed
       expr: stash_backup_session_success * on(invoker_name, invoker_kind) group_left(target_name, target_kind) stash_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"} == 0
-      for: {{ .Values.spec.alert.groups.stash.rules.backupSessionFailed.duration }}
+      for: {{ .Values.form.alert.groups.stash.rules.backupSessionFailed.duration }}
       labels:
-        severity: {{ .Values.spec.alert.groups.stash.rules.backupSessionFailed.severity }}
+        severity: {{ .Values.form.alert.groups.stash.rules.backupSessionFailed.severity }}
         {{- include "kubedbcom-redis-editor-options.alertLabels" . | nindent 8 }}
       annotations:
         summary: Redis Stash backup session failed (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "Redis Stash backupsession failed {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if .Values.spec.alert.groups.stash.rules.restoreSessionFailed.enabled -}}
+    {{ if .Values.form.alert.groups.stash.rules.restoreSessionFailed.enabled -}}
     - alert: RedisStashRestoreSessionFailed
       expr: stash_restore_session_success * on(invoker_name, invoker_kind) group_left(target_name, target_kind) stash_restoresession_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"} == 0
-      for: {{ .Values.spec.alert.groups.stash.rules.restoreSessionFailed.duration }}
+      for: {{ .Values.form.alert.groups.stash.rules.restoreSessionFailed.duration }}
       labels:
-        severity: {{ .Values.spec.alert.groups.stash.rules.restoreSessionFailed.severity }}
+        severity: {{ .Values.form.alert.groups.stash.rules.restoreSessionFailed.severity }}
         {{- include "kubedbcom-redis-editor-options.alertLabels" . | nindent 8 }}
       annotations:
         summary: Redis Stash restore session failed (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "Redis Stash restore session failed {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if .Values.spec.alert.groups.stash.rules.noBackupSessionForTooLong.enabled -}}
+    {{ if .Values.form.alert.groups.stash.rules.noBackupSessionForTooLong.enabled -}}
     - alert: RedisStashNoBackupSessionForTooLong
-      expr: time() - stash_backup_last_success_time_seconds + on(invoker_name, invoker_kind) group_left(target_name, target_kind) stash_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"} - 1 > {{ .Values.spec.alert.groups.stash.rules.noBackupSessionForTooLong.val }}
-      for: {{ .Values.spec.alert.groups.stash.rules.noBackupSessionForTooLong.duration }}
+      expr: time() - stash_backup_last_success_time_seconds + on(invoker_name, invoker_kind) group_left(target_name, target_kind) stash_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"} - 1 > {{ .Values.form.alert.groups.stash.rules.noBackupSessionForTooLong.val }}
+      for: {{ .Values.form.alert.groups.stash.rules.noBackupSessionForTooLong.duration }}
       labels:
-        severity: {{ .Values.spec.alert.groups.stash.rules.noBackupSessionForTooLong.severity }}
+        severity: {{ .Values.form.alert.groups.stash.rules.noBackupSessionForTooLong.severity }}
         {{- include "kubedbcom-redis-editor-options.alertLabels" . | nindent 8 }}
       annotations:
-        summary: Redis Stash no backup for last {{ .Values.spec.alert.groups.stash.rules.noBackupSessionForTooLong.val }} second (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
+        summary: Redis Stash no backup for last {{ .Values.form.alert.groups.stash.rules.noBackupSessionForTooLong.val }} second (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "Redis Stash no backup for too long {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if .Values.spec.alert.groups.stash.rules.repositoryCorrupted.enabled -}}
+    {{ if .Values.form.alert.groups.stash.rules.repositoryCorrupted.enabled -}}
     - alert: RedisStashRepositoryCorrupted
       expr: stash_repository_integrity * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"}
-      for: {{ .Values.spec.alert.groups.stash.rules.repositoryCorrupted.duration }}
+      for: {{ .Values.form.alert.groups.stash.rules.repositoryCorrupted.duration }}
       labels:
-        severity: {{ .Values.spec.alert.groups.stash.rules.repositoryCorrupted.severity }}
+        severity: {{ .Values.form.alert.groups.stash.rules.repositoryCorrupted.severity }}
         {{- include "kubedbcom-redis-editor-options.alertLabels" . | nindent 8 }}
       annotations:
         summary: Redis Stash repository corrupted (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "Redis Stash repository corrupted {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if .Values.spec.alert.groups.stash.rules.repositoryStorageRunningLow.enabled -}}
+    {{ if .Values.form.alert.groups.stash.rules.repositoryStorageRunningLow.enabled -}}
     - alert: RedisStashRepositoryStorageRunningLow
-      expr: stash_repository_size_bytes * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"} > {{ .Values.spec.alert.groups.stash.rules.repositoryStorageRunningLow.val }}
-      for: {{ .Values.spec.alert.groups.stash.rules.repositoryStorageRunningLow.duration }}
+      expr: stash_repository_size_bytes * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"} > {{ .Values.form.alert.groups.stash.rules.repositoryStorageRunningLow.val }}
+      for: {{ .Values.form.alert.groups.stash.rules.repositoryStorageRunningLow.duration }}
       labels:
-        severity: {{ .Values.spec.alert.groups.stash.rules.repositoryStorageRunningLow.severity }}
+        severity: {{ .Values.form.alert.groups.stash.rules.repositoryStorageRunningLow.severity }}
         {{- include "kubedbcom-redis-editor-options.alertLabels" . | nindent 8 }}
       annotations:
-        summary: Redis Stash Repository storage more than {{ .Values.spec.alert.groups.stash.rules.repositoryStorageRunningLow.val }} byte. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
+        summary: Redis Stash Repository storage more than {{ .Values.form.alert.groups.stash.rules.repositoryStorageRunningLow.val }} byte. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "Redis Stash Repository storage running low {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if .Values.spec.alert.groups.stash.rules.backupSessionPeriodTooLong.enabled -}}
+    {{ if .Values.form.alert.groups.stash.rules.backupSessionPeriodTooLong.enabled -}}
     - alert: RedisStashBackupSessionPeriodTooLong
-      expr: stash_backup_session_duration_seconds * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"} > {{ .Values.spec.alert.groups.stash.rules.backupSessionPeriodTooLong.val }}
-      for: {{ .Values.spec.alert.groups.stash.rules.backupSessionPeriodTooLong.duration }}
+      expr: stash_backup_session_duration_seconds * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"} > {{ .Values.form.alert.groups.stash.rules.backupSessionPeriodTooLong.val }}
+      for: {{ .Values.form.alert.groups.stash.rules.backupSessionPeriodTooLong.duration }}
       labels:
-        severity: {{ .Values.spec.alert.groups.stash.rules.backupSessionPeriodTooLong.severity }}
+        severity: {{ .Values.form.alert.groups.stash.rules.backupSessionPeriodTooLong.severity }}
         {{- include "kubedbcom-redis-editor-options.alertLabels" . | nindent 8 }}
       annotations:
-        summary:  Redis Stash backup session took more than {{ .Values.spec.alert.groups.stash.rules.backupSessionPeriodTooLong.val }} second to complete. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
+        summary:  Redis Stash backup session took more than {{ .Values.form.alert.groups.stash.rules.backupSessionPeriodTooLong.val }} second to complete. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "Redis Stash backup session taking to long to complete {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if .Values.spec.alert.groups.stash.rules.restoreSessionPeriodTooLong.enabled -}}
+    {{ if .Values.form.alert.groups.stash.rules.restoreSessionPeriodTooLong.enabled -}}
     - alert: RedisStashRestoreSessionPeriodTooLong
-      expr: stash_restore_session_duration_seconds * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_restoresession_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"} > {{ .Values.spec.alert.groups.stash.rules.restoreSessionPeriodTooLong.val }}
-      for: {{ .Values.spec.alert.groups.stash.rules.restoreSessionPeriodTooLong.duration }}
+      expr: stash_restore_session_duration_seconds * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_restoresession_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"} > {{ .Values.form.alert.groups.stash.rules.restoreSessionPeriodTooLong.val }}
+      for: {{ .Values.form.alert.groups.stash.rules.restoreSessionPeriodTooLong.duration }}
       labels:
-        severity: {{ .Values.spec.alert.groups.stash.rules.restoreSessionPeriodTooLong.severity }}
+        severity: {{ .Values.form.alert.groups.stash.rules.restoreSessionPeriodTooLong.severity }}
         {{- include "kubedbcom-redis-editor-options.alertLabels" . | nindent 8 }}
       annotations:
-        summary:  Redis Stash restore session took more than {{ .Values.spec.alert.groups.stash.rules.restoreSessionPeriodTooLong.val }} second to complete. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
+        summary:  Redis Stash restore session took more than {{ .Values.form.alert.groups.stash.rules.restoreSessionPeriodTooLong.val }} second to complete. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "Redis Stash restore session taking to long to complete {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
   {{ end -}}
