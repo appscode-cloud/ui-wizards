@@ -38,6 +38,7 @@ type KubedbcomMariadbEditorOptions struct {
 type KubedbcomMariadbEditorOptionsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Spec         KubedbcomMariadbEditorOptionsSpecSpec `json:"spec"`
+	Form         KubedbcomMariadbEditorOptionsSpecForm `json:"form"`
 }
 
 type KubedbcomMariadbEditorOptionsSpecSpec struct {
@@ -54,7 +55,10 @@ type KubedbcomMariadbEditorOptionsSpecSpec struct {
 	Resources         core.ResourceRequirements `json:"resources"`
 	AuthSecret        AuthSecret                `json:"authSecret"`
 	Monitoring        Monitoring                `json:"monitoring"`
-	Alert             MariaDBAlert              `json:"alert"`
+}
+
+type KubedbcomMariadbEditorOptionsSpecForm struct {
+	Alert MariaDBAlert `json:"alert"`
 }
 
 // +kubebuilder:validation:Enum=Standalone;Cluster

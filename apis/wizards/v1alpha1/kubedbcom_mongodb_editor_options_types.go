@@ -38,6 +38,7 @@ type KubedbcomMongodbEditorOptions struct {
 type KubedbcomMongodbEditorOptionsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Spec         KubedbcomMongodbEditorOptionsSpecSpec `json:"spec"`
+	Form         KubedbcomMongodbEditorOptionsSpecForm `json:"form"`
 }
 
 type KubedbcomMongodbEditorOptionsSpecSpec struct {
@@ -59,7 +60,10 @@ type KubedbcomMongodbEditorOptionsSpecSpec struct {
 	Resources         core.ResourceRequirements `json:"resources"`
 	AuthSecret        AuthSecret                `json:"authSecret"`
 	Monitoring        Monitoring                `json:"monitoring"`
-	Alert             MongoDBAlert              `json:"alert"`
+}
+
+type KubedbcomMongodbEditorOptionsSpecForm struct {
+	Alert MongoDBAlert `json:"alert"`
 }
 
 // +kubebuilder:validation:Enum=Standalone;Replicaset;Sharded

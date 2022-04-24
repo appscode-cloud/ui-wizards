@@ -38,6 +38,7 @@ type KubedbcomPostgresEditorOptions struct {
 type KubedbcomPostgresEditorOptionsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Spec         KubedbcomPostgresEditorOptionsSpecSpec `json:"spec"`
+	Form         KubedbcomPostgresEditorOptionsSpecForm `json:"form"`
 }
 
 type KubedbcomPostgresEditorOptionsSpecSpec struct {
@@ -54,7 +55,10 @@ type KubedbcomPostgresEditorOptionsSpecSpec struct {
 	Resources         core.ResourceRequirements `json:"resources"`
 	AuthSecret        AuthSecret                `json:"authSecret"`
 	Monitoring        Monitoring                `json:"monitoring"`
-	Alert             PostgresAlert             `json:"alert"`
+}
+
+type KubedbcomPostgresEditorOptionsSpecForm struct {
+	Alert PostgresAlert `json:"alert"`
 }
 
 // *** Alerts *** //
