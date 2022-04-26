@@ -45,11 +45,12 @@ The command removes all the Kubernetes components associated with the chart and 
 
 The following table lists the configurable parameters of the `snapshotstoragek8sio-volumesnapshotclass-editor` chart and their default values.
 
-|   Parameter   | Description |                 Default                 |
-|---------------|-------------|-----------------------------------------|
-| apiVersion    |             | <code>snapshot.storage.k8s.io/v1</code> |
-| kind          |             | <code>VolumeSnapshotClass</code>        |
-| metadata.name |             | <code>volumesnapshotclass</code>        |
+|     Parameter      | Description |                 Default                 |
+|--------------------|-------------|-----------------------------------------|
+| apiVersion         |             | <code>snapshot.storage.k8s.io/v1</code> |
+| kind               |             | <code>VolumeSnapshotClass</code>        |
+| metadata.name      |             | <code>volumesnapshotclass</code>        |
+| metadata.namespace |             | <code>""</code>                         |
 
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm upgrade -i`. For example:

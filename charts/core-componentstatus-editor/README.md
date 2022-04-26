@@ -45,11 +45,12 @@ The command removes all the Kubernetes components associated with the chart and 
 
 The following table lists the configurable parameters of the `core-componentstatus-editor` chart and their default values.
 
-|   Parameter   | Description |           Default            |
-|---------------|-------------|------------------------------|
-| apiVersion    |             | <code>v1</code>              |
-| kind          |             | <code>ComponentStatus</code> |
-| metadata.name |             | <code>componentstatus</code> |
+|     Parameter      | Description |           Default            |
+|--------------------|-------------|------------------------------|
+| apiVersion         |             | <code>v1</code>              |
+| kind               |             | <code>ComponentStatus</code> |
+| metadata.name      |             | <code>componentstatus</code> |
+| metadata.namespace |             | <code>""</code>              |
 
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm upgrade -i`. For example:

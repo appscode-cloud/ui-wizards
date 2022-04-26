@@ -45,11 +45,12 @@ The command removes all the Kubernetes components associated with the chart and 
 
 The following table lists the configurable parameters of the `catalogkubedbcom-mariadbversion-editor` chart and their default values.
 
-|   Parameter   | Description |                 Default                  |
-|---------------|-------------|------------------------------------------|
-| apiVersion    |             | <code>catalog.kubedb.com/v1alpha1</code> |
-| kind          |             | <code>MariaDBVersion</code>              |
-| metadata.name |             | <code>mariadbversion</code>              |
+|     Parameter      | Description |                 Default                  |
+|--------------------|-------------|------------------------------------------|
+| apiVersion         |             | <code>catalog.kubedb.com/v1alpha1</code> |
+| kind               |             | <code>MariaDBVersion</code>              |
+| metadata.name      |             | <code>mariadbversion</code>              |
+| metadata.namespace |             | <code>""</code>                          |
 
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm upgrade -i`. For example:
