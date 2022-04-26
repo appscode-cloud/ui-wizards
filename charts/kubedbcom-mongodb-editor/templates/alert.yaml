@@ -1,4 +1,4 @@
-{{ $app := (include "kubedbcom-mongodb-editor-options.fullname" .) }}
+{{ $app := (include "kubedbcom-mongodb-editor.fullname" .) }}
 
 {{ if .Values.form.alert.enabled }}
 apiVersion: monitoring.coreos.com/v1
@@ -8,7 +8,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
-    {{- include "kubedbcom-mongodb-editor-options.selectorLabels" . | nindent 4 }}
+    {{- include "kubedbcom-mongodb-editor.selectorLabels" . | nindent 4 }}
 {{- if .Values.form.alert.labels }}
     {{- toYaml .Values.form.alert.labels | nindent 4 }}
 {{- end }}
@@ -27,7 +27,7 @@ spec:
       for: {{ .Values.form.alert.groups.database.rules.mongodbVirtualMemoryUsage.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.database.rules.mongodbVirtualMemoryUsage.severity }}
-        {{- include "kubedbcom-mongodb-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-mongodb-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: MongoDB virtual memory usage (instance {{`{{`}} $labels.instance {{`}}`}})
         description: "High memory usage\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -38,7 +38,7 @@ spec:
       for: {{ .Values.form.alert.groups.database.rules.mongodbReplicationLag.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.database.rules.mongodbReplicationLag.severity }}
-        {{- include "kubedbcom-mongodb-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-mongodb-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: MongoDB database has replication lag (instance {{`{{`}} $labels.instance {{`}}`}})
         description: "Mongodb replication lag is more than {{ .Values.form.alert.groups.database.rules.mongodbReplicationLag.val }}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -49,7 +49,7 @@ spec:
       for: {{ .Values.form.alert.groups.database.rules.mongodbNumberCursorsOpen.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.database.rules.mongodbNumberCursorsOpen.severity }}
-        {{- include "kubedbcom-mongodb-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-mongodb-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: MongoDB number cursors open (instance {{`{{`}} $labels.instance {{`}}`}})
         description: "Too many cursors opened by MongoDB for clients (> 10k)\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -60,7 +60,7 @@ spec:
       for: {{ .Values.form.alert.groups.database.rules.mongodbCursorsTimeouts.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.database.rules.mongodbCursorsTimeouts.severity }}
-        {{- include "kubedbcom-mongodb-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-mongodb-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: MongoDB cursors timeouts (instance {{`{{`}} $labels.instance {{`}}`}})
         description: "Too many cursors are timing out\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -71,7 +71,7 @@ spec:
       for: {{ .Values.form.alert.groups.database.rules.mongodbTooManyConnections.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.database.rules.mongodbTooManyConnections.severity }}
-        {{- include "kubedbcom-mongodb-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-mongodb-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: MongoDB too many connections (instance {{`{{`}} $labels.instance {{`}}`}})
         description: "Too many connections (> 80%)\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -82,7 +82,7 @@ spec:
       for: {{ .Values.form.alert.groups.database.rules.mongoDBPhaseCritical.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.database.rules.mongoDBPhaseCritical.severity }}
-        {{- include "kubedbcom-mongodb-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-mongodb-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: MongoDB database is in Critical state (instance {{`{{`}} $labels.instance {{`}}`}})
         description: "Database in Critical state, one or more database nodes are not working properly.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -93,7 +93,7 @@ spec:
       for: {{ .Values.form.alert.groups.database.rules.mongoDBDown.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.database.rules.mongoDBDown.severity }}
-        {{- include "kubedbcom-mongodb-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-mongodb-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: MongoDB database is in NotReady state (instance {{`{{`}} $labels.instance {{`}}`}})
         description: "Database in NotReady state, database read/write is failing.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -106,7 +106,7 @@ spec:
       for: {{ .Values.form.alert.groups.database.rules.mongodbHighLatency.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.database.rules.mongodbHighLatency.severity }}
-        {{- include "kubedbcom-mongodb-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-mongodb-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: High latency in mongodb instances {{`{{`}} $labels.instance {{`}}`}}
         description: "High latency in instances\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -120,7 +120,7 @@ spec:
       for: {{ .Values.form.alert.groups.database.rules.mongodbHighTicketUtilization.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.database.rules.mongodbHighTicketUtilization.severity }}
-        {{- include "kubedbcom-mongodb-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-mongodb-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: Ticket usage over 75% {{`{{`}} $labels.instance {{`}}`}}
         description: "Ticket usage over 75%\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -131,7 +131,7 @@ spec:
       for: {{ .Values.form.alert.groups.database.rules.mongodbRecurrentCursorTimeout.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.database.rules.mongodbRecurrentCursorTimeout.severity }}
-        {{- include "kubedbcom-mongodb-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-mongodb-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: Recurrent cursors timeout in instance {{`{{`}} $labels.instance {{`}}`}}
         description: "Recurrent cursors timeout\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -142,7 +142,7 @@ spec:
       for: {{ .Values.form.alert.groups.database.rules.mongodbRecurrentMemoryPageFaults.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.database.rules.mongodbRecurrentMemoryPageFaults.severity }}
-        {{- include "kubedbcom-mongodb-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-mongodb-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: Recurrent memory page faults in instance {{`{{`}} $labels.instance {{`}}`}}
         description: "Recurrent memory page faults\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -157,7 +157,7 @@ spec:
       for: {{ .Values.form.alert.groups.provisioner.rules.appPhaseNotReady.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.provisioner.rules.appPhaseNotReady.severity }}
-        {{- include "kubedbcom-mongodb-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-mongodb-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: KubeDB MongoDB Phase NotReady (mongodb {{`{{`}} $labels.mongodb {{`}}`}})
         description: "KubeDB MongoDB Phase not ready on {{`{{`}} $labels.mongodb {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -168,7 +168,7 @@ spec:
       for: {{ .Values.form.alert.groups.provisioner.rules.appPhaseCritical.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.provisioner.rules.appPhaseCritical.severity }}
-        {{- include "kubedbcom-mongodb-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-mongodb-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: KubeDB MongoDB Phase Critical (mongodb {{`{{`}} $labels.mongodb {{`}}`}})
         description: "KubeDB MongoDB Phase Critical {{`{{`}} $labels.mongodb {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -183,7 +183,7 @@ spec:
       for: {{ .Values.form.alert.groups.opsManager.rules.opsRequestOnProgress.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.opsManager.rules.opsRequestOnProgress.severity }}
-        {{- include "kubedbcom-mongodb-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-mongodb-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: MongoDBOpsRequest on progress (mongodbopsrequest {{`{{`}} $labels.mongodbopsrequest {{`}}`}})
         description: "MaraiDBOpsRequest {{`{{`}} $labels.mongodbopsrequest {{`}}`}} is in progressressing status\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -194,7 +194,7 @@ spec:
       for: {{ .Values.form.alert.groups.opsManager.rules.opsRequestStatusProgressingToLong.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.opsManager.rules.opsRequestStatusProgressingToLong.severity }}
-        {{- include "kubedbcom-mongodb-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-mongodb-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: MongoDBOpsRequest is in progressing status for too long (mongodbopsrequest {{`{{`}} $labels.mongodbopsrequest {{`}}`}})
         description: "MaraiDBOpsRequest {{`{{`}} $labels.mongodbopsrequest {{`}}`}} is in progressing status for too long\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -205,7 +205,7 @@ spec:
       for: {{ .Values.form.alert.groups.opsManager.rules.opsRequestFailed.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.opsManager.rules.opsRequestFailed.severity }}
-        {{- include "kubedbcom-mongodb-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-mongodb-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: MongoDBOpsRequest failed (mongodbopsrequest {{`{{`}} $labels.mongodbopsrequest {{`}}`}})
         description: "MaraiDBOpsRequest {{`{{`}} $labels.mongodbopsrequest {{`}}`}} failed \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -220,7 +220,7 @@ spec:
       for: {{ .Values.form.alert.groups.stash.rules.backupSessionFailed.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.stash.rules.backupSessionFailed.severity }}
-        {{- include "kubedbcom-mongodb-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-mongodb-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: MongoDB Stash backup session failed (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "MongoDB Stash backupsession failed {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -231,7 +231,7 @@ spec:
       for: {{ .Values.form.alert.groups.stash.rules.restoreSessionFailed.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.stash.rules.restoreSessionFailed.severity }}
-        {{- include "kubedbcom-mongodb-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-mongodb-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: MongoDB Stash restore session failed (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "MongoDB Stash restore session failed {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -242,7 +242,7 @@ spec:
       for: {{ .Values.form.alert.groups.stash.rules.noBackupSessionForTooLong.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.stash.rules.noBackupSessionForTooLong.severity }}
-        {{- include "kubedbcom-mongodb-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-mongodb-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: MongoDB Stash no backup for last {{ .Values.form.alert.groups.stash.rules.noBackupSessionForTooLong.val }} second (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "MongoDB Stash no backup for too long {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -253,7 +253,7 @@ spec:
       for: {{ .Values.form.alert.groups.stash.rules.repositoryCorrupted.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.stash.rules.repositoryCorrupted.severity }}
-        {{- include "kubedbcom-mongodb-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-mongodb-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: MongoDB Stash repository corrupted (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "MongoDB Stash repository corrupted {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -264,7 +264,7 @@ spec:
       for: {{ .Values.form.alert.groups.stash.rules.repositoryStorageRunningLow.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.stash.rules.repositoryStorageRunningLow.severity }}
-        {{- include "kubedbcom-mongodb-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-mongodb-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: MongoDB Stash Repository storage more than {{ .Values.form.alert.groups.stash.rules.repositoryStorageRunningLow.val }} byte. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "MongoDB Stash Repository storage running low {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -275,7 +275,7 @@ spec:
       for: {{ .Values.form.alert.groups.stash.rules.backupSessionPeriodTooLong.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.stash.rules.backupSessionPeriodTooLong.severity }}
-        {{- include "kubedbcom-mongodb-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-mongodb-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary:  MongoDB Stash backup session took more than {{ .Values.form.alert.groups.stash.rules.backupSessionPeriodTooLong.val }} second to complete. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "MongoDB Stash backup session taking to long to complete {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -286,7 +286,7 @@ spec:
       for: {{ .Values.form.alert.groups.stash.rules.restoreSessionPeriodTooLong.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.stash.rules.restoreSessionPeriodTooLong.severity }}
-        {{- include "kubedbcom-mongodb-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-mongodb-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary:  MongoDB Stash restore session took more than {{ .Values.form.alert.groups.stash.rules.restoreSessionPeriodTooLong.val }} second to complete. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "MongoDB Stash restore session taking to long to complete {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -301,7 +301,7 @@ spec:
       for: {{ .Values.form.alert.groups.schemaManager.rules.schemaPendingForTooLong.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.schemaManager.rules.schemaPendingForTooLong.severity }}
-        {{- include "kubedbcom-mongodb-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-mongodb-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: KubeDB schema pending for too long for (mongodbdatabase {{`{{`}} $labels.mongodbdatabase {{`}}`}})
         description: "KubeDB schema pending for too long.\n {{`{{`}} $labels.mongodbdatabase {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -312,7 +312,7 @@ spec:
       for: {{ .Values.form.alert.groups.schemaManager.rules.schemaInProgressForTooLong.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.schemaManager.rules.schemaInProgressForTooLong.severity }}
-        {{- include "kubedbcom-mongodb-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-mongodb-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: KubeDB schema is in progress for too long for (mongodbdatabase {{`{{`}} $labels.mongodbdatabase {{`}}`}})
         description: "KubeDB schema is in progress for too long.\n {{`{{`}} $labels.mongodbdatabase {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -323,7 +323,7 @@ spec:
       for: {{ .Values.form.alert.groups.schemaManager.rules.schemaTerminatingForTooLong.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.schemaManager.rules.schemaTerminatingForTooLong.severity }}
-        {{- include "kubedbcom-mongodb-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-mongodb-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: KubeDB schema terminating for too long for (mongodbdatabase {{`{{`}} $labels.mongodbdatabase {{`}}`}})
         description: "KubeDB schema terminating for too long.\n {{`{{`}} $labels.mongodbdatabase {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -334,7 +334,7 @@ spec:
       for: {{ .Values.form.alert.groups.schemaManager.rules.schemaFailed.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.schemaManager.rules.schemaFailed.severity }}
-        {{- include "kubedbcom-mongodb-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-mongodb-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: KubeDB schema failed for (mongodbdatabase {{`{{`}} $labels.mongodbdatabase {{`}}`}})
         description: "KubeDB schema failed.\n {{`{{`}} $labels.mongodbdatabase {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -345,7 +345,7 @@ spec:
       for: {{ .Values.form.alert.groups.schemaManager.rules.schemaExpired.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.schemaManager.rules.schemaExpired.severity }}
-        {{- include "kubedbcom-mongodb-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-mongodb-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: KubeDB schema expired for (mongodbdatabase {{`{{`}} $labels.mongodbdatabase {{`}}`}})
         description: "KubeDB schema expired.\n {{`{{`}} $labels.mongodbdatabase {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"

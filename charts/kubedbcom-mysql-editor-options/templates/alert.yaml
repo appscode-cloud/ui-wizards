@@ -7,7 +7,8 @@ metadata:
   name: {{ $app }}
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "kubedbcom-mysql-editor-options.labels" . | nindent 4 }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    {{- include "kubedbcom-mysql-editor-options.selectorLabels" . | nindent 4 }}
 {{- if .Values.form.alert.labels }}
     {{- toYaml .Values.form.alert.labels | nindent 4 }}
 {{- end }}
