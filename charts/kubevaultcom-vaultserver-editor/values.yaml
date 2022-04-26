@@ -1,5 +1,75 @@
-apiVersion: kubevault.com/v1alpha1
-kind: VaultServer
 metadata:
-  name: vaultserver
-  namespace: default
+  resource:
+    group: kubevault.com
+    version: v1alpha1
+    name: vaultservers
+    kind: VaultServer
+    scope: Namespaced
+  release:
+    name: RELEASE-NAME
+    namespace: default
+resources:
+  kubevaultComVaultServer: # +doc-gen:break
+    apiVersion: kubevault.com/v1alpha1
+    kind: VaultServer
+    metadata:
+      name: vault
+      namespace: demo
+    spec:
+      backend:
+        consul:
+          aclTokenSecretName: vault-backend-creds
+          address: http://consul-server.default.svc:8500
+          path: vault
+          tlsSecretName: vault-backend-tls
+      configSecret:
+        name: vault-config
+      replicas: 1
+      unsealer:
+        mode:
+          awsKmsSsm:
+            credentialSecret: vault-unsealer-creds
+            kmsKeyID: <kms-key-id>
+            region: <region>
+        secretShares: 5
+        secretThreshold: 3
+      version: 1.8.2
+  secret_backend_creds: # +doc-gen:break
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: vault-backend-creds
+      namespace: demo
+    stringData:
+      aclToken: <acl-token>
+    type: Opaque
+  secret_backend_tls: # +doc-gen:break
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: vault-backend-tls
+      namespace: demo
+    stringData:
+      ca.crt: <ca-cert>
+      client.crt: <client-cert>
+      client.key: <client-key>
+    type: Opaque
+  secret_config: # +doc-gen:break
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: vault-config
+      namespace: demo
+    stringData:
+      vault.hcl: <data>
+    type: Opaque
+  secret_unsealer_creds: # +doc-gen:break
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: vault-unsealer-creds
+      namespace: demo
+    stringData:
+      access_key: <access_key>
+      secret_key: <secret_key>
+    type: Opaque
