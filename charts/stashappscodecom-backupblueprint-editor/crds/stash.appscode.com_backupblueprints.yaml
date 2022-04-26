@@ -1200,6 +1200,9 @@ spec:
                         type: string
                     type: object
                 type: object
+              repoNamespace:
+                description: RepoNamespace specifies the namespace where the Repository will be created for the respective target
+                type: string
               retentionPolicy:
                 description: RetentionPolicy indicates the policy to follow to clean old backup snapshots
                 properties:
@@ -2273,6 +2276,11 @@ spec:
                           type: string
                         description: 'NodeSelector is a selector which must be true for the pod to fit on a node. Selector which must match a node''s labels for the pod to be scheduled on that node. More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/'
                         type: object
+                      podAnnotations:
+                        additionalProperties:
+                          type: string
+                        description: PodAnnotations are the annotations that will be attached with the respective Pod
+                        type: object
                       priority:
                         description: The priority value. Various system components use this field to find the priority of the pod. When Priority Admission Controller is enabled, it prevents users from setting this field. The admission controller populates this field from PriorityClassName. The higher the value, the higher the priority.
                         format: int32
@@ -2383,6 +2391,11 @@ spec:
                                 type: string
                             type: object
                         type: object
+                      serviceAccountAnnotations:
+                        additionalProperties:
+                          type: string
+                        description: ServiceAccountAnnotations are the annotations that will be attached with the respective ServiceAccount
+                        type: object
                       serviceAccountName:
                         description: 'ServiceAccountName is the name of the ServiceAccount to use to run this pod. More info: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/'
                         type: string
@@ -2412,6 +2425,7 @@ spec:
                     type: object
                 type: object
               schedule:
+                description: Schedule specifies the default schedule for backup. You can overwrite this schedule for a particular target using 'stash.appscode.com/schedule' annotation.
                 type: string
               task:
                 description: Task specify the Task crd that specifies steps for backup process
@@ -2449,6 +2463,52 @@ spec:
                     - type: string
                     pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
                     x-kubernetes-int-or-string: true
+                type: object
+              usagePolicy:
+                description: UsagePolicy specifies a policy of how this Repository will be used. For example, you can use `allowedNamespaces` policy to restrict the usage of this Repository to particular namespaces. This field is optional. If you don't provide the usagePolicy, then it can be used only from the current namespace.
+                properties:
+                  allowedNamespaces:
+                    description: AllowedNamespaces specifies which namespaces are allowed to use the resource
+                    properties:
+                      from:
+                        default: Same
+                        description: 'From indicates how to select the namespaces that are allowed to use this resource. Possible values are: * All: All namespaces can use this resource. * Selector: Namespaces that matches the selector can use this resource. * Same: Only current namespace can use the resource.'
+                        enum:
+                        - All
+                        - Selector
+                        - Same
+                        type: string
+                      selector:
+                        description: Selector must be specified when From is set to "Selector". In that case, only the selected namespaces are allowed to use this resource. This field is ignored for other values of "From".
+                        properties:
+                          matchExpressions:
+                            description: matchExpressions is a list of label selector requirements. The requirements are ANDed.
+                            items:
+                              description: A label selector requirement is a selector that contains values, a key, and an operator that relates the key and values.
+                              properties:
+                                key:
+                                  description: key is the label key that the selector applies to.
+                                  type: string
+                                operator:
+                                  description: operator represents a key's relationship to a set of values. Valid operators are In, NotIn, Exists and DoesNotExist.
+                                  type: string
+                                values:
+                                  description: values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the operator is Exists or DoesNotExist, the values array must be empty. This array is replaced during a strategic merge patch.
+                                  items:
+                                    type: string
+                                  type: array
+                              required:
+                              - key
+                              - operator
+                              type: object
+                            type: array
+                          matchLabels:
+                            additionalProperties:
+                              type: string
+                            description: matchLabels is a map of {key,value} pairs. A single {key,value} in the matchLabels map is equivalent to an element of matchExpressions, whose key field is "key", the operator is "In", and the values array contains only "value". The requirements are ANDed.
+                            type: object
+                        type: object
+                    type: object
                 type: object
               wipeOut:
                 description: If true, delete respective restic repository

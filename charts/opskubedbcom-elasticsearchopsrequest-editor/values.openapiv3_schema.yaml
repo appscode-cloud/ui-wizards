@@ -25,6 +25,25 @@ properties:
   spec:
     properties:
       configuration:
+        properties:
+          applyConfig:
+            additionalProperties:
+              type: string
+            type: object
+          configSecret:
+            properties:
+              name:
+                type: string
+            type: object
+          removeCustomConfig:
+            type: boolean
+          removeSecureCustomConfig:
+            type: boolean
+          secureConfigSecret:
+            properties:
+              name:
+                type: string
+            type: object
         type: object
       databaseRef:
         properties:
@@ -183,12 +202,14 @@ properties:
       type:
         enum:
         - Upgrade
+        - UpdateVersion
         - HorizontalScaling
         - VerticalScaling
         - VolumeExpansion
         - Restart
         - Reconfigure
         - ReconfigureTLS
+        - Reprovision
         type: string
       upgrade:
         properties:
@@ -450,6 +471,12 @@ properties:
         type: object
       volumeExpansion:
         properties:
+          mode:
+            default: Online
+            enum:
+            - Offline
+            - Online
+            type: string
           node:
             anyOf:
             - type: integer
