@@ -1,4 +1,4 @@
-{{ $app := (include "kubedbcom-mariadb-editor-options.fullname" .) }}
+{{ $app := (include "kubedbcom-mariadb-editor.fullname" .) }}
 
 {{ if .Values.form.alert.enabled }}
 apiVersion: monitoring.coreos.com/v1
@@ -8,7 +8,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
-    {{- include "kubedbcom-mariadb-editor-options.selectorLabels" . | nindent 4 }}
+    {{- include "kubedbcom-mariadb-editor.selectorLabels" . | nindent 4 }}
 {{- if .Values.form.alert.labels }}
     {{- toYaml .Values.form.alert.labels | nindent 4 }}
 {{- end }}
@@ -27,7 +27,7 @@ spec:
       for: {{ .Values.form.alert.groups.database.rules.mySQLInstanceDown.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.database.rules.mySQLInstanceDown.severity }}
-        {{- include "kubedbcom-mariadb-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-mariadb-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: MySQL instance down (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "MySQL instance is down on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -38,7 +38,7 @@ spec:
       for: {{ .Values.form.alert.groups.database.rules.mySQLServiceDown.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.database.rules.mySQLServiceDown.severity }}
-        {{- include "kubedbcom-mariadb-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-mariadb-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: MySQL service down (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "MySQL service is down on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -49,7 +49,7 @@ spec:
       for: {{ .Values.form.alert.groups.database.rules.mySQLTooManyConnections.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.database.rules.mySQLTooManyConnections.severity }}
-        {{- include "kubedbcom-mariadb-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-mariadb-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: MySQL too many connections (> {{.Values.form.alert.groups.database.rules.mySQLTooManyConnections.val}}%) (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "More than {{.Values.form.alert.groups.database.rules.mySQLTooManyConnections.val}}% of MySQL connections are in use on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -60,7 +60,7 @@ spec:
       for: {{ .Values.form.alert.groups.database.rules.mySQLHighThreadsRunning.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.database.rules.mySQLHighThreadsRunning.severity }}
-        {{- include "kubedbcom-mariadb-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-mariadb-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: MySQL high threads running (> {{.Values.form.alert.groups.database.rules.mySQLHighThreadsRunning.val}}%) (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "More than {{.Values.form.alert.groups.database.rules.mySQLHighThreadsRunning.val}}% of MySQL threads are in use on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -71,7 +71,7 @@ spec:
       for: {{ .Values.form.alert.groups.database.rules.mySQLSlowQueries.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.database.rules.mySQLSlowQueries.severity }}
-        {{- include "kubedbcom-mariadb-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-mariadb-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: MySQL slow queries on (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "MySQL server mysql has some new slow query.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -82,7 +82,7 @@ spec:
       for: {{ .Values.form.alert.groups.database.rules.mySQLInnoDBLogWaits.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.database.rules.mySQLInnoDBLogWaits.severity }}
-        {{- include "kubedbcom-mariadb-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-mariadb-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: MySQL InnoDB log waits (> {{.Values.form.alert.groups.database.rules.mySQLInnoDBLogWaits.val}}) (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "MySQL innodb log writes stalling\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -93,7 +93,7 @@ spec:
       for: {{ .Values.form.alert.groups.database.rules.mySQLRestarted.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.database.rules.mySQLRestarted.severity }}
-        {{- include "kubedbcom-mariadb-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-mariadb-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: MySQL restarted ({{.Values.form.alert.groups.database.rules.mySQLRestarted.val}} second ago) (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "MySQL restarted\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -104,7 +104,7 @@ spec:
       for: {{ .Values.form.alert.groups.database.rules.mySQLHighQPS.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.database.rules.mySQLHighQPS.severity }}
-        {{- include "kubedbcom-mariadb-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-mariadb-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: MySQL has high queries per second (> {{.Values.form.alert.groups.database.rules.mySQLHighQPS.val}}) (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "MySQL has high QPS on (instance {{`{{`}} $labels.pod {{`}}`}})\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -115,7 +115,7 @@ spec:
       for: {{ .Values.form.alert.groups.database.rules.mySQLHighIncomingBytes.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.database.rules.mySQLHighIncomingBytes.severity }}
-        {{- include "kubedbcom-mariadb-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-mariadb-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: MySQL has high incoming bytes second (> {{.Values.form.alert.groups.database.rules.mySQLHighIncomingBytes.val}}) (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "MySQL has high incoming bytes per second on (instance {{`{{`}} $labels.pod {{`}}`}})\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -126,7 +126,7 @@ spec:
       for: {{ .Values.form.alert.groups.database.rules.mySQLHighOutgoingBytes.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.database.rules.mySQLHighOutgoingBytes.severity }}
-        {{- include "kubedbcom-mariadb-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-mariadb-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: MySQL has high outgoing bytes second (> {{.Values.form.alert.groups.database.rules.mySQLHighOutgoingBytes.val}}) (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "MySQL has high outgoing bytes per second on (instance {{`{{`}} $labels.pod {{`}}`}})\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -137,7 +137,7 @@ spec:
       for: {{ .Values.form.alert.groups.database.rules.mySQLTooManyOpenFiles.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.database.rules.mySQLTooManyOpenFiles.severity }}
-        {{- include "kubedbcom-mariadb-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-mariadb-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: MySQL too many opened files (> {{.Values.form.alert.groups.database.rules.mySQLTooManyOpenFiles.val}}%) (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "MySQL too many opened files on (instance {{`{{`}} $labels.pod {{`}}`}})\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -152,7 +152,7 @@ spec:
       for: {{ .Values.form.alert.groups.cluster.rules.galeraReplicationLatencyTooLong.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.cluster.rules.galeraReplicationLatencyTooLong.severity }}
-        {{- include "kubedbcom-mariadb-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-mariadb-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: MariaDB Galera Cluster latency too long ( > {{.Values.form.alert.groups.cluster.rules.galeraReplicationLatencyTooLong.val}} second,) (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "MariaDB Galera Cluster latency too long on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -167,7 +167,7 @@ spec:
       for: {{ .Values.form.alert.groups.provisioner.rules.appPhaseNotReady.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.provisioner.rules.appPhaseNotReady.severity }}
-        {{- include "kubedbcom-mariadb-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-mariadb-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: KubeDB MariaDB Phase NotReady (mariadb {{`{{`}} $labels.mariadb {{`}}`}})
         description: "KubeDB MariaDB Phase not ready on {{`{{`}} $labels.mariadb {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -178,7 +178,7 @@ spec:
       for: {{ .Values.form.alert.groups.provisioner.rules.appPhaseCritical.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.provisioner.rules.appPhaseCritical.severity }}
-        {{- include "kubedbcom-mariadb-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-mariadb-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: KubeDB MariaDB Phase Critical (mariadb {{`{{`}} $labels.mariadb {{`}}`}})
         description: "KubeDB MariaDB Phase Critical {{`{{`}} $labels.mariadb {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -193,7 +193,7 @@ spec:
       for: {{ .Values.form.alert.groups.opsManager.rules.opsRequestOnProgress.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.opsManager.rules.opsRequestOnProgress.severity }}
-        {{- include "kubedbcom-mariadb-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-mariadb-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: MariaDBOpsRequest on progress (mariadbopsrequest {{`{{`}} $labels.mariadbopsrequest {{`}}`}})
         description: "MaraiDBOpsRequest {{`{{`}} $labels.mariadbopsrequest {{`}}`}} is in progressressing status\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -204,7 +204,7 @@ spec:
       for: {{ .Values.form.alert.groups.opsManager.rules.opsRequestStatusProgressingToLong.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.opsManager.rules.opsRequestStatusProgressingToLong.severity }}
-        {{- include "kubedbcom-mariadb-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-mariadb-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: MariaDBOpsRequest is in progressing status for too long (mariadbopsrequest {{`{{`}} $labels.mariadbopsrequest {{`}}`}})
         description: "MaraiDBOpsRequest {{`{{`}} $labels.mariadbopsrequest {{`}}`}} is in progressing status for too long\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -215,7 +215,7 @@ spec:
       for: {{ .Values.form.alert.groups.opsManager.rules.opsRequestFailed.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.opsManager.rules.opsRequestFailed.severity }}
-        {{- include "kubedbcom-mariadb-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-mariadb-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: MariaDBOpsRequest failed (mariadbopsrequest {{`{{`}} $labels.mariadbopsrequest {{`}}`}})
         description: "MaraiDBOpsRequest {{`{{`}} $labels.mariadbopsrequest {{`}}`}} failed \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -230,7 +230,7 @@ spec:
       for: {{ .Values.form.alert.groups.stash.rules.backupSessionFailed.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.stash.rules.backupSessionFailed.severity }}
-        {{- include "kubedbcom-mariadb-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-mariadb-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: MariaDB Stash backup session failed (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "MariaDB Stash backupsession failed {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -241,7 +241,7 @@ spec:
       for: {{ .Values.form.alert.groups.stash.rules.restoreSessionFailed.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.stash.rules.restoreSessionFailed.severity }}
-        {{- include "kubedbcom-mariadb-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-mariadb-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: MariaDB Stash restore session failed (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "MariaDB Stash restore session failed {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -252,7 +252,7 @@ spec:
       for: {{ .Values.form.alert.groups.stash.rules.noBackupSessionForTooLong.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.stash.rules.noBackupSessionForTooLong.severity }}
-        {{- include "kubedbcom-mariadb-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-mariadb-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: MariaDB Stash no backup for last {{ .Values.form.alert.groups.stash.rules.noBackupSessionForTooLong.val }} second (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "MariaDB Stash no backup for too long {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -263,7 +263,7 @@ spec:
       for: {{ .Values.form.alert.groups.stash.rules.repositoryCorrupted.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.stash.rules.repositoryCorrupted.severity }}
-        {{- include "kubedbcom-mariadb-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-mariadb-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: MariaDB Stash repository corrupted (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "MariaDB Stash repository corrupted {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -274,7 +274,7 @@ spec:
       for: {{ .Values.form.alert.groups.stash.rules.repositoryStorageRunningLow.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.stash.rules.repositoryStorageRunningLow.severity }}
-        {{- include "kubedbcom-mariadb-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-mariadb-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: MariaDB Stash Repository storage more than {{ .Values.form.alert.groups.stash.rules.repositoryStorageRunningLow.val }} byte. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "MariaDB Stash Repository storage running low {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -285,7 +285,7 @@ spec:
       for: {{ .Values.form.alert.groups.stash.rules.backupSessionPeriodTooLong.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.stash.rules.backupSessionPeriodTooLong.severity }}
-        {{- include "kubedbcom-mariadb-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-mariadb-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary:  MariaDB Stash backup session took more than {{ .Values.form.alert.groups.stash.rules.backupSessionPeriodTooLong.val }} second to complete. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "MariaDB Stash backup session taking to long to complete {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -296,7 +296,7 @@ spec:
       for: {{ .Values.form.alert.groups.stash.rules.restoreSessionPeriodTooLong.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.stash.rules.restoreSessionPeriodTooLong.severity }}
-        {{- include "kubedbcom-mariadb-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-mariadb-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary:  MariaDB Stash restore session took more than {{ .Values.form.alert.groups.stash.rules.restoreSessionPeriodTooLong.val }} second to complete. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "MariaDB Stash restore session taking to long to complete {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -311,7 +311,7 @@ spec:
       for: {{ .Values.form.alert.groups.schemaManager.rules.schemaPendingForTooLong.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.schemaManager.rules.schemaPendingForTooLong.severity }}
-        {{- include "kubedbcom-mariadb-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-mariadb-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: KubeDB schema pending for too long for (mariadbdatabase {{`{{`}} $labels.mariadbdatabase {{`}}`}})
         description: "KubeDB schema pending for too long.\n {{`{{`}} $labels.mariadbdatabase {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -322,7 +322,7 @@ spec:
       for: {{ .Values.form.alert.groups.schemaManager.rules.schemaInProgressForTooLong.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.schemaManager.rules.schemaInProgressForTooLong.severity }}
-        {{- include "kubedbcom-mariadb-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-mariadb-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: KubeDB schema is in progress for too long for (mariadbdatabase {{`{{`}} $labels.mariadbdatabase {{`}}`}})
         description: "KubeDB schema is in progress for too long.\n {{`{{`}} $labels.mariadbdatabase {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -333,7 +333,7 @@ spec:
       for: {{ .Values.form.alert.groups.schemaManager.rules.schemaTerminatingForTooLong.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.schemaManager.rules.schemaTerminatingForTooLong.severity }}
-        {{- include "kubedbcom-mariadb-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-mariadb-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: KubeDB schema terminating for too long for (mariadbdatabase {{`{{`}} $labels.mariadbdatabase {{`}}`}})
         description: "KubeDB schema terminating for too long.\n {{`{{`}} $labels.mariadbdatabase {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -344,7 +344,7 @@ spec:
       for: {{ .Values.form.alert.groups.schemaManager.rules.schemaFailed.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.schemaManager.rules.schemaFailed.severity }}
-        {{- include "kubedbcom-mariadb-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-mariadb-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: KubeDB schema failed for (mariadbdatabase {{`{{`}} $labels.mariadbdatabase {{`}}`}})
         description: "KubeDB schema failed.\n {{`{{`}} $labels.mariadbdatabase {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -355,7 +355,7 @@ spec:
       for: {{ .Values.form.alert.groups.schemaManager.rules.schemaExpired.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.schemaManager.rules.schemaExpired.severity }}
-        {{- include "kubedbcom-mariadb-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-mariadb-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: KubeDB schema expired for (mariadbdatabase {{`{{`}} $labels.mariadbdatabase {{`}}`}})
         description: "KubeDB schema expired.\n {{`{{`}} $labels.mariadbdatabase {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"

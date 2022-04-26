@@ -1,3 +1,116 @@
+form:
+  alert:
+    additionalRuleLabels: {}
+    annotations: {}
+    enabled: true
+    groups:
+      database:
+        enabled: true
+        rules:
+          redisInstanceDown:
+            duration: 0m
+            enabled: true
+            severity: critical
+          redisRestarted:
+            duration: 0m
+            enabled: true
+            severity: critical
+          redisSlowQueries:
+            duration: 2m
+            enabled: true
+            severity: warning
+          redisTooManyConnections:
+            duration: 2m
+            enabled: true
+            severity: warning
+            val: 80
+          redisqlHighRollbackRate:
+            duration: 0m
+            enabled: true
+            severity: warning
+            val: 0.02
+          redisqlNotEnoughConnections:
+            duration: 2m
+            enabled: true
+            severity: warning
+            val: 5
+          redisqlReplicationLag:
+            duration: 0m
+            enabled: true
+            severity: critical
+            val: 30s
+          redisqlSplitBrain:
+            duration: 0m
+            enabled: true
+            severity: critical
+          redisqlTooManyLocksAcquired:
+            duration: 2m
+            enabled: true
+            severity: critical
+            val: 0.2
+      opsManager:
+        enabled: true
+        rules:
+          opsRequestFailed:
+            duration: 0m
+            enabled: true
+            severity: critical
+          opsRequestOnProgress:
+            duration: 0m
+            enabled: true
+            severity: warning
+          opsRequestStatusProgressingToLong:
+            duration: 30m
+            enabled: true
+            severity: critical
+      provisioner:
+        enabled: true
+        rules:
+          appPhaseCritical:
+            duration: 15m
+            enabled: true
+            severity: warning
+          appPhaseNotReady:
+            duration: 1m
+            enabled: true
+            severity: critical
+      stash:
+        enabled: true
+        rules:
+          backupSessionFailed:
+            duration: 0m
+            enabled: true
+            severity: critical
+          backupSessionPeriodTooLong:
+            duration: 0m
+            enabled: true
+            severity: waring
+            val: 1800
+          noBackupSessionForTooLong:
+            duration: 0m
+            enabled: true
+            severity: warning
+            val: 18000
+          repositoryCorrupted:
+            duration: 5m
+            enabled: true
+            severity: critical
+          repositoryStorageRunningLow:
+            duration: 5m
+            enabled: true
+            severity: waring
+            val: 1.073741824e+10
+          restoreSessionFailed:
+            duration: 0m
+            enabled: true
+            severity: critical
+          restoreSessionPeriodTooLong:
+            duration: 0m
+            enabled: true
+            severity: waring
+            val: 1800
+    labels:
+      release: kube-prometheus-stack
 metadata:
   resource:
     group: kubedb.com
@@ -79,29 +192,6 @@ resources:
       storageType: Durable
       terminationPolicy: WipeOut
       version: 6.2.5
-  monitoringCoreosComPrometheusRule: # +doc-gen:break
-    apiVersion: monitoring.coreos.com/v1
-    kind: PrometheusRule
-    metadata:
-      name: redis
-      namespace: demo
-    spec:
-      groups:
-        - name: redis.database.default.release-name.rules
-          rules:
-            - alert: RedisqlDown
-              annotations:
-                description: |-
-                  MySQL instance is down on {{ $labels.pod }}
-                    VALUE = {{ $value }}
-                    LABELS = {{ $labels }}
-                summary: Redis instance down (instance {{ $labels.pod }})
-              expr: pg_up{job="-stats",namespace="default" == 0
-              for: 0m
-              labels:
-                alertname: redis_instance_down
-                app: redis
-                severity: critical
   monitoringCoreosComServiceMonitor: # +doc-gen:break
     apiVersion: monitoring.coreos.com/v1
     kind: ServiceMonitor

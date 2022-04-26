@@ -1,3 +1,151 @@
+form:
+  alert:
+    additionalRuleLabels: {}
+    annotations: {}
+    enabled: true
+    groups:
+      database:
+        enabled: true
+        rules:
+          mongoDBDown:
+            duration: 30s
+            enabled: true
+            severity: crititcal
+          mongoDBPhaseCritical:
+            duration: 3m
+            enabled: true
+            severity: warning
+          mongodbCursorsTimeouts:
+            duration: 2m
+            enabled: true
+            severity: warning
+            val: 100
+          mongodbHighLatency:
+            duration: 10m
+            enabled: true
+            severity: warning
+            val: 250000
+          mongodbHighTicketUtilization:
+            duration: 10m
+            enabled: true
+            severity: warning
+            val: 75
+          mongodbNumberCursorsOpen:
+            duration: 2m
+            enabled: true
+            severity: warning
+            val: 10000
+          mongodbRecurrentCursorTimeout:
+            duration: 30m
+            enabled: true
+            severity: warning
+            val: 0
+          mongodbRecurrentMemoryPageFaults:
+            duration: 30m
+            enabled: true
+            severity: warning
+            val: 0
+          mongodbReplicationLag:
+            duration: 0m
+            enabled: true
+            severity: crititcal
+            val: 10
+          mongodbTooManyConnections:
+            duration: 2m
+            enabled: true
+            severity: warning
+            val: 80
+          mongodbVirtualMemoryUsage:
+            duration: 1m
+            enabled: true
+            severity: warning
+            val: 2.097152e+06
+      opsManager:
+        enabled: true
+        rules:
+          opsRequestFailed:
+            duration: 0m
+            enabled: true
+            severity: critical
+          opsRequestOnProgress:
+            duration: 0m
+            enabled: true
+            severity: warning
+          opsRequestStatusProgressingToLong:
+            duration: 30m
+            enabled: true
+            severity: critical
+      provisioner:
+        enabled: true
+        rules:
+          appPhaseCritical:
+            duration: 15m
+            enabled: true
+            severity: warning
+          appPhaseNotReady:
+            duration: 1m
+            enabled: true
+            severity: critical
+      schemaManager:
+        enabled: true
+        rules:
+          schemaExpired:
+            duration: 0m
+            enabled: true
+            severity: warning
+          schemaFailed:
+            duration: 0m
+            enabled: true
+            severity: warning
+          schemaInProgressForTooLong:
+            duration: 30m
+            enabled: true
+            severity: warning
+          schemaPendingForTooLong:
+            duration: 30m
+            enabled: true
+            severity: warning
+          schemaTerminatingForTooLong:
+            duration: 30m
+            enabled: true
+            severity: warning
+      stash:
+        enabled: true
+        rules:
+          backupSessionFailed:
+            duration: 0m
+            enabled: true
+            severity: critical
+          backupSessionPeriodTooLong:
+            duration: 0m
+            enabled: true
+            severity: waring
+            val: 1800
+          noBackupSessionForTooLong:
+            duration: 0m
+            enabled: true
+            severity: warning
+            val: 18000
+          repositoryCorrupted:
+            duration: 5m
+            enabled: true
+            severity: critical
+          repositoryStorageRunningLow:
+            duration: 5m
+            enabled: true
+            severity: waring
+            val: 1.073741824e+10
+          restoreSessionFailed:
+            duration: 0m
+            enabled: true
+            severity: critical
+          restoreSessionPeriodTooLong:
+            duration: 0m
+            enabled: true
+            severity: waring
+            val: 1800
+    labels:
+      release: kube-prometheus-stack
 metadata:
   resource:
     group: kubedb.com
@@ -75,32 +223,6 @@ resources:
           kind: Issuer
           name: mongo-ca
       version: 4.2.3
-  monitoringCoreosComPrometheusRule: # +doc-gen:break
-    apiVersion: monitoring.coreos.com/v1
-    kind: PrometheusRule
-    metadata:
-      name: mongodb
-      namespace: demo
-    spec:
-      groups:
-        - name: mongodb.database.default.release-name.rules
-          rules:
-            - alert: MongodbVirtualMemoryUsage
-              annotations:
-                description: |-
-                  High memory usage
-                    VALUE = {{ $value }}
-                    LABELS = {{ $labels }}
-                summary: MongoDB virtual memory usage (instance {{ $labels.instance }})
-              expr: sum(mongodb_memory{type="virtual",job="release-name-stats",namespace="default"}) BY (job) > 2.097152e+06
-              for: 1m
-              labels:
-                k8s-group: kubedb.com
-                k8s-kind: MongoDB
-                k8s-name: release-name
-                k8s-namespace: default
-                k8s-resource: mongodbs
-                severity: warning
   monitoringCoreosComServiceMonitor: # +doc-gen:break
     apiVersion: monitoring.coreos.com/v1
     kind: ServiceMonitor

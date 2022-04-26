@@ -1,3 +1,158 @@
+form:
+  alert:
+    additionalRuleLabels: {}
+    annotations: {}
+    enabled: true
+    groups:
+      cluster:
+        enabled: true
+        rules:
+          galeraReplicationLatencyTooLong:
+            duration: 5m
+            enabled: true
+            severity: warning
+            val: 0.1
+      database:
+        enabled: true
+        rules:
+          mySQLHighIncomingBytes:
+            duration: 0m
+            enabled: true
+            severity: critical
+            val: 1.048576e+06
+          mySQLHighOutgoingBytes:
+            duration: 0m
+            enabled: true
+            severity: critical
+            val: 1.048576e+06
+          mySQLHighQPS:
+            duration: 0m
+            enabled: true
+            severity: critical
+            val: 1000
+          mySQLHighThreadsRunning:
+            duration: 2m
+            enabled: true
+            severity: warning
+            val: 60
+          mySQLInnoDBLogWaits:
+            duration: 0m
+            enabled: true
+            severity: warning
+            val: 10
+          mySQLInstanceDown:
+            duration: 0m
+            enabled: true
+            severity: critical
+          mySQLRestarted:
+            duration: 0m
+            enabled: true
+            severity: warning
+            val: 60
+          mySQLServiceDown:
+            duration: 0m
+            enabled: true
+            severity: critical
+          mySQLSlowQueries:
+            duration: 2m
+            enabled: true
+            severity: warning
+          mySQLTooManyConnections:
+            duration: 2m
+            enabled: true
+            severity: warning
+            val: 80
+          mySQLTooManyOpenFiles:
+            duration: 2m
+            enabled: true
+            severity: warning
+            val: 80
+      opsManager:
+        enabled: true
+        rules:
+          opsRequestFailed:
+            duration: 0m
+            enabled: true
+            severity: critical
+          opsRequestOnProgress:
+            duration: 0m
+            enabled: true
+            severity: warning
+          opsRequestStatusProgressingToLong:
+            duration: 30m
+            enabled: true
+            severity: critical
+      provisioner:
+        enabled: true
+        rules:
+          appPhaseCritical:
+            duration: 15m
+            enabled: true
+            severity: warning
+          appPhaseNotReady:
+            duration: 1m
+            enabled: true
+            severity: critical
+      schemaManager:
+        enabled: true
+        rules:
+          schemaExpired:
+            duration: 0m
+            enabled: true
+            severity: warning
+          schemaFailed:
+            duration: 0m
+            enabled: true
+            severity: warning
+          schemaInProgressForTooLong:
+            duration: 30m
+            enabled: true
+            severity: warning
+          schemaPendingForTooLong:
+            duration: 30m
+            enabled: true
+            severity: warning
+          schemaTerminatingForTooLong:
+            duration: 30m
+            enabled: true
+            severity: warning
+      stash:
+        enabled: true
+        rules:
+          backupSessionFailed:
+            duration: 0m
+            enabled: true
+            severity: critical
+          backupSessionPeriodTooLong:
+            duration: 0m
+            enabled: true
+            severity: waring
+            val: 1800
+          noBackupSessionForTooLong:
+            duration: 0m
+            enabled: true
+            severity: warning
+            val: 18000
+          repositoryCorrupted:
+            duration: 5m
+            enabled: true
+            severity: critical
+          repositoryStorageRunningLow:
+            duration: 5m
+            enabled: true
+            severity: waring
+            val: 1.073741824e+10
+          restoreSessionFailed:
+            duration: 0m
+            enabled: true
+            severity: critical
+          restoreSessionPeriodTooLong:
+            duration: 0m
+            enabled: true
+            severity: waring
+            val: 1800
+    labels:
+      release: kube-prometheus-stack
 metadata:
   resource:
     group: kubedb.com
@@ -77,32 +232,6 @@ resources:
           kind: Issuer
           name: mariadb-ca
       version: 10.5.8
-  monitoringCoreosComPrometheusRule: # +doc-gen:break
-    apiVersion: monitoring.coreos.com/v1
-    kind: PrometheusRule
-    metadata:
-      name: mariadb
-      namespace: demo
-    spec:
-      groups:
-        - name: mariadb.database.default.release-name.rules
-          rules:
-            - alert: MySQLInstanceDown
-              annotations:
-                description: |-
-                  MySQL instance is down on {{ $labels.pod }}
-                    VALUE = {{ $value }}
-                    LABELS = {{ $labels }}
-                summary: MySQL instance down (instance {{ $labels.pod }})
-              expr: mysql_up{job="release-name-stats",namespace="default"} == 0
-              for: 0m
-              labels:
-                k8s-group: kubedb.com
-                k8s-kind: MariaDB
-                k8s-name: release-name
-                k8s-namespace: default
-                k8s-resource: mariadbs
-                severity: critical
   monitoringCoreosComServiceMonitor: # +doc-gen:break
     apiVersion: monitoring.coreos.com/v1
     kind: ServiceMonitor

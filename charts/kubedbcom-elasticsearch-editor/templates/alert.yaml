@@ -1,4 +1,4 @@
-{{ $app := (include "kubedbcom-elasticsearch-editor-options.fullname" .) }}
+{{ $app := (include "kubedbcom-elasticsearch-editor.fullname" .) }}
 
 {{ if .Values.form.alert.enabled }}
 apiVersion: monitoring.coreos.com/v1
@@ -8,7 +8,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
-    {{- include "kubedbcom-elasticsearch-editor-options.selectorLabels" . | nindent 4 }}
+    {{- include "kubedbcom-elasticsearch-editor.selectorLabels" . | nindent 4 }}
 {{- if .Values.form.alert.labels }}
     {{- toYaml .Values.form.alert.labels | nindent 4 }}
 {{- end }}
@@ -186,7 +186,7 @@ spec:
       for: {{ .Values.form.alert.groups.provisioner.rules.appPhaseNotReady.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.provisioner.rules.appPhaseNotReady.severity }}
-        {{- include "kubedbcom-elasticsearch-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-elasticsearch-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: KubeDB Elasticsearch Phase NotReady (elasticsearch {{`{{`}} $labels.elasticsearch {{`}}`}})
         description: "KubeDB Elasticsearch Phase not ready on {{`{{`}} $labels.elasticsearch {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -197,7 +197,7 @@ spec:
       for: {{ .Values.form.alert.groups.provisioner.rules.appPhaseCritical.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.provisioner.rules.appPhaseCritical.severity }}
-        {{- include "kubedbcom-elasticsearch-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-elasticsearch-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: KubeDB Elasticsearch Phase Critical (elasticsearch {{`{{`}} $labels.elasticsearch {{`}}`}})
         description: "KubeDB Elasticsearch Phase Critical {{`{{`}} $labels.elasticsearch {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -212,7 +212,7 @@ spec:
       for: {{ .Values.form.alert.groups.opsManager.rules.opsRequestOnProgress.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.opsManager.rules.opsRequestOnProgress.severity }}
-        {{- include "kubedbcom-elasticsearch-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-elasticsearch-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: ElasticsearchOpsRequest on progress (elasticsearchopsrequest {{`{{`}} $labels.elasticsearchopsrequest {{`}}`}})
         description: "MaraiDBOpsRequest {{`{{`}} $labels.elasticsearchopsrequest {{`}}`}} is in progressressing status\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -223,7 +223,7 @@ spec:
       for: {{ .Values.form.alert.groups.opsManager.rules.opsRequestStatusProgressingToLong.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.opsManager.rules.opsRequestStatusProgressingToLong.severity }}
-        {{- include "kubedbcom-elasticsearch-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-elasticsearch-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: ElasticsearchOpsRequest is in progressing status for too long (elasticsearchopsrequest {{`{{`}} $labels.elasticsearchopsrequest {{`}}`}})
         description: "MaraiDBOpsRequest {{`{{`}} $labels.elasticsearchopsrequest {{`}}`}} is in progressing status for too long\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -234,7 +234,7 @@ spec:
       for: {{ .Values.form.alert.groups.opsManager.rules.opsRequestFailed.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.opsManager.rules.opsRequestFailed.severity }}
-        {{- include "kubedbcom-elasticsearch-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-elasticsearch-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: ElasticsearchOpsRequest failed (elasticsearchopsrequest {{`{{`}} $labels.elasticsearchopsrequest {{`}}`}})
         description: "MaraiDBOpsRequest {{`{{`}} $labels.elasticsearchopsrequest {{`}}`}} failed \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -249,7 +249,7 @@ spec:
       for: {{ .Values.form.alert.groups.stash.rules.backupSessionFailed.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.stash.rules.backupSessionFailed.severity }}
-        {{- include "kubedbcom-elasticsearch-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-elasticsearch-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: Elasticsearch Stash backup session failed (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "Elasticsearch Stash backupsession failed {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -260,7 +260,7 @@ spec:
       for: {{ .Values.form.alert.groups.stash.rules.restoreSessionFailed.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.stash.rules.restoreSessionFailed.severity }}
-        {{- include "kubedbcom-elasticsearch-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-elasticsearch-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: Elasticsearch Stash restore session failed (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "Elasticsearch Stash restore session failed {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -271,7 +271,7 @@ spec:
       for: {{ .Values.form.alert.groups.stash.rules.noBackupSessionForTooLong.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.stash.rules.noBackupSessionForTooLong.severity }}
-        {{- include "kubedbcom-elasticsearch-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-elasticsearch-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: Elasticsearch Stash no backup for last {{ .Values.form.alert.groups.stash.rules.noBackupSessionForTooLong.val }} second (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "Elasticsearch Stash no backup for too long {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -282,7 +282,7 @@ spec:
       for: {{ .Values.form.alert.groups.stash.rules.repositoryCorrupted.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.stash.rules.repositoryCorrupted.severity }}
-        {{- include "kubedbcom-elasticsearch-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-elasticsearch-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: Elasticsearch Stash repository corrupted (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "Elasticsearch Stash repository corrupted {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -293,7 +293,7 @@ spec:
       for: {{ .Values.form.alert.groups.stash.rules.repositoryStorageRunningLow.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.stash.rules.repositoryStorageRunningLow.severity }}
-        {{- include "kubedbcom-elasticsearch-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-elasticsearch-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: Elasticsearch Stash Repository storage more than {{ .Values.form.alert.groups.stash.rules.repositoryStorageRunningLow.val }} byte. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "Elasticsearch Stash Repository storage running low {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -304,7 +304,7 @@ spec:
       for: {{ .Values.form.alert.groups.stash.rules.backupSessionPeriodTooLong.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.stash.rules.backupSessionPeriodTooLong.severity }}
-        {{- include "kubedbcom-elasticsearch-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-elasticsearch-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary:  Elasticsearch Stash backup session took more than {{ .Values.form.alert.groups.stash.rules.backupSessionPeriodTooLong.val }} second to complete. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "Elasticsearch Stash backup session taking to long to complete {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -315,7 +315,7 @@ spec:
       for: {{ .Values.form.alert.groups.stash.rules.restoreSessionPeriodTooLong.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.stash.rules.restoreSessionPeriodTooLong.severity }}
-        {{- include "kubedbcom-elasticsearch-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-elasticsearch-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary:  Elasticsearch Stash restore session took more than {{ .Values.form.alert.groups.stash.rules.restoreSessionPeriodTooLong.val }} second to complete. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "Elasticsearch Stash restore session taking to long to complete {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"

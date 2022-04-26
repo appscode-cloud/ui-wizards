@@ -54,29 +54,6 @@ resources:
           kind: Issuer
           name: redis-ca
       version: 6.2.5
-  monitoringCoreosComPrometheusRule_redis: # +doc-gen:break
-    apiVersion: monitoring.coreos.com/v1
-    kind: PrometheusRule
-    metadata:
-      name: redis
-      namespace: demo
-    spec:
-      groups:
-        - name: redis.database.default.release-name.rules
-          rules:
-            - alert: RedisqlDown
-              annotations:
-                description: |-
-                  MySQL instance is down on {{ $labels.pod }}
-                    VALUE = {{ $value }}
-                    LABELS = {{ $labels }}
-                summary: Redis instance down (instance {{ $labels.pod }})
-              expr: pg_up{job="-stats",namespace="default" == 0
-              for: 0m
-              labels:
-                alertname: redis_instance_down
-                app: redis
-                severity: critical
   monitoringCoreosComServiceMonitor_redis: # +doc-gen:break
     apiVersion: monitoring.coreos.com/v1
     kind: ServiceMonitor
