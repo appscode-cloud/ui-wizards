@@ -1,3 +1,139 @@
+form:
+  alert:
+    additionalRuleLabels: {}
+    annotations: {}
+    enabled: true
+    groups:
+      database:
+        enabled: true
+        rules:
+          postgresInstanceDown:
+            duration: 0m
+            enabled: true
+            severity: critical
+          postgresRestarted:
+            duration: 0m
+            enabled: true
+            severity: critical
+          postgresSlowQueries:
+            duration: 2m
+            enabled: true
+            severity: warning
+          postgresTooManyConnections:
+            duration: 2m
+            enabled: true
+            severity: warning
+            val: 80
+          postgresqlHighRollbackRate:
+            duration: 0m
+            enabled: true
+            severity: warning
+            val: 0.02
+          postgresqlNotEnoughConnections:
+            duration: 2m
+            enabled: true
+            severity: warning
+            val: 5
+          postgresqlReplicationLag:
+            duration: 0m
+            enabled: true
+            severity: critical
+            val: 30s
+          postgresqlSplitBrain:
+            duration: 0m
+            enabled: true
+            severity: critical
+          postgresqlTooManyLocksAcquired:
+            duration: 2m
+            enabled: true
+            severity: critical
+            val: 0.2
+      opsManager:
+        enabled: true
+        rules:
+          opsRequestFailed:
+            duration: 0m
+            enabled: true
+            severity: critical
+          opsRequestOnProgress:
+            duration: 0m
+            enabled: true
+            severity: warning
+          opsRequestStatusProgressingToLong:
+            duration: 30m
+            enabled: true
+            severity: critical
+      provisioner:
+        enabled: true
+        rules:
+          appPhaseCritical:
+            duration: 15m
+            enabled: true
+            severity: warning
+          appPhaseNotReady:
+            duration: 1m
+            enabled: true
+            severity: critical
+      schemaManager:
+        enabled: true
+        rules:
+          schemaExpired:
+            duration: 0m
+            enabled: true
+            severity: warning
+          schemaFailed:
+            duration: 0m
+            enabled: true
+            severity: warning
+          schemaInProgressForTooLong:
+            duration: 30m
+            enabled: true
+            severity: warning
+          schemaPendingForTooLong:
+            duration: 30m
+            enabled: true
+            severity: warning
+          schemaTerminatingForTooLong:
+            duration: 30m
+            enabled: true
+            severity: warning
+      stash:
+        enabled: true
+        rules:
+          backupSessionFailed:
+            duration: 0m
+            enabled: true
+            severity: critical
+          backupSessionPeriodTooLong:
+            duration: 0m
+            enabled: true
+            severity: waring
+            val: 1800
+          noBackupSessionForTooLong:
+            duration: 0m
+            enabled: true
+            severity: warning
+            val: 18000
+          repositoryCorrupted:
+            duration: 5m
+            enabled: true
+            severity: critical
+          repositoryStorageRunningLow:
+            duration: 5m
+            enabled: true
+            severity: waring
+            val: 1.073741824e+10
+          restoreSessionFailed:
+            duration: 0m
+            enabled: true
+            severity: critical
+          restoreSessionPeriodTooLong:
+            duration: 0m
+            enabled: true
+            severity: waring
+            val: 1800
+    labels:
+      release: kube-prometheus-stack
 metadata:
   resource:
     group: kubedb.com
@@ -71,29 +207,6 @@ resources:
           kind: Issuer
           name: postgres-ca
       version: 13.2-debian
-  monitoringCoreosComPrometheusRule: # +doc-gen:break
-    apiVersion: monitoring.coreos.com/v1
-    kind: PrometheusRule
-    metadata:
-      name: postgres
-      namespace: demo
-    spec:
-      groups:
-        - name: postgres.database.default.release-name.rules
-          rules:
-            - alert: PostgresqlDown
-              annotations:
-                description: |-
-                  MySQL instance is down on {{ $labels.pod }}
-                    VALUE = {{ $value }}
-                    LABELS = {{ $labels }}
-                summary: Postgres instance down (instance {{ $labels.pod }})
-              expr: pg_up{job="-stats",namespace="default" == 0
-              for: 0m
-              labels:
-                alertname: postgres_instance_down
-                app: postgres
-                severity: critical
   monitoringCoreosComServiceMonitor: # +doc-gen:break
     apiVersion: monitoring.coreos.com/v1
     kind: ServiceMonitor

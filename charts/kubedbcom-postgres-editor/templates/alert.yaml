@@ -1,4 +1,4 @@
-{{ $app := (include "kubedbcom-postgres-editor-options.fullname" .) }}
+{{ $app := (include "kubedbcom-postgres-editor.fullname" .) }}
 
 {{ if .Values.form.alert.enabled }}
 apiVersion: monitoring.coreos.com/v1
@@ -8,7 +8,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
-    {{- include "kubedbcom-postgres-editor-options.selectorLabels" . | nindent 4 }}
+    {{- include "kubedbcom-postgres-editor.selectorLabels" . | nindent 4 }}
 {{- if .Values.form.alert.labels }}
     {{- toYaml .Values.form.alert.labels | nindent 4 }}
 {{- end }}
@@ -67,7 +67,7 @@ spec:
       for: {{ .Values.form.alert.groups.provisioner.rules.appPhaseNotReady.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.provisioner.rules.appPhaseNotReady.severity }}
-        {{- include "kubedbcom-postgres-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-postgres-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: KubeDB PostgreSQL Phase NotReady (postgres {{`{{`}} $labels.postgres {{`}}`}})
         description: "KubeDB PostgreSQL Phase not ready on {{`{{`}} $labels.postgres {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -78,7 +78,7 @@ spec:
       for: {{ .Values.form.alert.groups.provisioner.rules.appPhaseCritical.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.provisioner.rules.appPhaseCritical.severity }}
-        {{- include "kubedbcom-postgres-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-postgres-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: KubeDB PostgreSQL Phase Critical (postgres {{`{{`}} $labels.postgres {{`}}`}})
         description: "KubeDB PostgreSQL Phase Critical {{`{{`}} $labels.postgres {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -93,7 +93,7 @@ spec:
       for: {{ .Values.form.alert.groups.opsManager.rules.opsRequestOnProgress.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.opsManager.rules.opsRequestOnProgress.severity }}
-        {{- include "kubedbcom-postgres-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-postgres-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: PostgreSQLOpsRequest on progress (postgresopsrequest {{`{{`}} $labels.postgresopsrequest {{`}}`}})
         description: "MaraiDBOpsRequest {{`{{`}} $labels.postgresopsrequest {{`}}`}} is in progressressing status\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -104,7 +104,7 @@ spec:
       for: {{ .Values.form.alert.groups.opsManager.rules.opsRequestStatusProgressingToLong.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.opsManager.rules.opsRequestStatusProgressingToLong.severity }}
-        {{- include "kubedbcom-postgres-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-postgres-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: PostgreSQLOpsRequest is in progressing status for too long (postgresopsrequest {{`{{`}} $labels.postgresopsrequest {{`}}`}})
         description: "MaraiDBOpsRequest {{`{{`}} $labels.postgresopsrequest {{`}}`}} is in progressing status for too long\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -115,7 +115,7 @@ spec:
       for: {{ .Values.form.alert.groups.opsManager.rules.opsRequestFailed.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.opsManager.rules.opsRequestFailed.severity }}
-        {{- include "kubedbcom-postgres-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-postgres-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: PostgreSQLOpsRequest failed (postgresopsrequest {{`{{`}} $labels.postgresopsrequest {{`}}`}})
         description: "MaraiDBOpsRequest {{`{{`}} $labels.postgresopsrequest {{`}}`}} failed \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -130,7 +130,7 @@ spec:
       for: {{ .Values.form.alert.groups.stash.rules.backupSessionFailed.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.stash.rules.backupSessionFailed.severity }}
-        {{- include "kubedbcom-postgres-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-postgres-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: PostgreSQL Stash backup session failed (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "PostgreSQL Stash backupsession failed {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -141,7 +141,7 @@ spec:
       for: {{ .Values.form.alert.groups.stash.rules.restoreSessionFailed.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.stash.rules.restoreSessionFailed.severity }}
-        {{- include "kubedbcom-postgres-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-postgres-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: PostgreSQL Stash restore session failed (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "PostgreSQL Stash restore session failed {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -152,7 +152,7 @@ spec:
       for: {{ .Values.form.alert.groups.stash.rules.noBackupSessionForTooLong.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.stash.rules.noBackupSessionForTooLong.severity }}
-        {{- include "kubedbcom-postgres-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-postgres-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: PostgreSQL Stash no backup for last {{ .Values.form.alert.groups.stash.rules.noBackupSessionForTooLong.val }} second (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "PostgreSQL Stash no backup for too long {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -163,7 +163,7 @@ spec:
       for: {{ .Values.form.alert.groups.stash.rules.repositoryCorrupted.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.stash.rules.repositoryCorrupted.severity }}
-        {{- include "kubedbcom-postgres-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-postgres-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: PostgreSQL Stash repository corrupted (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "PostgreSQL Stash repository corrupted {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -174,7 +174,7 @@ spec:
       for: {{ .Values.form.alert.groups.stash.rules.repositoryStorageRunningLow.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.stash.rules.repositoryStorageRunningLow.severity }}
-        {{- include "kubedbcom-postgres-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-postgres-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: PostgreSQL Stash Repository storage more than {{ .Values.form.alert.groups.stash.rules.repositoryStorageRunningLow.val }} byte. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "PostgreSQL Stash Repository storage running low {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -185,7 +185,7 @@ spec:
       for: {{ .Values.form.alert.groups.stash.rules.backupSessionPeriodTooLong.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.stash.rules.backupSessionPeriodTooLong.severity }}
-        {{- include "kubedbcom-postgres-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-postgres-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary:  PostgreSQL Stash backup session took more than {{ .Values.form.alert.groups.stash.rules.backupSessionPeriodTooLong.val }} second to complete. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "PostgreSQL Stash backup session taking to long to complete {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -196,7 +196,7 @@ spec:
       for: {{ .Values.form.alert.groups.stash.rules.restoreSessionPeriodTooLong.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.stash.rules.restoreSessionPeriodTooLong.severity }}
-        {{- include "kubedbcom-postgres-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-postgres-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary:  PostgreSQL Stash restore session took more than {{ .Values.form.alert.groups.stash.rules.restoreSessionPeriodTooLong.val }} second to complete. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "PostgreSQL Stash restore session taking to long to complete {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -211,7 +211,7 @@ spec:
       for: {{ .Values.form.alert.groups.schemaManager.rules.schemaPendingForTooLong.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.schemaManager.rules.schemaPendingForTooLong.severity }}
-        {{- include "kubedbcom-postgres-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-postgres-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: KubeDB schema pending for too long for (postgresdatabase {{`{{`}} $labels.postgresdatabase {{`}}`}})
         description: "KubeDB schema pending for too long.\n {{`{{`}} $labels.postgresdatabase {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -222,7 +222,7 @@ spec:
       for: {{ .Values.form.alert.groups.schemaManager.rules.schemaInProgressForTooLong.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.schemaManager.rules.schemaInProgressForTooLong.severity }}
-        {{- include "kubedbcom-postgres-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-postgres-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: KubeDB schema is in progress for too long for (postgresdatabase {{`{{`}} $labels.postgresdatabase {{`}}`}})
         description: "KubeDB schema is in progress for too long.\n {{`{{`}} $labels.postgresdatabase {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -233,7 +233,7 @@ spec:
       for: {{ .Values.form.alert.groups.schemaManager.rules.schemaTerminatingForTooLong.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.schemaManager.rules.schemaTerminatingForTooLong.severity }}
-        {{- include "kubedbcom-postgres-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-postgres-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: KubeDB schema terminating for too long for (postgresdatabase {{`{{`}} $labels.postgresdatabase {{`}}`}})
         description: "KubeDB schema terminating for too long.\n {{`{{`}} $labels.postgresdatabase {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -244,7 +244,7 @@ spec:
       for: {{ .Values.form.alert.groups.schemaManager.rules.schemaFailed.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.schemaManager.rules.schemaFailed.severity }}
-        {{- include "kubedbcom-postgres-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-postgres-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: KubeDB schema failed for (postgresdatabase {{`{{`}} $labels.postgresdatabase {{`}}`}})
         description: "KubeDB schema failed.\n {{`{{`}} $labels.postgresdatabase {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -255,7 +255,7 @@ spec:
       for: {{ .Values.form.alert.groups.schemaManager.rules.schemaExpired.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.schemaManager.rules.schemaExpired.severity }}
-        {{- include "kubedbcom-postgres-editor-options.alertLabels" . | nindent 8 }}
+        {{- include "kubedbcom-postgres-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: KubeDB schema expired for (postgresdatabase {{`{{`}} $labels.postgresdatabase {{`}}`}})
         description: "KubeDB schema expired.\n {{`{{`}} $labels.postgresdatabase {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"

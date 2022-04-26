@@ -34,28 +34,6 @@ resources:
         secretShares: 5
         secretThreshold: 3
       version: 1.8.2
-  monitoringCoreosComPrometheusRule: # +doc-gen:break
-    apiVersion: monitoring.coreos.com/v1
-    kind: PrometheusRule
-    metadata:
-      name: vault
-      namespace: demo
-    spec:
-      groups:
-        - name: elasticsearch.database.default.release-name.rules
-          rules:
-            - alert: ElasticsearchHeapUsageWarning
-              annotations:
-                description: |-
-                  The heap usage is over 80%
-                    VALUE = {{ $value }}
-                    LABELS = {{ $labels }}
-                summary: Elasticsearch Heap Usage warning (instance {{ $labels.instance }})
-              expr: (elasticsearch_jvm_memory_used_bytes{area="heap",job="release-name-stats",namespace="default"} / elasticsearch_jvm_memory_max_bytes{area="heap",job="release-name-stats",namespace="default"}) * 100 > 80
-              for: 2m
-              labels:
-                alertname: elasticsearch_heap_usage_warning
-                severity: warning
   secret_backend_creds: # +doc-gen:break
     apiVersion: v1
     kind: Secret

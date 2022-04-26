@@ -1,3 +1,133 @@
+form:
+  alert:
+    additionalRuleLabels: {}
+    annotations: {}
+    enabled: true
+    groups:
+      database:
+        enabled: true
+        rules:
+          elasticsearchClusterRed:
+            duration: 0m
+            enabled: false
+            severity: critical
+          elasticsearchClusterYellow:
+            duration: 0m
+            enabled: true
+            severity: warning
+          elasticsearchDiskOutOfSpace:
+            duration: 0m
+            enabled: false
+            severity: critical
+            val: 90
+          elasticsearchDiskSpaceLow:
+            duration: 2m
+            enabled: false
+            severity: warning
+            val: 80
+          elasticsearchHealthyDataNodes:
+            duration: 0m
+            enabled: true
+            severity: critical
+            val: 3
+          elasticsearchHealthyNodes:
+            duration: 0m
+            enabled: true
+            severity: critical
+            val: 3
+          elasticsearchHeapUsageTooHigh:
+            duration: 2m
+            enabled: false
+            severity: critical
+            val: 90
+          elasticsearchHeapUsageWarning:
+            duration: 2m
+            enabled: true
+            severity: warning
+            val: 80
+          elasticsearchInitializingShards:
+            duration: 0m
+            enabled: true
+            severity: info
+          elasticsearchNoNewDocuments10m:
+            duration: 0m
+            enabled: false
+            severity: info
+          elasticsearchPendingTasks:
+            duration: 15m
+            enabled: false
+            severity: warning
+          elasticsearchRelocatingShards:
+            duration: 0m
+            enabled: true
+            severity: info
+          elasticsearchUnassignedShards:
+            duration: 0m
+            enabled: true
+            severity: critical
+      opsManager:
+        enabled: true
+        rules:
+          opsRequestFailed:
+            duration: 0m
+            enabled: true
+            severity: critical
+          opsRequestOnProgress:
+            duration: 0m
+            enabled: true
+            severity: warning
+          opsRequestStatusProgressingToLong:
+            duration: 30m
+            enabled: true
+            severity: critical
+      provisioner:
+        enabled: true
+        rules:
+          appPhaseCritical:
+            duration: 15m
+            enabled: true
+            severity: warning
+          appPhaseNotReady:
+            duration: 1m
+            enabled: true
+            severity: critical
+      stash:
+        enabled: true
+        rules:
+          backupSessionFailed:
+            duration: 0m
+            enabled: true
+            severity: critical
+          backupSessionPeriodTooLong:
+            duration: 0m
+            enabled: true
+            severity: waring
+            val: 1800
+          noBackupSessionForTooLong:
+            duration: 0m
+            enabled: true
+            severity: warning
+            val: 18000
+          repositoryCorrupted:
+            duration: 5m
+            enabled: true
+            severity: critical
+          repositoryStorageRunningLow:
+            duration: 5m
+            enabled: true
+            severity: waring
+            val: 1.073741824e+10
+          restoreSessionFailed:
+            duration: 0m
+            enabled: true
+            severity: critical
+          restoreSessionPeriodTooLong:
+            duration: 0m
+            enabled: true
+            severity: waring
+            val: 1800
+    labels:
+      release: kube-prometheus-stack
 metadata:
   resource:
     group: kubedb.com
@@ -162,28 +292,6 @@ resources:
                 storage: 1Gi
             storageClassName: linode-block-storage
       version: searchguard-7.10.2
-  monitoringCoreosComPrometheusRule: # +doc-gen:break
-    apiVersion: monitoring.coreos.com/v1
-    kind: PrometheusRule
-    metadata:
-      name: elasticsearch
-      namespace: demo
-    spec:
-      groups:
-        - name: elasticsearch.database.default.release-name.rules
-          rules:
-            - alert: ElasticsearchHeapUsageWarning
-              annotations:
-                description: |-
-                  The heap usage is over 80%
-                    VALUE = {{ $value }}
-                    LABELS = {{ $labels }}
-                summary: Elasticsearch Heap Usage warning (instance {{ $labels.instance }})
-              expr: (elasticsearch_jvm_memory_used_bytes{area="heap",job="release-name-stats",namespace="default"} / elasticsearch_jvm_memory_max_bytes{area="heap",job="release-name-stats",namespace="default"}) * 100 > 80
-              for: 2m
-              labels:
-                alertname: elasticsearch_heap_usage_warning
-                severity: warning
   monitoringCoreosComServiceMonitor: # +doc-gen:break
     apiVersion: monitoring.coreos.com/v1
     kind: ServiceMonitor
