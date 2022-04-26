@@ -45,11 +45,12 @@ The command removes all the Kubernetes components associated with the chart and 
 
 The following table lists the configurable parameters of the `schedulingk8sio-priorityclass-editor` chart and their default values.
 
-|   Parameter   | Description |              Default              |
-|---------------|-------------|-----------------------------------|
-| apiVersion    |             | <code>scheduling.k8s.io/v1</code> |
-| kind          |             | <code>PriorityClass</code>        |
-| metadata.name |             | <code>priorityclass</code>        |
+|     Parameter      | Description |              Default              |
+|--------------------|-------------|-----------------------------------|
+| apiVersion         |             | <code>scheduling.k8s.io/v1</code> |
+| kind               |             | <code>PriorityClass</code>        |
+| metadata.name      |             | <code>priorityclass</code>        |
+| metadata.namespace |             | <code>""</code>                   |
 
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm upgrade -i`. For example:

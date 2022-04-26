@@ -45,11 +45,12 @@ The command removes all the Kubernetes components associated with the chart and 
 
 The following table lists the configurable parameters of the `authorizationk8sio-selfsubjectaccessreview-editor` chart and their default values.
 
-|   Parameter   | Description |               Default                |
-|---------------|-------------|--------------------------------------|
-| apiVersion    |             | <code>authorization.k8s.io/v1</code> |
-| kind          |             | <code>SelfSubjectAccessReview</code> |
-| metadata.name |             | <code>selfsubjectaccessreview</code> |
+|     Parameter      | Description |               Default                |
+|--------------------|-------------|--------------------------------------|
+| apiVersion         |             | <code>authorization.k8s.io/v1</code> |
+| kind               |             | <code>SelfSubjectAccessReview</code> |
+| metadata.name      |             | <code>selfsubjectaccessreview</code> |
+| metadata.namespace |             | <code>""</code>                      |
 
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm upgrade -i`. For example:
