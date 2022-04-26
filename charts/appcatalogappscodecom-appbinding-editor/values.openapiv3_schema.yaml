@@ -37,11 +37,17 @@ properties:
           insecureSkipTLSVerify:
             description: InsecureSkipTLSVerify disables TLS certificate verification when communicating with this app. This is strongly discouraged.  You should use the CABundle instead.
             type: boolean
+          serverName:
+            description: ServerName is used to verify the hostname on the returned certificates unless InsecureSkipVerify is given. It is also included in the client's handshake to support virtual hosting unless it is an IP address.
+            type: string
           service:
             description: "`service` is a reference to the service for this app. Either `service` or `url` must be specified. \n If the webhook is running within the cluster, then you should use `service`."
             properties:
               name:
                 description: '`name` is the name of the service. Required'
+                type: string
+              namespace:
+                description: '`namespace` is the namespace of the service.'
                 type: string
               path:
                 description: '`path` is an optional URL path which will be sent in any request to this service.'
@@ -105,10 +111,7 @@ properties:
                   description: The reference to the Secret that should be merged into the credentials Secret.
                   properties:
                     name:
-                      description: Name of the referent.
-                      type: string
-                    namespace:
-                      description: Namespace of the referent.
+                      description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?'
                       type: string
                   type: object
               type: object
@@ -136,6 +139,13 @@ properties:
               type: object
           type: object
         type: array
+      tlsSecret:
+        description: TLSSecret is the name of the secret that will hold the client certificate and private key associated with the AppBinding.
+        properties:
+          name:
+            description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names TODO: Add other useful fields. apiVersion, kind, uid?'
+            type: string
+        type: object
       type:
         description: Type used to facilitate programmatic handling of application.
         type: string

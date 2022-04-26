@@ -21,6 +21,13 @@ properties:
     type: object
   spec:
     properties:
+      coordinator:
+        properties:
+          image:
+            type: string
+        required:
+        - image
+        type: object
       db:
         properties:
           image:
@@ -32,8 +39,11 @@ properties:
         type: boolean
       distribution:
         enum:
+        - Official
         - Oracle
         - Percona
+        - KubeDB
+        - MySQL
         type: string
       exporter:
         properties:
@@ -57,6 +67,20 @@ properties:
         - databasePolicyName
         type: object
       replicationModeDetector:
+        properties:
+          image:
+            type: string
+        required:
+        - image
+        type: object
+      router:
+        properties:
+          image:
+            type: string
+        required:
+        - image
+        type: object
+      routerInitContainer:
         properties:
           image:
             type: string
@@ -142,7 +166,6 @@ properties:
     - exporter
     - initContainer
     - podSecurityPolicies
-    - replicationModeDetector
     - upgradeConstraints
     - version
     type: object
