@@ -542,8 +542,10 @@ steps:
     discriminator:
       scheduleBackup:
         type: boolean
+      repoInitialSelectionStatus:
+        type: string
     elements:
-    - computed: initScheduleBackup
+    - computed: initScheduleBackupForEdit
       label:
         text: labels.backup.title
       onChange: onScheduleBackupChange
@@ -560,6 +562,7 @@ steps:
           type: string
       elements:
       - computed: initBackupInvoker
+        disabled: true
         label:
           text: labels.backup.invoker
         onChange: onBackupInvokerChange
@@ -578,12 +581,13 @@ steps:
         - discriminator:
             repositoryChoise:
               type: string
+              default: select
           elements:
           - label:
               isSubsection: true
               text: labels.repositories.title
             type: label-element
-          - computed: initRepositoryChoise
+          - disabled: isEqualToDiscriminatorPath|yes|/repoInitialSelectionStatus
             onChange: onRepositoryChoiseChange
             options:
             - text: options.createOrSelect.select.text
@@ -594,6 +598,7 @@ steps:
               $ref: discriminator#/properties/repositoryChoise
             type: radio
           - allowUserDefinedOption: true
+            disabled: isEqualToDiscriminatorPath|yes|/repoInitialSelectionStatus
             fetch: resourceNames|stash.appscode.com|v1alpha1|repositories
             if: showRepositorySelectOrCreate|select
             label:

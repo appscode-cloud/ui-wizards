@@ -1878,6 +1878,18 @@ function addKubedbComElasticsearchDbAnnotation(
   });
 }
 
+function initScheduleBackupForEdit({ getValue, model, setDiscriminatorValue }) {
+  const {
+    stashAppscodeComBackupConfiguration,
+    isBluePrint,
+  } = getBackupConfigsAndAnnotations(getValue, model);
+
+  initRepositoryChoiseForEdit({getValue, model, setDiscriminatorValue});
+
+  if (stashAppscodeComBackupConfiguration || isBluePrint) return "yes";
+  else return "no";
+}
+
 function initScheduleBackup({ getValue, model }) {
   const {
     stashAppscodeComBackupConfiguration,
@@ -2042,6 +2054,17 @@ function initRepositoryChoise({ getValue, model }) {
 
   if (stashAppscodeComRepository_repo) return "create";
   else return "select";
+}
+
+function initRepositoryChoiseForEdit({ getValue, model, setDiscriminatorValue }) {
+  const stashAppscodeComRepository_repo = getValue(
+    model,
+    "/resources/stashAppscodeComRepository_repo"
+  );
+  const repoInitialSelectionStatus = stashAppscodeComRepository_repo ? "yes" : "no";
+  setDiscriminatorValue("/repoInitialSelectionStatus", repoInitialSelectionStatus);
+
+  return repoInitialSelectionStatus;
 }
 
 function onRepositoryChoiseChange({
@@ -2630,6 +2653,7 @@ return {
 	deleteKubedbComElasticsearchDbAnnotation,
 	addKubedbComElasticsearchDbAnnotation,
 	initScheduleBackup,
+  initScheduleBackupForEdit,
 	onScheduleBackupChange,
 	showBackupForm,
 	initBackupInvoker,
@@ -2638,6 +2662,7 @@ return {
 	initalizeTargetReferenceName,
 	setInitialRestoreSessionRepo,
 	initRepositoryChoise,
+  initRepositoryChoiseForEdit,
 	onRepositoryChoiseChange,
 	onRepositoryNameChange,
 	getMongoAnnotations,
