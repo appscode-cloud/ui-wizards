@@ -86,7 +86,8 @@ type PostgresDatabaseAlert struct {
 
 type PostgresDatabaseAlertRules struct {
 	PostgresInstanceDown           FixedAlert          `json:"postgresInstanceDown"`
-	PostgresRestarted              FixedAlert          `json:"postgresRestarted"`
+	PostgresRestarted              IntValAlert         `json:"postgresRestarted"`
+	PostgresqlExporterError        FixedAlert          `json:"postgresqlExporterError"`
 	PostgresTooManyConnections     IntValAlert         `json:"postgresTooManyConnections"`
 	PostgresqlNotEnoughConnections IntValAlert         `json:"postgresqlNotEnoughConnections"`
 	PostgresSlowQueries            FixedAlert          `json:"postgresSlowQueries"`
