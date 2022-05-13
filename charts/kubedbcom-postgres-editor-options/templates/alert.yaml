@@ -23,7 +23,7 @@ spec:
     rules:
     {{ if .Values.form.alert.groups.database.rules.postgresInstanceDown -}}
     - alert: PostgresqlDown
-      expr: pg_up{job="{{- .Values.dbName -}}-stats",namespace="{{ .Release.Namespace }}" == 0
+      expr: pg_up{job="{{- $app -}}-stats",namespace="{{ .Release.Namespace }}"} == 0
       for: {{ .Values.form.alert.groups.database.rules.postgresInstanceDown.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.database.rules.postgresInstanceDown.severity }}
@@ -31,11 +31,71 @@ spec:
         alertname: postgres_instance_down
       annotations:
         summary: Postgres instance down (instance {{`{{`}} $labels.pod {{`}}`}})
-        description: "MySQL instance is down on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        description: "Postgres instance is down on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{end -}}
+    {{ if .Values.form.alert.groups.database.rules.postgresqlSplitBrain.enabled -}}
+    - alert: PostgresqlSplitBrain
+      expr: count(pg_replication_is_replica{job="{{- $app -}}-stats",namespace="{{ .Release.Namespace }}"} == 0) != 1
+      for: {{ .Values.form.alert.groups.database.rules.postgresqlSplitBrain.duration }}
+      labels:
+        severity: {{ .Values.form.alert.groups.database.rules.postgresqlSplitBrain.severity }}
+        app: postgres
+        alertname: postgresql_split_brain
+      annotations:
+        summary: Postgresql split brain (instance {{`{{`}} $labels.pod {{`}}`}})
+        description: "Split Brain, too many primary Postgresql databases in read-write mode\n  {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{end -}}
+    {{ if .Values.form.alert.groups.database.rules.postgresqlTooManyLocksAcquired.enabled -}}
+    - alert: PostgresqlTooManyLocksAcquired
+      expr: ((sum by (pod) (pg_locks_count{job="{{- $app -}}-stats",namespace="{{ .Release.Namespace }}"}) ) / ( sum by (pod) (pg_settings_max_locks_per_transaction{job="{{- $app -}}-stats",namespace="{{ .Release.Namespace }}"}) * sum by (pod) (pg_settings_max_connections{job="{{- $app -}}-stats",namespace="{{ .Release.Namespace }}"}))) > {{.Values.form.alert.groups.database.rules.postgresqlTooManyLocksAcquired.val}}
+      for: {{ .Values.form.alert.groups.database.rules.postgresqlTooManyLocksAcquired.duration }}
+      labels:
+        severity: {{ .Values.form.alert.groups.database.rules.postgresqlTooManyLocksAcquired.severity }}
+        app: postgres
+        alertname: postgresql_too_many_locks_acquired
+      annotations:
+        summary: Postgresql too many locks acquired (instance {{`{{`}} $labels.pod {{`}}`}})
+        description: "Too many locks acquired on the database. \n  If this alert happens frequently, we may need to increase the postgres setting max_locks_per_transaction.\n  {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{end -}}
+    {{ if .Values.form.alert.groups.database.rules.postgresRestarted.enabled -}}
+    - alert: PostgresqlRestarted
+      expr: time() - pg_postmaster_start_time_seconds{job="{{- $app -}}-stats",namespace="{{ .Release.Namespace }}"} < {{ .Values.form.alert.groups.database.rules.postgresRestarted.val }}
+      for: {{ .Values.form.alert.groups.database.rules.postgresRestarted.duration }}
+      labels:
+        severity: {{ .Values.form.alert.groups.database.rules.postgresRestarted.severity }}
+        app: postgres
+        alertname: postgresRestarted
+      annotations:
+        summary: Postgresql restarted (instance {{`{{`}} $labels.pod {{`}}`}})
+        description: "Postgresql restarted\n  {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{end -}}
+    {{ if .Values.form.alert.groups.database.rules.postgresqlExporterError.enabled -}}
+    - alert: PostgresqlExporterError
+      expr: pg_exporter_last_scrape_error{job="{{- $app -}}-stats",namespace="{{ .Release.Namespace }}"} > 0
+      for: {{ .Values.form.alert.groups.database.rules.postgresqlExporterError.duration }}
+      labels:
+        severity: {{ .Values.form.alert.groups.database.rules.postgresqlExporterError.severity }}
+        app: postgres
+        alertname: postgresqlExporterError
+      annotations:
+        summary: Postgresql exporter error (instance {{`{{`}} $labels.pod {{`}}`}})
+        description: "Postgresql exporter is showing errors. A query may be buggy in query.yaml\n  {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{end -}}
+    {{ if .Values.form.alert.groups.database.rules.postgresqlHighRollbackRate.enabled -}}
+    - alert: PostgresqlHighRollbackRate
+      expr: rate(pg_stat_database_xact_rollback{job="{{- $app -}}-stats",namespace="{{ .Release.Namespace }}"}[3m]) / rate(pg_stat_database_xact_commit{job="{{- $app -}}-stats",namespace="{{ .Release.Namespace }}"}[3m]) > {{ .Values.form.alert.groups.database.rules.postgresqlHighRollbackRate.val }}
+      for: {{ .Values.form.alert.groups.database.rules.postgresqlHighRollbackRate.duration }}
+      labels:
+        severity: {{ .Values.form.alert.groups.database.rules.postgresqlHighRollbackRate.severity }}
+        app: postgres
+        alertname: postgresqlHighRollbackRate
+      annotations:
+        summary: Postgresql high rollback rate (instance {{`{{`}} $labels.pod {{`}}`}})
+        description: "Ratio of transactions being aborted compared to committed is hign. {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{end -}}
     {{ if .Values.form.alert.groups.database.rules.postgresTooManyConnections.enabled -}}
     - alert: PostgresTooManyConnections
-      expr: sum by (datname) (pg_stat_activity_count{job="{{- .Values.dbName -}}-stats",namespace="{{ .Release.Namespace }}"}) > (pg_settings_max_connections{job="{{- .Values.dbName -}}-stats",namespace="{{ .Release.Namespace }}"} * {{.Values.form.alert.groups.database.rules.postgresTooManyConnections.val}})
+      expr: sum by (pod) (pg_stat_activity_count{job="{{- $app -}}-stats",namespace="{{ .Release.Namespace }}"}) >= sum by (pod) (pg_settings_max_connections{job="{{- $app -}}-stats",namespace="{{ .Release.Namespace }}"} * {{.Values.form.alert.groups.database.rules.postgresTooManyConnections.val}}) / 100
       for: {{ .Values.form.alert.groups.database.rules.postgresTooManyConnections.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.database.rules.postgresTooManyConnections.severity }}
@@ -44,26 +104,14 @@ spec:
       annotations:
         summary: Postgresql too many connections (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "PostgreSQL instance has too many connections . {{.Values.form.alert.groups.database.rules.postgresTooManyConnections.val}}% of Postgres connections are in use on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
-    {{ end -}}
-    {{ if .Values.form.alert.groups.database.rules.postgresSlowQueries.enabled -}}
-    - alert: PostgresqlSlowQueries
-      expr: pg_slow_queries{job="{{- .Values.dbName -}}-stats",namespace="{{ .Release.Namespace }}"} > 0
-      for: {{ .Values.form.alert.groups.database.rules.postgresSlowQueries.duration }}
-      labels:
-        severity: {{ .Values.form.alert.groups.database.rules.postgresSlowQueries.severity }}
-        app: postgres
-        alertname: postgres_slow_queries
-      annotations:
-        summary: Postgres slow queries on (instance {{`{{`}} $labels.pod {{`}}`}})
-        description: "PostgreSQL executes slow queries\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
-    {{ end -}}
-  {{end -}}
+    {{- end }}
+  {{ end -}}
   {{ if .Values.form.alert.groups.provisioner.enabled -}}
   - name: postgres.provisioner.{{ .Release.Namespace }}.{{ $app }}.rules
     rules:
     {{ if .Values.form.alert.groups.provisioner.rules.appPhaseNotReady.enabled -}}
     - alert: KubeDBPostgreSQLPhaseNotReady
-      expr: kubedb_postgres_status_phase{phase="NotReady",postgres="{{ $app }}",namespace="{{ .Release.Namespace }}"} == 1
+      expr: kubedb_com_postgres_status_phase{phase="NotReady",app="{{ $app }}",namespace="{{ .Release.Namespace }}"} == 1
       for: {{ .Values.form.alert.groups.provisioner.rules.appPhaseNotReady.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.provisioner.rules.appPhaseNotReady.severity }}
@@ -74,7 +122,7 @@ spec:
     {{ end -}}
     {{ if .Values.form.alert.groups.provisioner.rules.appPhaseCritical.enabled -}}
     - alert: KubeDBPostgreSQLPhaseCritical
-      expr: kubedb_postgres_status_phase{phase="Critical",postgres="{{ $app }}",namespace="{{ .Release.Namespace }}"} == 1
+      expr: kubedb_com_postgres_status_phase{phase="Critical",app="{{ $app }}",namespace="{{ .Release.Namespace }}"} == 1
       for: {{ .Values.form.alert.groups.provisioner.rules.appPhaseCritical.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.provisioner.rules.appPhaseCritical.severity }}
@@ -89,36 +137,36 @@ spec:
     rules:
     {{ if .Values.form.alert.groups.opsManager.rules.opsRequestOnProgress.enabled -}}
     - alert: KubeDBPostgreSQLOpsRequestOnProgress
-      expr: kubedb_postgres_opsrequest_status_phase{phase="Progressing",database_ref="{{ $app }}",namespace="{{ .Release.Namespace }}"} == 1
+      expr: ops_kubedb_com_postgresopsrequest_status_phase{phase="Progressing",app="{{ $app }}",namespace="{{ .Release.Namespace }}"} == 1
       for: {{ .Values.form.alert.groups.opsManager.rules.opsRequestOnProgress.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.opsManager.rules.opsRequestOnProgress.severity }}
         {{- include "kubedbcom-postgres-editor-options.alertLabels" . | nindent 8 }}
       annotations:
         summary: PostgreSQLOpsRequest on progress (postgresopsrequest {{`{{`}} $labels.postgresopsrequest {{`}}`}})
-        description: "MaraiDBOpsRequest {{`{{`}} $labels.postgresopsrequest {{`}}`}} is in progressressing status\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        description: "PostgresOpsRequest {{`{{`}} $labels.postgresopsrequest {{`}}`}} is in progressressing status\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
     {{ if .Values.form.alert.groups.opsManager.rules.opsRequestStatusProgressingToLong.enabled -}}
     - alert: KubeDBPostgreSQLOpsRequestStatusProgressingToLong
-      expr: kubedb_postgres_opsrequest_status_phase{phase="Progressing",database_ref="{{ $app }}",namespace="{{ .Release.Namespace }}"} == 1
+      expr: ops_kubedb_com_postgresopsrequest_status_phase{phase="Progressing",app="{{ $app }}",namespace="{{ .Release.Namespace }}"} == 1
       for: {{ .Values.form.alert.groups.opsManager.rules.opsRequestStatusProgressingToLong.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.opsManager.rules.opsRequestStatusProgressingToLong.severity }}
         {{- include "kubedbcom-postgres-editor-options.alertLabels" . | nindent 8 }}
       annotations:
         summary: PostgreSQLOpsRequest is in progressing status for too long (postgresopsrequest {{`{{`}} $labels.postgresopsrequest {{`}}`}})
-        description: "MaraiDBOpsRequest {{`{{`}} $labels.postgresopsrequest {{`}}`}} is in progressing status for too long\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        description: "PostgresOpsRequest {{`{{`}} $labels.postgresopsrequest {{`}}`}} is in progressing status for too long\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
     {{ if .Values.form.alert.groups.opsManager.rules.opsRequestFailed.enabled -}}
     - alert: KubeDBPostgreSQLOpsRequestFailed
-      expr: kubedb_postgres_opsrequest_status_phase{phase="Failed",database_ref="{{ $app }}",namespace="{{ .Release.Namespace }}"} == 1
+      expr: ops_kubedb_com_postgresopsrequest_status_phase{phase="Failed",app="{{ $app }}",namespace="{{ .Release.Namespace }}"} == 1
       for: {{ .Values.form.alert.groups.opsManager.rules.opsRequestFailed.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.opsManager.rules.opsRequestFailed.severity }}
         {{- include "kubedbcom-postgres-editor-options.alertLabels" . | nindent 8 }}
       annotations:
         summary: PostgreSQLOpsRequest failed (postgresopsrequest {{`{{`}} $labels.postgresopsrequest {{`}}`}})
-        description: "MaraiDBOpsRequest {{`{{`}} $labels.postgresopsrequest {{`}}`}} failed \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        description: "PostgresOpsRequest {{`{{`}} $labels.postgresopsrequest {{`}}`}} failed \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
   {{ end -}}
   {{ if .Values.form.alert.groups.stash.enabled -}}
@@ -126,7 +174,7 @@ spec:
     rules:
     {{ if .Values.form.alert.groups.stash.rules.backupSessionFailed.enabled -}}
     - alert: PostgreSQLStashBackupSessionFailed
-      expr: stash_backup_session_success * on(invoker_name, invoker_kind) group_left(target_name, target_kind) stash_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"} == 0
+      expr: stash_backup_session_success * on(invoker_name, invoker_kind) group_left(target_name, target_kind) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"} == 0
       for: {{ .Values.form.alert.groups.stash.rules.backupSessionFailed.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.stash.rules.backupSessionFailed.severity }}
@@ -137,7 +185,7 @@ spec:
     {{ end -}}
     {{ if .Values.form.alert.groups.stash.rules.restoreSessionFailed.enabled -}}
     - alert: PostgreSQLStashRestoreSessionFailed
-      expr: stash_restore_session_success * on(invoker_name, invoker_kind) group_left(target_name, target_kind) stash_restoresession_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"} == 0
+      expr: stash_restore_session_success * on(invoker_name, invoker_kind) group_left(target_name, target_kind) stash_appscode_com_restoresession_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"} == 0
       for: {{ .Values.form.alert.groups.stash.rules.restoreSessionFailed.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.stash.rules.restoreSessionFailed.severity }}
@@ -148,7 +196,7 @@ spec:
     {{ end -}}
     {{ if .Values.form.alert.groups.stash.rules.noBackupSessionForTooLong.enabled -}}
     - alert: PostgreSQLStashNoBackupSessionForTooLong
-      expr: time() - stash_backup_last_success_time_seconds + on(invoker_name, invoker_kind) group_left(target_name, target_kind) stash_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"} - 1 > {{ .Values.form.alert.groups.stash.rules.noBackupSessionForTooLong.val }}
+      expr: time() - stash_backup_last_success_time_seconds + on(invoker_name, invoker_kind) group_left(target_name, target_kind) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"} - 1 > {{ .Values.form.alert.groups.stash.rules.noBackupSessionForTooLong.val }}
       for: {{ .Values.form.alert.groups.stash.rules.noBackupSessionForTooLong.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.stash.rules.noBackupSessionForTooLong.severity }}
@@ -159,7 +207,7 @@ spec:
     {{ end -}}
     {{ if .Values.form.alert.groups.stash.rules.repositoryCorrupted.enabled -}}
     - alert: PostgreSQLStashRepositoryCorrupted
-      expr: stash_repository_integrity * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"}
+      expr: stash_repository_integrity * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"}
       for: {{ .Values.form.alert.groups.stash.rules.repositoryCorrupted.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.stash.rules.repositoryCorrupted.severity }}
@@ -170,7 +218,7 @@ spec:
     {{ end -}}
     {{ if .Values.form.alert.groups.stash.rules.repositoryStorageRunningLow.enabled -}}
     - alert: PostgreSQLStashRepositoryStorageRunningLow
-      expr: stash_repository_size_bytes * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"} > {{ .Values.form.alert.groups.stash.rules.repositoryStorageRunningLow.val }}
+      expr: stash_repository_size_bytes * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"} > {{ .Values.form.alert.groups.stash.rules.repositoryStorageRunningLow.val }}
       for: {{ .Values.form.alert.groups.stash.rules.repositoryStorageRunningLow.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.stash.rules.repositoryStorageRunningLow.severity }}
@@ -178,10 +226,10 @@ spec:
       annotations:
         summary: PostgreSQL Stash Repository storage more than {{ .Values.form.alert.groups.stash.rules.repositoryStorageRunningLow.val }} byte. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
         description: "PostgreSQL Stash Repository storage running low {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
-    {{- end }}
+    {{ end -}}
     {{ if .Values.form.alert.groups.stash.rules.backupSessionPeriodTooLong.enabled -}}
     - alert: PostgreSQLStashBackupSessionPeriodTooLong
-      expr: stash_backup_session_duration_seconds * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"} > {{ .Values.form.alert.groups.stash.rules.backupSessionPeriodTooLong.val }}
+      expr: stash_backup_session_duration_seconds * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"} > {{ .Values.form.alert.groups.stash.rules.backupSessionPeriodTooLong.val }}
       for: {{ .Values.form.alert.groups.stash.rules.backupSessionPeriodTooLong.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.stash.rules.backupSessionPeriodTooLong.severity }}
@@ -192,7 +240,7 @@ spec:
     {{ end -}}
     {{ if .Values.form.alert.groups.stash.rules.restoreSessionPeriodTooLong.enabled -}}
     - alert: PostgreSQLStashRestoreSessionPeriodTooLong
-      expr: stash_restore_session_duration_seconds * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_restoresession_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"} > {{ .Values.form.alert.groups.stash.rules.restoreSessionPeriodTooLong.val }}
+      expr: stash_restore_session_duration_seconds * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_appscode_com_restoresession_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"} > {{ .Values.form.alert.groups.stash.rules.restoreSessionPeriodTooLong.val }}
       for: {{ .Values.form.alert.groups.stash.rules.restoreSessionPeriodTooLong.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.stash.rules.restoreSessionPeriodTooLong.severity }}
@@ -207,7 +255,7 @@ spec:
     rules:
     {{ if .Values.form.alert.groups.schemaManager.rules.schemaPendingForTooLong.enabled -}}
     - alert: KubeDBPostgreSQLSchemaPendingForTooLong
-      expr: kubedb_postgres_schema_status_phase{phase="Pending",serverRefName="{{ $app }}",serverRefNamespace="{{ .Release.Namespace }}"} == 1
+      expr: schema_kubedb_com_postgresdatabase_status_phase{phase="Pending",app="{{ $app }}",app_namespace="{{ .Release.Namespace }}"} == 1
       for: {{ .Values.form.alert.groups.schemaManager.rules.schemaPendingForTooLong.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.schemaManager.rules.schemaPendingForTooLong.severity }}
@@ -218,7 +266,7 @@ spec:
     {{ end -}}
     {{ if .Values.form.alert.groups.schemaManager.rules.schemaInProgressForTooLong.enabled -}}
     - alert: KubeDBPostgreSQLSchemaInProgressForTooLong
-      expr: kubedb_postgres_schema_status_phase{phase="InProgress",serverRefName="{{ $app }}",serverRefNamespace="{{ .Release.Namespace }}"} == 1
+      expr: schema_kubedb_com_postgresdatabase_status_phase{phase="InProgress",app="{{ $app }}",app_namespace="{{ .Release.Namespace }}"} == 1
       for: {{ .Values.form.alert.groups.schemaManager.rules.schemaInProgressForTooLong.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.schemaManager.rules.schemaInProgressForTooLong.severity }}
@@ -229,7 +277,7 @@ spec:
     {{ end -}}
     {{ if .Values.form.alert.groups.schemaManager.rules.schemaTerminatingForTooLong.enabled -}}
     - alert: KubeDBPostgreSQLSchemaTerminatingForTooLong
-      expr: kubedb_postgres_schema_status_phase{phase="Terminating",serverRefName="{{ $app }}",serverRefNamespace="{{ .Release.Namespace }}"} == 1
+      expr: schema_kubedb_com_postgresdatabase_status_phase{phase="Terminating",app="{{ $app }}",app_namespace="{{ .Release.Namespace }}"} == 1
       for: {{ .Values.form.alert.groups.schemaManager.rules.schemaTerminatingForTooLong.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.schemaManager.rules.schemaTerminatingForTooLong.severity }}
@@ -240,7 +288,7 @@ spec:
     {{ end -}}
     {{ if .Values.form.alert.groups.schemaManager.rules.schemaFailed.enabled -}}
     - alert: KubeDBPostgreSQLSchemaFailed
-      expr: kubedb_postgres_schema_status_phase{phase="Failed",serverRefName="{{ $app }}",serverRefNamespace="{{ .Release.Namespace }}"} == 1
+      expr: schema_kubedb_com_postgresdatabase_status_phase{phase="Failed",app="{{ $app }}",app_namespace="{{ .Release.Namespace }}"} == 1
       for: {{ .Values.form.alert.groups.schemaManager.rules.schemaFailed.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.schemaManager.rules.schemaFailed.severity }}
@@ -251,7 +299,7 @@ spec:
     {{ end -}}
     {{ if .Values.form.alert.groups.schemaManager.rules.schemaExpired.enabled -}}
     - alert: KubeDBPostgreSQLSchemaExpired
-      expr: kubedb_postgres_schema_status_phase{phase="Expired",serverRefName="{{ $app }}",serverRefNamespace="{{ .Release.Namespace }}"} == 1
+      expr: schema_kubedb_com_postgresdatabase_status_phase{phase="Expired",app="{{ $app }}",app_namespace="{{ .Release.Namespace }}"} == 1
       for: {{ .Values.form.alert.groups.schemaManager.rules.schemaExpired.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.schemaManager.rules.schemaExpired.severity }}
