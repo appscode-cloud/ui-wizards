@@ -111,6 +111,129 @@ steps:
   title: steps.0.label
 - form:
     discriminator:
+      alertEnabledStatus:
+        default: false
+        type: string
+    elements:
+    - computed: setAlertEnabledStatus
+      label:
+        text: Enable Alert?
+      onChange: onAlertEnabledStatusChange
+      schema:
+        $ref: discriminator#/properties/alertEnabledStatus
+      type: switch
+    - elements:
+      - isArray: true
+        keys:
+          label:
+            text: labels.labels.key
+        label:
+          text: labels.labels.label
+        schema:
+          $ref: schema#/properties/form/properties/alert/properties/labels
+        type: key-value-input-form
+        values:
+          label:
+            text: labels.labels.value
+          schema:
+            $ref: schema#/properties/form/properties/alert/properties/labels/additionalProperties
+          type: input
+      - isArray: true
+        keys:
+          label:
+            text: labels.annotations.key
+        label:
+          text: labels.annotations.label
+        schema:
+          $ref: schema#/properties/form/properties/alert/properties/annotations
+        type: key-value-input-form
+        values:
+          label:
+            text: labels.annotations.value
+          schema:
+            $ref: schema#/properties/form/properties/alert/properties/annotations/additionalProperties
+          type: input
+      - isArray: true
+        keys:
+          label:
+            text: labels.additionalRuleLabels.key
+        label:
+          text: labels.additionalRuleLabels.label
+        schema:
+          $ref: schema#/properties/form/properties/alert/properties/additionalRuleLabels
+        type: key-value-input-form
+        values:
+          label:
+            text: labels.additionalRuleLabels.value
+          schema:
+            $ref: schema#/properties/form/properties/alert/properties/additionalRuleLabels/additionalProperties
+          type: input
+      - element:
+          elements:
+          - element:
+              elements:
+              - label:
+                  text: duration
+                schema:
+                  $ref: schema#/properties/form/properties/alert/properties/groups/properties/dynamicAttribute/properties/rules/properties/dynamicAttribute/properties/duration
+                type: input
+              - label:
+                  text: severity
+                options:
+                - info
+                - warning
+                - critical
+                schema:
+                  $ref: schema#/properties/form/properties/alert/properties/groups/properties/dynamicAttribute/properties/rules/properties/dynamicAttribute/properties/severity
+                type: select
+              - if: showValField
+                label:
+                  text: val
+                schema:
+                  $ref: schema#/properties/form/properties/alert/properties/groups/properties/dynamicAttribute/properties/rules/properties/dynamicAttribute/properties/val
+                type: input
+              hideForm: true
+              schema:
+                $ref: schema#/properties/form/properties/alert/properties/groups/properties/dynamicAttribute/properties/rules/properties/dynamicAttribute
+              show_label: true
+              toggleOption:
+                id: switch
+                schema: 
+                  $ref: schema#/properties/form/properties/alert/properties/groups/properties/dynamicAttribute/properties/rules/properties/dynamicAttribute/properties/enabled
+                show: true
+              type: single-step-form
+            label:
+              text: Rules
+            schema:
+              $ref: schema#/properties/form/properties/alert/properties/groups/properties/dynamicAttribute/properties/rules
+            type: array-input-form
+          hideForm: true
+          schema:
+            $ref: schema#/properties/form/properties/alert/properties/groups/properties/dynamicAttribute
+          show_label: true
+          toggleOption:
+            id: switch
+            onStatusTrue: onGroupStatusChange|true
+            onStatusFalse: onGroupStatusChange|false
+            schema: 
+              $ref: schema#/properties/form/properties/alert/properties/groups/properties/dynamicAttribute/properties/enabled
+            show: true
+          type: single-step-form
+        label:
+          text: Alerts
+        schema:
+          $ref: schema#/properties/form/properties/alert/properties/groups
+        show_label: true
+        type: array-input-form
+      if: showAlertSection
+      schema:
+        $ref: schema#/properties/form/properties/alert
+      type: single-step-form
+    type: single-step-form
+  id: alert
+  title: Alert
+- form:
+    discriminator:
       activeDatabaseMode:
         default: Standalone
         type: string
