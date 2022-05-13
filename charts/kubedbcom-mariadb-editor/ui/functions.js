@@ -309,6 +309,55 @@ function showNewSecretCreateField({
   return resp;
 }
 
+// ************************** Alert *********************************
+
+function onGroupStatusChange({ rootSchema, elementSchema, commit, model, getValue }, status) {
+  const { $ref: ref } = elementSchema || {}
+  const [, path] = ref.split("#") || "";
+  const replacedPath = (path && path.replace(/\/properties/g, "")) || "";
+  const verd = (status === "true");
+  const currentStatus = (getValue(model, `${replacedPath}/enabled`) || false);
+  if(currentStatus !== verd) {
+    const groupSchema = getValue(rootSchema, `${path}/properties/rules/properties`);    
+    const groupModelValue = getValue(model, `${replacedPath}/rules`);
+
+    Object.keys(groupSchema).forEach((item) => {
+      if(!groupModelValue[item]) groupModelValue[item] = {};
+      groupModelValue[item].enabled = verd;
+    });
+
+    commit("wizard/model$update", {
+      path: `${replacedPath}/rules`,
+      value: groupModelValue,
+      force: true
+    });
+  }
+}
+
+function showValField({ elementSchema }) {
+  return elementSchema && Object.keys(elementSchema).length;
+}
+
+function setAlertEnabledStatus({ model, getValue }) {
+  const status = getValue(model, "/form/alert/enabled");
+  return !!status;
+}
+
+function onAlertEnabledStatusChange({ discriminator, getValue, commit }) {
+  const status = getValue(discriminator, "/alertEnabledStatus");
+  commit("wizard/model$update", {
+      path: "/form/alert/enabled",
+      value: status,
+      force: true
+  });
+}
+
+function showAlertSection({ model, getValue, watchDependency }) {
+  watchDependency("model#/form/alert/enabled")
+  const status = getValue(model, "/form/alert/enabled");
+  return !!status;
+}
+
 // ********************* Database Mode ***********************
 function setDatabaseMode({ model, getValue, watchDependency }) {
   const modelPathValue = getValue(model, "/resources/kubedbComMariaDB/spec/replicas");
@@ -1978,6 +2027,11 @@ return {
 	showAuthPasswordField,
 	showAuthSecretField,
 	showNewSecretCreateField,
+  onGroupStatusChange,
+  showValField,
+  setAlertEnabledStatus,
+  onAlertEnabledStatusChange,
+  showAlertSection,
 	setDatabaseMode,
 	getStorageClassNames,
 	deleteDatabaseModePath,
