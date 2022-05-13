@@ -21,7 +21,23 @@ properties:
                     type: boolean
                   rules:
                     properties:
-                      redisInstanceDown:
+                      redisDisconnectedSlaves:
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            type: string
+                          val:
+                            type: integer
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        - val
+                        type: object
+                      redisDown:
                         properties:
                           duration:
                             type: string
@@ -34,7 +50,7 @@ properties:
                         - enabled
                         - severity
                         type: object
-                      redisRestarted:
+                      redisMissingMaster:
                         properties:
                           duration:
                             type: string
@@ -42,12 +58,15 @@ properties:
                             type: boolean
                           severity:
                             type: string
+                          val:
+                            type: integer
                         required:
                         - duration
                         - enabled
                         - severity
+                        - val
                         type: object
-                      redisSlowQueries:
+                      redisRejectedConnections:
                         properties:
                           duration:
                             type: string
@@ -55,10 +74,13 @@ properties:
                             type: boolean
                           severity:
                             type: string
+                          val:
+                            type: integer
                         required:
                         - duration
                         - enabled
                         - severity
+                        - val
                         type: object
                       redisTooManyConnections:
                         properties:
@@ -76,24 +98,7 @@ properties:
                         - severity
                         - val
                         type: object
-                      redisqlHighRollbackRate:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            type: string
-                          val:
-                            format: double
-                            type: number
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        - val
-                        type: object
-                      redisqlNotEnoughConnections:
+                      redisTooManyMasters:
                         properties:
                           duration:
                             type: string
@@ -109,62 +114,13 @@ properties:
                         - severity
                         - val
                         type: object
-                      redisqlReplicationLag:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            type: string
-                          val:
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        - val
-                        type: object
-                      redisqlSplitBrain:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      redisqlTooManyLocksAcquired:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            type: string
-                          val:
-                            format: double
-                            type: number
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        - val
-                        type: object
                     required:
-                    - redisInstanceDown
-                    - redisRestarted
-                    - redisSlowQueries
+                    - redisDisconnectedSlaves
+                    - redisDown
+                    - redisMissingMaster
+                    - redisRejectedConnections
                     - redisTooManyConnections
-                    - redisqlHighRollbackRate
-                    - redisqlNotEnoughConnections
-                    - redisqlReplicationLag
-                    - redisqlSplitBrain
-                    - redisqlTooManyLocksAcquired
+                    - redisTooManyMasters
                     type: object
                 required:
                 - enabled

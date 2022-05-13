@@ -99,15 +99,12 @@ type RedisDatabaseAlert struct {
 }
 
 type RedisDatabaseAlertRules struct {
-	RedisInstanceDown           FixedAlert          `json:"redisInstanceDown"`
-	RedisRestarted              FixedAlert          `json:"redisRestarted"`
-	RedisTooManyConnections     IntValAlert         `json:"redisTooManyConnections"`
-	RedisqlNotEnoughConnections IntValAlert         `json:"redisqlNotEnoughConnections"`
-	RedisSlowQueries            FixedAlert          `json:"redisSlowQueries"`
-	RedisqlReplicationLag       StringValAlert      `json:"redisqlReplicationLag"`
-	RedisqlHighRollbackRate     FloatValAlertConfig `json:"redisqlHighRollbackRate"`
-	RedisqlSplitBrain           FixedAlert          `json:"redisqlSplitBrain"`
-	RedisqlTooManyLocksAcquired FloatValAlertConfig `json:"redisqlTooManyLocksAcquired"`
+	RedisDown                FixedAlert  `json:"redisDown"`
+	RedisMissingMaster       IntValAlert `json:"redisMissingMaster"`
+	RedisTooManyMasters      IntValAlert `json:"redisTooManyMasters"`
+	RedisDisconnectedSlaves  IntValAlert `json:"redisDisconnectedSlaves"`
+	RedisTooManyConnections  IntValAlert `json:"redisTooManyConnections"`
+	RedisRejectedConnections IntValAlert `json:"redisRejectedConnections"`
 }
 
 // *** Alerts *** //

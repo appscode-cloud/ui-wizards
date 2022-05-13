@@ -86,47 +86,35 @@ form:
       database:
         enabled: true
         rules:
-          redisInstanceDown:
+          redisDown:
             enabled: true
             duration: "0m"
             severity: critical
-          redisRestarted:
+          redisMissingMaster:
             enabled: true
             duration: "0m"
+            val: 1
             severity: critical
+          redisTooManyMasters:
+            enabled: true
+            duration: "2m"
+            val: 1
+            severity: critical
+          redisDisconnectedSlaves:
+            enabled: true
+            duration: "2m"
+            val: 1
+            severity: warning
           redisTooManyConnections:
             enabled: true
             duration: "2m"
-            val: 80
+            val: 100
             severity: warning
-          redisqlNotEnoughConnections:
-            enabled: true
-            duration: "2m"
-            val: 5
-            severity: warning
-          redisSlowQueries:
-            enabled: true
-            duration: "2m"
-            severity: warning
-          redisqlReplicationLag:
+          redisRejectedConnections:
             enabled: true
             duration: "0m"
-            val: 30s
-            severity: critical
-          redisqlHighRollbackRate:
-            enabled: true
-            duration: "0m"
-            val: 0.02
+            val: 0
             severity: warning
-          redisqlSplitBrain:
-            enabled: true
-            duration: "0m"
-            severity: critical
-          redisqlTooManyLocksAcquired:
-            enabled: true
-            duration: "2m"
-            val: 0.20
-            severity: critical
       provisioner:
         enabled: true
         rules:
@@ -144,7 +132,7 @@ form:
           opsRequestOnProgress:
             enabled: true
             duration: "0m"
-            severity: warning
+            severity: info
           opsRequestStatusProgressingToLong:
             enabled: true
             duration: "30m"
