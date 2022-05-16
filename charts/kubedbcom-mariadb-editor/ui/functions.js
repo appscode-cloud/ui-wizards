@@ -318,8 +318,8 @@ function onGroupStatusChange({ rootSchema, elementSchema, commit, model, getValu
   const verd = (status === "true");
   const currentStatus = (getValue(model, `${replacedPath}/enabled`) || false);
   if(currentStatus !== verd) {
-    const groupSchema = getValue(rootSchema, `${path}/properties/rules/properties`);    
-    const groupModelValue = getValue(model, `${replacedPath}/rules`);
+    const groupSchema = getValue(rootSchema, `${path}/properties/rules/properties`) || {};    
+    const groupModelValue = getValue(model, `${replacedPath}/rules`) || {};
 
     Object.keys(groupSchema).forEach((item) => {
       if(!groupModelValue[item]) groupModelValue[item] = {};
