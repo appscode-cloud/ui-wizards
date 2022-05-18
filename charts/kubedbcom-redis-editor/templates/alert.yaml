@@ -21,49 +21,73 @@ spec:
   {{ if .Values.form.alert.groups.database.enabled -}}
   - name: redis.database.{{ .Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if .Values.form.alert.groups.database.rules.redisInstanceDown -}}
-    - alert: RedisqlDown
-      expr: pg_up{job="{{- .Values.dbName -}}-stats",namespace="{{ .Release.Namespace }}" == 0
-      for: {{ .Values.form.alert.groups.database.rules.redisInstanceDown.duration }}
+    {{ if .Values.form.alert.groups.database.rules.redisDown -}}
+    - alert: RedisDown
+      expr: redis_up{job="{{- $app -}}-stats",namespace="{{ .Release.Namespace }}"} == 0
+      for: {{ .Values.form.alert.groups.database.rules.redisDown.duration }}
       labels:
-        severity: {{ .Values.form.alert.groups.database.rules.redisInstanceDown.severity }}
+        severity: {{ .Values.form.alert.groups.database.rules.redisDown.severity }}
         app: redis
-        alertname: redis_instance_down
+        alertname: redis_down
       annotations:
         summary: Redis instance down (instance {{`{{`}} $labels.pod {{`}}`}})
-        description: "MySQL instance is down on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        description: "Redis instance is down on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{end -}}
+    {{ if .Values.form.alert.groups.database.rules.redisMissingMaster -}}
+    - alert: RedisMissingMaster
+      expr: (count(redis_instance_info{job="{{- $app -}}-stats",namespace="{{ .Release.Namespace }}"}) or vector(0)) < {{.Values.form.alert.groups.database.rules.redisMissingMaster.val}}
+      for: {{ .Values.form.alert.groups.database.rules.redisMissingMaster.duration }}
+      labels:
+        severity: {{ .Values.form.alert.groups.database.rules.redisMissingMaster.severity }}
+        app: redis
+        alertname: redis_missing_master
+      annotations:
+        summary: Redis missing master (instance {{`{{`}} $labels.pod {{`}}`}})
+        description: "Redis cluster has less than expected amount of node marked as master\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{end -}}
     {{ if .Values.form.alert.groups.database.rules.redisTooManyConnections.enabled -}}
     - alert: RedisTooManyConnections
-      expr: sum by (datname) (pg_stat_activity_count{job="{{- .Values.dbName -}}-stats",namespace="{{ .Release.Namespace }}"}) > (pg_settings_max_connections{job="{{- .Values.dbName -}}-stats",namespace="{{ .Release.Namespace }}"} * {{.Values.form.alert.groups.database.rules.redisTooManyConnections.val}})
+      expr: redis_connected_clients{job="{{- $app -}}-stats",namespace="{{ .Release.Namespace }}"} > {{.Values.form.alert.groups.database.rules.redisTooManyConnections.val}}
       for: {{ .Values.form.alert.groups.database.rules.redisTooManyConnections.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.database.rules.redisTooManyConnections.severity }}
         app: redis
         alertname: redis_too_many_connections
       annotations:
-        summary: Redisql too many connections (instance {{`{{`}} $labels.pod {{`}}`}})
-        description: "Redis instance has too many connections . {{.Values.form.alert.groups.database.rules.redisTooManyConnections.val}}% of Redis connections are in use on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        summary: Redis too many connections (instance {{`{{`}} $labels.pod {{`}}`}})
+        description: "Redis instance has too many connections . More than {{.Values.form.alert.groups.database.rules.redisTooManyConnections.val}} of Redis connections are in use on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if .Values.form.alert.groups.database.rules.redisSlowQueries.enabled -}}
-    - alert: RedisqlSlowQueries
-      expr: pg_slow_queries{job="{{- .Values.dbName -}}-stats",namespace="{{ .Release.Namespace }}"} > 0
-      for: {{ .Values.form.alert.groups.database.rules.redisSlowQueries.duration }}
+    {{ if .Values.form.alert.groups.database.rules.redisTooManyMasters.enabled -}}
+    - alert: RedisTooManyMasters
+      expr: (count(redis_instance_info{job="{{- $app -}}-stats",namespace="{{ .Release.Namespace }}"})) > {{.Values.form.alert.groups.database.rules.redisTooManyMasters.val}}
+      for: {{ .Values.form.alert.groups.database.rules.redisTooManyMasters.duration }}
       labels:
-        severity: {{ .Values.form.alert.groups.database.rules.redisSlowQueries.severity }}
+        severity: {{ .Values.form.alert.groups.database.rules.redisTooManyMasters.severity }}
         app: redis
-        alertname: redis_slow_queries
+        alertname: redis_too_many_masters
       annotations:
-        summary: Redis slow queries on (instance {{`{{`}} $labels.pod {{`}}`}})
-        description: "Redis executes slow queries\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        summary: Redis too many master nodes (instance {{`{{`}} $labels.pod {{`}}`}})
+        description: "Redis cluster has too many nodes marked as master. \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
+    {{ if .Values.form.alert.groups.database.rules.redisDisconnectedSlaves.enabled -}}
+    - alert: RedisDisconnectedSlaves
+      expr: count without (instance) (redis_connected_slaves{job="{{- $app -}}-stats",namespace="{{ .Release.Namespace }}"}) - sum without (instance) (redis_connected_slaves{job="{{- $app -}}-stats",namespace="{{ .Release.Namespace }}"}) - 1 > {{.Values.form.alert.groups.database.rules.redisDisconnectedSlaves.val}}
+      for: {{ .Values.form.alert.groups.database.rules.redisDisconnectedSlaves.duration }}
+      labels:
+        severity: {{ .Values.form.alert.groups.database.rules.redisDisconnectedSlaves.severity }}
+        app: redis
+        alertname: Redis_disconnected_slaves
+      annotations:
+        summary: Redis disconnected slaves (instance {{`{{`}} $labels.pod {{`}}`}})
+        description: "Redis not replicating for all slaves. Consider reviewing the redis replication status.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
   {{end -}}
   {{ if .Values.form.alert.groups.provisioner.enabled -}}
   - name: redis.provisioner.{{ .Release.Namespace }}.{{ $app }}.rules
     rules:
     {{ if .Values.form.alert.groups.provisioner.rules.appPhaseNotReady.enabled -}}
     - alert: KubeDBRedisPhaseNotReady
-      expr: kubedb_redis_status_phase{phase="NotReady",redis="{{ $app }}",namespace="{{ .Release.Namespace }}"} == 1
+      expr: kubedb_com_redis_status_phase{phase="NotReady",app="{{ $app }}",namespace="{{ .Release.Namespace }}"} == 1
       for: {{ .Values.form.alert.groups.provisioner.rules.appPhaseNotReady.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.provisioner.rules.appPhaseNotReady.severity }}
@@ -74,7 +98,7 @@ spec:
     {{ end -}}
     {{ if .Values.form.alert.groups.provisioner.rules.appPhaseCritical.enabled -}}
     - alert: KubeDBRedisPhaseCritical
-      expr: kubedb_redis_status_phase{phase="Critical",redis="{{ $app }}",namespace="{{ .Release.Namespace }}"} == 1
+      expr: kubedb_com_redis_status_phase{phase="Critical",app="{{ $app }}",namespace="{{ .Release.Namespace }}"} == 1
       for: {{ .Values.form.alert.groups.provisioner.rules.appPhaseCritical.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.provisioner.rules.appPhaseCritical.severity }}
@@ -89,7 +113,7 @@ spec:
     rules:
     {{ if .Values.form.alert.groups.opsManager.rules.opsRequestOnProgress.enabled -}}
     - alert: KubeDBRedisOpsRequestOnProgress
-      expr: kubedb_redis_opsrequest_status_phase{phase="Progressing",database_ref="{{ $app }}",namespace="{{ .Release.Namespace }}"} == 1
+      expr: ops_kubedb_com_redisopsrequest_status_phase{phase="Progressing",database_ref="{{ $app }}",namespace="{{ .Release.Namespace }}"} == 1
       for: {{ .Values.form.alert.groups.opsManager.rules.opsRequestOnProgress.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.opsManager.rules.opsRequestOnProgress.severity }}
@@ -100,25 +124,25 @@ spec:
     {{ end -}}
     {{ if .Values.form.alert.groups.opsManager.rules.opsRequestStatusProgressingToLong.enabled -}}
     - alert: KubeDBRedisOpsRequestStatusProgressingToLong
-      expr: kubedb_redis_opsrequest_status_phase{phase="Progressing",database_ref="{{ $app }}",namespace="{{ .Release.Namespace }}"} == 1
+      expr: ops_kubedb_com_redisopsrequest_status_phase{phase="Progressing",database_ref="{{ $app }}",namespace="{{ .Release.Namespace }}"} == 1
       for: {{ .Values.form.alert.groups.opsManager.rules.opsRequestStatusProgressingToLong.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.opsManager.rules.opsRequestStatusProgressingToLong.severity }}
         {{- include "kubedbcom-redis-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: RedisOpsRequest is in progressing status for too long (redisopsrequest {{`{{`}} $labels.redisopsrequest {{`}}`}})
-        description: "MaraiDBOpsRequest {{`{{`}} $labels.redisopsrequest {{`}}`}} is in progressing status for too long\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        description: "RedisOpsRequest {{`{{`}} $labels.redisopsrequest {{`}}`}} is in progressing status for too long\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
     {{ if .Values.form.alert.groups.opsManager.rules.opsRequestFailed.enabled -}}
     - alert: KubeDBRedisOpsRequestFailed
-      expr: kubedb_redis_opsrequest_status_phase{phase="Failed",database_ref="{{ $app }}",namespace="{{ .Release.Namespace }}"} == 1
+      expr: ops_kubedb_com_redisopsrequest_status_phase{phase="Failed",database_ref="{{ $app }}",namespace="{{ .Release.Namespace }}"} == 1
       for: {{ .Values.form.alert.groups.opsManager.rules.opsRequestFailed.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.opsManager.rules.opsRequestFailed.severity }}
         {{- include "kubedbcom-redis-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: RedisOpsRequest failed (redisopsrequest {{`{{`}} $labels.redisopsrequest {{`}}`}})
-        description: "MaraiDBOpsRequest {{`{{`}} $labels.redisopsrequest {{`}}`}} failed \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        description: "RedisOpsRequest {{`{{`}} $labels.redisopsrequest {{`}}`}} failed \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
   {{ end -}}
   {{ if .Values.form.alert.groups.stash.enabled -}}
@@ -126,7 +150,7 @@ spec:
     rules:
     {{ if .Values.form.alert.groups.stash.rules.backupSessionFailed.enabled -}}
     - alert: RedisStashBackupSessionFailed
-      expr: stash_backup_session_success * on(invoker_name, invoker_kind) group_left(target_name, target_kind) stash_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"} == 0
+      expr: stash_backup_session_success * on(invoker_name, invoker_kind) group_left(target_name, target_kind) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"} == 0
       for: {{ .Values.form.alert.groups.stash.rules.backupSessionFailed.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.stash.rules.backupSessionFailed.severity }}
@@ -137,7 +161,7 @@ spec:
     {{ end -}}
     {{ if .Values.form.alert.groups.stash.rules.restoreSessionFailed.enabled -}}
     - alert: RedisStashRestoreSessionFailed
-      expr: stash_restore_session_success * on(invoker_name, invoker_kind) group_left(target_name, target_kind) stash_restoresession_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"} == 0
+      expr: stash_restore_session_success * on(invoker_name, invoker_kind) group_left(target_name, target_kind) stash_appscode_com_restoresession_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"} == 0
       for: {{ .Values.form.alert.groups.stash.rules.restoreSessionFailed.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.stash.rules.restoreSessionFailed.severity }}
@@ -148,7 +172,7 @@ spec:
     {{ end -}}
     {{ if .Values.form.alert.groups.stash.rules.noBackupSessionForTooLong.enabled -}}
     - alert: RedisStashNoBackupSessionForTooLong
-      expr: time() - stash_backup_last_success_time_seconds + on(invoker_name, invoker_kind) group_left(target_name, target_kind) stash_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"} - 1 > {{ .Values.form.alert.groups.stash.rules.noBackupSessionForTooLong.val }}
+      expr: time() - stash_backup_last_success_time_seconds + on(invoker_name, invoker_kind) group_left(target_name, target_kind) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"} - 1 > {{ .Values.form.alert.groups.stash.rules.noBackupSessionForTooLong.val }}
       for: {{ .Values.form.alert.groups.stash.rules.noBackupSessionForTooLong.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.stash.rules.noBackupSessionForTooLong.severity }}
@@ -159,7 +183,7 @@ spec:
     {{ end -}}
     {{ if .Values.form.alert.groups.stash.rules.repositoryCorrupted.enabled -}}
     - alert: RedisStashRepositoryCorrupted
-      expr: stash_repository_integrity * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"}
+      expr: stash_repository_integrity * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"}
       for: {{ .Values.form.alert.groups.stash.rules.repositoryCorrupted.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.stash.rules.repositoryCorrupted.severity }}
@@ -170,7 +194,7 @@ spec:
     {{ end -}}
     {{ if .Values.form.alert.groups.stash.rules.repositoryStorageRunningLow.enabled -}}
     - alert: RedisStashRepositoryStorageRunningLow
-      expr: stash_repository_size_bytes * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"} > {{ .Values.form.alert.groups.stash.rules.repositoryStorageRunningLow.val }}
+      expr: stash_repository_size_bytes * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"} > {{ .Values.form.alert.groups.stash.rules.repositoryStorageRunningLow.val }}
       for: {{ .Values.form.alert.groups.stash.rules.repositoryStorageRunningLow.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.stash.rules.repositoryStorageRunningLow.severity }}
@@ -181,7 +205,7 @@ spec:
     {{- end }}
     {{ if .Values.form.alert.groups.stash.rules.backupSessionPeriodTooLong.enabled -}}
     - alert: RedisStashBackupSessionPeriodTooLong
-      expr: stash_backup_session_duration_seconds * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"} > {{ .Values.form.alert.groups.stash.rules.backupSessionPeriodTooLong.val }}
+      expr: stash_backup_session_duration_seconds * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"} > {{ .Values.form.alert.groups.stash.rules.backupSessionPeriodTooLong.val }}
       for: {{ .Values.form.alert.groups.stash.rules.backupSessionPeriodTooLong.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.stash.rules.backupSessionPeriodTooLong.severity }}
@@ -192,7 +216,7 @@ spec:
     {{ end -}}
     {{ if .Values.form.alert.groups.stash.rules.restoreSessionPeriodTooLong.enabled -}}
     - alert: RedisStashRestoreSessionPeriodTooLong
-      expr: stash_restore_session_duration_seconds * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_restoresession_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"} > {{ .Values.form.alert.groups.stash.rules.restoreSessionPeriodTooLong.val }}
+      expr: stash_restore_session_duration_seconds * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_appscode_com_restoresession_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"} > {{ .Values.form.alert.groups.stash.rules.restoreSessionPeriodTooLong.val }}
       for: {{ .Values.form.alert.groups.stash.rules.restoreSessionPeriodTooLong.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.stash.rules.restoreSessionPeriodTooLong.severity }}

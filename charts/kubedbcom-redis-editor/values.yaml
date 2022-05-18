@@ -7,47 +7,35 @@ form:
       database:
         enabled: true
         rules:
-          redisInstanceDown:
-            duration: 0m
-            enabled: true
-            severity: critical
-          redisRestarted:
-            duration: 0m
-            enabled: true
-            severity: critical
-          redisSlowQueries:
+          redisDisconnectedSlaves:
             duration: 2m
             enabled: true
             severity: warning
+            val: 1
+          redisDown:
+            duration: 0m
+            enabled: true
+            severity: critical
+          redisMissingMaster:
+            duration: 0m
+            enabled: true
+            severity: critical
+            val: 1
+          redisRejectedConnections:
+            duration: 0m
+            enabled: true
+            severity: warning
+            val: 0
           redisTooManyConnections:
             duration: 2m
             enabled: true
             severity: warning
-            val: 80
-          redisqlHighRollbackRate:
-            duration: 0m
-            enabled: true
-            severity: warning
-            val: 0.02
-          redisqlNotEnoughConnections:
-            duration: 2m
-            enabled: true
-            severity: warning
-            val: 5
-          redisqlReplicationLag:
-            duration: 0m
-            enabled: true
-            severity: critical
-            val: 30s
-          redisqlSplitBrain:
-            duration: 0m
-            enabled: true
-            severity: critical
-          redisqlTooManyLocksAcquired:
+            val: 100
+          redisTooManyMasters:
             duration: 2m
             enabled: true
             severity: critical
-            val: 0.2
+            val: 1
       opsManager:
         enabled: true
         rules:
@@ -58,7 +46,7 @@ form:
           opsRequestOnProgress:
             duration: 0m
             enabled: true
-            severity: warning
+            severity: info
           opsRequestStatusProgressingToLong:
             duration: 30m
             enabled: true
