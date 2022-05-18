@@ -196,7 +196,7 @@ spec:
     rules:
     {{ if .Values.form.alert.groups.provisioner.rules.appPhaseNotReady.enabled -}}
     - alert: KubeDBMySQLPhaseNotReady
-      expr: kubedb_mysql_status_phase{phase="NotReady",mysql="{{ $app }}",namespace="{{ .Release.Namespace }}"} == 1
+      expr: kubedb_com_mysql_status_phase{phase="NotReady",app="{{ $app }}",namespace="{{ .Release.Namespace }}"} == 1
       for: {{ .Values.form.alert.groups.provisioner.rules.appPhaseNotReady.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.provisioner.rules.appPhaseNotReady.severity }}
@@ -207,7 +207,7 @@ spec:
     {{ end -}}
     {{ if .Values.form.alert.groups.provisioner.rules.appPhaseCritical.enabled -}}
     - alert: KubeDBMySQLPhaseCritical
-      expr: kubedb_mysql_status_phase{phase="Critical",mysql="{{ $app }}",namespace="{{ .Release.Namespace }}"} == 1
+      expr: kubedb_com_mysql_status_phase{phase="Critical",app="{{ $app }}",namespace="{{ .Release.Namespace }}"} == 1
       for: {{ .Values.form.alert.groups.provisioner.rules.appPhaseCritical.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.provisioner.rules.appPhaseCritical.severity }}
@@ -222,7 +222,7 @@ spec:
     rules:
     {{ if .Values.form.alert.groups.opsManager.rules.opsRequestOnProgress.enabled -}}
     - alert: KubeDBMySQLOpsRequestOnProgress
-      expr: kubedb_mysql_opsrequest_status_phase{phase="Progressing",database_ref="{{ $app }}",namespace="{{ .Release.Namespace }}"} == 1
+      expr: ops_kubedb_com_mysqlopsrequest_status_phase{phase="Progressing",app="{{ $app }}",namespace="{{ .Release.Namespace }}"} == 1
       for: {{ .Values.form.alert.groups.opsManager.rules.opsRequestOnProgress.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.opsManager.rules.opsRequestOnProgress.severity }}
@@ -233,7 +233,7 @@ spec:
     {{ end -}}
     {{ if .Values.form.alert.groups.opsManager.rules.opsRequestStatusProgressingToLong.enabled -}}
     - alert: KubeDBMySQLOpsRequestStatusProgressingToLong
-      expr: kubedb_mysql_opsrequest_status_phase{phase="Progressing",database_ref="{{ $app }}",namespace="{{ .Release.Namespace }}"} == 1
+      expr: ops_kubedb_com_mysqlopsrequest_status_phase{phase="Progressing",app="{{ $app }}",namespace="{{ .Release.Namespace }}"} == 1
       for: {{ .Values.form.alert.groups.opsManager.rules.opsRequestStatusProgressingToLong.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.opsManager.rules.opsRequestStatusProgressingToLong.severity }}
@@ -244,7 +244,7 @@ spec:
     {{ end -}}
     {{ if .Values.form.alert.groups.opsManager.rules.opsRequestFailed.enabled -}}
     - alert: KubeDBMySQLOpsRequestFailed
-      expr: kubedb_mysql_opsrequest_status_phase{phase="Failed",database_ref="{{ $app }}",namespace="{{ .Release.Namespace }}"} == 1
+      expr: ops_kubedb_com_mysqlopsrequest_status_phase{phase="Failed",app="{{ $app }}",namespace="{{ .Release.Namespace }}"} == 1
       for: {{ .Values.form.alert.groups.opsManager.rules.opsRequestFailed.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.opsManager.rules.opsRequestFailed.severity }}
@@ -259,7 +259,7 @@ spec:
     rules:
     {{ if .Values.form.alert.groups.stash.rules.backupSessionFailed.enabled -}}
     - alert: MySQLStashBackupSessionFailed
-      expr: stash_backup_session_success * on(invoker_name, invoker_kind) group_left(target_name, target_kind) stash_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"} == 0
+      expr: stash_backup_session_success * on(invoker_name, invoker_kind) group_left(target_name, target_kind) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"} == 0
       for: {{ .Values.form.alert.groups.stash.rules.backupSessionFailed.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.stash.rules.backupSessionFailed.severity }}
@@ -270,7 +270,7 @@ spec:
     {{ end -}}
     {{ if .Values.form.alert.groups.stash.rules.restoreSessionFailed.enabled -}}
     - alert: MySQLStashRestoreSessionFailed
-      expr: stash_restore_session_success * on(invoker_name, invoker_kind) group_left(target_name, target_kind) stash_restoresession_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"} == 0
+      expr: stash_restore_session_success * on(invoker_name, invoker_kind) group_left(target_name, target_kind) stash_appscode_com_restoresession_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"} == 0
       for: {{ .Values.form.alert.groups.stash.rules.restoreSessionFailed.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.stash.rules.restoreSessionFailed.severity }}
@@ -281,7 +281,7 @@ spec:
     {{ end -}}
     {{ if .Values.form.alert.groups.stash.rules.noBackupSessionForTooLong.enabled -}}
     - alert: MySQLStashNoBackupSessionForTooLong
-      expr: time() - stash_backup_last_success_time_seconds + on(invoker_name, invoker_kind) group_left(target_name, target_kind) stash_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"} - 1 > {{ .Values.form.alert.groups.stash.rules.noBackupSessionForTooLong.val }}
+      expr: time() - stash_backup_last_success_time_seconds + on(invoker_name, invoker_kind) group_left(target_name, target_kind) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"} - 1 > {{ .Values.form.alert.groups.stash.rules.noBackupSessionForTooLong.val }}
       for: {{ .Values.form.alert.groups.stash.rules.noBackupSessionForTooLong.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.stash.rules.noBackupSessionForTooLong.severity }}
@@ -292,7 +292,7 @@ spec:
     {{ end -}}
     {{ if .Values.form.alert.groups.stash.rules.repositoryCorrupted.enabled -}}
     - alert: MySQLStashRepositoryCorrupted
-      expr: stash_repository_integrity * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"}
+      expr: stash_repository_integrity * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"}
       for: {{ .Values.form.alert.groups.stash.rules.repositoryCorrupted.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.stash.rules.repositoryCorrupted.severity }}
@@ -303,7 +303,7 @@ spec:
     {{ end -}}
     {{ if .Values.form.alert.groups.stash.rules.repositoryStorageRunningLow.enabled -}}
     - alert: MySQLStashRepositoryStorageRunningLow
-      expr: stash_repository_size_bytes * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"} > {{ .Values.form.alert.groups.stash.rules.repositoryStorageRunningLow.val }}
+      expr: stash_repository_size_bytes * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"} > {{ .Values.form.alert.groups.stash.rules.repositoryStorageRunningLow.val }}
       for: {{ .Values.form.alert.groups.stash.rules.repositoryStorageRunningLow.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.stash.rules.repositoryStorageRunningLow.severity }}
@@ -314,7 +314,7 @@ spec:
     {{ end -}}
     {{ if .Values.form.alert.groups.stash.rules.backupSessionPeriodTooLong.enabled -}}
     - alert: MySQLStashBackupSessionPeriodTooLong
-      expr: stash_backup_session_duration_seconds * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"} > {{ .Values.form.alert.groups.stash.rules.backupSessionPeriodTooLong.val }}
+      expr: stash_backup_session_duration_seconds * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"} > {{ .Values.form.alert.groups.stash.rules.backupSessionPeriodTooLong.val }}
       for: {{ .Values.form.alert.groups.stash.rules.backupSessionPeriodTooLong.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.stash.rules.backupSessionPeriodTooLong.severity }}
@@ -325,7 +325,7 @@ spec:
     {{ end -}}
     {{ if .Values.form.alert.groups.stash.rules.restoreSessionPeriodTooLong.enabled -}}
     - alert: MySQLStashRestoreSessionPeriodTooLong
-      expr: stash_restore_session_duration_seconds * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_restoresession_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"} > {{ .Values.form.alert.groups.stash.rules.restoreSessionPeriodTooLong.val }}
+      expr: stash_restore_session_duration_seconds * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_appscode_com_restoresession_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"} > {{ .Values.form.alert.groups.stash.rules.restoreSessionPeriodTooLong.val }}
       for: {{ .Values.form.alert.groups.stash.rules.restoreSessionPeriodTooLong.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.stash.rules.restoreSessionPeriodTooLong.severity }}
@@ -340,7 +340,7 @@ spec:
     rules:
     {{ if .Values.form.alert.groups.schemaManager.rules.schemaPendingForTooLong.enabled -}}
     - alert: KubeDBMySQLSchemaPendingForTooLong
-      expr: kubedb_mysql_schema_status_phase{phase="Pending",server_ref_name="{{ $app }}",server_ref_namespace="{{ .Release.Namespace }}"} == 1
+      expr: schema_kubedb_com_mysqldatabase_status_phase{phase="Pending",app="{{ $app }}",app_namespace="{{ .Release.Namespace }}"} == 1
       for: {{ .Values.form.alert.groups.schemaManager.rules.schemaPendingForTooLong.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.schemaManager.rules.schemaPendingForTooLong.severity }}
@@ -351,7 +351,7 @@ spec:
     {{ end -}}
     {{ if .Values.form.alert.groups.schemaManager.rules.schemaInProgressForTooLong.enabled -}}
     - alert: KubeDBMySQLSchemaInProgressForTooLong
-      expr: kubedb_mysql_schema_status_phase{phase="InProgress",server_ref_name="{{ $app }}",server_ref_namespace="{{ .Release.Namespace }}"} == 1
+      expr: schema_kubedb_com_mysqldatabase_status_phase{phase="InProgress",app="{{ $app }}",app_namespace="{{ .Release.Namespace }}"} == 1
       for: {{ .Values.form.alert.groups.schemaManager.rules.schemaInProgressForTooLong.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.schemaManager.rules.schemaInProgressForTooLong.severity }}
@@ -362,7 +362,7 @@ spec:
     {{ end -}}
     {{ if .Values.form.alert.groups.schemaManager.rules.schemaTerminatingForTooLong.enabled -}}
     - alert: KubeDBMySQLSchemaTerminatingForTooLong
-      expr: kubedb_mysql_schema_status_phase{phase="Terminating",server_ref_name="{{ $app }}",server_ref_namespace="{{ .Release.Namespace }}"} == 1
+      expr: schema_kubedb_com_mysqldatabase_status_phase{phase="Terminating",app="{{ $app }}",app_namespace="{{ .Release.Namespace }}"} == 1
       for: {{ .Values.form.alert.groups.schemaManager.rules.schemaTerminatingForTooLong.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.schemaManager.rules.schemaTerminatingForTooLong.severity }}
@@ -373,7 +373,7 @@ spec:
     {{ end -}}
     {{ if .Values.form.alert.groups.schemaManager.rules.schemaFailed.enabled -}}
     - alert: KubeDBMySQLSchemaFailed
-      expr: kubedb_mysql_schema_status_phase{phase="Failed",server_ref_name="{{ $app }}",server_ref_namespace="{{ .Release.Namespace }}"} == 1
+      expr: schema_kubedb_com_mysqldatabase_status_phase{phase="Failed",app="{{ $app }}",app_namespace="{{ .Release.Namespace }}"} == 1
       for: {{ .Values.form.alert.groups.schemaManager.rules.schemaFailed.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.schemaManager.rules.schemaFailed.severity }}
@@ -384,7 +384,7 @@ spec:
     {{ end -}}
     {{ if .Values.form.alert.groups.schemaManager.rules.schemaExpired.enabled -}}
     - alert: KubeDBMySQLSchemaExpired
-      expr: kubedb_mysql_schema_status_phase{phase="Expired",server_ref_name="{{ $app }}",server_ref_namespace="{{ .Release.Namespace }}"} == 1
+      expr: schema_kubedb_com_mysqldatabase_status_phase{phase="Expired",app="{{ $app }}",app_namespace="{{ .Release.Namespace }}"} == 1
       for: {{ .Values.form.alert.groups.schemaManager.rules.schemaExpired.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.schemaManager.rules.schemaExpired.severity }}

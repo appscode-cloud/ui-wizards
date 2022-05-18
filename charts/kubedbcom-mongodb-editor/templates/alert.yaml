@@ -78,7 +78,7 @@ spec:
     {{- end }}
     {{ if .Values.form.alert.groups.database.rules.mongoDBPhaseCritical.enabled -}}
     - alert: MongoDBPhaseCritical
-      expr: kubedb_mongodb_status_phase{mongodb="{{ $app }}", namespace="{{ .Release.Namespace }}",phase="Critical"} >= 1
+      expr: kubedb_com_mongodb_status_phase{app="{{ $app }}", namespace="{{ .Release.Namespace }}",phase="Critical"} >= 1
       for: {{ .Values.form.alert.groups.database.rules.mongoDBPhaseCritical.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.database.rules.mongoDBPhaseCritical.severity }}
@@ -89,7 +89,7 @@ spec:
     {{- end }}
     {{ if .Values.form.alert.groups.database.rules.mongoDBDown.enabled -}}
     - alert: MongoDBDown
-      expr: kubedb_mongodb_status_phase{mongodb="{{ $app }}", namespace="{{ .Release.Namespace }}",phase="NotReady"} >= 1
+      expr: kubedb_com_mongodb_status_phase{app="{{ $app }}", namespace="{{ .Release.Namespace }}",phase="NotReady"} >= 1
       for: {{ .Values.form.alert.groups.database.rules.mongoDBDown.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.database.rules.mongoDBDown.severity }}
@@ -153,7 +153,7 @@ spec:
     rules:
     {{ if .Values.form.alert.groups.provisioner.rules.appPhaseNotReady.enabled -}}
     - alert: KubeDBMongoDBPhaseNotReady
-      expr: kubedb_mongodb_status_phase{phase="NotReady",mongodb="{{ $app }}",namespace="{{ .Release.Namespace }}"} == 1
+      expr: kubedb_com_mongodb_status_phase{phase="NotReady",app="{{ $app }}",namespace="{{ .Release.Namespace }}"} == 1
       for: {{ .Values.form.alert.groups.provisioner.rules.appPhaseNotReady.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.provisioner.rules.appPhaseNotReady.severity }}
@@ -164,7 +164,7 @@ spec:
     {{ end -}}
     {{ if .Values.form.alert.groups.provisioner.rules.appPhaseCritical.enabled -}}
     - alert: KubeDBMongoDBPhaseCritical
-      expr: kubedb_mongodb_status_phase{phase="Critical",mongodb="{{ $app }}",namespace="{{ .Release.Namespace }}"} == 1
+      expr: kubedb_com_mongodb_status_phase{phase="Critical",app="{{ $app }}",namespace="{{ .Release.Namespace }}"} == 1
       for: {{ .Values.form.alert.groups.provisioner.rules.appPhaseCritical.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.provisioner.rules.appPhaseCritical.severity }}
@@ -179,7 +179,7 @@ spec:
     rules:
     {{ if .Values.form.alert.groups.opsManager.rules.opsRequestOnProgress.enabled -}}
     - alert: KubeDBMongoDBOpsRequestOnProgress
-      expr: kubedb_mongodb_opsrequest_status_phase{phase="Progressing",database_ref="{{ $app }}",namespace="{{ .Release.Namespace }}"} == 1
+      expr: ops_kubedb_com_mongodbopsrequest_status_phase{phase="Progressing",app="{{ $app }}",namespace="{{ .Release.Namespace }}"} == 1
       for: {{ .Values.form.alert.groups.opsManager.rules.opsRequestOnProgress.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.opsManager.rules.opsRequestOnProgress.severity }}
@@ -190,7 +190,7 @@ spec:
     {{ end -}}
     {{ if .Values.form.alert.groups.opsManager.rules.opsRequestStatusProgressingToLong.enabled -}}
     - alert: KubeDBMongoDBOpsRequestStatusProgressingToLong
-      expr: kubedb_mongodb_opsrequest_status_phase{phase="Progressing",database_ref="{{ $app }}",namespace="{{ .Release.Namespace }}"} == 1
+      expr: ops_kubedb_com_mongodbopsrequest_status_phase{phase="Progressing",app="{{ $app }}",namespace="{{ .Release.Namespace }}"} == 1
       for: {{ .Values.form.alert.groups.opsManager.rules.opsRequestStatusProgressingToLong.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.opsManager.rules.opsRequestStatusProgressingToLong.severity }}
@@ -201,7 +201,7 @@ spec:
     {{ end -}}
     {{ if .Values.form.alert.groups.opsManager.rules.opsRequestFailed.enabled -}}
     - alert: KubeDBMongoDBOpsRequestFailed
-      expr: kubedb_mongodb_opsrequest_status_phase{phase="Failed",database_ref="{{ $app }}",namespace="{{ .Release.Namespace }}"} == 1
+      expr: ops_kubedb_com_mongodbopsrequest_status_phase{phase="Failed",app="{{ $app }}",namespace="{{ .Release.Namespace }}"} == 1
       for: {{ .Values.form.alert.groups.opsManager.rules.opsRequestFailed.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.opsManager.rules.opsRequestFailed.severity }}
@@ -216,7 +216,7 @@ spec:
     rules:
     {{ if .Values.form.alert.groups.stash.rules.backupSessionFailed.enabled -}}
     - alert: MongoDBStashBackupSessionFailed
-      expr: stash_backup_session_success * on(invoker_name, invoker_kind) group_left(target_name, target_kind) stash_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"} == 0
+      expr: stash_backup_session_success * on(invoker_name, invoker_kind) group_left(target_name, target_kind) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"} == 0
       for: {{ .Values.form.alert.groups.stash.rules.backupSessionFailed.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.stash.rules.backupSessionFailed.severity }}
@@ -227,7 +227,7 @@ spec:
     {{ end -}}
     {{ if .Values.form.alert.groups.stash.rules.restoreSessionFailed.enabled -}}
     - alert: MongoDBStashRestoreSessionFailed
-      expr: stash_restore_session_success * on(invoker_name, invoker_kind) group_left(target_name, target_kind) stash_restoresession_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"} == 0
+      expr: stash_restore_session_success * on(invoker_name, invoker_kind) group_left(target_name, target_kind) stash_appscode_com_restoresession_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"} == 0
       for: {{ .Values.form.alert.groups.stash.rules.restoreSessionFailed.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.stash.rules.restoreSessionFailed.severity }}
@@ -238,7 +238,7 @@ spec:
     {{ end -}}
     {{ if .Values.form.alert.groups.stash.rules.noBackupSessionForTooLong.enabled -}}
     - alert: MongoDBStashNoBackupSessionForTooLong
-      expr: time() - stash_backup_last_success_time_seconds + on(invoker_name, invoker_kind) group_left(target_name, target_kind) stash_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"} - 1 > {{ .Values.form.alert.groups.stash.rules.noBackupSessionForTooLong.val }}
+      expr: time() - stash_backup_last_success_time_seconds + on(invoker_name, invoker_kind) group_left(target_name, target_kind) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"} - 1 > {{ .Values.form.alert.groups.stash.rules.noBackupSessionForTooLong.val }}
       for: {{ .Values.form.alert.groups.stash.rules.noBackupSessionForTooLong.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.stash.rules.noBackupSessionForTooLong.severity }}
@@ -249,7 +249,7 @@ spec:
     {{ end -}}
     {{ if .Values.form.alert.groups.stash.rules.repositoryCorrupted.enabled -}}
     - alert: MongoDBStashRepositoryCorrupted
-      expr: stash_repository_integrity * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"}
+      expr: stash_repository_integrity * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"}
       for: {{ .Values.form.alert.groups.stash.rules.repositoryCorrupted.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.stash.rules.repositoryCorrupted.severity }}
@@ -260,7 +260,7 @@ spec:
     {{ end -}}
     {{ if .Values.form.alert.groups.stash.rules.repositoryStorageRunningLow.enabled -}}
     - alert: MongoDBStashRepositoryStorageRunningLow
-      expr: stash_repository_size_bytes * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"} > {{ .Values.form.alert.groups.stash.rules.repositoryStorageRunningLow.val }}
+      expr: stash_repository_size_bytes * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"} > {{ .Values.form.alert.groups.stash.rules.repositoryStorageRunningLow.val }}
       for: {{ .Values.form.alert.groups.stash.rules.repositoryStorageRunningLow.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.stash.rules.repositoryStorageRunningLow.severity }}
@@ -271,7 +271,7 @@ spec:
     {{- end }}
     {{ if .Values.form.alert.groups.stash.rules.backupSessionPeriodTooLong.enabled -}}
     - alert: MongoDBStashBackupSessionPeriodTooLong
-      expr: stash_backup_session_duration_seconds * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"} > {{ .Values.form.alert.groups.stash.rules.backupSessionPeriodTooLong.val }}
+      expr: stash_backup_session_duration_seconds * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"} > {{ .Values.form.alert.groups.stash.rules.backupSessionPeriodTooLong.val }}
       for: {{ .Values.form.alert.groups.stash.rules.backupSessionPeriodTooLong.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.stash.rules.backupSessionPeriodTooLong.severity }}
@@ -282,7 +282,7 @@ spec:
     {{ end -}}
     {{ if .Values.form.alert.groups.stash.rules.restoreSessionPeriodTooLong.enabled -}}
     - alert: MongoDBStashRestoreSessionPeriodTooLong
-      expr: stash_restore_session_duration_seconds * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_restoresession_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"} > {{ .Values.form.alert.groups.stash.rules.restoreSessionPeriodTooLong.val }}
+      expr: stash_restore_session_duration_seconds * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_appscode_com_restoresession_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"} > {{ .Values.form.alert.groups.stash.rules.restoreSessionPeriodTooLong.val }}
       for: {{ .Values.form.alert.groups.stash.rules.restoreSessionPeriodTooLong.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.stash.rules.restoreSessionPeriodTooLong.severity }}
@@ -297,7 +297,7 @@ spec:
     rules:
     {{ if .Values.form.alert.groups.schemaManager.rules.schemaPendingForTooLong.enabled -}}
     - alert: KubeDBMongoDBSchemaPendingForTooLong
-      expr: kubedb_mongodb_schema_status_phase{phase="Pending",serverRefName="{{ $app }}",serverRefNamespace="{{ .Release.Namespace }}"} == 1
+      expr: schema_kubedb_com_mongodbdatabase_status_phase{phase="Pending",app="{{ $app }}",app_namespace="{{ .Release.Namespace }}"} == 1
       for: {{ .Values.form.alert.groups.schemaManager.rules.schemaPendingForTooLong.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.schemaManager.rules.schemaPendingForTooLong.severity }}
@@ -308,7 +308,7 @@ spec:
     {{ end -}}
     {{ if .Values.form.alert.groups.schemaManager.rules.schemaInProgressForTooLong.enabled -}}
     - alert: KubeDBMongoDBSchemaInProgressForTooLong
-      expr: kubedb_mongodb_schema_status_phase{phase="InProgress",serverRefName="{{ $app }}",serverRefNamespace="{{ .Release.Namespace }}"} == 1
+      expr: schema_kubedb_com_mongodbdatabase_status_phase{phase="InProgress",app="{{ $app }}",app_namespace="{{ .Release.Namespace }}"} == 1
       for: {{ .Values.form.alert.groups.schemaManager.rules.schemaInProgressForTooLong.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.schemaManager.rules.schemaInProgressForTooLong.severity }}
@@ -319,7 +319,7 @@ spec:
     {{ end -}}
     {{ if .Values.form.alert.groups.schemaManager.rules.schemaTerminatingForTooLong.enabled -}}
     - alert: KubeDBMongoDBSchemaTerminatingForTooLong
-      expr: kubedb_mongodb_schema_status_phase{phase="Terminating",serverRefName="{{ $app }}",serverRefNamespace="{{ .Release.Namespace }}"} == 1
+      expr: schema_kubedb_com_mongodbdatabase_status_phase{phase="Terminating",app="{{ $app }}",app_namespace="{{ .Release.Namespace }}"} == 1
       for: {{ .Values.form.alert.groups.schemaManager.rules.schemaTerminatingForTooLong.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.schemaManager.rules.schemaTerminatingForTooLong.severity }}
@@ -330,7 +330,7 @@ spec:
     {{ end -}}
     {{ if .Values.form.alert.groups.schemaManager.rules.schemaFailed.enabled -}}
     - alert: KubeDBMongoDBSchemaFailed
-      expr: kubedb_mongodb_schema_status_phase{phase="Failed",serverRefName="{{ $app }}",serverRefNamespace="{{ .Release.Namespace }}"} == 1
+      expr: schema_kubedb_com_mongodbdatabase_status_phase{phase="Failed",app="{{ $app }}",app_namespace="{{ .Release.Namespace }}"} == 1
       for: {{ .Values.form.alert.groups.schemaManager.rules.schemaFailed.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.schemaManager.rules.schemaFailed.severity }}
@@ -341,7 +341,7 @@ spec:
     {{ end -}}
     {{ if .Values.form.alert.groups.schemaManager.rules.schemaExpired.enabled -}}
     - alert: KubeDBMongoDBSchemaExpired
-      expr: kubedb_mongodb_schema_status_phase{phase="Expired",serverRefName="{{ $app }}",serverRefNamespace="{{ .Release.Namespace }}"} == 1
+      expr: schema_kubedb_com_mongodbdatabase_status_phase{phase="Expired",app="{{ $app }}",app_namespace="{{ .Release.Namespace }}"} == 1
       for: {{ .Values.form.alert.groups.schemaManager.rules.schemaExpired.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.schemaManager.rules.schemaExpired.severity }}

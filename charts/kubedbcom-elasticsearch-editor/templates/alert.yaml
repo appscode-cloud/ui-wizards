@@ -28,6 +28,7 @@ spec:
       labels:
         severity: {{ .Values.form.alert.groups.database.rules.elasticsearchHeapUsageTooHigh.severity }}
         alertname: elasticsearch_heap_usage_too_high
+        {{- include "kubedbcom-elasticsearch-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: Elasticsearch Heap Usage Too High (instance {{`{{`}} $labels.instance {{`}}`}})
         description: "The heap usage is over {{ .Values.form.alert.groups.database.rules.elasticsearchHeapUsageTooHigh.val -}}%\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -40,6 +41,7 @@ spec:
       labels:
         severity: {{ .Values.form.alert.groups.database.rules.elasticsearchHeapUsageWarning.severity }}
         alertname: elasticsearch_heap_usage_warning
+        {{- include "kubedbcom-elasticsearch-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: Elasticsearch Heap Usage warning (instance {{`{{`}} $labels.instance {{`}}`}})
         description: "The heap usage is over {{ .Values.form.alert.groups.database.rules.elasticsearchHeapUsageWarning.val }}%\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -52,6 +54,7 @@ spec:
       labels:
         severity: {{ .Values.form.alert.groups.database.rules.elasticsearchDiskOutOfSpace.severity }}
         alertname: elasticsearch_disk_out_of_space
+        {{- include "kubedbcom-elasticsearch-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: Elasticsearch disk out of space (instance {{`{{`}} $labels.instance {{`}}`}})
         description: "The disk usage is over {{ .Values.form.alert.groups.database.rules.elasticsearchDiskOutOfSpace.val }}%\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -64,6 +67,7 @@ spec:
       labels:
         severity: {{ .Values.form.alert.groups.database.rules.elasticsearchDiskSpaceLow.severity }}
         alertname: elasticsearch_disk_space_low
+        {{- include "kubedbcom-elasticsearch-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: Elasticsearch disk space low (instance {{`{{`}} $labels.instance {{`}}`}})
         description: "The disk usage is over {{ .Values.form.alert.groups.database.rules.elasticsearchDiskSpaceLow.val }}%\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -76,6 +80,7 @@ spec:
       labels:
         severity: {{ .Values.form.alert.groups.database.rules.elasticsearchClusterRed.severity }}
         alertname: elasticsearch_cluster_red
+        {{- include "kubedbcom-elasticsearch-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: Elasticsearch Cluster Red (instance {{`{{`}} $labels.instance {{`}}`}})
         description: "Elastic Cluster Red status\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -88,6 +93,7 @@ spec:
       labels:
         severity: {{ .Values.form.alert.groups.database.rules.elasticsearchClusterYellow.severity }}
         alertname: elasticsearch_cluster_yellow
+        {{- include "kubedbcom-elasticsearch-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: Elasticsearch Cluster Yellow (instance {{`{{`}} $labels.instance {{`}}`}})
         description: "Elastic Cluster Yellow status\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -100,6 +106,7 @@ spec:
       labels:
         severity: {{ .Values.form.alert.groups.database.rules.elasticsearchHealthyNodes.severity }}
         alertname: elasticsearch_healthy_nodes
+        {{- include "kubedbcom-elasticsearch-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: Elasticsearch Healthy Nodes (instance {{`{{`}} $labels.instance {{`}}`}})
         description: "Missing node in Elasticsearch cluster\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -112,6 +119,7 @@ spec:
       labels:
         severity: {{ .Values.form.alert.groups.database.rules.elasticsearchHealthyDataNodes.severity }}
         alertname: elasticsearch_healthy_data_nodes
+        {{- include "kubedbcom-elasticsearch-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: Elasticsearch Healthy Data Nodes (instance {{`{{`}} $labels.instance {{`}}`}})
         description: "Missing data node in Elasticsearch cluster\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -124,6 +132,7 @@ spec:
       labels:
         severity: {{ .Values.form.alert.groups.database.rules.elasticsearchRelocatingShards.severity }}
         alertname: elasticsearch_relocating_shards
+        {{- include "kubedbcom-elasticsearch-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: Elasticsearch relocating shards (instance {{`{{`}} $labels.instance {{`}}`}})
         description: "Elasticsearch is relocating shards\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -136,6 +145,7 @@ spec:
       labels:
         severity: {{ .Values.form.alert.groups.database.rules.elasticsearchInitializingShards.severity }}
         alertname: elasticsearch_initializing_shards
+        {{- include "kubedbcom-elasticsearch-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: Elasticsearch initializing shards (instance {{`{{`}} $labels.instance {{`}}`}})
         description: "Elasticsearch is initializing shards\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -148,6 +158,7 @@ spec:
       labels:
         severity: {{ .Values.form.alert.groups.database.rules.elasticsearchUnassignedShards.severity }}
         alertname: elasticsearch_unassigned_shards
+        {{- include "kubedbcom-elasticsearch-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: Elasticsearch unassigned shards (instance {{`{{`}} $labels.instance {{`}}`}})
         description: "Elasticsearch has unassigned shards\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -160,6 +171,7 @@ spec:
       labels:
         severity: {{ .Values.form.alert.groups.database.rules.elasticsearchPendingTasks.severity }}
         alertname: elasticsearch_pending_tasks
+        {{- include "kubedbcom-elasticsearch-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: Elasticsearch pending tasks (instance {{`{{`}} $labels.instance {{`}}`}})
         description: "Elasticsearch has pending tasks. Cluster works slowly.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -172,6 +184,7 @@ spec:
       labels:
         severity: {{ .Values.form.alert.groups.database.rules.elasticsearchNoNewDocuments10m.severity }}
         alertname: elasticsearch_no_new_documents_10m
+        {{- include "kubedbcom-elasticsearch-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: Elasticsearch no new documents (instance {{`{{`}} $labels.instance {{`}}`}})
         description: "No new documents for 10 min!\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -182,7 +195,7 @@ spec:
     rules:
     {{ if .Values.form.alert.groups.provisioner.rules.appPhaseNotReady.enabled -}}
     - alert: KubeDBElasticsearchPhaseNotReady
-      expr: kubedb_elasticsearch_status_phase{phase="NotReady",elasticsearch="{{ $app }}",namespace="{{ .Release.Namespace }}"} == 1
+      expr: kubedb_com_elasticsearch_status_phase{phase="NotReady",app="{{ $app }}",namespace="{{ .Release.Namespace }}"} == 1
       for: {{ .Values.form.alert.groups.provisioner.rules.appPhaseNotReady.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.provisioner.rules.appPhaseNotReady.severity }}
@@ -193,7 +206,7 @@ spec:
     {{ end -}}
     {{ if .Values.form.alert.groups.provisioner.rules.appPhaseCritical.enabled -}}
     - alert: KubeDBElasticsearchPhaseCritical
-      expr: kubedb_elasticsearch_status_phase{phase="Critical",elasticsearch="{{ $app }}",namespace="{{ .Release.Namespace }}"} == 1
+      expr: kubedb_com_elasticsearch_status_phase{phase="Critical",app="{{ $app }}",namespace="{{ .Release.Namespace }}"} == 1
       for: {{ .Values.form.alert.groups.provisioner.rules.appPhaseCritical.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.provisioner.rules.appPhaseCritical.severity }}
@@ -208,7 +221,7 @@ spec:
     rules:
     {{ if .Values.form.alert.groups.opsManager.rules.opsRequestOnProgress.enabled -}}
     - alert: KubeDBElasticsearchOpsRequestOnProgress
-      expr: kubedb_elasticsearch_opsrequest_status_phase{phase="Progressing",database_ref="{{ $app }}",namespace="{{ .Release.Namespace }}"} == 1
+      expr: ops_kubedb_com_elasticsearchopsrequest_status_phase{phase="Progressing",app="{{ $app }}",namespace="{{ .Release.Namespace }}"} == 1
       for: {{ .Values.form.alert.groups.opsManager.rules.opsRequestOnProgress.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.opsManager.rules.opsRequestOnProgress.severity }}
@@ -219,7 +232,7 @@ spec:
     {{ end -}}
     {{ if .Values.form.alert.groups.opsManager.rules.opsRequestStatusProgressingToLong.enabled -}}
     - alert: KubeDBElasticsearchOpsRequestStatusProgressingToLong
-      expr: kubedb_elasticsearch_opsrequest_status_phase{phase="Progressing",database_ref="{{ $app }}",namespace="{{ .Release.Namespace }}"} == 1
+      expr: ops_kubedb_com_elasticsearchopsrequest_status_phase{phase="Progressing",app="{{ $app }}",namespace="{{ .Release.Namespace }}"} == 1
       for: {{ .Values.form.alert.groups.opsManager.rules.opsRequestStatusProgressingToLong.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.opsManager.rules.opsRequestStatusProgressingToLong.severity }}
@@ -230,7 +243,7 @@ spec:
     {{ end -}}
     {{ if .Values.form.alert.groups.opsManager.rules.opsRequestFailed.enabled -}}
     - alert: KubeDBElasticsearchOpsRequestFailed
-      expr: kubedb_elasticsearch_opsrequest_status_phase{phase="Failed",database_ref="{{ $app }}",namespace="{{ .Release.Namespace }}"} == 1
+      expr: ops_kubedb_com_elasticsearchopsrequest_status_phase{phase="Failed",app="{{ $app }}",namespace="{{ .Release.Namespace }}"} == 1
       for: {{ .Values.form.alert.groups.opsManager.rules.opsRequestFailed.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.opsManager.rules.opsRequestFailed.severity }}
@@ -245,7 +258,7 @@ spec:
     rules:
     {{ if .Values.form.alert.groups.stash.rules.backupSessionFailed.enabled -}}
     - alert: ElasticsearchStashBackupSessionFailed
-      expr: stash_backup_session_success * on(invoker_name, invoker_kind) group_left(target_name, target_kind) stash_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"} == 0
+      expr: stash_backup_session_success * on(invoker_name, invoker_kind) group_left(target_name, target_kind) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"} == 0
       for: {{ .Values.form.alert.groups.stash.rules.backupSessionFailed.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.stash.rules.backupSessionFailed.severity }}
@@ -256,7 +269,7 @@ spec:
     {{ end -}}
     {{ if .Values.form.alert.groups.stash.rules.restoreSessionFailed.enabled -}}
     - alert: ElasticsearchStashRestoreSessionFailed
-      expr: stash_restore_session_success * on(invoker_name, invoker_kind) group_left(target_name, target_kind) stash_restoresession_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"} == 0
+      expr: stash_restore_session_success * on(invoker_name, invoker_kind) group_left(target_name, target_kind) stash_appscode_com_restoresession_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"} == 0
       for: {{ .Values.form.alert.groups.stash.rules.restoreSessionFailed.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.stash.rules.restoreSessionFailed.severity }}
@@ -267,7 +280,7 @@ spec:
     {{ end -}}
     {{ if .Values.form.alert.groups.stash.rules.noBackupSessionForTooLong.enabled -}}
     - alert: ElasticsearchStashNoBackupSessionForTooLong
-      expr: time() - stash_backup_last_success_time_seconds + on(invoker_name, invoker_kind) group_left(target_name, target_kind) stash_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"} - 1 > {{ .Values.form.alert.groups.stash.rules.noBackupSessionForTooLong.val }}
+      expr: time() - stash_backup_last_success_time_seconds + on(invoker_name, invoker_kind) group_left(target_name, target_kind) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"} - 1 > {{ .Values.form.alert.groups.stash.rules.noBackupSessionForTooLong.val }}
       for: {{ .Values.form.alert.groups.stash.rules.noBackupSessionForTooLong.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.stash.rules.noBackupSessionForTooLong.severity }}
@@ -278,7 +291,7 @@ spec:
     {{ end -}}
     {{ if .Values.form.alert.groups.stash.rules.repositoryCorrupted.enabled -}}
     - alert: ElasticsearchStashRepositoryCorrupted
-      expr: stash_repository_integrity * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"}
+      expr: stash_repository_integrity * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"}
       for: {{ .Values.form.alert.groups.stash.rules.repositoryCorrupted.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.stash.rules.repositoryCorrupted.severity }}
@@ -289,7 +302,7 @@ spec:
     {{ end -}}
     {{ if .Values.form.alert.groups.stash.rules.repositoryStorageRunningLow.enabled -}}
     - alert: ElasticsearchStashRepositoryStorageRunningLow
-      expr: stash_repository_size_bytes * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"} > {{ .Values.form.alert.groups.stash.rules.repositoryStorageRunningLow.val }}
+      expr: stash_repository_size_bytes * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"} > {{ .Values.form.alert.groups.stash.rules.repositoryStorageRunningLow.val }}
       for: {{ .Values.form.alert.groups.stash.rules.repositoryStorageRunningLow.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.stash.rules.repositoryStorageRunningLow.severity }}
@@ -300,7 +313,7 @@ spec:
     {{- end }}
     {{ if .Values.form.alert.groups.stash.rules.backupSessionPeriodTooLong.enabled -}}
     - alert: ElasticsearchStashBackupSessionPeriodTooLong
-      expr: stash_backup_session_duration_seconds * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"} > {{ .Values.form.alert.groups.stash.rules.backupSessionPeriodTooLong.val }}
+      expr: stash_backup_session_duration_seconds * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"} > {{ .Values.form.alert.groups.stash.rules.backupSessionPeriodTooLong.val }}
       for: {{ .Values.form.alert.groups.stash.rules.backupSessionPeriodTooLong.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.stash.rules.backupSessionPeriodTooLong.severity }}
@@ -311,7 +324,7 @@ spec:
     {{ end -}}
     {{ if .Values.form.alert.groups.stash.rules.restoreSessionPeriodTooLong.enabled -}}
     - alert: ElasticsearchStashRestoreSessionPeriodTooLong
-      expr: stash_restore_session_duration_seconds * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_restoresession_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"} > {{ .Values.form.alert.groups.stash.rules.restoreSessionPeriodTooLong.val }}
+      expr: stash_restore_session_duration_seconds * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_appscode_com_restoresession_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ .Release.Namespace }}"} > {{ .Values.form.alert.groups.stash.rules.restoreSessionPeriodTooLong.val }}
       for: {{ .Values.form.alert.groups.stash.rules.restoreSessionPeriodTooLong.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.stash.rules.restoreSessionPeriodTooLong.severity }}
