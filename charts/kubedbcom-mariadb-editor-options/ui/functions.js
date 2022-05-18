@@ -468,6 +468,20 @@ function showMonitoringSection({ discriminator, getValue, watchDependency}) {
   return !!getValue(discriminator, "/monitoringEnabledStatus");
 }
 
+function setMonitoringStatus({ model, getValue }) {
+  const status = getValue(model, "/spec/monitoring/agent");
+  return !!status;
+}
+
+function onMonitoringStatusChange({ discriminator, getValue, commit }) {
+  const status = getValue(discriminator, "/monitoringEnabledStatus");
+  commit("wizard/model$update", {
+    path: "/spec/monitoring/agent",
+    value: status ? "prometheus.io/operator" : "",
+    force: true
+  });
+}
+
 
 
 return {
@@ -485,5 +499,7 @@ return {
 	setLimitsCpuOrMem,
 	setMachineToCustom,
   showAlertSection,
-  showMonitoringSection
+  showMonitoringSection,
+  setMonitoringStatus,
+  onMonitoringStatusChange
 }
