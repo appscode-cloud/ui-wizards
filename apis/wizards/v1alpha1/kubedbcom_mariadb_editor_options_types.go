@@ -69,7 +69,9 @@ type MariaDBMode string
 type MariaDBAlert struct {
 	Enabled              bool               `json:"enabled"`
 	Labels               map[string]string  `json:"labels"`
+	// +optional
 	Annotations          map[string]string  `json:"annotations"`
+	// +optional
 	AdditionalRuleLabels map[string]string  `json:"additionalRuleLabels"`
 	Groups               MariaDBAlertGroups `json:"groups"`
 }

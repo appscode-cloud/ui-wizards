@@ -78,7 +78,9 @@ type MySQLRouter struct {
 type MySQLAlert struct {
 	Enabled              bool              `json:"enabled"`
 	Labels               map[string]string `json:"labels"`
+	// +optional
 	Annotations          map[string]string `json:"annotations"`
+	// +optional
 	AdditionalRuleLabels map[string]string `json:"additionalRuleLabels"`
 	Groups               MySQLAlertGroups  `json:"groups"`
 }

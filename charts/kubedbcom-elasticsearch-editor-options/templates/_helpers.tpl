@@ -69,6 +69,6 @@ k8s_resource: {{ .Values.metadata.resource.name }}
 app: {{ include "kubedbcom-elasticsearch-editor-options.fullname" . }}
 app_namespace: {{ .Release.Namespace }}
 {{- if .Values.form.alert.additionalRuleLabels }}
-{{- toYaml .Values.form.alert.additionalRuleLabels }}
+{{ toYaml .Values.form.alert.additionalRuleLabels }}
 {{- end }}
 {{- end }}
