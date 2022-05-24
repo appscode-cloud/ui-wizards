@@ -146,6 +146,28 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/resources/properties/limits/properties/memory
       type: input
+    - alias: reusable-alert-option
+      chart:
+        name: uibytebuildersdev-component-alert-option
+        version: v0.4.3
+      moduleResolver: fetchJsons
+      schema:
+        $ref: schema#/properties/form/properties/alert
+      type: reusable-element
+    - alias: reusable-monitor-option
+      chart:
+        name: uibytebuildersdev-component-monitoring-option
+        version: v0.4.3
+      dataContext:
+        agent:
+          $ref: schema#/properties/spec/properties/monitoring/properties/agent
+      functionCallbacks:
+        updateAgentValue:
+          $ref: functions#/updateAgentValue
+      moduleResolver: fetchJsons
+      schema:
+        $ref: schema#/properties/spec/properties/monitoring/properties/serviceMonitor
+      type: reusable-element    
     - label:
         text: labels.configOptions
       type: label-element
@@ -154,6 +176,9 @@ steps:
       hasDependencies: true
       hasDescription: true
       options:
+      - description: options.configOptions.alert.description
+        text: options.configOptions.alert.label
+        value: alert
       - description: options.configOptions.topology.description
         text: options.configOptions.topology.label
         value: topology

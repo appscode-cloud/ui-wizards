@@ -146,68 +146,28 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/resources/properties/limits/properties/memory
       type: input
-    - elements:
-      - label:
-          text: labels.alert.alert_enable_question
-        schema:
-          $ref: schema#/properties/form/properties/alert/properties/enabled
-        type: switch
-      - if: showAlertSection
-        isArray: true
-        keys:
-          label:
-            text: labels.labels.key
-        label:
-          text: labels.labels.label
-        schema:
-          $ref: schema#/properties/form/properties/alert/properties/labels
-        type: key-value-input-form
-        values:
-          label:
-            text: labels.labels.value
-          schema:
-            $ref: schema#/properties/form/properties/alert/properties/labels/additionalProperties
-          type: input
-      label:
-        text: labels.alert.label
-      show_label: true
+    - alias: reusable-alert-option
+      chart:
+        name: uibytebuildersdev-component-alert-option
+        version: v0.4.3
+      moduleResolver: fetchJsons
       schema:
         $ref: schema#/properties/form/properties/alert
-      type: single-step-form
-    - discriminator:
-        monitoringEnabledStatus:
-          type: boolean
-          default: true
-      elements:
-      - computed: setMonitoringStatus
-        label:
-          text: labels.monitoring.monitoring_enable_question
-        onChange: onMonitoringStatusChange
-        schema:
-          $ref: discriminator#/properties/monitoringEnabledStatus
-        type: switch
-      - if: showMonitoringSection
-        isArray: true
-        keys:
-          label:
-            text: labels.labels.key
-        label:
-          text: labels.labels.label
-        schema:
-          $ref: schema#/properties/spec/properties/monitoring/properties/serviceMonitor/properties/labels
-        type: key-value-input-form
-        values:
-          label:
-            text: labels.labels.value
-          schema:
-            $ref: schema#/properties/spec/properties/monitoring/properties/serviceMonitor/properties/labels/additionalProperties
-          type: input
-      label:
-        text: labels.monitoring.label
-      show_label: true
+      type: reusable-element
+    - alias: reusable-monitor-option
+      chart:
+        name: uibytebuildersdev-component-monitoring-option
+        version: v0.4.3
+      dataContext:
+        agent:
+          $ref: schema#/properties/spec/properties/monitoring/properties/agent
+      functionCallbacks:
+        updateAgentValue:
+          $ref: functions#/updateAgentValue
+      moduleResolver: fetchJsons
       schema:
         $ref: schema#/properties/spec/properties/monitoring/properties/serviceMonitor
-      type: single-step-form
+      type: reusable-element
     - label:
         text: labels.configOptions
       type: label-element
