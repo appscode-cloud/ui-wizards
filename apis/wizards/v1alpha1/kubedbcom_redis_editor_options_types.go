@@ -81,7 +81,9 @@ type NamespacedName struct {
 type RedisAlert struct {
 	Enabled              bool              `json:"enabled"`
 	Labels               map[string]string `json:"labels"`
+	// +optional
 	Annotations          map[string]string `json:"annotations"`
+	// +optional
 	AdditionalRuleLabels map[string]string `json:"additionalRuleLabels"`
 	Groups               RedisAlertGroups  `json:"groups"`
 }
