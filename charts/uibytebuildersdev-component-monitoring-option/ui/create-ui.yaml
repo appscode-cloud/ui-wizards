@@ -1,0 +1,34 @@
+discriminator:
+  monitoringEnabledStatus:
+    type: boolean
+    default: true
+elements:
+- computed: setMonitoringStatus
+  label:
+    text: labels.monitoring_enable_question
+  onChange: onMonitoringStatusChange
+  schema:
+    $ref: discriminator#/properties/monitoringEnabledStatus
+  type: switch
+- if: showMonitoringSection
+  isArray: true
+  keys:
+    label:
+      text: labels.label.key
+  label:
+    text: labels.label.label
+  schema:
+    $ref: schema#/properties/labels
+  type: key-value-input-form
+  values:
+    label:
+      text: labels.label.value
+    schema:
+      $ref: schema#/properties/labels/additionalProperties
+    type: input
+label:
+  text: labels.monitor_profile
+show_label: true
+schema:
+  $ref: schema#/
+type: single-step-form

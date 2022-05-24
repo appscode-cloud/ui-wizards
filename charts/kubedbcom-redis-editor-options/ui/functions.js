@@ -511,7 +511,46 @@ function onCreateSentinelChange({discriminator, getValue, commit}) {
   }
 }
 
+async function fetchJsons({ axios, itemCtx }) {
+  let ui = {};
+  let language = {};
+  let functions = {};
+  const { name, url, version, packageviewUrlPrefix } = itemCtx.chart;
+  
+  try {
+    ui = await axios.get(
+      `${packageviewUrlPrefix}/create-ui.yaml?name=${name}&url=${url}&version=${version}&format=json`
+    );
+    language = await axios.get(
+      `${packageviewUrlPrefix}/language.yaml?name=${name}&url=${url}&version=${version}&format=json`
+    );
+    const functionString = await axios.get(
+      `${packageviewUrlPrefix}/functions.js?name=${name}&url=${url}&version=${version}`
+    );
+    // declare evaluate the functionString to get the functions Object
+    const evalFunc = new Function(functionString.data || "");
+    functions = evalFunc();
+  } catch (e) {
+    console.log(e);
+  }
+
+  return {
+    ui: ui.data || {},
+    language: language.data || {},
+    functions,
+  };
+}
+
+function updateAgentValue({commit },val) {
+  commit("wizard/model$update", {
+    path: "/spec/monitoring/agent",
+    value: val ? "prometheus.io/operator" : "",
+    force: true
+  });
+}
+
 return {
+  fetchJsons,
 	showAuthPasswordField,
 	isEqualToModelPathValue,
   isNotEqualToModelPathValue,
@@ -527,5 +566,6 @@ return {
 	setLimitsCpuOrMem,
 	setMachineToCustom,
   showSentinelNameAndNamespace,
-  onCreateSentinelChange
+  onCreateSentinelChange,
+  updateAgentValue,
 }
