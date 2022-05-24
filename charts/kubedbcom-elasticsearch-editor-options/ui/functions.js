@@ -558,8 +558,8 @@ function updateAgentValue({commit },val) {
 }
 
 return {
-  fetchJsons,
-  onVersionChange,
+	fetchJsons,
+	onVersionChange,
 	showAuthPasswordField,
 	isEqualToModelPathValue,
 	showAuthSecretField,
@@ -574,8 +574,8 @@ return {
 	setResourceLimit,
 	setLimitsCpuOrMem,
 	setMachineToCustom,
-  disableConfigureOption,
-  isSecurityEnabled,
-  onDisableSecurityChange,
-  updateAgentValue,
+	disableConfigureOption,
+	isSecurityEnabled,
+	onDisableSecurityChange,
+	updateAgentValue,
 }

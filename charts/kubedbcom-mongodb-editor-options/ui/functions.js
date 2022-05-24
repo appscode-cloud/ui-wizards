@@ -504,7 +504,7 @@ function updateAgentValue({commit },val) {
 }
 
 return {
-  fetchJsons,
+	fetchJsons,
 	showAuthPasswordField,
 	isEqualToModelPathValue,
 	showAuthSecretField,
@@ -519,5 +519,5 @@ return {
 	setResourceLimit,
 	setLimitsCpuOrMem,
 	setMachineToCustom,
-  updateAgentValue,
+	updateAgentValue,
 }

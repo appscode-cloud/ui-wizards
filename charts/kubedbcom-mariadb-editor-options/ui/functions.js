@@ -513,7 +513,7 @@ async function fetchJsons({ axios, itemCtx }) {
 
 
 return {
-  fetchJsons,
+	fetchJsons,
 	showAuthPasswordField,
 	isEqualToModelPathValue,
 	showAuthSecretField,
@@ -527,8 +527,8 @@ return {
 	setResourceLimit,
 	setLimitsCpuOrMem,
 	setMachineToCustom,
-  showAlertSection,
-  showMonitoringSection,
-  setMonitoringStatus,
-  updateAgentValue,
+	showAlertSection,
+	showMonitoringSection,
+	setMonitoringStatus,
+	updateAgentValue,
 }

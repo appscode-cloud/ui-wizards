@@ -550,13 +550,13 @@ function updateAgentValue({commit },val) {
 }
 
 return {
-  fetchJsons,
+	fetchJsons,
 	showAuthPasswordField,
 	isEqualToModelPathValue,
-  isNotEqualToModelPathValue,
+	isNotEqualToModelPathValue,
 	showAuthSecretField,
 	getResources,
-  getRedisSentinels,
+	getRedisSentinels,
 	getStorageClassNames,
 	getRedisVersions,
 	getSecrets,
@@ -565,7 +565,7 @@ return {
 	setResourceLimit,
 	setLimitsCpuOrMem,
 	setMachineToCustom,
-  showSentinelNameAndNamespace,
-  onCreateSentinelChange,
-  updateAgentValue,
+	showSentinelNameAndNamespace,
+	onCreateSentinelChange,
+	updateAgentValue,
 }
