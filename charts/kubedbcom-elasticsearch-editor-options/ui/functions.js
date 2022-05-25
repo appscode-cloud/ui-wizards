@@ -557,6 +557,11 @@ function updateAgentValue({commit },val) {
   });
 }
 
+function showAlertSection({ model, getValue, watchDependency}) {
+  watchDependency("model#/form/alert/enabled");
+  return !!getValue(model, "/form/alert/enabled");
+}
+
 return {
 	fetchJsons,
 	onVersionChange,
@@ -578,4 +583,5 @@ return {
 	isSecurityEnabled,
 	onDisableSecurityChange,
 	updateAgentValue,
+	showAlertSection,
 }

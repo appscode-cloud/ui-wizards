@@ -195,14 +195,34 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/resources/properties/limits/properties/memory
       type: input
-    - alias: reusable-alert-option
-      chart:
-        name: uibytebuildersdev-component-alert-option
-        version: v0.4.3
-      moduleResolver: fetchJsons
+    - elements:
+      - label:
+          text: labels.alert.alert_enable_question
+        schema:
+          $ref: schema#/properties/form/properties/alert/properties/enabled
+        type: switch
+      - if: showAlertSection
+        isArray: true
+        keys:
+          label:
+            text: labels.labels.key
+        label:
+          text: labels.labels.label
+        schema:
+          $ref: schema#/properties/form/properties/alert/properties/labels
+        type: key-value-input-form
+        values:
+          label:
+            text: labels.labels.value
+          schema:
+            $ref: schema#/properties/form/properties/alert/properties/labels/additionalProperties
+          type: input
+      label:
+        text: labels.alert.label
+      show_label: true
       schema:
         $ref: schema#/properties/form/properties/alert
-      type: reusable-element
+      type: single-step-form
     - alias: reusable-monitor-option
       chart:
         name: uibytebuildersdev-component-monitoring-option
