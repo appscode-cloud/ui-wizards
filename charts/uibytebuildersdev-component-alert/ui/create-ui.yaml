@@ -1,0 +1,126 @@
+discriminator:
+  alertEnabledStatus:
+    type: string
+elements:
+- label:
+    text: labels.alert_enable_question
+  schema:
+    $ref: schema#/properties/enabled
+  type: switch
+- if: showAlertSection
+  isArray: true
+  keys:
+    label:
+      text: labels.labels.key
+  label:
+    text: labels.labels.label
+  schema:
+    $ref: schema#/properties/labels
+  type: key-value-input-form
+  values:
+    label:
+      text: labels.labels.value
+    schema:
+      $ref: schema#/properties/labels/additionalProperties
+    type: input
+- if: showAlertSection
+  isArray: true
+  keys:
+    label:
+      text: labels.annotations.key
+  label:
+    text: labels.annotations.label
+  schema:
+    $ref: schema#/properties/annotations
+  type: key-value-input-form
+  values:
+    label:
+      text: labels.annotations.value
+    schema:
+      $ref: schema#/properties/annotations/additionalProperties
+    type: input
+- if: showAlertSection
+  isArray: true
+  keys:
+    label:
+      text: labels.additionalRuleLabels.key
+  label:
+    text: labels.additionalRuleLabels.label
+  schema:
+    $ref: schema#/properties/additionalRuleLabels
+  type: key-value-input-form
+  values:
+    label:
+      text: labels.additionalRuleLabels.value
+    schema:
+      $ref: schema#/properties/additionalRuleLabels/additionalProperties
+    type: input
+- element:
+    elements:
+    - element:
+        elements:
+        - customClass: mt-10
+          label:
+            text: labels.duration
+          schema:
+            $ref: schema#/properties/groups/properties/$dyn/properties/rules/properties/$dyn/properties/duration
+          type: input
+          validationRuleObject:
+            regex: ^((([0-9]+)y)?(([0-9]+)w)?(([0-9]+)d)?(([0-9]+)h)?(([0-9]+)m)?(([0-9]+)s)?(([0-9]+)ms)?|0)$
+        - label:
+            text: labels.severity
+          options:
+          - text: Info
+            value: info
+          - text: Warning
+            value: warning
+          - text: Critical
+            value: critical
+          schema:
+            $ref: schema#/properties/groups/properties/$dyn/properties/rules/properties/$dyn/properties/severity
+          type: select
+        - if: showValField
+          label:
+            text: labels.val
+          schema:
+            $ref: schema#/properties/groups/properties/$dyn/properties/rules/properties/$dyn/properties/val
+          type: input
+        hideForm: true
+        schema:
+          $ref: schema#/properties/groups/properties/$dyn/properties/rules/properties/$dyn
+        show_label: true
+        toggleOption:
+          id: switch
+          ignoreInitialStatusFunction: true
+          schema: 
+            $ref: schema#/properties/groups/properties/$dyn/properties/rules/properties/$dyn/properties/enabled
+          show: true
+        type: single-step-form
+      label:
+        text: Rules
+      schema:
+        $ref: schema#/properties/groups/properties/$dyn/properties/rules
+      type: array-input-form
+    hideForm: true
+    schema:
+      $ref: schema#/properties/groups/properties/$dyn
+    show_label: true
+    toggleOption:
+      id: switch
+      ignoreInitialStatusFunction: true
+      onStatusTrue: onGroupStatusChange|true
+      onStatusFalse: onGroupStatusChange|false
+      schema: 
+        $ref: schema#/properties/groups/properties/$dyn/properties/enabled
+      show: true
+    type: single-step-form
+  if: showAlertSection
+  label:
+    text: labels.alert_groups
+  schema:
+    $ref: schema#/properties/groups
+  show_label: true
+  type: array-input-form
+schema:
+  $ref: schema#/
+type: single-step-form
