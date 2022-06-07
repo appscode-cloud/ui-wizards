@@ -458,8 +458,62 @@ function setMachineToCustom() {
   return "custom";
 }
 
+function showAlertSection({ model, getValue, watchDependency}) {
+  watchDependency("model#/form/alert/enabled");
+  return !!getValue(model, "/form/alert/enabled");
+}
+
+function showMonitoringSection({ discriminator, getValue, watchDependency}) {
+  watchDependency("discriminator#/monitoringEnabledStatus");
+  return !!getValue(discriminator, "/monitoringEnabledStatus");
+}
+
+function setMonitoringStatus({ model, getValue }) {
+  const status = getValue(model, "/spec/monitoring/agent");
+  return !!status;
+}
+
+function updateAgentValue({commit },val) {
+  commit("wizard/model$update", {
+    path: "/spec/monitoring/agent",
+    value: val ? "prometheus.io/operator" : "",
+    force: true
+  });
+}
+
+async function fetchJsons({ axios, itemCtx }) {
+  let ui = {};
+  let language = {};
+  let functions = {};
+  const { name, url, version, packageviewUrlPrefix } = itemCtx.chart;
+  
+  try {
+    ui = await axios.get(
+      `${packageviewUrlPrefix}/create-ui.yaml?name=${name}&url=${url}&version=${version}&format=json`
+    );
+    language = await axios.get(
+      `${packageviewUrlPrefix}/language.yaml?name=${name}&url=${url}&version=${version}&format=json`
+    );
+    const functionString = await axios.get(
+      `${packageviewUrlPrefix}/functions.js?name=${name}&url=${url}&version=${version}`
+    );
+    // declare evaluate the functionString to get the functions Object
+    const evalFunc = new Function(functionString.data || "");
+    functions = evalFunc();
+  } catch (e) {
+    console.log(e);
+  }
+
+  return {
+    ui: ui.data || {},
+    language: language.data || {},
+    functions,
+  };
+}
+
 
 return {
+	fetchJsons,
 	showAuthPasswordField,
 	isEqualToModelPathValue,
 	showAuthSecretField,
@@ -472,5 +526,9 @@ return {
 	getMachineListForOptions,
 	setResourceLimit,
 	setLimitsCpuOrMem,
-	setMachineToCustom
+	setMachineToCustom,
+	showAlertSection,
+	showMonitoringSection,
+	setMonitoringStatus,
+	updateAgentValue,
 }
