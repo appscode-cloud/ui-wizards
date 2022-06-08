@@ -7,8 +7,8 @@
 ```bash
 $ helm repo add bytebuilders-ui https://bundles.byte.builders/ui/
 $ helm repo update
-$ helm search repo bytebuilders-ui/kubedbcom-postgres-editor-options --version=v0.4.4
-$ helm upgrade -i kubedbcom-postgres-editor-options bytebuilders-ui/kubedbcom-postgres-editor-options -n kube-system --create-namespace --version=v0.4.4
+$ helm search repo bytebuilders-ui/kubedbcom-postgres-editor-options --version=v0.4.5
+$ helm upgrade -i kubedbcom-postgres-editor-options bytebuilders-ui/kubedbcom-postgres-editor-options -n kube-system --create-namespace --version=v0.4.5
 ```
 
 ## Introduction
@@ -24,7 +24,7 @@ This chart deploys a Postgres Editor UI Options on a [Kubernetes](http://kuberne
 To install/upgrade the chart with the release name `kubedbcom-postgres-editor-options`:
 
 ```bash
-$ helm upgrade -i kubedbcom-postgres-editor-options bytebuilders-ui/kubedbcom-postgres-editor-options -n kube-system --create-namespace --version=v0.4.4
+$ helm upgrade -i kubedbcom-postgres-editor-options bytebuilders-ui/kubedbcom-postgres-editor-options -n kube-system --create-namespace --version=v0.4.5
 ```
 
 The command deploys a Postgres Editor UI Options on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
@@ -173,12 +173,12 @@ The following table lists the configurable parameters of the `kubedbcom-postgres
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm upgrade -i`. For example:
 
 ```bash
-$ helm upgrade -i kubedbcom-postgres-editor-options bytebuilders-ui/kubedbcom-postgres-editor-options -n kube-system --create-namespace --version=v0.4.4 --set metadata.resource.group=kubedb.com
+$ helm upgrade -i kubedbcom-postgres-editor-options bytebuilders-ui/kubedbcom-postgres-editor-options -n kube-system --create-namespace --version=v0.4.5 --set metadata.resource.group=kubedb.com
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
 installing the chart. For example:
 
 ```bash
-$ helm upgrade -i kubedbcom-postgres-editor-options bytebuilders-ui/kubedbcom-postgres-editor-options -n kube-system --create-namespace --version=v0.4.4 --values values.yaml
+$ helm upgrade -i kubedbcom-postgres-editor-options bytebuilders-ui/kubedbcom-postgres-editor-options -n kube-system --create-namespace --version=v0.4.5 --values values.yaml
 ```
