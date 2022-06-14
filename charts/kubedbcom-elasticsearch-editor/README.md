@@ -7,8 +7,8 @@
 ```bash
 $ helm repo add bytebuilders-ui https://bundles.byte.builders/ui/
 $ helm repo update
-$ helm search repo bytebuilders-ui/kubedbcom-elasticsearch-editor --version=v0.4.7
-$ helm upgrade -i kubedbcom-elasticsearch-editor bytebuilders-ui/kubedbcom-elasticsearch-editor -n default --create-namespace --version=v0.4.7
+$ helm search repo bytebuilders-ui/kubedbcom-elasticsearch-editor --version=v0.4.8
+$ helm upgrade -i kubedbcom-elasticsearch-editor bytebuilders-ui/kubedbcom-elasticsearch-editor -n default --create-namespace --version=v0.4.8
 ```
 
 ## Introduction
@@ -24,7 +24,7 @@ This chart deploys a Elasticsearch Editor on a [Kubernetes](http://kubernetes.io
 To install/upgrade the chart with the release name `kubedbcom-elasticsearch-editor`:
 
 ```bash
-$ helm upgrade -i kubedbcom-elasticsearch-editor bytebuilders-ui/kubedbcom-elasticsearch-editor -n default --create-namespace --version=v0.4.7
+$ helm upgrade -i kubedbcom-elasticsearch-editor bytebuilders-ui/kubedbcom-elasticsearch-editor -n default --create-namespace --version=v0.4.8
 ```
 
 The command deploys a Elasticsearch Editor on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
@@ -169,12 +169,12 @@ The following table lists the configurable parameters of the `kubedbcom-elastics
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm upgrade -i`. For example:
 
 ```bash
-$ helm upgrade -i kubedbcom-elasticsearch-editor bytebuilders-ui/kubedbcom-elasticsearch-editor -n default --create-namespace --version=v0.4.7 --set form.alert.groups.database.rules.elasticsearchClusterRed.duration=0m
+$ helm upgrade -i kubedbcom-elasticsearch-editor bytebuilders-ui/kubedbcom-elasticsearch-editor -n default --create-namespace --version=v0.4.8 --set form.alert.groups.database.rules.elasticsearchClusterRed.duration=0m
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
 installing the chart. For example:
 
 ```bash
-$ helm upgrade -i kubedbcom-elasticsearch-editor bytebuilders-ui/kubedbcom-elasticsearch-editor -n default --create-namespace --version=v0.4.7 --values values.yaml
+$ helm upgrade -i kubedbcom-elasticsearch-editor bytebuilders-ui/kubedbcom-elasticsearch-editor -n default --create-namespace --version=v0.4.8 --values values.yaml
 ```
