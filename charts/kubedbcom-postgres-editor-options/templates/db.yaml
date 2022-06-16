@@ -51,15 +51,15 @@ spec:
     storageClassName: {{ .Values.spec.storageClass.name }}
   storageType: Durable
   terminationPolicy: {{ .Values.spec.terminationPolicy }}
-{{ if .Values.spec.monitoring }}
+{{ if (and .Values.spec.monitoring .Values.spec.monitoring.agent) }}
   monitor:
     agent: {{ .Values.spec.monitoring.agent }}
     prometheus:
       exporter:
+        args:
+          - --compatible-mode
         resources:
-          requests:
-            cpu: 100m
-            memory: 128Mi
+          {{- toYaml .Values.spec.monitoring.exporter.resources | nindent 10 }}
       serviceMonitor:
         interval: 30s
         labels:
