@@ -18,7 +18,7 @@ metadata:
 spec:
   version: {{ .Values.spec.version | quote }}
 {{- if or (eq .Values.spec.mode "Standalone") (eq .Values.spec.mode "Replicaset") }}
-  replicas: {{ .Values.spec.replicas }}
+  replicas: {{ (eq .Values.spec.mode "Replicaset") | ternary .Values.spec.replicaSet.replicas 1 }}
   storageType: Durable
   storage:
     storageClassName: {{ .Values.spec.storageClass.name }}
