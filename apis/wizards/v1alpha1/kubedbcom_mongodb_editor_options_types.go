@@ -48,7 +48,6 @@ type KubedbcomMongodbEditorOptionsSpecSpec struct {
 	Labels            map[string]string         `json:"labels"`
 	Version           string                    `json:"version"`
 	Mode              MongoDBMode               `json:"mode"`
-	Replicas          int                       `json:"replicas"`
 	ReplicaSet        MongoDBReplicaSet         `json:"replicaSet"`
 	ShardTopology     MongoDBShardTopology      `json:"shardTopology"`
 	ClusterAuthMode   MongoDBClusterAuthMode    `json:"clusterAuthMode"`
@@ -76,7 +75,8 @@ type MongoDBClusterAuthMode string
 type MongoDBSSLMode string
 
 type MongoDBReplicaSet struct {
-	Name string `json:"name"`
+	Name     string `json:"name"`
+	Replicas int    `json:"replicas"`
 }
 
 type MongoDBShard struct {
