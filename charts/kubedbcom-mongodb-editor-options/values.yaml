@@ -71,12 +71,16 @@ spec:
   monitoring:
     # Name of monitoring agent (one of "prometheus.io", "prometheus.io/operator", "prometheus.io/builtin")
     agent: prometheus.io/operator
+    exporter:
+      resources: # +doc-gen:break
+        requests:
+          cpu: 100m
+          memory: 128Mi
     serviceMonitor:
       # Specify the labels for ServiceMonitor.
       # Prometheus crd will select ServiceMonitor using these labels.
       # Only usable when monitoring agent is `prometheus.io/webhook server`.
-      labels: # +doc-gen:break
-        release: kube-prometheus-stack
+      labels: {}
 
 form:
   alert:
@@ -84,8 +88,7 @@ form:
     enabled: true
 
     ## Labels for default rules
-    labels: # +doc-gen:break
-      release: kube-prometheus-stack
+    labels: {}
 
     ## Annotations for default rules
     annotations: {}
