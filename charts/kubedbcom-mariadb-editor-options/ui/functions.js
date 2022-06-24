@@ -458,10 +458,6 @@ function setMachineToCustom() {
   return "custom";
 }
 
-function showAlertSection({ model, getValue, watchDependency}) {
-  watchDependency("model#/form/alert/enabled");
-  return !!getValue(model, "/form/alert/enabled");
-}
 
 function showMonitoringSection({ discriminator, getValue, watchDependency}) {
   watchDependency("discriminator#/monitoringEnabledStatus");
@@ -527,7 +523,6 @@ return {
 	setResourceLimit,
 	setLimitsCpuOrMem,
 	setMachineToCustom,
-	showAlertSection,
 	showMonitoringSection,
 	setMonitoringStatus,
 	updateAgentValue,

@@ -10,13 +10,7 @@ function onMonitoringStatusChange({ discriminator, reusableElementCtx, getValue 
   updateAgentValue(status);
 }
 
-function showMonitoringSection({ discriminator, getValue, watchDependency}) {
-  watchDependency("discriminator#/monitoringEnabledStatus");
-  return !!getValue(discriminator, "/monitoringEnabledStatus");
-}
-
 return {
   setMonitoringStatus,
-  showMonitoringSection,
   onMonitoringStatusChange,
 }
