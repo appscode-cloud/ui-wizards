@@ -495,10 +495,6 @@ function updateAgentValue({commit },val) {
   });
 }
 
-function showAlertSection({ model, getValue, watchDependency}) {
-  watchDependency("model#/form/alert/enabled");
-  return !!getValue(model, "/form/alert/enabled");
-}
 
 return {
 	fetchJsons,
@@ -516,5 +512,4 @@ return {
 	setLimitsCpuOrMem,
 	setMachineToCustom,
 	updateAgentValue,
-	showAlertSection,
 }
