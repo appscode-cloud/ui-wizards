@@ -91,30 +91,18 @@ steps:
         text: Horizontal Scaling Form
       type: single-step-form
     - elements:
-      - alias: reusable_mariadb_reources
-        chart:
-          name: uibytebuildersdev-component-resources
-          version: v0.4.7
-        computed: setValueFromDbDetails|/spec/podTemplate/spec/resources|/spec/verticalScaling/mariadb
+      - computed: setValueFromDbDetails|/spec/podTemplate/spec/resources|/spec/verticalScaling/mariadb
         label:
           text: labels.resources
-        moduleResolver: fetchJsons
         schema:
           $ref: schema#/properties/spec/properties/verticalScaling/properties/mariadb
-        show_label: true
-        type: reusable-element
-      - alias: reusable_exporter_reources
-        chart:
-          name: uibytebuildersdev-component-resources
-          version: v0.4.7
-        computed: setValueFromDbDetails|/spec/monitor/prometheus/exporter/resources|/spec/verticalScaling/exporter
+        type: resource-input-form
+      - computed: setValueFromDbDetails|/spec/monitor/prometheus/exporter/resources|/spec/verticalScaling/exporter
         label:
           text: labels.exporter
-        moduleResolver: fetchJsons
         schema:
           $ref: schema#/properties/spec/properties/verticalScaling/properties/exporter
-        show_label: true
-        type: reusable-element
+        type: resource-input-form
       if: ifRequestTypeEqualsTo|VerticalScaling
       type: single-step-form
     - elements:
