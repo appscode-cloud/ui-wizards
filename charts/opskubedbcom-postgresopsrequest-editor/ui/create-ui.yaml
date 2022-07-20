@@ -92,30 +92,18 @@ steps:
       type: single-step-form
     - elements:
       - elements:
-        - alias: reusable_postgres_reources
-          chart:
-            name: uibytebuildersdev-component-resources
-            version: v0.4.7
-          computed: setValueFromDbDetails|/spec/podTemplate/spec/resources|/spec/verticalScaling/postgres
+        - computed: setValueFromDbDetails|/spec/podTemplate/spec/resources|/spec/verticalScaling/postgres
           label:
             text: labels.postgres
-          moduleResolver: fetchJsons
           schema:
             $ref: schema#/properties/spec/properties/verticalScaling/properties/postgres
-          show_label: true
-          type: reusable-element
-        - alias: reusable_exporter_reources
-          chart:
-            name: uibytebuildersdev-component-resources
-            version: v0.4.7
-          computed: setValueFromDbDetails|/spec/monitor/prometheus/exporter/resources|/spec/verticalScaling/exporter
+          type: resource-input-form
+        - computed: setValueFromDbDetails|/spec/monitor/prometheus/exporter/resources|/spec/verticalScaling/exporter
           label:
             text: labels.exporter
-          moduleResolver: fetchJsons
           schema:
             $ref: schema#/properties/spec/properties/verticalScaling/properties/exporter
-          show_label: true
-          type: reusable-element
+          type: resource-input-form
         if: ifDbTypeEqualsTo|cluster|verticalScaling
         schema:
           $ref: schema#/properties/spec/properties/verticalScaling/properties/postgres
