@@ -1935,6 +1935,23 @@ function onSetCustomConfigChange({ discriminator, getValue, commit }) {
   }
 }
 
+function getOpsRequestUrl({ storeGet, model, getValue, mode }, reqType) {
+  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const domain = storeGet("/domain");
+  const owner = storeGet("/route/params/user");
+  const dbname = getValue(model, "/metadata/release/name");
+  const group = getValue(model, "/metadata/resource/group");
+  const kind = getValue(model, "/metadata/resource/kind");
+  const namespace = getValue(model, "/metadata/release/namespace");
+  const resource = getValue(model, "/metadata/resource/name");
+  const version = getValue(model, "/metadata/resource/version");
+  const routeRootPath = storeGet("/route/path");
+  const pathPrefix = `${domain}${routeRootPath}${routeRootPath.split("/").pop() !== 'operations' ? '/operations' : ''}`;
+
+  if(mode === 'standalone-step') return `${pathPrefix}?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=${reqType}&showOpsRequestModal=true`;
+  else return `${domain}/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/mysqlopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=VerticalScaling`;
+}
+
 return {
 	fetchJsons,
 	disableLableChecker,
@@ -2031,4 +2048,5 @@ return {
 	setConfiguration,
 	setConfigurationFiles,
   onSetCustomConfigChange,
+  getOpsRequestUrl,
 }
