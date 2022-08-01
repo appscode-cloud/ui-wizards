@@ -7,8 +7,8 @@
 ```bash
 $ helm repo add bytebuilders-ui https://bundles.byte.builders/ui/
 $ helm repo update
-$ helm search repo bytebuilders-ui/clusterxk8sio-machineset-editor --version=v0.4.8
-$ helm upgrade -i clusterxk8sio-machineset-editor bytebuilders-ui/clusterxk8sio-machineset-editor -n default --create-namespace --version=v0.4.8
+$ helm search repo bytebuilders-ui/clusterxk8sio-machineset-editor --version=v0.4.9
+$ helm upgrade -i clusterxk8sio-machineset-editor bytebuilders-ui/clusterxk8sio-machineset-editor -n default --create-namespace --version=v0.4.9
 ```
 
 ## Introduction
@@ -24,7 +24,7 @@ This chart deploys a MachineSet Editor on a [Kubernetes](http://kubernetes.io) c
 To install/upgrade the chart with the release name `clusterxk8sio-machineset-editor`:
 
 ```bash
-$ helm upgrade -i clusterxk8sio-machineset-editor bytebuilders-ui/clusterxk8sio-machineset-editor -n default --create-namespace --version=v0.4.8
+$ helm upgrade -i clusterxk8sio-machineset-editor bytebuilders-ui/clusterxk8sio-machineset-editor -n default --create-namespace --version=v0.4.9
 ```
 
 The command deploys a MachineSet Editor on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
@@ -56,12 +56,12 @@ The following table lists the configurable parameters of the `clusterxk8sio-mach
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm upgrade -i`. For example:
 
 ```bash
-$ helm upgrade -i clusterxk8sio-machineset-editor bytebuilders-ui/clusterxk8sio-machineset-editor -n default --create-namespace --version=v0.4.8 --set apiVersion=cluster.x-k8s.io/v1alpha3
+$ helm upgrade -i clusterxk8sio-machineset-editor bytebuilders-ui/clusterxk8sio-machineset-editor -n default --create-namespace --version=v0.4.9 --set apiVersion=cluster.x-k8s.io/v1alpha3
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
 installing the chart. For example:
 
 ```bash
-$ helm upgrade -i clusterxk8sio-machineset-editor bytebuilders-ui/clusterxk8sio-machineset-editor -n default --create-namespace --version=v0.4.8 --values values.yaml
+$ helm upgrade -i clusterxk8sio-machineset-editor bytebuilders-ui/clusterxk8sio-machineset-editor -n default --create-namespace --version=v0.4.9 --values values.yaml
 ```
