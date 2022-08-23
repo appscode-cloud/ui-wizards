@@ -80,11 +80,13 @@ spec:
   monitor:
     agent: {{ .Values.spec.monitoring.agent }}
     prometheus:
+    {{- with .Values.spec.monitoring.exporter }}
       exporter:
         args:
           - --compatible-mode
         resources:
-          {{- toYaml .Values.spec.monitoring.exporter.resources | nindent 10 }}
+          {{- toYaml .resources | nindent 10 }}
+    {{- end }}
       serviceMonitor:
         interval: 30s
         labels:
