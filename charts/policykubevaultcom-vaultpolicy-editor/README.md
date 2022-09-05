@@ -7,8 +7,8 @@
 ```bash
 $ helm repo add bytebuilders-ui https://bundles.byte.builders/ui/
 $ helm repo update
-$ helm search repo bytebuilders-ui/policykubevaultcom-vaultpolicy-editor --version=v0.4.9
-$ helm upgrade -i policykubevaultcom-vaultpolicy-editor bytebuilders-ui/policykubevaultcom-vaultpolicy-editor -n default --create-namespace --version=v0.4.9
+$ helm search repo bytebuilders-ui/policykubevaultcom-vaultpolicy-editor --version=v0.4.10
+$ helm upgrade -i policykubevaultcom-vaultpolicy-editor bytebuilders-ui/policykubevaultcom-vaultpolicy-editor -n default --create-namespace --version=v0.4.10
 ```
 
 ## Introduction
@@ -24,7 +24,7 @@ This chart deploys a VaultPolicy Editor on a [Kubernetes](http://kubernetes.io) 
 To install/upgrade the chart with the release name `policykubevaultcom-vaultpolicy-editor`:
 
 ```bash
-$ helm upgrade -i policykubevaultcom-vaultpolicy-editor bytebuilders-ui/policykubevaultcom-vaultpolicy-editor -n default --create-namespace --version=v0.4.9
+$ helm upgrade -i policykubevaultcom-vaultpolicy-editor bytebuilders-ui/policykubevaultcom-vaultpolicy-editor -n default --create-namespace --version=v0.4.10
 ```
 
 The command deploys a VaultPolicy Editor on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
@@ -56,12 +56,12 @@ The following table lists the configurable parameters of the `policykubevaultcom
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm upgrade -i`. For example:
 
 ```bash
-$ helm upgrade -i policykubevaultcom-vaultpolicy-editor bytebuilders-ui/policykubevaultcom-vaultpolicy-editor -n default --create-namespace --version=v0.4.9 --set apiVersion=policy.kubevault.com/v1alpha1
+$ helm upgrade -i policykubevaultcom-vaultpolicy-editor bytebuilders-ui/policykubevaultcom-vaultpolicy-editor -n default --create-namespace --version=v0.4.10 --set apiVersion=policy.kubevault.com/v1alpha1
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
 installing the chart. For example:
 
 ```bash
-$ helm upgrade -i policykubevaultcom-vaultpolicy-editor bytebuilders-ui/policykubevaultcom-vaultpolicy-editor -n default --create-namespace --version=v0.4.9 --values values.yaml
+$ helm upgrade -i policykubevaultcom-vaultpolicy-editor bytebuilders-ui/policykubevaultcom-vaultpolicy-editor -n default --create-namespace --version=v0.4.10 --values values.yaml
 ```
