@@ -7,8 +7,8 @@
 ```bash
 $ helm repo add bytebuilders-ui https://bundles.byte.builders/ui/
 $ helm repo update
-$ helm search repo bytebuilders-ui/storagek8sio-csistoragecapacity-editor --version=v0.4.9
-$ helm upgrade -i storagek8sio-csistoragecapacity-editor bytebuilders-ui/storagek8sio-csistoragecapacity-editor -n default --create-namespace --version=v0.4.9
+$ helm search repo bytebuilders-ui/storagek8sio-csistoragecapacity-editor --version=v0.4.10
+$ helm upgrade -i storagek8sio-csistoragecapacity-editor bytebuilders-ui/storagek8sio-csistoragecapacity-editor -n default --create-namespace --version=v0.4.10
 ```
 
 ## Introduction
@@ -24,7 +24,7 @@ This chart deploys a CSIStorageCapacity Editor on a [Kubernetes](http://kubernet
 To install/upgrade the chart with the release name `storagek8sio-csistoragecapacity-editor`:
 
 ```bash
-$ helm upgrade -i storagek8sio-csistoragecapacity-editor bytebuilders-ui/storagek8sio-csistoragecapacity-editor -n default --create-namespace --version=v0.4.9
+$ helm upgrade -i storagek8sio-csistoragecapacity-editor bytebuilders-ui/storagek8sio-csistoragecapacity-editor -n default --create-namespace --version=v0.4.10
 ```
 
 The command deploys a CSIStorageCapacity Editor on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
@@ -56,12 +56,12 @@ The following table lists the configurable parameters of the `storagek8sio-csist
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm upgrade -i`. For example:
 
 ```bash
-$ helm upgrade -i storagek8sio-csistoragecapacity-editor bytebuilders-ui/storagek8sio-csistoragecapacity-editor -n default --create-namespace --version=v0.4.9 --set apiVersion=storage.k8s.io/v1beta1
+$ helm upgrade -i storagek8sio-csistoragecapacity-editor bytebuilders-ui/storagek8sio-csistoragecapacity-editor -n default --create-namespace --version=v0.4.10 --set apiVersion=storage.k8s.io/v1beta1
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
 installing the chart. For example:
 
 ```bash
-$ helm upgrade -i storagek8sio-csistoragecapacity-editor bytebuilders-ui/storagek8sio-csistoragecapacity-editor -n default --create-namespace --version=v0.4.9 --values values.yaml
+$ helm upgrade -i storagek8sio-csistoragecapacity-editor bytebuilders-ui/storagek8sio-csistoragecapacity-editor -n default --create-namespace --version=v0.4.10 --values values.yaml
 ```
