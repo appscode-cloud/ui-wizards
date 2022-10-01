@@ -1,0 +1,79 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  creationTimestamp: null
+  name: approvalpolicies.supervisor.appscode.com
+spec:
+  group: supervisor.appscode.com
+  names:
+    kind: ApprovalPolicy
+    listKind: ApprovalPolicyList
+    plural: approvalpolicies
+    singular: approvalpolicy
+  scope: Namespaced
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: ApprovalPolicy is the Schema for the approvalpolicies API
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          maintenanceWindowRef:
+            description: Specifies MaintenanceWindow reference for ApprovalPolicy. Recommendation will be executed in this MaintenanceWindow without manual approval.
+            properties:
+              apiGroup:
+                type: string
+              kind:
+                type: string
+              name:
+                description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names'
+                type: string
+              namespace:
+                description: 'Namespace of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/'
+                type: string
+            required:
+            - name
+            type: object
+          metadata:
+            type: object
+          targets:
+            description: Specifies the list of TargetRef for which the ApprovalPolicy will be effective for.
+            items:
+              properties:
+                group:
+                  type: string
+                kind:
+                  type: string
+                operations:
+                  items:
+                    properties:
+                      group:
+                        type: string
+                      kind:
+                        type: string
+                    required:
+                    - group
+                    - kind
+                    type: object
+                  type: array
+              required:
+              - group
+              - kind
+              type: object
+            type: array
+        required:
+        - maintenanceWindowRef
+        type: object
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: null
+  storedVersions: null
