@@ -10,30 +10,61 @@ metadata:
     namespace: default
 resources:
   kubevaultComVaultServer: # +doc-gen:break
-    apiVersion: kubevault.com/v1alpha1
+    apiVersion: kubevault.com/v1alpha2
     kind: VaultServer
     metadata:
       name: vault
-      namespace: demo
+      namespace: default
     spec:
+      allowedSecretEngines:
+        namespaces:
+          from: Same
+      authMethods:
+        - path: kubernetes
+          type: kubernetes
       backend:
-        consul:
-          aclTokenSecretName: vault-backend-creds
-          address: http://consul-server.default.svc:8500
-          path: vault
-          tlsSecretName: vault-backend-tls
-      configSecret:
-        name: vault-config
+        s3:
+          bucket: eks-uat-vault
+          region: eu-west-1
+      healthChecker:
+        failureThreshold: 1
+        periodSeconds: 10
+        timeoutSeconds: 10
+      monitor:
+        agent: prometheus.io
+        prometheus:
+          exporter:
+            port: 56790
+            resources: {}
+      podTemplate:
+        controller: {}
+        metadata: {}
+        spec:
+          resources: {}
       replicas: 1
+      terminationPolicy: Delete
+      tls:
+        certificates:
+          - alias: ca
+            secretName: vault-ca-certs
+          - alias: server
+            duration: 8760h
+            secretName: vault-server-certs
+          - alias: client
+            duration: 8760h
+            secretName: vault-client-certs
+        issuerRef:
+          apiGroup: cert-manager.io
+          kind: Issuer
+          name: vault-issuer
       unsealer:
         mode:
           awsKmsSsm:
-            credentialSecret: vault-unsealer-creds
-            kmsKeyID: <kms-key-id>
-            region: <region>
-        secretShares: 5
-        secretThreshold: 3
-      version: 1.8.2
+            kmsKeyID: f62a0db9-b550-4cfb-8537-b93978fc5395
+            region: eu-west-1
+        secretShares: 1
+        secretThreshold: 1
+      version: 0.11.5
   secret_backend_creds: # +doc-gen:break
     apiVersion: v1
     kind: Secret
