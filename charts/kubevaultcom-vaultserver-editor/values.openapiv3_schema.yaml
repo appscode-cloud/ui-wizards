@@ -111,6 +111,7 @@ properties:
                       - postgres
                       - mongodb
                       - mysql
+                      - mariadb
                       - elasticsearch
                       type: string
                     type: array
@@ -118,7 +119,70 @@ properties:
               authMethods:
                 items:
                   properties:
-                    config:
+                    description:
+                      type: string
+                    jwtConfig:
+                      properties:
+                        auditNonHMACRequestKeys:
+                          items:
+                            type: string
+                          type: array
+                        auditNonHMACResponseKeys:
+                          items:
+                            type: string
+                          type: array
+                        boundIssuer:
+                          type: string
+                        credentialSecretRef:
+                          properties:
+                            name:
+                              type: string
+                          type: object
+                          x-kubernetes-map-type: atomic
+                        defaultLeaseTTL:
+                          type: string
+                        defaultRole:
+                          type: string
+                        jwksURL:
+                          type: string
+                        jwtSupportedAlgs:
+                          items:
+                            type: string
+                          type: array
+                        jwtValidationPubkeys:
+                          items:
+                            type: string
+                          type: array
+                        listingVisibility:
+                          type: string
+                        maxLeaseTTL:
+                          type: string
+                        oidcClientID:
+                          type: string
+                        oidcDiscoveryURL:
+                          type: string
+                        oidcResponseMode:
+                          type: string
+                        oidcResponseTypes:
+                          type: string
+                        passthroughRequestHeaders:
+                          items:
+                            type: string
+                          type: array
+                        pluginName:
+                          type: string
+                        providerConfig:
+                          additionalProperties:
+                            type: string
+                          type: object
+                        tlsSecretRef:
+                          properties:
+                            name:
+                              type: string
+                          type: object
+                          x-kubernetes-map-type: atomic
+                      type: object
+                    kubernetesConfig:
                       properties:
                         auditNonHMACRequestKeys:
                           items:
@@ -141,15 +205,83 @@ properties:
                         pluginName:
                           type: string
                       type: object
-                    description:
-                      type: string
                     local:
                       type: boolean
+                    oidcConfig:
+                      properties:
+                        auditNonHMACRequestKeys:
+                          items:
+                            type: string
+                          type: array
+                        auditNonHMACResponseKeys:
+                          items:
+                            type: string
+                          type: array
+                        boundIssuer:
+                          type: string
+                        credentialSecretRef:
+                          properties:
+                            name:
+                              type: string
+                          type: object
+                          x-kubernetes-map-type: atomic
+                        defaultLeaseTTL:
+                          type: string
+                        defaultRole:
+                          type: string
+                        jwksURL:
+                          type: string
+                        jwtSupportedAlgs:
+                          items:
+                            type: string
+                          type: array
+                        jwtValidationPubkeys:
+                          items:
+                            type: string
+                          type: array
+                        listingVisibility:
+                          type: string
+                        maxLeaseTTL:
+                          type: string
+                        oidcClientID:
+                          type: string
+                        oidcDiscoveryURL:
+                          type: string
+                        oidcResponseMode:
+                          type: string
+                        oidcResponseTypes:
+                          type: string
+                        passthroughRequestHeaders:
+                          items:
+                            type: string
+                          type: array
+                        pluginName:
+                          type: string
+                        providerConfig:
+                          additionalProperties:
+                            type: string
+                          type: object
+                        tlsSecretRef:
+                          properties:
+                            name:
+                              type: string
+                          type: object
+                          x-kubernetes-map-type: atomic
+                      type: object
                     path:
                       type: string
                     pluginName:
                       type: string
                     type:
+                      enum:
+                      - kubernetes
+                      - aws
+                      - gcp
+                      - userpass
+                      - cert
+                      - azure
+                      - jwt
+                      - oidc
                       type: string
                   required:
                   - path
@@ -160,24 +292,31 @@ properties:
                 properties:
                   azure:
                     properties:
-                      accountKeySecret:
-                        type: string
                       accountName:
                         type: string
                       container:
                         type: string
+                      credentialSecretRef:
+                        properties:
+                          name:
+                            type: string
+                        type: object
+                        x-kubernetes-map-type: atomic
                       maxParallel:
                         format: int64
                         type: integer
                     required:
-                    - accountKeySecret
                     - accountName
                     - container
                     type: object
                   consul:
                     properties:
-                      aclTokenSecretName:
-                        type: string
+                      aclTokenSecretRef:
+                        properties:
+                          name:
+                            type: string
+                        type: object
+                        x-kubernetes-map-type: atomic
                       address:
                         type: string
                       checkTimeout:
@@ -204,15 +343,23 @@ properties:
                         type: string
                       tlsMinVersion:
                         type: string
-                      tlsSecretName:
-                        type: string
+                      tlsSecretRef:
+                        properties:
+                          name:
+                            type: string
+                        type: object
+                        x-kubernetes-map-type: atomic
                       tlsSkipVerify:
                         type: boolean
                     type: object
                   dynamodb:
                     properties:
-                      credentialSecret:
-                        type: string
+                      credentialSecretRef:
+                        properties:
+                          name:
+                            type: string
+                        type: object
+                        x-kubernetes-map-type: atomic
                       endpoint:
                         type: string
                       haEnabled:
@@ -225,8 +372,6 @@ properties:
                         type: integer
                       region:
                         type: string
-                      sessionTokenSecret:
-                        type: string
                       table:
                         type: string
                       writeCapacity:
@@ -237,8 +382,12 @@ properties:
                     properties:
                       address:
                         type: string
-                      credentialSecretName:
-                        type: string
+                      credentialSecretRef:
+                        properties:
+                          name:
+                            type: string
+                        type: object
+                        x-kubernetes-map-type: atomic
                       discoverySrv:
                         type: string
                       etcdApi:
@@ -249,8 +398,12 @@ properties:
                         type: string
                       sync:
                         type: boolean
-                      tlsSecretName:
-                        type: string
+                      tlsSecretRef:
+                        properties:
+                          name:
+                            type: string
+                        type: object
+                        x-kubernetes-map-type: atomic
                     required:
                     - address
                     type: object
@@ -446,8 +599,12 @@ properties:
                         type: string
                       chunkSize:
                         type: string
-                      credentialSecret:
-                        type: string
+                      credentialSecretRef:
+                        properties:
+                          name:
+                            type: string
+                        type: object
+                        x-kubernetes-map-type: atomic
                       haEnabled:
                         type: boolean
                       maxParallel:
@@ -462,31 +619,102 @@ properties:
                     properties:
                       address:
                         type: string
+                      credentialSecretRef:
+                        properties:
+                          name:
+                            type: string
+                        type: object
+                        x-kubernetes-map-type: atomic
                       database:
+                        default: vault
                         type: string
+                      databaseRef:
+                        properties:
+                          name:
+                            type: string
+                          namespace:
+                            type: string
+                          parameters:
+                            type: object
+                            x-kubernetes-embedded-resource: true
+                            x-kubernetes-preserve-unknown-fields: true
+                        required:
+                        - name
+                        - namespace
+                        type: object
+                      haEnabled:
+                        default: "true"
+                        type: string
+                      lockTable:
+                        default: vault_lock
+                        type: string
+                      maxConnectionLifetime:
+                        format: int64
+                        type: integer
+                      maxIdleConnection:
+                        format: int64
+                        type: integer
                       maxParallel:
                         format: int64
                         type: integer
+                      plaintextCredentialTransmission:
+                        type: string
                       table:
+                        default: vault
                         type: string
-                      tlsCASecret:
-                        type: string
-                      userCredentialSecret:
-                        type: string
-                    required:
-                    - userCredentialSecret
+                      tlsSecretRef:
+                        properties:
+                          name:
+                            type: string
+                        type: object
+                        x-kubernetes-map-type: atomic
                     type: object
                   postgresql:
                     properties:
-                      connectionURLSecret:
+                      address:
                         type: string
+                      credentialSecretRef:
+                        properties:
+                          name:
+                            type: string
+                        type: object
+                        x-kubernetes-map-type: atomic
+                      databaseRef:
+                        properties:
+                          name:
+                            type: string
+                          namespace:
+                            type: string
+                          parameters:
+                            type: object
+                            x-kubernetes-embedded-resource: true
+                            x-kubernetes-preserve-unknown-fields: true
+                        required:
+                        - name
+                        - namespace
+                        type: object
+                      haEnabled:
+                        default: "false"
+                        type: string
+                      haTable:
+                        default: vault_ha_locks
+                        type: string
+                      maxIdleConnection:
+                        format: int64
+                        type: integer
                       maxParallel:
                         format: int64
                         type: integer
-                      table:
+                      sslMode:
+                        enum:
+                        - disable
+                        - require
+                        - verify-ca
+                        - verify-full
                         type: string
-                    required:
-                    - connectionURLSecret
+                      table:
+                        default: vault_kv_store
+                        type: string
                     type: object
                   raft:
                     properties:
@@ -495,8 +723,6 @@ properties:
                       maxEntrySize:
                         format: int64
                         type: integer
-                      path:
-                        type: string
                       performanceMultiplier:
                         format: int64
                         type: integer
@@ -593,8 +819,12 @@ properties:
                     properties:
                       bucket:
                         type: string
-                      credentialSecret:
-                        type: string
+                      credentialSecretRef:
+                        properties:
+                          name:
+                            type: string
+                        type: object
+                        x-kubernetes-map-type: atomic
                       disableSSL:
                         type: boolean
                       endpoint:
@@ -606,21 +836,21 @@ properties:
                         type: integer
                       region:
                         type: string
-                      sessionTokenSecret:
-                        type: string
                     required:
                     - bucket
                     type: object
                   swift:
                     properties:
-                      authTokenSecret:
-                        type: string
                       authURL:
                         type: string
                       container:
                         type: string
-                      credentialSecret:
-                        type: string
+                      credentialSecretRef:
+                        properties:
+                          name:
+                            type: string
+                        type: object
+                        x-kubernetes-map-type: atomic
                       domain:
                         type: string
                       maxParallel:
@@ -641,7 +871,6 @@ properties:
                     required:
                     - authURL
                     - container
-                    - credentialSecret
                     type: object
                 type: object
               configSecret:
@@ -1363,6 +1592,27 @@ properties:
                 type: array
               halted:
                 type: boolean
+              healthChecker:
+                default:
+                  failureThreshold: 1
+                  periodSeconds: 10
+                  timeoutSeconds: 10
+                properties:
+                  disableWriteCheck:
+                    type: boolean
+                  failureThreshold:
+                    default: 1
+                    format: int32
+                    type: integer
+                  periodSeconds:
+                    default: 10
+                    format: int32
+                    type: integer
+                  timeoutSeconds:
+                    default: 10
+                    format: int32
+                    type: integer
+                type: object
               monitor:
                 properties:
                   agent:
@@ -4040,8 +4290,12 @@ properties:
                     properties:
                       awsKmsSsm:
                         properties:
-                          credentialSecret:
-                            type: string
+                          credentialSecretRef:
+                            properties:
+                              name:
+                                type: string
+                            type: object
+                            x-kubernetes-map-type: atomic
                           endpoint:
                             type: string
                           kmsKeyID:
@@ -4055,14 +4309,22 @@ properties:
                         type: object
                       azureKeyVault:
                         properties:
-                          aadClientSecret:
-                            type: string
-                          clientCertSecret:
-                            type: string
                           cloud:
                             type: string
+                          credentialSecretRef:
+                            properties:
+                              name:
+                                type: string
+                            type: object
+                            x-kubernetes-map-type: atomic
                           tenantID:
                             type: string
+                          tlsSecretRef:
+                            properties:
+                              name:
+                                type: string
+                            type: object
+                            x-kubernetes-map-type: atomic
                           useManagedIdentity:
                             type: boolean
                           vaultBaseURL:
@@ -4075,8 +4337,12 @@ properties:
                         properties:
                           bucket:
                             type: string
-                          credentialSecret:
-                            type: string
+                          credentialSecretRef:
+                            properties:
+                              name:
+                                type: string
+                            type: object
+                            x-kubernetes-map-type: atomic
                           kmsCryptoKey:
                             type: string
                           kmsKeyRing:
