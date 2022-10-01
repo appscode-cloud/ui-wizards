@@ -26,19 +26,26 @@ spec:
             properties:
               compute:
                 properties:
-                  disableScaleDown:
-                    type: boolean
                   mariadb:
                     properties:
                       containerControlledValues:
+                        enum:
+                        - RequestsAndLimits
+                        - RequestsOnly
                         type: string
                       controlledResources:
                         items:
                           type: string
                         type: array
-                      inMemoryScalingThreshold:
-                        format: int32
-                        type: integer
+                      inMemoryStorage:
+                        properties:
+                          scalingFactorPercentage:
+                            format: int32
+                            type: integer
+                          usageThresholdPercentage:
+                            format: int32
+                            type: integer
+                        type: object
                       maxAllowed:
                         additionalProperties:
                           anyOf:
@@ -67,6 +74,20 @@ spec:
               databaseRef:
                 properties:
                   name:
+                    type: string
+                type: object
+                x-kubernetes-map-type: atomic
+              opsRequestOptions:
+                properties:
+                  apply:
+                    default: IfReady
+                    enum:
+                    - IfReady
+                    - Always
+                    type: string
+                  readinessCriteria:
+                    type: object
+                  timeout:
                     type: string
                 type: object
               storage:

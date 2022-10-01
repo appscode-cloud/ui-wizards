@@ -24,6 +24,12 @@ properties:
     type: object
   spec:
     properties:
+      apply:
+        default: IfReady
+        enum:
+        - IfReady
+        - Always
+        type: string
       configuration:
         properties:
           configSecret:
@@ -31,6 +37,7 @@ properties:
               name:
                 type: string
             type: object
+            x-kubernetes-map-type: atomic
           inlineConfig:
             type: string
           removeCustomConfig:
@@ -41,6 +48,7 @@ properties:
           name:
             type: string
         type: object
+        x-kubernetes-map-type: atomic
       horizontalScaling:
         properties:
           member:
@@ -84,6 +92,7 @@ properties:
                   - kind
                   - name
                   type: object
+                  x-kubernetes-map-type: atomic
                 privateKey:
                   properties:
                     encoding:
@@ -149,6 +158,7 @@ properties:
             - kind
             - name
             type: object
+            x-kubernetes-map-type: atomic
           remove:
             type: boolean
           requireSSL:
@@ -237,6 +247,12 @@ properties:
         type: object
       volumeExpansion:
         properties:
+          mode:
+            default: Online
+            enum:
+            - Offline
+            - Online
+            type: string
           mysql:
             anyOf:
             - type: integer
