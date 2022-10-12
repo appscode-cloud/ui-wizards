@@ -519,6 +519,8 @@ async function getIssuerRefsName({
     url = `/clusters/${owner}/${cluster}/proxy/${apiGroup}/v1/clusterissuers`;
   }
 
+  if (!url) return []
+
   if(url && apiGroup && namespace) {
     try {
       const resp = await axios.get(url);

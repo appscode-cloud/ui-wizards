@@ -540,6 +540,8 @@ async function getIssuerRefsName({
     url = `/clusters/${owner}/${cluster}/proxy/${apiGroup}/v1/clusterissuers`;
   }
 
+  if (!url) return []
+
   try {
     const resp = await axios.get(url);
 
