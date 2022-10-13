@@ -791,6 +791,23 @@ function setDefaultNamespaceFrom() {
   return "Same";
 }
 
+// ************************* Auth Methods **********************************************
+function isAuthMethodTypeEqualTo({ rootModel, getValue, watchDependency }, expectedType) {
+  watchDependency("rootModel#/type");
+  const selectedType = getValue(rootModel, "/type");
+  return selectedType === expectedType;
+}
+
+function onAuthMethodTypeChange({ rootModel, getValue, updateModelValue }) {
+  const selectedType = getValue(rootModel, "/type");
+  const configList = ["kubernetes", "oidc", "jwt"];
+  configList.forEach(item => {
+    if(item !== selectedType) {
+      updateModelValue(`${item}Config`, true);
+    }
+  }) 
+}
+
 // ************************* Unsealer **********************************************
 
 const unsealerSecretObj = {
@@ -1313,6 +1330,8 @@ return {
   setTlsSecretName,
   setTlsSecretData,
   setDefaultNamespaceFrom,
+  isAuthMethodTypeEqualTo,
+  onAuthMethodTypeChange,
   onUnsealerModeChange,
   getUnsealerMode,
   setCreateUnsealerCredentialSecretStatus,

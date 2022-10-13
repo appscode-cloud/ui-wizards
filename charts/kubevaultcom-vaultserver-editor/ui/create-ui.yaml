@@ -1332,9 +1332,19 @@ steps:
           type: input
         - label: 
             text: labels.auth_methods.type
+          onChange: onAuthMethodTypeChange
+          options:
+          - kubernetes
+          - aws
+          - gcp
+          - userpass
+          - cert
+          - azure
+          - jwt
+          - oidc
           schema:
             $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/type
-          type: input
+          type: select
         - label: 
             text: labels.auth_methods.is_local_question
           schema:
@@ -1354,66 +1364,95 @@ steps:
           - label: 
               text: labels.auth_methods.defaultLeaseTTL
             schema:
-              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/config/properties/defaultLeaseTTL
+              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/kubernetesConfig/properties/defaultLeaseTTL
             type: input
           - label: 
               text: labels.auth_methods.listingVisibility
             schema:
-              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/config/properties/listingVisibility
+              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/kubernetesConfig/properties/listingVisibility
             type: input
           - label: 
               text: labels.auth_methods.maxLeaseTTL
             schema:
-              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/config/properties/maxLeaseTTL
+              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/kubernetesConfig/properties/maxLeaseTTL
             type: input
           - label: 
               text: labels.auth_methods.pluginName
             schema:
-              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/config/properties/pluginName
+              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/kubernetesConfig/properties/pluginName
             type: input
           - element:
               label:
                 isSubsection: true
                 text: labels.auth_methods.auditNonHMACRequestKey
               schema:
-                $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/config/properties/auditNonHMACRequestKeys/items
+                $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/kubernetesConfig/properties/auditNonHMACRequestKeys/items
               type: input
             label:
               text: labels.auth_methods.auditNonHMACRequestKeys
             schema:
-              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/config/properties/auditNonHMACRequestKeys
+              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/kubernetesConfig/properties/auditNonHMACRequestKeys
             type: list-input-form
           - element:
               label:
                 isSubsection: true
                 text: labels.auth_methods.auditNonHMACResponseKey
               schema:
-                $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/config/properties/auditNonHMACResponseKeys/items
+                $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/kubernetesConfig/properties/auditNonHMACResponseKeys/items
               type: input
             label:
               text: labels.auth_methods.auditNonHMACResponseKeys
             schema:
-              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/config/properties/auditNonHMACResponseKeys
+              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/kubernetesConfig/properties/auditNonHMACResponseKeys
             type: list-input-form
           - element:
               label:
                 isSubsection: true
                 text: labels.auth_methods.passthroughRequestHeader
               schema:
-                $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/config/properties/passthroughRequestHeaders/items
+                $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/kubernetesConfig/properties/passthroughRequestHeaders/items
               type: input
             label:
               text: labels.auth_methods.passthroughRequestHeaders
             schema:
-              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/config/properties/passthroughRequestHeaders
+              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/kubernetesConfig/properties/passthroughRequestHeaders
             type: list-input-form
+          if: isAuthMethodTypeEqualTo|kubernetes
           label:
-            text: labels.auth_methods.config
+            text: labels.auth_methods.kubernetes_config
           schema:
-            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/config
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/kubernetesConfig
           show_label: true
           hideForm: true
           type: single-step-form
+        - alias: reusable_jwt_config
+          chart:
+            name: uibytebuildersdev-component-jwtoidc-config
+            version: v0.4.10
+          customClass: mb-10
+          hideForm: true
+          if: isAuthMethodTypeEqualTo|jwt
+          moduleResolver: fetchJsons
+          label:
+            text: labels.auth_methods.jwt_config
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/jwtConfig
+          show_label: true
+          type: reusable-element
+        - alias: reusable_oidc_config
+          chart:
+            name: uibytebuildersdev-component-jwtoidc-config
+            version: v0.4.10
+          customClass: mb-10
+          hideForm: true
+          if: isAuthMethodTypeEqualTo|oidc
+          moduleResolver: fetchJsons
+          label:
+            text: labels.auth_methods.oidc_config
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/oidcConfig
+          show_label: true
+          type: reusable-element
         type: single-step-form
       label:
         text: labels.auth_methods.title
