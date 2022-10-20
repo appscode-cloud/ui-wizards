@@ -1091,18 +1091,6 @@ steps:
             type: input
           - if: showUnsealerCredentialCreateSecretField|azureKeyVault
             label:
-              text: labels.backend.clientCert
-            schema:
-              $ref: discriminator#/properties/data/properties/client_cert
-            type: input
-          - if: showUnsealerCredentialCreateSecretField|azureKeyVault
-            label:
-              text: labels.backend.clientCertPassword
-            schema:
-              $ref: discriminator#/properties/data/properties/client_cert_password
-            type: input
-          - if: showUnsealerCredentialCreateSecretField|azureKeyVault
-            label:
               text: labels.backend.clientId
             schema:
               $ref: discriminator#/properties/data/properties/client_id
@@ -1152,11 +1140,16 @@ steps:
           $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/unsealer/properties/mode/properties/awsKmsSsm
         type: single-step-form
       - elements:
-        - label:
-            text: labels.unsealer.aadClientSecret
+        - elements:
+          - fetch: getSecrets
+            label:
+              text: labels.unsealer.tlsSecretRef
+            schema:
+              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/unsealer/properties/mode/properties/azureKeyVault/properties/tlsSecretRef/properties/name
+            type: select
           schema:
-            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/unsealer/properties/mode/properties/azureKeyVault/properties/aadClientSecret
-          type: input
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/unsealer/properties/mode/properties/azureKeyVault/properties/tlsSecretRef
+          type: single-step-form
         - label:
             text: labels.unsealer.cloud
           schema:
@@ -1212,11 +1205,12 @@ steps:
           $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/unsealer/properties/mode/properties/googleKmsGcs
         type: single-step-form
       - elements:
-        - label:
+        - fetch: getSecrets
+          label:
             text: labels.unsealer.secretName
           schema:
             $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/unsealer/properties/mode/properties/kubernetesSecret/properties/secretName
-          type: input
+          type: select
         if: isEqualToDiscriminatorPath|kubernetesSecret|/mode
         schema:
           $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/unsealer/properties/mode/properties/kubernetesSecret
@@ -1620,7 +1614,6 @@ steps:
     type: single-step-form
   id: health-checker
   title: steps.14.label
-
 - form:
     discriminator:
       enableMonitoring:

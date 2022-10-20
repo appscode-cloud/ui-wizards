@@ -812,153 +812,235 @@ function onAuthMethodTypeChange({ rootModel, getValue, updateModelValue }) {
 
 const unsealerSecretObj = {
   awsKmsSsm: {
-    secretNamePaths: ["credentialSecret"],
-    secretObjectPaths: [
-      "access_key",
-      "secret_key",
-    ]
+    secretNamePath: 'credentialSecretRef/name',
+    secretObjectDataKeys: ['access_key', 'secret_key'],
   },
   azureKeyVault: {
-    secretNamePaths: ["aadClientSecret"],
-    secretObjectPaths: [
-      "client-cert",
-      "client-cert-password",
-      "client-id",
-      "client-secret",
-    ]
+    secretNamePath: 'credentialSecretRef/name',
+    secretObjectDataKeys: ['client-id', 'client-secret'],
   },
   googleKmsGcs: {
-    secretNamePaths: ["credentialSecret"],
-    secretObjectPaths: [
-      "sa.json"
-    ]
+    secretNamePath: 'credentialSecretRef/name',
+    secretObjectDataKeys: ['sa.json'],
   },
 }
 
-const hasUnsealerCredentialSecret = [
-  "awsKmsSsm",
-  "azureKeyVault",
-  "googleKmsGcs"
-];
+function onUnsealerModeChange({
+  discriminator,
+  getValue,
+  commit,
+  model,
+}) {
+  const unsealerModes = [
+    'awsKmsSsm',
+    'azureKeyVault',
+    'googleKmsGcs',
+    'kubernetesSecret',
+  ]
 
-function onUnsealerModeChange({discriminator, getValue, commit}) {
-  const unsealerModes = ["awsKmsSsm", "azureKeyVault", "googleKmsGcs", "kubernetesSecret"];
+  const selectedMode = getValue(discriminator, '/mode')
 
-  const selectedMode = getValue(discriminator, "/mode");
-  
-  unsealerModes.forEach((item) => {
-    if(item !== selectedMode) {
-      commit("wizard/model$delete", `/resources/kubevaultComVaultServer/spec/unsealer/mode/${item}`);
-    }
-  });
-}
+  const { secretNamePath } = unsealerSecretObj[selectedMode] || {}
+  const vsName = getValue(model, '/metadata/release/name')
 
-function getUnsealerMode({ model, getValue }) {
-  const unsealerMode = getValue(model, "/resources/kubevaultComVaultServer/spec/unsealer/mode");
-  return Object.keys(unsealerMode).find(key => key);
-}
-
-function setCreateUnsealerCredentialSecretStatus({model, getValue}) {
-  const unsealerCreds = getValue(model, "/resources/secret_unsealer_creds");
-
-  return !!unsealerCreds;
-}
-
-function onCreateUnsealerCredentialSecretChange({discriminator, model,  getValue, commit}) {
-  const createCredSecretStatus = getValue(discriminator, "/createCredentialSecret");
-  const unsealerMode = getValue(discriminator, "/mode");
-  const vsName = getValue(model, "/metadata/release/name");
-  
-  if(createCredSecretStatus) {
-    unsealerSecretObj[unsealerMode].secretNamePaths.forEach(item => {
-      commit("wizard/model$update", {
-        path: `/resources/kubevaultComVaultServer/spec/unsealer/mode/${unsealerMode}/${item}`,
-        value: `${vsName}-unsealer-creds`,
-        force: true
-      });
-    });
+  if (selectedMode !== 'kubernetesSecret' && secretNamePath) {
+    commit('wizard/model$update', {
+      path: `/resources/kubevaultComVaultServer/spec/unsealer/mode/${selectedMode}/${secretNamePath}`,
+      value: `${vsName}-unsealer-creds`,
+      force: true,
+    })
   } else {
-    commit("wizard/model$delete", "/resources/secret_unsealer_creds");
+    commit('wizard/model$delete', `/resources/secret_unsealer_creds`)
+  }
+
+  unsealerModes.forEach((item) => {
+    if (item && item !== selectedMode) {
+      commit(
+        'wizard/model$delete',
+        `/resources/kubevaultComVaultServer/spec/unsealer/mode/${item}`
+      )
+      unsealerSecretObj[item].secretObjectDataKeys.forEach((key) => {
+        commit(
+          'wizard/model$delete',
+          `/resources/secret_unsealer_creds/stringData/${key}`
+        )
+      })
+    }
+  })
+}
+
+function resetUnsealerCredDiscriminatorData({ setDiscriminatorValue }) {
+  setDiscriminatorValue('/data', undefined)
+  setDiscriminatorValue('/secretName', '')
+}
+
+function getUnsealerMode({ model, getValue, discriminator }) {
+  const unsealerMode =
+    getValue(model, '/resources/kubevaultComVaultServer/spec/unsealer/mode') ||
+    {}
+  if (Object.keys(unsealerMode).length)
+    return Object.keys(unsealerMode).find((key) => key)
+  else {
+    return getValue(discriminator, '/mode')
   }
 }
 
-function showUnsealerCredentialSecretField({discriminator, getValue, watchDependency}) {
-  watchDependency("discriminator#/mode");
-  const unsealerMode = getValue(discriminator, "/mode");
-  return hasUnsealerCredentialSecret.includes(unsealerMode);
+function setCreateUnsealerCredentialSecretStatus({ model, getValue }) {
+  const unsealerCreds = getValue(model, '/resources/secret_unsealer_creds')
+
+  return !!unsealerCreds
 }
 
-function showUnsealerExistingCredentialSecretSection({discriminator, getValue, watchDependency}) {
-  watchDependency("discriminator#/createCredentialSecret");
-  const createCredSecret = getValue(discriminator, "/createCredentialSecret");
-  return !createCredSecret;
-}
+function onCreateUnsealerCredentialSecretChange({
+  discriminator,
+  model,
+  getValue,
+  commit,
+  setDiscriminatorValue,
+}) {
+  const createCredSecretStatus = getValue(
+    discriminator,
+    '/createCredentialSecret'
+  )
+  const unsealerMode = getValue(discriminator, '/mode')
+  const vsName = getValue(model, '/metadata/release/name')
 
-function showUnsealerCreateCredentialSecretSection({discriminator, getValue, watchDependency}) {
-  return !showUnsealerExistingCredentialSecretSection({discriminator, getValue, watchDependency});
-}
+  const { secretNamePath } = unsealerSecretObj[unsealerMode] || {}
 
-function showUnsealerCredentialCreateSecretField({discriminator, getValue, watchDependency}, value) {
-  watchDependency("discriminator#/mode");
-  const mode = getValue(discriminator, "/mode");
-  
-  return value === mode;
-}
+  if (createCredSecretStatus) {
+    commit('wizard/model$update', {
+      path: `/resources/kubevaultComVaultServer/spec/unsealer/mode/${unsealerMode}/${secretNamePath}`,
+      value: `${vsName}-unsealer-creds`,
+      force: true,
+    })
+  } else {
+    commit('wizard/model$delete', '/resources/secret_unsealer_creds')
+    commit(
+      'wizard/model$delete',
+      `/resources/kubevaultComVaultServer/spec/unsealer/mode/${unsealerMode}/${secretNamePath}`
+    )
 
-function onUnsealerCredSecretNameChange({model, commit, getValue, discriminator}) {
-  const secretName = getValue(discriminator, "/secretName");
-  const unsealerMode = getUnsealerMode({model, getValue});
-
-  if(unsealerMode && secretName) { 
-    unsealerSecretObj[unsealerMode].secretNamePaths.forEach((item) => {
-      commit("wizard/model$update", {
-        path: `/resources/kubevaultComVaultServer/spec/unsealer/mode/${unsealerMode}/${item}`,
-        value: secretName,
-        force: true
-      });
-    });
+    resetUnsealerCredDiscriminatorData({ setDiscriminatorValue })
   }
 }
 
-function onUnsealerCredSecretDataChange({commit, getValue, discriminator, model}) {
-  const data = getValue(discriminator, "/data");
-  const mode = getUnsealerMode({model, getValue});
+function showUnsealerCredentialSecretField({
+  discriminator,
+  getValue,
+  watchDependency,
+}) {
+  watchDependency('discriminator#/mode')
+  const unsealerMode = getValue(discriminator, '/mode')
+  return Object.keys(unsealerSecretObj).includes(unsealerMode)
+}
 
-  if(data) {
-    commit("wizard/model$delete", `/resources/secret_unsealer_creds/data`);
-    unsealerSecretObj[mode]?.secretObjectPaths.forEach(path => {
-      commit("wizard/model$update", {
+function showUnsealerExistingCredentialSecretSection({
+  discriminator,
+  getValue,
+  watchDependency,
+}) {
+  watchDependency('discriminator#/createCredentialSecret')
+  const createCredSecret = getValue(discriminator, '/createCredentialSecret')
+  return !createCredSecret
+}
+
+function showUnsealerCreateCredentialSecretSection({
+  discriminator,
+  getValue,
+  watchDependency,
+}) {
+  return !showUnsealerExistingCredentialSecretSection({
+    discriminator,
+    getValue,
+    watchDependency,
+  })
+}
+
+function showUnsealerCredentialCreateSecretField(
+  { discriminator, getValue, watchDependency },
+  value
+) {
+  watchDependency('discriminator#/mode')
+  const mode = getValue(discriminator, '/mode')
+
+  return value === mode
+}
+
+function onUnsealerCredSecretNameChange({
+  model,
+  commit,
+  getValue,
+  discriminator,
+}) {
+  const secretName = getValue(discriminator, '/secretName')
+  const unsealerMode = getUnsealerMode({ model, getValue, discriminator })
+
+  if (unsealerMode && secretName) {
+    const secretNamePath = unsealerSecretObj[unsealerMode].secretNamePath || ''
+    commit('wizard/model$update', {
+      path: `/resources/kubevaultComVaultServer/spec/unsealer/mode/${unsealerMode}/${secretNamePath}`,
+      value: secretName,
+      force: true,
+    })
+  }
+}
+
+function onUnsealerCredSecretDataChange({
+  commit,
+  getValue,
+  discriminator,
+  model,
+}) {
+  const data = getValue(discriminator, '/data')
+  const mode = getUnsealerMode({ model, getValue, discriminator })
+
+  if (data) {
+    commit('wizard/model$delete', `/resources/secret_unsealer_creds/data`)
+    unsealerSecretObj[mode]?.secretObjectDataKeys.forEach((path) => {
+      commit('wizard/model$update', {
         path: `/resources/secret_unsealer_creds/stringData/${path}`,
-        value: data[dottedToDiscriminatorPath[path] || path] || "",
-        force: true
-      });
-    });
+        value: data[dottedToDiscriminatorPath[path] || path] || '',
+        force: true,
+      })
+    })
   }
 }
 
-function setUnsealerCredSecretName({model, getValue}) {
-  const unsealerMode = getUnsealerMode({model, getValue});
-  let secretName;
-  if(unsealerMode) {
-    const secretNamePath = unsealerSecretObj[unsealerMode].secretNamePaths[0];
-    secretName = getValue(model, `/resources/kubevaultComVaultServer/spec/unsealer/mode/${unsealerMode}/${secretNamePath}`);
+function setUnsealerCredSecretName({ model, getValue, discriminator }) {
+  const unsealerMode = getUnsealerMode({ model, getValue, discriminator })
+  let secretName
+  if (unsealerMode) {
+    const secretNamePath = unsealerSecretObj[unsealerMode].secretNamePath || ''
+    secretName = getValue(
+      model,
+      `/resources/kubevaultComVaultServer/spec/unsealer/mode/${unsealerMode}/${secretNamePath}`
+    )
   }
-  return secretName || "";
+  return secretName || ''
 }
 
-function setUnsealerCredSecretData({setDiscriminatorValue, model, discriminator, getValue}) {
-  const data = getValue(model, "/resources/secret_unsealer_creds/stringData");
+function setUnsealerCredSecretData({
+  setDiscriminatorValue,
+  model,
+  discriminator,
+  getValue,
+  watchDependency,
+}) {
+  watchDependency('discriminator#/mode')
 
-  const modifiedData = Object.keys(data).reduce((acc, key) => {
-    acc[dottedToDiscriminatorPath[key] || key] = data[key];
-    return acc;
-  }, {});
+  const createCred = getValue(discriminator, '/createCredentialSecret')
+  const data =
+    getValue(model, '/resources/secret_unsealer_creds/stringData') || {}
 
-  const createCred = getValue(discriminator, "/createCredentialSecret");
-  if(createCred) {
-    if(data) {
-      setDiscriminatorValue("/data", modifiedData);
-    } else return setDiscriminatorValue("/data", {});
+  if (createCred) {
+    if (data) {
+      const modifiedData = Object.keys(data).reduce((acc, key) => {
+        acc[dottedToDiscriminatorPath[key] || key] = data[key]
+        return acc
+      }, {})
+
+      setDiscriminatorValue('/data', modifiedData)
+    } else return setDiscriminatorValue('/data', {})
   }
 }
 
