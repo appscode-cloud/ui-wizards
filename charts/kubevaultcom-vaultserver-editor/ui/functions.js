@@ -294,46 +294,61 @@ function returnStringYes() {
 }
 
 // ************************* Basic Info **********************************************
-function onNameChange({ commit, model, getValue }) {
-  const dbName = getValue(model, "/metadata/release/name");
+function onNameChange({ commit, model, getValue, discriminator }) {
+  const dbName = getValue(model, '/metadata/release/name')
 
   // to reset configSecret name field
-  const hasSecretConfig = getValue(model, "/resources/secret_config");
+  const hasSecretConfig = getValue(model, '/resources/secret_config')
   if (hasSecretConfig) {
-    commit("wizard/model$update", {
-      path: "/resources/kubevaultComVaultServer/spec/configSecret/name",
+    commit('wizard/model$update', {
+      path: '/resources/kubevaultComVaultServer/spec/configSecret/name',
       value: `${dbName}-config`,
       force: true,
-    });
+    })
   }
 
-  const backendType = getVaultBackendType({model, getValue});
+  const backendType = getVaultBackendType({ model, getValue, discriminator })
+  const unsealerMode = getUnsealerMode({ model, getValue, discriminator })
 
   // to reset backendCredSecret name field
-  const hasSecretBackendCreds = getValue(model, "/resources/secret_backend_creds");
+  const hasSecretBackendCreds = getValue(
+    model,
+    '/resources/secret_backend_creds'
+  )
   if (hasSecretBackendCreds) {
-    backendSecretObj[backendType].secretNamePaths.forEach((item) => {
-      commit("wizard/model$update", {
-        path: `/resources/kubevaultComVaultServer/spec/backend/${backendType}/${item}`,
-        value: `${dbName}-backend-creds`,
-        force: true,
-      });
-    });
+    const { secretNamePath } = backendSecretObj[backendType] || {}
+    commit('wizard/model$update', {
+      path: `/resources/kubevaultComVaultServer/spec/backend/${backendType}/${secretNamePath}`,
+      value: `${dbName}-backend-creds`,
+      force: true,
+    })
   }
 
   // to reset backendTlsSecret name field
-  const hasSecretBackendTls = getValue(model, "/resources/secret_backend_tls");
+  const hasSecretBackendTls = getValue(model, '/resources/secret_backend_tls')
   if (hasSecretBackendTls) {
-    backendSecretObj[backendType].tlsSecretNamePaths.forEach((item) => {
-      commit("wizard/model$update", {
-        path: `/resources/kubevaultComVaultServer/spec/backend/${backendType}/${item}`,
-        value: `${dbName}-backend-tls`,
-        force: true,
-      });
-    });
+    const { tlsSecretNamePath } = backendSecretObj[backendType] || {}
+    commit('wizard/model$update', {
+      path: `/resources/kubevaultComVaultServer/spec/backend/${backendType}/${tlsSecretNamePath}`,
+      value: `${dbName}-backend-tls`,
+      force: true,
+    })
+  }
+
+  // to reset unsealerCredSecret name field
+  const hasSecretUnsealerCreds = getValue(
+    model,
+    '/resources/secret_unsealer_creds'
+  )
+  if (hasSecretUnsealerCreds) {
+    const { secretNamePath } = unsealerSecretObj[unsealerMode] || {}
+    commit('wizard/model$update', {
+      path: `/resources/kubevaultComVaultServer/spec/unsealer/mode/${unsealerMode}/${secretNamePath}`,
+      value: `${dbName}-unsealer-creds`,
+      force: true,
+    })
   }
 }
-
 async function getVaultServerVersions(
   { axios, storeGet },
   group,
@@ -385,404 +400,520 @@ async function getVaultServerVersions(
 
 const backendSecretObj = {
   azure: {
-    secretNamePaths: ["accountKeySecret"],
-    secretObjectPaths: [
-      "account_key"
-    ]
+    secretNamePath: 'credentialSecretRef/name',
+    secretObjectDataKeys: ['account_key'],
   },
   consul: {
-    secretNamePaths: ["aclTokenSecretName"],
-    secretObjectPaths: [
-      "aclToken"
-    ],
-    tlsSecretNamePaths: ["tlsSecretName"],
-    tlsObjectPaths: [
-      "ca.crt",
-      "client.crt",
-      "client.key"
-    ]
+    secretNamePath: 'aclTokenSecretRef/name',
+    secretObjectDataKeys: ['aclToken'],
+    tlsSecretNamePath: 'tlsSecretRef/name',
+    tlsSecretObjectDataKeys: ['ca.crt', 'client.crt', 'client.key'],
   },
   dynamodb: {
-    secretNamePaths: [
-      "credentialSecret",
-      "sessionTokenSecret"
-    ],
-    secretObjectPaths: [
-      "access_key",
-      "secret_key",
-      "session_token"
-    ],
+    secretNamePath: 'credentialSecretRef/name',
+    secretObjectDataKeys: ['access_key', 'secret_key', 'session_token'],
   },
   etcd: {
-    secretNamePaths: ["credentialSecretName"],
-    secretObjectPaths: [
-      "password",
-      "username"
-    ],
+    secretNamePath: 'credentialSecretRef/name',
+    secretObjectDataKeys: ['password', 'username'],
+    tlsSecretNamePath: 'tlsSecretRef/name',
+    tlsSecretObjectDataKeys: ['tls_ca_file'],
   },
   gcs: {
-    secretNamePaths: ["credentialSecret"],
-    secretObjectPaths: [
-      "sa.json"
-    ],
+    secretNamePath: 'credentialSecretRef/name',
+    secretObjectDataKeys: ['sa.json'],
   },
   mysql: {
-    secretNamePaths: ["userCredentialSecret"],
-    secretObjectPaths: [
-      "password",
-      "username"
-    ],
-    tlsSecretNamePaths: ["tlsCASecret"],
-    tlsObjectPaths: [
-      "tls_ca_file"
-    ]
+    secretNamePath: 'credentialSecretRef/name',
+    secretObjectDataKeys: ['password', 'username'],
+    tlsSecretNamePath: 'tlsSecretRef/name',
+    tlsSecretObjectDataKeys: ['tls_ca_file'],
   },
   postgresql: {
-    secretNamePaths: ["connectionURLSecret"],
-    secretObjectPaths: [
-      "connection_url"
-    ],
+    secretNamePath: 'credentialSecretRef/name',
+    secretObjectDataKeys: ['connection_url'],
   },
   s3: {
-    secretNamePaths: ["credentialSecret"],
-    secretObjectPaths: [
-      "access_key",
-      "secret_key"
-    ],
+    secretNamePath: 'credentialSecretRef/name',
+    secretObjectDataKeys: ['access_key', 'secret_key'],
   },
   swift: {
-    secretNamePaths: [
-      "authTokenSecret",
-      "credentialSecret"
-    ],
-    secretObjectPaths: [
-      "auth_token",
-      "password",
-      "username"
-    ],
+    secretNamePath: 'credentialSecretRef/name',
+    secretObjectDataKeys: ['auth_token', 'password', 'username'],
   },
 }
 
-dottedToDiscriminatorPath = {
-  "sa.json": "sa_json",
-  "ca.crt": "ca_crt",
-  "client.crt": "client_crt",
-  "client.key": "client_key",
-  "client-cert": "client_cert",
-  "client-cert-password": "client_cert_password",
-  "client-id": "client_id",
-  "client-secret": "client_secret",
-};
-
-const hasCredentialSecret = [
-  "azure",
-  "consul",
-  "dynamodb",
-  "etcd",
-  "gcs",
-  "mysql",
-  "postgresql",
-  "s3",
-  "swift"
-];
-
-const hasTlsSecret = [
-  "consul",
-  "mysql"
-];
-
-const lowAvailableStorageBackends = ["azure", "inmem", "s3", "swift"];
-
-function isLowAvailableStorageBackendSelected({model, getValue, watchDependency}) {
-  watchDependency("model#/resources/kubevaultComVaultServer/spec/backend");
-  const backendType = getVaultBackendType({model, getValue});
-  return lowAvailableStorageBackends.includes(backendType);
+const dottedToDiscriminatorPath = {
+  'sa.json': 'sa_json',
+  'ca.crt': 'ca_crt',
+  'client.crt': 'client_crt',
+  'client.key': 'client_key',
+  'client-cert': 'client_cert',
+  'client-cert-password': 'client_cert_password',
+  'client-id': 'client_id',
+  'client-secret': 'client_secret',
 }
 
-function onVaultBackendTypeChange({discriminator, model, getValue, commit}) {
+const hasCredentialSecret = [
+  'azure',
+  'consul',
+  'dynamodb',
+  'etcd',
+  'gcs',
+  'mysql',
+  'postgresql',
+  's3',
+  'swift',
+]
+
+const hasTlsSecret = ['consul', 'mysql', 'etcd']
+
+const lowAvailableStorageBackends = ['azure', 'inmem', 's3', 'swift']
+
+function isLowAvailableStorageBackendSelected({
+  model,
+  getValue,
+  watchDependency,
+  discriminator,
+}) {
+  watchDependency('model#/resources/kubevaultComVaultServer/spec/backend')
+  const backendType = getVaultBackendType({ model, getValue, discriminator })
+  return lowAvailableStorageBackends.includes(backendType)
+}
+
+function onVaultBackendTypeChange({
+  discriminator,
+  model,
+  getValue,
+  commit,
+}) {
   const backends = [
-    "azure",
-    "consul",
-    "dynamodb",
-    "etcd",
-    "gcs",
-    "inmem",
-    "mysql",
-    "postgresql",
-    "raft",
-    "s3",
-    "swift",
-  ];
+    'azure',
+    'consul',
+    'dynamodb',
+    'etcd',
+    'gcs',
+    'inmem',
+    'mysql',
+    'postgresql',
+    'raft',
+    's3',
+    'swift',
+  ]
 
-  const selectedBackend = getValue(discriminator, "/backend");
+  const selectedBackend = getValue(discriminator, '/backend')
 
-  if(selectedBackend) {
+  if (selectedBackend) {
     backends.forEach((item) => {
-      if(item !== selectedBackend) {
-        commit("wizard/model$delete", `/resources/kubevaultComVaultServer/spec/backend/${item}`);
+      if (item !== selectedBackend) {
+        commit(
+          'wizard/model$delete',
+          `/resources/kubevaultComVaultServer/spec/backend/${item}`
+        )
+        backendSecretObj[item]?.secretObjectDataKeys.forEach((key) => {
+          commit(
+            'wizard/model$delete',
+            `/resources/secret_backend_creds/stringData/${key}`
+          )
+        })
       } else {
-        const backendObj = getValue(model, `/resources/kubevaultComVaultServer/spec/backend/${item}`);
-        if(!backendObj) {
-          const createCredSecretStatus = getValue(model, "/resources/secret_backend_creds");
-          const createTlsSecretStatus = getValue(model, "/resources/secret_backend_tls");
-          const vsName = getValue(model, "/metadata/release/name");
-          
-          commit("wizard/model$update", { path: `/resources/kubevaultComVaultServer/spec/backend/${item}`, value: {}, force: true });
-          
-          if(createCredSecretStatus && hasCredentialSecret.includes(item)) {
-            backendSecretObj[item]?.secretNamePaths.forEach(path => {
-              commit("wizard/model$update", {
-                path: `/resources/kubevaultComVaultServer/spec/backend/${item}/${path}`,
-                value: `${vsName}-backend-creds`,
-                force: true
-              });
-            });
+        const backendObj = getValue(
+          model,
+          `/resources/kubevaultComVaultServer/spec/backend/${item}`
+        )
+        if (!backendObj) {
+          commit('wizard/model$update', {
+            path: `/resources/kubevaultComVaultServer/spec/backend/${item}`,
+            value: {},
+            force: true,
+          })
+
+          const vsName = getValue(model, '/metadata/release/name')
+
+          // add cred secret name to backend object
+          const createCredSecretStatus = getValue(
+            model,
+            '/resources/secret_backend_creds'
+          )
+          if (createCredSecretStatus && hasCredentialSecret.includes(item)) {
+            const { secretNamePath } = backendSecretObj[item] || {}
+
+            commit('wizard/model$update', {
+              path: `/resources/kubevaultComVaultServer/spec/backend/${item}/${secretNamePath}`,
+              value: `${vsName}-backend-creds`,
+              force: true,
+            })
           } else {
-            commit("wizard/model$delete", `/resources/secret_backend_creds`);
+            commit('wizard/model$delete', `/resources/secret_backend_creds`)
           }
 
-          if(createTlsSecretStatus && hasTlsSecret.includes(item)) {
-            backendSecretObj[item]?.tlsSecretNamePaths.forEach(path => {
-              commit("wizard/model$update", {
-                path: `/resources/kubevaultComVaultServer/spec/backend/${item}/${path}`,
+          // add tls secret name to backend object
+          const createTlsSecretStatus = getValue(
+            model,
+            '/resources/secret_backend_tls'
+          )
+          if (createTlsSecretStatus && hasTlsSecret.includes(item)) {
+            const { tlsSecretNamePath } =
+              backendSecretObj[item] ||
+              commit('wizard/model$update', {
+                path: `/resources/kubevaultComVaultServer/spec/backend/${item}/${tlsSecretNamePath}`,
                 value: `${vsName}-backend-tls`,
-                force: true
-              });
-            });
+                force: true,
+              })
           } else {
-            commit("wizard/model$delete", `/resources/secret_backend_tls`);
+            commit('wizard/model$delete', `/resources/secret_backend_tls`)
           }
         }
       }
-    });
+    })
   } else {
-      commit("wizard/model$delete", `/resources/kubevaultComVaultServer/spec/backend`);
-      commit("wizard/model$delete", `/resources/secret_backend_creds`);
-      commit("wizard/model$delete", `/resources/secret_backend_tls`);
+    commit(
+      'wizard/model$delete',
+      `/resources/kubevaultComVaultServer/spec/backend`
+    )
+    commit('wizard/model$delete', `/resources/secret_backend_creds`)
+    commit('wizard/model$delete', `/resources/secret_backend_tls`)
   }
 
-  if(lowAvailableStorageBackends.includes(selectedBackend)) {
-    commit("wizard/model$update", {
-      path: "/resources/kubevaultComVaultServer/spec/replicas",
+  // update replica for lowAvailableStorage backend
+  if (lowAvailableStorageBackends.includes(selectedBackend)) {
+    commit('wizard/model$update', {
+      path: '/resources/kubevaultComVaultServer/spec/replicas',
       value: 1,
-      force: true
+      force: true,
     })
   }
 }
 
-function getVaultBackendType({ model, getValue }) {
-  const backend = getValue(model, "/resources/kubevaultComVaultServer/spec/backend");
-  return Object.keys(backend).find(key => key);
+function resetBackendSecretDiscriminator({ setDiscriminatorValue }) {
+  setDiscriminatorValue('/data', undefined)
+  setDiscriminatorValue('/secretName', '')
+}
+
+function getVaultBackendType({ model, getValue, discriminator }) {
+  const backend =
+    getValue(model, '/resources/kubevaultComVaultServer/spec/backend') || {}
+
+  if (Object.keys(backend).length)
+    return Object.keys(backend).find((key) => key)
+  else {
+    return getValue(discriminator, '/backend')
+  }
 }
 
 // credential secret
 
-function setCreateCredentialSecretStatus({model, getValue}) {
-  const backendCreds = getValue(model, "/resources/secret_backend_creds");
-
-  return !!backendCreds;
+function setCreateCredentialSecretStatus({ model, getValue }) {
+  const backendCreds = getValue(model, '/resources/secret_backend_creds')
+  return !!backendCreds
 }
 
-function onCreateCredentialSecretChange({discriminator, model,  getValue, commit}) {
-  const createCredSecretStatus = getValue(discriminator, "/createCredentialSecret");
-  const backend = getValue(discriminator, "/backend");
-  const vsName = getValue(model, "/metadata/release/name");
-  
-  if(createCredSecretStatus) {
-    backendSecretObj[backend].secretNamePaths.forEach(item => {
-      commit("wizard/model$update", {
-        path: `/resources/kubevaultComVaultServer/spec/backend/${backend}/${item}`,
-        value: `${vsName}-backend-creds`,
-        force: true
-      });
-    });
+function onCreateCredentialSecretChange({
+  discriminator,
+  model,
+  getValue,
+  commit,
+  setDiscriminatorValue,
+}) {
+  const createCredSecretStatus = getValue(
+    discriminator,
+    '/createCredentialSecret'
+  )
+  const backend = getValue(discriminator, '/backend')
+  const vsName = getValue(model, '/metadata/release/name')
+  const { secretNamePath } = backendSecretObj[backend] || {}
+
+  if (createCredSecretStatus) {
+    commit('wizard/model$update', {
+      path: `/resources/kubevaultComVaultServer/spec/backend/${backend}/${secretNamePath}`,
+      value: `${vsName}-backend-creds`,
+      force: true,
+    })
   } else {
-    commit("wizard/model$delete", "/resources/secret_backend_creds");
+    commit('wizard/model$delete', '/resources/secret_backend_creds')
+    commit(
+      'wizard/model$delete',
+      `/resources/kubevaultComVaultServer/spec/backend/${backend}/${secretNamePath}`
+    )
+    resetBackendSecretDiscriminator({ setDiscriminatorValue })
   }
 }
 
-function showCredentialSecretField({discriminator, getValue, watchDependency}) {
-  watchDependency("discriminator#/backend");
-  const backendType = getValue(discriminator, "/backend");
-  return hasCredentialSecret.includes(backendType);
+function showCredentialSecretField({
+  discriminator,
+  getValue,
+  watchDependency,
+}) {
+  watchDependency('discriminator#/backend')
+  const backendType = getValue(discriminator, '/backend')
+  return hasCredentialSecret.includes(backendType)
 }
 
-function showBackendExistingCredentialSecretSection({discriminator, getValue, watchDependency}) {
-  watchDependency("discriminator#/createCredentialSecret");
-  const createCredSecret = getValue(discriminator, "/createCredentialSecret");
-  return !createCredSecret;
+function showBackendExistingCredentialSecretSection({
+  discriminator,
+  getValue,
+  watchDependency,
+}) {
+  watchDependency('discriminator#/createCredentialSecret')
+  const createCredSecret = getValue(discriminator, '/createCredentialSecret')
+  return !createCredSecret
 }
 
-function showBackendCreateCredentialSecretSection({discriminator, getValue, watchDependency}) {
-  return !showBackendExistingCredentialSecretSection({discriminator, getValue, watchDependency});
+function showBackendCreateCredentialSecretSection({
+  discriminator,
+  getValue,
+  watchDependency,
+}) {
+  return !showBackendExistingCredentialSecretSection({
+    discriminator,
+    getValue,
+    watchDependency,
+  })
 }
 
-function showCredentialCreateSecretField({discriminator, getValue, watchDependency}, value) {
-  watchDependency("discriminator#/backend");
-  const backendType = getValue(discriminator, "/backend");
-  
-  return value === backendType;
+function showCredentialCreateSecretField(
+  { discriminator, getValue, watchDependency },
+  value
+) {
+  watchDependency('discriminator#/backend')
+  const backendType = getValue(discriminator, '/backend')
+
+  return value === backendType
 }
 
-function onCredSecretNameChange({model, commit, getValue, discriminator}) {
-  const secretName = getValue(discriminator, "/secretName");
-  const backendType = getVaultBackendType({model, getValue});
+function onCredSecretNameChange({
+  model,
+  commit,
+  getValue,
+  discriminator,
+}) {
+  const secretName = getValue(discriminator, '/secretName')
+  const backendType = getVaultBackendType({ model, getValue, discriminator })
 
-  if(backendType && secretName) { 
-    backendSecretObj[backendType].secretNamePaths.forEach((item) => {
-      commit("wizard/model$update", {
-        path: `/resources/kubevaultComVaultServer/spec/backend/${backendType}/${item}`,
-        value: secretName,
-        force: true
-      });
-    });
+  if (backendType && secretName) {
+    const { secretNamePath } = backendSecretObj[backendType] || {}
+
+    commit('wizard/model$update', {
+      path: `/resources/kubevaultComVaultServer/spec/backend/${backendType}/${secretNamePath}`,
+      value: secretName,
+      force: true,
+    })
   }
 }
 
-function onCredSecretDataChange({commit, getValue, discriminator, model}) {
-  const data = getValue(discriminator, "/data");
-  const backend = getVaultBackendType({model, getValue});
+function onCredSecretDataChange({
+  commit,
+  getValue,
+  discriminator,
+  model,
+}) {
+  const data = getValue(discriminator, '/data')
+  const backend = getVaultBackendType({ model, getValue, discriminator })
 
-  if(data) {
-    commit("wizard/model$delete", `/resources/secret_backend_creds/data`);
-    backendSecretObj[backend]?.secretObjectPaths.forEach(path => {
-      commit("wizard/model$update", {
-        path: `/resources/secret_backend_creds/data/${path}`,
-        value: data[dottedToDiscriminatorPath[path] || path] || "",
-        force: true
-      });
-    });
+  if (data) {
+    commit('wizard/model$delete', `/resources/secret_backend_creds/stringData`)
+
+    backendSecretObj[backend]?.secretObjectDataKeys.forEach((path) => {
+      commit('wizard/model$update', {
+        path: `/resources/secret_backend_creds/stringData/${path}`,
+        value: data[dottedToDiscriminatorPath[path] || path] || '',
+        force: true,
+      })
+    })
   }
 }
 
-function setCredSecretName({model, getValue}) {
-  const backendType = getVaultBackendType({model, getValue});
-  let secretName;
-  if(backendType) {
-    const secretNamePath = backendSecretObj[backendType].secretNamePaths[0];
-    secretName = getValue(model, `/resources/kubevaultComVaultServer/spec/backend/${backendType}/${secretNamePath}`);
+function setCredSecretName({ model, getValue, discriminator }) {
+  const backendType = getVaultBackendType({ model, getValue, discriminator })
+  let secretName
+  if (backendType) {
+    const { secretNamePath } = backendSecretObj[backendType] || {}
+    secretName = getValue(
+      model,
+      `/resources/kubevaultComVaultServer/spec/backend/${backendType}/${secretNamePath}`
+    )
   }
-  return secretName || "";
+  return secretName || ''
 }
 
-function setCredSecretData({setDiscriminatorValue, model, discriminator, getValue}) {
-  const data = getValue(model, "/resources/secret_backend_creds/data");
+function setCredSecretData({
+  setDiscriminatorValue,
+  model,
+  discriminator,
+  getValue,
+  watchDependency,
+}) {
+  watchDependency('discriminator#/backend')
 
-  const modifiedData = Object.keys(data).reduce((acc, key) => {
-    acc[dottedToDiscriminatorPath[key] || key] = data[key];
-    return acc;
-  }, {});
+  const data =
+    getValue(model, '/resources/secret_backend_creds/stringData') || {}
 
-  const createCred = getValue(discriminator, "/createCredentialSecret");
-  if(createCred) {
-    if(data) {
-      setDiscriminatorValue("/data", modifiedData);
-    } else return setDiscriminatorValue("/data", {});
+  const createCred = getValue(discriminator, '/createCredentialSecret')
+
+  if (createCred) {
+    if (data) {
+      const modifiedData = Object.keys(data).reduce((acc, key) => {
+        acc[dottedToDiscriminatorPath[key] || key] = data[key]
+        return acc
+      }, {})
+      setDiscriminatorValue('/data', modifiedData)
+    } else return setDiscriminatorValue('/data', {})
   }
 }
 
 // tls secret
 
-function setCreateTlsSecretStatus({model, getValue}) {
-  const backendTls = getValue(model, "/resources/secret_backend_tls");
+function setCreateTlsSecretStatus({ model, getValue }) {
+  const backendTls = getValue(model, '/resources/secret_backend_tls')
 
-  return !!backendTls;
+  return !!backendTls
 }
 
-function onCreateTlsSecretChange({discriminator, model,  getValue, commit}) {
-  const createTlsSecretStatus = getValue(discriminator, "/createTlsSecret");
-  const backend = getValue(discriminator, "/backend");
-  const vsName = getValue(model, "/metadata/release/name");
-  
-  if(createTlsSecretStatus) {
-    backendSecretObj[backend].tlsSecretNamePaths.forEach(item => {
-      commit("wizard/model$update", {
-        path: `/resources/kubevaultComVaultServer/spec/backend/${backend}/${item}`,
-        value: `${vsName}-backend-tls`,
-        force: true
-      });
-    });
+function onCreateTlsSecretChange({
+  discriminator,
+  model,
+  getValue,
+  commit,
+  setDiscriminatorValue,
+}) {
+  const createTlsSecretStatus = getValue(discriminator, '/createTlsSecret')
+  const backend = getValue(discriminator, '/backend')
+  const vsName = getValue(model, '/metadata/release/name')
+
+  const { tlsSecretNamePath } = backendSecretObj[backend] || {}
+
+  if (createTlsSecretStatus) {
+    commit('wizard/model$update', {
+      path: `/resources/kubevaultComVaultServer/spec/backend/${backend}/${tlsSecretNamePath}`,
+      value: `${vsName}-backend-tls`,
+      force: true,
+    })
   } else {
-    commit("wizard/model$delete", "/resources/secret_backend_tls");
+    commit('wizard/model$delete', '/resources/secret_backend_tls')
+    commit(
+      'wizard/model$delete',
+      `/resources/kubevaultComVaultServer/spec/unsealer/mode/${backend}/${tlsSecretNamePath}`
+    )
+
+    resetBackendSecretDiscriminator({ setDiscriminatorValue })
   }
 }
 
-function showTlsSecretField({discriminator, getValue, watchDependency}) {
-  watchDependency("discriminator#/backend");
-  const backendType = getValue(discriminator, "/backend");
-  return hasTlsSecret.includes(backendType);
+function showTlsSecretField({
+  discriminator,
+  getValue,
+  watchDependency,
+}) {
+  watchDependency('discriminator#/backend')
+  const backendType = getValue(discriminator, '/backend')
+  return hasTlsSecret.includes(backendType)
 }
 
-function showBackendExistingTlsSecretSection({discriminator, getValue, watchDependency}) {
-  watchDependency("discriminator#/createTlsSecret");
-  const createTlsSecret = getValue(discriminator, "/createTlsSecret");
-  return !createTlsSecret;
+function showBackendExistingTlsSecretSection({
+  discriminator,
+  getValue,
+  watchDependency,
+}) {
+  watchDependency('discriminator#/createTlsSecret')
+  const createTlsSecret = getValue(discriminator, '/createTlsSecret')
+  return !createTlsSecret
 }
 
-function showBackendCreateTlsSecretSection({discriminator, getValue, watchDependency}) {
-  return !showBackendExistingTlsSecretSection({discriminator, getValue, watchDependency});
+function showBackendCreateTlsSecretSection({
+  discriminator,
+  getValue,
+  watchDependency,
+}) {
+  return !showBackendExistingTlsSecretSection({
+    discriminator,
+    getValue,
+    watchDependency,
+  })
 }
 
-function showTlsCreateSecretField({discriminator, getValue, watchDependency}, value) {
-  watchDependency("discriminator#/backend");
-  const backendType = getValue(discriminator, "/backend");
-  
-  return value === backendType;
+function showTlsCreateSecretField(
+  { discriminator, getValue, watchDependency },
+  value
+) {
+  watchDependency('discriminator#/backend')
+  const backendType = getValue(discriminator, '/backend')
+
+  return value === backendType
 }
 
-function onTlsSecretNameChange({model, commit, getValue, discriminator}) {
-  const secretName = getValue(discriminator, "/secretName");
-  const backendType = getVaultBackendType({model, getValue});
+function onTlsSecretNameChange({
+  model,
+  commit,
+  getValue,
+  discriminator,
+}) {
+  const secretName = getValue(discriminator, '/secretName')
+  const backendType = getVaultBackendType({ model, getValue, discriminator })
 
-  if(backendType && secretName) { 
-    backendSecretObj[backendType].tlsSecretNamePaths.forEach((item) => {
-      commit("wizard/model$update", {
-        path: `/resources/kubevaultComVaultServer/spec/backend/${backendType}/${item}`,
-        value: secretName,
-        force: true
-      });
-    });
+  if (backendType && secretName) {
+    const { tlsSecretNamePath } = backendSecretObj[backendType] || {}
+
+    commit('wizard/model$update', {
+      path: `/resources/kubevaultComVaultServer/spec/backend/${backendType}/${tlsSecretNamePath}`,
+      value: secretName,
+      force: true,
+    })
   }
 }
 
-function onTlsSecretDataChange({commit, getValue, discriminator, model}) {
-  const data = getValue(discriminator, "/data");
-  const backend = getVaultBackendType({model, getValue});
+function onTlsSecretDataChange({
+  commit,
+  getValue,
+  discriminator,
+  model,
+}) {
+  const data = getValue(discriminator, '/data')
+  const backend = getVaultBackendType({ model, getValue, discriminator })
 
-  if(data) {
-    commit("wizard/model$delete", `/resources/secret_backend_tls/data`);
-    backendSecretObj[backend]?.tlsObjectPaths.forEach(path => {
-      commit("wizard/model$update", {
-        path: `/resources/secret_backend_tls/data/${path}`,
-        value: data[dottedToDiscriminatorPath[path] || path] || "",
-        force: true
-      });
-    });
+  if (data) {
+    commit('wizard/model$delete', `/resources/secret_backend_tls/stringData`)
+    backendSecretObj[backend]?.tlsSecretObjectDataKeys.forEach((path) => {
+      commit('wizard/model$update', {
+        path: `/resources/secret_backend_tls/stringData/${path}`,
+        value: data[dottedToDiscriminatorPath[path] || path] || '',
+        force: true,
+      })
+    })
   }
 }
 
-function setTlsSecretName({model, getValue}) {
-  const backendType = getVaultBackendType({model, getValue});
-  let secretName;
-  if(backendType) {
-    const secretNamePath = backendSecretObj[backendType].tlsSecretNamePaths[0];
-    secretName = getValue(model, `/resources/kubevaultComVaultServer/spec/backend/${backendType}/${secretNamePath}`);
+function setTlsSecretName({ model, getValue, discriminator }) {
+  const backendType = getVaultBackendType({ model, getValue, discriminator })
+  let secretName
+  if (backendType) {
+    const { tlsSecretNamePath } = backendSecretObj[backendType] || {}
+    secretName = getValue(
+      model,
+      `/resources/kubevaultComVaultServer/spec/backend/${backendType}/${tlsSecretNamePath}`
+    )
   }
-  return secretName || "";
+  return secretName || ''
 }
 
-function setTlsSecretData({setDiscriminatorValue, model, discriminator, getValue}) {
-  const data = getValue(model, "/resources/secret_backend_tls/data");
-  
-  const modifiedData = Object.keys(data).reduce((acc, key) => {
-    acc[dottedToDiscriminatorPath[key] || key] = data[key];
-    return acc;
-  }, {});
-  const createTls = getValue(discriminator, "/createTlsSecret");
-  if(createTls) {
-    if(data) {
-      setDiscriminatorValue("/data", modifiedData);
-    } else return setDiscriminatorValue("/data", {});
+function setTlsSecretData({
+  setDiscriminatorValue,
+  model,
+  discriminator,
+  getValue,
+  watchDependency,
+}) {
+  watchDependency('discriminator#/backend')
+  const createTls = getValue(discriminator, '/createTlsSecret')
+  const data = getValue(model, '/resources/secret_backend_tls/stringData') || {}
+
+  if (createTls) {
+    if (data) {
+      const modifiedData = Object.keys(data).reduce((acc, key) => {
+        acc[dottedToDiscriminatorPath[key] || key] = data[key]
+        return acc
+      }, {})
+      setDiscriminatorValue('/data', modifiedData)
+    } else return setDiscriminatorValue('/data', {})
   }
 }
 
@@ -825,12 +956,7 @@ const unsealerSecretObj = {
   },
 }
 
-function onUnsealerModeChange({
-  discriminator,
-  getValue,
-  commit,
-  model,
-}) {
+function onUnsealerModeChange({ discriminator, getValue, commit, model }) {
   const unsealerModes = [
     'awsKmsSsm',
     'azureKeyVault',
@@ -859,7 +985,7 @@ function onUnsealerModeChange({
         'wizard/model$delete',
         `/resources/kubevaultComVaultServer/spec/unsealer/mode/${item}`
       )
-      unsealerSecretObj[item].secretObjectDataKeys.forEach((key) => {
+      unsealerSecretObj[item]?.secretObjectDataKeys.forEach((key) => {
         commit(
           'wizard/model$delete',
           `/resources/secret_unsealer_creds/stringData/${key}`
@@ -995,7 +1121,7 @@ function onUnsealerCredSecretDataChange({
   const mode = getUnsealerMode({ model, getValue, discriminator })
 
   if (data) {
-    commit('wizard/model$delete', `/resources/secret_unsealer_creds/data`)
+    commit('wizard/model$delete', `/resources/secret_unsealer_creds/stringData`)
     unsealerSecretObj[mode]?.secretObjectDataKeys.forEach((path) => {
       commit('wizard/model$update', {
         path: `/resources/secret_unsealer_creds/stringData/${path}`,
