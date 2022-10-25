@@ -1172,7 +1172,7 @@ function setUnsealerCredSecretData({
 
 // *************************** Data Source *************************
 
-dataSourceObj = {
+const dataSourceObj = {
   configMap: {
     name: "ConfigMap"
   },
@@ -1194,7 +1194,6 @@ function setDataSourceName({itemCtx}) {
 function getDataSourceType({itemCtx}) {
   if(!itemCtx) return "";
   const dataSource = Object.keys(itemCtx).find(key => key);
-  console.log(dataSourceObj[dataSource]?.name);
   return dataSourceObj[dataSource]?.name;
 }
 
@@ -1204,7 +1203,7 @@ function getDataSourceTypeForEdit({rootModel}) {
   return dataSourceObj[dataSource]?.name;
 }
 
-function isDataSourceEqualTo({itemCtx}, type) {
+function isDataSourceTypeEqualTo({itemCtx}, type) {
   const dataSource = getDataSourceType({itemCtx});
   return dataSource === type;
 }
@@ -1554,7 +1553,7 @@ return {
   setUnsealerCredSecretData,
   setDataSourceName,
   getDataSourceType,
-  isDataSourceEqualTo,
+  isDataSourceTypeEqualTo,
   onDataSourceChange,
 	setApiGroup,
 	getIssuerRefsName,

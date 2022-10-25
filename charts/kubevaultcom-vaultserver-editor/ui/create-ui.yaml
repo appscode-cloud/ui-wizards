@@ -885,11 +885,12 @@ steps:
               $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources/items/properties/csi/properties/fsType
             type: input
           - elements:
-            - label:
+            - fetch: getSecrets
+              label:
                 text: labels.dataSources.nodePublishSecretRef
               schema:
                 $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources/items/properties/csi/properties/nodePublishSecretRef/properties/name
-              type: input
+              type: select
             schema:
               $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources/items/properties/csi/properties/nodePublishSecretRef
             type: single-step-form
@@ -897,6 +898,8 @@ steps:
           schema:
             $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources/items/properties/csi
           type: single-step-form
+        schema:
+          $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources/items
         type: single-step-form
       label:
         text: labels.dataSources.title
@@ -917,21 +920,21 @@ steps:
         path: dataSourceType
         type: value
         typeOfValue: string
-      - if: isDataSourceTypeEqualTo|configMap
-        label:
-          text: labels.dataSources.defaultMode
-          isSubsection: true
-        path: configMap/defaultMode
-        type: value
-        typeOfValue: string
-      - if: isDataSourceTypeEqualTo|configMap
+      - if: isDataSourceTypeEqualTo|ConfigMap
         label:
           text: labels.dataSources.optional_question
           isSubsection: true
         path: configMap/optional
         type: value
         typeOfValue: string
-      - if: isDataSourceTypeEqualTo|configMap
+      - if: isDataSourceTypeEqualTo|ConfigMap
+        label:
+          text: labels.dataSources.defaultMode
+          isSubsection: true
+        path: configMap/defaultMode
+        type: value
+        typeOfValue: string
+      - if: isDataSourceTypeEqualTo|ConfigMap
         label:
           text: labels.dataSources.items
           isSubsection: true
@@ -957,13 +960,27 @@ steps:
           path: path
           type: value
           typeOfValue: string
-      - if: isDataSourceTypeEqualTo|secret
+      - if: isDataSourceTypeEqualTo|Secret
         label:
           text: labels.dataSources.secret
         path: secret/secretName
         type: value
         typeOfValue: string
-      - if: isDataSourceTypeEqualTo|secret
+      - if: isDataSourceTypeEqualTo|Secret
+        label:
+          text: labels.dataSources.optional_question
+          isSubsection: true
+        path: secret/optional
+        type: value
+        typeOfValue: string
+      - if: isDataSourceTypeEqualTo|Secret
+        label:
+          text: labels.dataSources.defaultMode
+          isSubsection: true
+        path: secret/defaultMode
+        type: value
+        typeOfValue: string
+      - if: isDataSourceTypeEqualTo|Secret
         label:
           text: labels.dataSources.items
           isSubsection: true
@@ -989,31 +1006,31 @@ steps:
           path: path
           type: value
           typeOfValue: string
-      - if: isDataSourceTypeEqualTo|csi
+      - if: isDataSourceTypeEqualTo|CSI
         label:
           text: labels.dataSources.driver
         path: csi/driver
         type: value
         typeOfValue: string
-      - if: isDataSourceTypeEqualTo|csi
+      - if: isDataSourceTypeEqualTo|CSI
         label:
           text: labels.dataSources.fsType
         path: csi/fsType
         type: value
         typeOfValue: string
-      - if: isDataSourceTypeEqualTo|csi
+      - if: isDataSourceTypeEqualTo|CSI
         label:
           text: labels.dataSources.nodePublishSecretRef
         path: csi/nodePublishSecretRef/name
         type: value
         typeOfValue: string
-      - if: isDataSourceTypeEqualTo|csi
+      - if: isDataSourceTypeEqualTo|CSI
         label:
           text: labels.dataSources.readonly_question
         path: csi/readOnly
         type: value
         typeOfValue: string
-      - if: isDataSourceTypeEqualTo|csi
+      - if: isDataSourceTypeEqualTo|CSI
         label:
           text: labels.dataSources.volumeAttributes
         path: csi/volumeAttributes
@@ -1447,6 +1464,8 @@ steps:
             $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/oidcConfig
           show_label: true
           type: reusable-element
+        schema:
+          $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/items
         type: single-step-form
       label:
         text: labels.auth_methods.title
