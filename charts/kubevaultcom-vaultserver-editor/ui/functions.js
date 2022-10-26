@@ -1208,12 +1208,12 @@ function isDataSourceTypeEqualTo({itemCtx}, type) {
   return dataSource === type;
 }
 
-function onDataSourceChange({discriminator, getValue, updateModelValue}) {
+function onDataSourceChange({discriminator, getValue, updateModelValue, rootModel}) {
   const selectedDataSource = getValue(discriminator, "/dataSource");
 
   Object.keys(dataSourceObj).forEach((key) => {
     if (dataSourceObj[key].name === selectedDataSource) {
-      updateModelValue(key, false, {});
+      if(!rootModel[key]) updateModelValue(key, false, {});
     } else {
       updateModelValue(key, true);
     }                                           
@@ -1553,6 +1553,7 @@ return {
   setUnsealerCredSecretData,
   setDataSourceName,
   getDataSourceType,
+  getDataSourceTypeForEdit,
   isDataSourceTypeEqualTo,
   onDataSourceChange,
 	setApiGroup,
