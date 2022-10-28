@@ -348,6 +348,16 @@ function onNameChange({ commit, model, getValue, discriminator }) {
       force: true,
     })
   }
+
+  // to reset unsealerTlsSecret name field
+  const hasTlsSecretUnsealer = getValue(model, '/resources/secret_unsealer_tls')
+  if (hasTlsSecretUnsealer) {
+    commit('wizard/model$update', {
+      path: `/resources/kubevaultComVaultServer/spec/unsealer/mode/azureKeyVault/tlsSecretRef/name`,
+      value: `${dbName}-unsealer-tls`,
+      force: true,
+    })
+  }
 }
 async function getVaultServerVersions(
   { axios, storeGet },
@@ -993,6 +1003,12 @@ function onUnsealerModeChange({ discriminator, getValue, commit, model }) {
       })
     }
   })
+
+
+  // delete tlsSecret object if unsealer mode is not azureKeyVault
+  if (selectedMode !== 'azureKeyVault') {
+    commit('wizard/model$delete', `/resources/secret_unsealer_tls`)
+  }
 }
 
 function resetUnsealerCredDiscriminatorData({ setDiscriminatorValue }) {
@@ -1167,6 +1183,130 @@ function setUnsealerCredSecretData({
 
       setDiscriminatorValue('/data', modifiedData)
     } else return setDiscriminatorValue('/data', {})
+  }
+}
+
+function setCreateUnsealerTlsSecretStatus({ model, getValue }) {
+  const unsealerTlsSecret = getValue(model, '/resources/secret_unsealer_tls')
+
+  return !!unsealerTlsSecret
+}
+
+function onCreateUnsealerTlsSecretChange({
+  discriminator,
+  model,
+  getValue,
+  commit,
+}) {
+  const createTlsSecretStatus = getValue(discriminator, '/createTlsSecret')
+  const vsName = getValue(model, '/metadata/release/name')
+
+  // if new tls secret option has been selected
+  if (createTlsSecretStatus) {
+    // set new tls secret name
+    commit('wizard/model$update', {
+      path: `/resources/kubevaultComVaultServer/spec/unsealer/mode/azureKeyVault/tlsSecretRef/name`,
+      value: `${vsName}-unsealer-tls`,
+      force: true,
+    })
+
+    const tlsSecretObj = getValue(model, '/resources/secret_unsealer_tls')
+
+    if (!tlsSecretObj)
+      // set default tls secret object
+      commit('wizard/model$update', {
+        path: '/resources/secret_unsealer_tls',
+        value: {},
+        force: true,
+      })
+  } else {
+    // remove tls secret object
+    commit('wizard/model$delete', '/resources/secret_unsealer_tls')
+    commit('wizard/model$update', {
+      path: `/resources/kubevaultComVaultServer/spec/unsealer/mode/azureKeyVault/tlsSecretRef/name`,
+      value: '',
+      force: true,
+    })
+  }
+}
+
+function showUnsealerExisitingTlsSecretField({
+  discriminator,
+  getValue,
+  watchDependency,
+}) {
+  watchDependency('discriminator#/createTlsSecret')
+  const createTlsSecretStatus = getValue(discriminator, '/createTlsSecret')
+  return !createTlsSecretStatus
+}
+
+function showUnsealerNewTlsSecretField({
+  discriminator,
+  getValue,
+  watchDependency,
+}) {
+  return !showUnsealerExisitingTlsSecretField({
+    discriminator,
+    getValue,
+    watchDependency,
+  })
+}
+
+function setUnsealerTlsSecretClientCert({
+  discriminator,
+  model,
+  getValue,
+}) {
+  const createTlsSecretStatus = getValue(discriminator, '/createTlsSecret')
+  const clientCertValue = getValue(model, '/resources/secret_unsealer_tls')
+
+  return createTlsSecretStatus ? clientCertValue : undefined
+}
+
+function onUnsealerTlsClientCertChange({
+  discriminator,
+  getValue,
+  commit,
+}) {
+  const createTlsSecretStatus = getValue(discriminator, '/createTlsSecret')
+  const clientCertValue = getValue(discriminator, '/clientCert')
+
+  if (createTlsSecretStatus) {
+    // update tls secret object on discriminator client cert change
+    commit('wizard/model$update', {
+      path: '/resources/secret_unsealer_tls/stringData/client-cert',
+      value: clientCertValue,
+      force: true,
+    })
+  }
+}
+
+function setUnsealerTlsSecretClientCertPassword({
+  discriminator,
+  model,
+  getValue,
+}) {
+  const createTlsSecretStatus = getValue(discriminator, '/createTlsSecret')
+  const clientCertValue = getValue(model, '/resources/secret_unsealer_tls')
+
+  return createTlsSecretStatus ? clientCertValue : undefined
+}
+
+function onUnsealerTlsClientCertPasswordChange({
+  discriminator,
+  getValue,
+  commit,
+}) {
+  const createTlsSecretStatus = getValue(discriminator, '/createTlsSecret')
+  const clientCertPasswordValue = getValue(discriminator, '/clientCertPassword')
+
+  if (createTlsSecretStatus) {
+    // update tls secret object on discriminator client cert password change
+    commit('wizard/model$update', {
+      path: '/resources/secret_unsealer_tls/stringData/client-cert-password',
+      value: clientCertPasswordValue,
+      force: true,
+    })
   }
 }
 
@@ -1551,6 +1691,14 @@ return {
   onUnsealerCredSecretDataChange,
   setUnsealerCredSecretName,
   setUnsealerCredSecretData,
+  setCreateUnsealerTlsSecretStatus,
+  onCreateUnsealerTlsSecretChange,
+  showUnsealerExisitingTlsSecretField,
+  showUnsealerNewTlsSecretField,
+  setUnsealerTlsSecretClientCert,
+  onUnsealerTlsClientCertChange,
+  setUnsealerTlsSecretClientCertPassword,
+  onUnsealerTlsClientCertPasswordChange,
   setDataSourceName,
   getDataSourceType,
   getDataSourceTypeForEdit,
