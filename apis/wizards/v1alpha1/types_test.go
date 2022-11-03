@@ -27,13 +27,14 @@ import (
 
 func TestDefaultValues(t *testing.T) {
 	checker := schemachecker.New(os.DirFS("../../.."),
-		v1alpha1.KubedbcomElasticsearchEditorOptionsSpec{},
-		v1alpha1.KubedbcomMariadbEditorOptionsSpec{},
-		v1alpha1.KubedbcomMemcachedEditorOptionsSpec{},
-		v1alpha1.KubedbcomMongodbEditorOptionsSpec{},
-		v1alpha1.KubedbcomMysqlEditorOptionsSpec{},
-		v1alpha1.KubedbcomPostgresEditorOptionsSpec{},
-		v1alpha1.KubedbcomRedisEditorOptionsSpec{},
+		schemachecker.TestCase{Obj: v1alpha1.KubedbcomElasticsearchEditorOptionsSpec{}},
+		schemachecker.TestCase{Obj: v1alpha1.KubedbcomMariadbEditorOptionsSpec{}},
+		schemachecker.TestCase{Obj: v1alpha1.KubedbcomMemcachedEditorOptionsSpec{}},
+		schemachecker.TestCase{Obj: v1alpha1.KubedbcomMongodbEditorOptionsSpec{}},
+		schemachecker.TestCase{Obj: v1alpha1.KubedbcomMysqlEditorOptionsSpec{}},
+		schemachecker.TestCase{Obj: v1alpha1.KubedbcomPostgresEditorOptionsSpec{}},
+		schemachecker.TestCase{Obj: v1alpha1.KubedbcomRedisEditorOptionsSpec{}},
+		schemachecker.TestCase{Obj: v1alpha1.StashappscodecomRepositoryEditorOptionsSpec{}},
 	)
 	checker.TestAll(t)
 }
