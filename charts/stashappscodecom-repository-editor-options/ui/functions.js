@@ -13,41 +13,29 @@ async function getResources(
     watchDependency("model#/metadata/release/namespace");
   }
 
-  if (!namespaced || namespace) {
-    // call api if resource is either not namespaced
-    // or namespaced and user has selected a namespace
-    try {
-      const resp = await axios.get(
-        `/clusters/${owner}/${cluster}/proxy/${group}/${version}${
-          namespace ? "/namespaces/" + namespace : ""
-        }/${resource}`,
-        {
-          params: { filter: { items: { metadata: { name: null } } } },
-        }
-      );
+  try {
+    const resp = await axios.get(
+      `/clusters/${owner}/${cluster}/proxy/${group}/${version}${
+        namespace ? "/namespaces/" + namespace : ""
+      }/${resource}`,
+      {
+        params: { filter: { items: { metadata: { name: null } } } },
+      }
+    );
 
-      const resources = (resp && resp.data && resp.data.items) || [];
+    const resources = (resp && resp.data && resp.data.items) || [];
 
-      resources.map((item) => {
-        const name = (item.metadata && item.metadata.name) || "";
-        item.text = name;
-        item.value = name;
-        return true;
-      });
-      return resources;
-    } catch (e) {
-      console.log(e);
-      return [];
-    }
-  } else return [];
-}
-
-function initNamespace({ route }) {
-  const { namespace } = route.query || {};
-  return namespace || null;
-}
-function isNamespaceDisabled({ route }) {
-  return !!initNamespace({ route });
+    resources.map((item) => {
+      const name = (item.metadata && item.metadata.name) || "";
+      item.text = name;
+      item.value = name;
+      return true;
+    });
+    return resources;
+  } catch (e) {
+    console.log(e);
+    return [];
+  }
 }
 
 function labelsDisabilityChecker({ itemCtx }) {
@@ -111,23 +99,7 @@ function showExistingSecretSelection({
   );
   watchDependency("discriminator#/useExistingAuthSecret");
   watchDependency("discriminator#/isExistingAuthSecretsFetching");
-
   return !isExistingAuthSecretsFetching && useExistingAuthSecret;
-}
-
-function onChoiseChange({discriminator, getValue, commit}) {
-  const useExistingAuthSecret = getValue(
-    discriminator,
-    "/useExistingAuthSecret"
-  );
-  // remove spec.authSecret
-    commit("wizard/model$delete", "/spec/authSecret");
-    if (useExistingAuthSecret) {
-      // remove the auth from each backend
-      Object.keys(backendMap).forEach((backend) => {
-        commit("wizard/model$delete", `/spec/backend/${backend}/auth`);
-      });
-    }
 }
 
 async function initExistingAuthSecrets(ctx) {
@@ -203,7 +175,7 @@ const backendMap = {
 };
 
 function initBackendProvider({ model, getValue }) {
-  const backend = getValue(model, "/spec/backend");
+  const backend = getValue(model, '/spec/backend');
   const selectedBackend = Object.keys(backendMap).find((key) => {
     const value = backend && backend[key];
 
@@ -245,21 +217,21 @@ function showBackendForm({ getValue, model, watchDependency }, value) {
   return backendProvider === value;
 }
 
-function showSecretForm({ model, getValue, watchDependency }, value) {
-  const backendProvider = getValue(model, "/spec/backend/provider");
+function showSecretForm(
+  { model, getValue, watchDependency },
+  value
+) {
+  const backendProvider = getValue(model, '/spec/backend/provider')
   watchDependency("model#/spec/backend/provider");
   return backendProvider === value;
 }
 
 return {
   getResources,
-  initNamespace,
-  isNamespaceDisabled,
   labelsDisabilityChecker,
   fetchJsons,
   showExistingSecretSelection,
   initExistingAuthSecrets,
-  onChoiseChange,
   getExistingAuthSecrets,
   showCreateSecretForm,
   initBackendProvider,
