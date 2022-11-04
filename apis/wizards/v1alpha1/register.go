@@ -68,6 +68,8 @@ func addKnownTypes(scheme *runtime.Scheme) error {
 		&KubedbcomPostgresEditorOptionsList{},
 		&KubedbcomRedisEditorOptions{},
 		&KubedbcomRedisEditorOptionsList{},
+		&StashappscodecomRepositoryEditorOptions{},
+		&StashappscodecomRepositoryEditorOptionsList{},
 	)
 
 	scheme.AddKnownTypes(SchemeGroupVersion,

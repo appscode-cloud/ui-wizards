@@ -1,0 +1,254 @@
+properties:
+  metadata:
+    properties:
+      release:
+        properties:
+          name:
+            type: string
+          namespace:
+            type: string
+        required:
+        - name
+        - namespace
+        type: object
+      resource:
+        description: ResourceID identifies a resource
+        properties:
+          group:
+            type: string
+          kind:
+            description: Kind is the serialized kind of the resource.  It is normally
+              CamelCase and singular.
+            type: string
+          name:
+            description: 'Name is the plural name of the resource to serve.  It must
+              match the name of the CustomResourceDefinition-registration too: plural.group
+              and it must be all lowercase.'
+            type: string
+          scope:
+            description: ResourceScope is an enum defining the different scopes available
+              to a custom resource
+            type: string
+          version:
+            type: string
+        required:
+        - group
+        - kind
+        - name
+        - scope
+        - version
+        type: object
+    required:
+    - release
+    - resource
+    type: object
+  spec:
+    properties:
+      annotations:
+        additionalProperties:
+          type: string
+        type: object
+      authSecret:
+        properties:
+          name:
+            type: string
+          password:
+            format: password
+            type: string
+        type: object
+      backend:
+        properties:
+          azure:
+            properties:
+              auth:
+                properties:
+                  AZURE_ACCOUNT_KEY:
+                    type: string
+                  AZURE_ACCOUNT_NAME:
+                    type: string
+                required:
+                - AZURE_ACCOUNT_KEY
+                - AZURE_ACCOUNT_NAME
+                type: object
+              spec:
+                properties:
+                  container:
+                    type: string
+                  maxConnections:
+                    format: int64
+                    type: integer
+                  prefix:
+                    type: string
+                required:
+                - container
+                type: object
+            required:
+            - spec
+            type: object
+          b2:
+            properties:
+              auth:
+                properties:
+                  B2_ACCOUNT_ID:
+                    type: string
+                  B2_ACCOUNT_KEY:
+                    type: string
+                required:
+                - B2_ACCOUNT_ID
+                - B2_ACCOUNT_KEY
+                type: object
+              spec:
+                properties:
+                  bucket:
+                    type: string
+                  maxConnections:
+                    format: int64
+                    type: integer
+                  prefix:
+                    type: string
+                required:
+                - bucket
+                type: object
+            required:
+            - spec
+            type: object
+          gcs:
+            properties:
+              auth:
+                properties:
+                  GOOGLE_PROJECT_ID:
+                    type: string
+                  GOOGLE_SERVICE_ACCOUNT_JSON_KEY:
+                    type: string
+                required:
+                - GOOGLE_PROJECT_ID
+                - GOOGLE_SERVICE_ACCOUNT_JSON_KEY
+                type: object
+              spec:
+                properties:
+                  bucket:
+                    type: string
+                  maxConnections:
+                    format: int64
+                    type: integer
+                  prefix:
+                    type: string
+                required:
+                - bucket
+                type: object
+            required:
+            - spec
+            type: object
+          provider:
+            type: string
+          s3:
+            properties:
+              auth:
+                properties:
+                  AWS_ACCESS_KEY_ID:
+                    type: string
+                  AWS_SECRET_ACCESS_KEY:
+                    type: string
+                  CA_CERT_DATA:
+                    type: string
+                required:
+                - AWS_ACCESS_KEY_ID
+                - AWS_SECRET_ACCESS_KEY
+                - CA_CERT_DATA
+                type: object
+              spec:
+                properties:
+                  bucket:
+                    type: string
+                  endpoint:
+                    type: string
+                  prefix:
+                    type: string
+                  region:
+                    type: string
+                required:
+                - bucket
+                - endpoint
+                type: object
+            required:
+            - spec
+            type: object
+          swift:
+            properties:
+              auth:
+                properties:
+                  OS_AUTH_TOKEN:
+                    type: string
+                  OS_AUTH_URL:
+                    type: string
+                  OS_PASSWORD:
+                    type: string
+                  OS_PROJECT_DOMAIN_NAME:
+                    type: string
+                  OS_PROJECT_NAME:
+                    type: string
+                  OS_REGION_NAME:
+                    type: string
+                  OS_STORAGE_URL:
+                    type: string
+                  OS_TENANT_ID:
+                    type: string
+                  OS_TENANT_NAME:
+                    type: string
+                  OS_USER_DOMAIN_NAME:
+                    type: string
+                  OS_USERNAME:
+                    type: string
+                  ST_AUTH:
+                    type: string
+                  ST_KEY:
+                    type: string
+                  ST_USER:
+                    type: string
+                required:
+                - OS_AUTH_TOKEN
+                - OS_AUTH_URL
+                - OS_PASSWORD
+                - OS_PROJECT_DOMAIN_NAME
+                - OS_PROJECT_NAME
+                - OS_REGION_NAME
+                - OS_STORAGE_URL
+                - OS_TENANT_ID
+                - OS_TENANT_NAME
+                - OS_USERNAME
+                - OS_USER_DOMAIN_NAME
+                - ST_AUTH
+                - ST_KEY
+                - ST_USER
+                type: object
+              spec:
+                properties:
+                  container:
+                    type: string
+                  prefix:
+                    type: string
+                required:
+                - container
+                type: object
+            required:
+            - spec
+            type: object
+        required:
+        - azure
+        - b2
+        - gcs
+        - provider
+        - s3
+        - swift
+        type: object
+      labels:
+        additionalProperties:
+          type: string
+        type: object
+    required:
+    - authSecret
+    - backend
+    type: object
+required:
+- spec
+type: object
