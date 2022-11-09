@@ -13,7 +13,7 @@ async function getResources(
     watchDependency("model#/metadata/release/namespace");
   }
 
-  if(!namespaced || namespace) {
+  if (!namespaced || namespace) {
     // call api if resource is either not namespaced
     // or namespaced and user has selected a namespace
     try {
@@ -25,9 +25,9 @@ async function getResources(
           params: { filter: { items: { metadata: { name: null } } } },
         }
       );
-  
+
       const resources = (resp && resp.data && resp.data.items) || [];
-  
+
       resources.map((item) => {
         const name = (item.metadata && item.metadata.name) || "";
         item.text = name;
@@ -40,6 +40,14 @@ async function getResources(
       return [];
     }
   } else return [];
+}
+
+function initNamespace({ route }) {
+  const { namespace } = route.query || {};
+  return namespace || null;
+}
+function isNamespaceDisabled({ route }) {
+  return !!initNamespace({ route });
 }
 
 function labelsDisabilityChecker({ itemCtx }) {
@@ -179,7 +187,7 @@ const backendMap = {
 };
 
 function initBackendProvider({ model, getValue }) {
-  const backend = getValue(model, '/spec/backend');
+  const backend = getValue(model, "/spec/backend");
   const selectedBackend = Object.keys(backendMap).find((key) => {
     const value = backend && backend[key];
 
@@ -221,17 +229,16 @@ function showBackendForm({ getValue, model, watchDependency }, value) {
   return backendProvider === value;
 }
 
-function showSecretForm(
-  { model, getValue, watchDependency },
-  value
-) {
-  const backendProvider = getValue(model, '/spec/backend/provider')
+function showSecretForm({ model, getValue, watchDependency }, value) {
+  const backendProvider = getValue(model, "/spec/backend/provider");
   watchDependency("model#/spec/backend/provider");
   return backendProvider === value;
 }
 
 return {
   getResources,
+  initNamespace,
+  isNamespaceDisabled,
   labelsDisabilityChecker,
   fetchJsons,
   showExistingSecretSelection,
