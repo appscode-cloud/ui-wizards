@@ -13,29 +13,33 @@ async function getResources(
     watchDependency("model#/metadata/release/namespace");
   }
 
-  try {
-    const resp = await axios.get(
-      `/clusters/${owner}/${cluster}/proxy/${group}/${version}${
-        namespace ? "/namespaces/" + namespace : ""
-      }/${resource}`,
-      {
-        params: { filter: { items: { metadata: { name: null } } } },
-      }
-    );
-
-    const resources = (resp && resp.data && resp.data.items) || [];
-
-    resources.map((item) => {
-      const name = (item.metadata && item.metadata.name) || "";
-      item.text = name;
-      item.value = name;
-      return true;
-    });
-    return resources;
-  } catch (e) {
-    console.log(e);
-    return [];
-  }
+  if(!namespaced || namespace) {
+    // call api if resource is either not namespaced
+    // or namespaced and user has selected a namespace
+    try {
+      const resp = await axios.get(
+        `/clusters/${owner}/${cluster}/proxy/${group}/${version}${
+          namespace ? "/namespaces/" + namespace : ""
+        }/${resource}`,
+        {
+          params: { filter: { items: { metadata: { name: null } } } },
+        }
+      );
+  
+      const resources = (resp && resp.data && resp.data.items) || [];
+  
+      resources.map((item) => {
+        const name = (item.metadata && item.metadata.name) || "";
+        item.text = name;
+        item.value = name;
+        return true;
+      });
+      return resources;
+    } catch (e) {
+      console.log(e);
+      return [];
+    }
+  } else return [];
 }
 
 function labelsDisabilityChecker({ itemCtx }) {
