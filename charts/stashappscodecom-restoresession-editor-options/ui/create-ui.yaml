@@ -1,0 +1,386 @@
+steps:
+- form:
+    elements:
+    - label:
+        text: labels.repository.name
+      schema:
+        $ref: schema#/properties/metadata/properties/release/properties/name
+      type: input
+    - fetch: getResources|core|v1|namespaces
+      label:
+        text: labels.namespace
+      schema:
+        $ref: schema#/properties/metadata/properties/release/properties/namespace
+      type: select
+      computed: initNamespace
+      disabled: isNamespaceDisabled
+    - discriminator:
+        existingAuthSecrets:
+          default: []
+          type: Array
+        isExistingAuthSecretsFetching:
+          default: true
+          type: boolean
+        useExistingAuthSecret:
+          default: true
+          type: boolean
+      elements:
+      - individualItemDisabilityCheck: labelsDisabilityChecker
+        isArray: true
+        keys:
+          label:
+            text: labels.key
+        label:
+          text: labels.repository.labels
+        schema:
+          $ref: schema#/properties/spec/properties/labels
+        type: key-value-input-form
+        values:
+          label:
+            text: labels.value
+          schema:
+            $ref: schema#/properties/spec/properties/labels/additionalProperties
+          type: input
+      - isArray: true
+        keys:
+          label:
+            text: labels.key
+        label:
+          text: labels.repository.annotations
+        schema:
+          $ref: schema#/properties/spec/properties/annotations
+        type: key-value-input-form
+        values:
+          label:
+            text: labels.value
+          schema:
+            $ref: schema#/properties/spec/properties/annotations/additionalProperties
+          type: input
+      - customClass: mb-10
+        label:
+          isSubsection: false
+          text: labels.repository.backend
+        type: label-element
+      - elements:
+        - computed: initBackendProvider
+          label:
+            text: labels.backend.provider
+          onChange: onBackendProviderChange
+          options:
+          - text: Azure Blob Storage
+            value: azure
+          - text: Backblaze B2
+            value: b2
+          - text: Google Cloud Service
+            value: gcs
+          - text: AWS S3
+            value: s3
+          - text: OpenStack Swift
+            value: swift
+          schema:
+            $ref: schema#/properties/spec/properties/backend/properties/provider
+          type: select
+        - elements:
+          - elements:
+            - label:
+                text: labels.backend.container
+              schema:
+                $ref: schema#/properties/spec/properties/backend/properties/azure/properties/spec/properties/container
+              type: input
+            - label:
+                text: labels.backend.prefix
+              schema:
+                $ref: schema#/properties/spec/properties/backend/properties/azure/properties/spec/properties/prefix
+              type: input
+            - label:
+                text: labels.backend.maxConnections
+              schema:
+                $ref: schema#/properties/spec/properties/backend/properties/azure/properties/spec/properties/maxConnections
+              type: input
+            schema:
+              $ref: schema#/properties/spec/properties/backend/properties/azure/properties/spec
+            type: single-step-form
+          if: showBackendForm|azure
+          schema:
+            $ref: schema#/properties/spec/properties/backend/properties/azure
+          type: single-step-form
+        - elements:
+          - elements:
+            - label:
+                text: labels.backend.bucket
+              schema:
+                $ref: schema#/properties/spec/properties/backend/properties/b2/properties/spec/properties/bucket
+              type: input
+            - label:
+                text: labels.backend.prefix
+              schema:
+                $ref: schema#/properties/spec/properties/backend/properties/b2/properties/spec/properties/prefix
+              type: input
+            - label:
+                text: labels.backend.maxConnections
+              schema:
+                $ref: schema#/properties/spec/properties/backend/properties/b2/properties/spec/properties/maxConnections
+              type: input
+            schema:
+              $ref: schema#/properties/spec/properties/backend/properties/b2/properties/spec
+            type: single-step-form
+          if: showBackendForm|b2
+          schema:
+            $ref: schema#/properties/spec/properties/backend/properties/b2
+          type: single-step-form
+        - elements:
+          - elements:
+            - label:
+                text: labels.backend.bucket
+              schema:
+                $ref: schema#/properties/spec/properties/backend/properties/gcs/properties/spec/properties/bucket
+              type: input
+            - label:
+                text: labels.backend.prefix
+              schema:
+                $ref: schema#/properties/spec/properties/backend/properties/gcs/properties/spec/properties/prefix
+              type: input
+            - label:
+                text: labels.backend.maxConnections
+              schema:
+                $ref: schema#/properties/spec/properties/backend/properties/gcs/properties/spec/properties/maxConnections
+              type: input
+            schema:
+              $ref: schema#/properties/spec/properties/backend/properties/gcs/properties/spec
+            type: single-step-form
+          if: showBackendForm|gcs
+          schema:
+            $ref: schema#/properties/spec/properties/backend/properties/gcs
+          type: single-step-form
+        - elements:
+          - elements:
+            - label:
+                text: labels.backend.endPoint
+              schema:
+                $ref: schema#/properties/spec/properties/backend/properties/s3/properties/spec/properties/endpoint
+              type: input
+            - label:
+                text: labels.backend.bucket
+              schema:
+                $ref: schema#/properties/spec/properties/backend/properties/s3/properties/spec/properties/bucket
+              type: input
+            - label:
+                text: labels.backend.prefix
+              schema:
+                $ref: schema#/properties/spec/properties/backend/properties/s3/properties/spec/properties/prefix
+              type: input
+            - label:
+                text: labels.backend.region
+              schema:
+                $ref: schema#/properties/spec/properties/backend/properties/s3/properties/spec/properties/region
+              type: input
+            schema:
+              $ref: schema#/properties/spec/properties/backend/properties/s3/properties/spec
+            type: single-step-form
+          if: showBackendForm|s3
+          schema:
+            $ref: schema#/properties/spec/properties/backend/properties/s3
+          type: single-step-form
+        - elements:
+          - elements:
+            - label:
+                text: labels.backend.container
+              schema:
+                $ref: schema#/properties/spec/properties/backend/properties/swift/properties/spec/properties/container
+              type: input
+            - label:
+                text: labels.backend.prefix
+              schema:
+                $ref: schema#/properties/spec/properties/backend/properties/swift/properties/spec/properties/prefix
+              type: input
+            schema:
+              $ref: schema#/properties/spec/properties/backend/properties/swift/properties/spec
+            type: single-step-form
+          if: showBackendForm|swift
+          schema:
+            $ref: schema#/properties/spec/properties/backend/properties/swift
+          type: single-step-form
+        show_label: true
+        type: single-step-form
+      - label:
+          isSubsection: false
+          text: labels.repository.secret
+        type: label-element
+      - computed: initExistingAuthSecrets
+        options:
+        - text: Use Existing
+          value: true
+        - text: Create New
+          value: false
+        schema:
+          $ref: discriminator#/useExistingAuthSecret
+        type: radio
+      - allowUserDefinedOption: true
+        fetch: getExistingAuthSecrets
+        if: showExistingSecretSelection
+        label:
+          text: labels.repository.existingSecret
+        schema:
+          $ref: schema#/properties/spec/properties/authSecret/properties/name
+        type: select
+      - elements:
+        - label:
+            text: labels.secret.name
+          schema:
+            $ref: schema#/properties/spec/properties/authSecret/properties/name
+          type: input
+        - label:
+            text: labels.secret.password
+          schema:
+            $ref: schema#/properties/spec/properties/authSecret/properties/password
+          type: input
+        - elements:
+          - label:
+              text: labels.backend.azure.account_name
+            schema:
+              $ref: schema#/properties/spec/properties/backend/properties/azure/properties/auth/properties/AZURE_ACCOUNT_NAME
+            type: input
+          - label:
+              text: labels.backend.azure.account_key
+            schema:
+              $ref: schema#/properties/spec/properties/backend/properties/azure/properties/auth/properties/AZURE_ACCOUNT_KEY
+            type: input
+          if: showSecretForm|azure
+          schema:
+            $ref: schema#/properties/spec/properties/backend/properties/azure/properties/auth
+          type: single-step-form
+        - elements:
+          - label:
+              text: labels.backend.b2.account_id
+            schema:
+              $ref: schema#/properties/spec/properties/backend/properties/b2/properties/auth/properties/B2_ACCOUNT_ID
+            type: input
+          - label:
+              text: labels.backend.b2.account_key
+            schema:
+              $ref: schema#/properties/spec/properties/backend/properties/b2/properties/auth/properties/B2_ACCOUNT_KEY
+            type: input
+          if: showSecretForm|b2
+          schema:
+            $ref: schema#/properties/spec/properties/backend/properties/b2/properties/auth
+          type: single-step-form
+        - elements:
+          - label:
+              text: labels.backend.gcs.project_id
+            schema:
+              $ref: schema#/properties/spec/properties/backend/properties/gcs/properties/auth/properties/GOOGLE_PROJECT_ID
+            type: input
+          - label:
+              text: labels.backend.gcs.service_account
+            language: json
+            schema:
+              $ref: schema#/properties/spec/properties/backend/properties/gcs/properties/auth/properties/GOOGLE_SERVICE_ACCOUNT_JSON_KEY
+            type: editor
+          if: showSecretForm|gcs
+          schema:
+            $ref: schema#/properties/spec/properties/backend/properties/gcs/properties/auth
+          type: single-step-form
+        - elements:
+          - label:
+              text: labels.backend.s3.access_key_id
+            schema:
+              $ref: schema#/properties/spec/properties/backend/properties/s3/properties/auth/properties/AWS_ACCESS_KEY_ID
+            type: input
+          - label:
+              text: labels.backend.s3.secret_access_key
+            schema:
+              $ref: schema#/properties/spec/properties/backend/properties/s3/properties/auth/properties/AWS_SECRET_ACCESS_KEY
+            type: input
+          - label:
+              text: labels.backend.s3.ca_cert_data
+            schema:
+              $ref: schema#/properties/spec/properties/backend/properties/s3/properties/auth/properties/CA_CERT_DATA
+            type: editor
+          if: showSecretForm|s3
+          schema:
+            $ref: schema#/properties/spec/properties/backend/properties/s3/properties/auth
+          type: single-step-form
+        - elements:
+          - label:
+              text: labels.backend.swift.os_auth_token
+            schema:
+              $ref: schema#/properties/spec/properties/backend/properties/swift/properties/auth/properties/OS_AUTH_TOKEN
+            type: input
+          - label:
+              text: labels.backend.swift.os_auth_url
+            schema:
+              $ref: schema#/properties/spec/properties/backend/properties/swift/properties/auth/properties/OS_AUTH_URL
+            type: input
+          - label:
+              text: labels.backend.swift.os_password
+            schema:
+              $ref: schema#/properties/spec/properties/backend/properties/swift/properties/auth/properties/OS_PASSWORD
+            type: input
+          - label:
+              text: labels.backend.swift.os_project_domain_name
+            schema:
+              $ref: schema#/properties/spec/properties/backend/properties/swift/properties/auth/properties/OS_PROJECT_DOMAIN_NAME
+            type: input
+          - label:
+              text: labels.backend.swift.os_project_name
+            schema:
+              $ref: schema#/properties/spec/properties/backend/properties/swift/properties/auth/properties/OS_PROJECT_NAME
+            type: input
+          - label:
+              text: labels.backend.swift.os_region_name
+            schema:
+              $ref: schema#/properties/spec/properties/backend/properties/swift/properties/auth/properties/OS_REGION_NAME
+            type: input
+          - label:
+              text: labels.backend.swift.os_storage_url
+            schema:
+              $ref: schema#/properties/spec/properties/backend/properties/swift/properties/auth/properties/OS_STORAGE_URL
+            type: input
+          - label:
+              text: labels.backend.swift.os_tenant_id
+            schema:
+              $ref: schema#/properties/spec/properties/backend/properties/swift/properties/auth/properties/OS_TENANT_ID
+            type: input
+          - label:
+              text: labels.backend.swift.os_tenant_name
+            schema:
+              $ref: schema#/properties/spec/properties/backend/properties/swift/properties/auth/properties/OS_TENANT_NAME
+            type: input
+          - label:
+              text: labels.backend.swift.os_username
+            schema:
+              $ref: schema#/properties/spec/properties/backend/properties/swift/properties/auth/properties/OS_USERNAME
+            type: input
+          - label:
+              text: labels.backend.swift.os_user_domain_name
+            schema:
+              $ref: schema#/properties/spec/properties/backend/properties/swift/properties/auth/properties/OS_USER_DOMAIN_NAME
+            type: input
+          - label:
+              text: labels.backend.swift.st_auth
+            schema:
+              $ref: schema#/properties/spec/properties/backend/properties/swift/properties/auth/properties/ST_AUTH
+            type: input
+          - label:
+              text: labels.backend.swift.st_key
+            schema:
+              $ref: schema#/properties/spec/properties/backend/properties/swift/properties/auth/properties/ST_KEY
+            type: input
+          - label:
+              text: labels.backend.swift.st_user
+            schema:
+              $ref: schema#/properties/spec/properties/backend/properties/swift/properties/auth/properties/ST_USER
+            type: input
+          if: showSecretForm|swift
+          schema:
+            $ref: schema#/properties/spec/properties/backend/properties/swift/properties/auth
+          type: single-step-form
+        if: showCreateSecretForm
+        type: single-step-form
+      schema:
+        $ref: schema#/properties/spec
+      type: single-step-form
+    type: single-step-form
+  id: options
+  title: steps.0.label
+type: multi-step-form
