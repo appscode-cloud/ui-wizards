@@ -1,0 +1,23 @@
+apiVersion: stash.appscode.com/v1beta1
+kind: RestoreSession
+metadata:
+  name: {{ include "stashappscodecom-restoresession-editor-options.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "stashappscodecom-restoresession-editor-options.labels" . | nindent 4 }}
+{{- if .Values.spec.annotations }}
+  annotations:
+    {{- include "stashappscodecom-restoresession-editor-options.annotations" . | nindent 4 }}
+{{- end }}
+spec:
+  repository: {{ .Values.spec.repository | toYaml }}
+  target: {{ .Values.spec.target | toYaml }}
+  rules:
+  - snapshots:
+    - {{ default "latest" .Values.spec.snapshot }}
+{{- if .Values.spec.runtimeSettings }}
+  runtimeSettings: {{ .Values.spec.runtimeSettings | toYaml }}
+{{- end}}
+{{- if .Values.spec.interimVolumeTemplate }}
+  interimVolumeTemplate: {{ .Values.spec.interimVolumeTemplate | toYaml }}
+{{- end}}
