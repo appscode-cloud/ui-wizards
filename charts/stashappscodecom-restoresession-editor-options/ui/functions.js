@@ -96,143 +96,117 @@ async function fetchJsons(
   };
 }
 
-function showExistingSecretSelection({
-  discriminator,
+async function fetchDatabases({
+  axios,
+  storeGet,
+  model,
   getValue,
   watchDependency,
 }) {
-  const useExistingAuthSecret = getValue(
-    discriminator,
-    "/useExistingAuthSecret"
-  );
-  const isExistingAuthSecretsFetching = getValue(
-    discriminator,
-    "/isExistingAuthSecretsFetching"
-  );
-  watchDependency("discriminator#/useExistingAuthSecret");
-  watchDependency("discriminator#/isExistingAuthSecretsFetching");
-  return !isExistingAuthSecretsFetching && useExistingAuthSecret;
-}
+  const owner = storeGet("/route/params/user");
+  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const namespace = getValue(model, "/metadata/release/namespace");
+  watchDependency("model#/metadata/release/namespace");
 
-async function initExistingAuthSecrets(ctx) {
-  ctx.setDiscriminatorValue("/isExistingAuthSecretsFetching", true);
-  const secrets = await getResources(ctx, "core", "v1", "secrets", true);
-  // set secrets;
-  ctx.setDiscriminatorValue("/existingAuthSecrets", secrets);
-  ctx.setDiscriminatorValue("/isExistingAuthSecretsFetching", false);
+  if (namespace) {
+    // call api if user has selected a namespace
+    try {
+      const resp = await axios.get(
+        `/clusters/${owner}/${cluster}/proxy/appcatalog.appscode.com/v1alpha1/namespaces/${namespace}/appbindings`,
+        {
+          params: {
+            filter: {
+              items: {
+                apiVersion: null,
+                kind: null,
+                metadata: { name: null, namespace: null },
+                spec: { type: null },
+              },
+            },
+          },
+        }
+      );
 
-  return true;
-}
+      const resources = (resp && resp.data && resp.data.items) || [];
 
-async function getExistingAuthSecrets({
-  discriminator,
-  getValue,
-  watchDependency,
-}) {
-  const existingAuthSecrets = getValue(discriminator, "/existingAuthSecrets");
-  watchDependency("discriminator#/existingAuthSecrets");
-  return existingAuthSecrets;
-}
+      const mappedResources = resources
+        .filter((item) => {
+          const type = (item.spec && item.spec.type) || "";
+          return type.startsWith('kubedb.com')
+        })
+        .map((item) => {
+          const apiVersion = item.apiVersion || "";
+          const kind = item.kind || "";
+          const name = (item.metadata && item.metadata.name) || "";
+          const namespace = (item.metadata && item.metadata.namespace) || "";
+          return {
+            text: name,
+            value: {
+              apiVersion,
+              kind,
+              name,
+              namespace,
+            },
+          };
+        });
 
-function showCreateSecretForm({ discriminator, getValue, watchDependency }) {
-  const useExistingAuthSecret = getValue(
-    discriminator,
-    "/useExistingAuthSecret"
-  );
-  watchDependency("discriminator#/useExistingAuthSecret");
-  return !useExistingAuthSecret;
-}
-
-// backend configuration
-const backendMap = {
-  azure: {
-    spec: { container: "", maxConnections: 0, prefix: "" },
-    auth: { AZURE_ACCOUNT_KEY: "", AZURE_ACCOUNT_NAME: "" },
-  },
-  b2: {
-    spec: { bucket: "", prefix: "", maxConnections: 0 },
-    auth: { B2_ACCOUNT_ID: "", B2_ACCOUNT_KEY: "" },
-  },
-  gcs: {
-    spec: { bucket: "", prefix: "", maxConnections: 0 },
-    auth: { GOOGLE_PROJECT_ID: "", GOOGLE_SERVICE_ACCOUNT_JSON_KEY: "" },
-  },
-  s3: {
-    spec: { endpoint: "", bucket: "", prefix: "", region: "" },
-    auth: {
-      AWS_ACCESS_KEY_ID: "",
-      AWS_SECRET_ACCESS_KEY: "",
-      CA_CERT_DATA: "",
-    },
-  },
-  swift: {
-    spec: { container: "", prefix: "" },
-    auth: {
-      OS_AUTH_TOKEN: "",
-      OS_AUTH_URL: "",
-      OS_PASSWORD: "",
-      OS_PROJECT_DOMAIN_NAME: "",
-      OS_PROJECT_NAME: "",
-      OS_REGION_NAME: "",
-      OS_STORAGE_URL: "",
-      OS_TENANT_ID: "",
-      OS_TENANT_NAME: "",
-      OS_USERNAME: "",
-      OS_USER_DOMAIN_NAME: "",
-      ST_AUTH: "",
-      ST_KEY: "",
-      ST_USER: "",
-    },
-  },
-};
-
-function initBackendProvider({ model, getValue }) {
-  const backend = getValue(model, "/spec/backend");
-  const selectedBackend = Object.keys(backendMap).find((key) => {
-    const value = backend && backend[key];
-
-    return value ? true : false;
-  });
-  return selectedBackend || "gcs";
-}
-
-function valueExists(value, getValue, path) {
-  const val = getValue(value, path);
-  if (val) return true;
-  else return false;
-}
-
-function onBackendProviderChange({ commit, getValue, model }) {
-  const selectedBackendProvider = getValue(model, "/spec/backend/provider");
-
-  // delete every other backend type from model  exect the selected one
-  Object.keys(backendMap).forEach((key) => {
-    if (key !== selectedBackendProvider) {
-      commit("wizard/model$delete", `/spec/backend/${key}`);
+      return mappedResources;
+    } catch (e) {
+      console.log(e);
+      return [];
     }
-  });
-
-  // set the selectedBackend type object in
-
-  if (!valueExists(model, getValue, `/${selectedBackendProvider}`)) {
-    commit("wizard/model$update", {
-      path: `/spec/backend/${selectedBackendProvider}`,
-      value: {},
-      force: true,
-    });
-  }
+  } else return [];
 }
 
-function showBackendForm({ getValue, model, watchDependency }, value) {
-  const backendProvider = getValue(model, "/spec/backend/provider");
-  watchDependency("model#/spec/backend/provider");
-  return backendProvider === value;
-}
+async function fetchRepositories({
+  axios,
+  storeGet,
+  model,
+  getValue,
+  watchDependency,
+}) {
+  const owner = storeGet("/route/params/user");
+  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const namespace = getValue(model, "/metadata/release/namespace");
+  watchDependency("model#/metadata/release/namespace");
 
-function showSecretForm({ model, getValue, watchDependency }, value) {
-  const backendProvider = getValue(model, "/spec/backend/provider");
-  watchDependency("model#/spec/backend/provider");
-  return backendProvider === value;
+  if (namespace) {
+    // call api if user has selected a namespace
+    try {
+      const resp = await axios.get(
+        `/clusters/${owner}/${cluster}/proxy/stash.appscode.com/v1alpha1/namespaces/${namespace}/repositories`,
+        {
+          params: {
+            filter: {
+              items: {
+                metadata: { name: null, namespace: null },
+              },
+            },
+          },
+        }
+      );
+
+      const resources = (resp && resp.data && resp.data.items) || [];
+
+      const mappedResources = resources
+        .map((item) => {
+          const name = (item.metadata && item.metadata.name) || "";
+          const namespace = (item.metadata && item.metadata.namespace) || "";
+          return {
+            text: name,
+            value: {
+              name,
+              namespace,
+            },
+          };
+        });
+
+      return mappedResources;
+    } catch (e) {
+      console.log(e);
+      return [];
+    }
+  } else return [];
 }
 
 return {
@@ -241,12 +215,6 @@ return {
   isNamespaceDisabled,
   labelsDisabilityChecker,
   fetchJsons,
-  showExistingSecretSelection,
-  initExistingAuthSecrets,
-  getExistingAuthSecrets,
-  showCreateSecretForm,
-  initBackendProvider,
-  onBackendProviderChange,
-  showBackendForm,
-  showSecretForm,
+  fetchDatabases,
+  fetchRepositories,
 };
