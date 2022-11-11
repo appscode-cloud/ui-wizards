@@ -67,7 +67,10 @@ steps:
                 $ref: store#/route/params/user
               cluster: 
                 $ref: store#/route/params/cluster
-            path: /${user}/${cluster}/stash.appscode.com/v1alpha1/repositories/create?namespace=demo
+              namespace:
+                $ref: model#/metadata/release/namespace
+            path: /${user}/${cluster}/stash.appscode.com/v1alpha1/repositories/create?namespace=${namespace}
+        refresh: true
       - type: input
         label:
           text: labels.restoresession.snapshot
