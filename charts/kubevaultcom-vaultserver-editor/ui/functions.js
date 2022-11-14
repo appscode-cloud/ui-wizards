@@ -1637,6 +1637,16 @@ function onSetCustomConfigChange({ discriminator, getValue, commit }) {
   }
 }
 
+//********************************************* Health checker      ******************************/
+
+function isWriteCheckEnabled({model, getValue, watchDependency}) {
+  watchDependency('model#/resources/kubevaultComVaultServer/spec/healthChecker/disableWriteCheck')
+  
+  const isEnabled = getValue(model, '/resources/kubevaultComVaultServer/spec/healthChecker/disableWriteCheck')
+
+  return !isEnabled;
+}
+
 return {
 	fetchJsons,
 	disableLableChecker,
@@ -1726,4 +1736,5 @@ return {
 	setConfiguration,
   setConfigurationFiles,
   onSetCustomConfigChange,
+  isWriteCheckEnabled
 }

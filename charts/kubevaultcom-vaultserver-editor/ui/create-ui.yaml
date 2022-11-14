@@ -565,11 +565,6 @@ steps:
                     $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/raft/properties/maxEntrySize
                   type: input
                 - label:
-                    text: labels.backend.path
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/raft/properties/path
-                  type: input
-                - label:
                     text: labels.backend.performanceMultiplier
                   schema:
                     $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/raft/properties/performanceMultiplier
@@ -1588,12 +1583,6 @@ steps:
             $ref: discriminator#/configureTLS
           type: switch
         - elements:
-            - computed: returnFalse
-              label:
-                text: labels.require_ssl_question
-              schema:
-                $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/requireSSL
-              type: switch
             - elements:
                 - computed: setApiGroup
                   disabled: true
@@ -1647,17 +1636,20 @@ steps:
           schema:
             $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/healthChecker/properties/disableWriteCheck
           type: switch
-        - label:
+        - if: isWriteCheckEnabled
+          label:
             text: labels.healthChecker.failureThreshold
           schema:
             $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/healthChecker/properties/failureThreshold
           type: input
-        - label:
+        - if: isWriteCheckEnabled
+          label:
             text: labels.healthChecker.periodSeconds
           schema:
             $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/healthChecker/properties/periodSeconds
           type: input
-        - label:
+        - if: isWriteCheckEnabled
+          label:
             text: labels.healthChecker.timeoutSeconds
           schema:
             $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/healthChecker/properties/timeoutSeconds
