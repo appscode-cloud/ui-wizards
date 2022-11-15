@@ -46,36 +46,36 @@ steps:
           schema:
             $ref: schema#/properties/spec/properties/annotations/additionalProperties
           type: input
-      - type: select
+      - fetch: fetchDatabases
         label:
           text: labels.restoresession.database
         schema:
           $ref: schema#/properties/spec/properties/target
-        fetch: fetchDatabases
-      - type: select
-        label:
-          text: labels.repository.select
-        schema:
-          $ref: schema#/properties/spec/properties/repository
-        fetch: fetchRepositories
-        add_new_button:
+        type: select
+      - add_new_button:
           label: labels.repository.create
           target: _blank
           url:
             params:
-              user: 
-                $ref: store#/route/params/user
-              cluster: 
+              cluster:
                 $ref: store#/route/params/cluster
               namespace:
                 $ref: model#/metadata/release/namespace
+              user:
+                $ref: store#/route/params/user
             path: /${user}/${cluster}/stash.appscode.com/v1alpha1/repositories/create?namespace=${namespace}
-        refresh: true
-      - type: input
+        fetch: fetchRepositories
         label:
+          text: labels.repository.select
+        refresh: true
+        schema:
+          $ref: schema#/properties/spec/properties/repository
+        type: select
+      - label:
           text: labels.restoresession.snapshot
         schema:
           $ref: schema#/properties/spec/properties/snapshot
+        type: input
       schema:
         $ref: schema#/properties/spec
       type: single-step-form

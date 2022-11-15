@@ -7,8 +7,8 @@
 ```bash
 $ helm repo add bytebuilders-ui https://bundles.byte.builders/ui/
 $ helm repo update
-$ helm search repo bytebuilders-ui/stashappscodecom-repository-editor-options --version=v0.4.11
-$ helm upgrade -i stashappscodecom-repository-editor-options bytebuilders-ui/stashappscodecom-repository-editor-options -n kube-system --create-namespace --version=v0.4.11
+$ helm search repo bytebuilders-ui/stashappscodecom-restoresession-editor-options --version=v0.4.11
+$ helm upgrade -i stashappscodecom-repository-editor-options bytebuilders-ui/stashappscodecom-restoresession-editor-options -n kube-system --create-namespace --version=v0.4.11
 ```
 
 ## Introduction
@@ -24,7 +24,7 @@ This chart deploys a Stash Repository Editor UI Options on a [Kubernetes](http:/
 To install/upgrade the chart with the release name `stashappscodecom-repository-editor-options`:
 
 ```bash
-$ helm upgrade -i stashappscodecom-repository-editor-options bytebuilders-ui/stashappscodecom-repository-editor-options -n kube-system --create-namespace --version=v0.4.11
+$ helm upgrade -i stashappscodecom-repository-editor-options bytebuilders-ui/stashappscodecom-restoresession-editor-options -n kube-system --create-namespace --version=v0.4.11
 ```
 
 The command deploys a Stash Repository Editor UI Options on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
@@ -43,7 +43,7 @@ The command removes all the Kubernetes components associated with the chart and 
 
 ## Configuration
 
-The following table lists the configurable parameters of the `stashappscodecom-repository-editor-options` chart and their default values.
+The following table lists the configurable parameters of the `stashappscodecom-restoresession-editor-options` chart and their default values.
 
 |         Parameter          |                    Description                     |             Default             |
 |----------------------------|----------------------------------------------------|---------------------------------|
@@ -57,23 +57,19 @@ The following table lists the configurable parameters of the `stashappscodecom-r
 | spec.annotations           | Annotations to add to the database custom resource | <code>{}</code>                 |
 | spec.labels                | Labels to add to all the template objects          | <code>{}</code>                 |
 | spec.snapshot              | snapshot to restore from                           | <code>latest</code>             |
-| spec.repository.name       |                                                    | <code>""</code>                 |
-| spec.repository.namespace  |                                                    | <code>""</code>                 |
-| spec.target.apiVersion     |                                                    | <code>""</code>                 |
-| spec.target.kind           |                                                    | <code>""</code>                 |
-| spec.target.name           |                                                    | <code>""</code>                 |
-| spec.target.namespace      |                                                    | <code>""</code>                 |
+| spec.repository            | repository of the snapshot                         | <code>{}</code>                 |
+| spec.target                | target database                                    | <code>{}</code>                 |
 
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm upgrade -i`. For example:
 
 ```bash
-$ helm upgrade -i stashappscodecom-repository-editor-options bytebuilders-ui/stashappscodecom-repository-editor-options -n kube-system --create-namespace --version=v0.4.11 --set metadata.resource.group=stash.appscode.com
+$ helm upgrade -i stashappscodecom-repository-editor-options bytebuilders-ui/stashappscodecom-restoresession-editor-options -n kube-system --create-namespace --version=v0.4.11 --set metadata.resource.group=stash.appscode.com
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
 installing the chart. For example:
 
 ```bash
-$ helm upgrade -i stashappscodecom-repository-editor-options bytebuilders-ui/stashappscodecom-repository-editor-options -n kube-system --create-namespace --version=v0.4.11 --values values.yaml
+$ helm upgrade -i stashappscodecom-repository-editor-options bytebuilders-ui/stashappscodecom-restoresession-editor-options -n kube-system --create-namespace --version=v0.4.11 --values values.yaml
 ```
