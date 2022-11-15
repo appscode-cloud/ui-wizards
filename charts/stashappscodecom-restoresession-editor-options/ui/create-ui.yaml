@@ -76,6 +76,81 @@ steps:
         schema:
           $ref: schema#/properties/spec/properties/snapshot
         type: input
+      - type: single-step-form
+        if: showInterimVolumneTemplate
+        show_label: true
+        label:
+          text: labels.interimVolumeTemplate
+        schema:
+          $ref: schema#/properties/spec/properties/interimVolumeTemplate
+        elements:
+        - type: select
+          label:
+            text: labels.storage.class
+          schema:
+            $ref: schema#/properties/spec/properties/interimVolumeTemplate/properties/spec/properties/storageClassName
+          fetch: getStorageClassNames|/spec/interimVolumeTemplate/spec/storageClassName
+        - type: input
+          label:
+            text: labels.storage.size
+          schema:
+            $ref: schema#/properties/spec/properties/interimVolumeTemplate/properties/spec/properties/resources/properties/requests/properties/storage
+      - type: single-step-form
+        discriminator:
+          customizeRestoreJobRuntimeSettings:
+            type: boolean
+            default: false
+        show_label: true
+        label:
+          text: Runtime Settings
+        elements:
+          - type: switch
+            label:
+              text: labels.runtimeSettings.choise
+            schema:
+              $ref: discriminator#/properties/customizeRestoreJobRuntimeSettings
+          - type: reusable-element
+            if: showRuntimeSettingsForm
+            alias: database-restore-runtime-settings
+            schema:
+              $ref: schema#/properties/spec/properties/runtimeSettings
+            chart:
+              name: uibytebuildersdev-component-database-runtime-settings
+              version: v0.4.11
+            moduleResolver: fetchJsons
+            dataContext:
+              namespace:
+                $ref: schema#/properties/metadata/properties/release/properties/namespace
+      # - discriminator:
+      #     customizeRestoreJobRuntimeSettings:
+      #       type: string
+      #   elements:
+      #   - computed: initCustomizeRestoreJobRuntimeSettings
+      #     label:
+      #       isSubsection: true
+      #       text: labels.runtimeSettings.choise
+      #     onChange: onCustomizeRestoreJobRuntimeSettingsChange
+      #     options:
+      #     - text: labels.textYes
+      #       value: "yes"
+      #     - text: labels.textNo
+      #       value: "no"
+      #     schema:
+      #       $ref: discriminator#/properties/customizeRestoreJobRuntimeSettings
+      #     type: radio
+      #   - alias: runtime_settings_init
+      #     chart:
+      #       name: uibytebuildersdev-component-runtime-settings
+      #       version: v0.4.11
+      #     dataContext:
+      #       namespace:
+      #         $ref: schema#/properties/metadata/properties/release/properties/namespace
+      #     if: showRuntimeForm|yes
+      #     moduleResolver: fetchJsons
+      #     schema:
+      #       $ref: schema#/properties/spec/properties/runtimeSettings
+      #     type: reusable-element
+      #   type: single-step-form
       schema:
         $ref: schema#/properties/spec
       type: single-step-form

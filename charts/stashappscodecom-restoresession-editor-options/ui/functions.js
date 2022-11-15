@@ -96,6 +96,8 @@ async function fetchJsons(
   };
 }
 
+let databaseToTypeMap = {};
+
 async function fetchDatabases({
   axios,
   storeGet,
@@ -132,7 +134,7 @@ async function fetchDatabases({
       const mappedResources = resources
         .filter((item) => {
           const type = (item.spec && item.spec.type) || "";
-          return type.startsWith('kubedb.com')
+          return type.startsWith("kubedb.com");
         })
         .map((item) => {
           const apiVersion = item.apiVersion || "";
@@ -149,6 +151,16 @@ async function fetchDatabases({
             },
           };
         });
+
+      // update database to type map
+      databaseToTypeMap = {};
+      resources.forEach((rs) => {
+        const type = (rs.spec && rs.spec.type) || "";
+        const name = (rs.metadata && rs.metadata.name) || "";
+        if (type.startsWith("kubedb.com")) {
+          databaseToTypeMap[name] = type;
+        }
+      });
 
       return mappedResources;
     } catch (e) {
@@ -188,18 +200,17 @@ async function fetchRepositories({
 
       const resources = (resp && resp.data && resp.data.items) || [];
 
-      const mappedResources = resources
-        .map((item) => {
-          const name = (item.metadata && item.metadata.name) || "";
-          const namespace = (item.metadata && item.metadata.namespace) || "";
-          return {
-            text: name,
-            value: {
-              name,
-              namespace,
-            },
-          };
-        });
+      const mappedResources = resources.map((item) => {
+        const name = (item.metadata && item.metadata.name) || "";
+        const namespace = (item.metadata && item.metadata.namespace) || "";
+        return {
+          text: name,
+          value: {
+            name,
+            namespace,
+          },
+        };
+      });
 
       return mappedResources;
     } catch (e) {
@@ -207,6 +218,120 @@ async function fetchRepositories({
       return [];
     }
   } else return [];
+}
+
+function valueExists(value, getValue, path) {
+  const val = getValue(value, path);
+  if (val) return true;
+  else return false;
+}
+
+function showInterimVolumneTemplate({
+  model,
+  getValue,
+  watchDependency,
+  commit,
+}) {
+  const appbindingName = getValue(model, "/spec/target/name");
+  watchDependency("model#/spec/target/name");
+
+  let verdict = false;
+  if (appbindingName) {
+    // find app binding type
+    const type = databaseToTypeMap[appbindingName];
+    if (type === "kubedb.com/elasticsearch") verdict = true;
+  }
+
+  if (!verdict) {
+    // delete interimVolumeTempalte if it exists
+    if (valueExists(model, getValue, "/spec/interimVolumeTemplate")) {
+      commit("wizard/model$delete", "/spec/interimVolumeTemplate");
+    }
+  }
+
+  return verdict;
+}
+
+async function getStorageClassNames(
+  { axios, storeGet, commit, setDiscriminatorValue, getValue, model },
+  path
+) {
+  const owner = storeGet("/route/params/user");
+  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+
+  const resp = await axios.get(
+    `/clusters/${owner}/${cluster}/proxy/storage.k8s.io/v1/storageclasses`,
+    {
+      params: {
+        filter: { items: { metadata: { name: null, annotations: null } } },
+      },
+    }
+  );
+
+  const resources = (resp && resp.data && resp.data.items) || [];
+
+  resources.map((item) => {
+    const name = (item.metadata && item.metadata.name) || "";
+    const isDefault =
+      item.metadata &&
+      item.metadata.annotations &&
+      item.metadata.annotations["storageclass.kubernetes.io/is-default-class"];
+
+    if (isDefault && path) {
+      const className = getValue(model, path);
+      if (!className) {
+        commit("wizard/model$update", {
+          path: path,
+          value: name,
+          force: true,
+        });
+      }
+    }
+
+    item.text = name;
+    item.value = name;
+    return true;
+  });
+
+  if (!path) {
+    setDiscriminatorValue("/storageClasses", resources);
+  }
+
+  return resources;
+}
+
+const restoreSessionInitRunTimeSettings = {
+  pod: {
+    serviceAccountName: "",
+    securityContext: {
+      fsGroup: null,
+      runAsUser: null,
+      runAsGroup: null,
+    },
+  },
+};
+function showRuntimeSettingsForm(
+  { discriminator, getValue, watchDependency, commit, model }
+) {
+  const customizeRestoreJobRuntimeSettings = getValue(
+    discriminator,
+    "/customizeRestoreJobRuntimeSettings"
+  );
+  watchDependency("discriminator#/customizeRestoreJobRuntimeSettings");
+
+  if (customizeRestoreJobRuntimeSettings) {
+    // set the runtime settings values with default values
+    if (!valueExists(model, getValue, "/spec/runtimeSettings")) {
+      // set new value
+      commit("wizard/model$update", {
+        path: "/spec/runtimeSettings",
+        value: restoreSessionInitRunTimeSettings,
+      });
+    }
+  } else {
+    commit("wizard/model$delete", "/spec/runtimeSettings");
+  }
+  return !!customizeRestoreJobRuntimeSettings;
 }
 
 return {
@@ -217,4 +342,9 @@ return {
   fetchJsons,
   fetchDatabases,
   fetchRepositories,
+
+  showInterimVolumneTemplate,
+  getStorageClassNames,
+
+  showRuntimeSettingsForm,
 };

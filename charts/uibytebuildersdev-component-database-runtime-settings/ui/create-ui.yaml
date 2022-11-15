@@ -1,0 +1,338 @@
+elements:
+- discriminator:
+    customizeAdditionalPodRuntimeSettings:
+      type: boolean
+      default: false
+  elements:
+  - allowUserDefinedOption: true
+    fetch: resourceNames|core|v1|serviceaccounts
+    label:
+      text: labels.runtimeSettings.pod.serviceAccountName
+    schema:
+      $ref: schema#/properties/pod/properties/serviceAccountName
+    type: select
+  - elements:
+    - label:
+        text: labels.runtimeSettings.securityContext.fsGroup
+      schema:
+        $ref: schema#/properties/pod/properties/securityContext/properties/fsGroup
+      type: input
+    - label:
+        text: labels.runtimeSettings.securityContext.runAsUser
+      schema:
+        $ref: schema#/properties/pod/properties/securityContext/properties/runAsUser
+      type: input
+    - label:
+        text: labels.runtimeSettings.securityContext.runAsGroup
+      schema:
+        $ref: schema#/properties/pod/properties/securityContext/properties/runAsGroup
+      type: input
+    label:
+      text: Pod security context
+    schema:
+      $ref: schema#/properties/pod/properties/securityContext
+    show_label: true
+    type: single-step-form
+  - type: switch
+    label:
+      text: labels.runtimeSettings.pod.additionalChoise
+    schema:
+      $ref: discriminator#/properties/customizeAdditionalPodRuntimeSettings
+  - type: single-step-form
+    if: showAdditionalPodRuntimeSettingsForm
+    elements:
+    - type: select
+      label:
+        text: labels.runtimeSettings.pod.nodeName
+      schema:
+        $ref: schema#/properties/pod/properties/nodeName
+      fetch: getNodes
+    - isArray: true
+      keys:
+        label:
+          text: labels.key
+      label:
+        text: labels.runtimeSettings.pod.annotations
+      schema:
+        $ref: schema#/properties/pod/properties/podAnnotations
+      type: key-value-input-form
+      values:
+        label:
+          text: labels.value
+        schema:
+          $ref: schema#/properties/pod/properties/podAnnotations/additionalProperties
+        type: input
+    - keys:
+        label:
+          text: labels.key
+      label:
+        text: labels.runtimeSettings.pod.nodeSelector
+      schema:
+        $ref: schema#/properties/pod/properties/nodeSelector
+      type: key-value-input-form
+      values:
+        label:
+          text: labels.value
+        schema:
+          $ref: schema#/properties/pod/properties/nodeSelector/additionalProperties
+        type: input
+    - elements:
+      - elements:
+        - elements:
+          - addFormLabel: labels.runtimeSettings.affinity.node_selector_terms
+            customClass: mb-20
+            element:
+              elements:
+              - alias: reusable_node_selector_terms_match_expressions
+                chart:
+                  name: uibytebuildersdev-component-match-expressions
+                  version: v0.4.11
+                moduleResolver: fetchJsons
+                schema:
+                  $ref: schema#/properties/pod/properties/affinity/properties/nodeAffinity/properties/requiredDuringSchedulingIgnoredDuringExecution/properties/nodeSelectorTerms/items/properties/matchExpressions
+                type: reusable-element
+              - alias: reusable_node_selector_terms_match_fields
+                chart:
+                  name: uibytebuildersdev-component-match-fields
+                  version: v0.4.11
+                moduleResolver: fetchJsons
+                schema:
+                  $ref: schema#/properties/pod/properties/affinity/properties/nodeAffinity/properties/requiredDuringSchedulingIgnoredDuringExecution/properties/nodeSelectorTerms/items/properties/matchFields
+                type: reusable-element
+              type: single-step-form
+            label:
+              text: labels.runtimeSettings.affinity.node_selector_terms
+            schema:
+              $ref: schema#/properties/pod/properties/affinity/properties/nodeAffinity/properties/requiredDuringSchedulingIgnoredDuringExecution/properties/nodeSelectorTerms
+            tableContents:
+            - inTableColumn: true
+              label:
+                text: labels.runtimeSettings.affinity.match_expressions
+              path: matchExpressions
+              tableContents:
+              - inTableColumn: true
+                label:
+                  text: labels.runtimeSettings.affinity.key
+                path: key
+                type: value
+                typeOfValue: string
+              - inTableColumn: true
+                label:
+                  text: labels.runtimeSettings.affinity.operator
+                path: operator
+                type: value
+                typeOfValue: string
+              - inTableColumn: true
+                label:
+                  text: labels.runtimeSettings.affinity.values
+                path: values
+                type: value
+                typeOfValue: array
+              type: value
+              typeOfValue: key-operator-values-array
+            - inTableColumn: true
+              label:
+                text: labels.runtimeSettings.affinity.match_fields
+              path: matchFields
+              tableContents:
+              - inTableColumn: true
+                label:
+                  text: labels.runtimeSettings.affinity.key
+                path: key
+                type: value
+                typeOfValue: string
+              - inTableColumn: true
+                label:
+                  text: labels.runtimeSettings.affinity.operator
+                path: operator
+                type: value
+                typeOfValue: string
+              - inTableColumn: true
+                label:
+                  text: labels.runtimeSettings.affinity.values
+                path: values
+                type: value
+                typeOfValue: array
+              type: value
+              typeOfValue: key-operator-values-array
+            type: single-step-form-array
+          schema:
+            $ref: schema#/properties/pod/properties/affinity/properties/nodeAffinity/properties/requiredDuringSchedulingIgnoredDuringExecution
+          type: single-step-form
+        - addFormLabel: labels.runtimeSettings.affinity.preferred_during_scheduling_ignored_during_execution
+          customClass: mb-20
+          element:
+            elements:
+            - elements:
+              - alias: reusable_preferred_match_expressions
+                chart:
+                  name: uibytebuildersdev-component-match-expressions
+                  version: v0.4.11
+                moduleResolver: fetchJsons
+                schema:
+                  $ref: schema#/properties/pod/properties/affinity/properties/nodeAffinity/properties/preferredDuringSchedulingIgnoredDuringExecution/items/properties/preference/properties/matchExpressions
+                type: reusable-element
+              - alias: reusable_preferred_match_fields
+                chart:
+                  name: uibytebuildersdev-component-match-fields
+                  version: v0.4.11
+                moduleResolver: fetchJsons
+                schema:
+                  $ref: schema#/properties/pod/properties/affinity/properties/nodeAffinity/properties/preferredDuringSchedulingIgnoredDuringExecution/items/properties/preference/properties/matchFields
+                type: reusable-element
+              schema:
+                $ref: schema#/properties/pod/properties/affinity/properties/nodeAffinity/properties/preferredDuringSchedulingIgnoredDuringExecution/items/properties/preference
+              type: single-step-form
+            - label:
+                text: labels.runtimeSettings.affinity.weight
+              schema:
+                $ref: schema#/properties/pod/properties/affinity/properties/nodeAffinity/properties/preferredDuringSchedulingIgnoredDuringExecution/items/properties/weight
+              type: input
+            type: single-step-form
+          label:
+            text: labels.runtimeSettings.affinity.preferred_during_scheduling_ignored_during_execution
+          schema:
+            $ref: schema#/properties/pod/properties/affinity/properties/nodeAffinity/properties/preferredDuringSchedulingIgnoredDuringExecution
+          tableContents:
+          - inTableColumn: true
+            label:
+              text: labels.runtimeSettings.affinity.weight
+            path: weight
+            type: value
+            typeOfValue: string
+          - inTableColumn: true
+            label:
+              text: labels.runtimeSettings.affinity.match_expressions
+            path: preference/matchExpressions
+            tableContents:
+            - inTableColumn: true
+              label:
+                text: labels.runtimeSettings.affinity.key
+              path: key
+              type: value
+              typeOfValue: string
+            - inTableColumn: true
+              label:
+                text: labels.runtimeSettings.affinity.operator
+              path: operator
+              type: value
+              typeOfValue: string
+            - inTableColumn: true
+              label:
+                text: labels.runtimeSettings.affinity.values
+              path: values
+              type: value
+              typeOfValue: array
+            type: value
+            typeOfValue: key-operator-values-array
+          - inTableColumn: true
+            label:
+              text: labels.runtimeSettings.affinity.match_fields
+            path: preference/matchFields
+            tableContents:
+            - inTableColumn: true
+              label:
+                text: labels.runtimeSettings.affinity.key
+              path: key
+              type: value
+              typeOfValue: string
+            - inTableColumn: true
+              label:
+                text: labels.runtimeSettings.affinity.operator
+              path: operator
+              type: value
+              typeOfValue: string
+            - inTableColumn: true
+              label:
+                text: labels.runtimeSettings.affinity.values
+              path: values
+              type: value
+              typeOfValue: array
+            type: value
+            typeOfValue: key-operator-values-array
+          type: single-step-form-array
+        schema:
+          $ref: schema#/properties/pod/properties/affinity/properties/nodeAffinity
+        type: single-step-form
+      schema:
+        $ref: schema#/properties/pod/properties/affinity
+      label:
+        text: labels.runtimeSettings.affinity.name
+      show_label: true
+      type: single-step-form
+    - addFormLabel: labels.runtimeSettings.toleration.name
+      customClass: mb-20
+      element:
+        elements:
+        - label:
+            text: labels.runtimeSettings.toleration.effect
+          schema:
+            $ref: schema#/properties/pod/properties/tolerations/items/properties/effect
+          type: input
+        - label:
+            text: labels.runtimeSettings.toleration.key
+          schema:
+            $ref: schema#/properties/pod/properties/tolerations/items/properties/key
+          type: input
+        - fetch: getOperatorsList
+          label:
+            text: labels.runtimeSettings.toleration.operator
+          schema:
+            $ref: schema#/properties/pod/properties/tolerations/items/properties/operator
+          type: select
+        - label:
+            text: labels.runtimeSettings.toleration.toleration_seconds
+          schema:
+            $ref: schema#/properties/pod/properties/tolerations/items/properties/tolerationSeconds
+          type: input
+        - label:
+            text: labels.runtimeSettings.toleration.value
+          schema:
+            $ref: schema#/properties/pod/properties/tolerations/items/properties/value
+          type: input
+        type: single-step-form
+      label:
+        text: labels.runtimeSettings.toleration.name
+      schema:
+        $ref: schema#/properties/pod/properties/tolerations
+      tableContents:
+      - inTableColumn: true
+        label:
+          text: labels.runtimeSettings.toleration.effect
+        path: effect
+        type: value
+        typeOfValue: string
+      - inTableColumn: true
+        label:
+          text: labels.runtimeSettings.toleration.key
+        path: key
+        type: value
+        typeOfValue: string
+      - inTableColumn: true
+        label:
+          text: labels.runtimeSettings.toleration.operator
+        path: operator
+        type: value
+        typeOfValue: string
+      - inTableColumn: true
+        label:
+          text: labels.runtimeSettings.toleration.toleration_seconds
+        path: tolerationSeconds
+        type: value
+        typeOfValue: string
+      - inTableColumn: true
+        label:
+          text: labels.runtimeSettings.toleration.value
+        path: value
+        type: value
+        typeOfValue: string
+      type: single-step-form-array
+  label:
+    text: labels.runtimeSettings.pod.title
+  schema:
+    $ref: schema#/properties/pod
+  show_label: true
+  type: single-step-form
+schema:
+  $ref: schema#/
+type: single-step-form
