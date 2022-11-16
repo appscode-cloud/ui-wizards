@@ -6,14 +6,14 @@ steps:
       schema:
         $ref: schema#/properties/metadata/properties/release/properties/name
       type: input
-    - fetch: getResources|core|v1|namespaces
+    - computed: initNamespace
+      disabled: isNamespaceDisabled
+      fetch: getResources|core|v1|namespaces
       label:
         text: labels.namespace
       schema:
         $ref: schema#/properties/metadata/properties/release/properties/namespace
       type: select
-      computed: initNamespace
-      disabled: isNamespaceDisabled
     - discriminator:
         existingAuthSecrets:
           default: []
