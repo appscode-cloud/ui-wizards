@@ -1,8 +1,8 @@
 elements:
 - discriminator:
     customizeAdditionalPodRuntimeSettings:
-      type: boolean
       default: false
+      type: boolean
   elements:
   - allowUserDefinedOption: true
     fetch: resourceNames|core|v1|serviceaccounts
@@ -33,20 +33,18 @@ elements:
       $ref: schema#/properties/pod/properties/securityContext
     show_label: true
     type: single-step-form
-  - type: switch
-    label:
+  - label:
       text: labels.runtimeSettings.pod.additionalChoise
     schema:
       $ref: discriminator#/properties/customizeAdditionalPodRuntimeSettings
-  - type: single-step-form
-    if: showAdditionalPodRuntimeSettingsForm
-    elements:
-    - type: select
+    type: switch
+  - elements:
+    - fetch: getNodes
       label:
         text: labels.runtimeSettings.pod.nodeName
       schema:
         $ref: schema#/properties/pod/properties/nodeName
-      fetch: getNodes
+      type: select
     - isArray: true
       keys:
         label:
@@ -254,10 +252,10 @@ elements:
         schema:
           $ref: schema#/properties/pod/properties/affinity/properties/nodeAffinity
         type: single-step-form
-      schema:
-        $ref: schema#/properties/pod/properties/affinity
       label:
         text: labels.runtimeSettings.affinity.name
+      schema:
+        $ref: schema#/properties/pod/properties/affinity
       show_label: true
       type: single-step-form
     - addFormLabel: labels.runtimeSettings.toleration.name
@@ -327,6 +325,8 @@ elements:
         type: value
         typeOfValue: string
       type: single-step-form-array
+    if: showAdditionalPodRuntimeSettingsForm
+    type: single-step-form
   label:
     text: labels.runtimeSettings.pod.title
   schema:

@@ -35,7 +35,7 @@ func TestDefaultValues(t *testing.T) {
 		schemachecker.TestCase{Obj: v1alpha1.KubedbcomPostgresEditorOptionsSpec{}},
 		schemachecker.TestCase{Obj: v1alpha1.KubedbcomRedisEditorOptionsSpec{}},
 		schemachecker.TestCase{Obj: v1alpha1.StashappscodecomRepositoryEditorOptionsSpec{}},
-		schemachecker.TestCase{Obj: v1alpha1.StashappscodecomRestoreSessionEditorOptionsSpec{}},
+		schemachecker.TestCase{Obj: v1alpha1.StashappscodecomRestoresessionEditorOptionsSpec{}},
 	)
 	checker.TestAll(t)
 }

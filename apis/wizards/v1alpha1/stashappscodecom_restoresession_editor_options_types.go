@@ -33,16 +33,16 @@ import (
 type StashappscodecomRestoreSessionEditorOptions struct {
 	metav1.TypeMeta   `json:",inline,omitempty"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	Spec              StashappscodecomRestoreSessionEditorOptionsSpec `json:"spec,omitempty"`
+	Spec              StashappscodecomRestoresessionEditorOptionsSpec `json:"spec,omitempty"`
 }
 
-// StashappscodecomRestoreSessionEditorOptionsSpec is the schema for Stash RestoreSession profile values file
-type StashappscodecomRestoreSessionEditorOptionsSpec struct {
+// StashappscodecomRestoresessionEditorOptionsSpec is the schema for Stash RestoreSession profile values file
+type StashappscodecomRestoresessionEditorOptionsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
-	Spec         StashappscodecomRestoreSessionEditorOptionsSpecSpec `json:"spec"`
+	Spec         StashappscodecomRestoresessionEditorOptionsSpecSpec `json:"spec"`
 }
 
-type StashappscodecomRestoreSessionEditorOptionsSpecSpec struct {
+type StashappscodecomRestoresessionEditorOptionsSpecSpec struct {
 	// +optional
 	Annotations map[string]string `json:"annotations,omitempty"`
 	// +optional

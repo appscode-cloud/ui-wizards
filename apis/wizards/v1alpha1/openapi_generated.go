@@ -141,8 +141,8 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 		"go.bytebuilders.dev/ui-wizards/apis/wizards/v1alpha1.StashappscodecomRepositoryEditorOptionsSpecSpec":     schema_ui_wizards_apis_wizards_v1alpha1_StashappscodecomRepositoryEditorOptionsSpecSpec(ref),
 		"go.bytebuilders.dev/ui-wizards/apis/wizards/v1alpha1.StashappscodecomRestoreSessionEditorOptions":         schema_ui_wizards_apis_wizards_v1alpha1_StashappscodecomRestoreSessionEditorOptions(ref),
 		"go.bytebuilders.dev/ui-wizards/apis/wizards/v1alpha1.StashappscodecomRestoreSessionEditorOptionsList":     schema_ui_wizards_apis_wizards_v1alpha1_StashappscodecomRestoreSessionEditorOptionsList(ref),
-		"go.bytebuilders.dev/ui-wizards/apis/wizards/v1alpha1.StashappscodecomRestoreSessionEditorOptionsSpec":     schema_ui_wizards_apis_wizards_v1alpha1_StashappscodecomRestoreSessionEditorOptionsSpec(ref),
-		"go.bytebuilders.dev/ui-wizards/apis/wizards/v1alpha1.StashappscodecomRestoreSessionEditorOptionsSpecSpec": schema_ui_wizards_apis_wizards_v1alpha1_StashappscodecomRestoreSessionEditorOptionsSpecSpec(ref),
+		"go.bytebuilders.dev/ui-wizards/apis/wizards/v1alpha1.StashappscodecomRestoresessionEditorOptionsSpec":     schema_ui_wizards_apis_wizards_v1alpha1_StashappscodecomRestoresessionEditorOptionsSpec(ref),
+		"go.bytebuilders.dev/ui-wizards/apis/wizards/v1alpha1.StashappscodecomRestoresessionEditorOptionsSpecSpec": schema_ui_wizards_apis_wizards_v1alpha1_StashappscodecomRestoresessionEditorOptionsSpecSpec(ref),
 		"go.bytebuilders.dev/ui-wizards/apis/wizards/v1alpha1.StorageClass":                                        schema_ui_wizards_apis_wizards_v1alpha1_StorageClass(ref),
 		"go.bytebuilders.dev/ui-wizards/apis/wizards/v1alpha1.StringValAlert":                                      schema_ui_wizards_apis_wizards_v1alpha1_StringValAlert(ref),
 		"go.bytebuilders.dev/ui-wizards/apis/wizards/v1alpha1.Swift":                                               schema_ui_wizards_apis_wizards_v1alpha1_Swift(ref),
@@ -5224,14 +5224,14 @@ func schema_ui_wizards_apis_wizards_v1alpha1_StashappscodecomRestoreSessionEdito
 					"spec": {
 						SchemaProps: spec.SchemaProps{
 							Default: map[string]interface{}{},
-							Ref:     ref("go.bytebuilders.dev/ui-wizards/apis/wizards/v1alpha1.StashappscodecomRestoreSessionEditorOptionsSpec"),
+							Ref:     ref("go.bytebuilders.dev/ui-wizards/apis/wizards/v1alpha1.StashappscodecomRestoresessionEditorOptionsSpec"),
 						},
 					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"go.bytebuilders.dev/ui-wizards/apis/wizards/v1alpha1.StashappscodecomRestoreSessionEditorOptionsSpec", "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"},
+			"go.bytebuilders.dev/ui-wizards/apis/wizards/v1alpha1.StashappscodecomRestoresessionEditorOptionsSpec", "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"},
 	}
 }
 
@@ -5284,11 +5284,11 @@ func schema_ui_wizards_apis_wizards_v1alpha1_StashappscodecomRestoreSessionEdito
 	}
 }
 
-func schema_ui_wizards_apis_wizards_v1alpha1_StashappscodecomRestoreSessionEditorOptionsSpec(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_ui_wizards_apis_wizards_v1alpha1_StashappscodecomRestoresessionEditorOptionsSpec(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "StashappscodecomRestoreSessionEditorOptionsSpec is the schema for Stash RestoreSession profile values file",
+				Description: "StashappscodecomRestoresessionEditorOptionsSpec is the schema for Stash RestoreSession profile values file",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"metadata": {
@@ -5300,7 +5300,7 @@ func schema_ui_wizards_apis_wizards_v1alpha1_StashappscodecomRestoreSessionEdito
 					"spec": {
 						SchemaProps: spec.SchemaProps{
 							Default: map[string]interface{}{},
-							Ref:     ref("go.bytebuilders.dev/ui-wizards/apis/wizards/v1alpha1.StashappscodecomRestoreSessionEditorOptionsSpecSpec"),
+							Ref:     ref("go.bytebuilders.dev/ui-wizards/apis/wizards/v1alpha1.StashappscodecomRestoresessionEditorOptionsSpecSpec"),
 						},
 					},
 				},
@@ -5308,11 +5308,11 @@ func schema_ui_wizards_apis_wizards_v1alpha1_StashappscodecomRestoreSessionEdito
 			},
 		},
 		Dependencies: []string{
-			"go.bytebuilders.dev/ui-wizards/apis/wizards/v1alpha1.StashappscodecomRestoreSessionEditorOptionsSpecSpec", "kubepack.dev/lib-app/api/v1alpha1.Metadata"},
+			"go.bytebuilders.dev/ui-wizards/apis/wizards/v1alpha1.StashappscodecomRestoresessionEditorOptionsSpecSpec", "kubepack.dev/lib-app/api/v1alpha1.Metadata"},
 	}
 }
 
-func schema_ui_wizards_apis_wizards_v1alpha1_StashappscodecomRestoreSessionEditorOptionsSpecSpec(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_ui_wizards_apis_wizards_v1alpha1_StashappscodecomRestoresessionEditorOptionsSpecSpec(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
