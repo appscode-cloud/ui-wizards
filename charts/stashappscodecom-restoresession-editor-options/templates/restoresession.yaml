@@ -1,0 +1,39 @@
+{{ $root:= . }}
+apiVersion: stash.appscode.com/v1beta1
+kind: RestoreSession
+metadata:
+  name: {{ include "stashappscodecom-restoresession-editor-options.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "stashappscodecom-restoresession-editor-options.labels" . | nindent 4 }}
+  {{- if .Values.spec.annotations }}
+  annotations:
+    {{- include "stashappscodecom-restoresession-editor-options.annotations" . | nindent 4 }}
+  {{- end }}
+spec:
+  repository:
+    {{- toYaml .Values.spec.repository | nindent 4 }}
+  target:
+    ref:
+      {{- toYaml .Values.spec.target | nindent 6 }}
+  rules:
+  - snapshots:
+    - {{ default "latest" .Values.spec.snapshot }}
+  {{- if .Values.spec.runtimeSettings }}
+  runtimeSettings: {{- toYaml .Values.spec.runtimeSettings | nindent 4 }}
+  {{- end}}
+{{- if .Values.spec.interimVolumeTemplate }}
+  {{- with .Values.spec.interimVolumeTemplate }}
+  interimVolumeTemplate:
+    metadata:
+      name: {{ include "stashappscodecom-restoresession-editor-options.fullname" $root }}-restore-tmp-storage
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+    {{- if .spec.storageClassName }}
+      storageClassName: {{ .spec.storageClassName }}
+    {{- end }}
+    {{- if .spec.resources }}
+      resources: {{ toYaml .spec.resources | nindent 8 }}
+    {{- end }}
+  {{- end }}
+{{- end}}
