@@ -57,8 +57,9 @@ The following table lists the configurable parameters of the `stashappscodecom-r
 | spec.annotations           | Annotations to add to the database custom resource | <code>{}</code>                 |
 | spec.labels                | Labels to add to all the template objects          | <code>{}</code>                 |
 | spec.snapshot              | snapshot to restore from                           | <code>latest</code>             |
-| spec.repository            | repository of the snapshot                         | <code>{}</code>                 |
+| spec.repository.name       |                                                    | <code>""</code>                 |
 | spec.target                | target database                                    | <code>{}</code>                 |
+| spec.runtimeSettings       |                                                    | <code>{}</code>                 |
 
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm upgrade -i`. For example:

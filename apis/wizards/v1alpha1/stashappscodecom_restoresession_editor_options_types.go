@@ -44,9 +44,9 @@ type StashappscodecomRestoresessionEditorOptionsSpec struct {
 
 type StashappscodecomRestoresessionEditorOptionsSpecSpec struct {
 	// +optional
-	Annotations map[string]string `json:"annotations,omitempty"`
+	Annotations map[string]string `json:"annotations"`
 	// +optional
-	Labels map[string]string `json:"labels,omitempty"`
+	Labels map[string]string `json:"labels"`
 	// InterimVolumeTemplate specifies a template for a volume to hold targeted data temporarily
 	// before uploading to backend or inserting into target. It is only usable for job model.
 	// Don't specify it in sidecar model.
