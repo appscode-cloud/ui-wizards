@@ -1,0 +1,130 @@
+steps:
+- form:
+    elements:
+    - label:
+        text: labels.restoresession.name
+      schema:
+        $ref: schema#/properties/metadata/properties/release/properties/name
+      type: input
+    - computed: initNamespace
+      disabled: isNamespaceDisabled
+      fetch: getResources|core|v1|namespaces
+      label:
+        text: labels.namespace
+      schema:
+        $ref: schema#/properties/metadata/properties/release/properties/namespace
+      type: select
+    - elements:
+      - individualItemDisabilityCheck: labelsDisabilityChecker
+        isArray: true
+        keys:
+          label:
+            text: labels.key
+        label:
+          text: labels.restoresession.labels
+        schema:
+          $ref: schema#/properties/spec/properties/labels
+        type: key-value-input-form
+        values:
+          label:
+            text: labels.value
+          schema:
+            $ref: schema#/properties/spec/properties/labels/additionalProperties
+          type: input
+      - isArray: true
+        keys:
+          label:
+            text: labels.key
+        label:
+          text: labels.restoresession.annotations
+        schema:
+          $ref: schema#/properties/spec/properties/annotations
+        type: key-value-input-form
+        values:
+          label:
+            text: labels.value
+          schema:
+            $ref: schema#/properties/spec/properties/annotations/additionalProperties
+          type: input
+      - fetch: fetchDatabases
+        label:
+          text: labels.restoresession.database
+        schema:
+          $ref: schema#/properties/spec/properties/target
+        type: select
+      - add_new_button:
+          label: labels.repository.create
+          target: _blank
+          url:
+            params:
+              cluster:
+                $ref: store#/route/params/cluster
+              namespace:
+                $ref: model#/metadata/release/namespace
+              user:
+                $ref: store#/route/params/user
+            path: /${user}/${cluster}/stash.appscode.com/v1alpha1/repositories/create?namespace=${namespace}
+        fetch: fetchRepositories
+        label:
+          text: labels.repository.select
+        refresh: true
+        schema:
+          $ref: schema#/properties/spec/properties/repository
+        type: select
+      - label:
+          text: labels.restoresession.snapshot
+        schema:
+          $ref: schema#/properties/spec/properties/snapshot
+        type: input
+      - elements:
+        - fetch: getStorageClassNames|/spec/interimVolumeTemplate/spec/storageClassName
+          label:
+            text: labels.storage.class
+          schema:
+            $ref: schema#/properties/spec/properties/interimVolumeTemplate/properties/spec/properties/storageClassName
+          type: select
+        - label:
+            text: labels.storage.size
+          schema:
+            $ref: schema#/properties/spec/properties/interimVolumeTemplate/properties/spec/properties/resources/properties/requests/properties/storage
+          type: input
+        if: showInterimVolumneTemplate
+        label:
+          text: labels.interimVolumeTemplate
+        schema:
+          $ref: schema#/properties/spec/properties/interimVolumeTemplate
+        show_label: true
+        type: single-step-form
+      - discriminator:
+          customizeRestoreJobRuntimeSettings:
+            default: false
+            type: boolean
+        elements:
+        - label:
+            text: labels.runtimeSettings.choise
+          schema:
+            $ref: discriminator#/properties/customizeRestoreJobRuntimeSettings
+          type: switch
+        - alias: database-restore-runtime-settings
+          chart:
+            name: uibytebuildersdev-component-database-runtime-settings
+            version: v0.4.11
+          dataContext:
+            namespace:
+              $ref: schema#/properties/metadata/properties/release/properties/namespace
+          if: showRuntimeSettingsForm
+          moduleResolver: fetchJsons
+          schema:
+            $ref: schema#/properties/spec/properties/runtimeSettings
+          type: reusable-element
+        label:
+          text: Runtime Settings
+        show_label: true
+        type: single-step-form
+      schema:
+        $ref: schema#/properties/spec
+      type: single-step-form
+    type: single-step-form
+  id: options
+  title: steps.0.label
+type: multi-step-form
