@@ -200,10 +200,10 @@ steps:
           schema:
             $ref: schema#/properties/spec/properties/backend/properties/swift
           type: single-step-form
-        show_label: true
-        type: single-step-form
         schema:
           $ref: schema#/properties/spec/properties/backend
+        show_label: true
+        type: single-step-form
       - label:
           isSubsection: false
           text: labels.repository.secret
@@ -218,10 +218,7 @@ steps:
         schema:
           $ref: discriminator#/useExistingAuthSecret
         type: radio
-      - type: single-step-form
-        schema:
-          $ref: schema#/properties/spec/properties/authSecret
-        elements:
+      - elements:
         - allowUserDefinedOption: true
           fetch: getExistingAuthSecrets
           if: showExistingSecretSelection
@@ -230,12 +227,15 @@ steps:
           schema:
             $ref: schema#/properties/spec/properties/authSecret/properties/name
           type: select
-        - label:
+        - if: showCreateSecretForm
+          label:
             text: labels.secret.password
           schema:
             $ref: schema#/properties/spec/properties/authSecret/properties/password
           type: input
-          if: showCreateSecretForm
+        schema:
+          $ref: schema#/properties/spec/properties/authSecret
+        type: single-step-form
       - elements:
         - elements:
           - label:
