@@ -202,11 +202,14 @@ steps:
           type: single-step-form
         show_label: true
         type: single-step-form
+        schema:
+          $ref: schema#/properties/spec/properties/backend
       - label:
           isSubsection: false
           text: labels.repository.secret
         type: label-element
       - computed: initExistingAuthSecrets
+        onChange: onChoiseChange
         options:
         - text: Use Existing
           value: true
@@ -215,25 +218,25 @@ steps:
         schema:
           $ref: discriminator#/useExistingAuthSecret
         type: radio
-      - allowUserDefinedOption: true
-        fetch: getExistingAuthSecrets
-        if: showExistingSecretSelection
-        label:
-          text: labels.repository.existingSecret
+      - type: single-step-form
         schema:
-          $ref: schema#/properties/spec/properties/authSecret/properties/name
-        type: select
-      - elements:
-        - label:
-            text: labels.secret.name
+          $ref: schema#/properties/spec/properties/authSecret
+        elements:
+        - allowUserDefinedOption: true
+          fetch: getExistingAuthSecrets
+          if: showExistingSecretSelection
+          label:
+            text: labels.repository.existingSecret
           schema:
             $ref: schema#/properties/spec/properties/authSecret/properties/name
-          type: input
+          type: select
         - label:
             text: labels.secret.password
           schema:
             $ref: schema#/properties/spec/properties/authSecret/properties/password
           type: input
+          if: showCreateSecretForm
+      - elements:
         - elements:
           - label:
               text: labels.backend.azure.account_name
