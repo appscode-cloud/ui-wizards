@@ -111,7 +111,23 @@ function showExistingSecretSelection({
   );
   watchDependency("discriminator#/useExistingAuthSecret");
   watchDependency("discriminator#/isExistingAuthSecretsFetching");
+
   return !isExistingAuthSecretsFetching && useExistingAuthSecret;
+}
+
+function onChoiseChange({discriminator, getValue, commit}) {
+  const useExistingAuthSecret = getValue(
+    discriminator,
+    "/useExistingAuthSecret"
+  );
+  // remove spec.authSecret
+    commit("wizard/model$delete", "/spec/authSecret");
+    if (useExistingAuthSecret) {
+      // remove the auth from each backend
+      Object.keys(backendMap).forEach((backend) => {
+        commit("wizard/model$delete", `/spec/backend/${backend}/auth`);
+      });
+    }
 }
 
 async function initExistingAuthSecrets(ctx) {
@@ -243,6 +259,7 @@ return {
   fetchJsons,
   showExistingSecretSelection,
   initExistingAuthSecrets,
+  onChoiseChange,
   getExistingAuthSecrets,
   showCreateSecretForm,
   initBackendProvider,
