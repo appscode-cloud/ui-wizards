@@ -49,6 +49,10 @@ function initNamespace({ route }) {
 function isNamespaceDisabled({ route }) {
   return !!initNamespace({ route });
 }
+function isDatabaseSelectDisabled({ route }) {
+  const { database } = route.query || {};
+  return !!database;
+}
 
 function labelsDisabilityChecker({ itemCtx }) {
   const { key } = itemCtx;
@@ -104,8 +108,10 @@ async function fetchDatabases({
   model,
   getValue,
   watchDependency,
+  commit
 }) {
   const owner = storeGet("/route/params/user");
+  const database = storeGet('/route/query/database');
   const cluster = storeGet("/cluster/clusterDefinition/spec/name");
   const namespace = getValue(model, "/metadata/release/namespace");
   watchDependency("model#/metadata/release/namespace");
@@ -151,7 +157,7 @@ async function fetchDatabases({
             },
           };
         });
-
+        
       // update database to type map
       databaseToTypeMap = {};
       resources.forEach((rs) => {
@@ -161,6 +167,20 @@ async function fetchDatabases({
           databaseToTypeMap[name] = type;
         }
       });
+
+      if(database) {
+        // if database name is provided in route query
+        // find the option matching with database
+        const matchedOption = mappedResources.find(rs => rs.text === database)
+        if(matchedOption) {
+          // set this value as target
+          commit("wizard/model$update", {
+            path: "/spec/target",
+            value: matchedOption.value,
+            force: true
+          })
+        }
+      }
 
       return mappedResources;
     } catch (e) {
@@ -338,6 +358,7 @@ return {
   getResources,
   initNamespace,
   isNamespaceDisabled,
+  isDatabaseSelectDisabled,
   labelsDisabilityChecker,
   fetchJsons,
   fetchDatabases,
