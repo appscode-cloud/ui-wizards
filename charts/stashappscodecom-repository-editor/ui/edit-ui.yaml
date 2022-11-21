@@ -1,0 +1,210 @@
+steps:
+- form:
+    elements:
+    - disabled: true
+      label:
+        text: labels.repository.name
+      schema:
+        $ref: schema#/properties/metadata/properties/release/properties/name
+      type: input
+    - computed: initNamespace
+      disabled: true
+      label:
+        text: labels.namespace
+      schema:
+        $ref: schema#/properties/metadata/properties/release/properties/namespace
+      type: input
+    - discriminator:
+        existingAuthSecrets:
+          default: []
+          type: Array
+        isExistingAuthSecretsFetching:
+          default: true
+          type: boolean
+        useExistingAuthSecret:
+          default: true
+          type: boolean
+      elements:
+      - disabled: true
+        individualItemDisabilityCheck: labelsDisabilityChecker
+        isArray: true
+        keys:
+          label:
+            text: labels.key
+        label:
+          text: labels.repository.labels
+        schema:
+          $ref: schema#/properties/resources/properties/stashAppscodeComRepository/properties/metadata/properties/labels
+        type: key-value-input-form
+        values:
+          label:
+            text: labels.value
+          schema:
+            $ref: schema#/properties/resources/properties/stashAppscodeComRepository/properties/metadata/properties/labels/additionalProperties
+          type: input
+      - disabled: true
+        isArray: true
+        keys:
+          label:
+            text: labels.key
+        label:
+          text: labels.repository.annotations
+        schema:
+          $ref: schema#/properties/resources/properties/stashAppscodeComRepository/properties/metadata/properties/annotations
+        type: key-value-input-form
+        values:
+          label:
+            text: labels.value
+          schema:
+            $ref: schema#/properties/resources/properties/stashAppscodeComRepository/properties/metadata/properties/annotations/additionalProperties
+          type: input
+      - customClass: mb-10
+        label:
+          isSubsection: false
+          text: labels.repository.backend
+        type: label-element
+      - disabled: true
+        discriminator:
+          backendProvider:
+            type: string
+        elements:
+        - computed: initBackendProvider
+          label:
+            text: labels.backend.provider
+          options:
+          - text: Azure Blob Storage
+            value: azure
+          - text: Backblaze B2
+            value: b2
+          - text: Google Cloud Service
+            value: gcs
+          - text: AWS S3
+            value: s3
+          - text: OpenStack Swift
+            value: swift
+          schema:
+            $ref: discriminator#/properties/backendProvider
+          type: select
+        - elements:
+          - label:
+              text: labels.backend.container
+            schema:
+              $ref: schema#/properties/resources/properties/stashAppscodeComRepository/properties/spec/properties/backend/properties/azure/properties/container
+            type: input
+          - label:
+              text: labels.backend.prefix
+            schema:
+              $ref: schema#/properties/resources/properties/stashAppscodeComRepository/properties/spec/properties/backend/properties/azure/properties/prefix
+            type: input
+          - label:
+              text: labels.backend.maxConnections
+            schema:
+              $ref: schema#/properties/resources/properties/stashAppscodeComRepository/properties/spec/properties/backend/properties/azure/properties/maxConnections
+            type: input
+          if: showBackendForm|azure
+          schema:
+            $ref: schema#/properties/resources/properties/stashAppscodeComRepository/properties/spec/properties/backend/properties/azure
+          type: single-step-form
+        - elements:
+          - label:
+              text: labels.backend.bucket
+            schema:
+              $ref: schema#/properties/resources/properties/stashAppscodeComRepository/properties/spec/properties/backend/properties/b2/properties/bucket
+            type: input
+          - label:
+              text: labels.backend.prefix
+            schema:
+              $ref: schema#/properties/resources/properties/stashAppscodeComRepository/properties/spec/properties/backend/properties/b2/properties/prefix
+            type: input
+          - label:
+              text: labels.backend.maxConnections
+            schema:
+              $ref: schema#/properties/resources/properties/stashAppscodeComRepository/properties/spec/properties/backend/properties/b2/properties/maxConnections
+            type: input
+          if: showBackendForm|b2
+          schema:
+            $ref: schema#/properties/resources/properties/stashAppscodeComRepository/properties/spec/properties/backend/properties/b2
+          type: single-step-form
+        - elements:
+          - label:
+              text: labels.backend.bucket
+            schema:
+              $ref: schema#/properties/resources/properties/stashAppscodeComRepository/properties/spec/properties/backend/properties/gcs/properties/bucket
+            type: input
+          - label:
+              text: labels.backend.prefix
+            schema:
+              $ref: schema#/properties/resources/properties/stashAppscodeComRepository/properties/spec/properties/backend/properties/gcs/properties/prefix
+            type: input
+          - label:
+              text: labels.backend.maxConnections
+            schema:
+              $ref: schema#/properties/resources/properties/stashAppscodeComRepository/properties/spec/properties/backend/properties/gcs/properties/maxConnections
+            type: input
+          if: showBackendForm|gcs
+          schema:
+            $ref: schema#/properties/resources/properties/stashAppscodeComRepository/properties/spec/properties/backend/properties/gcs
+          type: single-step-form
+        - elements:
+          - label:
+              text: labels.backend.endPoint
+            schema:
+              $ref: schema#/properties/resources/properties/stashAppscodeComRepository/properties/spec/properties/backend/properties/s3/properties/endpoint
+            type: input
+          - label:
+              text: labels.backend.bucket
+            schema:
+              $ref: schema#/properties/resources/properties/stashAppscodeComRepository/properties/spec/properties/backend/properties/s3/properties/bucket
+            type: input
+          - label:
+              text: labels.backend.prefix
+            schema:
+              $ref: schema#/properties/resources/properties/stashAppscodeComRepository/properties/spec/properties/backend/properties/s3/properties/prefix
+            type: input
+          - label:
+              text: labels.backend.region
+            schema:
+              $ref: schema#/properties/resources/properties/stashAppscodeComRepository/properties/spec/properties/backend/properties/s3/properties/region
+            type: input
+          if: showBackendForm|s3
+          schema:
+            $ref: schema#/properties/resources/properties/stashAppscodeComRepository/properties/spec/properties/backend/properties/s3
+          type: single-step-form
+        - elements:
+          - label:
+              text: labels.backend.container
+            schema:
+              $ref: schema#/properties/resources/properties/stashAppscodeComRepository/properties/spec/properties/backend/properties/swift/properties/container
+            type: input
+          - label:
+              text: labels.backend.prefix
+            schema:
+              $ref: schema#/properties/resources/properties/stashAppscodeComRepository/properties/spec/properties/backend/properties/swift/properties/prefix
+            type: input
+          if: showBackendForm|swift
+          schema:
+            $ref: schema#/properties/resources/properties/stashAppscodeComRepository/properties/spec/properties/backend/properties/swift
+          type: single-step-form
+        schema:
+          $ref: schema#/properties/resources/properties/stashAppscodeComRepository/properties/spec/properties/backend
+        show_label: true
+        type: single-step-form
+      - fetch: getSecrets
+        label:
+          text: labels.repository.secret
+        onChange: onSecretChange
+        schema:
+          $ref: schema#/properties/resources/properties/stashAppscodeComRepository/properties/spec/properties/backend/properties/storageSecretName
+        type: select
+      - customClass: mb-20
+        label:
+          text: labels.edit_secret
+        target: _blank
+        type: anchor
+        url:
+          function: getSecretEditPageLink
+      type: single-step-form
+    type: single-step-form
+  id: basic
+  title: steps.0.label
+type: multi-step-form
