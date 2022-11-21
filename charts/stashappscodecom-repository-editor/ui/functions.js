@@ -9,22 +9,6 @@ function labelsDisabilityChecker({ itemCtx }) {
   else return false;
 }
 
-
-function showSecretForm({ model, getValue }, value) {
-  const backendProvider = initBackendProvider({ model, getValue })
-  return backendProvider === value;
-}
-
-function showCreateSecretForm({ model, getValue, watchDependency }) {
-  watchDependency("model#/resources/secret_repo_cred");
-  const useCustomSecret = getValue(
-    model,
-    "/resources/secret_repo_cred"
-  );
-
-  return !!useCustomSecret;
-}
-
 // backend configuration
 const backendMap = {
   azure: {
@@ -80,21 +64,93 @@ function showBackendForm({ getValue, discriminator, watchDependency }, value) {
   return backendProvider === value;
 }
 
-function decodeBase64({}, value) {
-  return atob(value);
+async function getResources(
+  { axios, storeGet, model, getValue, watchDependency },
+  group,
+  version,
+  resource,
+  namespaced
+) {
+  const owner = storeGet("/route/params/user");
+  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  let namespace = "";
+  if (namespaced) {
+    namespace = getValue(model, "/metadata/release/namespace");
+    watchDependency("model#/metadata/release/namespace");
+  }
+
+  if (!namespaced || namespace) {
+    // call api if resource is either not namespaced
+    // or namespaced and user has selected a namespace
+    try {
+      const resp = await axios.get(
+        `/clusters/${owner}/${cluster}/proxy/${group}/${version}${
+          namespace ? "/namespaces/" + namespace : ""
+        }/${resource}`,
+        {
+          params: { filter: { items: { metadata: { name: null } } } },
+        }
+      );
+
+      const resources = (resp && resp.data && resp.data.items) || [];
+
+      resources.map((item) => {
+        const name = (item.metadata && item.metadata.name) || "";
+        item.text = name;
+        item.value = name;
+        return true;
+      });
+      return resources;
+    } catch (e) {
+      console.log(e);
+      return [];
+    }
+  } else return [];
 }
 
-function encodeBase64({}, value) {
-  return btoa(value);
+
+async function getSecrets(ctx) {
+  const { axios, storeGet, model, getValue, watchDependency } = ctx;
+  return getResources({ axios, storeGet, model, getValue, watchDependency }, "core", "v1", "secrets", true)
+}
+
+function getSecretEditPageLink({storeGet, getValue, model, watchDependency}) {
+  watchDependency("model#/resources/stashAppscodeComRepository/spec/backend/storageSecretName")
+  
+  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const domain = storeGet("/domain");
+  const owner = storeGet("/route/params/user");
+  const namespace = getValue(model, "/metadata/release/namespace");
+  const secretName = getValue(model, "/resources/stashAppscodeComRepository/spec/backend/storageSecretName")
+
+  return `${domain}/${owner}/kubernetes/${cluster}/core/v1/secrets/${secretName}?namespace=${namespace}`
+}
+
+function onSecretChange({commit, storeGet, model, getValue}) {
+  const initialSecretObject = storeGet("/wizard/initialModel/resources/secret_repo_cred")
+  const initialSecretName = storeGet("/wizard/initialModel/resources/secret_repo_cred/metadata/name")
+  const secretName = getValue(model, "/resources/stashAppscodeComRepository/spec/backend/storageSecretName")
+
+  if(initialSecretObject) {
+    if(secretName === initialSecretName) {
+      commit("wizard/model$update", {
+        path: "/resources/secret_repo_cred",
+        value: initialSecretObject,
+        force: true
+      })
+    }
+    else {
+      commit("wizard/model$delete", "/resources/secret_repo_cred")
+    }
+  }
 }
 
 return {
   initNamespace,
   labelsDisabilityChecker,
-  showCreateSecretForm,
   initBackendProvider,
   showBackendForm,
-  showSecretForm,
-  encodeBase64,
-  decodeBase64
+  getSecrets,
+  getSecretEditPageLink,
+  onSecretChange
 };
