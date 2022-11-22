@@ -9,7 +9,8 @@ steps:
       schema:
         $ref: discriminator#/properties/dbDetails
       type: input
-    - label:
+    - if: showAndInitName
+      label:
         text: labels.op_req_name
       required: true
       schema:
@@ -18,6 +19,7 @@ steps:
     - computed: initNamespace
       disabled: isNamespaceDisabled
       fetch: getNamespaces
+      if: showAndInitNamespace
       label:
         text: labels.namespace
       onChange: onNamespaceChange
@@ -28,6 +30,7 @@ steps:
     - computed: initDatabaseRef
       disabled: isDatabaseRefDisabled
       fetch: getDbs
+      if: showAndInitDatabaseRef
       label:
         text: labels.databaseRef
       onChange: onDbChange
@@ -35,12 +38,18 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/databaseRef/properties/name
       type: select
-    - label:
+    - if: showConfigureOpsrequestLabel
+      label:
         text: labels.config_ops_request
+      type: label-element
+    - if: showRestartOpsrequestLabel
+      label:
+        text: labels.restart_ops_request
       type: label-element
     - computed: getRequestTypeFromRoute
       disabled: isDbDetailsLoading
       hasDescription: true
+      if: showAndInitOpsRequestType
       individualItemDisabilityCheck: disableOpsRequest
       label:
         text: labels.ops_request_type
