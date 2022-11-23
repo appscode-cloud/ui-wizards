@@ -445,9 +445,11 @@ function deleteDatabaseModePath({
   const mode = getValue(model, "/resources/kubedbComRedis/spec/mode");
   if (mode === "Cluster") {
     commit("wizard/model$delete", "/resources/kubedbComRedis/spec/sentinelRef");
+    commit("wizard/model$delete", "/resources/kubedbComRedisSentinel_sentinel");
   } else if (mode === "Standalone") {
     commit("wizard/model$delete", "/resources/kubedbComRedis/spec/replicas");  
     commit("wizard/model$delete", "/resources/kubedbComRedis/spec/sentinelRef");  
+    commit("wizard/model$delete", "/resources/kubedbComRedisSentinel_sentinel");
   }
 }
 
@@ -487,7 +489,8 @@ function onCreateSentinelChange({discriminator, getValue, commit, model}) {
           storage,
           monitor,
           terminationPolicy
-        }
+        },
+        force: true
       });
     }
   } else if(verd === false) {
@@ -536,6 +539,8 @@ async function getIssuerRefsName({
   } else if (kind === "ClusterIssuer") {
     url = `/clusters/${owner}/${cluster}/proxy/${apiGroup}/v1/clusterissuers`;
   }
+
+  if (!url) return []
 
   try {
     const resp = await axios.get(url);
@@ -1804,6 +1809,18 @@ function onAgentChange({ commit, model, getValue }) {
   }
 }
 
+function onServiceMonitorChange({model, getValue, commit}) {
+  const serviceMonitor = getValue(model, "/resources/kubedbComRedis/spec/monitor/prometheus/serviceMonitor")
+
+  if(hasSentinelObject({model, getValue})) {
+    commit("wizard/model$update", {
+      path: "/resources/kubedbComRedisSentinel_sentinel/spec/monitor/prometheus/serviceMonitor",
+      value: serviceMonitor,
+      force: true,
+    });
+  }
+}
+
 /*************************************  Database Secret Section ********************************************/
 
 function getCreateAuthSecret({ model, getValue }) {
@@ -2153,6 +2170,7 @@ return {
 	onNameChange,
 	returnFalse,
 	onAgentChange,
+  onServiceMonitorChange,
 	getCreateAuthSecret,
   showExistingSecretSection,
 	showPasswordSection,
