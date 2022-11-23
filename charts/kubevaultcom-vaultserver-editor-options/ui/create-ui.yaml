@@ -126,7 +126,7 @@ steps:
             schema:
               $ref: schema#/properties/spec/properties/backend/properties/provider/properties/azure/properties/accountName
             type: input
-          if: isEqualToModelPathValue|azure|/spec/backend/provider/type 
+          if: isEqualToModelPathValue|azure|/spec/backend/provider/type
           schema:
             $ref: schema#/properties/spec/properties/backend/properties/provider/properties/azure
           type: single-step-form
@@ -141,7 +141,7 @@ steps:
             schema:
               $ref: schema#/properties/spec/properties/backend/properties/provider/properties/consul/properties/path
             type: input
-          if: isEqualToModelPathValue|consul|/spec/backend/provider/type 
+          if: isEqualToModelPathValue|consul|/spec/backend/provider/type
           schema:
             $ref: schema#/properties/spec/properties/backend/properties/provider/properties/consul
           type: single-step-form
@@ -154,14 +154,14 @@ steps:
           if: isEqualToModelPathValue|etcd|/spec/backend/provider/type
           schema:
             $ref: schema#/properties/spec/properties/backend/properties/provider/properties/etcd
-          type: single-step-form          
+          type: single-step-form
         - elements:
           - label:
               text: labels.backend.bucket
             schema:
               $ref: schema#/properties/spec/properties/backend/properties/provider/properties/gcs/properties/bucket
             type: input
-          if: isEqualToModelPathValue|gcs|/spec/backend/provider/type 
+          if: isEqualToModelPathValue|gcs|/spec/backend/provider/type
           schema:
             $ref: schema#/properties/spec/properties/backend/properties/provider/properties/gcs
           type: single-step-form
@@ -185,7 +185,7 @@ steps:
             schema:
               $ref: schema#/properties/spec/properties/backend/properties/provider/properties/raft/properties/storageClass
             type: single-step-form
-          if: isEqualToModelPathValue|raft|/spec/backend/provider/type 
+          if: isEqualToModelPathValue|raft|/spec/backend/provider/type
           schema:
             $ref: schema#/properties/spec/properties/backend/properties/provider/properties/raft
           type: single-step-form
@@ -200,7 +200,7 @@ steps:
             schema:
               $ref: schema#/properties/spec/properties/backend/properties/provider/properties/s3/properties/region
             type: input
-          if: isEqualToModelPathValue|s3|/spec/backend/provider/type 
+          if: isEqualToModelPathValue|s3|/spec/backend/provider/type
           schema:
             $ref: schema#/properties/spec/properties/backend/properties/provider/properties/s3
           type: single-step-form
@@ -209,8 +209,8 @@ steps:
         type: single-step-form
       - discriminator:
           createCredentialSecret:
-            type: string
             default: true
+            type: string
         elements:
         - label:
             text: labels.backend.credentialSecret
@@ -236,17 +236,17 @@ steps:
               text: labels.backend.accountKey
             schema:
               $ref: schema#/properties/spec/properties/backend/properties/credentialSecret/properties/azure/properties/accountKey
-            type: input  
+            type: input
           if: showCredentialCreateSecretField|azure
           schema:
             $ref: schema#/properties/spec/properties/backend/properties/credentialSecret/properties/azure
-          type: single-step-form 
+          type: single-step-form
         - elements:
           - label:
               text: labels.backend.aclToken
             schema:
               $ref: schema#/properties/spec/properties/backend/properties/credentialSecret/properties/consul/properties/aclToken
-            type: input  
+            type: input
           if: showCredentialCreateSecretField|consul
           schema:
             $ref: schema#/properties/spec/properties/backend/properties/credentialSecret/properties/consul
@@ -362,8 +362,8 @@ steps:
         type: single-step-form
       - discriminator:
           createTlsSecret:
-            type: string
             default: true
+            type: string
         elements:
         - label:
             text: labels.backend.tlsSecret
@@ -389,11 +389,11 @@ steps:
               text: labels.backend.tlsCaFile
             schema:
               $ref: schema#/properties/spec/properties/backend/properties/tlsSecret/properties/mysql/properties/tlsCaFile
-            type: input  
+            type: input
           if: showTlsCreateSecretField|mysql
           schema:
             $ref: schema#/properties/spec/properties/backend/properties/tlsSecret/properties/mysql
-          type: single-step-form 
+          type: single-step-form
         - elements:
           - label:
               text: labels.backend.caCert
@@ -413,7 +413,7 @@ steps:
           if: showTlsCreateSecretField|consul
           schema:
             $ref: schema#/properties/spec/properties/backend/properties/tlsSecret/properties/consul
-          type: single-step-form 
+          type: single-step-form
         if: showTlsSecret
         schema:
           $ref: schema#/properties/spec/properties/backend/properties/tlsSecret
@@ -497,8 +497,8 @@ steps:
         type: single-step-form
       - discriminator:
           createCredentialSecret:
-            type: boolean
             default: true
+            type: boolean
         elements:
         - label:
             text: labels.backend.credentialSecret
@@ -513,9 +513,9 @@ steps:
           type: radio
         - allowUserDefinedOption: true
           fetch: getSecrets
+          if: showUnsealerCredentialExistingSecretField
           label:
             text: labels.secret
-          if: showUnsealerCredentialExistingSecretField
           schema:
             $ref: schema#/properties/spec/properties/unsealer/properties/credentialSecret/properties/name
           type: select
