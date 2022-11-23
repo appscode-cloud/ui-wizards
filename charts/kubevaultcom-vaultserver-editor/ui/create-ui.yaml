@@ -1,1891 +1,1890 @@
 steps:
-  - form:
+- form:
+    elements:
+    - label:
+        text: labels.vaultserver.name
+      onChange: onNameChange
+      schema:
+        $ref: schema#/properties/metadata/properties/release/properties/name
+      type: input
+    - fetch: getResources|core|v1|namespaces
+      label:
+        text: labels.namespace
+      schema:
+        $ref: schema#/properties/metadata/properties/release/properties/namespace
+      type: select
+    - fetch: getVaultServerVersions|catalog.kubevault.com|v1alpha1|vaultserverversions
+      label:
+        text: labels.vaultserver.version
+      schema:
+        $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/version
+      type: select
+    - individualItemDisabilityCheck: disableLableChecker
+      isArray: true
+      keys:
+        label:
+          text: labels.labels.key
+      label:
+        text: labels.labels.label
+      schema:
+        $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/metadata/properties/labels
+      type: key-value-input-form
+      values:
+        label:
+          text: labels.labels.value
+        schema:
+          $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/metadata/properties/labels/additionalProperties
+        type: input
+    - isArray: true
+      keys:
+        label:
+          text: labels.annotations.key
+      label:
+        text: labels.annotations.label
+      schema:
+        $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/metadata/properties/annotations
+      type: key-value-input-form
+      values:
+        label:
+          text: labels.annotations.value
+        schema:
+          $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/metadata/properties/annotations/additionalProperties
+        type: input
+    - disabled: isLowAvailableStorageBackendSelected
+      label:
+        text: labels.replicaset.number
+      schema:
+        $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/replicas
+      type: input
+    - hasDescription: true
+      label:
+        text: labels.terminationPolicy
+      options:
+      - description: options.terminationPolicy.delete.description
+        text: options.terminationPolicy.delete.label
+        value: Delete
+      - description: options.terminationPolicy.halt.description
+        text: options.terminationPolicy.halt.label
+        value: Halt
+      - description: options.terminationPolicy.wipeOut.description
+        text: options.terminationPolicy.wipeOut.label
+        value: WipeOut
+      - description: options.terminationPolicy.doNotTerminate.description
+        text: options.terminationPolicy.doNotTerminate.label
+        value: DoNotTerminate
+      schema:
+        $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/terminationPolicy
+      type: radio
+    type: single-step-form
+  id: basic
+  title: steps.0.label
+- form:
+    elements:
+    - discriminator:
+        backend:
+          type: string
       elements:
+      - computed: getVaultBackendType
+        label:
+          text: labels.backend.backendType
+        onChange: onVaultBackendTypeChange
+        options:
+        - azure
+        - consul
+        - dynamodb
+        - etcd
+        - gcs
+        - inmem
+        - mysql
+        - postgresql
+        - raft
+        - s3
+        - swift
+        schema:
+          $ref: discriminator#/properties/backend
+        type: select
+      - discriminator:
+          createCredentialSecret:
+            type: string
+          data:
+            type: object
+          secretName:
+            type: string
+        elements:
+        - computed: setCreateCredentialSecretStatus
+          label:
+            text: labels.backend.credentialSecret
+          onChange: onCreateCredentialSecretChange
+          options:
+          - text: options.secret.existingSecret.label
+            value: false
+          - text: options.secret.customSecret.label
+            value: true
+          schema:
+            $ref: discriminator#/properties/createCredentialSecret
+          type: radio
+        - computed: setCredSecretName
+          fetch: getSecrets
+          if: showBackendExistingCredentialSecretSection
+          label:
+            text: labels.backend.credentialSecret
+          onChange: onCredSecretNameChange
+          schema:
+            $ref: discriminator#/properties/secretName
+          type: select
+        - computed: setCredSecretData
+          elements:
+          - if: showCredentialCreateSecretField|azure
+            label:
+              text: labels.backend.accountKey
+            schema:
+              $ref: discriminator#/properties/data/properties/account_key
+            type: input
+          - if: showCredentialCreateSecretField|consul
+            label:
+              text: labels.backend.aclToken
+            schema:
+              $ref: discriminator#/properties/data/properties/aclToken
+            type: input
+          - if: showCredentialCreateSecretField|dynamodb
+            label:
+              text: labels.backend.accessKey
+            schema:
+              $ref: discriminator#/properties/data/properties/access_key
+            type: input
+          - if: showCredentialCreateSecretField|dynamodb
+            label:
+              text: labels.backend.secretKey
+            schema:
+              $ref: discriminator#/properties/data/properties/secret_key
+            type: input
+          - if: showCredentialCreateSecretField|dynamodb
+            label:
+              text: labels.backend.sessionToken
+            schema:
+              $ref: discriminator#/properties/data/properties/session_token
+            type: input
+          - if: showCredentialCreateSecretField|etcd
+            label:
+              text: labels.backend.username
+            schema:
+              $ref: discriminator#/properties/data/properties/username
+            type: input
+          - if: showCredentialCreateSecretField|etcd
+            label:
+              text: labels.backend.password
+            schema:
+              $ref: discriminator#/properties/data/properties/password
+            type: input
+          - if: showCredentialCreateSecretField|gcs
+            label:
+              text: labels.backend.saJson
+            schema:
+              $ref: discriminator#/properties/data/properties/sa_json
+            type: editor
+          - if: showCredentialCreateSecretField|mysql
+            label:
+              text: labels.backend.username
+            schema:
+              $ref: discriminator#/properties/data/properties/username
+            type: input
+          - if: showCredentialCreateSecretField|mysql
+            label:
+              text: labels.backend.password
+            schema:
+              $ref: discriminator#/properties/data/properties/password
+            type: input
+          - if: showCredentialCreateSecretField|postgresql
+            label:
+              text: labels.backend.connectionURL
+            schema:
+              $ref: discriminator#/properties/data/properties/connection_url
+            type: input
+          - if: showCredentialCreateSecretField|s3
+            label:
+              text: labels.backend.accessKey
+            schema:
+              $ref: discriminator#/properties/data/properties/access_key
+            type: input
+          - if: showCredentialCreateSecretField|s3
+            label:
+              text: labels.backend.secretKey
+            schema:
+              $ref: discriminator#/properties/data/properties/secret_key
+            type: input
+          - if: showCredentialCreateSecretField|swift
+            label:
+              text: labels.backend.username
+            schema:
+              $ref: discriminator#/properties/data/properties/username
+            type: input
+          - if: showCredentialCreateSecretField|swift
+            label:
+              text: labels.backend.password
+            schema:
+              $ref: discriminator#/properties/data/properties/password
+            type: input
+          - if: showCredentialCreateSecretField|swift
+            label:
+              text: labels.backend.authToken
+            schema:
+              $ref: discriminator#/properties/data/properties/auth_token
+            type: input
+          if: showBackendCreateCredentialSecretSection
+          keepEmpty: true
+          onChange: onCredSecretDataChange
+          schema:
+            $ref: discriminator#/properties/data
+          type: single-step-form
+        if: showCredentialSecretField
+        type: single-step-form
+      - discriminator:
+          createTlsSecret:
+            type: string
+          data:
+            type: object
+          secretName:
+            type: string
+        elements:
+        - computed: setCreateTlsSecretStatus
+          label:
+            text: labels.backend.tlsSecret
+          onChange: onCreateTlsSecretChange
+          options:
+          - text: options.secret.existingSecret.label
+            value: false
+          - text: options.secret.customSecret.label
+            value: true
+          schema:
+            $ref: discriminator#/properties/createTlsSecret
+          type: radio
+        - computed: setTlsSecretName
+          fetch: getSecrets
+          if: showBackendExistingTlsSecretSection
+          label:
+            text: labels.backend.tlsSecret
+          onChange: onTlsSecretNameChange
+          schema:
+            $ref: discriminator#/properties/secretName
+          type: select
+        - computed: setTlsSecretData
+          elements:
+          - if: showTlsCreateSecretField|consul
+            label:
+              text: labels.backend.caCrt
+            schema:
+              $ref: discriminator#/properties/data/properties/ca_crt
+            type: editor
+          - if: showTlsCreateSecretField|consul
+            label:
+              text: labels.backend.clientCrt
+            schema:
+              $ref: discriminator#/properties/data/properties/client_crt
+            type: editor
+          - if: showTlsCreateSecretField|consul
+            label:
+              text: labels.backend.clientKey
+            schema:
+              $ref: discriminator#/properties/data/properties/client_key
+            type: editor
+          - if: showTlsCreateSecretField|mysql
+            label:
+              text: labels.backend.tlsCaFile
+            schema:
+              $ref: discriminator#/properties/data/properties/tls_ca_file
+            type: input
+          if: showBackendCreateTlsSecretSection
+          keepEmpty: true
+          onChange: onTlsSecretDataChange
+          schema:
+            $ref: discriminator#/properties/data
+          type: single-step-form
+        if: showTlsSecretField
+        type: single-step-form
+      - elements:
         - label:
-            text: labels.vaultserver.name
-          onChange: onNameChange
+            text: labels.backend.accountName
           schema:
-            $ref: schema#/properties/metadata/properties/release/properties/name
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/azure/properties/accountName
           type: input
-        - fetch: getResources|core|v1|namespaces
-          label:
-            text: labels.namespace
+        - label:
+            text: labels.backend.container
           schema:
-            $ref: schema#/properties/metadata/properties/release/properties/namespace
-          type: select
-        - fetch: getVaultServerVersions|catalog.kubevault.com|v1alpha1|vaultserverversions
-          label:
-            text: labels.vaultserver.version
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/azure/properties/container
+          type: input
+        - label:
+            text: labels.backend.maxParallel
           schema:
-            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/version
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/azure/properties/maxParallel
+          type: input
+        if: isEqualToDiscriminatorPath|azure|/backend
+        schema:
+          $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/azure
+        type: single-step-form
+      - elements:
+        - label:
+            text: labels.backend.tlsSkipVerify_question
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/consul/properties/tlsSkipVerify
+          type: switch
+        - label:
+            text: labels.backend.address
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/consul/properties/address
+          type: input
+        - label:
+            text: labels.backend.checkTimeout
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/consul/properties/checkTimeout
+          type: input
+        - label:
+            text: labels.backend.consistencyMode
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/consul/properties/consistencyMode
+          type: input
+        - label:
+            text: labels.backend.disableRegistration
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/consul/properties/disableRegistration
+          type: input
+        - label:
+            text: labels.backend.lockWaitTime
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/consul/properties/lockWaitTime
+          type: input
+        - label:
+            text: labels.backend.maxParallel
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/consul/properties/maxParallel
+          type: input
+        - label:
+            text: labels.backend.path
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/consul/properties/path
+          type: input
+        - label:
+            text: labels.backend.scheme
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/consul/properties/scheme
+          type: input
+        - label:
+            text: labels.backend.service
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/consul/properties/service
+          type: input
+        - label:
+            text: labels.backend.serviceAddress
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/consul/properties/serviceAddress
+          type: input
+        - label:
+            text: labels.backend.serviceTags
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/consul/properties/serviceTags
+          type: input
+        - label:
+            text: labels.backend.sessionTTL
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/consul/properties/sessionTTL
+          type: input
+        - label:
+            text: labels.backend.tlsMinVersion
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/consul/properties/tlsMinVersion
+          type: input
+        - label:
+            text: labels.backend.tlsSecretName
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/consul/properties/tlsSecretName
+          type: input
+        if: isEqualToDiscriminatorPath|consul|/backend
+        schema:
+          $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/consul
+        type: single-step-form
+      - elements:
+        - label:
+            text: labels.backend.haEnabled_question
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/dynamodb/properties/haEnabled
+          type: switch
+        - label:
+            text: labels.backend.endpoint
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/dynamodb/properties/endpoint
+          type: input
+        - label:
+            text: labels.backend.maxParallel
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/dynamodb/properties/maxParallel
+          type: input
+        - label:
+            text: labels.backend.readCapacity
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/dynamodb/properties/readCapacity
+          type: input
+        - label:
+            text: labels.backend.region
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/dynamodb/properties/region
+          type: input
+        - label:
+            text: labels.backend.table
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/dynamodb/properties/table
+          type: input
+        - label:
+            text: labels.backend.writeCapacity
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/dynamodb/properties/writeCapacity
+          type: input
+        if: isEqualToDiscriminatorPath|dynamodb|/backend
+        schema:
+          $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/dynamodb
+        type: single-step-form
+      - elements:
+        - label:
+            text: labels.backend.haEnable_question
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/etcd/properties/haEnable
+          type: switch
+        - label:
+            text: labels.backend.sync_question
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/etcd/properties/sync
+          type: switch
+        - label:
+            text: labels.backend.address
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/etcd/properties/address
+          type: input
+        - label:
+            text: labels.backend.discoverySrv
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/etcd/properties/discoverySrv
+          type: input
+        - label:
+            text: labels.backend.etcdApi
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/etcd/properties/etcdApi
+          type: input
+        - label:
+            text: labels.backend.path
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/etcd/properties/path
+          type: input
+        - label:
+            text: labels.backend.tlsSecretName
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/etcd/properties/tlsSecretName
+          type: input
+        if: isEqualToDiscriminatorPath|etcd|/backend
+        schema:
+          $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/etcd
+        type: single-step-form
+      - elements:
+        - label:
+            text: labels.backend.haEnabled_question
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/gcs/properties/haEnabled
+          type: switch
+        - label:
+            text: labels.backend.bucket
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/gcs/properties/bucket
+          type: input
+        - label:
+            text: labels.backend.chunkSize
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/gcs/properties/chunkSize
+          type: input
+        - label:
+            text: labels.backend.maxParallel
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/gcs/properties/maxParallel
+          type: input
+        if: isEqualToDiscriminatorPath|gcs|/backend
+        schema:
+          $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/gcs
+        type: single-step-form
+      - elements: null
+        if: isEqualToDiscriminatorPath|inmem|/backend
+        keepEmpty: true
+        schema:
+          $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/inmem
+        type: single-step-form
+      - elements:
+        - label:
+            text: labels.backend.address
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/mysql/properties/address
+          type: input
+        - label:
+            text: labels.backend.database
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/mysql/properties/database
+          type: input
+        - label:
+            text: labels.backend.maxParallel
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/mysql/properties/maxParallel
+          type: input
+        - label:
+            text: labels.backend.table
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/mysql/properties/table
+          type: input
+        if: isEqualToDiscriminatorPath|mysql|/backend
+        schema:
+          $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/mysql
+        type: single-step-form
+      - elements:
+        - label:
+            text: labels.backend.maxParallel
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/postgresql/properties/maxParallel
+          type: input
+        - label:
+            text: labels.backend.table
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/postgresql/properties/table
+          type: input
+        if: isEqualToDiscriminatorPath|postgresql|/backend
+        schema:
+          $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/postgresql
+        type: single-step-form
+      - elements:
+        - label:
+            text: labels.backend.autopilotReconcileInterval
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/raft/properties/autopilotReconcileInterval
+          type: input
+        - label:
+            text: labels.backend.maxEntrySize
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/raft/properties/maxEntrySize
+          type: input
+        - label:
+            text: labels.backend.performanceMultiplier
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/raft/properties/performanceMultiplier
+          type: input
+        - label:
+            text: labels.backend.snapshotThreshold
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/raft/properties/snapshotThreshold
+          type: input
+        - customClass: mb-10
+          elements:
+          - element:
+              label:
+                text: labels.backend.accessMode
+              schema:
+                $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/raft/properties/storage/properties/accessModes/items
+              type: input
+            label:
+              text: labels.backend.accessModes
+            schema:
+              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/raft/properties/storage/properties/accessModes
+            type: list-input-form
+          - elements:
+            - label:
+                text: labels.backend.apiGroup
+              schema:
+                $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/raft/properties/storage/properties/dataSource/properties/apiGroup
+              type: input
+            - label:
+                text: labels.backend.kind
+              schema:
+                $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/raft/properties/storage/properties/dataSource/properties/kind
+              type: input
+            - label:
+                text: labels.backend.name
+              schema:
+                $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/raft/properties/storage/properties/dataSource/properties/name
+              type: input
+            hideForm: true
+            label:
+              text: labels.backend.dataSource
+            schema:
+              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/raft/properties/storage/properties/dataSource
+            show_label: true
+            type: single-step-form
+          - label:
+              text: labels.resources
+            schema:
+              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/raft/properties/storage/properties/resources
+            type: resource-input-form
+          - alias: reusable_raft_selector
+            chart:
+              name: uibytebuildersdev-component-selector
+              version: v0.4.12
+            customClass: mb-10
+            hideForm: true
+            label:
+              text: labels.backend.selector
+            moduleResolver: fetchJsons
+            schema:
+              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/raft/properties/storage/properties/selector
+            show_label: true
+            type: reusable-element
+          - fetch: getStorageClassNames|/resources/kubevaultComVaultServer/spec/backend/raft/storage/storageClassName
+            label:
+              text: labels.backend.storageClassName
+            schema:
+              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/raft/properties/storage/properties/storageClassName
+            type: select
+          - label:
+              text: labels.backend.volumeMode
+            schema:
+              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/raft/properties/storage/properties/volumeMode
+            type: input
+          - label:
+              text: labels.backend.volumeName
+            schema:
+              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/raft/properties/storage/properties/volumeName
+            type: input
+          hideForm: true
+          label:
+            text: labels.backend.storage
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/raft/properties/storage
+          show_label: true
+          type: single-step-form
+        - label:
+            text: labels.backend.trailingLogs
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/raft/properties/trailingLogs
+          type: input
+        if: isEqualToDiscriminatorPath|raft|/backend
+        schema:
+          $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/raft
+        type: single-step-form
+      - elements:
+        - label:
+            text: labels.backend.bucket
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/s3/properties/bucket
+          type: input
+        - label:
+            text: labels.backend.disableSSL_question
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/s3/properties/disableSSL
+          type: switch
+        - label:
+            text: labels.backend.endpoint
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/s3/properties/endpoint
+          type: input
+        - label:
+            text: labels.backend.forcePathStyle
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/s3/properties/forcePathStyle
+          type: input
+        - label:
+            text: labels.backend.maxParallel
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/s3/properties/maxParallel
+          type: input
+        - label:
+            text: labels.backend.region
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/s3/properties/region
+          type: input
+        - fetch: getSecrets
+          label:
+            text: labels.backend.sessionTokenSecret
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/s3/properties/sessionTokenSecret
+          type: input
+        if: isEqualToDiscriminatorPath|s3|/backend
+        schema:
+          $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/s3
+        type: single-step-form
+      - elements:
+        - label:
+            text: labels.backend.authURL
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/swift/properties/authURL
+          type: input
+        - label:
+            text: labels.backend.container
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/swift/properties/container
+          type: input
+        - label:
+            text: labels.backend.domain
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/swift/properties/domain
+          type: input
+        - label:
+            text: labels.backend.maxParallel
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/swift/properties/maxParallel
+          type: input
+        - label:
+            text: labels.backend.projectDomain
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/swift/properties/projectDomain
+          type: input
+        - label:
+            text: labels.backend.region
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/swift/properties/region
+          type: input
+        - label:
+            text: labels.backend.storageURL
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/swift/properties/storageURL
+          type: input
+        - label:
+            text: labels.backend.tenant
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/swift/properties/tenant
+          type: input
+        - label:
+            text: labels.backend.tenantID
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/swift/properties/tenantID
+          type: input
+        - label:
+            text: labels.backend.trustID
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/swift/properties/trustID
+          type: input
+        if: isEqualToDiscriminatorPath|swift|/backend
+        schema:
+          $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/swift
+        type: single-step-form
+      schema:
+        $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend
+      type: single-step-form
+    type: single-step-form
+  id: backend
+  title: steps.13.label
+- form:
+    elements:
+    - addFormLabel: labels.dataSources.button
+      element:
+        discriminator:
+          dataSource:
+            type: string
+        elements:
+        - computed: getDataSourceTypeForEdit
+          label:
+            text: labels.dataSources.dataSourceType
+          onChange: onDataSourceChange
+          options:
+          - ConfigMap
+          - Secret
+          - CSI
+          schema:
+            $ref: discriminator#/properties/dataSource
           type: select
-        - individualItemDisabilityCheck: disableLableChecker
-          isArray: true
+        - elements:
+          - label:
+              text: labels.dataSources.optional_question
+            schema:
+              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources/items/properties/configMap/properties/optional
+            type: switch
+          - fetch: resourceNames|core|v1|configmaps
+            label:
+              text: labels.dataSources.name
+            schema:
+              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources/items/properties/configMap/properties/name
+            type: select
+          - label:
+              text: labels.dataSources.defaultMode
+            schema:
+              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources/items/properties/configMap/properties/defaultMode
+            type: input
+          - alias: reusable_config_map_items
+            chart:
+              name: uibytebuildersdev-component-data-sources-items
+              version: v0.4.12
+            customClass: mb-10
+            moduleResolver: fetchJsons
+            schema:
+              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources/items/properties/configMap/properties/items
+            type: reusable-element
+          if: isEqualToDiscriminatorPath|ConfigMap|/dataSource
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources/items/properties/configMap
+          type: single-step-form
+        - elements:
+          - label:
+              text: labels.dataSources.optional_question
+            schema:
+              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources/items/properties/secret/properties/optional
+            type: switch
+          - fetch: getSecrets
+            label:
+              text: labels.dataSources.secretName
+            schema:
+              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources/items/properties/secret/properties/secretName
+            type: select
+          - label:
+              text: labels.dataSources.defaultMode
+            schema:
+              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources/items/properties/secret/properties/defaultMode
+            type: input
+          - alias: reusable_secret_items
+            chart:
+              name: uibytebuildersdev-component-data-sources-items
+              version: v0.4.12
+            customClass: mb-10
+            moduleResolver: fetchJsons
+            schema:
+              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources/items/properties/secret/properties/items
+            type: reusable-element
+          if: isEqualToDiscriminatorPath|Secret|/dataSource
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources/items/properties/secret
+          type: single-step-form
+        - elements:
+          - label:
+              text: labels.dataSources.readonly_question
+            schema:
+              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources/items/properties/csi/properties/readOnly
+            type: switch
+          - isArray: true
+            keys:
+              label:
+                text: labels.labels.key
+            label:
+              text: labels.dataSources.volumeAttributes
+            schema:
+              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/metadata/properties/volumeAttributes
+            type: key-value-input-form
+            values:
+              label:
+                text: labels.labels.value
+              schema:
+                $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/metadata/properties/volumeAttributes/additionalProperties
+              type: input
+          - label:
+              text: labels.dataSources.driver
+            schema:
+              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources/items/properties/csi/properties/driver
+            type: input
+          - label:
+              text: labels.dataSources.fsType
+            schema:
+              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources/items/properties/csi/properties/fsType
+            type: input
+          - elements:
+            - fetch: getSecrets
+              label:
+                text: labels.dataSources.nodePublishSecretRef
+              schema:
+                $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources/items/properties/csi/properties/nodePublishSecretRef/properties/name
+              type: select
+            schema:
+              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources/items/properties/csi/properties/nodePublishSecretRef
+            type: single-step-form
+          if: isEqualToDiscriminatorPath|CSI|/dataSource
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources/items/properties/csi
+          type: single-step-form
+        schema:
+          $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources/items
+        type: single-step-form
+      label:
+        text: labels.dataSources.title
+      schema:
+        $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources
+      tableContents:
+      - computed: setDataSourceName
+        inTableColumn: true
+        label:
+          text: labels.dataSources.name
+        path: dataSourceName
+        type: value
+        typeOfValue: string
+      - computed: getDataSourceType
+        inTableColumn: true
+        label:
+          text: labels.dataSources.dataSourceType
+        path: dataSourceType
+        type: value
+        typeOfValue: string
+      - if: isDataSourceTypeEqualTo|ConfigMap
+        label:
+          isSubsection: true
+          text: labels.dataSources.optional_question
+        path: configMap/optional
+        type: value
+        typeOfValue: string
+      - if: isDataSourceTypeEqualTo|ConfigMap
+        label:
+          isSubsection: true
+          text: labels.dataSources.defaultMode
+        path: configMap/defaultMode
+        type: value
+        typeOfValue: string
+      - if: isDataSourceTypeEqualTo|ConfigMap
+        label:
+          isSubsection: true
+          text: labels.dataSources.items
+        path: configMap/items
+        tableContents:
+        - inTableColumn: true
+          label:
+            text: labels.dataSources.key
+          path: key
+          type: value
+          typeOfValue: string
+        - inTableColumn: true
+          label:
+            text: labels.dataSources.mode
+          path: mode
+          type: value
+          typeOfValue: string
+        - inTableColumn: true
+          label:
+            text: labels.dataources.path
+          path: path
+          type: value
+          typeOfValue: string
+        type: value
+        typeOfValue: object-array
+      - if: isDataSourceTypeEqualTo|Secret
+        label:
+          text: labels.dataSources.secret
+        path: secret/secretName
+        type: value
+        typeOfValue: string
+      - if: isDataSourceTypeEqualTo|Secret
+        label:
+          isSubsection: true
+          text: labels.dataSources.optional_question
+        path: secret/optional
+        type: value
+        typeOfValue: string
+      - if: isDataSourceTypeEqualTo|Secret
+        label:
+          isSubsection: true
+          text: labels.dataSources.defaultMode
+        path: secret/defaultMode
+        type: value
+        typeOfValue: string
+      - if: isDataSourceTypeEqualTo|Secret
+        label:
+          isSubsection: true
+          text: labels.dataSources.items
+        path: secret/items
+        tableContents:
+        - inTableColumn: true
+          label:
+            text: labels.dataSources.key
+          path: key
+          type: value
+          typeOfValue: string
+        - inTableColumn: true
+          label:
+            text: labels.dataSources.mode
+          path: mode
+          type: value
+          typeOfValue: string
+        - inTableColumn: true
+          label:
+            text: labels.dataources.path
+          path: path
+          type: value
+          typeOfValue: string
+        type: value
+        typeOfValue: object-array
+      - if: isDataSourceTypeEqualTo|CSI
+        label:
+          text: labels.dataSources.driver
+        path: csi/driver
+        type: value
+        typeOfValue: string
+      - if: isDataSourceTypeEqualTo|CSI
+        label:
+          text: labels.dataSources.fsType
+        path: csi/fsType
+        type: value
+        typeOfValue: string
+      - if: isDataSourceTypeEqualTo|CSI
+        label:
+          text: labels.dataSources.nodePublishSecretRef
+        path: csi/nodePublishSecretRef/name
+        type: value
+        typeOfValue: string
+      - if: isDataSourceTypeEqualTo|CSI
+        label:
+          text: labels.dataSources.readonly_question
+        path: csi/readOnly
+        type: value
+        typeOfValue: string
+      - if: isDataSourceTypeEqualTo|CSI
+        label:
+          text: labels.dataSources.volumeAttributes
+        path: csi/volumeAttributes
+        type: value
+        typeOfValue: key-value
+      type: single-step-form-array
+    type: single-step-form
+  id: data-sources
+  title: steps.12.label
+- form:
+    discriminator:
+      mode:
+        type: string
+    elements:
+    - computed: getUnsealerMode
+      label:
+        text: labels.unsealer.mode
+      onChange: onUnsealerModeChange
+      options:
+      - text: AWS Kms Ssm
+        value: awsKmsSsm
+      - text: Azure Key Vault
+        value: azureKeyVault
+      - text: Google Kms Gcs
+        value: googleKmsGcs
+      - text: Kubernetes Secret
+        value: kubernetesSecret
+      schema:
+        $ref: discriminator#/properties/mode
+      type: select
+    - elements:
+      - discriminator:
+          createCredentialSecret:
+            type: string
+          data:
+            type: object
+          secretName:
+            type: string
+        elements:
+        - computed: setCreateUnsealerCredentialSecretStatus
+          label:
+            text: labels.unsealer.credentialSecret
+          onChange: onCreateUnsealerCredentialSecretChange
+          options:
+          - text: options.secret.existingSecret.label
+            value: false
+          - text: options.secret.customSecret.label
+            value: true
+          schema:
+            $ref: discriminator#/properties/createCredentialSecret
+          type: radio
+        - computed: setUnsealerCredSecretName
+          fetch: getSecrets
+          if: showUnsealerExistingCredentialSecretSection
+          label:
+            text: labels.unsealer.credentialSecret
+          onChange: onUnsealerCredSecretNameChange
+          schema:
+            $ref: discriminator#/properties/secretName
+          type: select
+        - computed: setUnsealerCredSecretData
+          elements:
+          - if: showUnsealerCredentialCreateSecretField|awsKmsSsm
+            label:
+              text: labels.backend.accessKey
+            schema:
+              $ref: discriminator#/properties/data/properties/access_key
+            type: input
+          - if: showUnsealerCredentialCreateSecretField|awsKmsSsm
+            label:
+              text: labels.backend.secretKey
+            schema:
+              $ref: discriminator#/properties/data/properties/secret_key
+            type: input
+          - if: showUnsealerCredentialCreateSecretField|azureKeyVault
+            label:
+              text: labels.backend.clientId
+            schema:
+              $ref: discriminator#/properties/data/properties/client_id
+            type: input
+          - if: showUnsealerCredentialCreateSecretField|azureKeyVault
+            label:
+              text: labels.backend.clientSecret
+            schema:
+              $ref: discriminator#/properties/data/properties/client_secret
+            type: input
+          - if: showUnsealerCredentialCreateSecretField|googleKmsGcs
+            label:
+              text: labels.backend.saJson
+            schema:
+              $ref: discriminator#/properties/data/properties/sa_json
+            type: editor
+          if: showUnsealerCreateCredentialSecretSection
+          keepEmpty: true
+          onChange: onUnsealerCredSecretDataChange
+          schema:
+            $ref: discriminator#/properties/data
+          type: single-step-form
+        if: showUnsealerCredentialSecretField
+        type: single-step-form
+      - elements:
+        - label:
+            text: labels.unsealer.endpoint
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/unsealer/properties/mode/properties/awsKmsSsm/properties/endpoint
+          type: input
+        - label:
+            text: labels.unsealer.kmsKeyID
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/unsealer/properties/mode/properties/awsKmsSsm/properties/kmsKeyID
+          type: input
+        - label:
+            text: labels.unsealer.region
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/unsealer/properties/mode/properties/awsKmsSsm/properties/region
+          type: input
+        - label:
+            text: labels.unsealer.ssmKeyPrefix
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/unsealer/properties/mode/properties/awsKmsSsm/properties/ssmKeyPrefix
+          type: input
+        if: isEqualToDiscriminatorPath|awsKmsSsm|/mode
+        schema:
+          $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/unsealer/properties/mode/properties/awsKmsSsm
+        type: single-step-form
+      - elements:
+        - discriminator:
+            clientCert:
+              type: string
+            clientCertPassword:
+              type: string
+            createTlsSecret:
+              type: boolean
+          elements:
+          - computed: setCreateUnsealerTlsSecretStatus
+            label:
+              text: labels.unsealer.tlsSecret
+            onChange: onCreateUnsealerTlsSecretChange
+            options:
+            - text: options.secret.existingSecret.label
+              value: false
+            - text: options.secret.customSecret.label
+              value: true
+            schema:
+              $ref: discriminator#/properties/createTlsSecret
+            type: radio
+          - elements:
+            - fetch: getSecrets
+              label:
+                text: labels.unsealer.tlsSecret
+              schema:
+                $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/unsealer/properties/mode/properties/azureKeyVault/properties/tlsSecretRef/properties/name
+              type: select
+            if: showUnsealerExisitingTlsSecretField
+            schema:
+              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/unsealer/properties/mode/properties/azureKeyVault/properties/tlsSecretRef
+            type: single-step-form
+          - computed: setUnsealerTlsSecretClientCert
+            if: showUnsealerNewTlsSecretField
+            label:
+              text: labels.unsealer.clientCert
+            onChange: onUnsealerTlsClientCertChange
+            schema:
+              $ref: discriminator#/properties/clientCert
+            type: input
+          - computed: setUnsealerTlsSecretClientCert
+            if: showUnsealerNewTlsSecretField
+            label:
+              text: labels.unsealer.clientCertPassword
+            onChange: onUnsealerTlsClientCertPasswordChange
+            schema:
+              $ref: discriminator#/properties/clientCertPassword
+            type: input
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/unsealer/properties/mode/properties/azureKeyVault/properties/tlsSecretRef
+          type: single-step-form
+        - label:
+            text: labels.unsealer.cloud
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/unsealer/properties/mode/properties/azureKeyVault/properties/cloud
+          type: input
+        - label:
+            text: labels.unsealer.tenantID
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/unsealer/properties/mode/properties/azureKeyVault/properties/tenantID
+          type: input
+        - label:
+            text: labels.unsealer.useManagedIdentity_question
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/unsealer/properties/mode/properties/azureKeyVault/properties/useManagedIdentity
+          type: switch
+        - label:
+            text: labels.unsealer.vaultBaseURL
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/unsealer/properties/mode/properties/azureKeyVault/properties/vaultBaseURL
+          type: input
+        if: isEqualToDiscriminatorPath|azureKeyVault|/mode
+        schema:
+          $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/unsealer/properties/mode/properties/azureKeyVault
+        type: single-step-form
+      - elements:
+        - label:
+            text: labels.unsealer.bucket
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/unsealer/properties/mode/properties/googleKmsGcs/properties/bucket
+          type: input
+        - label:
+            text: labels.unsealer.kmsCryptoKey
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/unsealer/properties/mode/properties/googleKmsGcs/properties/kmsCryptoKey
+          type: input
+        - label:
+            text: labels.unsealer.kmsKeyRing
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/unsealer/properties/mode/properties/googleKmsGcs/properties/kmsKeyRing
+          type: input
+        - label:
+            text: labels.unsealer.kmsLocation
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/unsealer/properties/mode/properties/googleKmsGcs/properties/kmsLocation
+          type: input
+        - label:
+            text: labels.unsealer.kmsProject
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/unsealer/properties/mode/properties/googleKmsGcs/properties/kmsProject
+          type: input
+        if: isEqualToDiscriminatorPath|googleKmsGcs|/mode
+        schema:
+          $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/unsealer/properties/mode/properties/googleKmsGcs
+        type: single-step-form
+      - elements:
+        - label:
+            text: labels.unsealer.secretName
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/unsealer/properties/mode/properties/kubernetesSecret/properties/secretName
+          type: input
+        if: isEqualToDiscriminatorPath|kubernetesSecret|/mode
+        schema:
+          $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/unsealer/properties/mode/properties/kubernetesSecret
+        type: single-step-form
+      keepEmpty: true
+      schema:
+        $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/unsealer/properties/mode
+      type: single-step-form
+    - label:
+        text: labels.unsealer.overwriteExisting_question
+      schema:
+        $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/unsealer/properties/overwriteExisting
+      type: switch
+    - label:
+        text: labels.unsealer.storeRootToken_question
+      schema:
+        $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/unsealer/properties/storeRootToken
+      type: switch
+    - label:
+        text: labels.unsealer.retryPeriodSeconds
+      schema:
+        $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/unsealer/properties/retryPeriodSeconds
+      type: input
+    - label:
+        text: labels.unsealer.secretShares
+      schema:
+        $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/unsealer/properties/secretShares
+      type: input
+    - label:
+        text: labels.unsealer.secretThreshold
+      schema:
+        $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/unsealer/properties/secretThreshold
+      type: input
+    type: single-step-form
+  id: unsealer
+  title: steps.11.label
+- form:
+    elements:
+    - label:
+        text: labels.allowedSecretEngines.secretEngines
+      options:
+      - kv
+      - pki
+      - aws
+      - azure
+      - gcp
+      - postgres
+      - mongodb
+      - mysql
+      - mariadb
+      - elasticsearch
+      schema:
+        $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/allowedSecretEngines/properties/secretEngines
+      type: multiselect
+    - elements:
+      - computed: setDefaultNamespaceFrom
+        label:
+          text: labels.allowedSecretEngines.namespaceFrom
+        options:
+        - text: All
+          value: All
+        - text: Selector
+          value: Selector
+        - text: Same
+          value: Same
+        schema:
+          $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/allowedSecretEngines/properties/namespaces/properties/from
+        type: radio
+      - elements:
+        - isArray: true
           keys:
             label:
               text: labels.labels.key
           label:
             text: labels.labels.label
           schema:
-            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/metadata/properties/labels
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/allowedSecretEngines/properties/namespaces/properties/selector/properties/matchLabels
           type: key-value-input-form
           values:
             label:
               text: labels.labels.value
             schema:
-              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/metadata/properties/labels/additionalProperties
+              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/allowedSecretEngines/properties/namespaces/properties/selector/properties/matchLabels/additionalProperties
             type: input
+        - alias: reusable_match_expressions
+          chart:
+            name: uibytebuildersdev-component-match-expressions
+            version: v0.4.12
+          customClass: mb-10
+          moduleResolver: fetchJsons
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/allowedSecretEngines/properties/namespaces/properties/selector/properties/matchExpressions
+          type: reusable-element
+        if: isEqualToModelPathValue|Selector|/resources/kubevaultComVaultServer/spec/allowedSecretEngines/namespaces/from
+        schema:
+          $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/allowedSecretEngines/properties/namespaces/properties/selector
+        type: single-step-form
+      schema:
+        $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/allowedSecretEngines/properties/namespaces
+      type: single-step-form
+    type: single-step-form
+  id: allowed-secret-engines
+  title: steps.10.label
+- form:
+    elements:
+    - addFormLabel: labels.auth_methods.button
+      element:
+        elements:
+        - label:
+            text: labels.path
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/path
+          type: input
+        - label:
+            text: labels.auth_methods.type
+          onChange: onAuthMethodTypeChange
+          options:
+          - kubernetes
+          - aws
+          - gcp
+          - userpass
+          - cert
+          - azure
+          - jwt
+          - oidc
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/type
+          type: select
+        - label:
+            text: labels.auth_methods.is_local_question
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/local
+          type: switch
+        - label:
+            text: labels.auth_methods.description
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/description
+          type: textarea
+        - label:
+            text: labels.auth_methods.pluginName
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/pluginName
+          type: input
+        - elements:
+          - label:
+              text: labels.auth_methods.defaultLeaseTTL
+            schema:
+              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/kubernetesConfig/properties/defaultLeaseTTL
+            type: input
+          - label:
+              text: labels.auth_methods.listingVisibility
+            schema:
+              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/kubernetesConfig/properties/listingVisibility
+            type: input
+          - label:
+              text: labels.auth_methods.maxLeaseTTL
+            schema:
+              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/kubernetesConfig/properties/maxLeaseTTL
+            type: input
+          - label:
+              text: labels.auth_methods.pluginName
+            schema:
+              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/kubernetesConfig/properties/pluginName
+            type: input
+          - element:
+              label:
+                isSubsection: true
+                text: labels.auth_methods.auditNonHMACRequestKey
+              schema:
+                $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/kubernetesConfig/properties/auditNonHMACRequestKeys/items
+              type: input
+            label:
+              text: labels.auth_methods.auditNonHMACRequestKeys
+            schema:
+              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/kubernetesConfig/properties/auditNonHMACRequestKeys
+            type: list-input-form
+          - element:
+              label:
+                isSubsection: true
+                text: labels.auth_methods.auditNonHMACResponseKey
+              schema:
+                $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/kubernetesConfig/properties/auditNonHMACResponseKeys/items
+              type: input
+            label:
+              text: labels.auth_methods.auditNonHMACResponseKeys
+            schema:
+              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/kubernetesConfig/properties/auditNonHMACResponseKeys
+            type: list-input-form
+          - element:
+              label:
+                isSubsection: true
+                text: labels.auth_methods.passthroughRequestHeader
+              schema:
+                $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/kubernetesConfig/properties/passthroughRequestHeaders/items
+              type: input
+            label:
+              text: labels.auth_methods.passthroughRequestHeaders
+            schema:
+              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/kubernetesConfig/properties/passthroughRequestHeaders
+            type: list-input-form
+          hideForm: true
+          if: isAuthMethodTypeEqualTo|kubernetes
+          label:
+            text: labels.auth_methods.kubernetes_config
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/kubernetesConfig
+          show_label: true
+          type: single-step-form
+        - alias: reusable_jwt_config
+          chart:
+            name: uibytebuildersdev-component-jwtoidc-config
+            version: v0.4.12
+          customClass: mb-10
+          hideForm: true
+          if: isAuthMethodTypeEqualTo|jwt
+          label:
+            text: labels.auth_methods.jwt_config
+          moduleResolver: fetchJsons
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/jwtConfig
+          show_label: true
+          type: reusable-element
+        - alias: reusable_oidc_config
+          chart:
+            name: uibytebuildersdev-component-jwtoidc-config
+            version: v0.4.12
+          customClass: mb-10
+          hideForm: true
+          if: isAuthMethodTypeEqualTo|oidc
+          label:
+            text: labels.auth_methods.oidc_config
+          moduleResolver: fetchJsons
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/oidcConfig
+          show_label: true
+          type: reusable-element
+        schema:
+          $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/items
+        type: single-step-form
+      label:
+        text: labels.auth_methods.title
+      schema:
+        $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods
+      tableContents:
+      - inTableColumn: true
+        label:
+          text: labels.path
+        path: path
+        type: value
+        typeOfValue: string
+      - inTableColumn: true
+        label:
+          text: labels.auth_methods.type
+        path: type
+        type: value
+        typeOfValue: string
+      - inTableColumn: true
+        label:
+          text: labels.auth_methods.is_local_question
+        path: local
+        type: value
+        typeOfValue: string
+      - label:
+          text: labels.auth_methods.description
+        path: description
+        type: value
+        typeOfValue: string
+      - label:
+          text: labels.auth_methods.pluginName
+        path: pluginName
+        type: value
+        typeOfValue: string
+      - label:
+          text: labels.auth_methods.config
+        type: label
+      - label:
+          text: labels.auth_methods.defaultLeaseTTL
+        path: config/defaultLeaseTTL
+        type: value
+        typeOfValue: string
+      - label:
+          text: labels.auth_methods.listingVisibility
+        path: config/listingVisibility
+        type: value
+        typeOfValue: string
+      - label:
+          text: labels.auth_methods.maxLeaseTTL
+        path: config/maxLeaseTTL
+        type: value
+        typeOfValue: string
+      - label:
+          text: labels.auth_methods.pluginName
+        path: config/pluginName
+        type: value
+        typeOfValue: string
+      - label:
+          text: labels.auth_methods.auditNonHMACRequestKeys
+        path: config/auditNonHMACRequestKeys
+        type: value
+        typeOfValue: array
+      - label:
+          text: labels.auth_methods.auditNonHMACResponseKeys
+        path: config/auditNonHMACResponseKeys
+        type: value
+        typeOfValue: array
+      - label:
+          text: labels.auth_methods.passthroughRequestHeaders
+        path: config/passthroughRequestHeaders
+        type: value
+        typeOfValue: array
+      type: single-step-form-array
+    type: single-step-form
+  id: auth-methods
+  title: steps.9.label
+- form:
+    discriminator:
+      configureTLS:
+        default: true
+        type: boolean
+    elements:
+    - computed: returnTrue
+      label:
+        text: labels.enable_tls
+      onChange: onTlsConfigureChange
+      schema:
+        $ref: discriminator#/configureTLS
+      type: switch
+    - elements:
+      - elements:
+        - computed: setApiGroup
+          disabled: true
+          label:
+            text: labels.api_group
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/tls/properties/issuerRef/properties/apiGroup
+          type: input
+        - label:
+            text: labels.kind
+          options:
+          - text: Issuer
+            value: Issuer
+          - text: ClusterIssuer
+            value: ClusterIssuer
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/tls/properties/issuerRef/properties/kind
+          type: select
+        - allowUserDefinedOption: true
+          fetch: getIssuerRefsName
+          label:
+            text: labels.name
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/tls/properties/issuerRef/properties/name
+          type: select
+        label:
+          text: labels.issuer_ref
+        schema:
+          $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/tls/properties/issuerRef
+        type: single-step-form
+      - alias: reusable_certificates
+        chart:
+          name: uibytebuildersdev-component-certificates
+          version: v0.4.12
+        functionCallbacks:
+          getAliasOptions:
+            $ref: functions#/getAliasOptions
+        moduleResolver: fetchJsons
+        schema:
+          $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/tls/properties/certificates
+        type: reusable-element
+      if: showTlsConfigureSection
+      type: single-step-form
+    type: single-step-form
+  id: tls
+  title: steps.2.label
+- form:
+    elements:
+    - label:
+        text: labels.healthChecker.disableWriteCheck_question
+      schema:
+        $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/healthChecker/properties/disableWriteCheck
+      type: switch
+    - if: isWriteCheckEnabled
+      label:
+        text: labels.healthChecker.failureThreshold
+      schema:
+        $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/healthChecker/properties/failureThreshold
+      type: input
+    - if: isWriteCheckEnabled
+      label:
+        text: labels.healthChecker.periodSeconds
+      schema:
+        $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/healthChecker/properties/periodSeconds
+      type: input
+    - if: isWriteCheckEnabled
+      label:
+        text: labels.healthChecker.timeoutSeconds
+      schema:
+        $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/healthChecker/properties/timeoutSeconds
+      type: input
+    type: single-step-form
+  id: health-checker
+  title: steps.14.label
+- form:
+    discriminator:
+      enableMonitoring:
+        default: true
+        type: boolean
+    elements:
+    - computed: returnTrue
+      label:
+        text: labels.enable_monitoring
+      onChange: onEnableMonitoringChange
+      schema:
+        $ref: discriminator#/enableMonitoring
+      type: switch
+    - discriminator:
+        customizeExporter:
+          default: true
+          type: boolean
+      elements:
+      - hasDescription: true
+        label:
+          text: labels.agent
+        onChange: onAgentChange
+        options:
+        - description: options.agent.prometheus_operator.description
+          text: options.agent.prometheus_operator.label
+          value: prometheus.io/operator
+        - description: options.agent.prometheus.description
+          text: options.agent.prometheus.label
+          value: prometheus.io
+        - description: options.agent.prometheus_builtin.description
+          text: options.agent.prometheus_builtin.label
+          value: prometheus.io/builtin
+        schema:
+          $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/monitor/properties/agent
+        type: radio
+      - elements:
         - isArray: true
           keys:
             label:
-              text: labels.annotations.key
+              isSubsection: true
+              text: labels.labels.key
           label:
-            text: labels.annotations.label
+            text: labels.labels.label
           schema:
-            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/metadata/properties/annotations
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/monitor/properties/prometheus/properties/serviceMonitor/properties/labels
           type: key-value-input-form
           values:
             label:
-              text: labels.annotations.value
+              text: labels.labels.value
             schema:
-              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/metadata/properties/annotations/additionalProperties
+              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/monitor/properties/prometheus/properties/serviceMonitor/properties/labels/additionalProperties
             type: input
-        - disabled: isLowAvailableStorageBackendSelected
-          label:
-            text: labels.replicaset.number
+        - label:
+            text: labels.scrapping_interval
           schema:
-            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/replicas
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/monitor/properties/prometheus/properties/serviceMonitor/properties/interval
           type: input
-        - hasDescription: true
+        if: isEqualToModelPathValue|prometheus.io/operator|/resources/kubevaultComVaultServer/spec/monitor/agent
+        label:
+          text: labels.service_monitor_configuration
+        show_label: true
+        type: single-step-form
+      - if: isEqualToModelPathValue|prometheus.io|/resources/kubevaultComVaultServer/spec/monitor/agent
+        individualItemDisabilityCheck: disableLableChecker
+        isArray: true
+        keys:
           label:
-            text: labels.terminationPolicy
-          options:
-            - description: options.terminationPolicy.delete.description
-              text: options.terminationPolicy.delete.label
-              value: Delete
-            - description: options.terminationPolicy.halt.description
-              text: options.terminationPolicy.halt.label
-              value: Halt
-            - description: options.terminationPolicy.wipeOut.description
-              text: options.terminationPolicy.wipeOut.label
-              value: WipeOut
-            - description: options.terminationPolicy.doNotTerminate.description
-              text: options.terminationPolicy.doNotTerminate.label
-              value: DoNotTerminate
+            text: labels.labels.key
+        label:
+          text: labels.labels.label
+        schema:
+          $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/metadata/properties/labels
+        type: key-value-input-form
+        values:
+          label:
+            text: labels.labels.value
           schema:
-            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/terminationPolicy
-          type: radio
-      type: single-step-form
-    id: basic
-    title: steps.0.label
-  - form:
-      elements:
-        - discriminator:
-            backend:
-              type: string
-          elements:
-            - computed: getVaultBackendType
-              label:
-                text: labels.backend.backendType
-              onChange: onVaultBackendTypeChange
-              options:
-                - azure
-                - consul
-                - dynamodb
-                - etcd
-                - gcs
-                - inmem
-                - mysql
-                - postgresql
-                - raft
-                - s3
-                - swift
-              schema:
-                $ref: discriminator#/properties/backend
-              type: select
-            - discriminator:
-                createCredentialSecret:
-                  type: string
-                secretName:
-                  type: string
-                data:
-                  type: object
-              elements:
-                - computed: setCreateCredentialSecretStatus
-                  label:
-                    text: labels.backend.credentialSecret
-                  onChange: onCreateCredentialSecretChange
-                  options:
-                    - text: options.secret.existingSecret.label
-                      value: false
-                    - text: options.secret.customSecret.label
-                      value: true
-                  schema:
-                    $ref: discriminator#/properties/createCredentialSecret
-                  type: radio
-                - computed: setCredSecretName
-                  fetch: getSecrets
-                  if: showBackendExistingCredentialSecretSection
-                  label:
-                    text: labels.backend.credentialSecret
-                  onChange: onCredSecretNameChange
-                  schema:
-                    $ref: discriminator#/properties/secretName
-                  type: select
-                - computed: setCredSecretData
-                  keepEmpty: true
-                  elements:
-                    - if: showCredentialCreateSecretField|azure
-                      label:
-                        text: labels.backend.accountKey
-                      schema:
-                        $ref: discriminator#/properties/data/properties/account_key
-                      type: input
-                    - if: showCredentialCreateSecretField|consul
-                      label:
-                        text: labels.backend.aclToken
-                      schema:
-                        $ref: discriminator#/properties/data/properties/aclToken
-                      type: input
-                    - if: showCredentialCreateSecretField|dynamodb
-                      label:
-                        text: labels.backend.accessKey
-                      schema:
-                        $ref: discriminator#/properties/data/properties/access_key
-                      type: input
-                    - if: showCredentialCreateSecretField|dynamodb
-                      label:
-                        text: labels.backend.secretKey
-                      schema:
-                        $ref: discriminator#/properties/data/properties/secret_key
-                      type: input
-                    - if: showCredentialCreateSecretField|dynamodb
-                      label:
-                        text: labels.backend.sessionToken
-                      schema:
-                        $ref: discriminator#/properties/data/properties/session_token
-                      type: input
-                    - if: showCredentialCreateSecretField|etcd
-                      label:
-                        text: labels.backend.username
-                      schema:
-                        $ref: discriminator#/properties/data/properties/username
-                      type: input
-                    - if: showCredentialCreateSecretField|etcd
-                      label:
-                        text: labels.backend.password
-                      schema:
-                        $ref: discriminator#/properties/data/properties/password
-                      type: input
-                    - if: showCredentialCreateSecretField|gcs
-                      label:
-                        text: labels.backend.saJson
-                      schema:
-                        $ref: discriminator#/properties/data/properties/sa_json
-                      type: editor
-                    - if: showCredentialCreateSecretField|mysql
-                      label:
-                        text: labels.backend.username
-                      schema:
-                        $ref: discriminator#/properties/data/properties/username
-                      type: input
-                    - if: showCredentialCreateSecretField|mysql
-                      label:
-                        text: labels.backend.password
-                      schema:
-                        $ref: discriminator#/properties/data/properties/password
-                      type: input
-                    - if: showCredentialCreateSecretField|postgresql
-                      label:
-                        text: labels.backend.connectionURL
-                      schema:
-                        $ref: discriminator#/properties/data/properties/connection_url
-                      type: input
-                    - if: showCredentialCreateSecretField|s3
-                      label:
-                        text: labels.backend.accessKey
-                      schema:
-                        $ref: discriminator#/properties/data/properties/access_key
-                      type: input
-                    - if: showCredentialCreateSecretField|s3
-                      label:
-                        text: labels.backend.secretKey
-                      schema:
-                        $ref: discriminator#/properties/data/properties/secret_key
-                      type: input
-                    - if: showCredentialCreateSecretField|swift
-                      label:
-                        text: labels.backend.username
-                      schema:
-                        $ref: discriminator#/properties/data/properties/username
-                      type: input
-                    - if: showCredentialCreateSecretField|swift
-                      label:
-                        text: labels.backend.password
-                      schema:
-                        $ref: discriminator#/properties/data/properties/password
-                      type: input
-                    - if: showCredentialCreateSecretField|swift
-                      label:
-                        text: labels.backend.authToken
-                      schema:
-                        $ref: discriminator#/properties/data/properties/auth_token
-                      type: input
-                  if: showBackendCreateCredentialSecretSection
-                  onChange: onCredSecretDataChange
-                  schema:
-                    $ref: discriminator#/properties/data
-                  type: single-step-form
-              if: showCredentialSecretField
-              type: single-step-form
-            - discriminator:
-                createTlsSecret:
-                  type: string
-                secretName:
-                  type: string
-                data:
-                  type: object
-              elements:
-                - computed: setCreateTlsSecretStatus
-                  label:
-                    text: labels.backend.tlsSecret
-                  onChange: onCreateTlsSecretChange
-                  options:
-                    - text: options.secret.existingSecret.label
-                      value: false
-                    - text: options.secret.customSecret.label
-                      value: true
-                  schema:
-                    $ref: discriminator#/properties/createTlsSecret
-                  type: radio
-                - computed: setTlsSecretName
-                  fetch: getSecrets
-                  if: showBackendExistingTlsSecretSection
-                  label:
-                    text: labels.backend.tlsSecret
-                  onChange: onTlsSecretNameChange
-                  schema:
-                    $ref: discriminator#/properties/secretName
-                  type: select
-                - computed: setTlsSecretData
-                  keepEmpty: true
-                  elements:
-                    - if: showTlsCreateSecretField|consul
-                      label:
-                        text: labels.backend.caCrt
-                      schema:
-                        $ref: discriminator#/properties/data/properties/ca_crt
-                      type: editor
-                    - if: showTlsCreateSecretField|consul
-                      label:
-                        text: labels.backend.clientCrt
-                      schema:
-                        $ref: discriminator#/properties/data/properties/client_crt
-                      type: editor
-                    - if: showTlsCreateSecretField|consul
-                      label:
-                        text: labels.backend.clientKey
-                      schema:
-                        $ref: discriminator#/properties/data/properties/client_key
-                      type: editor
-                    - if: showTlsCreateSecretField|mysql
-                      label:
-                        text: labels.backend.tlsCaFile
-                      schema:
-                        $ref: discriminator#/properties/data/properties/tls_ca_file
-                      type: input
-                  if: showBackendCreateTlsSecretSection
-                  onChange: onTlsSecretDataChange
-                  schema:
-                    $ref: discriminator#/properties/data
-                  type: single-step-form
-              if: showTlsSecretField
-              type: single-step-form
-            - elements:
-                - label:
-                    text: labels.backend.accountName
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/azure/properties/accountName
-                  type: input
-                - label:
-                    text: labels.backend.container
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/azure/properties/container
-                  type: input
-                - label:
-                    text: labels.backend.maxParallel
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/azure/properties/maxParallel
-                  type: input
-              if: isEqualToDiscriminatorPath|azure|/backend
-              schema:
-                $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/azure
-              type: single-step-form
-            - elements:
-                - label:
-                    text: labels.backend.tlsSkipVerify_question
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/consul/properties/tlsSkipVerify
-                  type: switch
-                - label:
-                    text: labels.backend.address
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/consul/properties/address
-                  type: input
-                - label:
-                    text: labels.backend.checkTimeout
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/consul/properties/checkTimeout
-                  type: input
-                - label:
-                    text: labels.backend.consistencyMode
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/consul/properties/consistencyMode
-                  type: input
-                - label:
-                    text: labels.backend.disableRegistration
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/consul/properties/disableRegistration
-                  type: input
-                - label:
-                    text: labels.backend.lockWaitTime
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/consul/properties/lockWaitTime
-                  type: input
-                - label:
-                    text: labels.backend.maxParallel
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/consul/properties/maxParallel
-                  type: input
-                - label:
-                    text: labels.backend.path
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/consul/properties/path
-                  type: input
-                - label:
-                    text: labels.backend.scheme
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/consul/properties/scheme
-                  type: input
-                - label:
-                    text: labels.backend.service
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/consul/properties/service
-                  type: input
-                - label:
-                    text: labels.backend.serviceAddress
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/consul/properties/serviceAddress
-                  type: input
-                - label:
-                    text: labels.backend.serviceTags
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/consul/properties/serviceTags
-                  type: input
-                - label:
-                    text: labels.backend.sessionTTL
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/consul/properties/sessionTTL
-                  type: input
-                - label:
-                    text: labels.backend.tlsMinVersion
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/consul/properties/tlsMinVersion
-                  type: input
-                - label:
-                    text: labels.backend.tlsSecretName
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/consul/properties/tlsSecretName
-                  type: input
-              if: isEqualToDiscriminatorPath|consul|/backend
-              schema:
-                $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/consul
-              type: single-step-form
-            - elements:
-                - label:
-                    text: labels.backend.haEnabled_question
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/dynamodb/properties/haEnabled
-                  type: switch
-                - label:
-                    text: labels.backend.endpoint
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/dynamodb/properties/endpoint
-                  type: input
-                - label:
-                    text: labels.backend.maxParallel
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/dynamodb/properties/maxParallel
-                  type: input
-                - label:
-                    text: labels.backend.readCapacity
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/dynamodb/properties/readCapacity
-                  type: input
-                - label:
-                    text: labels.backend.region
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/dynamodb/properties/region
-                  type: input
-
-                - label:
-                    text: labels.backend.table
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/dynamodb/properties/table
-                  type: input
-                - label:
-                    text: labels.backend.writeCapacity
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/dynamodb/properties/writeCapacity
-                  type: input
-              if: isEqualToDiscriminatorPath|dynamodb|/backend
-              schema:
-                $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/dynamodb
-              type: single-step-form
-            - elements:
-                - label:
-                    text: labels.backend.haEnable_question
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/etcd/properties/haEnable
-                  type: switch
-                - label:
-                    text: labels.backend.sync_question
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/etcd/properties/sync
-                  type: switch
-                - label:
-                    text: labels.backend.address
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/etcd/properties/address
-                  type: input
-                - label:
-                    text: labels.backend.discoverySrv
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/etcd/properties/discoverySrv
-                  type: input
-                - label:
-                    text: labels.backend.etcdApi
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/etcd/properties/etcdApi
-                  type: input
-                - label:
-                    text: labels.backend.path
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/etcd/properties/path
-                  type: input
-                - label:
-                    text: labels.backend.tlsSecretName
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/etcd/properties/tlsSecretName
-                  type: input
-              if: isEqualToDiscriminatorPath|etcd|/backend
-              schema:
-                $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/etcd
-              type: single-step-form
-            - elements:
-                - label:
-                    text: labels.backend.haEnabled_question
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/gcs/properties/haEnabled
-                  type: switch
-                - label:
-                    text: labels.backend.bucket
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/gcs/properties/bucket
-                  type: input
-                - label:
-                    text: labels.backend.chunkSize
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/gcs/properties/chunkSize
-                  type: input
-                - label:
-                    text: labels.backend.maxParallel
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/gcs/properties/maxParallel
-                  type: input
-              if: isEqualToDiscriminatorPath|gcs|/backend
-              schema:
-                $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/gcs
-              type: single-step-form
-            - elements:
-              if: isEqualToDiscriminatorPath|inmem|/backend
-              keepEmpty: true
-              schema:
-                $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/inmem
-              type: single-step-form
-            - elements:
-                - label:
-                    text: labels.backend.address
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/mysql/properties/address
-                  type: input
-                - label:
-                    text: labels.backend.database
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/mysql/properties/database
-                  type: input
-                - label:
-                    text: labels.backend.maxParallel
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/mysql/properties/maxParallel
-                  type: input
-                - label:
-                    text: labels.backend.table
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/mysql/properties/table
-                  type: input
-              if: isEqualToDiscriminatorPath|mysql|/backend
-              schema:
-                $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/mysql
-              type: single-step-form
-            - elements:
-                - label:
-                    text: labels.backend.maxParallel
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/postgresql/properties/maxParallel
-                  type: input
-                - label:
-                    text: labels.backend.table
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/postgresql/properties/table
-                  type: input
-              if: isEqualToDiscriminatorPath|postgresql|/backend
-              schema:
-                $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/postgresql
-              type: single-step-form
-            - elements:
-                - label:
-                    text: labels.backend.autopilotReconcileInterval
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/raft/properties/autopilotReconcileInterval
-                  type: input
-                - label:
-                    text: labels.backend.maxEntrySize
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/raft/properties/maxEntrySize
-                  type: input
-                - label:
-                    text: labels.backend.performanceMultiplier
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/raft/properties/performanceMultiplier
-                  type: input
-                - label:
-                    text: labels.backend.snapshotThreshold
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/raft/properties/snapshotThreshold
-                  type: input
-                - customClass: mb-10
-                  elements:
-                    - element:
-                        label:
-                          text: labels.backend.accessMode
-                        schema:
-                          $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/raft/properties/storage/properties/accessModes/items
-                        type: input
-                      label:
-                        text: labels.backend.accessModes
-                      schema:
-                        $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/raft/properties/storage/properties/accessModes
-                      type: list-input-form
-                    - elements:
-                        - label:
-                            text: labels.backend.apiGroup
-                          schema:
-                            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/raft/properties/storage/properties/dataSource/properties/apiGroup
-                          type: input
-                        - label:
-                            text: labels.backend.kind
-                          schema:
-                            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/raft/properties/storage/properties/dataSource/properties/kind
-                          type: input
-                        - label:
-                            text: labels.backend.name
-                          schema:
-                            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/raft/properties/storage/properties/dataSource/properties/name
-                          type: input
-                      hideForm: true
-                      label:
-                        text: labels.backend.dataSource
-                      schema:
-                        $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/raft/properties/storage/properties/dataSource
-                      show_label: true
-                      type: single-step-form
-                    - label:
-                        text: labels.resources
-                      schema:
-                        $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/raft/properties/storage/properties/resources
-                      type: resource-input-form
-                    - alias: reusable_raft_selector
-                      chart:
-                        name: uibytebuildersdev-component-selector
-                        version: v0.4.12
-                      customClass: mb-10
-                      hideForm: true
-                      label:
-                        text: labels.backend.selector
-                      moduleResolver: fetchJsons
-                      schema:
-                        $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/raft/properties/storage/properties/selector
-                      show_label: true
-                      type: reusable-element
-                    - fetch: getStorageClassNames|/resources/kubevaultComVaultServer/spec/backend/raft/storage/storageClassName
-                      label:
-                        text: labels.backend.storageClassName
-                      schema:
-                        $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/raft/properties/storage/properties/storageClassName
-                      type: select
-                    - label:
-                        text: labels.backend.volumeMode
-                      schema:
-                        $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/raft/properties/storage/properties/volumeMode
-                      type: input
-                    - label:
-                        text: labels.backend.volumeName
-                      schema:
-                        $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/raft/properties/storage/properties/volumeName
-                      type: input
-                  hideForm: true
-                  label:
-                    text: labels.backend.storage
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/raft/properties/storage
-                  show_label: true
-                  type: single-step-form
-                - label:
-                    text: labels.backend.trailingLogs
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/raft/properties/trailingLogs
-                  type: input
-              if: isEqualToDiscriminatorPath|raft|/backend
-              schema:
-                $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/raft
-              type: single-step-form
-            - elements:
-                - label:
-                    text: labels.backend.bucket
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/s3/properties/bucket
-                  type: input
-                - label:
-                    text: labels.backend.disableSSL_question
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/s3/properties/disableSSL
-                  type: switch
-                - label:
-                    text: labels.backend.endpoint
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/s3/properties/endpoint
-                  type: input
-                - label:
-                    text: labels.backend.forcePathStyle
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/s3/properties/forcePathStyle
-                  type: input
-                - label:
-                    text: labels.backend.maxParallel
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/s3/properties/maxParallel
-                  type: input
-                - label:
-                    text: labels.backend.region
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/s3/properties/region
-                  type: input
-                - fetch: getSecrets
-                  label:
-                    text: labels.backend.sessionTokenSecret
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/s3/properties/sessionTokenSecret
-                  type: input
-              if: isEqualToDiscriminatorPath|s3|/backend
-              schema:
-                $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/s3
-              type: single-step-form
-            - elements:
-                - label:
-                    text: labels.backend.authURL
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/swift/properties/authURL
-                  type: input
-                - label:
-                    text: labels.backend.container
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/swift/properties/container
-                  type: input
-                - label:
-                    text: labels.backend.domain
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/swift/properties/domain
-                  type: input
-                - label:
-                    text: labels.backend.maxParallel
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/swift/properties/maxParallel
-                  type: input
-                - label:
-                    text: labels.backend.projectDomain
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/swift/properties/projectDomain
-                  type: input
-                - label:
-                    text: labels.backend.region
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/swift/properties/region
-                  type: input
-                - label:
-                    text: labels.backend.storageURL
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/swift/properties/storageURL
-                  type: input
-                - label:
-                    text: labels.backend.tenant
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/swift/properties/tenant
-                  type: input
-                - label:
-                    text: labels.backend.tenantID
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/swift/properties/tenantID
-                  type: input
-                - label:
-                    text: labels.backend.trustID
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/swift/properties/trustID
-                  type: input
-              if: isEqualToDiscriminatorPath|swift|/backend
-              schema:
-                $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/swift
-              type: single-step-form
+            $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/metadata/properties/labels/additionalProperties
+          type: input
+      - label:
+          text: labels.exporter_configuration
+        type: label-element
+      - label:
+          text: labels.customize_exporter
+        onChange: onCustomizeExporterChange
+        schema:
+          $ref: discriminator#/customizeExporter
+        type: switch
+      - elements:
+        - label:
+            text: labels.resources
           schema:
-            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend
-          type: single-step-form
-      type: single-step-form
-    id: backend
-    title: steps.13.label
-  - form:
-      elements:
-        - addFormLabel: labels.dataSources.button
-          element:
-            discriminator:
-              dataSource:
-                type: string
-            elements:
-              - computed: getDataSourceTypeForEdit
-                label:
-                  text: labels.dataSources.dataSourceType
-                onChange: onDataSourceChange
-                options:
-                  - ConfigMap
-                  - Secret
-                  - CSI
-                schema:
-                  $ref: discriminator#/properties/dataSource
-                type: select
-              - elements:
-                  - label:
-                      text: labels.dataSources.optional_question
-                    schema:
-                      $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources/items/properties/configMap/properties/optional
-                    type: switch
-                  - fetch: resourceNames|core|v1|configmaps
-                    label:
-                      text: labels.dataSources.name
-                    schema:
-                      $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources/items/properties/configMap/properties/name
-                    type: select
-                  - label:
-                      text: labels.dataSources.defaultMode
-                    schema:
-                      $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources/items/properties/configMap/properties/defaultMode
-                    type: input
-                  - alias: reusable_config_map_items
-                    chart:
-                      name: uibytebuildersdev-component-data-sources-items
-                      version: v0.4.12
-                    customClass: mb-10
-                    moduleResolver: fetchJsons
-                    schema:
-                      $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources/items/properties/configMap/properties/items
-                    type: reusable-element
-                if: isEqualToDiscriminatorPath|ConfigMap|/dataSource
-                schema:
-                  $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources/items/properties/configMap
-                type: single-step-form
-              - elements:
-                  - label:
-                      text: labels.dataSources.optional_question
-                    schema:
-                      $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources/items/properties/secret/properties/optional
-                    type: switch
-                  - fetch: getSecrets
-                    label:
-                      text: labels.dataSources.secretName
-                    schema:
-                      $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources/items/properties/secret/properties/secretName
-                    type: select
-                  - label:
-                      text: labels.dataSources.defaultMode
-                    schema:
-                      $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources/items/properties/secret/properties/defaultMode
-                    type: input
-                  - alias: reusable_secret_items
-                    chart:
-                      name: uibytebuildersdev-component-data-sources-items
-                      version: v0.4.12
-                    customClass: mb-10
-                    moduleResolver: fetchJsons
-                    schema:
-                      $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources/items/properties/secret/properties/items
-                    type: reusable-element
-                if: isEqualToDiscriminatorPath|Secret|/dataSource
-                schema:
-                  $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources/items/properties/secret
-                type: single-step-form
-              - elements:
-                  - label:
-                      text: labels.dataSources.readonly_question
-                    schema:
-                      $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources/items/properties/csi/properties/readOnly
-                    type: switch
-                  - isArray: true
-                    keys:
-                      label:
-                        text: labels.labels.key
-                    label:
-                      text: labels.dataSources.volumeAttributes
-                    schema:
-                      $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/metadata/properties/volumeAttributes
-                    type: key-value-input-form
-                    values:
-                      label:
-                        text: labels.labels.value
-                      schema:
-                        $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/metadata/properties/volumeAttributes/additionalProperties
-                      type: input
-                  - label:
-                      text: labels.dataSources.driver
-                    schema:
-                      $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources/items/properties/csi/properties/driver
-                    type: input
-                  - label:
-                      text: labels.dataSources.fsType
-                    schema:
-                      $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources/items/properties/csi/properties/fsType
-                    type: input
-                  - elements:
-                      - fetch: getSecrets
-                        label:
-                          text: labels.dataSources.nodePublishSecretRef
-                        schema:
-                          $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources/items/properties/csi/properties/nodePublishSecretRef/properties/name
-                        type: select
-                    schema:
-                      $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources/items/properties/csi/properties/nodePublishSecretRef
-                    type: single-step-form
-                if: isEqualToDiscriminatorPath|CSI|/dataSource
-                schema:
-                  $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources/items/properties/csi
-                type: single-step-form
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/resources
+          type: resource-input-form
+        - label:
+            text: labels.security_context
+          type: label-element
+        - label:
+            text: labels.run_as_user
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/securityContext/properties/runAsUser
+          type: input
+        - customClass: mb-0
+          label:
+            text: labels.run_as_group
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/securityContext/properties/runAsGroup
+          type: input
+        - label:
+            text: labels.port
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/port
+          type: input
+        - element:
+            label:
+              isSubsection: true
+              text: labels.args
             schema:
-              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources/items
-            type: single-step-form
+              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/args/items
+            type: input
           label:
-            text: labels.dataSources.title
+            text: labels.args
           schema:
-            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources
-          tableContents:
-            - computed: setDataSourceName
-              inTableColumn: true
-              label:
-                text: labels.dataSources.name
-              path: dataSourceName
-              type: value
-              typeOfValue: string
-            - computed: getDataSourceType
-              inTableColumn: true
-              label:
-                text: labels.dataSources.dataSourceType
-              path: dataSourceType
-              type: value
-              typeOfValue: string
-            - if: isDataSourceTypeEqualTo|ConfigMap
-              label:
-                text: labels.dataSources.optional_question
-                isSubsection: true
-              path: configMap/optional
-              type: value
-              typeOfValue: string
-            - if: isDataSourceTypeEqualTo|ConfigMap
-              label:
-                text: labels.dataSources.defaultMode
-                isSubsection: true
-              path: configMap/defaultMode
-              type: value
-              typeOfValue: string
-            - if: isDataSourceTypeEqualTo|ConfigMap
-              label:
-                text: labels.dataSources.items
-                isSubsection: true
-              path: configMap/items
-              type: value
-              typeOfValue: object-array
-              tableContents:
-                - inTableColumn: true
-                  label:
-                    text: labels.dataSources.key
-                  path: key
-                  type: value
-                  typeOfValue: string
-                - inTableColumn: true
-                  label:
-                    text: labels.dataSources.mode
-                  path: mode
-                  type: value
-                  typeOfValue: string
-                - inTableColumn: true
-                  label:
-                    text: labels.dataources.path
-                  path: path
-                  type: value
-                  typeOfValue: string
-            - if: isDataSourceTypeEqualTo|Secret
-              label:
-                text: labels.dataSources.secret
-              path: secret/secretName
-              type: value
-              typeOfValue: string
-            - if: isDataSourceTypeEqualTo|Secret
-              label:
-                text: labels.dataSources.optional_question
-                isSubsection: true
-              path: secret/optional
-              type: value
-              typeOfValue: string
-            - if: isDataSourceTypeEqualTo|Secret
-              label:
-                text: labels.dataSources.defaultMode
-                isSubsection: true
-              path: secret/defaultMode
-              type: value
-              typeOfValue: string
-            - if: isDataSourceTypeEqualTo|Secret
-              label:
-                text: labels.dataSources.items
-                isSubsection: true
-              path: secret/items
-              type: value
-              typeOfValue: object-array
-              tableContents:
-                - inTableColumn: true
-                  label:
-                    text: labels.dataSources.key
-                  path: key
-                  type: value
-                  typeOfValue: string
-                - inTableColumn: true
-                  label:
-                    text: labels.dataSources.mode
-                  path: mode
-                  type: value
-                  typeOfValue: string
-                - inTableColumn: true
-                  label:
-                    text: labels.dataources.path
-                  path: path
-                  type: value
-                  typeOfValue: string
-            - if: isDataSourceTypeEqualTo|CSI
-              label:
-                text: labels.dataSources.driver
-              path: csi/driver
-              type: value
-              typeOfValue: string
-            - if: isDataSourceTypeEqualTo|CSI
-              label:
-                text: labels.dataSources.fsType
-              path: csi/fsType
-              type: value
-              typeOfValue: string
-            - if: isDataSourceTypeEqualTo|CSI
-              label:
-                text: labels.dataSources.nodePublishSecretRef
-              path: csi/nodePublishSecretRef/name
-              type: value
-              typeOfValue: string
-            - if: isDataSourceTypeEqualTo|CSI
-              label:
-                text: labels.dataSources.readonly_question
-              path: csi/readOnly
-              type: value
-              typeOfValue: string
-            - if: isDataSourceTypeEqualTo|CSI
-              label:
-                text: labels.dataSources.volumeAttributes
-              path: csi/volumeAttributes
-              type: value
-              typeOfValue: key-value
-          type: single-step-form-array
-      type: single-step-form
-    id: data-sources
-    title: steps.12.label
-  - form:
-      discriminator:
-        mode:
-          type: string
-      elements:
-        - computed: getUnsealerMode
-          label:
-            text: labels.unsealer.mode
-          onChange: onUnsealerModeChange
-          options:
-            - text: AWS Kms Ssm
-              value: awsKmsSsm
-            - text: Azure Key Vault
-              value: azureKeyVault
-            - text: Google Kms Gcs
-              value: googleKmsGcs
-            - text: Kubernetes Secret
-              value: kubernetesSecret
-          schema:
-            $ref: discriminator#/properties/mode
-          type: select
-        - elements:
-            - discriminator:
-                createCredentialSecret:
-                  type: string
-                secretName:
-                  type: string
-                data:
-                  type: object
-              elements:
-                - computed: setCreateUnsealerCredentialSecretStatus
-                  label:
-                    text: labels.unsealer.credentialSecret
-                  onChange: onCreateUnsealerCredentialSecretChange
-                  options:
-                    - text: options.secret.existingSecret.label
-                      value: false
-                    - text: options.secret.customSecret.label
-                      value: true
-                  schema:
-                    $ref: discriminator#/properties/createCredentialSecret
-                  type: radio
-                - computed: setUnsealerCredSecretName
-                  fetch: getSecrets
-                  if: showUnsealerExistingCredentialSecretSection
-                  label:
-                    text: labels.unsealer.credentialSecret
-                  onChange: onUnsealerCredSecretNameChange
-                  schema:
-                    $ref: discriminator#/properties/secretName
-                  type: select
-                - computed: setUnsealerCredSecretData
-                  keepEmpty: true
-                  elements:
-                    - if: showUnsealerCredentialCreateSecretField|awsKmsSsm
-                      label:
-                        text: labels.backend.accessKey
-                      schema:
-                        $ref: discriminator#/properties/data/properties/access_key
-                      type: input
-                    - if: showUnsealerCredentialCreateSecretField|awsKmsSsm
-                      label:
-                        text: labels.backend.secretKey
-                      schema:
-                        $ref: discriminator#/properties/data/properties/secret_key
-                      type: input
-                    - if: showUnsealerCredentialCreateSecretField|azureKeyVault
-                      label:
-                        text: labels.backend.clientId
-                      schema:
-                        $ref: discriminator#/properties/data/properties/client_id
-                      type: input
-                    - if: showUnsealerCredentialCreateSecretField|azureKeyVault
-                      label:
-                        text: labels.backend.clientSecret
-                      schema:
-                        $ref: discriminator#/properties/data/properties/client_secret
-                      type: input
-                    - if: showUnsealerCredentialCreateSecretField|googleKmsGcs
-                      label:
-                        text: labels.backend.saJson
-                      schema:
-                        $ref: discriminator#/properties/data/properties/sa_json
-                      type: editor
-                  if: showUnsealerCreateCredentialSecretSection
-                  onChange: onUnsealerCredSecretDataChange
-                  schema:
-                    $ref: discriminator#/properties/data
-                  type: single-step-form
-              if: showUnsealerCredentialSecretField
-              type: single-step-form
-            - elements:
-                - label:
-                    text: labels.unsealer.endpoint
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/unsealer/properties/mode/properties/awsKmsSsm/properties/endpoint
-                  type: input
-                - label:
-                    text: labels.unsealer.kmsKeyID
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/unsealer/properties/mode/properties/awsKmsSsm/properties/kmsKeyID
-                  type: input
-                - label:
-                    text: labels.unsealer.region
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/unsealer/properties/mode/properties/awsKmsSsm/properties/region
-                  type: input
-                - label:
-                    text: labels.unsealer.ssmKeyPrefix
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/unsealer/properties/mode/properties/awsKmsSsm/properties/ssmKeyPrefix
-                  type: input
-              if: isEqualToDiscriminatorPath|awsKmsSsm|/mode
-              schema:
-                $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/unsealer/properties/mode/properties/awsKmsSsm
-              type: single-step-form
-            - elements:
-                - discriminator:
-                    createTlsSecret:
-                      type: boolean
-                    clientCert:
-                      type: string
-                    clientCertPassword:
-                      type: string
-                  elements:
-                    - computed: setCreateUnsealerTlsSecretStatus
-                      label:
-                        text: labels.unsealer.tlsSecret
-                      onChange: onCreateUnsealerTlsSecretChange
-                      options:
-                        - text: options.secret.existingSecret.label
-                          value: false
-                        - text: options.secret.customSecret.label
-                          value: true
-                      schema:
-                        $ref: discriminator#/properties/createTlsSecret
-                      type: radio
-                    - elements:
-                        - fetch: getSecrets
-                          label:
-                            text: labels.unsealer.tlsSecret
-                          schema:
-                            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/unsealer/properties/mode/properties/azureKeyVault/properties/tlsSecretRef/properties/name
-                          type: select
-                      if: showUnsealerExisitingTlsSecretField
-                      schema:
-                        $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/unsealer/properties/mode/properties/azureKeyVault/properties/tlsSecretRef
-                      type: single-step-form
-                    - computed: setUnsealerTlsSecretClientCert
-                      if: showUnsealerNewTlsSecretField
-                      label:
-                        text: labels.unsealer.clientCert
-                      onChange: onUnsealerTlsClientCertChange
-                      schema:
-                        $ref: discriminator#/properties/clientCert
-                      type: input
-                    - computed: setUnsealerTlsSecretClientCert
-                      if: showUnsealerNewTlsSecretField
-                      label:
-                        text: labels.unsealer.clientCertPassword
-                      onChange: onUnsealerTlsClientCertPasswordChange
-                      schema:
-                        $ref: discriminator#/properties/clientCertPassword
-                      type: input
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/unsealer/properties/mode/properties/azureKeyVault/properties/tlsSecretRef
-                  type: single-step-form
-                - label:
-                    text: labels.unsealer.cloud
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/unsealer/properties/mode/properties/azureKeyVault/properties/cloud
-                  type: input
-                - label:
-                    text: labels.unsealer.tenantID
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/unsealer/properties/mode/properties/azureKeyVault/properties/tenantID
-                  type: input
-                - label:
-                    text: labels.unsealer.useManagedIdentity_question
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/unsealer/properties/mode/properties/azureKeyVault/properties/useManagedIdentity
-                  type: switch
-                - label:
-                    text: labels.unsealer.vaultBaseURL
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/unsealer/properties/mode/properties/azureKeyVault/properties/vaultBaseURL
-                  type: input
-              if: isEqualToDiscriminatorPath|azureKeyVault|/mode
-              schema:
-                $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/unsealer/properties/mode/properties/azureKeyVault
-              type: single-step-form
-            - elements:
-                - label:
-                    text: labels.unsealer.bucket
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/unsealer/properties/mode/properties/googleKmsGcs/properties/bucket
-                  type: input
-                - label:
-                    text: labels.unsealer.kmsCryptoKey
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/unsealer/properties/mode/properties/googleKmsGcs/properties/kmsCryptoKey
-                  type: input
-                - label:
-                    text: labels.unsealer.kmsKeyRing
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/unsealer/properties/mode/properties/googleKmsGcs/properties/kmsKeyRing
-                  type: input
-                - label:
-                    text: labels.unsealer.kmsLocation
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/unsealer/properties/mode/properties/googleKmsGcs/properties/kmsLocation
-                  type: input
-                - label:
-                    text: labels.unsealer.kmsProject
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/unsealer/properties/mode/properties/googleKmsGcs/properties/kmsProject
-                  type: input
-              if: isEqualToDiscriminatorPath|googleKmsGcs|/mode
-              schema:
-                $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/unsealer/properties/mode/properties/googleKmsGcs
-              type: single-step-form
-            - elements:
-                - label:
-                    text: labels.unsealer.secretName
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/unsealer/properties/mode/properties/kubernetesSecret/properties/secretName
-                  type: input
-              if: isEqualToDiscriminatorPath|kubernetesSecret|/mode
-              schema:
-                $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/unsealer/properties/mode/properties/kubernetesSecret
-              type: single-step-form
-          keepEmpty: true
-          schema:
-            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/unsealer/properties/mode
-          type: single-step-form
-        - label:
-            text: labels.unsealer.overwriteExisting_question
-          schema:
-            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/unsealer/properties/overwriteExisting
-          type: switch
-        - label:
-            text: labels.unsealer.storeRootToken_question
-          schema:
-            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/unsealer/properties/storeRootToken
-          type: switch
-        - label:
-            text: labels.unsealer.retryPeriodSeconds
-          schema:
-            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/unsealer/properties/retryPeriodSeconds
-          type: input
-        - label:
-            text: labels.unsealer.secretShares
-          schema:
-            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/unsealer/properties/secretShares
-          type: input
-        - label:
-            text: labels.unsealer.secretThreshold
-          schema:
-            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/unsealer/properties/secretThreshold
-          type: input
-      type: single-step-form
-    id: unsealer
-    title: steps.11.label
-  - form:
-      elements:
-        - label:
-            text: labels.allowedSecretEngines.secretEngines
-          options:
-            - kv
-            - pki
-            - aws
-            - azure
-            - gcp
-            - postgres
-            - mongodb
-            - mysql
-            - mariadb
-            - elasticsearch
-          schema:
-            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/allowedSecretEngines/properties/secretEngines
-          type: multiselect
-        - elements:
-            - computed: setDefaultNamespaceFrom
-              label:
-                text: labels.allowedSecretEngines.namespaceFrom
-              options:
-                - text: All
-                  value: All
-                - text: Selector
-                  value: Selector
-                - text: Same
-                  value: Same
-              schema:
-                $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/allowedSecretEngines/properties/namespaces/properties/from
-              type: radio
-            - elements:
-                - isArray: true
-                  keys:
-                    label:
-                      text: labels.labels.key
-                  label:
-                    text: labels.labels.label
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/allowedSecretEngines/properties/namespaces/properties/selector/properties/matchLabels
-                  type: key-value-input-form
-                  values:
-                    label:
-                      text: labels.labels.value
-                    schema:
-                      $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/allowedSecretEngines/properties/namespaces/properties/selector/properties/matchLabels/additionalProperties
-                    type: input
-                - alias: reusable_match_expressions
-                  chart:
-                    name: uibytebuildersdev-component-match-expressions
-                    version: v0.4.12
-                  customClass: mb-10
-                  moduleResolver: fetchJsons
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/allowedSecretEngines/properties/namespaces/properties/selector/properties/matchExpressions
-                  type: reusable-element
-              if: isEqualToModelPathValue|Selector|/resources/kubevaultComVaultServer/spec/allowedSecretEngines/namespaces/from
-              schema:
-                $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/allowedSecretEngines/properties/namespaces/properties/selector
-              type: single-step-form
-          schema:
-            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/allowedSecretEngines/properties/namespaces
-          type: single-step-form
-      type: single-step-form
-    id: allowed-secret-engines
-    title: steps.10.label
-  - form:
-      elements:
-        - addFormLabel: labels.auth_methods.button
-          element:
-            elements:
-              - label:
-                  text: labels.path
-                schema:
-                  $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/path
-                type: input
-              - label:
-                  text: labels.auth_methods.type
-                onChange: onAuthMethodTypeChange
-                options:
-                  - kubernetes
-                  - aws
-                  - gcp
-                  - userpass
-                  - cert
-                  - azure
-                  - jwt
-                  - oidc
-                schema:
-                  $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/type
-                type: select
-              - label:
-                  text: labels.auth_methods.is_local_question
-                schema:
-                  $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/local
-                type: switch
-              - label:
-                  text: labels.auth_methods.description
-                schema:
-                  $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/description
-                type: textarea
-              - label:
-                  text: labels.auth_methods.pluginName
-                schema:
-                  $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/pluginName
-                type: input
-              - elements:
-                  - label:
-                      text: labels.auth_methods.defaultLeaseTTL
-                    schema:
-                      $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/kubernetesConfig/properties/defaultLeaseTTL
-                    type: input
-                  - label:
-                      text: labels.auth_methods.listingVisibility
-                    schema:
-                      $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/kubernetesConfig/properties/listingVisibility
-                    type: input
-                  - label:
-                      text: labels.auth_methods.maxLeaseTTL
-                    schema:
-                      $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/kubernetesConfig/properties/maxLeaseTTL
-                    type: input
-                  - label:
-                      text: labels.auth_methods.pluginName
-                    schema:
-                      $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/kubernetesConfig/properties/pluginName
-                    type: input
-                  - element:
-                      label:
-                        isSubsection: true
-                        text: labels.auth_methods.auditNonHMACRequestKey
-                      schema:
-                        $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/kubernetesConfig/properties/auditNonHMACRequestKeys/items
-                      type: input
-                    label:
-                      text: labels.auth_methods.auditNonHMACRequestKeys
-                    schema:
-                      $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/kubernetesConfig/properties/auditNonHMACRequestKeys
-                    type: list-input-form
-                  - element:
-                      label:
-                        isSubsection: true
-                        text: labels.auth_methods.auditNonHMACResponseKey
-                      schema:
-                        $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/kubernetesConfig/properties/auditNonHMACResponseKeys/items
-                      type: input
-                    label:
-                      text: labels.auth_methods.auditNonHMACResponseKeys
-                    schema:
-                      $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/kubernetesConfig/properties/auditNonHMACResponseKeys
-                    type: list-input-form
-                  - element:
-                      label:
-                        isSubsection: true
-                        text: labels.auth_methods.passthroughRequestHeader
-                      schema:
-                        $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/kubernetesConfig/properties/passthroughRequestHeaders/items
-                      type: input
-                    label:
-                      text: labels.auth_methods.passthroughRequestHeaders
-                    schema:
-                      $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/kubernetesConfig/properties/passthroughRequestHeaders
-                    type: list-input-form
-                if: isAuthMethodTypeEqualTo|kubernetes
-                label:
-                  text: labels.auth_methods.kubernetes_config
-                schema:
-                  $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/kubernetesConfig
-                show_label: true
-                hideForm: true
-                type: single-step-form
-              - alias: reusable_jwt_config
-                chart:
-                  name: uibytebuildersdev-component-jwtoidc-config
-                  version: v0.4.12
-                customClass: mb-10
-                hideForm: true
-                if: isAuthMethodTypeEqualTo|jwt
-                moduleResolver: fetchJsons
-                label:
-                  text: labels.auth_methods.jwt_config
-                schema:
-                  $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/jwtConfig
-                show_label: true
-                type: reusable-element
-              - alias: reusable_oidc_config
-                chart:
-                  name: uibytebuildersdev-component-jwtoidc-config
-                  version: v0.4.12
-                customClass: mb-10
-                hideForm: true
-                if: isAuthMethodTypeEqualTo|oidc
-                moduleResolver: fetchJsons
-                label:
-                  text: labels.auth_methods.oidc_config
-                schema:
-                  $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/oidcConfig
-                show_label: true
-                type: reusable-element
-            schema:
-              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/items
-            type: single-step-form
-          label:
-            text: labels.auth_methods.title
-          schema:
-            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods
-          tableContents:
-            - inTableColumn: true
-              label:
-                text: labels.path
-              path: path
-              type: value
-              typeOfValue: string
-            - inTableColumn: true
-              label:
-                text: labels.auth_methods.type
-              path: type
-              type: value
-              typeOfValue: string
-            - inTableColumn: true
-              label:
-                text: labels.auth_methods.is_local_question
-              path: local
-              type: value
-              typeOfValue: string
-            - label:
-                text: labels.auth_methods.description
-              path: description
-              type: value
-              typeOfValue: string
-            - label:
-                text: labels.auth_methods.pluginName
-              path: pluginName
-              type: value
-              typeOfValue: string
-            - label:
-                text: labels.auth_methods.config
-              type: label
-            - label:
-                text: labels.auth_methods.defaultLeaseTTL
-              path: config/defaultLeaseTTL
-              type: value
-              typeOfValue: string
-            - label:
-                text: labels.auth_methods.listingVisibility
-              path: config/listingVisibility
-              type: value
-              typeOfValue: string
-            - label:
-                text: labels.auth_methods.maxLeaseTTL
-              path: config/maxLeaseTTL
-              type: value
-              typeOfValue: string
-            - label:
-                text: labels.auth_methods.pluginName
-              path: config/pluginName
-              type: value
-              typeOfValue: string
-            - label:
-                text: labels.auth_methods.auditNonHMACRequestKeys
-              path: config/auditNonHMACRequestKeys
-              type: value
-              typeOfValue: array
-            - label:
-                text: labels.auth_methods.auditNonHMACResponseKeys
-              path: config/auditNonHMACResponseKeys
-              type: value
-              typeOfValue: array
-            - label:
-                text: labels.auth_methods.passthroughRequestHeaders
-              path: config/passthroughRequestHeaders
-              type: value
-              typeOfValue: array
-          type: single-step-form-array
-      type: single-step-form
-    id: auth-methods
-    title: steps.9.label
-  - form:
-      discriminator:
-        configureTLS:
-          default: true
-          type: boolean
-      elements:
-        - computed: returnTrue
-          label:
-            text: labels.enable_tls
-          onChange: onTlsConfigureChange
-          schema:
-            $ref: discriminator#/configureTLS
-          type: switch
-        - elements:
-            - elements:
-                - computed: setApiGroup
-                  disabled: true
-                  label:
-                    text: labels.api_group
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/tls/properties/issuerRef/properties/apiGroup
-                  type: input
-                - label:
-                    text: labels.kind
-                  options:
-                    - text: Issuer
-                      value: Issuer
-                    - text: ClusterIssuer
-                      value: ClusterIssuer
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/tls/properties/issuerRef/properties/kind
-                  type: select
-                - allowUserDefinedOption: true
-                  fetch: getIssuerRefsName
-                  label:
-                    text: labels.name
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/tls/properties/issuerRef/properties/name
-                  type: select
-              label:
-                text: labels.issuer_ref
-              schema:
-                $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/tls/properties/issuerRef
-              type: single-step-form
-            - alias: reusable_certificates
-              chart:
-                name: uibytebuildersdev-component-certificates
-                version: v0.4.12
-              functionCallbacks:
-                getAliasOptions:
-                  $ref: functions#/getAliasOptions
-              moduleResolver: fetchJsons
-              schema:
-                $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/tls/properties/certificates
-              type: reusable-element
-          if: showTlsConfigureSection
-          type: single-step-form
-      type: single-step-form
-    id: tls
-    title: steps.2.label
-  - form:
-      elements:
-        - label:
-            text: labels.healthChecker.disableWriteCheck_question
-          schema:
-            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/healthChecker/properties/disableWriteCheck
-          type: switch
-        - if: isWriteCheckEnabled
-          label:
-            text: labels.healthChecker.failureThreshold
-          schema:
-            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/healthChecker/properties/failureThreshold
-          type: input
-        - if: isWriteCheckEnabled
-          label:
-            text: labels.healthChecker.periodSeconds
-          schema:
-            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/healthChecker/properties/periodSeconds
-          type: input
-        - if: isWriteCheckEnabled
-          label:
-            text: labels.healthChecker.timeoutSeconds
-          schema:
-            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/healthChecker/properties/timeoutSeconds
-          type: input
-      type: single-step-form
-    id: health-checker
-    title: steps.14.label
-  - form:
-      discriminator:
-        enableMonitoring:
-          default: true
-          type: boolean
-      elements:
-        - computed: returnTrue
-          label:
-            text: labels.enable_monitoring
-          onChange: onEnableMonitoringChange
-          schema:
-            $ref: discriminator#/enableMonitoring
-          type: switch
-        - discriminator:
-            customizeExporter:
-              default: true
-              type: boolean
-          elements:
-            - hasDescription: true
-              label:
-                text: labels.agent
-              onChange: onAgentChange
-              options:
-                - description: options.agent.prometheus_operator.description
-                  text: options.agent.prometheus_operator.label
-                  value: prometheus.io/operator
-                - description: options.agent.prometheus.description
-                  text: options.agent.prometheus.label
-                  value: prometheus.io
-                - description: options.agent.prometheus_builtin.description
-                  text: options.agent.prometheus_builtin.label
-                  value: prometheus.io/builtin
-              schema:
-                $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/monitor/properties/agent
-              type: radio
-            - elements:
-                - isArray: true
-                  keys:
-                    label:
-                      isSubsection: true
-                      text: labels.labels.key
-                  label:
-                    text: labels.labels.label
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/monitor/properties/prometheus/properties/serviceMonitor/properties/labels
-                  type: key-value-input-form
-                  values:
-                    label:
-                      text: labels.labels.value
-                    schema:
-                      $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/monitor/properties/prometheus/properties/serviceMonitor/properties/labels/additionalProperties
-                    type: input
-                - label:
-                    text: labels.scrapping_interval
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/monitor/properties/prometheus/properties/serviceMonitor/properties/interval
-                  type: input
-              if: isEqualToModelPathValue|prometheus.io/operator|/resources/kubevaultComVaultServer/spec/monitor/agent
-              label:
-                text: labels.service_monitor_configuration
-              show_label: true
-              type: single-step-form
-            - if: isEqualToModelPathValue|prometheus.io|/resources/kubevaultComVaultServer/spec/monitor/agent
-              individualItemDisabilityCheck: disableLableChecker
-              isArray: true
-              keys:
-                label:
-                  text: labels.labels.key
-              label:
-                text: labels.labels.label
-              schema:
-                $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/metadata/properties/labels
-              type: key-value-input-form
-              values:
-                label:
-                  text: labels.labels.value
-                schema:
-                  $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/metadata/properties/labels/additionalProperties
-                type: input
-            - label:
-                text: labels.exporter_configuration
-              type: label-element
-            - label:
-                text: labels.customize_exporter
-              onChange: onCustomizeExporterChange
-              schema:
-                $ref: discriminator#/customizeExporter
-              type: switch
-            - elements:
-                - label:
-                    text: labels.resources
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/resources
-                  type: resource-input-form
-                - label:
-                    text: labels.security_context
-                  type: label-element
-                - label:
-                    text: labels.run_as_user
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/securityContext/properties/runAsUser
-                  type: input
-                - customClass: mb-0
-                  label:
-                    text: labels.run_as_group
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/securityContext/properties/runAsGroup
-                  type: input
-                - label:
-                    text: labels.port
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/port
-                  type: input
-                - element:
-                    label:
-                      isSubsection: true
-                      text: labels.args
-                    schema:
-                      $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/args/items
-                    type: input
-                  label:
-                    text: labels.args
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/args
-                  type: list-input-form
-                - alias: reusable_env
-                  chart:
-                    name: uibytebuildersdev-component-env
-                    version: v0.4.12
-                  dataContext:
-                    namespace:
-                      $ref: schema#/properties/metadata/properties/release/properties/namespace
-                  moduleResolver: fetchJsons
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env
-                  type: reusable-element
-              if: showCustomizeExporterSection
-              type: single-step-form
-          if: showMonitoringSection
-          type: single-step-form
-      type: single-step-form
-    id: monitoring
-    title: steps.5.label
-  - form:
-      elements:
-        - alias: pod_template_standalone
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/args
+          type: list-input-form
+        - alias: reusable_env
           chart:
-            name: uibytebuildersdev-component-pod-template
+            name: uibytebuildersdev-component-env
             version: v0.4.12
           dataContext:
             namespace:
               $ref: schema#/properties/metadata/properties/release/properties/namespace
           moduleResolver: fetchJsons
           schema:
-            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/podTemplate
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env
           type: reusable-element
+        if: showCustomizeExporterSection
+        type: single-step-form
+      if: showMonitoringSection
       type: single-step-form
-    id: pod-template
-    title: steps.6.label
-  - form:
+    type: single-step-form
+  id: monitoring
+  title: steps.5.label
+- form:
+    elements:
+    - alias: pod_template_standalone
+      chart:
+        name: uibytebuildersdev-component-pod-template
+        version: v0.4.12
+      dataContext:
+        namespace:
+          $ref: schema#/properties/metadata/properties/release/properties/namespace
+      moduleResolver: fetchJsons
+      schema:
+        $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/podTemplate
+      type: reusable-element
+    type: single-step-form
+  id: pod-template
+  title: steps.6.label
+- form:
+    elements:
+    - alias: reusable_service_templates
+      chart:
+        name: uibytebuildersdev-component-service-templates
+        version: v0.4.12
+      moduleResolver: fetchJsons
+      schema:
+        $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/serviceTemplates
+      type: reusable-element
+    type: single-step-form
+  id: networking
+  title: steps.7.label
+- form:
+    elements:
+    - discriminator:
+        setCustomConfig:
+          type: string
       elements:
-        - alias: reusable_service_templates
-          chart:
-            name: uibytebuildersdev-component-service-templates
-            version: v0.4.12
-          moduleResolver: fetchJsons
+      - computed: returnStringYes
+        label:
+          text: labels.setCustomConfig
+        onChange: onSetCustomConfigChange
+        options:
+        - text: options.yesOrNo.yes.text
+          value: "yes"
+        - text: options.yesOrNo.no.text
+          value: "no"
+        schema:
+          $ref: discriminator#/properties/setCustomConfig
+        type: radio
+      - discriminator:
+          configuration:
+            type: string
+          configurationSource:
+            default: use-existing-config
+            type: string
+        elements:
+        - computed: setConfigurationSource
+          label:
+            text: labels.custom_config
+          onChange: onConfigurationSourceChange
+          options:
+          - text: options.configuration_source.use_existing_config.label
+            value: use-existing-config
+          - text: options.configuration_source.create_new_config.label
+            value: create-new-config
           schema:
-            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/serviceTemplates
-          type: reusable-element
+            $ref: discriminator#/configurationSource
+          type: radio
+        - allowUserDefinedOption: true
+          fetch: getSecrets
+          if: isEqualToDiscriminatorPath|use-existing-config|/configurationSource
+          label:
+            text: labels.name
+          schema:
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/configSecret/properties/name
+          type: select
+        - computed: setConfiguration
+          if: isEqualToDiscriminatorPath|create-new-config|/configurationSource
+          label:
+            text: labels.vault_hcl
+          onChange: onConfigurationChange
+          schema:
+            $ref: discriminator#/properties/configuration
+          type: editor
+        if: isEqualToDiscriminatorPath|yes|/setCustomConfig
+        type: single-step-form
       type: single-step-form
-    id: networking
-    title: steps.7.label
-  - form:
-      elements:
-        - discriminator:
-            setCustomConfig:
-              type: string
-          elements:
-            - computed: returnStringYes
-              label:
-                text: labels.setCustomConfig
-              onChange: onSetCustomConfigChange
-              options:
-                - text: options.yesOrNo.yes.text
-                  value: "yes"
-                - text: options.yesOrNo.no.text
-                  value: "no"
-              schema:
-                $ref: discriminator#/properties/setCustomConfig
-              type: radio
-            - discriminator:
-                configuration:
-                  type: string
-                configurationSource:
-                  default: use-existing-config
-                  type: string
-              elements:
-                - computed: setConfigurationSource
-                  label:
-                    text: labels.custom_config
-                  onChange: onConfigurationSourceChange
-                  options:
-                    - text: options.configuration_source.use_existing_config.label
-                      value: use-existing-config
-                    - text: options.configuration_source.create_new_config.label
-                      value: create-new-config
-                  schema:
-                    $ref: discriminator#/configurationSource
-                  type: radio
-                - allowUserDefinedOption: true
-                  fetch: getSecrets
-                  if: isEqualToDiscriminatorPath|use-existing-config|/configurationSource
-                  label:
-                    text: labels.name
-                  schema:
-                    $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/configSecret/properties/name
-                  type: select
-                - computed: setConfiguration
-                  if: isEqualToDiscriminatorPath|create-new-config|/configurationSource
-                  label:
-                    text: labels.vault_hcl
-                  onChange: onConfigurationChange
-                  schema:
-                    $ref: discriminator#/properties/configuration
-                  type: editor
-              if: isEqualToDiscriminatorPath|yes|/setCustomConfig
-              type: single-step-form
-          type: single-step-form
-      type: single-step-form
-    id: custom-config
-    title: steps.8.label
+    type: single-step-form
+  id: custom-config
+  title: steps.8.label
 type: multi-step-form
