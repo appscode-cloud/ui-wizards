@@ -525,6 +525,8 @@ async function getIssuerRefsName({
   } else if (kind === "ClusterIssuer") {
     url = `/clusters/${owner}/${cluster}/proxy/${apiGroup}/v1/clusterissuers`;
   }
+  
+  if (!url) return []
 
   if(url && apiGroup && namespace) {
     try {
