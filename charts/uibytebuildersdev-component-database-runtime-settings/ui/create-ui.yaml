@@ -1,7 +1,6 @@
 elements:
 - discriminator:
     customizeAdditionalPodRuntimeSettings:
-      default: false
       type: boolean
   elements:
   - allowUserDefinedOption: true
@@ -33,8 +32,10 @@ elements:
       $ref: schema#/properties/pod/properties/securityContext
     show_label: true
     type: single-step-form
-  - label:
+  - computed: setAdditionalPodRuntimeSettingsSwitch
+    label:
       text: labels.runtimeSettings.pod.additionalChoise
+    onChange: onAdditionalPodRuntimeSettingsSwitchChange
     schema:
       $ref: discriminator#/properties/customizeAdditionalPodRuntimeSettings
     type: switch
@@ -336,3 +337,6 @@ elements:
 schema:
   $ref: schema#/
 type: single-step-form
+
+
+
