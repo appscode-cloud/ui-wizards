@@ -305,14 +305,6 @@ function showAndInitOpsRequestType({ route, commit }) {
 
   return !ver;
 }
-function showRestartOpsrequestLabel({route}) {
-  const operation = route.query.operation;
-  if(operation) {
-    const match = /^(.*)-opsrequest-(.*)$/.exec(operation);
-    const ops = match[2];
-    return ops === 'restart'
-  } else return false;
-}
 // vertical scaling
 function ifDbTypeEqualsTo(
   { discriminator, getValue, watchDependency, commit },
@@ -752,7 +744,6 @@ return {
   showAndInitDatabaseRef,
   showConfigureOpsrequestLabel,
   showAndInitOpsRequestType,
-  showRestartOpsrequestLabel,
 
   ifDbTypeEqualsTo,
   getConfigSecrets,

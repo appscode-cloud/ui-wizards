@@ -42,10 +42,6 @@ steps:
       label:
         text: labels.config_ops_request
       type: label-element
-    - if: showRestartOpsrequestLabel
-      label:
-        text: labels.restart_ops_request
-      type: label-element
     - computed: getRequestTypeFromRoute
       disabled: isDbDetailsLoading
       hasDescription: true
@@ -266,6 +262,28 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/tls
       type: single-step-form
+    - type: label-element
+      label:
+        text: labels.timeout_label
+        isSubsection: true
+    - type: input
+      schema:
+        $ref: schema#/properties/spec/properties/timeout
+      label:
+        text: labels.timeout
+    - type: radio
+      schema:
+        $ref: schema#/properties/spec/properties/apply
+      label:
+        text: labels.apply
+      hasDescription: true
+      options:
+      - text: IfReady
+        value: IfReady
+        description: OpsRequest will be applied if database is ready
+      - text: Always
+        value: Always
+        description: OpsRequest will always be applied
     type: single-step-form
   id: basic
   title: steps.0.label
