@@ -9,7 +9,8 @@ steps:
       schema:
         $ref: discriminator#/properties/elasticsearchDetails
       type: input
-    - label:
+    - if: showAndInitName
+      label:
         text: labels.op_req_name
       required: true
       schema:
@@ -18,6 +19,7 @@ steps:
     - computed: initNamespace
       disabled: isNamespaceDisabled
       fetch: getNamespaces
+      if: showAndInitNamespace
       label:
         text: labels.namespace
       onChange: onNamespaceChange
@@ -28,6 +30,7 @@ steps:
     - computed: initDatabaseRef
       disabled: isDatabaseRefDisabled
       fetch: getElasticsearches
+      if: showAndInitDatabaseRef
       label:
         text: labels.databaseRef
       onChange: onDbChange
@@ -35,12 +38,13 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/databaseRef/properties/name
       type: select
-    - label:
+    - if: showConfigureOpsrequestLabel
+      label:
         text: labels.config_ops_request
       type: label-element
-    - computed: getRequestTypeFromRoute
-      disabled: isDbDetailsLoading
+    - disabled: isDbDetailsLoading
       hasDescription: true
+      if: showAndInitOpsRequestType
       individualItemDisabilityCheck: disableOpsRequest
       label:
         text: labels.ops_request_type
@@ -198,7 +202,6 @@ steps:
             text: labels.transform_node
           schema:
             $ref: schema#/properties/spec/properties/verticalScaling/properties/topology/properties/transform
-          show_label: true
           type: resource-input-form
         - computed: setValueFromDbDetails|/spec/topology/dataCold/resources|/spec/verticalScaling/topology/dataCold
           if: hasResourceValue|dataCold
@@ -424,6 +427,30 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/tls
       type: single-step-form
+    - label:
+        isSubsection: true
+        text: labels.timeout_label
+      type: label-element
+    - label:
+        text: labels.timeout
+      schema:
+        $ref: schema#/properties/spec/properties/timeout
+      type: input
+      validationRuleObject:
+        regex: ^((([0-9]+)y)?(([0-9]+)w)?(([0-9]+)d)?(([0-9]+)h)?(([0-9]+)m)?(([0-9]+)s)?(([0-9]+)ms)?(([0-9]+)(u|µ)s)?(([0-9]+)ns)?|0)$
+    - hasDescription: true
+      label:
+        text: labels.apply
+      options:
+      - description: OpsRequest will be applied if database is ready
+        text: IfReady
+        value: IfReady
+      - description: OpsRequest will always be applied
+        text: Always
+        value: Always
+      schema:
+        $ref: schema#/properties/spec/properties/apply
+      type: radio
     type: single-step-form
   id: basic
   title: steps.0.label

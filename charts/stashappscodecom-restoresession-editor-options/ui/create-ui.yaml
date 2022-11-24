@@ -7,10 +7,10 @@ steps:
       schema:
         $ref: schema#/properties/metadata/properties/release/properties/name
       type: input
-    - if: showAndInitNamespace
-      computed: initNamespace
+    - computed: initNamespace
       disabled: isNamespaceDisabled
       fetch: getResources|core|v1|namespaces
+      if: showAndInitNamespace
       label:
         text: labels.namespace
       schema:
@@ -50,9 +50,9 @@ steps:
           schema:
             $ref: schema#/properties/spec/properties/annotations/additionalProperties
           type: input
-      - if: showAndInitDatabase
-        disabled: isDatabaseSelectDisabled
+      - disabled: isDatabaseSelectDisabled
         fetch: fetchDatabases
+        if: showAndInitDatabase
         label:
           text: labels.restoresession.database
         schema:

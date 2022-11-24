@@ -262,28 +262,30 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/tls
       type: single-step-form
-    - type: label-element
-      label:
-        text: labels.timeout_label
+    - label:
         isSubsection: true
-    - type: input
+        text: labels.timeout_label
+      type: label-element
+    - label:
+        text: labels.timeout
       schema:
         $ref: schema#/properties/spec/properties/timeout
-      label:
-        text: labels.timeout
-    - type: radio
-      schema:
-        $ref: schema#/properties/spec/properties/apply
+      type: input
+      validationRuleObject:
+        regex: ^((([0-9]+)y)?(([0-9]+)w)?(([0-9]+)d)?(([0-9]+)h)?(([0-9]+)m)?(([0-9]+)s)?(([0-9]+)ms)?(([0-9]+)(u|µ)s)?(([0-9]+)ns)?|0)$
+    - hasDescription: true
       label:
         text: labels.apply
-      hasDescription: true
       options:
-      - text: IfReady
+      - description: OpsRequest will be applied if database is ready
+        text: IfReady
         value: IfReady
-        description: OpsRequest will be applied if database is ready
-      - text: Always
+      - description: OpsRequest will always be applied
+        text: Always
         value: Always
-        description: OpsRequest will always be applied
+      schema:
+        $ref: schema#/properties/spec/properties/apply
+      type: radio
     type: single-step-form
   id: basic
   title: steps.0.label
