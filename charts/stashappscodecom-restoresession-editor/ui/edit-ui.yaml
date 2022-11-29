@@ -1,0 +1,151 @@
+steps:
+- form:
+    elements:
+    - disabled: true
+      label:
+        text: labels.restoresession.name
+      schema:
+        $ref: schema#/properties/metadata/properties/release/properties/name
+      type: input
+    - computed: initNamespace
+      disabled: true
+      label:
+        text: labels.namespace
+      schema:
+        $ref: schema#/properties/metadata/properties/release/properties/namespace
+      type: input
+    - discriminator:
+        snapshot:
+          type: string
+      elements:
+      - disabled: true
+        individualItemDisabilityCheck: labelsDisabilityChecker
+        isArray: true
+        keys:
+          label:
+            text: labels.key
+        label:
+          text: labels.restoresession.labels
+        schema:
+          $ref: schema#/properties/resources/properties/stashAppscodeComRestoreSession/properties/metadata/properties/labels
+        type: key-value-input-form
+        values:
+          label:
+            text: labels.value
+          schema:
+            $ref: schema#/properties/resources/properties/stashAppscodeComRestoreSession/properties/metadata/properties/labels/additionalProperties
+          type: input
+      - disabled: true
+        isArray: true
+        keys:
+          label:
+            text: labels.key
+        label:
+          text: labels.restoresession.annotations
+        schema:
+          $ref: schema#/properties/resources/properties/stashAppscodeComRestoreSession/properties/metadata/properties/annotations
+        type: key-value-input-form
+        values:
+          label:
+            text: labels.value
+          schema:
+            $ref: schema#/properties/resources/properties/stashAppscodeComRestoreSession/properties/metadata/properties/annotations/additionalProperties
+          type: input
+      - elements:
+        - elements:
+          - disabled: isDatabaseSelectDisabled
+            fetch: fetchDatabases
+            label:
+              text: labels.restoresession.database
+            schema:
+              $ref: schema#/properties/resources/properties/stashAppscodeComRestoreSession/properties/spec/properties/target/properties/ref/properties/name
+            type: select
+          schema:
+            $ref: schema#/properties/resources/properties/stashAppscodeComRestoreSession/properties/spec/properties/target/properties/ref
+          type: single-step-form
+        schema:
+          $ref: schema#/properties/resources/properties/stashAppscodeComRestoreSession/properties/spec/properties/target
+        type: single-step-form
+      - elements:
+        - add_new_button:
+            label: labels.repository.create
+            target: _blank
+            url:
+              params:
+                cluster:
+                  $ref: store#/route/params/cluster
+                namespace:
+                  $ref: model#/metadata/release/namespace
+                user:
+                  $ref: store#/route/params/user
+              path: /${user}/kubernetes/${cluster}/stash.appscode.com/v1alpha1/repositories/create?namespace=${namespace}
+          fetch: fetchRepositories
+          label:
+            text: labels.repository.select
+          refresh: true
+          schema:
+            $ref: schema#/properties/resources/properties/stashAppscodeComRestoreSession/properties/spec/properties/repository/properties/name
+          type: select
+        schema:
+          $ref: schema#/properties/resources/properties/stashAppscodeComRestoreSession/properties/spec/properties/repository
+        type: single-step-form
+      - computed: setSnapshot
+        label:
+          text: labels.restoresession.snapshot
+        onChange: onSnapshotChange
+        schema:
+          $ref: discriminator#/properties/snapshot
+        type: input
+      - elements:
+        - fetch: getStorageClassNames|/spec/interimVolumeTemplate/spec/storageClassName
+          label:
+            text: labels.storage.class
+          schema:
+            $ref: schema#/properties/resources/properties/stashAppscodeComRestoreSession/properties/spec/properties/interimVolumeTemplate/properties/spec/properties/storageClassName
+          type: select
+        - label:
+            text: labels.storage.size
+          schema:
+            $ref: schema#/properties/resources/properties/stashAppscodeComRestoreSession/properties/spec/properties/interimVolumeTemplate/properties/spec/properties/resources/properties/requests/properties/storage
+          type: input
+        if: showInterimVolumneTemplate
+        label:
+          text: labels.interimVolumeTemplate
+        schema:
+          $ref: schema#/properties/resources/properties/stashAppscodeComRestoreSession/properties/spec/properties/interimVolumeTemplate/properties/spec
+        show_label: true
+        type: single-step-form
+      - discriminator:
+          customizeRestoreJobRuntimeSettings:
+            type: boolean
+        elements:
+        - computed: setCustomizeRestoreJobRuntimeSettings
+          label:
+            text: labels.runtimeSettings.choise
+          schema:
+            $ref: discriminator#/properties/customizeRestoreJobRuntimeSettings
+          onChange: onCustomizeRestoreJobRuntimeSettingsChange
+          type: switch
+        - alias: database-restore-runtime-settings
+          chart:
+            name: uibytebuildersdev-component-database-runtime-settings
+            version: v0.4.11
+          dataContext:
+            namespace:
+              $ref: schema#/properties/metadata/properties/release/properties/namespace
+          if: showRuntimeSettingsForm
+          moduleResolver: fetchJsons
+          schema:
+            $ref: schema#/properties/resources/properties/stashAppscodeComRestoreSession/properties/spec/properties/runtimeSettings
+          type: reusable-element
+        label:
+          text: Runtime Settings
+        show_label: true
+        type: single-step-form
+      schema:
+        $ref: schema#/properties/resources/properties/stashAppscodeComRestoreSession/properties/spec
+      type: single-step-form
+    type: single-step-form
+  id: options
+  title: steps.0.label
+type: multi-step-form
