@@ -351,8 +351,8 @@ function setSnapshot({ model, getValue }) {
 function onSnapshotChange({ commit, getValue, discriminator }) {
   const snapshot = getValue(discriminator, '/snapshot')
   commit('wizard/model$update', {
-    path: '/resources/stashAppscodeComRestoreSession/spec/rules/0/snapshots/0',
-    value: snapshot,
+    path: '/resources/stashAppscodeComRestoreSession/spec/rules',
+    value: [{snapshot: [snapshot]}],
     force: true
   })
 }
