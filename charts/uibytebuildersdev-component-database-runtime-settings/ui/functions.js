@@ -92,7 +92,6 @@ function showAdditionalPodRuntimeSettingsForm({
   discriminator,
   getValue,
   watchDependency,
-  commit,
 }) {
   const customizeAdditionalPodRuntimeSettings = getValue(
     discriminator,
@@ -100,7 +99,20 @@ function showAdditionalPodRuntimeSettingsForm({
   );
   watchDependency("discriminator#/customizeAdditionalPodRuntimeSettings");
 
-  if (!customizeAdditionalPodRuntimeSettings) {
+  return !!customizeAdditionalPodRuntimeSettings;
+}
+
+function onAdditionalPodRuntimeSettingsSwitchChange({
+  discriminator,
+  getValue,
+  commit,
+}) {
+  const customizeAdditionalPodRuntimeSettings = getValue(
+    discriminator,
+    "/customizeAdditionalPodRuntimeSettings"
+  );
+
+  if (customizeAdditionalPodRuntimeSettings === false) {
     // remove additional runtime settings properties
     commit("wizard/model$delete", "/pod/nodeName");
     commit("wizard/model$delete", "/pod/podAnnotations");
@@ -108,8 +120,14 @@ function showAdditionalPodRuntimeSettingsForm({
     commit("wizard/model$delete", "/pod/affinity");
     commit("wizard/model$delete", "/pod/tolerations");
   }
+}
 
-  return !!customizeAdditionalPodRuntimeSettings;
+function setAdditionalPodRuntimeSettingsSwitch({model, getValue}) {
+  const pod = getValue(model, '/pod')
+
+  const { nodeName, podAnnotations, nodeSelector, affinity, tolerations } = pod;
+
+  return !!(nodeName || podAnnotations || nodeSelector || affinity || tolerations);
 }
 
 async function getNodes({ axios, storeGet }) {
@@ -146,4 +164,6 @@ return {
   showAdditionalPodRuntimeSettingsForm,
   getNodes,
   getOperatorsList,
+  setAdditionalPodRuntimeSettingsSwitch,
+  onAdditionalPodRuntimeSettingsSwitchChange
 };
