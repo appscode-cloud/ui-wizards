@@ -197,9 +197,9 @@ function getDbType({
   const postgresDetails = getValue(discriminator, "/dbDetails");
 
   const { spec } = postgresDetails || {};
-  const { replicas } = spec || {};
-  let verd = "";
-  if (replicas > 1) {
+  const { standbyMode } = spec || {};
+
+  if (standbyMode) {
     verd = "cluster";
   } else {
     verd = "standalone";

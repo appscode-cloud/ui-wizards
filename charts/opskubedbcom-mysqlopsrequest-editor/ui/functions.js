@@ -218,10 +218,10 @@ function getDbType({
   const dbDetails = getValue(discriminator, "/dbDetails");
 
   const { spec } = dbDetails || {};
-  const { replicas } = spec || {};
-  let verd = "";
+  const { topology } = spec || {};
+  const { mode } = topology || {};
 
-  if (replicas > 1) {
+  if (mode) {
     verd = "cluster";
   } else {
     verd = "standalone";
