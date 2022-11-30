@@ -3,7 +3,6 @@
 {{- if and .Values.spec.machine (hasKey $machines .Values.spec.machine) }}
   {{- $res = get (get $machines .Values.spec.machine) "resources" }}
 {{- end }}
-{{- $pgv := (split "." .Values.spec.version)._0 | atoi -}}
 
 apiVersion: kubedb.com/v1alpha2
 kind: Proxysql
@@ -22,19 +21,8 @@ spec:
   authSecret:
     name: {{ .Values.spec.authSecret.name }}
 {{- end }}
-{{- if ge $pgv 11 }}
-  clientAuthMode: scram
-{{- else }}
-  clientAuthMode: md5
-{{- end }}
 {{- if eq .Values.spec.mode "Cluster" }}
   replicas: 3
-  standbyMode: Hot
-  leaderElection:
-    electionTick: 10
-    heartbeatTick: 1
-    maximumLagBeforeFailover: 33554432
-    period: 100ms
 {{- else }}
   replicas: 1
 {{- end }}
