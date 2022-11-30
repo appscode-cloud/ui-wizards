@@ -264,6 +264,73 @@ function clearOpsReqSpec(verd, opsReqType, commit) {
   }
 }
 
+function asDatabaseOperation(route) {
+  return !!route.query.operation;
+}
+
+function showAndInitName({ route, commit }) {
+  const ver = asDatabaseOperation(route);
+  if (ver) {
+    commit("wizard/model$update", {
+      path: "/metadata/name",
+      value: `${route.query.name}-ops-${new Date().getTime()}`,
+      force: true,
+    });
+  }
+
+  return !ver;
+}
+function showAndInitNamespace({ route, commit }) {
+  const ver = asDatabaseOperation(route);
+  if (ver) {
+    commit("wizard/model$update", {
+      path: "/metadata/namespace",
+      value: `${route.query.namespace}`,
+      force: true,
+    });
+  }
+
+  return !ver;
+}
+function showAndInitDatabaseRef({ route, commit }) {
+  const ver = asDatabaseOperation(route);
+  if (ver) {
+    commit("wizard/model$update", {
+      path: "/spec/databaseRef/name",
+      value: `${route.query.name}`,
+      force: true,
+    });
+  }
+
+  return !ver;
+}
+function showConfigureOpsrequestLabel({ route }) {
+  return !asDatabaseOperation(route);
+}
+function showAndInitOpsRequestType({ route, commit }) {
+  const ver = asDatabaseOperation(route);
+  const opMap = {
+    upgrade: "Upgrade",
+    horizontalscaling: "HorizontalScaling",
+    verticalscaling: "VerticalScaling",
+    volumeexpansion: "VolumeExpansion",
+    restart: "Restart",
+    reconfiguretls: "ReconfigureTLS",
+  };
+  if (ver) {
+    const operation = route.query.operation;
+    const match = /^(.*)-opsrequest-(.*)$/.exec(operation);
+    const opstype = match[2];
+    commit("wizard/model$update", {
+      path: "/spec/type",
+      value: opMap[opstype],
+      force: true,
+    });
+  }
+
+  return !ver;
+}
+
 // vertical scaling
 function ifDbTypeEqualsTo(
   { discriminator, getValue, watchDependency, commit },
@@ -679,36 +746,43 @@ function onDbChange({commit}) {
 }
 
 return {
-	fetchJsons,
-	returnFalse,
-	getNamespaces,
-	getMongoDbs,
-	getMongoDetails,
-	getMongoDbVersions,
-	ifRequestTypeEqualsTo,
-	onRequestTypeChange,
-	getDbTls,
-	getDbType,
-	disableOpsRequest,
-	initNamespace,
-	initDatabaseRef,
-	clearOpsReqSpec,
-	ifDbTypeEqualsTo,
-	getConfigSecrets,
-	isEqualToValueFromType,
-	getNamespacedResourceList,
-	getResourceList,
-	resourceNames,
-	unNamespacedResourceNames,
-	ifReconfigurationTypeEqualsTo,
-	onReconfigurationTypeChange,
-	disableReconfigurationType,
-	hasTlsField,
-	initIssuerRefApiGroup,
-	getIssuerRefsName,
-	initTlsOperation,
-	onTlsOperationChange,
-	showIssuerRefAndCertificates,
+  fetchJsons,
+  returnFalse,
+  getNamespaces,
+  getMongoDbs,
+  getMongoDetails,
+  getMongoDbVersions,
+  ifRequestTypeEqualsTo,
+  onRequestTypeChange,
+  getDbTls,
+  getDbType,
+  disableOpsRequest,
+  initNamespace,
+  initDatabaseRef,
+  clearOpsReqSpec,
+
+  showAndInitName,
+  showAndInitNamespace,
+  showAndInitDatabaseRef,
+  showConfigureOpsrequestLabel,
+  showAndInitOpsRequestType,
+
+  ifDbTypeEqualsTo,
+  getConfigSecrets,
+  isEqualToValueFromType,
+  getNamespacedResourceList,
+  getResourceList,
+  resourceNames,
+  unNamespacedResourceNames,
+  ifReconfigurationTypeEqualsTo,
+  onReconfigurationTypeChange,
+  disableReconfigurationType,
+  hasTlsField,
+  initIssuerRefApiGroup,
+  getIssuerRefsName,
+  initTlsOperation,
+  onTlsOperationChange,
+  showIssuerRefAndCertificates,
   isIssuerRefRequired,
   getRequestTypeFromRoute,
   isDbDetailsLoading,
@@ -718,4 +792,4 @@ return {
   isDatabaseRefDisabled,
   onDbChange,
   onNamespaceChange,
-}
+};

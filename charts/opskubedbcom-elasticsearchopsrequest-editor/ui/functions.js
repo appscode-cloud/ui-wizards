@@ -3,7 +3,7 @@ async function fetchJsons({ axios, itemCtx }) {
   let language = {};
   let functions = {};
   const { name, url, version, packageviewUrlPrefix } = itemCtx.chart;
-  
+
   try {
     ui = await axios.get(
       `${packageviewUrlPrefix}/create-ui.yaml?name=${name}&url=${url}&version=${version}&format=json`
@@ -85,13 +85,15 @@ async function getElasticsearches({
   });
 }
 
+let elasticVersions = [];
+
 async function getElasticsearchDetails({
   axios,
   storeGet,
   model,
   getValue,
   watchDependency,
-  setDiscriminatorValue
+  setDiscriminatorValue,
 }) {
   const owner = storeGet("/route/params/user");
   const cluster = storeGet("/cluster/clusterDefinition/spec/name");
@@ -107,10 +109,12 @@ async function getElasticsearchDetails({
     );
 
     const { version } = resp?.data?.spec || {};
-    const elasticVersions = await elasticVersions$api({ axios, storeGet });
-    const selectedVersion = elasticVersions?.find((item) => item?.metadata?.name === version);
+    elasticVersions = await elasticVersions$api({ axios, storeGet });
+    const selectedVersion = elasticVersions?.find(
+      (item) => item?.metadata?.name === version
+    );
 
-    if(resp?.data?.spec) {
+    if (resp?.data?.spec) {
       resp.data.spec.authPlugin = selectedVersion?.spec?.authPlugin || "";
     }
 
@@ -133,7 +137,6 @@ async function elasticVersions$api({ axios, storeGet }) {
     },
   };
   try {
-
     const resp = await axios.get(
       `/clusters/${owner}/${cluster}/proxy/catalog.kubedb.com/v1alpha1/elasticsearchversions`,
       {
@@ -147,17 +150,26 @@ async function elasticVersions$api({ axios, storeGet }) {
   }
 }
 
-async function getElasticsearchVersions({ axios, storeGet, discriminator, getValue, watchDependency }) {
+async function getElasticsearchVersions({
+  axios,
+  storeGet,
+  discriminator,
+  getValue,
+  watchDependency,
+}) {
   watchDependency("discriminator#/elasticsearchDetails");
 
-  const resources = await elasticVersions$api({ axios, storeGet });
+  const resources = elasticVersions;
 
   const elasticsearchDetails = getValue(discriminator, "/elasticsearchDetails");
   const authPlugin = elasticsearchDetails?.spec?.authPlugin || "";
 
   // keep only non deprecated versions
   const filteredElasticsearchVersions = resources.filter(
-    (item) => item.spec && !item.spec.deprecated && (!authPlugin || item.spec.authPlugin === authPlugin)
+    (item) =>
+      item.spec &&
+      !item.spec.deprecated &&
+      (!authPlugin || item.spec.authPlugin === authPlugin)
   );
 
   return filteredElasticsearchVersions.map((item) => {
@@ -172,10 +184,7 @@ async function getElasticsearchVersions({ axios, storeGet, discriminator, getVal
   });
 }
 
-function ifRequestTypeEqualsTo(
-  { model, getValue, watchDependency },
-  type
-) {
+function ifRequestTypeEqualsTo({ model, getValue, watchDependency }, type) {
   const selectedType = getValue(model, "/spec/type");
   watchDependency("model#/spec/type");
 
@@ -200,23 +209,15 @@ function onRequestTypeChange({ model, getValue, commit }) {
   });
 }
 
-function getDbTls({
-  discriminator,
-  getValue,
-  watchDependency,
-}) {
+function getDbTls({ discriminator, getValue, watchDependency }) {
   watchDependency("discriminator#/elasticsearchDetails");
   const elasticsearchDetails = getValue(discriminator, "/elasticsearchDetails");
 
   const { spec } = elasticsearchDetails || {};
-  return spec.tls || undefined;
+  return (spec && spec.tls) || undefined;
 }
 
-function getDbType({
-  discriminator,
-  getValue,
-  watchDependency,
-}) {
+function getDbType({ discriminator, getValue, watchDependency }) {
   watchDependency("discriminator#/elasticsearchDetails");
   const elasticsearchDetails = getValue(discriminator, "/elasticsearchDetails");
 
@@ -258,6 +259,73 @@ function clearOpsReqSpec(verd, opsReqType, commit) {
   }
 }
 
+function asDatabaseOperation(route) {
+  return !!route.query.operation;
+}
+
+function showAndInitName({ route, commit }) {
+  const ver = asDatabaseOperation(route);
+  if (ver) {
+    commit("wizard/model$update", {
+      path: "/metadata/name",
+      value: `${route.query.name}-ops-${new Date().getTime()}`,
+      force: true,
+    });
+  }
+
+  return !ver;
+}
+function showAndInitNamespace({ route, commit }) {
+  const ver = asDatabaseOperation(route);
+  if (ver) {
+    commit("wizard/model$update", {
+      path: "/metadata/namespace",
+      value: `${route.query.namespace}`,
+      force: true,
+    });
+  }
+
+  return !ver;
+}
+function showAndInitDatabaseRef({ route, commit }) {
+  const ver = asDatabaseOperation(route);
+  if (ver) {
+    commit("wizard/model$update", {
+      path: "/spec/databaseRef/name",
+      value: `${route.query.name}`,
+      force: true,
+    });
+  }
+
+  return !ver;
+}
+function showConfigureOpsrequestLabel({ route }) {
+  return !asDatabaseOperation(route);
+}
+function showAndInitOpsRequestType({ route, commit }) {
+  const ver = asDatabaseOperation(route);
+  const opMap = {
+    upgrade: "Upgrade",
+    horizontalscaling: "HorizontalScaling",
+    verticalscaling: "VerticalScaling",
+    volumeexpansion: "VolumeExpansion",
+    restart: "Restart",
+    reconfiguretls: "ReconfigureTLS",
+  };
+  if (ver) {
+    const operation = route.query.operation;
+    const match = /^(.*)-opsrequest-(.*)$/.exec(operation);
+    const opstype = match[2];
+    commit("wizard/model$update", {
+      path: "/spec/type",
+      value: opMap[opstype],
+      force: true,
+    });
+  }
+
+  return !ver;
+}
+
 // vertical scaling
 function ifDbTypeEqualsTo(
   { discriminator, getValue, watchDependency, commit },
@@ -274,7 +342,10 @@ function ifDbTypeEqualsTo(
   return value === verd;
 }
 
-function isAuthPluginNotEqualTo({discriminator, getValue, watchDependency}, value) {
+function isAuthPluginNotEqualTo(
+  { discriminator, getValue, watchDependency },
+  value
+) {
   watchDependency("discriminator#/elasticsearchDetails");
   const elasticsearchDetails = getValue(discriminator, "/elasticsearchDetails");
 
@@ -283,7 +354,10 @@ function isAuthPluginNotEqualTo({discriminator, getValue, watchDependency}, valu
   return authPlugin && authPlugin !== value;
 }
 
-function isAuthPluginEqualTo({discriminator, getValue, watchDependency}, value) {
+function isAuthPluginEqualTo(
+  { discriminator, getValue, watchDependency },
+  value
+) {
   watchDependency("discriminator#/elasticsearchDetails");
   const elasticsearchDetails = getValue(discriminator, "/elasticsearchDetails");
 
@@ -353,11 +427,7 @@ async function getNamespacedResourceList(
 
   return ans;
 }
-async function getResourceList(
-  axios,
-  storeGet,
-  { group, version, resource }
-) {
+async function getResourceList(axios, storeGet, { group, version, resource }) {
   const owner = storeGet("/route/params/user");
   const cluster = storeGet("/cluster/clusterDefinition/spec/name");
 
@@ -448,9 +518,7 @@ function ifReconfigurationTypeEqualsTo(
 
   return reconfigurationType === value;
 }
-function onReconfigurationTypeChange(
-  { commit, discriminator, getValue }
-) {
+function onReconfigurationTypeChange({ commit, discriminator, getValue }) {
   const reconfigurationType = getValue(discriminator, "/reconfigurationType");
   if (reconfigurationType === "remove") {
     commit("wizard/model$delete", `/spec/configuration`);
@@ -461,45 +529,38 @@ function onReconfigurationTypeChange(
       force: true,
     });
   } else {
-    commit(
-      "wizard/model$delete",
-      `/spec/configuration/configSecret`
-    );
-    commit(
-      "wizard/model$delete",
-      `/spec/configuration/inlineConfig`
-    );
-    commit(
-      "wizard/model$delete",
-      `/spec/configuration/removeCustomConfig`
-    );
+    commit("wizard/model$delete", `/spec/configuration/configSecret`);
+    commit("wizard/model$delete", `/spec/configuration/inlineConfig`);
+    commit("wizard/model$delete", `/spec/configuration/removeCustomConfig`);
   }
 }
-async function disableReconfigurationType(
-  { axios, storeGet, model, getValue, watchDependency, setDiscriminatorValue, itemCtx },
-) {
+async function disableReconfigurationType({
+  axios,
+  storeGet,
+  model,
+  getValue,
+  watchDependency,
+  setDiscriminatorValue,
+  itemCtx,
+}) {
   const dbDetails = await getElasticsearchDetails({
     axios,
     storeGet,
     model,
     getValue,
     watchDependency,
-    setDiscriminatorValue
+    setDiscriminatorValue,
   });
 
   const { spec } = dbDetails || {};
-    if (itemCtx.value === "inlineConfig" || itemCtx.value === "remove") {
-      if (spec.configSecret) return false;
-      else return true;
-    } else return false;
+  if (itemCtx.value === "inlineConfig" || itemCtx.value === "remove") {
+    if (spec.configSecret) return false;
+    else return true;
+  } else return false;
 }
 
 // for tls
-function hasTlsField({
-  discriminator,
-  getValue,
-  watchDependency,
-}) {
+function hasTlsField({ discriminator, getValue, watchDependency }) {
   const tls = getDbTls({
     discriminator,
     getValue,
@@ -509,13 +570,21 @@ function hasTlsField({
   return !!tls;
 }
 
-function initIssuerRefApiGroup({ getValue, model, watchDependency, discriminator }) {
+function initIssuerRefApiGroup({
+  getValue,
+  model,
+  watchDependency,
+  discriminator,
+}) {
   const kind = getValue(model, "/spec/tls/issuerRef/kind");
   watchDependency("model#/spec/tls/issuerRef/kind");
 
   if (kind) {
-    const apiGroup = getValue(discriminator, "/dbDetails/spec/tls/issuerRef/apiGroup");
-    if(apiGroup) return apiGroup;
+    const apiGroup = getValue(
+      discriminator,
+      "/dbDetails/spec/tls/issuerRef/apiGroup"
+    );
+    if (apiGroup) return apiGroup;
     return "cert-manager.io";
   } else return undefined;
 }
@@ -602,11 +671,7 @@ function showIssuerRefAndCertificates({
   return verd;
 }
 
-function isIssuerRefRequired({
-  discriminator,
-  getValue,
-  watchDependency,
-}) {
+function isIssuerRefRequired({ discriminator, getValue, watchDependency }) {
   const hasTls = hasTlsField({
     discriminator,
     getValue,
@@ -616,41 +681,43 @@ function isIssuerRefRequired({
   return !hasTls;
 }
 
-function getRequestTypeFromRoute({ route, discriminator, model, getValue, watchDependency }) {
-  const isDbloading = isDbDetailsLoading({discriminator, model, getValue, watchDependency});
-  const { query } = route || {};
-  const { requestType } = query || {};
-  return isDbloading ? "" : requestType || "";
-}
-
 // ************************************** Set db details *****************************************
 
-function isDbDetailsLoading({discriminator, model, getValue, watchDependency}) {
+function isDbDetailsLoading({
+  discriminator,
+  model,
+  getValue,
+  watchDependency,
+}) {
   watchDependency("discriminator#/elasticsearchDetails");
   watchDependency("model#/spec/databaseRef/name");
   const elasticsearchDetails = getValue(discriminator, "/elasticsearchDetails");
   const dbName = getValue(model, "/spec/databaseRef/name");
-  
+
   return !elasticsearchDetails || !dbName;
 }
 
-function setValueFromDbDetails({discriminator, getValue, watchDependency, commit}, path, commitPath) {
+function setValueFromDbDetails(
+  { discriminator, getValue, watchDependency, commit },
+  path,
+  commitPath
+) {
   watchDependency("discriminator#/elasticsearchDetails");
   const retValue = getValue(discriminator, `/elasticsearchDetails${path}`);
 
-  if(commitPath) {
+  if (commitPath) {
     const tlsOperation = getValue(discriminator, "/tlsOperation");
-    
-    if(commitPath.includes("/spec/tls") && tlsOperation !== "update")
-      return undefined; 
+
+    if (commitPath.includes("/spec/tls") && tlsOperation !== "update")
+      return undefined;
 
     // direct model update required for reusable element.
     // computed property is not applicable for reusable element
-    if(retValue) {
+    if (retValue) {
       commit("wizard/model$update", {
         path: commitPath,
         value: retValue,
-        force: true
+        force: true,
       });
     }
   }
@@ -658,7 +725,12 @@ function setValueFromDbDetails({discriminator, getValue, watchDependency, commit
   return retValue || undefined;
 }
 
-function disableOpsRequest({itemCtx, discriminator, getValue, watchDependency}) {
+function disableOpsRequest({
+  itemCtx,
+  discriminator,
+  getValue,
+  watchDependency,
+}) {
   watchDependency("discriminator#/elasticsearchDetails");
   if (itemCtx.value === "ReconfigureTls") {
     const dbDetails = getValue(discriminator, "/elasticsearchDetails");
@@ -668,36 +740,51 @@ function disableOpsRequest({itemCtx, discriminator, getValue, watchDependency}) 
   return false;
 }
 
-function hasResourceValue({discriminator, getValue, watchDependency}, node) {
+function hasResourceValue({ discriminator, getValue, watchDependency }, node) {
   watchDependency("discriminator#/elasticsearchDetails");
-  const nodeResource = getValue(discriminator, `/elasticsearchDetails/spec/topology/${node}/resources`);
+  const nodeResource = getValue(
+    discriminator,
+    `/elasticsearchDetails/spec/topology/${node}/resources`
+  );
   return !!nodeResource;
 }
 
-function hasVolumeExpansion({discriminator, getValue, watchDependency}, node) {
+function hasVolumeExpansion(
+  { discriminator, getValue, watchDependency },
+  node
+) {
   watchDependency("discriminator#/elasticsearchDetails");
-  const nodeStorage = getValue(discriminator, `/elasticsearchDetails/spec/topology/${node}/storage/resources/requests/storage`);
+  const nodeStorage = getValue(
+    discriminator,
+    `/elasticsearchDetails/spec/topology/${node}/storage/resources/requests/storage`
+  );
   return !!nodeStorage;
 }
 
-function getAliasOptions({discriminator, getValue, watchDependency}) {
+function getAliasOptions({ discriminator, getValue, watchDependency }) {
   watchDependency("discriminator#/elasticsearchDetails");
 
-  const enableSSL = getValue(discriminator, "/elasticsearchDetails/spec/enableSSL");
-  const authPlugin = getValue(discriminator, "/elasticsearchDetails/spec/authPlugin");
+  const enableSSL = getValue(
+    discriminator,
+    "/elasticsearchDetails/spec/enableSSL"
+  );
+  const authPlugin = getValue(
+    discriminator,
+    "/elasticsearchDetails/spec/authPlugin"
+  );
   const monitor = getValue(discriminator, "/elasticsearchDetails/spec/monitor");
 
   // always include transport cert alias
   const aliases = ["transport"];
 
-  if(authPlugin !== "X-Pack") {
+  if (authPlugin !== "X-Pack") {
     aliases.push("admin");
   }
 
-  if(enableSSL) {
+  if (enableSSL) {
     aliases.push("http");
     aliases.push("archiver");
-    if(monitor) {
+    if (monitor) {
       aliases.push("metrics-exporter");
     }
   }
@@ -715,48 +802,68 @@ function isDatabaseRefDisabled({ route }) {
   return !!name;
 }
 
-function onNamespaceChange({commit}) {
-  commit("wizard/model$delete", "/spec/type");
+function onNamespaceChange({ commit, route }) {
+  const { operation } = route.query;
+  // if operation query parameter is present
+  // then the type is set by showAndInitOpsRequestType and can not be changed or deleted
+  // otherwise delete the type
+  if (!operation) {
+    // delete type
+    commit("wizard/model$delete", "/spec/type");
+  }
 }
 
-function onDbChange({commit}) {
-  commit("wizard/model$delete", "/spec/type");
+function onDbChange({ commit, route }) {
+  const { operation } = route.query;
+  // if operation query parameter is present
+  // then the type is set by showAndInitOpsRequestType and can not be changed or deleted
+  // otherwise delete the type
+  if (!operation) {
+    // delete type
+    commit("wizard/model$delete", "/spec/type");
+  }
 }
 
 return {
-	fetchJsons,
-	returnFalse,
-	getNamespaces,
-	getElasticsearches,
-	getElasticsearchDetails,
+  fetchJsons,
+  returnFalse,
+  getNamespaces,
+  getElasticsearches,
+  getElasticsearchDetails,
   elasticVersions$api,
-	getElasticsearchVersions,
-	ifRequestTypeEqualsTo,
-	onRequestTypeChange,
-	getDbTls,
-	getDbType,
-	initNamespace,
-	initDatabaseRef,
-	clearOpsReqSpec,
-	ifDbTypeEqualsTo,
+  getElasticsearchVersions,
+  ifRequestTypeEqualsTo,
+  onRequestTypeChange,
+  getDbTls,
+  getDbType,
+  initNamespace,
+  initDatabaseRef,
+  clearOpsReqSpec,
+
+  showAndInitName,
+  showAndInitNamespace,
+  showAndInitDatabaseRef,
+  showConfigureOpsrequestLabel,
+  showAndInitOpsRequestType,
+
+  ifDbTypeEqualsTo,
   isAuthPluginEqualTo,
   isAuthPluginNotEqualTo,
-	getConfigSecrets,
-	getNamespacedResourceList,
-	getResourceList,
-	resourceNames,
-	unNamespacedResourceNames,
-	ifReconfigurationTypeEqualsTo,
-	onReconfigurationTypeChange,
-	disableReconfigurationType,
-	hasTlsField,
-	initIssuerRefApiGroup,
-	getIssuerRefsName,
-	initTlsOperation,
-	onTlsOperationChange,
-	showIssuerRefAndCertificates,
-	isIssuerRefRequired,
-  getRequestTypeFromRoute,
+  getConfigSecrets,
+  getNamespacedResourceList,
+  getResourceList,
+  resourceNames,
+  unNamespacedResourceNames,
+  ifReconfigurationTypeEqualsTo,
+  onReconfigurationTypeChange,
+  disableReconfigurationType,
+  hasTlsField,
+  initIssuerRefApiGroup,
+  getIssuerRefsName,
+  initTlsOperation,
+  onTlsOperationChange,
+  showIssuerRefAndCertificates,
+  isIssuerRefRequired,
   isDbDetailsLoading,
   setValueFromDbDetails,
   disableOpsRequest,
@@ -767,4 +874,4 @@ return {
   isDatabaseRefDisabled,
   onNamespaceChange,
   onDbChange,
-}
+};
