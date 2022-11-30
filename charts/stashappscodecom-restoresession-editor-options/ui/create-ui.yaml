@@ -1,7 +1,8 @@
 steps:
 - form:
     elements:
-    - label:
+    - if: showAndInitName
+      label:
         text: labels.restoresession.name
       schema:
         $ref: schema#/properties/metadata/properties/release/properties/name
@@ -9,13 +10,15 @@ steps:
     - computed: initNamespace
       disabled: isNamespaceDisabled
       fetch: getResources|core|v1|namespaces
+      if: showAndInitNamespace
       label:
         text: labels.namespace
       schema:
         $ref: schema#/properties/metadata/properties/release/properties/namespace
       type: select
     - elements:
-      - individualItemDisabilityCheck: labelsDisabilityChecker
+      - if: showIfDoesNotHaveOperationQuery
+        individualItemDisabilityCheck: labelsDisabilityChecker
         isArray: true
         keys:
           label:
@@ -31,7 +34,8 @@ steps:
           schema:
             $ref: schema#/properties/spec/properties/labels/additionalProperties
           type: input
-      - isArray: true
+      - if: showIfDoesNotHaveOperationQuery
+        isArray: true
         keys:
           label:
             text: labels.key
@@ -48,6 +52,7 @@ steps:
           type: input
       - disabled: isDatabaseSelectDisabled
         fetch: fetchDatabases
+        if: showAndInitDatabase
         label:
           text: labels.restoresession.database
         schema:

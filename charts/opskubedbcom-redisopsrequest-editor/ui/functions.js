@@ -165,6 +165,7 @@ function onRequestTypeChange({ model, getValue, commit }) {
   const selectedType = getValue(model, "/spec/type");
   const reqTypeMapping = {
     Upgrade: "upgrade",
+    UpdateVersion: "upgrade",
     HorizontalScaling: "horizontalScaling",
     VerticalScaling: "verticalScaling",
     VolumeExpansion: "volumeExpansion",
@@ -247,6 +248,73 @@ function clearOpsReqSpec(verd, opsReqType, commit) {
       commit("wizard/model$delete", `/spec/${opsReqType}/node`);
     }
   }
+}
+
+function asDatabaseOperation(route) {
+  return !!route.query.operation;
+}
+
+function showAndInitName({ route, commit }) {
+  const ver = asDatabaseOperation(route);
+  if (ver) {
+    commit("wizard/model$update", {
+      path: "/metadata/name",
+      value: `${route.query.name}-ops-${new Date().getTime()}`,
+      force: true,
+    });
+  }
+
+  return !ver;
+}
+function showAndInitNamespace({ route, commit }) {
+  const ver = asDatabaseOperation(route);
+  if (ver) {
+    commit("wizard/model$update", {
+      path: "/metadata/namespace",
+      value: `${route.query.namespace}`,
+      force: true,
+    });
+  }
+
+  return !ver;
+}
+function showAndInitDatabaseRef({ route, commit }) {
+  const ver = asDatabaseOperation(route);
+  if (ver) {
+    commit("wizard/model$update", {
+      path: "/spec/databaseRef/name",
+      value: `${route.query.name}`,
+      force: true,
+    });
+  }
+
+  return !ver;
+}
+function showConfigureOpsrequestLabel({ route }) {
+  return !asDatabaseOperation(route);
+}
+function showAndInitOpsRequestType({ route, commit }) {
+  const ver = asDatabaseOperation(route);
+  const opMap = {
+    upgrade: "UpdateVersion", // deprecated, use updateVersion
+    horizontalscaling: "HorizontalScaling",
+    verticalscaling: "VerticalScaling",
+    volumeexpansion: "VolumeExpansion",
+    restart: "Restart",
+    reconfiguretls: "ReconfigureTLS",
+  };
+  if (ver) {
+    const operation = route.query.operation;
+    const match = /^(.*)-opsrequest-(.*)$/.exec(operation);
+    const opstype = match[2];
+    commit("wizard/model$update", {
+      path: "/spec/type",
+      value: opMap[opstype],
+      force: true,
+    });
+  }
+
+  return !ver;
 }
 
 // vertical scaling
@@ -661,37 +729,44 @@ function onDbChange({commit}) {
 }
 
 return {
-	fetchJsons,
-	returnFalse,
-	getNamespaces,
-	getDbs,
-	getDbDetails,
-	getDbVersions,
-	ifRequestTypeEqualsTo,
-	onRequestTypeChange,
-	getDbTls,
-	getDbType,
-	initNamespace,
-	initDatabaseRef,
-	clearOpsReqSpec,
-	ifDbTypeEqualsTo,
-	getConfigSecrets,
-	isEqualToValueFromType,
+  fetchJsons,
+  returnFalse,
+  getNamespaces,
+  getDbs,
+  getDbDetails,
+  getDbVersions,
+  ifRequestTypeEqualsTo,
+  onRequestTypeChange,
+  getDbTls,
+  getDbType,
+  initNamespace,
+  initDatabaseRef,
+  clearOpsReqSpec,
+
+  showAndInitName,
+  showAndInitNamespace,
+  showAndInitDatabaseRef,
+  showConfigureOpsrequestLabel,
+  showAndInitOpsRequestType,
+
+  ifDbTypeEqualsTo,
+  getConfigSecrets,
+  isEqualToValueFromType,
   disableOpsRequest,
-	getNamespacedResourceList,
-	getResourceList,
-	resourceNames,
-	unNamespacedResourceNames,
-	ifReconfigurationTypeEqualsTo,
-	onReconfigurationTypeChange,
-	disableReconfigurationType,
-	hasTlsField,
-	initIssuerRefApiGroup,
-	getIssuerRefsName,
-	initTlsOperation,
-	onTlsOperationChange,
-	showIssuerRefAndCertificates,
-	isIssuerRefRequired,
+  getNamespacedResourceList,
+  getResourceList,
+  resourceNames,
+  unNamespacedResourceNames,
+  ifReconfigurationTypeEqualsTo,
+  onReconfigurationTypeChange,
+  disableReconfigurationType,
+  hasTlsField,
+  initIssuerRefApiGroup,
+  getIssuerRefsName,
+  initTlsOperation,
+  onTlsOperationChange,
+  showIssuerRefAndCertificates,
+  isIssuerRefRequired,
   getRequestTypeFromRoute,
   isDbDetailsLoading,
   setValueFromDbDetails,
@@ -700,4 +775,4 @@ return {
   isDatabaseRefDisabled,
   onNamespaceChange,
   onDbChange,
-}
+};

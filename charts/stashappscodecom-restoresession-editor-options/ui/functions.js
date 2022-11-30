@@ -42,6 +42,45 @@ async function getResources(
   } else return [];
 }
 
+function hasOperationQuery(route) {
+  const { operation } = route.query;
+  return !!operation;
+}
+function showAndInitName({ route, commit }) {
+  const ver = hasOperationQuery(route);
+  if (ver) {
+    const { name } = route.query;
+
+    commit("wizard/model$update", {
+      path: "metadata/release/name",
+      value: `${name}-restore-${new Date().getTime()}`,
+      force: true,
+    });
+
+    return false;
+  } else {
+    return true;
+  }
+}
+function showAndInitNamespace({ route, commit }) {
+  const ver = hasOperationQuery(route);
+  if (ver) {
+    const { namespace } = route.query;
+
+    commit("wizard/model$update", {
+      path: "metadata/release/namespace",
+      value: namespace,
+      force: true,
+    });
+
+    return false;
+  } else {
+    return true;
+  }
+}
+function showIfDoesNotHaveOperationQuery({route}) {
+  return !hasOperationQuery(route);
+}
 function initNamespace({ route }) {
   const { namespace } = route.query || {};
   return namespace || null;
@@ -108,10 +147,10 @@ async function fetchDatabases({
   model,
   getValue,
   watchDependency,
-  commit
+  commit,
 }) {
   const owner = storeGet("/route/params/user");
-  const database = storeGet('/route/query/database');
+  const name = storeGet("/route/query/name");
   const cluster = storeGet("/cluster/clusterDefinition/spec/name");
   const namespace = getValue(model, "/metadata/release/namespace");
   watchDependency("model#/metadata/release/namespace");
@@ -157,7 +196,7 @@ async function fetchDatabases({
             },
           };
         });
-        
+
       // update database to type map
       databaseToTypeMap = {};
       resources.forEach((rs) => {
@@ -168,17 +207,19 @@ async function fetchDatabases({
         }
       });
 
-      if(database) {
+      if (name) {
         // if database name is provided in route query
         // find the option matching with database
-        const matchedOption = mappedResources.find(rs => rs.text === database)
-        if(matchedOption) {
+        const matchedOption = mappedResources.find(
+          (rs) => rs.text === name
+        );
+        if (matchedOption) {
           // set this value as target
           commit("wizard/model$update", {
             path: "/spec/target",
             value: matchedOption.value,
-            force: true
-          })
+            force: true,
+          });
         }
       }
 
@@ -188,6 +229,18 @@ async function fetchDatabases({
       return [];
     }
   } else return [];
+}
+
+function showAndInitDatabase({model, getValue, watchDependency, route}) {
+  // watch targetRef (database)
+  // if provided in query, then it will be set by fetchDatabases
+  const target = getValue(model, '/spec/target');
+  watchDependency('model#/spec/target');
+  
+  const {operation} = route.query;
+  if (target.name && operation) {
+    return false;
+  } else return true;
 }
 
 async function fetchRepositories({
@@ -330,9 +383,13 @@ const restoreSessionInitRunTimeSettings = {
     },
   },
 };
-function showRuntimeSettingsForm(
-  { discriminator, getValue, watchDependency, commit, model }
-) {
+function showRuntimeSettingsForm({
+  discriminator,
+  getValue,
+  watchDependency,
+  commit,
+  model,
+}) {
   const customizeRestoreJobRuntimeSettings = getValue(
     discriminator,
     "/customizeRestoreJobRuntimeSettings"
@@ -356,12 +413,20 @@ function showRuntimeSettingsForm(
 
 return {
   getResources,
+
+  showAndInitName,
+  showAndInitNamespace,
+  showIfDoesNotHaveOperationQuery,
+  
   initNamespace,
   isNamespaceDisabled,
   isDatabaseSelectDisabled,
   labelsDisabilityChecker,
   fetchJsons,
+  
   fetchDatabases,
+  showAndInitDatabase,
+  
   fetchRepositories,
 
   showInterimVolumneTemplate,
