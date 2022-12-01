@@ -7,8 +7,8 @@
 ```bash
 $ helm repo add bytebuilders-ui https://bundles.byte.builders/ui/
 $ helm repo update
-$ helm search repo bytebuilders-ui/opskubedbcom-memcachedopsrequest-editor --version=v0.4.11
-$ helm upgrade -i opskubedbcom-memcachedopsrequest-editor bytebuilders-ui/opskubedbcom-memcachedopsrequest-editor -n default --create-namespace --version=v0.4.11
+$ helm search repo bytebuilders-ui/opskubedbcom-memcachedopsrequest-editor --version=v0.4.12
+$ helm upgrade -i opskubedbcom-memcachedopsrequest-editor bytebuilders-ui/opskubedbcom-memcachedopsrequest-editor -n default --create-namespace --version=v0.4.12
 ```
 
 ## Introduction
@@ -24,7 +24,7 @@ This chart deploys a MemcachedOpsRequest Editor on a [Kubernetes](http://kuberne
 To install/upgrade the chart with the release name `opskubedbcom-memcachedopsrequest-editor`:
 
 ```bash
-$ helm upgrade -i opskubedbcom-memcachedopsrequest-editor bytebuilders-ui/opskubedbcom-memcachedopsrequest-editor -n default --create-namespace --version=v0.4.11
+$ helm upgrade -i opskubedbcom-memcachedopsrequest-editor bytebuilders-ui/opskubedbcom-memcachedopsrequest-editor -n default --create-namespace --version=v0.4.12
 ```
 
 The command deploys a MemcachedOpsRequest Editor on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
@@ -56,12 +56,12 @@ The following table lists the configurable parameters of the `opskubedbcom-memca
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm upgrade -i`. For example:
 
 ```bash
-$ helm upgrade -i opskubedbcom-memcachedopsrequest-editor bytebuilders-ui/opskubedbcom-memcachedopsrequest-editor -n default --create-namespace --version=v0.4.11 --set apiVersion=ops.kubedb.com/v1alpha1
+$ helm upgrade -i opskubedbcom-memcachedopsrequest-editor bytebuilders-ui/opskubedbcom-memcachedopsrequest-editor -n default --create-namespace --version=v0.4.12 --set apiVersion=ops.kubedb.com/v1alpha1
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
 installing the chart. For example:
 
 ```bash
-$ helm upgrade -i opskubedbcom-memcachedopsrequest-editor bytebuilders-ui/opskubedbcom-memcachedopsrequest-editor -n default --create-namespace --version=v0.4.11 --values values.yaml
+$ helm upgrade -i opskubedbcom-memcachedopsrequest-editor bytebuilders-ui/opskubedbcom-memcachedopsrequest-editor -n default --create-namespace --version=v0.4.12 --values values.yaml
 ```
