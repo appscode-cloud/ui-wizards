@@ -39,10 +39,23 @@ spec:
                 type: object
               backend:
                 properties:
-                  name:
-                    type: string
+                  ref:
+                    properties:
+                      apiGroup:
+                        type: string
+                      kind:
+                        type: string
+                      name:
+                        type: string
+                    required:
+                    - kind
+                    - name
+                    type: object
+                    x-kubernetes-map-type: atomic
+                  replicas:
+                    format: int32
+                    type: integer
                 type: object
-                x-kubernetes-map-type: atomic
               configSecret:
                 properties:
                   name:
