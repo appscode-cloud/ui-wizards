@@ -30,24 +30,11 @@ spec:
     spec:
       resources:
         {{- toYaml $res | nindent 8 }}
-  storage:
-    accessModes:
-    - ReadWriteOnce
-    resources:
-      requests:
-        storage: {{ .Values.spec.persistence.size }}
-    storageClassName: {{ .Values.spec.storageClass.name }}
-  storageType: Durable
   terminationPolicy: {{ .Values.spec.terminationPolicy }}
 {{ if (and .Values.spec.monitoring .Values.spec.monitoring.agent) }}
   monitor:
     agent: {{ .Values.spec.monitoring.agent }}
     prometheus:
-    {{- with .Values.spec.monitoring.exporter }}
-      exporter:
-        resources:
-          {{- toYaml .resources | nindent 10 }}
-    {{- end }}
       serviceMonitor:
         interval: 30s
         labels:

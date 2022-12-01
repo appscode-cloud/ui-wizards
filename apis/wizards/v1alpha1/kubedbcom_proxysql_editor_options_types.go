@@ -45,22 +45,27 @@ type KubedbcomProxysqlEditorOptionsSpecSpec struct {
 	// +optional
 	Annotations map[string]string `json:"annotations"`
 	// +optional
-	Labels            map[string]string         `json:"labels"`
-	Version           string                    `json:"version"`
-	Mode              ProxysqlMode              `json:"mode"`
-	TerminationPolicy TerminationPolicy         `json:"terminationPolicy"`
-	StorageClass      StorageClass              `json:"storageClass"`
-	Persistence       Persistence               `json:"persistence"`
-	Machine           MachineType               `json:"machine"`
-	Resources         core.ResourceRequirements `json:"resources"`
-	AuthSecret        AuthSecret                `json:"authSecret"`
-	Monitoring        Monitoring                `json:"monitoring"`
-	SyncUsers         bool                      `json:"syncUsers"`
-	Backend           string                    `json:"backend"`
+	Labels            map[string]string                 `json:"labels"`
+	Version           string                            `json:"version"`
+	Mode              ProxysqlMode                      `json:"mode"`
+	TerminationPolicy TerminationPolicy                 `json:"terminationPolicy"`
+	Machine           MachineType                       `json:"machine"`
+	Resources         core.ResourceRequirements         `json:"resources"`
+	AuthSecret        AuthSecret                        `json:"authSecret"`
+	Monitoring        KubedbcomProxysqlEditorMonitoring `json:"monitoring"`
+	SyncUsers         bool                              `json:"syncUsers"`
+	Backend           string                            `json:"backend"`
 }
 
 // +kubebuilder:validation:Enum=Standalone;Cluster
 type ProxysqlMode string
+
+type KubedbcomProxysqlEditorMonitoring struct {
+	Agent          MonitoringAgent       `json:"agent"`
+	ServiceMonitor *ServiceMonitorLabels `json:"serviceMonitor"`
+}
+
+// *** Alerts *** //
 
 type KubedbcomProxysqlEditorOptionsSpecForm struct {
 	Alert ProxySQLAlert `json:"alert"`
@@ -108,6 +113,8 @@ type ProxySQLClusterAlert struct {
 type ProxySQLClusterAlertRules struct {
 	ProxysqlCLusterSyncFailure FloatValAlertConfig `json:"proxysqlCLusterSyncFailure"`
 }
+
+// *** Alerts *** //
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
