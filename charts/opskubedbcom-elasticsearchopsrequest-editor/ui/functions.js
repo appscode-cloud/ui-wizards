@@ -732,7 +732,7 @@ function disableOpsRequest({
   watchDependency,
 }) {
   watchDependency("discriminator#/elasticsearchDetails");
-  if (itemCtx.value === "ReconfigureTls") {
+  if (itemCtx.value === "ReconfigureTLS") {
     const dbDetails = getValue(discriminator, "/elasticsearchDetails");
     const { issuerRef } = dbDetails?.spec?.tls || {};
     return !issuerRef;
