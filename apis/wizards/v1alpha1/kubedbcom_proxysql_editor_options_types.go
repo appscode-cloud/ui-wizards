@@ -38,6 +38,7 @@ type KubedbcomProxysqlEditorOptions struct {
 type KubedbcomProxysqlEditorOptionsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Spec         KubedbcomProxysqlEditorOptionsSpecSpec `json:"spec"`
+	Form         KubedbcomProxysqlEditorOptionsSpecForm `json:"form"`
 }
 
 type KubedbcomProxysqlEditorOptionsSpecSpec struct {
@@ -60,6 +61,53 @@ type KubedbcomProxysqlEditorOptionsSpecSpec struct {
 
 // +kubebuilder:validation:Enum=Standalone;Cluster
 type ProxysqlMode string
+
+type KubedbcomProxysqlEditorOptionsSpecForm struct {
+	Alert ProxySQLAlert `json:"alert"`
+}
+
+type ProxySQLAlert struct {
+	Enabled bool              `json:"enabled"`
+	Labels  map[string]string `json:"labels"`
+	// +optional
+	Annotations map[string]string `json:"annotations"`
+	// +optional
+	AdditionalRuleLabels map[string]string   `json:"additionalRuleLabels"`
+	Groups               ProxySQLAlertGroups `json:"groups"`
+}
+
+type ProxySQLAlertGroups struct {
+	Database    ProxySQLDatabaseAlert `json:"database"`
+	Cluster     ProxySQLClusterAlert  `json:"cluster"`
+	Provisioner ProvisionerAlert      `json:"provisioner"`
+	OpsManager  OpsManagerAlert       `json:"opsManager"`
+}
+
+type ProxySQLDatabaseAlert struct {
+	Enabled bool                       `json:"enabled"`
+	Rules   ProxySQLDatabaseAlertRules `json:"rules"`
+}
+
+type ProxySQLDatabaseAlertRules struct {
+	ProxySQLInstanceDown       FixedAlert  `json:"proxySQLInstanceDown"`
+	ProxySQLServiceDown        FixedAlert  `json:"proxySQLServiceDown"`
+	ProxySQLTooManyConnections IntValAlert `json:"proxySQLTooManyConnections"`
+	ProxySQLHighThreadsRunning IntValAlert `json:"proxySQLHighThreadsRunning"`
+	ProxySQLSlowQueries        FixedAlert  `json:"proxySQLSlowQueries"`
+	ProxySQLRestarted          IntValAlert `json:"proxySQLRestarted"`
+	ProxySQLHighQPS            IntValAlert `json:"proxySQLHighQPS"`
+	ProxySQLHighIncomingBytes  IntValAlert `json:"proxySQLHighIncomingBytes"`
+	ProxySQLHighOutgoingBytes  IntValAlert `json:"proxySQLHighOutgoingBytes"`
+}
+
+type ProxySQLClusterAlert struct {
+	Enabled bool                      `json:"enabled"`
+	Rules   ProxySQLClusterAlertRules `json:"rules"`
+}
+
+type ProxySQLClusterAlertRules struct {
+	ProxysqlCLusterSyncFailure FloatValAlertConfig `json:"proxysqlCLusterSyncFailure"`
+}
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 

@@ -64,3 +64,102 @@ spec:
   syncUsers: false
 
   backend: ""
+
+form:
+  alert:
+    ## Enable PrometheusRule alerts
+    enabled: true
+
+    ## Labels for default rules
+    labels: # +doc-gen:break
+      release: kube-prometheus-stack
+
+    ## Annotations for default rules
+    annotations: {}
+
+    ## Additional labels for PrometheusRule alerts
+    additionalRuleLabels: {}
+
+    ## Prefix for runbook URLs. Use this to override the first part of the runbookURLs that is common to all rules.
+    # runbookUrl: "https://runbooks.prometheus-operator.dev/runbooks"
+
+    groups:
+      database:
+        enabled: true
+        rules:
+          proxySQLInstanceDown:
+            enabled: true
+            duration: "0m"
+            severity: critical
+          proxySQLServiceDown:
+            enabled: true
+            duration: "0m"
+            severity: critical
+          proxySQLTooManyConnections:
+            enabled: true
+            duration: "2m"
+            val: 80
+            severity: warning
+          proxySQLHighThreadsRunning:
+            enabled: true
+            duration: "2m"
+            val: 60
+            severity: warning
+          proxySQLSlowQueries:
+            enabled: true
+            duration: "2m"
+            severity: warning
+          proxySQLRestarted:
+            enabled: true
+            duration: "0m"
+            val: 60
+            severity: warning
+          proxySQLHighQPS:
+            enabled: true
+            duration: "0m"
+            val: 1000
+            severity: critical
+          proxySQLHighIncomingBytes:
+            enabled: true
+            duration: "0m"
+            val: 1048576 # 1MB
+            severity: critical
+          proxySQLHighOutgoingBytes:
+            enabled: true
+            duration: "0m"
+            val: 1048576 # 1MB
+            severity: critical
+      cluster:
+        enabled: true
+        rules:
+          proxysqlCLusterSyncFailure:
+            enabled: true
+            val: 0.1
+            duration: "5m"
+            severity: warning
+      provisioner:
+        enabled: true
+        rules:
+          appPhaseNotReady:
+            enabled: true
+            duration: "1m"
+            severity: critical
+          appPhaseCritical:
+            enabled: true
+            duration: "15m"
+            severity: warning
+      opsManager:
+        enabled: true
+        rules:
+          opsRequestOnProgress:
+            enabled: true
+            duration: "0m"
+            severity: info
+          opsRequestStatusProgressingToLong:
+            enabled: true
+            duration: "30m"
+            severity: critical
+          opsRequestFailed:
+            enabled: true
+            duration: "0m"
+            severity: critical
