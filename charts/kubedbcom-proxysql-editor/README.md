@@ -124,7 +124,7 @@ The following table lists the configurable parameters of the `kubedbcom-proxysql
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm upgrade -i`. For example:
 
 ```bash
-$ helm upgrade -i kubedbcom-proxysql-editor bytebuilders-ui/kubedbcom-proxysql-editor -n default --create-namespace --version=v0.4.11 --set form.alert.groups.cluster.rules.proxysqlCLusterSyncFailure.duration=5m
+$ helm upgrade -i kubedbcom-proxysql-editor bytebuilders-ui/kubedbcom-proxysql-editor -n default --create-namespace --version=v0.4.12 --set form.alert.groups.cluster.rules.proxysqlCLusterSyncFailure.duration=5m
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
