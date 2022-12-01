@@ -135,6 +135,9 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/resources/properties/limits/properties/memory
       type: input
+    - label:
+        text: labels.backend_section
+      type: label-element
     - fetch: getResources|appcatalog.appscode.com|v1alpha1|appbindings
       label:
         text: labels.backend
@@ -147,6 +150,18 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/syncUsers
       type: switch
+    - elements:
+      - label:
+          text: labels.alert.alert_enable_question
+        schema:
+          $ref: schema#/properties/form/properties/alert/properties/enabled
+        type: switch
+      label:
+        text: labels.alert.label
+      schema:
+        $ref: schema#/properties/form/properties/alert
+      show_label: true
+      type: single-step-form
     - alias: reusable-monitor-option
       chart:
         name: uibytebuildersdev-component-monitoring-option

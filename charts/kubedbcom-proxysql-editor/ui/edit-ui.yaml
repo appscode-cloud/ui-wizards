@@ -17,11 +17,11 @@ steps:
         $ref: schema#/properties/metadata/properties/release/properties/namespace
       type: select
     - disabled: true
-      fetch: getMySqlVersions|catalog.kubedb.com|v1alpha1|mysqlversions
+      fetch: getProxySQLVersions|catalog.kubedb.com|v1alpha1|proxysqlversions
       label:
         text: labels.database.version
       schema:
-        $ref: schema#/properties/resources/properties/kubedbComMySQL/properties/spec/properties/version
+        $ref: schema#/properties/resources/properties/kubedbComProxySQL/properties/spec/properties/version
       type: select
     - individualItemDisabilityCheck: disableLableChecker
       isArray: true
@@ -32,13 +32,13 @@ steps:
         text: labels.labels.label
       onChange: onLabelChange
       schema:
-        $ref: schema#/properties/resources/properties/kubedbComMySQL/properties/metadata/properties/labels
+        $ref: schema#/properties/resources/properties/kubedbComProxySQL/properties/metadata/properties/labels
       type: key-value-input-form
       values:
         label:
           text: labels.labels.value
         schema:
-          $ref: schema#/properties/resources/properties/kubedbComMySQL/properties/metadata/properties/labels/additionalProperties
+          $ref: schema#/properties/resources/properties/kubedbComProxySQL/properties/metadata/properties/labels/additionalProperties
         type: input
     - isArray: true
       keys:
@@ -47,13 +47,13 @@ steps:
       label:
         text: labels.annotations.label
       schema:
-        $ref: schema#/properties/resources/properties/kubedbComMySQL/properties/metadata/properties/annotations
+        $ref: schema#/properties/resources/properties/kubedbComProxySQL/properties/metadata/properties/annotations
       type: key-value-input-form
       values:
         label:
           text: labels.annotations.value
         schema:
-          $ref: schema#/properties/resources/properties/kubedbComMySQL/properties/metadata/properties/annotations/additionalProperties
+          $ref: schema#/properties/resources/properties/kubedbComProxySQL/properties/metadata/properties/annotations/additionalProperties
         type: input
     - hasDescription: true
       label:
@@ -72,13 +72,13 @@ steps:
         text: options.terminationPolicy.doNotTerminate.label
         value: DoNotTerminate
       schema:
-        $ref: schema#/properties/resources/properties/kubedbComMySQL/properties/spec/properties/terminationPolicy
+        $ref: schema#/properties/resources/properties/kubedbComProxySQL/properties/spec/properties/terminationPolicy
       type: radio
     - disabled: true
       label:
         text: labels.secret
       schema:
-        $ref: schema#/properties/resources/properties/kubedbComMySQL/properties/spec/properties/authSecret/properties/name
+        $ref: schema#/properties/resources/properties/kubedbComProxySQL/properties/spec/properties/authSecret/properties/name
       type: input
     type: single-step-form
   id: basic
@@ -131,7 +131,7 @@ steps:
             $ref: model#/metadata/resource/name
           version:
             $ref: model#/metadata/resource/version
-        path: ${domain}/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/mysqlopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations
+        path: ${domain}/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/proxysqlopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations
     - computed: setDatabaseMode
       disabled: true
       hasDescription: true
@@ -156,7 +156,7 @@ steps:
       label:
         text: labels.replicaset.number
       schema:
-        $ref: schema#/properties/resources/properties/kubedbComMySQL/properties/spec/properties/replicas
+        $ref: schema#/properties/resources/properties/kubedbComProxySQL/properties/spec/properties/replicas
       type: input
     - disabled: true
       elements:
@@ -164,12 +164,12 @@ steps:
         label:
           text: labels.storage.class
         schema:
-          $ref: schema#/properties/resources/properties/kubedbComMySQL/properties/spec/properties/storage/properties/storageClassName
+          $ref: schema#/properties/resources/properties/kubedbComProxySQL/properties/spec/properties/storage/properties/storageClassName
         type: select
       - label:
           text: labels.storage.size
         schema:
-          $ref: schema#/properties/resources/properties/kubedbComMySQL/properties/spec/properties/storage/properties/resources/properties/requests/properties/storage
+          $ref: schema#/properties/resources/properties/kubedbComProxySQL/properties/spec/properties/storage/properties/resources/properties/requests/properties/storage
         type: input
       type: single-step-form
     - disabled: true
@@ -177,7 +177,7 @@ steps:
       - label:
           text: labels.group_name
         schema:
-          $ref: schema#/properties/resources/properties/kubedbComMySQL/properties/spec/properties/topology/properties/group/properties/name
+          $ref: schema#/properties/resources/properties/kubedbComProxySQL/properties/spec/properties/topology/properties/group/properties/name
         type: input
       - label:
           text: labels.group_mode
@@ -187,7 +187,7 @@ steps:
         - text: options.groupMode.MultiPrimary
           value: Multi-Primary
         schema:
-          $ref: schema#/properties/resources/properties/kubedbComMySQL/properties/spec/properties/topology/properties/group/properties/mode
+          $ref: schema#/properties/resources/properties/kubedbComProxySQL/properties/spec/properties/topology/properties/group/properties/mode
         type: radio
       if: isEqualToDatabaseMode|GroupReplication
       label:
@@ -230,8 +230,8 @@ steps:
             $ref: model#/metadata/resource/name
           version:
             $ref: model#/metadata/resource/version
-        path: ${domain}/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/mysqlopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=ReconfigureTLS
-    - computed: isValueExistInModel|/resources/kubedbComMySQL/spec/tls
+        path: ${domain}/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/proxysqlopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=ReconfigureTLS
+    - computed: isValueExistInModel|/resources/kubedbComProxySQL/spec/tls
       disabled: true
       label:
         text: labels.enable_tls
@@ -244,7 +244,7 @@ steps:
       - label:
           text: labels.requireSSL_question
         schema:
-          $ref: schema#/properties/resources/properties/kubedbComMySQL/properties/spec/properties/requireSSL
+          $ref: schema#/properties/resources/properties/kubedbComProxySQL/properties/spec/properties/requireSSL
         type: switch
       - elements:
         - computed: setApiGroup
@@ -252,7 +252,7 @@ steps:
           label:
             text: labels.api_group
           schema:
-            $ref: schema#/properties/resources/properties/kubedbComMySQL/properties/spec/properties/tls/properties/issuerRef/properties/apiGroup
+            $ref: schema#/properties/resources/properties/kubedbComProxySQL/properties/spec/properties/tls/properties/issuerRef/properties/apiGroup
           type: input
         - label:
             text: labels.kind
@@ -262,19 +262,19 @@ steps:
           - text: ClusterIssuer
             value: ClusterIssuer
           schema:
-            $ref: schema#/properties/resources/properties/kubedbComMySQL/properties/spec/properties/tls/properties/issuerRef/properties/kind
+            $ref: schema#/properties/resources/properties/kubedbComProxySQL/properties/spec/properties/tls/properties/issuerRef/properties/kind
           type: select
         - allowUserDefinedOption: true
           fetch: getIssuerRefsName
           label:
             text: labels.name
           schema:
-            $ref: schema#/properties/resources/properties/kubedbComMySQL/properties/spec/properties/tls/properties/issuerRef/properties/name
+            $ref: schema#/properties/resources/properties/kubedbComProxySQL/properties/spec/properties/tls/properties/issuerRef/properties/name
           type: select
         label:
           text: labels.issuer_ref
         schema:
-          $ref: schema#/properties/resources/properties/kubedbComMySQL/properties/spec/properties/tls/properties/issuerRef
+          $ref: schema#/properties/resources/properties/kubedbComProxySQL/properties/spec/properties/tls/properties/issuerRef
         type: single-step-form
       - alias: reusable_certificates
         chart:
@@ -282,7 +282,7 @@ steps:
           version: v0.4.12
         moduleResolver: fetchJsons
         schema:
-          $ref: schema#/properties/resources/properties/kubedbComMySQL/properties/spec/properties/tls/properties/certificates
+          $ref: schema#/properties/resources/properties/kubedbComProxySQL/properties/spec/properties/tls/properties/certificates
         type: reusable-element
       if: showTlsConfigureSection
       type: single-step-form
@@ -331,7 +331,7 @@ steps:
           - label:
               text: labels.script.path
             schema:
-              $ref: schema#/properties/resources/properties/kubedbComMySQL/properties/spec/properties/init/properties/script/properties/scriptPath
+              $ref: schema#/properties/resources/properties/kubedbComProxySQL/properties/spec/properties/init/properties/script/properties/scriptPath
             type: input
           - label:
               text: labels.script.volume
@@ -354,7 +354,7 @@ steps:
             label:
               text: labels.script.volumeName
             schema:
-              $ref: schema#/properties/resources/properties/kubedbComMySQL/properties/spec/properties/init/properties/script/properties/configMap/properties/name
+              $ref: schema#/properties/resources/properties/kubedbComProxySQL/properties/spec/properties/init/properties/script/properties/configMap/properties/name
             type: select
           - allowUserDefinedOption: true
             fetch: resourceNames|core|v1|secrets
@@ -362,7 +362,7 @@ steps:
             label:
               text: labels.script.volumeName
             schema:
-              $ref: schema#/properties/resources/properties/kubedbComMySQL/properties/spec/properties/init/properties/script/properties/secret/properties/secretName
+              $ref: schema#/properties/resources/properties/kubedbComProxySQL/properties/spec/properties/init/properties/script/properties/secret/properties/secretName
             type: select
           if: showScriptOrStashForm|script
           type: single-step-form
@@ -452,7 +452,7 @@ steps:
           label:
             text: labels.waitForInitialRestore
           schema:
-            $ref: schema#/properties/resources/properties/kubedbComMySQL/properties/spec/properties/init/properties/waitForInitialRestore
+            $ref: schema#/properties/resources/properties/kubedbComProxySQL/properties/spec/properties/init/properties/waitForInitialRestore
           type: switch
         if: showInitializationForm
         type: single-step-form
@@ -703,7 +703,7 @@ steps:
       type: anchor
       url:
         function: getOpsRequestUrl|VerticalScaling
-    - computed: isValueExistInModel|/resources/kubedbComMySQL/spec/monitor
+    - computed: isValueExistInModel|/resources/kubedbComProxySQL/spec/monitor
       label:
         text: labels.enable_monitoring
       onChange: onEnableMonitoringChange
@@ -730,15 +730,15 @@ steps:
           text: options.agent.prometheus_builtin.label
           value: prometheus.io/builtin
         schema:
-          $ref: schema#/properties/resources/properties/kubedbComMySQL/properties/spec/properties/monitor/properties/agent
+          $ref: schema#/properties/resources/properties/kubedbComProxySQL/properties/spec/properties/monitor/properties/agent
         type: radio
       - elements:
         - label:
             text: labels.scrapping_interval
           schema:
-            $ref: schema#/properties/resources/properties/kubedbComMySQL/properties/spec/properties/monitor/properties/prometheus/properties/serviceMonitor/properties/interval
+            $ref: schema#/properties/resources/properties/kubedbComProxySQL/properties/spec/properties/monitor/properties/prometheus/properties/serviceMonitor/properties/interval
           type: input
-        if: isEqualToModelPathValue|prometheus.io/operator|/resources/kubedbComMySQL/spec/monitor/agent
+        if: isEqualToModelPathValue|prometheus.io/operator|/resources/kubedbComProxySQL/spec/monitor/agent
         label:
           text: labels.service_monitor_configuration
         show_label: true
@@ -829,14 +829,14 @@ steps:
           schema:
             $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/selector
           type: single-step-form
-        if: isEqualToModelPathValue|prometheus.io|/resources/kubedbComMySQL/spec/monitor/agent
+        if: isEqualToModelPathValue|prometheus.io|/resources/kubedbComProxySQL/spec/monitor/agent
         label:
           text: labels.service_monitor
         schema:
           $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec
         show_label: true
         type: single-step-form
-      - if: isEqualToModelPathValue|prometheus.io|/resources/kubedbComMySQL/spec/monitor/agent
+      - if: isEqualToModelPathValue|prometheus.io|/resources/kubedbComProxySQL/spec/monitor/agent
         individualItemDisabilityCheck: disableLableChecker
         isArray: true
         keys:
@@ -867,7 +867,7 @@ steps:
           label:
             text: labels.resources
           schema:
-            $ref: schema#/properties/resources/properties/kubedbComMySQL/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/resources
+            $ref: schema#/properties/resources/properties/kubedbComProxySQL/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/resources
           type: resource-input-form
         - label:
             text: labels.security_context
@@ -875,30 +875,30 @@ steps:
         - label:
             text: labels.run_as_user
           schema:
-            $ref: schema#/properties/resources/properties/kubedbComMySQL/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/securityContext/properties/runAsUser
+            $ref: schema#/properties/resources/properties/kubedbComProxySQL/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/securityContext/properties/runAsUser
           type: input
         - customClass: mb-0
           label:
             text: labels.run_as_group
           schema:
-            $ref: schema#/properties/resources/properties/kubedbComMySQL/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/securityContext/properties/runAsGroup
+            $ref: schema#/properties/resources/properties/kubedbComProxySQL/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/securityContext/properties/runAsGroup
           type: input
         - label:
             text: labels.port
           schema:
-            $ref: schema#/properties/resources/properties/kubedbComMySQL/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/port
+            $ref: schema#/properties/resources/properties/kubedbComProxySQL/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/port
           type: input
         - element:
             label:
               isSubsection: true
               text: labels.args
             schema:
-              $ref: schema#/properties/resources/properties/kubedbComMySQL/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/args/items
+              $ref: schema#/properties/resources/properties/kubedbComProxySQL/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/args/items
             type: input
           label:
             text: labels.args
           schema:
-            $ref: schema#/properties/resources/properties/kubedbComMySQL/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/args
+            $ref: schema#/properties/resources/properties/kubedbComProxySQL/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/args
           type: list-input-form
         - alias: reusable_env
           chart:
@@ -909,7 +909,7 @@ steps:
               $ref: schema#/properties/metadata/properties/release/properties/namespace
           moduleResolver: fetchJsons
           schema:
-            $ref: schema#/properties/resources/properties/kubedbComMySQL/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env
+            $ref: schema#/properties/resources/properties/kubedbComProxySQL/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env
           type: reusable-element
         if: showCustomizeExporterSection
         type: single-step-form
@@ -933,7 +933,7 @@ steps:
             $ref: functions#/returnTrue
         moduleResolver: fetchJsons
         schema:
-          $ref: schema#/properties/resources/properties/kubedbComMySQL/properties/spec/properties/podTemplate
+          $ref: schema#/properties/resources/properties/kubedbComProxySQL/properties/spec/properties/podTemplate
         type: reusable-element
       type: single-step-form
     type: single-step-form
@@ -947,7 +947,7 @@ steps:
         version: v0.4.12
       moduleResolver: fetchJsons
       schema:
-        $ref: schema#/properties/resources/properties/kubedbComMySQL/properties/spec/properties/serviceTemplates
+        $ref: schema#/properties/resources/properties/kubedbComProxySQL/properties/spec/properties/serviceTemplates
       type: reusable-element
     type: single-step-form
   id: networking
@@ -987,7 +987,7 @@ steps:
                 $ref: model#/metadata/resource/name
               version:
                 $ref: model#/metadata/resource/version
-            path: ${domain}/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/mysqlopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=Reconfigure
+            path: ${domain}/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/proxysqlopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=Reconfigure
         - disabled: true
           label:
             text: labels.custom_config
@@ -1007,7 +1007,7 @@ steps:
           label:
             text: labels.name
           schema:
-            $ref: schema#/properties/resources/properties/kubedbComMySQL/properties/spec/properties/configSecret/properties/name
+            $ref: schema#/properties/resources/properties/kubedbComProxySQL/properties/spec/properties/configSecret/properties/name
           type: select
         type: single-step-form
       type: single-step-form

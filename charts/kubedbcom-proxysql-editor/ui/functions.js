@@ -214,7 +214,7 @@ function returnStringYes() {
   return "yes";
 }
 function setAddressType({model, getValue}) {
-  const value = getValue(model, "/resources/kubedbComMySQL/spec/useAddressType");
+  const value = getValue(model, "/resources/kubedbComProxySQL/spec/useAddressType");
 
   if(!value) {
     return "DNS";
@@ -224,7 +224,7 @@ function setAddressType({model, getValue}) {
 }
 
 // ************************* Basic Info **********************************************
-async function getMySqlVersions(
+async function getProxySQLVersions(
   { axios, storeGet },
   group,
   version,
@@ -273,8 +273,8 @@ async function getMySqlVersions(
 
 // ********************* Database Mode ***********************
 function setDatabaseMode({ model, getValue, watchDependency }) {
-  const modelPathValue = getValue(model, "/resources/kubedbComMySQL/spec/topology");
-  watchDependency("model#/resources/kubedbComMySQL/spec/topology");
+  const modelPathValue = getValue(model, "/resources/kubedbComProxySQL/spec/topology");
+  watchDependency("model#/resources/kubedbComProxySQL/spec/topology");
 
   if (modelPathValue?.mode) {
     return modelPathValue.mode;
@@ -310,11 +310,11 @@ async function getStorageClassNames(
     if (isDefault) {
       const className = getValue(
         model,
-        "/resources/kubedbComMySQL/spec/storage/storageClassName"
+        "/resources/kubedbComProxySQL/spec/storage/storageClassName"
       );
       if (!className) {
         commit("wizard/model$update", {
-          path: "/resources/kubedbComMySQL/spec/storage/storageClassName",
+          path: "/resources/kubedbComProxySQL/spec/storage/storageClassName",
           value: name,
           force: true,
         });
@@ -336,28 +336,28 @@ function deleteDatabaseModePath({
 }) {
   const mode = getValue(discriminator, "/activeDatabaseMode");
   if (mode === "GroupReplication" || mode === "InnoDBCluster") {
-    replicas = getValue(model, "/resources/kubedbComMySQL/spec/replicas");
+    replicas = getValue(model, "/resources/kubedbComProxySQL/spec/replicas");
     if(!replicas) {
       commit("wizard/model$update", {
-        path: "/resources/kubedbComMySQL/spec/replicas",
+        path: "/resources/kubedbComProxySQL/spec/replicas",
         value: 3,
         force: true,
       });
     }
     commit("wizard/model$update", {
-      path: "/resources/kubedbComMySQL/spec/topology/mode",
+      path: "/resources/kubedbComProxySQL/spec/topology/mode",
       value: mode,
       force: true,
     });
-    if(mode === "GroupReplication") commit("wizard/model$delete", "/resources/kubedbComMySQL/spec/topology/innoDBCluster");
-    else commit("wizard/model$delete", "/resources/kubedbComMySQL/spec/topology/group");
+    if(mode === "GroupReplication") commit("wizard/model$delete", "/resources/kubedbComProxySQL/spec/topology/innoDBCluster");
+    else commit("wizard/model$delete", "/resources/kubedbComProxySQL/spec/topology/group");
   } else if (mode === "Standalone") {
     commit("wizard/model$update", {
-      path: "/resources/kubedbComMySQL/spec/replicas",
+      path: "/resources/kubedbComProxySQL/spec/replicas",
       value: 1,
       force: true,
     });
-    commit("wizard/model$delete", "/resources/kubedbComMySQL/spec/topology");
+    commit("wizard/model$delete", "/resources/kubedbComProxySQL/spec/topology");
   }
 }
 
@@ -395,17 +395,17 @@ async function getIssuerRefsName({
   const owner = storeGet("/route/params/user");
   const cluster = storeGet("/cluster/clusterDefinition/spec/name");
   watchDependency(
-    "model#/resources/kubedbComMySQL/spec/tls/issuerRef/apiGroup"
+    "model#/resources/kubedbComProxySQL/spec/tls/issuerRef/apiGroup"
   );
-  watchDependency("model#/resources/kubedbComMySQL/spec/tls/issuerRef/kind");
+  watchDependency("model#/resources/kubedbComProxySQL/spec/tls/issuerRef/kind");
   watchDependency("model#/metadata/release/namespace");
   const apiGroup = getValue(
     model,
-    "/resources/kubedbComMySQL/spec/tls/issuerRef/apiGroup"
+    "/resources/kubedbComProxySQL/spec/tls/issuerRef/apiGroup"
   );
   const kind = getValue(
     model,
-    "/resources/kubedbComMySQL/spec/tls/issuerRef/kind"
+    "/resources/kubedbComProxySQL/spec/tls/issuerRef/kind"
   );
   const namespace = getValue(model, "/metadata/release/namespace");
 
@@ -473,7 +473,7 @@ async function hasNoIssuerRefName({
 }
 
 function setSSLMode({ model, getValue }) {
-  const val = getValue(model, "/resources/kubedbComMySQL/spec/sslMode");
+  const val = getValue(model, "/resources/kubedbComProxySQL/spec/sslMode");
   return val || "require";
 }
 
@@ -491,13 +491,13 @@ function onTlsConfigureChange({ discriminator, getValue, commit }) {
   const configureStatus = getValue(discriminator, "/configureTLS");
   if (configureStatus) {
     commit("wizard/model$update", {
-      path: "/resources/kubedbComMySQL/spec/tls",
+      path: "/resources/kubedbComProxySQL/spec/tls",
       value: { issuerRef: {}, certificates: [] },
       force: true,
     });
   } else {
-    commit("wizard/model$delete", "/resources/kubedbComMySQL/spec/tls");
-    commit("wizard/model$delete", "/resources/kubedbComMySQL/spec/sslMode");
+    commit("wizard/model$delete", "/resources/kubedbComProxySQL/spec/tls");
+    commit("wizard/model$delete", "/resources/kubedbComProxySQL/spec/sslMode");
   }
 }
 
@@ -522,12 +522,12 @@ function onEnableMonitoringChange({ discriminator, getValue, commit }) {
   const configureStatus = getValue(discriminator, "/enableMonitoring");
   if (configureStatus) {
     commit("wizard/model$update", {
-      path: "/resources/kubedbComMySQL/spec/monitor",
+      path: "/resources/kubedbComProxySQL/spec/monitor",
       value: {},
       force: true,
     });
   } else {
-    commit("wizard/model$delete", "/resources/kubedbComMySQL/spec/monitor");
+    commit("wizard/model$delete", "/resources/kubedbComProxySQL/spec/monitor");
   }
 }
 
@@ -545,14 +545,14 @@ function onCustomizeExporterChange({ discriminator, getValue, commit }) {
   const configureStatus = getValue(discriminator, "/customizeExporter");
   if (configureStatus) {
     commit("wizard/model$update", {
-      path: "/resources/kubedbComMySQL/spec/monitor/prometheus/exporter",
+      path: "/resources/kubedbComProxySQL/spec/monitor/prometheus/exporter",
       value: {},
       force: true,
     });
   } else {
     commit(
       "wizard/model$delete",
-      "/resources/kubedbComMySQL/spec/monitor/prometheus/exporter"
+      "/resources/kubedbComProxySQL/spec/monitor/prometheus/exporter"
     );
   }
 }
@@ -687,7 +687,7 @@ function valueExists(value, getValue, path) {
 function initPrePopulateDatabase({ getValue, model }) {
   const waitForInitialRestore = getValue(
     model,
-    "/resources/kubedbComMySQL/spec/init/waitForInitialRestore"
+    "/resources/kubedbComProxySQL/spec/init/waitForInitialRestore"
   );
   const stashAppscodeComRestoreSession_init = getValue(
     model,
@@ -695,7 +695,7 @@ function initPrePopulateDatabase({ getValue, model }) {
   );
   const script = getValue(
     model,
-    "/resources/kubedbComMySQL/spec/init/script"
+    "/resources/kubedbComProxySQL/spec/init/script"
   );
 
   return waitForInitialRestore ||
@@ -715,7 +715,7 @@ function onPrePopulateDatabaseChange({
   if (prePopulateDatabase === "no") {
     // delete related properties
     commit("wizard/model$update", {
-      path: "/resources/kubedbComMySQL/spec/init/waitForInitialRestore",
+      path: "/resources/kubedbComProxySQL/spec/init/waitForInitialRestore",
       value: false,
     });
     commit(
@@ -724,7 +724,7 @@ function onPrePopulateDatabaseChange({
     );
     commit(
       "wizard/model$delete",
-      "/resources/kubedbComMySQL/spec/init/script"
+      "/resources/kubedbComProxySQL/spec/init/script"
     );
     commit(
       "wizard/model$delete",
@@ -759,7 +759,7 @@ function onPrePopulateDatabaseChange({
 function initDataSource({ getValue, model }) {
   const script = getValue(
     model,
-    "/resources/kubedbComMySQL/spec/init/script"
+    "/resources/kubedbComProxySQL/spec/init/script"
   );
   const stashAppscodeComRestoreSession_init = getValue(
     model,
@@ -775,7 +775,7 @@ function onDataSourceChange({ commit, getValue, discriminator, model }) {
   const dataSource = getValue(discriminator, "/dataSource");
 
   commit("wizard/model$update", {
-    path: "/resources/kubedbComMySQL/spec/init/waitForInitialRestore",
+    path: "/resources/kubedbComProxySQL/spec/init/waitForInitialRestore",
     value: dataSource === "stashBackup",
     force: true,
   });
@@ -791,17 +791,17 @@ function onDataSourceChange({ commit, getValue, discriminator, model }) {
       !valueExists(
         model,
         getValue,
-        "/resources/kubedbComMySQL/spec/init/script"
+        "/resources/kubedbComProxySQL/spec/init/script"
       )
     )
       commit("wizard/model$update", {
-        path: "/resources/kubedbComMySQL/spec/init/script",
+        path: "/resources/kubedbComProxySQL/spec/init/script",
         value: initScript,
       });
   } else if (dataSource === "stashBackup") {
     commit(
       "wizard/model$delete",
-      "/resources/kubedbComMySQL/spec/init/script"
+      "/resources/kubedbComProxySQL/spec/init/script"
     );
 
     // create a new stashAppscodeComRestoreSession_init if there is no stashAppscodeComRestoreSession_init property
@@ -833,11 +833,11 @@ function onDataSourceChange({ commit, getValue, discriminator, model }) {
 function initVolumeType({ getValue, model }) {
   const configMap = getValue(
     model,
-    "/resources/kubedbComMySQL/spec/init/script/configMap/name"
+    "/resources/kubedbComProxySQL/spec/init/script/configMap/name"
   );
   const secret = getValue(
     model,
-    "/resources/kubedbComMySQL/spec/init/script/secret/secretName"
+    "/resources/kubedbComProxySQL/spec/init/script/secret/secretName"
   );
 
   if (configMap) return "configMap";
@@ -851,18 +851,18 @@ function onVolumeTypeChange({ commit, getValue, discriminator, model }) {
     // add configMap object and delete secret object
     commit(
       "wizard/model$delete",
-      "/resources/kubedbComMySQL/spec/init/script/secret"
+      "/resources/kubedbComProxySQL/spec/init/script/secret"
     );
 
     if (
       !valueExists(
         model,
         getValue,
-        "/resources/kubedbComMySQL/spec/init/script/configMap"
+        "/resources/kubedbComProxySQL/spec/init/script/configMap"
       )
     ) {
       commit("wizard/model$update", {
-        path: "/resources/kubedbComMySQL/spec/init/script/configMap",
+        path: "/resources/kubedbComProxySQL/spec/init/script/configMap",
         value: {
           name: "",
         },
@@ -872,18 +872,18 @@ function onVolumeTypeChange({ commit, getValue, discriminator, model }) {
     // delete configMap object and add secret object
     commit(
       "wizard/model$delete",
-      "/resources/kubedbComMySQL/spec/init/script/configMap"
+      "/resources/kubedbComProxySQL/spec/init/script/configMap"
     );
 
     if (
       !valueExists(
         model,
         getValue,
-        "/resources/kubedbComMySQL/spec/init/script/secret"
+        "/resources/kubedbComProxySQL/spec/init/script/secret"
       )
     ) {
       commit("wizard/model$update", {
-        path: "/resources/kubedbComMySQL/spec/init/script/secret",
+        path: "/resources/kubedbComProxySQL/spec/init/script/secret",
         value: {
           secretName: "",
         },
@@ -1111,10 +1111,10 @@ function getBackupConfigsAndAnnotations(getValue, model) {
     model,
     "/resources/stashAppscodeComBackupConfiguration"
   );
-  const kubedbComMySQLAnnotations =
-    getValue(model, "/resources/kubedbComMySQL/metadata/annotations") || {};
+  const kubedbComProxySQLAnnotations =
+    getValue(model, "/resources/kubedbComProxySQL/metadata/annotations") || {};
 
-  const isBluePrint = Object.keys(kubedbComMySQLAnnotations).some(
+  const isBluePrint = Object.keys(kubedbComProxySQLAnnotations).some(
     (k) =>
       k === "stash.appscode.com/backup-blueprint" ||
       k === "stash.appscode.com/schedule" ||
@@ -1127,9 +1127,9 @@ function getBackupConfigsAndAnnotations(getValue, model) {
   };
 }
 
-function deleteKubeDbComMySqlDbAnnotation(getValue, model, commit) {
+function deleteKubeDbComProxySQLDbAnnotation(getValue, model, commit) {
   const annotations =
-    getValue(model, "/resources/kubedbComMySQL/metadata/annotations") || {};
+    getValue(model, "/resources/kubedbComProxySQL/metadata/annotations") || {};
   const filteredKeyList =
     Object.keys(annotations).filter(
       (k) =>
@@ -1142,12 +1142,12 @@ function deleteKubeDbComMySqlDbAnnotation(getValue, model, commit) {
     filteredAnnotations[k] = annotations[k];
   });
   commit("wizard/model$update", {
-    path: "/resources/kubedbComMySQL/metadata/annotations",
+    path: "/resources/kubedbComProxySQL/metadata/annotations",
     value: filteredAnnotations,
   });
 }
 
-function addKubeDbComMySqlDbAnnotation(
+function addKubeDbComProxySQLDbAnnotation(
   getValue,
   model,
   commit,
@@ -1156,7 +1156,7 @@ function addKubeDbComMySqlDbAnnotation(
   force
 ) {
   const annotations =
-    getValue(model, "/resources/kubedbComMySQL/metadata/annotations") || {};
+    getValue(model, "/resources/kubedbComProxySQL/metadata/annotations") || {};
 
   if (annotations[key] === undefined) {
     annotations[key] = value;
@@ -1165,7 +1165,7 @@ function addKubeDbComMySqlDbAnnotation(
   }
 
   commit("wizard/model$update", {
-    path: "/resources/kubedbComMySQL/metadata/annotations",
+    path: "/resources/kubedbComProxySQL/metadata/annotations",
     value: annotations,
     force: true,
   });
@@ -1208,8 +1208,8 @@ function onScheduleBackupChange({
       "/resources/stashAppscodeComBackupConfiguration"
     );
     commit("wizard/model$delete", "/resources/stashAppscodeComRepository_repo");
-    // delete annotation from kubedbComMySQL annotation
-    deleteKubeDbComMySqlDbAnnotation(getValue, model, commit);
+    // delete annotation from kubedbComProxySQL annotation
+    deleteKubeDbComProxySQLDbAnnotation(getValue, model, commit);
   } else {
     const { isBluePrint } = getBackupConfigsAndAnnotations(getValue, model);
 
@@ -1270,7 +1270,7 @@ function onBackupInvokerChange({
 
   if (backupInvoker === "backupConfiguration") {
     // delete annotation and create backup config object
-    deleteKubeDbComMySqlDbAnnotation(getValue, model, commit);
+    deleteKubeDbComProxySQLDbAnnotation(getValue, model, commit);
     const dbName = getValue(model, "/metadata/release/name");
 
     if (
@@ -1297,7 +1297,7 @@ function onBackupInvokerChange({
       "wizard/model$delete",
       "/resources/stashAppscodeComBackupConfiguration"
     );
-    addKubeDbComMySqlDbAnnotation(
+    addKubeDbComProxySQLDbAnnotation(
       getValue,
       model,
       commit,
@@ -1416,7 +1416,7 @@ function onRepositoryNameChange({ getValue, model, commit }) {
 function getMongoAnnotations(getValue, model) {
   const annotations = getValue(
     model,
-    "/resources/kubedbComMySQL/metadata/annotations"
+    "/resources/kubedbComProxySQL/metadata/annotations"
   );
   return { ...annotations } || {};
 }
@@ -1433,7 +1433,7 @@ function onBackupBlueprintNameChange({
   model,
 }) {
   const backupBlueprintName = getValue(discriminator, "/backupBlueprintName");
-  addKubeDbComMySqlDbAnnotation(
+  addKubeDbComProxySQLDbAnnotation(
     getValue,
     model,
     commit,
@@ -1450,7 +1450,7 @@ function onBackupBlueprintScheduleChange({
   model,
 }) {
   const backupBlueprintSchedule = getValue(discriminator, "/schedule");
-  addKubeDbComMySqlDbAnnotation(
+  addKubeDbComProxySQLDbAnnotation(
     getValue,
     model,
     commit,
@@ -1484,7 +1484,7 @@ function onTaskParametersChange({
     (tp) => `params.stash.appscode.com/${tp}`
   );
   const oldAnnotations =
-    getValue(model, "/resources/kubedbComMySQL/metadata/annotations") || {};
+    getValue(model, "/resources/kubedbComProxySQL/metadata/annotations") || {};
   const newAnnotations = {};
 
   const filteredAnnotationKeys = Object.keys(oldAnnotations).filter(
@@ -1502,7 +1502,7 @@ function onTaskParametersChange({
   });
 
   commit("wizard/model$update", {
-    path: "/resources/kubedbComMySQL/metadata/annotations",
+    path: "/resources/kubedbComProxySQL/metadata/annotations",
     value: newAnnotations,
   });
 }
@@ -1516,7 +1516,7 @@ function onNamespaceChange({ commit, model, getValue }) {
   const namespace = getValue(model, "/metadata/release/namespace");
   const agent = getValue(
     model,
-    "/resources/kubedbComMySQL/spec/monitor/agent"
+    "/resources/kubedbComProxySQL/spec/monitor/agent"
   );
   if (agent === "prometheus.io") {
     commit("wizard/model$update", {
@@ -1531,12 +1531,12 @@ function onNamespaceChange({ commit, model, getValue }) {
 function onLabelChange({ commit, model, getValue }) {
   const labels = getValue(
     model,
-    "/resources/kubedbComMySQL/spec/metadata/labels"
+    "/resources/kubedbComProxySQL/spec/metadata/labels"
   );
 
   const agent = getValue(
     model,
-    "/resources/kubedbComMySQL/spec/monitor/agent"
+    "/resources/kubedbComProxySQL/spec/monitor/agent"
   );
 
   if (agent === "prometheus.io") {
@@ -1554,12 +1554,12 @@ function onNameChange({ commit, model, getValue }) {
 
   const agent = getValue(
     model,
-    "/resources/kubedbComMySQL/spec/monitor/agent"
+    "/resources/kubedbComProxySQL/spec/monitor/agent"
   );
 
   const labels = getValue(
     model,
-    "/resources/kubedbComMySQL/spec/metadata/labels"
+    "/resources/kubedbComProxySQL/spec/metadata/labels"
   );
 
   if (agent === "prometheus.io") {
@@ -1627,7 +1627,7 @@ function onNameChange({ commit, model, getValue }) {
   const hasSecretConfig = getValue(model, "/resources/secret_config");
   if (hasSecretConfig) {
     commit("wizard/model$update", {
-      path: "/resources/kubedbComMySQL/spec/configSecret/name",
+      path: "/resources/kubedbComProxySQL/spec/configSecret/name",
       value: `${dbName}-config`,
       force: true,
     });
@@ -1641,7 +1641,7 @@ function onNameChange({ commit, model, getValue }) {
   if (hasSecretShardConfig) {
     commit("wizard/model$update", {
       path:
-        "/resources/kubedbComMySQL/spec/shardTopology/shard/configSecret/name",
+        "/resources/kubedbComProxySQL/spec/shardTopology/shard/configSecret/name",
       value: `${dbName}-shard-config`,
       force: true,
     });
@@ -1655,7 +1655,7 @@ function onNameChange({ commit, model, getValue }) {
   if (hasSecretConfigServerConfig) {
     commit("wizard/model$update", {
       path:
-        "/resources/kubedbComMySQL/spec/shardTopology/configServer/configSecret/name",
+        "/resources/kubedbComProxySQL/spec/shardTopology/configServer/configSecret/name",
       value: `${dbName}-configserver-config`,
       force: true,
     });
@@ -1669,7 +1669,7 @@ function onNameChange({ commit, model, getValue }) {
   if (hasSecretMongosConfig) {
     commit("wizard/model$update", {
       path:
-        "/resources/kubedbComMySQL/spec/shardTopology/mongos/configSecret/name",
+        "/resources/kubedbComProxySQL/spec/shardTopology/mongos/configSecret/name",
       value: `${dbName}-mongos-config`,
       force: true,
     });
@@ -1683,7 +1683,7 @@ function returnFalse() {
 function onAgentChange({ commit, model, getValue }) {
   const agent = getValue(
     model,
-    "/resources/kubedbComMySQL/spec/monitor/agent"
+    "/resources/kubedbComProxySQL/spec/monitor/agent"
   );
   if (agent === "prometheus.io") {
     commit("wizard/model$update", {
@@ -1707,7 +1707,7 @@ function onAgentChange({ commit, model, getValue }) {
 function getCreateAuthSecret({ model, getValue }) {
   const authSecret = getValue(
     model,
-    "/resources/kubedbComMySQL/spec/authSecret"
+    "/resources/kubedbComProxySQL/spec/authSecret"
   );
 
   return !authSecret;
@@ -1772,9 +1772,9 @@ function disableInitializationSection({
 }) {
   const initialized = getValue(
     model,
-    "/resources/kubedbComMySQL/spec/init/initialized"
+    "/resources/kubedbComProxySQL/spec/init/initialized"
   );
-  watchDependency("model#/resources/kubedbComMySQL/spec/init/initialized");
+  watchDependency("model#/resources/kubedbComProxySQL/spec/init/initialized");
   return !!initialized;
 }
 
@@ -1797,7 +1797,7 @@ function onCreateAuthSecretChange({
   if (createAuthSecret) {
     commit(
       "wizard/model$delete",
-      "/resources/kubedbComMySQL/spec/authSecret"
+      "/resources/kubedbComProxySQL/spec/authSecret"
     );
   } else if(createAuthSecret === false) {
     commit(
@@ -1875,7 +1875,7 @@ function onConfigurationSourceChange({
       "/metadata/release/name"
     )}-config`;
     commit("wizard/model$update", {
-      path: "/resources/kubedbComMySQL/spec/configSecret/name",
+      path: "/resources/kubedbComProxySQL/spec/configSecret/name",
       value: configSecretName,
       force: true,
     });
@@ -1899,7 +1899,7 @@ function onConfigurationChange({
     "/metadata/release/name"
   )}-config`;
   commit("wizard/model$update", {
-    path: "/resources/kubedbComMySQL/spec/configSecret/name",
+    path: "/resources/kubedbComProxySQL/spec/configSecret/name",
     value: configSecretName,
     force: true,
   });
@@ -1932,7 +1932,7 @@ function onSetCustomConfigChange({ discriminator, getValue, commit }) {
   const value = getValue(discriminator, "/setCustomConfig");
 
   if(value === "no") {
-    commit("wizard/model$delete", "/resources/kubedbComMySQL/spec/configSecret");
+    commit("wizard/model$delete", "/resources/kubedbComProxySQL/spec/configSecret");
     commit("wizard/model$delete", "/resources/secret_config");
   }
 }
@@ -1951,7 +1951,13 @@ function getOpsRequestUrl({ storeGet, model, getValue, mode }, reqType) {
   const pathPrefix = `${domain}${routeRootPath}${routeRootPath.split("/").pop() !== 'operations' ? '/operations' : ''}`;
 
   if(mode === 'standalone-step') return `${pathPrefix}?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=${reqType}&showOpsRequestModal=true`;
-  else return `${domain}/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/mysqlopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=VerticalScaling`;
+  else return `${domain}/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/proxysqlopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=VerticalScaling`;
+}
+
+function isWriteCheckEnabled({model, getValue}) {
+  const disableWriteCheckStatus = getValue(model, '/resources/kubedbComProxySQL/spec/healthChecker/disableWriteCheck')
+
+  return !disableWriteCheckStatus;
 }
 
 return {
@@ -1968,7 +1974,7 @@ return {
   returnTrue,
   returnStringYes,
   setAddressType,
-	getMySqlVersions,
+	getProxySQLVersions,
 	setDatabaseMode,
 	getStorageClassNames,
 	deleteDatabaseModePath,
@@ -2006,8 +2012,8 @@ return {
 	showRuntimeForm,
 	getImagePullSecrets,
 	getBackupConfigsAndAnnotations,
-	deleteKubeDbComMySqlDbAnnotation,
-	addKubeDbComMySqlDbAnnotation,
+	deleteKubeDbComProxySQLDbAnnotation,
+	addKubeDbComProxySQLDbAnnotation,
 	initScheduleBackup,
   initScheduleBackupForEdit,
 	onScheduleBackupChange,
