@@ -1,6 +1,6 @@
-# Proxysql Editor UI Options
+# ProxySQL Editor UI Options
 
-[Proxysql Editor UI Options](https://byte.builders) - Proxysql Editor UI Options
+[ProxySQL Editor UI Options](https://byte.builders) - ProxySQL Editor UI Options
 
 ## TL;DR;
 
@@ -13,7 +13,7 @@ $ helm upgrade -i kubedbcom-proxysql-editor-options bytebuilders-ui/kubedbcom-pr
 
 ## Introduction
 
-This chart deploys a Proxysql Editor UI Options on a [Kubernetes](http://kubernetes.io) cluster using the [Helm](https://helm.sh) package manager.
+This chart deploys a ProxySQL Editor UI Options on a [Kubernetes](http://kubernetes.io) cluster using the [Helm](https://helm.sh) package manager.
 
 ## Prerequisites
 
@@ -27,7 +27,7 @@ To install/upgrade the chart with the release name `kubedbcom-proxysql-editor-op
 $ helm upgrade -i kubedbcom-proxysql-editor-options bytebuilders-ui/kubedbcom-proxysql-editor-options -n kube-system --create-namespace --version=v0.4.11
 ```
 
-The command deploys a Proxysql Editor UI Options on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
+The command deploys a ProxySQL Editor UI Options on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
 
 > **Tip**: List all releases using `helm list`
 
@@ -48,7 +48,7 @@ The following table lists the configurable parameters of the `kubedbcom-proxysql
 |                                   Parameter                                   |                                                                                Description                                                                                |                     Default                      |
 |-------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------|
 | metadata.resource.group                                                       |                                                                                                                                                                           | <code>kubedb.com</code>                          |
-| metadata.resource.kind                                                        |                                                                                                                                                                           | <code>Proxysql</code>                            |
+| metadata.resource.kind                                                        |                                                                                                                                                                           | <code>ProxySQL</code>                            |
 | metadata.resource.name                                                        |                                                                                                                                                                           | <code>proxysqls</code>                           |
 | metadata.resource.scope                                                       |                                                                                                                                                                           | <code>Namespaced</code>                          |
 | metadata.resource.version                                                     |                                                                                                                                                                           | <code>v1alpha2</code>                            |
