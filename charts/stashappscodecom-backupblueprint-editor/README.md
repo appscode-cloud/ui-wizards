@@ -7,8 +7,8 @@
 ```bash
 $ helm repo add bytebuilders-ui https://bundles.byte.builders/ui/
 $ helm repo update
-$ helm search repo bytebuilders-ui/stashappscodecom-backupblueprint-editor --version=v0.4.12
-$ helm upgrade -i stashappscodecom-backupblueprint-editor bytebuilders-ui/stashappscodecom-backupblueprint-editor -n default --create-namespace --version=v0.4.12
+$ helm search repo bytebuilders-ui/stashappscodecom-backupblueprint-editor --version=v0.4.13
+$ helm upgrade -i stashappscodecom-backupblueprint-editor bytebuilders-ui/stashappscodecom-backupblueprint-editor -n default --create-namespace --version=v0.4.13
 ```
 
 ## Introduction
@@ -24,7 +24,7 @@ This chart deploys a BackupBlueprint Editor on a [Kubernetes](http://kubernetes.
 To install/upgrade the chart with the release name `stashappscodecom-backupblueprint-editor`:
 
 ```bash
-$ helm upgrade -i stashappscodecom-backupblueprint-editor bytebuilders-ui/stashappscodecom-backupblueprint-editor -n default --create-namespace --version=v0.4.12
+$ helm upgrade -i stashappscodecom-backupblueprint-editor bytebuilders-ui/stashappscodecom-backupblueprint-editor -n default --create-namespace --version=v0.4.13
 ```
 
 The command deploys a BackupBlueprint Editor on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
@@ -56,12 +56,12 @@ The following table lists the configurable parameters of the `stashappscodecom-b
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm upgrade -i`. For example:
 
 ```bash
-$ helm upgrade -i stashappscodecom-backupblueprint-editor bytebuilders-ui/stashappscodecom-backupblueprint-editor -n default --create-namespace --version=v0.4.12 --set apiVersion=stash.appscode.com/v1beta1
+$ helm upgrade -i stashappscodecom-backupblueprint-editor bytebuilders-ui/stashappscodecom-backupblueprint-editor -n default --create-namespace --version=v0.4.13 --set apiVersion=stash.appscode.com/v1beta1
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
 installing the chart. For example:
 
 ```bash
-$ helm upgrade -i stashappscodecom-backupblueprint-editor bytebuilders-ui/stashappscodecom-backupblueprint-editor -n default --create-namespace --version=v0.4.12 --values values.yaml
+$ helm upgrade -i stashappscodecom-backupblueprint-editor bytebuilders-ui/stashappscodecom-backupblueprint-editor -n default --create-namespace --version=v0.4.13 --values values.yaml
 ```
