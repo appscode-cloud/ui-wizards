@@ -264,14 +264,75 @@ steps:
   title: steps.4.label
 - form:
     elements:
-    - label:
-        text: Init Config
-      type: label-element
+    - isArray: true
+      keys:
+        label:
+          text: labels.annotations.key
       label:
-        text: labels.healthChecker.timeoutSeconds
+        text: labels.initConfig.adminVariables
       schema:
-        $ref: schema#/properties/resources/properties/kubedbComProxySQL/properties/spec/properties/healthChecker/properties/timeoutSeconds
-      type: input
+        $ref: schema#/properties/resources/properties/kubedbComProxySQL/properties/spec/properties/initConfig/properties/adminVariables
+      type: key-value-input-form
+      values:
+        label:
+          text: labels.annotations.value
+        schema:
+          $ref: schema#/properties/resources/properties/kubedbComProxySQL/properties/spec/properties/initConfig/properties/adminVariables/additionalProperties
+        type: input
+    - isArray: true
+      keys:
+        label:
+          text: labels.annotations.key
+      label:
+        text: labels.initConfig.mysqlVariables
+      schema:
+        $ref: schema#/properties/resources/properties/kubedbComProxySQL/properties/spec/properties/initConfig/properties/mysqlVariables
+      type: key-value-input-form
+      values:
+        label:
+          text: labels.annotations.value
+        schema:
+          $ref: schema#/properties/resources/properties/kubedbComProxySQL/properties/spec/properties/initConfig/properties/mysqlVariables/additionalProperties
+        type: input
+    - addFormLabel: labels.initConfig.mysqlQueryRule
+      computed: setMySQLRules
+      element:
+        discriminator:
+          mysqlQueryRules:
+            emitAs: mysqlQueryRules
+            type: array
+        elements:
+        - isArray: true
+          keys:
+            label:
+              text: labels.annotations.key
+          label:
+            text: labels.initConfig.rules
+          schema:
+            $ref: discriminator#/properties/mysqlQueryRules/items/properties/rules
+          type: key-value-input-form
+          values:
+            label:
+              text: labels.annotations.value
+            schema:
+              $ref: discriminator#/properties/mysqlQueryRules/items/properties/rules/additionalProperties
+            type: input
+        schema:
+          $ref: discriminator#/properties/mysqlQueryRules/items
+        type: single-step-form
+      label:
+        text: labels.initConfig.mysqlQueryRules
+      onChange: onMySQLRulesChange
+      schema:
+        $ref: discriminator#/properties/mysqlQueryRules
+      tableContents:
+      - inTableColumn: true
+        label:
+          text: labels.initConfig.rules
+        path: rules
+        type: value
+        typeOfValue: key-value
+      type: single-step-form-array
     type: single-step-form
   id: init-config
   title: steps.5.label

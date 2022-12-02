@@ -823,6 +823,26 @@ function isWriteCheckEnabled({model, getValue, watchDependency}) {
   return !disableWriteCheckStatus;
 }
 
+function onMySQLRulesChange({ discriminator, getValue, commit }) {
+  const rules = getValue(discriminator, '/mysqlQueryRules')
+  const modifiedRules = rules?.map(item => item.rules)
+  
+  commit('wizard/model$update', {
+    path: '/resources/kubedbComProxySQL/spec/initConfig/mysqlQueryRules',
+    value: modifiedRules,
+    force: true
+  })
+}
+
+function setMySQLRules({ model, getValue, setDiscriminatorValue }) {
+  const rules = getValue(model, '/resources/kubedbComProxySQL/spec/initConfig/mysqlQueryRules')
+  const modifiedRules = rules?.map(item => ({ rules: item }))
+
+  setDiscriminatorValue('/mysqlQueryRules', modifiedRules);
+
+  return modifiedRules
+}
+
 return {
 	fetchJsons,
 	disableLableChecker,
@@ -876,4 +896,6 @@ return {
   onSetCustomConfigChange,
   getOpsRequestUrl,
   isWriteCheckEnabled,
+  onMySQLRulesChange,
+  setMySQLRules,
 }
