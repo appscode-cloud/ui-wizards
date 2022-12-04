@@ -1343,7 +1343,35 @@ steps:
         default: true
         type: boolean
     elements:
-    - computed: isValueExistInModel|/resources/kubedbComMariaDB/spec/tls
+    - label:
+        text: labels.to_update_tls
+      type: label-element
+    - customClass: mb-20
+      label:
+        text: labels.create_opsrequest
+      type: anchor
+      url:
+        params:
+          cluster:
+            $ref: store#/cluster/clusterDefinition/spec/name
+          vaultName:
+            $ref: model#/metadata/release/name
+          domain:
+            $ref: store#/domain
+          group:
+            $ref: model#/metadata/resource/group
+          kind:
+            $ref: model#/metadata/resource/kind
+          namespace:
+            $ref: model#/metadata/release/namespace
+          owner:
+            $ref: store#/route/params/user
+          resource:
+            $ref: model#/metadata/resource/name
+          version:
+            $ref: model#/metadata/resource/version
+        path: ${domain}/${owner}/kubernetes/${cluster}/ops.kubevault.com/v1alpha1/vaultopsrequests/create?name=${vaultName}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=ReconfigureTLS
+    - computed: isValueExistInModel|/resources/kubevaultComVaultServer/spec/tls
       disabled: true
       label:
         text: labels.enable_tls
