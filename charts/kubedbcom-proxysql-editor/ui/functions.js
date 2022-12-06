@@ -775,19 +775,13 @@ function setConfigurationSource({ model, getValue }) {
   return "use-existing-config";
 }
 
-function setSecretConfigNamespace({ getValue, model, watchDependency }) {
-  watchDependency("model#/metadata/release/namespace");
-  const namespace = getValue(model, "/metadata/release/namespace");
-  return namespace;
-}
-
-function setConfiguration({ model, getValue }) {
-  return getValue(model, "/resources/secret_config/stringData/md-config.cnf");
-}
-
-function setConfigurationFiles({ model, getValue }) {
-  const value = getValue(model, "/resources/secret_config/data/md-config.cnf");
-  return atob(value);
+function onConfigurationValueChange({ discriminator, getValue, commit }, path) {
+  const value = getValue(discriminator, `/${path}`)
+  commit('wizard/model$update', {
+    path: `/resources/secret_config/stringData/${path}.cnf`,
+    value,
+    force: true
+  })
 }
 
 function onSetCustomConfigChange({ discriminator, getValue, commit }) {
@@ -890,9 +884,7 @@ return {
 	onConfigurationSourceChange,
 	onConfigurationChange,
 	setConfigurationSource,
-	setSecretConfigNamespace,
-	setConfiguration,
-	setConfigurationFiles,
+  onConfigurationValueChange,
   onSetCustomConfigChange,
   getOpsRequestUrl,
   isWriteCheckEnabled,
