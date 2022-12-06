@@ -66,6 +66,8 @@ func addKnownTypes(scheme *runtime.Scheme) error {
 		&KubedbcomMysqlEditorOptionsList{},
 		&KubedbcomPostgresEditorOptions{},
 		&KubedbcomPostgresEditorOptionsList{},
+		&KubedbcomPgbouncerEditorOptions{},
+		&KubedbcomPgbouncerEditorOptionsList{},
 		&KubedbcomProxysqlEditorOptions{},
 		&KubedbcomProxysqlEditorOptionsList{},
 		&KubedbcomRedisEditorOptions{},

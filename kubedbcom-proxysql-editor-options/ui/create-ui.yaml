@@ -1,0 +1,238 @@
+steps:
+- form:
+    discriminator:
+      createAuthSecret:
+        default: true
+        type: boolean
+    elements:
+    - label:
+        text: labels.database.name
+      schema:
+        $ref: schema#/properties/metadata/properties/release/properties/name
+      type: input
+    - fetch: getResources|core|v1|namespaces
+      label:
+        text: labels.namespace
+      schema:
+        $ref: schema#/properties/metadata/properties/release/properties/namespace
+      type: select
+    - fetch: getProxysqlVersions|catalog.kubedb.com|v1alpha1|proxysqlversions
+      label:
+        text: labels.database.version
+      schema:
+        $ref: schema#/properties/spec/properties/version
+      type: select
+    - isArray: true
+      keys:
+        label:
+          text: labels.labels.key
+      label:
+        text: labels.labels.label
+      schema:
+        $ref: schema#/properties/spec/properties/labels
+      type: key-value-input-form
+      values:
+        label:
+          text: labels.labels.value
+        schema:
+          $ref: schema#/properties/spec/properties/labels/additionalProperties
+        type: input
+    - isArray: true
+      keys:
+        label:
+          text: labels.annotations.key
+      label:
+        text: labels.annotations.label
+      schema:
+        $ref: schema#/properties/spec/properties/annotations
+      type: key-value-input-form
+      values:
+        label:
+          text: labels.annotations.value
+        schema:
+          $ref: schema#/properties/spec/properties/annotations/additionalProperties
+        type: input
+    - hasDescription: true
+      label:
+        text: labels.database.mode
+      options:
+      - description: options.database.mode.Standalone.description
+        text: options.database.mode.Standalone.label
+        value: Standalone
+      - description: options.database.mode.Cluster.description
+        text: options.database.mode.Cluster.label
+        value: Cluster
+      schema:
+        $ref: schema#/properties/spec/properties/mode
+      type: radio
+    - hasDescription: true
+      label:
+        text: labels.terminationPolicy
+      options:
+      - description: options.terminationPolicy.delete.description
+        text: options.terminationPolicy.delete.label
+        value: Delete
+      - description: options.terminationPolicy.halt.description
+        text: options.terminationPolicy.halt.label
+        value: Halt
+      - description: options.terminationPolicy.wipeOut.description
+        text: options.terminationPolicy.wipeOut.label
+        value: WipeOut
+      - description: options.terminationPolicy.doNotTerminate.description
+        text: options.terminationPolicy.doNotTerminate.label
+        value: DoNotTerminate
+      schema:
+        $ref: schema#/properties/spec/properties/terminationPolicy
+      type: radio
+    - label:
+        text: labels.database.secret
+      type: label-element
+    - onChange: onCreateAuthSecretChange
+      options:
+      - text: options.database.secret.customSecret.label
+        value: true
+      - text: options.database.secret.existingSecret.label
+        value: false
+      schema:
+        $ref: discriminator#/createAuthSecret
+      type: radio
+    - allowUserDefinedOption: true
+      fetch: getSecrets
+      if: showAuthSecretField
+      label:
+        text: labels.secret
+      schema:
+        $ref: schema#/properties/spec/properties/authSecret/properties/name
+      type: select
+    - if: showAuthPasswordField
+      label:
+        text: labels.password
+      schema:
+        $ref: schema#/properties/spec/properties/authSecret/properties/password
+      type: input
+    - label:
+        text: labels.machine_profile
+      type: label-element
+    - computed: setMachineToCustom
+      fetch: getMachineListForOptions
+      label:
+        text: Machine
+      onChange: setResourceLimit
+      schema:
+        $ref: schema#/properties/spec/properties/machine
+      type: select
+    - computed: setLimitsCpuOrMem|cpu
+      disabled: disableLimit
+      label:
+        text: labels.cpu
+      schema:
+        $ref: schema#/properties/spec/properties/resources/properties/limits/properties/cpu
+      type: input
+    - computed: setLimitsCpuOrMem|memory
+      disabled: disableLimit
+      label:
+        text: labels.memory
+      schema:
+        $ref: schema#/properties/spec/properties/resources/properties/limits/properties/memory
+      type: input
+    - label:
+        text: labels.backend_section
+      type: label-element
+    - fetch: getResources|appcatalog.appscode.com|v1alpha1|appbindings
+      label:
+        text: labels.backend
+      refresh: true
+      schema:
+        $ref: schema#/properties/spec/properties/backend
+      type: select
+    - label:
+        text: labels.sync_users_question
+      schema:
+        $ref: schema#/properties/spec/properties/syncUsers
+      type: switch
+    - elements:
+      - label:
+          text: labels.alert.alert_enable_question
+        schema:
+          $ref: schema#/properties/form/properties/alert/properties/enabled
+        type: switch
+      label:
+        text: labels.alert.label
+      schema:
+        $ref: schema#/properties/form/properties/alert
+      show_label: true
+      type: single-step-form
+    - alias: reusable-monitor-option
+      chart:
+        name: uibytebuildersdev-component-monitoring-option
+        version: v0.4.12
+      dataContext:
+        agent:
+          $ref: schema#/properties/spec/properties/monitoring/properties/agent
+      functionCallbacks:
+        updateAgentValue:
+          $ref: functions#/updateAgentValue
+      moduleResolver: fetchJsons
+      schema:
+        $ref: schema#/properties/spec/properties/monitoring/properties/serviceMonitor
+      type: reusable-element
+    - label:
+        text: labels.configOptions
+      type: label-element
+    - cluster:
+        $ref: store#/cluster/clusterDefinition/spec/name
+      hasDependencies: true
+      hasDescription: true
+      options:
+      - description: options.configOptions.alert.description
+        text: options.configOptions.alert.label
+        value: alert
+      - description: options.configOptions.topology.description
+        text: options.configOptions.topology.label
+        value: topology
+      - dependencies:
+        - group: cert-manager.io
+          name: Cert-Manager
+          resource: issuers
+          url: https://cert-manager.io/docs/
+          version: v1
+        description: options.configOptions.tls.description
+        text: options.configOptions.tls.label
+        value: tls
+      - description: options.configOptions.initialization.description
+        text: options.configOptions.initialization.label
+        value: initialization
+      - dependencies:
+        - group: stash.appscode.com
+          name: Stash
+          resource: backupconfigurations
+          url: https://stash.run/
+          version: v1beta1
+        description: options.configOptions.backup.description
+        text: options.configOptions.backup.label
+        value: backupconfiguration
+      - description: options.configOptions.networking.description
+        text: options.configOptions.networking.label
+        value: networking
+      - dependencies:
+        - group: monitoring.coreos.com
+          name: Prometheus Operator
+          resource: servicemonitors
+          url: https://github.com/prometheus-operator
+          version: v1
+        description: options.configOptions.monitoring.description
+        text: options.configOptions.monitoring.label
+        value: monitoring
+      - description: options.configOptions.customConfig.description
+        text: options.configOptions.customConfig.label
+        value: custom-config
+      - description: options.configOptions.podTemplate.description
+        text: options.configOptions.podTemplate.label
+        value: pod-template
+      owner:
+        $ref: store#/route/params/user
+      type: configure-options
+    type: single-step-form
+  id: options
+  title: steps.0.label
+type: multi-step-form
