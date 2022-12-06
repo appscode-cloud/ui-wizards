@@ -261,6 +261,46 @@ async function getProxySQLVersions({ axios, storeGet }) {
   }
 }
 
+async function getAppBindings({ axios, storeGet }) {
+  const owner = storeGet("/route/params/user");
+  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+
+  const queryParams = {
+    filter: {
+      items: {
+        metadata: { name: null },
+        spec: { type: null },
+      },
+    },
+  };
+
+  try {
+    const resp = await axios.get(
+      `/clusters/${owner}/${cluster}/proxy/appcatalog.appscode.com/v1alpha1/appbindings`,
+      {
+        params: queryParams,
+      }
+    );
+
+    const resources = (resp && resp.data && resp.data.items) || [];
+
+    const fileredResources = resources
+      .filter((item) => item.spec?.type === 'kubedb.com/mysql' || item.spec?.type === 'kubedb.com/mariadb')
+      .map((item) => {
+        const name = (item.metadata && item.metadata.name) || "";
+        return {
+          text: name,
+          value: name,
+        };
+      });
+    return fileredResources;
+  } catch (e) {
+    console.log(e);
+    return [];
+  }
+}
+
+
 // ********************* Database Mode ***********************
 function setDatabaseMode({ model, getValue, watchDependency }) {
   const replicas = getValue(model, "/resources/kubedbComProxySQL/spec/replicas");
@@ -784,6 +824,11 @@ function onConfigurationValueChange({ discriminator, getValue, commit }, path) {
   })
 }
 
+function setCustomConfigConfigureChoice({ model, getValue }) {
+  const customConfig = getValue(model, '/resources/kubedbComProxySQL/spec/configSecret')
+  return customConfig ? 'yes' : 'no'
+};
+
 function onSetCustomConfigChange({ discriminator, getValue, commit }) {
   const value = getValue(discriminator, "/setCustomConfig");
 
@@ -807,7 +852,7 @@ function getOpsRequestUrl({ storeGet, model, getValue, mode }, reqType) {
   const pathPrefix = `${domain}${routeRootPath}${routeRootPath.split("/").pop() !== 'operations' ? '/operations' : ''}`;
 
   if(mode === 'standalone-step') return `${pathPrefix}?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=${reqType}&showOpsRequestModal=true`;
-  else return `${domain}/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/proxysqlopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=VerticalScaling`;
+  else return `${domain}/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/proxysqlopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations${reqType ? '&requestType=' + reqType : ''}`;
 }
 
 function isWriteCheckEnabled({model, getValue, watchDependency}) {
@@ -851,6 +896,7 @@ return {
   returnTrue,
   returnStringYes,
 	getProxySQLVersions,
+  getAppBindings,
 	setDatabaseMode,
 	onDatabaseModeChange,
 	isEqualToDatabaseMode,
@@ -886,6 +932,7 @@ return {
 	setConfigurationSource,
   onConfigurationValueChange,
   onSetCustomConfigChange,
+  setCustomConfigConfigureChoice,
   getOpsRequestUrl,
   isWriteCheckEnabled,
   onMySQLRulesChange,
