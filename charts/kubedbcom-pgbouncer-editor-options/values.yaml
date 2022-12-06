@@ -1,0 +1,154 @@
+# Default values for kubedbcom-pgbouncer-editor-options.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+metadata:
+  resource:
+    group: kubedb.com
+    kind: PgBouncer
+    name: pgbouncers
+    scope: Namespaced
+    version: v1alpha2
+  release:
+    # Release name
+    name: ""
+    # Release namespace
+    namespace: ""
+
+spec:
+  # List options
+  version: 2.3.2-debian
+
+  # Annotations to add to the database custom resource
+  annotations: {}
+
+  # Labels to add to all the template objects
+  labels: {}
+
+  # Standalone, Cluster
+  mode: Cluster
+
+  terminationPolicy: WipeOut
+
+  machine: ""
+
+  resources:
+    limits:
+      cpu: 500m
+      memory: 1Gi
+
+  authSecret:
+    name: ""
+    password: ""
+
+  monitoring:
+    # Name of monitoring agent (one of "prometheus.io", "prometheus.io/operator", "prometheus.io/builtin")
+    agent: prometheus.io/operator
+    serviceMonitor:
+      # Specify the labels for ServiceMonitor.
+      # Prometheus crd will select ServiceMonitor using these labels.
+      # Only usable when monitoring agent is `prometheus.io/webhook server`.
+      labels: {}
+
+  syncUsers: false
+
+  backend: ""
+
+form:
+  alert:
+    ## Enable PrometheusRule alerts
+    enabled: true
+
+    ## Labels for default rules
+    labels: # +doc-gen:break
+      release: kube-prometheus-stack
+
+    ## Annotations for default rules
+    annotations: {}
+
+    ## Additional labels for PrometheusRule alerts
+    additionalRuleLabels: {}
+
+    ## Prefix for runbook URLs. Use this to override the first part of the runbookURLs that is common to all rules.
+    # runbookUrl: "https://runbooks.prometheus-operator.dev/runbooks"
+
+    groups:
+      database:
+        enabled: true
+        rules:
+          pgBouncerInstanceDown:
+            enabled: true
+            duration: "0m"
+            severity: critical
+          pgBouncerServiceDown:
+            enabled: true
+            duration: "0m"
+            severity: critical
+          pgBouncerTooManyConnections:
+            enabled: true
+            duration: "2m"
+            val: 80
+            severity: warning
+          pgBouncerHighThreadsRunning:
+            enabled: true
+            duration: "2m"
+            val: 60
+            severity: warning
+          pgBouncerSlowQueries:
+            enabled: true
+            duration: "2m"
+            severity: warning
+          pgBouncerRestarted:
+            enabled: true
+            duration: "0m"
+            val: 60
+            severity: warning
+          pgBouncerHighQPS:
+            enabled: true
+            duration: "0m"
+            val: 1000
+            severity: critical
+          pgBouncerHighIncomingBytes:
+            enabled: true
+            duration: "0m"
+            val: 1048576 # 1MB
+            severity: critical
+          pgBouncerHighOutgoingBytes:
+            enabled: true
+            duration: "0m"
+            val: 1048576 # 1MB
+            severity: critical
+      cluster:
+        enabled: true
+        rules:
+          pgbouncerCLusterSyncFailure:
+            enabled: true
+            val: 0.1
+            duration: "5m"
+            severity: warning
+      provisioner:
+        enabled: true
+        rules:
+          appPhaseNotReady:
+            enabled: true
+            duration: "1m"
+            severity: critical
+          appPhaseCritical:
+            enabled: true
+            duration: "15m"
+            severity: warning
+      opsManager:
+        enabled: true
+        rules:
+          opsRequestOnProgress:
+            enabled: true
+            duration: "0m"
+            severity: info
+          opsRequestStatusProgressingToLong:
+            enabled: true
+            duration: "30m"
+            severity: critical
+          opsRequestFailed:
+            enabled: true
+            duration: "0m"
+            severity: critical

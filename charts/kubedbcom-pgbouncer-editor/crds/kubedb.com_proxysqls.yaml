@@ -24,95 +24,31 @@ spec:
             type: object
           spec:
             properties:
+              authSecret:
+                properties:
+                  externallyManaged:
+                    type: boolean
+                  name:
+                    type: string
+                type: object
+                x-kubernetes-map-type: atomic
               autoOps:
                 properties:
                   disabled:
                     type: boolean
                 type: object
-              connectionPool:
+              backend:
                 properties:
-                  adminUsers:
-                    items:
-                      type: string
-                    type: array
-                  authType:
-                    enum:
-                    - md5
-                    - scram
-                    - cert
-                    - plain
-                    - trust
-                    - any
-                    - hba
-                    - pam
+                  name:
                     type: string
-                  authUser:
-                    type: string
-                  defaultPoolSize:
-                    format: int64
-                    type: integer
-                  ignoreStartupParameters:
-                    type: string
-                  maxClientConnections:
-                    format: int64
-                    type: integer
-                  maxDBConnections:
-                    format: int64
-                    type: integer
-                  maxUserConnections:
-                    format: int64
-                    type: integer
-                  minPoolSize:
-                    format: int64
-                    type: integer
-                  poolMode:
-                    type: string
-                  port:
-                    format: int32
-                    type: integer
-                  reservePoolSize:
-                    format: int64
-                    type: integer
-                  reservePoolTimeoutSeconds:
-                    format: int64
-                    type: integer
-                  statsPeriodSeconds:
-                    format: int64
-                    type: integer
                 type: object
-              databases:
-                items:
-                  properties:
-                    alias:
-                      type: string
-                    authSecretRef:
-                      properties:
-                        name:
-                          type: string
-                      type: object
-                      x-kubernetes-map-type: atomic
-                    databaseName:
-                      type: string
-                    databaseRef:
-                      properties:
-                        name:
-                          type: string
-                        namespace:
-                          type: string
-                        parameters:
-                          type: object
-                          x-kubernetes-embedded-resource: true
-                          x-kubernetes-preserve-unknown-fields: true
-                      required:
-                      - name
-                      - namespace
-                      type: object
-                  required:
-                  - alias
-                  - databaseName
-                  - databaseRef
-                  type: object
-                type: array
+                x-kubernetes-map-type: atomic
+              configSecret:
+                properties:
+                  name:
+                    type: string
+                type: object
+                x-kubernetes-map-type: atomic
               healthChecker:
                 default:
                   failureThreshold: 1
@@ -134,6 +70,60 @@ spec:
                     format: int32
                     type: integer
                 type: object
+              initConfig:
+                properties:
+                  adminVariables:
+                    type: object
+                    x-kubernetes-preserve-unknown-fields: true
+                  mysqlQueryRules:
+                    items:
+                      type: object
+                      x-kubernetes-preserve-unknown-fields: true
+                    type: array
+                    x-kubernetes-preserve-unknown-fields: true
+                  mysqlUsers:
+                    items:
+                      properties:
+                        active:
+                          type: integer
+                        attributes:
+                          type: string
+                        backend:
+                          type: integer
+                        comment:
+                          type: string
+                        default_hostgroup:
+                          type: integer
+                        default_schema:
+                          type: string
+                        fast_forward:
+                          type: integer
+                        frontend:
+                          type: integer
+                        max_connections:
+                          format: int32
+                          type: integer
+                        schema_locked:
+                          type: integer
+                        transaction_persistent:
+                          type: integer
+                        use_ssl:
+                          type: integer
+                        username:
+                          type: string
+                      required:
+                      - username
+                      type: object
+                    type: array
+                  mysqlVariables:
+                    type: object
+                    x-kubernetes-preserve-unknown-fields: true
+                type: object
+              mode:
+                enum:
+                - Galera
+                - GroupReplication
+                type: string
               monitor:
                 properties:
                   agent:
@@ -2697,17 +2687,11 @@ spec:
                   - alias
                   type: object
                 type: array
-              sslMode:
-                enum:
-                - disable
-                - allow
-                - prefer
-                - require
-                - verify-ca
-                - verify-full
-                type: string
+              syncUsers:
+                type: boolean
               terminationPolicy:
                 enum:
+                - Halt
                 - Delete
                 - WipeOut
                 - DoNotTerminate
@@ -2813,12 +2797,6 @@ spec:
                     type: object
                     x-kubernetes-map-type: atomic
                 type: object
-              userListSecretRef:
-                properties:
-                  name:
-                    type: string
-                type: object
-                x-kubernetes-map-type: atomic
               version:
                 type: string
             required:

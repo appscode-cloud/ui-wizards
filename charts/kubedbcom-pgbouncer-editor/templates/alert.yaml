@@ -1,0 +1,180 @@
+{{ $app := (include "kubedbcom-pgbouncer-editor.fullname" .) }}
+
+{{ if .Values.form.alert.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ $app }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    {{- include "kubedbcom-pgbouncer-editor.selectorLabels" . | nindent 4 }}
+    {{- if .Values.form.alert.labels }}
+    {{- toYaml .Values.form.alert.labels | nindent 4 }}
+    {{- end }}
+{{- if .Values.form.alert.annotations }}
+  annotations:
+    {{- toYaml .Values.form.alert.annotations | nindent 4 }}
+{{- end }}
+spec:
+  groups:
+  {{ if .Values.form.alert.groups.database.enabled -}}
+  - name: pgbouncer.database.{{ .Release.Namespace }}.{{ $app }}.rules
+    rules:
+    {{ if .Values.form.alert.groups.database.rules.pgBouncerInstanceDown.enabled -}}
+    - alert: PgBouncerInstanceDown
+      expr: pgbouncer_uptime_seconds_total{job="{{ $app }}-stats",namespace="{{ .Release.Namespace }}"} == 0
+      for: {{ .Values.form.alert.groups.database.rules.pgBouncerInstanceDown.duration }}
+      labels:
+        severity: {{ .Values.form.alert.groups.database.rules.pgBouncerInstanceDown.severity }}
+        {{- include "kubedbcom-pgbouncer-editor.alertLabels" . | nindent 8 }}
+      annotations:
+        summary: PgBouncer instance down (instance {{`{{`}} $labels.pod {{`}}`}})
+        description: "PgBouncer instance is down on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{ end -}}
+    {{ if .Values.form.alert.groups.database.rules.pgBouncerServiceDown.enabled -}}
+    - alert: PgBouncerServiceDown
+      expr: sum by (service) (pgbouncer_uptime_seconds_total{job="{{ $app }}-stats",namespace="{{ .Release.Namespace }}"}) == 0
+      for: {{ .Values.form.alert.groups.database.rules.pgBouncerServiceDown.duration }}
+      labels:
+        severity: {{ .Values.form.alert.groups.database.rules.pgBouncerServiceDown.severity }}
+        {{- include "kubedbcom-pgbouncer-editor.alertLabels" . | nindent 8 }}
+      annotations:
+        summary: PgBouncer service down (instance {{`{{`}} $labels.pod {{`}}`}})
+        description: "PgBouncer service is down on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{ end -}}
+    {{ if .Values.form.alert.groups.database.rules.pgBouncerTooManyConnections.enabled -}}
+    - alert: PgBouncerTooManyConnections
+      expr: max_over_time(pgbouncer_client_connections_connected{job="{{ $app }}-stats",namespace="{{ .Release.Namespace }}"}[1m]) / pgbouncer_pgbouncer_max_connections{job="{{ $app }}-stats",namespace="{{ .Release.Namespace }}"} * 100 > {{.Values.form.alert.groups.database.rules.pgBouncerTooManyConnections.val}}
+      for: {{ .Values.form.alert.groups.database.rules.pgBouncerTooManyConnections.duration }}
+      labels:
+        severity: {{ .Values.form.alert.groups.database.rules.pgBouncerTooManyConnections.severity }}
+        {{- include "kubedbcom-pgbouncer-editor.alertLabels" . | nindent 8 }}
+      annotations:
+        summary: PgBouncer too many connections (> {{.Values.form.alert.groups.database.rules.pgBouncerTooManyConnections.val}}%) (instance {{`{{`}} $labels.pod {{`}}`}})
+        description: "More than {{.Values.form.alert.groups.database.rules.pgBouncerTooManyConnections.val}}% of PgBouncer connections are in use on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{ end -}}
+    {{ if .Values.form.alert.groups.database.rules.pgBouncerSlowQueries.enabled -}}
+    - alert: PgBouncerSlowQueries
+      expr: increase(pgbouncer_slow_queries_total{job="{{ $app }}-stats",namespace="{{ .Release.Namespace }}"}[1m]) > 0
+      for: {{ .Values.form.alert.groups.database.rules.pgBouncerSlowQueries.duration }}
+      labels:
+        severity: {{ .Values.form.alert.groups.database.rules.pgBouncerSlowQueries.severity }}
+        {{- include "kubedbcom-pgbouncer-editor.alertLabels" . | nindent 8 }}
+      annotations:
+        summary: PgBouncer slow queries on (instance {{`{{`}} $labels.pod {{`}}`}})
+        description: "PgBouncer server pgbouncer has some new slow query.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{ end -}}
+    {{ if .Values.form.alert.groups.database.rules.pgBouncerRestarted.enabled -}}
+    - alert: PgBouncerRestarted
+      expr: pgbouncer_uptime_seconds_total{job="{{ $app }}-stats",namespace="{{ .Release.Namespace }}"} < {{.Values.form.alert.groups.database.rules.pgBouncerRestarted.val}}
+      for: {{ .Values.form.alert.groups.database.rules.pgBouncerRestarted.duration }}
+      labels:
+        severity: {{ .Values.form.alert.groups.database.rules.pgBouncerRestarted.severity }}
+        {{- include "kubedbcom-pgbouncer-editor.alertLabels" . | nindent 8 }}
+      annotations:
+        summary: PgBouncer restarted ({{.Values.form.alert.groups.database.rules.pgBouncerRestarted.val}} second ago) (instance {{`{{`}} $labels.pod {{`}}`}})
+        description: "PgBouncer restarted\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{ end -}}
+    {{ if .Values.form.alert.groups.database.rules.pgBouncerHighIncomingBytes.enabled -}}
+    - alert: PgBouncerHighIncomingBytes
+      expr: rate(pgbouncer_queries_frontends_bytes_total{job="{{ $app }}-stats",namespace="{{ .Release.Namespace }}",traffic_flow="received"}[1m]) > {{.Values.form.alert.groups.database.rules.pgBouncerHighIncomingBytes.val}}
+      for: {{ .Values.form.alert.groups.database.rules.pgBouncerHighIncomingBytes.duration }}
+      labels:
+        severity: {{ .Values.form.alert.groups.database.rules.pgBouncerHighIncomingBytes.severity }}
+        {{- include "kubedbcom-pgbouncer-editor.alertLabels" . | nindent 8 }}
+      annotations:
+        summary: PgBouncer has high incoming bytes second (> {{.Values.form.alert.groups.database.rules.pgBouncerHighIncomingBytes.val}}) (instance {{`{{`}} $labels.pod {{`}}`}})
+        description: "PgBouncer has high incoming bytes per second on (instance {{`{{`}} $labels.pod {{`}}`}})\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{ end -}}
+    {{ if .Values.form.alert.groups.database.rules.pgBouncerHighOutgoingBytes.enabled -}}
+    - alert: PgBouncerHighOutgoingBytes
+      expr: rate(pgbouncer_queries_frontends_bytes_total{job="{{ $app }}-stats",namespace="{{ .Release.Namespace }}",traffic_flow="sent"}[1m]) > {{.Values.form.alert.groups.database.rules.pgBouncerHighOutgoingBytes.val}}
+      for: {{ .Values.form.alert.groups.database.rules.pgBouncerHighOutgoingBytes.duration }}
+      labels:
+        severity: {{ .Values.form.alert.groups.database.rules.pgBouncerHighOutgoingBytes.severity }}
+        {{- include "kubedbcom-pgbouncer-editor.alertLabels" . | nindent 8 }}
+      annotations:
+        summary: PgBouncer has high outgoing bytes second (> {{.Values.form.alert.groups.database.rules.pgBouncerHighOutgoingBytes.val}}) (instance {{`{{`}} $labels.pod {{`}}`}})
+        description: "PgBouncer has high outgoing bytes per second on (instance {{`{{`}} $labels.pod {{`}}`}})\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{ end -}}
+  {{ end -}}
+  {{ if .Values.form.alert.groups.cluster.enabled -}}
+  - name: pgbouncer.cluster.{{ .Release.Namespace }}.{{ $app }}.rules
+    rules:
+    {{ if .Values.form.alert.groups.cluster.rules.pgbouncerCLusterSyncFailure.enabled -}}
+    - alert: PgBouncerCLusterSyncFailure
+      expr: sum by(job) (rate(pgbouncer_cluster_syn_conflict_total{job="{{ $app }}-stats",namespace="{{ .Release.Namespace }}"}[1m])) > {{.Values.form.alert.groups.cluster.rules.pgbouncerCLusterSyncFailure.val}}
+      for: {{ .Values.form.alert.groups.cluster.rules.pgbouncerCLusterSyncFailure.duration }}
+      labels:
+        severity: {{ .Values.form.alert.groups.cluster.rules.pgbouncerCLusterSyncFailure.severity }}
+        {{- include "kubedbcom-pgbouncer-editor.alertLabels" . | nindent 8 }}
+      annotations:
+        summary: PgBouncer Cluster Sync Failed ( > {{.Values.form.alert.groups.cluster.rules.pgbouncerCLusterSyncFailure.val}} second,) (instance {{`{{`}} $labels.pod {{`}}`}})
+        description: "PgBouncer Cluster Sync Failed for {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+  {{ end -}}
+  {{ if .Values.form.alert.groups.provisioner.enabled -}}
+  - name: pgbouncer.provisioner.{{ .Release.Namespace }}.{{ $app }}.rules
+    rules:
+    {{ if .Values.form.alert.groups.provisioner.rules.appPhaseNotReady.enabled -}}
+    - alert: KubeDBPgBouncerPhaseNotReady
+      expr: kubedb_com_pgbouncer_status_phase{phase="NotReady",app="{{ $app }}",namespace="{{ .Release.Namespace }}"} == 1
+      for: {{ .Values.form.alert.groups.provisioner.rules.appPhaseNotReady.duration }}
+      labels:
+        severity: {{ .Values.form.alert.groups.provisioner.rules.appPhaseNotReady.severity }}
+        {{- include "kubedbcom-pgbouncer-editor.alertLabels" . | nindent 8 }}
+      annotations:
+        summary: KubeDB PgBouncer Phase NotReady (pgbouncer {{`{{`}} $labels.pgbouncer {{`}}`}})
+        description: "KubeDB PgBouncer Phase not ready on {{`{{`}} $labels.pgbouncer {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{ end -}}
+    {{ if .Values.form.alert.groups.provisioner.rules.appPhaseCritical.enabled -}}
+    - alert: KubeDBPgBouncerPhaseCritical
+      expr: kubedb_com_pgbouncer_status_phase{phase="Critical",app="{{ $app }}",namespace="{{ .Release.Namespace }}"} == 1
+      for: {{ .Values.form.alert.groups.provisioner.rules.appPhaseCritical.duration }}
+      labels:
+        severity: {{ .Values.form.alert.groups.provisioner.rules.appPhaseCritical.severity }}
+        {{- include "kubedbcom-pgbouncer-editor.alertLabels" . | nindent 8 }}
+      annotations:
+        summary: KubeDB PgBouncer Phase Critical (pgbouncer {{`{{`}} $labels.pgbouncer {{`}}`}})
+        description: "KubeDB PgBouncer Phase Critical {{`{{`}} $labels.pgbouncer {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+  {{ end -}}
+  {{ if .Values.form.alert.groups.opsManager.enabled -}}
+  - name: pgbouncer.opsManager.{{ .Release.Namespace }}.{{ $app }}.rules
+    rules:
+    {{ if .Values.form.alert.groups.opsManager.rules.opsRequestOnProgress.enabled -}}
+    - alert: KubeDBPgBouncerOpsRequestOnProgress
+      expr: ops_kubedb_com_pgbounceropsrequest_status_phase{phase="Progressing",app="{{ $app }}",namespace="{{ .Release.Namespace }}"} == 1
+      for: {{ .Values.form.alert.groups.opsManager.rules.opsRequestOnProgress.duration }}
+      labels:
+        severity: {{ .Values.form.alert.groups.opsManager.rules.opsRequestOnProgress.severity }}
+        {{- include "kubedbcom-pgbouncer-editor.alertLabels" . | nindent 8 }}
+      annotations:
+        summary: PgBouncerOpsRequest on progress (pgbounceropsrequest {{`{{`}} $labels.pgbounceropsrequest {{`}}`}})
+        description: "PgBouncerOpsRequest {{`{{`}} $labels.pgbounceropsrequest {{`}}`}} is in progressressing status\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{ end -}}
+    {{ if .Values.form.alert.groups.opsManager.rules.opsRequestStatusProgressingToLong.enabled -}}
+    - alert: KubeDBPgBouncerOpsRequestStatusProgressingToLong
+      expr: ops_kubedb_com_pgbounceropsrequest_status_phase{phase="Progressing",app="{{ $app }}",namespace="{{ .Release.Namespace }}"} == 1
+      for: {{ .Values.form.alert.groups.opsManager.rules.opsRequestStatusProgressingToLong.duration }}
+      labels:
+        severity: {{ .Values.form.alert.groups.opsManager.rules.opsRequestStatusProgressingToLong.severity }}
+        {{- include "kubedbcom-pgbouncer-editor.alertLabels" . | nindent 8 }}
+      annotations:
+        summary: PgBouncerOpsRequest is in progressing status for too long (pgbounceropsrequest {{`{{`}} $labels.pgbounceropsrequest {{`}}`}})
+        description: "PgBouncerOpsRequest {{`{{`}} $labels.pgbounceropsrequest {{`}}`}} is in progressing status for too long\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{ end -}}
+    {{ if .Values.form.alert.groups.opsManager.rules.opsRequestFailed.enabled -}}
+    - alert: KubeDBPgBouncerOpsRequestFailed
+      expr: ops_kubedb_com_pgbounceropsrequest_status_phase{phase="Failed",app="{{ $app }}",namespace="{{ .Release.Namespace }}"} == 1
+      for: {{ .Values.form.alert.groups.opsManager.rules.opsRequestFailed.duration }}
+      labels:
+        severity: {{ .Values.form.alert.groups.opsManager.rules.opsRequestFailed.severity }}
+        {{- include "kubedbcom-pgbouncer-editor.alertLabels" . | nindent 8 }}
+      annotations:
+        summary: PgBouncerOpsRequest failed (pgbounceropsrequest {{`{{`}} $labels.pgbounceropsrequest {{`}}`}})
+        description: "PgBouncerOpsRequest {{`{{`}} $labels.pgbounceropsrequest {{`}}`}} failed \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+  {{ end -}}
+{{ end }}
