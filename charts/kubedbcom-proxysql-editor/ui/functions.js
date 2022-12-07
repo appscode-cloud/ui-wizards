@@ -855,12 +855,6 @@ function getOpsRequestUrl({ storeGet, model, getValue, mode }, reqType) {
   else return `${domain}/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/proxysqlopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations${reqType ? '&requestType=' + reqType : ''}`;
 }
 
-function isWriteCheckEnabled({model, getValue, watchDependency}) {
-  watchDependency('model#/resources/kubedbComProxySQL/spec/healthChecker/disableWriteCheck')
-  const disableWriteCheckStatus = getValue(model, '/resources/kubedbComProxySQL/spec/healthChecker/disableWriteCheck')
-
-  return !disableWriteCheckStatus;
-}
 
 function onMySQLRulesChange({ discriminator, getValue, commit }) {
   const rules = getValue(discriminator, '/mysqlQueryRules')
@@ -934,7 +928,6 @@ return {
   onSetCustomConfigChange,
   setCustomConfigConfigureChoice,
   getOpsRequestUrl,
-  isWriteCheckEnabled,
   onMySQLRulesChange,
   setMySQLRules,
 }
