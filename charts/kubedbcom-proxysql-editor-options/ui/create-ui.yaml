@@ -72,9 +72,6 @@ steps:
       - description: options.terminationPolicy.delete.description
         text: options.terminationPolicy.delete.label
         value: Delete
-      - description: options.terminationPolicy.halt.description
-        text: options.terminationPolicy.halt.label
-        value: Halt
       - description: options.terminationPolicy.wipeOut.description
         text: options.terminationPolicy.wipeOut.label
         value: WipeOut
@@ -138,7 +135,7 @@ steps:
     - label:
         text: labels.backend_section
       type: label-element
-    - fetch: getResources|appcatalog.appscode.com|v1alpha1|appbindings
+    - fetch: getAppBindings
       label:
         text: labels.backend
       refresh: true
@@ -199,18 +196,9 @@ steps:
         description: options.configOptions.tls.description
         text: options.configOptions.tls.label
         value: tls
-      - description: options.configOptions.initialization.description
-        text: options.configOptions.initialization.label
-        value: initialization
-      - dependencies:
-        - group: stash.appscode.com
-          name: Stash
-          resource: backupconfigurations
-          url: https://stash.run/
-          version: v1beta1
-        description: options.configOptions.backup.description
-        text: options.configOptions.backup.label
-        value: backupconfiguration
+      - description: options.configOptions.healthChecker.description
+        text: options.configOptions.healthChecker.label
+        value: health-checker
       - description: options.configOptions.networking.description
         text: options.configOptions.networking.label
         value: networking
@@ -223,6 +211,9 @@ steps:
         description: options.configOptions.monitoring.description
         text: options.configOptions.monitoring.label
         value: monitoring
+      - description: options.configOptions.initConfig.description
+        text: options.configOptions.initConfig.label
+        value: init-config
       - description: options.configOptions.customConfig.description
         text: options.configOptions.customConfig.label
         value: custom-config

@@ -1699,48 +1699,6 @@ function onNameChange({ commit, model, getValue }) {
       force: true,
     });
   }
-
-  // to reset shard configSecret name field
-  const hasSecretShardConfig = getValue(
-    model,
-    "/resources/secret_shard_config"
-  );
-  if (hasSecretShardConfig) {
-    commit("wizard/model$update", {
-      path:
-        "/resources/kubedbComPostgres/spec/shardTopology/shard/configSecret/name",
-      value: `${dbName}-shard-config`,
-      force: true,
-    });
-  }
-
-  // to reset shard configSecret name field
-  const hasSecretConfigServerConfig = getValue(
-    model,
-    "/resources/secret_configserver_config"
-  );
-  if (hasSecretConfigServerConfig) {
-    commit("wizard/model$update", {
-      path:
-        "/resources/kubedbComPostgres/spec/shardTopology/configServer/configSecret/name",
-      value: `${dbName}-configserver-config`,
-      force: true,
-    });
-  }
-
-  // to reset mongos configSecret name field
-  const hasSecretMongosConfig = getValue(
-    model,
-    "/resources/secret_mongos_config"
-  );
-  if (hasSecretMongosConfig) {
-    commit("wizard/model$update", {
-      path:
-        "/resources/kubedbComPostgres/spec/shardTopology/mongos/configSecret/name",
-      value: `${dbName}-mongos-config`,
-      force: true,
-    });
-  }
 }
 
 function returnFalse() {
