@@ -1,0 +1,145 @@
+steps:
+- form:
+    discriminator:
+      vaultDetails:
+        type: object
+    elements:
+    - computed: getVaultDetails
+      if: returnFalse
+      schema:
+        $ref: discriminator#/properties/vaultDetails
+      type: input
+    - label:
+        text: labels.op_req_name
+      required: true
+      schema:
+        $ref: schema#/properties/metadata/properties/name
+      type: input
+    - computed: initNamespace
+      disabled: isNamespaceDisabled
+      fetch: getNamespaces
+      label:
+        text: labels.namespace
+      onChange: onNamespaceChange
+      required: true
+      schema:
+        $ref: schema#/properties/metadata/properties/namespace
+      type: select
+    - computed: initVaultRef
+      disabled: isVaultRefDisabled
+      fetch: getVaults
+      label:
+        text: labels.vaultRef
+      onChange: onVaultChange
+      required: true
+      schema:
+        $ref: schema#/properties/spec/properties/vaultRef/properties/name
+      type: select
+    - label:
+        text: labels.timeout
+      schema:
+        $ref: schema#/properties/spec/properties/timeout
+      type: time-input
+    - label:
+        text: labels.config_ops_request
+      type: label-element
+    - computed: getRequestTypeFromRoute
+      disabled: isVaultDetailsLoading
+      hasDescription: true
+      label:
+        text: labels.ops_request_type
+      onChange: onRequestTypeChange
+      options:
+      - description: options.Restart.description
+        text: options.Restart.text
+        value: Restart
+      - description: options.ReconfigureTLS.description
+        text: options.ReconfigureTLS.text
+        value: ReconfigureTLS
+      schema:
+        $ref: schema#/properties/spec/properties/type
+      type: radio
+    - discriminator:
+        tlsOperation:
+          default: update
+          type: string
+      elements:
+      - computed: initTlsOperation
+        if: hasTlsField
+        label:
+          text: labels.tls.tlsOperation
+        onChange: onTlsOperationChange
+        options:
+        - text: Update
+          value: update
+        - text: Rotate
+          value: rotate
+        - text: Remove
+          value: remove
+        schema:
+          $ref: discriminator#/properties/tlsOperation
+        type: radio
+      - if: returnFalse
+        schema:
+          $ref: schema#/properties/spec/properties/tls/properties/remove
+        type: switch
+      - if: returnFalse
+        schema:
+          $ref: schema#/properties/spec/properties/tls/properties/rotateCertificates
+        type: switch
+      - elements:
+        - computed: initIssuerRefApiGroup
+          disabled: true
+          label:
+            text: labels.tls.api_group
+          schema:
+            $ref: schema#/properties/spec/properties/tls/properties/issuerRef/properties/apiGroup
+          type: input
+        - computed: setValueFromVaultDetails|/spec/tls/issuerRef/kind
+          label:
+            text: labels.tls.kind
+          options:
+          - text: Issuer
+            value: Issuer
+          - text: ClusterIssuer
+            value: ClusterIssuer
+          required: isIssuerRefRequired
+          schema:
+            $ref: schema#/properties/spec/properties/tls/properties/issuerRef/properties/kind
+          type: select
+        - allowUserDefinedOption: true
+          computed: setValueFromVaultDetails|/spec/tls/issuerRef/name
+          fetch: getIssuerRefsName
+          label:
+            text: labels.tls.name
+          required: isIssuerRefRequired
+          schema:
+            $ref: schema#/properties/spec/properties/tls/properties/issuerRef/properties/name
+          type: select
+        if: showIssuerRefAndCertificates
+        schema:
+          $ref: schema#/properties/spec/properties/tls/properties/issuerRef
+        type: single-step-form
+      - alias: reusable_certificates
+        chart:
+          name: uibytebuildersdev-component-certificates
+          version: v0.4.12
+        computed: setValueFromVaultDetails|/spec/tls/certificates|/spec/tls/certificates
+        functionCallbacks:
+          getAliasOptions:
+            $ref: functions#/getAliasOptions
+        if: showIssuerRefAndCertificates
+        moduleResolver: fetchJsons
+        schema:
+          $ref: schema#/properties/spec/properties/tls/properties/certificates
+        type: reusable-element
+      if: ifRequestTypeEqualsTo|ReconfigureTLS
+      label:
+        text: labels.tls.tls
+      schema:
+        $ref: schema#/properties/spec/properties/tls
+      type: single-step-form
+    type: single-step-form
+  id: basic
+  title: steps.0.label
+type: multi-step-form
