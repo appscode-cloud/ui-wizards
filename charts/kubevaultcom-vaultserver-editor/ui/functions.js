@@ -1647,6 +1647,11 @@ function isWriteCheckEnabled({model, getValue, watchDependency}) {
   return !isEnabled;
 }
 
+function isValueExistInModel({ model, getValue }, path) {
+  const modelValue = getValue(model, path);
+  return !!modelValue;
+}
+
 return {
 	fetchJsons,
 	disableLableChecker,
@@ -1736,5 +1741,6 @@ return {
 	setConfiguration,
   setConfigurationFiles,
   onSetCustomConfigChange,
-  isWriteCheckEnabled
+  isWriteCheckEnabled,
+  isValueExistInModel
 }
