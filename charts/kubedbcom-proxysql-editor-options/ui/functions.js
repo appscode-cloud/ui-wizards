@@ -350,6 +350,45 @@ async function getProxysqlVersions(
   return filteredProxysqlVersions;
 }
 
+async function getAppBindings({ axios, storeGet }) {
+  const owner = storeGet("/route/params/user");
+  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+
+  const queryParams = {
+    filter: {
+      items: {
+        metadata: { name: null },
+        spec: { type: null },
+      },
+    },
+  };
+
+  try {
+    const resp = await axios.get(
+      `/clusters/${owner}/${cluster}/proxy/appcatalog.appscode.com/v1alpha1/appbindings`,
+      {
+        params: queryParams,
+      }
+    );
+
+    const resources = (resp && resp.data && resp.data.items) || [];
+
+    const fileredResources = resources
+      .filter((item) => item.spec?.type === 'kubedb.com/mysql' || item.spec?.type === 'kubedb.com/mariadb')
+      .map((item) => {
+        const name = (item.metadata && item.metadata.name) || "";
+        return {
+          text: name,
+          value: name,
+        };
+      });
+    return fileredResources;
+  } catch (e) {
+    console.log(e);
+    return [];
+  }
+}
+
 function onCreateAuthSecretChange({
   discriminator,
   getValue,
@@ -504,6 +543,7 @@ return {
 	getResources,
 	getStorageClassNames,
   getProxysqlVersions,
+  getAppBindings,
   onCreateAuthSecretChange,
 	getSecrets,
 	disableLimit,

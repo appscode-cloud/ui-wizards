@@ -88,6 +88,12 @@ en:
     cpu: CPU
     create_opsrequest: Create OpsRequest
     custom_config: Select Custom Config Type
+    customConfig:
+      adminVariables: Admin Variables
+      mysqlQueryRules: MySQL Query Rules
+      mysqlUsers: MySQL Users
+      mysqlVariables: MySQL Variables
+      value: Value
     customize_config_server_pod_template: Customize Config Server Pod Template
     customize_exporter: Customize Exporter Sidecar
     customize_mongos_pod_template: Customize Mongos Pod Template
@@ -98,7 +104,6 @@ en:
       name: Database Name
       secret: Database Secret
       version: Database Version
-    disableWriteCheck_question: Disable Write Check?
     dns_name: DNS Name
     dns_names: DNS Names
     duration: Duration
@@ -119,10 +124,36 @@ en:
     fs_group: Fs Group
     group_mode: Group Mode
     group_name: Group Name
+    healthChecker:
+      disableWriteCheck_question: Disable Write Check?
+      failureThreshold: Failure Threshold
+      periodSeconds: Period Seconds
+      timeoutSeconds: Timeout Seconds
     health_check_node_port: Health Check Node Port
     heartbeatTick: Heartbeat Tick
     honor_labels: Honor labels
     image_pull_secrets: Image Pull Secrets
+    initConfig:
+      active: Active
+      adminVariables: Admin Variables
+      attributes: Attributes
+      backend: Backend
+      comment: Comment
+      default_hostgroup: Default Hostgroup
+      default_schema: Default Schema
+      fast_forward: Fast Forward
+      frontend: Frontend
+      max_connections: Max Connections
+      mysqlQueryRule: MySQL Query Rule
+      mysqlQueryRules: MySQL Query Rules
+      mysqlUser: MySQL User
+      mysqlUsers: MySQL Users
+      mysqlVariables: MySQL Variables
+      rules: Rules
+      schema_locked: Schema Locked
+      transaction_persistent: Transaction Persistent
+      use_ssl: Use SSL
+      username: Username          
     initialization: Pre-populate your ProxySQL from backup/another database
     interval: Interval
     ip_address: IP Address
@@ -151,7 +182,7 @@ en:
     mode: Mode
     mongos: Mongos
     mongosNodes: Mongos Nodes
-    my_config_cnf: my-config.cnf
+    md_config_cnf: md-config.cnf
     name: Name
     namespace: Namespace
     new_secret_password: New Database Secret
@@ -276,6 +307,7 @@ en:
       class: Storage Class
       size: Storage Size
     subject: Subject
+    sync_users_question: Sync Users?
     terminalPolicy: Terminal Policy
     terminationPolicy: Termination Policy
     timeout_seconds: Timeout Seconds
@@ -283,6 +315,7 @@ en:
     toleration_seconds: Toleration in seconds
     tolerations: Tolerations
     topology: Topology
+    topologyMode: Topology Mode
     to_update_config: To update this section click on Create OpsRequest
     to_update_replicas: To update replicas click on Create OpsRequest
     to_update_tls: To update this section click on Create OpsRequest
@@ -354,12 +387,9 @@ en:
         text: Stash Backup
     database:
       mode:
-        GroupReplication:
-          description: GroupReplication for fault-tolerant replication topologies
-          label: GroupReplication
-        InnoDBCluster:
-          description: InnoDBCluster for high availability.
-          label: InnoDBCluster
+        Cluster:
+          description: ProxySQL ReplicaSet for high availability.
+          label: Cluster
         Standalone:
           description: Single node ProxySQL without high availability and sharding.
           label: Standalone
@@ -405,12 +435,12 @@ en:
         text: 'Yes'
   steps:
     - label: Basic Information
+    - label: Alert
     - label: Configure Cluster
     - label: TLS Configuration
-    - label: Initialization
-    - label: Backup
+    - label: Health Checker
+    - label: Init Config
     - label: Monitoring
     - label: Pod Template
     - label: Networking
-    - label: Custom Config
-    - label: Health Checker
+    - label: Custom Config   

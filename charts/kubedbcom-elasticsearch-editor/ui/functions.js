@@ -1075,7 +1075,7 @@ function onInternalUsersChange({ discriminator, getValue, commit }) {
   }
 }
 
-function setInternalUsers({ model, getValue, watchDependency }) {
+function setInternalUsers({ model, getValue, watchDependency, setDiscriminatorValue }) {
   watchDependency("model#/resources/kubedbComElasticsearch/spec/internalUsers");
   const internalUsers = getValue(
     model,
@@ -1100,6 +1100,8 @@ function setInternalUsers({ model, getValue, watchDependency }) {
     }
     users.push(internalUsers[item]);
   }
+
+  setDiscriminatorValue('/internalUsers', users)
 
   return users;
 }
@@ -1189,7 +1191,7 @@ function onRolesMappingChange({ discriminator, getValue, commit }) {
   }
 }
 
-function setRolesMapping({ model, getValue, watchDependency }) {
+function setRolesMapping({ model, getValue, watchDependency, setDiscriminatorValue }) {
   watchDependency("model#/resources/kubedbComElasticsearch/spec/rolesMapping");
   const rolesMapping = getValue(
     model,
@@ -1202,6 +1204,8 @@ function setRolesMapping({ model, getValue, watchDependency }) {
     rolesMapping[item].roleName = item;
     roles.push(rolesMapping[item]);
   }
+
+  setDiscriminatorValue('/rolesMapping', roles)
 
   return roles;
 }
@@ -2653,7 +2657,7 @@ function setConfigurationSource({ model, getValue }) {
   return "use-existing-config";
 }
 
-function setConfigFiles({ model, getValue, watchDependency }) {
+function setConfigFiles({ model, getValue, watchDependency, setDiscriminatorValue }) {
   watchDependency("model#/resources/secret_user_config/stringData");
   const configFiles = getValue(
     model,
@@ -2668,6 +2672,8 @@ function setConfigFiles({ model, getValue, watchDependency }) {
     obj.value = configFiles[item];
     files.push(obj);
   }
+
+  setDiscriminatorValue('/configFiles', files)
 
   return files;
 }
@@ -2752,7 +2758,7 @@ function setSecretConfigurationSource({ model, getValue }) {
   return "use-existing-config";
 }
 
-function setSecretConfigFiles({ model, getValue, watchDependency }) {
+function setSecretConfigFiles({ model, getValue, watchDependency, setDiscriminatorValue }) {
   watchDependency("model#/resources/secret_secure_config/stringData");
   const configFiles = getValue(
     model,
@@ -2767,6 +2773,8 @@ function setSecretConfigFiles({ model, getValue, watchDependency }) {
     obj.value = configFiles[item];
     files.push(obj);
   }
+
+  setDiscriminatorValue('/configFiles', files)
 
   return files;
 }
