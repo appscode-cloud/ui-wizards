@@ -1637,16 +1637,6 @@ function onSetCustomConfigChange({ discriminator, getValue, commit }) {
   }
 }
 
-//********************************************* Health checker      ******************************/
-
-function isWriteCheckEnabled({model, getValue, watchDependency}) {
-  watchDependency('model#/resources/kubevaultComVaultServer/spec/healthChecker/disableWriteCheck')
-  
-  const isEnabled = getValue(model, '/resources/kubevaultComVaultServer/spec/healthChecker/disableWriteCheck')
-
-  return !isEnabled;
-}
-
 function isValueExistInModel({ model, getValue }, path) {
   const modelValue = getValue(model, path);
   return !!modelValue;
@@ -1741,6 +1731,5 @@ return {
 	setConfiguration,
   setConfigurationFiles,
   onSetCustomConfigChange,
-  isWriteCheckEnabled,
   isValueExistInModel
 }

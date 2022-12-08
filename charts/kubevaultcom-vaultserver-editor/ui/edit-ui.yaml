@@ -1429,29 +1429,14 @@ steps:
   title: steps.2.label
 - form:
     elements:
-    - label:
-        text: labels.healthChecker.disableWriteCheck_question
+    - alias: reusable_health_checker
+      chart:
+        name: uibytebuildersdev-component-health-checker
+        version: v0.4.14
+      moduleResolver: fetchJsons
       schema:
-        $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/healthChecker/properties/disableWriteCheck
-      type: switch
-    - if: isWriteCheckEnabled
-      label:
-        text: labels.healthChecker.failureThreshold
-      schema:
-        $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/healthChecker/properties/failureThreshold
-      type: input
-    - if: isWriteCheckEnabled
-      label:
-        text: labels.healthChecker.periodSeconds
-      schema:
-        $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/healthChecker/properties/periodSeconds
-      type: input
-    - if: isWriteCheckEnabled
-      label:
-        text: labels.healthChecker.timeoutSeconds
-      schema:
-        $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/healthChecker/properties/timeoutSeconds
-      type: input
+        $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/healthChecker
+      type: reusable-element
     type: single-step-form
   id: health-checker
   title: steps.14.label
