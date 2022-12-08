@@ -758,8 +758,7 @@ steps:
           schema:
             $ref: schema#/properties/resources/properties/kubedbComProxySQL/properties/spec/properties/configSecret/properties/name
           type: select
-        - if: isEqualToDiscriminatorPath|create-new-config|/configurationSource
-          elements:
+        - elements:
           - discriminator:
               AdminVariables:
                 type: string
@@ -770,9 +769,9 @@ steps:
               schema:
                 $ref: discriminator#/properties/AdminVariables
               type: editor
+            hideForm: true
             label:
               text: labels.customConfig.adminVariables
-            hideForm: true
             show_label: true
             type: single-step-form
           - discriminator:
@@ -785,9 +784,9 @@ steps:
               schema:
                 $ref: discriminator#/properties/MysqlVariables
               type: editor
+            hideForm: true
             label:
               text: labels.customConfig.mysqlVariables
-            hideForm: true
             show_label: true
             type: single-step-form
           - discriminator:
@@ -800,9 +799,9 @@ steps:
               schema:
                 $ref: discriminator#/properties/MySQLQueryRules
               type: editor
+            hideForm: true
             label:
               text: labels.customConfig.mysqlQueryRules
-            hideForm: true
             show_label: true
             type: single-step-form
           - discriminator:
@@ -815,11 +814,12 @@ steps:
               schema:
                 $ref: discriminator#/properties/MySQLUsers
               type: editor
+            hideForm: true
             label:
               text: labels.customConfig.mysqlUsers
-            hideForm: true
             show_label: true
             type: single-step-form
+          if: isEqualToDiscriminatorPath|create-new-config|/configurationSource
           type: single-step-form
         if: isEqualToDiscriminatorPath|yes|/setCustomConfig
         type: single-step-form
