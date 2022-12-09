@@ -1971,10 +1971,12 @@ function getOpsRequestUrl({ storeGet, model, getValue, mode }, reqType) {
   const resource = getValue(model, "/metadata/resource/name");
   const version = getValue(model, "/metadata/resource/version");
   const routeRootPath = storeGet("/route/path");
-  const pathPrefix = `${domain}${routeRootPath}${routeRootPath.split("/").pop() !== 'operations' ? '/operations' : ''}`;
+  const pathPrefix = `${domain}${routeRootPath}`;
 
-  if(mode === 'standalone-step') return `${pathPrefix}?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=${reqType}&showOpsRequestModal=true`;
-  else return `${domain}/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/postgresopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=VerticalScaling`;
+  if (mode === "standalone-step")
+    return `${pathPrefix}?namespace=${namespace}&applyAction=create-opsrequest-${reqType.toLowerCase()}`;
+  else
+    return `${domain}/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/postgresopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=VerticalScaling`;
 }
 
 return {
