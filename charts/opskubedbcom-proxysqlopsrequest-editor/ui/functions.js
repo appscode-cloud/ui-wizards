@@ -276,6 +276,7 @@ function showAndInitOpsRequestType({ route, commit }) {
     volumeexpansion: "VolumeExpansion",
     restart: "Restart",
     reconfiguretls: "ReconfigureTLS",
+    reconfigure: "Reconfigure",
   };
   if (ver) {
     const operation = route.query.operation;
@@ -694,7 +695,7 @@ function onDbChange({ commit }) {
   commit("wizard/model$delete", "/spec/type");
 }
 
- /**************************************** MySQL Query Rules *******************************/
+/**************************************** MySQL Query Rules *******************************/
 
 function onMySQLRulesChange({ discriminator, getValue, commit }) {
   const rules = getValue(discriminator, "/mysqlQueryRules");
@@ -722,15 +723,19 @@ function onMySQLUserReqTypeChange({ model, getValue, commit }) {
   const reqType = getValue(model, "/spec/configuration/mysqlUsers/reqType");
 
   if (reqType === "delete") {
-    const users = getValue(model, '/spec/configuration/mysqlUsers/users') || [];
+    const users = getValue(model, "/spec/configuration/mysqlUsers/users") || [];
     const mappedUsers = users.map((item) => {
       return {
-        username: item.username
+        username: item.username,
       };
-    })
+    });
 
-    if(mappedUsers && mappedUsers.length) {
-      commit("wizard/model$update", { path: "/spec/configuration/mysqlUsers/users", value: mappedUsers, force: true });
+    if (mappedUsers && mappedUsers.length) {
+      commit("wizard/model$update", {
+        path: "/spec/configuration/mysqlUsers/users",
+        value: mappedUsers,
+        force: true,
+      });
     }
   }
 }
@@ -738,15 +743,14 @@ function onMySQLUserReqTypeChange({ model, getValue, commit }) {
 function showUserCreationField({ model, getValue, watchDependency }) {
   watchDependency("model#/spec/configuration/mysqlUsers/reqType");
   const reqType = getValue(model, "/spec/configuration/mysqlUsers/reqType");
-  return !reqType || reqType === 'update' || reqType === 'add';
+  return !reqType || reqType === "update" || reqType === "add";
 }
 
 function showUserDeletionField({ model, getValue, watchDependency }) {
   watchDependency("model#/spec/configuration/mysqlUsers/reqType");
   const reqType = getValue(model, "/spec/configuration/mysqlUsers/reqType");
-  return reqType === 'delete';
+  return reqType === "delete";
 }
-
 
 return {
   fetchJsons,
@@ -797,5 +801,5 @@ return {
   onMySQLRulesChange,
   onMySQLUserReqTypeChange,
   showUserCreationField,
-  showUserDeletionField
+  showUserDeletionField,
 };
