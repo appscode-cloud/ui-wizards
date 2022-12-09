@@ -241,21 +241,6 @@ function initDatabaseRef({ route, watchDependency }) {
   return name;
 }
 
-function clearOpsReqSpec(verd, opsReqType, commit) {
-  if (
-    opsReqType === "verticalScaling" ||
-    opsReqType === "horizontalScaling" ||
-    opsReqType === "volumeExpansion" ||
-    opsReqType === "configuration"
-  ) {
-    if (verd === "combined") {
-      commit("wizard/model$delete", `/spec/${opsReqType}/topology`);
-    } else {
-      commit("wizard/model$delete", `/spec/${opsReqType}/node`);
-    }
-  }
-}
-
 function asDatabaseOperation(route) {
   return !!route.query.operation;
 }
@@ -335,7 +320,6 @@ function ifDbTypeEqualsTo(
     watchDependency,
   });
 
-  clearOpsReqSpec(verd, opsReqType, commit);
   return value === verd;
 }
 
@@ -763,7 +747,6 @@ return {
   getDbType,
   initNamespace,
   initDatabaseRef,
-  clearOpsReqSpec,
 
   showAndInitName,
   showAndInitNamespace,
