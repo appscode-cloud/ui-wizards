@@ -276,6 +276,7 @@ function showAndInitOpsRequestType({ route, commit }) {
     volumeexpansion: "VolumeExpansion",
     restart: "Restart",
     reconfiguretls: "ReconfigureTLS",
+    reconfigure: "Reconfigure",
   };
   if (ver) {
     const operation = route.query.operation;
