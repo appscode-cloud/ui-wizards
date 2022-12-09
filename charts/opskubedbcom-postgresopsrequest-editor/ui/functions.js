@@ -237,21 +237,6 @@ function initDatabaseRef({ route, watchDependency }) {
   return name;
 }
 
-function clearOpsReqSpec(verd, opsReqType, commit) {
-  if (
-    opsReqType === "verticalScaling" ||
-    opsReqType === "horizontalScaling" ||
-    opsReqType === "volumeExpansion" ||
-    opsReqType === "configuration"
-  ) {
-    if (verd === "standalone") {
-      commit("wizard/model$delete", `/spec/${opsReqType}/cluster`);
-    } else {
-      commit("wizard/model$delete", `/spec/${opsReqType}/standalone`);
-    }
-  }
-}
-
 function asDatabaseOperation(route) {
   return !!route.query.operation;
 }
@@ -304,6 +289,7 @@ function showAndInitOpsRequestType({ route, commit }) {
     volumeexpansion: "VolumeExpansion",
     restart: "Restart",
     reconfiguretls: "ReconfigureTLS",
+    reconfigure: "Reconfigure",
   };
   if (ver) {
     const operation = route.query.operation;
@@ -331,7 +317,6 @@ function ifDbTypeEqualsTo(
     watchDependency,
   });
 
-  clearOpsReqSpec(verd, opsReqType, commit);
   return value === verd;
 }
 
@@ -785,7 +770,6 @@ return {
   disableOpsRequest,
   initNamespace,
   initDatabaseRef,
-  clearOpsReqSpec,
 
   showAndInitName,
   showAndInitNamespace,
