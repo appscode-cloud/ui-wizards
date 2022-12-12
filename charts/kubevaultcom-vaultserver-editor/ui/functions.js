@@ -1775,7 +1775,7 @@ function initPrePopulateDatabase({ getValue, model }) {
     "/resources/stashAppscodeComRestoreSession_init"
   );
 
-  return !stashAppscodeComRestoreSession_init ? "yes" : "no";
+  return stashAppscodeComRestoreSession_init ? "yes" : "no";
 }
 
 function onPrePopulateDatabaseChange({
@@ -1890,8 +1890,7 @@ function initScheduleBackupForEdit({ getValue, model }) {
     "/resources/stashAppscodeComBackupConfiguration"
   );
 
-  if (stashAppscodeComBackupConfiguration) return "yes";
-  else return "no";
+  return stashAppscodeComBackupConfiguration ? "yes" : "no";
 }
 
 function onScheduleBackupChange({

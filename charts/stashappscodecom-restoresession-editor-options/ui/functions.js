@@ -167,7 +167,7 @@ async function fetchDatabases({
                 apiVersion: null,
                 kind: null,
                 metadata: { name: null, namespace: null },
-                spec: { type: null },
+                spec: { type: null, appRef: { apiGroup: null } },
               },
             },
           },
@@ -178,8 +178,8 @@ async function fetchDatabases({
 
       const mappedResources = resources
         .filter((item) => {
-          const type = (item.spec && item.spec.type) || "";
-          return type.startsWith("kubedb.com");
+          const appRef = (item.spec?.appRef?.apiGroup) || "";
+          return appRef === "kubedb.com" || appRef === "kubevault.com";
         })
         .map((item) => {
           const apiVersion = item.apiVersion || "";

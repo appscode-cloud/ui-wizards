@@ -1060,6 +1060,224 @@ steps:
   id: unsealer
   title: steps.11.label
 - form:
+    discriminator:
+      prePopulateDatabase:
+        type: string
+    elements:
+    - computed: returnStringYes
+      label:
+        text: labels.prePopulateDatabase
+      onChange: onPrePopulateDatabaseChange
+      options:
+      - text: options.yesOrNo.yes.text
+        value: "yes"
+      - text: options.yesOrNo.no.text
+        value: "no"
+      schema:
+        $ref: discriminator#/properties/prePopulateDatabase
+      type: radio
+    - elements:
+      - label:
+          text: labels.repositories.title
+        type: label-element
+      - add_new_button:
+          label: labels.repository.create
+          target: _blank
+          url:
+            params:
+              cluster:
+                $ref: store#/route/params/cluster
+              namespace:
+                $ref: model#/metadata/release/namespace
+              user:
+                $ref: store#/route/params/user
+            path: /${user}/kubernetes/${cluster}/stash.appscode.com/v1alpha1/repositories/create?namespace=${namespace}
+        fetch: resourceNames|stash.appscode.com|v1alpha1|repositories
+        label:
+          text: labels.repositories.name
+        refresh: true
+        schema:
+          $ref: schema#/properties/resources/properties/stashAppscodeComRestoreSession_init/properties/spec/properties/repository/properties/name
+        type: select
+      - label:
+          text: labels.restoreSession.snapshot
+        schema:
+          $ref: schema#/properties/resources/properties/stashAppscodeComRestoreSession_init/properties/spec/properties/rules/properties/0/properties/snapshots/properties/0
+        type: input
+      - if: returnFalse
+        label:
+          text: labels.backupConfiguration.targetReference.name
+        schema:
+          $ref: schema#/properties/resources/properties/stashAppscodeComRestoreSession_init/properties/spec/properties/target/properties/ref/properties/name
+        type: input
+      - discriminator:
+          customizeRestoreJobRuntimeSettings:
+            type: string
+        elements:
+        - computed: initCustomizeRestoreJobRuntimeSettings
+          label:
+            isSubsection: true
+            text: labels.runtimeSettings.choise
+          onChange: onCustomizeRestoreJobRuntimeSettingsChange
+          options:
+          - text: options.yesOrNo.yes.text
+            value: "yes"
+          - text: options.yesOrNo.no.text
+            value: "no"
+          schema:
+            $ref: discriminator#/properties/customizeRestoreJobRuntimeSettings
+          type: radio
+        - alias: runtime_settings_init
+          chart:
+            name: uibytebuildersdev-component-database-runtime-settings
+            version: v0.4.12
+          dataContext:
+            namespace:
+              $ref: schema#/properties/metadata/properties/release/properties/namespace
+          if: showRuntimeForm|yes
+          moduleResolver: fetchJsons
+          schema:
+            $ref: schema#/properties/resources/properties/stashAppscodeComRestoreSession_init/properties/spec/properties/runtimeSettings
+          type: reusable-element
+        type: single-step-form
+      if: showInitializationForm
+      type: single-step-form
+    type: single-step-form
+  id: initialization
+  title: steps.3.label
+- form:
+    discriminator:
+      scheduleBackup:
+        type: string
+    elements:
+    - computed: returnStringYes
+      label:
+        text: labels.backup.title
+      onChange: onScheduleBackupChange
+      options:
+      - text: options.yesOrNo.yes.text
+        value: "yes"
+      - text: options.yesOrNo.no.text
+        value: "no"
+      schema:
+        $ref: discriminator#/properties/scheduleBackup
+      type: radio
+    - elements:
+      - label:
+          isSubsection: true
+          text: labels.repositories.title
+        type: label-element
+      - add_new_button:
+          label: labels.repository.create
+          target: _blank
+          url:
+            params:
+              cluster:
+                $ref: store#/route/params/cluster
+              namespace:
+                $ref: model#/metadata/release/namespace
+              user:
+                $ref: store#/route/params/user
+            path: /${user}/kubernetes/${cluster}/stash.appscode.com/v1alpha1/repositories/create?namespace=${namespace}
+        fetch: resourceNames|stash.appscode.com|v1alpha1|repositories
+        label:
+          text: labels.repositories.title
+        refresh: true
+        schema:
+          $ref: schema#/properties/resources/properties/stashAppscodeComBackupConfiguration/properties/spec/properties/repository/properties/name
+        type: select
+      - if: returnFalse
+        label:
+          text: labels.backupConfiguration.targetReference.name
+        schema:
+          $ref: schema#/properties/resources/properties/stashAppscodeComBackupConfiguration/properties/spec/properties/target/properties/ref/properties/name
+        type: input
+      - label:
+          text: labels.backupConfiguration.schedule
+        schema:
+          $ref: schema#/properties/resources/properties/stashAppscodeComBackupConfiguration/properties/spec/properties/schedule
+        type: input
+      - label:
+          isSubsection: true
+          text: labels.backupConfiguration.retentionPolicy.title
+        type: label-element
+      - label:
+          text: labels.backupConfiguration.retentionPolicy.name
+        schema:
+          $ref: schema#/properties/resources/properties/stashAppscodeComBackupConfiguration/properties/spec/properties/retentionPolicy/properties/name
+        type: input
+      - label:
+          text: labels.backupConfiguration.retentionPolicy.keepLast
+        schema:
+          $ref: schema#/properties/resources/properties/stashAppscodeComBackupConfiguration/properties/spec/properties/retentionPolicy/properties/keepLast
+        type: input
+      - label:
+          text: labels.backupConfiguration.retentionPolicy.keepHourly
+        schema:
+          $ref: schema#/properties/resources/properties/stashAppscodeComBackupConfiguration/properties/spec/properties/retentionPolicy/properties/keepHourly
+        type: input
+      - label:
+          text: labels.backupConfiguration.retentionPolicy.keepDaily
+        schema:
+          $ref: schema#/properties/resources/properties/stashAppscodeComBackupConfiguration/properties/spec/properties/retentionPolicy/properties/keepDaily
+        type: input
+      - label:
+          text: labels.backupConfiguration.retentionPolicy.keepWeekly
+        schema:
+          $ref: schema#/properties/resources/properties/stashAppscodeComBackupConfiguration/properties/spec/properties/retentionPolicy/properties/keepWeekly
+        type: input
+      - label:
+          text: labels.backupConfiguration.retentionPolicy.keepMonthly
+        schema:
+          $ref: schema#/properties/resources/properties/stashAppscodeComBackupConfiguration/properties/spec/properties/retentionPolicy/properties/keepMonthly
+        type: input
+      - label:
+          text: labels.backupConfiguration.retentionPolicy.keepYearly
+        schema:
+          $ref: schema#/properties/resources/properties/stashAppscodeComBackupConfiguration/properties/spec/properties/retentionPolicy/properties/keepYearly
+        type: input
+      - if: returnFalse
+        label:
+          text: labels.backupConfiguration.retentionPolicy.prune
+        schema:
+          $ref: schema#/properties/resources/properties/stashAppscodeComBackupConfiguration/properties/spec/properties/retentionPolicy/properties/prune
+        type: switch
+      - discriminator:
+          customizeRestoreJobRuntimeSettings:
+            type: string
+        elements:
+        - computed: initCustomizeRestoreJobRuntimeSettingsForBackup
+          label:
+            isSubsection: true
+            text: labels.runtimeSettings.choiseForBackup
+          onChange: onCustomizeRestoreJobRuntimeSettingsChangeForBackup
+          options:
+          - text: options.yesOrNo.yes.text
+            value: "yes"
+          - text: options.yesOrNo.no.text
+            value: "no"
+          schema:
+            $ref: discriminator#/properties/customizeRestoreJobRuntimeSettings
+          type: radio
+        - alias: runtime_settings_backup
+          chart:
+            name: uibytebuildersdev-component-database-runtime-settings
+            version: v0.4.12
+          dataContext:
+            namespace:
+              $ref: schema#/properties/metadata/properties/release/properties/namespace
+          if: showRuntimeForm|yes
+          moduleResolver: fetchJsons
+          schema:
+            $ref: schema#/properties/resources/properties/stashAppscodeComBackupConfiguration/properties/spec/properties/runtimeSettings
+          type: reusable-element
+        type: single-step-form
+      if: showBackupForm
+      type: single-step-form
+    type: single-step-form
+  id: backupconfiguration
+  title: steps.4.label
+- form:
     elements:
     - label:
         text: labels.allowedSecretEngines.secretEngines
