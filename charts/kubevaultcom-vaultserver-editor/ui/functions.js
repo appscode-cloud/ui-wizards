@@ -289,8 +289,17 @@ function returnTrue() {
   return true;
 }
 
+function returnFalse() {
+  return false;
+}
+
 function returnStringYes() {
   return "yes";
+}
+
+function valueExists(value, getValue, path) {
+  const val = getValue(value, path);
+  return !!val;
 }
 
 // ************************* Basic Info **********************************************
@@ -403,6 +412,104 @@ async function getVaultServerVersions(
   } catch (e) {
     console.log(e);
     return [];
+  }
+}
+
+function onNamespaceChange({ commit, model, getValue }) {
+  const namespace = getValue(model, "/metadata/release/namespace");
+  const agent = getValue(
+    model,
+    "/resources/kubedbComPostgres/spec/monitor/agent"
+  );
+  if (agent === "prometheus.io") {
+    commit("wizard/model$update", {
+      path:
+        "/resources/monitoringCoreosComServiceMonitor/spec/namespaceSelector/matchNames",
+      value: [namespace],
+      force: true,
+    });
+  }
+}
+
+function onLabelChange({ commit, model, getValue }) {
+  const labels = getValue(
+    model,
+    "/resources/kubedbComPostgres/spec/metadata/labels"
+  );
+
+  const agent = getValue(
+    model,
+    "/resources/kubedbComPostgres/spec/monitor/agent"
+  );
+
+  if (agent === "prometheus.io") {
+    commit("wizard/model$update", {
+      path:
+        "/resources/monitoringCoreosComServiceMonitor/spec/selector/matchLabels",
+      value: labels,
+      force: true,
+    });
+  }
+}
+
+function onNameChange({ commit, model, getValue }) {
+  const dbName = getValue(model, "/metadata/release/name");
+
+  const agent = getValue(
+    model,
+    "/resources/kubedbComPostgres/spec/monitor/agent"
+  );
+
+  const labels = getValue(
+    model,
+    "/resources/kubedbComPostgres/spec/metadata/labels"
+  );
+
+  if (agent === "prometheus.io") {
+    commit("wizard/model$update", {
+      path:
+        "/resources/monitoringCoreosComServiceMonitor/spec/selector/matchLabels",
+      value: labels,
+      force: true,
+    });
+  }
+
+  const scheduleBackup = getValue(
+    model,
+    "/resources/stashAppscodeComBackupConfiguration"
+  );
+
+  if (scheduleBackup) {
+    commit("wizard/model$update", {
+      path:
+        "/resources/stashAppscodeComBackupConfiguration/spec/target/ref/name",
+      value: dbName,
+      force: true,
+    });
+  }
+
+  const prePopulateDatabase = getValue(
+    model,
+    "/resources/stashAppscodeComRestoreSession_init"
+  );
+
+  if (prePopulateDatabase) {
+    commit("wizard/model$update", {
+      path:
+        "/resources/stashAppscodeComRestoreSession_init/spec/target/ref/name",
+      value: dbName,
+      force: true,
+    });
+  }
+
+  // to reset configSecret name field
+  const hasSecretConfig = getValue(model, "/resources/secret_config");
+  if (hasSecretConfig) {
+    commit("wizard/model$update", {
+      path: "/resources/kubedbComPostgres/spec/configSecret/name",
+      value: `${dbName}-config`,
+      force: true,
+    });
   }
 }
 
@@ -1537,8 +1644,26 @@ function onCustomizeExporterChange({ discriminator, getValue, commit }) {
   }
 }
 
-function returnFalse() {
-  return false;
+function onAgentChange({ commit, model, getValue }) {
+  const agent = getValue(
+    model,
+    "/resources/kubedbComPostgres/spec/monitor/agent"
+  );
+  if (agent === "prometheus.io") {
+    commit("wizard/model$update", {
+      path: "/resources/monitoringCoreosComServiceMonitor/spec/endpoints",
+      value: [],
+      force: true,
+    });
+
+    onNamespaceChange({ commit, model, getValue });
+    onLabelChange({ commit, model, getValue });
+  } else {
+    commit(
+      "wizard/model$delete",
+      "/resources/monitoringCoreosComServiceMonitor"
+    );
+  }
 }
 
 //////////////////////////////////////// Service Monitor //////////////////////////////////////////////////////
@@ -1642,6 +1767,232 @@ function isValueExistInModel({ model, getValue }, path) {
   return !!modelValue;
 }
 
+// ********************************* Initialization & Backup *************************************
+
+function initPrePopulateDatabase({ getValue, model }) {
+  const stashAppscodeComRestoreSession_init = getValue(
+    model,
+    "/resources/stashAppscodeComRestoreSession_init"
+  );
+
+  return !stashAppscodeComRestoreSession_init ? "yes" : "no";
+}
+
+function onPrePopulateDatabaseChange({
+  commit,
+  getValue,
+  discriminator,
+  model,
+}) {
+  const prePopulateDatabase = getValue(discriminator, "/prePopulateDatabase");
+  if (prePopulateDatabase === "no") {
+    // delete related properties
+    commit(
+      "wizard/model$delete",
+      "/resources/stashAppscodeComRestoreSession_init"
+    );
+  } else {
+    const dbName = getValue(model, "/metadata/release/name");
+    // set stashAppscodeComRestoreSession_init if it doesn't exist
+    if (
+      !valueExists(
+        model,
+        getValue,
+        "/resources/stashAppscodeComRestoreSession_init"
+      )
+    ) {
+      commit("wizard/model$update", {
+        path: "/resources/stashAppscodeComRestoreSession_init/spec/rules",
+        value: [{
+          snapshots: ["latest"],
+        }],
+        force: true,
+      });
+
+      commit("wizard/model$update", {
+        path: "/resources/stashAppscodeComRestoreSession_init/spec/target",
+        value: {
+          ref: {
+            apiVersion: "appcatalog.appscode.com/v1alpha1",
+            kind: "AppBinding",
+            name: dbName,
+          },
+        },
+        force: true,
+      });
+    }
+  }
+}
+
+function showInitializationForm({ getValue, discriminator, watchDependency }) {
+  const prePopulateDatabase = getValue(discriminator, "/prePopulateDatabase");
+  watchDependency("discriminator#/prePopulateDatabase");
+  return prePopulateDatabase === "yes";
+}
+
+function initCustomizeRestoreJobRuntimeSettings({ getValue, model }) {
+  const runtimeSettings = getValue(
+    model,
+    "/resources/stashAppscodeComRestoreSession_init/spec/runtimeSettings"
+  );
+  if (runtimeSettings) return "yes";
+  else return "no";
+}
+
+function onCustomizeRestoreJobRuntimeSettingsChange({
+  commit,
+  getValue,
+  discriminator,
+  model,
+}) {
+  const customizeRestoreJobRuntimeSettings = getValue(
+    discriminator,
+    "/customizeRestoreJobRuntimeSettings"
+  );
+  if (customizeRestoreJobRuntimeSettings === "no") {
+    commit(
+      "wizard/model$delete",
+      "/resources/stashAppscodeComRestoreSession_init/spec/runtimeSettings"
+    );
+  } else if (customizeRestoreJobRuntimeSettings === "yes") {
+    if (
+      !valueExists(
+        model,
+        getValue,
+        "/resources/stashAppscodeComRestoreSession_init/spec/runtimeSettings"
+      )
+    ) {
+      // set new value
+      commit("wizard/model$update", {
+        path:
+          "/resources/stashAppscodeComRestoreSession_init/spec/runtimeSettings",
+        value: {},
+      });
+    }
+  }
+}
+
+function showRuntimeForm(
+  { discriminator, getValue, watchDependency },
+  value
+) {
+  const customizeRestoreJobRuntimeSettings = getValue(
+    discriminator,
+    "/customizeRestoreJobRuntimeSettings"
+  );
+  watchDependency("discriminator#/customizeRestoreJobRuntimeSettings");
+  return customizeRestoreJobRuntimeSettings === value;
+}
+
+function initScheduleBackupForEdit({ getValue, model }) {
+  const stashAppscodeComBackupConfiguration = getValue(
+    model,
+    "/resources/stashAppscodeComBackupConfiguration"
+  );
+
+  if (stashAppscodeComBackupConfiguration) return "yes";
+  else return "no";
+}
+
+function onScheduleBackupChange({
+  commit,
+  getValue,
+  discriminator,
+  model,
+}) {
+  const scheduleBackup = getValue(discriminator, "/scheduleBackup");
+
+  if (scheduleBackup === "no") {
+    // delete stashAppscodeComBackupConfiguration
+    commit(
+      "wizard/model$delete",
+      "/resources/stashAppscodeComBackupConfiguration"
+    );
+  } else {
+    // create stashAppscodeComBackupConfiguration and initialize it if not exists
+    const dbName = getValue(model, "/metadata/release/name");
+    if (
+      !valueExists(
+        model,
+        getValue,
+        "/resources/stashAppscodeComBackupConfiguration"
+      )
+    ) {
+      commit("wizard/model$update", {
+        path: "/resources/stashAppscodeComBackupConfiguration/spec",
+        value: {
+          retentionPolicy: {
+            keepLast: 5,
+            name: "keep-last-5",
+            prune: true,
+          },
+          schedule: "*/5 * * * *",
+          target: {
+            ref: {
+              apiVersion: "appcatalog.appscode.com/v1alpha1",
+              kind: "AppBinding",
+              name: dbName,
+            },
+          },
+        },
+        force: true
+      });
+    }
+  }
+}
+
+function showBackupForm({ getValue, discriminator, watchDependency }) {
+  const scheduleBackup = getValue(discriminator, "/scheduleBackup");
+  watchDependency("discriminator#/scheduleBackup");
+
+  return scheduleBackup === "yes";
+}
+
+function onCustomizeRestoreJobRuntimeSettingsChangeForBackup({
+  commit,
+  getValue,
+  discriminator,
+  model,
+}) {
+  const customizeRestoreJobRuntimeSettings = getValue(
+    discriminator,
+    "/customizeRestoreJobRuntimeSettings"
+  );
+  if (customizeRestoreJobRuntimeSettings === "no") {
+    commit(
+      "wizard/model$delete",
+      "/resources/stashAppscodeComBackupConfiguration/spec/runtimeSettings"
+    );
+  } else if (customizeRestoreJobRuntimeSettings === "yes") {
+    if (
+      !valueExists(
+        model,
+        getValue,
+        "/resources/stashAppscodeComBackupConfiguration/spec/runtimeSettings"
+      )
+    ) {
+      // set new value
+      commit("wizard/model$update", {
+        path:
+          "/resources/stashAppscodeComBackupConfiguration/spec/runtimeSettings",
+        value: {},
+        force: true,
+      });
+    }
+  }
+}
+
+function initCustomizeRestoreJobRuntimeSettingsForBackup({
+  getValue,
+  model,
+}) {
+  const runtimeSettings = getValue(
+    model,
+    "/resources/stashAppscodeComBackupConfiguration/spec/runtimeSettings"
+  );
+  return runtimeSettings ? "yes" : "no";
+}
+
 return {
 	fetchJsons,
 	disableLableChecker,
@@ -1731,5 +2082,23 @@ return {
 	setConfiguration,
   setConfigurationFiles,
   onSetCustomConfigChange,
-  isValueExistInModel
+  isValueExistInModel,
+  valueExists,
+  initPrePopulateDatabase,
+  onPrePopulateDatabaseChange,
+  onDataSourceChange,
+  initCustomizeRestoreJobRuntimeSettings,
+  initCustomizeRestoreJobRuntimeSettingsForBackup,
+  onCustomizeRestoreJobRuntimeSettingsChange,
+  onCustomizeRestoreJobRuntimeSettingsChangeForBackup,
+  showRuntimeForm,
+  showInitializationForm,
+  initScheduleBackupForEdit,
+  onScheduleBackupChange,
+  showBackupForm,
+  isValueExistInModel,
+  onNamespaceChange,
+  onLabelChange,
+  onNameChange,
+  onAgentChange,
 }
