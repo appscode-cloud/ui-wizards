@@ -367,7 +367,64 @@ function onNameChange({ commit, model, getValue, discriminator }) {
       force: true,
     })
   }
+
+  // update monitoring fields value which has name dependency 
+  const agent = getValue(
+    model,
+    "/resources/kubedbComPostgres/spec/monitor/agent"
+  );
+  const labels = getValue(
+    model,
+    "/resources/kubedbComPostgres/spec/metadata/labels"
+  );
+  if (agent === "prometheus.io") {
+    commit("wizard/model$update", {
+      path:
+        "/resources/monitoringCoreosComServiceMonitor/spec/selector/matchLabels",
+      value: labels,
+      force: true,
+    });
+  }
+
+  // update backup fields value which has name dependency
+  const scheduleBackup = getValue(
+    model,
+    "/resources/stashAppscodeComBackupConfiguration"
+  );
+  if (scheduleBackup) {
+    commit("wizard/model$update", {
+      path: "/resources/stashAppscodeComBackupConfiguration/spec/target",
+      value: {
+        ref: {
+          apiVersion: "appcatalog.appscode.com/v1alpha1",
+          kind: "AppBinding",
+          name: dbName,
+        },
+      },
+      force: true,
+    });
+  }
+
+  // update initialization fields value which has name dependency
+  const prePopulateDatabase = getValue(
+    model,
+    "/resources/stashAppscodeComRestoreSession_init"
+  );
+  if (prePopulateDatabase) {
+    commit("wizard/model$update", {
+      path: "/resources/stashAppscodeComRestoreSession_init/spec/target",
+      value: {
+        ref: {
+          apiVersion: "appcatalog.appscode.com/v1alpha1",
+          kind: "AppBinding",
+          name: dbName,
+        },
+      },
+      force: true,
+    });
+  }
 }
+
 async function getVaultServerVersions(
   { axios, storeGet },
   group,
@@ -447,67 +504,6 @@ function onLabelChange({ commit, model, getValue }) {
       path:
         "/resources/monitoringCoreosComServiceMonitor/spec/selector/matchLabels",
       value: labels,
-      force: true,
-    });
-  }
-}
-
-function onNameChange({ commit, model, getValue }) {
-  const dbName = getValue(model, "/metadata/release/name");
-
-  const agent = getValue(
-    model,
-    "/resources/kubedbComPostgres/spec/monitor/agent"
-  );
-
-  const labels = getValue(
-    model,
-    "/resources/kubedbComPostgres/spec/metadata/labels"
-  );
-
-  if (agent === "prometheus.io") {
-    commit("wizard/model$update", {
-      path:
-        "/resources/monitoringCoreosComServiceMonitor/spec/selector/matchLabels",
-      value: labels,
-      force: true,
-    });
-  }
-
-  const scheduleBackup = getValue(
-    model,
-    "/resources/stashAppscodeComBackupConfiguration"
-  );
-
-  if (scheduleBackup) {
-    commit("wizard/model$update", {
-      path:
-        "/resources/stashAppscodeComBackupConfiguration/spec/target/ref/name",
-      value: dbName,
-      force: true,
-    });
-  }
-
-  const prePopulateDatabase = getValue(
-    model,
-    "/resources/stashAppscodeComRestoreSession_init"
-  );
-
-  if (prePopulateDatabase) {
-    commit("wizard/model$update", {
-      path:
-        "/resources/stashAppscodeComRestoreSession_init/spec/target/ref/name",
-      value: dbName,
-      force: true,
-    });
-  }
-
-  // to reset configSecret name field
-  const hasSecretConfig = getValue(model, "/resources/secret_config");
-  if (hasSecretConfig) {
-    commit("wizard/model$update", {
-      path: "/resources/kubedbComPostgres/spec/configSecret/name",
-      value: `${dbName}-config`,
       force: true,
     });
   }
@@ -2098,6 +2094,5 @@ return {
   isValueExistInModel,
   onNamespaceChange,
   onLabelChange,
-  onNameChange,
   onAgentChange,
 }
