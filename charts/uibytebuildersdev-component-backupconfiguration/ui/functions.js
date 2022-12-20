@@ -127,7 +127,6 @@ function onScheduleBackupChange({
         "/spec"
       )
     ) {
-      console.log("sdss");
       commit("wizard/model$update", {
         path: "/spec",
         value: {
