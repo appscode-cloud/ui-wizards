@@ -125,7 +125,7 @@ function onAdditionalPodRuntimeSettingsSwitchChange({
 function setAdditionalPodRuntimeSettingsSwitch({model, getValue}) {
   const pod = getValue(model, '/pod')
 
-  const { nodeName, podAnnotations, nodeSelector, affinity, tolerations } = pod;
+  const { nodeName, podAnnotations, nodeSelector, affinity, tolerations } = pod || {};
 
   return !!(nodeName || podAnnotations || nodeSelector || affinity || tolerations);
 }

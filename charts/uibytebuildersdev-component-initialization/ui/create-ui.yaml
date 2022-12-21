@@ -1,0 +1,106 @@
+discriminator:
+  prePopulateDatabase:
+    type: string
+elements:
+- computed: initPrePopulateDatabase
+  label:
+    text: labels.prePopulateDatabase
+  onChange: onPrePopulateDatabaseChange
+  options:
+  - text: options.yesOrNo.yes.text
+    value: "yes"
+  - text: options.yesOrNo.no.text
+    value: "no"
+  schema:
+    $ref: discriminator#/properties/prePopulateDatabase
+  type: radio
+- discriminator:
+    snapshot:
+      type: string
+    customizeRestoreJobRuntimeSettings:
+      type: string
+  elements:
+  - label:
+      text: labels.repositories.title
+    type: label-element
+  - elements:
+    - add_new_button:
+        label: labels.repository.create
+        target: _blank
+        url:
+          params:
+            cluster:
+              $ref: store#/route/params/cluster
+            namespace:
+              $ref: model#/metadata/release/namespace
+            user:
+              $ref: store#/route/params/user
+          path: /${user}/kubernetes/${cluster}/stash.appscode.com/v1alpha1/repositories/create?namespace=${namespace}
+      fetch: resourceNames|stash.appscode.com|v1alpha1|repositories
+      label:
+        text: labels.repositories.name
+      refresh: true
+      schema:
+        $ref: schema#/properties/spec/properties/repository/properties/name
+      type: select
+    schema:
+      $ref: schema#/properties/spec/properties/repository
+    type: single-step-form
+  - computed: setSnapshot
+    label:
+      text: labels.restoreSession.snapshot
+    onChange: onSnapshotChange
+    schema:
+      $ref: discriminator#/properties/snapshot
+    type: input
+  # this single step form is required to keep rules value in model
+  - if: returnFalse
+    schema:
+      $ref: schema#/properties/spec/properties/rules
+    type: single-step-form
+  - elements:
+    - elements:
+      - if: returnFalse
+        label:
+          text: labels.backupConfiguration.targetReference.name
+        schema:
+          $ref: schema#/properties/spec/properties/target/properties/ref/properties/name
+        type: input
+      schema:
+        $ref: schema#/properties/spec/properties/target/properties/ref
+      type: single-step-form
+    schema:
+      $ref: schema#/properties/spec/properties/target
+    type: single-step-form
+  - computed: initCustomizeRestoreJobRuntimeSettings
+    label:
+      isSubsection: true
+      text: labels.runtimeSettings.choise
+    onChange: onCustomizeRestoreJobRuntimeSettingsChange
+    options:
+    - text: options.yesOrNo.yes.text
+      value: "yes"
+    - text: options.yesOrNo.no.text
+      value: "no"
+    schema:
+      $ref: discriminator#/properties/customizeRestoreJobRuntimeSettings
+    type: radio
+  - alias: runtime_settings_init
+    chart:
+      name: uibytebuildersdev-component-database-runtime-settings
+      version: v0.4.12
+    dataContext:
+      namespace:
+        $ref: data#/properties/namespace
+    if: showRuntimeForm|yes
+    moduleResolver: fetchJsons
+    schema:
+      $ref: schema#/properties/spec/properties/runtimeSettings
+    type: reusable-element
+  if: showInitializationForm
+  schema:
+    $ref: schema#/properties/spec
+  type: single-step-form
+schema:
+  $ref: schema#/
+type: single-step-form
