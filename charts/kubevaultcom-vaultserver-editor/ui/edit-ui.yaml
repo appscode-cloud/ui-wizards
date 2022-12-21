@@ -1060,6 +1060,54 @@ steps:
   id: unsealer
   title: steps.11.label
 - form:
+    discriminator:
+      prePopulateDatabase:
+        type: string
+    elements:
+    - alias: vaultserver-initialization
+      chart:
+        name: uibytebuildersdev-component-initialization
+        version: v0.4.14
+      dataContext:
+        namespace:
+          $ref: schema#/properties/metadata/properties/release/properties/namespace
+        name:
+          $ref: schema#/properties/metadata/properties/release/properties/name
+      functionCallbacks:
+        isEditWizard:
+          $ref: functions#/returnTrue
+      moduleResolver: fetchJsons
+      schema:
+        $ref: schema#/properties/resources/properties/stashAppscodeComRestoreSession_init
+      type: reusable-element
+    type: single-step-form
+  id: initialization
+  title: steps.3.label
+- form:
+    discriminator:
+      scheduleBackup:
+        type: string
+    elements:
+    - alias: vaultserver-backupconfiguration
+      chart:
+        name: uibytebuildersdev-component-backupconfiguration
+        version: v0.4.14
+      dataContext:
+        namespace:
+          $ref: schema#/properties/metadata/properties/release/properties/namespace
+        name:
+          $ref: schema#/properties/metadata/properties/release/properties/name
+      functionCallbacks:
+        isEditWizard:
+          $ref: functions#/returnTrue
+      moduleResolver: fetchJsons
+      schema:
+        $ref: schema#/properties/resources/properties/stashAppscodeComBackupConfiguration
+      type: reusable-element
+    type: single-step-form
+  id: backupconfiguration
+  title: steps.4.label
+- form:
     elements:
     - label:
         text: labels.allowedSecretEngines.secretEngines

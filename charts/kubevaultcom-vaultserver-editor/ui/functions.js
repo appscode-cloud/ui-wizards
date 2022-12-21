@@ -289,8 +289,17 @@ function returnTrue() {
   return true;
 }
 
+function returnFalse() {
+  return false;
+}
+
 function returnStringYes() {
   return "yes";
+}
+
+function valueExists(value, getValue, path) {
+  const val = getValue(value, path);
+  return !!val;
 }
 
 // ************************* Basic Info **********************************************
@@ -358,7 +367,64 @@ function onNameChange({ commit, model, getValue, discriminator }) {
       force: true,
     })
   }
+
+  // update monitoring fields value which has name dependency 
+  const agent = getValue(
+    model,
+    "/resources/kubedbComPostgres/spec/monitor/agent"
+  );
+  const labels = getValue(
+    model,
+    "/resources/kubedbComPostgres/spec/metadata/labels"
+  );
+  if (agent === "prometheus.io") {
+    commit("wizard/model$update", {
+      path:
+        "/resources/monitoringCoreosComServiceMonitor/spec/selector/matchLabels",
+      value: labels,
+      force: true,
+    });
+  }
+
+  // update backup fields value which has name dependency
+  const scheduleBackup = getValue(
+    model,
+    "/resources/stashAppscodeComBackupConfiguration"
+  );
+  if (scheduleBackup) {
+    commit("wizard/model$update", {
+      path: "/resources/stashAppscodeComBackupConfiguration/spec/target",
+      value: {
+        ref: {
+          apiVersion: "appcatalog.appscode.com/v1alpha1",
+          kind: "AppBinding",
+          name: dbName,
+        },
+      },
+      force: true,
+    });
+  }
+
+  // update initialization fields value which has name dependency
+  const prePopulateDatabase = getValue(
+    model,
+    "/resources/stashAppscodeComRestoreSession_init"
+  );
+  if (prePopulateDatabase) {
+    commit("wizard/model$update", {
+      path: "/resources/stashAppscodeComRestoreSession_init/spec/target",
+      value: {
+        ref: {
+          apiVersion: "appcatalog.appscode.com/v1alpha1",
+          kind: "AppBinding",
+          name: dbName,
+        },
+      },
+      force: true,
+    });
+  }
 }
+
 async function getVaultServerVersions(
   { axios, storeGet },
   group,
@@ -403,6 +469,43 @@ async function getVaultServerVersions(
   } catch (e) {
     console.log(e);
     return [];
+  }
+}
+
+function onNamespaceChange({ commit, model, getValue }) {
+  const namespace = getValue(model, "/metadata/release/namespace");
+  const agent = getValue(
+    model,
+    "/resources/kubedbComPostgres/spec/monitor/agent"
+  );
+  if (agent === "prometheus.io") {
+    commit("wizard/model$update", {
+      path:
+        "/resources/monitoringCoreosComServiceMonitor/spec/namespaceSelector/matchNames",
+      value: [namespace],
+      force: true,
+    });
+  }
+}
+
+function onLabelChange({ commit, model, getValue }) {
+  const labels = getValue(
+    model,
+    "/resources/kubedbComPostgres/spec/metadata/labels"
+  );
+
+  const agent = getValue(
+    model,
+    "/resources/kubedbComPostgres/spec/monitor/agent"
+  );
+
+  if (agent === "prometheus.io") {
+    commit("wizard/model$update", {
+      path:
+        "/resources/monitoringCoreosComServiceMonitor/spec/selector/matchLabels",
+      value: labels,
+      force: true,
+    });
   }
 }
 
@@ -1537,8 +1640,26 @@ function onCustomizeExporterChange({ discriminator, getValue, commit }) {
   }
 }
 
-function returnFalse() {
-  return false;
+function onAgentChange({ commit, model, getValue }) {
+  const agent = getValue(
+    model,
+    "/resources/kubedbComPostgres/spec/monitor/agent"
+  );
+  if (agent === "prometheus.io") {
+    commit("wizard/model$update", {
+      path: "/resources/monitoringCoreosComServiceMonitor/spec/endpoints",
+      value: [],
+      force: true,
+    });
+
+    onNamespaceChange({ commit, model, getValue });
+    onLabelChange({ commit, model, getValue });
+  } else {
+    commit(
+      "wizard/model$delete",
+      "/resources/monitoringCoreosComServiceMonitor"
+    );
+  }
 }
 
 //////////////////////////////////////// Service Monitor //////////////////////////////////////////////////////
@@ -1731,5 +1852,11 @@ return {
 	setConfiguration,
   setConfigurationFiles,
   onSetCustomConfigChange,
-  isValueExistInModel
+  isValueExistInModel,
+  valueExists,
+  onDataSourceChange,
+  isValueExistInModel,
+  onNamespaceChange,
+  onLabelChange,
+  onAgentChange,
 }

@@ -1,0 +1,147 @@
+discriminator:
+  scheduleBackup:
+    type: string
+elements:
+- computed: initScheduleBackup
+  label:
+    text: labels.backup.title
+  onChange: onScheduleBackupChange
+  options:
+  - text: options.yesOrNo.yes.text
+    value: "yes"
+  - text: options.yesOrNo.no.text
+    value: "no"
+  schema:
+    $ref: discriminator#/properties/scheduleBackup
+  type: radio
+- discriminator:
+    customizeRestoreJobRuntimeSettings:
+      type: string
+  elements:
+  - elements:
+    - label:
+        isSubsection: true
+        text: labels.repositories.title
+      type: label-element
+    - add_new_button:
+        label: labels.repository.create
+        target: _blank
+        url:
+          params:
+            cluster:
+              $ref: store#/route/params/cluster
+            namespace:
+              $ref: model#/metadata/release/namespace
+            user:
+              $ref: store#/route/params/user
+          path: /${user}/kubernetes/${cluster}/stash.appscode.com/v1alpha1/repositories/create?namespace=${namespace}
+      fetch: resourceNames|stash.appscode.com|v1alpha1|repositories
+      label:
+        text: labels.repositories.title
+      refresh: true
+      schema:
+        $ref: schema#/properties/spec/properties/repository/properties/name
+      type: select
+    schema:
+      $ref: schema#/properties/spec/properties/repository
+    type: single-step-form  
+  - elements:
+    - elements:
+      - if: returnFalse
+        label:
+          text: labels.backupConfiguration.targetReference.name
+        schema:
+          $ref: schema#/properties/spec/properties/target/properties/ref/properties/name
+        type: input
+      schema:
+        $ref: schema#/properties/spec/properties/target/properties/ref
+      type: single-step-form
+    schema:
+      $ref: schema#/properties/spec/properties/target
+    type: single-step-form
+  - label:
+      text: labels.backupConfiguration.schedule
+    schema:
+      $ref: schema#/properties/spec/properties/schedule
+    type: input
+  - elements:
+    - label:
+        isSubsection: true
+        text: labels.backupConfiguration.retentionPolicy.title
+      type: label-element
+    - label:
+        text: labels.backupConfiguration.retentionPolicy.name
+      schema:
+        $ref: schema#/properties/spec/properties/retentionPolicy/properties/name
+      type: input
+    - label:
+        text: labels.backupConfiguration.retentionPolicy.keepLast
+      schema:
+        $ref: schema#/properties/spec/properties/retentionPolicy/properties/keepLast
+      type: input
+    - label:
+        text: labels.backupConfiguration.retentionPolicy.keepHourly
+      schema:
+        $ref: schema#/properties/spec/properties/retentionPolicy/properties/keepHourly
+      type: input
+    - label:
+        text: labels.backupConfiguration.retentionPolicy.keepDaily
+      schema:
+        $ref: schema#/properties/spec/properties/retentionPolicy/properties/keepDaily
+      type: input
+    - label:
+        text: labels.backupConfiguration.retentionPolicy.keepWeekly
+      schema:
+        $ref: schema#/properties/spec/properties/retentionPolicy/properties/keepWeekly
+      type: input
+    - label:
+        text: labels.backupConfiguration.retentionPolicy.keepMonthly
+      schema:
+        $ref: schema#/properties/spec/properties/retentionPolicy/properties/keepMonthly
+      type: input
+    - label:
+        text: labels.backupConfiguration.retentionPolicy.keepYearly
+      schema:
+        $ref: schema#/properties/spec/properties/retentionPolicy/properties/keepYearly
+      type: input
+    - if: returnFalse
+      label:
+        text: labels.backupConfiguration.retentionPolicy.prune
+      schema:
+        $ref: schema#/properties/spec/properties/retentionPolicy/properties/prune
+      type: switch
+    schema:
+      $ref: schema#/properties/spec/properties/retentionPolicy
+    type: single-step-form
+  - computed: initCustomizeRestoreJobRuntimeSettings
+    label:
+      isSubsection: true
+      text: labels.runtimeSettings.choiseForBackup
+    onChange: onCustomizeRestoreJobRuntimeSettingsChange
+    options:
+    - text: options.yesOrNo.yes.text
+      value: "yes"
+    - text: options.yesOrNo.no.text
+      value: "no"
+    schema:
+      $ref: discriminator#/properties/customizeRestoreJobRuntimeSettings
+    type: radio
+  - alias: runtime_settings_backup
+    chart:
+      name: uibytebuildersdev-component-database-runtime-settings
+      version: v0.4.12
+    dataContext:
+      namespace:
+        $ref: data#/properties/namespace
+    if: showRuntimeForm|yes
+    moduleResolver: fetchJsons
+    schema:
+      $ref: schema#/properties/spec/properties/runtimeSettings
+    type: reusable-element
+  if: showBackupForm
+  schema:
+    $ref: schema#/properties/spec
+  type: single-step-form
+schema:
+  $ref: schema#/
+type: single-step-form
