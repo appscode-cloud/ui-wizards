@@ -18,6 +18,17 @@ steps:
       onChange: onNamespaceChange
       schema:
         $ref: schema#/properties/metadata/properties/release/properties/namespace
+      refresh: true
+      add_new_button:
+        label: labels.add_new_namespace
+        target: _blank
+        url:
+          params:  
+            cluster:
+              $ref: store#/route/params/cluster
+            user:
+              $ref: store#/route/params/user
+          path: /${user}/kubernetes/${cluster}/core/v1/namespaces/create
       type: select
     - fetch: getMariaDbVersions|catalog.kubedb.com|v1alpha1|mariadbversions
       label:
