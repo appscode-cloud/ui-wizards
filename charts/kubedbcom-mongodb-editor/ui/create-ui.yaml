@@ -340,170 +340,20 @@ steps:
   id: tls
   title: steps.2.label
 - form:
-    discriminator:
-      prePopulateDatabase:
-        type: string
     elements:
-    - computed: returnStringYes
-      label:
-        text: labels.prePopulateDatabase
-      onChange: onPrePopulateDatabaseChange
-      options:
-      - text: options.yesOrNo.yes.text
-        value: "yes"
-      - text: options.yesOrNo.no.text
-        value: "no"
+    - alias: vaultserver-initialization
+      chart:
+        name: uibytebuildersdev-component-initialization
+        version: v0.4.14
+      dataContext:
+        namespace:
+          $ref: schema#/properties/metadata/properties/release/properties/namespace
+        name:
+          $ref: schema#/properties/metadata/properties/release/properties/name
+      moduleResolver: fetchJsons
       schema:
-        $ref: discriminator#/properties/prePopulateDatabase
-      type: radio
-    - discriminator:
-        dataSource:
-          type: string
-      elements:
-      - computed: initDataSource
-        label:
-          text: labels.dataSource
-        onChange: onDataSourceChange
-        options:
-        - text: options.dataSource.script.text
-          value: script
-        - text: options.dataSource.stashBackup.text
-          value: stashBackup
-        schema:
-          $ref: discriminator#/properties/dataSource
-        type: select
-      - discriminator:
-          sourceVolumeType:
-            type: string
-        elements:
-        - label:
-            text: labels.script.path
-          schema:
-            $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/init/properties/script/properties/scriptPath
-          type: input
-        - label:
-            text: labels.script.volume
-          type: label-element
-        - computed: initVolumeType
-          label:
-            text: labels.script.volumeType
-          onChange: onVolumeTypeChange
-          options:
-          - text: options.scriptSourceVolumeType.configMap.text
-            value: configMap
-          - text: options.scriptSourceVolumeType.secret.text
-            value: secret
-          schema:
-            $ref: discriminator#/properties/sourceVolumeType
-          type: select
-        - allowUserDefinedOption: true
-          fetch: resourceNames|core|v1|configmaps
-          if: showConfigMapOrSecretName|configMap
-          label:
-            text: labels.script.volumeName
-          schema:
-            $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/init/properties/script/properties/configMap/properties/name
-          type: select
-        - allowUserDefinedOption: true
-          fetch: resourceNames|core|v1|secrets
-          if: showConfigMapOrSecretName|secret
-          label:
-            text: labels.script.volumeName
-          schema:
-            $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/init/properties/script/properties/secret/properties/secretName
-          type: select
-        if: showScriptOrStashForm|script
-        type: single-step-form
-      - elements:
-        - label:
-            text: labels.restoreSession.snapshot
-          schema:
-            $ref: schema#/properties/resources/properties/stashAppscodeComRestoreSession_init/properties/spec/properties/rules/properties/0/properties/snapshots/properties/0
-          type: input
-        - discriminator:
-            repositoryChoise:
-              type: string
-          elements:
-          - label:
-              text: labels.repositories.title
-            type: label-element
-          - computed: setInitialRestoreSessionRepo
-            onChange: onInitRepositoryChoiseChange
-            options:
-            - text: options.createOrSelect.select.text
-              value: select
-            - text: options.createOrSelect.create.text
-              value: create
-            schema:
-              $ref: discriminator#/properties/repositoryChoise
-            type: radio
-          - allowUserDefinedOption: true
-            fetch: resourceNames|stash.appscode.com|v1alpha1|repositories
-            if: showRepositorySelectOrCreate|select
-            label:
-              text: labels.repositories.name
-            schema:
-              $ref: schema#/properties/resources/properties/stashAppscodeComRestoreSession_init/properties/spec/properties/repository/properties/name
-            type: select
-          - alias: repository_create_init
-            chart:
-              name: uibytebuildersdev-component-repository-create
-              version: v0.4.12
-            dataContext:
-              namespace:
-                $ref: schema#/properties/metadata/properties/release/properties/namespace
-            if: showRepositorySelectOrCreate|create
-            moduleResolver: fetchJsons
-            schema:
-              $ref: schema#/properties/resources/properties/stashAppscodeComRepository_init_repo/properties/spec/properties/backend
-            type: reusable-element
-          type: single-step-form
-        - if: returnFalse
-          label:
-            text: labels.backupConfiguration.targetReference.name
-          schema:
-            $ref: schema#/properties/resources/properties/stashAppscodeComRestoreSession_init/properties/spec/properties/target/properties/ref/properties/name
-          type: input
-        - discriminator:
-            customizeRestoreJobRuntimeSettings:
-              type: string
-          elements:
-          - computed: initCustomizeRestoreJobRuntimeSettings
-            label:
-              isSubsection: true
-              text: labels.runtimeSettings.choise
-            onChange: onCustomizeRestoreJobRuntimeSettingsChange
-            options:
-            - text: options.yesOrNo.yes.text
-              value: "yes"
-            - text: options.yesOrNo.no.text
-              value: "no"
-            schema:
-              $ref: discriminator#/properties/customizeRestoreJobRuntimeSettings
-            type: radio
-          - alias: runtime_settings_init
-            chart:
-              name: uibytebuildersdev-component-runtime-settings
-              version: v0.4.12
-            dataContext:
-              namespace:
-                $ref: schema#/properties/metadata/properties/release/properties/namespace
-            if: showRuntimeForm|yes
-            moduleResolver: fetchJsons
-            schema:
-              $ref: schema#/properties/resources/properties/stashAppscodeComRestoreSession_init/properties/spec/properties/runtimeSettings
-            type: reusable-element
-          type: single-step-form
-        if: showScriptOrStashForm|stashBackup
-        type: single-step-form
-      - if: returnFalse
-        label:
-          text: labels.waitForInitialRestore
-        schema:
-          $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/init/properties/waitForInitialRestore
-        type: switch
-      if: showInitializationForm
-      type: single-step-form
+        $ref: schema#/properties/resources/properties/stashAppscodeComRestoreSession_init
+      type: reusable-element
     type: single-step-form
   id: initialization
   title: steps.3.label
