@@ -51,11 +51,16 @@ type StashappscodecomRepositoryEditorOptionsSpecSpec struct {
 
 type RepositoryBackend struct {
 	Provider string `json:"provider"`
-	S3       S3     `json:"s3"`
-	Azure    Azure  `json:"azure"`
-	GCS      GCS    `json:"gcs"`
-	Swift    Swift  `json:"swift"`
-	B2       B2     `json:"b2"`
+	// +optional
+	S3 S3 `json:"s3"`
+	// +optional
+	Azure Azure `json:"azure"`
+	// +optional
+	GCS GCS `json:"gcs"`
+	// +optional
+	Swift Swift `json:"swift"`
+	// +optional
+	B2 B2 `json:"b2"`
 }
 
 type S3 struct {

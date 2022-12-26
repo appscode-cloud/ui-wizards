@@ -88,7 +88,8 @@ type ElasticsearchTopology struct {
 }
 
 type ElasticsearchNode struct {
-	Replicas    int         `json:"replicas"`
+	Replicas int `json:"replicas"`
+	// +optional
 	Machine     string      `json:"machine"`
 	Persistence Persistence `json:"persistence"`
 }
