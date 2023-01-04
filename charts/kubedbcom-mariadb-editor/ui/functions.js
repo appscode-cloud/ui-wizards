@@ -1940,6 +1940,20 @@ function getOpsRequestUrl({ storeGet, model, getValue, mode }, reqType) {
     return `${domain}/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/mariadbopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=VerticalScaling`;
 }
 
+function getCreateNameSpaceUrl ({ model, getValue, storeGet }){ 
+
+  const user = storeGet("/route/params/user");
+  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+
+  const domain = storeGet("/domain");
+  if(domain.includes("bb.test")){
+    return `http://console.bb.test:5990/${user}/kubernetes/${cluster}/core/v1/namespaces/create`
+  }else{
+    const editedDomain = domain.replace("kubedb","console");
+    return `${editedDomain}/${user}/kubernetes/${cluster}/core/v1/namespaces/create`
+  }
+}
+
 return {
 	fetchJsons,
 	disableLableChecker,
@@ -2038,5 +2052,6 @@ return {
 	setConfiguration,
   setConfigurationFiles,
   onSetCustomConfigChange,
-  getOpsRequestUrl
+  getOpsRequestUrl,
+  getCreateNameSpaceUrl
 }
