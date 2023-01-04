@@ -5,7 +5,7 @@ async function fetchJsons({ axios, itemCtx }) {
   let language = {};
   let functions = {};
   const { name, url, version, packageviewUrlPrefix } = itemCtx.chart;
-  
+
   try {
     ui = await axios.get(
       `${packageviewUrlPrefix}/create-ui.yaml?name=${name}&url=${url}&version=${version}&format=json`
@@ -56,12 +56,7 @@ function isNotEqualToModelPathValue(
   return modelPathValue !== value;
 }
 
-async function getResources(
-  { axios, storeGet },
-  group,
-  version,
-  resource
-) {
+async function getResources({ axios, storeGet }, group, version, resource) {
   const owner = storeGet("/route/params/user");
   const cluster = storeGet("/cluster/clusterDefinition/spec/name");
 
@@ -129,16 +124,23 @@ async function getNamespacedResourceList(
   return ans;
 }
 
-async function getRedisSentinels(
-  { axios, storeGet, model, getValue, watchDependency }
-) {
+async function getRedisSentinels({
+  axios,
+  storeGet,
+  model,
+  getValue,
+  watchDependency,
+}) {
   const owner = storeGet("/route/params/user");
   const cluster = storeGet("/cluster/clusterDefinition/spec/name");
-  const namespace = getValue(model, "/resources/kubedbComRedis/spec/sentinelRef/namespace");
+  const namespace = getValue(
+    model,
+    "/resources/kubedbComRedis/spec/sentinelRef/namespace"
+  );
 
   watchDependency("model#/resources/kubedbComRedis/spec/sentinelRef/namespace");
 
-  if(owner && cluster && namespace) {
+  if (owner && cluster && namespace) {
     try {
       const resp = await axios.get(
         `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/redissentinels`,
@@ -165,11 +167,7 @@ async function getRedisSentinels(
     return [];
   }
 }
-async function getResourceList(
-  axios,
-  storeGet,
-  { group, version, resource }
-) {
+async function getResourceList(axios, storeGet, { group, version, resource }) {
   const owner = storeGet("/route/params/user");
   const cluster = storeGet("/cluster/clusterDefinition/spec/name");
 
@@ -260,19 +258,17 @@ function returnStringYes() {
   return "yes";
 }
 
-function hasSentinelObject({model, getValue}) {
-  const sentinelObj = getValue(model, "/resources/kubedbComRedisSentinel_sentinel");
+function hasSentinelObject({ model, getValue }) {
+  const sentinelObj = getValue(
+    model,
+    "/resources/kubedbComRedisSentinel_sentinel"
+  );
 
   return !!sentinelObj;
 }
 
 // ************************* Basic Info **********************************************
-async function getRedisVersions(
-  { axios, storeGet },
-  group,
-  version,
-  resource
-) {
+async function getRedisVersions({ axios, storeGet }, group, version, resource) {
   const owner = storeGet("/route/params/user");
   const cluster = storeGet("/cluster/clusterDefinition/spec/name");
 
@@ -314,26 +310,29 @@ async function getRedisVersions(
   }
 }
 
-function onVersionChange({model, getValue, commit}) {
+function onVersionChange({ model, getValue, commit }) {
   const version = getValue(model, "/resources/kubedbComRedis/spec/version");
 
-  if(hasSentinelObject({model, getValue})) {
+  if (hasSentinelObject({ model, getValue })) {
     commit("wizard/model$update", {
       path: "/resources/kubedbComRedisSentinel_sentinel/spec/version",
       value: version,
-      force: true
+      force: true,
     });
   }
 }
 
-function onTerminationPolicyChange({model, getValue, commit}) {
-  const terminationPolicy = getValue(model, "/resources/kubedbComRedis/spec/terminationPolicy");
+function onTerminationPolicyChange({ model, getValue, commit }) {
+  const terminationPolicy = getValue(
+    model,
+    "/resources/kubedbComRedis/spec/terminationPolicy"
+  );
 
-  if(hasSentinelObject({model, getValue})) {
+  if (hasSentinelObject({ model, getValue })) {
     commit("wizard/model$update", {
       path: "/resources/kubedbComRedisSentinel_sentinel/spec/terminationPolicy",
       value: terminationPolicy,
-      force: true
+      force: true,
     });
   }
 }
@@ -386,15 +385,19 @@ function showNewSecretCreateField({
 }
 
 // ********************* Database Mode ***********************
-function setDatabaseMode({model, getValue}) {
+function setDatabaseMode({ model, getValue }) {
   const mode = getValue(model, "/resources/kubedbComRedis/spec/mode");
 
   return mode || "Standalone";
 }
 
-async function getStorageClassNames(
-  { axios, storeGet, commit, model, getValue }
-) {
+async function getStorageClassNames({
+  axios,
+  storeGet,
+  commit,
+  model,
+  getValue,
+}) {
   const owner = storeGet("/route/params/user");
   const cluster = storeGet("/cluster/clusterDefinition/spec/name");
 
@@ -437,49 +440,49 @@ async function getStorageClassNames(
   return resources;
 }
 
-function deleteDatabaseModePath({
-  getValue,
-  commit,
-  model,
-}) {
+function deleteDatabaseModePath({ getValue, commit, model }) {
   const mode = getValue(model, "/resources/kubedbComRedis/spec/mode");
   if (mode === "Cluster") {
     commit("wizard/model$delete", "/resources/kubedbComRedis/spec/sentinelRef");
     commit("wizard/model$delete", "/resources/kubedbComRedisSentinel_sentinel");
   } else if (mode === "Standalone") {
-    commit("wizard/model$delete", "/resources/kubedbComRedis/spec/replicas");  
-    commit("wizard/model$delete", "/resources/kubedbComRedis/spec/sentinelRef");  
+    commit("wizard/model$delete", "/resources/kubedbComRedis/spec/replicas");
+    commit("wizard/model$delete", "/resources/kubedbComRedis/spec/sentinelRef");
     commit("wizard/model$delete", "/resources/kubedbComRedisSentinel_sentinel");
   }
 }
 
-function isEqualToDatabaseMode(
-  { getValue, watchDependency, model },
-  value
-) {
+function isEqualToDatabaseMode({ getValue, watchDependency, model }, value) {
   watchDependency("model#/activeDatabaseMode");
   const mode = getValue(model, "/activeDatabaseMode");
   return mode === value;
 }
 
-function showSentinelNameAndNamespace({discriminator, getValue, watchDependency}) {
+function showSentinelNameAndNamespace({
+  discriminator,
+  getValue,
+  watchDependency,
+}) {
   watchDependency("discriminator#/createSentinel");
   const verd = getValue(discriminator, "/createSentinel");
 
   return !verd;
 }
 
-function onCreateSentinelChange({discriminator, getValue, commit, model}) {
+function onCreateSentinelChange({ discriminator, getValue, commit, model }) {
   const verd = getValue(discriminator, "/createSentinel");
 
-  if(verd === true) {
-    const sentinelObj = getValue(model, "/resources/kubedbComRedisSentinel_sentinel");
+  if (verd === true) {
+    const sentinelObj = getValue(
+      model,
+      "/resources/kubedbComRedisSentinel_sentinel"
+    );
 
-    if(!sentinelObj) {
-
+    if (!sentinelObj) {
       const redisSpec = getValue(model, "/resources/kubedbComRedis/spec");
 
-      const {version, tls, storage, monitor, terminationPolicy} = redisSpec || {};
+      const { version, tls, storage, monitor, terminationPolicy } =
+        redisSpec || {};
 
       commit("wizard/model$update", {
         path: "/resources/kubedbComRedisSentinel_sentinel/spec",
@@ -488,18 +491,21 @@ function onCreateSentinelChange({discriminator, getValue, commit, model}) {
           tls,
           storage,
           monitor,
-          terminationPolicy
+          terminationPolicy,
         },
-        force: true
+        force: true,
       });
     }
-  } else if(verd === false) {
+  } else if (verd === false) {
     commit("wizard/model$delete", "/resources/kubedbComRedisSentinel_sentinel");
   }
 }
 
-function setCreateSentinel({model, getValue}) {
-  const sentinelObj = getValue(model, "/resources/kubedbComRedisSentinel_sentinel");
+function setCreateSentinel({ model, getValue }) {
+  const sentinelObj = getValue(
+    model,
+    "/resources/kubedbComRedisSentinel_sentinel"
+  );
 
   return !!sentinelObj;
 }
@@ -540,7 +546,7 @@ async function getIssuerRefsName({
     url = `/clusters/${owner}/${cluster}/proxy/${apiGroup}/v1/clusterissuers`;
   }
 
-  if (!url) return []
+  if (!url) return [];
 
   try {
     const resp = await axios.get(url);
@@ -560,14 +566,17 @@ async function getIssuerRefsName({
   }
 }
 
-function onIssuerRefChange({model, getValue, commit}) {
-  const issuerRef = getValue(model, "/resources/kubedbComRedis/spec/tls/issuerRef");
+function onIssuerRefChange({ model, getValue, commit }) {
+  const issuerRef = getValue(
+    model,
+    "/resources/kubedbComRedis/spec/tls/issuerRef"
+  );
 
-  if(hasSentinelObject({model, getValue})) {
+  if (hasSentinelObject({ model, getValue })) {
     commit("wizard/model$update", {
       path: "/resources/kubedbComRedisSentinel_sentinel/spec/tls/issuerRef",
       value: issuerRef,
-      force: true
+      force: true,
     });
   }
 }
@@ -577,11 +586,7 @@ function setSSLMode({ model, getValue }) {
   return val || "require";
 }
 
-function showTlsConfigureSection({
-  watchDependency,
-  discriminator,
-  getValue,
-}) {
+function showTlsConfigureSection({ watchDependency, discriminator, getValue }) {
   watchDependency("discriminator#/configureTLS");
   const configureStatus = getValue(discriminator, "/configureTLS");
   return configureStatus;
@@ -607,11 +612,7 @@ function getAliasOptions() {
 
 /****** Monitoring *********/
 
-function showMonitoringSection({
-  watchDependency,
-  discriminator,
-  getValue,
-}) {
+function showMonitoringSection({ watchDependency, discriminator, getValue }) {
   watchDependency("discriminator#/enableMonitoring");
   const configureStatus = getValue(discriminator, "/enableMonitoring");
   return configureStatus;
@@ -792,10 +793,7 @@ function initPrePopulateDatabase({ getValue, model }) {
     model,
     "/resources/stashAppscodeComRestoreSession_init"
   );
-  const script = getValue(
-    model,
-    "/resources/kubedbComRedis/spec/init/script"
-  );
+  const script = getValue(model, "/resources/kubedbComRedis/spec/init/script");
 
   return waitForInitialRestore ||
     !!stashAppscodeComRestoreSession_init ||
@@ -821,10 +819,7 @@ function onPrePopulateDatabaseChange({
       "wizard/model$delete",
       "/resources/stashAppscodeComRestoreSession_init"
     );
-    commit(
-      "wizard/model$delete",
-      "/resources/kubedbComRedis/spec/init/script"
-    );
+    commit("wizard/model$delete", "/resources/kubedbComRedis/spec/init/script");
     commit(
       "wizard/model$delete",
       "/resources/stashAppscodeComRepository_init_repo"
@@ -846,8 +841,7 @@ function onPrePopulateDatabaseChange({
       });
 
       commit("wizard/model$update", {
-        path:
-          "/resources/stashAppscodeComRestoreSession_init/spec/target/ref/name",
+        path: "/resources/stashAppscodeComRestoreSession_init/spec/target/ref/name",
         value: dbName,
         force: true,
       });
@@ -856,10 +850,7 @@ function onPrePopulateDatabaseChange({
 }
 
 function initDataSource({ getValue, model }) {
-  const script = getValue(
-    model,
-    "/resources/kubedbComRedis/spec/init/script"
-  );
+  const script = getValue(model, "/resources/kubedbComRedis/spec/init/script");
   const stashAppscodeComRestoreSession_init = getValue(
     model,
     "/resources/stashAppscodeComRestoreSession_init"
@@ -898,10 +889,7 @@ function onDataSourceChange({ commit, getValue, discriminator, model }) {
         value: initScript,
       });
   } else if (dataSource === "stashBackup") {
-    commit(
-      "wizard/model$delete",
-      "/resources/kubedbComRedis/spec/init/script"
-    );
+    commit("wizard/model$delete", "/resources/kubedbComRedis/spec/init/script");
 
     // create a new stashAppscodeComRestoreSession_init if there is no stashAppscodeComRestoreSession_init property
     if (
@@ -919,8 +907,7 @@ function onDataSourceChange({ commit, getValue, discriminator, model }) {
       });
 
       commit("wizard/model$update", {
-        path:
-          "/resources/stashAppscodeComRestoreSession_init/spec/target/ref/name",
+        path: "/resources/stashAppscodeComRestoreSession_init/spec/target/ref/name",
         value: dbName,
         force: true,
       });
@@ -991,11 +978,7 @@ function onVolumeTypeChange({ commit, getValue, discriminator, model }) {
   }
 }
 
-function showInitializationForm({
-  getValue,
-  discriminator,
-  watchDependency,
-}) {
+function showInitializationForm({ getValue, discriminator, watchDependency }) {
   const prePopulateDatabase = getValue(discriminator, "/prePopulateDatabase");
   watchDependency("discriminator#/prePopulateDatabase");
   return prePopulateDatabase === "yes";
@@ -1061,8 +1044,7 @@ function onInitRepositoryChoiseChange({
     )}-init-repo`;
     // set this name in stashAppscodeComRestoreSession_init
     commit("wizard/model$update", {
-      path:
-        "/resources/stashAppscodeComRestoreSession_init/spec/repository/name",
+      path: "/resources/stashAppscodeComRestoreSession_init/spec/repository/name",
       value: repositoryName,
     });
   }
@@ -1077,10 +1059,7 @@ function initCustomizeRestoreJobRuntimeSettings({ getValue, model }) {
   else return "no";
 }
 
-function initCustomizeRestoreJobRuntimeSettingsForBackup({
-  getValue,
-  model,
-}) {
+function initCustomizeRestoreJobRuntimeSettingsForBackup({ getValue, model }) {
   const runtimeSettings = getValue(
     model,
     "/resources/stashAppscodeComBackupConfiguration/spec/runtimeSettings"
@@ -1114,8 +1093,7 @@ function onCustomizeRestoreJobRuntimeSettingsChange({
     ) {
       // set new value
       commit("wizard/model$update", {
-        path:
-          "/resources/stashAppscodeComRestoreSession_init/spec/runtimeSettings",
+        path: "/resources/stashAppscodeComRestoreSession_init/spec/runtimeSettings",
         value: restoreSessionInitRunTimeSettings,
       });
     }
@@ -1147,8 +1125,7 @@ function onCustomizeRestoreJobRuntimeSettingsChangeForBackup({
     ) {
       // set new value
       commit("wizard/model$update", {
-        path:
-          "/resources/stashAppscodeComBackupConfiguration/spec/runtimeSettings",
+        path: "/resources/stashAppscodeComBackupConfiguration/spec/runtimeSettings",
         value: {},
         force: true,
       });
@@ -1156,10 +1133,7 @@ function onCustomizeRestoreJobRuntimeSettingsChangeForBackup({
   }
 }
 
-function showRuntimeForm(
-  { discriminator, getValue, watchDependency },
-  value
-) {
+function showRuntimeForm({ discriminator, getValue, watchDependency }, value) {
   const customizeRestoreJobRuntimeSettings = getValue(
     discriminator,
     "/customizeRestoreJobRuntimeSettings"
@@ -1271,33 +1245,24 @@ function addkubedbComRedisAnnotation(
 }
 
 function initScheduleBackupForEdit({ getValue, model, setDiscriminatorValue }) {
-  const {
-    stashAppscodeComBackupConfiguration,
-    isBluePrint,
-  } = getBackupConfigsAndAnnotations(getValue, model);
+  const { stashAppscodeComBackupConfiguration, isBluePrint } =
+    getBackupConfigsAndAnnotations(getValue, model);
 
-  initRepositoryChoiseForEdit({getValue, model, setDiscriminatorValue});
+  initRepositoryChoiseForEdit({ getValue, model, setDiscriminatorValue });
 
   if (stashAppscodeComBackupConfiguration || isBluePrint) return "yes";
   else return "no";
 }
 
 function initScheduleBackup({ getValue, model }) {
-  const {
-    stashAppscodeComBackupConfiguration,
-    isBluePrint,
-  } = getBackupConfigsAndAnnotations(getValue, model);
+  const { stashAppscodeComBackupConfiguration, isBluePrint } =
+    getBackupConfigsAndAnnotations(getValue, model);
 
   if (stashAppscodeComBackupConfiguration || isBluePrint) return "yes";
   else return "no";
 }
 
-function onScheduleBackupChange({
-  commit,
-  getValue,
-  discriminator,
-  model,
-}) {
+function onScheduleBackupChange({ commit, getValue, discriminator, model }) {
   const scheduleBackup = getValue(discriminator, "/scheduleBackup");
 
   if (scheduleBackup === "no") {
@@ -1329,8 +1294,7 @@ function onScheduleBackupChange({
         value: stashAppscodeComBackupConfiguration,
       });
       commit("wizard/model$update", {
-        path:
-          "/resources/stashAppscodeComBackupConfiguration/spec/target/ref/name",
+        path: "/resources/stashAppscodeComBackupConfiguration/spec/target/ref/name",
         value: dbName,
         force: true,
       });
@@ -1349,22 +1313,15 @@ function showBackupForm({ getValue, discriminator, watchDependency }) {
 
 // invoker form
 function initBackupInvoker({ getValue, model }) {
-  const {
-    stashAppscodeComBackupConfiguration,
-    isBluePrint,
-  } = getBackupConfigsAndAnnotations(getValue, model);
+  const { stashAppscodeComBackupConfiguration, isBluePrint } =
+    getBackupConfigsAndAnnotations(getValue, model);
 
   if (stashAppscodeComBackupConfiguration) return "backupConfiguration";
   else if (isBluePrint) return "backupBlueprint";
   else return undefined;
 }
 
-function onBackupInvokerChange({
-  getValue,
-  discriminator,
-  commit,
-  model,
-}) {
+function onBackupInvokerChange({ getValue, discriminator, commit, model }) {
   const backupInvoker = getValue(discriminator, "/backupInvoker");
 
   if (backupInvoker === "backupConfiguration") {
@@ -1384,8 +1341,7 @@ function onBackupInvokerChange({
         value: stashAppscodeComBackupConfiguration,
       });
       commit("wizard/model$update", {
-        path:
-          "/resources/stashAppscodeComBackupConfiguration/spec/target/ref/name",
+        path: "/resources/stashAppscodeComBackupConfiguration/spec/target/ref/name",
         value: dbName,
         force: true,
       });
@@ -1406,10 +1362,7 @@ function onBackupInvokerChange({
   }
 }
 
-function showInvokerForm(
-  { getValue, discriminator, watchDependency },
-  value
-) {
+function showInvokerForm({ getValue, discriminator, watchDependency }, value) {
   const backupInvoker = getValue(discriminator, "/backupInvoker");
   watchDependency("discriminator#/backupInvoker");
 
@@ -1417,11 +1370,7 @@ function showInvokerForm(
 }
 
 // backup configuration form
-function initalizeTargetReferenceName({
-  getValue,
-  model,
-  watchDependency,
-}) {
+function initalizeTargetReferenceName({ getValue, model, watchDependency }) {
   const databaseName = getValue(model, "/metadata/release/name");
   watchDependency("model#/metadata/release/name");
 
@@ -1448,13 +1397,22 @@ function initRepositoryChoise({ getValue, model }) {
   else return "select";
 }
 
-function initRepositoryChoiseForEdit({ getValue, model, setDiscriminatorValue }) {
+function initRepositoryChoiseForEdit({
+  getValue,
+  model,
+  setDiscriminatorValue,
+}) {
   const stashAppscodeComRepository_repo = getValue(
     model,
     "/resources/stashAppscodeComRepository_repo"
   );
-  const repoInitialSelectionStatus = stashAppscodeComRepository_repo ? "yes" : "no";
-  setDiscriminatorValue("/repoInitialSelectionStatus", repoInitialSelectionStatus);
+  const repoInitialSelectionStatus = stashAppscodeComRepository_repo
+    ? "yes"
+    : "no";
+  setDiscriminatorValue(
+    "/repoInitialSelectionStatus",
+    repoInitialSelectionStatus
+  );
 
   return repoInitialSelectionStatus;
 }
@@ -1491,8 +1449,7 @@ function onRepositoryChoiseChange({
       )}-repo`;
       // set this name in stashAppscodeComRestoreSession_init
       commit("wizard/model$update", {
-        path:
-          "/resources/stashAppscodeComBackupConfiguration/spec/repository/name",
+        path: "/resources/stashAppscodeComBackupConfiguration/spec/repository/name",
         value: repositoryName,
       });
     }
@@ -1571,12 +1528,7 @@ function initFromAnnotationKeyValue({ getValue, model }, prefix) {
   return newOb;
 }
 
-function onTaskParametersChange({
-  getValue,
-  discriminator,
-  model,
-  commit,
-}) {
+function onTaskParametersChange({ getValue, discriminator, model, commit }) {
   const taskParameters = getValue(discriminator, "/taskParameters");
 
   const taskParamterKeys = Object.keys(taskParameters).map(
@@ -1613,14 +1565,10 @@ function isValueExistInModel({ model, getValue }, path) {
 
 function onNamespaceChange({ commit, model, getValue }) {
   const namespace = getValue(model, "/metadata/release/namespace");
-  const agent = getValue(
-    model,
-    "/resources/kubedbComRedis/spec/monitor/agent"
-  );
+  const agent = getValue(model, "/resources/kubedbComRedis/spec/monitor/agent");
   if (agent === "prometheus.io") {
     commit("wizard/model$update", {
-      path:
-        "/resources/monitoringCoreosComServiceMonitor/spec/namespaceSelector/matchNames",
+      path: "/resources/monitoringCoreosComServiceMonitor/spec/namespaceSelector/matchNames",
       value: [namespace],
       force: true,
     });
@@ -1633,15 +1581,11 @@ function onLabelChange({ commit, model, getValue }) {
     "/resources/kubedbComRedis/spec/metadata/labels"
   );
 
-  const agent = getValue(
-    model,
-    "/resources/kubedbComRedis/spec/monitor/agent"
-  );
+  const agent = getValue(model, "/resources/kubedbComRedis/spec/monitor/agent");
 
   if (agent === "prometheus.io") {
     commit("wizard/model$update", {
-      path:
-        "/resources/monitoringCoreosComServiceMonitor/spec/selector/matchLabels",
+      path: "/resources/monitoringCoreosComServiceMonitor/spec/selector/matchLabels",
       value: labels,
       force: true,
     });
@@ -1651,10 +1595,7 @@ function onLabelChange({ commit, model, getValue }) {
 function onNameChange({ commit, model, getValue }) {
   const dbName = getValue(model, "/metadata/release/name");
 
-  const agent = getValue(
-    model,
-    "/resources/kubedbComRedis/spec/monitor/agent"
-  );
+  const agent = getValue(model, "/resources/kubedbComRedis/spec/monitor/agent");
 
   const labels = getValue(
     model,
@@ -1663,8 +1604,7 @@ function onNameChange({ commit, model, getValue }) {
 
   if (agent === "prometheus.io") {
     commit("wizard/model$update", {
-      path:
-        "/resources/monitoringCoreosComServiceMonitor/spec/selector/matchLabels",
+      path: "/resources/monitoringCoreosComServiceMonitor/spec/selector/matchLabels",
       value: labels,
       force: true,
     });
@@ -1677,8 +1617,7 @@ function onNameChange({ commit, model, getValue }) {
 
   if (scheduleBackup) {
     commit("wizard/model$update", {
-      path:
-        "/resources/stashAppscodeComBackupConfiguration/spec/target/ref/name",
+      path: "/resources/stashAppscodeComBackupConfiguration/spec/target/ref/name",
       value: dbName,
       force: true,
     });
@@ -1688,8 +1627,7 @@ function onNameChange({ commit, model, getValue }) {
     );
     if (creatingNewRepo) {
       commit("wizard/model$update", {
-        path:
-          "/resources/stashAppscodeComBackupConfiguration/spec/repository/name",
+        path: "/resources/stashAppscodeComBackupConfiguration/spec/repository/name",
         value: `${dbName}-repo`,
         force: true,
       });
@@ -1703,8 +1641,7 @@ function onNameChange({ commit, model, getValue }) {
 
   if (prePopulateDatabase) {
     commit("wizard/model$update", {
-      path:
-        "/resources/stashAppscodeComRestoreSession_init/spec/target/ref/name",
+      path: "/resources/stashAppscodeComRestoreSession_init/spec/target/ref/name",
       value: dbName,
       force: true,
     });
@@ -1714,8 +1651,7 @@ function onNameChange({ commit, model, getValue }) {
     );
     if (creatingNewRepo) {
       commit("wizard/model$update", {
-        path:
-          "/resources/stashAppscodeComRestoreSession_init/spec/repository/name",
+        path: "/resources/stashAppscodeComRestoreSession_init/spec/repository/name",
         value: `${dbName}-init-repo`,
         force: true,
       });
@@ -1738,10 +1674,7 @@ function returnFalse() {
 }
 
 function onAgentChange({ commit, model, getValue }) {
-  const agent = getValue(
-    model,
-    "/resources/kubedbComRedis/spec/monitor/agent"
-  );
+  const agent = getValue(model, "/resources/kubedbComRedis/spec/monitor/agent");
   if (agent === "prometheus.io") {
     commit("wizard/model$update", {
       path: "/resources/monitoringCoreosComServiceMonitor/spec/endpoints",
@@ -1758,7 +1691,7 @@ function onAgentChange({ commit, model, getValue }) {
     );
   }
 
-  if(hasSentinelObject({model, getValue})) {
+  if (hasSentinelObject({ model, getValue })) {
     commit("wizard/model$update", {
       path: "/resources/kubedbComRedisSentinel_sentinel/spec/monitor/agent",
       value: agent,
@@ -1767,10 +1700,13 @@ function onAgentChange({ commit, model, getValue }) {
   }
 }
 
-function onServiceMonitorChange({model, getValue, commit}) {
-  const serviceMonitor = getValue(model, "/resources/kubedbComRedis/spec/monitor/prometheus/serviceMonitor")
+function onServiceMonitorChange({ model, getValue, commit }) {
+  const serviceMonitor = getValue(
+    model,
+    "/resources/kubedbComRedis/spec/monitor/prometheus/serviceMonitor"
+  );
 
-  if(hasSentinelObject({model, getValue})) {
+  if (hasSentinelObject({ model, getValue })) {
     commit("wizard/model$update", {
       path: "/resources/kubedbComRedisSentinel_sentinel/spec/monitor/prometheus/serviceMonitor",
       value: serviceMonitor,
@@ -1786,68 +1722,56 @@ function getCreateAuthSecret({ model, getValue }) {
     model,
     "/resources/kubedbComRedis/spec/authSecret"
   );
-  
+
   return !authSecret;
 }
 
 function showExistingSecretSection({
   getValue,
   watchDependency,
-  discriminator
+  discriminator,
 }) {
   watchDependency("discriminator#/createAuthSecret");
-  const hasAuthSecretName = getValue(
-    discriminator,
-    "/createAuthSecret"
-  );
+  const hasAuthSecretName = getValue(discriminator, "/createAuthSecret");
   return !hasAuthSecretName;
 }
 
-
-function showPasswordSection({
-  getValue,
-  watchDependency,
-  discriminator
-}) {
+function showPasswordSection({ getValue, watchDependency, discriminator }) {
   return !showExistingSecretSection({
     getValue,
     watchDependency,
-    discriminator
-  })
+    discriminator,
+  });
 }
 
 function setAuthSecretPassword({ model, getValue }) {
-  const encodedPassword = getValue(model, "/resources/secret_auth/data/password");
+  const encodedPassword = getValue(
+    model,
+    "/resources/secret_auth/data/password"
+  );
   return encodedPassword ? decodePassword({}, encodedPassword) : "";
 }
 
 function onAuthSecretPasswordChange({ getValue, discriminator, commit }) {
   const stringPassword = getValue(discriminator, "/password");
 
-  if(stringPassword) {
+  if (stringPassword) {
     commit("wizard/model$update", {
       path: "/resources/secret_auth/data/password",
       value: encodePassword({}, stringPassword),
-      force: true
+      force: true,
     });
     commit("wizard/model$update", {
       path: "/resources/secret_auth/data/username",
       value: encodePassword({}, "root"),
-      force: true
+      force: true,
     });
   } else {
-    commit(
-      "wizard/model$delete",
-      "/resources/secret_auth"
-    );
+    commit("wizard/model$delete", "/resources/secret_auth");
   }
 }
 
-function disableInitializationSection({
-  model,
-  getValue,
-  watchDependency,
-}) {
+function disableInitializationSection({ model, getValue, watchDependency }) {
   const initialized = getValue(
     model,
     "/resources/kubedbComRedis/spec/init/initialized"
@@ -1866,25 +1790,14 @@ function decodePassword({}, value) {
   return atob(value);
 }
 
-function onCreateAuthSecretChange({
-  discriminator,
-  getValue,
-  commit,
-}) {
+function onCreateAuthSecretChange({ discriminator, getValue, commit }) {
   const createAuthSecret = getValue(discriminator, "/createAuthSecret");
   if (createAuthSecret) {
-    commit(
-      "wizard/model$delete",
-      "/resources/kubedbComRedis/spec/authSecret"
-    );
-  } else if(createAuthSecret === false) {
-    commit(
-      "wizard/model$delete",
-      "/resources/secret_auth"
-    );
+    commit("wizard/model$delete", "/resources/kubedbComRedis/spec/authSecret");
+  } else if (createAuthSecret === false) {
+    commit("wizard/model$delete", "/resources/secret_auth");
   }
 }
-
 
 async function getSecrets({
   storeGet,
@@ -1930,10 +1843,7 @@ async function getSecrets({
 
 //////////////////////////////////////// Service Monitor //////////////////////////////////////////////////////
 
-function isEqualToServiceMonitorType(
-  { rootModel, watchDependency },
-  value
-) {
+function isEqualToServiceMonitorType({ rootModel, watchDependency }, value) {
   watchDependency("rootModel#/spec/type");
   return rootModel && rootModel.spec && rootModel.spec.type === value;
 }
@@ -1969,12 +1879,7 @@ function onConfigurationSourceChange({
   }
 }
 
-function onConfigurationChange({
-  getValue,
-  commit,
-  discriminator,
-  model,
-}) {
+function onConfigurationChange({ getValue, commit, discriminator, model }) {
   const value = getValue(discriminator, "/configuration");
   commit("wizard/model$update", {
     path: "/resources/secret_config/stringData/redis.conf",
@@ -2018,8 +1923,11 @@ function setConfigurationFiles({ model, getValue }) {
 function onSetCustomConfigChange({ discriminator, getValue, commit }) {
   const value = getValue(discriminator, "/setCustomConfig");
 
-  if(value === "no") {
-    commit("wizard/model$delete", "/resources/kubedbComRedis/spec/configSecret");
+  if (value === "no") {
+    commit(
+      "wizard/model$delete",
+      "/resources/kubedbComRedis/spec/configSecret"
+    );
     commit("wizard/model$delete", "/resources/secret_config");
   }
 }
@@ -2043,127 +1951,125 @@ function getOpsRequestUrl({ storeGet, model, getValue, mode }, reqType) {
     return `${domain}/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/redisopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=VerticalScaling`;
 }
 
-
-function getCreateNameSpaceUrl ({ model, getValue, storeGet }){ 
-
+function getCreateNameSpaceUrl({ model, getValue, storeGet }) {
   const user = storeGet("/route/params/user");
   const cluster = storeGet("/cluster/clusterDefinition/spec/name");
 
   const domain = storeGet("/domain");
-  if(domain.includes("bb.test")){
-    return `http://console.bb.test:5990/${user}/kubernetes/${cluster}/core/v1/namespaces/create`
-  }else{
-    const editedDomain = domain.replace("kubedb","console");
-    return `${editedDomain}/${user}/kubernetes/${cluster}/core/v1/namespaces/create`
+  if (domain.includes("bb.test")) {
+    return `http://console.bb.test:5990/${user}/kubernetes/${cluster}/core/v1/namespaces/create`;
+  } else {
+    const editedDomain = domain.replace("kubedb", "console");
+    return `${editedDomain}/${user}/kubernetes/${cluster}/core/v1/namespaces/create`;
   }
 }
 
 return {
-	fetchJsons,
-	disableLableChecker,
-	isEqualToModelPathValue,
+  fetchJsons,
+  disableLableChecker,
+  isEqualToModelPathValue,
   isNotEqualToModelPathValue,
-	getResources,
-	isEqualToDiscriminatorPath,
-	setValueFromModel,
-	getNamespacedResourceList,
+  getResources,
+  isEqualToDiscriminatorPath,
+  setValueFromModel,
+  getNamespacedResourceList,
   getRedisSentinels,
-	getResourceList,
-	resourceNames,
+  getResourceList,
+  resourceNames,
   unNamespacedResourceNames,
   returnTrue,
   returnStringYes,
   hasSentinelObject,
-	getRedisVersions,
+  getRedisVersions,
   onVersionChange,
   onTerminationPolicyChange,
-	showAuthPasswordField,
-	showAuthSecretField,
-	showNewSecretCreateField,
+  showAuthPasswordField,
+  showAuthSecretField,
+  showNewSecretCreateField,
   showSentinelNameAndNamespace,
   onCreateSentinelChange,
   setCreateSentinel,
   setDatabaseMode,
-	getStorageClassNames,
-	deleteDatabaseModePath,
-	isEqualToDatabaseMode,
-	setApiGroup,
-	getIssuerRefsName,
+  getStorageClassNames,
+  deleteDatabaseModePath,
+  isEqualToDatabaseMode,
+  setApiGroup,
+  getIssuerRefsName,
   onIssuerRefChange,
-	setSSLMode,
-	showTlsConfigureSection,
-	onTlsConfigureChange,
+  setSSLMode,
+  showTlsConfigureSection,
+  onTlsConfigureChange,
   getAliasOptions,
-	showMonitoringSection,
-	onEnableMonitoringChange,
-	showCustomizeExporterSection,
-	onCustomizeExporterChange,
-	valueExists,
-	initPrePopulateDatabase,
-	onPrePopulateDatabaseChange,
-	initDataSource,
-	onDataSourceChange,
-	initVolumeType,
-	onVolumeTypeChange,
-	showInitializationForm,
-	showScriptOrStashForm,
-	showConfigMapOrSecretName,
-	initializeNamespace,
-	showRepositorySelectOrCreate,
-	onInitRepositoryChoiseChange,
-	initCustomizeRestoreJobRuntimeSettings,
-	initCustomizeRestoreJobRuntimeSettingsForBackup,
-	onCustomizeRestoreJobRuntimeSettingsChange,
-	onCustomizeRestoreJobRuntimeSettingsChangeForBackup,
-	showRuntimeForm,
-	getImagePullSecrets,
-	getBackupConfigsAndAnnotations,
-	deletekubedbComRedisAnnotation,
-	addkubedbComRedisAnnotation,
-	initScheduleBackup,
+  showMonitoringSection,
+  onEnableMonitoringChange,
+  showCustomizeExporterSection,
+  onCustomizeExporterChange,
+  valueExists,
+  initPrePopulateDatabase,
+  onPrePopulateDatabaseChange,
+  initDataSource,
+  onDataSourceChange,
+  initVolumeType,
+  onVolumeTypeChange,
+  showInitializationForm,
+  showScriptOrStashForm,
+  showConfigMapOrSecretName,
+  initializeNamespace,
+  showRepositorySelectOrCreate,
+  onInitRepositoryChoiseChange,
+  initCustomizeRestoreJobRuntimeSettings,
+  initCustomizeRestoreJobRuntimeSettingsForBackup,
+  onCustomizeRestoreJobRuntimeSettingsChange,
+  onCustomizeRestoreJobRuntimeSettingsChangeForBackup,
+  showRuntimeForm,
+  getImagePullSecrets,
+  getBackupConfigsAndAnnotations,
+  deletekubedbComRedisAnnotation,
+  addkubedbComRedisAnnotation,
+  initScheduleBackup,
   initScheduleBackupForEdit,
-	onScheduleBackupChange,
-	showBackupForm,
-	initBackupInvoker,
-	onBackupInvokerChange,
-	showInvokerForm,
-	initalizeTargetReferenceName,
-	setInitialRestoreSessionRepo,
-	initRepositoryChoise,
+  onScheduleBackupChange,
+  showBackupForm,
+  initBackupInvoker,
+  onBackupInvokerChange,
+  showInvokerForm,
+  initalizeTargetReferenceName,
+  setInitialRestoreSessionRepo,
+  initRepositoryChoise,
   initRepositoryChoiseForEdit,
-	onRepositoryChoiseChange,
-	onRepositoryNameChange,
-	getMongoAnnotations,
-	initFromAnnotationValue,
-	onBackupBlueprintNameChange,
-	onBackupBlueprintScheduleChange,
-	initFromAnnotationKeyValue,
-	onTaskParametersChange,
-	isValueExistInModel,
-	onNamespaceChange,
-	onLabelChange,
-	onNameChange,
-	returnFalse,
-	onAgentChange,
+  onRepositoryChoiseChange,
+  onRepositoryNameChange,
+  getMongoAnnotations,
+  initFromAnnotationValue,
+  onBackupBlueprintNameChange,
+  onBackupBlueprintScheduleChange,
+  initFromAnnotationKeyValue,
+  onTaskParametersChange,
+  isValueExistInModel,
+  onNamespaceChange,
+  onLabelChange,
+  onNameChange,
+  returnFalse,
+  onAgentChange,
   onServiceMonitorChange,
-	getCreateAuthSecret,
+  getCreateAuthSecret,
   showExistingSecretSection,
-	showPasswordSection,
-	disableInitializationSection,
+  showPasswordSection,
+  disableInitializationSection,
   setAuthSecretPassword,
   onAuthSecretPasswordChange,
-	encodePassword,
-	decodePassword,
-	onCreateAuthSecretChange,
-	getSecrets,
-	isEqualToServiceMonitorType,
-	onConfigurationSourceChange,
-	onConfigurationChange,
-	setConfigurationSource,
-	setSecretConfigNamespace,
-	setConfiguration,
+  encodePassword,
+  decodePassword,
+  onCreateAuthSecretChange,
+  getSecrets,
+  isEqualToServiceMonitorType,
+  onConfigurationSourceChange,
+  onConfigurationChange,
+  setConfigurationSource,
+  setSecretConfigNamespace,
+  setConfiguration,
   setConfigurationFiles,
   onSetCustomConfigChange,
   getOpsRequestUrl,
-  getCreateNameSpaceUrl
-}
+  getCreateNameSpaceUrl,
+};

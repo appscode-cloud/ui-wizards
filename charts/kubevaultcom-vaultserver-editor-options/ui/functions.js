@@ -242,9 +242,11 @@ function isEqualToDiscriminatorPathValue(
   return pathValue === value;
 }
 
-function showTlsExistingSecretField(
-  { discriminator, getValue, watchDependency },
-) {
+function showTlsExistingSecretField({
+  discriminator,
+  getValue,
+  watchDependency,
+}) {
   const pathValue = getValue(discriminator, "/createTlsSecret");
   watchDependency("discriminator#/createTlsSecret");
   return !pathValue;
@@ -256,22 +258,31 @@ function showTlsCreateSecretField(
 ) {
   watchDependency("model#/spec/backend/provider/type");
   const selectedBackendType = getValue(model, "/spec/backend/provider/type");
-  return !showTlsExistingSecretField({ discriminator, getValue, watchDependency }) && selectedBackendType === backendType;
+  return (
+    !showTlsExistingSecretField({ discriminator, getValue, watchDependency }) &&
+    selectedBackendType === backendType
+  );
 }
 
-function onCreateTlsSecretChange({discriminator, commit, getValue}) {
+function onCreateTlsSecretChange({ discriminator, commit, getValue }) {
   const createTlsSecret = getValue(discriminator, "/createTlsSecret");
 
-  if(createTlsSecret) {
+  if (createTlsSecret) {
     commit("wizard/model$delete", "/spec/backend/tlsSecret/name");
   } else {
-    commit("wizard/model$update", { path: "/spec/backend/tlsSecret", value: { name: "" }, force: true });
+    commit("wizard/model$update", {
+      path: "/spec/backend/tlsSecret",
+      value: { name: "" },
+      force: true,
+    });
   }
 }
 
-function showCredentialExistingSecretField(
-  { discriminator, getValue, watchDependency },
-) {
+function showCredentialExistingSecretField({
+  discriminator,
+  getValue,
+  watchDependency,
+}) {
   const pathValue = getValue(discriminator, "/createCredentialSecret");
   watchDependency("discriminator#/createCredentialSecret");
   return !pathValue;
@@ -283,22 +294,37 @@ function showCredentialCreateSecretField(
 ) {
   watchDependency("model#/spec/backend/provider/type");
   const selectedBackendType = getValue(model, "/spec/backend/provider/type");
-  return !showCredentialExistingSecretField({ discriminator, getValue, watchDependency }) && selectedBackendType === backendType;
+  return (
+    !showCredentialExistingSecretField({
+      discriminator,
+      getValue,
+      watchDependency,
+    }) && selectedBackendType === backendType
+  );
 }
 
-function onCreateCredentialSecretChange({discriminator, commit, getValue}) {
-  const createCredentialSecret = getValue(discriminator, "/createCredentialSecret");
+function onCreateCredentialSecretChange({ discriminator, commit, getValue }) {
+  const createCredentialSecret = getValue(
+    discriminator,
+    "/createCredentialSecret"
+  );
 
-  if(createCredentialSecret) {
+  if (createCredentialSecret) {
     commit("wizard/model$delete", "/spec/backend/credentialSecret/name");
   } else {
-    commit("wizard/model$update", { path: "/spec/backend/credentialSecret", value: { name: "" }, force: true });
+    commit("wizard/model$update", {
+      path: "/spec/backend/credentialSecret",
+      value: { name: "" },
+      force: true,
+    });
   }
 }
 
-function showUnsealerCredentialExistingSecretField(
-  { discriminator, getValue, watchDependency },
-) {
+function showUnsealerCredentialExistingSecretField({
+  discriminator,
+  getValue,
+  watchDependency,
+}) {
   const pathValue = getValue(discriminator, "/createCredentialSecret");
   watchDependency("discriminator#/createCredentialSecret");
   return !pathValue;
@@ -310,25 +336,37 @@ function showUnsealerCredentialCreateSecretField(
 ) {
   watchDependency("model#/spec/unsealer/mode/type");
   const selectedUnsealerMode = getValue(model, "/spec/unsealer/mode/type");
-  return !showCredentialExistingSecretField({ discriminator, getValue, watchDependency }) && selectedUnsealerMode === unsealerMode;
+  return (
+    !showCredentialExistingSecretField({
+      discriminator,
+      getValue,
+      watchDependency,
+    }) && selectedUnsealerMode === unsealerMode
+  );
 }
 
-function onCreateUnsealerCredentialSecretChange({discriminator, commit, getValue}) {
-  const createCredentialSecret = getValue(discriminator, "/createCredentialSecret");
+function onCreateUnsealerCredentialSecretChange({
+  discriminator,
+  commit,
+  getValue,
+}) {
+  const createCredentialSecret = getValue(
+    discriminator,
+    "/createCredentialSecret"
+  );
 
-  if(createCredentialSecret) {
+  if (createCredentialSecret) {
     commit("wizard/model$delete", "/spec/backend/credentialSecret/name");
   } else {
-    commit("wizard/model$update", { path: "/spec/backend/credentialSecret", value: { name: "" }, force: true });
+    commit("wizard/model$update", {
+      path: "/spec/backend/credentialSecret",
+      value: { name: "" },
+      force: true,
+    });
   }
 }
 
-async function getResources(
-  { axios, storeGet },
-  group,
-  version,
-  resource
-) {
+async function getResources({ axios, storeGet }, group, version, resource) {
   const owner = storeGet("/user/username");
   const cluster = storeGet("/cluster/clusterDefinition/spec/name");
 
@@ -518,42 +556,57 @@ function setMachineToCustom() {
   return "custom";
 }
 
-function showCredentialSecret({model, getValue, watchDependency}) {
+function showCredentialSecret({ model, getValue, watchDependency }) {
   watchDependency("model#/spec/backend/provider/type");
-  const type = getValue(model ,"/spec/backend/provider/type");
+  const type = getValue(model, "/spec/backend/provider/type");
 
-  const backendsForCredential = ["azure", "consul", "dynamodb", "etcd", "gcs", "mysql", "postgresql", "s3", "swift"];
+  const backendsForCredential = [
+    "azure",
+    "consul",
+    "dynamodb",
+    "etcd",
+    "gcs",
+    "mysql",
+    "postgresql",
+    "s3",
+    "swift",
+  ];
 
   return backendsForCredential.includes(type);
 }
 
-function showTlsSecret({model, getValue, watchDependency}) {
+function showTlsSecret({ model, getValue, watchDependency }) {
   watchDependency("model#/spec/backend/provider/type");
-  const type = getValue(model ,"/spec/backend/provider/type");
+  const type = getValue(model, "/spec/backend/provider/type");
 
   const backendsForTls = ["consul", "mysql"];
 
   return backendsForTls.includes(type);
 }
 
-function onBackendTypeChange({model, getValue, commit, watchDependency}) {
-  if(isLowAvailableStorageBackendSelected({model, getValue, watchDependency})) {
+function onBackendTypeChange({ model, getValue, commit, watchDependency }) {
+  if (
+    isLowAvailableStorageBackendSelected({ model, getValue, watchDependency })
+  ) {
     commit("wizard/model$update", {
       path: "/spec/replicas",
       value: 1,
-      force: true
-    })
-  }
-  else {    
+      force: true,
+    });
+  } else {
     commit("wizard/model$update", {
       path: "/spec/replicas",
       value: 3,
-      force: true
-    })
+      force: true,
+    });
   }
 }
 
-function isLowAvailableStorageBackendSelected({model, getValue, watchDependency}) {
+function isLowAvailableStorageBackendSelected({
+  model,
+  getValue,
+  watchDependency,
+}) {
   watchDependency("model#/spec/backend/provider/type");
   const backendType = getValue(model, "/spec/backend/provider/type");
 
@@ -562,32 +615,31 @@ function isLowAvailableStorageBackendSelected({model, getValue, watchDependency}
   return lowAvailableStorageBackends.includes(backendType);
 }
 
-function getCreateNameSpaceUrl ({ model, getValue, storeGet }){ 
-
+function getCreateNameSpaceUrl({ model, getValue, storeGet }) {
   const user = storeGet("/route/params/user");
   const cluster = storeGet("/cluster/clusterDefinition/spec/name");
 
   const domain = storeGet("/domain");
-  if(domain.includes("bb.test")){
-    return `http://console.bb.test:5990/${user}/kubernetes/${cluster}/core/v1/namespaces/create`
-  }else{
-    const editedDomain = domain.replace("kubedb","console");
-    return `${editedDomain}/${user}/kubernetes/${cluster}/core/v1/namespaces/create`
+  if (domain.includes("bb.test")) {
+    return `http://console.bb.test:5990/${user}/kubernetes/${cluster}/core/v1/namespaces/create`;
+  } else {
+    const editedDomain = domain.replace("kubedb", "console");
+    return `${editedDomain}/${user}/kubernetes/${cluster}/core/v1/namespaces/create`;
   }
 }
 
 return {
-	isEqualToModelPathValue,
+  isEqualToModelPathValue,
   isNotEqualToModelPathValue,
-	getResources,
-	getStorageClassNames,
-	getVaultServerVersions,
-	getSecrets,
-	disableLimit,
-	getMachineListForOptions,
-	setResourceLimit,
-	setLimitsCpuOrMem,
-	setMachineToCustom,
+  getResources,
+  getStorageClassNames,
+  getVaultServerVersions,
+  getSecrets,
+  disableLimit,
+  getMachineListForOptions,
+  setResourceLimit,
+  setLimitsCpuOrMem,
+  setMachineToCustom,
   isEqualToDiscriminatorPathValue,
   showTlsCreateSecretField,
   showTlsExistingSecretField,
@@ -602,5 +654,5 @@ return {
   showTlsSecret,
   onBackendTypeChange,
   isLowAvailableStorageBackendSelected,
-  getCreateNameSpaceUrl
-}
+  getCreateNameSpaceUrl,
+};

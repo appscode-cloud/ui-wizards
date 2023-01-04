@@ -5,7 +5,7 @@ async function fetchJsons({ axios, itemCtx }) {
   let language = {};
   let functions = {};
   const { name, url, version, packageviewUrlPrefix } = itemCtx.chart;
-  
+
   try {
     ui = await axios.get(
       `${packageviewUrlPrefix}/create-ui.yaml?name=${name}&url=${url}&version=${version}&format=json`
@@ -46,12 +46,7 @@ function isEqualToModelPathValue(
   return modelPathValue === value;
 }
 
-async function getResources(
-  { axios, storeGet },
-  group,
-  version,
-  resource
-) {
+async function getResources({ axios, storeGet }, group, version, resource) {
   const owner = storeGet("/route/params/user");
   const cluster = storeGet("/cluster/clusterDefinition/spec/name");
 
@@ -101,12 +96,7 @@ function isNotShardModeSelected({ model, getValue, watchDependency }) {
   return !hasShardTopology;
 }
 
-function isShardModeSelected({
-  model,
-  getValue,
-  watchDependency,
-  commit,
-}) {
+function isShardModeSelected({ model, getValue, watchDependency, commit }) {
   const resp = !isNotShardModeSelected({ model, getValue, watchDependency });
   if (resp) {
     commit(
@@ -145,11 +135,7 @@ async function getNamespacedResourceList(
   return ans;
 }
 
-async function getResourceList(
-  axios,
-  storeGet,
-  { group, version, resource }
-) {
+async function getResourceList(axios, storeGet, { group, version, resource }) {
   const owner = storeGet("/route/params/user");
   const cluster = storeGet("/cluster/clusterDefinition/spec/name");
 
@@ -336,11 +322,7 @@ function showNewSecretCreateField({
 }
 
 // ********************* Database Mode ***********************
-function isNotStandaloneMode({
-  discriminator,
-  getValue,
-  watchDependency,
-}) {
+function isNotStandaloneMode({ discriminator, getValue, watchDependency }) {
   watchDependency("discriminator#/activeDatabaseMode");
   const mode = getValue(discriminator, "/activeDatabaseMode");
   return mode !== "Standalone";
@@ -413,16 +395,14 @@ async function getStorageClassNames(
       if (mode === "shard") {
         if (!shardClassName && databaseModeShard) {
           commit("wizard/model$update", {
-            path:
-              "/resources/kubedbComMongoDB/spec/shardTopology/shard/storage/storageClassName",
+            path: "/resources/kubedbComMongoDB/spec/shardTopology/shard/storage/storageClassName",
             value: name,
             force: true,
           });
         }
         if (!configServerClassName && databaseModeShard) {
           commit("wizard/model$update", {
-            path:
-              "/resources/kubedbComMongoDB/spec/shardTopology/configServer/storage/storageClassName",
+            path: "/resources/kubedbComMongoDB/spec/shardTopology/configServer/storage/storageClassName",
             value: name,
             force: true,
           });
@@ -463,20 +443,14 @@ function setStorageClass({ getValue, commit, model, discriminator }) {
 
   if (mode === "Sharded" && storageClassName) {
     commit("wizard/model$update", {
-      path:
-        "/resources/kubedbComMongoDB/spec/shardTopology/configServer/storage/storageClassName",
+      path: "/resources/kubedbComMongoDB/spec/shardTopology/configServer/storage/storageClassName",
       value: storageClassName,
       force: true,
     });
   }
 }
 
-function deleteDatabaseModePath({
-  discriminator,
-  getValue,
-  commit,
-  model,
-}) {
+function deleteDatabaseModePath({ discriminator, getValue, commit, model }) {
   const mode = getValue(discriminator, "/activeDatabaseMode");
   const modelSpec = getValue(model, "/resources/kubedbComMongoDB/spec");
   if (mode === "Sharded") {
@@ -615,7 +589,7 @@ async function getIssuerRefsName({
     url = `/clusters/${owner}/${cluster}/proxy/${apiGroup}/v1/clusterissuers`;
   }
 
-  if (!url) return []
+  if (!url) return [];
 
   try {
     const resp = await axios.get(url);
@@ -684,11 +658,7 @@ function setSSLMode({ model, getValue }) {
   return val || "requireSSL";
 }
 
-function showTlsConfigureSection({
-  watchDependency,
-  discriminator,
-  getValue,
-}) {
+function showTlsConfigureSection({ watchDependency, discriminator, getValue }) {
   watchDependency("discriminator#/configureTLS");
   const configureStatus = getValue(discriminator, "/configureTLS");
   return configureStatus;
@@ -716,14 +686,9 @@ function getAliasOptions() {
   return ["server", "client", "metrics-exporter"];
 }
 
-
 /****** Monitoring *********/
 
-function showMonitoringSection({
-  watchDependency,
-  discriminator,
-  getValue,
-}) {
+function showMonitoringSection({ watchDependency, discriminator, getValue }) {
   watchDependency("discriminator#/enableMonitoring");
   const configureStatus = getValue(discriminator, "/enableMonitoring");
   return configureStatus;
@@ -889,11 +854,7 @@ const stashAppscodeComBackupConfiguration = {
   },
 };
 
-function disableInitializationSection({
-  model,
-  getValue,
-  watchDependency,
-}) {
+function disableInitializationSection({ model, getValue, watchDependency }) {
   const initialized = getValue(
     model,
     "/resources/kubedbComMongoDB/spec/init/initialized"
@@ -971,8 +932,7 @@ function onPrePopulateDatabaseChange({
       });
 
       commit("wizard/model$update", {
-        path:
-          "/resources/stashAppscodeComRestoreSession_init/spec/target/ref/name",
+        path: "/resources/stashAppscodeComRestoreSession_init/spec/target/ref/name",
         value: dbName,
         force: true,
       });
@@ -1044,8 +1004,7 @@ function onDataSourceChange({ commit, getValue, discriminator, model }) {
       });
 
       commit("wizard/model$update", {
-        path:
-          "/resources/stashAppscodeComRestoreSession_init/spec/target/ref/name",
+        path: "/resources/stashAppscodeComRestoreSession_init/spec/target/ref/name",
         value: dbName,
         force: true,
       });
@@ -1116,11 +1075,7 @@ function onVolumeTypeChange({ commit, getValue, discriminator, model }) {
   }
 }
 
-function showInitializationForm({
-  getValue,
-  discriminator,
-  watchDependency,
-}) {
+function showInitializationForm({ getValue, discriminator, watchDependency }) {
   const prePopulateDatabase = getValue(discriminator, "/prePopulateDatabase");
   watchDependency("discriminator#/prePopulateDatabase");
   return prePopulateDatabase === "yes";
@@ -1186,8 +1141,7 @@ function onInitRepositoryChoiseChange({
     )}-init-repo`;
     // set this name in stashAppscodeComRestoreSession_init
     commit("wizard/model$update", {
-      path:
-        "/resources/stashAppscodeComRestoreSession_init/spec/repository/name",
+      path: "/resources/stashAppscodeComRestoreSession_init/spec/repository/name",
       value: repositoryName,
     });
   }
@@ -1202,10 +1156,7 @@ function initCustomizeRestoreJobRuntimeSettings({ getValue, model }) {
   else return "no";
 }
 
-function initCustomizeRestoreJobRuntimeSettingsForBackup({
-  getValue,
-  model,
-}) {
+function initCustomizeRestoreJobRuntimeSettingsForBackup({ getValue, model }) {
   const runtimeSettings = getValue(
     model,
     "/resources/stashAppscodeComBackupConfiguration/spec/runtimeSettings"
@@ -1239,8 +1190,7 @@ function onCustomizeRestoreJobRuntimeSettingsChange({
     ) {
       // set new value
       commit("wizard/model$update", {
-        path:
-          "/resources/stashAppscodeComRestoreSession_init/spec/runtimeSettings",
+        path: "/resources/stashAppscodeComRestoreSession_init/spec/runtimeSettings",
         value: restoreSessionInitRunTimeSettings,
       });
     }
@@ -1272,8 +1222,7 @@ function onCustomizeRestoreJobRuntimeSettingsChangeForBackup({
     ) {
       // set new value
       commit("wizard/model$update", {
-        path:
-          "/resources/stashAppscodeComBackupConfiguration/spec/runtimeSettings",
+        path: "/resources/stashAppscodeComBackupConfiguration/spec/runtimeSettings",
         value: {},
         force: true,
       });
@@ -1281,10 +1230,7 @@ function onCustomizeRestoreJobRuntimeSettingsChangeForBackup({
   }
 }
 
-function showRuntimeForm(
-  { discriminator, getValue, watchDependency },
-  value
-) {
+function showRuntimeForm({ discriminator, getValue, watchDependency }, value) {
   const customizeRestoreJobRuntimeSettings = getValue(
     discriminator,
     "/customizeRestoreJobRuntimeSettings"
@@ -1396,33 +1342,24 @@ function addKubeDbComMongDbAnnotation(
 }
 
 function initScheduleBackupForEdit({ getValue, model, setDiscriminatorValue }) {
-  const {
-    stashAppscodeComBackupConfiguration,
-    isBluePrint,
-  } = getBackupConfigsAndAnnotations(getValue, model);
+  const { stashAppscodeComBackupConfiguration, isBluePrint } =
+    getBackupConfigsAndAnnotations(getValue, model);
 
-  initRepositoryChoiseForEdit({getValue, model, setDiscriminatorValue});
+  initRepositoryChoiseForEdit({ getValue, model, setDiscriminatorValue });
 
   if (stashAppscodeComBackupConfiguration || isBluePrint) return "yes";
   else return "no";
 }
 
 function initScheduleBackup({ getValue, model }) {
-  const {
-    stashAppscodeComBackupConfiguration,
-    isBluePrint,
-  } = getBackupConfigsAndAnnotations(getValue, model);
+  const { stashAppscodeComBackupConfiguration, isBluePrint } =
+    getBackupConfigsAndAnnotations(getValue, model);
 
   if (stashAppscodeComBackupConfiguration || isBluePrint) return "yes";
   else return "no";
 }
 
-function onScheduleBackupChange({
-  commit,
-  getValue,
-  discriminator,
-  model,
-}) {
+function onScheduleBackupChange({ commit, getValue, discriminator, model }) {
   const scheduleBackup = getValue(discriminator, "/scheduleBackup");
 
   if (scheduleBackup === "no") {
@@ -1454,8 +1391,7 @@ function onScheduleBackupChange({
         value: stashAppscodeComBackupConfiguration,
       });
       commit("wizard/model$update", {
-        path:
-          "/resources/stashAppscodeComBackupConfiguration/spec/target/ref/name",
+        path: "/resources/stashAppscodeComBackupConfiguration/spec/target/ref/name",
         value: dbName,
         force: true,
       });
@@ -1474,22 +1410,15 @@ function showBackupForm({ getValue, discriminator, watchDependency }) {
 
 // invoker form
 function initBackupInvoker({ getValue, model }) {
-  const {
-    stashAppscodeComBackupConfiguration,
-    isBluePrint,
-  } = getBackupConfigsAndAnnotations(getValue, model);
+  const { stashAppscodeComBackupConfiguration, isBluePrint } =
+    getBackupConfigsAndAnnotations(getValue, model);
 
   if (stashAppscodeComBackupConfiguration) return "backupConfiguration";
   else if (isBluePrint) return "backupBlueprint";
   else return undefined;
 }
 
-function onBackupInvokerChange({
-  getValue,
-  discriminator,
-  commit,
-  model,
-}) {
+function onBackupInvokerChange({ getValue, discriminator, commit, model }) {
   const backupInvoker = getValue(discriminator, "/backupInvoker");
 
   if (backupInvoker === "backupConfiguration") {
@@ -1509,8 +1438,7 @@ function onBackupInvokerChange({
         value: stashAppscodeComBackupConfiguration,
       });
       commit("wizard/model$update", {
-        path:
-          "/resources/stashAppscodeComBackupConfiguration/spec/target/ref/name",
+        path: "/resources/stashAppscodeComBackupConfiguration/spec/target/ref/name",
         value: dbName,
         force: true,
       });
@@ -1531,10 +1459,7 @@ function onBackupInvokerChange({
   }
 }
 
-function showInvokerForm(
-  { getValue, discriminator, watchDependency },
-  value
-) {
+function showInvokerForm({ getValue, discriminator, watchDependency }, value) {
   const backupInvoker = getValue(discriminator, "/backupInvoker");
   watchDependency("discriminator#/backupInvoker");
 
@@ -1542,11 +1467,7 @@ function showInvokerForm(
 }
 
 // backup configuration form
-function initalizeTargetReferenceName({
-  getValue,
-  model,
-  watchDependency,
-}) {
+function initalizeTargetReferenceName({ getValue, model, watchDependency }) {
   const databaseName = getValue(model, "/metadata/release/name");
   watchDependency("model#/metadata/release/name");
 
@@ -1573,13 +1494,22 @@ function initRepositoryChoise({ getValue, model }) {
   else return "select";
 }
 
-function initRepositoryChoiseForEdit({ getValue, model, setDiscriminatorValue }) {
+function initRepositoryChoiseForEdit({
+  getValue,
+  model,
+  setDiscriminatorValue,
+}) {
   const stashAppscodeComRepository_repo = getValue(
     model,
     "/resources/stashAppscodeComRepository_repo"
   );
-  const repoInitialSelectionStatus = stashAppscodeComRepository_repo ? "yes" : "no";
-  setDiscriminatorValue("/repoInitialSelectionStatus", repoInitialSelectionStatus);
+  const repoInitialSelectionStatus = stashAppscodeComRepository_repo
+    ? "yes"
+    : "no";
+  setDiscriminatorValue(
+    "/repoInitialSelectionStatus",
+    repoInitialSelectionStatus
+  );
 
   return repoInitialSelectionStatus;
 }
@@ -1616,8 +1546,7 @@ function onRepositoryChoiseChange({
       )}-repo`;
       // set this name in stashAppscodeComRestoreSession_init
       commit("wizard/model$update", {
-        path:
-          "/resources/stashAppscodeComBackupConfiguration/spec/repository/name",
+        path: "/resources/stashAppscodeComBackupConfiguration/spec/repository/name",
         value: repositoryName,
       });
     }
@@ -1696,12 +1625,7 @@ function initFromAnnotationKeyValue({ getValue, model }, prefix) {
   return newOb;
 }
 
-function onTaskParametersChange({
-  getValue,
-  discriminator,
-  model,
-  commit,
-}) {
+function onTaskParametersChange({ getValue, discriminator, model, commit }) {
   const taskParameters = getValue(discriminator, "/taskParameters");
 
   const taskParamterKeys = Object.keys(taskParameters).map(
@@ -1744,8 +1668,7 @@ function onNamespaceChange({ commit, model, getValue }) {
   );
   if (agent === "prometheus.io") {
     commit("wizard/model$update", {
-      path:
-        "/resources/monitoringCoreosComServiceMonitor/spec/namespaceSelector/matchNames",
+      path: "/resources/monitoringCoreosComServiceMonitor/spec/namespaceSelector/matchNames",
       value: [namespace],
       force: true,
     });
@@ -1765,8 +1688,7 @@ function onLabelChange({ commit, model, getValue }) {
 
   if (agent === "prometheus.io") {
     commit("wizard/model$update", {
-      path:
-        "/resources/monitoringCoreosComServiceMonitor/spec/selector/matchLabels",
+      path: "/resources/monitoringCoreosComServiceMonitor/spec/selector/matchLabels",
       value: labels,
       force: true,
     });
@@ -1788,8 +1710,7 @@ function onNameChange({ commit, model, getValue }) {
 
   if (agent === "prometheus.io") {
     commit("wizard/model$update", {
-      path:
-        "/resources/monitoringCoreosComServiceMonitor/spec/selector/matchLabels",
+      path: "/resources/monitoringCoreosComServiceMonitor/spec/selector/matchLabels",
       value: labels,
       force: true,
     });
@@ -1802,8 +1723,7 @@ function onNameChange({ commit, model, getValue }) {
 
   if (scheduleBackup) {
     commit("wizard/model$update", {
-      path:
-        "/resources/stashAppscodeComBackupConfiguration/spec/target/ref/name",
+      path: "/resources/stashAppscodeComBackupConfiguration/spec/target/ref/name",
       value: dbName,
       force: true,
     });
@@ -1813,8 +1733,7 @@ function onNameChange({ commit, model, getValue }) {
     );
     if (creatingNewRepo) {
       commit("wizard/model$update", {
-        path:
-          "/resources/stashAppscodeComBackupConfiguration/spec/repository/name",
+        path: "/resources/stashAppscodeComBackupConfiguration/spec/repository/name",
         value: `${dbName}-repo`,
         force: true,
       });
@@ -1828,8 +1747,7 @@ function onNameChange({ commit, model, getValue }) {
 
   if (prePopulateDatabase) {
     commit("wizard/model$update", {
-      path:
-        "/resources/stashAppscodeComRestoreSession_init/spec/target/ref/name",
+      path: "/resources/stashAppscodeComRestoreSession_init/spec/target/ref/name",
       value: dbName,
       force: true,
     });
@@ -1839,8 +1757,7 @@ function onNameChange({ commit, model, getValue }) {
     );
     if (creatingNewRepo) {
       commit("wizard/model$update", {
-        path:
-          "/resources/stashAppscodeComRestoreSession_init/spec/repository/name",
+        path: "/resources/stashAppscodeComRestoreSession_init/spec/repository/name",
         value: `${dbName}-init-repo`,
         force: true,
       });
@@ -1864,8 +1781,7 @@ function onNameChange({ commit, model, getValue }) {
   );
   if (hasSecretShardConfig) {
     commit("wizard/model$update", {
-      path:
-        "/resources/kubedbComMongoDB/spec/shardTopology/shard/configSecret/name",
+      path: "/resources/kubedbComMongoDB/spec/shardTopology/shard/configSecret/name",
       value: `${dbName}-shard-config`,
       force: true,
     });
@@ -1878,8 +1794,7 @@ function onNameChange({ commit, model, getValue }) {
   );
   if (hasSecretConfigServerConfig) {
     commit("wizard/model$update", {
-      path:
-        "/resources/kubedbComMongoDB/spec/shardTopology/configServer/configSecret/name",
+      path: "/resources/kubedbComMongoDB/spec/shardTopology/configServer/configSecret/name",
       value: `${dbName}-configserver-config`,
       force: true,
     });
@@ -1892,8 +1807,7 @@ function onNameChange({ commit, model, getValue }) {
   );
   if (hasSecretMongosConfig) {
     commit("wizard/model$update", {
-      path:
-        "/resources/kubedbComMongoDB/spec/shardTopology/mongos/configSecret/name",
+      path: "/resources/kubedbComMongoDB/spec/shardTopology/mongos/configSecret/name",
       value: `${dbName}-mongos-config`,
       force: true,
     });
@@ -1933,60 +1847,53 @@ function getCreateAuthSecret({ model, getValue }) {
     model,
     "/resources/kubedbComMongoDB/spec/authSecret"
   );
-  
+
   return !authSecret;
 }
 
 function showExistingSecretSection({
   getValue,
   watchDependency,
-  discriminator
+  discriminator,
 }) {
   watchDependency("discriminator#/createAuthSecret");
-  
-  const hasAuthSecretName = getValue(
-    discriminator,
-    "/createAuthSecret"
-  );
+
+  const hasAuthSecretName = getValue(discriminator, "/createAuthSecret");
   return !hasAuthSecretName;
 }
 
-function showPasswordSection({
-  getValue,
-  watchDependency,
-  discriminator
-}) {
+function showPasswordSection({ getValue, watchDependency, discriminator }) {
   return !showExistingSecretSection({
     getValue,
     watchDependency,
-    discriminator
-  })
+    discriminator,
+  });
 }
 
 function setAuthSecretPassword({ model, getValue }) {
-  const encodedPassword = getValue(model, "/resources/secret_auth/data/password");
+  const encodedPassword = getValue(
+    model,
+    "/resources/secret_auth/data/password"
+  );
   return encodedPassword ? decodePassword({}, encodedPassword) : "";
 }
 
 function onAuthSecretPasswordChange({ getValue, discriminator, commit }) {
   const stringPassword = getValue(discriminator, "/password");
 
-  if(stringPassword) {
+  if (stringPassword) {
     commit("wizard/model$update", {
       path: "/resources/secret_auth/data/password",
       value: encodePassword({}, stringPassword),
-      force: true
+      force: true,
     });
     commit("wizard/model$update", {
       path: "/resources/secret_auth/data/username",
       value: encodePassword({}, "root"),
-      force: true
+      force: true,
     });
   } else {
-    commit(
-      "wizard/model$delete",
-      "/resources/secret_auth"
-    );
+    commit("wizard/model$delete", "/resources/secret_auth");
   }
 }
 
@@ -2000,22 +1907,15 @@ function decodePassword({}, value) {
   return atob(value);
 }
 
-function onCreateAuthSecretChange({
-  discriminator,
-  getValue,
-  commit,
-}) {
+function onCreateAuthSecretChange({ discriminator, getValue, commit }) {
   const createAuthSecret = getValue(discriminator, "/createAuthSecret");
   if (createAuthSecret) {
     commit(
       "wizard/model$delete",
       "/resources/kubedbComMongoDB/spec/authSecret"
     );
-  } else if(createAuthSecret === false) {
-    commit(
-      "wizard/model$delete",
-      "/resources/secret_auth"
-    );
+  } else if (createAuthSecret === false) {
+    commit("wizard/model$delete", "/resources/secret_auth");
   }
 }
 
@@ -2065,10 +1965,7 @@ async function getSecrets({
 
 //////////////////// service monitor ///////////////////
 
-function isEqualToServiceMonitorType(
-  { rootModel, watchDependency },
-  value
-) {
+function isEqualToServiceMonitorType({ rootModel, watchDependency }, value) {
   watchDependency("rootModel#/spec/type");
   return rootModel && rootModel.spec && rootModel.spec.type === value;
 }
@@ -2104,12 +2001,7 @@ function onConfigurationSourceChange({
   }
 }
 
-function onConfigurationChange({
-  getValue,
-  commit,
-  discriminator,
-  model,
-}) {
+function onConfigurationChange({ getValue, commit, discriminator, model }) {
   const value = getValue(discriminator, "/configuration");
   commit("wizard/model$update", {
     path: "/resources/secret_config/stringData/mongod.conf",
@@ -2143,11 +2035,7 @@ function setSecretConfigNamespace({ getValue, model, watchDependency }) {
 
 //////////////////// custom config for sharded topology /////////////////
 
-function setConfigurationSourceShard({
-  model,
-  getValue,
-  discriminator,
-}) {
+function setConfigurationSourceShard({ model, getValue, discriminator }) {
   const src = getValue(discriminator, "/configurationSourceShard");
   if (src) return src;
   const value = getValue(model, "/resources/secret_shard_config");
@@ -2165,11 +2053,7 @@ function setConfigurationSourceConfigServer({
   return value ? "create-new-config" : "use-existing-config";
 }
 
-function setConfigurationSourceMongos({
-  model,
-  getValue,
-  discriminator,
-}) {
+function setConfigurationSourceMongos({ model, getValue, discriminator }) {
   const src = getValue(discriminator, "/configurationSourceMongos");
   if (src) return src;
   const value = getValue(model, "/resources/secret_mongos_config");
@@ -2270,8 +2154,7 @@ function onConfigurationSourceMongosChange({
       });
     }
     commit("wizard/model$update", {
-      path:
-        "/resources/kubedbComMongoDB/spec/shardTopology/mongos/configSecret/name",
+      path: "/resources/kubedbComMongoDB/spec/shardTopology/mongos/configSecret/name",
       value: configSecretName,
       force: true,
     });
@@ -2320,8 +2203,7 @@ function onConfigurationSourceShardChange({
       });
     }
     commit("wizard/model$update", {
-      path:
-        "/resources/kubedbComMongoDB/spec/shardTopology/shard/configSecret/name",
+      path: "/resources/kubedbComMongoDB/spec/shardTopology/shard/configSecret/name",
       value: configSecretName,
       force: true,
     });
@@ -2370,8 +2252,7 @@ function onConfigurationSourceConfigServerChange({
       });
     }
     commit("wizard/model$update", {
-      path:
-        "/resources/kubedbComMongoDB/spec/shardTopology/configServer/configSecret/name",
+      path: "/resources/kubedbComMongoDB/spec/shardTopology/configServer/configSecret/name",
       value: configSecretName,
       force: true,
     });
@@ -2525,11 +2406,23 @@ function setConfigurationFilesMongos({ model, getValue }) {
 function onSetCustomConfigChange({ discriminator, getValue, commit }) {
   const value = getValue(discriminator, "/setCustomConfig");
 
-  if(value === "no") {
-    commit("wizard/model$delete", "/resources/kubedbComMongoDB/spec/configSecret");
-    commit("wizard/model$delete", "/resources/kubedbComMongoDB/spec/shardTopology/shard/configSecret");
-    commit("wizard/model$delete", "/resources/kubedbComMongoDB/spec/shardTopology/configServer/configSecret");
-    commit("wizard/model$delete", "/resources/kubedbComMongoDB/spec/shardTopology/mongos/configSecret");
+  if (value === "no") {
+    commit(
+      "wizard/model$delete",
+      "/resources/kubedbComMongoDB/spec/configSecret"
+    );
+    commit(
+      "wizard/model$delete",
+      "/resources/kubedbComMongoDB/spec/shardTopology/shard/configSecret"
+    );
+    commit(
+      "wizard/model$delete",
+      "/resources/kubedbComMongoDB/spec/shardTopology/configServer/configSecret"
+    );
+    commit(
+      "wizard/model$delete",
+      "/resources/kubedbComMongoDB/spec/shardTopology/mongos/configSecret"
+    );
     commit("wizard/model$delete", "/resources/secret_config");
     commit("wizard/model$delete", "/resources/secret_shard_config");
     commit("wizard/model$delete", "/resources/secret_configserver_config");
@@ -2537,139 +2430,138 @@ function onSetCustomConfigChange({ discriminator, getValue, commit }) {
   }
 }
 
-function getCreateNameSpaceUrl ({ model, getValue, storeGet }){ 
-
+function getCreateNameSpaceUrl({ model, getValue, storeGet }) {
   const user = storeGet("/route/params/user");
   const cluster = storeGet("/cluster/clusterDefinition/spec/name");
 
   const domain = storeGet("/domain");
-  if(domain.includes("bb.test")){
-    return `http://console.bb.test:5990/${user}/kubernetes/${cluster}/core/v1/namespaces/create`
-  }else{
-    const editedDomain = domain.replace("kubedb","console");
-    return `${editedDomain}/${user}/kubernetes/${cluster}/core/v1/namespaces/create`
+  if (domain.includes("bb.test")) {
+    return `http://console.bb.test:5990/${user}/kubernetes/${cluster}/core/v1/namespaces/create`;
+  } else {
+    const editedDomain = domain.replace("kubedb", "console");
+    return `${editedDomain}/${user}/kubernetes/${cluster}/core/v1/namespaces/create`;
   }
 }
 
 return {
-	fetchJsons,
-	disableLableChecker,
-	isEqualToModelPathValue,
-	getResources,
-	isEqualToDiscriminatorPath,
-	setValueFromModel,
-	isNotShardModeSelected,
-	isShardModeSelected,
-	getNamespacedResourceList,
-	getResourceList,
-	resourceNames,
+  fetchJsons,
+  disableLableChecker,
+  isEqualToModelPathValue,
+  getResources,
+  isEqualToDiscriminatorPath,
+  setValueFromModel,
+  isNotShardModeSelected,
+  isShardModeSelected,
+  getNamespacedResourceList,
+  getResourceList,
+  resourceNames,
   unNamespacedResourceNames,
   returnTrue,
   returnStringYes,
-	getMongoDbVersions,
-	showAuthPasswordField,
-	showAuthSecretField,
-	showNewSecretCreateField,
+  getMongoDbVersions,
+  showAuthPasswordField,
+  showAuthSecretField,
+  showNewSecretCreateField,
   isNotStandaloneMode,
-	showCommonStorageClassAndSizeField,
-	setDatabaseMode,
-	getStorageClassNames,
-	setStorageClass,
-	deleteDatabaseModePath,
-	isEqualToDatabaseMode,
-	setApiGroup,
-	getIssuerRefsName,
-	hasIssuerRefName,
-	hasNoIssuerRefName,
-	setClusterAuthMode,
-	setSSLMode,
-	showTlsConfigureSection,
-	onTlsConfigureChange,
+  showCommonStorageClassAndSizeField,
+  setDatabaseMode,
+  getStorageClassNames,
+  setStorageClass,
+  deleteDatabaseModePath,
+  isEqualToDatabaseMode,
+  setApiGroup,
+  getIssuerRefsName,
+  hasIssuerRefName,
+  hasNoIssuerRefName,
+  setClusterAuthMode,
+  setSSLMode,
+  showTlsConfigureSection,
+  onTlsConfigureChange,
   getAliasOptions,
-	showMonitoringSection,
-	onEnableMonitoringChange,
-	showCustomizeExporterSection,
+  showMonitoringSection,
+  onEnableMonitoringChange,
+  showCustomizeExporterSection,
   onCustomizeExporterChange,
   disableInitializationSection,
-	valueExists,
-	initPrePopulateDatabase,
-	onPrePopulateDatabaseChange,
-	initDataSource,
-	onDataSourceChange,
-	initVolumeType,
-	onVolumeTypeChange,
-	showInitializationForm,
-	showScriptOrStashForm,
-	showConfigMapOrSecretName,
-	initializeNamespace,
-	showRepositorySelectOrCreate,
-	onInitRepositoryChoiseChange,
-	initCustomizeRestoreJobRuntimeSettings,
-	initCustomizeRestoreJobRuntimeSettingsForBackup,
-	onCustomizeRestoreJobRuntimeSettingsChange,
-	onCustomizeRestoreJobRuntimeSettingsChangeForBackup,
-	showRuntimeForm,
-	getImagePullSecrets,
-	getBackupConfigsAndAnnotations,
-	deleteKubeDbComMongDbAnnotation,
-	addKubeDbComMongDbAnnotation,
-	initScheduleBackup,
+  valueExists,
+  initPrePopulateDatabase,
+  onPrePopulateDatabaseChange,
+  initDataSource,
+  onDataSourceChange,
+  initVolumeType,
+  onVolumeTypeChange,
+  showInitializationForm,
+  showScriptOrStashForm,
+  showConfigMapOrSecretName,
+  initializeNamespace,
+  showRepositorySelectOrCreate,
+  onInitRepositoryChoiseChange,
+  initCustomizeRestoreJobRuntimeSettings,
+  initCustomizeRestoreJobRuntimeSettingsForBackup,
+  onCustomizeRestoreJobRuntimeSettingsChange,
+  onCustomizeRestoreJobRuntimeSettingsChangeForBackup,
+  showRuntimeForm,
+  getImagePullSecrets,
+  getBackupConfigsAndAnnotations,
+  deleteKubeDbComMongDbAnnotation,
+  addKubeDbComMongDbAnnotation,
+  initScheduleBackup,
   initScheduleBackupForEdit,
-	onScheduleBackupChange,
-	showBackupForm,
-	initBackupInvoker,
-	onBackupInvokerChange,
-	showInvokerForm,
-	initalizeTargetReferenceName,
-	setInitialRestoreSessionRepo,
-	initRepositoryChoise,
+  onScheduleBackupChange,
+  showBackupForm,
+  initBackupInvoker,
+  onBackupInvokerChange,
+  showInvokerForm,
+  initalizeTargetReferenceName,
+  setInitialRestoreSessionRepo,
+  initRepositoryChoise,
   initRepositoryChoiseForEdit,
-	onRepositoryChoiseChange,
-	onRepositoryNameChange,
-	getMongoAnnotations,
-	initFromAnnotationValue,
-	onBackupBlueprintNameChange,
-	onBackupBlueprintScheduleChange,
-	initFromAnnotationKeyValue,
-	onTaskParametersChange,
-	isValueExistInModel,
-	onNamespaceChange,
-	onLabelChange,
-	onNameChange,
-	returnFalse,
-	onAgentChange,
+  onRepositoryChoiseChange,
+  onRepositoryNameChange,
+  getMongoAnnotations,
+  initFromAnnotationValue,
+  onBackupBlueprintNameChange,
+  onBackupBlueprintScheduleChange,
+  initFromAnnotationKeyValue,
+  onTaskParametersChange,
+  isValueExistInModel,
+  onNamespaceChange,
+  onLabelChange,
+  onNameChange,
+  returnFalse,
+  onAgentChange,
   getCreateAuthSecret,
   showExistingSecretSection,
-	showPasswordSection,
+  showPasswordSection,
   setAuthSecretPassword,
   onAuthSecretPasswordChange,
-	encodePassword,
-	decodePassword,
-	onCreateAuthSecretChange,
-	getSecrets,
-	isEqualToServiceMonitorType,
-	onConfigurationSourceChange,
-	onConfigurationChange,
-	setConfigurationSource,
-	setSecretConfigNamespace,
-	setConfigurationSourceShard,
-	setConfigurationSourceConfigServer,
-	setConfigurationSourceMongos,
-	isSchemaOf,
-	disableConfigSourceOption,
-	onConfigurationSourceMongosChange,
-	onConfigurationSourceShardChange,
-	onConfigurationSourceConfigServerChange,
-	transferConfigSecret,
-	onConfigSecretModelChange,
-	setConfiguration,
-	setConfigurationShard,
-	setConfigurationConfigServer,
-	setConfigurationMongos,
-	setConfigurationFiles,
-	setConfigurationFilesShard,
-	setConfigurationFilesConfigServer,
+  encodePassword,
+  decodePassword,
+  onCreateAuthSecretChange,
+  getSecrets,
+  isEqualToServiceMonitorType,
+  onConfigurationSourceChange,
+  onConfigurationChange,
+  setConfigurationSource,
+  setSecretConfigNamespace,
+  setConfigurationSourceShard,
+  setConfigurationSourceConfigServer,
+  setConfigurationSourceMongos,
+  isSchemaOf,
+  disableConfigSourceOption,
+  onConfigurationSourceMongosChange,
+  onConfigurationSourceShardChange,
+  onConfigurationSourceConfigServerChange,
+  transferConfigSecret,
+  onConfigSecretModelChange,
+  setConfiguration,
+  setConfigurationShard,
+  setConfigurationConfigServer,
+  setConfigurationMongos,
+  setConfigurationFiles,
+  setConfigurationFilesShard,
+  setConfigurationFilesConfigServer,
   setConfigurationFilesMongos,
   onSetCustomConfigChange,
-  getCreateNameSpaceUrl
-}
+  getCreateNameSpaceUrl,
+};
