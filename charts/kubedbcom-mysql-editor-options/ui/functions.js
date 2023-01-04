@@ -533,5 +533,5 @@ return {
 	setLimitsCpuOrMem,
 	setMachineToCustom,
 	updateAgentValue,
-  getCreateNameSpaceUrl
+	getCreateNameSpaceUrl
 }

@@ -467,5 +467,5 @@ return {
 	setResourceLimit,
 	setLimitsCpuOrMem,
 	setMachineToCustom,
-  getCreateNameSpaceUrl
+	getCreateNameSpaceUrl
 }

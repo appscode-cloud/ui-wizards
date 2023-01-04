@@ -592,5 +592,5 @@ return {
 	isSecurityEnabled,
 	onDisableSecurityChange,
 	updateAgentValue,
-  getCreateNameSpaceUrl
+	getCreateNameSpaceUrl
 }

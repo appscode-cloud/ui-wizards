@@ -583,5 +583,5 @@ return {
 	showSentinelNameAndNamespace,
 	onCreateSentinelChange,
 	updateAgentValue,
-  getCreateNameSpaceUrl,
+	getCreateNameSpaceUrl,
 }

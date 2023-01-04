@@ -540,5 +540,5 @@ return {
 	showMonitoringSection,
 	setMonitoringStatus,
 	updateAgentValue,
-  getCreateNameSpaceUrl
+	getCreateNameSpaceUrl
 }
