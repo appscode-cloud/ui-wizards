@@ -1763,6 +1763,21 @@ function isValueExistInModel({ model, getValue }, path) {
   return !!modelValue;
 }
 
+
+function getCreateNameSpaceUrl ({ model, getValue, storeGet }){ 
+
+  const user = storeGet("/route/params/user");
+  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+
+  const domain = storeGet("/domain");
+  if(domain.includes("bb.test")){
+    return `http://console.bb.test:5990/${user}/kubernetes/${cluster}/core/v1/namespaces/create`
+  }else{
+    const editedDomain = domain.replace("kubedb","console");
+    return `${editedDomain}/${user}/kubernetes/${cluster}/core/v1/namespaces/create`
+  }
+}
+
 return {
 	fetchJsons,
 	disableLableChecker,
@@ -1859,4 +1874,5 @@ return {
   onNamespaceChange,
   onLabelChange,
   onAgentChange,
+  getCreateNameSpaceUrl
 }
