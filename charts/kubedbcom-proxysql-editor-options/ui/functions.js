@@ -566,5 +566,5 @@ return {
 	setLimitsCpuOrMem,
 	setMachineToCustom,
 	updateAgentValue,
-  getNamespacedResourceList
+  getCreateNameSpaceUrl
 }
