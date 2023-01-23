@@ -512,7 +512,7 @@ function getCreateNameSpaceUrl ({ model, getValue, storeGet }){
   const user = storeGet("/route/params/user");
   const cluster = storeGet("/cluster/clusterDefinition/spec/name");
 
-  const domain = storeGet("/domain");
+  const domain = storeGet("/domain") || '';
   if(domain.includes("bb.test")){
     return `http://console.bb.test:5990/${user}/kubernetes/${cluster}/core/v1/namespaces/create`
   }else{

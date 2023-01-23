@@ -118,7 +118,7 @@ function getSecretEditPageLink({storeGet, getValue, model, watchDependency}) {
   watchDependency("model#/resources/stashAppscodeComRepository/spec/backend/storageSecretName")
   
   const cluster = storeGet("/cluster/clusterDefinition/spec/name");
-  const domain = storeGet("/domain");
+  const domain = storeGet("/domain") || '';
   const owner = storeGet("/route/params/user");
   const namespace = getValue(model, "/metadata/release/namespace");
   const secretName = getValue(model, "/resources/stashAppscodeComRepository/spec/backend/storageSecretName")
