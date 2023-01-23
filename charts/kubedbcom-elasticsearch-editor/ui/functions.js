@@ -2822,7 +2822,7 @@ function initSetSecureCustomConfig({ model, getValue }) {
 
 function getOpsRequestUrl({ storeGet, model, getValue, mode }, reqType) {
   const cluster = storeGet("/cluster/clusterDefinition/spec/name");
-  const domain = storeGet("/domain");
+  const domain = storeGet("/domain") || '';
   const owner = storeGet("/route/params/user");
   const dbname = getValue(model, "/metadata/release/name");
   const group = getValue(model, "/metadata/resource/group");
@@ -2845,7 +2845,7 @@ function getCreateNameSpaceUrl ({ model, getValue, storeGet }){
   const user = storeGet("/route/params/user");
   const cluster = storeGet("/cluster/clusterDefinition/spec/name");
 
-  const domain = storeGet("/domain");
+  const domain = storeGet("/domain") || '';
   if(domain.includes("bb.test")){
     return `http://console.bb.test:5990/${user}/kubernetes/${cluster}/core/v1/namespaces/create`
   }else{
