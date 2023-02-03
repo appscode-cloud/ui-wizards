@@ -36,7 +36,7 @@ async function getNamespacedResourceList(
   { namespace, group, version, resource }
 ) {
   const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const cluster = storeGet("/route/params/cluster");
 
   const url = `/clusters/${owner}/${cluster}/proxy/${group}/${version}/namespaces/${namespace}/${resource}`;
 
@@ -156,7 +156,7 @@ async function getSecrets({
   reusableElementCtx,
 }) {
   const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const cluster = storeGet("/route/params/cluster");
   const namespace = getValue(reusableElementCtx, "/dataContext/namespace");
 
   watchDependency("data#/namespace");
@@ -200,7 +200,7 @@ async function getSecretKeys({
   reusableElementCtx,
 }) {
   const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const cluster = storeGet("/route/params/cluster");
   const namespace = getValue(reusableElementCtx, "/dataContext/namespace");
   const secretName =
     (rootModel &&
@@ -241,7 +241,7 @@ async function getConfigMapKeys({
   reusableElementCtx,
 }) {
   const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const cluster = storeGet("/route/params/cluster");
   const namespace = getValue(reusableElementCtx, "/dataContext/namespace");
   const configMapName =
     (rootModel &&

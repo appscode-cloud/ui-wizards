@@ -34,7 +34,7 @@ function returnFalse() {
 
 async function getNamespaces({ axios, storeGet }) {
   const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const cluster = storeGet("/route/params/cluster");
 
   const resp = await axios.get(
     `/clusters/${owner}/${cluster}/proxy/core/v1/namespaces`,
@@ -62,7 +62,7 @@ async function getDbs({
   watchDependency,
 }) {
   const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const cluster = storeGet("/route/params/cluster");
 
   const namespace = getValue(model, "/metadata/namespace");
   watchDependency("model#/metadata/namespace");
@@ -94,7 +94,7 @@ async function getDbDetails({
   setDiscriminatorValue
 }) {
   const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const cluster = storeGet("/route/params/cluster");
 
   const namespace = getValue(model, "/metadata/namespace");
   watchDependency("model#/metadata/namespace");
@@ -115,7 +115,7 @@ async function getDbDetails({
 async function getDbVersions({ axios, storeGet, watchDependency }) {
   watchDependency("discriminator#/dbDetails");
   const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const cluster = storeGet("/route/params/cluster");
 
   const queryParams = {
     filter: {
@@ -333,7 +333,7 @@ async function getConfigSecrets({
   watchDependency,
 }) {
   const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const cluster = storeGet("/route/params/cluster");
   const namespace = getValue(model, "/metadata/namespace");
   watchDependency("model#/metadata/namespace");
 
@@ -374,7 +374,7 @@ async function getNamespacedResourceList(
   { namespace, group, version, resource }
 ) {
   const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const cluster = storeGet("/route/params/cluster");
 
   const url = `/clusters/${owner}/${cluster}/proxy/${group}/${version}/namespaces/${namespace}/${resource}`;
 
@@ -400,7 +400,7 @@ async function getResourceList(
   { group, version, resource }
 ) {
   const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const cluster = storeGet("/route/params/cluster");
 
   const url = `/clusters/${owner}/${cluster}/proxy/${group}/${version}/${resource}`;
 
@@ -563,7 +563,7 @@ async function getIssuerRefsName({
   watchDependency,
 }) {
   const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const cluster = storeGet("/route/params/cluster");
   watchDependency("model#/spec/tls/issuerRef/apiGroup");
   watchDependency("model#/spec/tls/issuerRef/kind");
   watchDependency("model#/metadata/namespace");

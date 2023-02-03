@@ -5,7 +5,7 @@ async function fetchJsons({ axios, itemCtx }) {
   let language = {};
   let functions = {};
   const { name, url, version, packageviewUrlPrefix } = itemCtx.chart;
-  
+
   try {
     ui = await axios.get(
       `${packageviewUrlPrefix}/create-ui.yaml?name=${name}&url=${url}&version=${version}&format=json`
@@ -46,14 +46,9 @@ function isEqualToModelPathValue(
   return modelPathValue === value;
 }
 
-async function getResources(
-  { axios, storeGet },
-  group,
-  version,
-  resource
-) {
+async function getResources({ axios, storeGet }, group, version, resource) {
   const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const cluster = storeGet("/route/params/cluster");
 
   try {
     const resp = await axios.get(
@@ -98,7 +93,7 @@ async function getNamespacedResourceList(
   { namespace, group, version, resource }
 ) {
   const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const cluster = storeGet("/route/params/cluster");
 
   const url = `/clusters/${owner}/${cluster}/proxy/${group}/${version}/namespaces/${namespace}/${resource}`;
 
@@ -119,13 +114,9 @@ async function getNamespacedResourceList(
   return ans;
 }
 
-async function getResourceList(
-  axios,
-  storeGet,
-  { group, version, resource }
-) {
+async function getResourceList(axios, storeGet, { group, version, resource }) {
   const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const cluster = storeGet("/route/params/cluster");
 
   const url = `/clusters/${owner}/${cluster}/proxy/${group}/${version}/${resource}`;
 
@@ -221,7 +212,7 @@ function returnStringYes() {
 // ************************* Basic Info **********************************************
 async function getProxySQLVersions({ axios, storeGet }) {
   const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const cluster = storeGet("/route/params/cluster");
 
   const queryParams = {
     filter: {
@@ -263,7 +254,7 @@ async function getProxySQLVersions({ axios, storeGet }) {
 
 async function getAppBindings({ axios, storeGet }) {
   const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const cluster = storeGet("/route/params/cluster");
 
   const queryParams = {
     filter: {
@@ -285,7 +276,11 @@ async function getAppBindings({ axios, storeGet }) {
     const resources = (resp && resp.data && resp.data.items) || [];
 
     const fileredResources = resources
-      .filter((item) => item.spec?.type === 'kubedb.com/mysql' || item.spec?.type === 'kubedb.com/mariadb')
+      .filter(
+        (item) =>
+          item.spec?.type === "kubedb.com/mysql" ||
+          item.spec?.type === "kubedb.com/mariadb"
+      )
       .map((item) => {
         const name = (item.metadata && item.metadata.name) || "";
         return {
@@ -300,20 +295,18 @@ async function getAppBindings({ axios, storeGet }) {
   }
 }
 
-
 // ********************* Database Mode ***********************
 function setDatabaseMode({ model, getValue, watchDependency }) {
-  const replicas = getValue(model, "/resources/kubedbComProxySQL/spec/replicas");
+  const replicas = getValue(
+    model,
+    "/resources/kubedbComProxySQL/spec/replicas"
+  );
   watchDependency("model#/resources/kubedbComProxySQL/spec/replicas");
 
-  return replicas > 1 ? 'Cluster' : 'Standalone';
+  return replicas > 1 ? "Cluster" : "Standalone";
 }
 
-function onDatabaseModeChange({
-  discriminator,
-  getValue,
-  commit,
-}) {
+function onDatabaseModeChange({ discriminator, getValue, commit }) {
   const mode = getValue(discriminator, "/activeDatabaseMode");
 
   if (mode === "Standalone") {
@@ -348,7 +341,7 @@ async function getIssuerRefsName({
   watchDependency,
 }) {
   const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const cluster = storeGet("/route/params/cluster");
   watchDependency(
     "model#/resources/kubedbComProxySQL/spec/tls/issuerRef/apiGroup"
   );
@@ -371,7 +364,7 @@ async function getIssuerRefsName({
     url = `/clusters/${owner}/${cluster}/proxy/${apiGroup}/v1/clusterissuers`;
   }
 
-  if (!url) return []
+  if (!url) return [];
 
   try {
     const resp = await axios.get(url);
@@ -427,11 +420,7 @@ async function hasNoIssuerRefName({
   return !resp;
 }
 
-function showTlsConfigureSection({
-  watchDependency,
-  discriminator,
-  getValue,
-}) {
+function showTlsConfigureSection({ watchDependency, discriminator, getValue }) {
   watchDependency("discriminator#/configureTLS");
   const configureStatus = getValue(discriminator, "/configureTLS");
   return configureStatus;
@@ -455,14 +444,9 @@ function getAliasOptions() {
   return ["server", "client", "metrics-exporter"];
 }
 
-
 /****** Monitoring *********/
 
-function showMonitoringSection({
-  watchDependency,
-  discriminator,
-  getValue,
-}) {
+function showMonitoringSection({ watchDependency, discriminator, getValue }) {
   watchDependency("discriminator#/enableMonitoring");
   const configureStatus = getValue(discriminator, "/enableMonitoring");
   return configureStatus;
@@ -520,8 +504,7 @@ function onNamespaceChange({ commit, model, getValue }) {
   );
   if (agent === "prometheus.io") {
     commit("wizard/model$update", {
-      path:
-        "/resources/monitoringCoreosComServiceMonitor/spec/namespaceSelector/matchNames",
+      path: "/resources/monitoringCoreosComServiceMonitor/spec/namespaceSelector/matchNames",
       value: [namespace],
       force: true,
     });
@@ -541,8 +524,7 @@ function onLabelChange({ commit, model, getValue }) {
 
   if (agent === "prometheus.io") {
     commit("wizard/model$update", {
-      path:
-        "/resources/monitoringCoreosComServiceMonitor/spec/selector/matchLabels",
+      path: "/resources/monitoringCoreosComServiceMonitor/spec/selector/matchLabels",
       value: labels,
       force: true,
     });
@@ -564,13 +546,12 @@ function onNameChange({ commit, model, getValue }) {
 
   if (agent === "prometheus.io") {
     commit("wizard/model$update", {
-      path:
-        "/resources/monitoringCoreosComServiceMonitor/spec/selector/matchLabels",
+      path: "/resources/monitoringCoreosComServiceMonitor/spec/selector/matchLabels",
       value: labels,
       force: true,
     });
   }
-  
+
   // to reset configSecret name field
   const hasSecretConfig = getValue(model, "/resources/secret_config");
   if (hasSecretConfig) {
@@ -618,60 +599,49 @@ function getCreateAuthSecret({ model, getValue }) {
 function showExistingSecretSection({
   getValue,
   watchDependency,
-  discriminator
+  discriminator,
 }) {
   watchDependency("discriminator#/createAuthSecret");
-  const hasAuthSecretName = getValue(
-    discriminator,
-    "/createAuthSecret"
-  );
+  const hasAuthSecretName = getValue(discriminator, "/createAuthSecret");
   return !hasAuthSecretName;
 }
 
-function showPasswordSection({
-  getValue,
-  watchDependency,
-  discriminator
-}) {
+function showPasswordSection({ getValue, watchDependency, discriminator }) {
   return !showExistingSecretSection({
     getValue,
     watchDependency,
-    discriminator
-  })
+    discriminator,
+  });
 }
 
 function setAuthSecretPassword({ model, getValue }) {
-  const encodedPassword = getValue(model, "/resources/secret_auth/data/password");
+  const encodedPassword = getValue(
+    model,
+    "/resources/secret_auth/data/password"
+  );
   return encodedPassword ? decodePassword({}, encodedPassword) : "";
 }
 
 function onAuthSecretPasswordChange({ getValue, discriminator, commit }) {
   const stringPassword = getValue(discriminator, "/password");
 
-  if(stringPassword) {
+  if (stringPassword) {
     commit("wizard/model$update", {
       path: "/resources/secret_auth/data/password",
       value: encodePassword({}, stringPassword),
-      force: true
+      force: true,
     });
     commit("wizard/model$update", {
       path: "/resources/secret_auth/data/username",
       value: encodePassword({}, "root"),
-      force: true
+      force: true,
     });
   } else {
-    commit(
-      "wizard/model$delete",
-      "/resources/secret_auth"
-    );
+    commit("wizard/model$delete", "/resources/secret_auth");
   }
 }
 
-function disableInitializationSection({
-  model,
-  getValue,
-  watchDependency,
-}) {
+function disableInitializationSection({ model, getValue, watchDependency }) {
   const initialized = getValue(
     model,
     "/resources/kubedbComProxySQL/spec/init/initialized"
@@ -690,22 +660,15 @@ function decodePassword({}, value) {
   return atob(value);
 }
 
-function onCreateAuthSecretChange({
-  discriminator,
-  getValue,
-  commit,
-}) {
+function onCreateAuthSecretChange({ discriminator, getValue, commit }) {
   const createAuthSecret = getValue(discriminator, "/createAuthSecret");
   if (createAuthSecret) {
     commit(
       "wizard/model$delete",
       "/resources/kubedbComProxySQL/spec/authSecret"
     );
-  } else if(createAuthSecret === false) {
-    commit(
-      "wizard/model$delete",
-      "/resources/secret_auth"
-    );
+  } else if (createAuthSecret === false) {
+    commit("wizard/model$delete", "/resources/secret_auth");
   }
 }
 
@@ -717,17 +680,23 @@ async function getSecrets({
   watchDependency,
 }) {
   const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const cluster = storeGet("/route/params/cluster");
   const namespace = getValue(model, "/metadata/release/namespace");
   watchDependency("model#/metadata/release/namespace");
 
-  if(owner && cluster && namespace) {
+  if (owner && cluster && namespace) {
     try {
       const resp = await axios.get(
         `/clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}/secrets`,
         {
           params: {
-            filter: { items: { data: {username: null, password: null }, metadata: { name: null }, type: null } },
+            filter: {
+              items: {
+                data: { username: null, password: null },
+                metadata: { name: null },
+                type: null,
+              },
+            },
           },
         }
       );
@@ -735,8 +704,16 @@ async function getSecrets({
       const secrets = (resp && resp.data && resp.data.items) || [];
 
       const filteredSecrets = secrets.filter((item) => {
-        const validType = ["kubernetes.io/service-account-token", "Opaque", "kubernetes.io/basic-auth"];
-        return validType.includes(item.type) && item.data?.username && item.data?.password;
+        const validType = [
+          "kubernetes.io/service-account-token",
+          "Opaque",
+          "kubernetes.io/basic-auth",
+        ];
+        return (
+          validType.includes(item.type) &&
+          item.data?.username &&
+          item.data?.password
+        );
       });
 
       filteredSecrets.map((item) => {
@@ -784,12 +761,7 @@ function onConfigurationSourceChange({
   }
 }
 
-function onConfigurationChange({
-  getValue,
-  commit,
-  discriminator,
-  model,
-}) {
+function onConfigurationChange({ getValue, commit, discriminator, model }) {
   const value = getValue(discriminator, "/configuration");
   commit("wizard/model$update", {
     path: "/resources/secret_config/stringData/md-config.cnf",
@@ -816,31 +788,37 @@ function setConfigurationSource({ model, getValue }) {
 }
 
 function onConfigurationValueChange({ discriminator, getValue, commit }, path) {
-  const value = getValue(discriminator, `/${path}`)
-  commit('wizard/model$update', {
+  const value = getValue(discriminator, `/${path}`);
+  commit("wizard/model$update", {
     path: `/resources/secret_config/stringData/${path}.cnf`,
     value,
-    force: true
-  })
+    force: true,
+  });
 }
 
 function setCustomConfigConfigureChoice({ model, getValue }) {
-  const customConfig = getValue(model, '/resources/kubedbComProxySQL/spec/configSecret')
-  return customConfig ? 'yes' : 'no'
-};
+  const customConfig = getValue(
+    model,
+    "/resources/kubedbComProxySQL/spec/configSecret"
+  );
+  return customConfig ? "yes" : "no";
+}
 
 function onSetCustomConfigChange({ discriminator, getValue, commit }) {
   const value = getValue(discriminator, "/setCustomConfig");
 
-  if(value === "no") {
-    commit("wizard/model$delete", "/resources/kubedbComProxySQL/spec/configSecret");
+  if (value === "no") {
+    commit(
+      "wizard/model$delete",
+      "/resources/kubedbComProxySQL/spec/configSecret"
+    );
     commit("wizard/model$delete", "/resources/secret_config");
   }
 }
 
 function getOpsRequestUrl({ storeGet, model, getValue, mode }, reqType) {
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
-  const domain = storeGet("/domain") || '';
+  const cluster = storeGet("/route/params/cluster");
+  const domain = storeGet("/domain") || "";
   const owner = storeGet("/route/params/user");
   const dbname = getValue(model, "/metadata/release/name");
   const group = getValue(model, "/metadata/resource/group");
@@ -859,94 +837,95 @@ function getOpsRequestUrl({ storeGet, model, getValue, mode }, reqType) {
     }`;
 }
 
-
 function onMySQLRulesChange({ discriminator, getValue, commit }) {
-  const rules = getValue(discriminator, '/mysqlQueryRules')
-  const modifiedRules = rules?.map(item => item.rules)
-  
-  commit('wizard/model$update', {
-    path: '/resources/kubedbComProxySQL/spec/initConfig/mysqlQueryRules',
+  const rules = getValue(discriminator, "/mysqlQueryRules");
+  const modifiedRules = rules?.map((item) => item.rules);
+
+  commit("wizard/model$update", {
+    path: "/resources/kubedbComProxySQL/spec/initConfig/mysqlQueryRules",
     value: modifiedRules,
-    force: true
-  })
+    force: true,
+  });
 }
 
 function setMySQLRules({ model, getValue, setDiscriminatorValue }) {
-  const rules = getValue(model, '/resources/kubedbComProxySQL/spec/initConfig/mysqlQueryRules')
-  const modifiedRules = rules?.map(item => ({ rules: item }))
+  const rules = getValue(
+    model,
+    "/resources/kubedbComProxySQL/spec/initConfig/mysqlQueryRules"
+  );
+  const modifiedRules = rules?.map((item) => ({ rules: item }));
 
-  setDiscriminatorValue('/mysqlQueryRules', modifiedRules);
+  setDiscriminatorValue("/mysqlQueryRules", modifiedRules);
 
-  return modifiedRules
+  return modifiedRules;
 }
 
-function getCreateNameSpaceUrl ({ model, getValue, storeGet }){ 
-
+function getCreateNameSpaceUrl({ model, getValue, storeGet }) {
   const user = storeGet("/route/params/user");
   const cluster = storeGet("/cluster/clusterDefinition/spec/name");
 
-  const domain = storeGet("/domain") || '';
-  if(domain.includes("bb.test")){
-    return `http://console.bb.test:5990/${user}/kubernetes/${cluster}/core/v1/namespaces/create`
-  }else{
-    const editedDomain = domain.replace("kubedb","console");
-    return `${editedDomain}/${user}/kubernetes/${cluster}/core/v1/namespaces/create`
+  const domain = storeGet("/domain") || "";
+  if (domain.includes("bb.test")) {
+    return `http://console.bb.test:5990/${user}/kubernetes/${cluster}/core/v1/namespaces/create`;
+  } else {
+    const editedDomain = domain.replace("kubedb", "console");
+    return `${editedDomain}/${user}/kubernetes/${cluster}/core/v1/namespaces/create`;
   }
 }
 
 return {
-	fetchJsons,
-	disableLableChecker,
-	isEqualToModelPathValue,
-	getResources,
-	isEqualToDiscriminatorPath,
-	setValueFromModel,
-	getNamespacedResourceList,
-	getResourceList,
-	resourceNames,
+  fetchJsons,
+  disableLableChecker,
+  isEqualToModelPathValue,
+  getResources,
+  isEqualToDiscriminatorPath,
+  setValueFromModel,
+  getNamespacedResourceList,
+  getResourceList,
+  resourceNames,
   unNamespacedResourceNames,
   returnTrue,
   returnStringYes,
-	getProxySQLVersions,
+  getProxySQLVersions,
   getAppBindings,
-	setDatabaseMode,
-	onDatabaseModeChange,
-	isEqualToDatabaseMode,
-	setApiGroup,
-	getIssuerRefsName,
-	hasIssuerRefName,
-	hasNoIssuerRefName,
-	showTlsConfigureSection,
-	onTlsConfigureChange,
+  setDatabaseMode,
+  onDatabaseModeChange,
+  isEqualToDatabaseMode,
+  setApiGroup,
+  getIssuerRefsName,
+  hasIssuerRefName,
+  hasNoIssuerRefName,
+  showTlsConfigureSection,
+  onTlsConfigureChange,
   getAliasOptions,
-	showMonitoringSection,
-	onEnableMonitoringChange,
-	showCustomizeExporterSection,
-	onCustomizeExporterChange,
-	isValueExistInModel,
-	onNamespaceChange,
-	onLabelChange,
-	onNameChange,
-	returnFalse,
-	onAgentChange,
-	getCreateAuthSecret,
+  showMonitoringSection,
+  onEnableMonitoringChange,
+  showCustomizeExporterSection,
+  onCustomizeExporterChange,
+  isValueExistInModel,
+  onNamespaceChange,
+  onLabelChange,
+  onNameChange,
+  returnFalse,
+  onAgentChange,
+  getCreateAuthSecret,
   showExistingSecretSection,
-	showPasswordSection,
+  showPasswordSection,
   setAuthSecretPassword,
   onAuthSecretPasswordChange,
-	disableInitializationSection,
-	encodePassword,
-	decodePassword,
-	onCreateAuthSecretChange,
-	getSecrets,
-	onConfigurationSourceChange,
-	onConfigurationChange,
-	setConfigurationSource,
+  disableInitializationSection,
+  encodePassword,
+  decodePassword,
+  onCreateAuthSecretChange,
+  getSecrets,
+  onConfigurationSourceChange,
+  onConfigurationChange,
+  setConfigurationSource,
   onConfigurationValueChange,
   onSetCustomConfigChange,
   setCustomConfigConfigureChoice,
   getOpsRequestUrl,
   onMySQLRulesChange,
   setMySQLRules,
-  getCreateNameSpaceUrl
-}
+  getCreateNameSpaceUrl,
+};

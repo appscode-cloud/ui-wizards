@@ -6,7 +6,7 @@ async function getResources(
   namespaced
 ) {
   const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const cluster = storeGet("/route/params/cluster");
   let namespace = "";
   if (namespaced) {
     namespace = getValue(model, "/metadata/release/namespace");
