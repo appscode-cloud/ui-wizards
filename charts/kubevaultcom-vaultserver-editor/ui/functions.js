@@ -48,7 +48,7 @@ function isEqualToModelPathValue(
 
 async function getResources({ axios, storeGet }, group, version, resource) {
   const owner = storeGet("/user/username");
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const cluster = storeGet("/route/params/cluster");
 
   try {
     const resp = await axios.get(
@@ -81,7 +81,7 @@ async function getSecrets({
   watchDependency,
 }) {
   const owner = storeGet("/user/username");
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const cluster = storeGet("/route/params/cluster");
   const namespace = getValue(model, "/metadata/release/namespace");
   watchDependency("model#/metadata/release/namespace");
 
@@ -135,7 +135,7 @@ async function getNamespacedResourceList(
   { namespace, group, version, resource }
 ) {
   const owner = storeGet("/user/username");
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const cluster = storeGet("/route/params/cluster");
 
   const url = `/clusters/${owner}/${cluster}/proxy/${group}/${version}/namespaces/${namespace}/${resource}`;
 
@@ -158,7 +158,7 @@ async function getNamespacedResourceList(
 
 async function getResourceList(axios, storeGet, { group, version, resource }) {
   const owner = storeGet("/user/username");
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const cluster = storeGet("/route/params/cluster");
 
   const url = `/clusters/${owner}/${cluster}/proxy/${group}/${version}/${resource}`;
 
@@ -213,7 +213,7 @@ async function resourceNames(
 
 async function getStorageClassNames({ axios, storeGet, commit }, path) {
   const owner = storeGet("/user/username");
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const cluster = storeGet("/route/params/cluster");
 
   const resp = await axios.get(
     `/clusters/${owner}/${cluster}/proxy/storage.k8s.io/v1/storageclasses`,
@@ -425,7 +425,7 @@ async function getVaultServerVersions(
   resource
 ) {
   const owner = storeGet("/user/username");
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const cluster = storeGet("/route/params/cluster");
 
   const queryParams = {
     filter: {
@@ -1445,7 +1445,7 @@ async function getIssuerRefsName({
   watchDependency,
 }) {
   const owner = storeGet("/user/username");
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const cluster = storeGet("/route/params/cluster");
   watchDependency(
     "model#/resources/kubevaultComVaultServer/spec/tls/issuerRef/apiGroup"
   );

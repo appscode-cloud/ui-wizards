@@ -34,7 +34,7 @@ function returnFalse() {
 
 async function getNamespaces({ axios, storeGet }) {
   const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const cluster = storeGet("/route/params/cluster");
 
   const resp = await axios.get(
     `/clusters/${owner}/${cluster}/proxy/core/v1/namespaces`,
@@ -62,7 +62,7 @@ async function getVaults({
   watchDependency,
 }) {
   const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const cluster = storeGet("/route/params/cluster");
 
   const namespace = getValue(model, "/metadata/namespace");
   watchDependency("model#/metadata/namespace");
@@ -94,7 +94,7 @@ async function getVaultDetails({
   setDiscriminatorValue
 }) {
   const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const cluster = storeGet("/route/params/cluster");
 
   const namespace = getValue(model, "/metadata/namespace");
   watchDependency("model#/metadata/namespace");
@@ -173,7 +173,7 @@ async function getNamespacedResourceList(
   { namespace, group, version, resource }
 ) {
   const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const cluster = storeGet("/route/params/cluster");
 
   const url = `/clusters/${owner}/${cluster}/proxy/${group}/${version}/namespaces/${namespace}/${resource}`;
 
@@ -199,7 +199,7 @@ async function getResourceList(
   { group, version, resource }
 ) {
   const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const cluster = storeGet("/route/params/cluster");
 
   const url = `/clusters/${owner}/${cluster}/proxy/${group}/${version}/${resource}`;
 
@@ -312,7 +312,7 @@ async function getIssuerRefsName({
   watchDependency,
 }) {
   const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const cluster = storeGet("/route/params/cluster");
   watchDependency("model#/spec/tls/issuerRef/apiGroup");
   watchDependency("model#/spec/tls/issuerRef/kind");
   watchDependency("model#/metadata/namespace");

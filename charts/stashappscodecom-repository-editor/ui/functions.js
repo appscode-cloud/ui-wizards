@@ -53,8 +53,11 @@ const backendMap = {
 };
 
 function initBackendProvider({ model, getValue }) {
-  const backend = getValue(model, "/resources/stashAppscodeComRepository/spec/backend");
-  const backendProvider = Object.keys(backend).find((key) => key)
+  const backend = getValue(
+    model,
+    "/resources/stashAppscodeComRepository/spec/backend"
+  );
+  const backendProvider = Object.keys(backend).find((key) => key);
   return backendProvider || "gcs";
 }
 
@@ -72,7 +75,7 @@ async function getResources(
   namespaced
 ) {
   const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const cluster = storeGet("/route/params/cluster");
   let namespace = "";
   if (namespaced) {
     namespace = getValue(model, "/metadata/release/namespace");
@@ -108,39 +111,55 @@ async function getResources(
   } else return [];
 }
 
-
 async function getSecrets(ctx) {
   const { axios, storeGet, model, getValue, watchDependency } = ctx;
-  return getResources({ axios, storeGet, model, getValue, watchDependency }, "core", "v1", "secrets", true)
+  return getResources(
+    { axios, storeGet, model, getValue, watchDependency },
+    "core",
+    "v1",
+    "secrets",
+    true
+  );
 }
 
-function getSecretEditPageLink({storeGet, getValue, model, watchDependency}) {
-  watchDependency("model#/resources/stashAppscodeComRepository/spec/backend/storageSecretName")
-  
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
-  const domain = storeGet("/domain") || '';
+function getSecretEditPageLink({ storeGet, getValue, model, watchDependency }) {
+  watchDependency(
+    "model#/resources/stashAppscodeComRepository/spec/backend/storageSecretName"
+  );
+
+  const cluster = storeGet("/route/params/cluster");
+  const domain = storeGet("/domain") || "";
   const owner = storeGet("/route/params/user");
   const namespace = getValue(model, "/metadata/release/namespace");
-  const secretName = getValue(model, "/resources/stashAppscodeComRepository/spec/backend/storageSecretName")
+  const secretName = getValue(
+    model,
+    "/resources/stashAppscodeComRepository/spec/backend/storageSecretName"
+  );
 
-  return `${domain}/${owner}/kubernetes/${cluster}/core/v1/secrets/${secretName}?namespace=${namespace}`
+  return `${domain}/${owner}/kubernetes/${cluster}/core/v1/secrets/${secretName}?namespace=${namespace}`;
 }
 
-function onSecretChange({commit, storeGet, model, getValue}) {
-  const initialSecretObject = storeGet("/wizard/initialModel/resources/secret_repo_cred")
-  const initialSecretName = storeGet("/wizard/initialModel/resources/secret_repo_cred/metadata/name")
-  const secretName = getValue(model, "/resources/stashAppscodeComRepository/spec/backend/storageSecretName")
+function onSecretChange({ commit, storeGet, model, getValue }) {
+  const initialSecretObject = storeGet(
+    "/wizard/initialModel/resources/secret_repo_cred"
+  );
+  const initialSecretName = storeGet(
+    "/wizard/initialModel/resources/secret_repo_cred/metadata/name"
+  );
+  const secretName = getValue(
+    model,
+    "/resources/stashAppscodeComRepository/spec/backend/storageSecretName"
+  );
 
-  if(initialSecretObject) {
-    if(secretName === initialSecretName) {
+  if (initialSecretObject) {
+    if (secretName === initialSecretName) {
       commit("wizard/model$update", {
         path: "/resources/secret_repo_cred",
         value: initialSecretObject,
-        force: true
-      })
-    }
-    else {
-      commit("wizard/model$delete", "/resources/secret_repo_cred")
+        force: true,
+      });
+    } else {
+      commit("wizard/model$delete", "/resources/secret_repo_cred");
     }
   }
 }
@@ -152,5 +171,5 @@ return {
   showBackendForm,
   getSecrets,
   getSecretEditPageLink,
-  onSecretChange
+  onSecretChange,
 };
