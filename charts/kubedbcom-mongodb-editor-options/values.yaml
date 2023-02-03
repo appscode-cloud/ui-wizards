@@ -15,9 +15,17 @@ metadata:
     # Release namespace
     namespace: ""
 
+managed:
+  k8sVersion: v1.22.0
+  clusterName: capi-aws
+  databaseNodes: 1
+  aws:
+    machinePoolTemplate:
+      name: mongo-machine-pool
+
 spec:
   # List options
-  version: 3.4.17
+  version: 4.4.6
 
   # Annotations to add to the database custom resource
   annotations: {}
@@ -52,10 +60,10 @@ spec:
   terminationPolicy: WipeOut
 
   storageClass:
-    name: standard
+    name: gp2
 
   persistence:
-    size: 10Gi
+    size: 1Gi
 
   machine: ""
 
@@ -85,7 +93,7 @@ spec:
 form:
   alert:
     ## Enable PrometheusRule alerts
-    enabled: true
+    enabled: false
 
     ## Labels for default rules
     labels: {}
@@ -103,65 +111,65 @@ form:
       database:
         enabled: true
         rules:
-          # Sepcifies the alert configuration for virtual memory usage.
+          # Specify the alert configuration for virtual memory usage.
           mongodbVirtualMemoryUsage:
             enabled: true
             val: 2097152 # 2GB
             duration: "1m"
             severity: warning
-          # Sepcifies the alert configuration for replication lag.
+          # Specify the alert configuration for replication lag.
           mongodbReplicationLag:
             enabled: true
             val: 10
             duration: "0m"
             severity: critical
-          # Sepcifies the alert configuration for number of opened cursors are more than a specified amount.
+          # Specify the alert configuration for number of opened cursors are more than a specified amount.
           mongodbNumberCursorsOpen:
             enabled: true
             val: 10000
             duration: "2m"
             severity: warning
-          # Sepcifies the alert configuration for timed out cursors.
+          # Specify the alert configuration for timed out cursors.
           mongodbCursorsTimeouts:
             enabled: true
             val: 100
             duration: "2m"
             severity: warning
-          # Sepcifies the alert configuration for too many connections are opened.
+          # Specify the alert configuration for too many connections are opened.
           mongodbTooManyConnections:
             enabled: true
             val: 80 # percentage
             duration: "2m"
             severity: warning
-          # Sepcifies the alert configuration for database is in Critical phase, that means one or more of the nodes are down but the database read/write are not hampered.
+          # Specify the alert configuration for database is in Critical phase, that means one or more of the nodes are down but the database read/write are not hampered.
           mongoDBPhaseCritical:
             enabled: true
             duration: "3m"
             severity: warning
-          # Sepcifies the alert configuration for database is in NotReady phase, that means the database is not accepting connections, read/write are hampered.
+          # Specify the alert configuration for database is in NotReady phase, that means the database is not accepting connections, read/write are hampered.
           mongoDBDown:
             enabled: true
             duration: "30s"
             severity: critical
-          # Sepcifies the alert configuration for high latency.
+          # Specify the alert configuration for high latency.
           mongodbHighLatency:
             enabled: true
             val: 250000
             duration: "10m"
             severity: warning
-          # Sepcifies the alert configuration for high ticket utilizations.
+          # Specify the alert configuration for high ticket utilizations.
           mongodbHighTicketUtilization:
             enabled: true
             val: 75 # percentage
             duration: "10m"
             severity: warning
-          # Sepcifies the alert configuration for recurrent cursor timeout.
+          # Specify the alert configuration for recurrent cursor timeout.
           mongodbRecurrentCursorTimeout:
             enabled: true
             val: 0
             duration: "30m"
             severity: warning
-          # Sepcifies the alert configuration for recurrent memory page faults.
+          # Specify the alert configuration for recurrent memory page faults.
           mongodbRecurrentMemoryPageFaults:
             enabled: true
             val: 0
