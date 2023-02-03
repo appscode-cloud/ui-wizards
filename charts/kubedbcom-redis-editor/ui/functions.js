@@ -58,7 +58,7 @@ function isNotEqualToModelPathValue(
 
 async function getResources({ axios, storeGet }, group, version, resource) {
   const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const cluster = storeGet("/route/params/cluster");
 
   try {
     const resp = await axios.get(
@@ -103,7 +103,7 @@ async function getNamespacedResourceList(
   { namespace, group, version, resource }
 ) {
   const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const cluster = storeGet("/route/params/cluster");
 
   const url = `/clusters/${owner}/${cluster}/proxy/${group}/${version}/namespaces/${namespace}/${resource}`;
 
@@ -132,7 +132,7 @@ async function getRedisSentinels({
   watchDependency,
 }) {
   const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const cluster = storeGet("/route/params/cluster");
   const namespace = getValue(
     model,
     "/resources/kubedbComRedis/spec/sentinelRef/namespace"
@@ -169,7 +169,7 @@ async function getRedisSentinels({
 }
 async function getResourceList(axios, storeGet, { group, version, resource }) {
   const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const cluster = storeGet("/route/params/cluster");
 
   const url = `/clusters/${owner}/${cluster}/proxy/${group}/${version}/${resource}`;
 
@@ -270,7 +270,7 @@ function hasSentinelObject({ model, getValue }) {
 // ************************* Basic Info **********************************************
 async function getRedisVersions({ axios, storeGet }, group, version, resource) {
   const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const cluster = storeGet("/route/params/cluster");
 
   const queryParams = {
     filter: {
@@ -399,7 +399,7 @@ async function getStorageClassNames({
   getValue,
 }) {
   const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const cluster = storeGet("/route/params/cluster");
 
   const resp = await axios.get(
     `/clusters/${owner}/${cluster}/proxy/storage.k8s.io/v1/storageclasses`,
@@ -523,7 +523,7 @@ async function getIssuerRefsName({
   watchDependency,
 }) {
   const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const cluster = storeGet("/route/params/cluster");
   watchDependency(
     "model#/resources/kubedbComRedis/spec/tls/issuerRef/apiGroup"
   );
@@ -1807,7 +1807,7 @@ async function getSecrets({
   watchDependency,
 }) {
   const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const cluster = storeGet("/route/params/cluster");
   const namespace = getValue(model, "/metadata/release/namespace");
   watchDependency("model#/metadata/release/namespace");
 
@@ -1933,8 +1933,8 @@ function onSetCustomConfigChange({ discriminator, getValue, commit }) {
 }
 
 function getOpsRequestUrl({ storeGet, model, getValue, mode }, reqType) {
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
-  const domain = storeGet("/domain") || '';
+  const cluster = storeGet("/route/params/cluster");
+  const domain = storeGet("/domain") || "";
   const owner = storeGet("/route/params/user");
   const dbname = getValue(model, "/metadata/release/name");
   const group = getValue(model, "/metadata/resource/group");
@@ -1955,7 +1955,7 @@ function getCreateNameSpaceUrl({ model, getValue, storeGet }) {
   const user = storeGet("/route/params/user");
   const cluster = storeGet("/cluster/clusterDefinition/spec/name");
 
-  const domain = storeGet("/domain") || '';
+  const domain = storeGet("/domain") || "";
   if (domain.includes("bb.test")) {
     return `http://console.bb.test:5990/${user}/kubernetes/${cluster}/core/v1/namespaces/create`;
   } else {

@@ -48,7 +48,7 @@ function isEqualToModelPathValue(
 
 async function getResources({ axios, storeGet }, group, version, resource) {
   const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const cluster = storeGet("/route/params/cluster");
 
   try {
     const resp = await axios.get(
@@ -93,7 +93,7 @@ async function getNamespacedResourceList(
   { namespace, group, version, resource }
 ) {
   const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const cluster = storeGet("/route/params/cluster");
 
   const url = `/clusters/${owner}/${cluster}/proxy/${group}/${version}/namespaces/${namespace}/${resource}`;
 
@@ -116,7 +116,7 @@ async function getNamespacedResourceList(
 
 async function getResourceList(axios, storeGet, { group, version, resource }) {
   const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const cluster = storeGet("/route/params/cluster");
 
   const url = `/clusters/${owner}/${cluster}/proxy/${group}/${version}/${resource}`;
 
@@ -220,7 +220,7 @@ function setAddressType({ model, getValue }) {
 // ************************* Basic Info **********************************************
 async function getMySqlVersions({ axios, storeGet }, group, version, resource) {
   const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const cluster = storeGet("/route/params/cluster");
 
   const queryParams = {
     filter: {
@@ -283,7 +283,7 @@ async function getStorageClassNames({
   getValue,
 }) {
   const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const cluster = storeGet("/route/params/cluster");
 
   const resp = await axios.get(
     `/clusters/${owner}/${cluster}/proxy/storage.k8s.io/v1/storageclasses`,
@@ -392,7 +392,7 @@ async function getIssuerRefsName({
   watchDependency,
 }) {
   const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const cluster = storeGet("/route/params/cluster");
   watchDependency(
     "model#/resources/kubedbComMySQL/spec/tls/issuerRef/apiGroup"
   );
@@ -1674,7 +1674,7 @@ async function getSecrets({
   watchDependency,
 }) {
   const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const cluster = storeGet("/route/params/cluster");
   const namespace = getValue(model, "/metadata/release/namespace");
   watchDependency("model#/metadata/release/namespace");
 
@@ -1809,8 +1809,8 @@ function onSetCustomConfigChange({ discriminator, getValue, commit }) {
 }
 
 function getOpsRequestUrl({ storeGet, model, getValue, mode }, reqType) {
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
-  const domain = storeGet("/domain") || '';
+  const cluster = storeGet("/route/params/cluster");
+  const domain = storeGet("/domain") || "";
   const owner = storeGet("/route/params/user");
   const dbname = getValue(model, "/metadata/release/name");
   const group = getValue(model, "/metadata/resource/group");
@@ -1827,17 +1827,16 @@ function getOpsRequestUrl({ storeGet, model, getValue, mode }, reqType) {
     return `${domain}/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/mysqlopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=VerticalScaling`;
 }
 
-function getCreateNameSpaceUrl ({ model, getValue, storeGet }){ 
-
+function getCreateNameSpaceUrl({ model, getValue, storeGet }) {
   const user = storeGet("/route/params/user");
   const cluster = storeGet("/cluster/clusterDefinition/spec/name");
 
-  const domain = storeGet("/domain") || '';
-  if(domain.includes("bb.test")){
-    return `http://console.bb.test:5990/${user}/kubernetes/${cluster}/core/v1/namespaces/create`
-  }else{
-    const editedDomain = domain.replace("kubedb","console");
-    return `${editedDomain}/${user}/kubernetes/${cluster}/core/v1/namespaces/create`
+  const domain = storeGet("/domain") || "";
+  if (domain.includes("bb.test")) {
+    return `http://console.bb.test:5990/${user}/kubernetes/${cluster}/core/v1/namespaces/create`;
+  } else {
+    const editedDomain = domain.replace("kubedb", "console");
+    return `${editedDomain}/${user}/kubernetes/${cluster}/core/v1/namespaces/create`;
   }
 }
 
@@ -1938,5 +1937,5 @@ return {
   setConfigurationFiles,
   onSetCustomConfigChange,
   getOpsRequestUrl,
-  getCreateNameSpaceUrl
+  getCreateNameSpaceUrl,
 };
