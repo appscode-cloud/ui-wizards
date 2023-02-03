@@ -58,7 +58,7 @@ function isEqualToModelPathValue(
 
 async function getResources({ axios, storeGet }, group, version, resource) {
   const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const cluster = storeGet("/route/params/cluster");
 
   try {
     const resp = await axios.get(
@@ -103,7 +103,7 @@ async function getNamespacedResourceList(
   { namespace, group, version, resource }
 ) {
   const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const cluster = storeGet("/route/params/cluster");
 
   const url = `/clusters/${owner}/${cluster}/proxy/${group}/${version}/namespaces/${namespace}/${resource}`;
 
@@ -126,7 +126,7 @@ async function getNamespacedResourceList(
 
 async function getResourceList(axios, storeGet, { group, version, resource }) {
   const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const cluster = storeGet("/route/params/cluster");
 
   const url = `/clusters/${owner}/${cluster}/proxy/${group}/${version}/${resource}`;
 
@@ -370,7 +370,7 @@ async function getElasticSearchVersions(
   resource
 ) {
   const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const cluster = storeGet("/route/params/cluster");
 
   const queryParams = {
     filter: {
@@ -710,7 +710,7 @@ async function getSecrets({
   watchDependency,
 }) {
   const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const cluster = storeGet("/route/params/cluster");
   const namespace = getValue(model, "/metadata/release/namespace");
   watchDependency("model#/metadata/release/namespace");
 
@@ -777,7 +777,7 @@ async function getStorageClassNames(
   path
 ) {
   const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const cluster = storeGet("/route/params/cluster");
 
   const resp = await axios.get(
     `/clusters/${owner}/${cluster}/proxy/storage.k8s.io/v1/storageclasses`,
@@ -895,7 +895,10 @@ function getMaxUnavailableOptions(
   return options;
 }
 
-function getStorageClassNamesFromDiscriminator({model, discriminator, getValue, watchDependency, commit}, path) {
+function getStorageClassNamesFromDiscriminator(
+  { model, discriminator, getValue, watchDependency, commit },
+  path
+) {
   watchDependency("discriminator#/storageClasses");
   const options = getValue(discriminator, "/storageClasses") || [];
 
@@ -1075,7 +1078,12 @@ function onInternalUsersChange({ discriminator, getValue, commit }) {
   }
 }
 
-function setInternalUsers({ model, getValue, watchDependency, setDiscriminatorValue }) {
+function setInternalUsers({
+  model,
+  getValue,
+  watchDependency,
+  setDiscriminatorValue,
+}) {
   watchDependency("model#/resources/kubedbComElasticsearch/spec/internalUsers");
   const internalUsers = getValue(
     model,
@@ -1101,7 +1109,7 @@ function setInternalUsers({ model, getValue, watchDependency, setDiscriminatorVa
     users.push(internalUsers[item]);
   }
 
-  setDiscriminatorValue('/internalUsers', users)
+  setDiscriminatorValue("/internalUsers", users);
 
   return users;
 }
@@ -1191,7 +1199,12 @@ function onRolesMappingChange({ discriminator, getValue, commit }) {
   }
 }
 
-function setRolesMapping({ model, getValue, watchDependency, setDiscriminatorValue }) {
+function setRolesMapping({
+  model,
+  getValue,
+  watchDependency,
+  setDiscriminatorValue,
+}) {
   watchDependency("model#/resources/kubedbComElasticsearch/spec/rolesMapping");
   const rolesMapping = getValue(
     model,
@@ -1205,7 +1218,7 @@ function setRolesMapping({ model, getValue, watchDependency, setDiscriminatorVal
     roles.push(rolesMapping[item]);
   }
 
-  setDiscriminatorValue('/rolesMapping', roles)
+  setDiscriminatorValue("/rolesMapping", roles);
 
   return roles;
 }
@@ -1293,7 +1306,7 @@ async function getIssuerRefsName({
   watchDependency,
 }) {
   const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const cluster = storeGet("/route/params/cluster");
   watchDependency(
     "model#/resources/kubedbComElasticsearch/spec/tls/issuerRef/apiGroup"
   );
@@ -1414,7 +1427,7 @@ function onTlsConfigureChange({ discriminator, getValue, commit }) {
 
 async function showTlsRecommendation({ axios, storeGet }) {
   const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const cluster = storeGet("/route/params/cluster");
 
   const url = `/clusters/${owner}/${cluster}/proxy/cert-manager.io/v1/issuers`;
 
@@ -2657,7 +2670,12 @@ function setConfigurationSource({ model, getValue }) {
   return "use-existing-config";
 }
 
-function setConfigFiles({ model, getValue, watchDependency, setDiscriminatorValue }) {
+function setConfigFiles({
+  model,
+  getValue,
+  watchDependency,
+  setDiscriminatorValue,
+}) {
   watchDependency("model#/resources/secret_user_config/stringData");
   const configFiles = getValue(
     model,
@@ -2673,7 +2691,7 @@ function setConfigFiles({ model, getValue, watchDependency, setDiscriminatorValu
     files.push(obj);
   }
 
-  setDiscriminatorValue('/configFiles', files)
+  setDiscriminatorValue("/configFiles", files);
 
   return files;
 }
@@ -2758,7 +2776,12 @@ function setSecretConfigurationSource({ model, getValue }) {
   return "use-existing-config";
 }
 
-function setSecretConfigFiles({ model, getValue, watchDependency, setDiscriminatorValue }) {
+function setSecretConfigFiles({
+  model,
+  getValue,
+  watchDependency,
+  setDiscriminatorValue,
+}) {
   watchDependency("model#/resources/secret_secure_config/stringData");
   const configFiles = getValue(
     model,
@@ -2774,7 +2797,7 @@ function setSecretConfigFiles({ model, getValue, watchDependency, setDiscriminat
     files.push(obj);
   }
 
-  setDiscriminatorValue('/configFiles', files)
+  setDiscriminatorValue("/configFiles", files);
 
   return files;
 }
@@ -2821,8 +2844,8 @@ function initSetSecureCustomConfig({ model, getValue }) {
 }
 
 function getOpsRequestUrl({ storeGet, model, getValue, mode }, reqType) {
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
-  const domain = storeGet("/domain") || '';
+  const cluster = storeGet("/route/params/cluster");
+  const domain = storeGet("/domain") || "";
   const owner = storeGet("/route/params/user");
   const dbname = getValue(model, "/metadata/release/name");
   const group = getValue(model, "/metadata/resource/group");
@@ -2839,18 +2862,16 @@ function getOpsRequestUrl({ storeGet, model, getValue, mode }, reqType) {
     return `${domain}/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/elasticsearchopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=${reqType}`;
 }
 
-
-function getCreateNameSpaceUrl ({ model, getValue, storeGet }){ 
-
+function getCreateNameSpaceUrl({ model, getValue, storeGet }) {
   const user = storeGet("/route/params/user");
   const cluster = storeGet("/cluster/clusterDefinition/spec/name");
 
-  const domain = storeGet("/domain") || '';
-  if(domain.includes("bb.test")){
-    return `http://console.bb.test:5990/${user}/kubernetes/${cluster}/core/v1/namespaces/create`
-  }else{
-    const editedDomain = domain.replace("kubedb","console");
-    return `${editedDomain}/${user}/kubernetes/${cluster}/core/v1/namespaces/create`
+  const domain = storeGet("/domain") || "";
+  if (domain.includes("bb.test")) {
+    return `http://console.bb.test:5990/${user}/kubernetes/${cluster}/core/v1/namespaces/create`;
+  } else {
+    const editedDomain = domain.replace("kubedb", "console");
+    return `${editedDomain}/${user}/kubernetes/${cluster}/core/v1/namespaces/create`;
   }
 }
 
@@ -2995,5 +3016,5 @@ return {
   initSetCustomConfig,
   initSetSecureCustomConfig,
   getOpsRequestUrl,
-  getCreateNameSpaceUrl
-}
+  getCreateNameSpaceUrl,
+};

@@ -5,7 +5,7 @@ async function fetchJsons({ axios, itemCtx }) {
   let language = {};
   let functions = {};
   const { name, url, version, packageviewUrlPrefix } = itemCtx.chart;
-  
+
   try {
     ui = await axios.get(
       `${packageviewUrlPrefix}/create-ui.yaml?name=${name}&url=${url}&version=${version}&format=json`
@@ -46,14 +46,9 @@ function isEqualToModelPathValue(
   return modelPathValue === value;
 }
 
-async function getResources(
-  { axios, storeGet },
-  group,
-  version,
-  resource
-) {
+async function getResources({ axios, storeGet }, group, version, resource) {
   const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const cluster = storeGet("/route/params/cluster");
 
   try {
     const resp = await axios.get(
@@ -98,7 +93,7 @@ async function getNamespacedResourceList(
   { namespace, group, version, resource }
 ) {
   const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const cluster = storeGet("/route/params/cluster");
 
   const url = `/clusters/${owner}/${cluster}/proxy/${group}/${version}/namespaces/${namespace}/${resource}`;
 
@@ -119,13 +114,9 @@ async function getNamespacedResourceList(
   return ans;
 }
 
-async function getResourceList(
-  axios,
-  storeGet,
-  { group, version, resource }
-) {
+async function getResourceList(axios, storeGet, { group, version, resource }) {
   const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const cluster = storeGet("/route/params/cluster");
 
   const url = `/clusters/${owner}/${cluster}/proxy/${group}/${version}/${resource}`;
 
@@ -222,7 +213,7 @@ async function getMariaDbVersions(
   resource
 ) {
   const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const cluster = storeGet("/route/params/cluster");
 
   const queryParams = {
     filter: {
@@ -311,7 +302,10 @@ function showNewSecretCreateField({
 
 // ********************* Database Mode ***********************
 function setDatabaseMode({ model, getValue, watchDependency }) {
-  const modelPathValue = getValue(model, "/resources/kubedbComMariaDB/spec/replicas");
+  const modelPathValue = getValue(
+    model,
+    "/resources/kubedbComMariaDB/spec/replicas"
+  );
   watchDependency("model#/resources/kubedbComMariaDB/spec/replicas");
 
   if (modelPathValue > 1) {
@@ -321,11 +315,15 @@ function setDatabaseMode({ model, getValue, watchDependency }) {
   }
 }
 
-async function getStorageClassNames(
-  { axios, storeGet, commit, model, getValue }
-) {
+async function getStorageClassNames({
+  axios,
+  storeGet,
+  commit,
+  model,
+  getValue,
+}) {
   const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const cluster = storeGet("/route/params/cluster");
 
   const resp = await axios.get(
     `/clusters/${owner}/${cluster}/proxy/storage.k8s.io/v1/storageclasses`,
@@ -366,16 +364,11 @@ async function getStorageClassNames(
   return resources;
 }
 
-function deleteDatabaseModePath({
-  discriminator,
-  getValue,
-  commit,
-  model,
-}) {
+function deleteDatabaseModePath({ discriminator, getValue, commit, model }) {
   const mode = getValue(discriminator, "/activeDatabaseMode");
   if (mode === "Cluster") {
     replicas = getValue(model, "/resources/kubedbComMariaDB/spec/replicas");
-    if(!replicas) {
+    if (!replicas) {
       commit("wizard/model$update", {
         path: "/resources/kubedbComMariaDB/spec/replicas",
         value: 3,
@@ -383,7 +376,7 @@ function deleteDatabaseModePath({
       });
     }
   } else if (mode === "Standalone") {
-    commit("wizard/model$delete", "/resources/kubedbComMariaDB/spec/replicas");  
+    commit("wizard/model$delete", "/resources/kubedbComMariaDB/spec/replicas");
   }
 }
 
@@ -410,7 +403,7 @@ async function getIssuerRefsName({
   watchDependency,
 }) {
   const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const cluster = storeGet("/route/params/cluster");
   watchDependency(
     "model#/resources/kubedbComMariaDB/spec/tls/issuerRef/apiGroup"
   );
@@ -433,7 +426,7 @@ async function getIssuerRefsName({
     url = `/clusters/${owner}/${cluster}/proxy/${apiGroup}/v1/clusterissuers`;
   }
 
-  if (!url) return []
+  if (!url) return [];
 
   try {
     const resp = await axios.get(url);
@@ -494,11 +487,7 @@ function setSSLMode({ model, getValue }) {
   return val || "require";
 }
 
-function showTlsConfigureSection({
-  watchDependency,
-  discriminator,
-  getValue,
-}) {
+function showTlsConfigureSection({ watchDependency, discriminator, getValue }) {
   watchDependency("discriminator#/configureTLS");
   const configureStatus = getValue(discriminator, "/configureTLS");
   return configureStatus;
@@ -524,11 +513,7 @@ function getAliasOptions() {
 
 /****** Monitoring *********/
 
-function showMonitoringSection({
-  watchDependency,
-  discriminator,
-  getValue,
-}) {
+function showMonitoringSection({ watchDependency, discriminator, getValue }) {
   watchDependency("discriminator#/enableMonitoring");
   const configureStatus = getValue(discriminator, "/enableMonitoring");
   return configureStatus;
@@ -763,8 +748,7 @@ function onPrePopulateDatabaseChange({
       });
 
       commit("wizard/model$update", {
-        path:
-          "/resources/stashAppscodeComRestoreSession_init/spec/target/ref/name",
+        path: "/resources/stashAppscodeComRestoreSession_init/spec/target/ref/name",
         value: dbName,
         force: true,
       });
@@ -836,8 +820,7 @@ function onDataSourceChange({ commit, getValue, discriminator, model }) {
       });
 
       commit("wizard/model$update", {
-        path:
-          "/resources/stashAppscodeComRestoreSession_init/spec/target/ref/name",
+        path: "/resources/stashAppscodeComRestoreSession_init/spec/target/ref/name",
         value: dbName,
         force: true,
       });
@@ -908,11 +891,7 @@ function onVolumeTypeChange({ commit, getValue, discriminator, model }) {
   }
 }
 
-function showInitializationForm({
-  getValue,
-  discriminator,
-  watchDependency,
-}) {
+function showInitializationForm({ getValue, discriminator, watchDependency }) {
   const prePopulateDatabase = getValue(discriminator, "/prePopulateDatabase");
   watchDependency("discriminator#/prePopulateDatabase");
   return prePopulateDatabase === "yes";
@@ -978,8 +957,7 @@ function onInitRepositoryChoiseChange({
     )}-init-repo`;
     // set this name in stashAppscodeComRestoreSession_init
     commit("wizard/model$update", {
-      path:
-        "/resources/stashAppscodeComRestoreSession_init/spec/repository/name",
+      path: "/resources/stashAppscodeComRestoreSession_init/spec/repository/name",
       value: repositoryName,
     });
   }
@@ -994,10 +972,7 @@ function initCustomizeRestoreJobRuntimeSettings({ getValue, model }) {
   else return "no";
 }
 
-function initCustomizeRestoreJobRuntimeSettingsForBackup({
-  getValue,
-  model,
-}) {
+function initCustomizeRestoreJobRuntimeSettingsForBackup({ getValue, model }) {
   const runtimeSettings = getValue(
     model,
     "/resources/stashAppscodeComBackupConfiguration/spec/runtimeSettings"
@@ -1031,8 +1006,7 @@ function onCustomizeRestoreJobRuntimeSettingsChange({
     ) {
       // set new value
       commit("wizard/model$update", {
-        path:
-          "/resources/stashAppscodeComRestoreSession_init/spec/runtimeSettings",
+        path: "/resources/stashAppscodeComRestoreSession_init/spec/runtimeSettings",
         value: restoreSessionInitRunTimeSettings,
       });
     }
@@ -1064,8 +1038,7 @@ function onCustomizeRestoreJobRuntimeSettingsChangeForBackup({
     ) {
       // set new value
       commit("wizard/model$update", {
-        path:
-          "/resources/stashAppscodeComBackupConfiguration/spec/runtimeSettings",
+        path: "/resources/stashAppscodeComBackupConfiguration/spec/runtimeSettings",
         value: {},
         force: true,
       });
@@ -1073,10 +1046,7 @@ function onCustomizeRestoreJobRuntimeSettingsChangeForBackup({
   }
 }
 
-function showRuntimeForm(
-  { discriminator, getValue, watchDependency },
-  value
-) {
+function showRuntimeForm({ discriminator, getValue, watchDependency }, value) {
   const customizeRestoreJobRuntimeSettings = getValue(
     discriminator,
     "/customizeRestoreJobRuntimeSettings"
@@ -1188,33 +1158,24 @@ function addKubeDbComMariaDbAnnotation(
 }
 
 function initScheduleBackupForEdit({ getValue, model, setDiscriminatorValue }) {
-  const {
-    stashAppscodeComBackupConfiguration,
-    isBluePrint,
-  } = getBackupConfigsAndAnnotations(getValue, model);
+  const { stashAppscodeComBackupConfiguration, isBluePrint } =
+    getBackupConfigsAndAnnotations(getValue, model);
 
-  initRepositoryChoiseForEdit({getValue, model, setDiscriminatorValue});
+  initRepositoryChoiseForEdit({ getValue, model, setDiscriminatorValue });
 
   if (stashAppscodeComBackupConfiguration || isBluePrint) return "yes";
   else return "no";
 }
 
 function initScheduleBackup({ getValue, model }) {
-  const {
-    stashAppscodeComBackupConfiguration,
-    isBluePrint,
-  } = getBackupConfigsAndAnnotations(getValue, model);
+  const { stashAppscodeComBackupConfiguration, isBluePrint } =
+    getBackupConfigsAndAnnotations(getValue, model);
 
   if (stashAppscodeComBackupConfiguration || isBluePrint) return "yes";
   else return "no";
 }
 
-function onScheduleBackupChange({
-  commit,
-  getValue,
-  discriminator,
-  model,
-}) {
+function onScheduleBackupChange({ commit, getValue, discriminator, model }) {
   const scheduleBackup = getValue(discriminator, "/scheduleBackup");
 
   if (scheduleBackup === "no") {
@@ -1246,8 +1207,7 @@ function onScheduleBackupChange({
         value: stashAppscodeComBackupConfiguration,
       });
       commit("wizard/model$update", {
-        path:
-          "/resources/stashAppscodeComBackupConfiguration/spec/target/ref/name",
+        path: "/resources/stashAppscodeComBackupConfiguration/spec/target/ref/name",
         value: dbName,
         force: true,
       });
@@ -1266,22 +1226,15 @@ function showBackupForm({ getValue, discriminator, watchDependency }) {
 
 // invoker form
 function initBackupInvoker({ getValue, model }) {
-  const {
-    stashAppscodeComBackupConfiguration,
-    isBluePrint,
-  } = getBackupConfigsAndAnnotations(getValue, model);
+  const { stashAppscodeComBackupConfiguration, isBluePrint } =
+    getBackupConfigsAndAnnotations(getValue, model);
 
   if (stashAppscodeComBackupConfiguration) return "backupConfiguration";
   else if (isBluePrint) return "backupBlueprint";
   else return undefined;
 }
 
-function onBackupInvokerChange({
-  getValue,
-  discriminator,
-  commit,
-  model,
-}) {
+function onBackupInvokerChange({ getValue, discriminator, commit, model }) {
   const backupInvoker = getValue(discriminator, "/backupInvoker");
 
   if (backupInvoker === "backupConfiguration") {
@@ -1301,8 +1254,7 @@ function onBackupInvokerChange({
         value: stashAppscodeComBackupConfiguration,
       });
       commit("wizard/model$update", {
-        path:
-          "/resources/stashAppscodeComBackupConfiguration/spec/target/ref/name",
+        path: "/resources/stashAppscodeComBackupConfiguration/spec/target/ref/name",
         value: dbName,
         force: true,
       });
@@ -1323,10 +1275,7 @@ function onBackupInvokerChange({
   }
 }
 
-function showInvokerForm(
-  { getValue, discriminator, watchDependency },
-  value
-) {
+function showInvokerForm({ getValue, discriminator, watchDependency }, value) {
   const backupInvoker = getValue(discriminator, "/backupInvoker");
   watchDependency("discriminator#/backupInvoker");
 
@@ -1334,11 +1283,7 @@ function showInvokerForm(
 }
 
 // backup configuration form
-function initalizeTargetReferenceName({
-  getValue,
-  model,
-  watchDependency,
-}) {
+function initalizeTargetReferenceName({ getValue, model, watchDependency }) {
   const databaseName = getValue(model, "/metadata/release/name");
   watchDependency("model#/metadata/release/name");
 
@@ -1365,13 +1310,22 @@ function initRepositoryChoise({ getValue, model }) {
   else return "select";
 }
 
-function initRepositoryChoiseForEdit({ getValue, model, setDiscriminatorValue }) {
+function initRepositoryChoiseForEdit({
+  getValue,
+  model,
+  setDiscriminatorValue,
+}) {
   const stashAppscodeComRepository_repo = getValue(
     model,
     "/resources/stashAppscodeComRepository_repo"
   );
-  const repoInitialSelectionStatus = stashAppscodeComRepository_repo ? "yes" : "no";
-  setDiscriminatorValue("/repoInitialSelectionStatus", repoInitialSelectionStatus);
+  const repoInitialSelectionStatus = stashAppscodeComRepository_repo
+    ? "yes"
+    : "no";
+  setDiscriminatorValue(
+    "/repoInitialSelectionStatus",
+    repoInitialSelectionStatus
+  );
 
   return repoInitialSelectionStatus;
 }
@@ -1408,8 +1362,7 @@ function onRepositoryChoiseChange({
       )}-repo`;
       // set this name in stashAppscodeComRestoreSession_init
       commit("wizard/model$update", {
-        path:
-          "/resources/stashAppscodeComBackupConfiguration/spec/repository/name",
+        path: "/resources/stashAppscodeComBackupConfiguration/spec/repository/name",
         value: repositoryName,
       });
     }
@@ -1488,12 +1441,7 @@ function initFromAnnotationKeyValue({ getValue, model }, prefix) {
   return newOb;
 }
 
-function onTaskParametersChange({
-  getValue,
-  discriminator,
-  model,
-  commit,
-}) {
+function onTaskParametersChange({ getValue, discriminator, model, commit }) {
   const taskParameters = getValue(discriminator, "/taskParameters");
 
   const taskParamterKeys = Object.keys(taskParameters).map(
@@ -1536,8 +1484,7 @@ function onNamespaceChange({ commit, model, getValue }) {
   );
   if (agent === "prometheus.io") {
     commit("wizard/model$update", {
-      path:
-        "/resources/monitoringCoreosComServiceMonitor/spec/namespaceSelector/matchNames",
+      path: "/resources/monitoringCoreosComServiceMonitor/spec/namespaceSelector/matchNames",
       value: [namespace],
       force: true,
     });
@@ -1557,8 +1504,7 @@ function onLabelChange({ commit, model, getValue }) {
 
   if (agent === "prometheus.io") {
     commit("wizard/model$update", {
-      path:
-        "/resources/monitoringCoreosComServiceMonitor/spec/selector/matchLabels",
+      path: "/resources/monitoringCoreosComServiceMonitor/spec/selector/matchLabels",
       value: labels,
       force: true,
     });
@@ -1580,8 +1526,7 @@ function onNameChange({ commit, model, getValue }) {
 
   if (agent === "prometheus.io") {
     commit("wizard/model$update", {
-      path:
-        "/resources/monitoringCoreosComServiceMonitor/spec/selector/matchLabels",
+      path: "/resources/monitoringCoreosComServiceMonitor/spec/selector/matchLabels",
       value: labels,
       force: true,
     });
@@ -1594,8 +1539,7 @@ function onNameChange({ commit, model, getValue }) {
 
   if (scheduleBackup) {
     commit("wizard/model$update", {
-      path:
-        "/resources/stashAppscodeComBackupConfiguration/spec/target/ref/name",
+      path: "/resources/stashAppscodeComBackupConfiguration/spec/target/ref/name",
       value: dbName,
       force: true,
     });
@@ -1605,8 +1549,7 @@ function onNameChange({ commit, model, getValue }) {
     );
     if (creatingNewRepo) {
       commit("wizard/model$update", {
-        path:
-          "/resources/stashAppscodeComBackupConfiguration/spec/repository/name",
+        path: "/resources/stashAppscodeComBackupConfiguration/spec/repository/name",
         value: `${dbName}-repo`,
         force: true,
       });
@@ -1620,8 +1563,7 @@ function onNameChange({ commit, model, getValue }) {
 
   if (prePopulateDatabase) {
     commit("wizard/model$update", {
-      path:
-        "/resources/stashAppscodeComRestoreSession_init/spec/target/ref/name",
+      path: "/resources/stashAppscodeComRestoreSession_init/spec/target/ref/name",
       value: dbName,
       force: true,
     });
@@ -1631,8 +1573,7 @@ function onNameChange({ commit, model, getValue }) {
     );
     if (creatingNewRepo) {
       commit("wizard/model$update", {
-        path:
-          "/resources/stashAppscodeComRestoreSession_init/spec/repository/name",
+        path: "/resources/stashAppscodeComRestoreSession_init/spec/repository/name",
         value: `${dbName}-init-repo`,
         force: true,
       });
@@ -1683,68 +1624,56 @@ function getCreateAuthSecret({ model, getValue }) {
     model,
     "/resources/kubedbComMariaDB/spec/authSecret"
   );
-  
+
   return !authSecret;
 }
 
 function showExistingSecretSection({
   getValue,
   watchDependency,
-  discriminator
+  discriminator,
 }) {
   watchDependency("discriminator#/createAuthSecret");
-  const hasAuthSecretName = getValue(
-    discriminator,
-    "/createAuthSecret"
-  );
+  const hasAuthSecretName = getValue(discriminator, "/createAuthSecret");
   return !hasAuthSecretName;
 }
 
-
-function showPasswordSection({
-  getValue,
-  watchDependency,
-  discriminator
-}) {
+function showPasswordSection({ getValue, watchDependency, discriminator }) {
   return !showExistingSecretSection({
     getValue,
     watchDependency,
-    discriminator
-  })
+    discriminator,
+  });
 }
 
 function setAuthSecretPassword({ model, getValue }) {
-  const encodedPassword = getValue(model, "/resources/secret_auth/data/password");
+  const encodedPassword = getValue(
+    model,
+    "/resources/secret_auth/data/password"
+  );
   return encodedPassword ? decodePassword({}, encodedPassword) : "";
 }
 
 function onAuthSecretPasswordChange({ getValue, discriminator, commit }) {
   const stringPassword = getValue(discriminator, "/password");
 
-  if(stringPassword) {
+  if (stringPassword) {
     commit("wizard/model$update", {
       path: "/resources/secret_auth/data/password",
       value: encodePassword({}, stringPassword),
-      force: true
+      force: true,
     });
     commit("wizard/model$update", {
       path: "/resources/secret_auth/data/username",
       value: encodePassword({}, "root"),
-      force: true
+      force: true,
     });
   } else {
-    commit(
-      "wizard/model$delete",
-      "/resources/secret_auth"
-    );
+    commit("wizard/model$delete", "/resources/secret_auth");
   }
 }
 
-function disableInitializationSection({
-  model,
-  getValue,
-  watchDependency,
-}) {
+function disableInitializationSection({ model, getValue, watchDependency }) {
   const initialized = getValue(
     model,
     "/resources/kubedbComMariaDB/spec/init/initialized"
@@ -1763,25 +1692,17 @@ function decodePassword({}, value) {
   return atob(value);
 }
 
-function onCreateAuthSecretChange({
-  discriminator,
-  getValue,
-  commit,
-}) {
+function onCreateAuthSecretChange({ discriminator, getValue, commit }) {
   const createAuthSecret = getValue(discriminator, "/createAuthSecret");
   if (createAuthSecret) {
     commit(
       "wizard/model$delete",
       "/resources/kubedbComMariaDB/spec/authSecret"
     );
-  } else if(createAuthSecret === false) {
-    commit(
-      "wizard/model$delete",
-      "/resources/secret_auth"
-    );
+  } else if (createAuthSecret === false) {
+    commit("wizard/model$delete", "/resources/secret_auth");
   }
 }
-
 
 async function getSecrets({
   storeGet,
@@ -1791,7 +1712,7 @@ async function getSecrets({
   watchDependency,
 }) {
   const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const cluster = storeGet("/route/params/cluster");
   const namespace = getValue(model, "/metadata/release/namespace");
   watchDependency("model#/metadata/release/namespace");
 
@@ -1827,10 +1748,7 @@ async function getSecrets({
 
 //////////////////////////////////////// Service Monitor //////////////////////////////////////////////////////
 
-function isEqualToServiceMonitorType(
-  { rootModel, watchDependency },
-  value
-) {
+function isEqualToServiceMonitorType({ rootModel, watchDependency }, value) {
   watchDependency("rootModel#/spec/type");
   return rootModel && rootModel.spec && rootModel.spec.type === value;
 }
@@ -1866,12 +1784,7 @@ function onConfigurationSourceChange({
   }
 }
 
-function onConfigurationChange({
-  getValue,
-  commit,
-  discriminator,
-  model,
-}) {
+function onConfigurationChange({ getValue, commit, discriminator, model }) {
   const value = getValue(discriminator, "/configuration");
   commit("wizard/model$update", {
     path: "/resources/secret_config/stringData/md-config.cnf",
@@ -1915,15 +1828,18 @@ function setConfigurationFiles({ model, getValue }) {
 function onSetCustomConfigChange({ discriminator, getValue, commit }) {
   const value = getValue(discriminator, "/setCustomConfig");
 
-  if(value === "no") {
-    commit("wizard/model$delete", "/resources/kubedbComMariaDB/spec/configSecret");
+  if (value === "no") {
+    commit(
+      "wizard/model$delete",
+      "/resources/kubedbComMariaDB/spec/configSecret"
+    );
     commit("wizard/model$delete", "/resources/secret_config");
   }
 }
 
 function getOpsRequestUrl({ storeGet, model, getValue, mode }, reqType) {
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
-  const domain = storeGet("/domain") || '';
+  const cluster = storeGet("/route/params/cluster");
+  const domain = storeGet("/domain") || "";
   const owner = storeGet("/route/params/user");
   const dbname = getValue(model, "/metadata/release/name");
   const group = getValue(model, "/metadata/resource/group");
@@ -1940,118 +1856,117 @@ function getOpsRequestUrl({ storeGet, model, getValue, mode }, reqType) {
     return `${domain}/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/mariadbopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=VerticalScaling`;
 }
 
-function getCreateNameSpaceUrl ({ model, getValue, storeGet }){ 
-
+function getCreateNameSpaceUrl({ model, getValue, storeGet }) {
   const user = storeGet("/route/params/user");
   const cluster = storeGet("/cluster/clusterDefinition/spec/name");
 
-  const domain = storeGet("/domain") || '';
-  if(domain.includes("bb.test")){
-    return `http://console.bb.test:5990/${user}/kubernetes/${cluster}/core/v1/namespaces/create`
-  }else{
-    const editedDomain = domain.replace("kubedb","console");
-    return `${editedDomain}/${user}/kubernetes/${cluster}/core/v1/namespaces/create`
+  const domain = storeGet("/domain") || "";
+  if (domain.includes("bb.test")) {
+    return `http://console.bb.test:5990/${user}/kubernetes/${cluster}/core/v1/namespaces/create`;
+  } else {
+    const editedDomain = domain.replace("kubedb", "console");
+    return `${editedDomain}/${user}/kubernetes/${cluster}/core/v1/namespaces/create`;
   }
 }
 
 return {
-	fetchJsons,
-	disableLableChecker,
-	isEqualToModelPathValue,
-	getResources,
-	isEqualToDiscriminatorPath,
-	setValueFromModel,
-	getNamespacedResourceList,
-	getResourceList,
-	resourceNames,
+  fetchJsons,
+  disableLableChecker,
+  isEqualToModelPathValue,
+  getResources,
+  isEqualToDiscriminatorPath,
+  setValueFromModel,
+  getNamespacedResourceList,
+  getResourceList,
+  resourceNames,
   unNamespacedResourceNames,
   returnTrue,
   returnStringYes,
-	getMariaDbVersions,
-	showAuthPasswordField,
-	showAuthSecretField,
-	showNewSecretCreateField,
-	setDatabaseMode,
-	getStorageClassNames,
-	deleteDatabaseModePath,
-	isEqualToDatabaseMode,
-	setApiGroup,
-	getIssuerRefsName,
-	hasIssuerRefName,
-	hasNoIssuerRefName,
-	setSSLMode,
-	showTlsConfigureSection,
-	onTlsConfigureChange,
+  getMariaDbVersions,
+  showAuthPasswordField,
+  showAuthSecretField,
+  showNewSecretCreateField,
+  setDatabaseMode,
+  getStorageClassNames,
+  deleteDatabaseModePath,
+  isEqualToDatabaseMode,
+  setApiGroup,
+  getIssuerRefsName,
+  hasIssuerRefName,
+  hasNoIssuerRefName,
+  setSSLMode,
+  showTlsConfigureSection,
+  onTlsConfigureChange,
   getAliasOptions,
-	showMonitoringSection,
-	onEnableMonitoringChange,
-	showCustomizeExporterSection,
-	onCustomizeExporterChange,
-	valueExists,
-	initPrePopulateDatabase,
-	onPrePopulateDatabaseChange,
-	initDataSource,
-	onDataSourceChange,
-	initVolumeType,
-	onVolumeTypeChange,
-	showInitializationForm,
-	showScriptOrStashForm,
-	showConfigMapOrSecretName,
-	initializeNamespace,
-	showRepositorySelectOrCreate,
-	onInitRepositoryChoiseChange,
-	initCustomizeRestoreJobRuntimeSettings,
-	initCustomizeRestoreJobRuntimeSettingsForBackup,
-	onCustomizeRestoreJobRuntimeSettingsChange,
-	onCustomizeRestoreJobRuntimeSettingsChangeForBackup,
-	showRuntimeForm,
-	getImagePullSecrets,
-	getBackupConfigsAndAnnotations,
-	deleteKubeDbComMariaDbAnnotation,
-	addKubeDbComMariaDbAnnotation,
-	initScheduleBackup,
+  showMonitoringSection,
+  onEnableMonitoringChange,
+  showCustomizeExporterSection,
+  onCustomizeExporterChange,
+  valueExists,
+  initPrePopulateDatabase,
+  onPrePopulateDatabaseChange,
+  initDataSource,
+  onDataSourceChange,
+  initVolumeType,
+  onVolumeTypeChange,
+  showInitializationForm,
+  showScriptOrStashForm,
+  showConfigMapOrSecretName,
+  initializeNamespace,
+  showRepositorySelectOrCreate,
+  onInitRepositoryChoiseChange,
+  initCustomizeRestoreJobRuntimeSettings,
+  initCustomizeRestoreJobRuntimeSettingsForBackup,
+  onCustomizeRestoreJobRuntimeSettingsChange,
+  onCustomizeRestoreJobRuntimeSettingsChangeForBackup,
+  showRuntimeForm,
+  getImagePullSecrets,
+  getBackupConfigsAndAnnotations,
+  deleteKubeDbComMariaDbAnnotation,
+  addKubeDbComMariaDbAnnotation,
+  initScheduleBackup,
   initScheduleBackupForEdit,
-	onScheduleBackupChange,
-	showBackupForm,
-	initBackupInvoker,
-	onBackupInvokerChange,
-	showInvokerForm,
-	initalizeTargetReferenceName,
-	setInitialRestoreSessionRepo,
-	initRepositoryChoise,
+  onScheduleBackupChange,
+  showBackupForm,
+  initBackupInvoker,
+  onBackupInvokerChange,
+  showInvokerForm,
+  initalizeTargetReferenceName,
+  setInitialRestoreSessionRepo,
+  initRepositoryChoise,
   initRepositoryChoiseForEdit,
-	onRepositoryChoiseChange,
-	onRepositoryNameChange,
-	getMongoAnnotations,
-	initFromAnnotationValue,
-	onBackupBlueprintNameChange,
-	onBackupBlueprintScheduleChange,
-	initFromAnnotationKeyValue,
-	onTaskParametersChange,
-	isValueExistInModel,
-	onNamespaceChange,
-	onLabelChange,
-	onNameChange,
-	returnFalse,
-	onAgentChange,
-	getCreateAuthSecret,
+  onRepositoryChoiseChange,
+  onRepositoryNameChange,
+  getMongoAnnotations,
+  initFromAnnotationValue,
+  onBackupBlueprintNameChange,
+  onBackupBlueprintScheduleChange,
+  initFromAnnotationKeyValue,
+  onTaskParametersChange,
+  isValueExistInModel,
+  onNamespaceChange,
+  onLabelChange,
+  onNameChange,
+  returnFalse,
+  onAgentChange,
+  getCreateAuthSecret,
   showExistingSecretSection,
-	showPasswordSection,
-	disableInitializationSection,
+  showPasswordSection,
+  disableInitializationSection,
   setAuthSecretPassword,
   onAuthSecretPasswordChange,
-	encodePassword,
-	decodePassword,
-	onCreateAuthSecretChange,
-	getSecrets,
-	isEqualToServiceMonitorType,
-	onConfigurationSourceChange,
-	onConfigurationChange,
-	setConfigurationSource,
-	setSecretConfigNamespace,
-	setConfiguration,
+  encodePassword,
+  decodePassword,
+  onCreateAuthSecretChange,
+  getSecrets,
+  isEqualToServiceMonitorType,
+  onConfigurationSourceChange,
+  onConfigurationChange,
+  setConfigurationSource,
+  setSecretConfigNamespace,
+  setConfiguration,
   setConfigurationFiles,
   onSetCustomConfigChange,
   getOpsRequestUrl,
-  getCreateNameSpaceUrl
-}
+  getCreateNameSpaceUrl,
+};
