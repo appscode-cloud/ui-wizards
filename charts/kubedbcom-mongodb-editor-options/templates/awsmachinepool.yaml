@@ -1,0 +1,28 @@
+{{- if .Values.managed.aws.machinePoolTemplate }}
+---
+apiVersion: cluster.x-k8s.io/v1beta1
+kind: MachinePool
+metadata:
+  name: {{ include "kubedbcom-mongodb-editor-options.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  clusterName: {{.Values.managed.clusterName}}
+  replicas: {{.Values.managed.databaseNodes}}
+  template:
+    spec:
+      bootstrap:
+        dataSecretName: ""
+      clusterName: {{.Values.managed.clusterName}}
+      infrastructureRef:
+        apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+        kind: AWSManagedMachinePool
+        name: {{ include "kubedbcom-mongodb-editor-options.fullname" . }}
+---
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+kind: AWSManagedMachinePool
+metadata:
+  name: {{ include "kubedbcom-mongodb-editor-options.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  eksNodegroupName: {{.Values.managed.aws.machinePoolTemplate.name}}
+  {{- end }}
