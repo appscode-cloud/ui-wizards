@@ -2432,7 +2432,7 @@ function onSetCustomConfigChange({ discriminator, getValue, commit }) {
 
 function getCreateNameSpaceUrl({ model, getValue, storeGet }) {
   const user = storeGet("/route/params/user");
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const cluster = storeGet("/route/params/cluster");
 
   const domain = storeGet("/domain") || '';
   if (domain.includes("bb.test")) {
