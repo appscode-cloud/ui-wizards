@@ -1,0 +1,977 @@
+steps:
+- form:
+    elements:
+    - if: returnFalse
+      computed: setReleaseNameAndNamespace
+      type: input
+    - disabled: isFeatureDisabled|grafana-operator
+      discriminator:
+        isGrafanaOperatorEnabled:
+          type: boolean
+      elements:    
+      - computed: getFeatureTitle|grafana-operator
+        type: label-element
+      - computed: getFeatureDescription|grafana-operator
+        customClass: mb-20
+        label:
+          isSubsection: true
+        type: label-element
+      - if: isFeatureDisabled|grafana-operator
+        computed: getFeatureNote|grafana-operator
+        alertInfo:
+          show: true
+          type: error
+        type: label-element
+      - computed: isFeatureEnabled|grafana-operator
+        label:
+          text: labels.enable_grafana_operator_question
+        onChange: onFeatureStatusChange|helmToolkitFluxcdIoHelmRelease_grafana_operator|/isGrafanaOperatorEnabled|grafana-operator
+        schema:
+          $ref: discriminator#/properties/isGrafanaOperatorEnabled
+        type: switch
+      - if: isDiscriminatorValueTrue|/isGrafanaOperatorEnabled
+        elements:
+        - label:
+            text: labels.registryFQDN
+          schema:
+            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_grafana_operator/properties/spec/properties/values/properties/registryFQDN
+          type: input
+        - fetch: getImagePullSecrets
+          label:
+            text: labels.imagePullSecrets
+          schema:
+            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_grafana_operator/properties/spec/properties/values/properties/imagePullSecrets
+          type: multiselect
+        - elements:
+          - label:
+              text: labels.readOnlyRootFilesystem_question
+            schema:
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_grafana_operator/properties/spec/properties/values/properties/image/properties/securityContext/properties/readOnlyRootFilesystem
+            type: switch
+          - label:
+              text: labels.runAsNonRoot_question
+            schema:
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_grafana_operator/properties/spec/properties/values/properties/image/properties/securityContext/properties/runAsNonRoot
+            type: switch
+          - label:
+              text: labels.runAsUser
+            schema:
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_grafana_operator/properties/spec/properties/values/properties/image/properties/securityContext/properties/runAsUser
+            type: input
+          label:
+            text: labels.containerSecurityContext
+          schema:
+            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_grafana_operator/properties/spec/properties/values/properties/image/properties/securityContext
+          show_label: true
+          type: single-step-form
+        - label:
+            isSubsection: true
+            text: labels.podSecurityContext
+          type: label-element
+        - elements:
+          - label:
+              text: labels.fsGroup
+            schema:
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_grafana_operator/properties/spec/properties/values/properties/podSecurityContext/properties/fsGroup
+            type: input
+          schema:
+            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_grafana_operator/properties/spec/properties/values/properties/podSecurityContext
+          type: single-step-form
+        - elements:
+          - label:
+              text: labels.serviceAccount.name
+            schema:
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_grafana_operator/properties/spec/properties/values/properties/serviceAccount/properties/name
+            onChange: onServiceAccountNameChange|helmToolkitFluxcdIoHelmRelease_grafana_operator
+            type: input
+          - isArray: true
+            keys:
+              label:
+                text: labels.annotations.key
+            label:
+              text: labels.annotations.label
+            schema:
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_grafana_operator/properties/spec/properties/values/properties/serviceAccount/properties/annotations
+            type: key-value-input-form
+            values:
+              label:
+                text: labels.annotations.value
+              schema:
+                $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_grafana_operator/properties/spec/properties/values/properties/serviceAccount/properties/annotations/additionalProperties
+              type: input
+          label:
+            text: labels.serviceAccount.label
+          schema:
+            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_grafana_operator/properties/spec/properties/values/properties/serviceAccount
+          show_label: true
+          type: single-step-form
+        - elements:
+          - hasDescription: true
+            label:
+              text: labels.agent
+            onChange: onAgentChange|helmToolkitFluxcdIoHelmRelease_grafana_operator
+            options:
+            - description: options.agent.prometheus_operator.description
+              text: options.agent.prometheus_operator.label
+              value: prometheus.io/operator
+            - description: options.agent.prometheus.description
+              text: options.agent.prometheus.label
+              value: prometheus.io
+            - description: options.agent.prometheus_builtin.description
+              text: options.agent.prometheus_builtin.label
+              value: prometheus.io/builtin
+            schema:
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_grafana_operator/properties/spec/properties/values/properties/monitoring/properties/agent
+            type: radio
+          - elements:
+            - isArray: true
+              keys:
+                label:
+                  text: labels.labels.key
+              label:
+                text: labels.labels.label
+              schema:
+                $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_grafana_operator/properties/spec/properties/values/properties/monitoring/properties/serviceMonitor/properties/labels
+              type: key-value-input-form
+              values:
+                label:
+                  text: labels.labels.value
+                schema:
+                  $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_grafana_operator/properties/spec/properties/values/properties/monitoring/properties/serviceMonitor/properties/labels/additionalProperties
+                type: input
+            if: isEqualToModelPathValue|/resources/helmToolkitFluxcdIoHelmRelease_grafana_operator/spec/values/monitoring/agent|prometheus.io/operator
+            schema:
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_grafana_operator/properties/spec/properties/values/properties/monitoring/properties/serviceMonitor
+            type: single-step-form
+          label:
+            text: labels.monitoring
+          schema:
+            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_grafana_operator/properties/spec/properties/values/properties/monitoring
+          show_label: true
+          type: single-step-form
+        type: single-step-form
+      type: single-step-form
+    type: single-step-form
+  id: grafana-operator
+  title: steps.0.label
+- form:
+    elements:
+    - disabled: isFeatureDisabled|grafana-ui-server
+      discriminator:
+        isKubeGrafanaDashboardEnabled:
+          type: boolean
+      elements:
+      - computed: getFeatureTitle|grafana-ui-server
+        type: label-element
+      - computed: getFeatureDescription|grafana-ui-server
+        customClass: mb-20
+        label:
+          isSubsection: true
+        type: label-element
+      - if: isFeatureDisabled|grafana-ui-server
+        computed: getFeatureNote|grafana-ui-server
+        alertInfo:
+          show: true
+          type: error
+        type: label-element
+      - computed: isFeatureEnabled|grafana-ui-server
+        label:
+          text: labels.enable_grafana_ui_server_question
+        onChange: onFeatureStatusChange|helmToolkitFluxcdIoHelmRelease_grafana_ui_server|/isKubeGrafanaDashboardEnabled|grafana-ui-server
+        schema:
+          $ref: discriminator#/properties/isKubeGrafanaDashboardEnabled
+        type: switch
+      - if: isDiscriminatorValueTrue|/isKubeGrafanaDashboardEnabled
+        elements:
+        - label:
+            text: labels.registryFQDN
+          schema:
+            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_grafana_ui_server/properties/spec/properties/values/properties/registryFQDN
+          type: input
+        - fetch: getImagePullSecrets
+          label:
+            text: labels.imagePullSecrets
+          schema:
+            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_grafana_ui_server/properties/spec/properties/values/properties/imagePullSecrets
+          type: multiselect
+        - elements:
+          - label:
+              text: labels.readOnlyRootFilesystem_question
+            schema:
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_grafana_ui_server/properties/spec/properties/values/properties/image/properties/securityContext/properties/readOnlyRootFilesystem
+            type: switch
+          - label:
+              text: labels.runAsNonRoot_question
+            schema:
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_grafana_ui_server/properties/spec/properties/values/properties/image/properties/securityContext/properties/runAsNonRoot
+            type: switch
+          - label:
+              text: labels.runAsUser
+            schema:
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_grafana_ui_server/properties/spec/properties/values/properties/image/properties/securityContext/properties/runAsUser
+            type: input
+          label:
+            text: labels.containerSecurityContext
+          schema:
+            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_grafana_ui_server/properties/spec/properties/values/properties/image/properties/securityContext
+          show_label: true
+          type: single-step-form
+        - label:
+            isSubsection: true
+            text: labels.podSecurityContext
+          type: label-element
+        - elements:
+          - label:
+              text: labels.fsGroup
+            schema:
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_grafana_ui_server/properties/spec/properties/values/properties/podSecurityContext/properties/fsGroup
+            type: input
+          schema:
+            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_grafana_ui_server/properties/spec/properties/values/properties/podSecurityContext
+          type: single-step-form
+        - elements:
+          - label:
+              text: labels.serviceAccount.name
+            schema:
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_grafana_ui_server/properties/spec/properties/values/properties/serviceAccount/properties/name
+            onChange: onServiceAccountNameChange|helmToolkitFluxcdIoHelmRelease_grafana_ui_server
+            type: input
+          - isArray: true
+            keys:
+              label:
+                text: labels.annotations.key
+            label:
+              text: labels.annotations.label
+            schema:
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_grafana_ui_server/properties/spec/properties/values/properties/serviceAccount/properties/annotations
+            type: key-value-input-form
+            values:
+              label:
+                text: labels.annotations.value
+              schema:
+                $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_grafana_ui_server/properties/spec/properties/values/properties/serviceAccount/properties/annotations/additionalProperties
+              type: input
+          label:
+            text: labels.serviceAccount.label
+          schema:
+            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_grafana_ui_server/properties/spec/properties/values/properties/serviceAccount
+          show_label: true
+          type: single-step-form
+        - elements:
+          - hasDescription: true
+            label:
+              text: labels.agent
+            onChange: onAgentChange|helmToolkitFluxcdIoHelmRelease_grafana_ui_server
+            options:
+            - description: options.agent.prometheus_operator.description
+              text: options.agent.prometheus_operator.label
+              value: prometheus.io/operator
+            - description: options.agent.prometheus.description
+              text: options.agent.prometheus.label
+              value: prometheus.io
+            - description: options.agent.prometheus_builtin.description
+              text: options.agent.prometheus_builtin.label
+              value: prometheus.io/builtin
+            schema:
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_grafana_ui_server/properties/spec/properties/values/properties/monitoring/properties/agent
+            type: radio
+          - elements:
+            - isArray: true
+              keys:
+                label:
+                  text: labels.labels.key
+              label:
+                text: labels.labels.label
+              schema:
+                $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_grafana_ui_server/properties/spec/properties/values/properties/monitoring/properties/serviceMonitor/properties/labels
+              type: key-value-input-form
+              values:
+                label:
+                  text: labels.labels.value
+                schema:
+                  $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_grafana_ui_server/properties/spec/properties/values/properties/monitoring/properties/serviceMonitor/properties/labels/additionalProperties
+                type: input
+            if: isEqualToModelPathValue|/resources/helmToolkitFluxcdIoHelmRelease_grafana_ui_server/spec/values/monitoring/agent|prometheus.io/operator
+            schema:
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_grafana_ui_server/properties/spec/properties/values/properties/monitoring/properties/serviceMonitor
+            type: single-step-form
+          label:
+            text: labels.monitoring
+          schema:
+            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_grafana_ui_server/properties/spec/properties/values/properties/monitoring
+          show_label: true
+          type: single-step-form
+        type: single-step-form
+      type: single-step-form
+    type: single-step-form
+  id: grafana-ui-server
+  title: steps.1.label
+- form:
+    elements:
+    - disabled: isFeatureDisabled|kube-grafana-dashboards
+      discriminator:
+        isKubeGrafanaDashboardEnabled:
+          type: boolean
+      elements:
+      - computed: getFeatureTitle|kube-grafana-dashboards
+        type: label-element
+      - computed: getFeatureDescription|kube-grafana-dashboards
+        customClass: mb-20
+        label:
+          isSubsection: true
+        type: label-element
+      - if: isFeatureDisabled|kube-grafana-dashboards
+        computed: getFeatureNote|kube-grafana-dashboards
+        alertInfo:
+          show: true
+          type: error
+        type: label-element
+      - computed: isFeatureEnabled|kube-grafana-dashboards
+        label:
+          text: labels.enable_kube_grafana_dashboard_question
+        onChange: onFeatureStatusChange|helmToolkitFluxcdIoHelmRelease_kube_grafana_dashboards|/isKubeGrafanaDashboardEnabled|kube-grafana-dashboards
+        schema:
+          $ref: discriminator#/properties/isKubeGrafanaDashboardEnabled
+        type: switch
+      - if: isDiscriminatorValueTrue|/isKubeGrafanaDashboardEnabled
+        discriminator:
+          selectedDashboards:
+            type: array
+        elements:
+        - computed: setSelectedDashboard
+          label:
+            text: labels.select_dashboard_to_enable
+          onChange: onSelectedDashboardChange
+          options:
+          - text: options.selectedDashboards.coreDns
+            value: coreDns
+          - text: options.selectedDashboards.kubeEtcd
+            value: kubeEtcd
+          - text: options.selectedDashboards.kubeApiServer
+            value: kubeApiServer
+          - text: options.selectedDashboards.kubeControllerManager
+            value: kubeControllerManager
+          - text: options.selectedDashboards.kubelet
+            value: kubelet
+          - text: options.selectedDashboards.kubeProxy
+            value: kubeProxy
+          - text: options.selectedDashboards.kubeScheduler
+            value: kubeScheduler
+          - text: options.selectedDashboards.nodeExporter
+            value: nodeExporter
+          - text: options.selectedDashboards.prometheus
+            value: prometheus
+          schema:
+            $ref: discriminator#/properties/selectedDashboards
+          type: checkbox
+        - elements:
+          - fetch: getResources|core|v1|namespaces
+            label:
+              text: labels.namespace
+            schema:
+              $ref: schema#/resources/properties/helmToolkitFluxcdIoHelmRelease_kube_grafana_dashboards/properties/spec/properties/values/properties/grafana/properties/namespace
+            type: select
+          - fetch: getNamespacedResources|appcatalog.appscode.com|v1alpha1|appbindings
+            label:
+              text: labels.name
+            schema:
+              $ref: schema#/resources/properties/helmToolkitFluxcdIoHelmRelease_kube_grafana_dashboards/properties/spec/properties/values/properties/grafana/properties/name
+            type: select
+          - fetch: getTimeZones
+            label:
+              text: labels.defaultDashboardsTimezone
+            schema:
+              $ref: schema#/resources/properties/helmToolkitFluxcdIoHelmRelease_kube_grafana_dashboards/properties/spec/properties/values/properties/grafana/properties/defaultDashboardsTimezone
+            type: select
+          label:
+            text: labels.grafana
+          schema:
+            $ref: schema#/resources/properties/helmToolkitFluxcdIoHelmRelease_kube_grafana_dashboards/properties/spec/properties/values/properties/grafana
+          show_label: true
+          type: single-step-form
+        type: single-step-form
+      type: single-step-form
+    type: single-step-form
+  id: kube_grafana_dashboard
+  title: steps.2.label
+- form:
+    elements:
+    - disabled: isFeatureDisabled|kube-prometheus-stack
+      discriminator:
+        isKubePrometheusStackEnabled:
+          type: boolean
+      elements:    
+      - computed: getFeatureTitle|kube-prometheus-stack
+        type: label-element
+      - computed: getFeatureDescription|kube-prometheus-stack
+        customClass: mb-20
+        label:
+          isSubsection: true
+        type: label-element
+      - if: isFeatureDisabled|kube-prometheus-stack
+        computed: getFeatureNote|kube-prometheus-stack
+        alertInfo:
+          show: true
+          type: error
+        type: label-element
+      - computed: isFeatureEnabled|kube-prometheus-stack
+        label:
+          text: labels.enable_kube_prometheus_stack_question
+        onChange: onFeatureStatusChange|helmToolkitFluxcdIoHelmRelease_kube_prometheus_stack|/isKubePrometheusStackEnabled|kube-prometheus-stack
+        schema:
+          $ref: discriminator#/properties/isKubePrometheusStackEnabled
+        type: switch
+      - if: isDiscriminatorValueTrue|/isKubePrometheusStackEnabled
+        elements:
+        - isArray: true
+          keys:
+            label:
+              text: labels.labels.key
+          label:
+            text: labels.commonLabels
+          schema:
+            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kube_prometheus_stack/properties/spec/properties/values/properties/commonLabels
+          type: key-value-input-form
+          values:
+            label:
+              text: labels.labels.value
+            schema:
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kube_prometheus_stack/properties/spec/properties/values/properties/commonLabels/additionalProperties
+            type: input
+        - elements:
+          - isArray: true
+            keys:
+              label:
+                text: labels.labels.key
+            label:
+              text: labels.labels.label
+            schema:
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kube_prometheus_stack/properties/spec/properties/values/properties/defaultRules/properties/labels
+            type: key-value-input-form
+            values:
+              label:
+                text: labels.labels.value
+              schema:
+                $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kube_prometheus_stack/properties/spec/properties/values/properties/defaultRules/properties/labels/additionalProperties
+              type: input
+          - isArray: true
+            keys:
+              label:
+                text: labels.annotations.key
+            label:
+              text: labels.annotations.label
+            schema:
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kube_prometheus_stack/properties/spec/properties/values/properties/defaultRules/properties/annotations
+            type: key-value-input-form
+            values:
+              label:
+                text: labels.annotations.value
+              schema:
+                $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kube_prometheus_stack/properties/spec/properties/values/properties/defaultRules/properties/annotations/additionalProperties
+              type: input
+          label:
+            text: labels.defaultRules
+          schema:
+            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kube_prometheus_stack/properties/spec/properties/values/properties/defaultRules
+          show_label: true
+          type: single-step-form
+        - elements:
+          - label:
+              text: labels.imageRegistry
+            schema:
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kube_prometheus_stack/properties/spec/properties/values/properties/global/properties/imageRegistry
+            type: input
+          - fetch: getImagePullSecrets
+            label:
+              text: labels.imagePullSecrets
+            schema:
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kube_prometheus_stack/properties/spec/properties/values/properties/global/properties/imagePullSecrets
+            type: multiselect
+          label:
+            text: labels.global
+          schema:
+            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kube_prometheus_stack/properties/spec/properties/values/properties/global
+          show_label: true
+          type: single-step-form
+        - elements:
+          - label:
+              text: labels.enable_alertManager_question
+            schema:
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kube_prometheus_stack/properties/spec/properties/values/properties/alertmanager/properties/enabled
+            type: switch
+          - elements:
+            - label:
+                text: labels.serviceAccount.name
+              schema:
+                $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kube_prometheus_stack/properties/spec/properties/values/properties/alertmanager/properties/serviceAccount/properties/name
+              onChange: onServiceAccountNameChange|helmToolkitFluxcdIoHelmRelease_kube_prometheus_stack
+              type: input
+            - isArray: true
+              keys:
+                label:
+                  text: labels.annotations.key
+              label:
+                text: labels.annotations.label
+              schema:
+                $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kube_prometheus_stack/properties/spec/properties/values/properties/alertmanager/properties/serviceAccount/properties/annotations
+              type: key-value-input-form
+              values:
+                label:
+                  text: labels.annotations.value
+                schema:
+                  $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kube_prometheus_stack/properties/spec/properties/values/properties/alertmanager/properties/serviceAccount/properties/annotations/additionalProperties
+                type: input
+            if: isModelValueTrue|/resources/helmToolkitFluxcdIoHelmRelease_kube_prometheus_stack/spec/values/alertmanager/enabled
+            label:
+              text: labels.serviceAccount.label
+            schema:
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kube_prometheus_stack/properties/spec/properties/values/properties/alertmanager/properties/serviceAccount
+            show_label: true
+            type: single-step-form
+          - elements:
+            - isArray: true
+              keys:
+                label:
+                  text: labels.labels.key
+              label:
+                text: labels.labels.label
+              schema:
+                $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kube_prometheus_stack/properties/spec/properties/values/properties/alertmanager/properties/service/properties/labels
+              type: key-value-input-form
+              values:
+                label:
+                  text: labels.labels.value
+                schema:
+                  $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kube_prometheus_stack/properties/spec/properties/values/properties/alertmanager/properties/service/properties/labels/additionalProperties
+                type: input
+            - label:
+                text: labels.service.type
+              options:
+              - ClusterIP
+              - NodePort
+              - LoadBalancer
+              - ExternalName
+              schema:
+                $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kube_prometheus_stack/properties/spec/properties/values/properties/alertmanager/properties/service/properties/type
+              type: select
+            - if: isEqualToModelPathValue|/resources/helmToolkitFluxcdIoHelmRelease_kube_prometheus_stack/spec/values/alertmanager/service/type|ClusterIP
+              label:
+                text: labels.service.cluster_ip
+              schema:
+                $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kube_prometheus_stack/properties/spec/properties/values/properties/alertmanager/properties/service/properties/clusterIP
+              type: input
+            - element:
+                label:
+                  text: labels.service.external_ip
+                schema:
+                  $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kube_prometheus_stack/properties/spec/properties/values/properties/alertmanager/properties/service/properties/externalIPs/items
+                type: input
+              if: isEqualToModelPathValue|/resources/helmToolkitFluxcdIoHelmRelease_kube_prometheus_stack/spec/values/alertmanager/service/type|ExternalName
+              label:
+                text: labels.service.external_ips
+              schema:
+                $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kube_prometheus_stack/properties/spec/properties/values/properties/alertmanager/properties/service/properties/externalIPs
+              type: list-input-form
+            - if: isEqualToModelPathValue|/resources/helmToolkitFluxcdIoHelmRelease_kube_prometheus_stack/spec/values/alertmanager/service/type|ExternalName
+              label:
+                text: labels.service.external_traffic_policy
+              schema:
+                $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kube_prometheus_stack/properties/spec/properties/values/properties/alertmanager/properties/service/properties/externalTrafficPolicy
+              type: input
+            - if: isEqualToModelPathValue|/resources/helmToolkitFluxcdIoHelmRelease_kube_prometheus_stack/spec/values/alertmanager/service/type|NodePort
+              label:
+                text: labels.service.nodePort
+              schema:
+                $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kube_prometheus_stack/properties/spec/properties/values/properties/alertmanager/properties/service/properties/nodePort
+              type: input
+            - if: isEqualToModelPathValue|/resources/helmToolkitFluxcdIoHelmRelease_kube_prometheus_stack/spec/values/alertmanager/service/type|LoadBalancer
+              label:
+                text: labels.service.load_balancer_ip
+              schema:
+                $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kube_prometheus_stack/properties/spec/properties/values/properties/alertmanager/properties/service/properties/loadBalancerIP
+              type: input
+            - element:
+                label:
+                  text: labels.service.load_balancer_source_range
+                schema:
+                  $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kube_prometheus_stack/properties/spec/properties/values/properties/alertmanager/properties/service/properties/loadBalancerSourceRanges/items
+                type: input
+              if: isEqualToModelPathValue|/resources/helmToolkitFluxcdIoHelmRelease_kube_prometheus_stack/spec/values/alertmanager/service/type|LoadBalancer
+              label:
+                text: labels.service.load_balancer_source_ranges
+              schema:
+                $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kube_prometheus_stack/properties/spec/properties/values/properties/alertmanager/properties/service/properties/loadBalancerSourceRanges
+              type: list-input-form
+            if: isModelValueTrue|/resources/helmToolkitFluxcdIoHelmRelease_kube_prometheus_stack/spec/values/alertmanager/enabled
+            label:
+              text: labels.service.label
+            schema:
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_grafana_operator/properties/spec/properties/values/properties/alertmanager/properties/service
+            show_label: true
+            type: single-step-form
+          schema:
+            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kube_prometheus_stack/properties/spec/properties/values/properties/alertmanager
+          show_label: true
+          type: single-step-form
+        - elements:
+          - label:
+              text: labels.enable_grafana_question
+            schema:
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kube_prometheus_stack/properties/spec/properties/values/properties/grafana/properties/enabled
+            type: switch
+          - if: isModelValueTrue|/resources/helmToolkitFluxcdIoHelmRelease_kube_prometheus_stack/spec/values/grafana/enabled
+            fetch: getTimeZones
+            label:
+              text: labels.defaultDashboardsTimezone
+            schema:
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kube_prometheus_stack/properties/spec/properties/values/properties/grafana/properties/defaultDashboardsTimezone
+            type: select
+          - showPasswordStrength: true
+            hideValue: true
+            if: isModelValueTrue|/resources/helmToolkitFluxcdIoHelmRelease_kube_prometheus_stack/spec/values/grafana/enabled
+            label:
+              text: labels.adminPassword
+            schema:
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kube_prometheus_stack/properties/spec/properties/values/properties/grafana/properties/adminPassword
+            type: input
+          - elements:
+            - elements:
+              - isArray: true
+                keys:
+                  label:
+                    text: labels.labels.key
+                label:
+                  text: labels.labels.label
+                schema:
+                  $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kube_prometheus_stack/properties/spec/properties/values/properties/grafana/properties/sidecar/properties/datasources/properties/labels
+                type: key-value-input-form
+                values:
+                  label:
+                    text: labels.labels.value
+                  schema:
+                    $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kube_prometheus_stack/properties/spec/properties/values/properties/grafana/properties/sidecar/properties/datasources/properties/labels/additionalProperties
+                  type: input
+              schema:
+                $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kube_prometheus_stack/properties/spec/properties/values/properties/grafana/properties/sidecar/properties/datasources
+              type: single-step-form
+            if: isModelValueTrue|/resources/helmToolkitFluxcdIoHelmRelease_kube_prometheus_stack/spec/values/grafana/enabled
+            schema:
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kube_prometheus_stack/properties/spec/properties/values/properties/grafana/properties/sidecar
+            type: single-step-form
+          schema:
+            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kube_prometheus_stack/properties/spec/properties/values/properties/grafana
+          show_label: true
+          type: single-step-form
+        - elements:
+          - label:
+              text: labels.registry
+            schema:
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kube_prometheus_stack/properties/spec/properties/values/properties/prometheusOperator/properties/image/properties/registry
+            type: input
+          - label:
+              text: labels.repository
+            schema:
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kube_prometheus_stack/properties/spec/properties/values/properties/prometheusOperator/properties/image/properties/repository
+            type: input
+          - label:
+              text: labels.tag
+            schema:
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kube_prometheus_stack/properties/spec/properties/values/properties/prometheusOperator/properties/image/properties/tag
+            type: input
+          - label:
+              text: labels.sha
+            schema:
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kube_prometheus_stack/properties/spec/properties/values/properties/prometheusOperator/properties/image/properties/sha
+            type: input
+          - label:
+              text: labels.pullPolicy
+            schema:
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kube_prometheus_stack/properties/spec/properties/values/properties/prometheusOperator/properties/image/properties/pullPolicy
+            type: input
+          label:
+            text: labels.prometheusOperator
+          show_label: true
+          type: single-step-form
+        - label:
+            text: labels.prometheus
+          type: label-element
+        - label:
+            text: labels.interval
+          schema:
+            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kube_prometheus_stack/properties/spec/properties/values/properties/prometheus/properties/serviceMonitor/properties/interval
+          type: input
+        - elements:
+          - label:
+              text: labels.scrapeInterval
+            schema:
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kube_prometheus_stack/properties/spec/properties/values/properties/prometheusSpec/properties/scrapeInterval
+            type: input
+          - elements:
+            - label:
+                text: labels.registry
+              schema:
+                $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kube_prometheus_stack/properties/spec/properties/values/properties/prometheusSpec/properties/image/properties/registry
+              type: input
+            - label:
+                text: labels.repository
+              schema:
+                $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kube_prometheus_stack/properties/spec/properties/values/properties/prometheusSpec/properties/image/properties/repository
+              type: input
+            - label:
+                text: labels.tag
+              schema:
+                $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kube_prometheus_stack/properties/spec/properties/values/properties/prometheusSpec/properties/image/properties/tag
+              type: input
+            - label:
+                text: labels.sha
+              schema:
+                $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kube_prometheus_stack/properties/spec/properties/values/properties/prometheusSpec/properties/image/properties/sha
+              type: input
+            label:
+              text: labels.container
+            show_label: true
+            type: single-step-form
+          - isArray: true
+            keys:
+              label:
+                text: labels.labels.key
+            label:
+              text: labels.serviceMonitorSelector
+            schema:
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kube_prometheus_stack/properties/spec/properties/values/properties/prometheusSpec/properties/serviceMonitorSelector
+            type: key-value-input-form
+            values:
+              label:
+                text: labels.labels.value
+              schema:
+                $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kube_prometheus_stack/properties/spec/properties/values/properties/prometheusSpec/properties/serviceMonitorSelector/additionalProperties
+              type: input
+          - isArray: true
+            keys:
+              label:
+                text: labels.labels.key
+            label:
+              text: labels.serviceMonitorNamespaceSelector
+            schema:
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kube_prometheus_stack/properties/spec/properties/values/properties/prometheusSpec/properties/serviceMonitorNamespaceSelector
+            type: key-value-input-form
+            values:
+              label:
+                text: labels.labels.value
+              schema:
+                $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kube_prometheus_stack/properties/spec/properties/values/properties/prometheusSpec/properties/serviceMonitorNamespaceSelector/additionalProperties
+              type: input
+          - isArray: true
+            keys:
+              label:
+                text: labels.labels.key
+            label:
+              text: labels.podMonitorSelector
+            schema:
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kube_prometheus_stack/properties/spec/properties/values/properties/prometheusSpec/properties/podMonitorSelector
+            type: key-value-input-form
+            values:
+              label:
+                text: labels.labels.value
+              schema:
+                $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kube_prometheus_stack/properties/spec/properties/values/properties/prometheusSpec/properties/podMonitorSelector/additionalProperties
+              type: input
+          - isArray: true
+            keys:
+              label:
+                text: labels.labels.key
+            label:
+              text: labels.podMonitorNamespaceSelector
+            schema:
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kube_prometheus_stack/properties/spec/properties/values/properties/prometheusSpec/properties/podMonitorNamespaceSelector
+            type: key-value-input-form
+            values:
+              label:
+                text: labels.labels.value
+              schema:
+                $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kube_prometheus_stack/properties/spec/properties/values/properties/prometheusSpec/properties/podMonitorNamespaceSelector/additionalProperties
+              type: input
+          - label:
+              text: labels.resources
+            schema:
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kube_prometheus_stack/properties/spec/properties/values/properties/prometheusSpec/properties/resources
+            type: resource-input-form
+          - computed: setStorageSpec
+            elements:
+            - fetch: getStorageClassNames|/resources/helmToolkitFluxcdIoHelmRelease_kube_prometheus_stack/spec/values/prometheusSpec/storageSpec/volumeClaimTemplate/spec/storageClassName
+              label:
+                text: labels.storageClassName
+              schema:
+                $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kube_prometheus_stack/properties/spec/properties/values/properties/prometheusSpec/properties/storageSpec/properties/volumeClaimTemplate/properties/spec/properties/storageClassName
+              type: select
+            - label:
+                text: labels.storageSize
+              schema:
+                $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kube_prometheus_stack/properties/spec/properties/values/properties/prometheusSpec/properties/storageSpec/properties/volumeClaimTemplate/properties/spec/properties/resources/properties/requests/properties/storage
+              type: input
+            label:
+              text: labels.storageSpec
+            show_label: true
+            type: single-step-form          
+          label:
+            text: labels.prometheusSpec
+          show_label: true
+          type: single-step-form
+        type: single-step-form
+      type: single-step-form
+    type: single-step-form
+  id: kube_prometheus_stack
+  title: steps.3.label
+- form:
+    elements:
+    - disabled: isFeatureDisabled|panopticon
+      discriminator:
+        isPanopticonEnabled:
+          type: boolean
+      elements:    
+      - computed: getFeatureTitle|panopticon
+        type: label-element
+      - computed: getFeatureDescription|panopticon
+        customClass: mb-20
+        label:
+          isSubsection: true
+        type: label-element
+      - if: isFeatureDisabled|panopticon
+        computed: getFeatureNote|panopticon
+        alertInfo:
+          show: true
+          type: error
+        type: label-element
+      - computed: isFeatureEnabled|panopticon
+        label:
+          text: labels.enable_panopticon_question
+        onChange: onFeatureStatusChange|helmToolkitFluxcdIoHelmRelease_panopticon|/isPanopticonEnabled|panopticon
+        schema:
+          $ref: discriminator#/properties/isPanopticonEnabled
+        type: switch
+      - if: isDiscriminatorValueTrue|/isPanopticonEnabled
+        elements:
+        - label:
+            text: labels.registryFQDN
+          schema:
+            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_panopticon/properties/spec/properties/values/properties/registryFQDN
+          type: input
+        - fetch: getImagePullSecrets
+          label:
+            text: labels.imagePullSecrets
+          schema:
+            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_panopticon/properties/spec/properties/values/properties/imagePullSecrets
+          type: multiselect
+        - elements:
+          - label:
+              text: labels.readOnlyRootFilesystem_question
+            schema:
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_panopticon/properties/spec/properties/values/properties/image/properties/securityContext/properties/readOnlyRootFilesystem
+            type: switch
+          - label:
+              text: labels.runAsNonRoot_question
+            schema:
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_panopticon/properties/spec/properties/values/properties/image/properties/securityContext/properties/runAsNonRoot
+            type: switch
+          - label:
+              text: labels.runAsUser
+            schema:
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_panopticon/properties/spec/properties/values/properties/image/properties/securityContext/properties/runAsUser
+            type: input
+          label:
+            text: labels.containerSecurityContext
+          schema:
+            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_panopticon/properties/spec/properties/values/properties/image/properties/securityContext
+          show_label: true
+          type: single-step-form
+        - label:
+            isSubsection: true
+            text: labels.podSecurityContext
+          type: label-element
+        - elements:
+          - label:
+              text: labels.fsGroup
+            schema:
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_panopticon/properties/spec/properties/values/properties/podSecurityContext/properties/fsGroup
+            type: input
+          schema:
+            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_panopticon/properties/spec/properties/values/properties/podSecurityContext
+          type: single-step-form
+        - elements:
+          - label:
+              text: labels.serviceAccount.name
+            schema:
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_panopticon/properties/spec/properties/values/properties/serviceAccount/properties/name
+            onChange: onServiceAccountNameChange|helmToolkitFluxcdIoHelmRelease_panopticon
+            type: input
+          - isArray: true
+            keys:
+              label:
+                text: labels.annotations.key
+            label:
+              text: labels.annotations.label
+            schema:
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_panopticon/properties/spec/properties/values/properties/serviceAccount/properties/annotations
+            type: key-value-input-form
+            values:
+              label:
+                text: labels.annotations.value
+              schema:
+                $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_panopticon/properties/spec/properties/values/properties/serviceAccount/properties/annotations/additionalProperties
+              type: input
+          label:
+            text: labels.serviceAccount.label
+          schema:
+            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_panopticon/properties/spec/properties/values/properties/serviceAccount
+          show_label: true
+          type: single-step-form
+        - elements:
+          - hasDescription: true
+            label:
+              text: labels.agent
+            onChange: onAgentChange|helmToolkitFluxcdIoHelmRelease_panopticon
+            options:
+            - description: options.agent.prometheus_operator.description
+              text: options.agent.prometheus_operator.label
+              value: prometheus.io/operator
+            - description: options.agent.prometheus.description
+              text: options.agent.prometheus.label
+              value: prometheus.io
+            - description: options.agent.prometheus_builtin.description
+              text: options.agent.prometheus_builtin.label
+              value: prometheus.io/builtin
+            schema:
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_panopticon/properties/spec/properties/values/properties/monitoring/properties/agent
+            type: radio
+          - elements:
+            - isArray: true
+              keys:
+                label:
+                  text: labels.labels.key
+              label:
+                text: labels.labels.label
+              schema:
+                $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_panopticon/properties/spec/properties/values/properties/monitoring/properties/serviceMonitor/properties/labels
+              type: key-value-input-form
+              values:
+                label:
+                  text: labels.labels.value
+                schema:
+                  $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_panopticon/properties/spec/properties/values/properties/monitoring/properties/serviceMonitor/properties/labels/additionalProperties
+                type: input
+            if: isEqualToModelPathValue|/resources/helmToolkitFluxcdIoHelmRelease_panopticon/spec/values/monitoring/agent|prometheus.io/operator
+            schema:
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_panopticon/properties/spec/properties/values/properties/monitoring/properties/serviceMonitor
+            type: single-step-form
+          label:
+            text: labels.monitoring
+          schema:
+            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_panopticon/properties/spec/properties/values/properties/monitoring
+          show_label: true
+          type: single-step-form
+        type: single-step-form
+      type: single-step-form
+    type: single-step-form
+  id: panopticon
+  title: steps.4.label
+type: multi-step-form

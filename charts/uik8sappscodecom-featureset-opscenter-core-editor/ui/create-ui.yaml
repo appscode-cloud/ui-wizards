@@ -1,0 +1,158 @@
+steps:
+- form:
+    elements:
+    - if: returnFalse
+      computed: setReleaseNameAndNamespace
+      type: input
+    - disabled: isFeatureDisabled|kube-ui-server
+      discriminator:
+        isKubeUiServerEnabled:
+          type: boolean
+      elements:    
+      - computed: getFeatureTitle|kube-ui-server
+        type: label-element
+      - computed: getFeatureDescription|kube-ui-server
+        customClass: mb-20
+        label:
+          isSubsection: true
+        type: label-element
+      - if: isFeatureDisabled|kube-ui-server
+        computed: getFeatureNote|kube-ui-server
+        alertInfo:
+          show: true
+          type: error
+        type: label-element
+      - computed: isFeatureEnabled|kube-ui-server
+        disabled: isFeatureRequired|kube-ui-server
+        label:
+          text: labels.enable_kube_ui_server_question
+        onChange: onFeatureStatusChange|helmToolkitFluxcdIoHelmRelease_kube_ui_server|/isKubeUiServerEnabled|kube-ui-server
+        schema:
+          $ref: discriminator#/properties/isKubeUiServerEnabled
+        type: switch
+      - if: isDiscriminatorValueTrue|/isKubeUiServerEnabled
+        elements:
+        - label:
+            text: labels.registryFQDN
+          schema:
+            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kube_ui_server/properties/spec/properties/values/properties/registryFQDN
+          type: input
+        - fetch: getImagePullSecrets
+          label:
+            text: labels.imagePullSecrets
+          schema:
+            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kube_ui_server/properties/spec/properties/values/properties/imagePullSecrets
+          type: multiselect
+        - elements:
+          - label:
+              text: labels.readOnlyRootFilesystem_question
+            schema:
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kube_ui_server/properties/spec/properties/values/properties/image/properties/securityContext/properties/readOnlyRootFilesystem
+            type: switch
+          - label:
+              text: labels.runAsNonRoot_question
+            schema:
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kube_ui_server/properties/spec/properties/values/properties/image/properties/securityContext/properties/runAsNonRoot
+            type: switch
+          - label:
+              text: labels.runAsUser
+            schema:
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kube_ui_server/properties/spec/properties/values/properties/image/properties/securityContext/properties/runAsUser
+            type: input
+          label:
+            text: labels.containerSecurityContext
+          schema:
+            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kube_ui_server/properties/spec/properties/values/properties/image/properties/securityContext
+          show_label: true
+          type: single-step-form
+        - label:
+            isSubsection: true
+            text: labels.podSecurityContext
+          type: label-element
+        - elements:
+          - label:
+              text: labels.fsGroup
+            schema:
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kube_ui_server/properties/spec/properties/values/properties/podSecurityContext/properties/fsGroup
+            type: input
+          schema:
+            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kube_ui_server/properties/spec/properties/values/properties/podSecurityContext
+          type: single-step-form
+        - elements:
+          - label:
+              text: labels.serviceAccount.name
+            schema:
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kube_ui_server/properties/spec/properties/values/properties/serviceAccount/properties/name
+            onChange: onServiceAccountNameChange|helmToolkitFluxcdIoHelmRelease_kube_ui_server
+            type: input
+          - isArray: true
+            keys:
+              label:
+                text: labels.annotations.key
+            label:
+              text: labels.annotations.label
+            schema:
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kube_ui_server/properties/spec/properties/values/properties/serviceAccount/properties/annotations
+            type: key-value-input-form
+            values:
+              label:
+                text: labels.annotations.value
+              schema:
+                $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kube_ui_server/properties/spec/properties/values/properties/serviceAccount/properties/annotations/additionalProperties
+              type: input
+          label:
+            text: labels.serviceAccount.label
+          schema:
+            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kube_ui_server/properties/spec/properties/values/properties/serviceAccount
+          show_label: true
+          type: single-step-form
+        - elements:
+          - hasDescription: true
+            label:
+              text: labels.agent
+            onChange: onAgentChange|helmToolkitFluxcdIoHelmRelease_kube_ui_server
+            options:
+            - description: options.agent.prometheus_operator.description
+              text: options.agent.prometheus_operator.label
+              value: prometheus.io/operator
+            - description: options.agent.prometheus.description
+              text: options.agent.prometheus.label
+              value: prometheus.io
+            - description: options.agent.prometheus_builtin.description
+              text: options.agent.prometheus_builtin.label
+              value: prometheus.io/builtin
+            schema:
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kube_ui_server/properties/spec/properties/values/properties/monitoring/properties/agent
+            type: radio
+          - elements:
+            - isArray: true
+              keys:
+                label:
+                  text: labels.labels.key
+              label:
+                text: labels.labels.label
+              schema:
+                $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kube_ui_server/properties/spec/properties/values/properties/monitoring/properties/serviceMonitor/properties/labels
+              type: key-value-input-form
+              values:
+                label:
+                  text: labels.labels.value
+                schema:
+                  $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kube_ui_server/properties/spec/properties/values/properties/monitoring/properties/serviceMonitor/properties/labels/additionalProperties
+                type: input
+            if: isEqualToModelPathValue|/resources/helmToolkitFluxcdIoHelmRelease_kube_ui_server/spec/values/monitoring/agent|prometheus.io/operator
+            schema:
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kube_ui_server/properties/spec/properties/values/properties/monitoring/properties/serviceMonitor
+            type: single-step-form
+          label:
+            text: labels.monitoring
+          schema:
+            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kube_ui_server/properties/spec/properties/values/properties/monitoring
+          show_label: true
+          type: single-step-form
+        type: single-step-form
+      type: single-step-form
+    type: single-step-form
+  id: kube-ui-server
+  title: steps.0.label
+type: multi-step-form
