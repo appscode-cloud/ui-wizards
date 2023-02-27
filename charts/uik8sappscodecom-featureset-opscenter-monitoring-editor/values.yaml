@@ -1,0 +1,149 @@
+metadata:
+  resource:
+    group: ui.k8s.appscode.com
+    version: v1alpha1
+    name: featuresets
+    kind: FeatureSet
+    scope: Cluster
+  release:
+    name: RELEASE-NAME
+    namespace: default
+resources:
+  helmToolkitFluxcdIoHelmRelease_grafana_operator: # +doc-gen:break
+    apiVersion: helm.toolkit.fluxcd.io/v2beta1
+    kind: HelmRelease
+    metadata:
+      name: grafana-operator
+      namespace: kubeops
+    spec:
+      chart:
+        spec:
+          chart: grafana-operator
+          sourceRef:
+            kind: HelmRepository
+            name: appscode
+            namespace: kubeops
+          version: v2022.06.14
+      install:
+        crds: CreateReplace
+        createNamespace: true
+      interval: 30m
+      releaseName: grafana-operator
+      targetNamespace: monitoring
+      upgrade:
+        crds: CreateReplace
+  helmToolkitFluxcdIoHelmRelease_grafana_ui_server: # +doc-gen:break
+    apiVersion: helm.toolkit.fluxcd.io/v2beta1
+    kind: HelmRelease
+    metadata:
+      name: grafana-ui-server
+      namespace: kubeops
+    spec:
+      chart:
+        spec:
+          chart: grafana-ui-server
+          sourceRef:
+            kind: HelmRepository
+            name: appscode
+            namespace: kubeops
+          version: v2022.06.14
+      install:
+        crds: CreateReplace
+        createNamespace: true
+      interval: 30m
+      releaseName: grafana-ui-server
+      targetNamespace: monitoring
+      upgrade:
+        crds: CreateReplace
+  helmToolkitFluxcdIoHelmRelease_kube_grafana_dashboards: # +doc-gen:break
+    apiVersion: helm.toolkit.fluxcd.io/v2beta1
+    kind: HelmRelease
+    metadata:
+      name: kube-grafana-dashboards
+      namespace: kubeops
+    spec:
+      chart:
+        spec:
+          chart: kube-grafana-dashboards
+          sourceRef:
+            kind: HelmRepository
+            name: appscode
+            namespace: kubeops
+          version: v2022.06.14
+      install:
+        crds: CreateReplace
+        createNamespace: true
+      interval: 30m
+      releaseName: kube-grafana-dashboards
+      targetNamespace: monitoring
+      upgrade:
+        crds: CreateReplace
+  helmToolkitFluxcdIoHelmRelease_kube_prometheus_stack: # +doc-gen:break
+    apiVersion: helm.toolkit.fluxcd.io/v2beta1
+    kind: HelmRelease
+    metadata:
+      name: kube-prometheus-stack
+      namespace: kubeops
+    spec:
+      chart:
+        spec:
+          chart: kube-prometheus-stack
+          sourceRef:
+            kind: HelmRepository
+            name: prometheus-community
+            namespace: kubeops
+          version: 45.0.0
+      install:
+        crds: CreateReplace
+        createNamespace: true
+      interval: 30m
+      releaseName: kube-prometheus-stack
+      targetNamespace: monitoring
+      upgrade:
+        crds: CreateReplace
+  helmToolkitFluxcdIoHelmRelease_monitoring_config: # +doc-gen:break
+    apiVersion: helm.toolkit.fluxcd.io/v2beta1
+    kind: HelmRelease
+    metadata:
+      name: monitoring-config
+      namespace: kubeops
+    spec:
+      chart:
+        spec:
+          chart: monitoring-config
+          sourceRef:
+            kind: HelmRepository
+            name: bytebuilders
+            namespace: kubeops
+          version: v2022.06.14
+      install:
+        crds: CreateReplace
+        createNamespace: true
+      interval: 30m
+      releaseName: monitoring-config
+      targetNamespace: monitoring
+      upgrade:
+        crds: CreateReplace
+  helmToolkitFluxcdIoHelmRelease_panopticon: # +doc-gen:break
+    apiVersion: helm.toolkit.fluxcd.io/v2beta1
+    kind: HelmRelease
+    metadata:
+      name: panopticon
+      namespace: kubeops
+    spec:
+      chart:
+        spec:
+          chart: panopticon
+          sourceRef:
+            kind: HelmRepository
+            name: appscode
+            namespace: kubeops
+          version: v2022.06.14
+      install:
+        crds: CreateReplace
+        createNamespace: true
+      interval: 30m
+      releaseName: panopticon
+      targetNamespace: monitoring
+      upgrade:
+        crds: CreateReplace
