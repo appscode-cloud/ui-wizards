@@ -53,7 +53,7 @@ async function getResources(
   resource
 ) {
   const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const cluster = storeGet("/route/params/cluster");
 
   try {
     const resp = await axios.get(
@@ -98,7 +98,7 @@ async function getNamespacedResourceList(
   { namespace, group, version, resource }
 ) {
   const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const cluster = storeGet("/route/params/cluster");
 
   const url = `/clusters/${owner}/${cluster}/proxy/${group}/${version}/namespaces/${namespace}/${resource}`;
 
@@ -125,7 +125,7 @@ async function getResourceList(
   { group, version, resource }
 ) {
   const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const cluster = storeGet("/route/params/cluster");
 
   const url = `/clusters/${owner}/${cluster}/proxy/${group}/${version}/${resource}`;
 
@@ -231,7 +231,7 @@ async function getPgBouncerVersions(
   resource
 ) {
   const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const cluster = storeGet("/route/params/cluster");
 
   const queryParams = {
     filter: {
@@ -287,7 +287,7 @@ async function getStorageClassNames(
   { axios, storeGet, commit, model, getValue }
 ) {
   const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const cluster = storeGet("/route/params/cluster");
 
   const resp = await axios.get(
     `/clusters/${owner}/${cluster}/proxy/storage.k8s.io/v1/storageclasses`,
@@ -393,7 +393,7 @@ async function getIssuerRefsName({
   watchDependency,
 }) {
   const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const cluster = storeGet("/route/params/cluster");
   watchDependency(
     "model#/resources/kubedbComPgBouncer/spec/tls/issuerRef/apiGroup"
   );
@@ -1815,7 +1815,7 @@ async function getSecrets({
   watchDependency,
 }) {
   const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const cluster = storeGet("/route/params/cluster");
   const namespace = getValue(model, "/metadata/release/namespace");
   watchDependency("model#/metadata/release/namespace");
 
@@ -1938,7 +1938,7 @@ function onSetCustomConfigChange({ discriminator, getValue, commit }) {
 }
 
 function getOpsRequestUrl({ storeGet, model, getValue, mode }, reqType) {
-  const cluster = storeGet("/cluster/clusterDefinition/spec/name");
+  const cluster = storeGet("/route/params/cluster");
   const domain = storeGet("/domain");
   const owner = storeGet("/route/params/user");
   const dbname = getValue(model, "/metadata/release/name");
