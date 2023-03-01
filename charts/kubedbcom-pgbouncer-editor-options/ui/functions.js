@@ -212,6 +212,60 @@ const machineList = [
   "db.r.24xlarge",
 ];
 
+const getAppbinding = async ( { axios, storeGet,getValue, watchDependency, rootModel}) =>{
+  
+  const owner = storeGet("/route/params/user");
+  const cluster = storeGet("/route/params/cluster");
+
+  const group = 'appcatalog.appscode.com'
+  const version = 'v1alpha1'
+  const resource = 'appbindings'
+  
+  watchDependency("rootModel#/databaseRef/namespace");
+  
+  
+  const namespace = getValue(rootModel, "/databaseRef/namespace");  
+
+  const resp = await axios.get(
+    `/clusters/${owner}/${cluster}/proxy/${group}/${version}/namespaces/${namespace}/${resource}`,
+    {
+      params: {
+        filter: { items: { metadata: { name: null }, type: null } },
+      },
+    }
+  );
+
+  const resources = (resp && resp.data && resp.data.items) || [];
+
+  resources.map((item) => {
+    const name = (item.metadata && item.metadata.name) || "";
+    item.text = name;
+    item.value = name;
+    return true;
+  });
+  return resources;
+
+}
+
+const onDatabaseModeChange = ({ discriminator,getValue, commit}) =>{
+
+  const databaseMode = getValue(discriminator, "/mode");
+
+  commit("wizard/model$update", {
+    path: "/spec/replicas",
+    value: databaseMode === 'Standalone' ? 1 : 3,
+    force: true,
+  });
+ 
+}
+
+const setDatabaseMode = ({model,getValue}) =>{
+  const replicas = getValue(model,'/spec/replicas')
+
+  return replicas === 1 ? 'Standalone' : 'Cluster'
+}
+
+
 function showAuthPasswordField({
   discriminator,
   getValue,
@@ -270,6 +324,8 @@ async function getResources(
   });
   return resources;
 }
+
+
 
 async function getStorageClassNames({ axios, storeGet, commit }) {
   const owner = storeGet("/route/params/user");
@@ -496,6 +552,8 @@ function updateAgentValue({commit },val) {
 }
 
 
+
+
 return {
 	fetchJsons,
 	showAuthPasswordField,
@@ -512,4 +570,7 @@ return {
 	setLimitsCpuOrMem,
 	setMachineToCustom,
 	updateAgentValue,
+  getAppbinding,
+  onDatabaseModeChange,
+  setDatabaseMode
 }
