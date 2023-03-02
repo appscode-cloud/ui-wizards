@@ -64,9 +64,6 @@ steps:
       - description: options.terminationPolicy.delete.description
         text: options.terminationPolicy.delete.label
         value: Delete
-      - description: options.terminationPolicy.halt.description
-        text: options.terminationPolicy.halt.label
-        value: Halt
       - description: options.terminationPolicy.wipeOut.description
         text: options.terminationPolicy.wipeOut.label
         value: WipeOut
@@ -76,20 +73,71 @@ steps:
       schema:
         $ref: schema#/properties/resources/properties/kubedbComPgBouncer/properties/spec/properties/terminationPolicy
       type: radio
-    - label:
-        text: labels.backend_section
-      type: label-element
-    - fetch: getResources|appcatalog.appscode.com|v1alpha1|appbindings
+    - addFormLabel: labels.database.label
+      customClass: mb-20
+      element:
+        elements:
+          - label:
+              text: labels.alias
+            schema:
+              $ref: schema#/properties/resources/properties/kubedbComPgBouncer/properties/spec/properties/databases/items/properties/alias
+            type: input
+          - label:
+              text: labels.database.name
+            schema:
+              $ref: schema#/properties/resources/properties/kubedbComPgBouncer/properties/spec/properties/databases/items/properties/databaseName
+            type: input
+          - elements:
+              - fetch: getResources|core|v1|namespaces
+                label:
+                  text: labels.namespace
+                schema:
+                  $ref: schema#/properties/resources/properties/kubedbComPgBouncer/properties/spec/properties/databases/items/properties/databaseRef/properties/namespace
+                type: select
+              - fetch: getAppbinding
+                label:
+                  text: labels.name
+                schema:
+                  $ref: schema#/properties/resources/properties/kubedbComPgBouncer/properties/spec/properties/databases/items/properties/databaseRef/properties/name
+                type: select
+            label:
+              isSubsection: true
+              text: labels.databaseref.label
+            schema:
+              $ref: schema#/properties/resources/properties/kubedbComPgBouncer/properties/spec/properties/databases/items/properties/databaseRef
+            show_label: true
+            type: single-step-form
+        type: single-step-form
       label:
-        text: labels.backend
+        text: labels.database.databases
       schema:
-        $ref: schema#/properties/resources/properties/kubedbComPgBouncer/properties/spec/properties/backend
-      type: select
-    - label:
-        text: labels.sync_users_question
-      schema:
-        $ref: schema#/properties/resources/properties/kubedbComPgBouncer/properties/spec/properties/sync_users
-      type: switch
+        $ref: schema#/properties/resources/properties/kubedbComPgBouncer/properties/spec/properties/databases
+      tableContents:
+        - inTableColumn: true
+          label:
+            text: labels.alias
+          path: alias
+          type: value
+          typeOfValue: string
+        - inTableColumn: true
+          label:
+            text: labels.database.name
+          path: databaseName
+          type: value
+          typeOfValue: string
+        - inTableColumn: true
+          label:
+            text: labels.databaseref.appbinding_name
+          path: databaseRef/name
+          type: value
+          typeOfValue: string
+        - inTableColumn: true
+          label:
+            text: labels.databaseref.appbinding_namespace
+          path: databaseRef/namespace
+          type: value
+          typeOfValue: string
+      type: single-step-form-array
     - label:
         text: labels.database.secret
       type: label-element
@@ -120,22 +168,97 @@ steps:
       schema:
         $ref: discriminator#/properties/password
       type: input
+    - type: label-element
+      label:
+        text: labels.autoops
+    - type: switch
+      label:
+        text: labels.disable_autoops
+      schema:
+        $ref: schema#/properties/resources/properties/kubedbComPgBouncer/properties/spec/properties/autoOps/properties/disabled
     type: single-step-form
   id: basic
   title: steps.0.label
 - form:
     elements:
-    - alias: reusable_alert
-      chart:
-        name: uibytebuildersdev-component-alert
-        version: v0.4.12
-      moduleResolver: fetchJsons
+    - type: select
+      label:
+        text: labels.connection_pool.authType
+      options:
+        - value: md5
+          text: md5
+        - value: scram
+          text: scram
+        - value: cert
+          text: cert
+        - value: trust
+          text: any
+        - value: hba
+          text: hba
+        - value: pam
+          text:  pam
       schema:
-        $ref: schema#/properties/form/properties/alert
-      type: reusable-element
+        $ref: schema#/properties/resources/properties/kubedbComPgBouncer/properties/spec/properties/connectionPool/properties/authType
+    - type: input
+      label:
+        text: labels.connection_pool.poolMode
+      schema:
+        $ref: schema#/properties/resources/properties/kubedbComPgBouncer/properties/spec/properties/connectionPool/properties/poolMode
+    - type: input
+      label:
+        text: labels.connection_pool.defaultPoolSize
+      schema:
+        $ref: schema#/properties/resources/properties/kubedbComPgBouncer/properties/spec/properties/connectionPool/properties/defaultPoolSize
+    - type: input
+      label:
+        text: labels.connection_pool.minPoolSize
+      schema:
+        $ref: schema#/properties/resources/properties/kubedbComPgBouncer/properties/spec/properties/connectionPool/properties/minPoolSize
+    - type: input
+      label:
+        text: labels.connection_pool.reservePoolSize
+      schema:
+        $ref: schema#/properties/resources/properties/kubedbComPgBouncer/properties/spec/properties/connectionPool/properties/reservePoolSize
+    - type: input
+      label:
+        text: labels.connection_pool.reservePoolTimeoutSeconds
+      schema:
+        $ref: schema#/properties/resources/properties/kubedbComPgBouncer/properties/spec/properties/connectionPool/properties/reservePoolTimeoutSeconds
+    - type: input
+      label:
+        text: labels.connection_pool.ignoreStartupParameters
+      schema:
+        $ref: schema#/properties/resources/properties/kubedbComPgBouncer/properties/spec/properties/connectionPool/properties/ignoreStartupParameters
+    - type: input
+      label:
+        text: labels.connection_pool.maxClientConnections
+      schema:
+        $ref: schema#/properties/resources/properties/kubedbComPgBouncer/properties/spec/properties/connectionPool/properties/maxClientConnections
+    - type: input
+      label:
+        text: labels.connection_pool.maxDBConnections
+      schema:
+        $ref: schema#/properties/resources/properties/kubedbComPgBouncer/properties/spec/properties/connectionPool/properties/maxDBConnections
+    - type: input
+      label:
+        text: labels.connection_pool.maxUserConnections
+      schema:
+        $ref: schema#/properties/resources/properties/kubedbComPgBouncer/properties/spec/properties/connectionPool/properties/maxUserConnections
+    - type: input
+      label:
+        text: labels.connection_pool.port
+      schema:
+        $ref: schema#/properties/resources/properties/kubedbComPgBouncer/properties/spec/properties/connectionPool/properties/port
+    - type: input
+      label:
+        text: labels.connection_pool.statsPeriodSeconds
+      schema:
+        $ref: schema#/properties/resources/properties/kubedbComPgBouncer/properties/spec/properties/connectionPool/properties/statsPeriodSeconds
+    schema:
+      $ref: schema#/properties/resources/properties/kubedbComPgBouncer/properties/spec/properties/connectionPool
     type: single-step-form
-  id: alert
-  title: labels.alert
+  id: connection-pool
+  title: steps.1.label
 - form:
     discriminator:
       activeDatabaseMode:
@@ -146,110 +269,62 @@ steps:
       hasDescription: true
       label:
         text: labels.database.mode
-      onChange: deleteDatabaseModePath
+      onChange: onDatabaseModeChange
       options:
       - description: options.database.mode.Standalone.description
         text: options.database.mode.Standalone.label
         value: Standalone
-      - description: options.database.mode.GroupReplication.description
-        text: options.database.mode.GroupReplication.label
-        value: GroupReplication
-      - description: options.database.mode.InnoDBCluster.description
-        text: options.database.mode.InnoDBCluster.label
-        value: InnoDBCluster
+      - description: options.database.mode.Cluster.description
+        text: options.database.mode.Cluster.label
+        value: Cluster
       schema:
         $ref: discriminator#/activeDatabaseMode
       type: radio
-    - if: isNotEqualToDatabaseMode|Standalone
+    - if: isEqualToDatabaseMode|Cluster
       label:
         text: labels.replicaset.number
       schema:
         $ref: schema#/properties/resources/properties/kubedbComPgBouncer/properties/spec/properties/replicas
       type: input
-    - elements:
-      - fetch: getStorageClassNames
-        label:
-          text: labels.storage.class
-        schema:
-          $ref: schema#/properties/resources/properties/kubedbComPgBouncer/properties/spec/properties/storage/properties/storageClassName
-        type: select
-      - label:
-          text: labels.storage.size
-        schema:
-          $ref: schema#/properties/resources/properties/kubedbComPgBouncer/properties/spec/properties/storage/properties/resources/properties/requests/properties/storage
-        type: input
-      type: single-step-form
-    - elements:
-      - label:
-          text: labels.group_name
-        schema:
-          $ref: schema#/properties/resources/properties/kubedbComPgBouncer/properties/spec/properties/topology/properties/group/properties/name
-        type: input
-      - label:
-          text: labels.group_mode
-        options:
-        - text: options.groupMode.SinglePrimary
-          value: Single-Primary
-        - text: options.groupMode.MultiPrimary
-          value: Multi-Primary
-        schema:
-          $ref: schema#/properties/resources/properties/kubedbComPgBouncer/properties/spec/properties/topology/properties/group/properties/mode
-        type: radio
-      if: isEqualToDatabaseMode|GroupReplication
-      label:
-        text: labels.topology
-      show_label: true
-      type: single-step-form
     type: single-step-form
   id: topology
-  title: steps.1.label
+  title: steps.2.label
 - form:
     elements:
-    - label:
-        text: labels.healthChecker.disableWriteCheck_question
+    - alias: reusable_health_checker
+      chart:
+        name: uibytebuildersdev-component-health-checker
+        version: v0.4.14
+      moduleResolver: fetchJsons
       schema:
-        $ref: schema#/properties/resources/properties/kubedbComPgBouncer/properties/spec/properties/healthChecker/properties/disableWriteCheck
-      type: switch
-    - if: isWriteCheckEnabled
-      label:
-        text: labels.healthChecker.failureThreshold
-      schema:
-        $ref: schema#/properties/resources/properties/kubedbComPgBouncer/properties/spec/properties/healthChecker/properties/failureThreshold
-      type: input
-    - if: isWriteCheckEnabled
-      label:
-        text: labels.healthChecker.periodSeconds
-      schema:
-        $ref: schema#/properties/resources/properties/kubedbComPgBouncer/properties/spec/properties/healthChecker/properties/periodSeconds
-      type: input
-    - if: isWriteCheckEnabled
-      label:
-        text: labels.healthChecker.timeoutSeconds
-      schema:
-        $ref: schema#/properties/resources/properties/kubedbComPgBouncer/properties/spec/properties/healthChecker/properties/timeoutSeconds
-      type: input
+        $ref: schema#/properties/resources/properties/kubedbComPgBouncer/properties/spec/properties/healthChecker
+      type: reusable-element
     type: single-step-form
   id: health-checker
-  title: steps.14.label
+  title: steps.3.label
 - form:
     discriminator:
       configureTLS:
         default: true
         type: boolean
     elements:
-    - computed: returnTrue
-      label:
-        text: labels.enable_tls
-      onChange: onTlsConfigureChange
+    - label:
+        text: labels.ssl_mode
+      options:
+      - text: allow
+        value: allow
+      - text: prefer
+        value: prefer
+      - text: require
+        value: require
+      - text: verify-ca
+        value: verify-ca
+      - text: verify-full
+        value: verify-full
       schema:
-        $ref: discriminator#/configureTLS
-      type: switch
+        $ref: schema#/properties/resources/properties/kubedbComPgBouncer/properties/spec/properties/sslMode
+      type: select
     - elements:
-      - label:
-          text: labels.requireSSL_question
-        schema:
-          $ref: schema#/properties/resources/properties/kubedbComPgBouncer/properties/spec/properties/requireSSL
-        type: switch
       - elements:
         - computed: setApiGroup
           disabled: true
@@ -291,401 +366,9 @@ steps:
         schema:
           $ref: schema#/properties/resources/properties/kubedbComPgBouncer/properties/spec/properties/tls/properties/certificates
         type: reusable-element
-      if: showTlsConfigureSection
       type: single-step-form
     type: single-step-form
   id: tls
-  title: steps.2.label
-- form:
-    discriminator:
-      prePopulateDatabase:
-        type: string
-    elements:
-    - computed: returnStringYes
-      label:
-        text: labels.prePopulateDatabase
-      onChange: onPrePopulateDatabaseChange
-      options:
-      - text: options.yesOrNo.yes.text
-        value: "yes"
-      - text: options.yesOrNo.no.text
-        value: "no"
-      schema:
-        $ref: discriminator#/properties/prePopulateDatabase
-      type: radio
-    - discriminator:
-        dataSource:
-          type: string
-      elements:
-      - computed: initDataSource
-        label:
-          text: labels.dataSource
-        onChange: onDataSourceChange
-        options:
-        - text: options.dataSource.script.text
-          value: script
-        - text: options.dataSource.stashBackup.text
-          value: stashBackup
-        schema:
-          $ref: discriminator#/properties/dataSource
-        type: select
-      - discriminator:
-          sourceVolumeType:
-            type: string
-        elements:
-        - label:
-            text: labels.script.path
-          schema:
-            $ref: schema#/properties/resources/properties/kubedbComPgBouncer/properties/spec/properties/init/properties/script/properties/scriptPath
-          type: input
-        - label:
-            text: labels.script.volume
-          type: label-element
-        - computed: initVolumeType
-          label:
-            text: labels.script.volumeType
-          onChange: onVolumeTypeChange
-          options:
-          - text: options.scriptSourceVolumeType.configMap.text
-            value: configMap
-          - text: options.scriptSourceVolumeType.secret.text
-            value: secret
-          schema:
-            $ref: discriminator#/properties/sourceVolumeType
-          type: select
-        - allowUserDefinedOption: true
-          fetch: resourceNames|core|v1|configmaps
-          if: showConfigMapOrSecretName|configMap
-          label:
-            text: labels.script.volumeName
-          schema:
-            $ref: schema#/properties/resources/properties/kubedbComPgBouncer/properties/spec/properties/init/properties/script/properties/configMap/properties/name
-          type: select
-        - allowUserDefinedOption: true
-          fetch: resourceNames|core|v1|secrets
-          if: showConfigMapOrSecretName|secret
-          label:
-            text: labels.script.volumeName
-          schema:
-            $ref: schema#/properties/resources/properties/kubedbComPgBouncer/properties/spec/properties/init/properties/script/properties/secret/properties/secretName
-          type: select
-        if: showScriptOrStashForm|script
-        type: single-step-form
-      - elements:
-        - label:
-            text: labels.restoreSession.snapshot
-          schema:
-            $ref: schema#/properties/resources/properties/stashAppscodeComRestoreSession_init/properties/spec/properties/rules/properties/0/properties/snapshots/properties/0
-          type: input
-        - discriminator:
-            repositoryChoise:
-              type: string
-          elements:
-          - label:
-              text: labels.repositories.title
-            type: label-element
-          - computed: setInitialRestoreSessionRepo
-            onChange: onInitRepositoryChoiseChange
-            options:
-            - text: options.createOrSelect.select.text
-              value: select
-            - text: options.createOrSelect.create.text
-              value: create
-            schema:
-              $ref: discriminator#/properties/repositoryChoise
-            type: radio
-          - allowUserDefinedOption: true
-            fetch: resourceNames|stash.appscode.com|v1alpha1|repositories
-            if: showRepositorySelectOrCreate|select
-            label:
-              text: labels.repositories.name
-            schema:
-              $ref: schema#/properties/resources/properties/stashAppscodeComRestoreSession_init/properties/spec/properties/repository/properties/name
-            type: select
-          - alias: repository_create_init
-            chart:
-              name: uibytebuildersdev-component-repository-create
-              version: v0.4.12
-            dataContext:
-              namespace:
-                $ref: schema#/properties/metadata/properties/release/properties/namespace
-            if: showRepositorySelectOrCreate|create
-            moduleResolver: fetchJsons
-            schema:
-              $ref: schema#/properties/resources/properties/stashAppscodeComRepository_init_repo/properties/spec/properties/backend
-            type: reusable-element
-          type: single-step-form
-        - if: returnFalse
-          label:
-            text: labels.backupConfiguration.targetReference.name
-          schema:
-            $ref: schema#/properties/resources/properties/stashAppscodeComRestoreSession_init/properties/spec/properties/target/properties/ref/properties/name
-          type: input
-        - discriminator:
-            customizeRestoreJobRuntimeSettings:
-              type: string
-          elements:
-          - computed: initCustomizeRestoreJobRuntimeSettings
-            label:
-              isSubsection: true
-              text: labels.runtimeSettings.choise
-            onChange: onCustomizeRestoreJobRuntimeSettingsChange
-            options:
-            - text: options.yesOrNo.yes.text
-              value: "yes"
-            - text: options.yesOrNo.no.text
-              value: "no"
-            schema:
-              $ref: discriminator#/properties/customizeRestoreJobRuntimeSettings
-            type: radio
-          - alias: runtime_settings_init
-            chart:
-              name: uibytebuildersdev-component-runtime-settings
-              version: v0.4.12
-            dataContext:
-              namespace:
-                $ref: schema#/properties/metadata/properties/release/properties/namespace
-            if: showRuntimeForm|yes
-            moduleResolver: fetchJsons
-            schema:
-              $ref: schema#/properties/resources/properties/stashAppscodeComRestoreSession_init/properties/spec/properties/runtimeSettings
-            type: reusable-element
-          type: single-step-form
-        if: showScriptOrStashForm|stashBackup
-        type: single-step-form
-      - if: returnFalse
-        label:
-          text: labels.waitForInitialRestore
-        schema:
-          $ref: schema#/properties/resources/properties/kubedbComPgBouncer/properties/spec/properties/init/properties/waitForInitialRestore
-        type: switch
-      if: showInitializationForm
-      type: single-step-form
-    type: single-step-form
-  id: initialization
-  title: steps.3.label
-- form:
-    discriminator:
-      scheduleBackup:
-        type: string
-    elements:
-    - computed: returnStringYes
-      label:
-        text: labels.backup.title
-      onChange: onScheduleBackupChange
-      options:
-      - text: options.yesOrNo.yes.text
-        value: "yes"
-      - text: options.yesOrNo.no.text
-        value: "no"
-      schema:
-        $ref: discriminator#/properties/scheduleBackup
-      type: radio
-    - discriminator:
-        backupInvoker:
-          type: string
-      elements:
-      - computed: initBackupInvoker
-        label:
-          text: labels.backup.invoker
-        onChange: onBackupInvokerChange
-        options:
-        - text: Backup Configuration
-          value: backupConfiguration
-        - text: Backup Blueprint
-          value: backupBlueprint
-        schema:
-          $ref: discriminator#/properties/backupInvoker
-        type: select
-      - discriminator:
-          targetType:
-            type: string
-        elements:
-        - discriminator:
-            repositoryChoise:
-              type: string
-          elements:
-          - label:
-              isSubsection: true
-              text: labels.repositories.title
-            type: label-element
-          - computed: initRepositoryChoise
-            onChange: onRepositoryChoiseChange
-            options:
-            - text: options.createOrSelect.select.text
-              value: select
-            - text: options.createOrSelect.create.text
-              value: create
-            schema:
-              $ref: discriminator#/properties/repositoryChoise
-            type: radio
-          - allowUserDefinedOption: true
-            fetch: resourceNames|stash.appscode.com|v1alpha1|repositories
-            if: showRepositorySelectOrCreate|select
-            label:
-              text: labels.repositories.title
-            schema:
-              $ref: schema#/properties/resources/properties/stashAppscodeComBackupConfiguration/properties/spec/properties/repository/properties/name
-            type: select
-          - alias: repository_create_backup
-            chart:
-              name: uibytebuildersdev-component-repository-create
-              version: v0.4.12
-            dataContext:
-              namespace:
-                $ref: schema#/properties/metadata/properties/release/properties/namespace
-            if: showRepositorySelectOrCreate|create
-            moduleResolver: fetchJsons
-            schema:
-              $ref: schema#/properties/resources/properties/stashAppscodeComRepository_repo/properties/spec/properties/backend
-            type: reusable-element
-          type: single-step-form
-        - if: returnFalse
-          label:
-            text: labels.backupConfiguration.targetReference.name
-          schema:
-            $ref: schema#/properties/resources/properties/stashAppscodeComBackupConfiguration/properties/spec/properties/target/properties/ref/properties/name
-          type: input
-        - label:
-            text: labels.backupConfiguration.schedule
-          schema:
-            $ref: schema#/properties/resources/properties/stashAppscodeComBackupConfiguration/properties/spec/properties/schedule
-          type: input
-        - label:
-            isSubsection: true
-            text: labels.backupConfiguration.retentionPolicy.title
-          type: label-element
-        - label:
-            text: labels.backupConfiguration.retentionPolicy.name
-          schema:
-            $ref: schema#/properties/resources/properties/stashAppscodeComBackupConfiguration/properties/spec/properties/retentionPolicy/properties/name
-          type: input
-        - label:
-            text: labels.backupConfiguration.retentionPolicy.keepLast
-          schema:
-            $ref: schema#/properties/resources/properties/stashAppscodeComBackupConfiguration/properties/spec/properties/retentionPolicy/properties/keepLast
-          type: input
-        - label:
-            text: labels.backupConfiguration.retentionPolicy.keepHourly
-          schema:
-            $ref: schema#/properties/resources/properties/stashAppscodeComBackupConfiguration/properties/spec/properties/retentionPolicy/properties/keepHourly
-          type: input
-        - label:
-            text: labels.backupConfiguration.retentionPolicy.keepDaily
-          schema:
-            $ref: schema#/properties/resources/properties/stashAppscodeComBackupConfiguration/properties/spec/properties/retentionPolicy/properties/keepDaily
-          type: input
-        - label:
-            text: labels.backupConfiguration.retentionPolicy.keepWeekly
-          schema:
-            $ref: schema#/properties/resources/properties/stashAppscodeComBackupConfiguration/properties/spec/properties/retentionPolicy/properties/keepWeekly
-          type: input
-        - label:
-            text: labels.backupConfiguration.retentionPolicy.keepMonthly
-          schema:
-            $ref: schema#/properties/resources/properties/stashAppscodeComBackupConfiguration/properties/spec/properties/retentionPolicy/properties/keepMonthly
-          type: input
-        - label:
-            text: labels.backupConfiguration.retentionPolicy.keepYearly
-          schema:
-            $ref: schema#/properties/resources/properties/stashAppscodeComBackupConfiguration/properties/spec/properties/retentionPolicy/properties/keepYearly
-          type: input
-        - if: returnFalse
-          label:
-            text: labels.backupConfiguration.retentionPolicy.prune
-          schema:
-            $ref: schema#/properties/resources/properties/stashAppscodeComBackupConfiguration/properties/spec/properties/retentionPolicy/properties/prune
-          type: switch
-        - discriminator:
-            customizeRestoreJobRuntimeSettings:
-              type: string
-          elements:
-          - computed: initCustomizeRestoreJobRuntimeSettingsForBackup
-            label:
-              isSubsection: true
-              text: labels.runtimeSettings.choiseForBackup
-            onChange: onCustomizeRestoreJobRuntimeSettingsChangeForBackup
-            options:
-            - text: options.yesOrNo.yes.text
-              value: "yes"
-            - text: options.yesOrNo.no.text
-              value: "no"
-            schema:
-              $ref: discriminator#/properties/customizeRestoreJobRuntimeSettings
-            type: radio
-          - alias: runtime_settings_backup
-            chart:
-              name: uibytebuildersdev-component-runtime-settings
-              version: v0.4.12
-            dataContext:
-              namespace:
-                $ref: schema#/properties/metadata/properties/release/properties/namespace
-            if: showRuntimeForm|yes
-            moduleResolver: fetchJsons
-            schema:
-              $ref: schema#/properties/resources/properties/stashAppscodeComBackupConfiguration/properties/spec/properties/runtimeSettings
-            type: reusable-element
-          type: single-step-form
-        if: showInvokerForm|backupConfiguration
-        label:
-          text: Backup Configuration form
-        type: single-step-form
-      - discriminator:
-          backupBlueprintName:
-            type: string
-          schedule:
-            type: string
-          taskParameters:
-            additionalProperties:
-              type: string
-            type: object
-        elements:
-        - label:
-            text: labels.backupBlueprint.title
-          type: label-element
-        - allowUserDefinedOption: true
-          computed: initFromAnnotationValue|stash.appscode.com/backup-blueprint
-          fetch: unNamespacedResourceNames|stash.appscode.com|v1beta1|backupblueprints
-          label:
-            text: labels.backupBlueprint.name
-          onChange: onBackupBlueprintNameChange
-          schema:
-            $ref: discriminator#/properties/backupBlueprintName
-          type: select
-        - computed: initFromAnnotationValue|stash.appscode.com/schedule
-          label:
-            text: labels.backupBlueprint.schedule
-          onChange: onBackupBlueprintScheduleChange
-          schema:
-            $ref: discriminator#/properties/schedule
-          type: input
-        - computed: initFromAnnotationKeyValue|params.stash.appscode.com/
-          isArray: true
-          keys:
-            label:
-              text: Key
-          label:
-            text: labels.backupBlueprint.taskParameters
-          onChange: onTaskParametersChange
-          schema:
-            $ref: discriminator#/properties/taskParameters
-          type: key-value-input-form
-          values:
-            label:
-              text: Value
-            schema:
-              $ref: discriminator#/properties/taskParameters/additionalProperties
-            type: input
-        if: showInvokerForm|backupBlueprint
-        label:
-          text: Backup Blueprint form
-        type: single-step-form
-      if: showBackupForm
-      label:
-        text: Backup Form
-      type: single-step-form
-    type: single-step-form
-  id: backupconfiguration
   title: steps.4.label
 - form:
     discriminator:

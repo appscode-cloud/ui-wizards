@@ -82,6 +82,20 @@ en:
     config_secret: ConfigSecret
     configuration_files: Configuration
     configuration_source: Configuration Source
+    connection_pool:
+      lables: Connection Pool
+      authType: Auth Type
+      defaultPoolSize: Default Pool Size
+      ignoreStartupParameters: Ignore Startup Parameters
+      maxClientConnections: Max Client Connections
+      maxDBConnections: Max DB Connections
+      maxUserConnections: Max User Connections
+      minPoolSize: Min Pool Size
+      poolMode: Pool Mode
+      port: Port
+      reservePoolSize: Reserve Pool Size
+      reservePoolTimeoutSeconds: Reserve Pool Timeout Seconds
+      statsPeriodSeconds: Stats Period Seconds
     controller_annotations: Controller Annotations
     countries: Countries
     country: Country
@@ -98,6 +112,14 @@ en:
       name: Database Name
       secret: Database Secret
       version: Database Version
+      databases: Databases
+      label: Database
+    databaseref:
+      appbinding_name: Appbinding Name
+      appbinding_namespace: Appbinding Namespace
+      label: Database Ref
+      name: Name
+      namespace: Namespace
     disableWriteCheck_question: Disable Write Check?
     dns_name: DNS Name
     dns_names: DNS Names
@@ -135,6 +157,8 @@ en:
       label: Labels
       value: Value
     leaderElection: Leader Election
+    autoops: AutoOps
+    disable_autoops: Disable AutoOps ?
     level: Level
     limit: Limit
     load_balancer_ip: Load Balancer IP
@@ -354,12 +378,9 @@ en:
         text: Stash Backup
     database:
       mode:
-        GroupReplication:
-          description: GroupReplication for fault-tolerant replication topologies
-          label: GroupReplication
-        InnoDBCluster:
-          description: InnoDBCluster for high availability.
-          label: InnoDBCluster
+        Cluster:
+          description: Postgres ReplicaSet for high availability.
+          label: Cluster
         Standalone:
           description: Single node PgBouncer without high availability and sharding.
           label: Standalone
@@ -405,12 +426,11 @@ en:
         text: 'Yes'
   steps:
     - label: Basic Information
-    - label: Configure Cluster
+    - label: Connection Pool 
+    - label: Topology
+    - label: Health Checker
     - label: TLS Configuration
-    - label: Initialization
-    - label: Backup
     - label: Monitoring
     - label: Pod Template
     - label: Networking
     - label: Custom Config
-    - label: Health Checker

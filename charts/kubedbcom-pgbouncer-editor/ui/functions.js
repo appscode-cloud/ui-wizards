@@ -272,93 +272,11 @@ async function getPgBouncerVersions(
 }
 
 // ********************* Database Mode ***********************
-function setDatabaseMode({ model, getValue, watchDependency }) {
-  const modelPathValue = getValue(model, "/resources/kubedbComPgBouncer/spec/topology");
-  watchDependency("model#/resources/kubedbComPgBouncer/spec/topology");
+function setDatabaseMode({ model, getValue }) {
 
-  if (modelPathValue?.mode) {
-    return modelPathValue.mode;
-  } else {
-    return "Standalone";
-  }
-}
+  const replicas = getValue(model, "/resources/kubedbComPgBouncer/spec/replicas")
 
-async function getStorageClassNames(
-  { axios, storeGet, commit, model, getValue }
-) {
-  const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/route/params/cluster");
-
-  const resp = await axios.get(
-    `/clusters/${owner}/${cluster}/proxy/storage.k8s.io/v1/storageclasses`,
-    {
-      params: {
-        filter: { items: { metadata: { name: null, annotations: null } } },
-      },
-    }
-  );
-
-  const resources = (resp && resp.data && resp.data.items) || [];
-
-  resources.map((item) => {
-    const name = (item.metadata && item.metadata.name) || "";
-    const isDefault =
-      item.metadata &&
-      item.metadata.annotations &&
-      item.metadata.annotations["storageclass.kubernetes.io/is-default-class"];
-
-    if (isDefault) {
-      const className = getValue(
-        model,
-        "/resources/kubedbComPgBouncer/spec/storage/storageClassName"
-      );
-      if (!className) {
-        commit("wizard/model$update", {
-          path: "/resources/kubedbComPgBouncer/spec/storage/storageClassName",
-          value: name,
-          force: true,
-        });
-      }
-    }
-
-    item.text = name;
-    item.value = name;
-    return true;
-  });
-  return resources;
-}
-
-function deleteDatabaseModePath({
-  discriminator,
-  getValue,
-  commit,
-  model,
-}) {
-  const mode = getValue(discriminator, "/activeDatabaseMode");
-  if (mode === "GroupReplication" || mode === "InnoDBCluster") {
-    replicas = getValue(model, "/resources/kubedbComPgBouncer/spec/replicas");
-    if(!replicas) {
-      commit("wizard/model$update", {
-        path: "/resources/kubedbComPgBouncer/spec/replicas",
-        value: 3,
-        force: true,
-      });
-    }
-    commit("wizard/model$update", {
-      path: "/resources/kubedbComPgBouncer/spec/topology/mode",
-      value: mode,
-      force: true,
-    });
-    if(mode === "GroupReplication") commit("wizard/model$delete", "/resources/kubedbComPgBouncer/spec/topology/innoDBCluster");
-    else commit("wizard/model$delete", "/resources/kubedbComPgBouncer/spec/topology/group");
-  } else if (mode === "Standalone") {
-    commit("wizard/model$update", {
-      path: "/resources/kubedbComPgBouncer/spec/replicas",
-      value: 1,
-      force: true,
-    });
-    commit("wizard/model$delete", "/resources/kubedbComPgBouncer/spec/topology");
-  }
+  return replicas === 1 ? 'Standalone' : 'Cluster'
 }
 
 function isEqualToDatabaseMode(
@@ -370,14 +288,18 @@ function isEqualToDatabaseMode(
   return mode === value;
 }
 
-function isNotEqualToDatabaseMode(
-  { getValue, watchDependency, discriminator },
-  value
-) {
-  watchDependency("discriminator#/activeDatabaseMode");
-  const mode = getValue(discriminator, "/activeDatabaseMode");
-  return mode !== value;
+const onDatabaseModeChange = ({ discriminator,getValue, commit}) =>{
+
+  const databaseMode = getValue(discriminator, "/activeDatabaseMode");
+
+  commit("wizard/model$update", {
+    path: "/resources/kubedbComPgBouncer/spec/replicas",
+    value: databaseMode === 'Standalone' ? 1 : 3,
+    force: true,
+  });
+ 
 }
+
 
 // ************************** TLS ******************************88
 
@@ -1874,6 +1796,7 @@ function onConfigurationSourceChange({
       model,
       "/metadata/release/name"
     )}-config`;
+    
     commit("wizard/model$update", {
       path: "/resources/kubedbComPgBouncer/spec/configSecret/name",
       value: configSecretName,
@@ -1937,6 +1860,10 @@ function onSetCustomConfigChange({ discriminator, getValue, commit }) {
   }
 }
 
+
+
+
+
 function getOpsRequestUrl({ storeGet, model, getValue, mode }, reqType) {
   const cluster = storeGet("/route/params/cluster");
   const domain = storeGet("/domain");
@@ -1954,14 +1881,46 @@ function getOpsRequestUrl({ storeGet, model, getValue, mode }, reqType) {
   else return `${domain}/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/pgbounceropsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=VerticalScaling`;
 }
 
-function isWriteCheckEnabled({model, getValue}) {
-  const disableWriteCheckStatus = getValue(model, '/resources/kubedbComPgBouncer/spec/healthChecker/disableWriteCheck')
+const getAppbinding = async ( { axios, storeGet,getValue, watchDependency, rootModel}) =>{
+  
+  const owner = storeGet("/route/params/user");
+  const cluster = storeGet("/route/params/cluster");
 
-  return !disableWriteCheckStatus;
+  const group = 'appcatalog.appscode.com'
+  const version = 'v1alpha1'
+  const resource = 'appbindings'
+  
+  watchDependency("rootModel#/databaseRef/namespace");
+  
+  
+  const namespace = getValue(rootModel, "/databaseRef/namespace");  
+
+  const resp = await axios.get(
+    `/clusters/${owner}/${cluster}/proxy/${group}/${version}/namespaces/${namespace}/${resource}`,
+    {
+      params: {
+        filter: { items: { metadata: { name: null }, type: null } },
+      },
+    }
+  );
+
+  const resources = (resp && resp.data && resp.data.items) || [];
+
+  resources.map((item) => {
+    const name = (item.metadata && item.metadata.name) || "";
+    item.text = name;
+    item.value = name;
+    return true;
+  });
+  return resources;
+
 }
 
 return {
 	fetchJsons,
+  getAppbinding,
+  onDatabaseModeChange,
+  setDatabaseMode,
 	disableLableChecker,
 	isEqualToModelPathValue,
 	getResources,
@@ -1975,11 +1934,7 @@ return {
   returnStringYes,
   setAddressType,
 	getPgBouncerVersions,
-	setDatabaseMode,
-	getStorageClassNames,
-	deleteDatabaseModePath,
 	isEqualToDatabaseMode,
-	isNotEqualToDatabaseMode,
 	setApiGroup,
 	getIssuerRefsName,
 	hasIssuerRefName,
