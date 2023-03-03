@@ -1813,7 +1813,7 @@ function onConfigurationChange({
 }) {
   const value = getValue(discriminator, "/configuration");
   commit("wizard/model$update", {
-    path: "/resources/secret_config/stringData/my-config.cnf",
+    path: "/resources/secret_config/stringData/user.conf",
     value: value,
     force: true,
   });
@@ -1843,11 +1843,11 @@ function setSecretConfigNamespace({ getValue, model, watchDependency }) {
 }
 
 function setConfiguration({ model, getValue }) {
-  return getValue(model, "/resources/secret_config/stringData/my-config.cnf");
+  return getValue(model, "/resources/secret_config/stringData/user.conf");
 }
 
 function setConfigurationFiles({ model, getValue }) {
-  const value = getValue(model, "/resources/secret_config/data/my-config.cnf");
+  const value = getValue(model, "/resources/secret_config/data/user.conf");
   return atob(value);
 }
 
