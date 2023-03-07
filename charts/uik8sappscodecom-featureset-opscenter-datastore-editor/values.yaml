@@ -1,0 +1,57 @@
+metadata:
+  resource:
+    group: ui.k8s.appscode.com
+    version: v1alpha1
+    name: featuresets
+    kind: FeatureSet
+    scope: Cluster
+  release:
+    name: RELEASE-NAME
+    namespace: default
+resources:
+  helmToolkitFluxcdIoHelmRelease_kubedb: # +doc-gen:break
+    apiVersion: helm.toolkit.fluxcd.io/v2beta1
+    kind: HelmRelease
+    metadata:
+      name: kubedb
+      namespace: kubeops
+    spec:
+      chart:
+        spec:
+          chart: kubedb
+          sourceRef:
+            kind: HelmRepository
+            name: kubedb
+            namespace: kubeops
+          version: v2023.02.28
+      install:
+        crds: CreateReplace
+        createNamespace: true
+      interval: 30m
+      releaseName: kubedb
+      targetNamespace: kubedb
+      upgrade:
+        crds: CreateReplace
+  helmToolkitFluxcdIoHelmRelease_kubedb_ui_server: # +doc-gen:break
+    apiVersion: helm.toolkit.fluxcd.io/v2beta1
+    kind: HelmRelease
+    metadata:
+      name: kubedb-ui-server
+      namespace: kubeops
+    spec:
+      chart:
+        spec:
+          chart: kubedb-ui-server
+          sourceRef:
+            kind: HelmRepository
+            name: kubedb
+            namespace: kubeops
+          version: v2023.02.28
+      install:
+        crds: CreateReplace
+        createNamespace: true
+      interval: 30m
+      releaseName: kubedb-ui-server
+      targetNamespace: kubedb
+      upgrade:
+        crds: CreateReplace

@@ -1,0 +1,57 @@
+metadata:
+  resource:
+    group: ui.k8s.appscode.com
+    version: v1alpha1
+    name: featuresets
+    kind: FeatureSet
+    scope: Cluster
+  release:
+    name: RELEASE-NAME
+    namespace: default
+resources:
+  helmToolkitFluxcdIoHelmRelease_stash: # +doc-gen:break
+    apiVersion: helm.toolkit.fluxcd.io/v2beta1
+    kind: HelmRelease
+    metadata:
+      name: stash
+      namespace: kubeops
+    spec:
+      chart:
+        spec:
+          chart: stash
+          sourceRef:
+            kind: HelmRepository
+            name: stashed
+            namespace: kubeops
+          version: v2023.02.28
+      install:
+        crds: CreateReplace
+        createNamespace: true
+      interval: 30m
+      releaseName: stash
+      targetNamespace: stash
+      upgrade:
+        crds: CreateReplace
+  helmToolkitFluxcdIoHelmRelease_stash_ui_server: # +doc-gen:break
+    apiVersion: helm.toolkit.fluxcd.io/v2beta1
+    kind: HelmRelease
+    metadata:
+      name: stash-ui-server
+      namespace: kubeops
+    spec:
+      chart:
+        spec:
+          chart: stash-ui-server
+          sourceRef:
+            kind: HelmRepository
+            name: stashed
+            namespace: kubeops
+          version: v2023.02.28
+      install:
+        crds: CreateReplace
+        createNamespace: true
+      interval: 30m
+      releaseName: stash-ui-server
+      targetNamespace: stash
+      upgrade:
+        crds: CreateReplace
