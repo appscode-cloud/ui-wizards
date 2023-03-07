@@ -1846,6 +1846,11 @@ function setConfiguration({ model, getValue }) {
   return getValue(model, "/resources/secret_config/stringData/user.conf");
 }
 
+function setConfigurationForEdit({ model, getValue }) {
+  const val =  getValue(model, "/resources/secret_config/Data/user.conf");
+  return val
+}
+
 function setConfigurationFiles({ model, getValue }) {
   const value = getValue(model, "/resources/secret_config/data/user.conf");
   return atob(value);
@@ -1980,6 +1985,7 @@ return {
 	setInitialRestoreSessionRepo,
 	initRepositoryChoise,
   initRepositoryChoiseForEdit,
+  setConfigurationForEdit,
 	onRepositoryChoiseChange,
 	onRepositoryNameChange,
 	getMongoAnnotations,
