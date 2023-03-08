@@ -27,11 +27,16 @@ resources:
       install:
         crds: CreateReplace
         createNamespace: true
-      interval: 30m
+        remediation:
+          retries: 5
+      interval: 5m
       releaseName: cert-manager
       targetNamespace: cert-manager
+      timeout: 10m
       upgrade:
         crds: CreateReplace
+        remediation:
+          retries: 5
   helmToolkitFluxcdIoHelmRelease_kubevault: # +doc-gen:break
     apiVersion: helm.toolkit.fluxcd.io/v2beta1
     kind: HelmRelease
@@ -50,11 +55,16 @@ resources:
       install:
         crds: CreateReplace
         createNamespace: true
-      interval: 30m
+        remediation:
+          retries: 5
+      interval: 5m
       releaseName: kubevault
       targetNamespace: kubevault
+      timeout: 10m
       upgrade:
         crds: CreateReplace
+        remediation:
+          retries: 5
   helmToolkitFluxcdIoHelmRelease_kubevault_opscenter: # +doc-gen:break
     apiVersion: helm.toolkit.fluxcd.io/v2beta1
     kind: HelmRelease
@@ -73,11 +83,16 @@ resources:
       install:
         crds: CreateReplace
         createNamespace: true
-      interval: 30m
+        remediation:
+          retries: 5
+      interval: 5m
       releaseName: kubevault-opscenter
       targetNamespace: kubevault
+      timeout: 10m
       upgrade:
         crds: CreateReplace
+        remediation:
+          retries: 5
   helmToolkitFluxcdIoHelmRelease_scanner: # +doc-gen:break
     apiVersion: helm.toolkit.fluxcd.io/v2beta1
     kind: HelmRelease
@@ -96,8 +111,13 @@ resources:
       install:
         crds: CreateReplace
         createNamespace: true
-      interval: 30m
+        remediation:
+          retries: 5
+      interval: 5m
       releaseName: scanner
       targetNamespace: kubeops
+      timeout: 10m
       upgrade:
         crds: CreateReplace
+        remediation:
+          retries: 5
