@@ -290,24 +290,33 @@ steps:
         default: true
         type: boolean
     elements:
-    - label:
-        text: labels.ssl_mode
+    - computed: isValueExistInModel|/resources/kubedbComPgBouncer/spec/tls
       disabled: true
-      options:
-      - text: allow
-        value: allow
-      - text: prefer
-        value: prefer
-      - text: require
-        value: require
-      - text: verify-ca
-        value: verify-ca
-      - text: verify-full
-        value: verify-full
+      label:
+        text: labels.enable_tls
+      onChange: onTlsConfigureChange
       schema:
-        $ref: schema#/properties/resources/properties/kubedbComPgBouncer/properties/spec/properties/sslMode
-      type: select
-    - elements:
+        $ref: discriminator#/configureTLS
+      type: switch
+    - disabled: true
+      elements:
+      - computed: setSSLMode
+        label:
+          text: labels.ssl_mode
+        options:
+        - text: allow
+          value: allow
+        - text: prefer
+          value: prefer
+        - text: require
+          value: require
+        - text: verify-ca
+          value: verify-ca
+        - text: verify-full
+          value: verify-full
+        schema:
+          $ref: schema#/properties/resources/properties/kubedbComPgBouncer/properties/spec/properties/sslMode
+        type: select
       - elements:
         - computed: setApiGroup
           disabled: true
@@ -342,14 +351,11 @@ steps:
         chart:
           name: uibytebuildersdev-component-certificates
           version: v0.4.12
-        functionCallbacks:
-          getAliasOptions:
-            $ref: functions#/getAliasOptions
         moduleResolver: fetchJsons
         schema:
           $ref: schema#/properties/resources/properties/kubedbComPgBouncer/properties/spec/properties/tls/properties/certificates
         type: reusable-element
-      disabled: true
+      if: showTlsConfigureSection
       type: single-step-form
     type: single-step-form
   id: tls
@@ -635,6 +641,7 @@ steps:
         - computed: setConfigurationSource
           label:
             text: labels.custom_config
+          disabled: true
           onChange: onConfigurationSourceChange
           options:
           - text: options.configuration_source.use_existing_config.label
@@ -656,7 +663,7 @@ steps:
           if: isEqualToDiscriminatorPath|create-new-config|/configurationSource
           label:
             text: labels.user_conf
-          onChange: onConfigurationChange
+          onChange: onConfigurationChangeEdit
           schema:
             $ref: discriminator#/properties/configuration
           type: editor

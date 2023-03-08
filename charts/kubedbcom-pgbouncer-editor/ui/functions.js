@@ -1756,7 +1756,7 @@ async function getSecrets({
 
       const filteredSecrets = secrets.filter((item) => {
         const validType = ["kubernetes.io/service-account-token", "Opaque", "kubernetes.io/basic-auth"];
-        return validType.includes(item.type) && item.data?.username && item.data?.password;
+        return validType.includes(item.type);
       });
 
       filteredSecrets.map((item) => {
@@ -1828,6 +1828,34 @@ function onConfigurationChange({
   });
 }
 
+function onConfigurationChangeEdit({
+  getValue,
+  commit,
+  discriminator,
+  model,
+}) {
+
+  
+  const value = getValue(discriminator, "/configuration");
+  
+  console.log(btoa(value))
+  commit("wizard/model$update", {
+    path: "/resources/secret_config/data/pgbouncer.ini",
+    value: btoa(value),
+    force: true,
+  });
+  const configSecretName = `${getValue(
+    model,
+    "/metadata/release/name"
+  )}-config`;
+  commit("wizard/model$update", {
+    path: "/resources/kubedbComPgBouncer/spec/configSecret/name",
+    value: configSecretName,
+    force: true,
+  });
+}
+
+
 function setConfigurationSource({ model, getValue }) {
   const modelValue = getValue(model, "/resources/secret_config");
   if (modelValue) {
@@ -1847,8 +1875,8 @@ function setConfiguration({ model, getValue }) {
 }
 
 function setConfigurationForEdit({ model, getValue }) {
-  const val =  getValue(model, "/resources/secret_config/Data/user.conf");
-  return val
+  const value =  getValue(model, "/resources/secret_config/data/pgbouncer.ini");
+  return atob(value);
 }
 
 function setConfigurationFiles({ model, getValue }) {
@@ -1953,6 +1981,8 @@ return {
 	showCustomizeExporterSection,
 	onCustomizeExporterChange,
 	valueExists,
+  onConfigurationChangeEdit,
+  setConfigurationForEdit,
 	initPrePopulateDatabase,
 	onPrePopulateDatabaseChange,
 	initDataSource,

@@ -308,23 +308,30 @@ steps:
         default: true
         type: boolean
     elements:
-    - label:
-        text: labels.ssl_mode
-      options:
-      - text: allow
-        value: allow
-      - text: prefer
-        value: prefer
-      - text: require
-        value: require
-      - text: verify-ca
-        value: verify-ca
-      - text: verify-full
-        value: verify-full
+    - computed: returnTrue
+      label:
+        text: labels.enable_tls
+      onChange: onTlsConfigureChange
       schema:
-        $ref: schema#/properties/resources/properties/kubedbComPgBouncer/properties/spec/properties/sslMode
-      type: select
+        $ref: discriminator#/configureTLS
+      type: switch
     - elements:
+      - label:
+          text: labels.ssl_mode
+        options:
+        - text: allow
+          value: allow
+        - text: prefer
+          value: prefer
+        - text: require
+          value: require
+        - text: verify-ca
+          value: verify-ca
+        - text: verify-full
+          value: verify-full
+        schema:
+          $ref: schema#/properties/resources/properties/kubedbComPgBouncer/properties/spec/properties/sslMode
+        type: select
       - elements:
         - computed: setApiGroup
           disabled: true
@@ -366,6 +373,7 @@ steps:
         schema:
           $ref: schema#/properties/resources/properties/kubedbComPgBouncer/properties/spec/properties/tls/properties/certificates
         type: reusable-element
+      if: showTlsConfigureSection
       type: single-step-form
     type: single-step-form
   id: tls
