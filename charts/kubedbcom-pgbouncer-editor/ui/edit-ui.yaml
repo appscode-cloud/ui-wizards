@@ -6,27 +6,27 @@ steps:
       password:
         type: string
     elements:
-    - label:
+    - disabled: true
+      label:
         text: labels.database.name
-      disabled: true
       onChange: onNameChange
       schema:
         $ref: schema#/properties/metadata/properties/release/properties/name
       type: input
-    - fetch: getResources|core|v1|namespaces
-      disabled: true
+    - disabled: true
+      fetch: getResources|core|v1|namespaces
       label:
         text: labels.namespace
       onChange: onNamespaceChange
       schema:
         $ref: schema#/properties/metadata/properties/release/properties/namespace
       type: select
-    - fetch: getPgBouncerVersions|catalog.kubedb.com|v1alpha1|pgbouncerversions
+    - disabled: true
+      fetch: getPgBouncerVersions|catalog.kubedb.com|v1alpha1|pgbouncerversions
       label:
         text: labels.database.version
       schema:
         $ref: schema#/properties/resources/properties/kubedbComPgBouncer/properties/spec/properties/version
-      disabled: true
       type: select
     - individualItemDisabilityCheck: disableLableChecker
       isArray: true
@@ -80,66 +80,66 @@ steps:
       customClass: mb-20
       element:
         elements:
-          - label:
-              text: labels.alias
-            schema:
-              $ref: schema#/properties/resources/properties/kubedbComPgBouncer/properties/spec/properties/databases/items/properties/alias
-            type: input
-          - label:
-              text: labels.database.name
-            schema:
-              $ref: schema#/properties/resources/properties/kubedbComPgBouncer/properties/spec/properties/databases/items/properties/databaseName
-            type: input
-          - elements:
-              - fetch: getResources|core|v1|namespaces
-                label:
-                  text: labels.namespace
-                schema:
-                  $ref: schema#/properties/resources/properties/kubedbComPgBouncer/properties/spec/properties/databases/items/properties/databaseRef/properties/namespace
-                type: select
-              - fetch: getAppbinding
-                label:
-                  text: labels.name
-                schema:
-                  $ref: schema#/properties/resources/properties/kubedbComPgBouncer/properties/spec/properties/databases/items/properties/databaseRef/properties/name
-                type: select
+        - label:
+            text: labels.alias
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComPgBouncer/properties/spec/properties/databases/items/properties/alias
+          type: input
+        - label:
+            text: labels.database.name
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComPgBouncer/properties/spec/properties/databases/items/properties/databaseName
+          type: input
+        - elements:
+          - fetch: getResources|core|v1|namespaces
             label:
-              isSubsection: true
-              text: labels.databaseref.label
+              text: labels.namespace
             schema:
-              $ref: schema#/properties/resources/properties/kubedbComPgBouncer/properties/spec/properties/databases/items/properties/databaseRef
-            show_label: true
-            type: single-step-form
+              $ref: schema#/properties/resources/properties/kubedbComPgBouncer/properties/spec/properties/databases/items/properties/databaseRef/properties/namespace
+            type: select
+          - fetch: getAppbinding
+            label:
+              text: labels.name
+            schema:
+              $ref: schema#/properties/resources/properties/kubedbComPgBouncer/properties/spec/properties/databases/items/properties/databaseRef/properties/name
+            type: select
+          label:
+            isSubsection: true
+            text: labels.databaseref.label
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComPgBouncer/properties/spec/properties/databases/items/properties/databaseRef
+          show_label: true
+          type: single-step-form
         type: single-step-form
       label:
         text: labels.database.databases
       schema:
         $ref: schema#/properties/resources/properties/kubedbComPgBouncer/properties/spec/properties/databases
       tableContents:
-        - inTableColumn: true
-          label:
-            text: labels.alias
-          path: alias
-          type: value
-          typeOfValue: string
-        - inTableColumn: true
-          label:
-            text: labels.database.name
-          path: databaseName
-          type: value
-          typeOfValue: string
-        - inTableColumn: true
-          label:
-            text: labels.databaseref.appbinding_name
-          path: databaseRef/name
-          type: value
-          typeOfValue: string
-        - inTableColumn: true
-          label:
-            text: labels.databaseref.appbinding_namespace
-          path: databaseRef/namespace
-          type: value
-          typeOfValue: string
+      - inTableColumn: true
+        label:
+          text: labels.alias
+        path: alias
+        type: value
+        typeOfValue: string
+      - inTableColumn: true
+        label:
+          text: labels.database.name
+        path: databaseName
+        type: value
+        typeOfValue: string
+      - inTableColumn: true
+        label:
+          text: labels.databaseref.appbinding_name
+        path: databaseRef/name
+        type: value
+        typeOfValue: string
+      - inTableColumn: true
+        label:
+          text: labels.databaseref.appbinding_namespace
+        path: databaseRef/namespace
+        type: value
+        typeOfValue: string
       type: single-step-form-array
     - label:
         text: labels.database.secret
@@ -147,95 +147,95 @@ steps:
     - disabled: true
       label:
         text: labels.secret
-      type: input
       schema:
         $ref: schema#/properties/resources/properties/kubedbComPgBouncer/properties/spec/properties/authSecret/properties/name
-    - type: label-element
-      label:
+      type: input
+    - label:
         text: labels.autoops
-    - type: switch
-      label:
+      type: label-element
+    - label:
         text: labels.disable_autoops
       schema:
         $ref: schema#/properties/resources/properties/kubedbComPgBouncer/properties/spec/properties/autoOps/properties/disabled
+      type: switch
     type: single-step-form
   id: basic
   title: steps.0.label
 - form:
     elements:
-    - type: select
-      label:
+    - label:
         text: labels.connection_pool.authType
       options:
-        - value: md5
-          text: md5
-        - value: scram
-          text: scram
-        - value: cert
-          text: cert
-        - value: trust
-          text: any
-        - value: hba
-          text: hba
-        - value: pam
-          text:  pam
+      - text: md5
+        value: md5
+      - text: scram
+        value: scram
+      - text: cert
+        value: cert
+      - text: any
+        value: trust
+      - text: hba
+        value: hba
+      - text: pam
+        value: pam
       schema:
         $ref: schema#/properties/resources/properties/kubedbComPgBouncer/properties/spec/properties/connectionPool/properties/authType
-    - type: input
-      label:
+      type: select
+    - label:
         text: labels.connection_pool.poolMode
       schema:
         $ref: schema#/properties/resources/properties/kubedbComPgBouncer/properties/spec/properties/connectionPool/properties/poolMode
-    - type: input
-      label:
+      type: input
+    - label:
         text: labels.connection_pool.defaultPoolSize
       schema:
         $ref: schema#/properties/resources/properties/kubedbComPgBouncer/properties/spec/properties/connectionPool/properties/defaultPoolSize
-    - type: input
-      label:
+      type: input
+    - label:
         text: labels.connection_pool.minPoolSize
       schema:
         $ref: schema#/properties/resources/properties/kubedbComPgBouncer/properties/spec/properties/connectionPool/properties/minPoolSize
-    - type: input
-      label:
+      type: input
+    - label:
         text: labels.connection_pool.reservePoolSize
       schema:
         $ref: schema#/properties/resources/properties/kubedbComPgBouncer/properties/spec/properties/connectionPool/properties/reservePoolSize
-    - type: input
-      label:
+      type: input
+    - label:
         text: labels.connection_pool.reservePoolTimeoutSeconds
       schema:
         $ref: schema#/properties/resources/properties/kubedbComPgBouncer/properties/spec/properties/connectionPool/properties/reservePoolTimeoutSeconds
-    - type: input
-      label:
+      type: input
+    - label:
         text: labels.connection_pool.ignoreStartupParameters
       schema:
         $ref: schema#/properties/resources/properties/kubedbComPgBouncer/properties/spec/properties/connectionPool/properties/ignoreStartupParameters
-    - type: input
-      label:
+      type: input
+    - label:
         text: labels.connection_pool.maxClientConnections
       schema:
         $ref: schema#/properties/resources/properties/kubedbComPgBouncer/properties/spec/properties/connectionPool/properties/maxClientConnections
-    - type: input
-      label:
+      type: input
+    - label:
         text: labels.connection_pool.maxDBConnections
       schema:
         $ref: schema#/properties/resources/properties/kubedbComPgBouncer/properties/spec/properties/connectionPool/properties/maxDBConnections
-    - type: input
-      label:
+      type: input
+    - label:
         text: labels.connection_pool.maxUserConnections
       schema:
         $ref: schema#/properties/resources/properties/kubedbComPgBouncer/properties/spec/properties/connectionPool/properties/maxUserConnections
-    - type: input
-      label:
+      type: input
+    - label:
         text: labels.connection_pool.port
       schema:
         $ref: schema#/properties/resources/properties/kubedbComPgBouncer/properties/spec/properties/connectionPool/properties/port
-    - type: input
-      label:
+      type: input
+    - label:
         text: labels.connection_pool.statsPeriodSeconds
       schema:
         $ref: schema#/properties/resources/properties/kubedbComPgBouncer/properties/spec/properties/connectionPool/properties/statsPeriodSeconds
+      type: input
     schema:
       $ref: schema#/properties/resources/properties/kubedbComPgBouncer/properties/spec/properties/connectionPool
     type: single-step-form
@@ -526,9 +526,9 @@ steps:
           $ref: discriminator#/customizeExporter
         type: switch
       - elements:
-        - label:
+        - disabled: true
+          label:
             text: labels.resources
-          disabled: true
           schema:
             $ref: schema#/properties/resources/properties/kubedbComPgBouncer/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/resources
           type: resource-input-form
@@ -620,6 +620,7 @@ steps:
           type: string
       elements:
       - computed: returnStringYes
+        disabled: true
         label:
           text: labels.setCustomConfig
         onChange: onSetCustomConfigChange
@@ -630,7 +631,6 @@ steps:
           value: "no"
         schema:
           $ref: discriminator#/properties/setCustomConfig
-        disabled: true
         type: radio
       - discriminator:
           configuration:
@@ -639,9 +639,9 @@ steps:
             type: string
         elements:
         - computed: setConfigurationSource
+          disabled: true
           label:
             text: labels.custom_config
-          disabled: true
           onChange: onConfigurationSourceChange
           options:
           - text: options.configuration_source.use_existing_config.label
