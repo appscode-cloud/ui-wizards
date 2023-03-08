@@ -1,0 +1,62 @@
+# Default values for kubedbcom-pgbouncer-editor-options.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+metadata:
+  resource:
+    group: kubedb.com
+    kind: PgBouncer
+    name: pgbouncers
+    scope: Namespaced
+    version: v1alpha2
+  release:
+    # Release name
+    name: ""
+    # Release namespace
+    namespace: ""
+
+spec:
+  replicas: 1
+
+  # List options
+  version: 2.3.2-debian
+
+  # Annotations to add to the database custom resource
+  annotations: {}
+
+  # Labels to add to all the template objects
+  labels: {}
+
+  terminationPolicy: WipeOut
+
+  machine: ""
+
+  resources:
+    limits:
+      cpu: 500m
+      memory: 1Gi
+
+  authSecret:
+    name: ""
+    password: ""
+
+  monitoring:
+    # Name of monitoring agent (one of "prometheus.io", "prometheus.io/operator", "prometheus.io/builtin")
+    agent: prometheus.io/operator
+    exporter:
+      resources: # +doc-gen:break
+        requests:
+          cpu: 100m
+          memory: 128Mi
+    serviceMonitor:
+      # Specify the labels for ServiceMonitor.
+      # Prometheus crd will select ServiceMonitor using these labels.
+      # Only usable when monitoring agent is `prometheus.io/webhook server`.
+      labels: {}
+
+  databases:
+  - alias: "testdb"
+    databaseName: "test"
+    databaseRef:
+      name: "demo-pg"
+      namespace: demo

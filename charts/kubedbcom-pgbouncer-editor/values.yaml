@@ -1,5 +1,127 @@
-apiVersion: kubedb.com/v1alpha2
-kind: PgBouncer
 metadata:
-  name: pgbouncer
-  namespace: default
+  resource:
+    group: kubedb.com
+    version: v1alpha2
+    name: pgbouncers
+    kind: PgBouncer
+    scope: Namespaced
+  release:
+    name: RELEASE-NAME
+    namespace: default
+resources:
+  certManagerIoIssuer_ca: # +doc-gen:break
+    apiVersion: cert-manager.io/v1
+    kind: Issuer
+    metadata:
+      name: pgbouncer-ca
+      namespace: demo
+    spec:
+      ca:
+        secretName: pgbouncer-ca
+  kubedbComPgBouncer: # +doc-gen:break
+    apiVersion: kubedb.com/v1alpha2
+    kind: PgBouncer
+    metadata:
+      name: pgbouncer
+      namespace: demo
+    spec:
+      authSecret:
+        name: pgbouncer-auth
+      configSecret:
+        name: pgbouncer-config
+      connectionPool:
+        adminUsers:
+          - rakib
+        authType: md5
+        authUser: rakib
+        defaultPoolSize: 20
+        maxClientConnections: 20
+        maxDBConnections: 0
+        maxUserConnections: 0
+        minPoolSize: 0
+        poolMode: session
+        port: 5432
+        reservePoolSize: 5
+        statsPeriodSeconds: 60
+      databases:
+        - alias: testdb
+          databaseName: test
+          databaseRef:
+            name: demo-pg
+            namespace: demo
+      monitor:
+        agent: prometheus.io
+        prometheus:
+          serviceMonitor:
+            interval: 30s
+            labels:
+              release: prometheus-stack
+      podTemplate:
+        spec:
+          args:
+            - --character-set-server=utf8mb4
+          env:
+            - name: MYSQL_DATABASE
+              value: mdDB
+          resources:
+            requests:
+              cpu: 250m
+              memory: 1Gi
+      replicas: 3
+      terminationPolicy: WipeOut
+      tls:
+        certificates:
+          - alias: server
+            dnsNames:
+              - localhost
+            ipAddresses:
+              - 127.0.0.1
+            subject:
+              organizations:
+                - kubedb:server
+        issuerRef:
+          apiGroup: cert-manager.io
+          kind: Issuer
+          name: proxysql-ca
+      version: 1.17.0
+  monitoringCoreosComServiceMonitor: # +doc-gen:break
+    apiVersion: monitoring.coreos.com/v1
+    kind: ServiceMonitor
+    metadata:
+      name: pgbouncer
+      namespace: demo
+    spec:
+      endpoints:
+        - honorLabels: true
+          interval: 30s
+          path: /metrics
+          port: metrics
+      namespaceSelector:
+        matchNames:
+          - demo
+      selector:
+        matchLabels:
+          app.kubernetes.io/instance: pgbouncer
+          app.kubernetes.io/name: pgbouncers.kubedb.com
+  secret_auth: # +doc-gen:break
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: pgbouncer-auth
+      namespace: demo
+    stringData:
+      password: thisIs1StrongPassword
+      username: root
+    type: Opaque
+  secret_config: # +doc-gen:break
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: pgbouncer-config
+      namespace: demo
+    stringData:
+      md-config.cnf: |
+        [mysqld]
+        max_connections = 200
+        read_buffer_size = 1048576
+    type: Opaque

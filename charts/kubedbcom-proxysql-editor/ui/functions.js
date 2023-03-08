@@ -710,10 +710,7 @@ async function getSecrets({
           "kubernetes.io/basic-auth",
         ];
         return (
-          validType.includes(item.type) &&
-          item.data?.username &&
-          item.data?.password
-        );
+          validType.includes(item.type));
       });
 
       filteredSecrets.map((item) => {

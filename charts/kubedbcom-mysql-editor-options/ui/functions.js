@@ -396,7 +396,7 @@ async function getSecrets({
 
       const filteredSecrets = secrets.filter((item) => {
         const validType = ["kubernetes.io/service-account-token", "Opaque", "kubernetes.io/basic-auth"];
-        return validType.includes(item.type) && item.data?.username && item.data?.password;
+        return validType.includes(item.type);
       });
 
       filteredSecrets.map((item) => {

@@ -1,0 +1,237 @@
+properties:
+  metadata:
+    properties:
+      release:
+        properties:
+          name:
+            type: string
+          namespace:
+            type: string
+        required:
+        - name
+        - namespace
+        type: object
+      resource:
+        description: ResourceID identifies a resource
+        properties:
+          group:
+            type: string
+          kind:
+            description: Kind is the serialized kind of the resource.  It is normally
+              CamelCase and singular.
+            type: string
+          name:
+            description: 'Name is the plural name of the resource to serve.  It must
+              match the name of the CustomResourceDefinition-registration too: plural.group
+              and it must be all lowercase.'
+            type: string
+          scope:
+            description: ResourceScope is an enum defining the different scopes available
+              to a custom resource
+            type: string
+          version:
+            type: string
+        required:
+        - group
+        - kind
+        - name
+        - scope
+        - version
+        type: object
+    required:
+    - release
+    - resource
+    type: object
+  spec:
+    properties:
+      annotations:
+        additionalProperties:
+          type: string
+        type: object
+      authSecret:
+        properties:
+          name:
+            type: string
+          password:
+            format: password
+            type: string
+        type: object
+      databases:
+        items:
+          properties:
+            alias:
+              description: Alias to uniquely identify a target database running inside
+                a specific Postgres instance.
+              type: string
+            authSecretRef:
+              description: AuthSecretRef points to a secret that contains the credentials
+                (username and password) of an existing user of this database. It is
+                used to bind a single user to this specific database connection.
+              properties:
+                name:
+                  description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                    TODO: Add other useful fields. apiVersion, kind, uid?'
+                  type: string
+              type: object
+              x-kubernetes-map-type: atomic
+            databaseName:
+              description: DatabaseName is the name of the target database inside
+                a Postgres instance.
+              type: string
+            databaseRef:
+              description: DatabaseRef specifies the database appbinding reference
+                in any namespace.
+              properties:
+                name:
+                  description: '`name` is the name of the app. Required'
+                  type: string
+                namespace:
+                  description: '`namespace` is the namespace of the app. Required'
+                  type: string
+                parameters:
+                  description: "Parameters is a set of the parameters to be used to\
+                    \ override default parameters. The inline YAML/JSON payload to\
+                    \ be translated into equivalent JSON object. \n The Parameters\
+                    \ field is NOT secret or secured in any way and should NEVER be\
+                    \ used to hold sensitive information."
+                  type: object
+                  x-kubernetes-embedded-resource: true
+                  x-kubernetes-preserve-unknown-fields: true
+              required:
+              - name
+              - namespace
+              type: object
+          required:
+          - alias
+          - databaseName
+          - databaseRef
+          type: object
+        type: array
+      labels:
+        additionalProperties:
+          type: string
+        type: object
+      machine:
+        enum:
+        - db.t.micro
+        - db.t.small
+        - db.t.medium
+        - db.t.large
+        - db.t.xlarge
+        - db.t.2xlarge
+        - db.m.small
+        - db.m.large
+        - db.m.xlarge
+        - db.m.2xlarge
+        - db.m.4xlarge
+        - db.m.8xlarge
+        - db.m.12xlarge
+        - db.m.16xlarge
+        - db.m.24xlarge
+        - db.r.large
+        - db.r.xlarge
+        - db.r.2xlarge
+        - db.r.4xlarge
+        - db.r.8xlarge
+        - db.r.12xlarge
+        - db.r.16xlarge
+        - db.r.24xlarge
+        type: string
+      monitoring:
+        properties:
+          agent:
+            enum:
+            - prometheus.io
+            - prometheus.io/operator
+            - prometheus.io/builtin
+            type: string
+          exporter:
+            properties:
+              resources:
+                description: Compute Resources required by the sidecar container.
+                properties:
+                  limits:
+                    additionalProperties:
+                      anyOf:
+                      - type: integer
+                      - type: string
+                      pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                      x-kubernetes-int-or-string: true
+                    description: 'Limits describes the maximum amount of compute resources
+                      allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                    type: object
+                  requests:
+                    additionalProperties:
+                      anyOf:
+                      - type: integer
+                      - type: string
+                      pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                      x-kubernetes-int-or-string: true
+                    description: 'Requests describes the minimum amount of compute
+                      resources required. If Requests is omitted for a container,
+                      it defaults to Limits if that is explicitly specified, otherwise
+                      to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                    type: object
+                type: object
+            type: object
+          serviceMonitor:
+            properties:
+              labels:
+                additionalProperties:
+                  type: string
+                type: object
+            type: object
+        required:
+        - agent
+        - exporter
+        - serviceMonitor
+        type: object
+      replicas:
+        type: integer
+      resources:
+        description: ResourceRequirements describes the compute resource requirements.
+        properties:
+          limits:
+            additionalProperties:
+              anyOf:
+              - type: integer
+              - type: string
+              pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+              x-kubernetes-int-or-string: true
+            description: 'Limits describes the maximum amount of compute resources
+              allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+            type: object
+          requests:
+            additionalProperties:
+              anyOf:
+              - type: integer
+              - type: string
+              pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+              x-kubernetes-int-or-string: true
+            description: 'Requests describes the minimum amount of compute resources
+              required. If Requests is omitted for a container, it defaults to Limits
+              if that is explicitly specified, otherwise to an implementation-defined
+              value. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+            type: object
+        type: object
+      terminationPolicy:
+        enum:
+        - Halt
+        - Delete
+        - WipeOut
+        - DoNotTerminate
+        type: string
+      version:
+        type: string
+    required:
+    - authSecret
+    - machine
+    - monitoring
+    - replicas
+    - resources
+    - terminationPolicy
+    - version
+    type: object
+required:
+- spec
+type: object
