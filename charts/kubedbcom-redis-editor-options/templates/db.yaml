@@ -48,7 +48,7 @@ spec:
   authSecret:
     name: {{ .Values.spec.authSecret.name }}
 {{- end }}
-{{ if (and .Values.spec.monitoring .Values.spec.monitoring.agent) }}
+{{- if (and .Values.spec.monitoring .Values.spec.monitoring.agent) }}
   monitor:
     agent: {{ .Values.spec.monitoring.agent }}
     prometheus:
@@ -61,4 +61,4 @@ spec:
         interval: 30s
         labels:
           {{- toYaml .Values.spec.monitoring.serviceMonitor.labels | nindent 10 }}
-{{ end }}
+{{- end }}
