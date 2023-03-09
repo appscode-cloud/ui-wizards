@@ -1,0 +1,67 @@
+metadata:
+  resource:
+    group: ui.k8s.appscode.com
+    version: v1alpha1
+    name: featuresets
+    kind: FeatureSet
+    scope: Cluster
+  release:
+    name: RELEASE-NAME
+    namespace: default
+resources:
+  helmToolkitFluxcdIoHelmRelease_kube_ui_server: # +doc-gen:break
+    apiVersion: helm.toolkit.fluxcd.io/v2beta1
+    kind: HelmRelease
+    metadata:
+      name: kube-ui-server
+      namespace: kubeops
+    spec:
+      chart:
+        spec:
+          chart: kube-ui-server
+          sourceRef:
+            kind: HelmRepository
+            name: appscode
+            namespace: kubeops
+          version: v2022.06.14
+      install:
+        crds: CreateReplace
+        createNamespace: true
+        remediation:
+          retries: 5
+      interval: 5m
+      releaseName: kube-ui-server
+      targetNamespace: kubeops
+      timeout: 10m
+      upgrade:
+        crds: CreateReplace
+        remediation:
+          retries: 5
+  helmToolkitFluxcdIoHelmRelease_supervisor: # +doc-gen:break
+    apiVersion: helm.toolkit.fluxcd.io/v2beta1
+    kind: HelmRelease
+    metadata:
+      name: supervisor
+      namespace: kubeops
+    spec:
+      chart:
+        spec:
+          chart: supervisor
+          sourceRef:
+            kind: HelmRepository
+            name: appscode
+            namespace: kubeops
+          version: v2022.06.14
+      install:
+        crds: CreateReplace
+        createNamespace: true
+        remediation:
+          retries: 5
+      interval: 5m
+      releaseName: supervisor
+      targetNamespace: kubeops
+      timeout: 10m
+      upgrade:
+        crds: CreateReplace
+        remediation:
+          retries: 5
