@@ -1,0 +1,123 @@
+metadata:
+  resource:
+    group: ui.k8s.appscode.com
+    version: v1alpha1
+    name: featuresets
+    kind: FeatureSet
+    scope: Cluster
+  release:
+    name: RELEASE-NAME
+    namespace: default
+resources:
+  helmToolkitFluxcdIoHelmRelease_cert_manager: # +doc-gen:break
+    apiVersion: helm.toolkit.fluxcd.io/v2beta1
+    kind: HelmRelease
+    metadata:
+      name: cert-manager
+      namespace: kubeops
+    spec:
+      chart:
+        spec:
+          chart: cert-manager
+          sourceRef:
+            kind: HelmRepository
+            name: jetstack
+            namespace: kubeops
+          version: v1.11.0
+      install:
+        crds: CreateReplace
+        createNamespace: true
+        remediation:
+          retries: 5
+      interval: 5m
+      releaseName: cert-manager
+      targetNamespace: cert-manager
+      timeout: 10m
+      upgrade:
+        crds: CreateReplace
+        remediation:
+          retries: 5
+  helmToolkitFluxcdIoHelmRelease_kubevault: # +doc-gen:break
+    apiVersion: helm.toolkit.fluxcd.io/v2beta1
+    kind: HelmRelease
+    metadata:
+      name: kubevault
+      namespace: kubeops
+    spec:
+      chart:
+        spec:
+          chart: kubevault
+          sourceRef:
+            kind: HelmRepository
+            name: kubevault
+            namespace: kubeops
+          version: v2023.03.03
+      install:
+        crds: CreateReplace
+        createNamespace: true
+        remediation:
+          retries: 5
+      interval: 5m
+      releaseName: kubevault
+      targetNamespace: kubevault
+      timeout: 10m
+      upgrade:
+        crds: CreateReplace
+        remediation:
+          retries: 5
+  helmToolkitFluxcdIoHelmRelease_kubevault_opscenter: # +doc-gen:break
+    apiVersion: helm.toolkit.fluxcd.io/v2beta1
+    kind: HelmRelease
+    metadata:
+      name: kubevault-opscenter
+      namespace: kubeops
+    spec:
+      chart:
+        spec:
+          chart: kubevault-opscenter
+          sourceRef:
+            kind: HelmRepository
+            name: kubevault
+            namespace: kubeops
+          version: v2023.03.03
+      install:
+        crds: CreateReplace
+        createNamespace: true
+        remediation:
+          retries: 5
+      interval: 5m
+      releaseName: kubevault-opscenter
+      targetNamespace: kubevault
+      timeout: 10m
+      upgrade:
+        crds: CreateReplace
+        remediation:
+          retries: 5
+  helmToolkitFluxcdIoHelmRelease_scanner: # +doc-gen:break
+    apiVersion: helm.toolkit.fluxcd.io/v2beta1
+    kind: HelmRelease
+    metadata:
+      name: scanner
+      namespace: kubeops
+    spec:
+      chart:
+        spec:
+          chart: scanner
+          sourceRef:
+            kind: HelmRepository
+            name: kubeops
+            namespace: kubeops
+          version: v2022.06.14
+      install:
+        crds: CreateReplace
+        createNamespace: true
+        remediation:
+          retries: 5
+      interval: 5m
+      releaseName: scanner
+      targetNamespace: kubeops
+      timeout: 10m
+      upgrade:
+        crds: CreateReplace
+        remediation:
+          retries: 5

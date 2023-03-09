@@ -1,0 +1,78 @@
+metadata:
+  resource:
+    group: ui.k8s.appscode.com
+    version: v1alpha1
+    name: featuresets
+    kind: FeatureSet
+    scope: Cluster
+  release:
+    name: RELEASE-NAME
+    namespace: default
+resources:
+  helmToolkitFluxcdIoHelmRelease_kubedb: # +doc-gen:break
+    apiVersion: helm.toolkit.fluxcd.io/v2beta1
+    kind: HelmRelease
+    metadata:
+      name: kubedb
+      namespace: kubeops
+    spec:
+      chart:
+        spec:
+          chart: kubedb
+          sourceRef:
+            kind: HelmRepository
+            name: kubedb
+            namespace: kubeops
+          version: v2023.02.28
+      install:
+        crds: CreateReplace
+        createNamespace: true
+        remediation:
+          retries: 5
+      interval: 5m
+      releaseName: kubedb
+      targetNamespace: kubedb
+      timeout: 10m
+      upgrade:
+        crds: CreateReplace
+        remediation:
+          retries: 5
+      values:
+        kubedb-autoscaler:
+          enabled: true
+        kubedb-dashboard:
+          enabled: true
+        kubedb-ops-manager:
+          enabled: true
+        kubedb-provisioner:
+          enabled: true
+        kubedb-schema-manager:
+          enabled: true
+  helmToolkitFluxcdIoHelmRelease_kubedb_opscenter: # +doc-gen:break
+    apiVersion: helm.toolkit.fluxcd.io/v2beta1
+    kind: HelmRelease
+    metadata:
+      name: kubedb-opscenter
+      namespace: kubeops
+    spec:
+      chart:
+        spec:
+          chart: kubedb-opscenter
+          sourceRef:
+            kind: HelmRepository
+            name: kubedb
+            namespace: kubeops
+          version: v2023.02.28
+      install:
+        crds: CreateReplace
+        createNamespace: true
+        remediation:
+          retries: 5
+      interval: 5m
+      releaseName: kubedb-opscenter
+      targetNamespace: kubedb
+      timeout: 10m
+      upgrade:
+        crds: CreateReplace
+        remediation:
+          retries: 5
