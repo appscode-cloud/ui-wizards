@@ -33,6 +33,7 @@ func TestDefaultValues(t *testing.T) {
 		schemachecker.TestCase{Obj: v1alpha1.KubedbcomMongodbEditorOptionsSpec{}},
 		schemachecker.TestCase{Obj: v1alpha1.KubedbcomMysqlEditorOptionsSpec{}},
 		schemachecker.TestCase{Obj: v1alpha1.KubedbcomPostgresEditorOptionsSpec{}},
+		schemachecker.TestCase{Obj: v1alpha1.KubedbcomPgbouncerEditorOptionsSpec{}},
 		schemachecker.TestCase{Obj: v1alpha1.KubedbcomProxysqlEditorOptionsSpec{}},
 		schemachecker.TestCase{Obj: v1alpha1.KubedbcomRedisEditorOptionsSpec{}},
 		schemachecker.TestCase{Obj: v1alpha1.StashappscodecomRepositoryEditorOptionsSpec{}},
