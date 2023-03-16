@@ -225,34 +225,75 @@ function showMonitoringConfigSection({
     if (isFeatureSetEnabled) {
       return true;
     } else {
-      commit("wizard/model$update", {
-        path: "/resources/helmToolkitFluxcdIoHelmRelease_monitoring_config/spec/values",
-        value: {
-          global: {
-            monitoring: {
-              serviceMonitor: {
-                labels: {
-                  release: "kube-prometheus-stack",
+      const isMonitoringConfigEnabled = getFeaturePropertyValue(
+        storeGet,
+        "monitoring-config",
+        getValue,
+        "/status/enabled"
+      );
+      const isPanopticonEnabled = getFeaturePropertyValue(
+        storeGet,
+        "panopticon",
+        getValue,
+        "/status/enabled"
+      );
+
+      if (!isMonitoringConfigEnabled) {
+        resources["helmToolkitFluxcdIoHelmRelease_monitoring_config"] = {
+          ...resources["helmToolkitFluxcdIoHelmRelease_monitoring_config"],
+          spec: {
+            ...resources["helmToolkitFluxcdIoHelmRelease_monitoring_config"]
+              ?.spec,
+            values: {
+              global: {
+                monitoring: {
+                  serviceMonitor: {
+                    labels: {
+                      release: "kube-prometheus-stack",
+                    },
+                  },
+                  alert: {
+                    labels: {
+                      release: "kube-prometheus-stack",
+                    },
+                  },
                 },
               },
-              alert: {
-                labels: {
-                  release: "kube-prometheus-stack",
+              prometheus: {
+                service: {
+                  scheme: "http",
+                  name: "kube-prometheus-stack-prometheus",
+                  namespace: "monitoring",
+                  port: "9090",
                 },
               },
             },
           },
-          prometheus: {
-            service: {
-              scheme: "http",
-              name: "kube-prometheus-stack-prometheus",
-              namespace: "monitoring",
-              port: "9090",
+        };
+      }
+
+      if (!isPanopticonEnabled) {
+        resources["helmToolkitFluxcdIoHelmRelease_panopticon"] = {
+          ...resources["helmToolkitFluxcdIoHelmRelease_panopticon"],
+          spec: {
+            ...resources["helmToolkitFluxcdIoHelmRelease_panopticon"]?.spec,
+            values: {
+              monitoring: {
+                serviceMonitor: {
+                  labels: {
+                    release: "kube-prometheus-stack",
+                  },
+                },
+                alert: {
+                  labels: {
+                    release: "kube-prometheus-stack",
+                  },
+                },
+              },
             },
           },
-        },
-        force: true,
-      });
+        };
+      }
       return false;
     }
   }
@@ -302,11 +343,17 @@ function setScheme({ model, getValue }) {
 }
 
 function onAuthTypeChange({ discriminator, getValue, commit }) {
-  const authType = getValue(discriminator, '/authType')
-  if(authType === 'token') {
-    commit('wizard/model$delete', '/resources/helmToolkitFluxcdIoHelmRelease_monitoring_config/spec/values/prometheus/basicAuth')
-  } else if (authType === 'basic') {
-    commit('wizard/model$delete', '/resources/helmToolkitFluxcdIoHelmRelease_monitoring_config/spec/values/prometheus/bearerToken')
+  const authType = getValue(discriminator, "/authType");
+  if (authType === "token") {
+    commit(
+      "wizard/model$delete",
+      "/resources/helmToolkitFluxcdIoHelmRelease_monitoring_config/spec/values/prometheus/basicAuth"
+    );
+  } else if (authType === "basic") {
+    commit(
+      "wizard/model$delete",
+      "/resources/helmToolkitFluxcdIoHelmRelease_monitoring_config/spec/values/prometheus/bearerToken"
+    );
   }
 }
 
@@ -489,15 +536,15 @@ async function getPrometheuses(
   });
 
   if (filteredResources?.length && path) {
-    const [src, pathRef] = path.split('#')
-    if(src === 'model') {
+    const [src, pathRef] = path.split("#");
+    if (src === "model") {
       commit("wizard/model$update", {
-        pathRef,
+        path: pathRef,
         value: filteredResources[0].value,
         force: true,
       });
-    } else if(src === 'discriminator') {
-      setDiscriminatorValue(pathRef, filteredResources[0].value)
+    } else if (src === "discriminator") {
+      setDiscriminatorValue(pathRef, filteredResources[0].value);
     }
   }
 
@@ -616,10 +663,7 @@ function getServicePorts({
 // **************************** On value change *******************************************************
 function onPrometheusChange({ discriminator, getValue, commit }) {
   const prometheuses = getValue(discriminator, "/prometheuses");
-  const selectedPrometheusName = getValue(
-    discriminator,
-    "/selectedPrometheus"
-  );
+  const selectedPrometheusName = getValue(discriminator, "/selectedPrometheus");
 
   if (prometheuses?.length && selectedPrometheusName) {
     const selectedPrometheus = prometheuses.find(
@@ -662,7 +706,10 @@ function onPrometheusChange({ discriminator, getValue, commit }) {
 }
 
 function onServiceMonitorLabelChange({ model, getValue, commit }) {
-  const labels = getValue(model, '/resources/helmToolkitFluxcdIoHelmRelease_monitoring_config/spec/values/global/monitoring/serviceMonitor/labels')
+  const labels = getValue(
+    model,
+    "/resources/helmToolkitFluxcdIoHelmRelease_monitoring_config/spec/values/global/monitoring/serviceMonitor/labels"
+  );
   commit("wizard/model$update", {
     path: "/resources/helmToolkitFluxcdIoHelmRelease_panopticon/spec/values/monitoring/serviceMonitor/labels",
     value: labels,
@@ -671,7 +718,10 @@ function onServiceMonitorLabelChange({ model, getValue, commit }) {
 }
 
 function onAlertLabelChange({ model, getValue, commit }) {
-  const labels = getValue(model, '/resources/helmToolkitFluxcdIoHelmRelease_monitoring_config/spec/values/global/monitoring/alert/labels')
+  const labels = getValue(
+    model,
+    "/resources/helmToolkitFluxcdIoHelmRelease_monitoring_config/spec/values/global/monitoring/alert/labels"
+  );
   commit("wizard/model$update", {
     path: "/resources/helmToolkitFluxcdIoHelmRelease_panopticon/spec/values/monitoring/alert/labels",
     value: labels,
