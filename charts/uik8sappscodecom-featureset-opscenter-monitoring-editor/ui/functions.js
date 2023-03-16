@@ -638,6 +638,11 @@ function onPrometheusChange({ discriminator, getValue, commit }) {
           value: serviceMonitorSelector,
           force: true,
         });
+        commit("wizard/model$update", {
+          path: "/resources/helmToolkitFluxcdIoHelmRelease_panopticon/spec/values/monitoring/serviceMonitor/labels",
+          value: serviceMonitorSelector,
+          force: true,
+        });
       }
 
       if (Object.keys(ruleSelector).length) {
@@ -646,9 +651,32 @@ function onPrometheusChange({ discriminator, getValue, commit }) {
           value: ruleSelector,
           force: true,
         });
+        commit("wizard/model$update", {
+          path: "/resources/helmToolkitFluxcdIoHelmRelease_panopticon/spec/values/monitoring/alert/labels",
+          value: ruleSelector,
+          force: true,
+        });
       }
     }
   }
+}
+
+function onServiceMonitorLabelChange({ model, getValue, commit }) {
+  const labels = getValue(model, '/resources/helmToolkitFluxcdIoHelmRelease_monitoring_config/spec/values/global/monitoring/serviceMonitor/labels')
+  commit("wizard/model$update", {
+    path: "/resources/helmToolkitFluxcdIoHelmRelease_panopticon/spec/values/monitoring/serviceMonitor/labels",
+    value: labels,
+    force: true,
+  });
+}
+
+function onAlertLabelChange({ model, getValue, commit }) {
+  const labels = getValue(model, '/resources/helmToolkitFluxcdIoHelmRelease_monitoring_config/spec/values/global/monitoring/alert/labels')
+  commit("wizard/model$update", {
+    path: "/resources/helmToolkitFluxcdIoHelmRelease_panopticon/spec/values/monitoring/alert/labels",
+    value: labels,
+    force: true,
+  });
 }
 
 return {
@@ -679,4 +707,6 @@ return {
   getServices,
   getServicePorts,
   onPrometheusChange,
+  onServiceMonitorLabelChange,
+  onAlertLabelChange,
 };
