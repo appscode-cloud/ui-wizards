@@ -52,6 +52,9 @@ steps:
               type: array
             prometheuses:
               type: array
+            selectedPrometheus:
+              type: string
+              default: dd
           elements:
           - label:
               text: labels.service.title
@@ -62,12 +65,12 @@ steps:
             schema:
               $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_monitoring_config/properties/spec/properties/values/properties/prometheus/properties/service/properties/namespace
             type: select
-          - fetch: getPrometheuses|/resources/helmToolkitFluxcdIoHelmRelease_monitoring_config/spec/values/prometheus/service/prometheus
+          - fetch: getPrometheuses|discriminator#/selectedPrometheus
             label:
               text: labels.prometheus.name
             onChange: onPrometheusChange
             schema:
-              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_monitoring_config/properties/spec/properties/values/properties/prometheus/properties/service/properties/prometheus
+              $ref: discriminator#/properties/selectedPrometheus
             type: select
           - fetch: getServices|/resources/helmToolkitFluxcdIoHelmRelease_monitoring_config/spec/values/prometheus/service/name
             label:

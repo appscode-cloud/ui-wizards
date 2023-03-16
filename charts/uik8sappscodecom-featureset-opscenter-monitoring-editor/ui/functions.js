@@ -489,11 +489,16 @@ async function getPrometheuses(
   });
 
   if (filteredResources?.length && path) {
-    commit("wizard/model$update", {
-      path,
-      value: filteredResources[0].value,
-      force: true,
-    });
+    const [src, pathRef] = path.split('#')
+    if(src === 'model') {
+      commit("wizard/model$update", {
+        pathRef,
+        value: filteredResources[0].value,
+        force: true,
+      });
+    } else if(src === 'discriminator') {
+      setDiscriminatorValue(pathRef, filteredResources[0].value)
+    }
   }
 
   setDiscriminatorValue("/prometheuses", filteredResources);
@@ -609,11 +614,11 @@ function getServicePorts({
 }
 
 // **************************** On value change *******************************************************
-function onPrometheusChange({ model, discriminator, getValue, commit }) {
+function onPrometheusChange({ discriminator, getValue, commit }) {
   const prometheuses = getValue(discriminator, "/prometheuses");
   const selectedPrometheusName = getValue(
-    model,
-    "/resources/helmToolkitFluxcdIoHelmRelease_monitoring_config/spec/values/prometheus/service/prometheus"
+    discriminator,
+    "/selectedPrometheus"
   );
 
   if (prometheuses?.length && selectedPrometheusName) {
