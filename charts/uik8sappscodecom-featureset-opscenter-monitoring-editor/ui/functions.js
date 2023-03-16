@@ -313,24 +313,16 @@ function onAuthTypeChange({ discriminator, getValue, commit }) {
 /// ****************************** EDITOR field related functions ****************************************
 
 function showtlsClientAuthAndCaCert({
-  model,
   discriminator,
   getValue,
   watchDependency,
   commit,
 }) {
-  watchDependency(
-    "model#/resources/helmToolkitFluxcdIoHelmRelease_monitoring_config/spec/values/prometheus/service/scheme"
-  );
   watchDependency("discriminator#/configureType");
 
   const configureType = getValue(discriminator, "/configureType");
-  const scheme = getValue(
-    model,
-    "/resources/helmToolkitFluxcdIoHelmRelease_monitoring_config/spec/values/prometheus/service/scheme"
-  );
 
-  if (scheme === "http") {
+  if (configureType !== "url") {
     commit(
       "wizard/model$delete",
       "/resources/helmToolkitFluxcdIoHelmRelease_monitoring_config/spec/values/prometheus/tls/ca"
@@ -345,7 +337,7 @@ function showtlsClientAuthAndCaCert({
     );
   }
 
-  return scheme === "https" || configureType === "url";
+  return configureType === "url";
 }
 
 // eslint-disable-next-line no-empty-pattern
