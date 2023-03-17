@@ -644,12 +644,12 @@ function getServicePorts({
     );
     const ports = (service && service.spec && service.spec.ports) || [];
 
-    const portList = ports.map((item) => item.port) || [];
+    const portList = ports.map((item) => String(item.port)) || [];
 
     if (portList.length) {
       commit("wizard/model$update", {
         path: "/resources/helmToolkitFluxcdIoHelmRelease_monitoring_config/spec/values/prometheus/service/port",
-        value: portList[0],
+        value: String(portList[0]),
         force: true,
       });
     }
