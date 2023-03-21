@@ -18,9 +18,13 @@ metadata:
 managed:
   k8sVersion: v1.22.0
   clusterName: capi-aws
+  clusterNamespace: kubedb-managed
   aws:
     machinePoolTemplate:
       name: mongo-machine-pool
+  externalDnsOperator:
+    domainFilter: superm4n.tk
+    nodeName: "{{.Name}}"
 
 spec:
   # List options
@@ -76,7 +80,7 @@ spec:
     password: ""
 
   monitoring:
-    # Name of monitoring agent (one of "prometheus.io", "prometheus.io/operator", "prometheus.io/builtin")
+    #Name of monitoring agent (one of "prometheus.io", "prometheus.io/operator", "prometheus.io/builtin")
     agent: prometheus.io/operator
     exporter:
       resources: # +doc-gen:break
