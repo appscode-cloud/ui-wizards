@@ -179,8 +179,36 @@ function returnFalse() {
   return false;
 }
 
-function setReleaseNameAndNamespace({ commit, storeGet, model, getValue }) {
-  resources = getValue(model, '/resources')
+async function setReleaseNameAndNamespace({ commit, storeGet, model, getValue, axios }) {
+  resources = getValue(model, "/resources");
+
+  const isFeatureSetInstalled = getFeatureSetPropertyValue(
+    storeGet,
+    getValue,
+    "/status/enabled"
+  );
+  
+  if(isFeatureSetInstalled) {
+    // get resources deafult values when featureset is installed
+    const owner = storeGet("/route/params/user");
+    const cluster = storeGet("/route/params/cluster");
+
+    const { name: chartName, url: chartUrl, version: chartVersion } = getFeatureSetPropertyValue(
+      storeGet,
+      getValue,
+      "/spec/chart"
+    );
+    const { data } = await axios.get(
+      `/clusters/${owner}/${cluster}/helm/packageview/values?name=${chartName}&url=${chartUrl}&version=${chartVersion}&format=json`
+    );
+    const { resources: resourcesDefaultValues } = data || {}
+        
+    Object.keys(resourcesDefaultValues || {}).forEach(key => {
+      if(!resources[key]) { 
+        resources[key] = resourcesDefaultValues[key];
+      }
+    })
+  }
   const featureSet = storeGet('/route/params/featureset')
   commit('wizard/model$update', {
     path: '/metadata/release',
