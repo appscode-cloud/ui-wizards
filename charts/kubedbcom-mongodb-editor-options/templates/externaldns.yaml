@@ -1,0 +1,22 @@
+{{- if .Values.managed.externalDnsOperator }}
+---
+apiVersion: external-dns.appscode.com/v1alpha1
+kind: ExternalDNS
+metadata:
+  name: {{ include "kubedbcom-mongodb-editor-options.fullname" . }}
+  namespace: {{ .Values.managed.clusterNamespace }}
+spec:
+  source:
+    type:
+      group: ""
+      version: v1
+      kind: Node
+    node:
+      labelFilter: eks.amazonaws.com/nodegroup={{ .Values.managed.aws.machinePoolTemplate.name }}
+      fqdnTemplate: "{{.Values.managed.externalDnsOperator.nodeName}}.{{.Values.managed.externalDnsOperator.domainFilter }}"
+  domainFilter:
+    - {{ .Values.managed.externalDnsOperator.domainFilter }}
+  provider: aws
+  aws:
+    zoneType: public
+  {{- end }}
