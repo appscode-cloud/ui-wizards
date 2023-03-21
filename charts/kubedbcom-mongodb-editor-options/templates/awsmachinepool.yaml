@@ -4,7 +4,7 @@ apiVersion: cluster.x-k8s.io/v1beta1
 kind: MachinePool
 metadata:
   name: {{ include "kubedbcom-mongodb-editor-options.fullname" . }}
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ .Values.managed.clusterNamespace }}
 spec:
   clusterName: {{.Values.managed.clusterName}}
   {{- if eq .Values.spec.mode "Replicaset" }}
@@ -26,7 +26,7 @@ apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
 kind: AWSManagedMachinePool
 metadata:
   name: {{ include "kubedbcom-mongodb-editor-options.fullname" . }}
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ .Values.managed.clusterNamespace }}
 spec:
   eksNodegroupName: {{.Values.managed.aws.machinePoolTemplate.name}}
-  {{- end }}
+{{- end }}
