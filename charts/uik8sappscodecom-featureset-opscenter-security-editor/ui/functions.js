@@ -166,12 +166,15 @@ function fetchFeatureSetOptions({ storeGet }) {
   const filteredFeatures = features.filter(item => item?.spec?.featureSet === featureSetName)
   const options = filteredFeatures.map(item => {
     const { spec, metadata } = item || {}
-    const { title, description } = spec || {}
+    const { title, description, required } = spec || {}
     const { name } = metadata || {}
     return {
       text: title,
       value: name,
-      description: description
+      description: description,
+      statusTag: {
+        text: required ? 'Required' : ''
+      }
     }
   })
 

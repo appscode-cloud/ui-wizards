@@ -203,23 +203,24 @@ async function setReleaseNameAndNamespace({ commit, storeGet, model, getValue, a
 }
 
 function fetchFeatureSetOptions({ storeGet }) {
-  const features = storeGet("/cluster/features/result") || [];
-  const featureSetName = storeGet("/route/params/featureset");
-  const filteredFeatures = features.filter(
-    (item) => item?.spec?.featureSet === featureSetName
-  );
-  const options = filteredFeatures.map((item) => {
-    const { spec, metadata } = item || {};
-    const { title, description } = spec || {};
-    const { name } = metadata || {};
+  const features = storeGet('/cluster/features/result') || []
+  const featureSetName = storeGet('/route/params/featureset')
+  const filteredFeatures = features.filter(item => item?.spec?.featureSet === featureSetName)
+  const options = filteredFeatures.map(item => {
+    const { spec, metadata } = item || {}
+    const { title, description, required } = spec || {}
+    const { name } = metadata || {}
     return {
       text: title,
       value: name,
       description: description,
-    };
-  });
+      statusTag: {
+        text: required ? 'Required' : ''
+      }
+    }
+  })
 
-  return options || [];
+  return options || []
 }
 
 return {
