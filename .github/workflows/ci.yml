@@ -37,7 +37,7 @@ jobs:
           sudo mv yqq /usr/local/bin/yqq
           pip3 install yq
           # install kubectl
-          curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.21.1/bin/linux/amd64/kubectl
+          curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.24.0/bin/linux/amd64/kubectl
           chmod +x ./kubectl
           sudo mv ./kubectl /usr/local/bin/kubectl
 
@@ -72,10 +72,6 @@ jobs:
 
       - name: Prepare cluster for testing
         id: local-path
-        env:
-          DOCKER_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-          USERNAME: 1gtm
-          REGISTRY_SECRET: regcred
         run: |
           echo "waiting for nodes to be ready ..."
           kubectl wait --for=condition=Ready nodes --all --timeout=5m
@@ -83,9 +79,6 @@ jobs:
           echo
           echo "install helm 3"
           curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
-          echo
-          echo "create docker-registry secret"
-          kubectl create secret docker-registry ${REGISTRY_SECRET} --namespace=kube-system --docker-server=https://index.docker.io/v1/ --docker-username=${USERNAME} --docker-password=${DOCKER_TOKEN}
 
       - name: Test charts
         run: |
