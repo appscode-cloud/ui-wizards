@@ -13,7 +13,7 @@ spec:
       kind: Node
     node:
       labelFilter: eks.amazonaws.com/nodegroup={{ .Values.managed.aws.machinePoolTemplate.name }}
-      fqdnTemplate: "{{.Values.managed.externalDnsOperator.nodeName}}.{{.Values.managed.externalDnsOperator.domainFilter }}"
+      fqdnTemplate: "{{ $url := print "{{.Name}}." .Values.managed.externalDnsOperator.domainFilter }}{{ $url }}"
   domainFilter:
     - {{ .Values.managed.externalDnsOperator.domainFilter }}
   provider: aws
