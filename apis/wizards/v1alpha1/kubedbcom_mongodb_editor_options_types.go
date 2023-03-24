@@ -47,6 +47,7 @@ type KubedbcomMongodbEditorOptionsSpecSpec struct {
 	// +optional
 	Labels            map[string]string         `json:"labels"`
 	Version           string                    `json:"version"`
+	ManagedDB         ManagedDBConfig           `json:"managedDB"`
 	Mode              MongoDBMode               `json:"mode"`
 	ReplicaSet        MongoDBReplicaSet         `json:"replicaSet"`
 	ShardTopology     MongoDBShardTopology      `json:"shardTopology"`
@@ -59,6 +60,26 @@ type KubedbcomMongodbEditorOptionsSpecSpec struct {
 	Resources         core.ResourceRequirements `json:"resources"`
 	AuthSecret        AuthSecret                `json:"authSecret"`
 	Monitoring        Monitoring                `json:"monitoring"`
+}
+
+type ManagedDBConfig struct {
+	KubernetesVersion   string                    `json:"kubernetesVersion"`
+	ClusterName         string                    `json:"clusterName"`
+	ClusterNamespace    string                    `json:"clusterNamespace"`
+	AWS                 AWSManagedDBConfig        `json:"aws"`
+	ExternalDNSOperator ExternalDNSOperatorConfig `json:"externalDNSOperatorConfig"`
+}
+
+type MachinePoolTemplate struct {
+	Name string `json:"name"`
+}
+
+type AWSManagedDBConfig struct {
+	MachinePoolTemplate MachinePoolTemplate `json:"machinePoolTemplate"`
+}
+
+type ExternalDNSOperatorConfig struct {
+	DomainFilter string `json:"domainFilter"`
 }
 
 type KubedbcomMongodbEditorOptionsSpecForm struct {
