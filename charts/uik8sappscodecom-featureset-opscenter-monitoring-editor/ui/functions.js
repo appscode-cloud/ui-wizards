@@ -134,32 +134,40 @@ function onEnabledFeaturesChange({
         "/spec/chart/version"
       );
 
-      commit("wizard/model$update", {
-        path: `/resources/${resourceValuePath}`,
-        value: {
-          ...resources?.[resourceValuePath],
-          metadata: {
-            ...resources?.[resourceValuePath]?.metadata,
-            labels: {
-              ...resources?.[resourceValuePath]?.metadata?.labels,
-              "app.kubernetes.io/component": featureName,
-              "app.kubernetes.io/part-of": featureSet,
-            },
-          },
-          spec: {
-            ...resources?.[resourceValuePath]?.spec,
-            chart: {
-              spec: {
-                chart,
-                sourceRef,
-                version,
+
+      const isEnabled = getFeatureDetails(storeGet, featureName, getValue, '/status/enabled')
+      const isManaged = getFeatureDetails(storeGet, featureName, getValue, '/status/managed')
+
+      if(isEnabled && (!isManaged)){
+        commit("wizard/model$delete", `/resources/${resourceValuePath}`);
+      }else{
+        commit("wizard/model$update", {
+          path: `/resources/${resourceValuePath}`,
+          value: {
+            ...resources?.[resourceValuePath],
+            metadata: {
+              ...resources?.[resourceValuePath]?.metadata,
+              labels: {
+                ...resources?.[resourceValuePath]?.metadata?.labels,
+                "app.kubernetes.io/component": featureName,
+                "app.kubernetes.io/part-of": featureSet,
               },
             },
-            targetNamespace,
+            spec: {
+              ...resources?.[resourceValuePath]?.spec,
+              chart: {
+                spec: {
+                  chart,
+                  sourceRef,
+                  version,
+                },
+              },
+              targetNamespace,
+            },
           },
-        },
-        force: true,
-      });
+          force: true,
+        });
+      }      
     } else {
       commit("wizard/model$delete", `/resources/${resourceValuePath}`);
     }
@@ -271,12 +279,22 @@ function showMonitoringConfigSection({
         getValue,
         "/status/enabled"
       );
+
+      const isMonitoringConfigManaged = getFeatureDetails( 
+        storeGet, 
+        "monitoring-config", 
+        getValue, 
+        '/status/managed'
+      )
+
       const isPanopticonEnabled = getFeaturePropertyValue(
         storeGet,
         "panopticon",
         getValue,
         "/status/enabled"
       );
+
+      if(!isMonitoringConfigManaged) return false
 
       if (!isMonitoringConfigEnabled) {
         resources["helmToolkitFluxcdIoHelmRelease_monitoring_config"] = {
