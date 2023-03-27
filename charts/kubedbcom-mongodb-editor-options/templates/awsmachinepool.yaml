@@ -1,12 +1,12 @@
-{{- if .Values.managed.aws.machinePoolTemplate }}
+{{- if .Values.spec.managed.aws.machinePoolTemplate }}
 ---
 apiVersion: cluster.x-k8s.io/v1beta1
 kind: MachinePool
 metadata:
   name: {{ include "kubedbcom-mongodb-editor-options.fullname" . }}
-  namespace: {{ .Values.managed.clusterNamespace }}
+  namespace: {{ .Values.spec.managed.clusterNamespace }}
 spec:
-  clusterName: {{.Values.managed.clusterName}}
+  clusterName: {{.Values.spec.managed.clusterName}}
   {{- if eq .Values.spec.mode "Replicaset" }}
   replicas: {{.Values.spec.replicaSet.replicas}}
   {{- else if eq .Values.spec.mode "Standalone" }}
@@ -16,7 +16,7 @@ spec:
     spec:
       bootstrap:
         dataSecretName: ""
-      clusterName: {{.Values.managed.clusterName}}
+      clusterName: {{.Values.spec.managed.clusterName}}
       infrastructureRef:
         apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
         kind: AWSManagedMachinePool
@@ -26,7 +26,7 @@ apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
 kind: AWSManagedMachinePool
 metadata:
   name: {{ include "kubedbcom-mongodb-editor-options.fullname" . }}
-  namespace: {{ .Values.managed.clusterNamespace }}
+  namespace: {{ .Values.spec.managed.clusterNamespace }}
 spec:
-  eksNodegroupName: {{.Values.managed.aws.machinePoolTemplate.name}}
+  eksNodegroupName: {{.Values.spec.managed.aws.machinePoolTemplate.name}}
 {{- end }}
