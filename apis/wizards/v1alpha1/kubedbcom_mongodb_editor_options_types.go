@@ -47,7 +47,7 @@ type KubedbcomMongodbEditorOptionsSpecSpec struct {
 	// +optional
 	Labels            map[string]string         `json:"labels"`
 	Version           string                    `json:"version"`
-	ManagedDB         ManagedDBConfig           `json:"managedDB"`
+	ManagedDB         ManagedDBConfig           `json:"managed"`
 	Mode              MongoDBMode               `json:"mode"`
 	ReplicaSet        MongoDBReplicaSet         `json:"replicaSet"`
 	ShardTopology     MongoDBShardTopology      `json:"shardTopology"`
@@ -63,23 +63,27 @@ type KubedbcomMongodbEditorOptionsSpecSpec struct {
 }
 
 type ManagedDBConfig struct {
-	KubernetesVersion   string                    `json:"kubernetesVersion"`
-	ClusterName         string                    `json:"clusterName"`
-	ClusterNamespace    string                    `json:"clusterNamespace"`
-	AWS                 AWSManagedDBConfig        `json:"aws"`
-	ExternalDNSOperator ExternalDNSOperatorConfig `json:"externalDNSOperatorConfig"`
+	K8SVersion          string              `json:"k8sVersion"`
+	ClusterName         string              `json:"clusterName"`
+	ClusterNamespace    string              `json:"clusterNamespace"`
+	Aws                 Aws                 `json:"aws"`
+	ExternalDnsOperator ExternalDnsOperator `json:"externalDnsOperator"`
+}
+
+type Aws struct {
+	MachinePoolTemplate AWSMachinePoolTemplate `json:"machinePoolTemplate"`
+}
+
+type AWSMachinePoolTemplate struct {
+	Name string `json:"name"`
+}
+
+type ExternalDnsOperator struct {
+	DomainFilter string `json:"domainFilter"`
 }
 
 type MachinePoolTemplate struct {
 	Name string `json:"name"`
-}
-
-type AWSManagedDBConfig struct {
-	MachinePoolTemplate MachinePoolTemplate `json:"machinePoolTemplate"`
-}
-
-type ExternalDNSOperatorConfig struct {
-	DomainFilter string `json:"domainFilter"`
 }
 
 type KubedbcomMongodbEditorOptionsSpecForm struct {
