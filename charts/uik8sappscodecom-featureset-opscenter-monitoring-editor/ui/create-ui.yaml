@@ -1,0 +1,218 @@
+steps:
+- form:
+    elements:
+    - if: returnFalse
+      computed: setReleaseNameAndNamespace
+      type: input
+    - discriminator:
+        enabledFeatures:
+          type: array
+      elements:  
+      - computed: getFeatureSetDescription
+        customClass: mb-20
+        label:
+          isSubsection: true
+        type: label-element
+      - computed: getEnabledFeatures
+        fetch: fetchFeatureSetOptions
+        hasDescription: true
+        individualItemDisabilityCheck: disableFeatures
+        onChange: onEnabledFeaturesChange
+        schema:
+          $ref: discriminator#/properties/enabledFeatures
+        type: checkbox
+      - discriminator:
+          configureType:
+            type: string
+          authType:
+            type: string
+            default: basic
+        elements:
+        - computed: setConfigureType
+          label:
+            text: labels.configure_using_url_or_service_question
+          onChange: onConfigureTypeChange
+          options:
+          - text: labels.provide_url
+            value: url
+          - text: labels.provide_service
+            value: service
+          schema:
+            $ref: discriminator#/properties/configureType
+          type: radio
+        - if: showConfigurationFieldsFor|url
+          label:
+            text: labels.url
+          schema:
+            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_monitoring_config/properties/spec/properties/values/properties/prometheus/properties/url
+          type: input
+        - if: showConfigurationFieldsFor|service
+          discriminator:
+            services:
+              type: array
+            prometheuses:
+              type: array
+            selectedPrometheus:
+              type: string
+              default: dd
+          elements:
+          - label:
+              text: labels.service.title
+            type: label-element
+          - fetch: getNamespaces
+            label:
+              text: labels.service.namespace
+            schema:
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_monitoring_config/properties/spec/properties/values/properties/prometheus/properties/service/properties/namespace
+            type: select
+          - fetch: getPrometheuses|discriminator#/selectedPrometheus
+            label:
+              text: labels.prometheus.name
+            onChange: onPrometheusChange
+            schema:
+              $ref: discriminator#/properties/selectedPrometheus
+            type: select
+          - fetch: getServices|/resources/helmToolkitFluxcdIoHelmRelease_monitoring_config/spec/values/prometheus/service/name
+            label:
+              text: labels.service.name
+            schema:
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_monitoring_config/properties/spec/properties/values/properties/prometheus/properties/service/properties/name
+            type: select
+          - fetch: getServicePorts
+            label:
+              text: labels.servicePort
+            schema:
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_monitoring_config/properties/spec/properties/values/properties/prometheus/properties/service/properties/port
+            type: select
+          - computed: setScheme
+            label:
+              text: labels.scheme
+            options:
+            - text: http
+              value: http
+            - text: https
+              value: https
+            schema:
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_monitoring_config/properties/spec/properties/values/properties/prometheus/properties/service/properties/scheme
+            type: radio
+          schema:
+            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_monitoring_config/properties/spec/properties/values/properties/prometheus/properties/service
+          type: single-step-form
+        - isArray: true
+          keys:
+            label:
+              text: labels.serviceMonitorSelector.key
+          label:
+            text: labels.serviceMonitorSelector.label
+          onChange: onServiceMonitorLabelChange
+          schema:
+            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_monitoring_config/properties/spec/properties/values/properties/global/properties/monitoring/properties/serviceMonitor/properties/labels
+          type: key-value-input-form
+          values:
+            label:
+              text: labels.serviceMonitorSelector.value
+            schema:
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_monitoring_config/properties/spec/properties/values/properties/global/properties/monitoring/properties/serviceMonitor/properties/labels/additionalProperties
+            type: input
+        - isArray: true
+          keys:
+            label:
+              text: labels.ruleSelector.key
+          onChange: onAlertLabelChange
+          label:
+            text: labels.ruleSelector.label
+          schema:
+            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_monitoring_config/properties/spec/properties/values/properties/global/properties/monitoring/properties/alert/properties/labels
+          type: key-value-input-form
+          values:
+            label:
+              text: labels.ruleSelector.value
+            schema:
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_monitoring_config/properties/spec/properties/values/properties/global/properties/monitoring/properties/alert/properties/labels/additionalProperties
+            type: input
+        - label:
+            text: labels.authSection
+          type: label-element
+        - label:
+            text: labels.chooseAuthType
+          onChange: onAuthTypeChange
+          options:
+          - text: options.auth_type.basic
+            value: basic
+          - text: options.auth_type.token
+            value: token
+          schema:
+            $ref: discriminator#/properties/authType
+          type: radio
+        - if: isEqualToDiscriminatorPathValue|/authType|token
+          label:
+            text: labels.bearerToken
+          schema:
+            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_monitoring_config/properties/spec/properties/values/properties/prometheus/properties/bearerToken
+          type: input
+        - if: isEqualToDiscriminatorPathValue|/authType|basic
+          label:
+            text: labels.username
+          schema:
+            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_monitoring_config/properties/spec/properties/values/properties/prometheus/properties/basicAuth/properties/username
+          type: input
+        - hideValue: true
+          if: isEqualToDiscriminatorPathValue|/authType|basic
+          label:
+            text: labels.password
+          schema:
+            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_monitoring_config/properties/spec/properties/values/properties/prometheus/properties/basicAuth/properties/password
+          type: input
+        - label:
+            text: labels.insecureSkipTLSVerify_question
+          schema:
+            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_monitoring_config/properties/spec/properties/values/properties/prometheus/properties/tls/properties/insecureSkipTLSVerify
+          type: switch
+        - elements:
+          - decoder: decodeBase64
+            encoder: encodeBase64
+            label:
+              text: labels.caCert
+            schema:
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_monitoring_config/properties/spec/properties/values/properties/prometheus/properties/tls/properties/ca
+            type: editor
+          hideForm: true
+          if: showtlsClientAuthAndCaCert
+          label:
+            text: labels.caCrt
+            isSubsection: true
+          show_label: true
+          type: single-step-form
+        - elements:
+          - decoder: decodeBase64
+            encoder: encodeBase64
+            label:
+              text: labels.clientCert
+            schema:
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_monitoring_config/properties/spec/properties/values/properties/prometheus/properties/tls/properties/cert
+            type: editor
+          - decoder: decodeBase64
+            encoder: encodeBase64
+            label:
+              text: labels.clientKey
+            schema:
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_monitoring_config/properties/spec/properties/values/properties/prometheus/properties/tls/properties/key
+            type: editor
+          hideForm: true
+          if: showtlsClientAuthAndCaCert
+          label:
+            text: labels.tlsClientAuth
+            isSubsection: true
+          show_label: true
+          type: single-step-form
+        hideForm: true
+        if: showMonitoringConfigSection
+        label:
+          text: labels.monitoring_config
+        show_label: true
+        type: single-step-form
+      type: single-step-form
+    type: single-step-form
+  id: opscenter-monitoring
+  title: steps.0.label
+type: multi-step-form
