@@ -66,6 +66,9 @@ spec:
 {{- else }}
   podTemplate:
     spec:
+      {{- if eq .Values.spec.managed.mode "public" }}
+      hostNetwork: true
+      {{- end }}
       resources:
         {{- toYaml $res | nindent 8 }}
 {{- end }}

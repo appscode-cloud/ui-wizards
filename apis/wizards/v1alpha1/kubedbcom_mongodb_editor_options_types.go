@@ -66,11 +66,26 @@ type ManagedDBConfig struct {
 	K8SVersion          string              `json:"k8sVersion"`
 	ClusterName         string              `json:"clusterName"`
 	ClusterNamespace    string              `json:"clusterNamespace"`
+	Mode                ManageDBMode        `json:"mode"`
 	Aws                 Aws                 `json:"aws"`
 	ExternalDnsOperator ExternalDnsOperator `json:"externalDnsOperator"`
 }
 
+type ManageDBMode string
+
+const (
+	Public  ManageDBMode = "public"
+	Private ManageDBMode = "private"
+)
+
+type AWSInstanceType string
+
+const (
+	T3large AWSInstanceType = "t3.large"
+)
+
 type Aws struct {
+	InstanceType        AWSInstanceType        `json:"instanceType"`
 	MachinePoolTemplate AWSMachinePoolTemplate `json:"machinePoolTemplate"`
 }
 

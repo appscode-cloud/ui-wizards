@@ -1,0 +1,44 @@
+{{- if eq .Values.spec.managed.mode "public" }}
+apiVersion: cluster.x-k8s.io/v1beta1
+kind: MachineDeployment
+metadata:
+  name: {{ include "kubedbcom-mongodb-editor-options.fullname" . }}
+  namespace: {{ .Values.spec.managed.clusterNamespace }}
+spec:
+  clusterName: {{.Values.spec.managed.clusterName}}
+  replicas: 1
+  template:
+    spec:
+      bootstrap:
+        configRef:
+          apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
+          kind: EKSConfigTemplate
+          name: {{ include "kubedbcom-mongodb-editor-options.fullname" . }}
+      clusterName: {{.Values.spec.managed.clusterName}}
+      infrastructureRef:
+        apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+        kind: AWSMachineTemplate
+        name: {{ include "kubedbcom-mongodb-editor-options.fullname" . }}
+      version: {{ .Values.spec.managed.k8sVersion }}
+---
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+kind: AWSMachineTemplate
+metadata:
+  name: {{ include "kubedbcom-mongodb-editor-options.fullname" . }}
+  namespace: {{ .Values.spec.managed.clusterNamespace }}
+spec:
+  template:
+    spec:
+      iamInstanceProfile: "{{ $role := print "nodes" .Values.spec.managed.clusterName "-" .Values.spec.managed.clusterNamespace }}{{ $role }}"
+      instanceType: {{ .Values.spec.managed.aws.instanceType }}
+      sshKeyName: ""
+      publicIP: true
+---
+apiVersion: bootstrap.cluster.x-k8s.io/v1beta1
+kind: EKSConfigTemplate
+metadata:
+  name: {{ include "kubedbcom-mongodb-editor-options.fullname" . }}
+  namespace: {{ .Values.spec.managed.clusterNamespace }}
+spec:
+  template: {}
+  {{- end }}
