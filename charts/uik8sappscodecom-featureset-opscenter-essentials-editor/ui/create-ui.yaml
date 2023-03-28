@@ -1,14 +1,14 @@
 steps:
 - form:
     elements:
-    - if: returnFalse
-      computed: setReleaseNameAndNamespace
+    - computed: setReleaseNameAndNamespace
+      if: returnFalse
       type: input
     - disabled: isFeatureDisabled|license-proxyserver
       discriminator:
         isLicenseProxyServerEnabled:
           type: boolean
-      elements:    
+      elements:
       - computed: getFeatureTitle|license-proxyserver
         type: label-element
       - computed: getFeatureDescription|license-proxyserver
@@ -16,11 +16,11 @@ steps:
         label:
           isSubsection: true
         type: label-element
-      - if: isFeatureDisabled|license-proxyserver
-        computed: getFeatureNote|license-proxyserver
-        alertInfo:
+      - alertInfo:
           show: true
           type: error
+        computed: getFeatureNote|license-proxyserver
+        if: isFeatureDisabled|license-proxyserver
         type: label-element
       - computed: isFeatureEnabled|license-proxyserver
         label:
@@ -29,8 +29,7 @@ steps:
         schema:
           $ref: discriminator#/properties/isLicenseProxyServerEnabled
         type: switch
-      - if: isDiscriminatorValueTrue|/isLicenseProxyServerEnabled
-        elements:
+      - elements:
         - label:
             text: labels.registryFQDN
           schema:
@@ -80,9 +79,9 @@ steps:
         - elements:
           - label:
               text: labels.serviceAccount.name
+            onChange: onServiceAccountNameChange|helmToolkitFluxcdIoHelmRelease_license_proxyserver
             schema:
               $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_license_proxyserver/properties/spec/properties/values/properties/serviceAccount/properties/name
-            onChange: onServiceAccountNameChange|helmToolkitFluxcdIoHelmRelease_license_proxyserver
             type: input
           - isArray: true
             keys:
@@ -149,6 +148,7 @@ steps:
             $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_license_proxyserver/properties/spec/properties/values/properties/monitoring
           show_label: true
           type: single-step-form
+        if: isDiscriminatorValueTrue|/isLicenseProxyServerEnabled
         type: single-step-form
       type: single-step-form
     type: single-step-form
@@ -168,11 +168,11 @@ steps:
         label:
           isSubsection: true
         type: label-element
-      - if: isFeatureDisabled|supervisor
-        computed: getFeatureNote|supervisor
-        alertInfo:
+      - alertInfo:
           show: true
           type: error
+        computed: getFeatureNote|supervisor
+        if: isFeatureDisabled|supervisor
         type: label-element
       - computed: isFeatureEnabled|supervisor
         label:
@@ -181,8 +181,7 @@ steps:
         schema:
           $ref: discriminator#/properties/isSupervisorEnabled
         type: switch
-      - if: isDiscriminatorValueTrue|/isSupervisorEnabled
-        elements:
+      - elements:
         - label:
             text: labels.registryFQDN
           schema:
@@ -232,9 +231,9 @@ steps:
         - elements:
           - label:
               text: labels.serviceAccount.name
+            onChange: onServiceAccountNameChange|helmToolkitFluxcdIoHelmRelease_supervisor
             schema:
               $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_supervisor/properties/spec/properties/values/properties/serviceAccount/properties/name
-            onChange: onServiceAccountNameChange|helmToolkitFluxcdIoHelmRelease_supervisor
             type: input
           - isArray: true
             keys:
@@ -301,8 +300,9 @@ steps:
             $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_supervisor/properties/spec/properties/values/properties/monitoring
           show_label: true
           type: single-step-form
+        if: isDiscriminatorValueTrue|/isSupervisorEnabled
         type: single-step-form
-      type: single-step-form 
+      type: single-step-form
     type: single-step-form
   id: supervisor
   title: steps.1.label
