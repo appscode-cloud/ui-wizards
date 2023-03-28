@@ -81,32 +81,42 @@ function onEnabledFeaturesChange({ discriminator, getValue, commit, storeGet }) 
       const sourceRef = getFeaturePropertyValue(storeGet, featureName, getValue, '/spec/chart/sourceRef');
       const version = getFeaturePropertyValue(storeGet, featureName, getValue, '/spec/chart/version');
 
-      commit('wizard/model$update', {
-        path: `/resources/${resourceValuePath}`,
-        value: {
-          ...resources?.[resourceValuePath],
-          metadata: {
-            ...resources?.[resourceValuePath]?.metadata,
-            labels: {
-              ...resources?.[resourceValuePath]?.metadata?.labels,
-              'app.kubernetes.io/component': featureName,
-              'app.kubernetes.io/part-of': featureSet,
+      const isEnabled = getFeaturePropertyValue(storeGet, featureName, getValue, '/status/enabled')
+      const isManaged = getFeaturePropertyValue(storeGet, featureName, getValue, '/status/managed')
+
+
+      if(isEnabled && (!isManaged)){
+        commit('wizard/model$delete', `/resources/${resourceValuePath}`)
+      }else{
+        commit('wizard/model$update', {
+          path: `/resources/${resourceValuePath}`,
+          value: {
+            ...resources?.[resourceValuePath],
+            metadata: {
+              ...resources?.[resourceValuePath]?.metadata,
+              labels: {
+                ...resources?.[resourceValuePath]?.metadata?.labels,
+                'app.kubernetes.io/component': featureName,
+                'app.kubernetes.io/part-of': featureSet,
+              },
             },
+            spec: {
+              ...resources?.[resourceValuePath]?.spec,
+              chart: {
+                spec: {
+                  chart,
+                  sourceRef,
+                  version,
+                }
+              },
+              targetNamespace
+            }
           },
-          spec: {
-            ...resources?.[resourceValuePath]?.spec,
-            chart: {
-              spec: {
-                chart,
-                sourceRef,
-                version,
-              }
-            },
-            targetNamespace
-          }
-        },
-        force: true
-      })
+          force: true
+        })
+      }
+
+      
     } else {
       commit('wizard/model$delete', `/resources/${resourceValuePath}`)
     }
