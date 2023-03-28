@@ -135,8 +135,8 @@ function onEnabledFeaturesChange({
       );
 
 
-      const isEnabled = getFeatureDetails(storeGet, featureName, getValue, '/status/enabled')
-      const isManaged = getFeatureDetails(storeGet, featureName, getValue, '/status/managed')
+      const isEnabled = getFeaturePropertyValue(storeGet, featureName, getValue, '/status/enabled')
+      const isManaged = getFeaturePropertyValue(storeGet, featureName, getValue, '/status/managed')
 
       if(isEnabled && (!isManaged)){
         commit("wizard/model$delete", `/resources/${resourceValuePath}`);
