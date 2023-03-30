@@ -303,7 +303,8 @@ function showMonitoringConfigSection({
             ...resources["helmToolkitFluxcdIoHelmRelease_monitoring_config"]
               ?.spec,
             values: {
-              global: {
+              presets: {
+                enable: true,
                 monitoring: {
                   serviceMonitor: {
                     labels: {
