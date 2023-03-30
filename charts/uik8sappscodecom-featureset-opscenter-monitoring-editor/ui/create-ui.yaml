@@ -1,13 +1,13 @@
 steps:
 - form:
     elements:
-    - if: returnFalse
-      computed: setReleaseNameAndNamespace
+    - computed: setReleaseNameAndNamespace
+      if: returnFalse
       type: input
     - discriminator:
         enabledFeatures:
           type: array
-      elements:  
+      elements:
       - computed: getFeatureSetDescription
         customClass: mb-20
         label:
@@ -22,11 +22,11 @@ steps:
           $ref: discriminator#/properties/enabledFeatures
         type: checkbox
       - discriminator:
+          authType:
+            default: basic
+            type: string
           configureType:
             type: string
-          authType:
-            type: string
-            default: basic
         elements:
         - computed: setConfigureType
           label:
@@ -46,15 +46,14 @@ steps:
           schema:
             $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_monitoring_config/properties/spec/properties/values/properties/prometheus/properties/url
           type: input
-        - if: showConfigurationFieldsFor|service
-          discriminator:
-            services:
-              type: array
+        - discriminator:
             prometheuses:
               type: array
             selectedPrometheus:
-              type: string
               default: dd
+              type: string
+            services:
+              type: array
           elements:
           - label:
               text: labels.service.title
@@ -95,6 +94,7 @@ steps:
             schema:
               $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_monitoring_config/properties/spec/properties/values/properties/prometheus/properties/service/properties/scheme
             type: radio
+          if: showConfigurationFieldsFor|service
           schema:
             $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_monitoring_config/properties/spec/properties/values/properties/prometheus/properties/service
           type: single-step-form
@@ -118,9 +118,9 @@ steps:
           keys:
             label:
               text: labels.ruleSelector.key
-          onChange: onAlertLabelChange
           label:
             text: labels.ruleSelector.label
+          onChange: onAlertLabelChange
           schema:
             $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_monitoring_config/properties/spec/properties/values/properties/global/properties/monitoring/properties/alert/properties/labels
           type: key-value-input-form
@@ -179,8 +179,8 @@ steps:
           hideForm: true
           if: showtlsClientAuthAndCaCert
           label:
-            text: labels.caCrt
             isSubsection: true
+            text: labels.caCrt
           show_label: true
           type: single-step-form
         - elements:
@@ -201,8 +201,8 @@ steps:
           hideForm: true
           if: showtlsClientAuthAndCaCert
           label:
-            text: labels.tlsClientAuth
             isSubsection: true
+            text: labels.tlsClientAuth
           show_label: true
           type: single-step-form
         hideForm: true
