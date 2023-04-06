@@ -7,8 +7,8 @@
 ```bash
 $ helm repo add bytebuilders-ui https://bundles.byte.builders/ui/
 $ helm repo update
-$ helm search repo bytebuilders-ui/certificatesk8sio-certificatesigningrequest-editor --version=v0.4.13
-$ helm upgrade -i certificatesk8sio-certificatesigningrequest-editor bytebuilders-ui/certificatesk8sio-certificatesigningrequest-editor -n default --create-namespace --version=v0.4.13
+$ helm search repo bytebuilders-ui/certificatesk8sio-certificatesigningrequest-editor --version=v0.4.14
+$ helm upgrade -i certificatesk8sio-certificatesigningrequest-editor bytebuilders-ui/certificatesk8sio-certificatesigningrequest-editor -n default --create-namespace --version=v0.4.14
 ```
 
 ## Introduction
@@ -24,7 +24,7 @@ This chart deploys a CertificateSigningRequest Editor on a [Kubernetes](http://k
 To install/upgrade the chart with the release name `certificatesk8sio-certificatesigningrequest-editor`:
 
 ```bash
-$ helm upgrade -i certificatesk8sio-certificatesigningrequest-editor bytebuilders-ui/certificatesk8sio-certificatesigningrequest-editor -n default --create-namespace --version=v0.4.13
+$ helm upgrade -i certificatesk8sio-certificatesigningrequest-editor bytebuilders-ui/certificatesk8sio-certificatesigningrequest-editor -n default --create-namespace --version=v0.4.14
 ```
 
 The command deploys a CertificateSigningRequest Editor on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
@@ -56,12 +56,12 @@ The following table lists the configurable parameters of the `certificatesk8sio-
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm upgrade -i`. For example:
 
 ```bash
-$ helm upgrade -i certificatesk8sio-certificatesigningrequest-editor bytebuilders-ui/certificatesk8sio-certificatesigningrequest-editor -n default --create-namespace --version=v0.4.13 --set apiVersion=certificates.k8s.io/v1
+$ helm upgrade -i certificatesk8sio-certificatesigningrequest-editor bytebuilders-ui/certificatesk8sio-certificatesigningrequest-editor -n default --create-namespace --version=v0.4.14 --set apiVersion=certificates.k8s.io/v1
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
 installing the chart. For example:
 
 ```bash
-$ helm upgrade -i certificatesk8sio-certificatesigningrequest-editor bytebuilders-ui/certificatesk8sio-certificatesigningrequest-editor -n default --create-namespace --version=v0.4.13 --values values.yaml
+$ helm upgrade -i certificatesk8sio-certificatesigningrequest-editor bytebuilders-ui/certificatesk8sio-certificatesigningrequest-editor -n default --create-namespace --version=v0.4.14 --values values.yaml
 ```
