@@ -1,0 +1,198 @@
+properties:
+  metadata:
+    properties:
+      release:
+        properties:
+          name:
+            type: string
+          namespace:
+            type: string
+        required:
+          - name
+          - namespace
+        type: object
+      resource:
+        description: ResourceID identifies a resource
+        properties:
+          group:
+            type: string
+          kind:
+            description: Kind is the serialized kind of the resource.  It
+              is normally CamelCase and singular.
+            type: string
+          name:
+            description: "Name is the plural name of the resource to serve.  It
+              must match the name of the CustomResourceDefinition-registration
+              too: plural.group and it must be all lowercase."
+            type: string
+          scope:
+            description: ResourceScope is an enum defining the different
+              scopes available to a custom resource
+            type: string
+          version:
+            type: string
+        required:
+          - group
+        type: object
+    required:
+      - release
+      - resource
+    type: object
+  spec:
+    properties:
+      annotations:
+        additionalProperties:
+          type: string
+        type: object
+      authSecret:
+        properties:
+          name:
+            type: string
+          password:
+            format: password
+            type: string
+        type: object
+      disableSecurity:
+        type: boolean
+      enableSSL:
+        type: boolean
+      labels:
+        additionalProperties:
+          type: string
+        type: object
+      machine:
+        enum:
+          - db.t.micro
+          - db.t.small
+          - db.t.medium
+          - db.t.large
+          - db.t.xlarge
+          - db.t.2xlarge
+          - db.m.small
+          - db.m.large
+          - db.m.xlarge
+          - db.m.2xlarge
+          - db.m.4xlarge
+          - db.m.8xlarge
+          - db.m.12xlarge
+          - db.m.16xlarge
+          - db.m.24xlarge
+          - db.r.large
+          - db.r.xlarge
+          - db.r.2xlarge
+          - db.r.4xlarge
+          - db.r.8xlarge
+          - db.r.12xlarge
+          - db.r.16xlarge
+          - db.r.24xlarge
+        type: string
+      mode:
+        enum:
+          - Combined
+          - Dedicated
+        type: string
+      monitoring:
+        properties:
+          agent:
+            enum:
+              - prometheus.io
+              - prometheus.io/operator
+              - prometheus.io/builtin
+            type: string
+          exporter:
+            properties:
+              resources:
+                description: Compute Resources required by the sidecar
+                  container.
+                properties:
+                  limits:
+                    additionalProperties:
+                      anyOf:
+                        - type: integer
+                        - type: string
+                      pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                      x-kubernetes-int-or-string: true
+                    description: "Limits describes the maximum amount
+                      of compute resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/"
+                    type: object
+                  requests:
+                    additionalProperties:
+                      anyOf:
+                        - type: integer
+                        - type: string
+                      pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                      x-kubernetes-int-or-string: true
+                    description: "Requests describes the minimum amount
+                      of compute resources required. If Requests is omitted
+                      for a container, it defaults to Limits if that is
+                      explicitly specified, otherwise to an implementation-defined
+                      value. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/"
+                    type: object
+                type: object
+            type: object
+          serviceMonitor:
+            properties:
+              labels:
+                additionalProperties:
+                  type: string
+                type: object
+            type: object
+        required:
+          - agent
+          - exporter
+          - serviceMonitor
+        type: object
+      persistence:
+        properties:
+          size:
+            type: string
+        required:
+          - size
+        type: object
+      replicas:
+        type: integer
+      resources:
+        description: ResourceRequirements describes the compute resource
+          requirements.
+        properties:
+          limits:
+            additionalProperties:
+              anyOf:
+                - type: integer
+                - type: string
+              pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+              x-kubernetes-int-or-string: true
+            description: "Limits describes the maximum amount of compute
+              resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/"
+            type: object
+          requests:
+            additionalProperties:
+              anyOf:
+                - type: integer
+                - type: string
+              pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+              x-kubernetes-int-or-string: true
+            description: "Requests describes the minimum amount of compute
+              resources required. If Requests is omitted for a container,
+              it defaults to Limits if that is explicitly specified, otherwise
+              to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/"
+            type: object
+        type: object
+      storageClass:
+        properties:
+          name:
+            type: string
+        required:
+          - name
+        type: object
+      terminationPolicy:
+        enum:
+          - Halt
+          - Delete
+          - WipeOut
+          - DoNotTerminate
+        type: string
+      topology:
+required:
+  - spec
+type: object

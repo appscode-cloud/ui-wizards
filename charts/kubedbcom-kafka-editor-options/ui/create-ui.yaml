@@ -1,0 +1,322 @@
+steps:
+- form:
+    discriminator:
+      elasticVersions:
+        type: array
+    elements:
+    - label:
+        text: labels.database.name
+      schema:
+        $ref: schema#/properties/metadata/properties/release/properties/name
+      type: input
+    - add_new_button:
+        label: labels.add_new_namespace
+        target: _blank
+        url:
+          function: getCreateNameSpaceUrl
+      fetch: getResources|core|v1|namespaces
+      label:
+        text: labels.namespace
+      refresh: true
+      schema:
+        $ref: schema#/properties/metadata/properties/release/properties/namespace
+      type: select
+    - computed: onVersionChange
+      fetch: getKafkaVersions|catalog.kubedb.com|v1alpha1|kafkaversions
+      label:
+        text: labels.database.version
+      onChange: onVersionChange
+      schema:
+        $ref: schema#/properties/spec/properties/version
+      type: select
+    - isArray: true
+      keys:
+        label:
+          text: labels.labels.key
+      label:
+        text: labels.labels.label
+      schema:
+        $ref: schema#/properties/spec/properties/labels
+      type: key-value-input-form
+      values:
+        label:
+          text: labels.labels.value
+        schema:
+          $ref: schema#/properties/spec/properties/labels/additionalProperties
+        type: input
+    - isArray: true
+      keys:
+        label:
+          text: labels.annotations.key
+      label:
+        text: labels.annotations.label
+      schema:
+        $ref: schema#/properties/spec/properties/annotations
+      type: key-value-input-form
+      values:
+        label:
+          text: labels.annotations.value
+        schema:
+          $ref: schema#/properties/spec/properties/annotations/additionalProperties
+        type: input
+    - hasDescription: true
+      label:
+        text: labels.database.mode
+      options:
+      - description: options.database.mode.Combined.description
+        text: options.database.mode.Combined.label
+        value: Combined
+      - description: options.database.mode.Dedicated.description
+        text: options.database.mode.Dedicated.label
+        value: Dedicated
+      schema:
+        $ref: schema#/properties/spec/properties/mode
+      type: radio
+    - fetch: getStorageClassNames|/spec/storageClass/name
+      label:
+        text: labels.storage.class
+      schema:
+        $ref: schema#/properties/spec/properties/storageClass/properties/name
+      type: select
+    - elements:
+      - label:
+          text: labels.replicaset.number
+        schema:
+          $ref: schema#/properties/spec/properties/replicas
+        type: input
+      - label:
+          text: labels.storage.size
+        schema:
+          $ref: schema#/properties/spec/properties/persistence/properties/size
+        type: input
+      if: isEqualToModelPathValue|Combined|/spec/mode
+      type: single-step-form
+    - elements:
+      - elements:
+        - label:
+            text: labels.controller_nodes
+          type: label-element
+        - label:
+            text: labels.replicaset.number
+          schema:
+            $ref: schema#/properties/spec/properties/topology/properties/controller/properties/replicas
+          type: input
+        - elements:
+          - label:
+              text: labels.storage.size
+            schema:
+              $ref: schema#/properties/spec/properties/topology/properties/controller/properties/persistence/properties/size
+            type: input
+          schema:
+            $ref: schema#/properties/spec/properties/topology/properties/controller/properties/persistence
+          type: single-step-form
+        schema:
+          $ref: schema#/properties/spec/properties/topology/properties/controller
+        type: single-step-form
+      - elements:
+        - label:
+            text: labels.broker_nodes
+          type: label-element
+        - label:
+            text: labels.replicaset.number
+          schema:
+            $ref: schema#/properties/spec/properties/topology/properties/broker/properties/replicas
+          type: input
+        - elements:
+          - label:
+              text: labels.storage.size
+            schema:
+              $ref: schema#/properties/spec/properties/topology/properties/broker/properties/persistence/properties/size
+            type: input
+          schema:
+            $ref: schema#/properties/spec/properties/topology/properties/broker/properties/persistence
+          type: single-step-form
+        schema:
+          $ref: schema#/properties/spec/properties/topology/properties/broker
+        type: single-step-form
+      if: isEqualToModelPathValue|Dedicated|/spec/mode
+      schema:
+        $ref: schema#/properties/spec/properties/topology
+      type: single-step-form
+    - hasDescription: true
+      label:
+        text: labels.terminationPolicy
+      options:
+      - description: options.terminationPolicy.wipeOut.description
+        text: options.terminationPolicy.wipeOut.label
+        value: WipeOut
+      - description: options.terminationPolicy.doNotTerminate.description
+        text: options.terminationPolicy.doNotTerminate.label
+        value: DoNotTerminate
+      schema:
+        $ref: schema#/properties/spec/properties/terminationPolicy
+      type: radio
+    - label:
+        text: labels.disable_security_question
+      onChange: onDisableSecurityChange
+      schema:
+        $ref: schema#/properties/spec/properties/disableSecurity
+      type: switch
+    - label:
+        text: labels.enable_ssl_question
+      onChange: onEnableSSLChange
+      schema:
+        $ref: schema#/properties/spec/properties/enableSSL
+      type: switch
+    - discriminator:
+        createAuthSecret:
+          default: true
+          type: boolean
+      elements:
+      - label:
+          text: labels.database.admin_secret
+        type: label-element
+      - onChange: onCreateAuthSecretChange
+        options:
+        - text: options.database.secret.customSecret.label
+          value: true
+        - text: options.database.secret.existingSecret.label
+          value: false
+        schema:
+          $ref: discriminator#/properties/createAuthSecret
+        type: radio
+      - allowUserDefinedOption: true
+        fetch: getSecrets
+        if: showAuthSecretField
+        label:
+          text: labels.secret
+        schema:
+          $ref: schema#/properties/spec/properties/authSecret/properties/name
+        type: select
+      - if: showAuthPasswordField
+        label:
+          text: labels.password
+        schema:
+          $ref: schema#/properties/spec/properties/authSecret/properties/password
+        type: input
+      if: isSecurityEnabled
+      type: single-step-form
+    - label:
+        text: labels.machine_profile
+      type: label-element
+    - computed: setMachineToCustom
+      fetch: getMachineListForOptions
+      label:
+        text: Machine
+      onChange: setResourceLimit
+      schema:
+        $ref: schema#/properties/spec/properties/machine
+      type: select
+    - computed: setLimitsCpuOrMem|cpu
+      disabled: disableLimit
+      label:
+        text: labels.cpu
+      schema:
+        $ref: schema#/properties/spec/properties/resources/properties/limits/properties/cpu
+      type: input
+    - computed: setLimitsCpuOrMem|memory
+      disabled: disableLimit
+      label:
+        text: labels.memory
+      schema:
+        $ref: schema#/properties/spec/properties/resources/properties/limits/properties/memory
+      type: input
+    - elements:
+      - label:
+          text: labels.alert.alert_enable_question
+        schema:
+          $ref: schema#/properties/form/properties/alert/properties/enabled
+        type: switch
+      label:
+        text: labels.alert.label
+      schema:
+        $ref: schema#/properties/form/properties/alert
+      show_label: true
+      type: single-step-form
+    - alias: reusable-monitor-option
+      chart:
+        name: uibytebuildersdev-component-monitoring-option
+        version: v0.4.12
+      dataContext:
+        agent:
+          $ref: schema#/properties/spec/properties/monitoring/properties/agent
+      functionCallbacks:
+        updateAgentValue:
+          $ref: functions#/updateAgentValue
+      moduleResolver: fetchJsons
+      schema:
+        $ref: schema#/properties/spec/properties/monitoring/properties/serviceMonitor
+      type: reusable-element
+    - label:
+        text: labels.configOptions
+      type: label-element
+    - cluster:
+        $ref: store#/route/params/cluster
+      hasDependencies: true
+      hasDescription: true
+      individualItemDisabilityCheck: disableConfigureOption
+      options:
+      - description: options.configOptions.alert.description
+        text: options.configOptions.alert.label
+        value: alert
+      - description: options.configOptions.topology.description
+        text: options.configOptions.topology.label
+        value: topology
+      - description: options.configOptions.internalUsers.description
+        text: options.configOptions.internalUsers.label
+        value: internal-users
+      - description: options.configOptions.kernelSettings.description
+        text: options.configOptions.kernelSettings.label
+        value: kernel-settings
+      - description: options.configOptions.rolesMapping.description
+        text: options.configOptions.rolesMapping.label
+        value: roles-mapping
+      - dependencies:
+        - group: cert-manager.io
+          name: Cert-Manager
+          resource: issuers
+          url: https://cert-manager.io/docs/
+          version: v1
+        description: options.configOptions.tls.description
+        text: options.configOptions.tls.label
+        value: tls
+      - description: options.configOptions.initialization.description
+        text: options.configOptions.initialization.label
+        value: initialization
+      - dependencies:
+        - group: stash.appscode.com
+          name: Stash
+          resource: backupconfigurations
+          url: https://stash.run/
+          version: v1beta1
+        description: options.configOptions.backup.description
+        text: options.configOptions.backup.label
+        value: backupconfiguration
+      - description: options.configOptions.networking.description
+        text: options.configOptions.networking.label
+        value: networking
+      - dependencies:
+        - group: monitoring.coreos.com
+          name: Prometheus Operator
+          resource: servicemonitors
+          url: https://github.com/prometheus-operator
+          version: v1
+        description: options.configOptions.monitoring.description
+        text: options.configOptions.monitoring.label
+        value: monitoring
+      - description: options.configOptions.customConfig.description
+        text: options.configOptions.customConfig.label
+        value: custom-config
+      - description: options.configOptions.secureCustomConfig.description
+        text: options.configOptions.secureCustomConfig.label
+        value: secure-custom-config
+      - description: options.configOptions.podTemplate.description
+        text: options.configOptions.podTemplate.label
+        value: pod-template
+      owner:
+        $ref: store#/route/params/user
+      type: configure-options
+    type: single-step-form
+  id: options
+  title: steps.0.label
+type: multi-step-form
