@@ -1,0 +1,95 @@
+metadata:
+  resource:
+    group: kubedb.com
+    version: v1alpha2
+    name: kafkas
+    kind: Kafka
+    scope: Namespaced
+  release:
+    name: RELEASE-NAME
+    namespace: default
+resources:
+  certManagerIoIssuer_ca: # +doc-gen:break
+    apiVersion: cert-manager.io/v1
+    kind: Issuer
+    metadata:
+      name: kafka-ca
+      namespace: demo
+    spec:
+      ca:
+        secretName: kafka-ca
+  kubedbComKafka: # +doc-gen:break
+    apiVersion: kubedb.com/v1alpha2
+    kind: Kafka
+    metadata:
+      name: kafka
+      namespace: demo
+    spec:
+      authSecret:
+        name: kafka-admin-cred
+      enableSSL: true
+      monitor:
+        agent: prometheus.io/operator
+        prometheus:
+          exporter:
+            port: 9091
+          serviceMonitor:
+            interval: 10s
+            labels:
+              release: prometheus
+      storageType: Ephemeral
+      terminationPolicy: WipeOut
+      tls:
+        issuerRef:
+          apiGroup: cert-manager.io
+          kind: Issuer
+          name: kafka-ca
+      topology:
+        broker:
+          replicas: 3
+          storage:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 1Gi
+            storageClassName: standard
+        controller:
+          replicas: 2
+          storage:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 1Gi
+            storageClassName: standard
+      version: 3.3.2
+  monitoringCoreosComServiceMonitor: # +doc-gen:break
+    apiVersion: monitoring.coreos.com/v1
+    kind: ServiceMonitor
+    metadata:
+      name: kafka
+      namespace: demo
+    spec:
+      endpoints:
+        - honorLabels: true
+          interval: 10s
+          path: /metrics
+          port: metrics
+      namespaceSelector:
+        matchNames:
+          - demo
+      selector:
+        matchLabels:
+          app.kubernetes.io/instance: kafka
+          app.kubernetes.io/name: kafkas.kubedb.com
+  secret_admin_cred: # +doc-gen:break
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: kafka-admin-cred
+      namespace: demo
+    stringData:
+      password: WeakPassword
+      username: admin
+    type: kubernetes.io/basic-auth
