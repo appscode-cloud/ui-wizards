@@ -193,6 +193,55 @@ properties:
           - DoNotTerminate
         type: string
       topology:
+        properties:
+          broker:
+            properties:
+              machine:
+                type: string
+              persistence:
+                properties:
+                  size:
+                    type: string
+                required:
+                  - size
+                type: object
+              replicas:
+                type: integer
+            required:
+              - persistence
+              - replicas
+            type: object
+          controller:
+            properties:
+              machine:
+                type: string
+              persistence:
+                properties:
+                  size:
+                    type: string
+                required:
+                  - size
+                type: object
+              replicas:
+                type: integer
+            required:
+              - persistence
+              - replicas
+            type: object
+        type: object
+      version:
+        type: string
+    required:
+      - authSecret
+      - disableSecurity
+      - enableSSL
+      - mode
+      - monitoring
+      - resources
+      - storageClass
+      - terminationPolicy
+      - version
+    type: object
 required:
-  - spec
+- spec
 type: object

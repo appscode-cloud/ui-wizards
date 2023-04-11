@@ -221,18 +221,6 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/resources/properties/limits/properties/memory
       type: input
-    - elements:
-      - label:
-          text: labels.alert.alert_enable_question
-        schema:
-          $ref: schema#/properties/form/properties/alert/properties/enabled
-        type: switch
-      label:
-        text: labels.alert.label
-      schema:
-        $ref: schema#/properties/form/properties/alert
-      show_label: true
-      type: single-step-form
     - alias: reusable-monitor-option
       chart:
         name: uibytebuildersdev-component-monitoring-option
@@ -256,21 +244,9 @@ steps:
       hasDescription: true
       individualItemDisabilityCheck: disableConfigureOption
       options:
-      - description: options.configOptions.alert.description
-        text: options.configOptions.alert.label
-        value: alert
       - description: options.configOptions.topology.description
         text: options.configOptions.topology.label
         value: topology
-      - description: options.configOptions.internalUsers.description
-        text: options.configOptions.internalUsers.label
-        value: internal-users
-      - description: options.configOptions.kernelSettings.description
-        text: options.configOptions.kernelSettings.label
-        value: kernel-settings
-      - description: options.configOptions.rolesMapping.description
-        text: options.configOptions.rolesMapping.label
-        value: roles-mapping
       - dependencies:
         - group: cert-manager.io
           name: Cert-Manager
@@ -280,18 +256,6 @@ steps:
         description: options.configOptions.tls.description
         text: options.configOptions.tls.label
         value: tls
-      - description: options.configOptions.initialization.description
-        text: options.configOptions.initialization.label
-        value: initialization
-      - dependencies:
-        - group: stash.appscode.com
-          name: Stash
-          resource: backupconfigurations
-          url: https://stash.run/
-          version: v1beta1
-        description: options.configOptions.backup.description
-        text: options.configOptions.backup.label
-        value: backupconfiguration
       - description: options.configOptions.networking.description
         text: options.configOptions.networking.label
         value: networking
@@ -304,12 +268,6 @@ steps:
         description: options.configOptions.monitoring.description
         text: options.configOptions.monitoring.label
         value: monitoring
-      - description: options.configOptions.customConfig.description
-        text: options.configOptions.customConfig.label
-        value: custom-config
-      - description: options.configOptions.secureCustomConfig.description
-        text: options.configOptions.secureCustomConfig.label
-        value: secure-custom-config
       - description: options.configOptions.podTemplate.description
         text: options.configOptions.podTemplate.label
         value: pod-template
