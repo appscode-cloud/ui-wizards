@@ -77,12 +77,6 @@ steps:
       schema:
         $ref: schema#/properties/resources/properties/kubedbComKafka/properties/spec/properties/disableSecurity
       type: switch
-    - label:
-        text: labels.enable_ssl_question
-      onChange: onEnableSSLChange
-      schema:
-        $ref: schema#/properties/resources/properties/kubedbComKafka/properties/spec/properties/enableSSL
-      type: switch
     - discriminator:
         createAuthSecret:
           type: boolean
@@ -216,11 +210,8 @@ steps:
             $ref: schema#/properties/resources/properties/kubedbComKafka/properties/spec/properties/topology/properties/$dyn
           show_label: true
           toggleOption:
-            disabled: disableNode
             id: switch
-            onStatusFalse: onNodeSwitchFalse
-            setInitialStatusFalse: setInitialStatusFalse
-            show: true
+            show: false
           type: single-step-form
         schema:
           $ref: schema#/properties/resources/properties/kubedbComKafka/properties/spec/properties/topology
@@ -231,24 +222,15 @@ steps:
   id: topology
   title: steps.1.label
 - form:
-    discriminator:
-      configureTLS:
-        default: true
-        type: boolean
     elements:
     - computed: returnTrue
       label:
         text: labels.enable_tls
       onChange: onTlsConfigureChange
       schema:
-        $ref: discriminator#/configureTLS
+        $ref: schema#/properties/resources/properties/kubedbComKafka/properties/spec/properties/enableSSL
       type: switch
     - elements:
-      - label:
-          text: labels.enable_ssl_question
-        schema:
-          $ref: schema#/properties/resources/properties/kubedbComKafka/properties/spec/properties/enableSSL
-        type: switch
       - elements:
         - computed: setApiGroup
           disabled: true
@@ -309,11 +291,7 @@ steps:
       schema:
         $ref: discriminator#/enableMonitoring
       type: switch
-    - discriminator:
-        customizeExporter:
-          default: true
-          type: boolean
-      elements:
+    - elements:
       - hasDescription: true
         label:
           text: labels.agent
@@ -456,70 +434,24 @@ steps:
           schema:
             $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/metadata/properties/labels/additionalProperties
           type: input
-      - label:
-          text: labels.exporter_configuration
-        type: label-element
-      - label:
-          text: labels.customize_exporter
-        onChange: onCustomizeExporterChange
-        schema:
-          $ref: discriminator#/customizeExporter
-        type: switch
-      - elements:
-        - label:
-            text: labels.resources
-          schema:
-            $ref: schema#/properties/resources/properties/kubedbComKafka/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/resources
-          type: resource-input-form
-        - label:
-            text: labels.security_context
-          type: label-element
-        - label:
-            text: labels.run_as_user
-          schema:
-            $ref: schema#/properties/resources/properties/kubedbComKafka/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/securityContext/properties/runAsUser
-          type: input
-        - customClass: mb-0
-          label:
-            text: labels.run_as_group
-          schema:
-            $ref: schema#/properties/resources/properties/kubedbComKafka/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/securityContext/properties/runAsGroup
-          type: input
-        - label:
-            text: labels.port
-          schema:
-            $ref: schema#/properties/resources/properties/kubedbComKafka/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/port
-          type: input
-        - element:
-            label:
-              isSubsection: true
-              text: labels.args
-            schema:
-              $ref: schema#/properties/resources/properties/kubedbComKafka/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/args/items
-            type: input
-          label:
-            text: labels.args
-          schema:
-            $ref: schema#/properties/resources/properties/kubedbComKafka/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/args
-          type: list-input-form
-        - alias: reusable_env
-          chart:
-            name: uibytebuildersdev-component-env
-            version: v0.4.12
-          dataContext:
-            namespace:
-              $ref: schema#/properties/metadata/properties/release/properties/namespace
-          moduleResolver: fetchJsons
-          schema:
-            $ref: schema#/properties/resources/properties/kubedbComKafka/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env
-          type: reusable-element
-        if: showCustomizeExporterSection
-        type: single-step-form
       if: showMonitoringSection
       type: single-step-form
     type: single-step-form
   id: monitoring
   title: steps.3.label
+- form:
+    elements:
+    - alias: reusable_service_templates
+      chart:
+        name: uibytebuildersdev-component-service-templates
+        version: v0.4.12
+      moduleResolver: fetchJsons
+      schema:
+        $ref: schema#/properties/resources/properties/kubedbComKafka/properties/spec/properties/serviceTemplates
+      type: reusable-element
+    type: single-step-form
+  id: networking
+  title: steps.4.label
 - form:
     elements:
     - alias: pod_template_standalone
@@ -540,109 +472,5 @@ steps:
       type: reusable-element
     type: single-step-form
   id: pod-template
-  title: steps.4.label
-- form:
-    elements:
-    - alias: reusable_service_templates
-      chart:
-        name: uibytebuildersdev-component-service-templates
-        version: v0.4.12
-      moduleResolver: fetchJsons
-      schema:
-        $ref: schema#/properties/resources/properties/kubedbComKafka/properties/spec/properties/serviceTemplates
-      type: reusable-element
-    type: single-step-form
-  id: networking
   title: steps.5.label
-- form:
-    elements:
-    - discriminator:
-        setCustomConfig:
-          type: string
-      elements:
-      - computed: returnStringYes
-        label:
-          text: labels.setCustomConfig
-        onChange: onSetCustomConfigChange
-        options:
-        - text: options.yesOrNo.yes.text
-          value: "yes"
-        - text: options.yesOrNo.no.text
-          value: "no"
-        schema:
-          $ref: discriminator#/properties/setCustomConfig
-        type: radio
-      - discriminator:
-          configFiles:
-            type: string
-          configurationSource:
-            default: use-existing-config
-            type: string
-        elements:
-        - computed: setConfigurationSource
-          label:
-            text: labels.custom_config_type
-          onChange: onConfigurationSourceChange
-          options:
-          - text: options.configuration_source.use_existing_config.label
-            value: use-existing-config
-          - text: options.configuration_source.create_new_config.label
-            value: create-new-config
-          schema:
-            $ref: discriminator#/configurationSource
-          type: radio
-        - allowUserDefinedOption: true
-          fetch: getSecrets
-          if: isEqualToDiscriminatorPath|use-existing-config|/configurationSource
-          label:
-            text: labels.name
-          schema:
-            $ref: schema#/properties/resources/properties/kubedbComKafka/properties/spec/properties/configSecret/properties/name
-          type: select
-        - addFormLabel: labels.config_file
-          computed: setConfigFiles
-          element:
-            discriminator:
-              files:
-                emitAs: configFiles
-                type: array
-            elements:
-            - label:
-                text: labels.filename
-              required: true
-              schema:
-                $ref: discriminator#/properties/files/items/properties/key
-              type: input
-            - label:
-                text: labels.labels.value
-              required: true
-              schema:
-                $ref: discriminator#/properties/files/items/properties/value
-              type: editor
-            type: single-step-form
-          if: isEqualToDiscriminatorPath|create-new-config|/configurationSource
-          label:
-            text: labels.config_files
-          onChange: onConfigFilesChange
-          schema:
-            $ref: discriminator#/properties/configFiles
-          tableContents:
-          - inTableColumn: true
-            label:
-              text: labels.filename
-            path: key
-            type: value
-            typeOfValue: string
-          - label:
-              text: labels.labels.value
-            path: value
-            type: value
-            typeOfValue: code
-          type: single-step-form-array
-        if: isDiscriminatorEqualTo|/setCustomConfig|yes
-        type: single-step-form
-      type: single-step-form
-    type: single-step-form
-  id: custom-config
-  title: steps.6.label
 type: multi-step-form

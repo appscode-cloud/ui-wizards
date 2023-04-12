@@ -157,12 +157,6 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/disableSecurity
       type: switch
-    - label:
-        text: labels.enable_ssl_question
-      onChange: onEnableSSLChange
-      schema:
-        $ref: schema#/properties/spec/properties/enableSSL
-      type: switch
     - discriminator:
         createAuthSecret:
           default: true
@@ -256,9 +250,6 @@ steps:
         description: options.configOptions.tls.description
         text: options.configOptions.tls.label
         value: tls
-      - description: options.configOptions.networking.description
-        text: options.configOptions.networking.label
-        value: networking
       - dependencies:
         - group: monitoring.coreos.com
           name: Prometheus Operator
@@ -268,6 +259,9 @@ steps:
         description: options.configOptions.monitoring.description
         text: options.configOptions.monitoring.label
         value: monitoring
+      - description: options.configOptions.networking.description
+        text: options.configOptions.networking.label
+        value: networking
       - description: options.configOptions.podTemplate.description
         text: options.configOptions.podTemplate.label
         value: pod-template

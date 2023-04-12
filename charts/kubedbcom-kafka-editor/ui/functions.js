@@ -571,38 +571,6 @@ function getStorageClassNamesFromDiscriminator(
   return options;
 }
 
-function onNodeSwitchFalse({ elementSchema, commit }) {
-  const { $ref } = elementSchema || {};
-  const node = ($ref || "").split("/").pop();
-  commit(
-    "wizard/model$delete",
-    `/resources/kubedbComKafka/spec/topology/${node}`
-  );
-}
-
-function hasTopologyNode({ model, getValue, itemCtx }) {
-  const nodeValue = getValue(
-    model,
-    `/resources/kubedbComKafka/spec/topology/${itemCtx}`
-  );
-
-  return !nodeValue;
-}
-
-function setInitialStatusFalse({ elementSchema }) {
-  const disableNodes = ["broker", "controller"];
-  const { $ref } = elementSchema || {};
-  const node = ($ref || "").split("/").pop();
-  return !disableNodes.includes(node);
-}
-
-function disableNode({ elementSchema }) {
-  const disableNodes = ["broker", "controller"];
-  const { $ref } = elementSchema || {};
-  const node = ($ref || "").split("/").pop();
-  return disableNodes.includes(node);
-}
-
 // ************************** TLS *******************************************
 
 function setApiGroup() {
@@ -716,14 +684,20 @@ function setSSLMode({ model, getValue }) {
   return val || "requireSSL";
 }
 
-function showTlsConfigureSection({ watchDependency, discriminator, getValue }) {
-  watchDependency("discriminator#/configureTLS");
-  const configureStatus = getValue(discriminator, "/configureTLS");
+function showTlsConfigureSection({ watchDependency, model, getValue }) {
+  watchDependency("model#/resources/kubedbComKafka/spec/enableSSL");
+  const configureStatus = getValue(
+    model,
+    "/resources/kubedbComKafka/spec/enableSSL"
+  );
   return configureStatus;
 }
 
-function onTlsConfigureChange({ discriminator, getValue, commit }) {
-  const configureStatus = getValue(discriminator, "/configureTLS");
+function onTlsConfigureChange({ model, getValue, commit }) {
+  const configureStatus = getValue(
+    model,
+    "/resources/kubedbComKafka/spec/enableSSL"
+  );
   if (configureStatus) {
     commit("wizard/model$update", {
       path: "/resources/kubedbComKafka/spec/tls",
@@ -791,32 +765,6 @@ function onEnableMonitoringChange({ discriminator, getValue, commit }) {
     });
   } else {
     commit("wizard/model$delete", "/resources/kubedbComKafka/spec/monitor");
-  }
-}
-
-function showCustomizeExporterSection({
-  watchDependency,
-  discriminator,
-  getValue,
-}) {
-  watchDependency("discriminator#/customizeExporter");
-  const configureStatus = getValue(discriminator, "/customizeExporter");
-  return configureStatus;
-}
-
-function onCustomizeExporterChange({ discriminator, getValue, commit }) {
-  const configureStatus = getValue(discriminator, "/customizeExporter");
-  if (configureStatus) {
-    commit("wizard/model$update", {
-      path: "/resources/kubedbComKafka/spec/monitor/prometheus/exporter",
-      value: {},
-      force: true,
-    });
-  } else {
-    commit(
-      "wizard/model$delete",
-      "/resources/kubedbComKafka/spec/monitor/prometheus/exporter"
-    );
   }
 }
 
@@ -1133,10 +1081,6 @@ return {
   getStorageClassNamesFromDiscriminator,
   deleteDatabaseModePath,
   isEqualToDatabaseMode,
-  onNodeSwitchFalse,
-  hasTopologyNode,
-  disableNode,
-  setInitialStatusFalse,
   setApiGroup,
   setApiGroupEdit,
   getIssuerRefsName,
@@ -1150,8 +1094,6 @@ return {
   getAliasOptions,
   showMonitoringSection,
   onEnableMonitoringChange,
-  showCustomizeExporterSection,
-  onCustomizeExporterChange,
   isValueExistInModel,
   onNamespaceChange,
   onLabelChange,

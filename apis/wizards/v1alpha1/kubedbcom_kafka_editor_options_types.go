@@ -51,7 +51,6 @@ type KubedbcomKafkaEditorOptionsSpecSpec struct {
 	Replicas *int `json:"replicas,omitempty"`
 	// +optional
 	Topology          *KafkaTopology    `json:"topology,omitempty"`
-	EnableSSL         bool              `json:"enableSSL"`
 	DisableSecurity   bool              `json:"disableSecurity"`
 	TerminationPolicy TerminationPolicy `json:"terminationPolicy"`
 	StorageClass      StorageClass      `json:"storageClass"`
