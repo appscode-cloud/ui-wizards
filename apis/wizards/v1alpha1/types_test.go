@@ -36,6 +36,7 @@ func TestDefaultValues(t *testing.T) {
 		schemachecker.TestCase{Obj: v1alpha1.KubedbcomPgbouncerEditorOptionsSpec{}},
 		schemachecker.TestCase{Obj: v1alpha1.KubedbcomProxysqlEditorOptionsSpec{}},
 		schemachecker.TestCase{Obj: v1alpha1.KubedbcomRedisEditorOptionsSpec{}},
+		schemachecker.TestCase{Obj: v1alpha1.KubedbcomKafkaEditorOptionsSpec{}},
 		schemachecker.TestCase{Obj: v1alpha1.StashappscodecomRepositoryEditorOptionsSpec{}},
 		schemachecker.TestCase{Obj: v1alpha1.StashappscodecomRestoresessionEditorOptionsSpec{}},
 	)

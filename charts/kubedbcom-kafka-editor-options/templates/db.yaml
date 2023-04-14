@@ -1,0 +1,87 @@
+{{- $res := .Values.spec.resources -}}
+{{- $machines := .Files.Get "data/machines.yaml" | fromYaml -}}
+{{- if and .Values.spec.machine (hasKey $machines .Values.spec.machine) }}
+  {{- $res = get (get $machines .Values.spec.machine) "resources" }}
+{{- end }}
+
+apiVersion: kubedb.com/v1alpha2
+kind: Kafka
+metadata:
+  name: {{ include "kubedbcom-kafka-editor-options.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kubedbcom-kafka-editor-options.labels" . | nindent 4 }}
+{{- if .Values.spec.annotations }}
+  annotations:
+    {{- include "kubedbcom-kafka-editor-options.annotations" . | nindent 4 }}
+{{- end }}
+spec:
+  version: {{ .Values.spec.version | quote }}
+  storageType: Durable
+{{- if eq .Values.spec.mode "Combined" }}
+  replicas: {{ .Values.spec.replicas }}
+  storage:
+    storageClassName: {{ .Values.spec.storageClass.name }}
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: {{ .Values.spec.persistence.size }}
+  podTemplate:
+    spec:
+      resources:
+        {{- toYaml $res | nindent 8 }}
+{{- else if eq .Values.spec.mode "Dedicated" }}
+  topology:
+    controller:
+      replicas: {{ .Values.spec.topology.controller.replicas }}
+      resources:
+        {{- $resController := .Values.spec.resources -}}
+        {{- if and .Values.spec.topology.controller.machine (hasKey $machines .Values.spec.topology.controller.machine) }}
+          {{- $resController = get (get $machines .Values.spec.topology.controller.machine) "resources" }}
+        {{- end }}
+        {{- toYaml $resController | nindent 8 }}
+      storage:
+        storageClassName: {{ .Values.spec.storageClass.name }}
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: {{ .Values.spec.topology.controller.persistence.size }}
+    broker:
+      replicas: {{ .Values.spec.topology.broker.replicas }}
+      resources:
+        {{- $resBroker := .Values.spec.resources -}}
+        {{- if and .Values.spec.topology.broker.machine (hasKey $machines .Values.spec.topology.broker.machine) }}
+          {{- $resBroker = get (get $machines .Values.spec.topology.broker.machine) "resources" }}
+        {{- end }}
+        {{- toYaml $resBroker | nindent 8 }}
+      storage:
+        storageClassName: {{ .Values.spec.storageClass.name }}
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: {{ .Values.spec.topology.broker.persistence.size }}
+{{- end }}
+  enableSSL: {{ .Values.spec.enableSSL }}
+  disableSecurity: {{ .Values.spec.disableSecurity }}
+  terminationPolicy: {{ .Values.spec.terminationPolicy }}
+{{- if .Values.spec.authSecret.name }}
+  authSecret:
+    name: {{ .Values.spec.authSecret.name }}
+{{- end }}
+{{- if (and .Values.spec.monitoring .Values.spec.monitoring.agent) }}
+  monitor:
+    agent: {{ .Values.spec.monitoring.agent }}
+    prometheus:
+    {{- with .Values.spec.monitoring.exporter }}
+      exporter:
+        resources:
+          {{- toYaml .resources | nindent 10 }}
+    {{- end }}
+      serviceMonitor:
+        interval: 30s
+        labels:
+          {{- toYaml .Values.spec.monitoring.serviceMonitor.labels | nindent 10 }}
+{{- end }}
