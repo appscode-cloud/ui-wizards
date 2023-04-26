@@ -2378,6 +2378,20 @@ spec:
                 type: object
               restart:
                 type: object
+              sentinel:
+                properties:
+                  ref:
+                    properties:
+                      name:
+                        type: string
+                      namespace:
+                        type: string
+                    type: object
+                  removeUnusedSentinel:
+                    type: boolean
+                required:
+                - ref
+                type: object
               timeout:
                 type: string
               tls:
@@ -2484,10 +2498,23 @@ spec:
                     type: boolean
                   rotateCertificates:
                     type: boolean
+                  sentinel:
+                    properties:
+                      ref:
+                        properties:
+                          name:
+                            type: string
+                          namespace:
+                            type: string
+                        type: object
+                      removeUnusedSentinel:
+                        type: boolean
+                    required:
+                    - ref
+                    type: object
                 type: object
               type:
                 enum:
-                - Upgrade
                 - UpdateVersion
                 - HorizontalScaling
                 - VerticalScaling
@@ -2495,9 +2522,9 @@ spec:
                 - Restart
                 - Reconfigure
                 - ReconfigureTLS
-                - Reprovision
+                - ReplaceSentinel
                 type: string
-              upgrade:
+              updateVersion:
                 properties:
                   readinessCriteria:
                     type: object

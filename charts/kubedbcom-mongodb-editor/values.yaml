@@ -144,8 +144,7 @@ form:
             enabled: true
             severity: warning
             val: 1800
-    labels:
-      release: kube-prometheus-stack
+    labels: {}
 metadata:
   resource:
     group: kubedb.com
@@ -166,6 +165,49 @@ resources:
     spec:
       ca:
         secretName: mongodb-ca
+  clusterXK8sIoMachinePool: # +doc-gen:break
+    apiVersion: cluster.x-k8s.io/v1beta1
+    kind: MachinePool
+    metadata:
+      name: mongodb
+      namespace: demo
+    spec:
+      clusterName: cluster-x
+      replicas: 1
+      template:
+        spec:
+          bootstrap:
+            dataSecretName: ""
+          clusterName: cluster-x
+          infrastructureRef:
+            apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+            kind: AWSManagedMachinePool
+            name: mongodb
+  externalDNSAppscodeComExternalDNS: # +doc-gen:break
+    apiVersion: external-dns.appscode.com/v1alpha1
+    kind: ExternalDNS
+    metadata:
+      name: mongodb
+      namespace: demo
+    spec:
+      aws:
+        zoneType: public
+      provider: aws
+      source:
+        node:
+          labelFilter: eks.amazonaws.com/nodegroup=nodegroup
+        type:
+          group: ""
+          kind: Node
+          version: v1
+  infrastructureClusterXK8sIoAWSManagedMachinePool: # +doc-gen:break
+    apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+    kind: AWSManagedMachinePool
+    metadata:
+      name: mongodb
+      namespace: demo
+    spec:
+      eksNodegroupName: nodegroup
   kubedbComMongoDB: # +doc-gen:break
     apiVersion: kubedb.com/v1alpha2
     kind: MongoDB

@@ -24,6 +24,13 @@ spec:
             type: object
           spec:
             properties:
+              UpdateVersion:
+                properties:
+                  readinessCriteria:
+                    type: object
+                  targetVersion:
+                    type: string
+                type: object
               apply:
                 default: IfReady
                 enum:
@@ -32,16 +39,16 @@ spec:
                 type: string
               configuration:
                 type: object
-              databaseRef:
+              horizontalScaling:
+                type: object
+              restart:
+                type: object
+              serverRef:
                 properties:
                   name:
                     type: string
                 type: object
                 x-kubernetes-map-type: atomic
-              horizontalScaling:
-                type: object
-              restart:
-                type: object
               tls:
                 properties:
                   certificates:
@@ -149,32 +156,20 @@ spec:
                 type: object
               type:
                 enum:
-                - Upgrade
                 - UpdateVersion
                 - HorizontalScaling
                 - VerticalScaling
-                - VolumeExpansion
                 - Restart
                 - Reconfigure
                 - ReconfigureTLS
-                - Reprovision
                 type: string
-              upgrade:
-                properties:
-                  readinessCriteria:
-                    type: object
-                  targetVersion:
-                    type: string
-                type: object
               verticalScaling:
                 properties:
                   readinessCriteria:
                     type: object
                 type: object
-              volumeExpansion:
-                type: object
             required:
-            - databaseRef
+            - serverRef
             - type
             type: object
         type: object

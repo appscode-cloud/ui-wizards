@@ -1,0 +1,134 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  creationTimestamp: null
+  name: helmrepositories.source.toolkit.fluxcd.io
+spec:
+  group: source.toolkit.fluxcd.io
+  names:
+    kind: HelmRepository
+    listKind: HelmRepositoryList
+    plural: helmrepositories
+    singular: helmrepository
+  scope: Namespaced
+  versions:
+  - name: v1beta2
+    schema:
+      openAPIV3Schema:
+        description: HelmRepository is the Schema for the helmrepositories API.
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: HelmRepositorySpec specifies the required configuration to
+              produce an Artifact for a Helm repository index YAML.
+            properties:
+              accessFrom:
+                description: 'AccessFrom specifies an Access Control List for allowing
+                  cross-namespace references to this object. NOTE: Not implemented,
+                  provisional as of https://github.com/fluxcd/flux2/pull/2092'
+                properties:
+                  namespaceSelectors:
+                    description: NamespaceSelectors is the list of namespace selectors
+                      to which this ACL applies. Items in this list are evaluated
+                      using a logical OR operation.
+                    items:
+                      description: NamespaceSelector selects the namespaces to which
+                        this ACL applies. An empty map of MatchLabels matches all
+                        namespaces in a cluster.
+                      properties:
+                        matchLabels:
+                          additionalProperties:
+                            type: string
+                          description: MatchLabels is a map of {key,value} pairs.
+                            A single {key,value} in the matchLabels map is equivalent
+                            to an element of matchExpressions, whose key field is
+                            "key", the operator is "In", and the values array contains
+                            only "value". The requirements are ANDed.
+                          type: object
+                      type: object
+                    type: array
+                required:
+                - namespaceSelectors
+                type: object
+              interval:
+                description: Interval at which to check the URL for updates.
+                pattern: ^([0-9]+(\.[0-9]+)?(ms|s|m|h))+$
+                type: string
+              passCredentials:
+                description: PassCredentials allows the credentials from the SecretRef
+                  to be passed on to a host that does not match the host as defined
+                  in URL. This may be required if the host of the advertised chart
+                  URLs in the index differ from the defined URL. Enabling this should
+                  be done with caution, as it can potentially result in credentials
+                  getting stolen in a MITM-attack.
+                type: boolean
+              provider:
+                default: generic
+                description: Provider used for authentication, can be 'aws', 'azure',
+                  'gcp' or 'generic'. This field is optional, and only taken into
+                  account if the .spec.type field is set to 'oci'. When not specified,
+                  defaults to 'generic'.
+                enum:
+                - generic
+                - aws
+                - azure
+                - gcp
+                type: string
+              secretRef:
+                description: SecretRef specifies the Secret containing authentication
+                  credentials for the HelmRepository. For HTTP/S basic auth the secret
+                  must contain 'username' and 'password' fields. For TLS the secret
+                  must contain a 'certFile' and 'keyFile', and/or 'caCert' fields.
+                properties:
+                  name:
+                    description: Name of the referent.
+                    type: string
+                required:
+                - name
+                type: object
+              suspend:
+                description: Suspend tells the controller to suspend the reconciliation
+                  of this HelmRepository.
+                type: boolean
+              timeout:
+                default: 60s
+                description: Timeout is used for the index fetch operation for an
+                  HTTPS helm repository, and for remote OCI Repository operations
+                  like pulling for an OCI helm repository. Its default value is 60s.
+                pattern: ^([0-9]+(\.[0-9]+)?(ms|s|m))+$
+                type: string
+              type:
+                description: Type of the HelmRepository. When this field is set to  "oci",
+                  the URL field value must be prefixed with "oci://".
+                enum:
+                - default
+                - oci
+                type: string
+              url:
+                description: URL of the Helm repository, a valid URL contains at least
+                  a protocol and host.
+                type: string
+            required:
+            - interval
+            - url
+            type: object
+        type: object
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: null
+  storedVersions: null

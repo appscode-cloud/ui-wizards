@@ -7,15 +7,14 @@ metadata:
   name: {{ $app }}
   namespace: {{ .Release.Namespace }}
   labels:
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
-    {{- include "kubedbcom-proxysql-editor.selectorLabels" . | nindent 4 }}
-    {{- if .Values.form.alert.labels }}
-    {{- toYaml .Values.form.alert.labels | nindent 4 }}
-    {{- end }}
-{{- if .Values.form.alert.annotations }}
-  annotations:
-    {{- toYaml .Values.form.alert.annotations | nindent 4 }}
-{{- end }}
+    {{- include "kubedbcom-proxysql-editor.labels" . | nindent 4 }}
+  {{- if .Values.form.alert.labels }}
+  {{- toYaml .Values.form.alert.labels | nindent 4 }}
+  {{- end }}
+  {{- if .Values.form.alert.annotations }}
+annotations:
+  {{- toYaml .Values.form.alert.annotations | nindent 4 }}
+  {{- end }}
 spec:
   groups:
   {{ if .Values.form.alert.groups.database.enabled -}}
@@ -45,7 +44,7 @@ spec:
     {{ end -}}
     {{ if .Values.form.alert.groups.database.rules.proxySQLTooManyConnections.enabled -}}
     - alert: ProxySQLTooManyConnections
-      expr: max_over_time(proxysql_client_connections_connected{job="{{ $app }}-stats",namespace="{{ .Release.Namespace }}"}[1m]) / proxysql_proxysql_max_connections{job="{{ $app }}-stats",namespace="{{ .Release.Namespace }}"} * 100 > {{.Values.form.alert.groups.database.rules.proxySQLTooManyConnections.val}}
+      expr: max_over_time(proxysql_client_connections_connected{job="{{ $app }}-stats",namespace="{{ .Release.Namespace }}"}[1m]) / proxysql_mysql_max_connections{job="{{ $app }}-stats",namespace="{{ .Release.Namespace }}"} * 100 > {{.Values.form.alert.groups.database.rules.proxySQLTooManyConnections.val}}
       for: {{ .Values.form.alert.groups.database.rules.proxySQLTooManyConnections.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.database.rules.proxySQLTooManyConnections.severity }}
@@ -63,7 +62,7 @@ spec:
         {{- include "kubedbcom-proxysql-editor.alertLabels" . | nindent 8 }}
       annotations:
         summary: ProxySQL slow queries on (instance {{`{{`}} $labels.pod {{`}}`}})
-        description: "ProxySQL server proxysql has some new slow query.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        description: "ProxySQL server mysql has some new slow query.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
     {{ if .Values.form.alert.groups.database.rules.proxySQLRestarted.enabled -}}
     - alert: ProxySQLRestarted

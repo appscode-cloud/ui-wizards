@@ -1,7 +1,7 @@
 metadata:
   resource:
     group: kubevault.com
-    version: v1alpha2
+    version: v1alpha1
     name: vaultservers
     kind: VaultServer
     scope: Namespaced
@@ -104,41 +104,3 @@ resources:
       access_key: <access_key>
       secret_key: <secret_key>
     type: Opaque
-  stashAppscodeComBackupConfiguration: # +doc-gen:break
-    apiVersion: stash.appscode.com/v1beta1
-    kind: BackupConfiguration
-    metadata:
-      name: vaultserver
-      namespace: demo
-    spec:
-      repository:
-        name: vaultserver-repo
-      retentionPolicy:
-        keepLast: 5
-        name: keep-last-5
-        prune: true
-      schedule: '*/5 * * * *'
-      target:
-        ref:
-          apiVersion: appcatalog.appscode.com/v1alpha1
-          kind: AppBinding
-          name: vaultserver
-  stashAppscodeComRestoreSession_init: # +doc-gen:break
-    apiVersion: stash.appscode.com/v1beta1
-    kind: RestoreSession
-    metadata:
-      name: vaultserver-init
-      namespace: demo
-    spec:
-      repository:
-        name: vaultserver-init-repo
-      rules:
-        - snapshots:
-            - latest
-      target:
-        ref:
-          apiVersion: appcatalog.appscode.com/v1alpha1
-          kind: AppBinding
-          name: vaultserver
-      task:
-        name: vaultserver-restore-10.5.8

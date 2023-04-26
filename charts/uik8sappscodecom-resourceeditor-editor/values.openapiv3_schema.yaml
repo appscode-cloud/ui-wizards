@@ -1,30 +1,44 @@
 properties:
   apiVersion:
-    description: 'APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+    description: 'APIVersion defines the versioned schema of this representation of
+      an object. Servers should convert recognized schemas to the latest internal
+      value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
     type: string
   kind:
-    description: 'Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+    description: 'Kind is a string value representing the REST resource this object
+      represents. Servers may infer this from the endpoint the client submits requests
+      to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
     type: string
   metadata:
     properties:
       annotations:
         additionalProperties:
           type: string
-        description: 'Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects. More info: http://kubernetes.io/docs/user-guide/annotations'
+        description: 'Annotations is an unstructured key value map stored with a resource
+          that may be set by external tools to store and retrieve arbitrary metadata.
+          They are not queryable and should be preserved when modifying objects. More
+          info: http://kubernetes.io/docs/user-guide/annotations'
         type: object
       labels:
         additionalProperties:
           type: string
-        description: 'Map of string keys and values that can be used to organize and categorize (scope and select) objects. May match selectors of replication controllers and services. More info: http://kubernetes.io/docs/user-guide/labels'
+        description: 'Map of string keys and values that can be used to organize and
+          categorize (scope and select) objects. May match selectors of replication
+          controllers and services. More info: http://kubernetes.io/docs/user-guide/labels'
         type: object
       name:
-        description: 'Name must be unique within a namespace. Is required when creating resources, although some resources may allow a client to request the generation of an appropriate name automatically. Name is primarily intended for creation idempotence and configuration definition. Cannot be updated. More info: http://kubernetes.io/docs/user-guide/identifiers#names'
+        description: 'Name must be unique within a namespace. Is required when creating
+          resources, although some resources may allow a client to request the generation
+          of an appropriate name automatically. Name is primarily intended for creation
+          idempotence and configuration definition. Cannot be updated. More info:
+          http://kubernetes.io/docs/user-guide/identifiers#names'
         type: string
     type: object
   spec:
     properties:
       icons:
-        description: Icons is an optional list of icons for an application. Icon information includes the source, size, and mime type.
+        description: Icons is an optional list of icons for an application. Icon information
+          includes the source, size, and mime type.
         items:
           description: ImageSpec contains information about an image used as an icon.
           properties:
@@ -32,7 +46,9 @@ properties:
               description: (optional) The size of the image in pixels (e.g., 25x25).
               type: string
             src:
-              description: The source for image represented as either an absolute URL to the image or a Data URL containing the image. Data URLs are defined in RFC 2397.
+              description: The source for image represented as either an absolute
+                URL to the image or a Data URL containing the image. Data URLs are
+                defined in RFC 2397.
               type: string
             type:
               description: (optional) The mine type of the image (e.g., "image/png").
@@ -48,12 +64,27 @@ properties:
             properties:
               name:
                 type: string
-              url:
-                type: string
+              sourceRef:
+                description: TypedObjectReference represents an typed namespaced object.
+                properties:
+                  apiGroup:
+                    type: string
+                  kind:
+                    type: string
+                  name:
+                    description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names'
+                    type: string
+                  namespace:
+                    description: 'Namespace of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/'
+                    type: string
+                required:
+                - name
+                type: object
               version:
                 type: string
             required:
             - name
+            - sourceRef
             - version
             type: object
           planID:
@@ -67,40 +98,138 @@ properties:
           group:
             type: string
           kind:
-            description: Kind is the serialized kind of the resource.  It is normally CamelCase and singular.
+            description: Kind is the serialized kind of the resource.  It is normally
+              CamelCase and singular.
             type: string
           name:
-            description: 'Name is the plural name of the resource to serve.  It must match the name of the CustomResourceDefinition-registration too: plural.group and it must be all lowercase.'
+            description: 'Name is the plural name of the resource to serve.  It must
+              match the name of the CustomResourceDefinition-registration too: plural.group
+              and it must be all lowercase.'
             type: string
           scope:
-            description: ResourceScope is an enum defining the different scopes available to a custom resource
+            description: ResourceScope is an enum defining the different scopes available
+              to a custom resource
             type: string
           version:
             type: string
         required:
         - group
-        - kind
-        - name
-        - scope
-        - version
         type: object
       ui:
         properties:
+          actions:
+            items:
+              properties:
+                description:
+                  type: string
+                items:
+                  items:
+                    properties:
+                      description:
+                        type: string
+                      disabledTemplate:
+                        type: string
+                      editor:
+                        description: ChartRepoRef references to a single version of
+                          a Chart
+                        properties:
+                          name:
+                            type: string
+                          sourceRef:
+                            description: TypedObjectReference represents an typed
+                              namespaced object.
+                            properties:
+                              apiGroup:
+                                type: string
+                              kind:
+                                type: string
+                              name:
+                                description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names'
+                                type: string
+                              namespace:
+                                description: 'Namespace of the referent. More info:
+                                  https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/'
+                                type: string
+                            required:
+                            - name
+                            type: object
+                          version:
+                            type: string
+                        required:
+                        - name
+                        - sourceRef
+                        - version
+                        type: object
+                      flow:
+                        type: string
+                      icons:
+                        items:
+                          description: ImageSpec contains information about an image
+                            used as an icon.
+                          properties:
+                            size:
+                              description: (optional) The size of the image in pixels
+                                (e.g., 25x25).
+                              type: string
+                            src:
+                              description: The source for image represented as either
+                                an absolute URL to the image or a Data URL containing
+                                the image. Data URLs are defined in RFC 2397.
+                              type: string
+                            type:
+                              description: (optional) The mine type of the image (e.g.,
+                                "image/png").
+                              type: string
+                          required:
+                          - src
+                          type: object
+                        type: array
+                      name:
+                        type: string
+                      operationId:
+                        type: string
+                    required:
+                    - flow
+                    - operationId
+                    type: object
+                  type: array
+                name:
+                  type: string
+              required:
+              - items
+              type: object
+            type: array
           editor:
             description: ChartRepoRef references to a single version of a Chart
             properties:
               name:
                 type: string
-              url:
-                type: string
+              sourceRef:
+                description: TypedObjectReference represents an typed namespaced object.
+                properties:
+                  apiGroup:
+                    type: string
+                  kind:
+                    type: string
+                  name:
+                    description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names'
+                    type: string
+                  namespace:
+                    description: 'Namespace of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/'
+                    type: string
+                required:
+                - name
+                type: object
               version:
                 type: string
             required:
             - name
+            - sourceRef
             - version
             type: object
           instanceLabelPaths:
-            description: app.kubernetes.io/instance label must be updated at these paths when refilling metadata
+            description: app.kubernetes.io/instance label must be updated at these
+              paths when refilling metadata
             items:
               type: string
             type: array
@@ -109,12 +238,27 @@ properties:
             properties:
               name:
                 type: string
-              url:
-                type: string
+              sourceRef:
+                description: TypedObjectReference represents an typed namespaced object.
+                properties:
+                  apiGroup:
+                    type: string
+                  kind:
+                    type: string
+                  name:
+                    description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names'
+                    type: string
+                  namespace:
+                    description: 'Namespace of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/'
+                    type: string
+                required:
+                - name
+                type: object
               version:
                 type: string
             required:
             - name
+            - sourceRef
             - version
             type: object
         type: object
@@ -123,18 +267,25 @@ properties:
         items:
           properties:
             apiGroup:
-              description: APIGroup is the group for the resource being referenced. If APIGroup is not specified, the specified Kind must be in the core API group. For any other third-party types, APIGroup is required.
+              description: APIGroup is the group for the resource being referenced.
+                If APIGroup is not specified, the specified Kind must be in the core
+                API group. For any other third-party types, APIGroup is required.
               type: string
             icons:
-              description: Icons is an optional list of icons for an application. Icon information includes the source, size, and mime type.
+              description: Icons is an optional list of icons for an application.
+                Icon information includes the source, size, and mime type.
               items:
-                description: ImageSpec contains information about an image used as an icon.
+                description: ImageSpec contains information about an image used as
+                  an icon.
                 properties:
                   size:
-                    description: (optional) The size of the image in pixels (e.g., 25x25).
+                    description: (optional) The size of the image in pixels (e.g.,
+                      25x25).
                     type: string
                   src:
-                    description: The source for image represented as either an absolute URL to the image or a Data URL containing the image. Data URLs are defined in RFC 2397.
+                    description: The source for image represented as either an absolute
+                      URL to the image or a Data URL containing the image. Data URLs
+                      are defined in RFC 2397.
                     type: string
                   type:
                     description: (optional) The mine type of the image (e.g., "image/png").
@@ -153,6 +304,7 @@ properties:
           - kind
           - name
           type: object
+          x-kubernetes-map-type: atomic
         type: array
     required:
     - resource
