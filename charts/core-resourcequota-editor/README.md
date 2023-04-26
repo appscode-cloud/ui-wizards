@@ -47,7 +47,7 @@ The following table lists the configurable parameters of the `core-resourcequota
 
 |     Parameter      | Description |          Default           |
 |--------------------|-------------|----------------------------|
-| apiVersion         |             | <code>v1</code>            |
+| apiVersion         |             | <code>core/v1</code>       |
 | kind               |             | <code>ResourceQuota</code> |
 | metadata.name      |             | <code>resourcequota</code> |
 | metadata.namespace |             | <code>default</code>       |
@@ -56,7 +56,7 @@ The following table lists the configurable parameters of the `core-resourcequota
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm upgrade -i`. For example:
 
 ```bash
-$ helm upgrade -i core-resourcequota-editor bytebuilders-ui/core-resourcequota-editor -n default --create-namespace --version=v0.4.14 --set apiVersion=v1
+$ helm upgrade -i core-resourcequota-editor bytebuilders-ui/core-resourcequota-editor -n default --create-namespace --version=v0.4.14 --set apiVersion=core/v1
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while

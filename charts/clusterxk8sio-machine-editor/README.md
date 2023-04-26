@@ -45,18 +45,18 @@ The command removes all the Kubernetes components associated with the chart and 
 
 The following table lists the configurable parameters of the `clusterxk8sio-machine-editor` chart and their default values.
 
-|     Parameter      | Description |                Default                 |
-|--------------------|-------------|----------------------------------------|
-| apiVersion         |             | <code>cluster.x-k8s.io/v1alpha3</code> |
-| kind               |             | <code>Machine</code>                   |
-| metadata.name      |             | <code>machine</code>                   |
-| metadata.namespace |             | <code>default</code>                   |
+|     Parameter      | Description |                Default                |
+|--------------------|-------------|---------------------------------------|
+| apiVersion         |             | <code>cluster.x-k8s.io/v1beta1</code> |
+| kind               |             | <code>Machine</code>                  |
+| metadata.name      |             | <code>machine</code>                  |
+| metadata.namespace |             | <code>default</code>                  |
 
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm upgrade -i`. For example:
 
 ```bash
-$ helm upgrade -i clusterxk8sio-machine-editor bytebuilders-ui/clusterxk8sio-machine-editor -n default --create-namespace --version=v0.4.14 --set apiVersion=cluster.x-k8s.io/v1alpha3
+$ helm upgrade -i clusterxk8sio-machine-editor bytebuilders-ui/clusterxk8sio-machine-editor -n default --create-namespace --version=v0.4.14 --set apiVersion=cluster.x-k8s.io/v1beta1
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
