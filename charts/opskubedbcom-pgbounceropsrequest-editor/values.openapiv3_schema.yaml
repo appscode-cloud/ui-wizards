@@ -8,22 +8,42 @@ properties:
       annotations:
         additionalProperties:
           type: string
-        description: 'Annotations is an unstructured key value map stored with a resource that may be set by external tools to store and retrieve arbitrary metadata. They are not queryable and should be preserved when modifying objects. More info: http://kubernetes.io/docs/user-guide/annotations'
+        description: 'Annotations is an unstructured key value map stored with a resource
+          that may be set by external tools to store and retrieve arbitrary metadata.
+          They are not queryable and should be preserved when modifying objects. More
+          info: http://kubernetes.io/docs/user-guide/annotations'
         type: object
       labels:
         additionalProperties:
           type: string
-        description: 'Map of string keys and values that can be used to organize and categorize (scope and select) objects. May match selectors of replication controllers and services. More info: http://kubernetes.io/docs/user-guide/labels'
+        description: 'Map of string keys and values that can be used to organize and
+          categorize (scope and select) objects. May match selectors of replication
+          controllers and services. More info: http://kubernetes.io/docs/user-guide/labels'
         type: object
       name:
-        description: 'Name must be unique within a namespace. Is required when creating resources, although some resources may allow a client to request the generation of an appropriate name automatically. Name is primarily intended for creation idempotence and configuration definition. Cannot be updated. More info: http://kubernetes.io/docs/user-guide/identifiers#names'
+        description: 'Name must be unique within a namespace. Is required when creating
+          resources, although some resources may allow a client to request the generation
+          of an appropriate name automatically. Name is primarily intended for creation
+          idempotence and configuration definition. Cannot be updated. More info:
+          http://kubernetes.io/docs/user-guide/identifiers#names'
         type: string
       namespace:
-        description: "Namespace defines the space within which each name must be unique. An empty namespace is equivalent to the \"default\" namespace, but \"default\" is the canonical representation. Not all objects are required to be scoped to a namespace - the value of this field for those objects will be empty. \n Must be a DNS_LABEL. Cannot be updated. More info: http://kubernetes.io/docs/user-guide/namespaces"
+        description: "Namespace defines the space within which each name must be unique.
+          An empty namespace is equivalent to the \"default\" namespace, but \"default\"
+          is the canonical representation. Not all objects are required to be scoped
+          to a namespace - the value of this field for those objects will be empty.
+          \n Must be a DNS_LABEL. Cannot be updated. More info: http://kubernetes.io/docs/user-guide/namespaces"
         type: string
     type: object
   spec:
     properties:
+      UpdateVersion:
+        properties:
+          readinessCriteria:
+            type: object
+          targetVersion:
+            type: string
+        type: object
       apply:
         default: IfReady
         enum:
@@ -32,16 +52,16 @@ properties:
         type: string
       configuration:
         type: object
-      databaseRef:
+      horizontalScaling:
+        type: object
+      restart:
+        type: object
+      serverRef:
         properties:
           name:
             type: string
         type: object
         x-kubernetes-map-type: atomic
-      horizontalScaling:
-        type: object
-      restart:
-        type: object
       tls:
         properties:
           certificates:
@@ -149,32 +169,20 @@ properties:
         type: object
       type:
         enum:
-        - Upgrade
         - UpdateVersion
         - HorizontalScaling
         - VerticalScaling
-        - VolumeExpansion
         - Restart
         - Reconfigure
         - ReconfigureTLS
-        - Reprovision
         type: string
-      upgrade:
-        properties:
-          readinessCriteria:
-            type: object
-          targetVersion:
-            type: string
-        type: object
       verticalScaling:
         properties:
           readinessCriteria:
             type: object
         type: object
-      volumeExpansion:
-        type: object
     required:
-    - databaseRef
+    - serverRef
     - type
     type: object
 type: object

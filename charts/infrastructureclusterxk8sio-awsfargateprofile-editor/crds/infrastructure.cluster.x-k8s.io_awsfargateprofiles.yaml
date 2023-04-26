@@ -1,0 +1,91 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  creationTimestamp: null
+  name: awsfargateprofiles.infrastructure.cluster.x-k8s.io
+spec:
+  group: infrastructure.cluster.x-k8s.io
+  names:
+    kind: AWSFargateProfile
+    listKind: AWSFargateProfileList
+    plural: awsfargateprofiles
+    singular: awsfargateprofile
+  scope: Namespaced
+  versions:
+  - name: v1beta2
+    schema:
+      openAPIV3Schema:
+        description: AWSFargateProfile is the Schema for the awsfargateprofiles API.
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: FargateProfileSpec defines the desired state of FargateProfile.
+            properties:
+              additionalTags:
+                additionalProperties:
+                  type: string
+                description: AdditionalTags is an optional set of tags to add to AWS
+                  resources managed by the AWS provider, in addition to the ones added
+                  by default.
+                type: object
+              clusterName:
+                description: ClusterName is the name of the Cluster this object belongs
+                  to.
+                minLength: 1
+                type: string
+              profileName:
+                description: ProfileName specifies the profile name.
+                type: string
+              roleName:
+                description: RoleName specifies the name of IAM role for this fargate
+                  pool If the role is pre-existing we will treat it as unmanaged and
+                  not delete it on deletion. If the EKSEnableIAM feature flag is true
+                  and no name is supplied then a role is created.
+                type: string
+              selectors:
+                description: Selectors specify fargate pod selectors.
+                items:
+                  description: FargateSelector specifies a selector for pods that
+                    should run on this fargate pool.
+                  properties:
+                    labels:
+                      additionalProperties:
+                        type: string
+                      description: Labels specifies which pod labels this selector
+                        should match.
+                      type: object
+                    namespace:
+                      description: Namespace specifies which namespace this selector
+                        should match.
+                      type: string
+                  type: object
+                type: array
+              subnetIDs:
+                description: SubnetIDs specifies which subnets are used for the auto
+                  scaling group of this nodegroup.
+                items:
+                  type: string
+                type: array
+            required:
+            - clusterName
+            type: object
+        type: object
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: null
+  storedVersions: null
