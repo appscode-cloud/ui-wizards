@@ -194,13 +194,13 @@ async function setReleaseNameAndNamespace({ commit, storeGet, model, getValue, a
     const owner = storeGet("/route/params/user");
     const cluster = storeGet("/route/params/cluster");
 
-    const { name: chartName, url: chartUrl, version: chartVersion } = getFeatureSetPropertyValue(
+    const { name: chartName, sourceRef, version: chartVersion } = getFeatureSetPropertyValue(
       storeGet,
       getValue,
       "/spec/chart"
     );
     const { data } = await axios.get(
-      `/clusters/${owner}/${cluster}/helm/packageview/values?name=${chartName}&url=${chartUrl}&version=${chartVersion}&format=json`
+      `/clusters/${owner}/${cluster}/helm/packageview/values?name=${chartName}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${chartVersion}&format=json`
     );
     const { resources: resourcesDefaultValues } = data || {}
         
