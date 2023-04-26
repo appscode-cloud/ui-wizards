@@ -17,9 +17,10 @@ limitations under the License.
 package v1alpha1
 
 import (
+	alerts "go.appscode.dev/alerts/apis/alerts/v1alpha1"
 	core "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	api "kubepack.dev/lib-app/api/v1alpha1"
+	api "x-helm.dev/apimachinery/apis/releases/v1alpha1"
 )
 
 // KubedbcomRedisEditorOptions defines the schama for Redis Editor UI Options.
@@ -38,7 +39,7 @@ type KubedbcomRedisEditorOptions struct {
 type KubedbcomRedisEditorOptionsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Spec         KubedbcomRedisEditorOptionsSpecSpec `json:"spec"`
-	Form         KubedbcomRedisEditorOptionsSpecForm `json:"form"`
+	Form         alerts.RedisAlertsSpecForm          `json:"form"`
 }
 
 type KubedbcomRedisEditorOptionsSpecSpec struct {
@@ -62,10 +63,6 @@ type KubedbcomRedisEditorOptionsSpecSpec struct {
 	Monitoring        Monitoring                `json:"monitoring"`
 }
 
-type KubedbcomRedisEditorOptionsSpecForm struct {
-	Alert RedisAlert `json:"alert"`
-}
-
 type RedisCluster struct {
 	Master   int `json:"master"`
 	Replicas int `json:"replicas"`
@@ -75,41 +72,6 @@ type NamespacedName struct {
 	Name      string `json:"name"`
 	Namespace string `json:"namespace"`
 }
-
-// *** Alerts *** //
-
-type RedisAlert struct {
-	Enabled bool              `json:"enabled"`
-	Labels  map[string]string `json:"labels"`
-	// +optional
-	Annotations map[string]string `json:"annotations"`
-	// +optional
-	AdditionalRuleLabels map[string]string `json:"additionalRuleLabels"`
-	Groups               RedisAlertGroups  `json:"groups"`
-}
-
-type RedisAlertGroups struct {
-	Database    RedisDatabaseAlert `json:"database"`
-	Provisioner ProvisionerAlert   `json:"provisioner"`
-	OpsManager  OpsManagerAlert    `json:"opsManager"`
-	Stash       StashAlert         `json:"stash"`
-}
-
-type RedisDatabaseAlert struct {
-	Enabled bool                    `json:"enabled"`
-	Rules   RedisDatabaseAlertRules `json:"rules"`
-}
-
-type RedisDatabaseAlertRules struct {
-	RedisDown                FixedAlert  `json:"redisDown"`
-	RedisMissingMaster       IntValAlert `json:"redisMissingMaster"`
-	RedisTooManyMasters      IntValAlert `json:"redisTooManyMasters"`
-	RedisDisconnectedSlaves  IntValAlert `json:"redisDisconnectedSlaves"`
-	RedisTooManyConnections  IntValAlert `json:"redisTooManyConnections"`
-	RedisRejectedConnections IntValAlert `json:"redisRejectedConnections"`
-}
-
-// *** Alerts *** //
 
 // +kubebuilder:validation:Enum=Standalone;Cluster;Sentinel
 type RedisMode string

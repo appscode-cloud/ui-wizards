@@ -21,6 +21,36 @@ properties:
                     type: boolean
                   rules:
                     properties:
+                      postgresExporterError:
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            type: string
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        type: object
+                      postgresHighRollbackRate:
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            type: string
+                          val:
+                            format: double
+                            type: number
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        - val
+                        type: object
                       postgresInstanceDown:
                         properties:
                           duration:
@@ -33,6 +63,38 @@ properties:
                         - duration
                         - enabled
                         - severity
+                        type: object
+                      postgresNotEnoughConnections:
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            type: string
+                          val:
+                            type: integer
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        - val
+                        type: object
+                      postgresReplicationLag:
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            type: string
+                          val:
+                            type: string
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        - val
                         type: object
                       postgresRestarted:
                         properties:
@@ -63,6 +125,19 @@ properties:
                         - enabled
                         - severity
                         type: object
+                      postgresSplitBrain:
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            type: string
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        type: object
                       postgresTooManyConnections:
                         properties:
                           duration:
@@ -79,82 +154,7 @@ properties:
                         - severity
                         - val
                         type: object
-                      postgresqlExporterError:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      postgresqlHighRollbackRate:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            type: string
-                          val:
-                            format: double
-                            type: number
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        - val
-                        type: object
-                      postgresqlNotEnoughConnections:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            type: string
-                          val:
-                            type: integer
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        - val
-                        type: object
-                      postgresqlReplicationLag:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            type: string
-                          val:
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        - val
-                        type: object
-                      postgresqlSplitBrain:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      postgresqlTooManyLocksAcquired:
+                      postgresTooManyLocksAcquired:
                         properties:
                           duration:
                             type: string
@@ -172,16 +172,16 @@ properties:
                         - val
                         type: object
                     required:
+                    - postgresExporterError
+                    - postgresHighRollbackRate
                     - postgresInstanceDown
+                    - postgresNotEnoughConnections
+                    - postgresReplicationLag
                     - postgresRestarted
                     - postgresSlowQueries
+                    - postgresSplitBrain
                     - postgresTooManyConnections
-                    - postgresqlExporterError
-                    - postgresqlHighRollbackRate
-                    - postgresqlNotEnoughConnections
-                    - postgresqlReplicationLag
-                    - postgresqlSplitBrain
-                    - postgresqlTooManyLocksAcquired
+                    - postgresTooManyLocksAcquired
                     type: object
                 required:
                 - enabled

@@ -33,26 +33,26 @@ spec:
         summary: Postgres instance down (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Postgres instance is down on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{end -}}
-    {{ if .Values.form.alert.groups.database.rules.postgresqlSplitBrain.enabled -}}
+    {{ if .Values.form.alert.groups.database.rules.postgresSplitBrain.enabled -}}
     - alert: PostgresqlSplitBrain
       expr: count(pg_replication_is_replica{job="{{- $app -}}-stats",namespace="{{ .Release.Namespace }}"} == 0) != 1
-      for: {{ .Values.form.alert.groups.database.rules.postgresqlSplitBrain.duration }}
+      for: {{ .Values.form.alert.groups.database.rules.postgresSplitBrain.duration }}
       labels:
-        severity: {{ .Values.form.alert.groups.database.rules.postgresqlSplitBrain.severity }}
+        severity: {{ .Values.form.alert.groups.database.rules.postgresSplitBrain.severity }}
         app: postgres
-        alertname: postgresql_split_brain
+        alertname: postgres_split_brain
       annotations:
         summary: Postgresql split brain (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Split Brain, too many primary Postgresql databases in read-write mode\n  {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{end -}}
-    {{ if .Values.form.alert.groups.database.rules.postgresqlTooManyLocksAcquired.enabled -}}
+    {{ if .Values.form.alert.groups.database.rules.postgresTooManyLocksAcquired.enabled -}}
     - alert: PostgresqlTooManyLocksAcquired
-      expr: ((sum by (pod) (pg_locks_count{job="{{- $app -}}-stats",namespace="{{ .Release.Namespace }}"}) ) / ( sum by (pod) (pg_settings_max_locks_per_transaction{job="{{- $app -}}-stats",namespace="{{ .Release.Namespace }}"}) * sum by (pod) (pg_settings_max_connections{job="{{- $app -}}-stats",namespace="{{ .Release.Namespace }}"}))) > {{.Values.form.alert.groups.database.rules.postgresqlTooManyLocksAcquired.val}}
-      for: {{ .Values.form.alert.groups.database.rules.postgresqlTooManyLocksAcquired.duration }}
+      expr: ((sum by (pod) (pg_locks_count{job="{{- $app -}}-stats",namespace="{{ .Release.Namespace }}"}) ) / ( sum by (pod) (pg_settings_max_locks_per_transaction{job="{{- $app -}}-stats",namespace="{{ .Release.Namespace }}"}) * sum by (pod) (pg_settings_max_connections{job="{{- $app -}}-stats",namespace="{{ .Release.Namespace }}"}))) > {{.Values.form.alert.groups.database.rules.postgresTooManyLocksAcquired.val}}
+      for: {{ .Values.form.alert.groups.database.rules.postgresTooManyLocksAcquired.duration }}
       labels:
-        severity: {{ .Values.form.alert.groups.database.rules.postgresqlTooManyLocksAcquired.severity }}
+        severity: {{ .Values.form.alert.groups.database.rules.postgresTooManyLocksAcquired.severity }}
         app: postgres
-        alertname: postgresql_too_many_locks_acquired
+        alertname: postgres_too_many_locks_acquired
       annotations:
         summary: Postgresql too many locks acquired (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Too many locks acquired on the database. \n  If this alert happens frequently, we may need to increase the postgres setting max_locks_per_transaction.\n  {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -69,26 +69,26 @@ spec:
         summary: Postgresql restarted (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Postgresql restarted\n  {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{end -}}
-    {{ if .Values.form.alert.groups.database.rules.postgresqlExporterError.enabled -}}
+    {{ if .Values.form.alert.groups.database.rules.postgresExporterError.enabled -}}
     - alert: PostgresqlExporterError
       expr: pg_exporter_last_scrape_error{job="{{- $app -}}-stats",namespace="{{ .Release.Namespace }}"} > 0
-      for: {{ .Values.form.alert.groups.database.rules.postgresqlExporterError.duration }}
+      for: {{ .Values.form.alert.groups.database.rules.postgresExporterError.duration }}
       labels:
-        severity: {{ .Values.form.alert.groups.database.rules.postgresqlExporterError.severity }}
+        severity: {{ .Values.form.alert.groups.database.rules.postgresExporterError.severity }}
         app: postgres
-        alertname: postgresqlExporterError
+        alertname: postgresExporterError
       annotations:
         summary: Postgresql exporter error (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Postgresql exporter is showing errors. A query may be buggy in query.yaml\n  {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{end -}}
-    {{ if .Values.form.alert.groups.database.rules.postgresqlHighRollbackRate.enabled -}}
+    {{ if .Values.form.alert.groups.database.rules.postgresHighRollbackRate.enabled -}}
     - alert: PostgresqlHighRollbackRate
-      expr: rate(pg_stat_database_xact_rollback{job="{{- $app -}}-stats",namespace="{{ .Release.Namespace }}"}[3m]) / rate(pg_stat_database_xact_commit{job="{{- $app -}}-stats",namespace="{{ .Release.Namespace }}"}[3m]) > {{ .Values.form.alert.groups.database.rules.postgresqlHighRollbackRate.val }}
-      for: {{ .Values.form.alert.groups.database.rules.postgresqlHighRollbackRate.duration }}
+      expr: rate(pg_stat_database_xact_rollback{job="{{- $app -}}-stats",namespace="{{ .Release.Namespace }}"}[3m]) / rate(pg_stat_database_xact_commit{job="{{- $app -}}-stats",namespace="{{ .Release.Namespace }}"}[3m]) > {{ .Values.form.alert.groups.database.rules.postgresHighRollbackRate.val }}
+      for: {{ .Values.form.alert.groups.database.rules.postgresHighRollbackRate.duration }}
       labels:
-        severity: {{ .Values.form.alert.groups.database.rules.postgresqlHighRollbackRate.severity }}
+        severity: {{ .Values.form.alert.groups.database.rules.postgresHighRollbackRate.severity }}
         app: postgres
-        alertname: postgresqlHighRollbackRate
+        alertname: postgresHighRollbackRate
       annotations:
         summary: Postgresql high rollback rate (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Ratio of transactions being aborted compared to committed is hign. {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"

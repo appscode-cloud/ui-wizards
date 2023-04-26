@@ -17,9 +17,10 @@ limitations under the License.
 package v1alpha1
 
 import (
+	alerts "go.appscode.dev/alerts/apis/alerts/v1alpha1"
 	core "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	api "kubepack.dev/lib-app/api/v1alpha1"
+	api "x-helm.dev/apimachinery/apis/releases/v1alpha1"
 )
 
 // KubevaultcomVaultserverEditorOptions defines the schama for Vaultserver Editor UI Options.
@@ -38,6 +39,7 @@ type KubevaultcomVaultserverEditorOptions struct {
 type KubevaultcomVaultserverEditorOptionsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Spec         KubevaultcomVaultserverEditorOptionsSpecSpec `json:"spec"`
+	Form         alerts.VaultserverAlertsSpecForm             `json:"form"`
 }
 
 type KubevaultcomVaultserverEditorOptionsSpecSpec struct {

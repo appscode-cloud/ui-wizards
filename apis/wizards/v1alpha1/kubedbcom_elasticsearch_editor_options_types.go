@@ -17,9 +17,10 @@ limitations under the License.
 package v1alpha1
 
 import (
+	alerts "go.appscode.dev/alerts/apis/alerts/v1alpha1"
 	core "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	api "kubepack.dev/lib-app/api/v1alpha1"
+	api "x-helm.dev/apimachinery/apis/releases/v1alpha1"
 )
 
 // KubedbcomElasticsearchEditorOptions defines the schama for Elasticsearch Editor UI Options.
@@ -38,7 +39,7 @@ type KubedbcomElasticsearchEditorOptions struct {
 type KubedbcomElasticsearchEditorOptionsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Spec         KubedbcomElasticsearchEditorOptionsSpecSpec `json:"spec"`
-	Form         KubedbcomElasticsearchEditorOptionsSpecForm `json:"form"`
+	Form         alerts.ElasticsearchAlertsSpecForm          `json:"form"`
 }
 
 type KubedbcomElasticsearchEditorOptionsSpecSpec struct {
@@ -67,10 +68,6 @@ type KubedbcomElasticsearchEditorOptionsSpecSpec struct {
 	Monitoring Monitoring                `json:"monitoring"`
 }
 
-type KubedbcomElasticsearchEditorOptionsSpecForm struct {
-	Alert ElasticsearchAlert `json:"alert"`
-}
-
 // +kubebuilder:validation:Enum=OpenDistro;OpenSearch;SearchGuard;X-Pack
 type ElasticsearchAuthPlugin string
 
@@ -93,48 +90,6 @@ type ElasticsearchNode struct {
 	Machine     string      `json:"machine"`
 	Persistence Persistence `json:"persistence"`
 }
-
-// *** Alerts //
-
-type ElasticsearchAlert struct {
-	Enabled bool              `json:"enabled"`
-	Labels  map[string]string `json:"labels"`
-	// +optional
-	Annotations map[string]string `json:"annotations"`
-	// +optional
-	AdditionalRuleLabels map[string]string        `json:"additionalRuleLabels"`
-	Groups               ElasticsearchAlertGroups `json:"groups"`
-}
-
-type ElasticsearchAlertGroups struct {
-	Database    ElasticsearchDatabaseAlert `json:"database"`
-	Provisioner ProvisionerAlert           `json:"provisioner"`
-	OpsManager  OpsManagerAlert            `json:"opsManager"`
-	Stash       StashAlert                 `json:"stash"`
-}
-
-type ElasticsearchDatabaseAlert struct {
-	Enabled bool                            `json:"enabled"`
-	Rules   ElasticsearchDatabaseAlertRules `json:"rules"`
-}
-
-type ElasticsearchDatabaseAlertRules struct {
-	ElasticsearchHeapUsageTooHigh   IntValAlert `json:"elasticsearchHeapUsageTooHigh"`
-	ElasticsearchHeapUsageWarning   IntValAlert `json:"elasticsearchHeapUsageWarning"`
-	ElasticsearchDiskOutOfSpace     IntValAlert `json:"elasticsearchDiskOutOfSpace"`
-	ElasticsearchDiskSpaceLow       IntValAlert `json:"elasticsearchDiskSpaceLow"`
-	ElasticsearchClusterRed         FixedAlert  `json:"elasticsearchClusterRed"`
-	ElasticsearchClusterYellow      FixedAlert  `json:"elasticsearchClusterYellow"`
-	ElasticsearchHealthyNodes       IntValAlert `json:"elasticsearchHealthyNodes"`
-	ElasticsearchHealthyDataNodes   IntValAlert `json:"elasticsearchHealthyDataNodes"`
-	ElasticsearchRelocatingShards   FixedAlert  `json:"elasticsearchRelocatingShards"`
-	ElasticsearchInitializingShards FixedAlert  `json:"elasticsearchInitializingShards"`
-	ElasticsearchUnassignedShards   FixedAlert  `json:"elasticsearchUnassignedShards"`
-	ElasticsearchPendingTasks       FixedAlert  `json:"elasticsearchPendingTasks"`
-	ElasticsearchNoNewDocuments10M  FixedAlert  `json:"elasticsearchNoNewDocuments10m"`
-}
-
-// *** Alerts //
 
 // +kubebuilder:validation:Enum=Combined;Dedicated
 type ElasticsearchMode string

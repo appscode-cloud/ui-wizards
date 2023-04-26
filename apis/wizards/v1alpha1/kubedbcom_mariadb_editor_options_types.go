@@ -17,9 +17,10 @@ limitations under the License.
 package v1alpha1
 
 import (
+	alerts "go.appscode.dev/alerts/apis/alerts/v1alpha1"
 	core "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	api "kubepack.dev/lib-app/api/v1alpha1"
+	api "x-helm.dev/apimachinery/apis/releases/v1alpha1"
 )
 
 // KubedbcomMariadbEditorOptions defines the schama for MariaDB Editor UI Options.
@@ -38,7 +39,7 @@ type KubedbcomMariadbEditorOptions struct {
 type KubedbcomMariadbEditorOptionsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Spec         KubedbcomMariadbEditorOptionsSpecSpec `json:"spec"`
-	Form         KubedbcomMariadbEditorOptionsSpecForm `json:"form"`
+	Form         alerts.MariadbAlertsSpecForm          `json:"form"`
 }
 
 type KubedbcomMariadbEditorOptionsSpecSpec struct {
@@ -57,63 +58,8 @@ type KubedbcomMariadbEditorOptionsSpecSpec struct {
 	Monitoring        Monitoring                `json:"monitoring"`
 }
 
-type KubedbcomMariadbEditorOptionsSpecForm struct {
-	Alert MariaDBAlert `json:"alert"`
-}
-
 // +kubebuilder:validation:Enum=Standalone;Cluster
 type MariaDBMode string
-
-// *** Alerts *** //
-
-type MariaDBAlert struct {
-	Enabled bool              `json:"enabled"`
-	Labels  map[string]string `json:"labels"`
-	// +optional
-	Annotations map[string]string `json:"annotations"`
-	// +optional
-	AdditionalRuleLabels map[string]string  `json:"additionalRuleLabels"`
-	Groups               MariaDBAlertGroups `json:"groups"`
-}
-
-type MariaDBAlertGroups struct {
-	Database      MariaDBDatabaseAlert `json:"database"`
-	Cluster       MariaDBClusterAlert  `json:"cluster"`
-	Provisioner   ProvisionerAlert     `json:"provisioner"`
-	OpsManager    OpsManagerAlert      `json:"opsManager"`
-	Stash         StashAlert           `json:"stash"`
-	SchemaManager SchemaManagerAlert   `json:"schemaManager"`
-}
-
-type MariaDBDatabaseAlert struct {
-	Enabled bool                      `json:"enabled"`
-	Rules   MariaDBDatabaseAlertRules `json:"rules"`
-}
-
-type MariaDBDatabaseAlertRules struct {
-	MySQLInstanceDown       FixedAlert  `json:"mySQLInstanceDown"`
-	MySQLServiceDown        FixedAlert  `json:"mySQLServiceDown"`
-	MySQLTooManyConnections IntValAlert `json:"mySQLTooManyConnections"`
-	MySQLHighThreadsRunning IntValAlert `json:"mySQLHighThreadsRunning"`
-	MySQLSlowQueries        FixedAlert  `json:"mySQLSlowQueries"`
-	MySQLInnoDBLogWaits     IntValAlert `json:"mySQLInnoDBLogWaits"`
-	MySQLRestarted          IntValAlert `json:"mySQLRestarted"`
-	MySQLHighQPS            IntValAlert `json:"mySQLHighQPS"`
-	MySQLHighIncomingBytes  IntValAlert `json:"mySQLHighIncomingBytes"`
-	MySQLHighOutgoingBytes  IntValAlert `json:"mySQLHighOutgoingBytes"`
-	MySQLTooManyOpenFiles   IntValAlert `json:"mySQLTooManyOpenFiles"`
-}
-
-type MariaDBClusterAlert struct {
-	Enabled bool                     `json:"enabled"`
-	Rules   MariaDBClusterAlertRules `json:"rules"`
-}
-
-type MariaDBClusterAlertRules struct {
-	GaleraReplicationLatencyTooLong FloatValAlertConfig `json:"galeraReplicationLatencyTooLong"`
-}
-
-// *** Alerts *** //
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
