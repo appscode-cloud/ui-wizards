@@ -20,8 +20,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	kmapi "kmodules.xyz/client-go/api/v1"
 	ofst "kmodules.xyz/offshoot-api/api/v1"
-	api "kubepack.dev/lib-app/api/v1alpha1"
 	stashv1beta1 "stash.appscode.dev/apimachinery/apis/stash/v1beta1"
+	api "x-helm.dev/apimachinery/apis/releases/v1alpha1"
 )
 
 // StashappscodecomRestoreSessionEditorOptions defines the schama for Stash RestoreSession Editor UI Options.

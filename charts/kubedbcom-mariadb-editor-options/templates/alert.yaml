@@ -21,125 +21,125 @@ spec:
   {{ if .Values.form.alert.groups.database.enabled -}}
   - name: mariadb.database.{{ .Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if .Values.form.alert.groups.database.rules.mySQLInstanceDown.enabled -}}
+    {{ if .Values.form.alert.groups.database.rules.mysqlInstanceDown.enabled -}}
     - alert: MySQLInstanceDown
       expr: mysql_up{job="{{ $app }}-stats",namespace="{{ .Release.Namespace }}"} == 0
-      for: {{ .Values.form.alert.groups.database.rules.mySQLInstanceDown.duration }}
+      for: {{ .Values.form.alert.groups.database.rules.mysqlInstanceDown.duration }}
       labels:
-        severity: {{ .Values.form.alert.groups.database.rules.mySQLInstanceDown.severity }}
+        severity: {{ .Values.form.alert.groups.database.rules.mysqlInstanceDown.severity }}
         {{- include "kubedbcom-mariadb-editor-options.alertLabels" . | nindent 8 }}
       annotations:
         summary: MySQL instance down (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "MySQL instance is down on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if .Values.form.alert.groups.database.rules.mySQLServiceDown.enabled -}}
+    {{ if .Values.form.alert.groups.database.rules.mysqlServiceDown.enabled -}}
     - alert: MySQLServiceDown
       expr: sum by (service) (mysql_up{job="{{ $app }}-stats",namespace="{{ .Release.Namespace }}"}) == 0
-      for: {{ .Values.form.alert.groups.database.rules.mySQLServiceDown.duration }}
+      for: {{ .Values.form.alert.groups.database.rules.mysqlServiceDown.duration }}
       labels:
-        severity: {{ .Values.form.alert.groups.database.rules.mySQLServiceDown.severity }}
+        severity: {{ .Values.form.alert.groups.database.rules.mysqlServiceDown.severity }}
         {{- include "kubedbcom-mariadb-editor-options.alertLabels" . | nindent 8 }}
       annotations:
         summary: MySQL service down (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "MySQL service is down on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if .Values.form.alert.groups.database.rules.mySQLTooManyConnections.enabled -}}
+    {{ if .Values.form.alert.groups.database.rules.mysqlTooManyConnections.enabled -}}
     - alert: MySQLTooManyConnections
-      expr: max_over_time(mysql_global_status_threads_connected{job="{{ $app }}-stats",namespace="{{ .Release.Namespace }}"}[1m]) / mysql_global_variables_max_connections{job="{{ $app }}-stats",namespace="{{ .Release.Namespace }}"} * 100 > {{.Values.form.alert.groups.database.rules.mySQLTooManyConnections.val}}
-      for: {{ .Values.form.alert.groups.database.rules.mySQLTooManyConnections.duration }}
+      expr: max_over_time(mysql_global_status_threads_connected{job="{{ $app }}-stats",namespace="{{ .Release.Namespace }}"}[1m]) / mysql_global_variables_max_connections{job="{{ $app }}-stats",namespace="{{ .Release.Namespace }}"} * 100 > {{.Values.form.alert.groups.database.rules.mysqlTooManyConnections.val}}
+      for: {{ .Values.form.alert.groups.database.rules.mysqlTooManyConnections.duration }}
       labels:
-        severity: {{ .Values.form.alert.groups.database.rules.mySQLTooManyConnections.severity }}
+        severity: {{ .Values.form.alert.groups.database.rules.mysqlTooManyConnections.severity }}
         {{- include "kubedbcom-mariadb-editor-options.alertLabels" . | nindent 8 }}
       annotations:
-        summary: MySQL too many connections (> {{.Values.form.alert.groups.database.rules.mySQLTooManyConnections.val}}%) (instance {{`{{`}} $labels.pod {{`}}`}})
-        description: "More than {{.Values.form.alert.groups.database.rules.mySQLTooManyConnections.val}}% of MySQL connections are in use on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        summary: MySQL too many connections (> {{.Values.form.alert.groups.database.rules.mysqlTooManyConnections.val}}%) (instance {{`{{`}} $labels.pod {{`}}`}})
+        description: "More than {{.Values.form.alert.groups.database.rules.mysqlTooManyConnections.val}}% of MySQL connections are in use on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if .Values.form.alert.groups.database.rules.mySQLHighThreadsRunning.enabled -}}
+    {{ if .Values.form.alert.groups.database.rules.mysqlHighThreadsRunning.enabled -}}
     - alert: MySQLHighThreadsRunning
-      expr: max_over_time(mysql_global_status_threads_running{job="{{ $app }}-stats",namespace="{{ .Release.Namespace }}"}[1m]) / mysql_global_variables_max_connections{job="{{ $app }}-stats",namespace="{{ .Release.Namespace }}"} * 100 > {{.Values.form.alert.groups.database.rules.mySQLHighThreadsRunning.val}}
-      for: {{ .Values.form.alert.groups.database.rules.mySQLHighThreadsRunning.duration }}
+      expr: max_over_time(mysql_global_status_threads_running{job="{{ $app }}-stats",namespace="{{ .Release.Namespace }}"}[1m]) / mysql_global_variables_max_connections{job="{{ $app }}-stats",namespace="{{ .Release.Namespace }}"} * 100 > {{.Values.form.alert.groups.database.rules.mysqlHighThreadsRunning.val}}
+      for: {{ .Values.form.alert.groups.database.rules.mysqlHighThreadsRunning.duration }}
       labels:
-        severity: {{ .Values.form.alert.groups.database.rules.mySQLHighThreadsRunning.severity }}
+        severity: {{ .Values.form.alert.groups.database.rules.mysqlHighThreadsRunning.severity }}
         {{- include "kubedbcom-mariadb-editor-options.alertLabels" . | nindent 8 }}
       annotations:
-        summary: MySQL high threads running (> {{.Values.form.alert.groups.database.rules.mySQLHighThreadsRunning.val}}%) (instance {{`{{`}} $labels.pod {{`}}`}})
-        description: "More than {{.Values.form.alert.groups.database.rules.mySQLHighThreadsRunning.val}}% of MySQL threads are in use on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        summary: MySQL high threads running (> {{.Values.form.alert.groups.database.rules.mysqlHighThreadsRunning.val}}%) (instance {{`{{`}} $labels.pod {{`}}`}})
+        description: "More than {{.Values.form.alert.groups.database.rules.mysqlHighThreadsRunning.val}}% of MySQL threads are in use on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if .Values.form.alert.groups.database.rules.mySQLSlowQueries.enabled -}}
+    {{ if .Values.form.alert.groups.database.rules.mysqlSlowQueries.enabled -}}
     - alert: MySQLSlowQueries
       expr: increase(mysql_global_status_slow_queries{job="{{ $app }}-stats",namespace="{{ .Release.Namespace }}"}[1m]) > 0
-      for: {{ .Values.form.alert.groups.database.rules.mySQLSlowQueries.duration }}
+      for: {{ .Values.form.alert.groups.database.rules.mysqlSlowQueries.duration }}
       labels:
-        severity: {{ .Values.form.alert.groups.database.rules.mySQLSlowQueries.severity }}
+        severity: {{ .Values.form.alert.groups.database.rules.mysqlSlowQueries.severity }}
         {{- include "kubedbcom-mariadb-editor-options.alertLabels" . | nindent 8 }}
       annotations:
         summary: MySQL slow queries on (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "MySQL server mysql has some new slow query.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if .Values.form.alert.groups.database.rules.mySQLInnoDBLogWaits.enabled -}}
+    {{ if .Values.form.alert.groups.database.rules.mysqlInnoDBLogWaits.enabled -}}
     - alert: MySQLInnoDBLogWaits
-      expr: rate(mysql_global_status_innodb_log_waits{job="{{ $app }}-stats",namespace="{{ .Release.Namespace }}"}[15m]) > {{.Values.form.alert.groups.database.rules.mySQLInnoDBLogWaits.val}}
-      for: {{ .Values.form.alert.groups.database.rules.mySQLInnoDBLogWaits.duration }}
+      expr: rate(mysql_global_status_innodb_log_waits{job="{{ $app }}-stats",namespace="{{ .Release.Namespace }}"}[15m]) > {{.Values.form.alert.groups.database.rules.mysqlInnoDBLogWaits.val}}
+      for: {{ .Values.form.alert.groups.database.rules.mysqlInnoDBLogWaits.duration }}
       labels:
-        severity: {{ .Values.form.alert.groups.database.rules.mySQLInnoDBLogWaits.severity }}
+        severity: {{ .Values.form.alert.groups.database.rules.mysqlInnoDBLogWaits.severity }}
         {{- include "kubedbcom-mariadb-editor-options.alertLabels" . | nindent 8 }}
       annotations:
-        summary: MySQL InnoDB log waits (> {{.Values.form.alert.groups.database.rules.mySQLInnoDBLogWaits.val}}) (instance {{`{{`}} $labels.pod {{`}}`}})
+        summary: MySQL InnoDB log waits (> {{.Values.form.alert.groups.database.rules.mysqlInnoDBLogWaits.val}}) (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "MySQL innodb log writes stalling\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if .Values.form.alert.groups.database.rules.mySQLRestarted.enabled -}}
+    {{ if .Values.form.alert.groups.database.rules.mysqlRestarted.enabled -}}
     - alert: MySQLRestarted
-      expr: mysql_global_status_uptime{job="{{ $app }}-stats",namespace="{{ .Release.Namespace }}"} < {{.Values.form.alert.groups.database.rules.mySQLRestarted.val}}
-      for: {{ .Values.form.alert.groups.database.rules.mySQLRestarted.duration }}
+      expr: mysql_global_status_uptime{job="{{ $app }}-stats",namespace="{{ .Release.Namespace }}"} < {{.Values.form.alert.groups.database.rules.mysqlRestarted.val}}
+      for: {{ .Values.form.alert.groups.database.rules.mysqlRestarted.duration }}
       labels:
-        severity: {{ .Values.form.alert.groups.database.rules.mySQLRestarted.severity }}
+        severity: {{ .Values.form.alert.groups.database.rules.mysqlRestarted.severity }}
         {{- include "kubedbcom-mariadb-editor-options.alertLabels" . | nindent 8 }}
       annotations:
-        summary: MySQL restarted ({{.Values.form.alert.groups.database.rules.mySQLRestarted.val}} second ago) (instance {{`{{`}} $labels.pod {{`}}`}})
+        summary: MySQL restarted ({{.Values.form.alert.groups.database.rules.mysqlRestarted.val}} second ago) (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "MySQL restarted\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if .Values.form.alert.groups.database.rules.mySQLHighQPS.enabled -}}
+    {{ if .Values.form.alert.groups.database.rules.mysqlHighQPS.enabled -}}
     - alert: MySQLHighQPS
-      expr: rate(mysql_global_status_queries{job="{{ $app }}-stats",namespace="{{ .Release.Namespace }}"}[1m]) > {{.Values.form.alert.groups.database.rules.mySQLHighQPS.val}}
-      for: {{ .Values.form.alert.groups.database.rules.mySQLHighQPS.duration }}
+      expr: rate(mysql_global_status_queries{job="{{ $app }}-stats",namespace="{{ .Release.Namespace }}"}[1m]) > {{.Values.form.alert.groups.database.rules.mysqlHighQPS.val}}
+      for: {{ .Values.form.alert.groups.database.rules.mysqlHighQPS.duration }}
       labels:
-        severity: {{ .Values.form.alert.groups.database.rules.mySQLHighQPS.severity }}
+        severity: {{ .Values.form.alert.groups.database.rules.mysqlHighQPS.severity }}
         {{- include "kubedbcom-mariadb-editor-options.alertLabels" . | nindent 8 }}
       annotations:
-        summary: MySQL has high queries per second (> {{.Values.form.alert.groups.database.rules.mySQLHighQPS.val}}) (instance {{`{{`}} $labels.pod {{`}}`}})
+        summary: MySQL has high queries per second (> {{.Values.form.alert.groups.database.rules.mysqlHighQPS.val}}) (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "MySQL has high QPS on (instance {{`{{`}} $labels.pod {{`}}`}})\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if .Values.form.alert.groups.database.rules.mySQLHighIncomingBytes.enabled -}}
+    {{ if .Values.form.alert.groups.database.rules.mysqlHighIncomingBytes.enabled -}}
     - alert: MySQLHighIncomingBytes
-      expr: rate(mysql_global_status_bytes_received{job="{{ $app }}-stats",namespace="{{ .Release.Namespace }}"}[1m]) > {{.Values.form.alert.groups.database.rules.mySQLHighIncomingBytes.val}}
-      for: {{ .Values.form.alert.groups.database.rules.mySQLHighIncomingBytes.duration }}
+      expr: rate(mysql_global_status_bytes_received{job="{{ $app }}-stats",namespace="{{ .Release.Namespace }}"}[1m]) > {{.Values.form.alert.groups.database.rules.mysqlHighIncomingBytes.val}}
+      for: {{ .Values.form.alert.groups.database.rules.mysqlHighIncomingBytes.duration }}
       labels:
-        severity: {{ .Values.form.alert.groups.database.rules.mySQLHighIncomingBytes.severity }}
+        severity: {{ .Values.form.alert.groups.database.rules.mysqlHighIncomingBytes.severity }}
         {{- include "kubedbcom-mariadb-editor-options.alertLabels" . | nindent 8 }}
       annotations:
-        summary: MySQL has high incoming bytes second (> {{.Values.form.alert.groups.database.rules.mySQLHighIncomingBytes.val}}) (instance {{`{{`}} $labels.pod {{`}}`}})
+        summary: MySQL has high incoming bytes second (> {{.Values.form.alert.groups.database.rules.mysqlHighIncomingBytes.val}}) (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "MySQL has high incoming bytes per second on (instance {{`{{`}} $labels.pod {{`}}`}})\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if .Values.form.alert.groups.database.rules.mySQLHighOutgoingBytes.enabled -}}
+    {{ if .Values.form.alert.groups.database.rules.mysqlHighOutgoingBytes.enabled -}}
     - alert: MySQLHighOutgoingBytes
-      expr: rate(mysql_global_status_bytes_sent{job="{{ $app }}-stats",namespace="{{ .Release.Namespace }}"}[1m]) > {{.Values.form.alert.groups.database.rules.mySQLHighOutgoingBytes.val}}
-      for: {{ .Values.form.alert.groups.database.rules.mySQLHighOutgoingBytes.duration }}
+      expr: rate(mysql_global_status_bytes_sent{job="{{ $app }}-stats",namespace="{{ .Release.Namespace }}"}[1m]) > {{.Values.form.alert.groups.database.rules.mysqlHighOutgoingBytes.val}}
+      for: {{ .Values.form.alert.groups.database.rules.mysqlHighOutgoingBytes.duration }}
       labels:
-        severity: {{ .Values.form.alert.groups.database.rules.mySQLHighOutgoingBytes.severity }}
+        severity: {{ .Values.form.alert.groups.database.rules.mysqlHighOutgoingBytes.severity }}
         {{- include "kubedbcom-mariadb-editor-options.alertLabels" . | nindent 8 }}
       annotations:
-        summary: MySQL has high outgoing bytes second (> {{.Values.form.alert.groups.database.rules.mySQLHighOutgoingBytes.val}}) (instance {{`{{`}} $labels.pod {{`}}`}})
+        summary: MySQL has high outgoing bytes second (> {{.Values.form.alert.groups.database.rules.mysqlHighOutgoingBytes.val}}) (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "MySQL has high outgoing bytes per second on (instance {{`{{`}} $labels.pod {{`}}`}})\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if .Values.form.alert.groups.database.rules.mySQLTooManyOpenFiles.enabled -}}
+    {{ if .Values.form.alert.groups.database.rules.mysqlTooManyOpenFiles.enabled -}}
     - alert: MySQLTooManyOpenFiles
-      expr: max_over_time(mysql_global_status_open_files{job="{{ $app }}-stats",namespace="{{ .Release.Namespace }}"}[1m]) / mysql_global_variables_open_files_limit{job="{{ $app }}-stats",namespace="{{ .Release.Namespace }}"} * 100 > {{.Values.form.alert.groups.database.rules.mySQLTooManyOpenFiles.val}}
-      for: {{ .Values.form.alert.groups.database.rules.mySQLTooManyOpenFiles.duration }}
+      expr: max_over_time(mysql_global_status_open_files{job="{{ $app }}-stats",namespace="{{ .Release.Namespace }}"}[1m]) / mysql_global_variables_open_files_limit{job="{{ $app }}-stats",namespace="{{ .Release.Namespace }}"} * 100 > {{.Values.form.alert.groups.database.rules.mysqlTooManyOpenFiles.val}}
+      for: {{ .Values.form.alert.groups.database.rules.mysqlTooManyOpenFiles.duration }}
       labels:
-        severity: {{ .Values.form.alert.groups.database.rules.mySQLTooManyOpenFiles.severity }}
+        severity: {{ .Values.form.alert.groups.database.rules.mysqlTooManyOpenFiles.severity }}
         {{- include "kubedbcom-mariadb-editor-options.alertLabels" . | nindent 8 }}
       annotations:
-        summary: MySQL too many opened files (> {{.Values.form.alert.groups.database.rules.mySQLTooManyOpenFiles.val}}%) (instance {{`{{`}} $labels.pod {{`}}`}})
+        summary: MySQL too many opened files (> {{.Values.form.alert.groups.database.rules.mysqlTooManyOpenFiles.val}}%) (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "MySQL too many opened files on (instance {{`{{`}} $labels.pod {{`}}`}})\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
   {{ end -}}
@@ -196,7 +196,7 @@ spec:
         {{- include "kubedbcom-mariadb-editor-options.alertLabels" . | nindent 8 }}
       annotations:
         summary: MariaDBOpsRequest on progress (mariadbopsrequest {{`{{`}} $labels.mariadbopsrequest {{`}}`}})
-        description: "MaraiDBOpsRequest {{`{{`}} $labels.mariadbopsrequest {{`}}`}} is in progressressing status\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        description: "MariaDBOpsRequest {{`{{`}} $labels.mariadbopsrequest {{`}}`}} is in progressressing status\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
     {{ if .Values.form.alert.groups.opsManager.rules.opsRequestStatusProgressingToLong.enabled -}}
     - alert: KubeDBMariaDBOpsRequestStatusProgressingToLong
@@ -207,7 +207,7 @@ spec:
         {{- include "kubedbcom-mariadb-editor-options.alertLabels" . | nindent 8 }}
       annotations:
         summary: MariaDBOpsRequest is in progressing status for too long (mariadbopsrequest {{`{{`}} $labels.mariadbopsrequest {{`}}`}})
-        description: "MaraiDBOpsRequest {{`{{`}} $labels.mariadbopsrequest {{`}}`}} is in progressing status for too long\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        description: "MariaDBOpsRequest {{`{{`}} $labels.mariadbopsrequest {{`}}`}} is in progressing status for too long\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
     {{ if .Values.form.alert.groups.opsManager.rules.opsRequestFailed.enabled -}}
     - alert: KubeDBMariaDBOpsRequestFailed
@@ -218,7 +218,7 @@ spec:
         {{- include "kubedbcom-mariadb-editor-options.alertLabels" . | nindent 8 }}
       annotations:
         summary: MariaDBOpsRequest failed (mariadbopsrequest {{`{{`}} $labels.mariadbopsrequest {{`}}`}})
-        description: "MaraiDBOpsRequest {{`{{`}} $labels.mariadbopsrequest {{`}}`}} failed \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        description: "MariaDBOpsRequest {{`{{`}} $labels.mariadbopsrequest {{`}}`}} failed \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
   {{ end -}}
   {{ if .Values.form.alert.groups.stash.enabled -}}

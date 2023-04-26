@@ -1,3 +1,115 @@
+form:
+  alert:
+    additionalRuleLabels: {}
+    annotations: {}
+    enabled: true
+    groups:
+      operator:
+        enabled: true
+        rules:
+          appPhaseCritical:
+            duration: 15m
+            enabled: true
+            severity: warning
+          appPhaseNotReady:
+            duration: 5m
+            enabled: true
+            severity: critical
+      opsManager:
+        enabled: true
+        rules:
+          opsRequestFailed:
+            duration: 0m
+            enabled: true
+            severity: critical
+          opsRequestOnProgress:
+            duration: 0m
+            enabled: true
+            severity: info
+          opsRequestStatusProgressingToLong:
+            duration: 30m
+            enabled: true
+            severity: critical
+      stash:
+        enabled: true
+        rules:
+          backupSessionFailed:
+            duration: 0m
+            enabled: true
+            severity: critical
+          backupSessionPeriodTooLong:
+            duration: 0m
+            enabled: true
+            severity: warning
+            val: 1800
+          noBackupSessionForTooLong:
+            duration: 0m
+            enabled: true
+            severity: warning
+            val: 18000
+          repositoryCorrupted:
+            duration: 5m
+            enabled: true
+            severity: critical
+          repositoryStorageRunningLow:
+            duration: 5m
+            enabled: true
+            severity: warning
+            val: 1.073741824e+10
+          restoreSessionFailed:
+            duration: 0m
+            enabled: true
+            severity: critical
+          restoreSessionPeriodTooLong:
+            duration: 0m
+            enabled: true
+            severity: warning
+            val: 1800
+      vault:
+        enabled: true
+        rules:
+          vaultAutoPilotNodeUnhealthy:
+            duration: 1m
+            enabled: true
+            severity: critical
+          vaultDown:
+            duration: 0m
+            enabled: true
+            severity: critical
+          vaultLeadershipLoss:
+            duration: 1m
+            enabled: true
+            severity: critical
+            val: 5
+          vaultLeadershipSetupFailures:
+            duration: 1m
+            enabled: true
+            severity: critical
+            val: 5
+          vaultLeadershipStepsDowns:
+            duration: 1m
+            enabled: true
+            severity: critical
+            val: 5
+          vaultRequestFailures:
+            duration: 15m
+            enabled: true
+            severity: critical
+          vaultResponseFailures:
+            duration: 15m
+            enabled: true
+            severity: critical
+          vaultSealed:
+            duration: 0m
+            enabled: true
+            severity: critical
+          vaultTooManyInfinityTokens:
+            duration: 5m
+            enabled: true
+            severity: warning
+            val: 3
+    labels:
+      release: prometheus
 metadata:
   resource:
     group: kubevault.com

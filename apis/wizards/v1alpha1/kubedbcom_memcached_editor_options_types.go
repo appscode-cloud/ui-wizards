@@ -19,7 +19,7 @@ package v1alpha1
 import (
 	core "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	api "kubepack.dev/lib-app/api/v1alpha1"
+	api "x-helm.dev/apimachinery/apis/releases/v1alpha1"
 )
 
 // KubedbcomMemcachedEditorOptions defines the schama for Memcached Editor UI Options.

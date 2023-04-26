@@ -20,7 +20,7 @@ import (
 	core "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	kubedb "kubedb.dev/apimachinery/apis/kubedb/v1alpha2"
-	api "kubepack.dev/lib-app/api/v1alpha1"
+	api "x-helm.dev/apimachinery/apis/releases/v1alpha1"
 )
 
 // KubedbcomPgbouncerEditorOptions defines the schama for PgBouncer Editor UI Options.

@@ -3,35 +3,39 @@ module go.bytebuilders.dev/ui-wizards
 go 1.18
 
 require (
+	go.appscode.dev/alerts v0.1.0
 	k8s.io/api v0.25.3
-	k8s.io/apimachinery v0.25.3
-	kmodules.xyz/client-go v0.25.16
+	k8s.io/apimachinery v0.25.4
+	kmodules.xyz/client-go v0.25.21
 	kmodules.xyz/objectstore-api v0.25.1-0.20221104003322-f0289b5b6ca2
 	kmodules.xyz/offshoot-api v0.25.0
 	kmodules.xyz/schema-checker v0.4.2-0.20220924062710-97ca6e9cc6e1
-	kubedb.dev/apimachinery v0.32.0
-	kubepack.dev/lib-app v0.0.7-0.20221024072338-713f6f659246
-	stash.appscode.dev/apimachinery v0.24.0
+	kubedb.dev/apimachinery v0.33.1
+	stash.appscode.dev/apimachinery v0.28.0
+	x-helm.dev/apimachinery v0.0.8
 )
 
 require (
-	github.com/Masterminds/semver/v3 v3.1.1 // indirect
+	github.com/Masterminds/semver/v3 v3.2.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cert-manager/cert-manager v1.9.1 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
-	github.com/fsnotify/fsnotify v1.5.4 // indirect
+	github.com/fsnotify/fsnotify v1.6.0 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.2-0.20181231171920-c182affec369 // indirect
+	github.com/onsi/ginkgo/v2 v2.9.1 // indirect
+	github.com/onsi/gomega v1.27.3 // indirect
+	github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring v0.59.1 // indirect
 	github.com/prometheus/client_golang v1.13.0 // indirect
-	github.com/prometheus/client_model v0.2.0 // indirect
+	github.com/prometheus/client_model v0.3.0 // indirect
 	github.com/prometheus/common v0.37.0 // indirect
 	github.com/prometheus/procfs v0.8.0 // indirect
 	gomodules.xyz/mergo v0.3.13 // indirect
 	gomodules.xyz/pointer v0.1.0 // indirect
 	k8s.io/component-base v0.25.3 // indirect
 	kmodules.xyz/custom-resources v0.25.1 // indirect
-	kmodules.xyz/monitoring-agent-api v0.25.0 // indirect
+	kmodules.xyz/monitoring-agent-api v0.25.1 // indirect
 	sigs.k8s.io/gateway-api v0.4.3 // indirect
 )
 
@@ -47,7 +51,7 @@ require (
 	github.com/go-openapi/swag v0.22.3 // indirect
 	github.com/gobeam/stringy v0.0.5 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
-	github.com/golang/protobuf v1.5.2 // indirect
+	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/gnostic v0.6.9 // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/google/gofuzz v1.2.0 // indirect
@@ -64,11 +68,11 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/yudai/gojsondiff v1.0.0 // indirect
 	github.com/yudai/golcs v0.0.0-20170316035057-ecda9a501e82 // indirect
-	golang.org/x/net v0.7.0 // indirect
-	golang.org/x/oauth2 v0.1.0 // indirect
-	golang.org/x/sys v0.5.0 // indirect
-	golang.org/x/term v0.5.0 // indirect
-	golang.org/x/text v0.7.0 // indirect
+	golang.org/x/net v0.9.0 // indirect
+	golang.org/x/oauth2 v0.7.0 // indirect
+	golang.org/x/sys v0.7.0 // indirect
+	golang.org/x/term v0.7.0 // indirect
+	golang.org/x/text v0.9.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
 	gomodules.xyz/jsonpatch/v2 v2.2.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
@@ -80,12 +84,10 @@ require (
 	k8s.io/client-go v0.25.3 // indirect
 	k8s.io/klog/v2 v2.80.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20221012153701-172d655c2280
-	k8s.io/utils v0.0.0-20221012122500-cfd413dd9e85 // indirect
+	k8s.io/utils v0.0.0-20221108210102-8e77b1f39fe2 // indirect
 	kmodules.xyz/prober v0.25.0 // indirect
-	kubepack.dev/kubepack v0.5.1 // indirect
-	sigs.k8s.io/application v0.8.2-0.20200306235134-f10d9ca8abd4 // indirect
 	sigs.k8s.io/controller-runtime v0.13.1 // indirect
-	sigs.k8s.io/json v0.0.0-20220713155537-f223a00ba0e2 // indirect
+	sigs.k8s.io/json v0.0.0-20221116044647-bc3834ca7abd // indirect
 	sigs.k8s.io/structured-merge-diff/v4 v4.2.3 // indirect
 	sigs.k8s.io/yaml v1.3.0 // indirect
 )

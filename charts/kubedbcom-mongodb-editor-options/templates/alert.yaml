@@ -23,7 +23,7 @@ spec:
     rules:
     {{ if .Values.form.alert.groups.database.rules.mongodbVirtualMemoryUsage.enabled -}}
     - alert: MongodbVirtualMemoryUsage
-      expr: sum(mongodb_memory{type="virtual",job="{{ $app }}-stats",namespace="{{ .Release.Namespace }}"}) BY (job) > {{ .Values.form.alert.groups.database.rules.mongodbVirtualMemoryUsage.val }}
+      expr: sum(mongodb_ss_mem_virtual{job="{{ $app }}-stats",namespace="{{ .Release.Namespace }}"}) BY (job) > {{ .Values.form.alert.groups.database.rules.mongodbVirtualMemoryUsage.val }}
       for: {{ .Values.form.alert.groups.database.rules.mongodbVirtualMemoryUsage.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.database.rules.mongodbVirtualMemoryUsage.severity }}
@@ -45,7 +45,7 @@ spec:
     {{- end }}
     {{ if .Values.form.alert.groups.database.rules.mongodbNumberCursorsOpen.enabled -}}
     - alert: MongodbNumberCursorsOpen
-      expr: mongodb_mongod_metrics_cursor_open{state="total",job="{{ $app }}-stats",namespace="{{ .Release.Namespace }}"} > {{ .Values.form.alert.groups.database.rules.mongodbNumberCursorsOpen.val }}
+      expr: mongodb_ss_metrics_cursor_open{csr_type="total",job="{{ $app }}-stats",namespace="{{ .Release.Namespace }}"} > {{ .Values.form.alert.groups.database.rules.mongodbNumberCursorsOpen.val }}
       for: {{ .Values.form.alert.groups.database.rules.mongodbNumberCursorsOpen.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.database.rules.mongodbNumberCursorsOpen.severity }}
@@ -56,7 +56,7 @@ spec:
     {{- end }}
     {{ if .Values.form.alert.groups.database.rules.mongodbCursorsTimeouts.enabled -}}
     - alert: MongodbCursorsTimeouts
-      expr: increase(mongodb_mongod_metrics_cursor_timed_out_total{job="{{ $app }}-stats",namespace="{{ .Release.Namespace }}"}[1m]) > {{ .Values.form.alert.groups.database.rules.mongodbCursorsTimeouts.val }}
+      expr: increase(mongodb_ss_metrics_cursor_timedOut{job="{{ $app }}-stats",namespace="{{ .Release.Namespace }}"}[1m]) > {{ .Values.form.alert.groups.database.rules.mongodbCursorsTimeouts.val }}
       for: {{ .Values.form.alert.groups.database.rules.mongodbCursorsTimeouts.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.database.rules.mongodbCursorsTimeouts.severity }}
@@ -67,7 +67,7 @@ spec:
     {{- end }}
     {{ if .Values.form.alert.groups.database.rules.mongodbTooManyConnections.enabled -}}
     - alert: MongodbTooManyConnections
-      expr: avg by(instance) (rate(mongodb_connections{state="current",job="{{ $app }}-stats",namespace="{{ .Release.Namespace }}"}[1m])) / avg by(instance) (sum (mongodb_connections) by (instance)) * 100 > {{ .Values.form.alert.groups.database.rules.mongodbTooManyConnections.val }}
+      expr: avg by(instance) (rate(mongodb_ss_connections{conn_type="current",job="{{ $app }}-stats",namespace="{{ .Release.Namespace }}"}[1m])) / avg by(instance) (sum (mongodb_ss_connections) by (instance)) * 100 > {{ .Values.form.alert.groups.database.rules.mongodbTooManyConnections.val }}
       for: {{ .Values.form.alert.groups.database.rules.mongodbTooManyConnections.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.database.rules.mongodbTooManyConnections.severity }}
@@ -101,8 +101,8 @@ spec:
     {{ if .Values.form.alert.groups.database.rules.mongodbHighLatency.enabled -}}
     - alert: MongoDBHighLatency
       expr: |
-        rate(mongodb_mongod_op_latencies_latency_total{job="{{ $app }}-stats",namespace="{{ .Release.Namespace }}"}[5m]) /
-        rate(mongodb_mongod_op_latencies_ops_total{job="{{ $app }}-stats",namespace="{{ .Release.Namespace }}"}[5m]) > {{ .Values.form.alert.groups.database.rules.mongodbHighLatency.val }}
+        rate(mongodb_ss_opLatencies_latency{job="{{ $app }}-stats",namespace="{{ .Release.Namespace }}"}[5m]) /
+        rate(mongodb_ss_opLatencies_ops{job="{{ $app }}-stats",namespace="{{ .Release.Namespace }}"}[5m]) > {{ .Values.form.alert.groups.database.rules.mongodbHighLatency.val }}
       for: {{ .Values.form.alert.groups.database.rules.mongodbHighLatency.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.database.rules.mongodbHighLatency.severity }}
@@ -114,8 +114,8 @@ spec:
     {{ if .Values.form.alert.groups.database.rules.mongodbHighTicketUtilization.enabled -}}
     - alert: MongoDBHighTicketUtilization
       expr: |
-        (mongodb_mongod_wiredtiger_concurrent_transactions_out_tickets{job="{{ $app }}-stats",namespace="{{ .Release.Namespace }}"} /
-        mongodb_mongod_wiredtiger_concurrent_transactions_total_tickets{job="{{ $app }}-stats",namespace="{{ .Release.Namespace }}"}) * 100
+        (mongodb_ss_wt_concurrentTransactions_out{job="{{ $app }}-stats",namespace="{{ .Release.Namespace }}"} /
+        mongodb_ss_wt_concurrentTransactions_totalTickets{job="{{ $app }}-stats",namespace="{{ .Release.Namespace }}"}) * 100
         > {{ .Values.form.alert.groups.database.rules.mongodbHighTicketUtilization.val }}
       for: {{ .Values.form.alert.groups.database.rules.mongodbHighTicketUtilization.duration }}
       labels:
@@ -127,7 +127,7 @@ spec:
     {{- end }}
     {{ if .Values.form.alert.groups.database.rules.mongodbRecurrentCursorTimeout.enabled -}}
     - alert: MongoDBRecurrentCursorTimeout
-      expr: rate(mongodb_mongod_metrics_cursor_timed_out_total{job="{{ $app }}-stats",namespace="{{ .Release.Namespace }}"}[5m]) > {{ .Values.form.alert.groups.database.rules.mongodbRecurrentCursorTimeout.val }}
+      expr: rate(mongodb_ss_metrics_cursor_timedOut{job="{{ $app }}-stats",namespace="{{ .Release.Namespace }}"}[5m]) > {{ .Values.form.alert.groups.database.rules.mongodbRecurrentCursorTimeout.val }}
       for: {{ .Values.form.alert.groups.database.rules.mongodbRecurrentCursorTimeout.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.database.rules.mongodbRecurrentCursorTimeout.severity }}
@@ -138,7 +138,7 @@ spec:
     {{- end }}
     {{ if .Values.form.alert.groups.database.rules.mongodbRecurrentMemoryPageFaults.enabled -}}
     - alert: MongoDBRecurrentMemoryPageFaults
-      expr: rate(mongodb_extra_info_page_faults_total{job="{{ $app }}-stats",namespace="{{ .Release.Namespace }}"}[5m]) > {{ .Values.form.alert.groups.database.rules.mongodbRecurrentMemoryPageFaults.val }}
+      expr: rate(mongodb_ss_extra_info_page_faults{job="{{ $app }}-stats",namespace="{{ .Release.Namespace }}"}[5m]) > {{ .Values.form.alert.groups.database.rules.mongodbRecurrentMemoryPageFaults.val }}
       for: {{ .Values.form.alert.groups.database.rules.mongodbRecurrentMemoryPageFaults.duration }}
       labels:
         severity: {{ .Values.form.alert.groups.database.rules.mongodbRecurrentMemoryPageFaults.severity }}

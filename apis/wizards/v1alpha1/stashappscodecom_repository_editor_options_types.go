@@ -19,7 +19,7 @@ package v1alpha1
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	store "kmodules.xyz/objectstore-api/api/v1"
-	api "kubepack.dev/lib-app/api/v1alpha1"
+	api "x-helm.dev/apimachinery/apis/releases/v1alpha1"
 )
 
 // StashappscodecomRepositoryEditorOptions defines the schama for Stash Repository Editor UI Options.
