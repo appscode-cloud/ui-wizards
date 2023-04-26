@@ -469,17 +469,17 @@ async function fetchJsons({ axios, itemCtx }) {
   let ui = {};
   let language = {};
   let functions = {};
-  const { name, url, version, packageviewUrlPrefix } = itemCtx.chart;
+  const { name, sourceRef, version, packageviewUrlPrefix } = itemCtx.chart;
   
   try {
     ui = await axios.get(
-      `${packageviewUrlPrefix}/create-ui.yaml?name=${name}&url=${url}&version=${version}&format=json`
+      `${packageviewUrlPrefix}/create-ui.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`
     );
     language = await axios.get(
-      `${packageviewUrlPrefix}/language.yaml?name=${name}&url=${url}&version=${version}&format=json`
+      `${packageviewUrlPrefix}/language.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`
     );
     const functionString = await axios.get(
-      `${packageviewUrlPrefix}/functions.js?name=${name}&url=${url}&version=${version}`
+      `${packageviewUrlPrefix}/functions.js?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}`
     );
     // declare evaluate the functionString to get the functions Object
     const evalFunc = new Function(functionString.data || "");
