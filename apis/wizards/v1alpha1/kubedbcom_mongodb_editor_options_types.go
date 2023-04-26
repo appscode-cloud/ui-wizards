@@ -17,9 +17,10 @@ limitations under the License.
 package v1alpha1
 
 import (
+	alerts "go.appscode.dev/alerts/apis/alerts/v1alpha1"
 	core "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	api "kubepack.dev/lib-app/api/v1alpha1"
+	api "x-helm.dev/apimachinery/apis/releases/v1alpha1"
 )
 
 // KubedbcomMongodbEditorOptions defines the schama for MongoDB Editor UI Options.
@@ -38,7 +39,7 @@ type KubedbcomMongodbEditorOptions struct {
 type KubedbcomMongodbEditorOptionsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Spec         KubedbcomMongodbEditorOptionsSpecSpec `json:"spec"`
-	Form         KubedbcomMongodbEditorOptionsSpecForm `json:"form"`
+	Form         alerts.MongodbAlertsSpecForm          `json:"form"`
 }
 
 type KubedbcomMongodbEditorOptionsSpecSpec struct {
@@ -59,10 +60,6 @@ type KubedbcomMongodbEditorOptionsSpecSpec struct {
 	Resources         core.ResourceRequirements `json:"resources"`
 	AuthSecret        AuthSecret                `json:"authSecret"`
 	Monitoring        Monitoring                `json:"monitoring"`
-}
-
-type KubedbcomMongodbEditorOptionsSpecForm struct {
-	Alert MongoDBAlert `json:"alert"`
 }
 
 // +kubebuilder:validation:Enum=Standalone;Replicaset;Sharded
@@ -99,47 +96,6 @@ type MongoDBShardTopology struct {
 	ConfigServer MongoDBConfigServer `json:"configServer"`
 	Mongos       MongoDBMongos       `json:"mongos"`
 }
-
-// *** Alerts *** //
-
-type MongoDBAlert struct {
-	Enabled bool              `json:"enabled"`
-	Labels  map[string]string `json:"labels"`
-	// +optional
-	Annotations map[string]string `json:"annotations"`
-	// +optional
-	AdditionalRuleLabels map[string]string  `json:"additionalRuleLabels"`
-	Groups               MongoDBAlertGroups `json:"groups"`
-}
-
-type MongoDBAlertGroups struct {
-	Database      MongoDBDatabaseAlert `json:"database"`
-	Provisioner   ProvisionerAlert     `json:"provisioner"`
-	OpsManager    OpsManagerAlert      `json:"opsManager"`
-	Stash         StashAlert           `json:"stash"`
-	SchemaManager SchemaManagerAlert   `json:"schemaManager"`
-}
-
-type MongoDBDatabaseAlert struct {
-	Enabled bool                      `json:"enabled"`
-	Rules   MongoDBDatabaseAlertRules `json:"rules"`
-}
-
-type MongoDBDatabaseAlertRules struct {
-	MongodbVirtualMemoryUsage        IntValAlert `json:"mongodbVirtualMemoryUsage"`
-	MongodbReplicationLag            IntValAlert `json:"mongodbReplicationLag"`
-	MongodbNumberCursorsOpen         IntValAlert `json:"mongodbNumberCursorsOpen"`
-	MongodbCursorsTimeouts           IntValAlert `json:"mongodbCursorsTimeouts"`
-	MongodbTooManyConnections        IntValAlert `json:"mongodbTooManyConnections"`
-	MongoDBPhaseCritical             FixedAlert  `json:"mongoDBPhaseCritical"`
-	MongoDBDown                      FixedAlert  `json:"mongoDBDown"`
-	MongodbHighLatency               IntValAlert `json:"mongodbHighLatency"`
-	MongodbHighTicketUtilization     IntValAlert `json:"mongodbHighTicketUtilization"`
-	MongodbRecurrentCursorTimeout    IntValAlert `json:"mongodbRecurrentCursorTimeout"`
-	MongodbRecurrentMemoryPageFaults IntValAlert `json:"mongodbRecurrentMemoryPageFaults"`
-}
-
-// *** Alerts *** //
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 

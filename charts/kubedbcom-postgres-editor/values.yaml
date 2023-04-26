@@ -7,10 +7,29 @@ form:
       database:
         enabled: true
         rules:
+          postgresExporterError:
+            duration: 5m
+            enabled: true
+            severity: warning
+          postgresHighRollbackRate:
+            duration: 0m
+            enabled: true
+            severity: warning
+            val: 0.02
           postgresInstanceDown:
             duration: 0m
             enabled: true
             severity: critical
+          postgresNotEnoughConnections:
+            duration: 2m
+            enabled: true
+            severity: warning
+            val: 5
+          postgresReplicationLag:
+            duration: 0m
+            enabled: true
+            severity: critical
+            val: 30s
           postgresRestarted:
             duration: 0m
             enabled: true
@@ -20,35 +39,16 @@ form:
             duration: 2m
             enabled: true
             severity: warning
+          postgresSplitBrain:
+            duration: 0m
+            enabled: true
+            severity: critical
           postgresTooManyConnections:
             duration: 2m
             enabled: true
             severity: warning
             val: 80
-          postgresqlExporterError:
-            duration: 5m
-            enabled: true
-            severity: warning
-          postgresqlHighRollbackRate:
-            duration: 0m
-            enabled: true
-            severity: warning
-            val: 0.02
-          postgresqlNotEnoughConnections:
-            duration: 2m
-            enabled: true
-            severity: warning
-            val: 5
-          postgresqlReplicationLag:
-            duration: 0m
-            enabled: true
-            severity: critical
-            val: 30s
-          postgresqlSplitBrain:
-            duration: 0m
-            enabled: true
-            severity: critical
-          postgresqlTooManyLocksAcquired:
+          postgresTooManyLocksAcquired:
             duration: 2m
             enabled: true
             severity: critical
@@ -137,7 +137,8 @@ form:
             enabled: true
             severity: warning
             val: 1800
-    labels: {}
+    labels:
+      release: kube-prometheus-stack
 metadata:
   resource:
     group: kubedb.com

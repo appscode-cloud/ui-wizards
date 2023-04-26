@@ -17,9 +17,10 @@ limitations under the License.
 package v1alpha1
 
 import (
+	alerts "go.appscode.dev/alerts/apis/alerts/v1alpha1"
 	core "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	api "kubepack.dev/lib-app/api/v1alpha1"
+	api "x-helm.dev/apimachinery/apis/releases/v1alpha1"
 )
 
 // KubedbcomProxysqlEditorOptions defines the schama for Proxysql Editor UI Options.
@@ -38,7 +39,7 @@ type KubedbcomProxysqlEditorOptions struct {
 type KubedbcomProxysqlEditorOptionsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Spec         KubedbcomProxysqlEditorOptionsSpecSpec `json:"spec"`
-	Form         KubedbcomProxysqlEditorOptionsSpecForm `json:"form"`
+	Form         alerts.ProxysqlAlertsSpecForm          `json:"form"`
 }
 
 type KubedbcomProxysqlEditorOptionsSpecSpec struct {
@@ -64,57 +65,6 @@ type KubedbcomProxysqlEditorMonitoring struct {
 	Agent          MonitoringAgent       `json:"agent"`
 	ServiceMonitor *ServiceMonitorLabels `json:"serviceMonitor"`
 }
-
-// *** Alerts *** //
-
-type KubedbcomProxysqlEditorOptionsSpecForm struct {
-	Alert ProxySQLAlert `json:"alert"`
-}
-
-type ProxySQLAlert struct {
-	Enabled bool              `json:"enabled"`
-	Labels  map[string]string `json:"labels"`
-	// +optional
-	Annotations map[string]string `json:"annotations"`
-	// +optional
-	AdditionalRuleLabels map[string]string   `json:"additionalRuleLabels"`
-	Groups               ProxySQLAlertGroups `json:"groups"`
-}
-
-type ProxySQLAlertGroups struct {
-	Database    ProxySQLDatabaseAlert `json:"database"`
-	Cluster     ProxySQLClusterAlert  `json:"cluster"`
-	Provisioner ProvisionerAlert      `json:"provisioner"`
-	OpsManager  OpsManagerAlert       `json:"opsManager"`
-}
-
-type ProxySQLDatabaseAlert struct {
-	Enabled bool                       `json:"enabled"`
-	Rules   ProxySQLDatabaseAlertRules `json:"rules"`
-}
-
-type ProxySQLDatabaseAlertRules struct {
-	ProxySQLInstanceDown       FixedAlert  `json:"proxySQLInstanceDown"`
-	ProxySQLServiceDown        FixedAlert  `json:"proxySQLServiceDown"`
-	ProxySQLTooManyConnections IntValAlert `json:"proxySQLTooManyConnections"`
-	ProxySQLHighThreadsRunning IntValAlert `json:"proxySQLHighThreadsRunning"`
-	ProxySQLSlowQueries        FixedAlert  `json:"proxySQLSlowQueries"`
-	ProxySQLRestarted          IntValAlert `json:"proxySQLRestarted"`
-	ProxySQLHighQPS            IntValAlert `json:"proxySQLHighQPS"`
-	ProxySQLHighIncomingBytes  IntValAlert `json:"proxySQLHighIncomingBytes"`
-	ProxySQLHighOutgoingBytes  IntValAlert `json:"proxySQLHighOutgoingBytes"`
-}
-
-type ProxySQLClusterAlert struct {
-	Enabled bool                      `json:"enabled"`
-	Rules   ProxySQLClusterAlertRules `json:"rules"`
-}
-
-type ProxySQLClusterAlertRules struct {
-	ProxysqlCLusterSyncFailure FloatValAlertConfig `json:"proxysqlCLusterSyncFailure"`
-}
-
-// *** Alerts *** //
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
