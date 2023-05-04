@@ -45,18 +45,18 @@ The command removes all the Kubernetes components associated with the chart and 
 
 The following table lists the configurable parameters of the `discoveryk8sio-endpointslice-editor` chart and their default values.
 
-|     Parameter      | Description |                Default                |
-|--------------------|-------------|---------------------------------------|
-| apiVersion         |             | <code>discovery.k8s.io/v1beta1</code> |
-| kind               |             | <code>EndpointSlice</code>            |
-| metadata.name      |             | <code>endpointslice</code>            |
-| metadata.namespace |             | <code>default</code>                  |
+|     Parameter      | Description |             Default              |
+|--------------------|-------------|----------------------------------|
+| apiVersion         |             | <code>discovery.k8s.io/v1</code> |
+| kind               |             | <code>EndpointSlice</code>       |
+| metadata.name      |             | <code>endpointslice</code>       |
+| metadata.namespace |             | <code>default</code>             |
 
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm upgrade -i`. For example:
 
 ```bash
-$ helm upgrade -i discoveryk8sio-endpointslice-editor bytebuilders-ui/discoveryk8sio-endpointslice-editor -n default --create-namespace --version=v0.4.14 --set apiVersion=discovery.k8s.io/v1beta1
+$ helm upgrade -i discoveryk8sio-endpointslice-editor bytebuilders-ui/discoveryk8sio-endpointslice-editor -n default --create-namespace --version=v0.4.14 --set apiVersion=discovery.k8s.io/v1
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
