@@ -2921,6 +2921,8 @@ properties:
                         type: object
                       dnsPolicy:
                         type: string
+                      enableServiceLinks:
+                        type: boolean
                       env:
                         items:
                           properties:
@@ -3777,6 +3779,7 @@ properties:
                         additionalProperties:
                           type: string
                         type: object
+                        x-kubernetes-map-type: atomic
                       priority:
                         format: int32
                         type: integer
@@ -3879,6 +3882,8 @@ properties:
                               x-kubernetes-int-or-string: true
                             type: object
                         type: object
+                      runtimeClassName:
+                        type: string
                       schedulerName:
                         type: string
                       securityContext:
@@ -4243,10 +4248,8 @@ properties:
                                           additionalProperties:
                                             type: string
                                           type: object
-                                        finalizers:
-                                          items:
-                                            type: string
-                                          type: array
+                                        generateName:
+                                          type: string
                                         labels:
                                           additionalProperties:
                                             type: string
@@ -4255,6 +4258,29 @@ properties:
                                           type: string
                                         namespace:
                                           type: string
+                                        ownerReferences:
+                                          items:
+                                            properties:
+                                              apiVersion:
+                                                type: string
+                                              blockOwnerDeletion:
+                                                type: boolean
+                                              controller:
+                                                type: boolean
+                                              kind:
+                                                type: string
+                                              name:
+                                                type: string
+                                              uid:
+                                                type: string
+                                            required:
+                                            - apiVersion
+                                            - kind
+                                            - name
+                                            - uid
+                                            type: object
+                                            x-kubernetes-map-type: atomic
+                                          type: array
                                       type: object
                                     spec:
                                       properties:
@@ -4401,17 +4427,6 @@ properties:
                                   type: boolean
                               required:
                               - pdName
-                              type: object
-                            gitRepo:
-                              properties:
-                                directory:
-                                  type: string
-                                repository:
-                                  type: string
-                                revision:
-                                  type: string
-                              required:
-                              - repository
                               type: object
                             glusterfs:
                               properties:
@@ -5753,6 +5768,8 @@ properties:
                         type: object
                       dnsPolicy:
                         type: string
+                      enableServiceLinks:
+                        type: boolean
                       env:
                         items:
                           properties:
@@ -6609,6 +6626,7 @@ properties:
                         additionalProperties:
                           type: string
                         type: object
+                        x-kubernetes-map-type: atomic
                       priority:
                         format: int32
                         type: integer
@@ -6711,6 +6729,8 @@ properties:
                               x-kubernetes-int-or-string: true
                             type: object
                         type: object
+                      runtimeClassName:
+                        type: string
                       schedulerName:
                         type: string
                       securityContext:
@@ -7075,10 +7095,8 @@ properties:
                                           additionalProperties:
                                             type: string
                                           type: object
-                                        finalizers:
-                                          items:
-                                            type: string
-                                          type: array
+                                        generateName:
+                                          type: string
                                         labels:
                                           additionalProperties:
                                             type: string
@@ -7087,6 +7105,29 @@ properties:
                                           type: string
                                         namespace:
                                           type: string
+                                        ownerReferences:
+                                          items:
+                                            properties:
+                                              apiVersion:
+                                                type: string
+                                              blockOwnerDeletion:
+                                                type: boolean
+                                              controller:
+                                                type: boolean
+                                              kind:
+                                                type: string
+                                              name:
+                                                type: string
+                                              uid:
+                                                type: string
+                                            required:
+                                            - apiVersion
+                                            - kind
+                                            - name
+                                            - uid
+                                            type: object
+                                            x-kubernetes-map-type: atomic
+                                          type: array
                                       type: object
                                     spec:
                                       properties:
@@ -7233,17 +7274,6 @@ properties:
                                   type: boolean
                               required:
                               - pdName
-                              type: object
-                            gitRepo:
-                              properties:
-                                directory:
-                                  type: string
-                                repository:
-                                  type: string
-                                revision:
-                                  type: string
-                              required:
-                              - repository
                               type: object
                             glusterfs:
                               properties:
