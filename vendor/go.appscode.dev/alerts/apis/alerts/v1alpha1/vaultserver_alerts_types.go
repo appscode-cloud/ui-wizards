@@ -50,7 +50,7 @@ type VaultserverAlertsSpecForm struct {
 }
 
 type VaultserverAlertsAlert struct {
-	Enabled bool              `json:"enabled"`
+	Enabled SeverityFlag      `json:"enabled"`
 	Labels  map[string]string `json:"labels"`
 	// +optional
 	Annotations map[string]string `json:"annotations"`
@@ -67,7 +67,7 @@ type VaultserverAlertsAlertGroups struct {
 }
 
 type VaultserverAlertsVaultAlert struct {
-	Enabled bool                             `json:"enabled"`
+	Enabled SeverityFlag                     `json:"enabled"`
 	Rules   VaultserverAlertsVaultAlertRules `json:"rules"`
 }
 

@@ -50,7 +50,7 @@ type PostgresAlertsSpecForm struct {
 }
 
 type PostgresAlert struct {
-	Enabled bool              `json:"enabled"`
+	Enabled SeverityFlag      `json:"enabled"`
 	Labels  map[string]string `json:"labels"`
 	// +optional
 	Annotations map[string]string `json:"annotations"`
@@ -68,7 +68,7 @@ type PostgresAlertGroups struct {
 }
 
 type PostgresDatabaseAlert struct {
-	Enabled bool                       `json:"enabled"`
+	Enabled SeverityFlag               `json:"enabled"`
 	Rules   PostgresDatabaseAlertRules `json:"rules"`
 }
 

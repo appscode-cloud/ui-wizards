@@ -50,7 +50,7 @@ type ElasticsearchAlertsSpecForm struct {
 }
 
 type ElasticsearchAlert struct {
-	Enabled bool              `json:"enabled"`
+	Enabled SeverityFlag      `json:"enabled"`
 	Labels  map[string]string `json:"labels"`
 	// +optional
 	Annotations map[string]string `json:"annotations"`
@@ -67,7 +67,7 @@ type ElasticsearchAlertGroups struct {
 }
 
 type ElasticsearchDatabaseAlert struct {
-	Enabled bool                            `json:"enabled"`
+	Enabled SeverityFlag                    `json:"enabled"`
 	Rules   ElasticsearchDatabaseAlertRules `json:"rules"`
 }
 

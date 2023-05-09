@@ -50,7 +50,7 @@ type MysqlAlertsSpecForm struct {
 }
 
 type MySQLAlert struct {
-	Enabled bool              `json:"enabled"`
+	Enabled SeverityFlag      `json:"enabled"`
 	Labels  map[string]string `json:"labels"`
 	// +optional
 	Annotations map[string]string `json:"annotations"`
@@ -69,7 +69,7 @@ type MySQLAlertGroups struct {
 }
 
 type MySQLDatabaseAlert struct {
-	Enabled bool                    `json:"enabled"`
+	Enabled SeverityFlag            `json:"enabled"`
 	Rules   MySQLDatabaseAlertRules `json:"rules"`
 }
 
@@ -88,7 +88,7 @@ type MySQLDatabaseAlertRules struct {
 }
 
 type MySQLGroupAlert struct {
-	Enabled bool                 `json:"enabled"`
+	Enabled SeverityFlag         `json:"enabled"`
 	Rules   MySQLGroupAlertRules `json:"rules"`
 }
 
