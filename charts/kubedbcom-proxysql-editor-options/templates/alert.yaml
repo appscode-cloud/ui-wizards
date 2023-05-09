@@ -1,11 +1,11 @@
 {{ $app := (include "kubedbcom-proxysql-editor-options.fullname" .) }}
 
-{{ if .Values.form.alert.enabled }}
+{{ if (include "kubedbcom-proxysql-editor-options.alertGroupEnabled" .Values.form.alert.enabled) }}
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
   name: {{ $app }}
-  namespace: {{ .Release.Namespace }}
+  namespace: {{ $.Release.Namespace }}
   labels:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     {{- include "kubedbcom-proxysql-editor-options.selectorLabels" . | nindent 4 }}
@@ -18,163 +18,178 @@ annotations:
   {{- end }}
 spec:
   groups:
-  {{ if .Values.form.alert.groups.database.enabled -}}
-  - name: proxysql.database.{{ .Release.Namespace }}.{{ $app }}.rules
+  {{ with .Values.form.alert.groups.database -}}
+  {{ if (include "kubedbcom-proxysql-editor-options.alertGroupEnabled" .enabled) -}}
+  - name: proxysql.database.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if .Values.form.alert.groups.database.rules.proxysqlInstanceDown.enabled -}}
+    {{ if (include "kubedbcom-proxysql-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.proxysqlInstanceDown.enabled .rules.proxysqlInstanceDown.severity)) -}}
     - alert: ProxySQLInstanceDown
-      expr: proxysql_uptime_seconds_total{job="{{ $app }}-stats",namespace="{{ .Release.Namespace }}"} == 0
-      for: {{ .Values.form.alert.groups.database.rules.proxysqlInstanceDown.duration }}
+      expr: proxysql_uptime_seconds_total{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} == 0
+      for: {{ .rules.proxysqlInstanceDown.duration }}
       labels:
-        severity: {{ .Values.form.alert.groups.database.rules.proxysqlInstanceDown.severity }}
-        {{- include "kubedbcom-proxysql-editor-options.alertLabels" . | nindent 8 }}
+        severity: {{ .rules.proxysqlInstanceDown.severity }}
+        {{- include "kubedbcom-proxysql-editor-options.alertLabels" $ | nindent 8 }}
       annotations:
         summary: ProxySQL instance down (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "ProxySQL instance is down on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if .Values.form.alert.groups.database.rules.proxysqlServiceDown.enabled -}}
+    {{ if (include "kubedbcom-proxysql-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.proxysqlServiceDown.enabled .rules.proxysqlServiceDown.severity)) -}}
     - alert: ProxySQLServiceDown
-      expr: sum by (service) (proxysql_uptime_seconds_total{job="{{ $app }}-stats",namespace="{{ .Release.Namespace }}"}) == 0
-      for: {{ .Values.form.alert.groups.database.rules.proxysqlServiceDown.duration }}
+      expr: sum by (service) (proxysql_uptime_seconds_total{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}) == 0
+      for: {{ .rules.proxysqlServiceDown.duration }}
       labels:
-        severity: {{ .Values.form.alert.groups.database.rules.proxysqlServiceDown.severity }}
-        {{- include "kubedbcom-proxysql-editor-options.alertLabels" . | nindent 8 }}
+        severity: {{ .rules.proxysqlServiceDown.severity }}
+        {{- include "kubedbcom-proxysql-editor-options.alertLabels" $ | nindent 8 }}
       annotations:
         summary: ProxySQL service down (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "ProxySQL service is down on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if .Values.form.alert.groups.database.rules.proxysqlTooManyConnections.enabled -}}
+    {{ if (include "kubedbcom-proxysql-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.proxysqlTooManyConnections.enabled .rules.proxysqlTooManyConnections.severity)) -}}
     - alert: ProxySQLTooManyConnections
-      expr: max_over_time(proxysql_client_connections_connected{job="{{ $app }}-stats",namespace="{{ .Release.Namespace }}"}[1m]) / proxysql_mysql_max_connections{job="{{ $app }}-stats",namespace="{{ .Release.Namespace }}"} * 100 > {{.Values.form.alert.groups.database.rules.proxysqlTooManyConnections.val}}
-      for: {{ .Values.form.alert.groups.database.rules.proxysqlTooManyConnections.duration }}
+      expr: max_over_time(proxysql_client_connections_connected{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}[1m]) / proxysql_mysql_max_connections{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} * 100 > {{.rules.proxysqlTooManyConnections.val}}
+      for: {{ .rules.proxysqlTooManyConnections.duration }}
       labels:
-        severity: {{ .Values.form.alert.groups.database.rules.proxysqlTooManyConnections.severity }}
-        {{- include "kubedbcom-proxysql-editor-options.alertLabels" . | nindent 8 }}
+        severity: {{ .rules.proxysqlTooManyConnections.severity }}
+        {{- include "kubedbcom-proxysql-editor-options.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: ProxySQL too many connections (> {{.Values.form.alert.groups.database.rules.proxysqlTooManyConnections.val}}%) (instance {{`{{`}} $labels.pod {{`}}`}})
-        description: "More than {{.Values.form.alert.groups.database.rules.proxysqlTooManyConnections.val}}% of ProxySQL connections are in use on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+        summary: ProxySQL too many connections (> {{.rules.proxysqlTooManyConnections.val}}%) (instance {{`{{`}} $labels.pod {{`}}`}})
+        description: "More than {{.rules.proxysqlTooManyConnections.val}}% of ProxySQL connections are in use on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if .Values.form.alert.groups.database.rules.proxysqlSlowQueries.enabled -}}
+    {{ if (include "kubedbcom-proxysql-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.proxysqlSlowQueries.enabled .rules.proxysqlSlowQueries.severity)) -}}
     - alert: ProxySQLSlowQueries
-      expr: increase(proxysql_slow_queries_total{job="{{ $app }}-stats",namespace="{{ .Release.Namespace }}"}[1m]) > 0
-      for: {{ .Values.form.alert.groups.database.rules.proxysqlSlowQueries.duration }}
+      expr: increase(proxysql_slow_queries_total{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}[1m]) > 0
+      for: {{ .rules.proxysqlSlowQueries.duration }}
       labels:
-        severity: {{ .Values.form.alert.groups.database.rules.proxysqlSlowQueries.severity }}
-        {{- include "kubedbcom-proxysql-editor-options.alertLabels" . | nindent 8 }}
+        severity: {{ .rules.proxysqlSlowQueries.severity }}
+        {{- include "kubedbcom-proxysql-editor-options.alertLabels" $ | nindent 8 }}
       annotations:
         summary: ProxySQL slow queries on (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "ProxySQL server mysql has some new slow query.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if .Values.form.alert.groups.database.rules.proxysqlRestarted.enabled -}}
+    {{ if (include "kubedbcom-proxysql-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.proxysqlRestarted.enabled .rules.proxysqlRestarted.severity)) -}}
     - alert: ProxySQLRestarted
-      expr: proxysql_uptime_seconds_total{job="{{ $app }}-stats",namespace="{{ .Release.Namespace }}"} < {{.Values.form.alert.groups.database.rules.proxysqlRestarted.val}}
-      for: {{ .Values.form.alert.groups.database.rules.proxysqlRestarted.duration }}
+      expr: proxysql_uptime_seconds_total{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} < {{.rules.proxysqlRestarted.val}}
+      for: {{ .rules.proxysqlRestarted.duration }}
       labels:
-        severity: {{ .Values.form.alert.groups.database.rules.proxysqlRestarted.severity }}
-        {{- include "kubedbcom-proxysql-editor-options.alertLabels" . | nindent 8 }}
+        severity: {{ .rules.proxysqlRestarted.severity }}
+        {{- include "kubedbcom-proxysql-editor-options.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: ProxySQL restarted ({{.Values.form.alert.groups.database.rules.proxysqlRestarted.val}} second ago) (instance {{`{{`}} $labels.pod {{`}}`}})
+        summary: ProxySQL restarted ({{.rules.proxysqlRestarted.val}} second ago) (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "ProxySQL restarted\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if .Values.form.alert.groups.database.rules.proxysqlHighIncomingBytes.enabled -}}
+    {{ if (include "kubedbcom-proxysql-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.proxysqlHighIncomingBytes.enabled .rules.proxysqlHighIncomingBytes.severity)) -}}
     - alert: ProxySQLHighIncomingBytes
-      expr: rate(proxysql_queries_frontends_bytes_total{job="{{ $app }}-stats",namespace="{{ .Release.Namespace }}",traffic_flow="received"}[1m]) > {{.Values.form.alert.groups.database.rules.proxysqlHighIncomingBytes.val}}
-      for: {{ .Values.form.alert.groups.database.rules.proxysqlHighIncomingBytes.duration }}
+      expr: rate(proxysql_queries_frontends_bytes_total{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}",traffic_flow="received"}[1m]) > {{.rules.proxysqlHighIncomingBytes.val}}
+      for: {{ .rules.proxysqlHighIncomingBytes.duration }}
       labels:
-        severity: {{ .Values.form.alert.groups.database.rules.proxysqlHighIncomingBytes.severity }}
-        {{- include "kubedbcom-proxysql-editor-options.alertLabels" . | nindent 8 }}
+        severity: {{ .rules.proxysqlHighIncomingBytes.severity }}
+        {{- include "kubedbcom-proxysql-editor-options.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: ProxySQL has high incoming bytes second (> {{.Values.form.alert.groups.database.rules.proxysqlHighIncomingBytes.val}}) (instance {{`{{`}} $labels.pod {{`}}`}})
+        summary: ProxySQL has high incoming bytes second (> {{.rules.proxysqlHighIncomingBytes.val}}) (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "ProxySQL has high incoming bytes per second on (instance {{`{{`}} $labels.pod {{`}}`}})\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if .Values.form.alert.groups.database.rules.proxysqlHighOutgoingBytes.enabled -}}
+    {{ if (include "kubedbcom-proxysql-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.proxysqlHighOutgoingBytes.enabled .rules.proxysqlHighOutgoingBytes.severity)) -}}
     - alert: ProxySQLHighOutgoingBytes
-      expr: rate(proxysql_queries_frontends_bytes_total{job="{{ $app }}-stats",namespace="{{ .Release.Namespace }}",traffic_flow="sent"}[1m]) > {{.Values.form.alert.groups.database.rules.proxysqlHighOutgoingBytes.val}}
-      for: {{ .Values.form.alert.groups.database.rules.proxysqlHighOutgoingBytes.duration }}
+      expr: rate(proxysql_queries_frontends_bytes_total{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}",traffic_flow="sent"}[1m]) > {{.rules.proxysqlHighOutgoingBytes.val}}
+      for: {{ .rules.proxysqlHighOutgoingBytes.duration }}
       labels:
-        severity: {{ .Values.form.alert.groups.database.rules.proxysqlHighOutgoingBytes.severity }}
-        {{- include "kubedbcom-proxysql-editor-options.alertLabels" . | nindent 8 }}
+        severity: {{ .rules.proxysqlHighOutgoingBytes.severity }}
+        {{- include "kubedbcom-proxysql-editor-options.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: ProxySQL has high outgoing bytes second (> {{.Values.form.alert.groups.database.rules.proxysqlHighOutgoingBytes.val}}) (instance {{`{{`}} $labels.pod {{`}}`}})
+        summary: ProxySQL has high outgoing bytes second (> {{.rules.proxysqlHighOutgoingBytes.val}}) (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "ProxySQL has high outgoing bytes per second on (instance {{`{{`}} $labels.pod {{`}}`}})\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
   {{ end -}}
-  {{ if .Values.form.alert.groups.cluster.enabled -}}
-  - name: proxysql.cluster.{{ .Release.Namespace }}.{{ $app }}.rules
+  {{ end -}}
+
+
+  {{ with .Values.form.alert.groups.cluster -}}
+  {{ if (include "kubedbcom-proxysql-editor-options.alertGroupEnabled" .enabled) -}}
+  - name: proxysql.cluster.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if .Values.form.alert.groups.cluster.rules.proxysqlClusterSyncFailure.enabled -}}
+    {{ if (include "kubedbcom-proxysql-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.proxysqlClusterSyncFailure.enabled .rules.proxysqlClusterSyncFailure.severity)) -}}
     - alert: ProxySQLCLusterSyncFailure
-      expr: sum by(job) (rate(proxysql_cluster_syn_conflict_total{job="{{ $app }}-stats",namespace="{{ .Release.Namespace }}"}[1m])) > {{.Values.form.alert.groups.cluster.rules.proxysqlClusterSyncFailure.val}}
-      for: {{ .Values.form.alert.groups.cluster.rules.proxysqlClusterSyncFailure.duration }}
+      expr: sum by(job) (rate(proxysql_cluster_syn_conflict_total{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}[1m])) > {{.rules.proxysqlClusterSyncFailure.val}}
+      for: {{ .rules.proxysqlClusterSyncFailure.duration }}
       labels:
-        severity: {{ .Values.form.alert.groups.cluster.rules.proxysqlClusterSyncFailure.severity }}
-        {{- include "kubedbcom-proxysql-editor-options.alertLabels" . | nindent 8 }}
+        severity: {{ .rules.proxysqlClusterSyncFailure.severity }}
+        {{- include "kubedbcom-proxysql-editor-options.alertLabels" $ | nindent 8 }}
       annotations:
-        summary: ProxySQL Cluster Sync Failed ( > {{.Values.form.alert.groups.cluster.rules.proxysqlClusterSyncFailure.val}} second,) (instance {{`{{`}} $labels.pod {{`}}`}})
+        summary: ProxySQL Cluster Sync Failed ( > {{.rules.proxysqlClusterSyncFailure.val}} second,) (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "ProxySQL Cluster Sync Failed for {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
   {{ end -}}
-  {{ if .Values.form.alert.groups.provisioner.enabled -}}
-  - name: proxysql.provisioner.{{ .Release.Namespace }}.{{ $app }}.rules
+  {{ end -}}
+
+
+  {{ with .Values.form.alert.groups.provisioner -}}
+  {{ if (include "kubedbcom-proxysql-editor-options.alertGroupEnabled" .enabled) -}}
+  - name: proxysql.provisioner.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if .Values.form.alert.groups.provisioner.rules.appPhaseNotReady.enabled -}}
+    {{ if (include "kubedbcom-proxysql-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseNotReady.enabled .rules.appPhaseNotReady.severity)) -}}
     - alert: KubeDBProxySQLPhaseNotReady
-      expr: kubedb_com_proxysql_status_phase{phase="NotReady",app="{{ $app }}",namespace="{{ .Release.Namespace }}"} == 1
-      for: {{ .Values.form.alert.groups.provisioner.rules.appPhaseNotReady.duration }}
+      expr: kubedb_com_proxysql_status_phase{phase="NotReady",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
+      for: {{ .rules.appPhaseNotReady.duration }}
       labels:
-        severity: {{ .Values.form.alert.groups.provisioner.rules.appPhaseNotReady.severity }}
-        {{- include "kubedbcom-proxysql-editor-options.alertLabels" . | nindent 8 }}
+        severity: {{ .rules.appPhaseNotReady.severity }}
+        {{- include "kubedbcom-proxysql-editor-options.alertLabels" $ | nindent 8 }}
       annotations:
         summary: KubeDB ProxySQL Phase NotReady (proxysql {{`{{`}} $labels.proxysql {{`}}`}})
         description: "KubeDB ProxySQL Phase not ready on {{`{{`}} $labels.proxysql {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if .Values.form.alert.groups.provisioner.rules.appPhaseCritical.enabled -}}
+    {{ if (include "kubedbcom-proxysql-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseCritical.enabled .rules.appPhaseCritical.severity)) -}}
     - alert: KubeDBProxySQLPhaseCritical
-      expr: kubedb_com_proxysql_status_phase{phase="Critical",app="{{ $app }}",namespace="{{ .Release.Namespace }}"} == 1
-      for: {{ .Values.form.alert.groups.provisioner.rules.appPhaseCritical.duration }}
+      expr: kubedb_com_proxysql_status_phase{phase="Critical",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
+      for: {{ .rules.appPhaseCritical.duration }}
       labels:
-        severity: {{ .Values.form.alert.groups.provisioner.rules.appPhaseCritical.severity }}
-        {{- include "kubedbcom-proxysql-editor-options.alertLabels" . | nindent 8 }}
+        severity: {{ .rules.appPhaseCritical.severity }}
+        {{- include "kubedbcom-proxysql-editor-options.alertLabels" $ | nindent 8 }}
       annotations:
         summary: KubeDB ProxySQL Phase Critical (proxysql {{`{{`}} $labels.proxysql {{`}}`}})
         description: "KubeDB ProxySQL Phase Critical {{`{{`}} $labels.proxysql {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
   {{ end -}}
-  {{ if .Values.form.alert.groups.opsManager.enabled -}}
-  - name: proxysql.opsManager.{{ .Release.Namespace }}.{{ $app }}.rules
+  {{ end -}}
+
+
+  {{ with .Values.form.alert.groups.opsManager -}}
+  {{ if (include "kubedbcom-proxysql-editor-options.alertGroupEnabled" .enabled) -}}
+  - name: proxysql.opsManager.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if .Values.form.alert.groups.opsManager.rules.opsRequestOnProgress.enabled -}}
+    {{ if (include "kubedbcom-proxysql-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.opsRequestOnProgress.enabled .rules.opsRequestOnProgress.severity)) -}}
     - alert: KubeDBProxySQLOpsRequestOnProgress
-      expr: ops_kubedb_com_proxysqlopsrequest_status_phase{phase="Progressing",app="{{ $app }}",namespace="{{ .Release.Namespace }}"} == 1
-      for: {{ .Values.form.alert.groups.opsManager.rules.opsRequestOnProgress.duration }}
+      expr: ops_kubedb_com_proxysqlopsrequest_status_phase{phase="Progressing",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
+      for: {{ .rules.opsRequestOnProgress.duration }}
       labels:
-        severity: {{ .Values.form.alert.groups.opsManager.rules.opsRequestOnProgress.severity }}
-        {{- include "kubedbcom-proxysql-editor-options.alertLabels" . | nindent 8 }}
+        severity: {{ .rules.opsRequestOnProgress.severity }}
+        {{- include "kubedbcom-proxysql-editor-options.alertLabels" $ | nindent 8 }}
       annotations:
         summary: ProxySQLOpsRequest on progress (proxysqlopsrequest {{`{{`}} $labels.proxysqlopsrequest {{`}}`}})
         description: "ProxySQLOpsRequest {{`{{`}} $labels.proxysqlopsrequest {{`}}`}} is in progressressing status\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if .Values.form.alert.groups.opsManager.rules.opsRequestStatusProgressingToLong.enabled -}}
+    {{ if (include "kubedbcom-proxysql-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.opsRequestStatusProgressingToLong.enabled .rules.opsRequestStatusProgressingToLong.severity)) -}}
     - alert: KubeDBProxySQLOpsRequestStatusProgressingToLong
-      expr: ops_kubedb_com_proxysqlopsrequest_status_phase{phase="Progressing",app="{{ $app }}",namespace="{{ .Release.Namespace }}"} == 1
-      for: {{ .Values.form.alert.groups.opsManager.rules.opsRequestStatusProgressingToLong.duration }}
+      expr: ops_kubedb_com_proxysqlopsrequest_status_phase{phase="Progressing",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
+      for: {{ .rules.opsRequestStatusProgressingToLong.duration }}
       labels:
-        severity: {{ .Values.form.alert.groups.opsManager.rules.opsRequestStatusProgressingToLong.severity }}
-        {{- include "kubedbcom-proxysql-editor-options.alertLabels" . | nindent 8 }}
+        severity: {{ .rules.opsRequestStatusProgressingToLong.severity }}
+        {{- include "kubedbcom-proxysql-editor-options.alertLabels" $ | nindent 8 }}
       annotations:
         summary: ProxySQLOpsRequest is in progressing status for too long (proxysqlopsrequest {{`{{`}} $labels.proxysqlopsrequest {{`}}`}})
         description: "ProxySQLOpsRequest {{`{{`}} $labels.proxysqlopsrequest {{`}}`}} is in progressing status for too long\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if .Values.form.alert.groups.opsManager.rules.opsRequestFailed.enabled -}}
+    {{ if (include "kubedbcom-proxysql-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.opsRequestFailed.enabled .rules.opsRequestFailed.severity)) -}}
     - alert: KubeDBProxySQLOpsRequestFailed
-      expr: ops_kubedb_com_proxysqlopsrequest_status_phase{phase="Failed",app="{{ $app }}",namespace="{{ .Release.Namespace }}"} == 1
-      for: {{ .Values.form.alert.groups.opsManager.rules.opsRequestFailed.duration }}
+      expr: ops_kubedb_com_proxysqlopsrequest_status_phase{phase="Failed",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
+      for: {{ .rules.opsRequestFailed.duration }}
       labels:
-        severity: {{ .Values.form.alert.groups.opsManager.rules.opsRequestFailed.severity }}
-        {{- include "kubedbcom-proxysql-editor-options.alertLabels" . | nindent 8 }}
+        severity: {{ .rules.opsRequestFailed.severity }}
+        {{- include "kubedbcom-proxysql-editor-options.alertLabels" $ | nindent 8 }}
       annotations:
         summary: ProxySQLOpsRequest failed (proxysqlopsrequest {{`{{`}} $labels.proxysqlopsrequest {{`}}`}})
         description: "ProxySQLOpsRequest {{`{{`}} $labels.proxysqlopsrequest {{`}}`}} failed \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
   {{ end -}}
+  {{ end -}}
+
 {{ end }}
