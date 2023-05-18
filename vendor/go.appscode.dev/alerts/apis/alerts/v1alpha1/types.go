@@ -16,35 +16,54 @@ limitations under the License.
 
 package v1alpha1
 
+// +kubebuilder:validation:Enum=none;critical;warning;info
+type SeverityFlag string
+
+const (
+	SeverityFlagNone     SeverityFlag = "none"     // 0
+	SeverityFlagCritical SeverityFlag = "critical" // 1
+	SeverityFlagWarning  SeverityFlag = "warning"  // 2
+	SeverityFlagInfo     SeverityFlag = "info"     // 3
+)
+
+// +kubebuilder:validation:Enum=critical;warning;info
+type Severity string
+
+const (
+	SeverityCritical Severity = "critical"
+	SeverityWarning  Severity = "warning"
+	SeverityInfo     Severity = "info"
+)
+
 type FixedAlert struct {
-	Enabled  bool   `json:"enabled"`
-	Duration string `json:"duration"`
-	Severity string `json:"severity"`
+	Enabled  bool     `json:"enabled"`
+	Duration string   `json:"duration"`
+	Severity Severity `json:"severity"`
 }
 
 type StringValAlert struct {
-	Enabled  bool   `json:"enabled"`
-	Duration string `json:"duration"`
-	Val      string `json:"val"`
-	Severity string `json:"severity"`
+	Enabled  bool     `json:"enabled"`
+	Duration string   `json:"duration"`
+	Val      string   `json:"val"`
+	Severity Severity `json:"severity"`
 }
 
 type IntValAlert struct {
-	Enabled  bool   `json:"enabled"`
-	Duration string `json:"duration"`
-	Val      int    `json:"val"`
-	Severity string `json:"severity"`
+	Enabled  bool     `json:"enabled"`
+	Duration string   `json:"duration"`
+	Val      int      `json:"val"`
+	Severity Severity `json:"severity"`
 }
 
 type FloatValAlertConfig struct {
-	Enabled  bool    `json:"enabled"`
-	Duration string  `json:"duration"`
-	Val      float64 `json:"val"`
-	Severity string  `json:"severity"`
+	Enabled  bool     `json:"enabled"`
+	Duration string   `json:"duration"`
+	Val      float64  `json:"val"`
+	Severity Severity `json:"severity"`
 }
 
 type ProvisionerAlert struct {
-	Enabled bool                  `json:"enabled"`
+	Enabled SeverityFlag          `json:"enabled"`
 	Rules   ProvisionerAlertRules `json:"rules"`
 }
 
@@ -54,7 +73,7 @@ type ProvisionerAlertRules struct {
 }
 
 type OpsManagerAlert struct {
-	Enabled bool                 `json:"enabled"`
+	Enabled SeverityFlag         `json:"enabled"`
 	Rules   OpsManagerAlertRules `json:"rules"`
 }
 
@@ -65,7 +84,7 @@ type OpsManagerAlertRules struct {
 }
 
 type StashAlert struct {
-	Enabled bool            `json:"enabled"`
+	Enabled SeverityFlag    `json:"enabled"`
 	Rules   StashAlertRules `json:"rules"`
 }
 
@@ -80,7 +99,7 @@ type StashAlertRules struct {
 }
 
 type SchemaManagerAlert struct {
-	Enabled bool                    `json:"enabled"`
+	Enabled SeverityFlag            `json:"enabled"`
 	Rules   SchemaManagerAlertRules `json:"rules"`
 }
 

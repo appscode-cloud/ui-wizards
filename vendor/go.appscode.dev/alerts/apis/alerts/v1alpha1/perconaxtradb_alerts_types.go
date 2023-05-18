@@ -50,7 +50,7 @@ type PerconaxtradbAlertsSpecForm struct {
 }
 
 type PerconaXtraDBAlert struct {
-	Enabled bool              `json:"enabled"`
+	Enabled SeverityFlag      `json:"enabled"`
 	Labels  map[string]string `json:"labels"`
 	// +optional
 	Annotations map[string]string `json:"annotations"`
@@ -69,7 +69,7 @@ type PerconaXtraDBAlertGroups struct {
 }
 
 type PerconaXtraDBDatabaseAlert struct {
-	Enabled bool                            `json:"enabled"`
+	Enabled SeverityFlag                    `json:"enabled"`
 	Rules   PerconaXtraDBDatabaseAlertRules `json:"rules"`
 }
 
@@ -88,7 +88,7 @@ type PerconaXtraDBDatabaseAlertRules struct {
 }
 
 type PerconaXtraDBClusterAlert struct {
-	Enabled bool                           `json:"enabled"`
+	Enabled SeverityFlag                   `json:"enabled"`
 	Rules   PerconaXtraDBClusterAlertRules `json:"rules"`
 }
 

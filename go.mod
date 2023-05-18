@@ -3,17 +3,17 @@ module go.bytebuilders.dev/ui-wizards
 go 1.18
 
 require (
-	go.appscode.dev/alerts v0.1.0
+	go.appscode.dev/alerts v0.2.0
 	k8s.io/api v0.25.3
 	k8s.io/apimachinery v0.25.4
 	k8s.io/kube-openapi v0.0.0-20221012153701-172d655c2280
-	kmodules.xyz/client-go v0.25.21
+	kmodules.xyz/client-go v0.25.22
 	kmodules.xyz/objectstore-api v0.25.1-0.20221104003322-f0289b5b6ca2
 	kmodules.xyz/offshoot-api v0.25.0
 	kmodules.xyz/schema-checker v0.4.2-0.20220924062710-97ca6e9cc6e1
 	kubedb.dev/apimachinery v0.33.1
-	stash.appscode.dev/apimachinery v0.28.0
-	x-helm.dev/apimachinery v0.0.8
+	stash.appscode.dev/apimachinery v0.29.0
+	x-helm.dev/apimachinery v0.0.9
 )
 
 require (

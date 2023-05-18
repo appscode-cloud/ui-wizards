@@ -50,7 +50,7 @@ type ProxysqlAlertsSpecForm struct {
 }
 
 type ProxySQLAlert struct {
-	Enabled bool              `json:"enabled"`
+	Enabled SeverityFlag      `json:"enabled"`
 	Labels  map[string]string `json:"labels"`
 	// +optional
 	Annotations map[string]string `json:"annotations"`
@@ -67,7 +67,7 @@ type ProxySQLAlertGroups struct {
 }
 
 type ProxySQLDatabaseAlert struct {
-	Enabled bool                       `json:"enabled"`
+	Enabled SeverityFlag               `json:"enabled"`
 	Rules   ProxySQLDatabaseAlertRules `json:"rules"`
 }
 
@@ -84,7 +84,7 @@ type ProxySQLDatabaseAlertRules struct {
 }
 
 type ProxySQLClusterAlert struct {
-	Enabled bool                      `json:"enabled"`
+	Enabled SeverityFlag              `json:"enabled"`
 	Rules   ProxySQLClusterAlertRules `json:"rules"`
 }
 
