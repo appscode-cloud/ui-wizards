@@ -50,7 +50,7 @@ type MariadbAlertsSpecForm struct {
 }
 
 type MariaDBAlert struct {
-	Enabled bool              `json:"enabled"`
+	Enabled SeverityFlag      `json:"enabled"`
 	Labels  map[string]string `json:"labels"`
 	// +optional
 	Annotations map[string]string `json:"annotations"`
@@ -69,7 +69,7 @@ type MariaDBAlertGroups struct {
 }
 
 type MariaDBDatabaseAlert struct {
-	Enabled bool                      `json:"enabled"`
+	Enabled SeverityFlag              `json:"enabled"`
 	Rules   MariaDBDatabaseAlertRules `json:"rules"`
 }
 
@@ -88,7 +88,7 @@ type MariaDBDatabaseAlertRules struct {
 }
 
 type MariaDBClusterAlert struct {
-	Enabled bool                     `json:"enabled"`
+	Enabled SeverityFlag             `json:"enabled"`
 	Rules   MariaDBClusterAlertRules `json:"rules"`
 }
 

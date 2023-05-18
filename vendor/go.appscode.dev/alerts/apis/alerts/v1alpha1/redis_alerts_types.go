@@ -50,7 +50,7 @@ type RedisAlertsSpecForm struct {
 }
 
 type RedisAlert struct {
-	Enabled bool              `json:"enabled"`
+	Enabled SeverityFlag      `json:"enabled"`
 	Labels  map[string]string `json:"labels"`
 	// +optional
 	Annotations map[string]string `json:"annotations"`
@@ -67,7 +67,7 @@ type RedisAlertGroups struct {
 }
 
 type RedisDatabaseAlert struct {
-	Enabled bool                    `json:"enabled"`
+	Enabled SeverityFlag            `json:"enabled"`
 	Rules   RedisDatabaseAlertRules `json:"rules"`
 }
 
