@@ -2,11 +2,20 @@ discriminator:
   alertEnabledStatus:
     type: string
 elements:
-- label:
-    text: labels.alert_enable_question
+- type: select
+  label:
+    text: labels.alert_options
   schema:
     $ref: schema#/properties/enabled
-  type: switch
+  options:
+    - value: critical
+      text: Critical
+    - value: warning
+      text: Warning
+    - value: info
+      text: Info
+    - value: none
+      text: None
 - if: showAlertSection
   isArray: true
   keys:
@@ -40,7 +49,24 @@ elements:
       $ref: schema#/properties/additionalRuleLabels/additionalProperties
     type: input
 - element:
+    discriminator:
+      toggleValue:
+        type: string
     elements:
+    - type: select
+      label:
+        text: labels.alert_options
+      options:
+      - value: critical
+        text: Critical
+      - value: warning
+        text: Warning
+      - value: info
+        text: Info
+      - value: none
+        text: None
+      schema:
+        $ref: schema#/properties/groups/properties/$dyn/properties/enabled
     - element:
         elements:
         - customClass: mt-10
@@ -91,11 +117,11 @@ elements:
     show_label: true
     toggleOption:
       id: switch
-      ignoreInitialStatusFunction: true
+      setInitialStatusFalse: setInitialValueOfToggleBtn
       onStatusFalse: onGroupStatusChange|false
       onStatusTrue: onGroupStatusChange|true
       schema:
-        $ref: schema#/properties/groups/properties/$dyn/properties/enabled
+        $ref: discriminator#/toggleValue
       show: true
     type: single-step-form
   if: showAlertSection

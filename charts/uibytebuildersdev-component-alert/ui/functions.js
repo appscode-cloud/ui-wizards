@@ -1,40 +1,36 @@
-function onGroupStatusChange(
-  { rootSchema, schemaRef, commit, model, getValue },
-  status
-) {
-  const { $ref: ref } = schemaRef || {};
-  const [, path] = ref.split("#") || "";
-  const replacedPath = `/groups/${path.split("/").pop()}`;
-  console.log({ ref, path, replacedPath });
-  const verd = status === "true";
-  const currentStatus =
-    getValue(model, path.replace(/\/properties/g, "")) || false;
+function getFinalPathFromSchema(path) {
+  const pathWithoutSchema = path?.replace(/^schema#\//, "") || "";
+  const pathWithoutProperties =
+    pathWithoutSchema?.replaceAll(/properties\//gi, "") || "";
 
-  const rulesPath = `${path
-    .replace(/\/enabled$/, "")
-    .replace(/\/properties/g, "")}/rules`;
+  const pathWithoutFormAlert =
+    pathWithoutProperties?.replace("form/alert/", "") || "";
+  const finalPath = pathWithoutFormAlert + "/enabled";
 
-  if (currentStatus !== verd) {
-    const groupSchema =
-      getValue(
-        rootSchema,
-        `${path.replace(/\/enabled$/, "")}/rules/properties`
-      ) || {};
-    const groupModelValue = getValue(model, rulesPath) || {};
+  return finalPath;
+}
 
-    console.log({ groupSchema });
+function onGroupStatusChange({ elementSchema, commit }, status) {
+  const path = elementSchema?.$ref || "";
+  const finalPath = getFinalPathFromSchema(path);
 
-    Object.keys(groupSchema).forEach((item) => {
-      if (!groupModelValue[item]) groupModelValue[item] = {};
-      groupModelValue[item].enabled = verd;
-    });
+  commit("wizard/model$update", {
+    path: finalPath,
+    value: status === "true" ? "warning" : "none",
+    force: true,
+  });
+}
 
-    commit("wizard/model$update", {
-      path: rulesPath,
-      value: groupModelValue,
-      force: true,
-    });
-  }
+function setInitialValueOfToggleBtn(context) {
+  const { model, getValue, elementSchema } = context;
+
+  const path = elementSchema?.$ref || "";
+  const finalPath = getFinalPathFromSchema(path);
+
+  const value = getValue(model, finalPath);
+
+  if (value === "none") return true;
+  else return false;
 }
 
 function showValField({ schemaRef }) {
@@ -44,11 +40,12 @@ function showValField({ schemaRef }) {
 function showAlertSection({ model, getValue, watchDependency }) {
   watchDependency("model#/enabled");
   const status = getValue(model, "/enabled");
-  return !!status;
+  return status !== "none";
 }
 
 return {
   onGroupStatusChange,
+  setInitialValueOfToggleBtn,
   showValField,
   showAlertSection,
 };
