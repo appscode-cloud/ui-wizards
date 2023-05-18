@@ -2,20 +2,20 @@ discriminator:
   alertEnabledStatus:
     type: string
 elements:
-- type: select
-  label:
+- label:
     text: labels.alert_options
+  options:
+  - text: Critical
+    value: critical
+  - text: Warning
+    value: warning
+  - text: Info
+    value: info
+  - text: None
+    value: none
   schema:
     $ref: schema#/properties/enabled
-  options:
-    - value: critical
-      text: Critical
-    - value: warning
-      text: Warning
-    - value: info
-      text: Info
-    - value: none
-      text: None
+  type: select
 - if: showAlertSection
   isArray: true
   keys:
@@ -53,20 +53,20 @@ elements:
       toggleValue:
         type: string
     elements:
-    - type: select
-      label:
+    - label:
         text: labels.alert_options
       options:
-      - value: critical
-        text: Critical
-      - value: warning
-        text: Warning
-      - value: info
-        text: Info
-      - value: none
-        text: None
+      - text: Critical
+        value: critical
+      - text: Warning
+        value: warning
+      - text: Info
+        value: info
+      - text: None
+        value: none
       schema:
         $ref: schema#/properties/groups/properties/$dyn/properties/enabled
+      type: select
     - element:
         elements:
         - customClass: mt-10
@@ -117,11 +117,11 @@ elements:
     show_label: true
     toggleOption:
       id: switch
-      setInitialStatusFalse: setInitialValueOfToggleBtn
       onStatusFalse: onGroupStatusChange|false
       onStatusTrue: onGroupStatusChange|true
       schema:
         $ref: discriminator#/toggleValue
+      setInitialStatusFalse: setInitialValueOfToggleBtn
       show: true
     type: single-step-form
   if: showAlertSection
