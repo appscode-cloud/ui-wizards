@@ -1,6 +1,6 @@
 {{ $app := (include "kubedbcom-mysql-editor.fullname" .) }}
 
-{{ if (include "kubedbcom-mysql-editor.alertGroupEnabled" .Values.form.alert.enabled) }}
+{{ if (include "kubedbcom-mysql-editor.alertsEnabled" .Values.form.alert.enabled) }}
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
@@ -19,7 +19,7 @@ metadata:
 spec:
   groups:
   {{ with .Values.form.alert.groups.database -}}
-  {{ if (include "kubedbcom-mysql-editor.alertGroupEnabled" .enabled) -}}
+  {{ if (include "kubedbcom-mysql-editor.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: mysql.database.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
     {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.mysqlInstanceDown.enabled .rules.mysqlInstanceDown.severity)) -}}
@@ -148,7 +148,7 @@ spec:
 
 
   {{ with .Values.form.alert.groups.group -}}
-  {{ if (include "kubedbcom-mysql-editor.alertGroupEnabled" .enabled) -}}
+  {{ if (include "kubedbcom-mysql-editor.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: mysql.group.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
     {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.mysqlHighReplicationDelay.enabled .rules.mysqlHighReplicationDelay.severity)) -}}
@@ -200,7 +200,7 @@ spec:
 
 
   {{ with .Values.form.alert.groups.provisioner -}}
-  {{ if (include "kubedbcom-mysql-editor.alertGroupEnabled" .enabled) -}}
+  {{ if (include "kubedbcom-mysql-editor.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: mysql.provisioner.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
     {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseNotReady.enabled .rules.appPhaseNotReady.severity)) -}}
@@ -230,7 +230,7 @@ spec:
 
 
   {{ with .Values.form.alert.groups.opsManager -}}
-  {{ if (include "kubedbcom-mysql-editor.alertGroupEnabled" .enabled) -}}
+  {{ if (include "kubedbcom-mysql-editor.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: mysql.opsManager.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
     {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.opsRequestOnProgress.enabled .rules.opsRequestOnProgress.severity)) -}}
@@ -271,7 +271,7 @@ spec:
 
 
   {{ with .Values.form.alert.groups.stash -}}
-  {{ if (include "kubedbcom-mysql-editor.alertGroupEnabled" .enabled) -}}
+  {{ if (include "kubedbcom-mysql-editor.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: mysql.stash.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
     {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.backupSessionFailed.enabled .rules.backupSessionFailed.severity)) -}}
@@ -356,7 +356,7 @@ spec:
 
 
   {{ with .Values.form.alert.groups.schemaManager -}}
-  {{ if (include "kubedbcom-mysql-editor.alertGroupEnabled" .enabled) -}}
+  {{ if (include "kubedbcom-mysql-editor.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: mysql.schemaManager.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
     {{ if (include "kubedbcom-mysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.schemaPendingForTooLong.enabled .rules.schemaPendingForTooLong.severity)) -}}

@@ -1,6 +1,6 @@
 {{ $app := (include "kubedbcom-elasticsearch-editor.fullname" .) }}
 
-{{ if (include "kubedbcom-elasticsearch-editor.alertGroupEnabled" .Values.form.alert.enabled) }}
+{{ if (include "kubedbcom-elasticsearch-editor.alertsEnabled" .Values.form.alert.enabled) }}
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
@@ -19,7 +19,7 @@ metadata:
 spec:
   groups:
   {{ with .Values.form.alert.groups.database -}}
-  {{ if (include "kubedbcom-elasticsearch-editor.alertGroupEnabled" .enabled) -}}
+  {{ if (include "kubedbcom-elasticsearch-editor.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: elasticsearch.database.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
     {{ if (include "kubedbcom-elasticsearch-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.elasticsearchHeapUsageTooHigh.enabled .rules.elasticsearchHeapUsageTooHigh.severity)) -}}
@@ -195,7 +195,7 @@ spec:
 
 
   {{ with .Values.form.alert.groups.provisioner -}}
-  {{ if (include "kubedbcom-elasticsearch-editor.alertGroupEnabled" .enabled) -}}
+  {{ if (include "kubedbcom-elasticsearch-editor.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: elasticsearch.provisioner.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
     {{ if (include "kubedbcom-elasticsearch-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseNotReady.enabled .rules.appPhaseNotReady.severity)) -}}
@@ -225,7 +225,7 @@ spec:
 
 
   {{ with .Values.form.alert.groups.opsManager -}}
-  {{ if (include "kubedbcom-elasticsearch-editor.alertGroupEnabled" .enabled) -}}
+  {{ if (include "kubedbcom-elasticsearch-editor.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: elasticsearch.opsManager.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
     {{ if (include "kubedbcom-elasticsearch-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.opsRequestOnProgress.enabled .rules.opsRequestOnProgress.severity)) -}}
@@ -266,7 +266,7 @@ spec:
 
 
   {{ with .Values.form.alert.groups.stash -}}
-  {{ if (include "kubedbcom-elasticsearch-editor.alertGroupEnabled" .enabled) -}}
+  {{ if (include "kubedbcom-elasticsearch-editor.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: elasticsearch.stash.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
     {{ if (include "kubedbcom-elasticsearch-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.backupSessionFailed.enabled .rules.backupSessionFailed.severity)) -}}
