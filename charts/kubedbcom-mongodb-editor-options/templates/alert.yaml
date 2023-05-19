@@ -1,6 +1,6 @@
 {{ $app := (include "kubedbcom-mongodb-editor-options.fullname" .) }}
 
-{{ if (include "kubedbcom-mongodb-editor-options.alertGroupEnabled" .Values.form.alert.enabled) }}
+{{ if (include "kubedbcom-mongodb-editor-options.alertsEnabled" .Values.form.alert.enabled) }}
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
@@ -19,7 +19,7 @@ metadata:
 spec:
   groups:
   {{ with .Values.form.alert.groups.database -}}
-  {{ if (include "kubedbcom-mongodb-editor-options.alertGroupEnabled" .enabled) -}}
+  {{ if (include "kubedbcom-mongodb-editor-options.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: mongodb.database.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
     {{ if (include "kubedbcom-mongodb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.mongodbVirtualMemoryUsage.enabled .rules.mongodbVirtualMemoryUsage.severity)) -}}
@@ -153,7 +153,7 @@ spec:
 
 
   {{ with .Values.form.alert.groups.provisioner -}}
-  {{ if (include "kubedbcom-mongodb-editor-options.alertGroupEnabled" .enabled) -}}
+  {{ if (include "kubedbcom-mongodb-editor-options.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: mongodb.provisioner.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
     {{ if (include "kubedbcom-mongodb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseNotReady.enabled .rules.appPhaseNotReady.severity)) -}}
@@ -183,7 +183,7 @@ spec:
 
 
   {{ with .Values.form.alert.groups.opsManager -}}
-  {{ if (include "kubedbcom-mongodb-editor-options.alertGroupEnabled" .enabled) -}}
+  {{ if (include "kubedbcom-mongodb-editor-options.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: mongodb.opsManager.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
     {{ if (include "kubedbcom-mongodb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.opsRequestOnProgress.enabled .rules.opsRequestOnProgress.severity)) -}}
@@ -224,7 +224,7 @@ spec:
 
 
   {{ with .Values.form.alert.groups.stash -}}
-  {{ if (include "kubedbcom-mongodb-editor-options.alertGroupEnabled" .enabled) -}}
+  {{ if (include "kubedbcom-mongodb-editor-options.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: mongodb.stash.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
     {{ if (include "kubedbcom-mongodb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.backupSessionFailed.enabled .rules.backupSessionFailed.severity)) -}}
@@ -309,7 +309,7 @@ spec:
 
 
   {{ with .Values.form.alert.groups.schemaManager -}}
-  {{ if (include "kubedbcom-mongodb-editor-options.alertGroupEnabled" .enabled) -}}
+  {{ if (include "kubedbcom-mongodb-editor-options.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: mongodb.schemaManager.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
     {{ if (include "kubedbcom-mongodb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.schemaPendingForTooLong.enabled .rules.schemaPendingForTooLong.severity)) -}}
