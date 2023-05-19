@@ -74,12 +74,28 @@ app_namespace: {{ .Release.Namespace }}
 {{- end }}
 
 {{/*
+Alerts Enabled
+*/}}
+{{- define "kubedbcom-mariadb-editor-options.alertsEnabled" -}}
+{{- $ranks := dict "critical" 1 "warning" 2 "info" 3 -}}
+{{- $result := dig . 0 $ranks -}}
+{{- if $result -}}{{ . }}{{- end -}}
+{{- end }}
+
+{{/*
 Alert Group Enabled
 */}}
 {{- define "kubedbcom-mariadb-editor-options.alertGroupEnabled" -}}
 {{- $ranks := dict "critical" 1 "warning" 2 "info" 3 -}}
-{{- $result := dig . 0 $ranks -}}
-{{- if $result -}}{{ . }}{{- end -}}
+{{- $flags := (mustLast .) -}}
+{{- $group := dig (mustFirst .) 0 $ranks -}}
+{{- $group = min $group (dig $flags.enabled 0 $ranks) -}}
+{{- $hasRules := false -}}
+{{- range $k, $v := $flags.rules -}}
+{{- $sev := dig $v.severity 0 $ranks -}}
+{{- if (and $sev (le $sev $group) $v.enabled) -}}{{ $hasRules = true }}{{- end -}}
+{{- end -}}
+{{- if (and $group $hasRules) -}}{{ $flags.enabled }}{{- end -}}
 {{- end }}
 
 {{/*
@@ -95,5 +111,5 @@ Alert Enabled
 {{- range $x := $flags -}}
 {{- $result = min $result (dig $x 0 $ranks) -}}
 {{- end -}}
-{{- if (and (le $sev $result) $enabled) -}}{{ (mustLast .) }}{{- end -}}
+{{- if (and $sev (le $sev $result) $enabled) -}}{{ (mustLast .) }}{{- end -}}
 {{- end }}

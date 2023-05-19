@@ -1,6 +1,6 @@
 {{ $app := (include "kubedbcom-mariadb-editor.fullname" .) }}
 
-{{ if (include "kubedbcom-mariadb-editor.alertGroupEnabled" .Values.form.alert.enabled) }}
+{{ if (include "kubedbcom-mariadb-editor.alertsEnabled" .Values.form.alert.enabled) }}
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
@@ -19,7 +19,7 @@ metadata:
 spec:
   groups:
   {{ with .Values.form.alert.groups.database -}}
-  {{ if (include "kubedbcom-mariadb-editor.alertGroupEnabled" .enabled) -}}
+  {{ if (include "kubedbcom-mariadb-editor.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: mariadb.database.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
     {{ if (include "kubedbcom-mariadb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.mysqlInstanceDown.enabled .rules.mysqlInstanceDown.severity)) -}}
@@ -148,7 +148,7 @@ spec:
 
 
   {{ with .Values.form.alert.groups.cluster -}}
-  {{ if (include "kubedbcom-mariadb-editor.alertGroupEnabled" .enabled) -}}
+  {{ if (include "kubedbcom-mariadb-editor.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: mariadb.cluster.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
     {{ if (include "kubedbcom-mariadb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.galeraReplicationLatencyTooLong.enabled .rules.galeraReplicationLatencyTooLong.severity)) -}}
@@ -167,7 +167,7 @@ spec:
 
 
   {{ with .Values.form.alert.groups.provisioner -}}
-  {{ if (include "kubedbcom-mariadb-editor.alertGroupEnabled" .enabled) -}}
+  {{ if (include "kubedbcom-mariadb-editor.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: mariadb.provisioner.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
     {{ if (include "kubedbcom-mariadb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseNotReady.enabled .rules.appPhaseNotReady.severity)) -}}
@@ -197,7 +197,7 @@ spec:
 
 
   {{ with .Values.form.alert.groups.opsManager -}}
-  {{ if (include "kubedbcom-mariadb-editor.alertGroupEnabled" .enabled) -}}
+  {{ if (include "kubedbcom-mariadb-editor.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: mariadb.opsManager.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
     {{ if (include "kubedbcom-mariadb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.opsRequestOnProgress.enabled .rules.opsRequestOnProgress.severity)) -}}
@@ -238,7 +238,7 @@ spec:
 
 
   {{ with .Values.form.alert.groups.stash -}}
-  {{ if (include "kubedbcom-mariadb-editor.alertGroupEnabled" .enabled) -}}
+  {{ if (include "kubedbcom-mariadb-editor.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: mariadb.stash.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
     {{ if (include "kubedbcom-mariadb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.backupSessionFailed.enabled .rules.backupSessionFailed.severity)) -}}
@@ -323,7 +323,7 @@ spec:
 
 
   {{ with .Values.form.alert.groups.schemaManager -}}
-  {{ if (include "kubedbcom-mariadb-editor.alertGroupEnabled" .enabled) -}}
+  {{ if (include "kubedbcom-mariadb-editor.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: mariadb.schemaManager.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
     {{ if (include "kubedbcom-mariadb-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.schemaPendingForTooLong.enabled .rules.schemaPendingForTooLong.severity)) -}}

@@ -1,6 +1,6 @@
 {{ $app := (include "kubedbcom-proxysql-editor.fullname" .) }}
 
-{{ if (include "kubedbcom-proxysql-editor.alertGroupEnabled" .Values.form.alert.enabled) }}
+{{ if (include "kubedbcom-proxysql-editor.alertsEnabled" .Values.form.alert.enabled) }}
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
@@ -19,7 +19,7 @@ annotations:
 spec:
   groups:
   {{ with .Values.form.alert.groups.database -}}
-  {{ if (include "kubedbcom-proxysql-editor.alertGroupEnabled" .enabled) -}}
+  {{ if (include "kubedbcom-proxysql-editor.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: proxysql.database.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
     {{ if (include "kubedbcom-proxysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.proxysqlInstanceDown.enabled .rules.proxysqlInstanceDown.severity)) -}}
@@ -104,7 +104,7 @@ spec:
 
 
   {{ with .Values.form.alert.groups.cluster -}}
-  {{ if (include "kubedbcom-proxysql-editor.alertGroupEnabled" .enabled) -}}
+  {{ if (include "kubedbcom-proxysql-editor.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: proxysql.cluster.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
     {{ if (include "kubedbcom-proxysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.proxysqlClusterSyncFailure.enabled .rules.proxysqlClusterSyncFailure.severity)) -}}
@@ -123,7 +123,7 @@ spec:
 
 
   {{ with .Values.form.alert.groups.provisioner -}}
-  {{ if (include "kubedbcom-proxysql-editor.alertGroupEnabled" .enabled) -}}
+  {{ if (include "kubedbcom-proxysql-editor.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: proxysql.provisioner.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
     {{ if (include "kubedbcom-proxysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseNotReady.enabled .rules.appPhaseNotReady.severity)) -}}
@@ -153,7 +153,7 @@ spec:
 
 
   {{ with .Values.form.alert.groups.opsManager -}}
-  {{ if (include "kubedbcom-proxysql-editor.alertGroupEnabled" .enabled) -}}
+  {{ if (include "kubedbcom-proxysql-editor.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: proxysql.opsManager.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
     {{ if (include "kubedbcom-proxysql-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.opsRequestOnProgress.enabled .rules.opsRequestOnProgress.severity)) -}}
