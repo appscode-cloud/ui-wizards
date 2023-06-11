@@ -73,13 +73,47 @@ resources:
         driver:
           kind: modern-bpf
         falco:
+          http_output:
+            enabled: true
+            url: http://falco-ui-server:8080/falcoevents
+          json_include_output_property: true
+          json_output: true
           modern_bpf:
             cpus_for_each_syscall_buffer: 1
         falcosidekick:
-          enabled: true
+          enabled: false
           webui:
-            enabled: true
+            enabled: false
         tty: true
+  helmToolkitFluxcdIoHelmRelease_falco_ui_server: # +doc-gen:break
+    apiVersion: helm.toolkit.fluxcd.io/v2beta1
+    kind: HelmRelease
+    metadata:
+      name: falco-ui-server
+      namespace: kubeops
+    spec:
+      chart:
+        spec:
+          chart: falco-ui-server
+          sourceRef:
+            kind: HelmRepository
+            name: kubeops
+            namespace: kubeops
+          version: v2023.03.23
+      install:
+        crds: CreateReplace
+        createNamespace: true
+        remediation:
+          retries: -1
+      interval: 5m
+      releaseName: falco-ui-server
+      storageNamespace: falco
+      targetNamespace: falco
+      timeout: 30m
+      upgrade:
+        crds: CreateReplace
+        remediation:
+          retries: -1
   helmToolkitFluxcdIoHelmRelease_gatekeeper: # +doc-gen:break
     apiVersion: helm.toolkit.fluxcd.io/v2beta1
     kind: HelmRelease
