@@ -547,6 +547,13 @@ function updateAgentValue({commit },val) {
     value: val ? "prometheus.io/operator" : "",
     force: true
   });
+
+  // update alert value depend on monitoring profile
+  commit("wizard/model$update", {
+    path: "/form/alert/enabled",
+    value: val ? 'warning' : 'none',
+    force: true
+  });
 }
 
 function getCreateNameSpaceUrl ({ model, getValue, storeGet }){ 
