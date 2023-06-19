@@ -1586,6 +1586,13 @@ function onEnableMonitoringChange({ discriminator, getValue, commit }) {
       "/resources/kubevaultComVaultServer/spec/monitor"
     );
   }
+
+  // update alert value depend on monitoring profile
+  commit("wizard/model$update", {
+    path: "/form/alert/enabled",
+    value: configureStatus ? 'warning' : 'none',
+    force: true
+  });
 }
 
 function showCustomizeExporterSection({
