@@ -3,7 +3,7 @@ async function fetchJsons({ axios, itemCtx }) {
   let language = {};
   let functions = {};
   const { name, sourceRef, version, packageviewUrlPrefix } = itemCtx.chart;
-  
+
   try {
     ui = await axios.get(
       `${packageviewUrlPrefix}/create-ui.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`
@@ -161,7 +161,8 @@ function ifRequestTypeEqualsTo(
 function onRequestTypeChange({ model, getValue, commit }) {
   const selectedType = getValue(model, "/spec/type");
   const reqTypeMapping = {
-    Upgrade: "upgrade",
+    Upgrade: "updateVersion",
+    UpdateVersion: "updateVersion",
     HorizontalScaling: "horizontalScaling",
     VerticalScaling: "verticalScaling",
     VolumeExpansion: "volumeExpansion",
@@ -310,7 +311,8 @@ function showConfigureOpsrequestLabel({ route }) {
 function showAndInitOpsRequestType({ route, commit }) {
   const ver = asDatabaseOperation(route);
   const opMap = {
-    upgrade: "Upgrade",
+    upgrade: "UpdateVersion",
+    updateVersion: "UpdateVersion",
     horizontalscaling: "HorizontalScaling",
     verticalscaling: "VerticalScaling",
     volumeexpansion: "VolumeExpansion",
@@ -707,10 +709,10 @@ function setValueFromDbDetails({discriminator, getValue, watchDependency, commit
 
   if(commitPath) {
     const tlsOperation = getValue(discriminator, "/tlsOperation");
-    
+
     // computed called when tls fields is not visible
     if(commitPath.includes("/spec/tls") && tlsOperation !== "update")
-      return undefined; 
+      return undefined;
 
     // direct model update required for reusable element.
     // computed property is not applicable for reusable element
