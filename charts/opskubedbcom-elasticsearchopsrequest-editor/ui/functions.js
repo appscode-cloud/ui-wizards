@@ -194,7 +194,8 @@ function ifRequestTypeEqualsTo({ model, getValue, watchDependency }, type) {
 function onRequestTypeChange({ model, getValue, commit }) {
   const selectedType = getValue(model, "/spec/type");
   const reqTypeMapping = {
-    Upgrade: "upgrade",
+    Upgrade: "updateVersion",
+    UpdateVersion: "updateVersion",
     HorizontalScaling: "horizontalScaling",
     VerticalScaling: "verticalScaling",
     VolumeExpansion: "volumeExpansion",
@@ -305,7 +306,8 @@ function showConfigureOpsrequestLabel({ route }) {
 function showAndInitOpsRequestType({ route, commit }) {
   const ver = asDatabaseOperation(route);
   const opMap = {
-    upgrade: "Upgrade",
+    upgrade: "UpdateVersion",
+    updateVersion: "UpdateVersion",
     horizontalscaling: "HorizontalScaling",
     verticalscaling: "VerticalScaling",
     volumeexpansion: "VolumeExpansion",
