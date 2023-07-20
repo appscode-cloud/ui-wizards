@@ -1,0 +1,156 @@
+metadata:
+  resource:
+    group: ui.k8s.appscode.com
+    version: v1alpha1
+    name: featuresets
+    kind: FeatureSet
+    scope: Cluster
+  release:
+    name: RELEASE-NAME
+    namespace: default
+resources:
+  helmToolkitFluxcdIoHelmRelease_capi_ui_presets: # +doc-gen:break
+    apiVersion: helm.toolkit.fluxcd.io/v2beta1
+    kind: HelmRelease
+    metadata:
+      name: capi-ui-presets
+      namespace: kubeops
+    spec:
+      chart:
+        spec:
+          chart: capi-ui-presets
+          sourceRef:
+            kind: HelmRepository
+            name: appscode
+            namespace: kubeops
+          version: v2023.03.23
+      install:
+        crds: CreateReplace
+        createNamespace: true
+        remediation:
+          retries: -1
+      interval: 5m
+      releaseName: capi-ui-presets
+      storageNamespace: kubeops
+      targetNamespace: kubeops
+      timeout: 30m
+      upgrade:
+        crds: CreateReplace
+        remediation:
+          retries: -1
+  helmToolkitFluxcdIoHelmRelease_crossplane: # +doc-gen:break
+    apiVersion: helm.toolkit.fluxcd.io/v2beta1
+    kind: HelmRelease
+    metadata:
+      name: crossplane
+      namespace: kubeops
+    spec:
+      chart:
+        spec:
+          chart: crossplane
+          sourceRef:
+            kind: HelmRepository
+            name: crossplane
+            namespace: kubeops
+          version: 1.12.2
+      install:
+        crds: CreateReplace
+        createNamespace: true
+        remediation:
+          retries: -1
+      interval: 5m
+      releaseName: crossplane
+      storageNamespace: crossplane-system
+      targetNamespace: crossplane-system
+      timeout: 30m
+      upgrade:
+        crds: CreateReplace
+        remediation:
+          retries: -1
+  helmToolkitFluxcdIoHelmRelease_external_dns_operator: # +doc-gen:break
+    apiVersion: helm.toolkit.fluxcd.io/v2beta1
+    kind: HelmRelease
+    metadata:
+      name: external-dns-operator
+      namespace: kubeops
+    spec:
+      chart:
+        spec:
+          chart: external-dns-operator
+          sourceRef:
+            kind: HelmRepository
+            name: appscode
+            namespace: kubeops
+          version: v2022.06.14
+      install:
+        crds: CreateReplace
+        createNamespace: true
+        remediation:
+          retries: -1
+      interval: 5m
+      releaseName: external-dns-operator
+      storageNamespace: kubeops
+      targetNamespace: kubeops
+      timeout: 30m
+      upgrade:
+        crds: CreateReplace
+        remediation:
+          retries: -1
+  helmToolkitFluxcdIoHelmRelease_kubedb_gateway: # +doc-gen:break
+    apiVersion: helm.toolkit.fluxcd.io/v2beta1
+    kind: HelmRelease
+    metadata:
+      name: kubedb-gateway
+      namespace: kubeops
+    spec:
+      chart:
+        spec:
+          chart: gateway-helm
+          sourceRef:
+            kind: HelmRepository
+            name: appscode
+            namespace: kubeops
+          version: v0.0.0-latest
+      install:
+        crds: CreateReplace
+        createNamespace: true
+        remediation:
+          retries: -1
+      interval: 5m
+      releaseName: kubedb-gateway
+      storageNamespace: gateway-system
+      targetNamespace: gateway-system
+      timeout: 30m
+      upgrade:
+        crds: CreateReplace
+        remediation:
+          retries: -1
+  helmToolkitFluxcdIoHelmRelease_kubeform_provider_azure: # +doc-gen:break
+    apiVersion: helm.toolkit.fluxcd.io/v2beta1
+    kind: HelmRelease
+    metadata:
+      name: kubeform-provider-azure
+      namespace: kubeops
+    spec:
+      chart:
+        spec:
+          chart: kubeform-provider-azure
+          sourceRef:
+            kind: HelmRepository
+            name: appscode
+            namespace: kubeops
+          version: v2023.06.27
+      install:
+        crds: CreateReplace
+        createNamespace: true
+        remediation:
+          retries: -1
+      interval: 5m
+      releaseName: kubeform-provider-azure
+      storageNamespace: crossplane-system
+      targetNamespace: crossplane-system
+      timeout: 30m
+      upgrade:
+        crds: CreateReplace
+        remediation:
+          retries: -1
