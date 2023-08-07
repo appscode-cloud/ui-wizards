@@ -45,7 +45,7 @@ async function getNamespacedResourceList(
   storeGet,
   { namespace, group, version, resource }
 ) {
-  const owner = storeGet("/user/username");
+  const owner = storeGet("/route/params/user");
   const cluster = storeGet("/route/params/cluster");
 
   const url = `/clusters/${owner}/${cluster}/proxy/${group}/${version}/namespaces/${namespace}/${resource}`;
@@ -117,7 +117,7 @@ function onPrePopulateDatabaseChange({
   reusableElementCtx
 }) {
   const prePopulateDatabase = getValue(discriminator, "/prePopulateDatabase");
-  
+
   if (prePopulateDatabase === "no") {
     // delete related properties
     commit(
