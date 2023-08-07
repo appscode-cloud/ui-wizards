@@ -367,7 +367,7 @@ function onCreateUnsealerCredentialSecretChange({
 }
 
 async function getResources({ axios, storeGet }, group, version, resource) {
-  const owner = storeGet("/user/username");
+  const owner = storeGet("/route/params/user");
   const cluster = storeGet("/route/params/cluster");
 
   const resp = await axios.get(
@@ -389,7 +389,7 @@ async function getResources({ axios, storeGet }, group, version, resource) {
 }
 
 async function getStorageClassNames({ axios, storeGet, commit }, path) {
-  const owner = storeGet("/user/username");
+  const owner = storeGet("/route/params/user");
   const cluster = storeGet("/route/params/cluster");
 
   const resp = await axios.get(
@@ -431,7 +431,7 @@ async function getVaultServerVersions(
   version,
   resource
 ) {
-  const owner = storeGet("/user/username");
+  const owner = storeGet("/route/params/user");
   const cluster = storeGet("/route/params/cluster");
 
   const queryParams = {
@@ -474,7 +474,7 @@ async function getSecrets({
   getValue,
   watchDependency,
 }) {
-  const owner = storeGet("/user/username");
+  const owner = storeGet("/route/params/user");
   const cluster = storeGet("/route/params/cluster");
   const namespace = getValue(model, "/metadata/release/namespace");
   watchDependency("model#/metadata/release/namespace");
