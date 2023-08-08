@@ -45,9 +45,10 @@ function isEqualToModelPathValue({ model, getValue, watchDependency }, path, val
 function getEnabledFeatures({ storeGet }) {
   const allFeatures = storeGet('/cluster/features/result') || []
   const featureSet = storeGet('/route/params/featureset') || []
+  const featureBlock = storeGet('/route/query/activeBlock') || ''
 
   const enabledFeatures = allFeatures.filter(item => {
-    return (item?.status?.enabled || item?.spec?.required) && item?.spec?.featureSet === featureSet
+    return (item?.status?.enabled || item?.spec?.required || item?.spec?.featureBlock === featureBlock) && item?.spec?.featureSet === featureSet
   })
 
   const enabledFeatureNames = enabledFeatures.map(item => item?.metadata?.name)
