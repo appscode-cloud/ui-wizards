@@ -64,21 +64,17 @@ function isEqualToDiscriminatorPathValue(
 }
 
 function getEnabledFeatures({ storeGet }) {
-  const allFeatures = storeGet("/cluster/features/result") || [];
-  const featureSet = storeGet("/route/params/featureset") || [];
+  const allFeatures = storeGet('/cluster/features/result') || []
+  const featureSet = storeGet('/route/params/featureset') || []
+  const featureBlock = storeGet('/route/query/activeBlock') || ''
 
-  const enabledFeatures = allFeatures.filter((item) => {
-    return (
-      (item?.status?.enabled || item?.spec?.required) &&
-      item?.spec?.featureSet === featureSet
-    );
-  });
+  const enabledFeatures = allFeatures.filter(item => {
+    return (item?.status?.enabled || item?.spec?.required || item?.spec?.featureBlock === featureBlock) && item?.spec?.featureSet === featureSet
+  })
 
-  const enabledFeatureNames = enabledFeatures.map(
-    (item) => item?.metadata?.name
-  );
+  const enabledFeatureNames = enabledFeatures.map(item => item?.metadata?.name)
 
-  return enabledFeatureNames;
+  return enabledFeatureNames
 }
 
 function disableFeatures({ storeGet, itemCtx }) {
@@ -167,7 +163,7 @@ function onEnabledFeaturesChange({
           },
           force: true,
         });
-      }      
+      }
     } else {
       commit("wizard/model$delete", `/resources/${resourceValuePath}`);
     }
@@ -188,7 +184,7 @@ async function setReleaseNameAndNamespace({ commit, storeGet, model, getValue, a
     getValue,
     "/status/enabled"
   );
-  
+
   if(isFeatureSetInstalled) {
     // get resources deafult values when featureset is installed
     const owner = storeGet("/route/params/user");
@@ -203,9 +199,9 @@ async function setReleaseNameAndNamespace({ commit, storeGet, model, getValue, a
       `/clusters/${owner}/${cluster}/helm/packageview/values?name=${chartName}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${chartVersion}&format=json`
     );
     const { resources: resourcesDefaultValues } = data || {}
-        
+
     Object.keys(resourcesDefaultValues || {}).forEach(key => {
-      if(!resources[key]) { 
+      if(!resources[key]) {
         resources[key] = resourcesDefaultValues[key];
       }
     })
@@ -280,10 +276,10 @@ function showMonitoringConfigSection({
         "/status/enabled"
       );
 
-      const isMonitoringConfigManaged = getFeatureDetails( 
-        storeGet, 
-        "monitoring-config", 
-        getValue, 
+      const isMonitoringConfigManaged = getFeatureDetails(
+        storeGet,
+        "monitoring-config",
+        getValue,
         '/status/managed'
       )
 
