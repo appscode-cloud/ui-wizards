@@ -9,6 +9,35 @@ metadata:
     name: RELEASE-NAME
     namespace: default
 resources:
+  helmToolkitFluxcdIoHelmRelease_capa_vpc_peering_operator: # +doc-gen:break
+    apiVersion: helm.toolkit.fluxcd.io/v2beta1
+    kind: HelmRelease
+    metadata:
+      name: capa-vpc-peering-operator
+      namespace: kubeops
+    spec:
+      chart:
+        spec:
+          chart: capa-vpc-peering-operator
+          sourceRef:
+            kind: HelmRepository
+            name: appscode
+            namespace: kubeops
+          version: v2023.03.23
+      install:
+        crds: CreateReplace
+        createNamespace: true
+        remediation:
+          retries: -1
+      interval: 5m
+      releaseName: capa-vpc-peering-operator
+      storageNamespace: crossplane-system
+      targetNamespace: crossplane-system
+      timeout: 30m
+      upgrade:
+        crds: CreateReplace
+        remediation:
+          retries: -1
   helmToolkitFluxcdIoHelmRelease_capi_ui_presets: # +doc-gen:break
     apiVersion: helm.toolkit.fluxcd.io/v2beta1
     kind: HelmRelease
@@ -120,6 +149,35 @@ resources:
       releaseName: kubedb-gateway
       storageNamespace: gateway-system
       targetNamespace: gateway-system
+      timeout: 30m
+      upgrade:
+        crds: CreateReplace
+        remediation:
+          retries: -1
+  helmToolkitFluxcdIoHelmRelease_kubeform_provider_aws: # +doc-gen:break
+    apiVersion: helm.toolkit.fluxcd.io/v2beta1
+    kind: HelmRelease
+    metadata:
+      name: kubeform-provider-aws
+      namespace: kubeops
+    spec:
+      chart:
+        spec:
+          chart: kubeform-provider-aws
+          sourceRef:
+            kind: HelmRepository
+            name: appscode
+            namespace: kubeops
+          version: v2023.06.27
+      install:
+        crds: CreateReplace
+        createNamespace: true
+        remediation:
+          retries: -1
+      interval: 5m
+      releaseName: kubeform-provider-aws
+      storageNamespace: crossplane-system
+      targetNamespace: crossplane-system
       timeout: 30m
       upgrade:
         crds: CreateReplace
