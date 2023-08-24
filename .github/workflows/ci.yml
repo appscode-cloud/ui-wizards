@@ -41,14 +41,14 @@ jobs:
           chmod +x ./kubectl
           sudo mv ./kubectl /usr/local/bin/kubectl
 
-      - name: Install uibuilder-tools
+      - name: Check schema
         run: |
           go install go.bytebuilders.dev/uibuilder-tools@master
+          uibuilder-tools check --wizard-dir=./charts
 
       - name: Run checks
         run: |
           make ci
-          uibuilder-tools check --wizard-dir=./charts
 
   kubernetes:
     name: Kubernetes
