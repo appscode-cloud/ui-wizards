@@ -48,15 +48,16 @@ properties:
           properties:
             labels:
               items:
-                description: ENUM(backup_via,catalog,cert_issuer,config,connect_via,exposed_by,id,located_on,monitored_by,offshoot,ops,policy,recommended_for,restore_into,scaled_by,view)
+                description: ENUM(authn,authz,backup_via,catalog,cert_issuer,config,connect_via,exposed_by,located_on,monitored_by,offshoot,ops,policy,recommended_for,restore_into,scaled_by,storage,view)
                 enum:
+                - authn
+                - authz
                 - backup_via
                 - catalog
                 - cert_issuer
                 - config
                 - connect_via
                 - exposed_by
-                - id
                 - located_on
                 - monitored_by
                 - offshoot
@@ -65,6 +66,7 @@ properties:
                 - recommended_for
                 - restore_into
                 - scaled_by
+                - storage
                 - view
                 type: string
               type: array
@@ -72,8 +74,15 @@ properties:
               type: string
             nameTemplate:
               type: string
-            namespacePath:
-              type: string
+            namespace:
+              properties:
+                labelSelector:
+                  type: string
+                path:
+                  type: string
+                selector:
+                  type: string
+              type: object
             references:
               description: "References are a jsonpath that returns a CSV formatted
                 references to target resources \n If each row has a single column,
@@ -193,15 +202,16 @@ properties:
                     query:
                       properties:
                         byLabel:
-                          description: ENUM(backup_via,catalog,cert_issuer,config,connect_via,exposed_by,id,located_on,monitored_by,offshoot,ops,policy,recommended_for,restore_into,scaled_by,view)
+                          description: ENUM(authn,authz,backup_via,catalog,cert_issuer,config,connect_via,exposed_by,located_on,monitored_by,offshoot,ops,policy,recommended_for,restore_into,scaled_by,storage,view)
                           enum:
+                          - authn
+                          - authz
                           - backup_via
                           - catalog
                           - cert_issuer
                           - config
                           - connect_via
                           - exposed_by
-                          - id
                           - located_on
                           - monitored_by
                           - offshoot
@@ -210,6 +220,7 @@ properties:
                           - recommended_for
                           - restore_into
                           - scaled_by
+                          - storage
                           - view
                           type: string
                         raw:
