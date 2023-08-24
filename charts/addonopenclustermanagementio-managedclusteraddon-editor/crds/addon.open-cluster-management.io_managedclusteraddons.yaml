@@ -1,0 +1,85 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  creationTimestamp: null
+  name: managedclusteraddons.addon.open-cluster-management.io
+spec:
+  group: addon.open-cluster-management.io
+  names:
+    kind: ManagedClusterAddOn
+    listKind: ManagedClusterAddOnList
+    plural: managedclusteraddons
+    singular: managedclusteraddon
+  scope: Namespaced
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: ManagedClusterAddOn is the Custom Resource object which holds
+          the current state of an add-on. This object is used by add-on operators
+          to convey their state. This resource should be created in the ManagedCluster
+          namespace.
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: spec holds configuration that could apply to any operator.
+            properties:
+              configs:
+                description: configs is a list of add-on configurations. In scenario
+                  where the current add-on has its own configurations. An empty list
+                  means there are no default configurations for add-on. The default
+                  is an empty list
+                items:
+                  properties:
+                    group:
+                      default: ""
+                      description: group of the add-on configuration.
+                      type: string
+                    name:
+                      description: name of the add-on configuration.
+                      minLength: 1
+                      type: string
+                    namespace:
+                      description: namespace of the add-on configuration. If this
+                        field is not set, the configuration is in the cluster scope.
+                      type: string
+                    resource:
+                      description: resource of the add-on configuration.
+                      minLength: 1
+                      type: string
+                  required:
+                  - name
+                  - resource
+                  type: object
+                type: array
+              installNamespace:
+                default: open-cluster-management-agent-addon
+                description: installNamespace is the namespace on the managed cluster
+                  to install the addon agent. If it is not set, open-cluster-management-agent-addon
+                  namespace is used to install the addon agent.
+                maxLength: 63
+                pattern: ^[a-z0-9]([-a-z0-9]*[a-z0-9])?$
+                type: string
+            type: object
+        required:
+        - spec
+        type: object
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: null
+  storedVersions: null
