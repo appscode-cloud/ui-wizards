@@ -47,7 +47,7 @@ The following table lists the configurable parameters of the `policy-poddisrupti
 
 |     Parameter      | Description |             Default              |
 |--------------------|-------------|----------------------------------|
-| apiVersion         |             | <code>policy/v1beta1</code>      |
+| apiVersion         |             | <code>policy/v1</code>           |
 | kind               |             | <code>PodDisruptionBudget</code> |
 | metadata.name      |             | <code>poddisruptionbudget</code> |
 | metadata.namespace |             | <code>default</code>             |
@@ -56,7 +56,7 @@ The following table lists the configurable parameters of the `policy-poddisrupti
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm upgrade -i`. For example:
 
 ```bash
-$ helm upgrade -i policy-poddisruptionbudget-editor bytebuilders-ui/policy-poddisruptionbudget-editor -n default --create-namespace --version=v0.4.16 --set apiVersion=policy/v1beta1
+$ helm upgrade -i policy-poddisruptionbudget-editor bytebuilders-ui/policy-poddisruptionbudget-editor -n default --create-namespace --version=v0.4.16 --set apiVersion=policy/v1
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
