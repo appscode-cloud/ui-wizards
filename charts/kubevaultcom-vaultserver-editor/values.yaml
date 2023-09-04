@@ -177,6 +177,25 @@ resources:
         secretShares: 1
         secretThreshold: 1
       version: 0.11.5
+  monitoringCoreosComServiceMonitor: # +doc-gen:break
+    apiVersion: monitoring.coreos.com/v1
+    kind: ServiceMonitor
+    metadata:
+      name: vault
+      namespace: default
+    spec:
+      endpoints:
+        - honorLabels: true
+          interval: 30s
+          path: /metrics
+          port: metrics
+      namespaceSelector:
+        matchNames:
+          - demo
+      selector:
+        matchLabels:
+          app.kubernetes.io/instance: redis
+          app.kubernetes.io/name: redises.kubedb.com
   secret_backend_creds: # +doc-gen:break
     apiVersion: v1
     kind: Secret
