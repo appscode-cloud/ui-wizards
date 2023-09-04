@@ -7,20 +7,20 @@ require (
 	k8s.io/api v0.25.3
 	k8s.io/apimachinery v0.25.4
 	k8s.io/kube-openapi v0.0.0-20221012153701-172d655c2280
-	kmodules.xyz/client-go v0.25.22
-	kmodules.xyz/objectstore-api v0.25.1-0.20221104003322-f0289b5b6ca2
-	kmodules.xyz/offshoot-api v0.25.0
-	kmodules.xyz/schema-checker v0.4.2-0.20220924062710-97ca6e9cc6e1
-	kubedb.dev/apimachinery v0.33.1
-	stash.appscode.dev/apimachinery v0.29.0
+	kmodules.xyz/client-go v0.25.30
+	kmodules.xyz/objectstore-api v0.25.1
+	kmodules.xyz/offshoot-api v0.25.4
+	kmodules.xyz/schema-checker v0.4.2-0.20230316051604-9a40277165e8
+	kubedb.dev/apimachinery v0.35.0
+	stash.appscode.dev/apimachinery v0.31.1
 	x-helm.dev/apimachinery v0.0.9
 )
 
 require (
-	github.com/Masterminds/semver/v3 v3.2.0 // indirect
+	github.com/Masterminds/semver/v3 v3.2.1 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cert-manager/cert-manager v1.9.1 // indirect
-	github.com/cespare/xxhash/v2 v2.1.2 // indirect
+	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/emicklei/go-restful/v3 v3.9.0 // indirect
 	github.com/evanphx/json-patch v5.6.0+incompatible // indirect
@@ -60,13 +60,13 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/yudai/gojsondiff v1.0.0 // indirect
 	github.com/yudai/golcs v0.0.0-20170316035057-ecda9a501e82 // indirect
-	golang.org/x/net v0.9.0 // indirect
+	golang.org/x/net v0.10.0 // indirect
 	golang.org/x/oauth2 v0.7.0 // indirect
-	golang.org/x/sys v0.7.0 // indirect
-	golang.org/x/term v0.7.0 // indirect
+	golang.org/x/sys v0.8.0 // indirect
+	golang.org/x/term v0.8.0 // indirect
 	golang.org/x/text v0.9.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
-	gomodules.xyz/jsonpatch/v2 v2.2.0 // indirect
+	gomodules.xyz/jsonpatch/v2 v2.4.0 // indirect
 	gomodules.xyz/mergo v0.3.13 // indirect
 	gomodules.xyz/pointer v0.1.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
@@ -79,7 +79,7 @@ require (
 	k8s.io/component-base v0.25.3 // indirect
 	k8s.io/klog/v2 v2.80.1 // indirect
 	k8s.io/utils v0.0.0-20221108210102-8e77b1f39fe2 // indirect
-	kmodules.xyz/custom-resources v0.25.1 // indirect
+	kmodules.xyz/custom-resources v0.25.2 // indirect
 	kmodules.xyz/monitoring-agent-api v0.25.1 // indirect
 	kmodules.xyz/prober v0.25.0 // indirect
 	sigs.k8s.io/controller-runtime v0.13.1 // indirect

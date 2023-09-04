@@ -25,6 +25,7 @@ import (
 
 	promapi "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
 	"gomodules.xyz/pointer"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	appslister "k8s.io/client-go/listers/apps/v1"
 	kmapi "kmodules.xyz/client-go/api/v1"
@@ -38,6 +39,10 @@ func (_ ProxySQL) CustomResourceDefinition() *apiextensions.CustomResourceDefini
 	return crds.MustCustomResourceDefinition(SchemeGroupVersion.WithResource(ResourcePluralProxySQL))
 }
 
+func (p *ProxySQL) AsOwner() *metav1.OwnerReference {
+	return metav1.NewControllerRef(p, SchemeGroupVersion.WithKind(ResourceKindProxySQL))
+}
+
 var _ apis.ResourceInfo = &ProxySQL{}
 
 func (p ProxySQL) OffshootName() string {
@@ -49,7 +54,6 @@ func (p ProxySQL) OffshootSelectors() map[string]string {
 		meta_util.NameLabelKey:      p.ResourceFQN(),
 		meta_util.InstanceLabelKey:  p.Name,
 		meta_util.ManagedByLabelKey: kubedb.GroupName,
-		LabelProxySQLLoadBalance:    string(*p.Spec.Mode),
 	}
 }
 
@@ -171,7 +175,7 @@ func (p *ProxySQL) SetDefaults(usesAcme bool) {
 		return
 	}
 
-	if p == nil || p.Spec.Mode == nil || p.Spec.Backend == nil {
+	if p == nil || p.Spec.Backend == nil {
 		return
 	}
 
