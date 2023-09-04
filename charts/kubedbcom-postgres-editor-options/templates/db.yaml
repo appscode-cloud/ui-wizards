@@ -4,6 +4,7 @@
   {{- $res = get (get $machines .Values.spec.machine) "resources" }}
 {{- end }}
 {{- $pgv := (split "." .Values.spec.version)._0 | atoi -}}
+{{ $poolName := printf "%s-%s-%s" .Values.form.capi.clusterName .Release.Namespace (include "kubedbcom-postgres-editor-options.fullname" .) }}
 
 apiVersion: kubedb.com/v1alpha2
 kind: Postgres
@@ -42,6 +43,25 @@ spec:
     spec:
       resources:
         {{- toYaml $res | nindent 8 }}
+      {{- if and .Values.form.capi.provider .Values.form.capi.dedicated }}
+      tolerations:
+        - key: dedicated
+          operator: "Equal"
+          value: "true"
+          effect: "NoSchedule"
+      {{- end }}
+      {{- if and (eq .Values.form.capi.provider "capa") .Values.form.capi.dedicated }}
+      nodeSelector:
+        eks.amazonaws.com/nodegroup: {{ $poolName }}
+      {{- end }}
+      {{- if and (eq .Values.form.capi.provider "capg") .Values.form.capi.dedicated }}
+      nodeSelector:
+        gke.cloud.google.com/nodepool: {{ $poolName }}
+      {{- end }}
+      {{- if and (eq .Values.form.capi.provider "capz") .Values.form.capi.dedicated }}
+      nodeSelector:
+        kubernetes.azure.com/agentpool: {{ $poolName }}
+      {{- end }}
   storage:
     accessModes:
     - ReadWriteOnce

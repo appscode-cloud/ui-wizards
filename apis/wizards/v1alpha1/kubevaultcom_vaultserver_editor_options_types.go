@@ -39,7 +39,7 @@ type KubevaultcomVaultserverEditorOptions struct {
 type KubevaultcomVaultserverEditorOptionsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Spec         KubevaultcomVaultserverEditorOptionsSpecSpec `json:"spec"`
-	Form         alerts.VaultserverAlertsSpecForm             `json:"form"`
+	Form         VaultserverAlertsSpecForm                    `json:"form"`
 }
 
 type KubevaultcomVaultserverEditorOptionsSpecSpec struct {
@@ -272,6 +272,11 @@ type VaultserverCredentialSecretGoogleKmsGcs struct {
 
 // +kubebuilder:validation:Enum=Standalone;Cluster;Sentinel
 type VaultserverMode string
+
+type VaultserverAlertsSpecForm struct {
+	Alert alerts.VaultserverAlertsAlert `json:"alert"`
+	CAPI  CAPIFormSpec                  `json:"capi"`
+}
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 

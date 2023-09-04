@@ -1,0 +1,44 @@
+{{- if and (eq .Values.form.capi.provider "capg") .Values.form.capi.dedicated }}
+
+{{ $poolName := printf "%s-%s-%s-%s" .Values.form.capi.clusterName .Release.namespace .Release.name .Values.form.capi.uniqueKey }}
+
+apiVersion: cluster.x-k8s.io/v1beta1
+kind: MachinePool
+metadata:
+  name: {{ $poolName }}
+  namespace: {{ .Values.form.capi.namespace }}
+  annotations:
+    cluster.x-k8s.io/cluster-api-autoscaler-node-group-min-size: "1"
+    cluster.x-k8s.io/cluster-api-autoscaler-node-group-max-size: "{{ .Values.form.capi.nodes }}"
+spec:
+  clusterName: {{ .Values.form.capi.clusterName }}
+  replicas: {{ .Values.form.capi.nodes }}
+  template:
+    spec:
+      bootstrap:
+        dataSecretName: ""
+      clusterName: {{ .Values.form.capi.clusterName }}
+      infrastructureRef:
+        apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+        kind: GCPManagedMachinePool
+        name: {{ $poolName }}
+      version: {{ .Values.form.capi.kubernetesVersion }}
+---
+apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
+kind: GCPManagedMachinePool
+metadata:
+  name: {{ $poolName }}
+  namespace: {{ .Values.form.capi.namespace }}
+spec:
+  scaling:
+    minCount: 1
+    maxCount: {{ .Values.form.capi.nodes }}
+  nodePoolName: {{ $poolName }}
+  kubernetesLabels:
+    gke.cloud.google.com/nodepool: {{ $poolName }}
+  taints:
+    - effect: NoSchedule
+      key: dedicated
+      value: "true"
+
+{{- end }}

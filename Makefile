@@ -474,7 +474,7 @@ clean:
 UIBUILDER_TOOLS = $(shell pwd)/bin/uibuilder-tools
 .PHONY: uibuilder-tools
 uibuilder-tools: ## Download uibuilder-tools locally if necessary.
-	$(call go-get-tool,$(UIBUILDER_TOOLS),bytebuilders/uibuilder-tools,v0.0.1)
+	GOBIN=$(shell pwd)/bin go install go.bytebuilders.dev/uibuilder-tools@master
 
 # go-get-tool will 'curl' binary from GH repo $2 with version $3 and install it to $1.
 PROJECT_DIR := $(shell dirname $(abspath $(lastword $(MAKEFILE_LIST))))

@@ -39,7 +39,7 @@ type KubedbcomMysqlEditorOptions struct {
 type KubedbcomMysqlEditorOptionsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Spec         KubedbcomMysqlEditorOptionsSpecSpec `json:"spec"`
-	Form         alerts.MysqlAlertsSpecForm          `json:"form"`
+	Form         MysqlAlertsSpecForm                 `json:"form"`
 }
 
 type KubedbcomMysqlEditorOptionsSpecSpec struct {
@@ -72,6 +72,11 @@ type MySQLRouter struct {
 
 // +kubebuilder:validation:Enum=Standalone;GroupReplication;InnoDBCluster
 type MysqlMode string
+
+type MysqlAlertsSpecForm struct {
+	Alert alerts.MySQLAlert `json:"alert"`
+	CAPI  CAPIFormSpec      `json:"capi"`
+}
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
