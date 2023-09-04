@@ -401,7 +401,7 @@ steps:
         - label:
             text: labels.backend.tlsSecretName
           schema:
-            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/consul/properties/tlsSecretName
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/consul/properties/tlsSecretRef/properties/name
           type: input
         if: isEqualToDiscriminatorPath|consul|/backend
         schema:
@@ -481,7 +481,7 @@ steps:
         - label:
             text: labels.backend.tlsSecretName
           schema:
-            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/etcd/properties/tlsSecretName
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/etcd/properties/tlsSecretRef/properties/name
           type: input
         if: isEqualToDiscriminatorPath|etcd|/backend
         schema:
@@ -697,9 +697,9 @@ steps:
           type: input
         - fetch: getSecrets
           label:
-            text: labels.backend.sessionTokenSecret
+            text: labels.backend.credentialSecretName
           schema:
-            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/s3/properties/sessionTokenSecret
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/s3/properties/credentialSecretRef/properties/name
           type: input
         if: isEqualToDiscriminatorPath|s3|/backend
         schema:
@@ -851,21 +851,6 @@ steps:
             schema:
               $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/dataSources/items/properties/csi/properties/readOnly
             type: switch
-          - isArray: true
-            keys:
-              label:
-                text: labels.labels.key
-            label:
-              text: labels.dataSources.volumeAttributes
-            schema:
-              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/metadata/properties/volumeAttributes
-            type: key-value-input-form
-            values:
-              label:
-                text: labels.labels.value
-              schema:
-                $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/metadata/properties/volumeAttributes/additionalProperties
-              type: input
           - label:
               text: labels.dataSources.driver
             schema:
@@ -1406,7 +1391,7 @@ steps:
         - label:
             text: labels.path
           schema:
-            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/path
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/items/properties/path
           type: input
         - label:
             text: labels.auth_methods.type
@@ -1421,86 +1406,86 @@ steps:
           - jwt
           - oidc
           schema:
-            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/type
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/items/properties/type
           type: select
         - label:
             text: labels.auth_methods.is_local_question
           schema:
-            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/local
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/items/properties/local
           type: switch
         - label:
             text: labels.auth_methods.description
           schema:
-            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/description
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/items/properties/description
           type: textarea
         - label:
             text: labels.auth_methods.pluginName
           schema:
-            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/pluginName
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/items/properties/pluginName
           type: input
         - elements:
           - label:
               text: labels.auth_methods.defaultLeaseTTL
             schema:
-              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/kubernetesConfig/properties/defaultLeaseTTL
+              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/items/properties/kubernetesConfig/properties/defaultLeaseTTL
             type: input
           - label:
               text: labels.auth_methods.listingVisibility
             schema:
-              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/kubernetesConfig/properties/listingVisibility
+              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/items/properties/kubernetesConfig/properties/listingVisibility
             type: input
           - label:
               text: labels.auth_methods.maxLeaseTTL
             schema:
-              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/kubernetesConfig/properties/maxLeaseTTL
+              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/items/properties/kubernetesConfig/properties/maxLeaseTTL
             type: input
           - label:
               text: labels.auth_methods.pluginName
             schema:
-              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/kubernetesConfig/properties/pluginName
+              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/items/properties/kubernetesConfig/properties/pluginName
             type: input
           - element:
               label:
                 isSubsection: true
                 text: labels.auth_methods.auditNonHMACRequestKey
               schema:
-                $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/kubernetesConfig/properties/auditNonHMACRequestKeys/items
+                $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/items/properties/kubernetesConfig/properties/auditNonHMACRequestKeys/items
               type: input
             label:
               text: labels.auth_methods.auditNonHMACRequestKeys
             schema:
-              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/kubernetesConfig/properties/auditNonHMACRequestKeys
+              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/items/properties/kubernetesConfig/properties/auditNonHMACRequestKeys
             type: list-input-form
           - element:
               label:
                 isSubsection: true
                 text: labels.auth_methods.auditNonHMACResponseKey
               schema:
-                $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/kubernetesConfig/properties/auditNonHMACResponseKeys/items
+                $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/items/properties/kubernetesConfig/properties/auditNonHMACResponseKeys/items
               type: input
             label:
               text: labels.auth_methods.auditNonHMACResponseKeys
             schema:
-              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/kubernetesConfig/properties/auditNonHMACResponseKeys
+              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/items/properties/kubernetesConfig/properties/auditNonHMACResponseKeys
             type: list-input-form
           - element:
               label:
                 isSubsection: true
                 text: labels.auth_methods.passthroughRequestHeader
               schema:
-                $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/kubernetesConfig/properties/passthroughRequestHeaders/items
+                $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/items/properties/kubernetesConfig/properties/passthroughRequestHeaders/items
               type: input
             label:
               text: labels.auth_methods.passthroughRequestHeaders
             schema:
-              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/kubernetesConfig/properties/passthroughRequestHeaders
+              $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/items/properties/kubernetesConfig/properties/passthroughRequestHeaders
             type: list-input-form
           hideForm: true
           if: isAuthMethodTypeEqualTo|kubernetes
           label:
             text: labels.auth_methods.kubernetes_config
           schema:
-            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/kubernetesConfig
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/items/properties/kubernetesConfig
           show_label: true
           type: single-step-form
         - alias: reusable_jwt_config
@@ -1514,7 +1499,7 @@ steps:
             text: labels.auth_methods.jwt_config
           moduleResolver: fetchJsons
           schema:
-            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/jwtConfig
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/items/properties/jwtConfig
           show_label: true
           type: reusable-element
         - alias: reusable_oidc_config
@@ -1528,7 +1513,7 @@ steps:
             text: labels.auth_methods.oidc_config
           moduleResolver: fetchJsons
           schema:
-            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/properties/oidcConfig
+            $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/authMethods/items/properties/oidcConfig
           show_label: true
           type: reusable-element
         schema:
