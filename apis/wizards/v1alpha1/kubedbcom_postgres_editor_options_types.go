@@ -39,7 +39,7 @@ type KubedbcomPostgresEditorOptions struct {
 type KubedbcomPostgresEditorOptionsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Spec         KubedbcomPostgresEditorOptionsSpecSpec `json:"spec"`
-	Form         alerts.PostgresAlertsSpecForm          `json:"form"`
+	Form         PostgresAlertsSpecForm                 `json:"form"`
 }
 
 type KubedbcomPostgresEditorOptionsSpecSpec struct {
@@ -60,6 +60,11 @@ type KubedbcomPostgresEditorOptionsSpecSpec struct {
 
 // +kubebuilder:validation:Enum=Standalone;Cluster
 type PostgresMode string
+
+type PostgresAlertsSpecForm struct {
+	Alert alerts.PostgresAlert `json:"alert"`
+	CAPI  CAPIFormSpec         `json:"capi"`
+}
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 

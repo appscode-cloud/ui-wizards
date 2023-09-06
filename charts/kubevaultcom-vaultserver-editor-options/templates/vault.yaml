@@ -8,6 +8,8 @@
 {{- $backendTLS    := default (printf "%s-backend-tls"    (include "kubevaultcom-vaultserver-editor-options.fullname" . )) .Values.spec.backend.tlsSecret.name -}}
 {{- $unsealerCreds := default (printf "%s-unsealer-creds" (include "kubevaultcom-vaultserver-editor-options.fullname" . )) .Values.spec.unsealer.credentialSecret.name -}}
 
+{{ $poolName := printf "%s-%s-%s" .Values.form.capi.clusterName .Release.Namespace (include "kubevaultcom-vaultserver-editor-options.fullname" .) }}
+
 apiVersion: kubevault.com/v1alpha2
 kind: VaultServer
 metadata:
@@ -26,6 +28,16 @@ spec:
     spec:
       resources:
         {{- toYaml $res | nindent 8 }}
+      {{- if and .Values.form.capi.provider .Values.form.capi.dedicated }}
+      nodeSelector:
+        nodes.klusters.dev/pool: {{ $poolName }}
+      tolerations:
+        - key: dedicated
+          operator: "Equal"
+          value: "true"
+          effect: "NoSchedule"
+      {{- end }}
+
   terminationPolicy: {{ .Values.spec.terminationPolicy }}
 
   backend:
