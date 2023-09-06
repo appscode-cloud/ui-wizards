@@ -5,10 +5,10 @@
 ## TL;DR;
 
 ```bash
-$ helm repo add bytebuilders-ui https://bundles.byte.builders/ui/
+$ helm repo add bytebuilders-ui-dev https://raw.githubusercontent.com/bytebuilders/ui-wizards/
 $ helm repo update
-$ helm search repo bytebuilders-ui/catalogkubewaredev-mariadbbinding-editor --version=v0.4.16
-$ helm upgrade -i catalogkubewaredev-mariadbbinding-editor bytebuilders-ui/catalogkubewaredev-mariadbbinding-editor -n default --create-namespace --version=v0.4.16
+$ helm search repo bytebuilders-ui-dev/catalogkubewaredev-mariadbbinding-editor --version=v0.4.17
+$ helm upgrade -i catalogkubewaredev-mariadbbinding-editor bytebuilders-ui-dev/catalogkubewaredev-mariadbbinding-editor -n default --create-namespace --version=v0.4.17
 ```
 
 ## Introduction
@@ -24,7 +24,7 @@ This chart deploys a MariaDBBinding Editor on a [Kubernetes](http://kubernetes.i
 To install/upgrade the chart with the release name `catalogkubewaredev-mariadbbinding-editor`:
 
 ```bash
-$ helm upgrade -i catalogkubewaredev-mariadbbinding-editor bytebuilders-ui/catalogkubewaredev-mariadbbinding-editor -n default --create-namespace --version=v0.4.16
+$ helm upgrade -i catalogkubewaredev-mariadbbinding-editor bytebuilders-ui-dev/catalogkubewaredev-mariadbbinding-editor -n default --create-namespace --version=v0.4.17
 ```
 
 The command deploys a MariaDBBinding Editor on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
@@ -56,12 +56,12 @@ The following table lists the configurable parameters of the `catalogkubewaredev
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm upgrade -i`. For example:
 
 ```bash
-$ helm upgrade -i catalogkubewaredev-mariadbbinding-editor bytebuilders-ui/catalogkubewaredev-mariadbbinding-editor -n default --create-namespace --version=v0.4.16 --set apiVersion=catalog.kubeware.dev/v1alpha1
+$ helm upgrade -i catalogkubewaredev-mariadbbinding-editor bytebuilders-ui-dev/catalogkubewaredev-mariadbbinding-editor -n default --create-namespace --version=v0.4.17 --set apiVersion=catalog.kubeware.dev/v1alpha1
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
 installing the chart. For example:
 
 ```bash
-$ helm upgrade -i catalogkubewaredev-mariadbbinding-editor bytebuilders-ui/catalogkubewaredev-mariadbbinding-editor -n default --create-namespace --version=v0.4.16 --values values.yaml
+$ helm upgrade -i catalogkubewaredev-mariadbbinding-editor bytebuilders-ui-dev/catalogkubewaredev-mariadbbinding-editor -n default --create-namespace --version=v0.4.17 --values values.yaml
 ```
