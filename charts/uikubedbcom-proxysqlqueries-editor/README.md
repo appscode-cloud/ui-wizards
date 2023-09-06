@@ -5,10 +5,10 @@
 ## TL;DR;
 
 ```bash
-$ helm repo add bytebuilders-ui https://bundles.byte.builders/ui/
+$ helm repo add bytebuilders-ui-dev https://raw.githubusercontent.com/bytebuilders/ui-wizards/
 $ helm repo update
-$ helm search repo bytebuilders-ui/uikubedbcom-proxysqlqueries-editor --version=v0.4.16
-$ helm upgrade -i uikubedbcom-proxysqlqueries-editor bytebuilders-ui/uikubedbcom-proxysqlqueries-editor -n default --create-namespace --version=v0.4.16
+$ helm search repo bytebuilders-ui-dev/uikubedbcom-proxysqlqueries-editor --version=v0.4.17
+$ helm upgrade -i uikubedbcom-proxysqlqueries-editor bytebuilders-ui-dev/uikubedbcom-proxysqlqueries-editor -n default --create-namespace --version=v0.4.17
 ```
 
 ## Introduction
@@ -24,7 +24,7 @@ This chart deploys a ProxySQLQueries Editor on a [Kubernetes](http://kubernetes.
 To install/upgrade the chart with the release name `uikubedbcom-proxysqlqueries-editor`:
 
 ```bash
-$ helm upgrade -i uikubedbcom-proxysqlqueries-editor bytebuilders-ui/uikubedbcom-proxysqlqueries-editor -n default --create-namespace --version=v0.4.16
+$ helm upgrade -i uikubedbcom-proxysqlqueries-editor bytebuilders-ui-dev/uikubedbcom-proxysqlqueries-editor -n default --create-namespace --version=v0.4.17
 ```
 
 The command deploys a ProxySQLQueries Editor on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
@@ -56,12 +56,12 @@ The following table lists the configurable parameters of the `uikubedbcom-proxys
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm upgrade -i`. For example:
 
 ```bash
-$ helm upgrade -i uikubedbcom-proxysqlqueries-editor bytebuilders-ui/uikubedbcom-proxysqlqueries-editor -n default --create-namespace --version=v0.4.16 --set apiVersion=ui.kubedb.com/v1alpha1
+$ helm upgrade -i uikubedbcom-proxysqlqueries-editor bytebuilders-ui-dev/uikubedbcom-proxysqlqueries-editor -n default --create-namespace --version=v0.4.17 --set apiVersion=ui.kubedb.com/v1alpha1
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
 installing the chart. For example:
 
 ```bash
-$ helm upgrade -i uikubedbcom-proxysqlqueries-editor bytebuilders-ui/uikubedbcom-proxysqlqueries-editor -n default --create-namespace --version=v0.4.16 --values values.yaml
+$ helm upgrade -i uikubedbcom-proxysqlqueries-editor bytebuilders-ui-dev/uikubedbcom-proxysqlqueries-editor -n default --create-namespace --version=v0.4.17 --values values.yaml
 ```
