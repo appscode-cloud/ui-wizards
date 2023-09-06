@@ -394,6 +394,32 @@ ct: $(BUILD_DIRS)
 	    $(CHART_TEST_IMAGE)                                     \
 	    ct $(CT_COMMAND) --debug --validate-maintainers=false $(CT_ARGS)
 
+.PHONY: capi-tests
+capi-tests:
+	@set -xe;\
+	for f in capa capg capz; do \
+		helm template -f ./hack/testdata/$$f.yaml charts/kubedbcom-elasticsearch-editor >/dev/null; \
+		helm template -f ./hack/testdata/$$f.yaml charts/kubedbcom-elasticsearch-editor-options >/dev/null; \
+		helm template -f ./hack/testdata/$$f.yaml charts/kubedbcom-kafka-editor >/dev/null; \
+		helm template -f ./hack/testdata/$$f.yaml charts/kubedbcom-kafka-editor-options >/dev/null; \
+		helm template -f ./hack/testdata/$$f.yaml charts/kubedbcom-mariadb-editor >/dev/null; \
+		helm template -f ./hack/testdata/$$f.yaml charts/kubedbcom-mariadb-editor-options >/dev/null; \
+		helm template -f ./hack/testdata/$$f.yaml charts/kubedbcom-memcached-editor >/dev/null; \
+		helm template -f ./hack/testdata/$$f.yaml charts/kubedbcom-memcached-editor-options >/dev/null; \
+		helm template -f ./hack/testdata/$$f.yaml charts/kubedbcom-mongodb-editor >/dev/null; \
+		helm template -f ./hack/testdata/$$f.yaml charts/kubedbcom-mongodb-editor-options >/dev/null; \
+		helm template -f ./hack/testdata/$$f.yaml charts/kubedbcom-mysql-editor >/dev/null; \
+		helm template -f ./hack/testdata/$$f.yaml charts/kubedbcom-mysql-editor-options >/dev/null; \
+		helm template -f ./hack/testdata/$$f.yaml charts/kubedbcom-pgbouncer-editor >/dev/null; \
+		helm template -f ./hack/testdata/$$f.yaml charts/kubedbcom-pgbouncer-editor-options >/dev/null; \
+		helm template -f ./hack/testdata/$$f.yaml charts/kubedbcom-postgres-editor >/dev/null; \
+		helm template -f ./hack/testdata/$$f.yaml charts/kubedbcom-postgres-editor-options >/dev/null; \
+		helm template -f ./hack/testdata/$$f.yaml charts/kubedbcom-proxysql-editor >/dev/null; \
+		helm template -f ./hack/testdata/$$f.yaml charts/kubedbcom-proxysql-editor-options >/dev/null; \
+		helm template -f ./hack/testdata/$$f.yaml charts/kubedbcom-redis-editor >/dev/null; \
+		helm template -f ./hack/testdata/$$f.yaml charts/kubedbcom-redis-editor-options >/dev/null; \
+	done
+
 ADDTL_LINTERS   := goconst,gofmt,goimports,unparam
 
 .PHONY: lint
