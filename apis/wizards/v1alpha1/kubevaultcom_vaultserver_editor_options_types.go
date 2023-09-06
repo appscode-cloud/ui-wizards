@@ -202,6 +202,7 @@ type VaultserverBackendProviderRaft struct {
 }
 
 type VaultserverBackendProviderS3 struct {
+	Region           string `json:"region"`
 	Bucket           string `json:"bucket"`
 	CredentialSecret string `json:"credentialSecret"`
 }

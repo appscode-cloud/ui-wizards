@@ -23,8 +23,8 @@ type CAPIFormSpec struct {
 	ClusterName string       `json:"clusterName"`
 	Dedicated   bool         `json:"dedicated"`
 	Nodes       int          `json:"nodes"`
-	SKU         string       `json:"sku,omitempty"`
-	Zones       []string     `json:"zones,omitempty"`
+	SKU         string       `json:"sku"`
+	Zones       []string     `json:"zones"`
 }
 
 // +kubebuilder:validation:Enum=capa;capg;capz
