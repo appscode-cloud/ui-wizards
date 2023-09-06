@@ -258,9 +258,9 @@ update-charts: uibuilder-tools $(shell find $$(pwd)/charts -maxdepth 1 -mindepth
 	$(UIBUILDER_TOOLS) update-version --wizard-dir=./charts --version=$(CHART_VERSION)
 
 chart-%:
-	@$(MAKE) chart-contents-$* gen-chart-doc-$* --no-print-directory
+	@$(MAKE) contents-$* gen-chart-doc-$* --no-print-directory
 
-chart-contents-%:
+contents-%:
 	@if test -f "./charts/$*/doc.yaml"; then \
 		yq -y --indentless -i '.repository.name="$(CHART_REGISTRY)"' ./charts/$*/doc.yaml; \
 		yq -y --indentless -i '.repository.url="$(CHART_REGISTRY_URL)"' ./charts/$*/doc.yaml; \
