@@ -1,8 +1,7 @@
 {{- if and (eq .Values.form.capi.provider "capz") .Values.form.capi.dedicated }}
 
-{{ $poolName := printf "%s-%s-%s" .Values.form.capi.clusterName .Release.Namespace (include "kubedbcom-redis-editor-options.fullname" .) }}
+{{ $poolName := printf "%s-%s-%s" .Values.form.capi.clusterName .Release.Namespace (include "kubedbcom-mongodb-editor.fullname" .) }}
 {{ $maxNodes := mulf .Values.form.capi.nodes 2 }}
-{{ $azpool := printf "%s%s" (.Values.form.capi.clusterName | replace "-" "" | trunc 6) (randAlphaNum 6) | lower }}
 
 apiVersion: cluster.x-k8s.io/v1beta1
 kind: MachinePool
@@ -32,7 +31,6 @@ metadata:
   namespace: {{ .Values.form.capi.namespace }}
 spec:
   mode: User
-  name: {{ $azpool }}
   sku: {{ .Values.form.capi.sku }}
   {{- with .Values.form.capi.zones }}
   availabilityZones: {{ . | toJson }}
@@ -40,6 +38,8 @@ spec:
   scaling:
     minSize: 1
     maxSize: {{ $maxNodes }}
+  nodeLabels:
+    nodes.klusters.dev/pool: {{ $poolName }}
   taints:
     - effect: NoSchedule
       key: dedicated

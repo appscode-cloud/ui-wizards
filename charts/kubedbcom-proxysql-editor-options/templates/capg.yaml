@@ -1,6 +1,7 @@
 {{- if and (eq .Values.form.capi.provider "capg") .Values.form.capi.dedicated }}
 
-{{ $poolName := printf "%s-%s-%s-%s" .Values.form.capi.clusterName .Release.namespace .Release.name .Values.form.capi.uniqueKey }}
+{{ $poolName := printf "%s-%s-%s" .Values.form.capi.clusterName .Release.Namespace (include "kubedbcom-proxysql-editor-options.fullname" .) }}
+{{ $maxNodes := mulf .Values.form.capi.nodes 2 }}
 
 apiVersion: cluster.x-k8s.io/v1beta1
 kind: MachinePool
@@ -9,7 +10,7 @@ metadata:
   namespace: {{ .Values.form.capi.namespace }}
   annotations:
     cluster.x-k8s.io/cluster-api-autoscaler-node-group-min-size: "1"
-    cluster.x-k8s.io/cluster-api-autoscaler-node-group-max-size: "{{ .Values.form.capi.nodes }}"
+    cluster.x-k8s.io/cluster-api-autoscaler-node-group-max-size: "{{ $maxNodes }}"
 spec:
   clusterName: {{ .Values.form.capi.clusterName }}
   replicas: {{ .Values.form.capi.nodes }}
@@ -22,7 +23,6 @@ spec:
         apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
         kind: GCPManagedMachinePool
         name: {{ $poolName }}
-      version: {{ .Values.form.capi.kubernetesVersion }}
 ---
 apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
 kind: GCPManagedMachinePool
@@ -32,11 +32,11 @@ metadata:
 spec:
   scaling:
     minCount: 1
-    maxCount: {{ .Values.form.capi.nodes }}
+    maxCount: {{ $maxNodes }}
   nodePoolName: {{ $poolName }}
   kubernetesLabels:
-    gke.cloud.google.com/nodepool: {{ $poolName }}
-  taints:
+    nodes.klusters.dev/pool: {{ $poolName }}
+  kubernetesTaints:
     - effect: NoSchedule
       key: dedicated
       value: "true"
