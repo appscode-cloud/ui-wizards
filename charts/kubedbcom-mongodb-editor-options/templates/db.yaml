@@ -3,6 +3,7 @@
 {{- if and .Values.spec.machine (hasKey $machines .Values.spec.machine) }}
   {{- $res = get (get $machines .Values.spec.machine) "resources" }}
 {{- end }}
+{{ $poolName := printf "%s-%s-%s" .Values.form.capi.clusterName .Release.Namespace (include "kubedbcom-mongodb-editor-options.fullname" .) }}
 
 apiVersion: kubedb.com/v1alpha2
 kind: MongoDB
@@ -40,6 +41,15 @@ spec:
         spec:
           resources:
             {{- toYaml $res | nindent 12 }}
+          {{- if and .Values.form.capi.provider .Values.form.capi.dedicated }}
+          nodeSelector:
+            nodes.klusters.dev/pool: {{ $poolName }}
+          tolerations:
+            - key: dedicated
+              operator: "Equal"
+              value: "true"
+              effect: "NoSchedule"
+          {{- end }}
       storage:
         resources:
           requests:
@@ -51,6 +61,15 @@ spec:
         spec:
           resources:
             {{- toYaml $res | nindent 12 }}
+          {{- if and .Values.form.capi.provider .Values.form.capi.dedicated }}
+          nodeSelector:
+            nodes.klusters.dev/pool: {{ $poolName }}
+          tolerations:
+            - key: dedicated
+              operator: "Equal"
+              value: "true"
+              effect: "NoSchedule"
+          {{- end }}
     shard:
       shards: {{ .Values.spec.shardTopology.shard.shards }}
       replicas: {{ .Values.spec.shardTopology.shard.replicas }}
@@ -58,6 +77,15 @@ spec:
         spec:
           resources:
             {{- toYaml $res | nindent 12 }}
+          {{- if and .Values.form.capi.provider .Values.form.capi.dedicated }}
+          nodeSelector:
+            nodes.klusters.dev/pool: {{ $poolName }}
+          tolerations:
+            - key: dedicated
+              operator: "Equal"
+              value: "true"
+              effect: "NoSchedule"
+          {{- end }}
       storage:
         resources:
           requests:
@@ -68,6 +96,15 @@ spec:
     spec:
       resources:
         {{- toYaml $res | nindent 8 }}
+      {{- if and .Values.form.capi.provider .Values.form.capi.dedicated }}
+      nodeSelector:
+        nodes.klusters.dev/pool: {{ $poolName }}
+      tolerations:
+        - key: dedicated
+          operator: "Equal"
+          value: "true"
+          effect: "NoSchedule"
+      {{- end }}
 {{- end }}
   terminationPolicy: {{ .Values.spec.terminationPolicy }}
   clusterAuthMode: {{ .Values.spec.clusterAuthMode }}

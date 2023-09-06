@@ -39,7 +39,7 @@ type KubedbcomElasticsearchEditorOptions struct {
 type KubedbcomElasticsearchEditorOptionsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Spec         KubedbcomElasticsearchEditorOptionsSpecSpec `json:"spec"`
-	Form         alerts.ElasticsearchAlertsSpecForm          `json:"form"`
+	Form         ElasticsearchAlertsSpecForm                 `json:"form"`
 }
 
 type KubedbcomElasticsearchEditorOptionsSpecSpec struct {
@@ -93,6 +93,11 @@ type ElasticsearchNode struct {
 
 // +kubebuilder:validation:Enum=Combined;Dedicated
 type ElasticsearchMode string
+
+type ElasticsearchAlertsSpecForm struct {
+	Alert alerts.ElasticsearchAlert `json:"alert"`
+	CAPI  CAPIFormSpec              `json:"capi"`
+}
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 

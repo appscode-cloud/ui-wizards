@@ -39,7 +39,7 @@ type KubedbcomProxysqlEditorOptions struct {
 type KubedbcomProxysqlEditorOptionsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Spec         KubedbcomProxysqlEditorOptionsSpecSpec `json:"spec"`
-	Form         alerts.ProxysqlAlertsSpecForm          `json:"form"`
+	Form         ProxysqlAlertsSpecForm                 `json:"form"`
 }
 
 type KubedbcomProxysqlEditorOptionsSpecSpec struct {
@@ -64,6 +64,11 @@ type ProxysqlMode string
 type KubedbcomProxysqlEditorMonitoring struct {
 	Agent          MonitoringAgent       `json:"agent"`
 	ServiceMonitor *ServiceMonitorLabels `json:"serviceMonitor"`
+}
+
+type ProxysqlAlertsSpecForm struct {
+	Alert alerts.ProxySQLAlert `json:"alert"`
+	CAPI  CAPIFormSpec         `json:"capi"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

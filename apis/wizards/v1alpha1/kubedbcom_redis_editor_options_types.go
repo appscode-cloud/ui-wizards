@@ -39,7 +39,7 @@ type KubedbcomRedisEditorOptions struct {
 type KubedbcomRedisEditorOptionsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Spec         KubedbcomRedisEditorOptionsSpecSpec `json:"spec"`
-	Form         alerts.RedisAlertsSpecForm          `json:"form"`
+	Form         RedisAlertsSpecForm                 `json:"form"`
 }
 
 type KubedbcomRedisEditorOptionsSpecSpec struct {
@@ -75,6 +75,11 @@ type NamespacedName struct {
 
 // +kubebuilder:validation:Enum=Standalone;Cluster;Sentinel
 type RedisMode string
+
+type RedisAlertsSpecForm struct {
+	Alert alerts.RedisAlert `json:"alert"`
+	CAPI  CAPIFormSpec      `json:"capi"`
+}
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 

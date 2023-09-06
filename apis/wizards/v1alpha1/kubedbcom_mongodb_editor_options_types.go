@@ -39,7 +39,7 @@ type KubedbcomMongodbEditorOptions struct {
 type KubedbcomMongodbEditorOptionsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Spec         KubedbcomMongodbEditorOptionsSpecSpec `json:"spec"`
-	Form         alerts.MongodbAlertsSpecForm          `json:"form"`
+	Form         MongodbAlertsSpecForm                 `json:"form"`
 }
 
 type KubedbcomMongodbEditorOptionsSpecSpec struct {
@@ -95,6 +95,11 @@ type MongoDBShardTopology struct {
 	Shard        MongoDBShard        `json:"shard"`
 	ConfigServer MongoDBConfigServer `json:"configServer"`
 	Mongos       MongoDBMongos       `json:"mongos"`
+}
+
+type MongodbAlertsSpecForm struct {
+	Alert alerts.MongoDBAlert `json:"alert"`
+	CAPI  CAPIFormSpec        `json:"capi"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

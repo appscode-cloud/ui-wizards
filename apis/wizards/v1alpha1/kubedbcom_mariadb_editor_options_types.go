@@ -39,7 +39,7 @@ type KubedbcomMariadbEditorOptions struct {
 type KubedbcomMariadbEditorOptionsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Spec         KubedbcomMariadbEditorOptionsSpecSpec `json:"spec"`
-	Form         alerts.MariadbAlertsSpecForm          `json:"form"`
+	Form         MariadbAlertsSpecForm                 `json:"form"`
 }
 
 type KubedbcomMariadbEditorOptionsSpecSpec struct {
@@ -60,6 +60,11 @@ type KubedbcomMariadbEditorOptionsSpecSpec struct {
 
 // +kubebuilder:validation:Enum=Standalone;Cluster
 type MariaDBMode string
+
+type MariadbAlertsSpecForm struct {
+	Alert alerts.MariaDBAlert `json:"alert"`
+	CAPI  CAPIFormSpec        `json:"capi"`
+}
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
