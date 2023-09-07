@@ -5,10 +5,10 @@
 ## TL;DR;
 
 ```bash
-$ helm repo add bytebuilders-ui-dev https://raw.githubusercontent.com/bytebuilders/ui-wizards/
+$ helm repo add bytebuilders-ui https://bundles.byte.builders/ui/
 $ helm repo update
-$ helm search repo bytebuilders-ui-dev/storagek8sio-csidriver-editor --version=v0.4.17
-$ helm upgrade -i storagek8sio-csidriver-editor bytebuilders-ui-dev/storagek8sio-csidriver-editor -n default --create-namespace --version=v0.4.17
+$ helm search repo bytebuilders-ui/storagek8sio-csidriver-editor --version=v0.4.17
+$ helm upgrade -i storagek8sio-csidriver-editor bytebuilders-ui/storagek8sio-csidriver-editor -n default --create-namespace --version=v0.4.17
 ```
 
 ## Introduction
@@ -24,7 +24,7 @@ This chart deploys a CSIDriver Editor on a [Kubernetes](http://kubernetes.io) cl
 To install/upgrade the chart with the release name `storagek8sio-csidriver-editor`:
 
 ```bash
-$ helm upgrade -i storagek8sio-csidriver-editor bytebuilders-ui-dev/storagek8sio-csidriver-editor -n default --create-namespace --version=v0.4.17
+$ helm upgrade -i storagek8sio-csidriver-editor bytebuilders-ui/storagek8sio-csidriver-editor -n default --create-namespace --version=v0.4.17
 ```
 
 The command deploys a CSIDriver Editor on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
@@ -56,12 +56,12 @@ The following table lists the configurable parameters of the `storagek8sio-csidr
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm upgrade -i`. For example:
 
 ```bash
-$ helm upgrade -i storagek8sio-csidriver-editor bytebuilders-ui-dev/storagek8sio-csidriver-editor -n default --create-namespace --version=v0.4.17 --set apiVersion=storage.k8s.io/v1
+$ helm upgrade -i storagek8sio-csidriver-editor bytebuilders-ui/storagek8sio-csidriver-editor -n default --create-namespace --version=v0.4.17 --set apiVersion=storage.k8s.io/v1
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
 installing the chart. For example:
 
 ```bash
-$ helm upgrade -i storagek8sio-csidriver-editor bytebuilders-ui-dev/storagek8sio-csidriver-editor -n default --create-namespace --version=v0.4.17 --values values.yaml
+$ helm upgrade -i storagek8sio-csidriver-editor bytebuilders-ui/storagek8sio-csidriver-editor -n default --create-namespace --version=v0.4.17 --values values.yaml
 ```

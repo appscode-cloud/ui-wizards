@@ -248,8 +248,8 @@ manifests: gen-crds gen-values-schema
 .PHONY: gen
 gen: clientset manifests gen-chart-doc
 
-CHART_REGISTRY     ?= bytebuilders-ui-dev
-CHART_REGISTRY_URL ?= https://raw.githubusercontent.com/bytebuilders/ui-wizards/
+CHART_REGISTRY     ?= bytebuilders-ui
+CHART_REGISTRY_URL ?= https://bundles.byte.builders/ui/
 CHART_VERSION      ?=
 APP_VERSION        ?= $(CHART_VERSION)
 
