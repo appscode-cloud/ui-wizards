@@ -1,0 +1,69 @@
+metadata:
+  resource:
+    group: ui.k8s.appscode.com
+    version: v1alpha1
+    name: featuresets
+    kind: FeatureSet
+    scope: Cluster
+  release:
+    name: RELEASE-NAME
+    namespace: default
+resources:
+  helmToolkitFluxcdIoHelmRelease_external_dns_operator: # +doc-gen:break
+    apiVersion: helm.toolkit.fluxcd.io/v2beta1
+    kind: HelmRelease
+    metadata:
+      name: external-dns-operator
+      namespace: kubeops
+    spec:
+      chart:
+        spec:
+          chart: external-dns-operator
+          sourceRef:
+            kind: HelmRepository
+            name: appscode
+            namespace: kubeops
+          version: v2022.06.14
+      install:
+        crds: CreateReplace
+        createNamespace: true
+        remediation:
+          retries: -1
+      interval: 5m
+      releaseName: external-dns-operator
+      storageNamespace: kubeops
+      targetNamespace: kubeops
+      timeout: 30m
+      upgrade:
+        crds: CreateReplace
+        remediation:
+          retries: -1
+  helmToolkitFluxcdIoHelmRelease_kubedb_gateway: # +doc-gen:break
+    apiVersion: helm.toolkit.fluxcd.io/v2beta1
+    kind: HelmRelease
+    metadata:
+      name: kubedb-gateway
+      namespace: kubeops
+    spec:
+      chart:
+        spec:
+          chart: gateway-helm
+          sourceRef:
+            kind: HelmRepository
+            name: appscode
+            namespace: kubeops
+          version: v0.0.0-latest
+      install:
+        crds: CreateReplace
+        createNamespace: true
+        remediation:
+          retries: -1
+      interval: 5m
+      releaseName: kubedb-gateway
+      storageNamespace: gateway-system
+      targetNamespace: gateway-system
+      timeout: 30m
+      upgrade:
+        crds: CreateReplace
+        remediation:
+          retries: -1

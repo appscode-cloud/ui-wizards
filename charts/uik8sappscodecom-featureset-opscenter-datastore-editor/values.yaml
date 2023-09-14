@@ -9,6 +9,35 @@ metadata:
     name: RELEASE-NAME
     namespace: default
 resources:
+  helmToolkitFluxcdIoHelmRelease_crossplane: # +doc-gen:break
+    apiVersion: helm.toolkit.fluxcd.io/v2beta1
+    kind: HelmRelease
+    metadata:
+      name: crossplane
+      namespace: kubeops
+    spec:
+      chart:
+        spec:
+          chart: crossplane
+          sourceRef:
+            kind: HelmRepository
+            name: crossplane
+            namespace: kubeops
+          version: 1.12.2
+      install:
+        crds: CreateReplace
+        createNamespace: true
+        remediation:
+          retries: -1
+      interval: 5m
+      releaseName: crossplane
+      storageNamespace: crossplane-system
+      targetNamespace: crossplane-system
+      timeout: 30m
+      upgrade:
+        crds: CreateReplace
+        remediation:
+          retries: -1
   helmToolkitFluxcdIoHelmRelease_kubedb: # +doc-gen:break
     apiVersion: helm.toolkit.fluxcd.io/v2beta1
     kind: HelmRelease
@@ -73,6 +102,93 @@ resources:
       releaseName: kubedb-opscenter
       storageNamespace: kubedb
       targetNamespace: kubedb
+      timeout: 30m
+      upgrade:
+        crds: CreateReplace
+        remediation:
+          retries: -1
+  helmToolkitFluxcdIoHelmRelease_kubeform_provider_aws: # +doc-gen:break
+    apiVersion: helm.toolkit.fluxcd.io/v2beta1
+    kind: HelmRelease
+    metadata:
+      name: kubeform-provider-aws
+      namespace: kubeops
+    spec:
+      chart:
+        spec:
+          chart: kubeform-provider-aws
+          sourceRef:
+            kind: HelmRepository
+            name: appscode
+            namespace: kubeops
+          version: v2023.06.27
+      install:
+        crds: CreateReplace
+        createNamespace: true
+        remediation:
+          retries: -1
+      interval: 5m
+      releaseName: kubeform-provider-aws
+      storageNamespace: crossplane-system
+      targetNamespace: crossplane-system
+      timeout: 30m
+      upgrade:
+        crds: CreateReplace
+        remediation:
+          retries: -1
+  helmToolkitFluxcdIoHelmRelease_kubeform_provider_azure: # +doc-gen:break
+    apiVersion: helm.toolkit.fluxcd.io/v2beta1
+    kind: HelmRelease
+    metadata:
+      name: kubeform-provider-azure
+      namespace: kubeops
+    spec:
+      chart:
+        spec:
+          chart: kubeform-provider-azure
+          sourceRef:
+            kind: HelmRepository
+            name: appscode
+            namespace: kubeops
+          version: v2023.06.27
+      install:
+        crds: CreateReplace
+        createNamespace: true
+        remediation:
+          retries: -1
+      interval: 5m
+      releaseName: kubeform-provider-azure
+      storageNamespace: crossplane-system
+      targetNamespace: crossplane-system
+      timeout: 30m
+      upgrade:
+        crds: CreateReplace
+        remediation:
+          retries: -1
+  helmToolkitFluxcdIoHelmRelease_kubeform_provider_gcp: # +doc-gen:break
+    apiVersion: helm.toolkit.fluxcd.io/v2beta1
+    kind: HelmRelease
+    metadata:
+      name: kubeform-provider-gcp
+      namespace: kubeops
+    spec:
+      chart:
+        spec:
+          chart: kubeform-provider-gcp
+          sourceRef:
+            kind: HelmRepository
+            name: appscode
+            namespace: kubeops
+          version: v2023.06.27
+      install:
+        crds: CreateReplace
+        createNamespace: true
+        remediation:
+          retries: -1
+      interval: 5m
+      releaseName: kubeform-provider-gcp
+      storageNamespace: crossplane-system
+      targetNamespace: crossplane-system
       timeout: 30m
       upgrade:
         crds: CreateReplace
