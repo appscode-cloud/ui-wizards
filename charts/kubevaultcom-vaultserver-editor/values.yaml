@@ -233,6 +233,16 @@ resources:
     stringData:
       vault.hcl: <data>
     type: Opaque
+  secret_repo_cred: # +doc-gen:break
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: vault-repo-cred
+      namespace: default
+    stringData:
+      password: thisIs1StrongPassword
+      username: root
+    type: Opaque
   secret_unsealer_creds: # +doc-gen:break
     apiVersion: v1
     kind: Secret
@@ -279,3 +289,15 @@ resources:
           name: elasticsearch
       task:
         name: elasticsearch-backup-7.3.2
+  stashAppscodeComRepository_repo: # +doc-gen:break
+    apiVersion: stash.appscode.com/v1alpha1
+    kind: Repository
+    metadata:
+      name: vault-repo
+      namespace: default
+    spec:
+      backend:
+        gcs:
+          bucket: stash-testing
+          prefix: /demo/mariadb/mariadb
+        storageSecretName: gcs-secret

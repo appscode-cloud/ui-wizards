@@ -1660,578 +1660,6 @@ properties:
         required:
         - spec
         type: object
-      clusterXK8sIoMachinePool:
-        properties:
-          apiVersion:
-            type: string
-          kind:
-            type: string
-          metadata:
-            properties:
-              annotations:
-                additionalProperties:
-                  type: string
-                type: object
-              labels:
-                additionalProperties:
-                  type: string
-                type: object
-              name:
-                type: string
-              namespace:
-                type: string
-            type: object
-          spec:
-            properties:
-              clusterName:
-                minLength: 1
-                type: string
-              failureDomains:
-                items:
-                  type: string
-                type: array
-              minReadySeconds:
-                format: int32
-                type: integer
-              providerIDList:
-                items:
-                  type: string
-                type: array
-              replicas:
-                format: int32
-                type: integer
-              template:
-                properties:
-                  metadata:
-                    properties:
-                      annotations:
-                        additionalProperties:
-                          type: string
-                        type: object
-                      labels:
-                        additionalProperties:
-                          type: string
-                        type: object
-                    type: object
-                  spec:
-                    properties:
-                      bootstrap:
-                        properties:
-                          configRef:
-                            properties:
-                              apiVersion:
-                                type: string
-                              fieldPath:
-                                type: string
-                              kind:
-                                type: string
-                              name:
-                                type: string
-                              namespace:
-                                type: string
-                              resourceVersion:
-                                type: string
-                              uid:
-                                type: string
-                            type: object
-                            x-kubernetes-map-type: atomic
-                          dataSecretName:
-                            type: string
-                        type: object
-                      clusterName:
-                        minLength: 1
-                        type: string
-                      failureDomain:
-                        type: string
-                      infrastructureRef:
-                        properties:
-                          apiVersion:
-                            type: string
-                          fieldPath:
-                            type: string
-                          kind:
-                            type: string
-                          name:
-                            type: string
-                          namespace:
-                            type: string
-                          resourceVersion:
-                            type: string
-                          uid:
-                            type: string
-                        type: object
-                        x-kubernetes-map-type: atomic
-                      nodeDeletionTimeout:
-                        type: string
-                      nodeDrainTimeout:
-                        type: string
-                      nodeVolumeDetachTimeout:
-                        type: string
-                      providerID:
-                        type: string
-                      version:
-                        type: string
-                    required:
-                    - bootstrap
-                    - clusterName
-                    - infrastructureRef
-                    type: object
-                type: object
-            required:
-            - clusterName
-            - template
-            type: object
-        type: object
-      externalDNSAppscodeComExternalDNS:
-        properties:
-          apiVersion:
-            type: string
-          kind:
-            type: string
-          metadata:
-            properties:
-              annotations:
-                additionalProperties:
-                  type: string
-                type: object
-              labels:
-                additionalProperties:
-                  type: string
-                type: object
-              name:
-                type: string
-              namespace:
-                type: string
-            type: object
-          spec:
-            properties:
-              aws:
-                properties:
-                  apiRetries:
-                    type: integer
-                  assumeRole:
-                    type: string
-                  batchChangeInterval:
-                    format: int64
-                    type: integer
-                  batchChangeSize:
-                    type: integer
-                  evaluateTargetHealth:
-                    type: boolean
-                  preferCNAME:
-                    type: boolean
-                  sdServiceCleanup:
-                    type: boolean
-                  secretRef:
-                    properties:
-                      credentialKey:
-                        type: string
-                      name:
-                        type: string
-                    required:
-                    - credentialKey
-                    - name
-                    type: object
-                  zoneCacheDuration:
-                    format: int64
-                    type: integer
-                  zoneTagFilter:
-                    items:
-                      type: string
-                    type: array
-                  zoneType:
-                    type: string
-                type: object
-              azure:
-                properties:
-                  resourceGroup:
-                    type: string
-                  secretRef:
-                    properties:
-                      credentialKey:
-                        type: string
-                      name:
-                        type: string
-                    required:
-                    - credentialKey
-                    - name
-                    type: object
-                  subscriptionId:
-                    type: string
-                  userAssignedIdentityClientID:
-                    type: string
-                type: object
-              cloudflare:
-                properties:
-                  baseURL:
-                    type: string
-                  proxied:
-                    type: boolean
-                  secretRef:
-                    properties:
-                      apiEmailKey:
-                        type: string
-                      apiKey:
-                        type: string
-                      apiTokenKey:
-                        type: string
-                      name:
-                        type: string
-                    required:
-                    - name
-                    type: object
-                  zonesPerPage:
-                    type: integer
-                type: object
-              connectorSourceServer:
-                type: string
-              defaultTargets:
-                items:
-                  type: string
-                type: array
-              domainFilter:
-                items:
-                  type: string
-                type: array
-              excludeDomains:
-                items:
-                  type: string
-                type: array
-              gatewayLabelFilter:
-                type: string
-              gatewayNamespace:
-                type: string
-              google:
-                properties:
-                  batchChangeInterval:
-                    format: int64
-                    type: integer
-                  batchChangeSize:
-                    type: integer
-                  project:
-                    type: string
-                  secretRef:
-                    properties:
-                      credentialKey:
-                        type: string
-                      name:
-                        type: string
-                    required:
-                    - credentialKey
-                    - name
-                    type: object
-                  zoneVisibility:
-                    type: string
-                type: object
-              manageDNSRecordTypes:
-                items:
-                  type: string
-                type: array
-              ocRouterName:
-                type: string
-              policy:
-                type: string
-              provider:
-                type: string
-              registry:
-                type: string
-              requestTimeout:
-                format: int64
-                type: integer
-              source:
-                properties:
-                  ingress:
-                    properties:
-                      annotationFilter:
-                        type: string
-                      combineFQDNAndAnnotation:
-                        type: boolean
-                      fqdnTemplate:
-                        type: string
-                      ignoreHostnameAnnotation:
-                        type: boolean
-                      ignoreIngressRulesSpec:
-                        type: boolean
-                      ignoreIngressTLSSpec:
-                        type: boolean
-                      labelFilter:
-                        type: string
-                      namespace:
-                        type: string
-                    type: object
-                  node:
-                    properties:
-                      annotationFilter:
-                        type: string
-                      fqdnTemplate:
-                        type: string
-                      labelFilter:
-                        type: string
-                    type: object
-                  service:
-                    properties:
-                      alwaysPublishNotReadyAddresses:
-                        type: boolean
-                      annotationFilter:
-                        type: string
-                      combineFQDNAndAnnotation:
-                        type: boolean
-                      compatibility:
-                        type: string
-                      fqdnTemplate:
-                        type: string
-                      ignoreHostnameAnnotation:
-                        type: boolean
-                      labelFilter:
-                        type: string
-                      namespace:
-                        type: string
-                      publishHostIP:
-                        type: boolean
-                      publishInternal:
-                        type: boolean
-                      serviceTypeFilter:
-                        items:
-                          type: string
-                        type: array
-                    type: object
-                  type:
-                    properties:
-                      group:
-                        type: string
-                      kind:
-                        type: string
-                      version:
-                        type: string
-                    required:
-                    - group
-                    - kind
-                    - version
-                    type: object
-                required:
-                - type
-                type: object
-              txtOwnerID:
-                type: string
-              txtPrefix:
-                type: string
-              txtSuffix:
-                type: string
-              txtWildcardReplacement:
-                type: string
-              zoneIDFilter:
-                items:
-                  type: string
-                type: array
-            required:
-            - provider
-            - source
-            type: object
-        type: object
-      infrastructureClusterXK8sIoAWSManagedMachinePool:
-        properties:
-          apiVersion:
-            type: string
-          kind:
-            type: string
-          metadata:
-            properties:
-              annotations:
-                additionalProperties:
-                  type: string
-                type: object
-              labels:
-                additionalProperties:
-                  type: string
-                type: object
-              name:
-                type: string
-              namespace:
-                type: string
-            type: object
-          spec:
-            properties:
-              additionalTags:
-                additionalProperties:
-                  type: string
-                type: object
-              amiType:
-                default: AL2_x86_64
-                enum:
-                - AL2_x86_64
-                - AL2_x86_64_GPU
-                - AL2_ARM_64
-                - CUSTOM
-                type: string
-              amiVersion:
-                minLength: 2
-                type: string
-              availabilityZones:
-                items:
-                  type: string
-                type: array
-              awsLaunchTemplate:
-                properties:
-                  additionalSecurityGroups:
-                    items:
-                      properties:
-                        filters:
-                          items:
-                            properties:
-                              name:
-                                type: string
-                              values:
-                                items:
-                                  type: string
-                                type: array
-                            required:
-                            - name
-                            - values
-                            type: object
-                          type: array
-                        id:
-                          type: string
-                      type: object
-                    type: array
-                  ami:
-                    properties:
-                      eksLookupType:
-                        enum:
-                        - AmazonLinux
-                        - AmazonLinuxGPU
-                        type: string
-                      id:
-                        type: string
-                    type: object
-                  iamInstanceProfile:
-                    type: string
-                  imageLookupBaseOS:
-                    type: string
-                  imageLookupFormat:
-                    type: string
-                  imageLookupOrg:
-                    type: string
-                  instanceType:
-                    type: string
-                  name:
-                    type: string
-                  rootVolume:
-                    properties:
-                      deviceName:
-                        type: string
-                      encrypted:
-                        type: boolean
-                      encryptionKey:
-                        type: string
-                      iops:
-                        format: int64
-                        type: integer
-                      size:
-                        format: int64
-                        minimum: 8
-                        type: integer
-                      throughput:
-                        format: int64
-                        type: integer
-                      type:
-                        type: string
-                    required:
-                    - size
-                    type: object
-                  spotMarketOptions:
-                    properties:
-                      maxPrice:
-                        type: string
-                    type: object
-                  sshKeyName:
-                    type: string
-                  versionNumber:
-                    format: int64
-                    type: integer
-                type: object
-              capacityType:
-                default: onDemand
-                enum:
-                - onDemand
-                - spot
-                type: string
-              diskSize:
-                format: int32
-                type: integer
-              eksNodegroupName:
-                type: string
-              instanceType:
-                type: string
-              labels:
-                additionalProperties:
-                  type: string
-                type: object
-              providerIDList:
-                items:
-                  type: string
-                type: array
-              remoteAccess:
-                properties:
-                  public:
-                    type: boolean
-                  sourceSecurityGroups:
-                    items:
-                      type: string
-                    type: array
-                  sshKeyName:
-                    type: string
-                type: object
-              roleAdditionalPolicies:
-                items:
-                  type: string
-                type: array
-              roleName:
-                type: string
-              scaling:
-                properties:
-                  maxSize:
-                    format: int32
-                    type: integer
-                  minSize:
-                    format: int32
-                    type: integer
-                type: object
-              subnetIDs:
-                items:
-                  type: string
-                type: array
-              taints:
-                items:
-                  properties:
-                    effect:
-                      enum:
-                      - no-schedule
-                      - no-execute
-                      - prefer-no-schedule
-                      type: string
-                    key:
-                      type: string
-                    value:
-                      type: string
-                  required:
-                  - effect
-                  - key
-                  - value
-                  type: object
-                type: array
-              updateConfig:
-                properties:
-                  maxUnavailable:
-                    maximum: 100
-                    minimum: 1
-                    type: integer
-                  maxUnavailablePrecentage:
-                    maximum: 100
-                    minimum: 1
-                    type: integer
-                type: object
-            type: object
-        type: object
       kubedbComMongoDB:
         properties:
           apiVersion:
@@ -18671,7 +18099,77 @@ properties:
           type:
             type: string
         type: object
+      secret_init_repo_cred:
+        properties:
+          apiVersion:
+            type: string
+          data:
+            additionalProperties:
+              format: byte
+              type: string
+            type: object
+          immutable:
+            type: boolean
+          kind:
+            type: string
+          metadata:
+            properties:
+              annotations:
+                additionalProperties:
+                  type: string
+                type: object
+              labels:
+                additionalProperties:
+                  type: string
+                type: object
+              name:
+                type: string
+              namespace:
+                type: string
+            type: object
+          stringData:
+            additionalProperties:
+              type: string
+            type: object
+          type:
+            type: string
+        type: object
       secret_mongos_config:
+        properties:
+          apiVersion:
+            type: string
+          data:
+            additionalProperties:
+              format: byte
+              type: string
+            type: object
+          immutable:
+            type: boolean
+          kind:
+            type: string
+          metadata:
+            properties:
+              annotations:
+                additionalProperties:
+                  type: string
+                type: object
+              labels:
+                additionalProperties:
+                  type: string
+                type: object
+              name:
+                type: string
+              namespace:
+                type: string
+            type: object
+          stringData:
+            additionalProperties:
+              type: string
+            type: object
+          type:
+            type: string
+        type: object
+      secret_repo_cred:
         properties:
           apiVersion:
             type: string

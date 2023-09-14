@@ -339,6 +339,15 @@ resources:
       password: thisIs1StrongPassword
       username: elastic
     type: kubernetes.io/basic-auth
+  secret_init_repo_cred: # +doc-gen:break
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: elasticsearch-init-repo-cred
+      namespace: demo
+    stringData:
+      password: ""
+      username: ""
   secret_kibanaro_cred: # +doc-gen:break
     apiVersion: v1
     kind: Secret
@@ -389,6 +398,15 @@ resources:
       password: WeakPassword
       username: kibanaserver
     type: kubernetes.io/basic-auth
+  secret_repo_cred: # +doc-gen:break
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: elasticsearch-repo-cred
+      namespace: demo
+    stringData:
+      password: ""
+      username: ""
   secret_secure_config: # +doc-gen:break
     apiVersion: v1
     kind: Secret
@@ -462,7 +480,7 @@ resources:
         gcs:
           bucket: kubedb-testing
           prefix: /elasticsearch
-        storageSecretName: gcs-secret
+        storageSecretName: elasticsearch-init-repo-cred
   stashAppscodeComRepository_repo: # +doc-gen:break
     apiVersion: stash.appscode.com/v1alpha1
     kind: Repository
@@ -474,7 +492,7 @@ resources:
         gcs:
           bucket: kubedb-testing
           prefix: /elasticsearch
-        storageSecretName: gcs-secret
+        storageSecretName: elasticsearch-repo-cred
   stashAppscodeComRestoreSession_init: # +doc-gen:break
     apiVersion: stash.appscode.com/v1beta1
     kind: RestoreSession

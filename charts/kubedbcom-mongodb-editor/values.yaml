@@ -174,49 +174,6 @@ resources:
     spec:
       ca:
         secretName: mongodb-ca
-  clusterXK8sIoMachinePool: # +doc-gen:break
-    apiVersion: cluster.x-k8s.io/v1beta1
-    kind: MachinePool
-    metadata:
-      name: mongodb
-      namespace: demo
-    spec:
-      clusterName: cluster-x
-      replicas: 1
-      template:
-        spec:
-          bootstrap:
-            dataSecretName: ""
-          clusterName: cluster-x
-          infrastructureRef:
-            apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
-            kind: AWSManagedMachinePool
-            name: mongodb
-  externalDNSAppscodeComExternalDNS: # +doc-gen:break
-    apiVersion: external-dns.appscode.com/v1alpha1
-    kind: ExternalDNS
-    metadata:
-      name: mongodb
-      namespace: demo
-    spec:
-      aws:
-        zoneType: public
-      provider: aws
-      source:
-        node:
-          labelFilter: eks.amazonaws.com/nodegroup=nodegroup
-        type:
-          group: ""
-          kind: Node
-          version: v1
-  infrastructureClusterXK8sIoAWSManagedMachinePool: # +doc-gen:break
-    apiVersion: infrastructure.cluster.x-k8s.io/v1beta1
-    kind: AWSManagedMachinePool
-    metadata:
-      name: mongodb
-      namespace: demo
-    spec:
-      eksNodegroupName: nodegroup
   kubedbComMongoDB: # +doc-gen:break
     apiVersion: kubedb.com/v1alpha2
     kind: MongoDB
@@ -325,6 +282,16 @@ resources:
         net:
           maxIncomingConnections: 20000
     type: Opaque
+  secret_init_repo_cred: # +doc-gen:break
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: mongodb-init-repo-cred
+      namespace: demo
+    stringData:
+      password: thisIs1StrongPassword
+      username: root
+    type: Opaque
   secret_mongos_config: # +doc-gen:break
     apiVersion: v1
     kind: Secret
@@ -335,6 +302,16 @@ resources:
       mongod.conf: |
         net:
           maxIncomingConnections: 30000
+    type: Opaque
+  secret_repo_cred: # +doc-gen:break
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: mongodb-repo-cred
+      namespace: demo
+    stringData:
+      password: thisIs1StrongPassword
+      username: root
     type: Opaque
   secret_shard_config: # +doc-gen:break
     apiVersion: v1
