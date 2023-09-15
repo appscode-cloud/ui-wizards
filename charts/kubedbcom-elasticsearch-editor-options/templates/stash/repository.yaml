@@ -1,0 +1,75 @@
+{{- if eq .Values.spec.backup.tool "Stash" -}}
+apiVersion: stash.appscode.com/v1alpha1
+kind: Repository
+metadata:
+  name: {{ include "kubedbcom-elasticsearch-editor-options.fullname" . }}-repo
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kubedbcom-elasticsearch-editor-options.labels" . | nindent 4 }}
+spec:
+  backend:
+    storageSecretName: {{ default (printf "%s-repo-cred" (include "kubedbcom-elasticsearch-editor-options.fullname" .)) .Values.spec.backup.stash.authSecret.name }}
+
+  {{- if eq .Values.spec.backup.stash.backend.provider "s3" }}
+    {{- with .Values.spec.backup.stash.backend.s3.spec }}
+    s3:
+      endpoint: {{ .endpoint }}
+      bucket: {{ .bucket }}
+      {{- with .region }}
+      region: {{ . }}
+      {{- end }}
+      {{- with .prefix }}
+      prefix: {{ . }}
+      {{- end }}
+    {{- end }}
+  {{- end }}
+
+  {{- if eq .Values.spec.backup.stash.backend.provider "azure" }}
+    {{- with .Values.spec.backup.stash.backend.azure.spec }}
+    azure:
+      container: {{ .container }}
+      {{- with .prefix }}
+      prefix: {{ . }}
+      {{- end }}
+      {{- with .maxConnections }}
+      maxConnections: {{ . }}
+      {{- end }}
+    {{- end }}
+  {{- end }}
+
+  {{- if eq .Values.spec.backup.stash.backend.provider "gcs" }}
+    {{- with .Values.spec.backup.stash.backend.gcs.spec }}
+    gcs:
+      bucket: {{ .bucket }}
+      {{- with .prefix }}
+      prefix: {{ . }}
+      {{- end }}
+      {{- with .maxConnections }}
+      maxConnections: {{ . }}
+      {{- end }}
+    {{- end }}
+  {{- end }}
+
+  {{- if eq .Values.spec.backup.stash.backend.provider "swift" }}
+    {{- with .Values.spec.backup.stash.backend.swift.spec }}
+    swift:
+      container: {{ .container }}
+      {{- with .prefix }}
+      prefix: {{ . }}
+      {{- end }}
+    {{- end }}
+  {{- end }}
+
+  {{- if eq .Values.spec.backup.stash.backend.provider "b2" }}
+    {{- with .Values.spec.backup.stash.backend.b2.spec }}
+    b2:
+      bucket: {{ .bucket }}
+      {{- with .prefix }}
+      prefix: {{ . }}
+      {{- end }}
+      {{- with .maxConnections }}
+      maxConnections: {{ . }}
+      {{- end }}
+    {{- end }}
+  {{- end }}
+{{- end }}
