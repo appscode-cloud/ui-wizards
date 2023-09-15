@@ -1,0 +1,35 @@
+{{- if eq .Values.spec.backup.tool "Stash" -}}
+apiVersion: stash.appscode.com/v1beta1
+kind: BackupConfiguration
+metadata:
+  name: {{ include "kubedbcom-elasticsearch-editor-options.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kubedbcom-elasticsearch-editor-options.labels" . | nindent 4 }}
+spec:
+  schedule: {{ .Values.spec.backup.stash.schedule }}
+  repository:
+    name: {{ include "kubedbcom-elasticsearch-editor-options.fullname" . }}-repo
+  target:
+    ref:
+      apiVersion: appcatalog.appscode.com/v1alpha1
+      kind: AppBinding
+      name: {{ include "kubedbcom-elasticsearch-editor-options.fullname" . }}
+  interimVolumeTemplate:
+    metadata:
+      name: {{ include "kubedbcom-elasticsearch-editor-options.fullname" . }}-backup-tmp
+    spec:
+      storageClassName: {{ .Values.spec.storageClass.name }}
+      accessModes:
+      - ReadWriteOnce
+      # resources:
+      #   requests:
+      #     storage: 1Gi
+  runtimeSettings:
+    pod:
+      securityContext:
+        fsGroup: 65534
+  retentionPolicy:
+    {{- .Values.spec.backup.stash.retentionPolicy | nindent 4 }}
+
+{{- end }}
