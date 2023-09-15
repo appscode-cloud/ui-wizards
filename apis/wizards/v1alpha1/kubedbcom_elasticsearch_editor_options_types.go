@@ -66,6 +66,7 @@ type KubedbcomElasticsearchEditorOptionsSpecSpec struct {
 	Resources  core.ResourceRequirements `json:"resources"`
 	AuthSecret AuthSecret                `json:"authSecret"`
 	Monitoring Monitoring                `json:"monitoring"`
+	Backup     BackupToolSpec            `json:"backup"`
 }
 
 // +kubebuilder:validation:Enum=OpenDistro;OpenSearch;SearchGuard;X-Pack

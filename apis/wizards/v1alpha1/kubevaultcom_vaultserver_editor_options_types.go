@@ -56,6 +56,7 @@ type KubevaultcomVaultserverEditorOptionsSpecSpec struct {
 	Backend           VaultserverBackend        `json:"backend"`
 	Unsealer          VaultserverUnsealer       `json:"unsealer"`
 	Monitoring        Monitoring                `json:"monitoring"`
+	Backup            BackupToolSpec            `json:"backup"`
 }
 
 type VaultserverBackend struct {
