@@ -31,6 +31,11 @@ steps:
       schema:
         $ref: schema#/properties/resources/properties/kubedbComProxySQL/properties/spec/properties/version
       type: select
+    - label:
+        text: labels.replicas
+      schema:
+        $ref: schema#/properties/resources/properties/kubedbComProxySQL/properties/spec/properties/replicas
+      type: input
     - individualItemDisabilityCheck: disableLableChecker
       isArray: true
       keys:
@@ -139,36 +144,6 @@ steps:
     type: single-step-form
   id: alert
   title: steps.1.label
-- form:
-    discriminator:
-      activeDatabaseMode:
-        default: Standalone
-        type: string
-    elements:
-    - computed: setDatabaseMode
-      hasDescription: true
-      label:
-        text: labels.database.mode
-      onChange: onDatabaseModeChange
-      options:
-      - description: options.database.mode.Standalone.description
-        text: options.database.mode.Standalone.label
-        value: Standalone
-      - description: options.database.mode.Cluster.description
-        text: options.database.mode.Cluster.label
-        value: Cluster
-      schema:
-        $ref: discriminator#/activeDatabaseMode
-      type: radio
-    - if: isEqualToDatabaseMode|Cluster
-      label:
-        text: labels.replicaset.number
-      schema:
-        $ref: schema#/properties/resources/properties/kubedbComProxySQL/properties/spec/properties/replicas
-      type: input
-    type: single-step-form
-  id: topology
-  title: steps.2.label
 - form:
     discriminator:
       configureTLS:

@@ -49,7 +49,7 @@ type KubedbcomProxysqlEditorOptionsSpecSpec struct {
 	// +optional
 	Labels            map[string]string                 `json:"labels"`
 	Version           string                            `json:"version"`
-	Mode              ProxysqlMode                      `json:"mode"`
+	Replicas          int                               `json:"replicas"`
 	TerminationPolicy TerminationPolicy                 `json:"terminationPolicy"`
 	Machine           MachineType                       `json:"machine"`
 	Resources         core.ResourceRequirements         `json:"resources"`
@@ -58,9 +58,6 @@ type KubedbcomProxysqlEditorOptionsSpecSpec struct {
 	SyncUsers         bool                              `json:"syncUsers"`
 	Backend           string                            `json:"backend"`
 }
-
-// +kubebuilder:validation:Enum=Standalone;Cluster
-type ProxysqlMode string
 
 type KubedbcomProxysqlEditorMonitoring struct {
 	Agent          mona.AgentType             `json:"agent"`
