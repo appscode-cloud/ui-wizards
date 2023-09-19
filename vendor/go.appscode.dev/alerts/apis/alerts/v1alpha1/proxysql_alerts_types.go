@@ -18,6 +18,7 @@ package v1alpha1
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	mona "kmodules.xyz/monitoring-agent-api/api/v1"
 	api "x-helm.dev/apimachinery/apis/releases/v1alpha1"
 )
 
@@ -50,7 +51,7 @@ type ProxysqlAlertsSpecForm struct {
 }
 
 type ProxySQLAlert struct {
-	Enabled SeverityFlag      `json:"enabled"`
+	Enabled mona.SeverityFlag `json:"enabled"`
 	Labels  map[string]string `json:"labels"`
 	// +optional
 	Annotations map[string]string `json:"annotations"`
@@ -67,7 +68,7 @@ type ProxySQLAlertGroups struct {
 }
 
 type ProxySQLDatabaseAlert struct {
-	Enabled SeverityFlag               `json:"enabled"`
+	Enabled mona.SeverityFlag          `json:"enabled"`
 	Rules   ProxySQLDatabaseAlertRules `json:"rules"`
 }
 
@@ -84,7 +85,7 @@ type ProxySQLDatabaseAlertRules struct {
 }
 
 type ProxySQLClusterAlert struct {
-	Enabled SeverityFlag              `json:"enabled"`
+	Enabled mona.SeverityFlag         `json:"enabled"`
 	Rules   ProxySQLClusterAlertRules `json:"rules"`
 }
 

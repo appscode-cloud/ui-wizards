@@ -16,7 +16,10 @@ limitations under the License.
 
 package v1alpha1
 
-import core "k8s.io/api/core/v1"
+import (
+	core "k8s.io/api/core/v1"
+	mona "kmodules.xyz/monitoring-agent-api/api/v1"
+)
 
 // +kubebuilder:validation:Enum=db.t.micro;db.t.small;db.t.medium;db.t.large;db.t.xlarge;db.t.2xlarge;db.m.small;db.m.large;db.m.xlarge;db.m.2xlarge;db.m.4xlarge;db.m.8xlarge;db.m.12xlarge;db.m.16xlarge;db.m.24xlarge;db.r.large;db.r.xlarge;db.r.2xlarge;db.r.4xlarge;db.r.8xlarge;db.r.12xlarge;db.r.16xlarge;db.r.24xlarge
 type MachineType string
@@ -42,13 +45,10 @@ type AuthSecret struct {
 
 // *** Monitoring *** //
 
-// +kubebuilder:validation:Enum=prometheus.io;prometheus.io/operator;prometheus.io/builtin
-type MonitoringAgent string
-
 type Monitoring struct {
-	Agent          MonitoringAgent       `json:"agent"`
-	Exporter       PrometheusExporter    `json:"exporter"`
-	ServiceMonitor *ServiceMonitorLabels `json:"serviceMonitor"`
+	Agent          mona.AgentType             `json:"agent"`
+	Exporter       PrometheusExporter         `json:"exporter"`
+	ServiceMonitor *mona.ServiceMonitorLabels `json:"serviceMonitor"`
 }
 
 type PrometheusExporter struct {
@@ -57,89 +57,8 @@ type PrometheusExporter struct {
 	Resources core.ResourceRequirements `json:"resources"`
 }
 
-type ServiceMonitorLabels struct {
-	// +optional
-	Labels map[string]string `json:"labels"`
-}
-
 // *** Monitoring *** //
 
 // *** Alerts *** //
-
-type FixedAlert struct {
-	Enabled  bool   `json:"enabled"`
-	Duration string `json:"duration"`
-	Severity string `json:"severity"`
-}
-
-type StringValAlert struct {
-	Enabled  bool   `json:"enabled"`
-	Duration string `json:"duration"`
-	Val      string `json:"val"`
-	Severity string `json:"severity"`
-}
-
-type IntValAlert struct {
-	Enabled  bool   `json:"enabled"`
-	Duration string `json:"duration"`
-	Val      int    `json:"val"`
-	Severity string `json:"severity"`
-}
-
-type FloatValAlertConfig struct {
-	Enabled  bool    `json:"enabled"`
-	Duration string  `json:"duration"`
-	Val      float64 `json:"val"`
-	Severity string  `json:"severity"`
-}
-
-type ProvisionerAlert struct {
-	Enabled bool                  `json:"enabled"`
-	Rules   ProvisionerAlertRules `json:"rules"`
-}
-
-type ProvisionerAlertRules struct {
-	AppPhaseNotReady FixedAlert `json:"appPhaseNotReady"`
-	AppPhaseCritical FixedAlert `json:"appPhaseCritical"`
-}
-
-type OpsManagerAlert struct {
-	Enabled bool                 `json:"enabled"`
-	Rules   OpsManagerAlertRules `json:"rules"`
-}
-
-type OpsManagerAlertRules struct {
-	OpsRequestOnProgress              FixedAlert `json:"opsRequestOnProgress"`
-	OpsRequestStatusProgressingToLong FixedAlert `json:"opsRequestStatusProgressingToLong"`
-	OpsRequestFailed                  FixedAlert `json:"opsRequestFailed"`
-}
-
-type StashAlert struct {
-	Enabled bool            `json:"enabled"`
-	Rules   StashAlertRules `json:"rules"`
-}
-
-type StashAlertRules struct {
-	BackupSessionFailed         FixedAlert  `json:"backupSessionFailed"`
-	RestoreSessionFailed        FixedAlert  `json:"restoreSessionFailed"`
-	NoBackupSessionForTooLong   IntValAlert `json:"noBackupSessionForTooLong"`
-	RepositoryCorrupted         FixedAlert  `json:"repositoryCorrupted"`
-	RepositoryStorageRunningLow IntValAlert `json:"repositoryStorageRunningLow"`
-	BackupSessionPeriodTooLong  IntValAlert `json:"backupSessionPeriodTooLong"`
-	RestoreSessionPeriodTooLong IntValAlert `json:"restoreSessionPeriodTooLong"`
-}
-
-type SchemaManagerAlert struct {
-	Enabled bool                    `json:"enabled"`
-	Rules   SchemaManagerAlertRules `json:"rules"`
-}
-
-type SchemaManagerAlertRules struct {
-	SchemaPendingForTooLong     FixedAlert `json:"schemaPendingForTooLong"`
-	SchemaInProgressForTooLong  FixedAlert `json:"schemaInProgressForTooLong"`
-	SchemaTerminatingForTooLong FixedAlert `json:"schemaTerminatingForTooLong"`
-	SchemaFailed                FixedAlert `json:"schemaFailed"`
-	SchemaExpired               FixedAlert `json:"schemaExpired"`
-}
 
 // *** Alerts *** //
