@@ -16,15 +16,7 @@ limitations under the License.
 
 package v1alpha1
 
-// +kubebuilder:validation:Enum=none;critical;warning;info
-type SeverityFlag string
-
-const (
-	SeverityFlagNone     SeverityFlag = "none"     // 0
-	SeverityFlagCritical SeverityFlag = "critical" // 1
-	SeverityFlagWarning  SeverityFlag = "warning"  // 2
-	SeverityFlagInfo     SeverityFlag = "info"     // 3
-)
+import mona "kmodules.xyz/monitoring-agent-api/api/v1"
 
 // +kubebuilder:validation:Enum=critical;warning;info
 type Severity string
@@ -63,7 +55,7 @@ type FloatValAlertConfig struct {
 }
 
 type ProvisionerAlert struct {
-	Enabled SeverityFlag          `json:"enabled"`
+	Enabled mona.SeverityFlag     `json:"enabled"`
 	Rules   ProvisionerAlertRules `json:"rules"`
 }
 
@@ -73,7 +65,7 @@ type ProvisionerAlertRules struct {
 }
 
 type OpsManagerAlert struct {
-	Enabled SeverityFlag         `json:"enabled"`
+	Enabled mona.SeverityFlag    `json:"enabled"`
 	Rules   OpsManagerAlertRules `json:"rules"`
 }
 
@@ -84,8 +76,8 @@ type OpsManagerAlertRules struct {
 }
 
 type StashAlert struct {
-	Enabled SeverityFlag    `json:"enabled"`
-	Rules   StashAlertRules `json:"rules"`
+	Enabled mona.SeverityFlag `json:"enabled"`
+	Rules   StashAlertRules   `json:"rules"`
 }
 
 type StashAlertRules struct {
@@ -99,7 +91,7 @@ type StashAlertRules struct {
 }
 
 type SchemaManagerAlert struct {
-	Enabled SeverityFlag            `json:"enabled"`
+	Enabled mona.SeverityFlag       `json:"enabled"`
 	Rules   SchemaManagerAlertRules `json:"rules"`
 }
 

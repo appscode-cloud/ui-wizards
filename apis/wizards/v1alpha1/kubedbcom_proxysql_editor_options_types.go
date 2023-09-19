@@ -20,6 +20,7 @@ import (
 	alerts "go.appscode.dev/alerts/apis/alerts/v1alpha1"
 	core "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	mona "kmodules.xyz/monitoring-agent-api/api/v1"
 	api "x-helm.dev/apimachinery/apis/releases/v1alpha1"
 )
 
@@ -62,8 +63,8 @@ type KubedbcomProxysqlEditorOptionsSpecSpec struct {
 type ProxysqlMode string
 
 type KubedbcomProxysqlEditorMonitoring struct {
-	Agent          MonitoringAgent       `json:"agent"`
-	ServiceMonitor *ServiceMonitorLabels `json:"serviceMonitor"`
+	Agent          mona.AgentType             `json:"agent"`
+	ServiceMonitor *mona.ServiceMonitorLabels `json:"serviceMonitor"`
 }
 
 type ProxysqlAlertsSpecForm struct {
