@@ -3,11 +3,12 @@ module go.bytebuilders.dev/ui-wizards
 go 1.18
 
 require (
-	go.appscode.dev/alerts v0.2.0
+	go.appscode.dev/alerts v0.2.1-0.20230919005021-23204b26d9cd
 	k8s.io/api v0.25.3
 	k8s.io/apimachinery v0.25.4
 	k8s.io/kube-openapi v0.0.0-20221012153701-172d655c2280
-	kmodules.xyz/client-go v0.25.30
+	kmodules.xyz/client-go v0.25.33
+	kmodules.xyz/monitoring-agent-api v0.25.2-0.20230919004036-c0df0c1f7cbc
 	kmodules.xyz/objectstore-api v0.25.1
 	kmodules.xyz/offshoot-api v0.25.4
 	kmodules.xyz/schema-checker v0.4.2-0.20230316051604-9a40277165e8
@@ -80,7 +81,6 @@ require (
 	k8s.io/klog/v2 v2.80.1 // indirect
 	k8s.io/utils v0.0.0-20221108210102-8e77b1f39fe2 // indirect
 	kmodules.xyz/custom-resources v0.25.2 // indirect
-	kmodules.xyz/monitoring-agent-api v0.25.1 // indirect
 	kmodules.xyz/prober v0.25.0 // indirect
 	sigs.k8s.io/controller-runtime v0.13.1 // indirect
 	sigs.k8s.io/gateway-api v0.4.3 // indirect

@@ -18,6 +18,7 @@ package v1alpha1
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	mona "kmodules.xyz/monitoring-agent-api/api/v1"
 	api "x-helm.dev/apimachinery/apis/releases/v1alpha1"
 )
 
@@ -50,7 +51,7 @@ type MysqlAlertsSpecForm struct {
 }
 
 type MySQLAlert struct {
-	Enabled SeverityFlag      `json:"enabled"`
+	Enabled mona.SeverityFlag `json:"enabled"`
 	Labels  map[string]string `json:"labels"`
 	// +optional
 	Annotations map[string]string `json:"annotations"`
@@ -69,7 +70,7 @@ type MySQLAlertGroups struct {
 }
 
 type MySQLDatabaseAlert struct {
-	Enabled SeverityFlag            `json:"enabled"`
+	Enabled mona.SeverityFlag       `json:"enabled"`
 	Rules   MySQLDatabaseAlertRules `json:"rules"`
 }
 
@@ -88,7 +89,7 @@ type MySQLDatabaseAlertRules struct {
 }
 
 type MySQLGroupAlert struct {
-	Enabled SeverityFlag         `json:"enabled"`
+	Enabled mona.SeverityFlag    `json:"enabled"`
 	Rules   MySQLGroupAlertRules `json:"rules"`
 }
 
