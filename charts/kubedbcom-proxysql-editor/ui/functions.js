@@ -295,37 +295,6 @@ async function getAppBindings({ axios, storeGet }) {
   }
 }
 
-// ********************* Database Mode ***********************
-function setDatabaseMode({ model, getValue, watchDependency }) {
-  const replicas = getValue(
-    model,
-    "/resources/kubedbComProxySQL/spec/replicas"
-  );
-  watchDependency("model#/resources/kubedbComProxySQL/spec/replicas");
-
-  return replicas > 1 ? "Cluster" : "Standalone";
-}
-
-function onDatabaseModeChange({ discriminator, getValue, commit }) {
-  const mode = getValue(discriminator, "/activeDatabaseMode");
-
-  if (mode === "Standalone") {
-    commit("wizard/model$update", {
-      path: "/resources/kubedbComProxySQL/spec/replicas",
-      value: 1,
-      force: true,
-    });
-  }
-}
-
-function isEqualToDatabaseMode(
-  { getValue, watchDependency, discriminator },
-  value
-) {
-  watchDependency("discriminator#/activeDatabaseMode");
-  const mode = getValue(discriminator, "/activeDatabaseMode");
-  return mode === value;
-}
 
 // ************************** TLS ******************************88
 
@@ -892,9 +861,6 @@ return {
   returnStringYes,
   getProxySQLVersions,
   getAppBindings,
-  setDatabaseMode,
-  onDatabaseModeChange,
-  isEqualToDatabaseMode,
   setApiGroup,
   getIssuerRefsName,
   hasIssuerRefName,
