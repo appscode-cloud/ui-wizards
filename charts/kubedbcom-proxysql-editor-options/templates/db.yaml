@@ -26,11 +26,7 @@ spec:
     name: {{ .Values.spec.backend }}
   syncUsers: {{ .Values.spec.syncUsers }}
   mode: GroupReplication
-{{- if eq .Values.spec.mode "Cluster" }}
-  replicas: 3
-{{- else }}
-  replicas: 1
-{{- end }}
+  replicas: {{ .Values.spec.replicas }}
   podTemplate:
     spec:
       resources:
