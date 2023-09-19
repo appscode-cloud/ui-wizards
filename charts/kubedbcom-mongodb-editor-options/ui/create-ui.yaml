@@ -225,6 +225,7 @@ steps:
         $ref: schema#/properties/form/properties/alert
       show_label: true
       type: single-step-form
+    
     - alias: reusable-monitor-option
       chart:
         name: uibytebuildersdev-component-monitoring-option
@@ -239,6 +240,43 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/monitoring/properties/serviceMonitor
       type: reusable-element
+    
+    # - alias: reusable-capi-fields
+    #   chart:
+    #     name: uibytebuildersdev-component-capi
+    #     version: v0.4.17
+    #   if: ifCapiProviderIsEmpty
+    #   moduleResolver: fetchJsons
+    #   schema:
+    #     $ref: schema#/properties/form/properties/capi
+    #   type: reusable-element
+    
+    - elements:
+      - label:
+          text: Dedicated
+        type: switch
+        schema:
+          $ref: schema#/properties/form/properties/capi/properties/dedicated
+      - label: 
+          text: Zones
+        fetch: getZones
+        if: ifDedicated
+        type: multiselect
+        schema:
+          $ref: schema#/properties/form/properties/capi/properties/zones  
+      - label: 
+          text: SKU
+        fetch: getSKU
+        if: ifZones
+        type: select
+        schema:
+          $ref: schema#/properties/form/properties/capi/properties/sku
+      label:
+        text: Capi-Provider
+      if: ifCapiProviderIsEmpty
+      show_label: true
+      type: single-step-form
+
     - label:
         text: labels.configOptions
       type: label-element
