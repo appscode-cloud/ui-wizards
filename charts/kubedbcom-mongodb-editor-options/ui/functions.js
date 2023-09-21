@@ -545,10 +545,7 @@ const ifZones = ({ model, getValue, watchDependency,commit }) => {
   const zones = getValue(model, "form/capi/zones") || [];
   const isDedicated = getValue(model, "form/capi/dedicated");
   if(zones.length && isDedicated)return true
-  else {
-    console.log("called")
-    commit("wizard/model$delete", "form/capi/sku");
-  }
+  else commit("wizard/model$delete", "form/capi/sku");
 };
 
 async function getZones({storeGet,axios,model,getValue}) {
@@ -583,7 +580,6 @@ async function getSKU({storeGet,axios,model,getValue,watchDependency}) {
         url+= `zones=${encodeURIComponent(item)}&`
       });
       url = url.slice(0,-1)
-      console.log(url)
       const resp = await axios.get(url);
       const val = resp.data.map((item)=>{
         return {"value":item,"text":item}
