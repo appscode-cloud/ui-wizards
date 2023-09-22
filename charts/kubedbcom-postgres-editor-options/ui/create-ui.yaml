@@ -191,6 +191,7 @@ steps:
     - elements:
       - type: radio
         hasDescription: true
+        onChange: dedicatedOnChange
         options: 
           - value : false
             text : Shared node pool
@@ -204,6 +205,7 @@ steps:
           text: Zones
         fetch: getZones
         if: ifDedicated
+        onChange: zonesOnChange
         type: multiselect
         schema:
           $ref: schema#/properties/form/properties/capi/properties/zones  
@@ -216,7 +218,7 @@ steps:
           $ref: schema#/properties/form/properties/capi/properties/sku
       label:
         text: Database Profile
-      if: ifCapiProviderIsEmpty
+      if: ifCapiProviderIsNotEmpty
       show_label: true
       type: single-step-form
     - label:

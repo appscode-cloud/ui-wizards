@@ -516,26 +516,39 @@ function getCreateNameSpaceUrl ({ model, getValue, storeGet }){
   }
 }
 
-const ifCapiProviderIsEmpty = ({ model, getValue, watchDependency }) => {
+const ifCapiProviderIsNotEmpty = ({ model, getValue, watchDependency }) => {
   watchDependency("model#/form/capi/provider");
   const val = getValue(model, "/form/capi/provider");
-  if(val)return true
+  if (val) return true
 };
 
-const ifDedicated = ({ model, getValue, watchDependency,commit }) => {
+const ifDedicated = ({ model, getValue, watchDependency }) => {
   watchDependency("model#/form/capi/dedicated");
   const val = getValue(model, "form/capi/dedicated");
-  if(val)return true
-  else commit("wizard/model$delete", "form/capi/zones");
+  if (val) return true
 };
 
-const ifZones = ({ model, getValue, watchDependency,commit }) => {
+const dedicatedOnChange = ({ model, getValue, commit }) => {
+  const val = getValue(model, "form/capi/dedicated");
+  if (!val) {
+    commit("wizard/model$delete", "form/capi/zones");
+    commit("wizard/model$delete", "form/capi/sku");
+  }
+};
+
+
+const ifZones = ({ model, getValue, watchDependency }) => {
   watchDependency("model#/form/capi/zones");
   watchDependency("model#/form/capi/dedicated");
   const zones = getValue(model, "form/capi/zones") || [];
   const isDedicated = getValue(model, "form/capi/dedicated");
-  if(zones.length && isDedicated)return true
-  else commit("wizard/model$delete", "form/capi/sku");
+  if (zones.length && isDedicated) return true
+};
+
+const zonesOnChange = ({ model, getValue, commit }) => {
+  const zones = getValue(model, "form/capi/zones") || [];
+  const isDedicated = getValue(model, "form/capi/dedicated");
+  if (!zones.length) commit("wizard/model$delete", "form/capi/sku");
 };
 
 async function getZones({storeGet,axios,model,getValue}) {
@@ -600,9 +613,10 @@ return {
 	setMachineToCustom,
 	updateAgentValue,
 	getCreateNameSpaceUrl,
-  ifCapiProviderIsEmpty,
+  ifCapiProviderIsNotEmpty,
   ifDedicated,
+  dedicatedOnChange,
   ifZones,
+  zonesOnChange,
   getZones,
   getSKU
-}

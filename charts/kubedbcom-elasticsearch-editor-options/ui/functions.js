@@ -1,4 +1,4 @@
-function onVersionChange({discriminator, getValue, commit, model, watchDependency}) {
+function onVersionChange({ discriminator, getValue, commit, model, watchDependency }) {
   watchDependency("discriminator#/elasticVersions")
   const versions = getValue(discriminator, "/elasticVersions");
 
@@ -389,7 +389,7 @@ function onCreateAuthSecretChange({
       "wizard/model$delete",
       "/spec/authSecret/name"
     );
-  } else if(createAuthSecret === false) {
+  } else if (createAuthSecret === false) {
     commit(
       "wizard/model$delete",
       "/spec/authSecret/password"
@@ -490,19 +490,19 @@ function disableConfigureOption({ model, getValue, watchDependency, itemCtx }) {
   watchDependency("model#/spec/authPlugin");
   const authPlugin = getValue(model, "/spec/authPlugin");
 
-  if(itemCtx.value === "tls") {
-    return !isSecurityEnabled({model, getValue, watchDependency});
+  if (itemCtx.value === "tls") {
+    return !isSecurityEnabled({ model, getValue, watchDependency });
   }
-  else if(itemCtx.value === "internal-users" || itemCtx.value === "roles-mapping") {  
-    return !isSecurityEnabled({model, getValue, watchDependency}) || !authPlugin || authPlugin === "X-Pack";
+  else if (itemCtx.value === "internal-users" || itemCtx.value === "roles-mapping") {
+    return !isSecurityEnabled({ model, getValue, watchDependency }) || !authPlugin || authPlugin === "X-Pack";
   }
-  else if(itemCtx.value === "secure-custom-config") {
+  else if (itemCtx.value === "secure-custom-config") {
     return authPlugin !== "X-Pack";
   }
   return false;
 }
 
-function isSecurityEnabled({model, getValue, watchDependency}) {
+function isSecurityEnabled({ model, getValue, watchDependency }) {
   watchDependency("model#/spec/disableSecurity");
   const value = getValue(model, "/spec/disableSecurity");
   return !value;
@@ -511,7 +511,7 @@ function isSecurityEnabled({model, getValue, watchDependency}) {
 function onDisableSecurityChange({ model, getValue }) {
   const disableSecurity = getValue(model, "/resources/kubedbComElasticsearch/spec/disableSecurity");
 
-  if(disableSecurity) {
+  if (disableSecurity) {
     commit(
       "wizard/model$delete",
       "/spec/authSecret",
@@ -524,7 +524,7 @@ async function fetchJsons({ axios, itemCtx }) {
   let language = {};
   let functions = {};
   const { name, sourceRef, version, packageviewUrlPrefix } = itemCtx.chart;
-  
+
   try {
     ui = await axios.get(
       `${packageviewUrlPrefix}/create-ui.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`
@@ -549,7 +549,7 @@ async function fetchJsons({ axios, itemCtx }) {
   };
 }
 
-function updateAgentValue({commit },val) {
+function updateAgentValue({ commit }, val) {
   commit("wizard/model$update", {
     path: "/spec/monitoring/agent",
     value: val ? "prometheus.io/operator" : "",
@@ -565,52 +565,65 @@ function updateAgentValue({commit },val) {
 
 }
 
-function getCreateNameSpaceUrl ({ model, getValue, storeGet }){ 
+function getCreateNameSpaceUrl({ model, getValue, storeGet }) {
 
   const user = storeGet("/route/params/user");
   const cluster = storeGet("/route/params/cluster");
 
   const domain = storeGet("/domain") || '';
-  if(domain.includes("bb.test")){
+  if (domain.includes("bb.test")) {
     return `http://console.bb.test:5990/${user}/kubernetes/${cluster}/core/v1/namespaces/create`
-  }else{
-    const editedDomain = domain.replace("kubedb","console");
+  } else {
+    const editedDomain = domain.replace("kubedb", "console");
     return `${editedDomain}/${user}/kubernetes/${cluster}/core/v1/namespaces/create`
   }
 }
 
-const ifCapiProviderIsEmpty = ({ model, getValue, watchDependency }) => {
+const ifCapiProviderIsNotEmpty = ({ model, getValue, watchDependency }) => {
   watchDependency("model#/form/capi/provider");
   const val = getValue(model, "/form/capi/provider");
-  if(val)return true
+  if (val) return true
 };
 
-const ifDedicated = ({ model, getValue, watchDependency,commit }) => {
+const ifDedicated = ({ model, getValue, watchDependency }) => {
   watchDependency("model#/form/capi/dedicated");
   const val = getValue(model, "form/capi/dedicated");
-  if(val)return true
-  else commit("wizard/model$delete", "form/capi/zones");
+  if (val) return true
 };
 
-const ifZones = ({ model, getValue, watchDependency,commit }) => {
+const dedicatedOnChange = ({ model, getValue, commit }) => {
+  const val = getValue(model, "form/capi/dedicated");
+  if (!val) {
+    commit("wizard/model$delete", "form/capi/zones");
+    commit("wizard/model$delete", "form/capi/sku");
+  }
+};
+
+
+const ifZones = ({ model, getValue, watchDependency }) => {
   watchDependency("model#/form/capi/zones");
   watchDependency("model#/form/capi/dedicated");
   const zones = getValue(model, "form/capi/zones") || [];
   const isDedicated = getValue(model, "form/capi/dedicated");
-  if(zones.length && isDedicated)return true
-  else commit("wizard/model$delete", "form/capi/sku");
+  if (zones.length && isDedicated) return true
 };
 
-async function getZones({storeGet,axios,model,getValue}) {
+const zonesOnChange = ({ model, getValue, commit }) => {
+  const zones = getValue(model, "form/capi/zones") || [];
+  const isDedicated = getValue(model, "form/capi/dedicated");
+  if (!zones.length) commit("wizard/model$delete", "form/capi/sku");
+};
+
+
+async function getZones({ storeGet, axios, model, getValue }) {
   const owner = storeGet("/route/params/user")
   const cluster = storeGet("/route/params/cluster")
-  const isDedicated = getValue(model,"form/capi/dedicated")
-  if(isDedicated)
-  {
+  const isDedicated = getValue(model, "form/capi/dedicated")
+  if (isDedicated) {
     try {
       const resp = await axios.get(`clustersv2/${owner}/${cluster}/zones`);
-      const val = resp.data.map((item)=>{
-        return {"value":item,"text":item}
+      const val = resp.data.map((item) => {
+        return { "value": item, "text": item }
       })
       return val
     } catch (e) {
@@ -620,22 +633,21 @@ async function getZones({storeGet,axios,model,getValue}) {
   }
 }
 
-async function getSKU({storeGet,axios,model,getValue,watchDependency}) {
+async function getSKU({ storeGet, axios, model, getValue, watchDependency }) {
   watchDependency("model#/form/capi/zones")
   const owner = storeGet("/route/params/user")
   const cluster = storeGet("/route/params/cluster")
-  const zones = getValue(model,"form/capi/zones") || []
-  if(zones.length)
-  {
+  const zones = getValue(model, "form/capi/zones") || []
+  if (zones.length) {
     try {
       let url = `clustersv2/${owner}/${cluster}/vms?`
       zones.forEach((item) => {
-        url+= `zones=${encodeURIComponent(item)}&`
+        url += `zones=${encodeURIComponent(item)}&`
       });
-      url = url.slice(0,-1)
+      url = url.slice(0, -1)
       const resp = await axios.get(url);
-      const val = resp.data.map((item)=>{
-        return {"value":item,"text":item}
+      const val = resp.data.map((item) => {
+        return { "value": item, "text": item }
       })
       return val
     } catch (e) {
@@ -647,30 +659,32 @@ async function getSKU({storeGet,axios,model,getValue,watchDependency}) {
 
 
 return {
-	fetchJsons,
-	onVersionChange,
-	showAuthPasswordField,
-	isEqualToModelPathValue,
-	showAuthSecretField,
-	showStorageSizeField,
-	getResources,
-	getStorageClassNames,
+  fetchJsons,
+  onVersionChange,
+  showAuthPasswordField,
+  isEqualToModelPathValue,
+  showAuthSecretField,
+  showStorageSizeField,
+  getResources,
+  getStorageClassNames,
   getElasticSearchVersions,
   onCreateAuthSecretChange,
-	getSecrets,
-	disableLimit,
-	getMachineListForOptions,
-	setResourceLimit,
-	setLimitsCpuOrMem,
-	setMachineToCustom,
-	disableConfigureOption,
-	isSecurityEnabled,
-	onDisableSecurityChange,
-	updateAgentValue,
-	getCreateNameSpaceUrl,
-  ifCapiProviderIsEmpty,
+  getSecrets,
+  disableLimit,
+  getMachineListForOptions,
+  setResourceLimit,
+  setLimitsCpuOrMem,
+  setMachineToCustom,
+  disableConfigureOption,
+  isSecurityEnabled,
+  onDisableSecurityChange,
+  updateAgentValue,
+  getCreateNameSpaceUrl,
+  ifCapiProviderIsNotEmpty,
   ifDedicated,
+  dedicatedOnChange,
   ifZones,
+  zonesOnChange,
   getZones,
   getSKU
 }
