@@ -570,6 +570,84 @@ function getCreateNameSpaceUrl ({ model, getValue, storeGet }){
   }
 }
 
+const ifCapiProviderIsNotEmpty = ({ model, getValue, watchDependency }) => {
+  watchDependency("model#/form/capi/provider");
+  const val = getValue(model, "/form/capi/provider");
+  if (val) return true
+};
+
+const ifDedicated = ({ model, getValue, watchDependency }) => {
+  watchDependency("model#/form/capi/dedicated");
+  const val = getValue(model, "form/capi/dedicated");
+  if (val) return true
+};
+
+const dedicatedOnChange = ({ model, getValue, commit }) => {
+  const val = getValue(model, "form/capi/dedicated");
+  if (!val) {
+    commit("wizard/model$delete", "form/capi/zones");
+    commit("wizard/model$delete", "form/capi/sku");
+  }
+};
+
+
+const ifZones = ({ model, getValue, watchDependency }) => {
+  watchDependency("model#/form/capi/zones");
+  watchDependency("model#/form/capi/dedicated");
+  const zones = getValue(model, "form/capi/zones") || [];
+  const isDedicated = getValue(model, "form/capi/dedicated");
+  if (zones.length && isDedicated) return true
+};
+
+const zonesOnChange = ({ model, getValue, commit }) => {
+  const zones = getValue(model, "form/capi/zones") || [];
+  const isDedicated = getValue(model, "form/capi/dedicated");
+  if (!zones.length) commit("wizard/model$delete", "form/capi/sku");
+};
+
+async function getZones({storeGet,axios,model,getValue}) {
+  const owner = storeGet("/route/params/user")
+  const cluster = storeGet("/route/params/cluster")
+  const isDedicated = getValue(model,"form/capi/dedicated")
+  if(isDedicated)
+  {
+    try {
+      const resp = await axios.get(`clustersv2/${owner}/${cluster}/zones`);
+      const val = resp.data.map((item)=>{
+        return {"value":item,"text":item}
+      })
+      return val
+    } catch (e) {
+      console.log(e);
+      return [];
+    }
+  }
+}
+
+async function getSKU({storeGet,axios,model,getValue,watchDependency}) {
+  watchDependency("model#/form/capi/zones")
+  const owner = storeGet("/route/params/user")
+  const cluster = storeGet("/route/params/cluster")
+  const zones = getValue(model,"form/capi/zones") || []
+  if(zones.length)
+  {
+    try {
+      let url = `clustersv2/${owner}/${cluster}/vms?`
+      zones.forEach((item) => {
+        url+= `zones=${encodeURIComponent(item)}&`
+      });
+      url = url.slice(0,-1)
+      const resp = await axios.get(url);
+      const val = resp.data.map((item)=>{
+        return {"value":item,"text":item}
+      })
+      return val
+    } catch (e) {
+      console.log(e);
+      return [];
+    }
+  }
+}
 
 return {
 	fetchJsons,
@@ -591,4 +669,11 @@ return {
 	onCreateSentinelChange,
 	updateAgentValue,
 	getCreateNameSpaceUrl,
+  ifCapiProviderIsNotEmpty,
+  ifDedicated,
+  dedicatedOnChange,
+  ifZones,
+  zonesOnChange,
+  getZones,
+  getSKU
 }
