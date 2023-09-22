@@ -240,21 +240,16 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/monitoring/properties/serviceMonitor
       type: reusable-element
-    
-    # - alias: reusable-capi-fields
-    #   chart:
-    #     name: uibytebuildersdev-component-capi
-    #     version: v0.4.17
-    #   if: ifCapiProviderIsEmpty
-    #   moduleResolver: fetchJsons
-    #   schema:
-    #     $ref: schema#/properties/form/properties/capi
-    #   type: reusable-element
-    
     - elements:
-      - label:
-          text: Dedicated
-        type: switch
+      - type: radio
+        hasDescription: true
+        options: 
+          - value : false
+            text : Shared node pool
+            description: Create the database in shared node pool
+          - value : true
+            text : Dedicated node pool
+            description: Create a dedicated node pool for the database
         schema:
           $ref: schema#/properties/form/properties/capi/properties/dedicated
       - label: 
@@ -272,11 +267,10 @@ steps:
         schema:
           $ref: schema#/properties/form/properties/capi/properties/sku
       label:
-        text: Capi-Provider
+        text: Database Profile
       if: ifCapiProviderIsEmpty
       show_label: true
       type: single-step-form
-
     - label:
         text: labels.configOptions
       type: label-element
