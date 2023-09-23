@@ -41,35 +41,6 @@ resources:
       values:
         features:
           enterprise: true
-  helmToolkitFluxcdIoHelmRelease_kubestash_presets: # +doc-gen:break
-    apiVersion: helm.toolkit.fluxcd.io/v2beta1
-    kind: HelmRelease
-    metadata:
-      name: kubestash-presets
-      namespace: kubeops
-    spec:
-      chart:
-        spec:
-          chart: kubestash-presets
-          sourceRef:
-            kind: HelmRepository
-            name: appscode
-            namespace: kubeops
-          version: v2023.03.23
-      install:
-        crds: CreateReplace
-        createNamespace: true
-        remediation:
-          retries: -1
-      interval: 5m
-      releaseName: kubestash-presets
-      storageNamespace: kubestash
-      targetNamespace: kubestash
-      timeout: 30m
-      upgrade:
-        crds: CreateReplace
-        remediation:
-          retries: -1
   helmToolkitFluxcdIoHelmRelease_stash: # +doc-gen:break
     apiVersion: helm.toolkit.fluxcd.io/v2beta1
     kind: HelmRelease
@@ -134,32 +105,3 @@ resources:
       values:
         stash-metrics:
           enabled: false
-  helmToolkitFluxcdIoHelmRelease_stash_presets: # +doc-gen:break
-    apiVersion: helm.toolkit.fluxcd.io/v2beta1
-    kind: HelmRelease
-    metadata:
-      name: stash-presets
-      namespace: kubeops
-    spec:
-      chart:
-        spec:
-          chart: stash-presets
-          sourceRef:
-            kind: HelmRepository
-            name: appscode
-            namespace: kubeops
-          version: v2023.03.23
-      install:
-        crds: CreateReplace
-        createNamespace: true
-        remediation:
-          retries: -1
-      interval: 5m
-      releaseName: stash-presets
-      storageNamespace: stash
-      targetNamespace: stash
-      timeout: 30m
-      upgrade:
-        crds: CreateReplace
-        remediation:
-          retries: -1
