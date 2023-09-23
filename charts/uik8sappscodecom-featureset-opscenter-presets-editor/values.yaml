@@ -9,16 +9,16 @@ metadata:
     name: RELEASE-NAME
     namespace: default
 resources:
-  helmToolkitFluxcdIoHelmRelease_kube_ui_server: # +doc-gen:break
+  helmToolkitFluxcdIoHelmRelease_kubestash_presets: # +doc-gen:break
     apiVersion: helm.toolkit.fluxcd.io/v2beta1
     kind: HelmRelease
     metadata:
-      name: kube-ui-server
+      name: kubestash-presets
       namespace: kubeops
     spec:
       chart:
         spec:
-          chart: kube-ui-server
+          chart: kubestash-presets
           sourceRef:
             kind: HelmRepository
             name: appscode
@@ -30,53 +30,24 @@ resources:
         remediation:
           retries: -1
       interval: 5m
-      releaseName: kube-ui-server
-      storageNamespace: kubeops
-      targetNamespace: kubeops
+      releaseName: kubestash-presets
+      storageNamespace: kubestash
+      targetNamespace: kubestash
       timeout: 30m
       upgrade:
         crds: CreateReplace
         remediation:
           retries: -1
-  helmToolkitFluxcdIoHelmRelease_license_proxyserver: # +doc-gen:break
+  helmToolkitFluxcdIoHelmRelease_stash_presets: # +doc-gen:break
     apiVersion: helm.toolkit.fluxcd.io/v2beta1
     kind: HelmRelease
     metadata:
-      name: license-proxyserver
+      name: stash-presets
       namespace: kubeops
     spec:
       chart:
         spec:
-          chart: license-proxyserver
-          sourceRef:
-            kind: HelmRepository
-            name: bytebuilders
-            namespace: kubeops
-          version: v2023.10.1
-      install:
-        crds: CreateReplace
-        createNamespace: true
-        remediation:
-          retries: -1
-      interval: 5m
-      releaseName: license-proxyserver
-      storageNamespace: kubeops
-      targetNamespace: kubeops
-      timeout: 30m
-      upgrade:
-        crds: CreateReplace
-        remediation:
-          retries: -1
-  helmToolkitFluxcdIoHelmRelease_supervisor: # +doc-gen:break
-    apiVersion: helm.toolkit.fluxcd.io/v2beta1
-    kind: HelmRelease
-    metadata:
-      name: supervisor
-      namespace: kubeops
-    spec:
-      chart:
-        spec:
-          chart: supervisor
+          chart: stash-presets
           sourceRef:
             kind: HelmRepository
             name: appscode
@@ -88,9 +59,9 @@ resources:
         remediation:
           retries: -1
       interval: 5m
-      releaseName: supervisor
-      storageNamespace: kubeops
-      targetNamespace: kubeops
+      releaseName: stash-presets
+      storageNamespace: stash
+      targetNamespace: stash
       timeout: 30m
       upgrade:
         crds: CreateReplace
