@@ -213,36 +213,36 @@ steps:
         $ref: schema#/properties/spec/properties/monitoring/properties/serviceMonitor
       type: reusable-element
     - elements:
-      - type: radio
-        hasDescription: true
+      - hasDescription: true
         onChange: dedicatedOnChange
-        options: 
-          - value : false
-            text : Shared node pool
-            description: Create the database in shared node pool
-          - value : true
-            text : Dedicated node pool
-            description: Create a dedicated node pool for the database
+        options:
+        - description: Create the database in shared node pool
+          text: Shared node pool
+          value: false
+        - description: Create a dedicated node pool for the database
+          text: Dedicated node pool
+          value: true
         schema:
           $ref: schema#/properties/form/properties/capi/properties/dedicated
-      - label: 
-          text: Zones
-        fetch: getZones
+        type: radio
+      - fetch: getZones
         if: ifDedicated
+        label:
+          text: Zones
         onChange: zonesOnChange
-        type: multiselect
         schema:
-          $ref: schema#/properties/form/properties/capi/properties/zones  
-      - label: 
-          text: SKU
-        fetch: getSKU
+          $ref: schema#/properties/form/properties/capi/properties/zones
+        type: multiselect
+      - fetch: getSKU
         if: ifZones
-        type: select
+        label:
+          text: SKU
         schema:
           $ref: schema#/properties/form/properties/capi/properties/sku
+        type: select
+      if: ifCapiProviderIsNotEmpty
       label:
         text: Database Profile
-      if: ifCapiProviderIsNotEmpty
       show_label: true
       type: single-step-form
     - label:
