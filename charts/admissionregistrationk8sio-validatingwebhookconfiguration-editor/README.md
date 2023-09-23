@@ -7,8 +7,8 @@
 ```bash
 $ helm repo add bytebuilders-ui https://bundles.byte.builders/ui/
 $ helm repo update
-$ helm search repo bytebuilders-ui/admissionregistrationk8sio-validatingwebhookconfiguration-editor --version=v0.4.17
-$ helm upgrade -i admissionregistrationk8sio-validatingwebhookconfiguration-editor bytebuilders-ui/admissionregistrationk8sio-validatingwebhookconfiguration-editor -n default --create-namespace --version=v0.4.17
+$ helm search repo bytebuilders-ui/admissionregistrationk8sio-validatingwebhookconfiguration-editor --version=v0.4.18
+$ helm upgrade -i admissionregistrationk8sio-validatingwebhookconfiguration-editor bytebuilders-ui/admissionregistrationk8sio-validatingwebhookconfiguration-editor -n default --create-namespace --version=v0.4.18
 ```
 
 ## Introduction
@@ -24,7 +24,7 @@ This chart deploys a ValidatingWebhookConfiguration Editor on a [Kubernetes](htt
 To install/upgrade the chart with the release name `admissionregistrationk8sio-validatingwebhookconfiguration-editor`:
 
 ```bash
-$ helm upgrade -i admissionregistrationk8sio-validatingwebhookconfiguration-editor bytebuilders-ui/admissionregistrationk8sio-validatingwebhookconfiguration-editor -n default --create-namespace --version=v0.4.17
+$ helm upgrade -i admissionregistrationk8sio-validatingwebhookconfiguration-editor bytebuilders-ui/admissionregistrationk8sio-validatingwebhookconfiguration-editor -n default --create-namespace --version=v0.4.18
 ```
 
 The command deploys a ValidatingWebhookConfiguration Editor on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
@@ -56,12 +56,12 @@ The following table lists the configurable parameters of the `admissionregistrat
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm upgrade -i`. For example:
 
 ```bash
-$ helm upgrade -i admissionregistrationk8sio-validatingwebhookconfiguration-editor bytebuilders-ui/admissionregistrationk8sio-validatingwebhookconfiguration-editor -n default --create-namespace --version=v0.4.17 --set apiVersion=admissionregistration.k8s.io/v1
+$ helm upgrade -i admissionregistrationk8sio-validatingwebhookconfiguration-editor bytebuilders-ui/admissionregistrationk8sio-validatingwebhookconfiguration-editor -n default --create-namespace --version=v0.4.18 --set apiVersion=admissionregistration.k8s.io/v1
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
 installing the chart. For example:
 
 ```bash
-$ helm upgrade -i admissionregistrationk8sio-validatingwebhookconfiguration-editor bytebuilders-ui/admissionregistrationk8sio-validatingwebhookconfiguration-editor -n default --create-namespace --version=v0.4.17 --values values.yaml
+$ helm upgrade -i admissionregistrationk8sio-validatingwebhookconfiguration-editor bytebuilders-ui/admissionregistrationk8sio-validatingwebhookconfiguration-editor -n default --create-namespace --version=v0.4.18 --values values.yaml
 ```
