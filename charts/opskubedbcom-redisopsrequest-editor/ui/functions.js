@@ -714,6 +714,10 @@ function onDbChange({commit}) {
   commit("wizard/model$delete", "/spec/type");
 }
 
+function setApplyToIfReady(){
+  return "IfReady"
+}
+
 return {
   fetchJsons,
   returnFalse,
@@ -760,4 +764,5 @@ return {
   isDatabaseRefDisabled,
   onNamespaceChange,
   onDbChange,
+  setApplyToIfReady
 };
