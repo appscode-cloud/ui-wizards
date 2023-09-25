@@ -38,16 +38,16 @@ resources:
         crds: CreateReplace
         remediation:
           retries: -1
-  helmToolkitFluxcdIoHelmRelease_grafana_opscenter: # +doc-gen:break
+  helmToolkitFluxcdIoHelmRelease_kube_grafana_dashboards: # +doc-gen:break
     apiVersion: helm.toolkit.fluxcd.io/v2beta1
     kind: HelmRelease
     metadata:
-      name: grafana-opscenter
+      name: kube-grafana-dashboards
       namespace: kubeops
     spec:
       chart:
         spec:
-          chart: grafana-opscenter
+          chart: kube-grafana-dashboards
           sourceRef:
             kind: HelmRepository
             name: appscode
@@ -59,7 +59,7 @@ resources:
         remediation:
           retries: -1
       interval: 5m
-      releaseName: grafana-opscenter
+      releaseName: kube-grafana-dashboards
       storageNamespace: monitoring
       targetNamespace: monitoring
       timeout: 30m
@@ -67,11 +67,6 @@ resources:
         crds: CreateReplace
         remediation:
           retries: -1
-      values:
-        grafana-ui-server:
-          enabled: true
-        kube-grafana-dashboards:
-          enabled: true
   helmToolkitFluxcdIoHelmRelease_kube_prometheus_stack: # +doc-gen:break
     apiVersion: helm.toolkit.fluxcd.io/v2beta1
     kind: HelmRelease
@@ -123,6 +118,35 @@ resources:
           retries: -1
       interval: 5m
       releaseName: monitoring-config
+      storageNamespace: monitoring
+      targetNamespace: monitoring
+      timeout: 30m
+      upgrade:
+        crds: CreateReplace
+        remediation:
+          retries: -1
+  helmToolkitFluxcdIoHelmRelease_monitoring_operator: # +doc-gen:break
+    apiVersion: helm.toolkit.fluxcd.io/v2beta1
+    kind: HelmRelease
+    metadata:
+      name: monitoring-operator
+      namespace: kubeops
+    spec:
+      chart:
+        spec:
+          chart: monitoring-operator
+          sourceRef:
+            kind: HelmRepository
+            name: appscode
+            namespace: kubeops
+          version: v2023.10.1
+      install:
+        crds: CreateReplace
+        createNamespace: true
+        remediation:
+          retries: -1
+      interval: 5m
+      releaseName: monitoring-operator
       storageNamespace: monitoring
       targetNamespace: monitoring
       timeout: 30m
