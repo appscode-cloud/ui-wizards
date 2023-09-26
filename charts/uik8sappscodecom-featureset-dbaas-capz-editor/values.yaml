@@ -9,16 +9,16 @@ metadata:
     name: RELEASE-NAME
     namespace: default
 resources:
-  helmToolkitFluxcdIoHelmRelease_capi_ui_presets: # +doc-gen:break
+  helmToolkitFluxcdIoHelmRelease_capi_cluster_presets: # +doc-gen:break
     apiVersion: helm.toolkit.fluxcd.io/v2beta1
     kind: HelmRelease
     metadata:
-      name: capi-ui-presets
+      name: capi-cluster-presets
       namespace: kubeops
     spec:
       chart:
         spec:
-          chart: capi-ui-presets
+          chart: capi-cluster-presets
           sourceRef:
             kind: HelmRepository
             name: appscode
@@ -30,7 +30,7 @@ resources:
         remediation:
           retries: -1
       interval: 5m
-      releaseName: capi-ui-presets
+      releaseName: capi-cluster-presets
       storageNamespace: capi-cluster
       targetNamespace: capi-cluster
       timeout: 30m
