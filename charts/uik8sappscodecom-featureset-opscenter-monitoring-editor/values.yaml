@@ -96,35 +96,6 @@ resources:
         crds: CreateReplace
         remediation:
           retries: -1
-  helmToolkitFluxcdIoHelmRelease_monitoring_config: # +doc-gen:break
-    apiVersion: helm.toolkit.fluxcd.io/v2beta1
-    kind: HelmRelease
-    metadata:
-      name: monitoring-config
-      namespace: kubeops
-    spec:
-      chart:
-        spec:
-          chart: monitoring-config
-          sourceRef:
-            kind: HelmRepository
-            name: bytebuilders
-            namespace: kubeops
-          version: v2023.10.1
-      install:
-        crds: CreateReplace
-        createNamespace: true
-        remediation:
-          retries: -1
-      interval: 5m
-      releaseName: monitoring-config
-      storageNamespace: monitoring
-      targetNamespace: monitoring
-      timeout: 30m
-      upgrade:
-        crds: CreateReplace
-        remediation:
-          retries: -1
   helmToolkitFluxcdIoHelmRelease_monitoring_operator: # +doc-gen:break
     apiVersion: helm.toolkit.fluxcd.io/v2beta1
     kind: HelmRelease
