@@ -827,6 +827,10 @@ function onDbChange({ commit, route }) {
   }
 }
 
+function setApplyToIfReady(){
+  return "IfReady"
+}
+
 return {
   fetchJsons,
   returnFalse,
@@ -877,4 +881,5 @@ return {
   isDatabaseRefDisabled,
   onNamespaceChange,
   onDbChange,
+  setApplyToIfReady
 };
