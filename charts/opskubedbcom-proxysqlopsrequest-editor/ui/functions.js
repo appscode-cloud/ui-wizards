@@ -754,6 +754,10 @@ function showUserDeletionField({ model, getValue, watchDependency }) {
   return reqType === "delete";
 }
 
+function setApplyToIfReady(){
+  return "IfReady"
+}
+
 return {
   fetchJsons,
   returnFalse,
@@ -804,4 +808,5 @@ return {
   onMySQLUserReqTypeChange,
   showUserCreationField,
   showUserDeletionField,
+  setApplyToIfReady
 };
