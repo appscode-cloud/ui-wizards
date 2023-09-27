@@ -576,8 +576,20 @@ const ifCapiProviderIsNotEmpty = ({ model, getValue, watchDependency }) => {
   if (val) return true
 };
 
-const ifDedicated = ({ model, getValue, watchDependency }) => {
+const showMultiselectZone = ({ model, getValue, watchDependency }) => {
   watchDependency("model#/form/capi/dedicated");
+  const val = getValue(model, "/form/capi/provider");
+  console.log(val)
+  if(val === "capz" && ifDedicated({ model, getValue })) return true;
+};
+
+const showSelectZone = ({ model, getValue, watchDependency }) => {
+  watchDependency("model#/form/capi/dedicated");
+  const val = getValue(model, "/form/capi/provider");
+  if(val !== "capz" && ifDedicated({ model, getValue })) return true;
+};
+
+const ifDedicated = ({ model, getValue}) => {
   const val = getValue(model, "form/capi/dedicated");
   if (val) return true
 };
@@ -639,7 +651,8 @@ async function getSKU({storeGet,axios,model,getValue,watchDependency}) {
       url = url.slice(0,-1)
       const resp = await axios.get(url);
       const val = resp.data.map((item)=>{
-        return {"value":item,"text":item}
+        console.log(item)
+        return {"value":item.name,"text":item.name}
       })
       return val
     } catch (e) {
@@ -681,5 +694,7 @@ return {
   ifZones,
   zonesOnChange,
   getZones,
-  getSKU
+  getSKU,
+  showMultiselectZone,
+  showSelectZone
 }
