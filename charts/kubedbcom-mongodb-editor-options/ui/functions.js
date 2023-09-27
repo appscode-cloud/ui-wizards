@@ -535,7 +535,7 @@ const ifCapiProviderIsNotEmpty = ({ model, getValue, watchDependency }) => {
 const showMultiselectZone = ({ model, getValue, watchDependency }) => {
   watchDependency("model#/form/capi/dedicated");
   const val = getValue(model, "/form/capi/provider");
-  console.log(val)
+  
   if(val === "capz" && ifDedicated({ model, getValue })) return true;
 };
 
