@@ -585,8 +585,20 @@ const ifCapiProviderIsNotEmpty = ({ model, getValue, watchDependency }) => {
   if (val) return true
 };
 
-const ifDedicated = ({ model, getValue, watchDependency }) => {
+const showMultiselectZone = ({ model, getValue, watchDependency }) => {
   watchDependency("model#/form/capi/dedicated");
+  const val = getValue(model, "/form/capi/provider");
+  
+  if(val === "capz" && ifDedicated({ model, getValue })) return true;
+};
+
+const showSelectZone = ({ model, getValue, watchDependency }) => {
+  watchDependency("model#/form/capi/dedicated");
+  const val = getValue(model, "/form/capi/provider");
+  if(val !== "capz" && ifDedicated({ model, getValue })) return true;
+};
+
+const ifDedicated = ({ model, getValue}) => {
   const val = getValue(model, "form/capi/dedicated");
   if (val) return true
 };
@@ -610,20 +622,19 @@ const ifZones = ({ model, getValue, watchDependency }) => {
 
 const zonesOnChange = ({ model, getValue, commit }) => {
   const zones = getValue(model, "form/capi/zones") || [];
-  const isDedicated = getValue(model, "form/capi/dedicated");
   if (!zones.length) commit("wizard/model$delete", "form/capi/sku");
 };
 
-
-async function getZones({ storeGet, axios, model, getValue }) {
+async function getZones({storeGet,axios,model,getValue}) {
   const owner = storeGet("/route/params/user")
   const cluster = storeGet("/route/params/cluster")
-  const isDedicated = getValue(model, "form/capi/dedicated")
-  if (isDedicated) {
+  const isDedicated = getValue(model,"form/capi/dedicated")
+  if(isDedicated)
+  {
     try {
       const resp = await axios.get(`clustersv2/${owner}/${cluster}/zones`);
-      const val = resp.data.map((item) => {
-        return { "value": item, "text": item }
+      const val = resp.data.map((item)=>{
+        return {"value":item,"text":item}
       })
       return val
     } catch (e) {
@@ -633,21 +644,22 @@ async function getZones({ storeGet, axios, model, getValue }) {
   }
 }
 
-async function getSKU({ storeGet, axios, model, getValue, watchDependency }) {
+async function getSKU({storeGet,axios,model,getValue,watchDependency}) {
   watchDependency("model#/form/capi/zones")
   const owner = storeGet("/route/params/user")
   const cluster = storeGet("/route/params/cluster")
-  const zones = getValue(model, "form/capi/zones") || []
-  if (zones.length) {
+  const zones = getValue(model,"form/capi/zones") || []
+  if(zones.length)
+  {
     try {
       let url = `clustersv2/${owner}/${cluster}/vms?`
       zones.forEach((item) => {
-        url += `zones=${encodeURIComponent(item)}&`
+        url+= `zones=${encodeURIComponent(item)}&`
       });
-      url = url.slice(0, -1)
+      url = url.slice(0,-1)
       const resp = await axios.get(url);
-      const val = resp.data.map((item) => {
-        return { "value": item, "text": item }
+      const val = resp.data.map((item)=>{
+        return {"value":item.name,"text":`${item.name} [CPU: ${item.cpu}] [Memory: ${item.memory}mb] `}
       })
       return val
     } catch (e) {
@@ -661,6 +673,7 @@ function isPresetAvailable ({storeGet})  {
   const preset = storeGet("/route/query/preset");
   return preset ? true : false
 }
+
 
 
 return {
@@ -692,5 +705,7 @@ return {
   ifZones,
   zonesOnChange,
   getZones,
-  getSKU
+  getSKU,
+  showMultiselectZone,
+  showSelectZone
 }
