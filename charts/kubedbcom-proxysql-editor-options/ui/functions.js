@@ -561,8 +561,20 @@ const ifCapiProviderIsNotEmpty = ({ model, getValue, watchDependency }) => {
   if (val) return true
 };
 
-const ifDedicated = ({ model, getValue, watchDependency }) => {
+const showMultiselectZone = ({ model, getValue, watchDependency }) => {
   watchDependency("model#/form/capi/dedicated");
+  const val = getValue(model, "/form/capi/provider");
+  
+  if(val === "capz" && ifDedicated({ model, getValue })) return true;
+};
+
+const showSelectZone = ({ model, getValue, watchDependency }) => {
+  watchDependency("model#/form/capi/dedicated");
+  const val = getValue(model, "/form/capi/provider");
+  if(val !== "capz" && ifDedicated({ model, getValue })) return true;
+};
+
+const ifDedicated = ({ model, getValue}) => {
   const val = getValue(model, "form/capi/dedicated");
   if (val) return true
 };
@@ -586,7 +598,6 @@ const ifZones = ({ model, getValue, watchDependency }) => {
 
 const zonesOnChange = ({ model, getValue, commit }) => {
   const zones = getValue(model, "form/capi/zones") || [];
-  const isDedicated = getValue(model, "form/capi/dedicated");
   if (!zones.length) commit("wizard/model$delete", "form/capi/sku");
 };
 
@@ -624,7 +635,7 @@ async function getSKU({storeGet,axios,model,getValue,watchDependency}) {
       url = url.slice(0,-1)
       const resp = await axios.get(url);
       const val = resp.data.map((item)=>{
-        return {"value":item,"text":item}
+        return {"value":item.name,"text":`${item.name} [CPU: ${item.cpu}] [Memory: ${item.memory}mb] `}
       })
       return val
     } catch (e) {
@@ -638,6 +649,7 @@ function isPresetAvailable ({storeGet})  {
   const preset = storeGet("/route/query/preset");
   return preset ? true : false
 }
+
 
 
 return {
@@ -665,5 +677,7 @@ return {
   ifZones,
   zonesOnChange,
   getZones,
-  getSKU
+  getSKU,
+  showMultiselectZone,
+  showSelectZone
 }

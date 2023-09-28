@@ -300,13 +300,21 @@ steps:
           $ref: schema#/properties/form/properties/capi/properties/dedicated
         type: radio
       - fetch: getZones
-        if: ifDedicated
+        if: showMultiselectZone
         label:
           text: Zones
         onChange: zonesOnChange
         schema:
           $ref: schema#/properties/form/properties/capi/properties/zones
         type: multiselect
+      - fetch: getZones
+        if: showSelectZone
+        label:
+          text: Zones
+        onChange: zonesOnChange
+        schema:
+          $ref: schema#/properties/form/properties/capi/properties/zones
+        type: select
       - fetch: getSKU
         if: ifZones
         label:
