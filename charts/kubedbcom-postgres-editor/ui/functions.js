@@ -1914,7 +1914,13 @@ function getCreateNameSpaceUrl({ model, getValue, storeGet }) {
   }
 }
 
+function isPresetAvailable ({storeGet})  {
+  const preset = storeGet("/route/query/preset");
+  return preset ? true : false
+}
+
 return {
+  isPresetAvailable,
   fetchJsons,
   disableLableChecker,
   isEqualToModelPathValue,

@@ -2882,6 +2882,13 @@ function getCreateNameSpaceUrl({ model, getValue, storeGet }) {
   }
 }
 
+
+function isPresetAvailable ({storeGet})  {
+  const preset = storeGet("/route/query/preset");
+  return preset ? true : false
+}
+
+
 return {
   fetchJsons,
   disableLableChecker,
@@ -3024,4 +3031,5 @@ return {
   initSetSecureCustomConfig,
   getOpsRequestUrl,
   getCreateNameSpaceUrl,
+  isPresetAvailable
 };
