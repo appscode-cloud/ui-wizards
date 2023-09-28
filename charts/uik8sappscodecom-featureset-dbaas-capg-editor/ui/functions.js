@@ -75,6 +75,15 @@ function disableFeatures({ storeGet, itemCtx }) {
   return (enabled && !managed) || required;
 }
 
+function getResourceValuePathFromFeature(feature) {
+  const featureName = feature?.metadata?.name || "";
+  const underscoredFeatureName = featureName
+    .toLowerCase()
+    .replaceAll("-", "_");
+  const resourceValuePath = `helmToolkitFluxcdIoHelmRelease_${underscoredFeatureName}`;
+  return resourceValuePath;
+}
+
 function onEnabledFeaturesChange({
   discriminator,
   getValue,
@@ -87,10 +96,7 @@ function onEnabledFeaturesChange({
 
   allFeatures.forEach((item) => {
     const featureName = item?.metadata?.name || "";
-    const underscoredFeatureName = featureName
-      .toLowerCase()
-      .replaceAll("-", "_");
-    const resourceValuePath = `helmToolkitFluxcdIoHelmRelease_${underscoredFeatureName}`;
+    const resourceValuePath = getResourceValuePathFromFeature(item)
 
     if (enabledFeatures.includes(featureName)) {
       const featureSet = storeGet("/route/params/featureset") || "";
@@ -123,11 +129,11 @@ function onEnabledFeaturesChange({
       const isManaged = getFeaturePropertyValue(storeGet, featureName, getValue, '/status/managed')
 
 
-      if(isEnabled && (!isManaged)){
+      if (isEnabled && (!isManaged)) {
         commit("wizard/model$delete", `/resources/${resourceValuePath}`);
       }
-      else{
-         commit("wizard/model$update", {
+      else {
+        commit("wizard/model$update", {
           path: `/resources/${resourceValuePath}`,
           value: {
             ...resources?.[resourceValuePath],
@@ -167,8 +173,9 @@ function returnFalse() {
   return false;
 }
 
-async function setReleaseNameAndNamespace({ commit, storeGet, model, getValue, axios }) {
-  resources = getValue(model, "/resources");
+async function setReleaseNameAndNamespaceAndInitializeValues({ commit, storeGet, model, getValue, axios }) {
+  const modelResources = getValue(model, "/resources");
+  resources = { ...modelResources }
 
   const isFeatureSetInstalled = getFeatureSetPropertyValue(
     storeGet,
@@ -176,7 +183,7 @@ async function setReleaseNameAndNamespace({ commit, storeGet, model, getValue, a
     "/status/enabled"
   );
 
-  if(isFeatureSetInstalled) {
+  if (isFeatureSetInstalled) {
     // get resources deafult values when featureset is installed
     const owner = storeGet("/route/params/user");
     const cluster = storeGet("/route/params/cluster");
@@ -192,7 +199,7 @@ async function setReleaseNameAndNamespace({ commit, storeGet, model, getValue, a
     const { resources: resourcesDefaultValues } = data || {}
 
     Object.keys(resourcesDefaultValues || {}).forEach(key => {
-      if(!resources[key]) {
+      if (!resources[key]) {
         resources[key] = resourcesDefaultValues[key];
       }
     })
@@ -205,6 +212,17 @@ async function setReleaseNameAndNamespace({ commit, storeGet, model, getValue, a
       namespace: 'kubeops'
     },
     force: true
+  })
+
+  // delete extra values from model if the feature does not exist
+  const allFeatures = storeGet("/cluster/features/result") || [];
+  const allFeatureResourceValuePathNames = allFeatures.map(feature => getResourceValuePathFromFeature(feature))
+  Object.keys(modelResources).forEach(modelResourcePath => {
+    if (!allFeatureResourceValuePathNames.includes(modelResourcePath)) {
+      // model path does not exist in feature values
+      // remove the model path
+      commit("wizard/model$delete", `/resources/${modelResourcePath}`);
+    }
   })
 }
 
@@ -238,6 +256,6 @@ return {
   disableFeatures,
   onEnabledFeaturesChange,
   returnFalse,
-  setReleaseNameAndNamespace,
+  setReleaseNameAndNamespaceAndInitializeValues,
   fetchFeatureSetOptions,
 };
