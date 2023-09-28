@@ -3,43 +3,53 @@
 
 // get specific feature details
 function getFeatureSetDetails(storeGet) {
-  const featureSets = storeGet('/cluster/featureSets/result') || []
-  const featureSetName = storeGet('/route/params/featureset') || ''
-  const featureSet = featureSets.find(item => item?.metadata?.name === featureSetName)
-  return featureSet
+  const featureSets = storeGet("/cluster/featureSets/result") || [];
+  const featureSetName = storeGet("/route/params/featureset") || "";
+  const featureSet = featureSets.find(
+    (item) => item?.metadata?.name === featureSetName
+  );
+  return featureSet;
 }
 
 // get specific attribute's value of a feature
 function getFeatureSetPropertyValue(storeGet, getValue, path) {
   const featureSet = getFeatureSetDetails(storeGet);
-  const value = getValue(featureSet, path)
-  return value
+  const value = getValue(featureSet, path);
+  return value;
 }
 
 function getFeatureSetDescription({ storeGet, getValue }) {
-  const description = getFeatureSetPropertyValue(storeGet, getValue, '/spec/description');
-  return description
+  const description = getFeatureSetPropertyValue(
+    storeGet,
+    getValue,
+    "/spec/description"
+  );
+  return description;
 }
 
 // get specific feature details
 function getFeatureDetails(storeGet, name) {
-  const features = storeGet('/cluster/features/result') || []
-  const feature = features.find(item => item?.metadata?.name === name)
-  return feature
+  const features = storeGet("/cluster/features/result") || [];
+  const feature = features.find((item) => item?.metadata?.name === name);
+  return feature;
 }
 
 // get specific attribute's value of a feature
 function getFeaturePropertyValue(storeGet, name, getValue, path) {
   const feature = getFeatureDetails(storeGet, name);
-  const value = getValue(feature, path)
-  return value
+  const value = getValue(feature, path);
+  return value;
 }
 
-function isEqualToModelPathValue({ model, getValue, watchDependency }, path, value) {
-  watchDependency(`model#${path}`)
+function isEqualToModelPathValue(
+  { model, getValue, watchDependency },
+  path,
+  value
+) {
+  watchDependency(`model#${path}`);
 
-  const modelValue = getValue(model, path)
-  return modelValue === value
+  const modelValue = getValue(model, path);
+  return modelValue === value;
 }
 
 function getEnabledFeatures({ storeGet }) {
@@ -58,37 +68,72 @@ function getEnabledFeatures({ storeGet }) {
 
 function disableFeatures({ storeGet, itemCtx }) {
   const featureName = itemCtx.value;
-  const feature = getFeatureDetails(storeGet, featureName)
-  const { status, spec } = feature || {}
-  const { enabled, managed } = status || {}
-  const { required } = spec || {}
-  return ((enabled && !managed) || required)
+  const feature = getFeatureDetails(storeGet, featureName);
+  const { status, spec } = feature || {};
+  const { enabled, managed } = status || {};
+  const { required } = spec || {};
+  return (enabled && !managed) || required;
 }
 
-function onEnabledFeaturesChange({ discriminator, getValue, commit, storeGet }) {
-  const enabledFeatures = getValue(discriminator, '/enabledFeatures') || []
+function getResourceValuePathFromFeature(feature) {
+  const featureName = feature?.metadata?.name || "";
+  const underscoredFeatureName = featureName
+    .toLowerCase()
+    .replaceAll("-", "_");
+  const resourceValuePath = `helmToolkitFluxcdIoHelmRelease_${underscoredFeatureName}`;
+  return resourceValuePath;
+}
 
-  const allFeatures = storeGet('/cluster/features/result') || []
+function onEnabledFeaturesChange({
+  discriminator,
+  getValue,
+  commit,
+  storeGet,
+}) {
+  const enabledFeatures = getValue(discriminator, "/enabledFeatures") || [];
 
-  allFeatures.forEach(item => {
-    const featureName = item?.metadata?.name || ''
-    const underscoredFeatureName = featureName.toLowerCase().replaceAll('-', '_')
-    const resourceValuePath = `helmToolkitFluxcdIoHelmRelease_${underscoredFeatureName}`
+  const allFeatures = storeGet("/cluster/features/result") || [];
 
-    if(enabledFeatures.includes(featureName)) {
-      const featureSet = storeGet('/route/params/featureset') || ''
-      const chart = getFeaturePropertyValue(storeGet, featureName,  getValue, '/spec/chart/name');
-      const targetNamespace = getFeaturePropertyValue(storeGet, featureName, getValue, '/spec/chart/namespace');
-      const sourceRef = getFeaturePropertyValue(storeGet, featureName, getValue, '/spec/chart/sourceRef');
-      const version = getFeaturePropertyValue(storeGet, featureName, getValue, '/spec/chart/version');
+  allFeatures.forEach((item) => {
+    const featureName = item?.metadata?.name || "";
+    const resourceValuePath = getResourceValuePathFromFeature(item)
+
+    if (enabledFeatures.includes(featureName)) {
+      const featureSet = storeGet("/route/params/featureset") || "";
+      const chart = getFeaturePropertyValue(
+        storeGet,
+        featureName,
+        getValue,
+        "/spec/chart/name"
+      );
+      const targetNamespace = getFeaturePropertyValue(
+        storeGet,
+        featureName,
+        getValue,
+        "/spec/chart/namespace"
+      );
+      const sourceRef = getFeaturePropertyValue(
+        storeGet,
+        featureName,
+        getValue,
+        "/spec/chart/sourceRef"
+      );
+      const version = getFeaturePropertyValue(
+        storeGet,
+        featureName,
+        getValue,
+        "/spec/chart/version"
+      );
 
       const isEnabled = getFeaturePropertyValue(storeGet, featureName, getValue, '/status/enabled')
       const isManaged = getFeaturePropertyValue(storeGet, featureName, getValue, '/status/managed')
 
-      if(isEnabled && (!isManaged)){
-        commit('wizard/model$delete', `/resources/${resourceValuePath}`)
-      }else {
-        commit('wizard/model$update', {
+
+      if (isEnabled && (!isManaged)) {
+        commit("wizard/model$delete", `/resources/${resourceValuePath}`);
+      }
+      else {
+        commit("wizard/model$update", {
           path: `/resources/${resourceValuePath}`,
           value: {
             ...resources?.[resourceValuePath],
@@ -96,8 +141,8 @@ function onEnabledFeaturesChange({ discriminator, getValue, commit, storeGet }) 
               ...resources?.[resourceValuePath]?.metadata,
               labels: {
                 ...resources?.[resourceValuePath]?.metadata?.labels,
-                'app.kubernetes.io/component': featureName,
-                'app.kubernetes.io/part-of': featureSet,
+                "app.kubernetes.io/component": featureName,
+                "app.kubernetes.io/part-of": featureSet,
               },
             },
             spec: {
@@ -107,30 +152,30 @@ function onEnabledFeaturesChange({ discriminator, getValue, commit, storeGet }) 
                   chart,
                   sourceRef,
                   version,
-                }
+                },
               },
-              targetNamespace
-            }
+              targetNamespace,
+            },
           },
-          force: true
-        })
+          force: true,
+        });
       }
 
-
     } else {
-      commit('wizard/model$delete', `/resources/${resourceValuePath}`)
+      commit("wizard/model$delete", `/resources/${resourceValuePath}`);
     }
-  })
+  });
 }
 
-let resources = {}
+let resources = {};
 
 function returnFalse() {
   return false;
 }
 
-async function setReleaseNameAndNamespace({ commit, storeGet, model, getValue, axios }) {
-  resources = getValue(model, "/resources");
+async function setReleaseNameAndNamespaceAndInitializeValues({ commit, storeGet, model, getValue, axios }) {
+  const modelResources = getValue(model, "/resources");
+  resources = { ...modelResources }
 
   const isFeatureSetInstalled = getFeatureSetPropertyValue(
     storeGet,
@@ -138,7 +183,7 @@ async function setReleaseNameAndNamespace({ commit, storeGet, model, getValue, a
     "/status/enabled"
   );
 
-  if(isFeatureSetInstalled) {
+  if (isFeatureSetInstalled) {
     // get resources deafult values when featureset is installed
     const owner = storeGet("/route/params/user");
     const cluster = storeGet("/route/params/cluster");
@@ -154,7 +199,7 @@ async function setReleaseNameAndNamespace({ commit, storeGet, model, getValue, a
     const { resources: resourcesDefaultValues } = data || {}
 
     Object.keys(resourcesDefaultValues || {}).forEach(key => {
-      if(!resources[key]) {
+      if (!resources[key]) {
         resources[key] = resourcesDefaultValues[key];
       }
     })
@@ -168,6 +213,18 @@ async function setReleaseNameAndNamespace({ commit, storeGet, model, getValue, a
     },
     force: true
   })
+
+  // delete extra values from model if the feature does not exist
+  const allFeatures = storeGet("/cluster/features/result") || [];
+  const allFeatureResourceValuePathNames = allFeatures.map(feature => getResourceValuePathFromFeature(feature))
+  Object.keys(modelResources).forEach(modelResourcePath => {
+    if (!allFeatureResourceValuePathNames.includes(modelResourcePath)) {
+      // model path does not exist in feature values
+      // remove the model path
+      commit("wizard/model$delete", `/resources/${modelResourcePath}`);
+    }
+  })
+
 }
 
 function fetchFeatureSetOptions({ storeGet }) {
@@ -200,6 +257,6 @@ return {
   disableFeatures,
   onEnabledFeaturesChange,
   returnFalse,
-  setReleaseNameAndNamespace,
+  setReleaseNameAndNamespaceAndInitializeValues,
   fetchFeatureSetOptions,
 };
