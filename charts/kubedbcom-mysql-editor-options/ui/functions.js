@@ -603,7 +603,13 @@ async function getSKU({storeGet,axios,model,getValue,watchDependency}) {
   }
 }
 
+function isPresetAvailable ({storeGet})  {
+  const preset = storeGet("/route/query/preset");
+  return preset ? true : false
+}
+
 return {
+  isPresetAvailable,
 	fetchJsons,
 	showAuthPasswordField,
 	isEqualToModelPathValue,

@@ -47,7 +47,7 @@ function initNamespace({ route }) {
   return namespace || null;
 }
 function isNamespaceDisabled({ route }) {
-  return !!initNamespace({ route });
+  return !!initNamespace({ route }) || !isPresetAvailable;
 }
 
 function labelsDisabilityChecker({ itemCtx }) {
@@ -266,7 +266,13 @@ function getCreateNameSpaceUrl ({ model, getValue, storeGet }){
   }
 }
 
+function isPresetAvailable ({storeGet})  {
+  const preset = storeGet("/route/query/preset");
+  return preset ? true : false
+}
+
 return {
+  isPresetAvailable,
   getResources,
   initNamespace,
   isNamespaceDisabled,
