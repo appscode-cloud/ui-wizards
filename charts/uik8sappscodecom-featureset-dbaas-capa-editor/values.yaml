@@ -23,7 +23,7 @@ resources:
             kind: HelmRepository
             name: aws-ebs-csi-driver
             namespace: kubeops
-          version: v1.23.0
+          version: 2.23.0
       install:
         crds: CreateReplace
         createNamespace: true
@@ -125,6 +125,16 @@ resources:
         crds: CreateReplace
         remediation:
           retries: -1
+      values:
+        autoscalingGroups:
+          - maxSize: 6
+            minSize: 1
+            name: default
+        cloudProvider: clusterapi
+        extraArgs:
+          logtostderr: null
+          stderrthreshold: null
+          v: null
   helmToolkitFluxcdIoHelmRelease_crossplane: # +doc-gen:break
     apiVersion: helm.toolkit.fluxcd.io/v2beta1
     kind: HelmRelease
