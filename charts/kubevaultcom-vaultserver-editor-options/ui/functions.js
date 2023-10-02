@@ -628,13 +628,13 @@ function getCreateNameSpaceUrl({ model, getValue, storeGet }) {
   }
 }
 
-function isPresetAvailable ({storeGet})  {
-  const preset = storeGet("/route/query/preset");
-  return preset ? true : false
+function isVariantAvailable ({storeGet})  {
+  const variant = storeGet("/route/query/variant");
+  return variant ? true : false
 }
 
 return {
-  isPresetAvailable,
+  isVariantAvailable,
   isEqualToModelPathValue,
   isNotEqualToModelPathValue,
   getResources,

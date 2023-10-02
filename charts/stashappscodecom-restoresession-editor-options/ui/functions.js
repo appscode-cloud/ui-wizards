@@ -86,7 +86,7 @@ function initNamespace({ route }) {
   return namespace || null;
 }
 function isNamespaceDisabled({ route }) {
-  return !!initNamespace({ route }) || !isPresetAvailable;
+  return !!initNamespace({ route }) || !isVariantAvailable;
 }
 function isDatabaseSelectDisabled({ route }) {
   const { database } = route.query || {};
@@ -425,14 +425,14 @@ function getCreateNameSpaceUrl ({ model, getValue, storeGet }){
   }
 }
 
-function isPresetAvailable ({storeGet})  {
-  const preset = storeGet("/route/query/preset");
-  return preset ? true : false
+function isVariantAvailable ({storeGet})  {
+  const variant = storeGet("/route/query/variant");
+  return variant ? true : false
 }
 
 
 return {
-  isPresetAvailable,
+  isVariantAvailable,
   getResources,
 
   showAndInitName,
