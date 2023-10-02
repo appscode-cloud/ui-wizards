@@ -1956,14 +1956,14 @@ const getAppbinding = async ( { axios, storeGet,getValue, watchDependency, rootM
 
 }
 
-function isPresetAvailable ({storeGet})  {
-  const preset = storeGet("/route/query/preset");
-  return preset ? true : false
+function isVariantAvailable ({storeGet})  {
+  const variant = storeGet("/route/query/variant");
+  return variant ? true : false
 }
 
 
 return {
-  isPresetAvailable,
+  isVariantAvailable,
 	fetchJsons,
   getAppbinding,
   onDatabaseModeChange,
