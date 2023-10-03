@@ -644,10 +644,15 @@ async function getSKU({storeGet,axios,model,getValue,watchDependency}) {
   {
     try {
       let url = `clustersv2/${owner}/${cluster}/vms?`
-      zones.forEach((item) => {
-        url+= `zones=${encodeURIComponent(item)}&`
-      });
-      url = url.slice(0,-1)
+      if(typeof zones === 'string') {
+        url+=`zones=${encodeURIComponent(zones)}`
+      }
+      else {
+        zones.forEach((item) => {
+          url+= `zones=${encodeURIComponent(item)}&`
+        });
+        url = url.slice(0,-1)
+      }
       const resp = await axios.get(url);
       const val = resp.data.map((item)=>{
         return {"value":item.name,"text":`${item.name} [CPU: ${item.cpu}] [Memory: ${item.memory}mb] `}
