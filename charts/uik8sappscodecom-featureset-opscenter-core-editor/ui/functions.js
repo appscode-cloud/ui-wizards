@@ -52,34 +52,85 @@ function isEqualToModelPathValue(
   return modelValue === value;
 }
 
+function isFeatureRequired(storeGet,featureName) {
+
+  
+
+  const featureSet = getFeatureSetDetails(storeGet);
+  const requiredFeatures = featureSet?.spec?.requiredFeatures || [];
+  const isRequired = requiredFeatures.includes(featureName);
+
+  return isRequired;
+}
+
 function getEnabledFeatures({ storeGet }) {
-  const allFeatures = storeGet('/cluster/features/result') || []
-  const featureSet = storeGet('/route/params/featureset') || []
-  const featureBlock = storeGet('/route/query/activeBlock') || ''
+  const allFeatures = storeGet("/cluster/features/result") || [];
+  const featureSet = storeGet("/route/params/featureset") || [];
+  const featureBlock = storeGet("/route/query/activeBlock") || "";
+  const configureMode = storeGet("/route/query/mode") || "";
 
-  const enabledFeatures = allFeatures.filter(item => {
-    return (item?.status?.enabled || item?.spec?.required || item?.spec?.featureBlock === featureBlock) && item?.spec?.featureSet === featureSet
-  })
+  const allFeatureSetFeature =
+    allFeatures.filter((item) => {
+      return item?.spec?.featureSet === featureSet;
+    }) || [];
 
-  const enabledFeatureNames = enabledFeatures.map(item => item?.metadata?.name)
-
-  return enabledFeatureNames
+  // if user click on featureSet configure btn
+  if (configureMode) {
+    // filter only (enabled + required) feature of a feature set
+    const enabledFeatures = allFeatureSetFeature.filter((item) => {
+      const featureName = item?.metadata?.name;
+      return item?.status?.enabled || isFeatureRequired(storeGet, featureName);
+    });
+    const enabledFeatureNames =
+      enabledFeatures.map((item) => item?.metadata?.name) || [];
+    return enabledFeatureNames;
+  } else {
+    // if user click feature block enable btn
+    if (featureBlock) {
+      
+      // filter only (enabled + required + feature block feature)
+      const enabledFeatures = allFeatureSetFeature.filter((item) => {
+        const featureName = item?.metadata?.name;
+        return (
+          item?.status?.enabled ||
+          isFeatureRequired(storeGet, featureName) ||
+          item?.spec?.featureBlock === featureBlock
+        );
+      });
+      const enabledFeatureNames =
+        enabledFeatures.map((item) => item?.metadata?.name) || [];
+      return enabledFeatureNames;
+    }
+    // is user click feature set enable btn
+    else {
+      // filter only (enabled + required + recommended)
+      const enabledFeatures = allFeatureSetFeature.filter((item) => {
+        const featureName = item?.metadata?.name;
+        return (
+          item?.status?.enabled ||
+          item?.spec?.recommended ||
+          isFeatureRequired(storeGet,featureName)
+        );
+      });
+      const enabledFeatureNames =
+        enabledFeatures.map((item) => item?.metadata?.name) || [];
+      return enabledFeatureNames;
+    }
+  }
 }
 
 function disableFeatures({ storeGet, itemCtx }) {
   const featureName = itemCtx.value;
-  const feature = getFeatureDetails(storeGet, featureName);
-  const { status, spec } = feature || {};
-  const { enabled, managed } = status || {};
-  const { required } = spec || {};
-  return (enabled && !managed) || required;
+  const featureSet = getFeatureSetDetails(storeGet);
+  const requiredFeatures = featureSet?.spec?.requiredFeatures || [];
+
+  if (requiredFeatures.includes(featureName)) return true;
+  else return false;
 }
 
 function getResourceValuePathFromFeature(feature) {
   const featureName = feature?.metadata?.name || "";
-  const underscoredFeatureName = featureName
-    .toLowerCase()
-    .replaceAll("-", "_");
+  const underscoredFeatureName = featureName.toLowerCase().replaceAll("-", "_");
   const resourceValuePath = `helmToolkitFluxcdIoHelmRelease_${underscoredFeatureName}`;
   return resourceValuePath;
 }
@@ -96,7 +147,7 @@ function onEnabledFeaturesChange({
 
   allFeatures.forEach((item) => {
     const featureName = item?.metadata?.name || "";
-    const resourceValuePath = getResourceValuePathFromFeature(item)
+    const resourceValuePath = getResourceValuePathFromFeature(item);
 
     if (enabledFeatures.includes(featureName)) {
       const featureSet = storeGet("/route/params/featureset") || "";
@@ -125,14 +176,22 @@ function onEnabledFeaturesChange({
         "/spec/chart/version"
       );
 
-      const isEnabled = getFeaturePropertyValue(storeGet, featureName, getValue, '/status/enabled')
-      const isManaged = getFeaturePropertyValue(storeGet, featureName, getValue, '/status/managed')
+      const isEnabled = getFeaturePropertyValue(
+        storeGet,
+        featureName,
+        getValue,
+        "/status/enabled"
+      );
+      const isManaged = getFeaturePropertyValue(
+        storeGet,
+        featureName,
+        getValue,
+        "/status/managed"
+      );
 
-
-      if (isEnabled && (!isManaged)) {
+      if (isEnabled && !isManaged) {
         commit("wizard/model$delete", `/resources/${resourceValuePath}`);
-      }
-      else {
+      } else {
         commit("wizard/model$update", {
           path: `/resources/${resourceValuePath}`,
           value: {
@@ -160,7 +219,6 @@ function onEnabledFeaturesChange({
           force: true,
         });
       }
-
     } else {
       commit("wizard/model$delete", `/resources/${resourceValuePath}`);
     }
@@ -173,9 +231,15 @@ function returnFalse() {
   return false;
 }
 
-async function setReleaseNameAndNamespaceAndInitializeValues({ commit, storeGet, model, getValue, axios }) {
+async function setReleaseNameAndNamespaceAndInitializeValues({
+  commit,
+  storeGet,
+  model,
+  getValue,
+  axios,
+}) {
   const modelResources = getValue(model, "/resources");
-  resources = { ...modelResources }
+  resources = { ...modelResources };
 
   const isFeatureSetInstalled = getFeatureSetPropertyValue(
     storeGet,
@@ -188,64 +252,67 @@ async function setReleaseNameAndNamespaceAndInitializeValues({ commit, storeGet,
     const owner = storeGet("/route/params/user");
     const cluster = storeGet("/route/params/cluster");
 
-    const { name: chartName, sourceRef, version: chartVersion } = getFeatureSetPropertyValue(
-      storeGet,
-      getValue,
-      "/spec/chart"
-    );
+    const {
+      name: chartName,
+      sourceRef,
+      version: chartVersion,
+    } = getFeatureSetPropertyValue(storeGet, getValue, "/spec/chart");
     const { data } = await axios.get(
       `/clusters/${owner}/${cluster}/helm/packageview/values?name=${chartName}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${chartVersion}&format=json`
     );
-    const { resources: resourcesDefaultValues } = data || {}
+    const { resources: resourcesDefaultValues } = data || {};
 
-    Object.keys(resourcesDefaultValues || {}).forEach(key => {
+    Object.keys(resourcesDefaultValues || {}).forEach((key) => {
       if (!resources[key]) {
         resources[key] = resourcesDefaultValues[key];
       }
-    })
+    });
   }
-  const featureSet = storeGet('/route/params/featureset')
-  commit('wizard/model$update', {
-    path: '/metadata/release',
+  const featureSet = storeGet("/route/params/featureset");
+  commit("wizard/model$update", {
+    path: "/metadata/release",
     value: {
       name: featureSet,
-      namespace: 'kubeops'
+      namespace: "kubeops",
     },
-    force: true
-  })
+    force: true,
+  });
 
   // delete extra values from model if the feature does not exist
   const allFeatures = storeGet("/cluster/features/result") || [];
-  const allFeatureResourceValuePathNames = allFeatures.map(feature => getResourceValuePathFromFeature(feature))
-  Object.keys(modelResources).forEach(modelResourcePath => {
+  const allFeatureResourceValuePathNames = allFeatures.map((feature) =>
+    getResourceValuePathFromFeature(feature)
+  );
+  Object.keys(modelResources).forEach((modelResourcePath) => {
     if (!allFeatureResourceValuePathNames.includes(modelResourcePath)) {
       // model path does not exist in feature values
       // remove the model path
       commit("wizard/model$delete", `/resources/${modelResourcePath}`);
     }
-  })
-
+  });
 }
 
 function fetchFeatureSetOptions({ storeGet }) {
-  const features = storeGet('/cluster/features/result') || []
-  const featureSetName = storeGet('/route/params/featureset')
-  const filteredFeatures = features.filter(item => item?.spec?.featureSet === featureSetName)
-  const options = filteredFeatures.map(item => {
-    const { spec, metadata } = item || {}
-    const { title, description, required } = spec || {}
-    const { name } = metadata || {}
+  const features = storeGet("/cluster/features/result") || [];
+  const featureSetName = storeGet("/route/params/featureset");
+  const filteredFeatures = features.filter(
+    (item) => item?.spec?.featureSet === featureSetName
+  );
+  const options = filteredFeatures.map((item) => {
+    const { spec, metadata } = item || {};
+    const { title, description, required } = spec || {};
+    const { name } = metadata || {};
     return {
       text: title,
       value: name,
       description: description,
       statusTag: {
-        text: required ? 'Required' : ''
-      }
-    }
-  })
+        text: required ? "Required" : "",
+      },
+    };
+  });
 
-  return options || []
+  return options || [];
 }
 
 return {

@@ -52,27 +52,80 @@ function isEqualToModelPathValue(
   return modelValue === value;
 }
 
+function isFeatureRequired(storeGet,featureName) {
+
+  
+
+  const featureSet = getFeatureSetDetails(storeGet);
+  const requiredFeatures = featureSet?.spec?.requiredFeatures || [];
+  const isRequired = requiredFeatures.includes(featureName);
+
+  return isRequired;
+}
+
 function getEnabledFeatures({ storeGet }) {
-  const allFeatures = storeGet('/cluster/features/result') || []
-  const featureSet = storeGet('/route/params/featureset') || []
-  const featureBlock = storeGet('/route/query/activeBlock') || ''
+  const allFeatures = storeGet("/cluster/features/result") || [];
+  const featureSet = storeGet("/route/params/featureset") || [];
+  const featureBlock = storeGet("/route/query/activeBlock") || "";
+  const configureMode = storeGet("/route/query/mode") || "";
 
-  const enabledFeatures = allFeatures.filter(item => {
-    return (item?.status?.enabled || item?.spec?.required || item?.spec?.featureBlock === featureBlock) && item?.spec?.featureSet === featureSet
-  })
+  const allFeatureSetFeature =
+    allFeatures.filter((item) => {
+      return item?.spec?.featureSet === featureSet;
+    }) || [];
 
-  const enabledFeatureNames = enabledFeatures.map(item => item?.metadata?.name)
-
-  return enabledFeatureNames
+  // if user click on featureSet configure btn
+  if (configureMode) {
+    // filter only (enabled + required) feature of a feature set
+    const enabledFeatures = allFeatureSetFeature.filter((item) => {
+      const featureName = item?.metadata?.name;
+      return item?.status?.enabled || isFeatureRequired(storeGet, featureName);
+    });
+    const enabledFeatureNames =
+      enabledFeatures.map((item) => item?.metadata?.name) || [];
+    return enabledFeatureNames;
+  } else {
+    // if user click feature block enable btn
+    if (featureBlock) {
+      
+      // filter only (enabled + required + feature block feature)
+      const enabledFeatures = allFeatureSetFeature.filter((item) => {
+        const featureName = item?.metadata?.name;
+        return (
+          item?.status?.enabled ||
+          isFeatureRequired(storeGet, featureName) ||
+          item?.spec?.featureBlock === featureBlock
+        );
+      });
+      const enabledFeatureNames =
+        enabledFeatures.map((item) => item?.metadata?.name) || [];
+      return enabledFeatureNames;
+    }
+    // is user click feature set enable btn
+    else {
+      // filter only (enabled + required + recommended)
+      const enabledFeatures = allFeatureSetFeature.filter((item) => {
+        const featureName = item?.metadata?.name;
+        return (
+          item?.status?.enabled ||
+          item?.spec?.recommended ||
+          isFeatureRequired(storeGet,featureName)
+        );
+      });
+      const enabledFeatureNames =
+        enabledFeatures.map((item) => item?.metadata?.name) || [];
+      return enabledFeatureNames;
+    }
+  }
 }
 
 function disableFeatures({ storeGet, itemCtx }) {
   const featureName = itemCtx.value;
-  const feature = getFeatureDetails(storeGet, featureName);
-  const { status, spec } = feature || {};
-  const { enabled, managed } = status || {};
-  const { required } = spec || {};
-  return (enabled && !managed) || required;
+  const featureSet = getFeatureSetDetails(storeGet);
+  const requiredFeatures = featureSet?.spec?.requiredFeatures || [];
+
+  if (requiredFeatures.includes(featureName)) return true;
+  else return false;
 }
 
 function getResourceValuePathFromFeature(feature) {
