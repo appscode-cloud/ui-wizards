@@ -390,7 +390,726 @@ properties:
                     type: string
                 type: object
               values:
-                x-kubernetes-preserve-unknown-fields: true
+                properties:
+                  global:
+                    properties:
+                      imagePullSecrets:
+                        items:
+                          properties:
+                            name:
+                              type: string
+                          type: object
+                          x-kubernetes-map-type: atomic
+                        type: array
+                      license:
+                        type: string
+                      registry:
+                        type: string
+                      registryFQDN:
+                        type: string
+                      skipCleaner:
+                        type: boolean
+                    required:
+                    - license
+                    - registry
+                    - registryFQDN
+                    - skipCleaner
+                    type: object
+                  kubestash-operator:
+                    properties:
+                      affinity:
+                        properties:
+                          nodeAffinity:
+                            properties:
+                              preferredDuringSchedulingIgnoredDuringExecution:
+                                items:
+                                  properties:
+                                    preference:
+                                      properties:
+                                        matchExpressions:
+                                          items:
+                                            properties:
+                                              key:
+                                                type: string
+                                              operator:
+                                                type: string
+                                              values:
+                                                items:
+                                                  type: string
+                                                type: array
+                                            required:
+                                            - key
+                                            - operator
+                                            type: object
+                                          type: array
+                                        matchFields:
+                                          items:
+                                            properties:
+                                              key:
+                                                type: string
+                                              operator:
+                                                type: string
+                                              values:
+                                                items:
+                                                  type: string
+                                                type: array
+                                            required:
+                                            - key
+                                            - operator
+                                            type: object
+                                          type: array
+                                      type: object
+                                      x-kubernetes-map-type: atomic
+                                    weight:
+                                      format: int32
+                                      type: integer
+                                  required:
+                                  - preference
+                                  - weight
+                                  type: object
+                                type: array
+                              requiredDuringSchedulingIgnoredDuringExecution:
+                                properties:
+                                  nodeSelectorTerms:
+                                    items:
+                                      properties:
+                                        matchExpressions:
+                                          items:
+                                            properties:
+                                              key:
+                                                type: string
+                                              operator:
+                                                type: string
+                                              values:
+                                                items:
+                                                  type: string
+                                                type: array
+                                            required:
+                                            - key
+                                            - operator
+                                            type: object
+                                          type: array
+                                        matchFields:
+                                          items:
+                                            properties:
+                                              key:
+                                                type: string
+                                              operator:
+                                                type: string
+                                              values:
+                                                items:
+                                                  type: string
+                                                type: array
+                                            required:
+                                            - key
+                                            - operator
+                                            type: object
+                                          type: array
+                                      type: object
+                                      x-kubernetes-map-type: atomic
+                                    type: array
+                                required:
+                                - nodeSelectorTerms
+                                type: object
+                                x-kubernetes-map-type: atomic
+                            type: object
+                          podAffinity:
+                            properties:
+                              preferredDuringSchedulingIgnoredDuringExecution:
+                                items:
+                                  properties:
+                                    podAffinityTerm:
+                                      properties:
+                                        labelSelector:
+                                          properties:
+                                            matchExpressions:
+                                              items:
+                                                properties:
+                                                  key:
+                                                    type: string
+                                                  operator:
+                                                    type: string
+                                                  values:
+                                                    items:
+                                                      type: string
+                                                    type: array
+                                                required:
+                                                - key
+                                                - operator
+                                                type: object
+                                              type: array
+                                            matchLabels:
+                                              additionalProperties:
+                                                type: string
+                                              type: object
+                                          type: object
+                                          x-kubernetes-map-type: atomic
+                                        namespaceSelector:
+                                          properties:
+                                            matchExpressions:
+                                              items:
+                                                properties:
+                                                  key:
+                                                    type: string
+                                                  operator:
+                                                    type: string
+                                                  values:
+                                                    items:
+                                                      type: string
+                                                    type: array
+                                                required:
+                                                - key
+                                                - operator
+                                                type: object
+                                              type: array
+                                            matchLabels:
+                                              additionalProperties:
+                                                type: string
+                                              type: object
+                                          type: object
+                                          x-kubernetes-map-type: atomic
+                                        namespaces:
+                                          items:
+                                            type: string
+                                          type: array
+                                        topologyKey:
+                                          type: string
+                                      required:
+                                      - topologyKey
+                                      type: object
+                                    weight:
+                                      format: int32
+                                      type: integer
+                                  required:
+                                  - podAffinityTerm
+                                  - weight
+                                  type: object
+                                type: array
+                              requiredDuringSchedulingIgnoredDuringExecution:
+                                items:
+                                  properties:
+                                    labelSelector:
+                                      properties:
+                                        matchExpressions:
+                                          items:
+                                            properties:
+                                              key:
+                                                type: string
+                                              operator:
+                                                type: string
+                                              values:
+                                                items:
+                                                  type: string
+                                                type: array
+                                            required:
+                                            - key
+                                            - operator
+                                            type: object
+                                          type: array
+                                        matchLabels:
+                                          additionalProperties:
+                                            type: string
+                                          type: object
+                                      type: object
+                                      x-kubernetes-map-type: atomic
+                                    namespaceSelector:
+                                      properties:
+                                        matchExpressions:
+                                          items:
+                                            properties:
+                                              key:
+                                                type: string
+                                              operator:
+                                                type: string
+                                              values:
+                                                items:
+                                                  type: string
+                                                type: array
+                                            required:
+                                            - key
+                                            - operator
+                                            type: object
+                                          type: array
+                                        matchLabels:
+                                          additionalProperties:
+                                            type: string
+                                          type: object
+                                      type: object
+                                      x-kubernetes-map-type: atomic
+                                    namespaces:
+                                      items:
+                                        type: string
+                                      type: array
+                                    topologyKey:
+                                      type: string
+                                  required:
+                                  - topologyKey
+                                  type: object
+                                type: array
+                            type: object
+                          podAntiAffinity:
+                            properties:
+                              preferredDuringSchedulingIgnoredDuringExecution:
+                                items:
+                                  properties:
+                                    podAffinityTerm:
+                                      properties:
+                                        labelSelector:
+                                          properties:
+                                            matchExpressions:
+                                              items:
+                                                properties:
+                                                  key:
+                                                    type: string
+                                                  operator:
+                                                    type: string
+                                                  values:
+                                                    items:
+                                                      type: string
+                                                    type: array
+                                                required:
+                                                - key
+                                                - operator
+                                                type: object
+                                              type: array
+                                            matchLabels:
+                                              additionalProperties:
+                                                type: string
+                                              type: object
+                                          type: object
+                                          x-kubernetes-map-type: atomic
+                                        namespaceSelector:
+                                          properties:
+                                            matchExpressions:
+                                              items:
+                                                properties:
+                                                  key:
+                                                    type: string
+                                                  operator:
+                                                    type: string
+                                                  values:
+                                                    items:
+                                                      type: string
+                                                    type: array
+                                                required:
+                                                - key
+                                                - operator
+                                                type: object
+                                              type: array
+                                            matchLabels:
+                                              additionalProperties:
+                                                type: string
+                                              type: object
+                                          type: object
+                                          x-kubernetes-map-type: atomic
+                                        namespaces:
+                                          items:
+                                            type: string
+                                          type: array
+                                        topologyKey:
+                                          type: string
+                                      required:
+                                      - topologyKey
+                                      type: object
+                                    weight:
+                                      format: int32
+                                      type: integer
+                                  required:
+                                  - podAffinityTerm
+                                  - weight
+                                  type: object
+                                type: array
+                              requiredDuringSchedulingIgnoredDuringExecution:
+                                items:
+                                  properties:
+                                    labelSelector:
+                                      properties:
+                                        matchExpressions:
+                                          items:
+                                            properties:
+                                              key:
+                                                type: string
+                                              operator:
+                                                type: string
+                                              values:
+                                                items:
+                                                  type: string
+                                                type: array
+                                            required:
+                                            - key
+                                            - operator
+                                            type: object
+                                          type: array
+                                        matchLabels:
+                                          additionalProperties:
+                                            type: string
+                                          type: object
+                                      type: object
+                                      x-kubernetes-map-type: atomic
+                                    namespaceSelector:
+                                      properties:
+                                        matchExpressions:
+                                          items:
+                                            properties:
+                                              key:
+                                                type: string
+                                              operator:
+                                                type: string
+                                              values:
+                                                items:
+                                                  type: string
+                                                type: array
+                                            required:
+                                            - key
+                                            - operator
+                                            type: object
+                                          type: array
+                                        matchLabels:
+                                          additionalProperties:
+                                            type: string
+                                          type: object
+                                      type: object
+                                      x-kubernetes-map-type: atomic
+                                    namespaces:
+                                      items:
+                                        type: string
+                                      type: array
+                                    topologyKey:
+                                      type: string
+                                  required:
+                                  - topologyKey
+                                  type: object
+                                type: array
+                            type: object
+                        type: object
+                      annotations:
+                        additionalProperties:
+                          type: string
+                        type: object
+                      apiserver:
+                        properties:
+                          bypassValidatingWebhookXray:
+                            type: boolean
+                          ca:
+                            type: string
+                          groupPriorityMinimum:
+                            format: int32
+                            type: integer
+                          healthcheck:
+                            properties:
+                              enabled:
+                                type: boolean
+                            type: object
+                          servingCerts:
+                            properties:
+                              caCrt:
+                                type: string
+                              generate:
+                                type: boolean
+                              serverCrt:
+                                type: string
+                              serverKey:
+                                type: string
+                            required:
+                            - generate
+                            type: object
+                          useKubeapiserverFqdnForAks:
+                            type: boolean
+                          versionPriority:
+                            format: int32
+                            type: integer
+                        required:
+                        - ca
+                        - groupPriorityMinimum
+                        - healthcheck
+                        - servingCerts
+                        - useKubeapiserverFqdnForAks
+                        - versionPriority
+                        type: object
+                      cleaner:
+                        properties:
+                          registry:
+                            type: string
+                          repository:
+                            type: string
+                          skip:
+                            type: boolean
+                          tag:
+                            type: string
+                        required:
+                        - registry
+                        - repository
+                        - skip
+                        - tag
+                        type: object
+                      criticalAddon:
+                        type: boolean
+                      fullnameOverride:
+                        type: string
+                      imagePullPolicy:
+                        type: string
+                      imagePullSecrets:
+                        items:
+                          type: string
+                        type: array
+                      license:
+                        type: string
+                      licenseApiService:
+                        type: string
+                      logLevel:
+                        format: int32
+                        type: integer
+                      monitoring:
+                        properties:
+                          agent:
+                            type: string
+                          backup:
+                            type: boolean
+                          operator:
+                            type: boolean
+                          serviceMonitor:
+                            properties:
+                              labels:
+                                additionalProperties:
+                                  type: string
+                                type: object
+                            type: object
+                        required:
+                        - agent
+                        - serviceMonitor
+                        type: object
+                      nameOverride:
+                        type: string
+                      nodeSelector:
+                        additionalProperties:
+                          type: string
+                        type: object
+                      operator:
+                        properties:
+                          registry:
+                            type: string
+                          repository:
+                            type: string
+                          resources:
+                            properties:
+                              limits:
+                                additionalProperties:
+                                  anyOf:
+                                  - type: integer
+                                  - type: string
+                                  pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                  x-kubernetes-int-or-string: true
+                                type: object
+                              requests:
+                                additionalProperties:
+                                  anyOf:
+                                  - type: integer
+                                  - type: string
+                                  pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                  x-kubernetes-int-or-string: true
+                                type: object
+                            type: object
+                          securityContext:
+                            properties:
+                              allowPrivilegeEscalation:
+                                type: boolean
+                              capabilities:
+                                properties:
+                                  add:
+                                    items:
+                                      type: string
+                                    type: array
+                                  drop:
+                                    items:
+                                      type: string
+                                    type: array
+                                type: object
+                              privileged:
+                                type: boolean
+                              procMount:
+                                type: string
+                              readOnlyRootFilesystem:
+                                type: boolean
+                              runAsGroup:
+                                format: int64
+                                type: integer
+                              runAsNonRoot:
+                                type: boolean
+                              runAsUser:
+                                format: int64
+                                type: integer
+                              seLinuxOptions:
+                                properties:
+                                  level:
+                                    type: string
+                                  role:
+                                    type: string
+                                  type:
+                                    type: string
+                                  user:
+                                    type: string
+                                type: object
+                              seccompProfile:
+                                properties:
+                                  localhostProfile:
+                                    type: string
+                                  type:
+                                    type: string
+                                required:
+                                - type
+                                type: object
+                              windowsOptions:
+                                properties:
+                                  gmsaCredentialSpec:
+                                    type: string
+                                  gmsaCredentialSpecName:
+                                    type: string
+                                  hostProcess:
+                                    type: boolean
+                                  runAsUserName:
+                                    type: string
+                                type: object
+                            type: object
+                          tag:
+                            type: string
+                        required:
+                        - registry
+                        - repository
+                        - tag
+                        type: object
+                      platform:
+                        properties:
+                          openshift:
+                            type: boolean
+                        type: object
+                      podAnnotations:
+                        additionalProperties:
+                          type: string
+                        type: object
+                      podSecurityContext:
+                        properties:
+                          fsGroup:
+                            format: int64
+                            type: integer
+                          fsGroupChangePolicy:
+                            type: string
+                          runAsGroup:
+                            format: int64
+                            type: integer
+                          runAsNonRoot:
+                            type: boolean
+                          runAsUser:
+                            format: int64
+                            type: integer
+                          seLinuxOptions:
+                            properties:
+                              level:
+                                type: string
+                              role:
+                                type: string
+                              type:
+                                type: string
+                              user:
+                                type: string
+                            type: object
+                          seccompProfile:
+                            properties:
+                              localhostProfile:
+                                type: string
+                              type:
+                                type: string
+                            required:
+                            - type
+                            type: object
+                          supplementalGroups:
+                            items:
+                              format: int64
+                              type: integer
+                            type: array
+                          sysctls:
+                            items:
+                              properties:
+                                name:
+                                  type: string
+                                value:
+                                  type: string
+                              required:
+                              - name
+                              - value
+                              type: object
+                            type: array
+                          windowsOptions:
+                            properties:
+                              gmsaCredentialSpec:
+                                type: string
+                              gmsaCredentialSpecName:
+                                type: string
+                              hostProcess:
+                                type: boolean
+                              runAsUserName:
+                                type: string
+                            type: object
+                        type: object
+                      replicaCount:
+                        format: int32
+                        type: integer
+                      security:
+                        properties:
+                          apparmor:
+                            properties:
+                              enabled:
+                                type: boolean
+                            type: object
+                          seccomp:
+                            properties:
+                              enabled:
+                                type: boolean
+                            type: object
+                        required:
+                        - apparmor
+                        - seccomp
+                        type: object
+                      serviceAccount:
+                        properties:
+                          annotations:
+                            additionalProperties:
+                              type: string
+                            type: object
+                          create:
+                            type: boolean
+                          name:
+                            type: string
+                        required:
+                        - create
+                        type: object
+                      tolerations:
+                        items:
+                          properties:
+                            effect:
+                              type: string
+                            key:
+                              type: string
+                            operator:
+                              type: string
+                            tolerationSeconds:
+                              format: int64
+                              type: integer
+                            value:
+                              type: string
+                          type: object
+                        type: array
+                    required:
+                    - cleaner
+                    - imagePullPolicy
+                    - monitoring
+                    - operator
+                    - replicaCount
+                    - security
+                    - serviceAccount
+                    type: object
+                required:
+                - global
+                type: object
               valuesFrom:
                 items:
                   properties:
@@ -777,7 +1496,2276 @@ properties:
                     type: string
                 type: object
               values:
-                x-kubernetes-preserve-unknown-fields: true
+                properties:
+                  features:
+                    properties:
+                      community:
+                        type: boolean
+                      enterprise:
+                        type: boolean
+                    required:
+                    - community
+                    - enterprise
+                    type: object
+                  global:
+                    properties:
+                      imagePullSecrets:
+                        items:
+                          properties:
+                            name:
+                              type: string
+                          type: object
+                          x-kubernetes-map-type: atomic
+                        type: array
+                      license:
+                        type: string
+                      licenseSecretName:
+                        type: string
+                      registry:
+                        type: string
+                      registryFQDN:
+                        type: string
+                      skipCleaner:
+                        type: boolean
+                    required:
+                    - license
+                    - registry
+                    - registryFQDN
+                    - skipCleaner
+                    type: object
+                  stash-catalog:
+                    properties:
+                      elasticsearch:
+                        properties:
+                          backup:
+                            properties:
+                              args:
+                                type: string
+                            type: object
+                          enabled:
+                            type: boolean
+                          restore:
+                            properties:
+                              args:
+                                type: string
+                            type: object
+                        required:
+                        - backup
+                        - enabled
+                        - restore
+                        type: object
+                      etcd:
+                        properties:
+                          backup:
+                            properties:
+                              args:
+                                type: string
+                            type: object
+                          enabled:
+                            type: boolean
+                          restore:
+                            properties:
+                              args:
+                                type: string
+                              dataDir:
+                                type: string
+                              initialCluster:
+                                type: string
+                              initialClusterToken:
+                                type: string
+                              workloadKind:
+                                type: string
+                              workloadName:
+                                type: string
+                            type: object
+                        required:
+                        - backup
+                        - enabled
+                        - restore
+                        type: object
+                      image:
+                        properties:
+                          registry:
+                            type: string
+                        required:
+                        - registry
+                        type: object
+                      kubedump:
+                        properties:
+                          backup:
+                            properties:
+                              includeDependants:
+                                type: boolean
+                              labelSelector:
+                                type: string
+                              sanitize:
+                                type: boolean
+                            required:
+                            - includeDependants
+                            - labelSelector
+                            - sanitize
+                            type: object
+                          enabled:
+                            type: boolean
+                        required:
+                        - backup
+                        - enabled
+                        type: object
+                      mariadb:
+                        properties:
+                          backup:
+                            properties:
+                              args:
+                                type: string
+                            type: object
+                          enabled:
+                            type: boolean
+                          restore:
+                            properties:
+                              args:
+                                type: string
+                            type: object
+                        required:
+                        - backup
+                        - enabled
+                        - restore
+                        type: object
+                      mongodb:
+                        properties:
+                          backup:
+                            properties:
+                              args:
+                                type: string
+                            type: object
+                          enabled:
+                            type: boolean
+                          maxConcurrency:
+                            format: int32
+                            type: integer
+                          restore:
+                            properties:
+                              args:
+                                type: string
+                            type: object
+                        required:
+                        - backup
+                        - enabled
+                        - maxConcurrency
+                        - restore
+                        type: object
+                      mysql:
+                        properties:
+                          backup:
+                            properties:
+                              args:
+                                type: string
+                            type: object
+                          enabled:
+                            type: boolean
+                          restore:
+                            properties:
+                              args:
+                                type: string
+                            type: object
+                        required:
+                        - backup
+                        - enabled
+                        - restore
+                        type: object
+                      nats:
+                        properties:
+                          backup:
+                            properties:
+                              args:
+                                type: string
+                              streams:
+                                type: string
+                            type: object
+                          enabled:
+                            type: boolean
+                          restore:
+                            properties:
+                              args:
+                                type: string
+                              overwrite:
+                                type: boolean
+                              streams:
+                                type: string
+                            type: object
+                        required:
+                        - backup
+                        - enabled
+                        - restore
+                        type: object
+                      perconaxtradb:
+                        properties:
+                          backup:
+                            properties:
+                              args:
+                                type: string
+                              socatRetry:
+                                format: int32
+                                type: integer
+                            type: object
+                          enabled:
+                            type: boolean
+                          restore:
+                            properties:
+                              args:
+                                type: string
+                              targetAppReplicas:
+                                format: int32
+                                type: integer
+                            required:
+                            - targetAppReplicas
+                            type: object
+                        required:
+                        - backup
+                        - enabled
+                        - restore
+                        type: object
+                      postgres:
+                        properties:
+                          backup:
+                            properties:
+                              args:
+                                type: string
+                              cmd:
+                                type: string
+                            type: object
+                          enabled:
+                            type: boolean
+                          restore:
+                            properties:
+                              args:
+                                type: string
+                            type: object
+                        required:
+                        - backup
+                        - enabled
+                        - restore
+                        type: object
+                      redis:
+                        properties:
+                          backup:
+                            properties:
+                              args:
+                                type: string
+                            type: object
+                          enabled:
+                            type: boolean
+                          restore:
+                            properties:
+                              args:
+                                type: string
+                            type: object
+                        required:
+                        - backup
+                        - enabled
+                        - restore
+                        type: object
+                      registryFQDN:
+                        type: string
+                      vault:
+                        properties:
+                          backup:
+                            properties:
+                              args:
+                                type: string
+                              keyPrefix:
+                                type: string
+                            type: object
+                          enabled:
+                            type: boolean
+                          restore:
+                            properties:
+                              args:
+                                type: string
+                              force:
+                                type: boolean
+                              keyPrefix:
+                                type: string
+                              oldKeyPrefix:
+                                type: string
+                            type: object
+                        required:
+                        - backup
+                        - enabled
+                        - restore
+                        type: object
+                      waitTimeout:
+                        format: int64
+                        type: integer
+                    required:
+                    - elasticsearch
+                    - etcd
+                    - image
+                    - kubedump
+                    - mariadb
+                    - mongodb
+                    - mysql
+                    - nats
+                    - perconaxtradb
+                    - postgres
+                    - redis
+                    - registryFQDN
+                    - vault
+                    - waitTimeout
+                    type: object
+                  stash-community:
+                    properties:
+                      affinity:
+                        properties:
+                          nodeAffinity:
+                            properties:
+                              preferredDuringSchedulingIgnoredDuringExecution:
+                                items:
+                                  properties:
+                                    preference:
+                                      properties:
+                                        matchExpressions:
+                                          items:
+                                            properties:
+                                              key:
+                                                type: string
+                                              operator:
+                                                type: string
+                                              values:
+                                                items:
+                                                  type: string
+                                                type: array
+                                            required:
+                                            - key
+                                            - operator
+                                            type: object
+                                          type: array
+                                        matchFields:
+                                          items:
+                                            properties:
+                                              key:
+                                                type: string
+                                              operator:
+                                                type: string
+                                              values:
+                                                items:
+                                                  type: string
+                                                type: array
+                                            required:
+                                            - key
+                                            - operator
+                                            type: object
+                                          type: array
+                                      type: object
+                                      x-kubernetes-map-type: atomic
+                                    weight:
+                                      format: int32
+                                      type: integer
+                                  required:
+                                  - preference
+                                  - weight
+                                  type: object
+                                type: array
+                              requiredDuringSchedulingIgnoredDuringExecution:
+                                properties:
+                                  nodeSelectorTerms:
+                                    items:
+                                      properties:
+                                        matchExpressions:
+                                          items:
+                                            properties:
+                                              key:
+                                                type: string
+                                              operator:
+                                                type: string
+                                              values:
+                                                items:
+                                                  type: string
+                                                type: array
+                                            required:
+                                            - key
+                                            - operator
+                                            type: object
+                                          type: array
+                                        matchFields:
+                                          items:
+                                            properties:
+                                              key:
+                                                type: string
+                                              operator:
+                                                type: string
+                                              values:
+                                                items:
+                                                  type: string
+                                                type: array
+                                            required:
+                                            - key
+                                            - operator
+                                            type: object
+                                          type: array
+                                      type: object
+                                      x-kubernetes-map-type: atomic
+                                    type: array
+                                required:
+                                - nodeSelectorTerms
+                                type: object
+                                x-kubernetes-map-type: atomic
+                            type: object
+                          podAffinity:
+                            properties:
+                              preferredDuringSchedulingIgnoredDuringExecution:
+                                items:
+                                  properties:
+                                    podAffinityTerm:
+                                      properties:
+                                        labelSelector:
+                                          properties:
+                                            matchExpressions:
+                                              items:
+                                                properties:
+                                                  key:
+                                                    type: string
+                                                  operator:
+                                                    type: string
+                                                  values:
+                                                    items:
+                                                      type: string
+                                                    type: array
+                                                required:
+                                                - key
+                                                - operator
+                                                type: object
+                                              type: array
+                                            matchLabels:
+                                              additionalProperties:
+                                                type: string
+                                              type: object
+                                          type: object
+                                          x-kubernetes-map-type: atomic
+                                        namespaceSelector:
+                                          properties:
+                                            matchExpressions:
+                                              items:
+                                                properties:
+                                                  key:
+                                                    type: string
+                                                  operator:
+                                                    type: string
+                                                  values:
+                                                    items:
+                                                      type: string
+                                                    type: array
+                                                required:
+                                                - key
+                                                - operator
+                                                type: object
+                                              type: array
+                                            matchLabels:
+                                              additionalProperties:
+                                                type: string
+                                              type: object
+                                          type: object
+                                          x-kubernetes-map-type: atomic
+                                        namespaces:
+                                          items:
+                                            type: string
+                                          type: array
+                                        topologyKey:
+                                          type: string
+                                      required:
+                                      - topologyKey
+                                      type: object
+                                    weight:
+                                      format: int32
+                                      type: integer
+                                  required:
+                                  - podAffinityTerm
+                                  - weight
+                                  type: object
+                                type: array
+                              requiredDuringSchedulingIgnoredDuringExecution:
+                                items:
+                                  properties:
+                                    labelSelector:
+                                      properties:
+                                        matchExpressions:
+                                          items:
+                                            properties:
+                                              key:
+                                                type: string
+                                              operator:
+                                                type: string
+                                              values:
+                                                items:
+                                                  type: string
+                                                type: array
+                                            required:
+                                            - key
+                                            - operator
+                                            type: object
+                                          type: array
+                                        matchLabels:
+                                          additionalProperties:
+                                            type: string
+                                          type: object
+                                      type: object
+                                      x-kubernetes-map-type: atomic
+                                    namespaceSelector:
+                                      properties:
+                                        matchExpressions:
+                                          items:
+                                            properties:
+                                              key:
+                                                type: string
+                                              operator:
+                                                type: string
+                                              values:
+                                                items:
+                                                  type: string
+                                                type: array
+                                            required:
+                                            - key
+                                            - operator
+                                            type: object
+                                          type: array
+                                        matchLabels:
+                                          additionalProperties:
+                                            type: string
+                                          type: object
+                                      type: object
+                                      x-kubernetes-map-type: atomic
+                                    namespaces:
+                                      items:
+                                        type: string
+                                      type: array
+                                    topologyKey:
+                                      type: string
+                                  required:
+                                  - topologyKey
+                                  type: object
+                                type: array
+                            type: object
+                          podAntiAffinity:
+                            properties:
+                              preferredDuringSchedulingIgnoredDuringExecution:
+                                items:
+                                  properties:
+                                    podAffinityTerm:
+                                      properties:
+                                        labelSelector:
+                                          properties:
+                                            matchExpressions:
+                                              items:
+                                                properties:
+                                                  key:
+                                                    type: string
+                                                  operator:
+                                                    type: string
+                                                  values:
+                                                    items:
+                                                      type: string
+                                                    type: array
+                                                required:
+                                                - key
+                                                - operator
+                                                type: object
+                                              type: array
+                                            matchLabels:
+                                              additionalProperties:
+                                                type: string
+                                              type: object
+                                          type: object
+                                          x-kubernetes-map-type: atomic
+                                        namespaceSelector:
+                                          properties:
+                                            matchExpressions:
+                                              items:
+                                                properties:
+                                                  key:
+                                                    type: string
+                                                  operator:
+                                                    type: string
+                                                  values:
+                                                    items:
+                                                      type: string
+                                                    type: array
+                                                required:
+                                                - key
+                                                - operator
+                                                type: object
+                                              type: array
+                                            matchLabels:
+                                              additionalProperties:
+                                                type: string
+                                              type: object
+                                          type: object
+                                          x-kubernetes-map-type: atomic
+                                        namespaces:
+                                          items:
+                                            type: string
+                                          type: array
+                                        topologyKey:
+                                          type: string
+                                      required:
+                                      - topologyKey
+                                      type: object
+                                    weight:
+                                      format: int32
+                                      type: integer
+                                  required:
+                                  - podAffinityTerm
+                                  - weight
+                                  type: object
+                                type: array
+                              requiredDuringSchedulingIgnoredDuringExecution:
+                                items:
+                                  properties:
+                                    labelSelector:
+                                      properties:
+                                        matchExpressions:
+                                          items:
+                                            properties:
+                                              key:
+                                                type: string
+                                              operator:
+                                                type: string
+                                              values:
+                                                items:
+                                                  type: string
+                                                type: array
+                                            required:
+                                            - key
+                                            - operator
+                                            type: object
+                                          type: array
+                                        matchLabels:
+                                          additionalProperties:
+                                            type: string
+                                          type: object
+                                      type: object
+                                      x-kubernetes-map-type: atomic
+                                    namespaceSelector:
+                                      properties:
+                                        matchExpressions:
+                                          items:
+                                            properties:
+                                              key:
+                                                type: string
+                                              operator:
+                                                type: string
+                                              values:
+                                                items:
+                                                  type: string
+                                                type: array
+                                            required:
+                                            - key
+                                            - operator
+                                            type: object
+                                          type: array
+                                        matchLabels:
+                                          additionalProperties:
+                                            type: string
+                                          type: object
+                                      type: object
+                                      x-kubernetes-map-type: atomic
+                                    namespaces:
+                                      items:
+                                        type: string
+                                      type: array
+                                    topologyKey:
+                                      type: string
+                                  required:
+                                  - topologyKey
+                                  type: object
+                                type: array
+                            type: object
+                        type: object
+                      annotations:
+                        additionalProperties:
+                          type: string
+                        type: object
+                      apiserver:
+                        properties:
+                          bypassValidatingWebhookXray:
+                            type: boolean
+                          ca:
+                            type: string
+                          enableMutatingWebhook:
+                            type: boolean
+                          enableValidatingWebhook:
+                            type: boolean
+                          groupPriorityMinimum:
+                            format: int32
+                            type: integer
+                          healthcheck:
+                            properties:
+                              enabled:
+                                type: boolean
+                            type: object
+                          servingCerts:
+                            properties:
+                              caCrt:
+                                type: string
+                              generate:
+                                type: boolean
+                              serverCrt:
+                                type: string
+                              serverKey:
+                                type: string
+                            required:
+                            - generate
+                            type: object
+                          useKubeapiserverFqdnForAks:
+                            type: boolean
+                          versionPriority:
+                            format: int32
+                            type: integer
+                          webhook:
+                            properties:
+                              failurePolicy:
+                                type: string
+                            required:
+                            - failurePolicy
+                            type: object
+                        required:
+                        - ca
+                        - enableMutatingWebhook
+                        - enableValidatingWebhook
+                        - groupPriorityMinimum
+                        - healthcheck
+                        - servingCerts
+                        - useKubeapiserverFqdnForAks
+                        - versionPriority
+                        - webhook
+                        type: object
+                      cleaner:
+                        properties:
+                          registry:
+                            type: string
+                          repository:
+                            type: string
+                          securityContext:
+                            properties:
+                              allowPrivilegeEscalation:
+                                type: boolean
+                              capabilities:
+                                properties:
+                                  add:
+                                    items:
+                                      type: string
+                                    type: array
+                                  drop:
+                                    items:
+                                      type: string
+                                    type: array
+                                type: object
+                              privileged:
+                                type: boolean
+                              procMount:
+                                type: string
+                              readOnlyRootFilesystem:
+                                type: boolean
+                              runAsGroup:
+                                format: int64
+                                type: integer
+                              runAsNonRoot:
+                                type: boolean
+                              runAsUser:
+                                format: int64
+                                type: integer
+                              seLinuxOptions:
+                                properties:
+                                  level:
+                                    type: string
+                                  role:
+                                    type: string
+                                  type:
+                                    type: string
+                                  user:
+                                    type: string
+                                type: object
+                              seccompProfile:
+                                properties:
+                                  localhostProfile:
+                                    type: string
+                                  type:
+                                    type: string
+                                required:
+                                - type
+                                type: object
+                              windowsOptions:
+                                properties:
+                                  gmsaCredentialSpec:
+                                    type: string
+                                  gmsaCredentialSpecName:
+                                    type: string
+                                  hostProcess:
+                                    type: boolean
+                                  runAsUserName:
+                                    type: string
+                                type: object
+                            type: object
+                          skip:
+                            type: boolean
+                          tag:
+                            type: string
+                        required:
+                        - registry
+                        - repository
+                        - skip
+                        - tag
+                        type: object
+                      crdInstaller:
+                        properties:
+                          enabled:
+                            type: boolean
+                          registry:
+                            type: string
+                          repository:
+                            type: string
+                          securityContext:
+                            properties:
+                              allowPrivilegeEscalation:
+                                type: boolean
+                              capabilities:
+                                properties:
+                                  add:
+                                    items:
+                                      type: string
+                                    type: array
+                                  drop:
+                                    items:
+                                      type: string
+                                    type: array
+                                type: object
+                              privileged:
+                                type: boolean
+                              procMount:
+                                type: string
+                              readOnlyRootFilesystem:
+                                type: boolean
+                              runAsGroup:
+                                format: int64
+                                type: integer
+                              runAsNonRoot:
+                                type: boolean
+                              runAsUser:
+                                format: int64
+                                type: integer
+                              seLinuxOptions:
+                                properties:
+                                  level:
+                                    type: string
+                                  role:
+                                    type: string
+                                  type:
+                                    type: string
+                                  user:
+                                    type: string
+                                type: object
+                              seccompProfile:
+                                properties:
+                                  localhostProfile:
+                                    type: string
+                                  type:
+                                    type: string
+                                required:
+                                - type
+                                type: object
+                              windowsOptions:
+                                properties:
+                                  gmsaCredentialSpec:
+                                    type: string
+                                  gmsaCredentialSpecName:
+                                    type: string
+                                  hostProcess:
+                                    type: boolean
+                                  runAsUserName:
+                                    type: string
+                                type: object
+                            type: object
+                          tag:
+                            type: string
+                        required:
+                        - registry
+                        - repository
+                        - tag
+                        type: object
+                      criticalAddon:
+                        type: boolean
+                      fullnameOverride:
+                        type: string
+                      imagePullPolicy:
+                        type: string
+                      imagePullSecrets:
+                        items:
+                          type: string
+                        type: array
+                      license:
+                        type: string
+                      licenseApiService:
+                        type: string
+                      licenseSecretName:
+                        type: string
+                      logLevel:
+                        format: int32
+                        type: integer
+                      monitoring:
+                        properties:
+                          agent:
+                            enum:
+                            - prometheus.io
+                            - prometheus.io/operator
+                            - prometheus.io/builtin
+                            type: string
+                          backup:
+                            type: boolean
+                          operator:
+                            type: boolean
+                          serviceMonitor:
+                            properties:
+                              labels:
+                                additionalProperties:
+                                  type: string
+                                type: object
+                            type: object
+                        required:
+                        - agent
+                        - serviceMonitor
+                        type: object
+                      nameOverride:
+                        type: string
+                      nodeSelector:
+                        additionalProperties:
+                          type: string
+                        type: object
+                      operator:
+                        properties:
+                          registry:
+                            type: string
+                          repository:
+                            type: string
+                          resources:
+                            properties:
+                              limits:
+                                additionalProperties:
+                                  anyOf:
+                                  - type: integer
+                                  - type: string
+                                  pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                  x-kubernetes-int-or-string: true
+                                type: object
+                              requests:
+                                additionalProperties:
+                                  anyOf:
+                                  - type: integer
+                                  - type: string
+                                  pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                  x-kubernetes-int-or-string: true
+                                type: object
+                            type: object
+                          securityContext:
+                            properties:
+                              allowPrivilegeEscalation:
+                                type: boolean
+                              capabilities:
+                                properties:
+                                  add:
+                                    items:
+                                      type: string
+                                    type: array
+                                  drop:
+                                    items:
+                                      type: string
+                                    type: array
+                                type: object
+                              privileged:
+                                type: boolean
+                              procMount:
+                                type: string
+                              readOnlyRootFilesystem:
+                                type: boolean
+                              runAsGroup:
+                                format: int64
+                                type: integer
+                              runAsNonRoot:
+                                type: boolean
+                              runAsUser:
+                                format: int64
+                                type: integer
+                              seLinuxOptions:
+                                properties:
+                                  level:
+                                    type: string
+                                  role:
+                                    type: string
+                                  type:
+                                    type: string
+                                  user:
+                                    type: string
+                                type: object
+                              seccompProfile:
+                                properties:
+                                  localhostProfile:
+                                    type: string
+                                  type:
+                                    type: string
+                                required:
+                                - type
+                                type: object
+                              windowsOptions:
+                                properties:
+                                  gmsaCredentialSpec:
+                                    type: string
+                                  gmsaCredentialSpecName:
+                                    type: string
+                                  hostProcess:
+                                    type: boolean
+                                  runAsUserName:
+                                    type: string
+                                type: object
+                            type: object
+                          tag:
+                            type: string
+                        required:
+                        - registry
+                        - repository
+                        - tag
+                        type: object
+                      platform:
+                        properties:
+                          openshift:
+                            type: boolean
+                        type: object
+                      podAnnotations:
+                        additionalProperties:
+                          type: string
+                        type: object
+                      podSecurityContext:
+                        properties:
+                          fsGroup:
+                            format: int64
+                            type: integer
+                          fsGroupChangePolicy:
+                            type: string
+                          runAsGroup:
+                            format: int64
+                            type: integer
+                          runAsNonRoot:
+                            type: boolean
+                          runAsUser:
+                            format: int64
+                            type: integer
+                          seLinuxOptions:
+                            properties:
+                              level:
+                                type: string
+                              role:
+                                type: string
+                              type:
+                                type: string
+                              user:
+                                type: string
+                            type: object
+                          seccompProfile:
+                            properties:
+                              localhostProfile:
+                                type: string
+                              type:
+                                type: string
+                            required:
+                            - type
+                            type: object
+                          supplementalGroups:
+                            items:
+                              format: int64
+                              type: integer
+                            type: array
+                          sysctls:
+                            items:
+                              properties:
+                                name:
+                                  type: string
+                                value:
+                                  type: string
+                              required:
+                              - name
+                              - value
+                              type: object
+                            type: array
+                          windowsOptions:
+                            properties:
+                              gmsaCredentialSpec:
+                                type: string
+                              gmsaCredentialSpecName:
+                                type: string
+                              hostProcess:
+                                type: boolean
+                              runAsUserName:
+                                type: string
+                            type: object
+                        type: object
+                      pushgateway:
+                        properties:
+                          customURL:
+                            type: string
+                          registry:
+                            type: string
+                          repository:
+                            type: string
+                          resources:
+                            properties:
+                              limits:
+                                additionalProperties:
+                                  anyOf:
+                                  - type: integer
+                                  - type: string
+                                  pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                  x-kubernetes-int-or-string: true
+                                type: object
+                              requests:
+                                additionalProperties:
+                                  anyOf:
+                                  - type: integer
+                                  - type: string
+                                  pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                  x-kubernetes-int-or-string: true
+                                type: object
+                            type: object
+                          securityContext:
+                            properties:
+                              allowPrivilegeEscalation:
+                                type: boolean
+                              capabilities:
+                                properties:
+                                  add:
+                                    items:
+                                      type: string
+                                    type: array
+                                  drop:
+                                    items:
+                                      type: string
+                                    type: array
+                                type: object
+                              privileged:
+                                type: boolean
+                              procMount:
+                                type: string
+                              readOnlyRootFilesystem:
+                                type: boolean
+                              runAsGroup:
+                                format: int64
+                                type: integer
+                              runAsNonRoot:
+                                type: boolean
+                              runAsUser:
+                                format: int64
+                                type: integer
+                              seLinuxOptions:
+                                properties:
+                                  level:
+                                    type: string
+                                  role:
+                                    type: string
+                                  type:
+                                    type: string
+                                  user:
+                                    type: string
+                                type: object
+                              seccompProfile:
+                                properties:
+                                  localhostProfile:
+                                    type: string
+                                  type:
+                                    type: string
+                                required:
+                                - type
+                                type: object
+                              windowsOptions:
+                                properties:
+                                  gmsaCredentialSpec:
+                                    type: string
+                                  gmsaCredentialSpecName:
+                                    type: string
+                                  hostProcess:
+                                    type: boolean
+                                  runAsUserName:
+                                    type: string
+                                type: object
+                            type: object
+                          tag:
+                            type: string
+                        required:
+                        - customURL
+                        - registry
+                        - repository
+                        - tag
+                        type: object
+                      registryFQDN:
+                        type: string
+                      replicaCount:
+                        format: int32
+                        type: integer
+                      security:
+                        properties:
+                          apparmor:
+                            properties:
+                              enabled:
+                                type: boolean
+                            type: object
+                          copyAuthenticationConfigMap:
+                            type: boolean
+                          createPSPs:
+                            properties:
+                              baseline:
+                                type: boolean
+                              privileged:
+                                type: boolean
+                            required:
+                            - baseline
+                            - privileged
+                            type: object
+                          podSecurityPolicies:
+                            items:
+                              type: string
+                            type: array
+                          seccomp:
+                            properties:
+                              enabled:
+                                type: boolean
+                            type: object
+                        required:
+                        - apparmor
+                        - copyAuthenticationConfigMap
+                        - createPSPs
+                        - seccomp
+                        type: object
+                      serviceAccount:
+                        properties:
+                          annotations:
+                            additionalProperties:
+                              type: string
+                            type: object
+                          create:
+                            type: boolean
+                          name:
+                            type: string
+                        required:
+                        - create
+                        type: object
+                      tolerations:
+                        items:
+                          properties:
+                            effect:
+                              type: string
+                            key:
+                              type: string
+                            operator:
+                              type: string
+                            tolerationSeconds:
+                              format: int64
+                              type: integer
+                            value:
+                              type: string
+                          type: object
+                        type: array
+                    required:
+                    - apiserver
+                    - cleaner
+                    - crdInstaller
+                    - imagePullPolicy
+                    - monitoring
+                    - operator
+                    - pushgateway
+                    - registryFQDN
+                    - replicaCount
+                    - security
+                    - serviceAccount
+                    type: object
+                  stash-enterprise:
+                    properties:
+                      affinity:
+                        properties:
+                          nodeAffinity:
+                            properties:
+                              preferredDuringSchedulingIgnoredDuringExecution:
+                                items:
+                                  properties:
+                                    preference:
+                                      properties:
+                                        matchExpressions:
+                                          items:
+                                            properties:
+                                              key:
+                                                type: string
+                                              operator:
+                                                type: string
+                                              values:
+                                                items:
+                                                  type: string
+                                                type: array
+                                            required:
+                                            - key
+                                            - operator
+                                            type: object
+                                          type: array
+                                        matchFields:
+                                          items:
+                                            properties:
+                                              key:
+                                                type: string
+                                              operator:
+                                                type: string
+                                              values:
+                                                items:
+                                                  type: string
+                                                type: array
+                                            required:
+                                            - key
+                                            - operator
+                                            type: object
+                                          type: array
+                                      type: object
+                                      x-kubernetes-map-type: atomic
+                                    weight:
+                                      format: int32
+                                      type: integer
+                                  required:
+                                  - preference
+                                  - weight
+                                  type: object
+                                type: array
+                              requiredDuringSchedulingIgnoredDuringExecution:
+                                properties:
+                                  nodeSelectorTerms:
+                                    items:
+                                      properties:
+                                        matchExpressions:
+                                          items:
+                                            properties:
+                                              key:
+                                                type: string
+                                              operator:
+                                                type: string
+                                              values:
+                                                items:
+                                                  type: string
+                                                type: array
+                                            required:
+                                            - key
+                                            - operator
+                                            type: object
+                                          type: array
+                                        matchFields:
+                                          items:
+                                            properties:
+                                              key:
+                                                type: string
+                                              operator:
+                                                type: string
+                                              values:
+                                                items:
+                                                  type: string
+                                                type: array
+                                            required:
+                                            - key
+                                            - operator
+                                            type: object
+                                          type: array
+                                      type: object
+                                      x-kubernetes-map-type: atomic
+                                    type: array
+                                required:
+                                - nodeSelectorTerms
+                                type: object
+                                x-kubernetes-map-type: atomic
+                            type: object
+                          podAffinity:
+                            properties:
+                              preferredDuringSchedulingIgnoredDuringExecution:
+                                items:
+                                  properties:
+                                    podAffinityTerm:
+                                      properties:
+                                        labelSelector:
+                                          properties:
+                                            matchExpressions:
+                                              items:
+                                                properties:
+                                                  key:
+                                                    type: string
+                                                  operator:
+                                                    type: string
+                                                  values:
+                                                    items:
+                                                      type: string
+                                                    type: array
+                                                required:
+                                                - key
+                                                - operator
+                                                type: object
+                                              type: array
+                                            matchLabels:
+                                              additionalProperties:
+                                                type: string
+                                              type: object
+                                          type: object
+                                          x-kubernetes-map-type: atomic
+                                        namespaceSelector:
+                                          properties:
+                                            matchExpressions:
+                                              items:
+                                                properties:
+                                                  key:
+                                                    type: string
+                                                  operator:
+                                                    type: string
+                                                  values:
+                                                    items:
+                                                      type: string
+                                                    type: array
+                                                required:
+                                                - key
+                                                - operator
+                                                type: object
+                                              type: array
+                                            matchLabels:
+                                              additionalProperties:
+                                                type: string
+                                              type: object
+                                          type: object
+                                          x-kubernetes-map-type: atomic
+                                        namespaces:
+                                          items:
+                                            type: string
+                                          type: array
+                                        topologyKey:
+                                          type: string
+                                      required:
+                                      - topologyKey
+                                      type: object
+                                    weight:
+                                      format: int32
+                                      type: integer
+                                  required:
+                                  - podAffinityTerm
+                                  - weight
+                                  type: object
+                                type: array
+                              requiredDuringSchedulingIgnoredDuringExecution:
+                                items:
+                                  properties:
+                                    labelSelector:
+                                      properties:
+                                        matchExpressions:
+                                          items:
+                                            properties:
+                                              key:
+                                                type: string
+                                              operator:
+                                                type: string
+                                              values:
+                                                items:
+                                                  type: string
+                                                type: array
+                                            required:
+                                            - key
+                                            - operator
+                                            type: object
+                                          type: array
+                                        matchLabels:
+                                          additionalProperties:
+                                            type: string
+                                          type: object
+                                      type: object
+                                      x-kubernetes-map-type: atomic
+                                    namespaceSelector:
+                                      properties:
+                                        matchExpressions:
+                                          items:
+                                            properties:
+                                              key:
+                                                type: string
+                                              operator:
+                                                type: string
+                                              values:
+                                                items:
+                                                  type: string
+                                                type: array
+                                            required:
+                                            - key
+                                            - operator
+                                            type: object
+                                          type: array
+                                        matchLabels:
+                                          additionalProperties:
+                                            type: string
+                                          type: object
+                                      type: object
+                                      x-kubernetes-map-type: atomic
+                                    namespaces:
+                                      items:
+                                        type: string
+                                      type: array
+                                    topologyKey:
+                                      type: string
+                                  required:
+                                  - topologyKey
+                                  type: object
+                                type: array
+                            type: object
+                          podAntiAffinity:
+                            properties:
+                              preferredDuringSchedulingIgnoredDuringExecution:
+                                items:
+                                  properties:
+                                    podAffinityTerm:
+                                      properties:
+                                        labelSelector:
+                                          properties:
+                                            matchExpressions:
+                                              items:
+                                                properties:
+                                                  key:
+                                                    type: string
+                                                  operator:
+                                                    type: string
+                                                  values:
+                                                    items:
+                                                      type: string
+                                                    type: array
+                                                required:
+                                                - key
+                                                - operator
+                                                type: object
+                                              type: array
+                                            matchLabels:
+                                              additionalProperties:
+                                                type: string
+                                              type: object
+                                          type: object
+                                          x-kubernetes-map-type: atomic
+                                        namespaceSelector:
+                                          properties:
+                                            matchExpressions:
+                                              items:
+                                                properties:
+                                                  key:
+                                                    type: string
+                                                  operator:
+                                                    type: string
+                                                  values:
+                                                    items:
+                                                      type: string
+                                                    type: array
+                                                required:
+                                                - key
+                                                - operator
+                                                type: object
+                                              type: array
+                                            matchLabels:
+                                              additionalProperties:
+                                                type: string
+                                              type: object
+                                          type: object
+                                          x-kubernetes-map-type: atomic
+                                        namespaces:
+                                          items:
+                                            type: string
+                                          type: array
+                                        topologyKey:
+                                          type: string
+                                      required:
+                                      - topologyKey
+                                      type: object
+                                    weight:
+                                      format: int32
+                                      type: integer
+                                  required:
+                                  - podAffinityTerm
+                                  - weight
+                                  type: object
+                                type: array
+                              requiredDuringSchedulingIgnoredDuringExecution:
+                                items:
+                                  properties:
+                                    labelSelector:
+                                      properties:
+                                        matchExpressions:
+                                          items:
+                                            properties:
+                                              key:
+                                                type: string
+                                              operator:
+                                                type: string
+                                              values:
+                                                items:
+                                                  type: string
+                                                type: array
+                                            required:
+                                            - key
+                                            - operator
+                                            type: object
+                                          type: array
+                                        matchLabels:
+                                          additionalProperties:
+                                            type: string
+                                          type: object
+                                      type: object
+                                      x-kubernetes-map-type: atomic
+                                    namespaceSelector:
+                                      properties:
+                                        matchExpressions:
+                                          items:
+                                            properties:
+                                              key:
+                                                type: string
+                                              operator:
+                                                type: string
+                                              values:
+                                                items:
+                                                  type: string
+                                                type: array
+                                            required:
+                                            - key
+                                            - operator
+                                            type: object
+                                          type: array
+                                        matchLabels:
+                                          additionalProperties:
+                                            type: string
+                                          type: object
+                                      type: object
+                                      x-kubernetes-map-type: atomic
+                                    namespaces:
+                                      items:
+                                        type: string
+                                      type: array
+                                    topologyKey:
+                                      type: string
+                                  required:
+                                  - topologyKey
+                                  type: object
+                                type: array
+                            type: object
+                        type: object
+                      annotations:
+                        additionalProperties:
+                          type: string
+                        type: object
+                      apiserver:
+                        properties:
+                          bypassValidatingWebhookXray:
+                            type: boolean
+                          ca:
+                            type: string
+                          enableMutatingWebhook:
+                            type: boolean
+                          enableValidatingWebhook:
+                            type: boolean
+                          groupPriorityMinimum:
+                            format: int32
+                            type: integer
+                          healthcheck:
+                            properties:
+                              enabled:
+                                type: boolean
+                            type: object
+                          servingCerts:
+                            properties:
+                              caCrt:
+                                type: string
+                              generate:
+                                type: boolean
+                              serverCrt:
+                                type: string
+                              serverKey:
+                                type: string
+                            required:
+                            - generate
+                            type: object
+                          useKubeapiserverFqdnForAks:
+                            type: boolean
+                          versionPriority:
+                            format: int32
+                            type: integer
+                          webhook:
+                            properties:
+                              failurePolicy:
+                                type: string
+                            required:
+                            - failurePolicy
+                            type: object
+                        required:
+                        - ca
+                        - enableMutatingWebhook
+                        - enableValidatingWebhook
+                        - groupPriorityMinimum
+                        - healthcheck
+                        - servingCerts
+                        - useKubeapiserverFqdnForAks
+                        - versionPriority
+                        - webhook
+                        type: object
+                      cleaner:
+                        properties:
+                          registry:
+                            type: string
+                          repository:
+                            type: string
+                          securityContext:
+                            properties:
+                              allowPrivilegeEscalation:
+                                type: boolean
+                              capabilities:
+                                properties:
+                                  add:
+                                    items:
+                                      type: string
+                                    type: array
+                                  drop:
+                                    items:
+                                      type: string
+                                    type: array
+                                type: object
+                              privileged:
+                                type: boolean
+                              procMount:
+                                type: string
+                              readOnlyRootFilesystem:
+                                type: boolean
+                              runAsGroup:
+                                format: int64
+                                type: integer
+                              runAsNonRoot:
+                                type: boolean
+                              runAsUser:
+                                format: int64
+                                type: integer
+                              seLinuxOptions:
+                                properties:
+                                  level:
+                                    type: string
+                                  role:
+                                    type: string
+                                  type:
+                                    type: string
+                                  user:
+                                    type: string
+                                type: object
+                              seccompProfile:
+                                properties:
+                                  localhostProfile:
+                                    type: string
+                                  type:
+                                    type: string
+                                required:
+                                - type
+                                type: object
+                              windowsOptions:
+                                properties:
+                                  gmsaCredentialSpec:
+                                    type: string
+                                  gmsaCredentialSpecName:
+                                    type: string
+                                  hostProcess:
+                                    type: boolean
+                                  runAsUserName:
+                                    type: string
+                                type: object
+                            type: object
+                          skip:
+                            type: boolean
+                          tag:
+                            type: string
+                        required:
+                        - registry
+                        - repository
+                        - skip
+                        - tag
+                        type: object
+                      crdInstaller:
+                        properties:
+                          enabled:
+                            type: boolean
+                          registry:
+                            type: string
+                          repository:
+                            type: string
+                          securityContext:
+                            properties:
+                              allowPrivilegeEscalation:
+                                type: boolean
+                              capabilities:
+                                properties:
+                                  add:
+                                    items:
+                                      type: string
+                                    type: array
+                                  drop:
+                                    items:
+                                      type: string
+                                    type: array
+                                type: object
+                              privileged:
+                                type: boolean
+                              procMount:
+                                type: string
+                              readOnlyRootFilesystem:
+                                type: boolean
+                              runAsGroup:
+                                format: int64
+                                type: integer
+                              runAsNonRoot:
+                                type: boolean
+                              runAsUser:
+                                format: int64
+                                type: integer
+                              seLinuxOptions:
+                                properties:
+                                  level:
+                                    type: string
+                                  role:
+                                    type: string
+                                  type:
+                                    type: string
+                                  user:
+                                    type: string
+                                type: object
+                              seccompProfile:
+                                properties:
+                                  localhostProfile:
+                                    type: string
+                                  type:
+                                    type: string
+                                required:
+                                - type
+                                type: object
+                              windowsOptions:
+                                properties:
+                                  gmsaCredentialSpec:
+                                    type: string
+                                  gmsaCredentialSpecName:
+                                    type: string
+                                  hostProcess:
+                                    type: boolean
+                                  runAsUserName:
+                                    type: string
+                                type: object
+                            type: object
+                          tag:
+                            type: string
+                        required:
+                        - registry
+                        - repository
+                        - tag
+                        type: object
+                      criticalAddon:
+                        type: boolean
+                      fullnameOverride:
+                        type: string
+                      imagePullPolicy:
+                        type: string
+                      imagePullSecrets:
+                        items:
+                          type: string
+                        type: array
+                      license:
+                        type: string
+                      licenseApiService:
+                        type: string
+                      licenseSecretName:
+                        type: string
+                      logLevel:
+                        format: int32
+                        type: integer
+                      monitoring:
+                        properties:
+                          agent:
+                            enum:
+                            - prometheus.io
+                            - prometheus.io/operator
+                            - prometheus.io/builtin
+                            type: string
+                          backup:
+                            type: boolean
+                          operator:
+                            type: boolean
+                          serviceMonitor:
+                            properties:
+                              labels:
+                                additionalProperties:
+                                  type: string
+                                type: object
+                            type: object
+                        required:
+                        - agent
+                        - serviceMonitor
+                        type: object
+                      nameOverride:
+                        type: string
+                      netVolAccessor:
+                        properties:
+                          cpu:
+                            type: string
+                          memory:
+                            type: string
+                          privileged:
+                            type: boolean
+                          runAsUser:
+                            format: int64
+                            type: integer
+                        type: object
+                      nodeSelector:
+                        additionalProperties:
+                          type: string
+                        type: object
+                      operator:
+                        properties:
+                          registry:
+                            type: string
+                          repository:
+                            type: string
+                          resources:
+                            properties:
+                              limits:
+                                additionalProperties:
+                                  anyOf:
+                                  - type: integer
+                                  - type: string
+                                  pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                  x-kubernetes-int-or-string: true
+                                type: object
+                              requests:
+                                additionalProperties:
+                                  anyOf:
+                                  - type: integer
+                                  - type: string
+                                  pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                  x-kubernetes-int-or-string: true
+                                type: object
+                            type: object
+                          securityContext:
+                            properties:
+                              allowPrivilegeEscalation:
+                                type: boolean
+                              capabilities:
+                                properties:
+                                  add:
+                                    items:
+                                      type: string
+                                    type: array
+                                  drop:
+                                    items:
+                                      type: string
+                                    type: array
+                                type: object
+                              privileged:
+                                type: boolean
+                              procMount:
+                                type: string
+                              readOnlyRootFilesystem:
+                                type: boolean
+                              runAsGroup:
+                                format: int64
+                                type: integer
+                              runAsNonRoot:
+                                type: boolean
+                              runAsUser:
+                                format: int64
+                                type: integer
+                              seLinuxOptions:
+                                properties:
+                                  level:
+                                    type: string
+                                  role:
+                                    type: string
+                                  type:
+                                    type: string
+                                  user:
+                                    type: string
+                                type: object
+                              seccompProfile:
+                                properties:
+                                  localhostProfile:
+                                    type: string
+                                  type:
+                                    type: string
+                                required:
+                                - type
+                                type: object
+                              windowsOptions:
+                                properties:
+                                  gmsaCredentialSpec:
+                                    type: string
+                                  gmsaCredentialSpecName:
+                                    type: string
+                                  hostProcess:
+                                    type: boolean
+                                  runAsUserName:
+                                    type: string
+                                type: object
+                            type: object
+                          tag:
+                            type: string
+                        required:
+                        - registry
+                        - repository
+                        - tag
+                        type: object
+                      platform:
+                        properties:
+                          openshift:
+                            type: boolean
+                        type: object
+                      podAnnotations:
+                        additionalProperties:
+                          type: string
+                        type: object
+                      podSecurityContext:
+                        properties:
+                          fsGroup:
+                            format: int64
+                            type: integer
+                          fsGroupChangePolicy:
+                            type: string
+                          runAsGroup:
+                            format: int64
+                            type: integer
+                          runAsNonRoot:
+                            type: boolean
+                          runAsUser:
+                            format: int64
+                            type: integer
+                          seLinuxOptions:
+                            properties:
+                              level:
+                                type: string
+                              role:
+                                type: string
+                              type:
+                                type: string
+                              user:
+                                type: string
+                            type: object
+                          seccompProfile:
+                            properties:
+                              localhostProfile:
+                                type: string
+                              type:
+                                type: string
+                            required:
+                            - type
+                            type: object
+                          supplementalGroups:
+                            items:
+                              format: int64
+                              type: integer
+                            type: array
+                          sysctls:
+                            items:
+                              properties:
+                                name:
+                                  type: string
+                                value:
+                                  type: string
+                              required:
+                              - name
+                              - value
+                              type: object
+                            type: array
+                          windowsOptions:
+                            properties:
+                              gmsaCredentialSpec:
+                                type: string
+                              gmsaCredentialSpecName:
+                                type: string
+                              hostProcess:
+                                type: boolean
+                              runAsUserName:
+                                type: string
+                            type: object
+                        type: object
+                      pushgateway:
+                        properties:
+                          customURL:
+                            type: string
+                          registry:
+                            type: string
+                          repository:
+                            type: string
+                          resources:
+                            properties:
+                              limits:
+                                additionalProperties:
+                                  anyOf:
+                                  - type: integer
+                                  - type: string
+                                  pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                  x-kubernetes-int-or-string: true
+                                type: object
+                              requests:
+                                additionalProperties:
+                                  anyOf:
+                                  - type: integer
+                                  - type: string
+                                  pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                  x-kubernetes-int-or-string: true
+                                type: object
+                            type: object
+                          securityContext:
+                            properties:
+                              allowPrivilegeEscalation:
+                                type: boolean
+                              capabilities:
+                                properties:
+                                  add:
+                                    items:
+                                      type: string
+                                    type: array
+                                  drop:
+                                    items:
+                                      type: string
+                                    type: array
+                                type: object
+                              privileged:
+                                type: boolean
+                              procMount:
+                                type: string
+                              readOnlyRootFilesystem:
+                                type: boolean
+                              runAsGroup:
+                                format: int64
+                                type: integer
+                              runAsNonRoot:
+                                type: boolean
+                              runAsUser:
+                                format: int64
+                                type: integer
+                              seLinuxOptions:
+                                properties:
+                                  level:
+                                    type: string
+                                  role:
+                                    type: string
+                                  type:
+                                    type: string
+                                  user:
+                                    type: string
+                                type: object
+                              seccompProfile:
+                                properties:
+                                  localhostProfile:
+                                    type: string
+                                  type:
+                                    type: string
+                                required:
+                                - type
+                                type: object
+                              windowsOptions:
+                                properties:
+                                  gmsaCredentialSpec:
+                                    type: string
+                                  gmsaCredentialSpecName:
+                                    type: string
+                                  hostProcess:
+                                    type: boolean
+                                  runAsUserName:
+                                    type: string
+                                type: object
+                            type: object
+                          tag:
+                            type: string
+                        required:
+                        - customURL
+                        - registry
+                        - repository
+                        - tag
+                        type: object
+                      registryFQDN:
+                        type: string
+                      replicaCount:
+                        format: int32
+                        type: integer
+                      security:
+                        properties:
+                          apparmor:
+                            properties:
+                              enabled:
+                                type: boolean
+                            type: object
+                          copyAuthenticationConfigMap:
+                            type: boolean
+                          createPSPs:
+                            properties:
+                              baseline:
+                                type: boolean
+                              privileged:
+                                type: boolean
+                            required:
+                            - baseline
+                            - privileged
+                            type: object
+                          podSecurityPolicies:
+                            items:
+                              type: string
+                            type: array
+                          seccomp:
+                            properties:
+                              enabled:
+                                type: boolean
+                            type: object
+                        required:
+                        - apparmor
+                        - copyAuthenticationConfigMap
+                        - createPSPs
+                        - seccomp
+                        type: object
+                      serviceAccount:
+                        properties:
+                          annotations:
+                            additionalProperties:
+                              type: string
+                            type: object
+                          create:
+                            type: boolean
+                          name:
+                            type: string
+                        required:
+                        - create
+                        type: object
+                      tolerations:
+                        items:
+                          properties:
+                            effect:
+                              type: string
+                            key:
+                              type: string
+                            operator:
+                              type: string
+                            tolerationSeconds:
+                              format: int64
+                              type: integer
+                            value:
+                              type: string
+                          type: object
+                        type: array
+                    required:
+                    - apiserver
+                    - cleaner
+                    - crdInstaller
+                    - imagePullPolicy
+                    - monitoring
+                    - operator
+                    - pushgateway
+                    - registryFQDN
+                    - replicaCount
+                    - security
+                    - serviceAccount
+                    type: object
+                required:
+                - features
+                - global
+                type: object
               valuesFrom:
                 items:
                   properties:
