@@ -23,7 +23,7 @@ resources:
             kind: HelmRepository
             name: appscode
             namespace: kubeops
-          version: v2022.06.14
+          version: v2023.10.1
       install:
         crds: CreateReplace
         createNamespace: true
@@ -38,11 +38,40 @@ resources:
         crds: CreateReplace
         remediation:
           retries: -1
-  helmToolkitFluxcdIoHelmRelease_kubedb_gateway: # +doc-gen:break
+  helmToolkitFluxcdIoHelmRelease_voyager: # +doc-gen:break
     apiVersion: helm.toolkit.fluxcd.io/v2beta1
     kind: HelmRelease
     metadata:
-      name: kubedb-gateway
+      name: voyager
+      namespace: kubeops
+    spec:
+      chart:
+        spec:
+          chart: voyager
+          sourceRef:
+            kind: HelmRepository
+            name: appscode
+            namespace: kubeops
+          version: v2023.9.18
+      install:
+        crds: CreateReplace
+        createNamespace: true
+        remediation:
+          retries: -1
+      interval: 5m
+      releaseName: voyager
+      storageNamespace: voyager
+      targetNamespace: voyager
+      timeout: 30m
+      upgrade:
+        crds: CreateReplace
+        remediation:
+          retries: -1
+  helmToolkitFluxcdIoHelmRelease_voyager_gateway: # +doc-gen:break
+    apiVersion: helm.toolkit.fluxcd.io/v2beta1
+    kind: HelmRelease
+    metadata:
+      name: voyager-gateway
       namespace: kubeops
     spec:
       chart:
@@ -59,7 +88,7 @@ resources:
         remediation:
           retries: -1
       interval: 5m
-      releaseName: kubedb-gateway
+      releaseName: voyager-gateway
       storageNamespace: gateway-system
       targetNamespace: gateway-system
       timeout: 30m
