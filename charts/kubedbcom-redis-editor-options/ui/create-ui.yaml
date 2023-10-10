@@ -5,17 +5,18 @@ steps:
         default: true
         type: boolean
     elements:
-    - label:
+    - disabled: isVariantAvailable
+      label:
         text: labels.database.name
       schema:
         $ref: schema#/properties/metadata/properties/release/properties/name
       type: input
-      disabled: isVariantAvailable
     - add_new_button:
         label: labels.add_new_namespace
         target: _blank
         url:
           function: getCreateNameSpaceUrl
+      disabled: isVariantAvailable
       fetch: getResources|core|v1|namespaces
       label:
         text: labels.namespace
@@ -23,7 +24,6 @@ steps:
       schema:
         $ref: schema#/properties/metadata/properties/release/properties/namespace
       type: select
-      disabled: isVariantAvailable
     - fetch: getRedisVersions|catalog.kubedb.com|v1alpha1|redisversions
       label:
         text: labels.database.version

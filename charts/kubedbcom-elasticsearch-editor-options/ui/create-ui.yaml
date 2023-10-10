@@ -4,17 +4,18 @@ steps:
       elasticVersions:
         type: array
     elements:
-    - label:
+    - disabled: isVariantAvailable
+      label:
         text: labels.database.name
       schema:
         $ref: schema#/properties/metadata/properties/release/properties/name
       type: input
-      disabled: isVariantAvailable
     - add_new_button:
         label: labels.add_new_namespace
         target: _blank
         url:
           function: getCreateNameSpaceUrl
+      disabled: isVariantAvailable
       fetch: getResources|core|v1|namespaces
       label:
         text: labels.namespace
@@ -22,7 +23,6 @@ steps:
       schema:
         $ref: schema#/properties/metadata/properties/release/properties/namespace
       type: select
-      disabled: isVariantAvailable
     - computed: onVersionChange
       fetch: getElasticSearchVersions|catalog.kubedb.com|v1alpha1|elasticsearchversions
       label:
