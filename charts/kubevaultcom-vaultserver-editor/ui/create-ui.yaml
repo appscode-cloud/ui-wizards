@@ -1,18 +1,19 @@
 steps:
 - form:
     elements:
-    - label:
+    - disabled: isVariantAvailable
+      label:
         text: labels.vaultserver.name
       onChange: onNameChange
       schema:
         $ref: schema#/properties/metadata/properties/release/properties/name
       type: input
-      disabled: isVariantAvailable
     - add_new_button:
         label: labels.add_new_namespace
         target: _blank
         url:
           function: getCreateNameSpaceUrl
+      disabled: isVariantAvailable
       fetch: getResources|core|v1|namespaces
       label:
         text: labels.namespace
@@ -20,7 +21,6 @@ steps:
       schema:
         $ref: schema#/properties/metadata/properties/release/properties/namespace
       type: select
-      disabled: isVariantAvailable
     - fetch: getVaultServerVersions|catalog.kubevault.com|v1alpha1|vaultserverversions
       label:
         text: labels.vaultserver.version
@@ -514,11 +514,11 @@ steps:
         schema:
           $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/gcs
         type: single-step-form
-      - if: isEqualToDiscriminatorPath|inmem|/backend
+      - elements: []
+        if: isEqualToDiscriminatorPath|inmem|/backend
         keepEmpty: true
         schema:
           $ref: schema#/properties/resources/properties/kubevaultComVaultServer/properties/spec/properties/backend/properties/inmem
-        elements: []
         type: single-step-form
       - elements:
         - label:
