@@ -52,16 +52,53 @@ function isEqualToModelPathValue(
   return modelValue === value;
 }
 
-function isFeatureRequired(storeGet,featureName) {
-
-  
-
+function isFeatureRequired(storeGet, featureName) {
   const featureSet = getFeatureSetDetails(storeGet);
   const requiredFeatures = featureSet?.spec?.requiredFeatures || [];
   const isRequired = requiredFeatures.includes(featureName);
-
   return isRequired;
 }
+
+function getEnabledFeatureInConfigureBtnClick(allFeatureSetFeature, isBlockLevel, storeGet){   
+  const featureBlock = storeGet("/route/query/activeBlock") || "";
+  const enabledFeatures = allFeatureSetFeature.filter((item) => {
+    const featureName = item?.metadata?.name;
+    return (
+      item?.status?.enabled ||
+      isFeatureRequired(storeGet, featureName) ||
+      (isBlockLevel && item?.spec?.featureBlock === featureBlock && item?.spec?.recommended)
+    );
+  });
+  const enabledFeatureNames =
+    enabledFeatures.map((item) => item?.metadata?.name) || [];
+  return enabledFeatureNames;
+}
+
+function getEnabledFeatureInEnableBtnClick(allFeatureSetFeature, isBlockLevel, storeGet){
+  // filter only (enabled + required + feature block feature)
+  const featureBlock = storeGet("/route/query/activeBlock") || "";
+  const enabledFeatures = allFeatureSetFeature.filter((item) => {
+    const featureName = item?.metadata?.name;
+
+    if(isBlockLevel){
+      return (
+        item?.status?.enabled ||
+        isFeatureRequired(storeGet, featureName) ||
+        item?.spec?.featureBlock === featureBlock
+      );
+    }else{
+      return (
+        item?.status?.enabled ||
+        item?.spec?.recommended ||
+        isFeatureRequired(storeGet, featureName)
+      );
+    }
+  });
+  const enabledFeatureNames =
+    enabledFeatures.map((item) => item?.metadata?.name) || [];
+  return enabledFeatureNames;
+}
+
 
 function getEnabledFeatures({ storeGet }) {
   const allFeatures = storeGet("/cluster/features/result") || [];
@@ -74,47 +111,23 @@ function getEnabledFeatures({ storeGet }) {
       return item?.spec?.featureSet === featureSet;
     }) || [];
 
-  // if user click on featureSet configure btn
-  if (configureMode) {
-    // filter only (enabled + required) feature of a feature set
-    const enabledFeatures = allFeatureSetFeature.filter((item) => {
-      const featureName = item?.metadata?.name;
-      return item?.status?.enabled || isFeatureRequired(storeGet, featureName);
-    });
-    const enabledFeatureNames =
-      enabledFeatures.map((item) => item?.metadata?.name) || [];
-    return enabledFeatureNames;
-  } else {
-    // if user click feature block enable btn
-    if (featureBlock) {
-      
-      // filter only (enabled + required + feature block feature)
-      const enabledFeatures = allFeatureSetFeature.filter((item) => {
-        const featureName = item?.metadata?.name;
-        return (
-          item?.status?.enabled ||
-          isFeatureRequired(storeGet, featureName) ||
-          item?.spec?.featureBlock === featureBlock
-        );
-      });
-      const enabledFeatureNames =
-        enabledFeatures.map((item) => item?.metadata?.name) || [];
-      return enabledFeatureNames;
+  if (featureBlock) {
+    //feature block level
+    if (configureMode) {
+      // configure btn
+      return getEnabledFeatureInConfigureBtnClick(allFeatureSetFeature, true, storeGet);
+    } else {
+      // enable btn
+      return getEnabledFeatureInEnableBtnClick(allFeatureSetFeature, true, storeGet)
     }
-    // is user click feature set enable btn
-    else {
-      // filter only (enabled + required + recommended)
-      const enabledFeatures = allFeatureSetFeature.filter((item) => {
-        const featureName = item?.metadata?.name;
-        return (
-          item?.status?.enabled ||
-          item?.spec?.recommended ||
-          isFeatureRequired(storeGet,featureName)
-        );
-      });
-      const enabledFeatureNames =
-        enabledFeatures.map((item) => item?.metadata?.name) || [];
-      return enabledFeatureNames;
+  } else {
+    // feature set level
+    if (configureMode) {
+      // configure btn
+      return getEnabledFeatureInConfigureBtnClick(allFeatureSetFeature, false, storeGet);
+    } else {
+      // enable btn
+      return getEnabledFeatureInEnableBtnClick(allFeatureSetFeature, false, storeGet)
     }
   }
 }

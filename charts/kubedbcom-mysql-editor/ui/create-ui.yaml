@@ -6,18 +6,19 @@ steps:
       password:
         type: string
     elements:
-    - label:
+    - disabled: isVariantAvailable
+      label:
         text: labels.database.name
       onChange: onNameChange
       schema:
         $ref: schema#/properties/metadata/properties/release/properties/name
       type: input
-      disabled: isVariantAvailable
     - add_new_button:
         label: labels.add_new_namespace
         target: _blank
         url:
           function: getCreateNameSpaceUrl
+      disabled: isVariantAvailable
       fetch: getResources|core|v1|namespaces
       label:
         text: labels.namespace
@@ -26,7 +27,6 @@ steps:
       schema:
         $ref: schema#/properties/metadata/properties/release/properties/namespace
       type: select
-      disabled: isVariantAvailable
     - fetch: getMySqlVersions|catalog.kubedb.com|v1alpha1|mysqlversions
       label:
         text: labels.database.version
