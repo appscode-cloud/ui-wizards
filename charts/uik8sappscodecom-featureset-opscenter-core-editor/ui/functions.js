@@ -132,7 +132,13 @@ function getEnabledFeatures({ storeGet }) {
   }
 }
 
-function disableFeatures({ storeGet, itemCtx }) {
+function disableFeatures({getValue, storeGet, itemCtx, discriminator,watchDependency }) {
+
+  watchDependency("discriminator#/isResourceLoaded")
+
+  const isResourceLoaded = getValue(discriminator, "/isResourceLoaded");
+  if(!isResourceLoaded) return true; 
+
   const featureName = itemCtx.value;
   const featureSet = getFeatureSetDetails(storeGet);
   const requiredFeatures = featureSet?.spec?.requiredFeatures || [];
@@ -250,6 +256,7 @@ async function setReleaseNameAndNamespaceAndInitializeValues({
   model,
   getValue,
   axios,
+  setDiscriminatorValue
 }) {
   const modelResources = getValue(model, "/resources");
   resources = { ...modelResources };
@@ -261,7 +268,7 @@ async function setReleaseNameAndNamespaceAndInitializeValues({
   );
 
   if (isFeatureSetInstalled) {
-    // get resources deafult values when featureset is installed
+    // get resources default values when featureset is installed
     const owner = storeGet("/route/params/user");
     const cluster = storeGet("/route/params/cluster");
 
@@ -303,6 +310,8 @@ async function setReleaseNameAndNamespaceAndInitializeValues({
       commit("wizard/model$delete", `/resources/${modelResourcePath}`);
     }
   });
+
+  setDiscriminatorValue("/isResourceLoaded", true);
 }
 
 function fetchFeatureSetOptions({ storeGet }) {
@@ -328,7 +337,25 @@ function fetchFeatureSetOptions({ storeGet }) {
   return options || [];
 }
 
+// this element is is used only to catch discriminator value
+// It is not used in create-ui to get or store value
+function hideThisElement () {
+  return false
+}
+
+// this computed's main purpose is to watch isResourceLoaded flag
+// and fire the onEnabledFeatureChange function when it's true
+function checkIsResourceLoaded ({commit, storeGet,watchDependency,getValue,discriminator }) {
+  watchDependency("discriminator#/isResourceLoaded")
+  const isResourceLoaded = getValue(discriminator, "/isResourceLoaded");
+  if(isResourceLoaded){
+    onEnabledFeaturesChange({discriminator,getValue, commit, storeGet})
+  }
+}
+
 return {
+  hideThisElement,
+  checkIsResourceLoaded,
   getFeatureSetDetails,
   getFeatureSetPropertyValue,
   getFeatureSetDescription,

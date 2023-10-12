@@ -1,5 +1,9 @@
 steps:
 - form:
+    discriminator:
+      isResourceLoaded:
+        default: false
+        type: boolean
     elements:
     - computed: setReleaseNameAndNamespaceAndInitializeValues
       if: returnFalse
@@ -21,6 +25,9 @@ steps:
         schema:
           $ref: discriminator#/properties/enabledFeatures
         type: checkbox
+      - computed: checkIsResourceLoaded
+        if: hideThisElement
+        type: input
       type: single-step-form
     type: single-step-form
   id: opscenter-presets
