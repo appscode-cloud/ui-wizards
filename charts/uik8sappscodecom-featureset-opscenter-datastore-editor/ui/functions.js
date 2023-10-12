@@ -132,7 +132,13 @@ function getEnabledFeatures({ storeGet }) {
   }
 }
 
-function disableFeatures({ storeGet, itemCtx }) {
+function disableFeatures({getValue, storeGet, itemCtx, discriminator,watchDependency }) {
+
+  watchDependency("discriminator#/isResourceLoaded")
+
+  const isResourceLoaded = getValue(discriminator, "/isResourceLoaded");
+  if(!isResourceLoaded) return true; 
+
   const featureName = itemCtx.value;
   const featureSet = getFeatureSetDetails(storeGet);
   const requiredFeatures = featureSet?.spec?.requiredFeatures || [];
@@ -238,9 +244,16 @@ function returnFalse() {
   return false;
 }
 
-async function setReleaseNameAndNamespaceAndInitializeValues({ commit, storeGet, model, getValue, axios }) {
+async function setReleaseNameAndNamespaceAndInitializeValues({
+  commit,
+  storeGet,
+  model,
+  getValue,
+  axios,
+  setDiscriminatorValue
+}) {
   const modelResources = getValue(model, "/resources");
-  resources = { ...modelResources }
+  resources = { ...modelResources };
 
   const isFeatureSetInstalled = getFeatureSetPropertyValue(
     storeGet,
@@ -249,47 +262,50 @@ async function setReleaseNameAndNamespaceAndInitializeValues({ commit, storeGet,
   );
 
   if (isFeatureSetInstalled) {
-    // get resources deafult values when featureset is installed
+    // get resources default values when featureset is installed
     const owner = storeGet("/route/params/user");
     const cluster = storeGet("/route/params/cluster");
 
-    const { name: chartName, sourceRef, version: chartVersion } = getFeatureSetPropertyValue(
-      storeGet,
-      getValue,
-      "/spec/chart"
-    );
+    const {
+      name: chartName,
+      sourceRef,
+      version: chartVersion,
+    } = getFeatureSetPropertyValue(storeGet, getValue, "/spec/chart");
     const { data } = await axios.get(
       `/clusters/${owner}/${cluster}/helm/packageview/values?name=${chartName}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${chartVersion}&format=json`
     );
-    const { resources: resourcesDefaultValues } = data || {}
+    const { resources: resourcesDefaultValues } = data || {};
 
-    Object.keys(resourcesDefaultValues || {}).forEach(key => {
+    Object.keys(resourcesDefaultValues || {}).forEach((key) => {
       if (!resources[key]) {
         resources[key] = resourcesDefaultValues[key];
       }
-    })
+    });
   }
-  const featureSet = storeGet('/route/params/featureset')
-  commit('wizard/model$update', {
-    path: '/metadata/release',
+  const featureSet = storeGet("/route/params/featureset");
+  commit("wizard/model$update", {
+    path: "/metadata/release",
     value: {
       name: featureSet,
-      namespace: 'kubeops'
+      namespace: "kubeops",
     },
-    force: true
-  })
+    force: true,
+  });
 
   // delete extra values from model if the feature does not exist
   const allFeatures = storeGet("/cluster/features/result") || [];
-  const allFeatureResourceValuePathNames = allFeatures.map(feature => getResourceValuePathFromFeature(feature))
-  Object.keys(modelResources).forEach(modelResourcePath => {
+  const allFeatureResourceValuePathNames = allFeatures.map((feature) =>
+    getResourceValuePathFromFeature(feature)
+  );
+  Object.keys(modelResources).forEach((modelResourcePath) => {
     if (!allFeatureResourceValuePathNames.includes(modelResourcePath)) {
       // model path does not exist in feature values
       // remove the model path
       commit("wizard/model$delete", `/resources/${modelResourcePath}`);
     }
-  })
+  });
 
+  setDiscriminatorValue("/isResourceLoaded", true);
 }
 
 function fetchFeatureSetOptions({ storeGet }) {
@@ -313,7 +329,25 @@ function fetchFeatureSetOptions({ storeGet }) {
   return options || []
 }
 
+// this element is is used only to catch discriminator value
+// It is not used in create-ui to get or store value
+function hideThisElement () {
+  return false
+}
+
+// this computed's main purpose is to watch isResourceLoaded flag
+// and fire the onEnabledFeatureChange function when it's true
+function checkIsResourceLoaded ({commit, storeGet,watchDependency,getValue,discriminator }) {
+  watchDependency("discriminator#/isResourceLoaded")
+  const isResourceLoaded = getValue(discriminator, "/isResourceLoaded");
+  if(isResourceLoaded){
+    onEnabledFeaturesChange({discriminator,getValue, commit, storeGet})
+  }
+}
+
 return {
+  hideThisElement,
+  checkIsResourceLoaded,
   getFeatureSetDetails,
   getFeatureSetPropertyValue,
   getFeatureSetDescription,
