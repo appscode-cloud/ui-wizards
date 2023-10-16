@@ -17,7 +17,7 @@ This chart deploys a VerticalPodAutoscalerCheckpoint Editor on a [Kubernetes](ht
 
 ## Prerequisites
 
-- Kubernetes 1.16+
+- Kubernetes 1.20+
 
 ## Installing the Chart
 

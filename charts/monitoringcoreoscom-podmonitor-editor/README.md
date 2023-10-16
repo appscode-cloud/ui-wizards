@@ -17,7 +17,7 @@ This chart deploys a PodMonitor Editor on a [Kubernetes](http://kubernetes.io) c
 
 ## Prerequisites
 
-- Kubernetes 1.16+
+- Kubernetes 1.20+
 
 ## Installing the Chart
 

@@ -17,7 +17,7 @@ This chart deploys a Kafka Editor on a [Kubernetes](http://kubernetes.io) cluste
 
 ## Prerequisites
 
-- Kubernetes 1.16+
+- Kubernetes 1.20+
 
 ## Installing the Chart
 

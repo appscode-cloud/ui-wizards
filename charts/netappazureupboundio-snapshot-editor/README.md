@@ -1,0 +1,67 @@
+# Snapshot Editor
+
+[Snapshot Editor by AppsCode](https://byte.builders) - Snapshot Editor
+
+## TL;DR;
+
+```bash
+$ helm repo add bytebuilders-ui https://bundles.byte.builders/ui/
+$ helm repo update
+$ helm search repo bytebuilders-ui/netappazureupboundio-snapshot-editor --version=v0.4.18
+$ helm upgrade -i netappazureupboundio-snapshot-editor bytebuilders-ui/netappazureupboundio-snapshot-editor -n default --create-namespace --version=v0.4.18
+```
+
+## Introduction
+
+This chart deploys a Snapshot Editor on a [Kubernetes](http://kubernetes.io) cluster using the [Helm](https://helm.sh) package manager.
+
+## Prerequisites
+
+- Kubernetes 1.20+
+
+## Installing the Chart
+
+To install/upgrade the chart with the release name `netappazureupboundio-snapshot-editor`:
+
+```bash
+$ helm upgrade -i netappazureupboundio-snapshot-editor bytebuilders-ui/netappazureupboundio-snapshot-editor -n default --create-namespace --version=v0.4.18
+```
+
+The command deploys a Snapshot Editor on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
+
+> **Tip**: List all releases using `helm list`
+
+## Uninstalling the Chart
+
+To uninstall the `netappazureupboundio-snapshot-editor`:
+
+```bash
+$ helm uninstall netappazureupboundio-snapshot-editor -n default
+```
+
+The command removes all the Kubernetes components associated with the chart and deletes the release.
+
+## Configuration
+
+The following table lists the configurable parameters of the `netappazureupboundio-snapshot-editor` chart and their default values.
+
+|     Parameter      | Description |                   Default                    |
+|--------------------|-------------|----------------------------------------------|
+| apiVersion         |             | <code>netapp.azure.upbound.io/v1beta1</code> |
+| kind               |             | <code>Snapshot</code>                        |
+| metadata.name      |             | <code>snapshot</code>                        |
+| metadata.namespace |             | <code>""</code>                              |
+
+
+Specify each parameter using the `--set key=value[,key=value]` argument to `helm upgrade -i`. For example:
+
+```bash
+$ helm upgrade -i netappazureupboundio-snapshot-editor bytebuilders-ui/netappazureupboundio-snapshot-editor -n default --create-namespace --version=v0.4.18 --set apiVersion=netapp.azure.upbound.io/v1beta1
+```
+
+Alternatively, a YAML file that specifies the values for the parameters can be provided while
+installing the chart. For example:
+
+```bash
+$ helm upgrade -i netappazureupboundio-snapshot-editor bytebuilders-ui/netappazureupboundio-snapshot-editor -n default --create-namespace --version=v0.4.18 --values values.yaml
+```
