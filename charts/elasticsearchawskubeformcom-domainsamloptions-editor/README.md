@@ -17,7 +17,7 @@ This chart deploys a DomainSAMLOptions Editor on a [Kubernetes](http://kubernete
 
 ## Prerequisites
 
-- Kubernetes 1.16+
+- Kubernetes 1.20+
 
 ## Installing the Chart
 
