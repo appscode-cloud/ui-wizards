@@ -17,7 +17,7 @@ This chart deploys a VaultPolicy Editor on a [Kubernetes](http://kubernetes.io) 
 
 ## Prerequisites
 
-- Kubernetes 1.16+
+- Kubernetes 1.20+
 
 ## Installing the Chart
 

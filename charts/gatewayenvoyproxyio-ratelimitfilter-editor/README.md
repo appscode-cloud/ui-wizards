@@ -17,7 +17,7 @@ This chart deploys a RateLimitFilter Editor on a [Kubernetes](http://kubernetes.
 
 ## Prerequisites
 
-- Kubernetes 1.16+
+- Kubernetes 1.20+
 
 ## Installing the Chart
 

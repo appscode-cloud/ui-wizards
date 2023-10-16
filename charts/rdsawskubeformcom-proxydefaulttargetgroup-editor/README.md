@@ -17,7 +17,7 @@ This chart deploys a ProxyDefaultTargetGroup Editor on a [Kubernetes](http://kub
 
 ## Prerequisites
 
-- Kubernetes 1.16+
+- Kubernetes 1.20+
 
 ## Installing the Chart
 

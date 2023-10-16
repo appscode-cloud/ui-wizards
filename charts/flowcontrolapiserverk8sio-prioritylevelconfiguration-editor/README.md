@@ -17,7 +17,7 @@ This chart deploys a PriorityLevelConfiguration Editor on a [Kubernetes](http://
 
 ## Prerequisites
 
-- Kubernetes 1.16+
+- Kubernetes 1.20+
 
 ## Installing the Chart
 
