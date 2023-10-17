@@ -219,7 +219,6 @@ function onEnabledFeaturesChange({
       }
       else{
         const resourceObject = getValue(model, "/resources") || [];
-        console.log(resourceValuePath,isStash)
         if(resourceValuePath === 'helmToolkitFluxcdIoHelmRelease_stash_presets' && !resourceObject.hasOwnProperty('helmToolkitFluxcdIoHelmRelease_stash_presets'))
         {
           commit("wizard/model$update", {
@@ -232,7 +231,7 @@ function onEnabledFeaturesChange({
                   ...resources?.[resourceValuePath]?.metadata?.labels,
                   "app.kubernetes.io/component": featureName,
                   "app.kubernetes.io/part-of": featureSet,
-                },
+                }
               },
               spec: {
                 ...resources?.[resourceValuePath]?.spec,
