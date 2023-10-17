@@ -219,8 +219,8 @@ function onEnabledFeaturesChange({
       }
       else{
         const resourceObject = getValue(model, "/resources") || [];
-
-        if(resourceObject.hasOwnProperty('helmToolkitFluxcdIoHelmRelease_stash_presets') && isStash)
+        console.log(resourceValuePath,isStash)
+        if(resourceValuePath === 'helmToolkitFluxcdIoHelmRelease_stash_presets' && !resourceObject.hasOwnProperty('helmToolkitFluxcdIoHelmRelease_stash_presets'))
         {
           commit("wizard/model$update", {
             path: `/resources/${resourceValuePath}`,
@@ -249,7 +249,7 @@ function onEnabledFeaturesChange({
             force: true,
           });
         }
-        else{
+        else if(resourceValuePath === 'helmToolkitFluxcdIoHelmRelease_kubestash_presets' && !resourceObject.hasOwnProperty('helmToolkitFluxcdIoHelmRelease_kubestash_presets')){
         commit("wizard/model$update", {
           path: `/resources/${resourceValuePath}`,
           value: {
@@ -282,14 +282,6 @@ function onEnabledFeaturesChange({
       commit("wizard/model$delete", `/resources/${resourceValuePath}`);
     }
   });
-
-  if(enabledFeatures.includes('stash-presets')){
-  commit("wizard/model$update", {	
-    path: `/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/stash/retentionPolicy`,	
-    value: { prune: false},	
-    force: true,	
-  });	
-}
 }
 
 let resources = {};
@@ -304,10 +296,13 @@ async function setReleaseNameAndNamespaceAndInitializeValues({
   model,
   getValue,
   axios,
-  setDiscriminatorValue
+  setDiscriminatorValue,
+  discriminator,
 }) {
   const modelResources = getValue(model, "/resources");
   resources = { ...modelResources };
+
+
 
   const isFeatureSetInstalled = getFeatureSetPropertyValue(
     storeGet,
@@ -337,6 +332,7 @@ async function setReleaseNameAndNamespaceAndInitializeValues({
     });
   }
   const featureSet = storeGet("/route/params/featureset");
+
   commit("wizard/model$update", {
     path: "/metadata/release",
     value: {
@@ -345,7 +341,7 @@ async function setReleaseNameAndNamespaceAndInitializeValues({
     },
     force: true,
   });
-
+  
   // delete extra values from model if the feature does not exist
   const allFeatures = storeGet("/cluster/features/result") || [];
   const allFeatureResourceValuePathNames = allFeatures.map((feature) =>
@@ -360,6 +356,21 @@ async function setReleaseNameAndNamespaceAndInitializeValues({
   });
 
   setDiscriminatorValue("/isResourceLoaded", true);
+  setTimeout(function() {
+    const retentionPolicy = getValue(model, "/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/stash/retentionPolicy");
+    if (retentionPolicy === undefined) {
+      if (isStash) {
+        commit("wizard/model$update", {	
+          path: `/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/stash/retentionPolicy`,	
+          value: { prune: false },	
+          force: true,	
+        });
+      }
+    }
+  }, 2000); // 2000 milliseconds = 2 seconds
+  
+
+
 }
 
 function fetchFeatureSetOptions({ storeGet }) {
@@ -441,6 +452,35 @@ function showBackendForm({ getValue, model, watchDependency ,commit}, value) {
 }
 
 async function initExistingAuthSecrets(ctx) {
+  setTimeout(function() {
+    const secretStorage = ctx.getValue(ctx.model, "/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/stash/authSecret");
+    if (secretStorage.hasOwnProperty('password')) {
+      ctx.setDiscriminatorValue("/useExistingAuthSecret", false);
+      const password = ctx.getValue(
+        ctx.model,
+        "/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/stash/authSecret/password"
+      );
+      ctx.commit("wizard/model$update", {	
+        path: `/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/stash/authSecret/password`,	
+        value: password,	
+        force: true,	
+      });	
+    }
+    else if(secretStorage.hasOwnProperty('name'))
+    {
+      const name = ctx.getValue(
+        ctx.model,
+        "/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/stash/authSecret/name"
+      );
+      ctx.commit("wizard/model$update", {	
+        path: `/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/stash/authSecret/name`,	
+        value: name,	
+        force: true,	
+      });	
+    }
+  }, 2000); // 1000 milliseconds = 1 second
+  
+
   ctx.setDiscriminatorValue("/isExistingAuthSecretsFetching", true);
   const secrets = await getResources(ctx, "core", "v1", "secrets", true);
   // set secrets;
@@ -450,12 +490,14 @@ async function initExistingAuthSecrets(ctx) {
   return true;
 }
 
-function onChoiseChange({discriminator, getValue, commit}) {
+function onChoiseChange({discriminator, getValue, commit,model}) {
   const useExistingAuthSecret = getValue(
     discriminator,
     "/useExistingAuthSecret"
   );
   // remove spec.authSecret
+    const auth = getValue(model, "/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/stash/authSecret");
+    if(!auth.hasOwnProperty('name') && !auth.hasOwnProperty('password')){
     commit("wizard/model$delete", "/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/stash/authSecret");
     if (useExistingAuthSecret) {
       // remove the auth from each backend
@@ -463,7 +505,7 @@ function onChoiseChange({discriminator, getValue, commit}) {
         commit("wizard/model$delete", `/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/stash/backend/${backend}/auth`);
       });
     }
-    
+  }
 }
 
 
@@ -492,7 +534,6 @@ function showExistingSecretSelection({
   );
   watchDependency("discriminator#/useExistingAuthSecret");
   watchDependency("discriminator#/isExistingAuthSecretsFetching");
-
   return !isExistingAuthSecretsFetching && useExistingAuthSecret;
 }
 
@@ -502,6 +543,7 @@ function showCreateSecretForm({ discriminator, getValue, watchDependency }) {
     "/useExistingAuthSecret"
   );
   watchDependency("discriminator#/useExistingAuthSecret");
+
   if(useExistingAuthSecret === undefined)
     return false
   return !useExistingAuthSecret;
@@ -629,10 +671,14 @@ function removeResource({commit}){
   }
 }
 
+
+
+
 return {
   hideThisElement,
   getFeatureSetDetails,
   getFeatureSetPropertyValue,
+  checkIsResourceLoaded,
   getFeatureSetDescription,
   isEqualToModelPathValue,
   getEnabledFeatures,
