@@ -12,7 +12,12 @@ async function checkIsFeatureEnabled(axios,feature){
   return status.enabled
 }
 
-function initBackupStatus({ model, getValue }) {
+async function initBackupStatus({ model, getValue ,axios}) {
+  
+  if( !(await checkIsFeatureEnabled(axios,'stash') && await checkIsFeatureEnabled(axios,'stash-presets')))
+  {
+    return false
+  }
   const tool =  getValue(model, "/tool");
   return tool === 'Stash';
 }
