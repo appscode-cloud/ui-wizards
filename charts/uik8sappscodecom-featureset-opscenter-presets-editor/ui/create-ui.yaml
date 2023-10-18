@@ -29,11 +29,7 @@ steps:
         if: hideThisElement
         type: input
       type: single-step-form
-    - discriminator:
-        useExistingAuthSecret:
-          default: true
-          type: boolean
-      elements:
+    - elements:
       - label:
           text: labels.repository.backend
         type: label-element
@@ -154,28 +150,8 @@ steps:
       - label:
           text: labels.radio.storage_secret
         type: label-element
-      - computed: initExistingAuthSecrets
-        onChange: onChoiseChange
-        options:
-        - text: Use Existing
-          value: true
-        - text: Create New
-          value: false
-        schema:
-          $ref: discriminator#/useExistingAuthSecret
-        type: radio
       - elements:
-        - allowUserDefinedOption: true
-          fetch: getExistingAuthSecrets
-          if: showExistingSecretSelection
-          label:
-            text: labels.repository.existingSecret
-          schema:
-            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/stash/properties/authSecret/properties/name
-          type: select
-          required: true
-        - if: showCreateSecretForm
-          label:
+        - label:
             text: labels.secret.password
           schema:
             $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/stash/properties/authSecret/properties/password
@@ -199,7 +175,7 @@ steps:
             type: input
             required: true
           type: single-step-form
-          if: showSecretForm|azure  
+          if: showBackendForm|azure  
         - elements:
           - label:
               text: labels.backend.swift.os_auth_token
@@ -286,7 +262,7 @@ steps:
             type: input
             required: true
           type: single-step-form
-          if: showSecretForm|swift
+          if: showBackendForm|swift
         - elements:
           - label:
               text: B2 Account ID
@@ -301,7 +277,7 @@ steps:
             type: input
             required: true
           type: single-step-form
-          if: showSecretForm|b2 
+          if: showBackendForm|b2 
         - elements:
           - label:
               text: labels.backend.gcs.project_id
@@ -317,7 +293,7 @@ steps:
             type: editor
             required: true
           type: single-step-form
-          if: showSecretForm|gcs
+          if: showBackendForm|gcs
         - elements:
           - label:
               text: labels.backend.s3.access_key_id
@@ -337,9 +313,8 @@ steps:
               $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/stash/properties/backend/properties/s3/properties/auth/properties/CA_CERT_DATA
             type: editor
           type: single-step-form
-          if: showSecretForm|s3
+          if:  showBackendForm|s3
         type: single-step-form
-        if: showCreateSecretForm
       - label:
           text: labels.backupConfiguration.retentionPolicy.title
         type: label-element

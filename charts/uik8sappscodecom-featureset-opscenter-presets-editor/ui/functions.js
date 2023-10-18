@@ -450,103 +450,7 @@ function showBackendForm({ getValue, model, watchDependency ,commit}, value) {
   return backendProvider === value;
 }
 
-async function initExistingAuthSecrets(ctx) {
-  setTimeout(function() {
-    const secretStorage = ctx.getValue(ctx.model, "/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/stash/authSecret");
-    if (secretStorage.hasOwnProperty('password')) {
-      ctx.setDiscriminatorValue("/useExistingAuthSecret", false);
-      const password = ctx.getValue(
-        ctx.model,
-        "/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/stash/authSecret/password"
-      );
-      ctx.commit("wizard/model$update", {	
-        path: `/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/stash/authSecret/password`,	
-        value: password,	
-        force: true,	
-      });	
-    }
-    else if(secretStorage.hasOwnProperty('name'))
-    {
-      const name = ctx.getValue(
-        ctx.model,
-        "/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/stash/authSecret/name"
-      );
-      ctx.commit("wizard/model$update", {	
-        path: `/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/stash/authSecret/name`,	
-        value: name,	
-        force: true,	
-      });	
-    }
-  }, 2000); // 1000 milliseconds = 1 second
-  
 
-  ctx.setDiscriminatorValue("/isExistingAuthSecretsFetching", true);
-  const secrets = await getResources(ctx, "core", "v1", "secrets", true);
-  // set secrets;
-  ctx.setDiscriminatorValue("/existingAuthSecrets", secrets);
-  ctx.setDiscriminatorValue("/isExistingAuthSecretsFetching", false);
-
-  return true;
-}
-
-function onChoiseChange({discriminator, getValue, commit,model}) {
-  const useExistingAuthSecret = getValue(
-    discriminator,
-    "/useExistingAuthSecret"
-  );
-  // remove spec.authSecret
-    const auth = getValue(model, "/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/stash/authSecret");
-    if(!auth.hasOwnProperty('name') && !auth.hasOwnProperty('password')){
-    commit("wizard/model$delete", "/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/stash/authSecret");
-    if (useExistingAuthSecret) {
-      // remove the auth from each backend
-      Object.keys(backendMap).forEach((backend) => {
-        commit("wizard/model$delete", `/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/stash/backend/${backend}/auth`);
-      });
-    }
-  }
-}
-
-
-async function getExistingAuthSecrets({
-  discriminator,
-  getValue,
-  watchDependency,
-}) {
-  const existingAuthSecrets = getValue(discriminator, "/existingAuthSecrets");
-  watchDependency("discriminator#/existingAuthSecrets");
-  return existingAuthSecrets;
-}
-
-function showExistingSecretSelection({
-  discriminator,
-  getValue,
-  watchDependency,
-}) {
-  const useExistingAuthSecret = getValue(
-    discriminator,
-    "/useExistingAuthSecret"
-  );
-  const isExistingAuthSecretsFetching = getValue(
-    discriminator,
-    "/isExistingAuthSecretsFetching"
-  );
-  watchDependency("discriminator#/useExistingAuthSecret");
-  watchDependency("discriminator#/isExistingAuthSecretsFetching");
-  return !isExistingAuthSecretsFetching && useExistingAuthSecret;
-}
-
-function showCreateSecretForm({ discriminator, getValue, watchDependency }) {
-  const useExistingAuthSecret = getValue(
-    discriminator,
-    "/useExistingAuthSecret"
-  );
-  watchDependency("discriminator#/useExistingAuthSecret");
-
-  if(useExistingAuthSecret === undefined)
-    return false
-  return !useExistingAuthSecret;
-}
 
 async function getResources(
   { axios, storeGet, model, getValue, watchDependency },
@@ -688,11 +592,6 @@ return {
   fetchFeatureSetOptions,
   onBackendProviderChange,
   showBackendForm,
-  initExistingAuthSecrets,
-  onChoiseChange,
-  getExistingAuthSecrets,
-  showExistingSecretSelection,
-  showCreateSecretForm,
   getResources,
   showSecretForm,
   valueExists,
