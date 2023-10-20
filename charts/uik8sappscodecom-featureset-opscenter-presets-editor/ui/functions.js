@@ -6,7 +6,7 @@ function getFeatureSetDetails(storeGet) {
   const featureSets = storeGet("/cluster/featureSets/result") || [];
   const featureSetName = storeGet("/route/params/featureset") || "";
   const featureSet = featureSets.find(
-    (item) => item?.metadata?.name === featureSetName,
+    (item) => item?.metadata?.name === featureSetName
   );
   return featureSet;
 }
@@ -22,7 +22,7 @@ function getFeatureSetDescription({ storeGet, getValue }) {
   const description = getFeatureSetPropertyValue(
     storeGet,
     getValue,
-    "/spec/description",
+    "/spec/description"
   );
   return description;
 }
@@ -44,7 +44,7 @@ function getFeaturePropertyValue(storeGet, name, getValue, path) {
 function isEqualToModelPathValue(
   { model, getValue, watchDependency },
   path,
-  value,
+  value
 ) {
   watchDependency(`model#${path}`);
 
@@ -62,7 +62,7 @@ function isFeatureRequired(storeGet, featureName) {
 function getEnabledFeatureInConfigureBtnClick(
   allFeatureSetFeature,
   isBlockLevel,
-  storeGet,
+  storeGet
 ) {
   const featureBlock = storeGet("/route/query/activeBlock") || "";
   const enabledFeatures = allFeatureSetFeature.filter((item) => {
@@ -83,7 +83,7 @@ function getEnabledFeatureInConfigureBtnClick(
 function getEnabledFeatureInEnableBtnClick(
   allFeatureSetFeature,
   isBlockLevel,
-  storeGet,
+  storeGet
 ) {
   // filter only (enabled + required + feature block feature)
   const featureBlock = storeGet("/route/query/activeBlock") || "";
@@ -127,14 +127,14 @@ function getEnabledFeatures({ storeGet }) {
       return getEnabledFeatureInConfigureBtnClick(
         allFeatureSetFeature,
         true,
-        storeGet,
+        storeGet
       );
     } else {
       // enable btn
       return getEnabledFeatureInEnableBtnClick(
         allFeatureSetFeature,
         true,
-        storeGet,
+        storeGet
       );
     }
   } else {
@@ -144,14 +144,14 @@ function getEnabledFeatures({ storeGet }) {
       return getEnabledFeatureInConfigureBtnClick(
         allFeatureSetFeature,
         false,
-        storeGet,
+        storeGet
       );
     } else {
       // enable btn
       return getEnabledFeatureInEnableBtnClick(
         allFeatureSetFeature,
         false,
-        storeGet,
+        storeGet
       );
     }
   }
@@ -211,38 +211,38 @@ function onEnabledFeaturesChange({
         storeGet,
         featureName,
         getValue,
-        "/spec/chart/name",
+        "/spec/chart/name"
       );
       const targetNamespace = getFeaturePropertyValue(
         storeGet,
         featureName,
         getValue,
-        "/spec/chart/namespace",
+        "/spec/chart/namespace"
       );
       const sourceRef = getFeaturePropertyValue(
         storeGet,
         featureName,
         getValue,
-        "/spec/chart/sourceRef",
+        "/spec/chart/sourceRef"
       );
       const version = getFeaturePropertyValue(
         storeGet,
         featureName,
         getValue,
-        "/spec/chart/version",
+        "/spec/chart/version"
       );
 
       const isEnabled = getFeaturePropertyValue(
         storeGet,
         featureName,
         getValue,
-        "/status/enabled",
+        "/status/enabled"
       );
       const isManaged = getFeaturePropertyValue(
         storeGet,
         featureName,
         getValue,
-        "/status/managed",
+        "/status/managed"
       );
 
       if (isEnabled && !isManaged) {
@@ -253,7 +253,7 @@ function onEnabledFeaturesChange({
           resourceValuePath ===
             "helmToolkitFluxcdIoHelmRelease_stash_presets" &&
           !resourceObject.hasOwnProperty(
-            "helmToolkitFluxcdIoHelmRelease_stash_presets",
+            "helmToolkitFluxcdIoHelmRelease_stash_presets"
           )
         ) {
           commit("wizard/model$update", {
@@ -286,7 +286,7 @@ function onEnabledFeaturesChange({
           resourceValuePath ===
             "helmToolkitFluxcdIoHelmRelease_kubestash_presets" &&
           !resourceObject.hasOwnProperty(
-            "helmToolkitFluxcdIoHelmRelease_kubestash_presets",
+            "helmToolkitFluxcdIoHelmRelease_kubestash_presets"
           )
         ) {
           commit("wizard/model$update", {
@@ -344,7 +344,7 @@ async function setReleaseNameAndNamespaceAndInitializeValues({
   const isFeatureSetInstalled = getFeatureSetPropertyValue(
     storeGet,
     getValue,
-    "/status/enabled",
+    "/status/enabled"
   );
 
   if (isFeatureSetInstalled) {
@@ -358,7 +358,7 @@ async function setReleaseNameAndNamespaceAndInitializeValues({
       version: chartVersion,
     } = getFeatureSetPropertyValue(storeGet, getValue, "/spec/chart");
     const { data } = await axios.get(
-      `/clusters/${owner}/${cluster}/helm/packageview/values?name=${chartName}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${chartVersion}&format=json`,
+      `/clusters/${owner}/${cluster}/helm/packageview/values?name=${chartName}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${chartVersion}&format=json`
     );
     const { resources: resourcesDefaultValues } = data || {};
 
@@ -382,7 +382,7 @@ async function setReleaseNameAndNamespaceAndInitializeValues({
   // delete extra values from model if the feature does not exist
   const allFeatures = storeGet("/cluster/features/result") || [];
   const allFeatureResourceValuePathNames = allFeatures.map((feature) =>
-    getResourceValuePathFromFeature(feature),
+    getResourceValuePathFromFeature(feature)
   );
   Object.keys(modelResources).forEach((modelResourcePath) => {
     if (!allFeatureResourceValuePathNames.includes(modelResourcePath)) {
@@ -396,7 +396,7 @@ async function setReleaseNameAndNamespaceAndInitializeValues({
   setTimeout(function () {
     const retentionPolicy = getValue(
       model,
-      "/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/stash/retentionPolicy",
+      "/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/stash/retentionPolicy"
     );
     if (retentionPolicy === undefined) {
       if (isStash) {
@@ -414,7 +414,7 @@ function fetchFeatureSetOptions({ storeGet }) {
   const features = storeGet("/cluster/features/result") || [];
   const featureSetName = storeGet("/route/params/featureset");
   const filteredFeatures = features.filter(
-    (item) => item?.spec?.featureSet === featureSetName,
+    (item) => item?.spec?.featureSet === featureSetName
   );
   const options = filteredFeatures.map((item) => {
     const { spec, metadata } = item || {};
@@ -458,7 +458,7 @@ function checkIsResourceLoaded({
 function onBackendProviderChange({ commit, getValue, model }) {
   const selectedBackendProvider = getValue(
     model,
-    "/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/stash/backend/provider",
+    "/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/stash/backend/provider"
   );
 
   // delete every other backend type from model  exect the selected one
@@ -466,7 +466,7 @@ function onBackendProviderChange({ commit, getValue, model }) {
     if (key !== selectedBackendProvider) {
       commit(
         "wizard/model$delete",
-        `/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/stash/backend/${key}`,
+        `/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/stash/backend/${key}`
       );
     }
   });
@@ -485,10 +485,10 @@ function onBackendProviderChange({ commit, getValue, model }) {
 function showBackendForm({ getValue, model, watchDependency, commit }, value) {
   const backendProvider = getValue(
     model,
-    "/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/stash/backend/provider",
+    "/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/stash/backend/provider"
   );
   watchDependency(
-    "model#/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/stash/backend/provider",
+    "model#/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/stash/backend/provider"
   );
 
   // delete every other backend type from model  exect the selected one
@@ -498,7 +498,7 @@ function showBackendForm({ getValue, model, watchDependency, commit }, value) {
       if (key !== backendProvider) {
         commit(
           "wizard/model$delete",
-          `/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/stash/backend/${key}`,
+          `/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/stash/backend/${key}`
         );
       }
     });
@@ -512,7 +512,7 @@ async function getResources(
   group,
   version,
   resource,
-  namespaced,
+  namespaced
 ) {
   const owner = storeGet("/route/params/user");
   const cluster = storeGet("/route/params/cluster");
@@ -532,7 +532,7 @@ async function getResources(
         }/${resource}`,
         {
           params: { filter: { items: { metadata: { name: null } } } },
-        },
+        }
       );
 
       const resources = (resp && resp.data && resp.data.items) || [];
@@ -595,19 +595,19 @@ const backendMap = {
 
 function showSecretForm(
   { model, getValue, watchDependency, discriminator },
-  value,
+  value
 ) {
   const useExistingAuthSecret = getValue(
     discriminator,
-    "/useExistingAuthSecret",
+    "/useExistingAuthSecret"
   );
   if (useExistingAuthSecret === undefined) return false;
   const backendProvider = getValue(
     model,
-    "/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/stash/backend/provider",
+    "/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/stash/backend/provider"
   );
   watchDependency(
-    "model#/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/stash/backend/provider",
+    "model#/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/stash/backend/provider"
   );
   watchDependency("discriminator#/useExistingAuthSecret");
 
@@ -631,7 +631,7 @@ function removeResource({ commit }) {
     setTimeout(function () {
       commit(
         "wizard/model$delete",
-        "/resources/helmToolkitFluxcdIoHelmRelease_stash_presets",
+        "/resources/helmToolkitFluxcdIoHelmRelease_stash_presets"
       );
     }, 1000);
   }

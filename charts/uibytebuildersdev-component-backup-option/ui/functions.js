@@ -1,6 +1,6 @@
 async function checkIsFeatureEnabled(axios, feature) {
   const resp = await axios.get(
-    `/clusters/appscode/console-demo-linode/proxy/ui.k8s.appscode.com/v1alpha1/features/${feature}`,
+    `/clusters/appscode/console-demo-linode/proxy/ui.k8s.appscode.com/v1alpha1/features/${feature}`
   );
   const status = resp.data.status;
 
@@ -30,7 +30,6 @@ function onBackupStatusChange({ discriminator, getValue, commit }) {
     value: status ? "Stash" : "",
     force: true,
   });
-  // updateModelValue("/tool", status ? 'Stash' : '')
 }
 
 async function stashEnabled({ axios }) {
