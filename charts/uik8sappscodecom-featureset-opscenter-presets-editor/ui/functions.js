@@ -52,21 +52,27 @@ function isEqualToModelPathValue(
   return modelValue === value;
 }
 
-function isFeatureRequired(storeGet,featureName) {
+function isFeatureRequired(storeGet, featureName) {
   const featureSet = getFeatureSetDetails(storeGet);
   const requiredFeatures = featureSet?.spec?.requiredFeatures || [];
   const isRequired = requiredFeatures.includes(featureName);
   return isRequired;
 }
 
-function getEnabledFeatureInConfigureBtnClick(allFeatureSetFeature, isBlockLevel, storeGet){   
+function getEnabledFeatureInConfigureBtnClick(
+  allFeatureSetFeature,
+  isBlockLevel,
+  storeGet
+) {
   const featureBlock = storeGet("/route/query/activeBlock") || "";
   const enabledFeatures = allFeatureSetFeature.filter((item) => {
     const featureName = item?.metadata?.name;
     return (
       item?.status?.enabled ||
       isFeatureRequired(storeGet, featureName) ||
-      (isBlockLevel && item?.spec?.featureBlock === featureBlock && item?.spec?.recommended)
+      (isBlockLevel &&
+        item?.spec?.featureBlock === featureBlock &&
+        item?.spec?.recommended)
     );
   });
   const enabledFeatureNames =
@@ -74,19 +80,23 @@ function getEnabledFeatureInConfigureBtnClick(allFeatureSetFeature, isBlockLevel
   return enabledFeatureNames;
 }
 
-function getEnabledFeatureInEnableBtnClick(allFeatureSetFeature, isBlockLevel, storeGet){
+function getEnabledFeatureInEnableBtnClick(
+  allFeatureSetFeature,
+  isBlockLevel,
+  storeGet
+) {
   // filter only (enabled + required + feature block feature)
   const featureBlock = storeGet("/route/query/activeBlock") || "";
   const enabledFeatures = allFeatureSetFeature.filter((item) => {
     const featureName = item?.metadata?.name;
 
-    if(isBlockLevel){
+    if (isBlockLevel) {
       return (
         item?.status?.enabled ||
         isFeatureRequired(storeGet, featureName) ||
         item?.spec?.featureBlock === featureBlock
       );
-    }else{
+    } else {
       return (
         item?.status?.enabled ||
         item?.spec?.recommended ||
@@ -98,7 +108,6 @@ function getEnabledFeatureInEnableBtnClick(allFeatureSetFeature, isBlockLevel, s
     enabledFeatures.map((item) => item?.metadata?.name) || [];
   return enabledFeatureNames;
 }
-
 
 function getEnabledFeatures({ storeGet }) {
   const allFeatures = storeGet("/cluster/features/result") || [];
@@ -115,60 +124,86 @@ function getEnabledFeatures({ storeGet }) {
     //feature block level
     if (configureMode) {
       // configure btn
-      return getEnabledFeatureInConfigureBtnClick(allFeatureSetFeature, true, storeGet);
+      return getEnabledFeatureInConfigureBtnClick(
+        allFeatureSetFeature,
+        true,
+        storeGet
+      );
     } else {
       // enable btn
-      return getEnabledFeatureInEnableBtnClick(allFeatureSetFeature, true, storeGet)
+      return getEnabledFeatureInEnableBtnClick(
+        allFeatureSetFeature,
+        true,
+        storeGet
+      );
     }
   } else {
     // feature set level
     if (configureMode) {
       // configure btn
-      return getEnabledFeatureInConfigureBtnClick(allFeatureSetFeature, false, storeGet);
+      return getEnabledFeatureInConfigureBtnClick(
+        allFeatureSetFeature,
+        false,
+        storeGet
+      );
     } else {
       // enable btn
-      return getEnabledFeatureInEnableBtnClick(allFeatureSetFeature, false, storeGet)
+      return getEnabledFeatureInEnableBtnClick(
+        allFeatureSetFeature,
+        false,
+        storeGet
+      );
     }
   }
 }
 
-function disableFeatures({getValue, storeGet, itemCtx, discriminator,watchDependency }) {
-
-  watchDependency("discriminator#/isResourceLoaded")
+function disableFeatures({
+  getValue,
+  storeGet,
+  itemCtx,
+  discriminator,
+  watchDependency,
+}) {
+  watchDependency("discriminator#/isResourceLoaded");
 
   const isResourceLoaded = getValue(discriminator, "/isResourceLoaded");
-  if(!isResourceLoaded) return true; 
+  if (!isResourceLoaded) return true;
 
   const featureName = itemCtx.value;
   const featureSet = getFeatureSetDetails(storeGet);
   const requiredFeatures = featureSet?.spec?.requiredFeatures || [];
-
   if (requiredFeatures.includes(featureName)) return true;
   else return false;
 }
 
 function getResourceValuePathFromFeature(feature) {
   const featureName = feature?.metadata?.name || "";
-  const underscoredFeatureName = featureName
-    .toLowerCase()
-    .replaceAll("-", "_");
+  const underscoredFeatureName = featureName.toLowerCase().replaceAll("-", "_");
   const resourceValuePath = `helmToolkitFluxcdIoHelmRelease_${underscoredFeatureName}`;
   return resourceValuePath;
 }
+
+let isStash = false;
 
 function onEnabledFeaturesChange({
   discriminator,
   getValue,
   commit,
   storeGet,
+  model,
 }) {
   const enabledFeatures = getValue(discriminator, "/enabledFeatures") || [];
 
+  if (enabledFeatures.includes("stash-presets")) {
+    isStash = true;
+  } else {
+    isStash = false;
+  }
   const allFeatures = storeGet("/cluster/features/result") || [];
 
   allFeatures.forEach((item) => {
     const featureName = item?.metadata?.name || "";
-    const resourceValuePath = getResourceValuePathFromFeature(item)
+    const resourceValuePath = getResourceValuePathFromFeature(item);
 
     if (enabledFeatures.includes(featureName)) {
       const featureSet = storeGet("/route/params/featureset") || "";
@@ -197,42 +232,91 @@ function onEnabledFeaturesChange({
         "/spec/chart/version"
       );
 
-      const isEnabled = getFeaturePropertyValue(storeGet, featureName, getValue, '/status/enabled')
-      const isManaged = getFeaturePropertyValue(storeGet, featureName, getValue, '/status/managed')
+      const isEnabled = getFeaturePropertyValue(
+        storeGet,
+        featureName,
+        getValue,
+        "/status/enabled"
+      );
+      const isManaged = getFeaturePropertyValue(
+        storeGet,
+        featureName,
+        getValue,
+        "/status/managed"
+      );
 
-
-      if (isEnabled && (!isManaged)) {
+      if (isEnabled && !isManaged) {
         commit("wizard/model$delete", `/resources/${resourceValuePath}`);
-      }
-      else {
-        commit("wizard/model$update", {
-          path: `/resources/${resourceValuePath}`,
-          value: {
-            ...resources?.[resourceValuePath],
-            metadata: {
-              ...resources?.[resourceValuePath]?.metadata,
-              labels: {
-                ...resources?.[resourceValuePath]?.metadata?.labels,
-                "app.kubernetes.io/component": featureName,
-                "app.kubernetes.io/part-of": featureSet,
-              },
-            },
-            spec: {
-              ...resources?.[resourceValuePath]?.spec,
-              chart: {
-                spec: {
-                  chart,
-                  sourceRef,
-                  version,
+      } else {
+        const resourceObject = getValue(model, "/resources") || [];
+        if (
+          resourceValuePath ===
+            "helmToolkitFluxcdIoHelmRelease_stash_presets" &&
+          !resourceObject.hasOwnProperty(
+            "helmToolkitFluxcdIoHelmRelease_stash_presets"
+          )
+        ) {
+          commit("wizard/model$update", {
+            path: `/resources/${resourceValuePath}`,
+            value: {
+              ...resources?.[resourceValuePath],
+              metadata: {
+                ...resources?.[resourceValuePath]?.metadata,
+                labels: {
+                  ...resources?.[resourceValuePath]?.metadata?.labels,
+                  "app.kubernetes.io/component": featureName,
+                  "app.kubernetes.io/part-of": featureSet,
                 },
               },
-              targetNamespace,
+              spec: {
+                ...resources?.[resourceValuePath]?.spec,
+                chart: {
+                  spec: {
+                    chart,
+                    sourceRef,
+                    version,
+                  },
+                },
+                targetNamespace,
+              },
             },
-          },
-          force: true,
-        });
+            force: true,
+          });
+        } else if (
+          resourceValuePath ===
+            "helmToolkitFluxcdIoHelmRelease_kubestash_presets" &&
+          !resourceObject.hasOwnProperty(
+            "helmToolkitFluxcdIoHelmRelease_kubestash_presets"
+          )
+        ) {
+          commit("wizard/model$update", {
+            path: `/resources/${resourceValuePath}`,
+            value: {
+              ...resources?.[resourceValuePath],
+              metadata: {
+                ...resources?.[resourceValuePath]?.metadata,
+                labels: {
+                  ...resources?.[resourceValuePath]?.metadata?.labels,
+                  "app.kubernetes.io/component": featureName,
+                  "app.kubernetes.io/part-of": featureSet,
+                },
+              },
+              spec: {
+                ...resources?.[resourceValuePath]?.spec,
+                chart: {
+                  spec: {
+                    chart,
+                    sourceRef,
+                    version,
+                  },
+                },
+                targetNamespace,
+              },
+            },
+            force: true,
+          });
+        }
       }
-
     } else {
       commit("wizard/model$delete", `/resources/${resourceValuePath}`);
     }
@@ -251,7 +335,8 @@ async function setReleaseNameAndNamespaceAndInitializeValues({
   model,
   getValue,
   axios,
-  setDiscriminatorValue
+  setDiscriminatorValue,
+  discriminator,
 }) {
   const modelResources = getValue(model, "/resources");
   resources = { ...modelResources };
@@ -284,6 +369,7 @@ async function setReleaseNameAndNamespaceAndInitializeValues({
     });
   }
   const featureSet = storeGet("/route/params/featureset");
+
   commit("wizard/model$update", {
     path: "/metadata/release",
     value: {
@@ -307,42 +393,247 @@ async function setReleaseNameAndNamespaceAndInitializeValues({
   });
 
   setDiscriminatorValue("/isResourceLoaded", true);
+  setTimeout(function () {
+    const retentionPolicy = getValue(
+      model,
+      "/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/stash/retentionPolicy"
+    );
+    if (retentionPolicy === undefined) {
+      if (isStash) {
+        commit("wizard/model$update", {
+          path: `/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/stash/retentionPolicy`,
+          value: { prune: false },
+          force: true,
+        });
+      }
+    }
+  }, 2000); // 2000 milliseconds = 2 seconds
 }
 
 function fetchFeatureSetOptions({ storeGet }) {
-  const features = storeGet('/cluster/features/result') || []
-  const featureSetName = storeGet('/route/params/featureset')
-  const filteredFeatures = features.filter(item => item?.spec?.featureSet === featureSetName)
-  const options = filteredFeatures.map(item => {
-    const { spec, metadata } = item || {}
-    const { title, description, required } = spec || {}
-    const { name } = metadata || {}
+  const features = storeGet("/cluster/features/result") || [];
+  const featureSetName = storeGet("/route/params/featureset");
+  const filteredFeatures = features.filter(
+    (item) => item?.spec?.featureSet === featureSetName
+  );
+  const options = filteredFeatures.map((item) => {
+    const { spec, metadata } = item || {};
+    const { title, description, required } = spec || {};
+    const { name } = metadata || {};
     return {
       text: title,
       value: name,
       description: description,
       statusTag: {
-        text: required ? 'Required' : ''
-      }
-    }
-  })
+        text: required ? "Required" : "",
+      },
+    };
+  });
 
-  return options || []
+  return options || [];
 }
 
 // this element is is used only to catch discriminator value
 // It is not used in create-ui to get or store value
-function hideThisElement () {
-  return false
+function hideThisElement() {
+  return false;
 }
 
 // this computed's main purpose is to watch isResourceLoaded flag
 // and fire the onEnabledFeatureChange function when it's true
-function checkIsResourceLoaded ({commit, storeGet,watchDependency,getValue,discriminator }) {
-  watchDependency("discriminator#/isResourceLoaded")
+function checkIsResourceLoaded({
+  commit,
+  storeGet,
+  watchDependency,
+  getValue,
+  discriminator,
+}) {
+  watchDependency("discriminator#/isResourceLoaded");
   const isResourceLoaded = getValue(discriminator, "/isResourceLoaded");
-  if(isResourceLoaded){
-    onEnabledFeaturesChange({discriminator,getValue, commit, storeGet})
+  if (isResourceLoaded) {
+    onEnabledFeaturesChange({ discriminator, getValue, commit, storeGet });
+  }
+}
+
+function onBackendProviderChange({ commit, getValue, model }) {
+  const selectedBackendProvider = getValue(
+    model,
+    "/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/stash/backend/provider"
+  );
+
+  // delete every other backend type from model  exect the selected one
+  Object.keys(backendMap).forEach((key) => {
+    if (key !== selectedBackendProvider) {
+      commit(
+        "wizard/model$delete",
+        `/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/stash/backend/${key}`
+      );
+    }
+  });
+
+  // set the selectedBackend type object in
+
+  if (!valueExists(model, getValue, `/${selectedBackendProvider}`)) {
+    commit("wizard/model$update", {
+      path: `/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/stash/backend/${selectedBackendProvider}`,
+      value: {},
+      force: true,
+    });
+  }
+}
+
+function showBackendForm({ getValue, model, watchDependency, commit }, value) {
+  const backendProvider = getValue(
+    model,
+    "/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/stash/backend/provider"
+  );
+  watchDependency(
+    "model#/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/stash/backend/provider"
+  );
+
+  // delete every other backend type from model  exect the selected one
+
+  setTimeout(() => {
+    Object.keys(backendMap).forEach((key) => {
+      if (key !== backendProvider) {
+        commit(
+          "wizard/model$delete",
+          `/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/stash/backend/${key}`
+        );
+      }
+    });
+  }, 1000);
+
+  return backendProvider === value;
+}
+
+async function getResources(
+  { axios, storeGet, model, getValue, watchDependency },
+  group,
+  version,
+  resource,
+  namespaced
+) {
+  const owner = storeGet("/route/params/user");
+  const cluster = storeGet("/route/params/cluster");
+  let namespace = "";
+  if (namespaced) {
+    namespace = getValue(model, "/metadata/release/namespace");
+    watchDependency("model#/metadata/release/namespace");
+  }
+
+  if (!namespaced || namespace) {
+    // call api if resource is either not namespaced
+    // or namespaced and user has selected a namespace
+    try {
+      const resp = await axios.get(
+        `/clusters/${owner}/${cluster}/proxy/${group}/${version}${
+          namespace ? "/namespaces/" + namespace : ""
+        }/${resource}`,
+        {
+          params: { filter: { items: { metadata: { name: null } } } },
+        }
+      );
+
+      const resources = (resp && resp.data && resp.data.items) || [];
+
+      resources.map((item) => {
+        const name = (item.metadata && item.metadata.name) || "";
+        item.text = name;
+        item.value = name;
+        return true;
+      });
+      return resources;
+    } catch (e) {
+      console.log(e);
+      return [];
+    }
+  } else return [];
+}
+
+const backendMap = {
+  azure: {
+    spec: { container: "", maxConnections: 0, prefix: "" },
+    auth: { AZURE_ACCOUNT_KEY: "", AZURE_ACCOUNT_NAME: "" },
+  },
+  b2: {
+    spec: { bucket: "", prefix: "", maxConnections: 0 },
+    auth: { B2_ACCOUNT_ID: "", B2_ACCOUNT_KEY: "" },
+  },
+  gcs: {
+    spec: { bucket: "", prefix: "", maxConnections: 0 },
+    auth: { GOOGLE_PROJECT_ID: "", GOOGLE_SERVICE_ACCOUNT_JSON_KEY: "" },
+  },
+  s3: {
+    spec: { endpoint: "", bucket: "", prefix: "", region: "" },
+    auth: {
+      AWS_ACCESS_KEY_ID: "",
+      AWS_SECRET_ACCESS_KEY: "",
+      CA_CERT_DATA: "",
+    },
+  },
+  swift: {
+    spec: { container: "", prefix: "" },
+    auth: {
+      OS_AUTH_TOKEN: "",
+      OS_AUTH_URL: "",
+      OS_PASSWORD: "",
+      OS_PROJECT_DOMAIN_NAME: "",
+      OS_PROJECT_NAME: "",
+      OS_REGION_NAME: "",
+      OS_STORAGE_URL: "",
+      OS_TENANT_ID: "",
+      OS_TENANT_NAME: "",
+      OS_USERNAME: "",
+      OS_USER_DOMAIN_NAME: "",
+      ST_AUTH: "",
+      ST_KEY: "",
+      ST_USER: "",
+    },
+  },
+};
+
+function showSecretForm(
+  { model, getValue, watchDependency, discriminator },
+  value
+) {
+  const useExistingAuthSecret = getValue(
+    discriminator,
+    "/useExistingAuthSecret"
+  );
+  if (useExistingAuthSecret === undefined) return false;
+  const backendProvider = getValue(
+    model,
+    "/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/stash/backend/provider"
+  );
+  watchDependency(
+    "model#/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/stash/backend/provider"
+  );
+  watchDependency("discriminator#/useExistingAuthSecret");
+
+  return backendProvider === value && !useExistingAuthSecret;
+}
+
+function valueExists(value, getValue, path) {
+  const val = getValue(value, path);
+  if (val) return true;
+  else return false;
+}
+
+function isPresetEnabled({ getValue, watchDependency, model }) {
+  watchDependency("model#/resources");
+
+  return isStash;
+}
+
+function removeResource({ commit }) {
+  if (!isStash) {
+    setTimeout(function () {
+      commit(
+        "wizard/model$delete",
+        "/resources/helmToolkitFluxcdIoHelmRelease_stash_presets"
+      );
+    }, 1000);
   }
 }
 
@@ -350,6 +641,7 @@ return {
   hideThisElement,
   getFeatureSetDetails,
   getFeatureSetPropertyValue,
+  checkIsResourceLoaded,
   getFeatureSetDescription,
   isEqualToModelPathValue,
   getEnabledFeatures,
@@ -358,4 +650,11 @@ return {
   returnFalse,
   setReleaseNameAndNamespaceAndInitializeValues,
   fetchFeatureSetOptions,
+  onBackendProviderChange,
+  showBackendForm,
+  getResources,
+  showSecretForm,
+  valueExists,
+  isPresetEnabled,
+  removeResource,
 };
