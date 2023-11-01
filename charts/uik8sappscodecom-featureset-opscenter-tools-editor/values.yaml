@@ -9,16 +9,16 @@ metadata:
     name: RELEASE-NAME
     namespace: default
 resources:
-  helmToolkitFluxcdIoHelmRelease_kube_ui_server: # +doc-gen:break
+  helmToolkitFluxcdIoHelmRelease_sidekick: # +doc-gen:break
     apiVersion: helm.toolkit.fluxcd.io/v2beta1
     kind: HelmRelease
     metadata:
-      name: kube-ui-server
+      name: sidekick
       namespace: kubeops
     spec:
       chart:
         spec:
-          chart: kube-ui-server
+          chart: sidekick
           sourceRef:
             kind: HelmRepository
             name: appscode-charts-oci
@@ -30,7 +30,7 @@ resources:
         remediation:
           retries: -1
       interval: 5m
-      releaseName: kube-ui-server
+      releaseName: sidekick
       storageNamespace: kubeops
       targetNamespace: kubeops
       timeout: 30m
@@ -38,16 +38,16 @@ resources:
         crds: CreateReplace
         remediation:
           retries: -1
-  helmToolkitFluxcdIoHelmRelease_license_proxyserver: # +doc-gen:break
+  helmToolkitFluxcdIoHelmRelease_supervisor: # +doc-gen:break
     apiVersion: helm.toolkit.fluxcd.io/v2beta1
     kind: HelmRelease
     metadata:
-      name: license-proxyserver
+      name: supervisor
       namespace: kubeops
     spec:
       chart:
         spec:
-          chart: license-proxyserver
+          chart: supervisor
           sourceRef:
             kind: HelmRepository
             name: appscode-charts-oci
@@ -59,7 +59,7 @@ resources:
         remediation:
           retries: -1
       interval: 5m
-      releaseName: license-proxyserver
+      releaseName: supervisor
       storageNamespace: kubeops
       targetNamespace: kubeops
       timeout: 30m
