@@ -42,6 +42,39 @@ resources:
           retries: -1
       values:
         installCRDs: true
+  helmToolkitFluxcdIoHelmRelease_cert_manager_csi_driver_cacerts: # +doc-gen:break
+    apiVersion: helm.toolkit.fluxcd.io/v2beta1
+    kind: HelmRelease
+    metadata:
+      labels:
+        ace.appscode.com/feature: cert-manager-csi-driver-cacerts
+      name: cert-manager-csi-driver-cacerts
+      namespace: kubeops
+    spec:
+      chart:
+        spec:
+          chart: cert-manager-csi-driver-cacerts
+          sourceRef:
+            kind: HelmRepository
+            name: appscode-charts-oci
+            namespace: kubeops
+          version: v2023.10.1
+      install:
+        crds: CreateReplace
+        createNamespace: true
+        remediation:
+          retries: -1
+      interval: 5m
+      releaseName: cert-manager-csi-driver-cacerts
+      storageNamespace: cert-manager
+      targetNamespace: cert-manager
+      timeout: 30m
+      upgrade:
+        crds: CreateReplace
+        remediation:
+          retries: -1
+      values:
+        installCRDs: true
   helmToolkitFluxcdIoHelmRelease_falco: # +doc-gen:break
     apiVersion: helm.toolkit.fluxcd.io/v2beta1
     kind: HelmRelease
