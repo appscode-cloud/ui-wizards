@@ -21,9 +21,9 @@ resources:
           chart: kubestash
           sourceRef:
             kind: HelmRepository
-            name: kubestash
+            name: appscode-charts-oci
             namespace: kubeops
-          version: v2023.04.14
+          version: v2023.10.30-rc.0
       install:
         crds: CreateReplace
         createNamespace: true
@@ -53,7 +53,7 @@ resources:
           chart: stash
           sourceRef:
             kind: HelmRepository
-            name: stashed
+            name: appscode-charts-oci
             namespace: kubeops
           version: v2023.10.9
       install:
@@ -73,6 +73,32 @@ resources:
       values:
         features:
           enterprise: true
+        global:
+          license: |
+            -----BEGIN CERTIFICATE-----
+            MIIEEDCCAvigAwIBAgIIQqRL8fs8UCwwDQYJKoZIhvcNAQELBQAwJTEWMBQGA1UE
+            ChMNQXBwc0NvZGUgSW5jLjELMAkGA1UEAxMCY2EwHhcNMjMxMDI3MjM0OTI0WhcN
+            MjMxMTEwMjM0OTI0WjCB2TEOMAwGA1UEBhMFc3Rhc2gxEzARBgNVBAgTCmVudGVy
+            cHJpc2UxaDAWBgNVBAoTD3N0YXNoLWNvbW11bml0eTAXBgNVBAoTEGt1YmVkYi1l
+            eHQtc3Rhc2gwFwYDVQQKExBzdGFzaC1lbnRlcnByaXNlMBwGA1UEChMVcGFub3B0
+            aWNvbi1lbnRlcnByaXNlMRkwFwYDVQQLExBzdGFzaC1lbnRlcnByaXNlMS0wKwYD
+            VQQDEyQ2MDE0ZTg4MS0xZjJhLTRhNWUtOTA2Zi1iZWMwMTdhMDVlYzEwggEiMA0G
+            CSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDlr+C5Ao1r/+MQ/sAdPOa3e/V2Falb
+            MteXYpd6TjcT2ZBFEvJ5IZZlaTX8q16kIFOJmxVDZg64tBdAN1zGP2JZHCsVqLpS
+            EeTLrcJ9/IQzKST1O0YGEV08mbj8YH+He/2gmz+do+rDvIOEN6D2UyypwBgw23bI
+            cdyACw5MUP3x21Bg3VaGDyahdZ2JBLu5Vd39KHCDm9PXPwsyx/8ac6OmcOFVzppf
+            cdN+oINRMMMFMXVkZ/OJNbvLY/9O/tE88K6ocS3qXNv3+sFALAYXkKuVjw/ODXiS
+            HvpITWBPZI6+j7MGt5MB+mejxf6lFPmcjnfmUoDZikant6LbecWLNQozAgMBAAGj
+            gY4wgYswDgYDVR0PAQH/BAQDAgWgMBMGA1UdJQQMMAoGCCsGAQUFBwMCMGQGA1Ud
+            EQRdMFuCJDYwMTRlODgxLTFmMmEtNGE1ZS05MDZmLWJlYzAxN2EwNWVjMYEfVGFt
+            YWwgU2FoYSA8dGFtYWxAYXBwc2NvZGUuY29tPoESdGFtYWxAYXBwc2NvZGUuY29t
+            MA0GCSqGSIb3DQEBCwUAA4IBAQBYqAFa8tG0mpeRBTQ7orRxeobOpsiAWs8kjPOm
+            zar5vm6PZ8mnK2AOz4FAay7HoUEHGd0fhGWUJeIG/kRE2tmDaaKldULQm5SLr/c5
+            dwxCLKvHQR9Kq8bLLtnPaWvDeZfQemTZ/lTf2izTiIiJ3yVUGjHN2y8EotLFzcfr
+            HZrFwbtWwq3pN6sF7El3Roj9RHKF4mxhlzBZTezJ+eSbt0V5mnp2fraY+o9Jk8QB
+            BiJTcwAI7KsK1U+zfoeyXVLfDNvBJMngKxlm/W9dRffN6xV2IQd0aeS8wnyzWi2D
+            Iwe0khcAFYoLVEoX1C65T7KzHdlNSm0SZx+q0SAZdTjW/DPb
+            -----END CERTIFICATE-----
   helmToolkitFluxcdIoHelmRelease_stash_opscenter: # +doc-gen:break
     apiVersion: helm.toolkit.fluxcd.io/v2beta1
     kind: HelmRelease
@@ -85,7 +111,7 @@ resources:
           chart: stash-opscenter
           sourceRef:
             kind: HelmRepository
-            name: stashed
+            name: appscode-charts-oci
             namespace: kubeops
           version: v2023.10.9
       install:
