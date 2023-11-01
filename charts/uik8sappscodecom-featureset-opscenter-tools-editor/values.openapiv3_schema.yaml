@@ -36,7 +36,7 @@ properties:
     type: object
   resources:
     properties:
-      helmToolkitFluxcdIoHelmRelease_kube_ui_server:
+      helmToolkitFluxcdIoHelmRelease_sidekick:
         properties:
           apiVersion:
             type: string
@@ -756,56 +756,8 @@ properties:
                             type: array
                         type: object
                     type: object
-                  annotations:
-                    additionalProperties:
-                      type: string
-                    type: object
-                  apiserver:
-                    properties:
-                      groupPriorityMinimum:
-                        format: int32
-                        type: integer
-                      healthcheck:
-                        properties:
-                          enabled:
-                            type: boolean
-                        type: object
-                      servingCerts:
-                        properties:
-                          caCrt:
-                            type: string
-                          generate:
-                            type: boolean
-                          serverCrt:
-                            type: string
-                          serverKey:
-                            type: string
-                        required:
-                        - generate
-                        type: object
-                      useKubeapiserverFqdnForAks:
-                        type: boolean
-                      versionPriority:
-                        format: int32
-                        type: integer
-                    required:
-                    - groupPriorityMinimum
-                    - healthcheck
-                    - servingCerts
-                    - useKubeapiserverFqdnForAks
-                    - versionPriority
-                    type: object
-                  criticalAddon:
-                    type: boolean
                   fullnameOverride:
                     type: string
-                  helmRepositories:
-                    properties:
-                      create:
-                        type: boolean
-                    required:
-                    - create
-                    type: object
                   image:
                     properties:
                       registry:
@@ -905,11 +857,6 @@ properties:
                     items:
                       type: string
                     type: array
-                  kubeconfigSecretName:
-                    type: string
-                  logLevel:
-                    format: int32
-                    type: integer
                   monitoring:
                     properties:
                       agent:
@@ -1003,54 +950,9 @@ properties:
                             type: string
                         type: object
                     type: object
-                  prometheus:
-                    properties:
-                      address:
-                        type: string
-                      basicAuth:
-                        properties:
-                          password:
-                            type: string
-                          username:
-                            type: string
-                        required:
-                        - password
-                        - username
-                        type: object
-                      bearerToken:
-                        type: string
-                      proxyURL:
-                        type: string
-                      tls:
-                        properties:
-                          ca:
-                            type: string
-                          cert:
-                            type: string
-                          insecureSkipTLSVerify:
-                            type: boolean
-                          key:
-                            type: string
-                          serverName:
-                            type: string
-                        required:
-                        - ca
-                        - cert
-                        - insecureSkipTLSVerify
-                        - key
-                        - serverName
-                        type: object
-                    required:
-                    - address
-                    - basicAuth
-                    - bearerToken
-                    - proxyURL
-                    - tls
-                    type: object
                   registryFQDN:
                     type: string
                   replicaCount:
-                    format: int32
                     type: integer
                   serviceAccount:
                     properties:
@@ -1082,13 +984,9 @@ properties:
                       type: object
                     type: array
                 required:
-                - apiserver
-                - helmRepositories
                 - image
                 - imagePullPolicy
-                - kubeconfigSecretName
                 - monitoring
-                - prometheus
                 - registryFQDN
                 - replicaCount
                 - serviceAccount
@@ -1125,7 +1023,7 @@ properties:
             - interval
             type: object
         type: object
-      helmToolkitFluxcdIoHelmRelease_license_proxyserver:
+      helmToolkitFluxcdIoHelmRelease_supervisor:
         properties:
           apiVersion:
             type: string
@@ -1851,8 +1749,11 @@ properties:
                     type: object
                   apiserver:
                     properties:
+                      enableMutatingWebhook:
+                        type: boolean
+                      enableValidatingWebhook:
+                        type: boolean
                       groupPriorityMinimum:
-                        format: int32
                         type: integer
                       healthcheck:
                         properties:
@@ -1875,21 +1776,20 @@ properties:
                       useKubeapiserverFqdnForAks:
                         type: boolean
                       versionPriority:
-                        format: int32
                         type: integer
                     required:
+                    - enableMutatingWebhook
+                    - enableValidatingWebhook
                     - groupPriorityMinimum
                     - healthcheck
                     - servingCerts
                     - useKubeapiserverFqdnForAks
                     - versionPriority
                     type: object
+                  beforeDeadlineDuration:
+                    type: string
                   criticalAddon:
                     type: boolean
-                  encodedLicenses:
-                    additionalProperties:
-                      type: string
-                    type: object
                   fullnameOverride:
                     type: string
                   image:
@@ -1991,12 +1891,10 @@ properties:
                     items:
                       type: string
                     type: array
-                  licenses:
-                    additionalProperties:
-                      type: string
-                    type: object
                   logLevel:
                     format: int32
+                    type: integer
+                  maxConcurrentReconcile:
                     type: integer
                   monitoring:
                     properties:
@@ -2022,16 +1920,6 @@ properties:
                   nodeSelector:
                     additionalProperties:
                       type: string
-                    type: object
-                  platform:
-                    properties:
-                      baseURL:
-                        type: string
-                      token:
-                        type: string
-                    required:
-                    - baseURL
-                    - token
                     type: object
                   podAnnotations:
                     additionalProperties:
@@ -2106,6 +1994,10 @@ properties:
                   replicaCount:
                     format: int32
                     type: integer
+                  requeueAfterDuration:
+                    type: string
+                  retryAfterDuration:
+                    type: string
                   serviceAccount:
                     properties:
                       annotations:
@@ -2137,12 +2029,15 @@ properties:
                     type: array
                 required:
                 - apiserver
+                - beforeDeadlineDuration
                 - image
                 - imagePullPolicy
+                - maxConcurrentReconcile
                 - monitoring
-                - platform
                 - registryFQDN
                 - replicaCount
+                - requeueAfterDuration
+                - retryAfterDuration
                 - serviceAccount
                 type: object
               valuesFrom:
