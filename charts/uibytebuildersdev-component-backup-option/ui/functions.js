@@ -43,7 +43,7 @@ async function stashEnabled({ axios,storeGet }) {
 }
 
 function getRequirements(){
-  return `To configure backup you need to enable the followings 
+  return `To configure backup you need to enable following features
   - ## **Stash**
   - ## **Stash Presets**`
 }
