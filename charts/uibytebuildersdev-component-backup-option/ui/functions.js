@@ -43,8 +43,9 @@ async function stashEnabled({ axios,storeGet }) {
 }
 
 function getRequirements(){
-  console.log('came here')
-   return 'By Enabling <code> Stash Preset </code> you can set it as backup for any datastore.To be able enable it you must need to enable <B> Stash </B>  & <B> Stash Presets </B>'
+  return `To configure backup you need to enable the followings 
+  - ## **Stash**
+  - ## **Stash Presets**`
 }
 
 
