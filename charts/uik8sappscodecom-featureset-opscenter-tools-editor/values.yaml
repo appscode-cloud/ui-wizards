@@ -9,12 +9,41 @@ metadata:
     name: RELEASE-NAME
     namespace: default
 resources:
+  helmToolkitFluxcdIoHelmRelease_config_syncer: # +doc-gen:break
+    apiVersion: helm.toolkit.fluxcd.io/v2beta1
+    kind: HelmRelease
+    metadata:
+      name: config-syncer
+      namespace: kubeops
+    spec:
+      chart:
+        spec:
+          chart: config-syncer
+          sourceRef:
+            kind: HelmRepository
+            name: appscode-charts-oci
+            namespace: kubeops
+          version: v0.14.2
+      install:
+        crds: CreateReplace
+        createNamespace: true
+        remediation:
+          retries: -1
+      interval: 5m
+      releaseName: config-syncer
+      storageNamespace: kubeops
+      targetNamespace: kubeops
+      timeout: 30m
+      upgrade:
+        crds: CreateReplace
+        remediation:
+          retries: -1
+      values:
+        mode: enterprise
   helmToolkitFluxcdIoHelmRelease_reloader: # +doc-gen:break
     apiVersion: helm.toolkit.fluxcd.io/v2beta1
     kind: HelmRelease
     metadata:
-      labels:
-        ace.appscode.com/feature: reloader
       name: reloader
       namespace: kubeops
     spec:
@@ -44,8 +73,6 @@ resources:
     apiVersion: helm.toolkit.fluxcd.io/v2beta1
     kind: HelmRelease
     metadata:
-      labels:
-        ace.appscode.com/feature: sidekick
       name: sidekick
       namespace: kubeops
     spec:
@@ -75,8 +102,6 @@ resources:
     apiVersion: helm.toolkit.fluxcd.io/v2beta1
     kind: HelmRelease
     metadata:
-      labels:
-        ace.appscode.com/feature: supervisor
       name: supervisor
       namespace: kubeops
     spec:
