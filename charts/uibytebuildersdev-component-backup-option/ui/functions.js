@@ -1,6 +1,9 @@
-async function checkIsFeatureEnabled(axios, feature) {
+async function checkIsFeatureEnabled(axios, feature,storeGet) {
+
+  const owner = storeGet("/route/params/user");
+  const cluster = storeGet("/route/params/cluster");
   const resp = await axios.get(
-    `/clusters/appscode/console-demo-linode/proxy/ui.k8s.appscode.com/v1alpha1/features/${feature}`
+    `/clusters/${owner}/${cluster}/proxy/ui.k8s.appscode.com/v1alpha1/features/${feature}`
   );
   const status = resp.data.status;
 
@@ -10,11 +13,11 @@ async function checkIsFeatureEnabled(axios, feature) {
   return status.enabled;
 }
 
-async function initBackupStatus({ model, getValue, axios }) {
+async function initBackupStatus({ model, getValue, axios,storeGet}) {
   if (
     !(
-      (await checkIsFeatureEnabled(axios, "stash")) &&
-      (await checkIsFeatureEnabled(axios, "stash-presets"))
+      (await checkIsFeatureEnabled(axios, "stash",storeGet)) &&
+      (await checkIsFeatureEnabled(axios, "stash-presets",storeGet))
     )
   ) {
     return false;
@@ -32,14 +35,23 @@ function onBackupStatusChange({ discriminator, getValue, commit }) {
   });
 }
 
-async function stashEnabled({ axios }) {
+async function stashEnabled({ axios,storeGet }) {
   return !(
-    (await checkIsFeatureEnabled(axios, "stash")) &&
-    (await checkIsFeatureEnabled(axios, "stash-presets"))
+    (await checkIsFeatureEnabled(axios, "stash",storeGet)) &&
+    (await checkIsFeatureEnabled(axios, "stash-presets",storeGet))
   );
 }
+
+function getRequirements(){
+  return `To configure backup you need to enable following features
+  - ## **Stash**
+  - ## **Stash Presets**`
+}
+
+
 return {
   initBackupStatus,
   onBackupStatusChange,
   stashEnabled,
+  getRequirements,
 };
