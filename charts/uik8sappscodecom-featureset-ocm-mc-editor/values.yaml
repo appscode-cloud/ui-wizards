@@ -9,13 +9,13 @@ metadata:
     name: RELEASE-NAME
     namespace: default
 resources:
-  helmToolkitFluxcdIoHelmRelease_kube_ui_server_ocm: # +doc-gen:break
+  helmToolkitFluxcdIoHelmRelease_kube_ui_server: # +doc-gen:break
     apiVersion: helm.toolkit.fluxcd.io/v2beta1
     kind: HelmRelease
     metadata:
       labels:
-        ace.appscode.com/feature: kube-ui-server-ocm
-      name: kube-ui-server-ocm
+        ace.appscode.com/feature: kube-ui-server
+      name: kube-ui-server
       namespace: kubeops
     spec:
       chart:
@@ -26,13 +26,15 @@ resources:
             name: appscode-charts-oci
             namespace: kubeops
           version: v2023.10.1
+      dependsOn:
+        - name: multicluster-controlplane
       install:
         crds: Skip
         createNamespace: true
         remediation:
           retries: -1
       interval: 5m
-      releaseName: kube-ui-server-ocm
+      releaseName: kube-ui-server
       storageNamespace: multicluster-controlplane
       targetNamespace: multicluster-controlplane
       timeout: 30m
