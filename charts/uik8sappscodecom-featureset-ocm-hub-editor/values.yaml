@@ -9,18 +9,55 @@ metadata:
     name: RELEASE-NAME
     namespace: default
 resources:
-  helmToolkitFluxcdIoHelmRelease_cluster_manager_spoke: # +doc-gen:break
+  helmToolkitFluxcdIoHelmRelease_cluster_gateway_addon_manager: # +doc-gen:break
     apiVersion: helm.toolkit.fluxcd.io/v2beta1
     kind: HelmRelease
     metadata:
       labels:
-        ace.appscode.com/feature: cluster-manager-spoke
-      name: cluster-manager-spoke
+        ace.appscode.com/feature: cluster-gateway-addon-manager
+      name: cluster-gateway-addon-manager
       namespace: kubeops
     spec:
       chart:
         spec:
-          chart: cluster-manager-spoke
+          chart: cluster-gateway-addon-manager
+          sourceRef:
+            kind: HelmRepository
+            name: appscode-charts-oci
+            namespace: kubeops
+          version: 1.4.0
+      dependsOn:
+        - name: cluster-manager-hub
+        - name: managed-serviceaccount
+      install:
+        crds: Skip
+        createNamespace: true
+        remediation:
+          retries: -1
+      interval: 5m
+      releaseName: cluster-gateway-addon-manager
+      storageNamespace: open-cluster-management
+      targetNamespace: open-cluster-management
+      timeout: 30m
+      upgrade:
+        crds: Skip
+        remediation:
+          retries: -1
+      values:
+        konnectivityEgress: true
+        manualSecretManagement: false
+  helmToolkitFluxcdIoHelmRelease_cluster_manager_hub: # +doc-gen:break
+    apiVersion: helm.toolkit.fluxcd.io/v2beta1
+    kind: HelmRelease
+    metadata:
+      labels:
+        ace.appscode.com/feature: cluster-manager-hub
+      name: cluster-manager-hub
+      namespace: kubeops
+    spec:
+      chart:
+        spec:
+          chart: cluster-manager-hub
           sourceRef:
             kind: HelmRepository
             name: appscode-charts-oci
@@ -32,11 +69,110 @@ resources:
         remediation:
           retries: -1
       interval: 5m
-      releaseName: cluster-manager-spoke
+      releaseName: cluster-manager-hub
       storageNamespace: open-cluster-management
       targetNamespace: open-cluster-management
       timeout: 30m
       upgrade:
         crds: CreateReplace
+        remediation:
+          retries: -1
+  helmToolkitFluxcdIoHelmRelease_cluster_proxy: # +doc-gen:break
+    apiVersion: helm.toolkit.fluxcd.io/v2beta1
+    kind: HelmRelease
+    metadata:
+      labels:
+        ace.appscode.com/feature: cluster-proxy
+      name: cluster-proxy
+      namespace: kubeops
+    spec:
+      chart:
+        spec:
+          chart: cluster-proxy
+          sourceRef:
+            kind: HelmRepository
+            name: appscode-charts-oci
+            namespace: kubeops
+          version: 0.3.0
+      dependsOn:
+        - name: cluster-manager-hub
+      install:
+        crds: Skip
+        createNamespace: true
+        remediation:
+          retries: -1
+      interval: 5m
+      releaseName: cluster-proxy
+      storageNamespace: open-cluster-management
+      targetNamespace: open-cluster-management
+      timeout: 30m
+      upgrade:
+        crds: Skip
+        remediation:
+          retries: -1
+  helmToolkitFluxcdIoHelmRelease_fluxcd_addon_manager: # +doc-gen:break
+    apiVersion: helm.toolkit.fluxcd.io/v2beta1
+    kind: HelmRelease
+    metadata:
+      labels:
+        ace.appscode.com/feature: fluxcd-addon-manager
+      name: fluxcd-addon-manager
+      namespace: kubeops
+    spec:
+      chart:
+        spec:
+          chart: fluxcd-addon-manager
+          sourceRef:
+            kind: HelmRepository
+            name: appscode-charts-oci
+            namespace: kubeops
+          version: 0.1.0
+      dependsOn:
+        - name: cluster-manager-hub
+      install:
+        crds: Skip
+        createNamespace: true
+        remediation:
+          retries: -1
+      interval: 5m
+      releaseName: fluxcd-addon-manager
+      storageNamespace: open-cluster-management
+      targetNamespace: open-cluster-management
+      timeout: 30m
+      upgrade:
+        crds: Skip
+        remediation:
+          retries: -1
+  helmToolkitFluxcdIoHelmRelease_managed_serviceaccount: # +doc-gen:break
+    apiVersion: helm.toolkit.fluxcd.io/v2beta1
+    kind: HelmRelease
+    metadata:
+      labels:
+        ace.appscode.com/feature: managed-serviceaccount
+      name: managed-serviceaccount
+      namespace: kubeops
+    spec:
+      chart:
+        spec:
+          chart: managed-serviceaccount
+          sourceRef:
+            kind: HelmRepository
+            name: appscode-charts-oci
+            namespace: kubeops
+          version: 0.4.0
+      dependsOn:
+        - name: cluster-manager-hub
+      install:
+        crds: Skip
+        createNamespace: true
+        remediation:
+          retries: -1
+      interval: 5m
+      releaseName: managed-serviceaccount
+      storageNamespace: open-cluster-management
+      targetNamespace: open-cluster-management
+      timeout: 30m
+      upgrade:
+        crds: Skip
         remediation:
           retries: -1
