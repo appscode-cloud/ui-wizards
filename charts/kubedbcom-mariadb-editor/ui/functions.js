@@ -1170,7 +1170,7 @@ function initScheduleBackupForEdit({ getValue, model, setDiscriminatorValue }) {
 
   initRepositoryChoiseForEdit({ getValue, model, setDiscriminatorValue });
 
-  if (stashAppscodeComBackupConfiguration || isBluePrint) return "yes";
+  if (stashAppscodeComBackupConfiguration || isBluePrint ) return "yes";
   else return "no";
 }
 
@@ -1881,7 +1881,14 @@ function isVariantAvailable ({storeGet})  {
   return variant ? true : false
 }
 
+function showScheduleBackup({storeGet}){
+  const operationQuery = storeGet("/route/query/operation") || ''
+  const isBackupOperation = operationQuery === 'edit-self-backupconfiguration' ? true : false
+  return !isBackupOperation
+}
+
 return {
+  showScheduleBackup,
   isVariantAvailable,
   fetchJsons,
   disableLableChecker,
