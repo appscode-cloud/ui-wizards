@@ -1100,7 +1100,7 @@ function addKubeDbComPgBouncerDbAnnotation(
   });
 }
 
-function initScheduleBackupForEdit({ getValue, model, setDiscriminatorValue, storeGet }) {
+function initScheduleBackupForEdit({ getValue, model, setDiscriminatorValue }) {
   const {
     stashAppscodeComBackupConfiguration,
     isBluePrint,
@@ -1108,10 +1108,7 @@ function initScheduleBackupForEdit({ getValue, model, setDiscriminatorValue, sto
 
   initRepositoryChoiseForEdit({getValue, model, setDiscriminatorValue});
 
-  const operationQuery = storeGet("/route/query/operation") || ''
-  const isBackupOperation = operationQuery === 'edit-self-backupconfiguration' ? true : false
-
-  if (stashAppscodeComBackupConfiguration || isBluePrint || isBackupOperation) return "yes";
+  if (stashAppscodeComBackupConfiguration || isBluePrint ) return "yes";
   else return "no";
 }
 
