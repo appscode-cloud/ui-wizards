@@ -1108,7 +1108,7 @@ function initScheduleBackupForEdit({ getValue, model, setDiscriminatorValue }) {
 
   initRepositoryChoiseForEdit({getValue, model, setDiscriminatorValue});
 
-  if (stashAppscodeComBackupConfiguration || isBluePrint) return "yes";
+  if (stashAppscodeComBackupConfiguration || isBluePrint ) return "yes";
   else return "no";
 }
 

@@ -1919,7 +1919,14 @@ function isVariantAvailable ({storeGet})  {
   return variant ? true : false
 }
 
+function showScheduleBackup({storeGet}){
+  const operationQuery = storeGet("/route/query/operation") || ''
+  const isBackupOperation = operationQuery === 'edit-self-backupconfiguration' ? true : false
+  return !isBackupOperation
+}
+
 return {
+  showScheduleBackup,
   isVariantAvailable,
   fetchJsons,
   disableLableChecker,
