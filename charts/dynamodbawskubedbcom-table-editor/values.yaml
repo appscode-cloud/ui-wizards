@@ -1,5 +1,118 @@
-apiVersion: dynamodb.aws.kubedb.com/v1alpha1
-kind: Table
 metadata:
-  name: table
-  namespace: ""
+  resource:
+    group: dynamodb.aws.kubedb.com
+    version: v1alpha1
+    name: tables
+    kind: Table
+    scope: Cluster
+  release:
+    name: RELEASE-NAME
+    namespace: default
+resources:
+  dynamodbAwsKubedbComContributorInsights: # +doc-gen:break
+    apiVersion: dynamodb.aws.kubedb.com/v1alpha1
+    kind: ContributorInsights
+    metadata:
+      name: example
+      namespace: ""
+    spec:
+      forProvider:
+        region: us-east-2
+        tableNameSelector:
+          matchLabels:
+            testing.kubedb.com/example-name: mytable
+  dynamodbAwsKubedbComGlobalTable: # +doc-gen:break
+    apiVersion: dynamodb.aws.kubedb.com/v1alpha1
+    kind: GlobalTable
+    metadata:
+      name: example
+      namespace: ""
+    spec:
+      forProvider:
+        region: us-east-2
+        replica:
+          - regionName: us-east-2
+  dynamodbAwsKubedbComKinesisStreamingDestination: # +doc-gen:break
+    apiVersion: dynamodb.aws.kubedb.com/v1alpha1
+    kind: KinesisStreamingDestination
+    metadata:
+      name: example
+      namespace: ""
+    spec:
+      forProvider:
+        region: us-east-2
+        streamArnSelector:
+          matchLabels:
+            testing.kubedb.com/example-name: example
+        tableNameSelector:
+          matchLabels:
+            testing.kubedb.com/example-name: mytable
+  dynamodbAwsKubedbComTable: # +doc-gen:break
+    apiVersion: dynamodb.aws.kubedb.com/v1alpha1
+    kind: Table
+    metadata:
+      name: example
+      namespace: ""
+    spec:
+      forProvider:
+        attribute:
+          - name: exampleHashKey
+            type: S
+        billingMode: PAY_PER_REQUEST
+        hashKey: exampleHashKey
+        region: us-east-2
+        streamEnabled: true
+        streamViewType: NEW_AND_OLD_IMAGES
+  dynamodbAwsKubedbComTableItem: # +doc-gen:break
+    apiVersion: dynamodb.aws.kubedb.com/v1alpha1
+    kind: TableItem
+    metadata:
+      name: example
+      namespace: ""
+    spec:
+      forProvider:
+        hashKey: exampleHashKey
+        item: |
+          {
+            "exampleHashKey": {"S": "something"},
+            "one": {"N": "11111"},
+            "two": {"N": "22222"},
+            "three": {"N": "33333"},
+            "four": {"N": "44444"}
+          }
+        region: us-east-2
+        tableNameSelector:
+          matchLabels:
+            testing.kubedb.com/example-name: mytable
+  dynamodbAwsKubedbComTableReplica: # +doc-gen:break
+    apiVersion: dynamodb.aws.kubedb.com/v1alpha1
+    kind: TableReplica
+    metadata:
+      name: example
+      namespace: ""
+    spec:
+      forProvider:
+        globalTableArn: arn:aws:dynamodb:us-east-2:452618475015:table/mytable
+        region: us-west-2
+  dynamodbAwsKubedbComTag: # +doc-gen:break
+    apiVersion: dynamodb.aws.kubedb.com/v1alpha1
+    kind: Tag
+    metadata:
+      name: example
+      namespace: ""
+    spec:
+      forProvider:
+        key: testkey
+        region: us-east-2
+        resourceArn: arn:aws:dynamodb:us-east-2:452618475015:table/mytable
+        value: testvalue
+  kinesisAwsKubedbComStream: # +doc-gen:break
+    apiVersion: kinesis.aws.kubedb.com/v1alpha1
+    kind: Stream
+    metadata:
+      name: example
+      namespace: ""
+    spec:
+      forProvider:
+        region: us-east-2
+        shardCount: 1
