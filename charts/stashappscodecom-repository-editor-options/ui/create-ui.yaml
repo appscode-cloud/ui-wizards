@@ -93,6 +93,7 @@ steps:
               schema:
                 $ref: schema#/properties/spec/properties/backend/properties/azure/properties/spec/properties/container
               type: input
+              required: true
             - label:
                 text: labels.backend.prefix
               schema:
@@ -117,6 +118,7 @@ steps:
               schema:
                 $ref: schema#/properties/spec/properties/backend/properties/b2/properties/spec/properties/bucket
               type: input
+              required: true
             - label:
                 text: labels.backend.prefix
               schema:
@@ -141,6 +143,7 @@ steps:
               schema:
                 $ref: schema#/properties/spec/properties/backend/properties/gcs/properties/spec/properties/bucket
               type: input
+              required: true
             - label:
                 text: labels.backend.prefix
               schema:
@@ -165,11 +168,13 @@ steps:
               schema:
                 $ref: schema#/properties/spec/properties/backend/properties/s3/properties/spec/properties/endpoint
               type: input
+              required: true
             - label:
                 text: labels.backend.bucket
               schema:
                 $ref: schema#/properties/spec/properties/backend/properties/s3/properties/spec/properties/bucket
               type: input
+              required: true
             - label:
                 text: labels.backend.prefix
               schema:
@@ -194,6 +199,7 @@ steps:
               schema:
                 $ref: schema#/properties/spec/properties/backend/properties/swift/properties/spec/properties/container
               type: input
+              required: true
             - label:
                 text: labels.backend.prefix
               schema:
@@ -232,12 +238,14 @@ steps:
           schema:
             $ref: schema#/properties/spec/properties/authSecret/properties/name
           type: select
+          required: true
         - if: showCreateSecretForm
           label:
             text: labels.secret.password
           schema:
             $ref: schema#/properties/spec/properties/authSecret/properties/password
           type: input
+          required: true
         schema:
           $ref: schema#/properties/spec/properties/authSecret
         type: single-step-form
@@ -248,11 +256,13 @@ steps:
             schema:
               $ref: schema#/properties/spec/properties/backend/properties/azure/properties/auth/properties/AZURE_ACCOUNT_NAME
             type: input
+            required: true
           - label:
               text: labels.backend.azure.account_key
             schema:
               $ref: schema#/properties/spec/properties/backend/properties/azure/properties/auth/properties/AZURE_ACCOUNT_KEY
             type: input
+            required: true
           if: showSecretForm|azure
           schema:
             $ref: schema#/properties/spec/properties/backend/properties/azure/properties/auth
@@ -263,11 +273,13 @@ steps:
             schema:
               $ref: schema#/properties/spec/properties/backend/properties/b2/properties/auth/properties/B2_ACCOUNT_ID
             type: input
+            required: true
           - label:
               text: labels.backend.b2.account_key
             schema:
               $ref: schema#/properties/spec/properties/backend/properties/b2/properties/auth/properties/B2_ACCOUNT_KEY
             type: input
+            required: true
           if: showSecretForm|b2
           schema:
             $ref: schema#/properties/spec/properties/backend/properties/b2/properties/auth
@@ -278,12 +290,14 @@ steps:
             schema:
               $ref: schema#/properties/spec/properties/backend/properties/gcs/properties/auth/properties/GOOGLE_PROJECT_ID
             type: input
+            required: true
           - label:
               text: labels.backend.gcs.service_account
             language: json
             schema:
               $ref: schema#/properties/spec/properties/backend/properties/gcs/properties/auth/properties/GOOGLE_SERVICE_ACCOUNT_JSON_KEY
             type: editor
+            required: true
           if: showSecretForm|gcs
           schema:
             $ref: schema#/properties/spec/properties/backend/properties/gcs/properties/auth
@@ -294,11 +308,13 @@ steps:
             schema:
               $ref: schema#/properties/spec/properties/backend/properties/s3/properties/auth/properties/AWS_ACCESS_KEY_ID
             type: input
+            required: true
           - label:
               text: labels.backend.s3.secret_access_key
             schema:
               $ref: schema#/properties/spec/properties/backend/properties/s3/properties/auth/properties/AWS_SECRET_ACCESS_KEY
             type: input
+            required: true
           - label:
               text: labels.backend.s3.ca_cert_data
             schema:
@@ -314,71 +330,85 @@ steps:
             schema:
               $ref: schema#/properties/spec/properties/backend/properties/swift/properties/auth/properties/OS_AUTH_TOKEN
             type: input
+            required: true
           - label:
               text: labels.backend.swift.os_auth_url
             schema:
               $ref: schema#/properties/spec/properties/backend/properties/swift/properties/auth/properties/OS_AUTH_URL
             type: input
+            required: true
           - label:
               text: labels.backend.swift.os_password
             schema:
               $ref: schema#/properties/spec/properties/backend/properties/swift/properties/auth/properties/OS_PASSWORD
             type: input
+            required: true
           - label:
               text: labels.backend.swift.os_project_domain_name
             schema:
               $ref: schema#/properties/spec/properties/backend/properties/swift/properties/auth/properties/OS_PROJECT_DOMAIN_NAME
             type: input
+            required: true
           - label:
               text: labels.backend.swift.os_project_name
             schema:
               $ref: schema#/properties/spec/properties/backend/properties/swift/properties/auth/properties/OS_PROJECT_NAME
             type: input
+            required: true
           - label:
               text: labels.backend.swift.os_region_name
             schema:
               $ref: schema#/properties/spec/properties/backend/properties/swift/properties/auth/properties/OS_REGION_NAME
             type: input
+            required: true
           - label:
               text: labels.backend.swift.os_storage_url
             schema:
               $ref: schema#/properties/spec/properties/backend/properties/swift/properties/auth/properties/OS_STORAGE_URL
             type: input
+            required: true
           - label:
               text: labels.backend.swift.os_tenant_id
             schema:
               $ref: schema#/properties/spec/properties/backend/properties/swift/properties/auth/properties/OS_TENANT_ID
             type: input
+            required: true
           - label:
               text: labels.backend.swift.os_tenant_name
             schema:
               $ref: schema#/properties/spec/properties/backend/properties/swift/properties/auth/properties/OS_TENANT_NAME
             type: input
+            required: true
           - label:
               text: labels.backend.swift.os_username
             schema:
               $ref: schema#/properties/spec/properties/backend/properties/swift/properties/auth/properties/OS_USERNAME
             type: input
+            required: true
           - label:
               text: labels.backend.swift.os_user_domain_name
             schema:
               $ref: schema#/properties/spec/properties/backend/properties/swift/properties/auth/properties/OS_USER_DOMAIN_NAME
             type: input
+            required: true
           - label:
               text: labels.backend.swift.st_auth
             schema:
               $ref: schema#/properties/spec/properties/backend/properties/swift/properties/auth/properties/ST_AUTH
             type: input
+            required: true
           - label:
               text: labels.backend.swift.st_key
             schema:
               $ref: schema#/properties/spec/properties/backend/properties/swift/properties/auth/properties/ST_KEY
             type: input
+            required: true
           - label:
               text: labels.backend.swift.st_user
             schema:
               $ref: schema#/properties/spec/properties/backend/properties/swift/properties/auth/properties/ST_USER
             type: input
+            required: true
           if: showSecretForm|swift
           schema:
             $ref: schema#/properties/spec/properties/backend/properties/swift/properties/auth
