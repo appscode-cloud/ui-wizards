@@ -25,7 +25,7 @@ resources:
             kind: HelmRepository
             name: appscode-charts-oci
             namespace: kubeops
-          version: v2023.11.14
+          version: v2023.12.5
       dependsOn:
         - name: cluster-manager-hub
       install:
@@ -169,39 +169,6 @@ resources:
           retries: -1
       interval: 5m
       releaseName: fluxcd-addon-manager
-      storageNamespace: open-cluster-management
-      targetNamespace: open-cluster-management
-      timeout: 30m
-      upgrade:
-        crds: CreateReplace
-        remediation:
-          retries: -1
-  helmToolkitFluxcdIoHelmRelease_license_proxyserver_addon_manager: # +doc-gen:break
-    apiVersion: helm.toolkit.fluxcd.io/v2beta1
-    kind: HelmRelease
-    metadata:
-      labels:
-        ace.appscode.com/feature: license-proxyserver-addon-manager
-      name: license-proxyserver-addon-manager
-      namespace: kubeops
-    spec:
-      chart:
-        spec:
-          chart: license-proxyserver-addon-manager
-          sourceRef:
-            kind: HelmRepository
-            name: appscode-charts-oci
-            namespace: kubeops
-          version: 0.1.0
-      dependsOn:
-        - name: cluster-manager-hub
-      install:
-        crds: CreateReplace
-        createNamespace: true
-        remediation:
-          retries: -1
-      interval: 5m
-      releaseName: license-proxyserver-addon-manager
       storageNamespace: open-cluster-management
       targetNamespace: open-cluster-management
       timeout: 30m

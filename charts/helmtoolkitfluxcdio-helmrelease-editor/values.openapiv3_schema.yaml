@@ -49,6 +49,25 @@ properties:
         description: Chart defines the template of the v1beta2.HelmChart that should
           be created for this HelmRelease.
         properties:
+          metadata:
+            description: ObjectMeta holds the template for metadata like labels and
+              annotations.
+            properties:
+              annotations:
+                additionalProperties:
+                  type: string
+                description: 'Annotations is an unstructured key value map stored
+                  with a resource that may be set by external tools to store and retrieve
+                  arbitrary metadata. They are not queryable and should be preserved
+                  when modifying objects. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/'
+                type: object
+              labels:
+                additionalProperties:
+                  type: string
+                description: 'Map of string keys and values that can be used to organize
+                  and categorize (scope and select) objects. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/'
+                type: object
+            type: object
           spec:
             description: Spec holds the template for the v1beta2.HelmChartSpec for
               this HelmRelease.
@@ -56,9 +75,11 @@ properties:
               chart:
                 description: The name or path the Helm chart is available at in the
                   SourceRef.
+                maxLength: 2048
+                minLength: 1
                 type: string
               interval:
-                description: Interval at which to check the v1beta2.Source for updates.
+                description: Interval at which to check the v1.Source for updates.
                   Defaults to 'HelmReleaseSpec.Interval'.
                 pattern: ^([0-9]+(\.[0-9]+)?(ms|s|m|h))+$
                 type: string
@@ -73,8 +94,8 @@ properties:
                 - Revision
                 type: string
               sourceRef:
-                description: The name and namespace of the v1beta2.Source the chart
-                  is available at.
+                description: The name and namespace of the v1.Source the chart is
+                  available at.
                 properties:
                   apiVersion:
                     description: APIVersion of the referent.
@@ -172,6 +193,76 @@ properties:
           - name
           type: object
         type: array
+      driftDetection:
+        description: DriftDetection holds the configuration for detecting and handling
+          differences between the manifest in the Helm storage and the resources currently
+          existing in the cluster.
+        properties:
+          ignore:
+            description: Ignore contains a list of rules for specifying which changes
+              to ignore during diffing.
+            items:
+              description: IgnoreRule defines a rule to selectively disregard specific
+                changes during the drift detection process.
+              properties:
+                paths:
+                  description: Paths is a list of JSON Pointer (RFC 6901) paths to
+                    be excluded from consideration in a Kubernetes object.
+                  items:
+                    type: string
+                  type: array
+                target:
+                  description: Target is a selector for specifying Kubernetes objects
+                    to which this rule applies. If Target is not set, the Paths will
+                    be ignored for all Kubernetes objects within the manifest of the
+                    Helm release.
+                  properties:
+                    annotationSelector:
+                      description: AnnotationSelector is a string that follows the
+                        label selection expression https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#api
+                        It matches with the resource annotations.
+                      type: string
+                    group:
+                      description: Group is the API group to select resources from.
+                        Together with Version and Kind it is capable of unambiguously
+                        identifying and/or selecting resources. https://github.com/kubernetes/community/blob/master/contributors/design-proposals/api-machinery/api-group.md
+                      type: string
+                    kind:
+                      description: Kind of the API Group to select resources from.
+                        Together with Group and Version it is capable of unambiguously
+                        identifying and/or selecting resources. https://github.com/kubernetes/community/blob/master/contributors/design-proposals/api-machinery/api-group.md
+                      type: string
+                    labelSelector:
+                      description: LabelSelector is a string that follows the label
+                        selection expression https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#api
+                        It matches with the resource labels.
+                      type: string
+                    name:
+                      description: Name to match resources with.
+                      type: string
+                    namespace:
+                      description: Namespace to select resources from.
+                      type: string
+                    version:
+                      description: Version of the API Group to select resources from.
+                        Together with Group and Kind it is capable of unambiguously
+                        identifying and/or selecting resources. https://github.com/kubernetes/community/blob/master/contributors/design-proposals/api-machinery/api-group.md
+                      type: string
+                  type: object
+              required:
+              - paths
+              type: object
+            type: array
+          mode:
+            description: Mode defines how differences should be handled between the
+              Helm manifest and the manifest currently applied to the cluster. If
+              not explicitly set, it defaults to DiffModeDisabled.
+            enum:
+            - enabled
+            - warn
+            - disabled
+            type: string
+        type: object
       install:
         description: Install holds the configuration for Helm install actions for
           this HelmRelease.
@@ -184,9 +275,9 @@ properties:
               CRDs. \n Create: new CRDs are created, existing CRDs are neither updated
               nor deleted. \n CreateReplace: new CRDs are created, existing CRDs are
               updated (replaced) but not deleted. \n By default, CRDs are applied
-              (installed) during Helm install action. With this option users can opt-in
-              to CRD replace existing CRDs on Helm install actions, which is not (yet)
-              natively supported by Helm. https://helm.sh/docs/chart_best_practices/custom_resource_definitions."
+              (installed) during Helm install action. With this option users can opt
+              in to CRD replace existing CRDs on Helm install actions, which is not
+              (yet) natively supported by Helm. https://helm.sh/docs/chart_best_practices/custom_resource_definitions."
             enum:
             - Skip
             - Create
@@ -263,14 +354,13 @@ properties:
           is empty.
         properties:
           secretRef:
-            description: SecretRef holds the name to a secret that contains a key
-              with the kubeconfig file as the value. If no key is specified the key
-              will default to 'value'. The secret must be in the same namespace as
-              the HelmRelease. It is recommended that the kubeconfig is self-contained,
+            description: SecretRef holds the name of a secret that contains a key
+              with the kubeconfig file as the value. If no key is set, the key will
+              default to 'value'. It is recommended that the kubeconfig is self-contained,
               and the secret is regularly updated if credentials such as a cloud-access-token
               expire. Cloud specific `cmd-path` auth helpers will not function without
               adding binaries and credentials to the Pod that is responsible for reconciling
-              the HelmRelease.
+              Kubernetes resources.
             properties:
               key:
                 description: Key in the Secret, when not specified an implementation-specific
@@ -282,11 +372,23 @@ properties:
             required:
             - name
             type: object
+        required:
+        - secretRef
         type: object
       maxHistory:
         description: MaxHistory is the number of revisions saved by Helm for this
-          HelmRelease. Use '0' for an unlimited number of revisions; defaults to '10'.
+          HelmRelease. Use '0' for an unlimited number of revisions; defaults to '5'.
         type: integer
+      persistentClient:
+        description: "PersistentClient tells the controller to use a persistent Kubernetes
+          client for this release. When enabled, the client will be reused for the
+          duration of the reconciliation, instead of being created and destroyed for
+          each (step of a) Helm action. \n This can improve performance, but may cause
+          issues with some Helm charts that for example do create Custom Resource
+          Definitions during installation outside Helm's CRD lifecycle hooks, which
+          are then not observed to be available by e.g. post-install hooks. \n If
+          not set, it defaults to true."
+        type: boolean
       postRenderers:
         description: PostRenderers holds an array of Helm PostRenderers, which will
           be applied in order of their definition.
@@ -375,10 +477,13 @@ properties:
                               https://github.com/kubernetes/community/blob/master/contributors/design-proposals/api-machinery/api-group.md
                             type: string
                         type: object
+                    required:
+                    - patch
                     type: object
                   type: array
                 patchesJson6902:
-                  description: JSON 6902 patches, defined as inline YAML objects.
+                  description: 'JSON 6902 patches, defined as inline YAML objects.
+                    Deprecated: use Patches instead.'
                   items:
                     description: JSON6902Patch contains a JSON6902 patch and the target
                       the patch should be applied to.
@@ -469,7 +574,8 @@ properties:
                     type: object
                   type: array
                 patchesStrategicMerge:
-                  description: Strategic merge patches, defined as inline YAML objects.
+                  description: 'Strategic merge patches, defined as inline YAML objects.
+                    Deprecated: use Patches instead.'
                   items:
                     x-kubernetes-preserve-unknown-fields: true
                   type: array
@@ -518,6 +624,8 @@ properties:
       serviceAccountName:
         description: The name of the Kubernetes service account to impersonate when
           reconciling this HelmRelease.
+        maxLength: 253
+        minLength: 1
         type: string
       storageNamespace:
         description: StorageNamespace used for the Helm storage. Defaults to the namespace
@@ -543,6 +651,25 @@ properties:
             description: Enable enables Helm test actions for this HelmRelease after
               an Helm install or upgrade action has been performed.
             type: boolean
+          filters:
+            description: Filters is a list of tests to run or exclude from running.
+            items:
+              description: Filter holds the configuration for individual Helm test
+                filters.
+              properties:
+                exclude:
+                  description: Exclude specifies whether the named test should be
+                    excluded.
+                  type: boolean
+                name:
+                  description: Name is the name of the test.
+                  maxLength: 253
+                  minLength: 1
+                  type: string
+              required:
+              - name
+              type: object
+            type: array
           ignoreFailures:
             description: IgnoreFailures tells the controller to skip remediation when
               the Helm tests are run but fail. Can be overwritten for tests run after
@@ -565,6 +692,15 @@ properties:
         description: Uninstall holds the configuration for Helm uninstall actions
           for this HelmRelease.
         properties:
+          deletionPropagation:
+            default: background
+            description: DeletionPropagation specifies the deletion propagation policy
+              when a Helm uninstall is performed.
+            enum:
+            - background
+            - foreground
+            - orphan
+            type: string
           disableHooks:
             description: DisableHooks prevents hooks from running during the Helm
               rollback action.
@@ -706,9 +842,7 @@ properties:
               type: string
             valuesKey:
               description: ValuesKey is the data key where the values.yaml or a specific
-                value can be found at. Defaults to 'values.yaml'. When set, must be
-                a valid Data Key, consisting of alphanumeric characters, '-', '_'
-                or '.'.
+                value can be found at. Defaults to 'values.yaml'.
               maxLength: 253
               pattern: ^[\-._a-zA-Z0-9]+$
               type: string

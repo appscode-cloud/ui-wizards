@@ -12,10 +12,10 @@ spec:
     singular: receiver
   scope: Namespaced
   versions:
-  - name: v1beta1
+  - name: v1
     schema:
       openAPIV3Schema:
-        description: Receiver is the Schema for the receivers API
+        description: Receiver is the Schema for the receivers API.
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
@@ -30,14 +30,20 @@ spec:
           metadata:
             type: object
           spec:
-            description: ReceiverSpec defines the desired state of Receiver
+            description: ReceiverSpec defines the desired state of the Receiver.
             properties:
               events:
-                description: A list of events to handle, e.g. 'push' for GitHub or
-                  'Push Hook' for GitLab.
+                description: Events specifies the list of event types to handle, e.g.
+                  'push' for GitHub or 'Push Hook' for GitLab.
                 items:
                   type: string
                 type: array
+              interval:
+                default: 10m
+                description: Interval at which to reconcile the Receiver with its
+                  Secret references.
+                pattern: ^([0-9]+(\.[0-9]+)?(ms|s|m|h))+$
+                type: string
               resources:
                 description: A list of resources to be notified about changes.
                 items:
@@ -68,10 +74,11 @@ spec:
                         {key,value} in the matchLabels map is equivalent to an element
                         of matchExpressions, whose key field is "key", the operator
                         is "In", and the values array contains only "value". The requirements
-                        are ANDed.
+                        are ANDed. MatchLabels requires the name to be set to `*`.
                       type: object
                     name:
-                      description: Name of the referent
+                      description: Name of the referent If multiple resources are
+                        targeted `*` may be set.
                       maxLength: 53
                       minLength: 1
                       type: string
@@ -81,12 +88,13 @@ spec:
                       minLength: 1
                       type: string
                   required:
+                  - kind
                   - name
                   type: object
                 type: array
               secretRef:
-                description: Secret reference containing the token used to validate
-                  the payload authenticity
+                description: SecretRef specifies the Secret containing the token used
+                  to validate the payload authenticity.
                 properties:
                   name:
                     description: Name of the referent.
@@ -95,8 +103,8 @@ spec:
                 - name
                 type: object
               suspend:
-                description: This flag tells the controller to suspend subsequent
-                  events handling. Defaults to false.
+                description: Suspend tells the controller to suspend subsequent events
+                  handling for this receiver.
                 type: boolean
               type:
                 description: Type of webhook sender, used to determine the validation
@@ -116,6 +124,7 @@ spec:
                 type: string
             required:
             - resources
+            - secretRef
             - type
             type: object
         type: object
