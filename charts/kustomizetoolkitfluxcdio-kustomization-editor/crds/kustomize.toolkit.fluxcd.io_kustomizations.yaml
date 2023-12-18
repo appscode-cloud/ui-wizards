@@ -12,7 +12,7 @@ spec:
     singular: kustomization
   scope: Namespaced
   versions:
-  - name: v1beta2
+  - name: v1
     schema:
       openAPIV3Schema:
         description: Kustomization is the Schema for the kustomizations API.
@@ -33,6 +33,28 @@ spec:
             description: KustomizationSpec defines the configuration to calculate
               the desired state from a Source using Kustomize.
             properties:
+              commonMetadata:
+                description: CommonMetadata specifies the common labels and annotations
+                  that are applied to all resources. Any existing label or annotation
+                  will be overridden if its key matches a common one.
+                properties:
+                  annotations:
+                    additionalProperties:
+                      type: string
+                    description: Annotations to be added to the object's metadata.
+                    type: object
+                  labels:
+                    additionalProperties:
+                      type: string
+                    description: Labels to be added to the object's metadata.
+                    type: object
+                type: object
+              components:
+                description: Components specifies relative paths to specifications
+                  of other Components.
+                items:
+                  type: string
+                type: array
               decryption:
                 description: Decrypt Kubernetes secrets before applying them on the
                   cluster.
@@ -134,6 +156,8 @@ spec:
                 type: array
               interval:
                 description: The interval at which to reconcile the Kustomization.
+                  This interval is approximate and may be subject to jitter to ensure
+                  efficient use of resources.
                 pattern: ^([0-9]+(\.[0-9]+)?(ms|s|m|h))+$
                 type: string
               kubeConfig:
@@ -216,102 +240,9 @@ spec:
                             identifying and/or selecting resources. https://github.com/kubernetes/community/blob/master/contributors/design-proposals/api-machinery/api-group.md
                           type: string
                       type: object
-                  type: object
-                type: array
-              patchesJson6902:
-                description: 'JSON 6902 patches, defined as inline YAML objects. Deprecated:
-                  Use Patches instead.'
-                items:
-                  description: JSON6902Patch contains a JSON6902 patch and the target
-                    the patch should be applied to.
-                  properties:
-                    patch:
-                      description: Patch contains the JSON6902 patch document with
-                        an array of operation objects.
-                      items:
-                        description: JSON6902 is a JSON6902 operation object. https://datatracker.ietf.org/doc/html/rfc6902#section-4
-                        properties:
-                          from:
-                            description: From contains a JSON-pointer value that references
-                              a location within the target document where the operation
-                              is performed. The meaning of the value depends on the
-                              value of Op, and is NOT taken into account by all operations.
-                            type: string
-                          op:
-                            description: Op indicates the operation to perform. Its
-                              value MUST be one of "add", "remove", "replace", "move",
-                              "copy", or "test". https://datatracker.ietf.org/doc/html/rfc6902#section-4
-                            enum:
-                            - test
-                            - remove
-                            - add
-                            - replace
-                            - move
-                            - copy
-                            type: string
-                          path:
-                            description: Path contains the JSON-pointer value that
-                              references a location within the target document where
-                              the operation is performed. The meaning of the value
-                              depends on the value of Op.
-                            type: string
-                          value:
-                            description: Value contains a valid JSON structure. The
-                              meaning of the value depends on the value of Op, and
-                              is NOT taken into account by all operations.
-                            x-kubernetes-preserve-unknown-fields: true
-                        required:
-                        - op
-                        - path
-                        type: object
-                      type: array
-                    target:
-                      description: Target points to the resources that the patch document
-                        should be applied to.
-                      properties:
-                        annotationSelector:
-                          description: AnnotationSelector is a string that follows
-                            the label selection expression https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#api
-                            It matches with the resource annotations.
-                          type: string
-                        group:
-                          description: Group is the API group to select resources
-                            from. Together with Version and Kind it is capable of
-                            unambiguously identifying and/or selecting resources.
-                            https://github.com/kubernetes/community/blob/master/contributors/design-proposals/api-machinery/api-group.md
-                          type: string
-                        kind:
-                          description: Kind of the API Group to select resources from.
-                            Together with Group and Version it is capable of unambiguously
-                            identifying and/or selecting resources. https://github.com/kubernetes/community/blob/master/contributors/design-proposals/api-machinery/api-group.md
-                          type: string
-                        labelSelector:
-                          description: LabelSelector is a string that follows the
-                            label selection expression https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/#api
-                            It matches with the resource labels.
-                          type: string
-                        name:
-                          description: Name to match resources with.
-                          type: string
-                        namespace:
-                          description: Namespace to select resources from.
-                          type: string
-                        version:
-                          description: Version of the API Group to select resources
-                            from. Together with Group and Kind it is capable of unambiguously
-                            identifying and/or selecting resources. https://github.com/kubernetes/community/blob/master/contributors/design-proposals/api-machinery/api-group.md
-                          type: string
-                      type: object
                   required:
                   - patch
-                  - target
                   type: object
-                type: array
-              patchesStrategicMerge:
-                description: 'Strategic merge patches, defined as inline YAML objects.
-                  Deprecated: Use Patches instead.'
-                items:
-                  x-kubernetes-preserve-unknown-fields: true
                 type: array
               path:
                 description: Path to the directory containing the kustomization.yaml
@@ -336,7 +267,7 @@ spec:
                     description: SubstituteFrom holds references to ConfigMaps and
                       Secrets containing the variables and their values to be substituted
                       in the YAML manifests. The ConfigMap and the Secret data keys
-                      represent the var names and they must match the vars declared
+                      represent the var names, and they must match the vars declared
                       in the manifests for the substitution to happen.
                     items:
                       description: SubstituteReference contains a reference to a resource
@@ -422,13 +353,6 @@ spec:
                 description: Timeout for validation, apply and health checking operations.
                   Defaults to 'Interval' duration.
                 pattern: ^([0-9]+(\.[0-9]+)?(ms|s|m|h))+$
-                type: string
-              validation:
-                description: 'Deprecated: Not used in v1beta2.'
-                enum:
-                - none
-                - client
-                - server
                 type: string
               wait:
                 description: Wait instructs the controller to check the health of

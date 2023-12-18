@@ -1654,6 +1654,41 @@ properties:
                 type: integer
               init:
                 properties:
+                  archiver:
+                    properties:
+                      encryptionSecret:
+                        properties:
+                          name:
+                            type: string
+                          namespace:
+                            type: string
+                        required:
+                        - name
+                        type: object
+                      fullDBRepository:
+                        properties:
+                          name:
+                            type: string
+                          namespace:
+                            type: string
+                        required:
+                        - name
+                        type: object
+                      manifestRepository:
+                        properties:
+                          name:
+                            type: string
+                          namespace:
+                            type: string
+                        required:
+                        - name
+                        type: object
+                      recoveryTimestamp:
+                        format: date-time
+                        type: string
+                    required:
+                    - recoveryTimestamp
+                    type: object
                   initialized:
                     type: boolean
                   script:
@@ -2572,6 +2607,8 @@ properties:
                 type: object
               kernelSettings:
                 properties:
+                  disableDefaults:
+                    type: boolean
                   privileged:
                     type: boolean
                   sysctls:
@@ -2595,6 +2632,10 @@ properties:
               monitor:
                 properties:
                   agent:
+                    enum:
+                    - prometheus.io/operator
+                    - prometheus.io
+                    - prometheus.io/builtin
                     type: string
                   prometheus:
                     properties:
