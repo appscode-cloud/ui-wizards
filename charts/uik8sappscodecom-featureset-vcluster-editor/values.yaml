@@ -9,7 +9,40 @@ metadata:
     name: RELEASE-NAME
     namespace: default
 resources:
-  helmToolkitFluxcdIoHelmRelease: # +doc-gen:break
+  helmToolkitFluxcdIoHelmRelease_cluster_manager_spoke: # +doc-gen:break
+    apiVersion: helm.toolkit.fluxcd.io/v2beta1
+    kind: HelmRelease
+    metadata:
+      labels:
+        ace.appscode.com/feature: cluster-manager-spoke
+      name: cluster-manager-spoke
+      namespace: kubeops
+    spec:
+      chart:
+        spec:
+          chart: cluster-manager-spoke
+          sourceRef:
+            kind: HelmRepository
+            name: appscode-charts-oci
+            namespace: kubeops
+          version: 0.1.0
+      dependsOn:
+        - name: vcluster
+      install:
+        crds: CreateReplace
+        createNamespace: true
+        remediation:
+          retries: -1
+      interval: 5m
+      releaseName: cluster-manager-spoke
+      storageNamespace: open-cluster-management
+      targetNamespace: open-cluster-management
+      timeout: 30m
+      upgrade:
+        crds: CreateReplace
+        remediation:
+          retries: -1
+  helmToolkitFluxcdIoHelmRelease_vcluster: # +doc-gen:break
     apiVersion: helm.toolkit.fluxcd.io/v2beta1
     kind: HelmRelease
     metadata:
@@ -48,36 +81,3 @@ resources:
           disabled: "true"
         vcluster:
           image: rancher/k3s:v1.23.5-k3s1
-  helmToolkitFluxcdIoHelmRelease_cluster_manager_spoke: # +doc-gen:break
-    apiVersion: helm.toolkit.fluxcd.io/v2beta1
-    kind: HelmRelease
-    metadata:
-      labels:
-        ace.appscode.com/feature: cluster-manager-spoke
-      name: cluster-manager-spoke
-      namespace: kubeops
-    spec:
-      chart:
-        spec:
-          chart: cluster-manager-spoke
-          sourceRef:
-            kind: HelmRepository
-            name: appscode-charts-oci
-            namespace: kubeops
-          version: 0.1.0
-      dependsOn:
-        - name: vcluster
-      install:
-        crds: CreateReplace
-        createNamespace: true
-        remediation:
-          retries: -1
-      interval: 5m
-      releaseName: cluster-manager-spoke
-      storageNamespace: open-cluster-management
-      targetNamespace: open-cluster-management
-      timeout: 30m
-      upgrade:
-        crds: CreateReplace
-        remediation:
-          retries: -1
