@@ -75,6 +75,8 @@ properties:
                   spec:
                     properties:
                       chart:
+                        maxLength: 2048
+                        minLength: 1
                         type: string
                       interval:
                         pattern: ^([0-9]+(\.[0-9]+)?(ms|s|m|h))+$
@@ -150,6 +152,43 @@ properties:
                   - name
                   type: object
                 type: array
+              driftDetection:
+                properties:
+                  ignore:
+                    items:
+                      properties:
+                        paths:
+                          items:
+                            type: string
+                          type: array
+                        target:
+                          properties:
+                            annotationSelector:
+                              type: string
+                            group:
+                              type: string
+                            kind:
+                              type: string
+                            labelSelector:
+                              type: string
+                            name:
+                              type: string
+                            namespace:
+                              type: string
+                            version:
+                              type: string
+                          type: object
+                      required:
+                      - paths
+                      type: object
+                    type: array
+                  mode:
+                    enum:
+                    - enabled
+                    - warn
+                    - disabled
+                    type: string
+                type: object
               install:
                 properties:
                   crds:
@@ -330,6 +369,8 @@ properties:
                     type: string
                 type: object
               serviceAccountName:
+                maxLength: 253
+                minLength: 1
                 type: string
               storageNamespace:
                 maxLength: 63
@@ -345,6 +386,19 @@ properties:
                 properties:
                   enable:
                     type: boolean
+                  filters:
+                    items:
+                      properties:
+                        exclude:
+                          type: boolean
+                        name:
+                          maxLength: 253
+                          minLength: 1
+                          type: string
+                      required:
+                      - name
+                      type: object
+                    type: array
                   ignoreFailures:
                     type: boolean
                   timeout:
@@ -414,70 +468,7 @@ properties:
                     type: string
                 type: object
               values:
-                properties:
-                  bundleVersion:
-                    properties:
-                      clusteradmImageVersion:
-                        type: string
-                      operatorImageVersion:
-                        type: string
-                      placementImageVersion:
-                        type: string
-                      registrationImageVersion:
-                        type: string
-                      workImageVersion:
-                        type: string
-                    type: object
-                  clusterName:
-                    type: string
-                  hub:
-                    properties:
-                      apiServer:
-                        type: string
-                      caData:
-                        type: string
-                      kubeConfig:
-                        type: string
-                      token:
-                        type: string
-                    type: object
-                  managedKubeconfig:
-                    type: string
-                  registrationFeatures:
-                    items:
-                      properties:
-                        feature:
-                          type: string
-                        mode:
-                          default: Disable
-                          enum:
-                          - Enable
-                          - Disable
-                          type: string
-                      required:
-                      - feature
-                      type: object
-                    type: array
-                  registry:
-                    type: string
-                  workFeatures:
-                    items:
-                      properties:
-                        feature:
-                          type: string
-                        mode:
-                          default: Disable
-                          enum:
-                          - Enable
-                          - Disable
-                          type: string
-                      required:
-                      - feature
-                      type: object
-                    type: array
-                required:
-                - clusterName
-                type: object
+                x-kubernetes-preserve-unknown-fields: true
               valuesFrom:
                 items:
                   properties:
