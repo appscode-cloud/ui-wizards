@@ -1,0 +1,970 @@
+properties:
+  metadata:
+    properties:
+      release:
+        properties:
+          name:
+            type: string
+          namespace:
+            type: string
+        required:
+        - name
+        - namespace
+        type: object
+      resource:
+        properties:
+          group:
+            type: string
+          kind:
+            type: string
+          name:
+            type: string
+          scope:
+            type: string
+          version:
+            type: string
+        required:
+        - group
+        - kind
+        - name
+        - scope
+        - version
+        type: object
+    required:
+    - release
+    - resource
+    type: object
+  resources:
+    properties:
+      helmToolkitFluxcdIoHelmRelease_external_snapshotter:
+        properties:
+          apiVersion:
+            type: string
+          kind:
+            type: string
+          metadata:
+            properties:
+              annotations:
+                additionalProperties:
+                  type: string
+                type: object
+              labels:
+                additionalProperties:
+                  type: string
+                type: object
+              name:
+                type: string
+              namespace:
+                type: string
+            type: object
+          spec:
+            properties:
+              chart:
+                properties:
+                  metadata:
+                    properties:
+                      annotations:
+                        additionalProperties:
+                          type: string
+                        type: object
+                      labels:
+                        additionalProperties:
+                          type: string
+                        type: object
+                    type: object
+                  spec:
+                    properties:
+                      chart:
+                        maxLength: 2048
+                        minLength: 1
+                        type: string
+                      interval:
+                        pattern: ^([0-9]+(\.[0-9]+)?(ms|s|m|h))+$
+                        type: string
+                      reconcileStrategy:
+                        default: ChartVersion
+                        enum:
+                        - ChartVersion
+                        - Revision
+                        type: string
+                      sourceRef:
+                        properties:
+                          apiVersion:
+                            type: string
+                          kind:
+                            enum:
+                            - HelmRepository
+                            - GitRepository
+                            - Bucket
+                            type: string
+                          name:
+                            maxLength: 253
+                            minLength: 1
+                            type: string
+                          namespace:
+                            maxLength: 63
+                            minLength: 1
+                            type: string
+                        required:
+                        - name
+                        type: object
+                      valuesFile:
+                        type: string
+                      valuesFiles:
+                        items:
+                          type: string
+                        type: array
+                      verify:
+                        properties:
+                          provider:
+                            default: cosign
+                            enum:
+                            - cosign
+                            type: string
+                          secretRef:
+                            properties:
+                              name:
+                                type: string
+                            required:
+                            - name
+                            type: object
+                        required:
+                        - provider
+                        type: object
+                      version:
+                        default: '*'
+                        type: string
+                    required:
+                    - chart
+                    - sourceRef
+                    type: object
+                required:
+                - spec
+                type: object
+              dependsOn:
+                items:
+                  properties:
+                    name:
+                      type: string
+                    namespace:
+                      type: string
+                  required:
+                  - name
+                  type: object
+                type: array
+              driftDetection:
+                properties:
+                  ignore:
+                    items:
+                      properties:
+                        paths:
+                          items:
+                            type: string
+                          type: array
+                        target:
+                          properties:
+                            annotationSelector:
+                              type: string
+                            group:
+                              type: string
+                            kind:
+                              type: string
+                            labelSelector:
+                              type: string
+                            name:
+                              type: string
+                            namespace:
+                              type: string
+                            version:
+                              type: string
+                          type: object
+                      required:
+                      - paths
+                      type: object
+                    type: array
+                  mode:
+                    enum:
+                    - enabled
+                    - warn
+                    - disabled
+                    type: string
+                type: object
+              install:
+                properties:
+                  crds:
+                    enum:
+                    - Skip
+                    - Create
+                    - CreateReplace
+                    type: string
+                  createNamespace:
+                    type: boolean
+                  disableHooks:
+                    type: boolean
+                  disableOpenAPIValidation:
+                    type: boolean
+                  disableWait:
+                    type: boolean
+                  disableWaitForJobs:
+                    type: boolean
+                  remediation:
+                    properties:
+                      ignoreTestFailures:
+                        type: boolean
+                      remediateLastFailure:
+                        type: boolean
+                      retries:
+                        type: integer
+                    type: object
+                  replace:
+                    type: boolean
+                  skipCRDs:
+                    type: boolean
+                  timeout:
+                    pattern: ^([0-9]+(\.[0-9]+)?(ms|s|m|h))+$
+                    type: string
+                type: object
+              interval:
+                pattern: ^([0-9]+(\.[0-9]+)?(ms|s|m|h))+$
+                type: string
+              kubeConfig:
+                properties:
+                  secretRef:
+                    properties:
+                      key:
+                        type: string
+                      name:
+                        type: string
+                    required:
+                    - name
+                    type: object
+                required:
+                - secretRef
+                type: object
+              maxHistory:
+                type: integer
+              persistentClient:
+                type: boolean
+              postRenderers:
+                items:
+                  properties:
+                    kustomize:
+                      properties:
+                        images:
+                          items:
+                            properties:
+                              digest:
+                                type: string
+                              name:
+                                type: string
+                              newName:
+                                type: string
+                              newTag:
+                                type: string
+                            required:
+                            - name
+                            type: object
+                          type: array
+                        patches:
+                          items:
+                            properties:
+                              patch:
+                                type: string
+                              target:
+                                properties:
+                                  annotationSelector:
+                                    type: string
+                                  group:
+                                    type: string
+                                  kind:
+                                    type: string
+                                  labelSelector:
+                                    type: string
+                                  name:
+                                    type: string
+                                  namespace:
+                                    type: string
+                                  version:
+                                    type: string
+                                type: object
+                            required:
+                            - patch
+                            type: object
+                          type: array
+                        patchesJson6902:
+                          items:
+                            properties:
+                              patch:
+                                items:
+                                  properties:
+                                    from:
+                                      type: string
+                                    op:
+                                      enum:
+                                      - test
+                                      - remove
+                                      - add
+                                      - replace
+                                      - move
+                                      - copy
+                                      type: string
+                                    path:
+                                      type: string
+                                    value:
+                                      x-kubernetes-preserve-unknown-fields: true
+                                  required:
+                                  - op
+                                  - path
+                                  type: object
+                                type: array
+                              target:
+                                properties:
+                                  annotationSelector:
+                                    type: string
+                                  group:
+                                    type: string
+                                  kind:
+                                    type: string
+                                  labelSelector:
+                                    type: string
+                                  name:
+                                    type: string
+                                  namespace:
+                                    type: string
+                                  version:
+                                    type: string
+                                type: object
+                            required:
+                            - patch
+                            - target
+                            type: object
+                          type: array
+                        patchesStrategicMerge:
+                          items:
+                            x-kubernetes-preserve-unknown-fields: true
+                          type: array
+                      type: object
+                  type: object
+                type: array
+              releaseName:
+                maxLength: 53
+                minLength: 1
+                type: string
+              rollback:
+                properties:
+                  cleanupOnFail:
+                    type: boolean
+                  disableHooks:
+                    type: boolean
+                  disableWait:
+                    type: boolean
+                  disableWaitForJobs:
+                    type: boolean
+                  force:
+                    type: boolean
+                  recreate:
+                    type: boolean
+                  timeout:
+                    pattern: ^([0-9]+(\.[0-9]+)?(ms|s|m|h))+$
+                    type: string
+                type: object
+              serviceAccountName:
+                maxLength: 253
+                minLength: 1
+                type: string
+              storageNamespace:
+                maxLength: 63
+                minLength: 1
+                type: string
+              suspend:
+                type: boolean
+              targetNamespace:
+                maxLength: 63
+                minLength: 1
+                type: string
+              test:
+                properties:
+                  enable:
+                    type: boolean
+                  filters:
+                    items:
+                      properties:
+                        exclude:
+                          type: boolean
+                        name:
+                          maxLength: 253
+                          minLength: 1
+                          type: string
+                      required:
+                      - name
+                      type: object
+                    type: array
+                  ignoreFailures:
+                    type: boolean
+                  timeout:
+                    pattern: ^([0-9]+(\.[0-9]+)?(ms|s|m|h))+$
+                    type: string
+                type: object
+              timeout:
+                pattern: ^([0-9]+(\.[0-9]+)?(ms|s|m|h))+$
+                type: string
+              uninstall:
+                properties:
+                  deletionPropagation:
+                    default: background
+                    enum:
+                    - background
+                    - foreground
+                    - orphan
+                    type: string
+                  disableHooks:
+                    type: boolean
+                  disableWait:
+                    type: boolean
+                  keepHistory:
+                    type: boolean
+                  timeout:
+                    pattern: ^([0-9]+(\.[0-9]+)?(ms|s|m|h))+$
+                    type: string
+                type: object
+              upgrade:
+                properties:
+                  cleanupOnFail:
+                    type: boolean
+                  crds:
+                    enum:
+                    - Skip
+                    - Create
+                    - CreateReplace
+                    type: string
+                  disableHooks:
+                    type: boolean
+                  disableOpenAPIValidation:
+                    type: boolean
+                  disableWait:
+                    type: boolean
+                  disableWaitForJobs:
+                    type: boolean
+                  force:
+                    type: boolean
+                  preserveValues:
+                    type: boolean
+                  remediation:
+                    properties:
+                      ignoreTestFailures:
+                        type: boolean
+                      remediateLastFailure:
+                        type: boolean
+                      retries:
+                        type: integer
+                      strategy:
+                        enum:
+                        - rollback
+                        - uninstall
+                        type: string
+                    type: object
+                  timeout:
+                    pattern: ^([0-9]+(\.[0-9]+)?(ms|s|m|h))+$
+                    type: string
+                type: object
+              values:
+                x-kubernetes-preserve-unknown-fields: true
+              valuesFrom:
+                items:
+                  properties:
+                    kind:
+                      enum:
+                      - Secret
+                      - ConfigMap
+                      type: string
+                    name:
+                      maxLength: 253
+                      minLength: 1
+                      type: string
+                    optional:
+                      type: boolean
+                    targetPath:
+                      maxLength: 250
+                      pattern: ^([a-zA-Z0-9_\-.\\\/]|\[[0-9]{1,5}\])+$
+                      type: string
+                    valuesKey:
+                      maxLength: 253
+                      pattern: ^[\-._a-zA-Z0-9]+$
+                      type: string
+                  required:
+                  - kind
+                  - name
+                  type: object
+                type: array
+            required:
+            - chart
+            - interval
+            type: object
+        type: object
+      helmToolkitFluxcdIoHelmRelease_topolvm:
+        properties:
+          apiVersion:
+            type: string
+          kind:
+            type: string
+          metadata:
+            properties:
+              annotations:
+                additionalProperties:
+                  type: string
+                type: object
+              labels:
+                additionalProperties:
+                  type: string
+                type: object
+              name:
+                type: string
+              namespace:
+                type: string
+            type: object
+          spec:
+            properties:
+              chart:
+                properties:
+                  metadata:
+                    properties:
+                      annotations:
+                        additionalProperties:
+                          type: string
+                        type: object
+                      labels:
+                        additionalProperties:
+                          type: string
+                        type: object
+                    type: object
+                  spec:
+                    properties:
+                      chart:
+                        maxLength: 2048
+                        minLength: 1
+                        type: string
+                      interval:
+                        pattern: ^([0-9]+(\.[0-9]+)?(ms|s|m|h))+$
+                        type: string
+                      reconcileStrategy:
+                        default: ChartVersion
+                        enum:
+                        - ChartVersion
+                        - Revision
+                        type: string
+                      sourceRef:
+                        properties:
+                          apiVersion:
+                            type: string
+                          kind:
+                            enum:
+                            - HelmRepository
+                            - GitRepository
+                            - Bucket
+                            type: string
+                          name:
+                            maxLength: 253
+                            minLength: 1
+                            type: string
+                          namespace:
+                            maxLength: 63
+                            minLength: 1
+                            type: string
+                        required:
+                        - name
+                        type: object
+                      valuesFile:
+                        type: string
+                      valuesFiles:
+                        items:
+                          type: string
+                        type: array
+                      verify:
+                        properties:
+                          provider:
+                            default: cosign
+                            enum:
+                            - cosign
+                            type: string
+                          secretRef:
+                            properties:
+                              name:
+                                type: string
+                            required:
+                            - name
+                            type: object
+                        required:
+                        - provider
+                        type: object
+                      version:
+                        default: '*'
+                        type: string
+                    required:
+                    - chart
+                    - sourceRef
+                    type: object
+                required:
+                - spec
+                type: object
+              dependsOn:
+                items:
+                  properties:
+                    name:
+                      type: string
+                    namespace:
+                      type: string
+                  required:
+                  - name
+                  type: object
+                type: array
+              driftDetection:
+                properties:
+                  ignore:
+                    items:
+                      properties:
+                        paths:
+                          items:
+                            type: string
+                          type: array
+                        target:
+                          properties:
+                            annotationSelector:
+                              type: string
+                            group:
+                              type: string
+                            kind:
+                              type: string
+                            labelSelector:
+                              type: string
+                            name:
+                              type: string
+                            namespace:
+                              type: string
+                            version:
+                              type: string
+                          type: object
+                      required:
+                      - paths
+                      type: object
+                    type: array
+                  mode:
+                    enum:
+                    - enabled
+                    - warn
+                    - disabled
+                    type: string
+                type: object
+              install:
+                properties:
+                  crds:
+                    enum:
+                    - Skip
+                    - Create
+                    - CreateReplace
+                    type: string
+                  createNamespace:
+                    type: boolean
+                  disableHooks:
+                    type: boolean
+                  disableOpenAPIValidation:
+                    type: boolean
+                  disableWait:
+                    type: boolean
+                  disableWaitForJobs:
+                    type: boolean
+                  remediation:
+                    properties:
+                      ignoreTestFailures:
+                        type: boolean
+                      remediateLastFailure:
+                        type: boolean
+                      retries:
+                        type: integer
+                    type: object
+                  replace:
+                    type: boolean
+                  skipCRDs:
+                    type: boolean
+                  timeout:
+                    pattern: ^([0-9]+(\.[0-9]+)?(ms|s|m|h))+$
+                    type: string
+                type: object
+              interval:
+                pattern: ^([0-9]+(\.[0-9]+)?(ms|s|m|h))+$
+                type: string
+              kubeConfig:
+                properties:
+                  secretRef:
+                    properties:
+                      key:
+                        type: string
+                      name:
+                        type: string
+                    required:
+                    - name
+                    type: object
+                required:
+                - secretRef
+                type: object
+              maxHistory:
+                type: integer
+              persistentClient:
+                type: boolean
+              postRenderers:
+                items:
+                  properties:
+                    kustomize:
+                      properties:
+                        images:
+                          items:
+                            properties:
+                              digest:
+                                type: string
+                              name:
+                                type: string
+                              newName:
+                                type: string
+                              newTag:
+                                type: string
+                            required:
+                            - name
+                            type: object
+                          type: array
+                        patches:
+                          items:
+                            properties:
+                              patch:
+                                type: string
+                              target:
+                                properties:
+                                  annotationSelector:
+                                    type: string
+                                  group:
+                                    type: string
+                                  kind:
+                                    type: string
+                                  labelSelector:
+                                    type: string
+                                  name:
+                                    type: string
+                                  namespace:
+                                    type: string
+                                  version:
+                                    type: string
+                                type: object
+                            required:
+                            - patch
+                            type: object
+                          type: array
+                        patchesJson6902:
+                          items:
+                            properties:
+                              patch:
+                                items:
+                                  properties:
+                                    from:
+                                      type: string
+                                    op:
+                                      enum:
+                                      - test
+                                      - remove
+                                      - add
+                                      - replace
+                                      - move
+                                      - copy
+                                      type: string
+                                    path:
+                                      type: string
+                                    value:
+                                      x-kubernetes-preserve-unknown-fields: true
+                                  required:
+                                  - op
+                                  - path
+                                  type: object
+                                type: array
+                              target:
+                                properties:
+                                  annotationSelector:
+                                    type: string
+                                  group:
+                                    type: string
+                                  kind:
+                                    type: string
+                                  labelSelector:
+                                    type: string
+                                  name:
+                                    type: string
+                                  namespace:
+                                    type: string
+                                  version:
+                                    type: string
+                                type: object
+                            required:
+                            - patch
+                            - target
+                            type: object
+                          type: array
+                        patchesStrategicMerge:
+                          items:
+                            x-kubernetes-preserve-unknown-fields: true
+                          type: array
+                      type: object
+                  type: object
+                type: array
+              releaseName:
+                maxLength: 53
+                minLength: 1
+                type: string
+              rollback:
+                properties:
+                  cleanupOnFail:
+                    type: boolean
+                  disableHooks:
+                    type: boolean
+                  disableWait:
+                    type: boolean
+                  disableWaitForJobs:
+                    type: boolean
+                  force:
+                    type: boolean
+                  recreate:
+                    type: boolean
+                  timeout:
+                    pattern: ^([0-9]+(\.[0-9]+)?(ms|s|m|h))+$
+                    type: string
+                type: object
+              serviceAccountName:
+                maxLength: 253
+                minLength: 1
+                type: string
+              storageNamespace:
+                maxLength: 63
+                minLength: 1
+                type: string
+              suspend:
+                type: boolean
+              targetNamespace:
+                maxLength: 63
+                minLength: 1
+                type: string
+              test:
+                properties:
+                  enable:
+                    type: boolean
+                  filters:
+                    items:
+                      properties:
+                        exclude:
+                          type: boolean
+                        name:
+                          maxLength: 253
+                          minLength: 1
+                          type: string
+                      required:
+                      - name
+                      type: object
+                    type: array
+                  ignoreFailures:
+                    type: boolean
+                  timeout:
+                    pattern: ^([0-9]+(\.[0-9]+)?(ms|s|m|h))+$
+                    type: string
+                type: object
+              timeout:
+                pattern: ^([0-9]+(\.[0-9]+)?(ms|s|m|h))+$
+                type: string
+              uninstall:
+                properties:
+                  deletionPropagation:
+                    default: background
+                    enum:
+                    - background
+                    - foreground
+                    - orphan
+                    type: string
+                  disableHooks:
+                    type: boolean
+                  disableWait:
+                    type: boolean
+                  keepHistory:
+                    type: boolean
+                  timeout:
+                    pattern: ^([0-9]+(\.[0-9]+)?(ms|s|m|h))+$
+                    type: string
+                type: object
+              upgrade:
+                properties:
+                  cleanupOnFail:
+                    type: boolean
+                  crds:
+                    enum:
+                    - Skip
+                    - Create
+                    - CreateReplace
+                    type: string
+                  disableHooks:
+                    type: boolean
+                  disableOpenAPIValidation:
+                    type: boolean
+                  disableWait:
+                    type: boolean
+                  disableWaitForJobs:
+                    type: boolean
+                  force:
+                    type: boolean
+                  preserveValues:
+                    type: boolean
+                  remediation:
+                    properties:
+                      ignoreTestFailures:
+                        type: boolean
+                      remediateLastFailure:
+                        type: boolean
+                      retries:
+                        type: integer
+                      strategy:
+                        enum:
+                        - rollback
+                        - uninstall
+                        type: string
+                    type: object
+                  timeout:
+                    pattern: ^([0-9]+(\.[0-9]+)?(ms|s|m|h))+$
+                    type: string
+                type: object
+              values:
+                x-kubernetes-preserve-unknown-fields: true
+              valuesFrom:
+                items:
+                  properties:
+                    kind:
+                      enum:
+                      - Secret
+                      - ConfigMap
+                      type: string
+                    name:
+                      maxLength: 253
+                      minLength: 1
+                      type: string
+                    optional:
+                      type: boolean
+                    targetPath:
+                      maxLength: 250
+                      pattern: ^([a-zA-Z0-9_\-.\\\/]|\[[0-9]{1,5}\])+$
+                      type: string
+                    valuesKey:
+                      maxLength: 253
+                      pattern: ^[\-._a-zA-Z0-9]+$
+                      type: string
+                  required:
+                  - kind
+                  - name
+                  type: object
+                type: array
+            required:
+            - chart
+            - interval
+            type: object
+        type: object
+    type: object
+type: object
