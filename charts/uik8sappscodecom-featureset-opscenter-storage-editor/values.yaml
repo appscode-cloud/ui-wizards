@@ -9,13 +9,13 @@ metadata:
     name: RELEASE-NAME
     namespace: default
 resources:
-  helmToolkitFluxcdIoHelmRelease_external_snapshotter: # +doc-gen:break
+  helmToolkitFluxcdIoHelmRelease_snapshot_controller: # +doc-gen:break
     apiVersion: helm.toolkit.fluxcd.io/v2beta2
     kind: HelmRelease
     metadata:
       labels:
-        app.kubernetes.io/component: external-snapshotter
-      name: external-snapshotter
+        app.kubernetes.io/component: snapshot-controller
+      name: snapshot-controller
       namespace: kubeops
     spec:
       chart:
@@ -32,7 +32,7 @@ resources:
         remediation:
           retries: -1
       interval: 5m
-      releaseName: external-snapshotter
+      releaseName: snapshot-controller
       storageNamespace: kubeops
       targetNamespace: kubeops
       timeout: 30m
