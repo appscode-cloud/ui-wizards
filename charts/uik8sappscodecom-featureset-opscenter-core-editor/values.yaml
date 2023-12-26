@@ -9,6 +9,54 @@ metadata:
     name: RELEASE-NAME
     namespace: default
 resources:
+  helmToolkitFluxcdIoHelmRelease_flux2: # +doc-gen:break
+    apiVersion: helm.toolkit.fluxcd.io/v2beta2
+    kind: HelmRelease
+    metadata:
+      labels:
+        app.kubernetes.io/component: flux2
+      name: flux2
+      namespace: kubeops
+    spec:
+      chart:
+        spec:
+          chart: flux2
+          sourceRef:
+            kind: HelmRepository
+            name: appscode-charts-oci
+            namespace: kubeops
+          version: 2.12.1
+      install:
+        crds: CreateReplace
+        createNamespace: true
+        remediation:
+          retries: -1
+      interval: 5m
+      releaseName: flux2
+      storageNamespace: flux-system
+      targetNamespace: flux-system
+      timeout: 30m
+      upgrade:
+        crds: CreateReplace
+        remediation:
+          retries: -1
+      values:
+        helmController:
+          create: true
+          labels:
+            ace.appscode.com/managed: "true"
+        imageAutomationController:
+          create: false
+        imageReflectionController:
+          create: false
+        kustomizeController:
+          create: false
+        notificationController:
+          create: false
+        sourceController:
+          create: true
+          labels:
+            ace.appscode.com/managed: "true"
   helmToolkitFluxcdIoHelmRelease_kube_ui_server: # +doc-gen:break
     apiVersion: helm.toolkit.fluxcd.io/v2beta2
     kind: HelmRelease
@@ -71,3 +119,47 @@ resources:
         crds: CreateReplace
         remediation:
           retries: -1
+  helmToolkitFluxcdIoHelmRelease_opscenter_features: # +doc-gen:break
+    apiVersion: helm.toolkit.fluxcd.io/v2beta2
+    kind: HelmRelease
+    metadata:
+      labels:
+        app.kubernetes.io/component: opscenter-features
+      name: opscenter-features
+      namespace: kubeops
+    spec:
+      chart:
+        spec:
+          chart: opscenter-features
+          sourceRef:
+            kind: HelmRepository
+            name: appscode-charts-oci
+            namespace: kubeops
+          version: v2023.12.5
+      install:
+        crds: CreateReplace
+        createNamespace: true
+        remediation:
+          retries: -1
+      interval: 5m
+      releaseName: opscenter-features
+      storageNamespace: kubeops
+      targetNamespace: kubeops
+      timeout: 30m
+      upgrade:
+        crds: CreateReplace
+        remediation:
+          retries: -1
+      values:
+        helm:
+          repositories:
+            appscode-charts-oci:
+              url: oci://ghcr.io/appscode-charts
+        image:
+          proxies:
+            appscode: r.appscode.com
+            dockerHub: ""
+            dockerLibrary: ""
+            ghcr: ghcr.io
+            kubernetes: registry.k8s.io
+            quay: quay.io
