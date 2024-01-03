@@ -155,6 +155,76 @@ resources:
       namespace: demo
     spec:
       selfSigned: {}
+  coreKubestashComBackupConfiguration: # +doc-gen:break
+    apiVersion: core.kubestash.com/v1alpha1
+    kind: BackupConfiguration
+    metadata:
+      name: elasticsearch
+      namespace: demo
+    spec:
+      backends:
+        - name: elasticsearch-backend
+          retentionPolicy:
+            name: elasticsearch-retention-policy
+            namespace: demo
+          storageRef:
+            name: elasticsearch-storage
+            namespace: demo
+      sessions:
+        - addon:
+            jobTemplate:
+              spec:
+                securityContext:
+                  runAsGroup: 0
+                  runAsUser: 0
+            name: elasticsearch-addon
+            tasks:
+              - name: LogicalBackup
+          name: elasticsearch-frequent-backup
+          repositories:
+            - backend: elasticsearch-backend
+              directory: /es-repo
+              encryptionSecret:
+                name: elasticsearch-encryption-secret
+                namespace: demo
+              name: elasticsearch-repo
+          scheduler:
+            jobTemplate:
+              backoffLimit: 1
+            schedule: '*/5 * * * *'
+          sessionHistoryLimit: 2
+      target:
+        apiGroup: kubedb.com
+        kind: Elasticsearch
+        name: elasticsearch
+        namespace: demo
+  coreKubestashComRestoreSession: # +doc-gen:break
+    apiVersion: core.kubestash.com/v1alpha1
+    kind: RestoreSession
+    metadata:
+      name: elasticsearch
+      namespace: demo
+    spec:
+      addon:
+        jobTemplate:
+          spec:
+            securityContext:
+              runAsGroup: 0
+              runAsUser: 0
+        name: elasticsearch-addon
+        tasks:
+          - name: LogicalBackupRestore
+      dataSource:
+        encryptionSecret:
+          name: elasticsearch-encryption-secret
+          namespace: demo
+        repository: elasticsearch-repo
+        snapshot: latest
+      target:
+        apiGroup: kubedb.com
+        kind: Elasticsearch
+        name: elasticsearch
+        namespace: demo
   kubedbComElasticsearch: # +doc-gen:break
     apiVersion: kubedb.com/v1alpha2
     kind: Elasticsearch
@@ -339,6 +409,14 @@ resources:
       password: thisIs1StrongPassword
       username: elastic
     type: kubernetes.io/basic-auth
+  secret_encryption_secret: # +doc-gen:break
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: elasticsearch-encryption-secret
+      namespace: demo
+    stringData:
+      key: ""
   secret_init_repo_cred: # +doc-gen:break
     apiVersion: v1
     kind: Secret
@@ -425,6 +503,15 @@ resources:
       password: WeakPassword
       username: kibanaserver
     type: kubernetes.io/basic-auth
+  secret_storage_cred: # +doc-gen:break
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: elasticsearch-storage-cred
+      namespace: demo
+    stringData:
+      password: ""
+      username: ""
   secret_user_config: # +doc-gen:break
     apiVersion: v1
     kind: Secret
@@ -525,3 +612,29 @@ resources:
           apiVersion: appcatalog.appscode.com/v1alpha1
           kind: AppBinding
           name: elasticsearch
+  storageKubestashComBackupStorage_storage: # +doc-gen:break
+    apiVersion: storage.kubestash.com/v1alpha1
+    kind: BackupStorage
+    metadata:
+      name: elasticsearch-storage
+      namespace: demo
+    spec:
+      deletionPolicy: Delete
+      storage:
+        gcs:
+          bucket: kubedb-testing
+          prefix: /elasticsearch
+          secret: elasticsearch-storage-cred
+        provider: gcs
+  storageKubestashComRetentionPolicy_retention_policy: # +doc-gen:break
+    apiVersion: storage.kubestash.com/v1alpha1
+    kind: RetentionPolicy
+    metadata:
+      name: elasticsearch-retention-policy
+      namespace: demo
+    spec:
+      failedSnapshots:
+        last: 2
+      maxRetentionPeriod: 2mo
+      successfulSnapshots:
+        last: 5

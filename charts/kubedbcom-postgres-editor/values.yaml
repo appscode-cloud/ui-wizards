@@ -167,6 +167,76 @@ resources:
     spec:
       ca:
         secretName: postgres-ca
+  coreKubestashComBackupConfiguration: # +doc-gen:break
+    apiVersion: core.kubestash.com/v1alpha1
+    kind: BackupConfiguration
+    metadata:
+      name: postgres
+      namespace: demo
+    spec:
+      backends:
+        - name: postgres-backend
+          retentionPolicy:
+            name: postgres-retention-policy
+            namespace: demo
+          storageRef:
+            name: postgres-storage
+            namespace: demo
+      sessions:
+        - addon:
+            jobTemplate:
+              spec:
+                securityContext:
+                  runAsGroup: 0
+                  runAsUser: 0
+            name: postgres-addon
+            tasks:
+              - name: LogicalBackup
+          name: postgres-frequent-backup
+          repositories:
+            - backend: postgres-backend
+              directory: /postgres-repo
+              encryptionSecret:
+                name: postgres-encryption-secret
+                namespace: demo
+              name: postgres-repo
+          scheduler:
+            jobTemplate:
+              backoffLimit: 1
+            schedule: '*/5 * * * *'
+          sessionHistoryLimit: 2
+      target:
+        apiGroup: kubedb.com
+        kind: Postgres
+        name: postgres
+        namespace: demo
+  coreKubestashComRestoreSession: # +doc-gen:break
+    apiVersion: core.kubestash.com/v1alpha1
+    kind: RestoreSession
+    metadata:
+      name: postgres
+      namespace: demo
+    spec:
+      addon:
+        jobTemplate:
+          spec:
+            securityContext:
+              runAsGroup: 0
+              runAsUser: 0
+        name: postgres-addon
+        tasks:
+          - name: LogicalBackupRestore
+      dataSource:
+        encryptionSecret:
+          name: postgres-encryption-secret
+          namespace: demo
+        repository: postgres-repo
+        snapshot: latest
+      target:
+        apiGroup: kubedb.com
+        kind: Postgres
+        name: postgres
+        namespace: demo
   kubedbComPostgres: # +doc-gen:break
     apiVersion: kubedb.com/v1alpha2
     kind: Postgres
@@ -260,6 +330,14 @@ resources:
         max_connections=110
         shared_buffers=258MB
     type: Opaque
+  secret_encryption_secret: # +doc-gen:break
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: postgres-encryption-secret
+      namespace: demo
+    stringData:
+      key: ""
   secret_init_repo_cred: # +doc-gen:break
     apiVersion: v1
     kind: Secret
@@ -280,6 +358,15 @@ resources:
       password: thisIs1StrongPassword
       username: postgres
     type: Opaque
+  secret_storage_cred: # +doc-gen:break
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: postgres-storage-cred
+      namespace: demo
+    stringData:
+      password: ""
+      username: ""
   stashAppscodeComBackupConfiguration: # +doc-gen:break
     apiVersion: stash.appscode.com/v1beta1
     kind: BackupConfiguration
@@ -340,3 +427,29 @@ resources:
           apiVersion: appcatalog.appscode.com/v1alpha1
           kind: AppBinding
           name: postgres
+  storageKubestashComBackupStorage_storage: # +doc-gen:break
+    apiVersion: storage.kubestash.com/v1alpha1
+    kind: BackupStorage
+    metadata:
+      name: postgres-storage
+      namespace: demo
+    spec:
+      deletionPolicy: Delete
+      storage:
+        gcs:
+          bucket: kubedb-testing
+          prefix: /postgres
+          secret: postgres-storage-cred
+        provider: gcs
+  storageKubestashComRetentionPolicy_retention_policy: # +doc-gen:break
+    apiVersion: storage.kubestash.com/v1alpha1
+    kind: RetentionPolicy
+    metadata:
+      name: postgres-retention-policy
+      namespace: demo
+    spec:
+      failedSnapshots:
+        last: 2
+      maxRetentionPeriod: 2mo
+      successfulSnapshots:
+        last: 5
