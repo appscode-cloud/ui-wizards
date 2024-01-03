@@ -103,17 +103,49 @@ steps:
         text: Horizontal Scaling Form
       type: single-step-form
     - elements:
-      - computed: setValueFromDbDetails|/spec/podTemplate/spec/resources|/spec/verticalScaling/redis
+      - elements:
+        - computed: setValueFromDbDetails|/spec/podTemplate/spec/resources|/spec/verticalScaling/redis/resources
+          label:
+            text: labels.resources
+          schema:
+            $ref: schema#/properties/spec/properties/verticalScaling/properties/redis/properties/resources
+          type: resource-input-form
+        - label:
+            text: labels.node_selection_policy
+          options:
+          - text: LabelSelector
+            value: LabelSelector
+          - text: Taint
+            value: Taint
+          schema:
+            $ref: schema#/properties/spec/properties/verticalScaling/properties/redis/properties/nodeSelectionPolicy
+          type: select
+        - isArray: true
+          keys:
+            label:
+              text: labels.key
+          label:
+            text: labels.topology
+          schema:
+            $ref: schema#/properties/spec/properties/verticalScaling/properties/redis/properties/topology
+          type: key-value-input-form
+          values:
+            label:
+              text: labels.value
+            schema:
+              $ref: schema#/properties/spec/properties/verticalScaling/properties/redis/properties/topology
+            type: input
         label:
-          text: labels.resources
+          text: labels.redis
         schema:
           $ref: schema#/properties/spec/properties/verticalScaling/properties/redis
-        type: resource-input-form
-      - computed: setValueFromDbDetails|/spec/monitor/prometheus/exporter/resources|/spec/verticalScaling/exporter
+        show_label: true
+        type: single-step-form
+      - computed: setValueFromDbDetails|/spec/monitor/prometheus/exporter/resources|/spec/verticalScaling/exporter/resources
         label:
           text: labels.exporter
         schema:
-          $ref: schema#/properties/spec/properties/verticalScaling/properties/exporter
+          $ref: schema#/properties/spec/properties/verticalScaling/properties/exporter/properties/resources
         type: resource-input-form
       if: ifRequestTypeEqualsTo|VerticalScaling
       type: single-step-form

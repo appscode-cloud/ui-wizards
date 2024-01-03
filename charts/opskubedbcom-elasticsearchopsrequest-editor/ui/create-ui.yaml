@@ -168,92 +168,444 @@ steps:
       type: single-step-form
     - elements:
       - elements:
-        - computed: setValueFromDbDetails|/spec/topology/master/resources|/spec/verticalScaling/topology/master
+        - elements:
+          - computed: setValueFromDbDetails|/spec/topology/master/resources|/spec/verticalScaling/master/resources
+            label:
+              text: labels.resources
+            schema:
+              $ref: schema#/properties/spec/properties/verticalScaling/properties/master/properties/resources
+            type: resource-input-form
+          - label:
+              text: labels.node_selection_policy
+            options:
+            - text: LabelSelector
+              value: LabelSelector
+            - text: Taint
+              value: Taint
+            schema:
+              $ref: schema#/properties/spec/properties/verticalScaling/properties/master/properties/nodeSelectionPolicy
+            type: select
+          - isArray: true
+            keys:
+              label:
+                text: labels.key
+            label:
+              text: labels.topology
+            schema:
+              $ref: schema#/properties/spec/properties/verticalScaling/properties/master/properties/topology
+            type: key-value-input-form
+            values:
+              label:
+                text: labels.value
+              schema:
+                $ref: schema#/properties/spec/properties/verticalScaling/properties/master/properties/topology
+              type: input
           if: hasResourceValue|master
           label:
             text: labels.master_node
           schema:
-            $ref: schema#/properties/spec/properties/verticalScaling/properties/topology/properties/master
-          type: resource-input-form
-        - computed: setValueFromDbDetails|/spec/topology/data/resources|/spec/verticalScaling/topology/data
+            $ref: schema#/properties/spec/properties/verticalScaling/properties/master
+          show_label: true
+          type: single-step-form
+        - elements:
+          - computed: setValueFromDbDetails|/spec/topology/data/resources|/spec/verticalScaling/data/resources
+            label:
+              text: labels.resources
+            schema:
+              $ref: schema#/properties/spec/properties/verticalScaling/properties/data/properties/resources
+            type: resource-input-form
+          - label:
+              text: labels.node_selection_policy
+            options:
+            - text: LabelSelector
+              value: LabelSelector
+            - text: Taint
+              value: Taint
+            schema:
+              $ref: schema#/properties/spec/properties/verticalScaling/properties/data/properties/nodeSelectionPolicy
+            type: select
+          - isArray: true
+            keys:
+              label:
+                text: labels.key
+            label:
+              text: labels.topology
+            schema:
+              $ref: schema#/properties/spec/properties/verticalScaling/properties/data/properties/topology
+            type: key-value-input-form
+            values:
+              label:
+                text: labels.value
+              schema:
+                $ref: schema#/properties/spec/properties/verticalScaling/properties/data/properties/topology
+              type: input
           if: hasResourceValue|data
           label:
             text: labels.data_node
           schema:
-            $ref: schema#/properties/spec/properties/verticalScaling/properties/topology/properties/data
-          type: resource-input-form
-        - computed: setValueFromDbDetails|/spec/topology/ingest/resources|/spec/verticalScaling/topology/ingest
+            $ref: schema#/properties/spec/properties/verticalScaling/properties/data
+          show_label: true
+          type: single-step-form
+        - elements:
+          - computed: setValueFromDbDetails|/spec/topology/ingest/resources|/spec/verticalScaling/ingest/resources
+            label:
+              text: labels.resources
+            schema:
+              $ref: schema#/properties/spec/properties/verticalScaling/properties/ingest/properties/resources
+            type: resource-input-form
+          - label:
+              text: labels.node_selection_policy
+            options:
+            - text: LabelSelector
+              value: LabelSelector
+            - text: Taint
+              value: Taint
+            schema:
+              $ref: schema#/properties/spec/properties/verticalScaling/properties/ingest/properties/nodeSelectionPolicy
+            type: select
+          - isArray: true
+            keys:
+              label:
+                text: labels.key
+            label:
+              text: labels.topology
+            schema:
+              $ref: schema#/properties/spec/properties/verticalScaling/properties/ingest/properties/topology
+            type: key-value-input-form
+            values:
+              label:
+                text: labels.value
+              schema:
+                $ref: schema#/properties/spec/properties/verticalScaling/properties/ingest/properties/topology
+              type: input
           if: hasResourceValue|ingest
           label:
             text: labels.ingest_node
           schema:
-            $ref: schema#/properties/spec/properties/verticalScaling/properties/topology/properties/ingest
-          type: resource-input-form
-        - computed: setValueFromDbDetails|/spec/topology/ml/resources|/spec/verticalScaling/topology/ml
+            $ref: schema#/properties/spec/properties/verticalScaling/properties/ingest
+          show_label: true
+          type: single-step-form
+        - elements:
+          - computed: setValueFromDbDetails|/spec/topology/ml/resources|/spec/verticalScaling/ml/resources
+            label:
+              text: labels.resources
+            schema:
+              $ref: schema#/properties/spec/properties/verticalScaling/properties/ml/properties/resources
+            type: resource-input-form
+          - label:
+              text: labels.node_selection_policy
+            options:
+            - text: LabelSelector
+              value: LabelSelector
+            - text: Taint
+              value: Taint
+            schema:
+              $ref: schema#/properties/spec/properties/verticalScaling/properties/ml/properties/nodeSelectionPolicy
+            type: select
+          - isArray: true
+            keys:
+              label:
+                text: labels.key
+            label:
+              text: labels.topology
+            schema:
+              $ref: schema#/properties/spec/properties/verticalScaling/properties/ml/properties/topology
+            type: key-value-input-form
+            values:
+              label:
+                text: labels.value
+              schema:
+                $ref: schema#/properties/spec/properties/verticalScaling/properties/ml/properties/topology
+              type: input
           if: hasResourceValue|ml
           label:
-            text: labels.ml_node
+            text: labels.ml_mode
           schema:
-            $ref: schema#/properties/spec/properties/verticalScaling/properties/topology/properties/ml
-          type: resource-input-form
-        - computed: setValueFromDbDetails|/spec/topology/transform/resources|/spec/verticalScaling/topology/transform
+            $ref: schema#/properties/spec/properties/verticalScaling/properties/ml
+          show_label: true
+          type: single-step-form
+        - elements:
+          - computed: setValueFromDbDetails|/spec/topology/transform/resources|/spec/verticalScaling/transform/resources
+            label:
+              text: labels.resources
+            schema:
+              $ref: schema#/properties/spec/properties/verticalScaling/properties/transform/properties/resources
+            type: resource-input-form
+          - label:
+              text: labels.node_selection_policy
+            options:
+            - text: LabelSelector
+              value: LabelSelector
+            - text: Taint
+              value: Taint
+            schema:
+              $ref: schema#/properties/spec/properties/verticalScaling/properties/transform/properties/nodeSelectionPolicy
+            type: select
+          - isArray: true
+            keys:
+              label:
+                text: labels.key
+            label:
+              text: labels.topology
+            schema:
+              $ref: schema#/properties/spec/properties/verticalScaling/properties/transform/properties/topology
+            type: key-value-input-form
+            values:
+              label:
+                text: labels.value
+              schema:
+                $ref: schema#/properties/spec/properties/verticalScaling/properties/transform/properties/topology
+              type: input
           if: hasResourceValue|transform
           label:
             text: labels.transform_node
           schema:
-            $ref: schema#/properties/spec/properties/verticalScaling/properties/topology/properties/transform
-          type: resource-input-form
-        - computed: setValueFromDbDetails|/spec/topology/dataCold/resources|/spec/verticalScaling/topology/dataCold
+            $ref: schema#/properties/spec/properties/verticalScaling/properties/transform
+          show_label: true
+          type: single-step-form
+        - elements:
+          - computed: setValueFromDbDetails|/spec/topology/dataCold/resources|/spec/verticalScaling/dataCold/resources
+            label:
+              text: labels.resources
+            schema:
+              $ref: schema#/properties/spec/properties/verticalScaling/properties/dataCold/properties/resources
+            type: resource-input-form
+          - label:
+              text: labels.node_selection_policy
+            options:
+            - text: LabelSelector
+              value: LabelSelector
+            - text: Taint
+              value: Taint
+            schema:
+              $ref: schema#/properties/spec/properties/verticalScaling/properties/dataCold/properties/nodeSelectionPolicy
+            type: select
+          - isArray: true
+            keys:
+              label:
+                text: labels.key
+            label:
+              text: labels.topology
+            schema:
+              $ref: schema#/properties/spec/properties/verticalScaling/properties/dataCold/properties/topology
+            type: key-value-input-form
+            values:
+              label:
+                text: labels.value
+              schema:
+                $ref: schema#/properties/spec/properties/verticalScaling/properties/dataCold/properties/topology
+              type: input
           if: hasResourceValue|dataCold
           label:
             text: labels.data_cold_node
           schema:
-            $ref: schema#/properties/spec/properties/verticalScaling/properties/topology/properties/dataCold
-          type: resource-input-form
-        - computed: setValueFromDbDetails|/spec/topology/dataContent/resources|/spec/verticalScaling/topology/dataContent
+            $ref: schema#/properties/spec/properties/verticalScaling/properties/dataCold
+          show_label: true
+          type: single-step-form
+        - elements:
+          - computed: setValueFromDbDetails|/spec/topology/dataContent/resources|/spec/verticalScaling/dataContent/resources
+            label:
+              text: labels.resources
+            schema:
+              $ref: schema#/properties/spec/properties/verticalScaling/properties/dataContent/properties/resources
+            type: resource-input-form
+          - label:
+              text: labels.node_selection_policy
+            options:
+            - text: LabelSelector
+              value: LabelSelector
+            - text: Taint
+              value: Taint
+            schema:
+              $ref: schema#/properties/spec/properties/verticalScaling/properties/dataContent/properties/nodeSelectionPolicy
+            type: select
+          - isArray: true
+            keys:
+              label:
+                text: labels.key
+            label:
+              text: labels.topology
+            schema:
+              $ref: schema#/properties/spec/properties/verticalScaling/properties/dataContent/properties/topology
+            type: key-value-input-form
+            values:
+              label:
+                text: labels.value
+              schema:
+                $ref: schema#/properties/spec/properties/verticalScaling/properties/dataContent/properties/topology
+              type: input
           if: hasResourceValue|dataContent
           label:
             text: labels.data_content_node
           schema:
-            $ref: schema#/properties/spec/properties/verticalScaling/properties/topology/properties/dataContent
-          type: resource-input-form
-        - computed: setValueFromDbDetails|/spec/topology/dataFrozen/resources|/spec/verticalScaling/topology/dataFrozen
+            $ref: schema#/properties/spec/properties/verticalScaling/properties/dataCold
+          show_label: true
+          type: single-step-form
+        - elements:
+          - computed: setValueFromDbDetails|/spec/topology/dataFrozen/resources|/spec/verticalScaling/dataFrozen/resources
+            label:
+              text: labels.resources
+            schema:
+              $ref: schema#/properties/spec/properties/verticalScaling/properties/dataFrozen/properties/resources
+            type: resource-input-form
+          - label:
+              text: labels.node_selection_policy
+            options:
+            - text: LabelSelector
+              value: LabelSelector
+            - text: Taint
+              value: Taint
+            schema:
+              $ref: schema#/properties/spec/properties/verticalScaling/properties/dataFrozen/properties/nodeSelectionPolicy
+            type: select
+          - isArray: true
+            keys:
+              label:
+                text: labels.key
+            label:
+              text: labels.topology
+            schema:
+              $ref: schema#/properties/spec/properties/verticalScaling/properties/dataFrozen/properties/topology
+            type: key-value-input-form
+            values:
+              label:
+                text: labels.value
+              schema:
+                $ref: schema#/properties/spec/properties/verticalScaling/properties/dataFrozen/properties/topology
+              type: input
           if: hasResourceValue|dataFrozen
           label:
             text: labels.data_frozen_node
           schema:
-            $ref: schema#/properties/spec/properties/verticalScaling/properties/topology/properties/dataFrozen
-          type: resource-input-form
-        - computed: setValueFromDbDetails|/spec/topology/dataHot/resources|/spec/verticalScaling/topology/dataHot
+            $ref: schema#/properties/spec/properties/verticalScaling/properties/dataFrozen
+          show_label: true
+          type: single-step-form
+        - elements:
+          - computed: setValueFromDbDetails|/spec/topology/dataHot/resources|/spec/verticalScaling/dataHot/resources
+            label:
+              text: labels.resources
+            schema:
+              $ref: schema#/properties/spec/properties/verticalScaling/properties/dataHot/properties/resources
+            type: resource-input-form
+          - label:
+              text: labels.node_selection_policy
+            options:
+            - text: LabelSelector
+              value: LabelSelector
+            - text: Taint
+              value: Taint
+            schema:
+              $ref: schema#/properties/spec/properties/verticalScaling/properties/dataHot/properties/nodeSelectionPolicy
+            type: select
+          - isArray: true
+            keys:
+              label:
+                text: labels.key
+            label:
+              text: labels.topology
+            schema:
+              $ref: schema#/properties/spec/properties/verticalScaling/properties/dataHot/properties/topology
+            type: key-value-input-form
+            values:
+              label:
+                text: labels.value
+              schema:
+                $ref: schema#/properties/spec/properties/verticalScaling/properties/dataHot/properties/topology
+              type: input
           if: hasResourceValue|dataHot
           label:
-            text: labels.data_hot_node
+            text: labels.dataHot_node
           schema:
-            $ref: schema#/properties/spec/properties/verticalScaling/properties/topology/properties/dataHot
-          type: resource-input-form
-        - computed: setValueFromDbDetails|/spec/topology/dataWarm/resources|/spec/verticalScaling/topology/dataWarm
+            $ref: schema#/properties/spec/properties/verticalScaling/properties/dataHot
+          show_label: true
+          type: single-step-form
+        - elements:
+          - computed: setValueFromDbDetails|/spec/topology/dataWarm/resources|/spec/verticalScaling/dataWarm/resources
+            label:
+              text: labels.resources
+            schema:
+              $ref: schema#/properties/spec/properties/verticalScaling/properties/dataWarm/properties/resources
+            type: resource-input-form
+          - label:
+              text: labels.node_selection_policy
+            options:
+            - text: LabelSelector
+              value: LabelSelector
+            - text: Taint
+              value: Taint
+            schema:
+              $ref: schema#/properties/spec/properties/verticalScaling/properties/dataWarm/properties/nodeSelectionPolicy
+            type: select
+          - isArray: true
+            keys:
+              label:
+                text: labels.key
+            label:
+              text: labels.topology
+            schema:
+              $ref: schema#/properties/spec/properties/verticalScaling/properties/dataWarm/properties/topology
+            type: key-value-input-form
+            values:
+              label:
+                text: labels.value
+              schema:
+                $ref: schema#/properties/spec/properties/verticalScaling/properties/dataWarm/properties/topology
+              type: input
           if: hasResourceValue|dataWarm
           label:
             text: labels.data_warm_node
           schema:
-            $ref: schema#/properties/spec/properties/verticalScaling/properties/topology/properties/dataWarm
-          type: resource-input-form
+            $ref: schema#/properties/spec/properties/verticalScaling/properties/dataWarm
+          show_label: true
+          type: single-step-form
         if: ifDbTypeEqualsTo|topology|verticalScaling
         schema:
-          $ref: schema#/properties/spec/properties/verticalScaling/properties/topology
+          $ref: schema#/properties/spec/properties/verticalScaling
         type: single-step-form
-      - computed: setValueFromDbDetails|/spec/podTemplate/spec/resources|/spec/verticalScaling/node
+      - elements:
+        - computed: setValueFromDbDetails|/spec/podTemplate/spec/resources|/spec/verticalScaling/node/resources
+          label:
+            text: labels.resources
+          schema:
+            $ref: schema#/properties/spec/properties/verticalScaling/properties/node/properties/resources
+          type: resource-input-form
+        - label:
+            text: labels.node_selection_policy
+          options:
+          - text: LabelSelector
+            value: LabelSelector
+          - text: Taint
+            value: Taint
+          schema:
+            $ref: schema#/properties/spec/properties/verticalScaling/properties/node/properties/nodeSelectionPolicy
+          type: select
+        - isArray: true
+          keys:
+            label:
+              text: labels.key
+          label:
+            text: labels.topology
+          schema:
+            $ref: schema#/properties/spec/properties/verticalScaling/properties/node/properties/topology
+          type: key-value-input-form
+          values:
+            label:
+              text: labels.value
+            schema:
+              $ref: schema#/properties/spec/properties/verticalScaling/properties/node/properties/topology
+            type: input
         if: ifDbTypeEqualsTo|combined|verticalScaling
         label:
           text: labels.node
         schema:
           $ref: schema#/properties/spec/properties/verticalScaling/properties/node
-        type: resource-input-form
-      - computed: setValueFromDbDetails|/spec/monitor/prometheus/exporter/resources|/spec/verticalScaling/exporter
+        show_label: true
+        type: single-step-form
+      - computed: setValueFromDbDetails|/spec/monitor/prometheus/exporter/resources|/spec/verticalScaling/exporter/resources
         label:
           text: labels.exporter
         schema:
-          $ref: schema#/properties/spec/properties/verticalScaling/properties/exporter
+          $ref: schema#/properties/spec/properties/verticalScaling/properties/exporter/properties/resources
         type: resource-input-form
       if: ifRequestTypeEqualsTo|VerticalScaling
       type: single-step-form
@@ -271,76 +623,76 @@ steps:
           label:
             text: labels.storage.master_size
           schema:
-            $ref: schema#/properties/spec/properties/volumeExpansion/properties/topology/properties/master
+            $ref: schema#/properties/spec/properties/volumeExpansion/properties/master
           type: input
         - computed: setValueFromDbDetails|/spec/topology/data/storage/resources/requests/storage
           if: hasVolumeExpansion|data
           label:
             text: labels.storage.data_size
           schema:
-            $ref: schema#/properties/spec/properties/volumeExpansion/properties/topology/properties/data
+            $ref: schema#/properties/spec/properties/volumeExpansion/properties/data
           type: input
         - computed: setValueFromDbDetails|/spec/topology/ingest/storage/resources/requests/storage
           if: hasVolumeExpansion|ingest
           label:
             text: labels.storage.ingest_size
           schema:
-            $ref: schema#/properties/spec/properties/volumeExpansion/properties/topology/properties/ingest
+            $ref: schema#/properties/spec/properties/volumeExpansion/properties/ingest
           type: input
         - computed: setValueFromDbDetails|/spec/topology/ml/storage/resources/requests/storage
           if: hasVolumeExpansion|ml
           label:
             text: labels.storage.ml_size
           schema:
-            $ref: schema#/properties/spec/properties/volumeExpansion/properties/topology/properties/ml
+            $ref: schema#/properties/spec/properties/volumeExpansion/properties/ml
           type: input
         - computed: setValueFromDbDetails|/spec/topology/transform/storage/resources/requests/storage
           if: hasVolumeExpansion|transform
           label:
             text: labels.storage.transform_size
           schema:
-            $ref: schema#/properties/spec/properties/volumeExpansion/properties/topology/properties/transform
+            $ref: schema#/properties/spec/properties/volumeExpansion/properties/transform
           type: input
         - computed: setValueFromDbDetails|/spec/topology/dataCold/storage/resources/requests/storage
           if: hasVolumeExpansion|dataCold
           label:
             text: labels.storage.data_cold_size
           schema:
-            $ref: schema#/properties/spec/properties/volumeExpansion/properties/topology/properties/dataCold
+            $ref: schema#/properties/spec/properties/volumeExpansion/properties/dataCold
           type: input
         - computed: setValueFromDbDetails|/spec/topology/dataContent/storage/resources/requests/storage
           if: hasVolumeExpansion|dataContent
           label:
             text: labels.storage.data_content_size
           schema:
-            $ref: schema#/properties/spec/properties/volumeExpansion/properties/topology/properties/dataContent
+            $ref: schema#/properties/spec/properties/volumeExpansion/properties/dataContent
           type: input
         - computed: setValueFromDbDetails|/spec/topology/dataFrozen/storage/resources/requests/storage
           if: hasVolumeExpansion|dataFrozen
           label:
             text: labels.storage.data_frozen_size
           schema:
-            $ref: schema#/properties/spec/properties/volumeExpansion/properties/topology/properties/dataFrozen
+            $ref: schema#/properties/spec/properties/volumeExpansion/properties/dataFrozen
           type: input
         - computed: setValueFromDbDetails|/spec/topology/dataHot/storage/resources/requests/storage
           if: hasVolumeExpansion|dataHot
           label:
             text: labels.storage.data_hot_size
           schema:
-            $ref: schema#/properties/spec/properties/volumeExpansion/properties/topology/properties/dataHot
+            $ref: schema#/properties/spec/properties/volumeExpansion/properties/dataHot
           type: input
         - computed: setValueFromDbDetails|/spec/topology/dataWarm/storage/resources/requests/storage
           if: hasVolumeExpansion|dataWarm
           label:
             text: labels.storage.data_warm_size
           schema:
-            $ref: schema#/properties/spec/properties/volumeExpansion/properties/topology/properties/dataWarm
+            $ref: schema#/properties/spec/properties/volumeExpansion/properties/dataWarm
           type: input
         if: ifDbTypeEqualsTo|topology|VolumeExpansion
         label:
           text: labels.storage.size
         schema:
-          $ref: schema#/properties/spec/properties/volumeExpansion/properties/topology
+          $ref: schema#/properties/spec/properties/volumeExpansion
         show_label: true
         type: single-step-form
       if: ifRequestTypeEqualsTo|VolumeExpansion

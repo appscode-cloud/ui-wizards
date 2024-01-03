@@ -153,57 +153,197 @@ steps:
       type: single-step-form
     - elements:
       - elements:
-        - computed: setValueFromDbDetails|/spec/podTemplate/spec/resources|/spec/verticalScaling/standalone
+        - computed: setValueFromDbDetails|/spec/podTemplate/spec/resources|/spec/verticalScaling/standalone/resources
           label:
-            text: Standalone vertical scaling
+            text: labels.resources
           schema:
-            $ref: schema#/properties/spec/properties/verticalScaling/properties/standalone
+            $ref: schema#/properties/spec/properties/verticalScaling/properties/standalone/properties/resources
           type: resource-input-form
+        - label:
+            text: labels.node_selection_policy
+          options:
+          - text: LabelSelector
+            value: LabelSelector
+          - text: Taint
+            value: Taint
+          schema:
+            $ref: schema#/properties/spec/properties/verticalScaling/properties/standalone/properties/nodeSelectionPolicy
+          type: select
+        - isArray: true
+          keys:
+            label:
+              text: labels.key
+          label:
+            text: labels.topology
+          schema:
+            $ref: schema#/properties/spec/properties/verticalScaling/properties/standalone/properties/topology
+          type: key-value-input-form
+          values:
+            label:
+              text: labels.value
+            schema:
+              $ref: schema#/properties/spec/properties/verticalScaling/properties/standalone/properties/topology
+            type: input
         if: ifDbTypeEqualsTo|standalone|verticalScaling
+        label:
+          text: Standalone vertical scaling
         schema:
           $ref: schema#/properties/spec/properties/verticalScaling/properties/standalone
+        show_label: true
         type: single-step-form
       - elements:
-        - computed: setValueFromDbDetails|/spec/podTemplate/spec/resources|/spec/verticalScaling/replicaSet
+        - computed: setValueFromDbDetails|/spec/podTemplate/spec/resources|/spec/verticalScaling/replicaSet/resources
           label:
-            text: 'Replicaset vertical scaling '
+            text: labels.resources
           schema:
-            $ref: schema#/properties/spec/properties/verticalScaling/properties/replicaSet
+            $ref: schema#/properties/spec/properties/verticalScaling/properties/replicaSet/properties/resources
           type: resource-input-form
+        - label:
+            text: labels.node_selection_policy
+          options:
+          - text: LabelSelector
+            value: LabelSelector
+          - text: Taint
+            value: Taint
+          schema:
+            $ref: schema#/properties/spec/properties/verticalScaling/properties/replicaSet/properties/nodeSelectionPolicy
+          type: select
+        - isArray: true
+          keys:
+            label:
+              text: labels.key
+          label:
+            text: labels.topology
+          schema:
+            $ref: schema#/properties/spec/properties/verticalScaling/properties/replicaSet/properties/topology
+          type: key-value-input-form
+          values:
+            label:
+              text: labels.value
+            schema:
+              $ref: schema#/properties/spec/properties/verticalScaling/properties/replicaSet/properties/topology
+            type: input
         if: ifDbTypeEqualsTo|replicaSet|verticalScaling
+        label:
+          text: Replicaset vertical scaling
         schema:
           $ref: schema#/properties/spec/properties/verticalScaling/properties/replicaSet
+        show_label: true
         type: single-step-form
       - elements:
         - elements:
-          - computed: setValueFromDbDetails|/spec/shardTopology/configServer/podTemplate/spec/resources|/spec/verticalScaling/configServer
+          - computed: setValueFromDbDetails|/spec/shardTopology/configServer/podTemplate/spec/resources|/spec/verticalScaling/configServer/resources
             label:
-              text: Config Server Vertical Scaling
+              text: labels.resources
             schema:
-              $ref: schema#/properties/spec/properties/verticalScaling/properties/configServer
+              $ref: schema#/properties/spec/properties/verticalScaling/properties/configServer/properties/resources
             type: resource-input-form
+          - label:
+              text: labels.node_selection_policy
+            options:
+            - text: LabelSelector
+              value: LabelSelector
+            - text: Taint
+              value: Taint
+            schema:
+              $ref: schema#/properties/spec/properties/verticalScaling/properties/configServer/properties/nodeSelectionPolicy
+            type: select
+          - isArray: true
+            keys:
+              label:
+                text: labels.key
+            label:
+              text: labels.topology
+            schema:
+              $ref: schema#/properties/spec/properties/verticalScaling/properties/configServer/properties/topology
+            type: key-value-input-form
+            values:
+              label:
+                text: labels.value
+              schema:
+                $ref: schema#/properties/spec/properties/verticalScaling/properties/configServer/properties/topology
+              type: input
+          label:
+            text: Config Server Vertical Scaling
           schema:
             $ref: schema#/properties/spec/properties/verticalScaling/properties/configServer
+          show_label: true
           type: single-step-form
         - elements:
-          - computed: setValueFromDbDetails|/spec/shardTopology/mongos/podTemplate/spec/resources|/spec/verticalScaling/mongos
+          - computed: setValueFromDbDetails|/spec/shardTopology/mongos/podTemplate/spec/resources|/spec/verticalScaling/mongos/resources
             label:
-              text: Mongos Vertical Scaling
+              text: labels.resources
             schema:
-              $ref: schema#/properties/spec/properties/verticalScaling/properties/mongos
+              $ref: schema#/properties/spec/properties/verticalScaling/properties/mongos/properties/resources
             type: resource-input-form
+          - label:
+              text: labels.node_selection_policy
+            options:
+            - text: LabelSelector
+              value: LabelSelector
+            - text: Taint
+              value: Taint
+            schema:
+              $ref: schema#/properties/spec/properties/verticalScaling/properties/mongos/properties/nodeSelectionPolicy
+            type: select
+          - isArray: true
+            keys:
+              label:
+                text: labels.key
+            label:
+              text: labels.topology
+            schema:
+              $ref: schema#/properties/spec/properties/verticalScaling/properties/mongos/properties/topology
+            type: key-value-input-form
+            values:
+              label:
+                text: labels.value
+              schema:
+                $ref: schema#/properties/spec/properties/verticalScaling/properties/mongos/properties/topology
+              type: input
+          label:
+            text: Mongos Vertical Scaling
           schema:
             $ref: schema#/properties/spec/properties/verticalScaling/properties/mongos
+          show_label: true
           type: single-step-form
         - elements:
-          - computed: setValueFromDbDetails|/spec/shardTopology/shard/podTemplate/spec/resources|/spec/verticalScaling/shard
+          - computed: setValueFromDbDetails|/spec/shardTopology/shard/podTemplate/spec/resources|/spec/verticalScaling/shard/resources
             label:
-              text: Shard Vertical Scaling
+              text: labels.resources
             schema:
-              $ref: schema#/properties/spec/properties/verticalScaling/properties/shard
+              $ref: schema#/properties/spec/properties/verticalScaling/properties/shard/properties/resources
             type: resource-input-form
+          - label:
+              text: labels.node_selection_policy
+            options:
+            - text: LabelSelector
+              value: LabelSelector
+            - text: Taint
+              value: Taint
+            schema:
+              $ref: schema#/properties/spec/properties/verticalScaling/properties/shard/properties/nodeSelectionPolicy
+            type: select
+          - isArray: true
+            keys:
+              label:
+                text: labels.key
+            label:
+              text: labels.topology
+            schema:
+              $ref: schema#/properties/spec/properties/verticalScaling/properties/shard/properties/topology
+            type: key-value-input-form
+            values:
+              label:
+                text: labels.value
+              schema:
+                $ref: schema#/properties/spec/properties/verticalScaling/properties/shard/properties/topology
+              type: input
+          label:
+            text: Shard Vertical Scaling
           schema:
             $ref: schema#/properties/spec/properties/verticalScaling/properties/shard
+          show_label: true
           type: single-step-form
         if: ifDbTypeEqualsTo|sharded|verticalScaling
         label:

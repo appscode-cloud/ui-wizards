@@ -92,13 +92,45 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/horizontalScaling
       type: single-step-form
-    - computed: setValueFromDbDetails|/spec/podTemplate/spec/resources|/spec/verticalScaling/proxysql
+    - elements:
+      - computed: setValueFromDbDetails|/spec/podTemplate/spec/resources|/spec/verticalScaling/proxysql/resources
+        label:
+          text: labels.resources
+        schema:
+          $ref: schema#/properties/spec/properties/verticalScaling/properties/proxysql/properties/resources
+        type: resource-input-form
+      - label:
+          text: labels.node_selection_policy
+        options:
+        - text: LabelSelector
+          value: LabelSelector
+        - text: Taint
+          value: Taint
+        schema:
+          $ref: schema#/properties/spec/properties/verticalScaling/properties/proxysql/properties/nodeSelectionPolicy
+        type: select
+      - isArray: true
+        keys:
+          label:
+            text: labels.key
+        label:
+          text: labels.topology
+        schema:
+          $ref: schema#/properties/spec/properties/verticalScaling/properties/proxysql/properties/topology
+        type: key-value-input-form
+        values:
+          label:
+            text: labels.value
+          schema:
+            $ref: schema#/properties/spec/properties/verticalScaling/properties/proxysql/properties/topology
+          type: input
       if: ifRequestTypeEqualsTo|VerticalScaling
       label:
-        text: labels.resources
+        text: labels.proxysql
       schema:
         $ref: schema#/properties/spec/properties/verticalScaling/properties/proxysql
-      type: resource-input-form
+      show_label: true
+      type: single-step-form
     - elements:
       - computed: setValueFromDbDetails|/spec/initConfig/adminVariables|/spec/configuration/adminVariables
         isArray: true
