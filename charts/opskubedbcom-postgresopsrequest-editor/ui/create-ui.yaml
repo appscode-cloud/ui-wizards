@@ -97,17 +97,49 @@ steps:
       type: single-step-form
     - elements:
       - elements:
-        - computed: setValueFromDbDetails|/spec/podTemplate/spec/resources|/spec/verticalScaling/postgres
+        - elements:
+          - computed: setValueFromDbDetails|/spec/podTemplate/spec/resources|/spec/verticalScaling/postgres/resources
+            label:
+              text: labels.resources
+            schema:
+              $ref: schema#/properties/spec/properties/verticalScaling/properties/postgres/properties/resources
+            type: resource-input-form
+          - label:
+              text: labels.node_selection_policy
+            options:
+            - text: LabelSelector
+              value: LabelSelector
+            - text: Taint
+              value: Taint
+            schema:
+              $ref: schema#/properties/spec/properties/verticalScaling/properties/postgres/properties/nodeSelectionPolicy
+            type: select
+          - isArray: true
+            keys:
+              label:
+                text: labels.key
+            label:
+              text: labels.topology
+            schema:
+              $ref: schema#/properties/spec/properties/verticalScaling/properties/postgres/properties/topology
+            type: key-value-input-form
+            values:
+              label:
+                text: labels.value
+              schema:
+                $ref: schema#/properties/spec/properties/verticalScaling/properties/postgres/properties/topology
+              type: input
           label:
             text: labels.postgres
           schema:
             $ref: schema#/properties/spec/properties/verticalScaling/properties/postgres
-          type: resource-input-form
-        - computed: setValueFromDbDetails|/spec/monitor/prometheus/exporter/resources|/spec/verticalScaling/exporter
+          show_label: true
+          type: single-step-form
+        - computed: setValueFromDbDetails|/spec/monitor/prometheus/exporter/resources|/spec/verticalScaling/exporter/resources
           label:
             text: labels.exporter
           schema:
-            $ref: schema#/properties/spec/properties/verticalScaling/properties/exporter
+            $ref: schema#/properties/spec/properties/verticalScaling/properties/exporter/resources
           type: resource-input-form
         schema:
           $ref: schema#/properties/spec/properties/verticalScaling/properties/postgres
