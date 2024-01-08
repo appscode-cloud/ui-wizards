@@ -1,0 +1,77 @@
+apiVersion: storage.kubestash.com/v1alpha1
+kind: BackupStorage
+metadata:
+  name: {{ include "storagekubestashcom-backupstorage-editor-options.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "storagekubestashcom-backupstorage-editor-options.labels" . | nindent 4 }}
+{{- if .Values.spec.annotations }}
+  annotations:
+    {{- include "storagekubestashcom-backupstorage-editor-options.annotations" . | nindent 4 }}
+{{- end }}
+spec:
+  backend:
+    storageSecretName: {{ default (printf "%s-repo-cred" (include "storagekubestashcom-backupstorage-editor-options.fullname" .)) .Values.spec.storageSecret.name }}
+
+  {{- if eq .Values.spec.backend.provider "s3" }}
+    {{- with .Values.spec.backend.s3.spec }}
+    s3:
+      endpoint: {{ .endpoint }}
+      bucket: {{ .bucket }}
+      {{- with .region }}
+      region: {{ . }}
+      {{- end }}
+      {{- with .prefix }}
+      prefix: {{ . }}
+      {{- end }}
+    {{- end }}
+  {{- end }}
+
+  {{- if eq .Values.spec.backend.provider "azure" }}
+    {{- with .Values.spec.backend.azure.spec }}
+    azure:
+      container: {{ .container }}
+      {{- with .prefix }}
+      prefix: {{ . }}
+      {{- end }}
+      {{- with .maxConnections }}
+      maxConnections: {{ . }}
+      {{- end }}
+    {{- end }}
+  {{- end }}
+
+  {{- if eq .Values.spec.backend.provider "gcs" }}
+    {{- with .Values.spec.backend.gcs.spec }}
+    gcs:
+      bucket: {{ .bucket }}
+      {{- with .prefix }}
+      prefix: {{ . }}
+      {{- end }}
+      {{- with .maxConnections }}
+      maxConnections: {{ . }}
+      {{- end }}
+    {{- end }}
+  {{- end }}
+
+  {{- if eq .Values.spec.backend.provider "swift" }}
+    {{- with .Values.spec.backend.swift.spec }}
+    swift:
+      container: {{ .container }}
+      {{- with .prefix }}
+      prefix: {{ . }}
+      {{- end }}
+    {{- end }}
+  {{- end }}
+
+  {{- if eq .Values.spec.backend.provider "b2" }}
+    {{- with .Values.spec.backend.b2.spec }}
+    b2:
+      bucket: {{ .bucket }}
+      {{- with .prefix }}
+      prefix: {{ . }}
+      {{- end }}
+      {{- with .maxConnections }}
+      maxConnections: {{ . }}
+      {{- end }}
+    {{- end }}
+  {{- end }}
