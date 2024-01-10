@@ -1,36 +1,5 @@
+apiVersion: stash.appscode.com/v1alpha1
+kind: Repository
 metadata:
-  resource:
-    group: stash.appscode.com
-    version: v1alpha1
-    name: repositories
-    kind: Repository
-    scope: Namespaced
-  release:
-    name: RELEASE-NAME
-    namespace: default
-resources:
-  secret_repo_cred: # +doc-gen:break
-    apiVersion: v1
-    kind: Secret
-    metadata:
-      name: s3-repo-cred
-      namespace: demo
-    stringData:
-      AWS_ACCESS_KEY_ID: "y"
-      AWS_SECRET_ACCESS_KEY: z
-      RESTIC_PASSWORD: x
-    type: Opaque
-  stashAppscodeComRepository: # +doc-gen:break
-    apiVersion: stash.appscode.com/v1alpha1
-    kind: Repository
-    metadata:
-      name: s3
-      namespace: demo
-    spec:
-      backend:
-        s3:
-          bucket: stash-demo
-          endpoint: s3.amazonaws.com
-          prefix: /backup/demo/deployment/stash-demo
-          region: us-west-1
-        storageSecretName: s3-secret
+  name: repository
+  namespace: default
