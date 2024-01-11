@@ -137,3 +137,34 @@ resources:
       values:
         stash-metrics:
           enabled: false
+  helmToolkitFluxcdIoHelmRelease_stash_presets: # +doc-gen:break
+    apiVersion: helm.toolkit.fluxcd.io/v2beta2
+    kind: HelmRelease
+    metadata:
+      labels:
+        app.kubernetes.io/component: stash-presets
+      name: stash-presets
+      namespace: kubeops
+    spec:
+      chart:
+        spec:
+          chart: stash-presets
+          sourceRef:
+            kind: HelmRepository
+            name: appscode-charts-oci
+            namespace: kubeops
+          version: v2023.11.14
+      install:
+        crds: CreateReplace
+        createNamespace: true
+        remediation:
+          retries: -1
+      interval: 5m
+      releaseName: stash-presets
+      storageNamespace: stash
+      targetNamespace: stash
+      timeout: 30m
+      upgrade:
+        crds: CreateReplace
+        remediation:
+          retries: -1

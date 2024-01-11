@@ -40,9 +40,9 @@ type KubeStashInfo struct {
 	// +optional
 	Schedule string `json:"schedule,omitempty"`
 	// RetentionPolicy indicates the policy to follow to clean old backup snapshots
-	RetentionPolicy stashv1alpha1.RetentionPolicy `json:"retentionPolicy"`
-	AuthSecret      AuthSecret                    `json:"authSecret"`
-	Backend         RepositoryBackend             `json:"backend"`
+	RetentionPolicy  NamespacedName `json:"retentionPolicy"`
+	EncryptionSecret AuthSecret     `json:"encryptionSecret"`
+	Backend          NamespacedName `json:"backend"`
 }
 
 type StashInfo struct {
