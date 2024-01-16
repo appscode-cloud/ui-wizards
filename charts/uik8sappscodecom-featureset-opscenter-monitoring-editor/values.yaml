@@ -102,6 +102,37 @@ resources:
         crds: CreateReplace
         remediation:
           retries: -1
+  helmToolkitFluxcdIoHelmRelease_metrics_server: # +doc-gen:break
+    apiVersion: helm.toolkit.fluxcd.io/v2beta2
+    kind: HelmRelease
+    metadata:
+      labels:
+        app.kubernetes.io/component: metrics-server
+      name: metrics-server
+      namespace: kubeops
+    spec:
+      chart:
+        spec:
+          chart: metrics-server
+          sourceRef:
+            kind: HelmRepository
+            name: appscode-charts-oci
+            namespace: kubeops
+          version: v0.0.3
+      install:
+        crds: CreateReplace
+        createNamespace: true
+        remediation:
+          retries: -1
+      interval: 5m
+      releaseName: metrics-server
+      storageNamespace: monitoring
+      targetNamespace: monitoring
+      timeout: 30m
+      upgrade:
+        crds: CreateReplace
+        remediation:
+          retries: -1
   helmToolkitFluxcdIoHelmRelease_monitoring_operator: # +doc-gen:break
     apiVersion: helm.toolkit.fluxcd.io/v2beta2
     kind: HelmRelease
@@ -157,6 +188,37 @@ resources:
           retries: -1
       interval: 5m
       releaseName: panopticon
+      storageNamespace: monitoring
+      targetNamespace: monitoring
+      timeout: 30m
+      upgrade:
+        crds: CreateReplace
+        remediation:
+          retries: -1
+  helmToolkitFluxcdIoHelmRelease_prometheus_adapter: # +doc-gen:break
+    apiVersion: helm.toolkit.fluxcd.io/v2beta2
+    kind: HelmRelease
+    metadata:
+      labels:
+        app.kubernetes.io/component: prometheus-adapter
+      name: prometheus-adapter
+      namespace: kubeops
+    spec:
+      chart:
+        spec:
+          chart: prometheus-adapter
+          sourceRef:
+            kind: HelmRepository
+            name: appscode-charts-oci
+            namespace: kubeops
+          version: v0.0.3
+      install:
+        crds: CreateReplace
+        createNamespace: true
+        remediation:
+          retries: -1
+      interval: 5m
+      releaseName: prometheus-adapter
       storageNamespace: monitoring
       targetNamespace: monitoring
       timeout: 30m
