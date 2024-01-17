@@ -1,0 +1,59 @@
+steps:
+- form:
+    elements:
+
+    - disabled: true
+      label:
+        text: "Name"
+      computed: getDbName
+      schema:
+        "$ref": schema#/properties/metadata/properties/name
+      type: input
+
+    - disabled: true
+      label: 
+        text: "Namespace"
+      computed: getDbNamespace
+      schema:
+        "$ref": schema#/properties/metadata/properties/namespace
+      type: input
+
+    - required: true
+      fetch: getResources|core|v1|namespaces
+      label:
+        text: Select VaultServer
+      refresh: true
+      schema:
+        $ref: discriminator#/properties/vaultserver
+      type: select
+
+    - disabled: true
+      if: isVaultSelected
+      label:
+        text: Vaultref name
+      computed: vaultRefName
+      schema:
+        $ref: schema#/properties/spec/properties/vaultRef/properties/name
+      type: input
+      onChange: specRef
+
+    - disabled: true
+      if: isVaultSelected
+      label:
+        text: Vaultref namespace
+      computed: vaultRefNamespace
+      schema:
+        $ref: schema#/properties/spec/properties/vaultRef/properties/namespace
+      type: input
+
+    - disabled: true
+      label:
+        text: "Plugin Name"
+      computed: getPluginName
+      schema:
+        $ref: discriminator#/properties/plugin-name
+      type: input
+    
+    type: single-step-form
+  id: basic
+type: multi-step-form

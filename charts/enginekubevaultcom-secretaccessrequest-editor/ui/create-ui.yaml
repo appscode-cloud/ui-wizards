@@ -1,0 +1,94 @@
+steps:
+- form:
+    elements:
+
+    - label:
+        text: "Name"
+      computed: getDbName
+      schema:
+        "$ref": schema#/properties/metadata/properties/name
+      type: input
+
+    - disabled: true
+      label: 
+        text: "Namespace"
+      computed: getDbNamespace
+      schema:
+        "$ref": schema#/properties/metadata/properties/namespace
+      type: input
+
+    - required: true
+      fetch: getResources|core|v1|namespaces
+      label:
+        text: Select Role
+      refresh: true
+      schema:
+        $ref: schema#/properties/spec/properties/roleRef
+      type: select
+      onChange: getRoleKind
+
+    - type: "single-step-form-array"
+      label: 
+        text: "Subjects"
+      addFormLabel: "Subject"
+      schema: 
+        $ref: "schema#/properties/spec/properties/subjects"
+      tableContents: 
+        - type: "value"
+          typeOfValue: "string"
+          inTableColumn: true
+          label: 
+            text: "Name"
+          path: "name"
+        - type: "value"
+          typeOfValue: "string"
+          inTableColumn: true
+          label: 
+            text: "Kind"
+          path: "kind"
+        - type: "value"
+          typeOfValue: "string"
+          inTableColumn: true
+          label: 
+            text: "Namespace"
+          path: "namespace"
+        - type: "value"
+          typeOfValue: "string"
+          inTableColumn: true
+          label: 
+            text: "APIGroup"
+          path: "apigroup"
+      element: 
+        elements: 
+          - label: 
+              text: "Name"
+            type: "input"
+            schema: 
+              $ref: "schema#/properties/spec/properties/subjects/items/properties/name"
+          - label: 
+              text: "Kind"
+            type: "input"
+            schema: 
+              $ref: "schema#/properties/spec/properties/subjects/items/properties/kind"
+          - label: 
+              text: "Namespace"
+            type: "input"
+            schema: 
+              $ref: "schema#/properties/spec/properties/subjects/items/properties/namespace"
+          - label: 
+              text: "APIGroup"
+            type: "input"
+            schema: 
+              $ref: "schema#/properties/spec/properties/subjects/items/properties/apigroup"
+        type: "single-step-form"
+
+
+    - label:
+        text: "TTL"
+      schema:
+        $ref: schema#/properties/spec/properties/ttl
+      type: input
+
+    type: single-step-form
+  id: basic
+type: multi-step-form
