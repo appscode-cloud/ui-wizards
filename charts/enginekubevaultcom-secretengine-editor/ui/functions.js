@@ -26,17 +26,17 @@ async function getResources(
 
 function getDbName({storeGet}) {
   const path =  storeGet("/route/fullPath")
-  // const splitedPath = path.split('/')
-  return "abcd"
+  const splitedPath = path.split('/')
+  return splitedPath[6]
 }
 
 
 function getDbNamespace({storeGet}) {
-  // const path =  storeGet("/route/fullPath")
-  // const splitedPath = path.split('/')
-  // const segment = splitedPath[splitedPath.length-1]
-  // const namespace = segment.split('=')
-  return "efgh"
+  const path =  storeGet("/route/fullPath")
+  const splitedPath = path.split('/')
+  const segment = splitedPath[splitedPath.length-1]
+  const namespace = segment.split('=')
+  return namespace[1]
 }
 
 
