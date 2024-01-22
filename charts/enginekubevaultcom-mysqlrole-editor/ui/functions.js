@@ -30,8 +30,6 @@ async function getResources({ axios, storeGet }) {
     const namespace = (item.metadata && item.metadata.namespace) || ""
     item.text = name
     item.value = name
-    console.log(item.text);
-    console.log(item.text.startsWith(dbname));
     return true
   })
   const mappedresources = resources.filter(

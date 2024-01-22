@@ -1,9 +1,36 @@
-async function getResources(
-  { axios, storeGet },
-  group,
-  version,
-  resource
-) {
+function getDbName({storeGet}) {
+  const path =  storeGet("/route/fullPath")
+  const splitedPath = path.split('/')
+  return splitedPath[6]
+}
+
+
+function getDbVault({ storeGet, getValue, watchDependency, model }) {
+  watchDependency("model#/spec/vaultRef/name")
+  const val = getValue(model, "/spec/vaultRef/name") || ''
+  const dbName = getDbName({storeGet})
+  return val.length ? `${dbName}-${val}` : dbName
+}
+
+
+function getDbNamespace({storeGet}) {
+  const path =  storeGet("/route/fullPath")
+  const splitedPath = path.split('/')
+  const segment = splitedPath[splitedPath.length-1]
+  const namespace = segment.split('=')
+  return namespace[1] || ''
+}
+
+
+function isVaultSelected({ getValue, watchDependency, discriminator }) {
+  watchDependency("discriminator#/vaultserver")
+  const val = getValue(discriminator, "/vaultserver")
+  if(val && val.length > 0) return true
+  else return false
+};
+
+
+async function getResources({ axios, storeGet }) {
   const owner = storeGet("/route/params/user")
   const cluster = storeGet("/route/params/cluster")
 
@@ -16,45 +43,19 @@ async function getResources(
   resources.map((item) => {
     const name = (item.metadata && item.metadata.name) || ""
     const namespace = (item.metadata && item.metadata.namespace) || ""
-    item.text = `${name} (${namespace})`
-    item.value = `${name} (${namespace})`
+    item.text = `${namespace}/${name}`
+    item.value = `${namespace}/${name}`
     return true
   })
   return resources
 }
 
 
-function getDbName({storeGet}) {
-  const path =  storeGet("/route/fullPath")
-  const splitedPath = path.split('/')
-  return splitedPath[6]
-}
-
-
-function getDbNamespace({storeGet}) {
-  const path =  storeGet("/route/fullPath")
-  const splitedPath = path.split('/')
-  const segment = splitedPath[splitedPath.length-1]
-  const namespace = segment.split('=')
-  return namespace[1]
-}
-
-
-function isVaultSelected({ getValue, watchDependency, discriminator }) {
-  watchDependency("discriminator#/vaultserver")
-  const val = getValue(discriminator, "/vaultserver")
-  if(val && val.length > 0) return true
-  else return false
-};
-
-
 function vaultRefName({ getValue, discriminator }) {
-  //  watchDependency("model#/spec/vaultserver")
-  // specRef()
   const val = getValue(discriminator, "/vaultserver")
   let refName = ''
   if(val && val.length > 0) {
-    refName = val.split('(')[0].slice(0, -1)
+    refName = val.split('/')[1]
   }
   return refName
 }
@@ -64,7 +65,7 @@ function vaultRefNamespace({ getValue, discriminator }) {
   const val = getValue(discriminator, "/vaultserver")
   let refName = ''
   if(val && val.length > 0) {
-    refName = val.split('(')[1].slice(0, -1)
+    refName = val.split('/')[0]
   }
   return refName
 }
@@ -114,6 +115,7 @@ function specRef({ model, getValue, storeGet, commit}) {
 
 return {
   getDbName,
+  getDbVault,
   getDbNamespace,
 	getResources,
   isVaultSelected,

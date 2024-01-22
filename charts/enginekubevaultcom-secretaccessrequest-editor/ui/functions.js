@@ -14,12 +14,7 @@ function getDbNamespace({storeGet}) {
 }
 
 
-async function getResources(
-  { axios, storeGet },
-  group,
-  version,
-  resource
-) {
+async function getResources({ axios, storeGet }) {
   const owner = storeGet("/route/params/user")
   const cluster = storeGet("/route/params/cluster")
 
@@ -42,8 +37,9 @@ async function getResources(
     return true
   })
   const dbname = getDbName({storeGet}) || ''
-  const mappedresources = resources.filter((item) => item.spec && (item.spec.secretEngineRef.name === dbname) )
-  console.log(mappedresources);
+  const mappedresources = resources.filter(
+    (item) => item.spec && (item.spec.secretEngineRef.name.startsWith(dbname))
+  )
   return mappedresources
 }
 
