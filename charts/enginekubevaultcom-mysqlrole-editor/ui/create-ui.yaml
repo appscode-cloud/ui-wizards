@@ -1,68 +1,60 @@
 steps:
 - form:
     elements:
-
-    - label:
+    - computed: getDbName
+      label:
         text: Name
-      computed: getDbName
       schema:
         $ref: schema#/properties/metadata/properties/name
       type: input
-
-    - disabled: true
-      label: 
+    - computed: getDbNamespace
+      disabled: true
+      label:
         text: Namespace
-      computed: getDbNamespace
       schema:
         $ref: schema#/properties/metadata/properties/namespace
       type: input
-
-    - required: true
-      fetch: getResources|core|v1|namespaces
+    - fetch: getResources|core|v1|namespaces
       label:
         text: Select SecretEngine
       refresh: true
+      required: true
       schema:
         $ref: schema#/properties/spec/properties/secretEngineRef/properties/name
       type: select
-
     - label:
         text: DefaultTTL
       schema:
         $ref: schema#/properties/spec/properties/defaultTTL
       type: input
-
     - label:
         text: MaxTTL
       schema:
         $ref: schema#/properties/spec/properties/maxTTL
       type: input
-    
-    - label:
+    - element:
+        label:
+          text: Statement
+        schema:
+          $ref: schema#/properties/spec/properties/creationStatements/items
+        type: input
+      label:
         text: Creation Statements
       schema:
         $ref: schema#/properties/spec/properties/creationStatements
       type: list-input-form
-      element: 
-        label: 
+    - element:
+        label:
           text: Statement
-        schema: 
-          $ref: schema#/properties/spec/properties/creationStatements/items
+        schema:
+          $ref: schema#/properties/spec/properties/revocationStatements/items
         type: input
-
-    - label:
+      label:
         text: Revocation Statements
       schema:
         $ref: schema#/properties/spec/properties/revocationStatements
       type: list-input-form
-      element: 
-        label: 
-          text: Statement
-        schema: 
-          $ref: schema#/properties/spec/properties/revocationStatements/items
-        type: input
-
     type: single-step-form
-  title: Create MySQLRole
   id: basic
+  title: Create MySQLRole
 type: multi-step-form
