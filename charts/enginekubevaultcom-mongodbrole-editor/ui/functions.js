@@ -1,20 +1,16 @@
 function getDbName({ storeGet }) {
-  const path = storeGet("/route/fullPath");
-  const splitedPath = path.split("/");
-  return splitedPath[6] || "";
+  const name = storeGet("/route/params/name") || "";
+  return name;
 }
 
 function getDbNamespace({ storeGet }) {
-  const path = storeGet("/route/fullPath");
-  const splitedPath = path.split("/");
-  const segment = splitedPath[splitedPath.length - 1];
-  const namespace = segment.split("=");
-  return namespace[1] || "";
+  const namespace = storeGet("/route/query/namespace") || "";
+  return namespace;
 }
 
 async function getResources({ axios, storeGet }, group, version, resource) {
-  const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/route/params/cluster");
+  const owner = storeGet("/route/params/user") || "";
+  const cluster = storeGet("/route/params/cluster") || "";
   try {
     const resp = await axios.get(
       `/clusters/${owner}/${cluster}/proxy/${group}/${version}/${resource}`,
@@ -25,7 +21,7 @@ async function getResources({ axios, storeGet }, group, version, resource) {
 
     const resources = (resp && resp.data && resp.data.items) || [];
 
-    const dbname = getDbName({ storeGet }) || "";
+    const dbname = getDbName({ storeGet });
     resources.map((item) => {
       const name = (item.metadata && item.metadata.name) || "";
       const namespace = (item.metadata && item.metadata.namespace) || "";

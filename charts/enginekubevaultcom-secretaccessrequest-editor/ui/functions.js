@@ -1,20 +1,16 @@
 function getDbName({ storeGet }) {
-  const path = storeGet("/route/fullPath");
-  const splitedPath = path.split("/");
-  return splitedPath[6] || "";
+  const name = storeGet("/route/params/name") || "";
+  return name;
 }
 
 function getDbNamespace({ storeGet }) {
-  const path = storeGet("/route/fullPath");
-  const splitedPath = path.split("/");
-  const segment = splitedPath[splitedPath.length - 1];
-  const namespace = segment.split("=");
-  return namespace[1] || "";
+  const namespace = storeGet("/route/query/namespace") || "";
+  return namespace;
 }
 
 async function getNamespaces({ axios, storeGet }, group, version, resource) {
-  const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/route/params/cluster");
+  const owner = storeGet("/route/params/user") || "";
+  const cluster = storeGet("/route/params/cluster") || "";
 
   try {
     const resp = await axios.get(
@@ -40,19 +36,20 @@ async function getNamespaces({ axios, storeGet }, group, version, resource) {
 }
 
 function getResourceRoleName(resource) {
-  if (resource === "elasticsearches") return "ElasticsearchRole";
-  else if (resource === "mariadbs") return "MysqlRole";
-  else if (resource === "mongodbs") return "MongodbRole";
-  else if (resource === "mysqls") return "MysqlRole";
-  else if (resource === "postgreses") return "PostgresRole";
-  else if (resource === "redises") return "RedisRole";
+  if (resource === "elasticsearches") return "elasticsearchroles";
+  else if (resource === "mariadbs") return "mariadbroles";
+  else if (resource === "mongodbs") return "mongodbroles";
+  else if (resource === "mysqls") return "mysqlroles";
+  else if (resource === "postgreses") return "postgresroles";
+  else if (resource === "redises") return "redisroles";
+  else return ""
 }
 
 async function getDbRoles({ axios, storeGet }, group, version) {
-  const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/route/params/cluster");
+  const owner = storeGet("/route/params/user") || "";
+  const cluster = storeGet("/route/params/cluster") || "";
   const resource = storeGet("/route/params/resource") || "";
-  const pluralRole = getResourceRoleName(resource).toLowerCase() + "s";
+  const pluralRole = getResourceRoleName(resource);
   try {
     const url = `/clusters/${owner}/${cluster}/proxy/${group}/${version}/${pluralRole}`;
     const resp = await axios.get(url);
@@ -60,8 +57,8 @@ async function getDbRoles({ axios, storeGet }, group, version) {
 
     resources.map((item) => {
       const name = (item.metadata && item.metadata.name) || "";
-      const kind = item && item.kind;
-      const namespace = item.metadata && item.metadata.namespace;
+      const kind = (item && item.kind) || "";
+      const namespace = (item.metadata && item.metadata.namespace) || "";
       item.text = name;
       item.value = {
         name: name,
@@ -81,28 +78,10 @@ async function getDbRoles({ axios, storeGet }, group, version) {
   }
 }
 
-function getRoleKind({ model, getValue, storeGet, commit }) {
-  const resource = storeGet("/route/params/resource") || "";
-  const kind = getResourceRoleName(resource);
-
-  let specRef = getValue(model, "/spec/roleRef") || {};
-  specRef.kind = kind;
-  specRef.namespace = getDbNamespace({ storeGet });
-  if (kind) {
-    commit("wizard/model$update", {
-      path: `/spec/roleRef`,
-      value: specRef,
-      force: true,
-    });
-  }
-  return kind;
-}
-
 return {
   getDbName,
   getDbNamespace,
   getNamespaces,
   getResourceRoleName,
   getDbRoles,
-  getRoleKind,
 };

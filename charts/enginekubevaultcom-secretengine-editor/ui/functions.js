@@ -1,7 +1,6 @@
 function getDbName({ storeGet }) {
-  const path = storeGet("/route/fullPath");
-  const splitedPath = path.split("/");
-  return splitedPath[6];
+  const name = storeGet("/route/params/name") || "";
+  return name;
 }
 
 function getDbVault({ storeGet, getValue, watchDependency, model }) {
@@ -12,23 +11,19 @@ function getDbVault({ storeGet, getValue, watchDependency, model }) {
 }
 
 function getDbNamespace({ storeGet }) {
-  const path = storeGet("/route/fullPath");
-  const splitedPath = path.split("/");
-  const segment = splitedPath[splitedPath.length - 1];
-  const namespace = segment.split("=");
-  return namespace[1] || "";
+  const namespace = storeGet("/route/query/namespace") || "";
+  return namespace;
 }
 
 function isVaultSelected({ getValue, watchDependency, discriminator }) {
   watchDependency("discriminator#/vaultserver");
-  const val = getValue(discriminator, "/vaultserver");
-  if (val && val.length > 0) return true;
-  else return false;
+  const val = getValue(discriminator, "/vaultserver") || "";
+  return val.length > 0 ? true : false;
 }
 
 async function getResources({ axios, storeGet }, group, version, resource) {
-  const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/route/params/cluster");
+  const owner = storeGet("/route/params/user") || "";
+  const cluster = storeGet("/route/params/cluster") || "";
   try {
     const resp = await axios.get(
       `/clusters/${owner}/${cluster}/proxy/${group}/${version}/${resource}`,
@@ -56,7 +51,7 @@ async function getResources({ axios, storeGet }, group, version, resource) {
 }
 
 function vaultRefName({ getValue, discriminator }) {
-  const val = getValue(discriminator, "/vaultserver");
+  const val = getValue(discriminator, "/vaultserver") || "";
   let refName = "";
   if (val && val.length > 0) {
     refName = val.split("/")[1];
@@ -65,7 +60,7 @@ function vaultRefName({ getValue, discriminator }) {
 }
 
 function vaultRefNamespace({ getValue, discriminator }) {
-  const val = getValue(discriminator, "/vaultserver");
+  const val = getValue(discriminator, "/vaultserver") || "";
   let refName = "";
   if (val && val.length > 0) {
     refName = val.split("/")[0];
