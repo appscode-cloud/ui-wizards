@@ -3,76 +3,76 @@ steps:
     elements:
     - computed: getDbName
       label:
-        text: Name
+        text: metadata.name
       schema:
         $ref: schema#/properties/metadata/properties/name
       type: input
     - computed: getDbNamespace
       disabled: true
       label:
-        text: Namespace
+        text: metadata.namespace
       schema:
         $ref: schema#/properties/metadata/properties/namespace
       type: input
     - fetch: getResources|engine.kubevault.com|v1alpha1|secretengines
       label:
-        text: Select SecretEngine
+        text: labels.select
       refresh: true
       required: true
       schema:
         $ref: schema#/properties/spec/properties/secretEngineRef/properties/name
       type: select
     - label:
-        text: DefaultTTL
+        text: spec.defaultTTL
       schema:
         $ref: schema#/properties/spec/properties/defaultTTL
       type: input
     - label:
-        text: MaxTTL
+        text: spec.maxTTL
       schema:
         $ref: schema#/properties/spec/properties/maxTTL
       type: input
     - element:
         label:
-          text: Statement
+          text: labels.statement
         schema:
           $ref: schema#/properties/spec/properties/creationStatements/items
         type: input
       label:
-        text: Creation Statements
+        text: spec.creation
       schema:
         $ref: schema#/properties/spec/properties/creationStatements
       type: list-input-form
     - element:
         label:
-          text: Statement
+          text: labels.statement
         schema:
           $ref: schema#/properties/spec/properties/revocationStatements/items
         type: input
       label:
-        text: Revocation Statements
+        text: spec.revocation
       schema:
         $ref: schema#/properties/spec/properties/revocationStatements
       type: list-input-form
     - element:
         label:
-          text: Statement
+          text: labels.statement
         schema:
           $ref: schema#/properties/spec/properties/rollbackStatements/items
         type: input
       label:
-        text: Rollback Statements
+        text: spec.rollback
       schema:
         $ref: schema#/properties/spec/properties/rollbackStatements
       type: list-input-form
     - element:
         label:
-          text: Statement
+          text: labels.statement
         schema:
           $ref: schema#/properties/spec/properties/renewStatements/items
         type: input
       label:
-        text: Renew Statements
+        text: spec.renew
       schema:
         $ref: schema#/properties/spec/properties/renewStatements
       type: list-input-form
