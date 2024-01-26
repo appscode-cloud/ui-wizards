@@ -1,0 +1,88 @@
+steps:
+- form:
+    elements:
+    - computed: getDbName
+      label:
+        text: metadata.name
+      schema:
+        $ref: schema#/properties/metadata/properties/name
+      type: input
+    - computed: getDbNamespace
+      disabled: true
+      label:
+        text: metadata.namespace
+      schema:
+        $ref: schema#/properties/metadata/properties/namespace
+      type: input
+    - fetch: getDbRoles|engine.kubevault.com|v1alpha1
+      label:
+        text: labels.select
+      refresh: true
+      required: true
+      schema:
+        $ref: schema#/properties/spec/properties/roleRef
+      type: select
+    - addFormLabel: Subject
+      element:
+        elements:
+        - label:
+            text: spec.subjects.name
+          schema:
+            $ref: schema#/properties/spec/properties/subjects/items/properties/name
+          type: input
+        - label:
+            text: spec.subjects.kind
+          schema:
+            $ref: schema#/properties/spec/properties/subjects/items/properties/kind
+          type: input
+        - fetch: getNamespaces|core|v1|namespaces
+          label:
+            text: spec.subjects.namespace
+          schema:
+            $ref: schema#/properties/spec/properties/subjects/items/properties/namespace
+          type: select
+        - label:
+            text: spec.subjects.group
+          schema:
+            $ref: schema#/properties/spec/properties/subjects/items/properties/apiGroup
+          type: input
+        type: single-step-form
+      label:
+        text: spec.subjects.title
+      schema:
+        $ref: schema#/properties/spec/properties/subjects
+      tableContents:
+      - inTableColumn: true
+        label:
+          text: spec.subjects.name
+        path: name
+        type: value
+        typeOfValue: string
+      - inTableColumn: true
+        label:
+          text: spec.subjects.kind
+        path: kind
+        type: value
+        typeOfValue: string
+      - inTableColumn: true
+        label:
+          text: spec.subjects.namespace
+        path: namespace
+        type: value
+        typeOfValue: string
+      - inTableColumn: true
+        label:
+          text: spec.subjects.group
+        path: apigroup
+        type: value
+        typeOfValue: string
+      type: single-step-form-array
+    - label:
+        text: labels.ttl
+      schema:
+        $ref: schema#/properties/spec/properties/ttl
+      type: input
+    type: single-step-form
+  id: basic
+  title: Create SecretAccessRequest
+type: multi-step-form

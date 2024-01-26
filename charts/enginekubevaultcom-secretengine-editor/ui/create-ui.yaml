@@ -1,0 +1,53 @@
+steps:
+- form:
+    elements:
+    - computed: getDbVault
+      disabled: true
+      label:
+        text: metadata.name
+      schema:
+        $ref: schema#/properties/metadata/properties/name
+      type: input
+    - computed: getDbNamespace
+      disabled: true
+      label:
+        text: metadata.namespace
+      schema:
+        $ref: schema#/properties/metadata/properties/namespace
+      type: input
+    - fetch: getResources|kubevault.com|v1alpha2|vaultservers
+      label:
+        text: labels.select
+      refresh: true
+      required: true
+      schema:
+        $ref: discriminator#/properties/vaultserver
+      type: select
+    - computed: vaultRefName
+      disabled: true
+      if: isVaultSelected
+      label:
+        text: spec.vaultRef.name
+      onChange: getSpecRef
+      schema:
+        $ref: schema#/properties/spec/properties/vaultRef/properties/name
+      type: input
+    - computed: vaultRefNamespace
+      disabled: true
+      if: isVaultSelected
+      label:
+        text: spec.vaultRef.namespace
+      schema:
+        $ref: schema#/properties/spec/properties/vaultRef/properties/namespace
+      type: input
+    - computed: getPluginName
+      disabled: true
+      label:
+        text: labels.plugin
+      schema:
+        $ref: discriminator#/properties/plugin-name
+      type: input
+    type: single-step-form
+  id: basic
+  title: Create SecretEngine
+type: multi-step-form
