@@ -2,7 +2,7 @@ function isConsole({ storeGet }) {
   const owner = storeGet("/route/params/user");
   const path = storeGet("/route/path");
   const prefix = `/${owner}/kubernetes`;
-  if(path.startsWith(prefix)) return true;
+  if (path.startsWith(prefix)) return true;
   return false;
 }
 
@@ -15,7 +15,7 @@ async function getDatabases({ axios, storeGet }, group, version, resource) {
       {
         params: {
           convertToTable: true,
-          labelSelector: 'k8s.io/group=kubedb.com'
+          labelSelector: "k8s.io/group=kubedb.com",
         },
       }
     );
@@ -30,7 +30,7 @@ async function getDatabases({ axios, storeGet }, group, version, resource) {
       item.value = {
         name: name,
         namespace: namespace,
-        resource: resource
+        resource: resource,
       };
       return true;
     });
@@ -41,6 +41,15 @@ async function getDatabases({ axios, storeGet }, group, version, resource) {
   }
 }
 
+function isDbSelected({ getValue, storeGet, discriminator, watchDependency }) {
+  const dbName = getDbName({
+    getValue,
+    storeGet,
+    discriminator,
+    watchDependency,
+  });
+  return dbName ? true : false;
+}
 
 function getDbName({ getValue, storeGet, discriminator, watchDependency }) {
   watchDependency("discriminator#/database");
@@ -49,14 +58,30 @@ function getDbName({ getValue, storeGet, discriminator, watchDependency }) {
   return val && val.name ? val.name : name;
 }
 
-function getEngineName({ storeGet, getValue, watchDependency, model, discriminator }) {
+function getEngineName({
+  storeGet,
+  getValue,
+  watchDependency,
+  model,
+  discriminator,
+}) {
   watchDependency("model#/spec/vaultRef/name");
   const val = getValue(model, "/spec/vaultRef/name") || "";
-  const dbName = getDbName({ getValue, storeGet, discriminator, watchDependency });
+  const dbName = getDbName({
+    getValue,
+    storeGet,
+    discriminator,
+    watchDependency,
+  });
   return val && dbName ? `${dbName}-${val}` : dbName;
 }
 
-function getDbNamespace({ getValue, storeGet, discriminator, watchDependency  }) {
+function getDbNamespace({
+  getValue,
+  storeGet,
+  discriminator,
+  watchDependency,
+}) {
   watchDependency("discriminator#/database");
   const data = getValue(discriminator, "/database") || {};
   const namespace = storeGet("/route/query/namespace") || "";
@@ -89,7 +114,7 @@ async function getVaultservers({ axios, storeGet }, group, version, resource) {
       item.text = `${namespace}/${name}`;
       item.value = {
         name: name,
-        namespace: namespace
+        namespace: namespace,
       };
       return true;
     });
@@ -133,7 +158,7 @@ function getPluginName({ storeGet, getValue, watchDependency, discriminator }) {
   const resource = storeGet("/route/params/resource") || "";
   let singularResource = getSingularResource(resource) || "";
   if (singularResource === "postgres") singularResource = "postgresql";
-  if(database && database.resource) {
+  if (database && database.resource) {
     const databaseResource = database.resource;
     singularResource = databaseResource.toLowerCase();
   }
@@ -142,27 +167,45 @@ function getPluginName({ storeGet, getValue, watchDependency, discriminator }) {
   return plugin;
 }
 
-function getSpecRef({ model, getValue, storeGet, commit, watchDependency, discriminator }) {
+function getSpecRef({
+  model,
+  getValue,
+  storeGet,
+  commit,
+  watchDependency,
+  discriminator,
+}) {
   watchDependency("discriminator#/database");
   const database = getValue(discriminator, "/database") || {};
   const paramResource = storeGet("/route/params/resource") || "";
   let databaseRefName = getSingularResource(paramResource) || "";
-  if(database && database.resource) databaseRefName = database.resource.toLowerCase()
+  if (database && database.resource)
+    databaseRefName = database.resource.toLowerCase();
   const val = {
     databaseRef: {
       name: getDbName({ getValue, storeGet, discriminator, watchDependency }),
-      namespace: getDbNamespace({ getValue, storeGet, discriminator, watchDependency }),
+      namespace: getDbNamespace({
+        getValue,
+        storeGet,
+        discriminator,
+        watchDependency,
+      }),
     },
-    pluginName: getPluginName({ storeGet, getValue, watchDependency, discriminator }),
+    pluginName: getPluginName({
+      storeGet,
+      getValue,
+      watchDependency,
+      discriminator,
+    }),
   };
 
   let spec = getValue(model, "/spec") || {};
 
-  const temp = Object.keys(spec).filter(key => key === 'vaultRef');
+  const temp = Object.keys(spec).filter((key) => key === "vaultRef");
   const tempSpec = {};
-  temp.forEach(key => {
+  temp.forEach((key) => {
     tempSpec[key] = spec[key];
-  })
+  });
   spec = tempSpec;
 
   spec[databaseRefName] = val;
@@ -178,6 +221,7 @@ function getSpecRef({ model, getValue, storeGet, commit, watchDependency, discri
 return {
   isConsole,
   getDatabases,
+  isDbSelected,
   getDbName,
   getEngineName,
   getDbNamespace,
