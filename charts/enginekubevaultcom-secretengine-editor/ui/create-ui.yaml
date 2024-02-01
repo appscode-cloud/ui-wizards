@@ -1,23 +1,33 @@
 steps:
 - form:
     elements:
-    - computed: getDbVault
-      disabled: true
+    - label:
+        text: labels.selectDb
+      if: isConsole
+      required: true
+      refresh: true
+      fetch: getDatabases|core.k8s.appscode.com|v1alpha1|genericresources
+      schema:
+        $ref: discriminator#/properties/database
+      type: select
+      onChange: getSpecRef
+    - computed: getEngineName
       label:
         text: metadata.name
       schema:
         $ref: schema#/properties/metadata/properties/name
       type: input
     - computed: getDbNamespace
+      if: isDbSelected
       disabled: true
       label:
         text: metadata.namespace
       schema:
         $ref: schema#/properties/metadata/properties/namespace
       type: input
-    - fetch: getResources|kubevault.com|v1alpha2|vaultservers
+    - fetch: getVaultservers|kubevault.com|v1alpha2|vaultservers
       label:
-        text: labels.select
+        text: labels.selectVault
       refresh: true
       required: true
       schema:
