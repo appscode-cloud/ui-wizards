@@ -444,8 +444,12 @@ function setResourceLimit({ commit, model, getValue, watchDependency }) {
   }
 }
 
-function setLimitsCpuOrMem({ model, getValue }, path) {
+function setLimitsCpuOrMem({ model, getValue, watchDependency }, path) {
+
+  watchDependency('model#/spec/version');
+  const dbVersion = getValue(model, '/spec/version')
   const modelPathValue = getValue(model, "/spec/machine");
+
   if (modelPathValue && modelPathValue !== "custom") {
     return (
       machines[modelPathValue] &&
@@ -454,7 +458,8 @@ function setLimitsCpuOrMem({ model, getValue }, path) {
     );
   } else {
     if (path === "cpu") {
-      return ".5";
+      if(dbVersion >= '6') return "1"
+      else return ".5";
     } else if (path === "memory") {
       return "1024Mi";
     }
