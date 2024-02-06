@@ -269,12 +269,15 @@ function asDatabaseOperation(route) {
   return !!route.query.operation;
 }
 
-function showAndInitName({ route, commit }) {
+function showAndInitName({ route, commit, getValue, model, watchDependency }) {
+  watchDependency("model#/spec/type");
   const ver = asDatabaseOperation(route);
+  const selectedType = getValue(model, "/spec/type");
+  const lowerType = selectedType ? String(selectedType).toLowerCase() : "";
   if (ver) {
     commit("wizard/model$update", {
       path: "/metadata/name",
-      value: `${route.query.name}-ops-${new Date().getTime()}`,
+      value: `${route.query.name}-${Math.floor(Date.now() / 1000)}-${lowerType}`,
       force: true,
     });
   }
