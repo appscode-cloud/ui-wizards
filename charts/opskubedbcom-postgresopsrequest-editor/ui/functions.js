@@ -250,7 +250,7 @@ function showAndInitName({ route, commit, getValue, model, watchDependency }) {
   if (ver) {
     commit("wizard/model$update", {
       path: "/metadata/name",
-      value: `${route.query.name}-${new Date().getTime()}-${lowerType}`,
+      value: `${route.query.name}-${Math.floor(Date.now() / 1000)}-${lowerType}`,
       force: true,
     });
   }
