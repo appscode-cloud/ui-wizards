@@ -26,7 +26,7 @@ import (
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
 // +kubebuilder:object:root=true
-// +kubebuilder:resource:path=stashappscodecomrepositoryeditoroptionss,singular=stashappscodecomrepositoryeditoroptions
+// +kubebuilder:resource:path=storagekubestashcombackupstorageeditoroptionss,singular=storagekubestashcombackupstorageeditoroptions
 type StoragekubestashcomBackupstorageEditorOptions struct {
 	metav1.TypeMeta   `json:",inline,omitempty"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -45,7 +45,7 @@ type StoragekubestashcomBackupstorageEditorOptionsSpecSpec struct {
 	// +optional
 	Labels        map[string]string `json:"labels"`
 	StorageSecret OptionalResource  `json:"storageSecret"`
-	Backend       RepositoryBackend `json:"backend"`
+	Backend       BackupStorage     `json:"backend"`
 }
 
 type BackupStorage struct {
