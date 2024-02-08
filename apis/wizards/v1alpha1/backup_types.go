@@ -21,6 +21,7 @@ import (
 )
 
 type BackupToolSpec struct {
+	// +kubebuilder:default=KubeStash
 	Tool      BackupTool     `json:"tool"`
 	Kubestash *KubeStashInfo `json:"kubestash,omitempty"`
 	Stash     *StashInfo     `json:"stash,omitempty"`
@@ -30,7 +31,6 @@ type BackupToolSpec struct {
 type BackupTool string
 
 const (
-	BackupToolDisabled  BackupTool = ""
 	BackupToolKubeStash BackupTool = "KubeStash"
 	BackupToolStash     BackupTool = "Stash"
 )
@@ -38,11 +38,21 @@ const (
 type KubeStashInfo struct {
 	// Schedule specifies the schedule for invoking backup sessions
 	// +optional
-	Schedule string `json:"schedule,omitempty"`
-	// RetentionPolicy indicates the policy to follow to clean old backup snapshots
-	RetentionPolicy  NamespacedName `json:"retentionPolicy"`
-	EncryptionSecret AuthSecret     `json:"encryptionSecret"`
-	Backend          NamespacedName `json:"backend"`
+	Schedule         string           `json:"schedule,omitempty"`
+	StorageRef       ObjectReference  `json:"storageRef"`
+	RetentionPolicy  ObjectReference  `json:"retentionPolicy"`
+	EncryptionSecret ObjectReference  `json:"encryptionSecret"`
+	StorageSecret    OptionalResource `json:"storageSecret"`
+}
+
+// ObjectReference contains enough information to let you inspect or modify the referred object.
+type ObjectReference struct {
+	// Namespace of the referent.
+	// More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/
+	Namespace string `json:"namespace"`
+	// Name of the referent.
+	// More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+	Name string `json:"name"`
 }
 
 type StashInfo struct {

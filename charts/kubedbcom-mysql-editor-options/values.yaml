@@ -67,20 +67,20 @@ spec:
 
   backup:
     tool: ""
+
     kubestash:
       schedule: "0 */2 * * *"
-
-      backend:
-        name: keep-last-30d
+      storageRef:
+        name: default
         namespace: ""
-
-      encryptionSecret:
-        name: ""
-        key: ""
-
       retentionPolicy:
-        name: keep-last-30d
+        name: "keep-1mo"
         namespace: ""
+      encryptionSecret:
+        name: default-encryption-secret
+        namespace: ""
+      storageSecret:
+        create: true
 
     stash:
       schedule: "0 */2 * * *"

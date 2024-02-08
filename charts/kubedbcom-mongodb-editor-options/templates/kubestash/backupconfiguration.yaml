@@ -3,18 +3,18 @@
 apiVersion: core.kubestash.com/v1alpha1
 kind: BackupConfiguration
 metadata:
-  name: {{ include "kubedbcom-elasticsearch-editor-options.fullname" . }}
+  name: {{ include "kubedbcom-mongodb-editor-options.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "kubedbcom-elasticsearch-editor-options.labels" . | nindent 4 }}
+    {{- include "kubedbcom-mongodb-editor-options.labels" . | nindent 4 }}
 spec:
   target:
     apiGroup: kubedb.com
-    kind: Elasticsearch
-    name: {{ include "kubedbcom-elasticsearch-editor-options.fullname" . }}
+    kind: MongoDB
+    name: {{ include "kubedbcom-mongodb-editor-options.fullname" . }}
     namespace: {{ .Release.Namespace }}
   backends:
-    - name: elasticsearch-backend
+    - name: mongodb-backend
       storageRef:
         name: {{ .Values.spec.backup.kubestash.storageRef.name }}
         namespace: {{ .Values.spec.backup.kubestash.storageRef.namespace }}
@@ -22,21 +22,21 @@ spec:
         name: {{ .Values.spec.backup.kubestash.retentionPolicy.name }}
         namespace: {{ .Values.spec.backup.kubestash.retentionPolicy.namespace }}
   sessions:
-    - name: elasticsearch-frequent-backup
+    - name: mongodb-frequent-backup
       sessionHistoryLimit: 2
       scheduler:
         schedule: {{ .Values.spec.backup.kubestash.schedule }}
         jobTemplate:
           backoffLimit: 1
       repositories:
-        - name: elasticsearch-repo
-          backend: elasticsearch-backend
-          directory: /es-repo
+        - name: mongodb-repo
+          backend: mongodb-backend
+          directory: /mongo-repo
           encryptionSecret:
             name: {{ .Values.spec.backup.kubestash.encryptionSecret.name }}
             namespace: {{ .Values.spec.backup.kubestash.encryptionSecret.namespace }}
       addon:
-        name: elasticsearch-addon
+        name: mongodb-addon
         tasks:
           - name: logical-backup
         jobTemplate:
