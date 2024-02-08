@@ -117,31 +117,6 @@ steps:
                 text: labels.backend.bucket
               required: true
               schema:
-                $ref: schema#/properties/spec/properties/backend/properties/b2/properties/spec/properties/bucket
-              type: input
-            - label:
-                text: labels.backend.prefix
-              schema:
-                $ref: schema#/properties/spec/properties/backend/properties/b2/properties/spec/properties/prefix
-              type: input
-            - label:
-                text: labels.backend.maxConnections
-              schema:
-                $ref: schema#/properties/spec/properties/backend/properties/b2/properties/spec/properties/maxConnections
-              type: input
-            schema:
-              $ref: schema#/properties/spec/properties/backend/properties/b2/properties/spec
-            type: single-step-form
-          if: showBackendForm|b2
-          schema:
-            $ref: schema#/properties/spec/properties/backend/properties/b2
-          type: single-step-form
-        - elements:
-          - elements:
-            - label:
-                text: labels.backend.bucket
-              required: true
-              schema:
                 $ref: schema#/properties/spec/properties/backend/properties/gcs/properties/spec/properties/bucket
               type: input
             - label:
@@ -192,26 +167,6 @@ steps:
           schema:
             $ref: schema#/properties/spec/properties/backend/properties/s3
           type: single-step-form
-        - elements:
-          - elements:
-            - label:
-                text: labels.backend.container
-              required: true
-              schema:
-                $ref: schema#/properties/spec/properties/backend/properties/swift/properties/spec/properties/container
-              type: input
-            - label:
-                text: labels.backend.prefix
-              schema:
-                $ref: schema#/properties/spec/properties/backend/properties/swift/properties/spec/properties/prefix
-              type: input
-            schema:
-              $ref: schema#/properties/spec/properties/backend/properties/swift/properties/spec
-            type: single-step-form
-          if: showBackendForm|swift
-          schema:
-            $ref: schema#/properties/spec/properties/backend/properties/swift
-          type: single-step-form
         schema:
           $ref: schema#/properties/spec/properties/backend
         show_label: true
@@ -230,26 +185,6 @@ steps:
           $ref: discriminator#/useExistingAuthSecret
         type: radio
       - elements:
-        - allowUserDefinedOption: true
-          fetch: getExistingAuthSecrets
-          if: showExistingSecretSelection
-          label:
-            text: labels.repository.existingSecret
-          required: true
-          schema:
-            $ref: schema#/properties/spec/properties/storageSecret/properties/name
-          type: select
-        - if: showCreateSecretForm
-          label:
-            text: labels.secret.password
-          required: true
-          schema:
-            $ref: schema#/properties/spec/properties/storageSecret/properties/password
-          type: input
-        schema:
-          $ref: schema#/properties/spec/properties/storageSecret
-        type: single-step-form
-      - elements:
         - elements:
           - label:
               text: labels.backend.azure.account_name
@@ -266,23 +201,6 @@ steps:
           if: showSecretForm|azure
           schema:
             $ref: schema#/properties/spec/properties/backend/properties/azure/properties/auth
-          type: single-step-form
-        - elements:
-          - label:
-              text: labels.backend.b2.account_id
-            required: true
-            schema:
-              $ref: schema#/properties/spec/properties/backend/properties/b2/properties/auth/properties/B2_ACCOUNT_ID
-            type: input
-          - label:
-              text: labels.backend.b2.account_key
-            required: true
-            schema:
-              $ref: schema#/properties/spec/properties/backend/properties/b2/properties/auth/properties/B2_ACCOUNT_KEY
-            type: input
-          if: showSecretForm|b2
-          schema:
-            $ref: schema#/properties/spec/properties/backend/properties/b2/properties/auth
           type: single-step-form
         - elements:
           - label:
@@ -323,95 +241,6 @@ steps:
           if: showSecretForm|s3
           schema:
             $ref: schema#/properties/spec/properties/backend/properties/s3/properties/auth
-          type: single-step-form
-        - elements:
-          - label:
-              text: labels.backend.swift.os_auth_token
-            required: true
-            schema:
-              $ref: schema#/properties/spec/properties/backend/properties/swift/properties/auth/properties/OS_AUTH_TOKEN
-            type: input
-          - label:
-              text: labels.backend.swift.os_auth_url
-            required: true
-            schema:
-              $ref: schema#/properties/spec/properties/backend/properties/swift/properties/auth/properties/OS_AUTH_URL
-            type: input
-          - label:
-              text: labels.backend.swift.os_password
-            required: true
-            schema:
-              $ref: schema#/properties/spec/properties/backend/properties/swift/properties/auth/properties/OS_PASSWORD
-            type: input
-          - label:
-              text: labels.backend.swift.os_project_domain_name
-            required: true
-            schema:
-              $ref: schema#/properties/spec/properties/backend/properties/swift/properties/auth/properties/OS_PROJECT_DOMAIN_NAME
-            type: input
-          - label:
-              text: labels.backend.swift.os_project_name
-            required: true
-            schema:
-              $ref: schema#/properties/spec/properties/backend/properties/swift/properties/auth/properties/OS_PROJECT_NAME
-            type: input
-          - label:
-              text: labels.backend.swift.os_region_name
-            required: true
-            schema:
-              $ref: schema#/properties/spec/properties/backend/properties/swift/properties/auth/properties/OS_REGION_NAME
-            type: input
-          - label:
-              text: labels.backend.swift.os_storage_url
-            required: true
-            schema:
-              $ref: schema#/properties/spec/properties/backend/properties/swift/properties/auth/properties/OS_STORAGE_URL
-            type: input
-          - label:
-              text: labels.backend.swift.os_tenant_id
-            required: true
-            schema:
-              $ref: schema#/properties/spec/properties/backend/properties/swift/properties/auth/properties/OS_TENANT_ID
-            type: input
-          - label:
-              text: labels.backend.swift.os_tenant_name
-            required: true
-            schema:
-              $ref: schema#/properties/spec/properties/backend/properties/swift/properties/auth/properties/OS_TENANT_NAME
-            type: input
-          - label:
-              text: labels.backend.swift.os_username
-            required: true
-            schema:
-              $ref: schema#/properties/spec/properties/backend/properties/swift/properties/auth/properties/OS_USERNAME
-            type: input
-          - label:
-              text: labels.backend.swift.os_user_domain_name
-            required: true
-            schema:
-              $ref: schema#/properties/spec/properties/backend/properties/swift/properties/auth/properties/OS_USER_DOMAIN_NAME
-            type: input
-          - label:
-              text: labels.backend.swift.st_auth
-            required: true
-            schema:
-              $ref: schema#/properties/spec/properties/backend/properties/swift/properties/auth/properties/ST_AUTH
-            type: input
-          - label:
-              text: labels.backend.swift.st_key
-            required: true
-            schema:
-              $ref: schema#/properties/spec/properties/backend/properties/swift/properties/auth/properties/ST_KEY
-            type: input
-          - label:
-              text: labels.backend.swift.st_user
-            required: true
-            schema:
-              $ref: schema#/properties/spec/properties/backend/properties/swift/properties/auth/properties/ST_USER
-            type: input
-          if: showSecretForm|swift
-          schema:
-            $ref: schema#/properties/spec/properties/backend/properties/swift/properties/auth
           type: single-step-form
         if: showCreateSecretForm
         type: single-step-form
