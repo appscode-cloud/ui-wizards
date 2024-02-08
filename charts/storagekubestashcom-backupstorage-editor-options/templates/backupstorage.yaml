@@ -20,16 +20,19 @@ spec:
   {{- if eq .Values.spec.backend.provider "s3" }}
     {{- with .Values.spec.backend.s3.spec }}
     s3:
-      endpoint: {{ .endpoint }}
-      bucket: {{ .bucket }}
+      endpoint: {{ .endpoint | quote }}
+      bucket: {{ .bucket | quote }}
       {{- with .region }}
-      region: {{ . }}
+      region: {{ . | quote }}
       {{- end }}
       {{- with .prefix }}
-      prefix: {{ . }}
+      prefix: {{ . | quote }}
+      {{- end }}
+      {{- with .insecureTLS }}
+      insecureTLS: {{ . }}
       {{- end }}
       {{- if $.Values.spec.storageSecret.create }}
-      secretName: {{ printf "%s-repo-cred" (include "storagekubestashcom-backupstorage-editor-options.fullname" $) }}
+      secretName: {{ printf "%s-storage-cred" (include "storagekubestashcom-backupstorage-editor-options.fullname" $) }}
       {{- end }}
     {{- end }}
   {{- end }}
@@ -40,13 +43,13 @@ spec:
       storageAccount: '{{ $.Values.spec.backend.azure.auth.AZURE_ACCOUNT_NAME }}'
       container: {{ .container }}
       {{- with .prefix }}
-      prefix: {{ . }}
+      prefix: {{ . | quote }}
       {{- end }}
       {{- with .maxConnections }}
       maxConnections: {{ . }}
       {{- end }}
       {{- if $.Values.spec.storageSecret.create }}
-      secretName: {{ printf "%s-repo-cred" (include "storagekubestashcom-backupstorage-editor-options.fullname" $) }}
+      secretName: {{ printf "%s-storage-cred" (include "storagekubestashcom-backupstorage-editor-options.fullname" $) }}
       {{- end }}
     {{- end }}
   {{- end }}
@@ -54,15 +57,15 @@ spec:
   {{- if eq .Values.spec.backend.provider "gcs" }}
     {{- with .Values.spec.backend.gcs.spec }}
     gcs:
-      bucket: {{ .bucket }}
+      bucket: {{ .bucket | quote }}
       {{- with .prefix }}
-      prefix: {{ . }}
+      prefix: {{ . | quote }}
       {{- end }}
       {{- with .maxConnections }}
       maxConnections: {{ . }}
       {{- end }}
       {{- if $.Values.spec.storageSecret.create }}
-      secretName: {{ printf "%s-repo-cred" (include "storagekubestashcom-backupstorage-editor-options.fullname" $) }}
+      secretName: {{ printf "%s-storage-cred" (include "storagekubestashcom-backupstorage-editor-options.fullname" $) }}
       {{- end }}
     {{- end }}
   {{- end }}
