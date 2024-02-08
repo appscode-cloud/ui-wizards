@@ -303,7 +303,8 @@ fmt: $(BUILD_DIRS) uibuilder-tools
 	    $(BUILD_IMAGE)                                          \
 	    /bin/bash -c "                                          \
 	        REPO_PKG=$(GO_PKG)                                  \
-	        ./hack/fmt.sh $(SRC_DIRS)                           \
+	        ./hack/fmt.sh $(SRC_DIRS);                          \
+	        ./hack/scripts/copy-data-files.sh                   \
 	    "
 	$(UIBUILDER_TOOLS) check --wizard-dir=./charts --fmt-only
 
