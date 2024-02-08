@@ -127,6 +127,76 @@ resources:
     spec:
       ca:
         secretName: redis-ca
+  coreKubestashComBackupConfiguration: # +doc-gen:break
+    apiVersion: core.kubestash.com/v1alpha1
+    kind: BackupConfiguration
+    metadata:
+      name: redis
+      namespace: demo
+    spec:
+      backends:
+        - name: redis-backend
+          retentionPolicy:
+            name: redis-retention-policy
+            namespace: demo
+          storageRef:
+            name: redis-storage
+            namespace: demo
+      sessions:
+        - addon:
+            jobTemplate:
+              spec:
+                securityContext:
+                  runAsGroup: 0
+                  runAsUser: 0
+            name: redis-addon
+            tasks:
+              - name: logical-backup
+          name: redis-frequent-backup
+          repositories:
+            - backend: redis-backend
+              directory: /redis-repo
+              encryptionSecret:
+                name: redis-encryption-secret
+                namespace: demo
+              name: redis-repo
+          scheduler:
+            jobTemplate:
+              backoffLimit: 1
+            schedule: '*/5 * * * *'
+          sessionHistoryLimit: 2
+      target:
+        apiGroup: kubedb.com
+        kind: Redis
+        name: redis
+        namespace: demo
+  coreKubestashComRestoreSession: # +doc-gen:break
+    apiVersion: core.kubestash.com/v1alpha1
+    kind: RestoreSession
+    metadata:
+      name: redis
+      namespace: demo
+    spec:
+      addon:
+        jobTemplate:
+          spec:
+            securityContext:
+              runAsGroup: 0
+              runAsUser: 0
+        name: redis-addon
+        tasks:
+          - name: logical-backup-restore
+      dataSource:
+        encryptionSecret:
+          name: redis-encryption-secret
+          namespace: demo
+        repository: redis-repo
+        snapshot: latest
+      target:
+        apiGroup: kubedb.com
+        kind: Redis
+        name: redis
+        namespace: demo
   kubedbComRedis: # +doc-gen:break
     apiVersion: kubedb.com/v1alpha2
     kind: Redis
@@ -228,6 +298,14 @@ resources:
         databases 10
         maxclients 500
     type: Opaque
+  secret_encryption_secret: # +doc-gen:break
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: redis-encryption-secret
+      namespace: demo
+    stringData:
+      key: ""
   secret_init_repo_cred: # +doc-gen:break
     apiVersion: v1
     kind: Secret

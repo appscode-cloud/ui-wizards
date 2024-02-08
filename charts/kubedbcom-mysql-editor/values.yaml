@@ -196,6 +196,76 @@ resources:
     spec:
       ca:
         secretName: mysql-ca
+  coreKubestashComBackupConfiguration: # +doc-gen:break
+    apiVersion: core.kubestash.com/v1alpha1
+    kind: BackupConfiguration
+    metadata:
+      name: mysql
+      namespace: demo
+    spec:
+      backends:
+        - name: mysql-backend
+          retentionPolicy:
+            name: mysql-retention-policy
+            namespace: demo
+          storageRef:
+            name: mysql-storage
+            namespace: demo
+      sessions:
+        - addon:
+            jobTemplate:
+              spec:
+                securityContext:
+                  runAsGroup: 0
+                  runAsUser: 0
+            name: mysql-addon
+            tasks:
+              - name: logical-backup
+          name: mysql-frequent-backup
+          repositories:
+            - backend: mysql-backend
+              directory: /mysql-repo
+              encryptionSecret:
+                name: mysql-encryption-secret
+                namespace: demo
+              name: mysql-repo
+          scheduler:
+            jobTemplate:
+              backoffLimit: 1
+            schedule: '*/5 * * * *'
+          sessionHistoryLimit: 2
+      target:
+        apiGroup: kubedb.com
+        kind: MySQL
+        name: mysql
+        namespace: demo
+  coreKubestashComRestoreSession: # +doc-gen:break
+    apiVersion: core.kubestash.com/v1alpha1
+    kind: RestoreSession
+    metadata:
+      name: mysql
+      namespace: demo
+    spec:
+      addon:
+        jobTemplate:
+          spec:
+            securityContext:
+              runAsGroup: 0
+              runAsUser: 0
+        name: mysql-addon
+        tasks:
+          - name: logical-backup-restore
+      dataSource:
+        encryptionSecret:
+          name: mysql-encryption-secret
+          namespace: demo
+        repository: mysql-repo
+        snapshot: latest
+      target:
+        apiGroup: kubedb.com
+        kind: MySQL
+        name: mysql
+        namespace: demo
   kubedbComMySQL: # +doc-gen:break
     apiVersion: kubedb.com/v1alpha2
     kind: MySQL
@@ -300,6 +370,14 @@ resources:
         max_connections = 200
         read_buffer_size = 1048576
     type: Opaque
+  secret_encryption_secret: # +doc-gen:break
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: mysql-encryption-secret
+      namespace: demo
+    stringData:
+      key: ""
   secret_init_repo_cred: # +doc-gen:break
     apiVersion: v1
     kind: Secret

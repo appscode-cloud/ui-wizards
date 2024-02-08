@@ -1,0 +1,71 @@
+apiVersion: storage.kubestash.com/v1alpha1
+kind: BackupStorage
+metadata:
+  name: {{ include "storagekubestashcom-backupstorage-editor-options.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "storagekubestashcom-backupstorage-editor-options.labels" . | nindent 4 }}
+{{- if .Values.spec.annotations }}
+  annotations:
+    {{- include "storagekubestashcom-backupstorage-editor-options.annotations" . | nindent 4 }}
+{{- end }}
+spec:
+  usagePolicy:
+    allowedNamespaces:
+      from: All
+  default: true
+  deletionPolicy: WipeOut
+  storage:
+    provider: {{ .Values.spec.backend.provider }}
+  {{- if eq .Values.spec.backend.provider "s3" }}
+    {{- with .Values.spec.backend.s3.spec }}
+    s3:
+      endpoint: {{ .endpoint | quote }}
+      bucket: {{ .bucket | quote }}
+      {{- with .region }}
+      region: {{ . | quote }}
+      {{- end }}
+      {{- with .prefix }}
+      prefix: {{ . | quote }}
+      {{- end }}
+      {{- with .insecureTLS }}
+      insecureTLS: {{ . }}
+      {{- end }}
+      {{- if $.Values.spec.storageSecret.create }}
+      secretName: {{ printf "%s-storage-cred" (include "storagekubestashcom-backupstorage-editor-options.fullname" $) }}
+      {{- end }}
+    {{- end }}
+  {{- end }}
+
+  {{- if eq .Values.spec.backend.provider "azure" }}
+    {{- with .Values.spec.backend.azure.spec }}
+    azure:
+      storageAccount: '{{ $.Values.spec.backend.azure.auth.AZURE_ACCOUNT_NAME }}'
+      container: {{ .container }}
+      {{- with .prefix }}
+      prefix: {{ . | quote }}
+      {{- end }}
+      {{- with .maxConnections }}
+      maxConnections: {{ . }}
+      {{- end }}
+      {{- if $.Values.spec.storageSecret.create }}
+      secretName: {{ printf "%s-storage-cred" (include "storagekubestashcom-backupstorage-editor-options.fullname" $) }}
+      {{- end }}
+    {{- end }}
+  {{- end }}
+
+  {{- if eq .Values.spec.backend.provider "gcs" }}
+    {{- with .Values.spec.backend.gcs.spec }}
+    gcs:
+      bucket: {{ .bucket | quote }}
+      {{- with .prefix }}
+      prefix: {{ . | quote }}
+      {{- end }}
+      {{- with .maxConnections }}
+      maxConnections: {{ . }}
+      {{- end }}
+      {{- if $.Values.spec.storageSecret.create }}
+      secretName: {{ printf "%s-storage-cred" (include "storagekubestashcom-backupstorage-editor-options.fullname" $) }}
+      {{- end }}
+    {{- end }}
+  {{- end }}

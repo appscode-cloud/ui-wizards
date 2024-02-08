@@ -43,6 +43,11 @@ type AuthSecret struct {
 	Password string `json:"password"`
 }
 
+type OptionalResource struct {
+	// +optional
+	Create bool `json:"create"`
+}
+
 // *** Monitoring *** //
 
 type Monitoring struct {
