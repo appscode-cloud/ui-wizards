@@ -792,31 +792,29 @@ properties:
         properties:
           kubestash:
             properties:
-              backend:
+              encryptionSecret:
+                description: ObjectReference contains enough information to let you
+                  inspect or modify the referred object.
                 properties:
                   name:
+                    description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names'
                     type: string
                   namespace:
+                    description: 'Namespace of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/'
                     type: string
                 required:
                 - name
                 - namespace
                 type: object
-              encryptionSecret:
-                properties:
-                  name:
-                    type: string
-                  password:
-                    format: password
-                    type: string
-                type: object
               retentionPolicy:
-                description: RetentionPolicy indicates the policy to follow to clean
-                  old backup snapshots
+                description: ObjectReference contains enough information to let you
+                  inspect or modify the referred object.
                 properties:
                   name:
+                    description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names'
                     type: string
                   namespace:
+                    description: 'Namespace of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/'
                     type: string
                 required:
                 - name
@@ -825,10 +823,30 @@ properties:
               schedule:
                 description: Schedule specifies the schedule for invoking backup sessions
                 type: string
+              storageRef:
+                description: ObjectReference contains enough information to let you
+                  inspect or modify the referred object.
+                properties:
+                  name:
+                    description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names'
+                    type: string
+                  namespace:
+                    description: 'Namespace of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/'
+                    type: string
+                required:
+                - name
+                - namespace
+                type: object
+              storageSecret:
+                properties:
+                  create:
+                    type: boolean
+                type: object
             required:
-            - backend
             - encryptionSecret
             - retentionPolicy
+            - storageRef
+            - storageSecret
             type: object
           stash:
             properties:
@@ -1065,6 +1083,7 @@ properties:
             - retentionPolicy
             type: object
           tool:
+            default: KubeStash
             enum:
             - KubeStash
             - Stash
