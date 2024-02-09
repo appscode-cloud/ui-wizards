@@ -358,6 +358,58 @@ function checkIsResourceLoaded ({commit, storeGet,watchDependency,getValue,discr
   }
 }
 
+function onBackupPresetChange({ discriminator, getValue, commit }) {
+  const status = getValue(discriminator, "/backupPresetType");
+  window.console.log(status)
+}
+
+function showBackendForm({ getValue, model, watchDependency, commit }, value) {
+  const backendProvider = getValue(
+    model,
+    "/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/stash/backend/provider"
+  );
+  watchDependency(
+    "model#/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/stash/backend/provider"
+  );
+
+  // delete every other backend type from model  exect the selected one
+
+  setTimeout(() => {
+    Object.keys(backendMap).forEach((key) => {
+      if (key !== backendProvider) {
+        commit(
+          "wizard/model$delete",
+          `/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/stash/backend/${key}`
+        );
+      }
+    });
+  }, 1000);
+
+  return backendProvider === value;
+}
+
+function checkPresetType({ getValue, model, watchDependency, commit , discriminator}, value) {
+  watchDependency("discriminator#/backupPresetType")
+  const backupType = getValue(discriminator, "/backupPresetType");
+  console.log({discriminator})
+  console.log(backupType)
+  if(backupType === value)
+  {
+    return true
+  }
+  return false
+}
+
+function presetTypeChecker({getValue, discriminator})
+{
+  console.log('called')
+  console.log({discriminator})
+}
+
+function onBackendProviderChange({})
+{
+  console.log('on change is called')
+}
 return {
   hideThisElement,
   checkIsResourceLoaded,
@@ -371,4 +423,8 @@ return {
   returnFalse,
   setReleaseNameAndNamespaceAndInitializeValues,
   fetchFeatureSetOptions,
+  onBackupPresetChange, 
+  checkPresetType,
+  presetTypeChecker,
+  onBackendProviderChange,
 };

@@ -29,10 +29,24 @@ steps:
         if: hideThisElement
         type: input
       type: single-step-form
-    - elements:
+    - discriminator:
+        backupPresetType:
+          default: stash
+          type: string
+      elements: 
       - label:
-          text: labels.default.title
+          text: labels.backup.type
         type: label-element
+      - disabled: false
+        onChange: presetTypeChecker
+        options:
+        - text: labels.backup.kubestash
+          value: kubestash
+        - text: labels.backup.stash
+          value: stash
+        schema:
+          $ref: discriminator#/properties/backupPresetType
+        type: radio
       - label:
           text: labels.backend.provider
         onChange: onBackendProviderChange
@@ -48,9 +62,10 @@ steps:
         - text: OpenStack Swift
           value: swift
         schema:
-          $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/stash/properties/backend/properties/provider
+          $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kubestash/properties/spec/properties/values/properties/stash/properties/backend/properties/provider
         type: select
         required: true
+        if: checkPresetType|kubestash
       type: single-step-form
     type: single-step-form
   id: opscenter-backup
