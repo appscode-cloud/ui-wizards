@@ -1,5 +1,4 @@
-async function checkIsFeatureEnabled(axios, feature,storeGet) {
-
+async function checkIsFeatureEnabled(axios, feature, storeGet) {
   const owner = storeGet("/route/params/user");
   const cluster = storeGet("/route/params/cluster");
   const resp = await axios.get(
@@ -13,41 +12,51 @@ async function checkIsFeatureEnabled(axios, feature,storeGet) {
   return status.enabled;
 }
 
-async function initBackupStatus({ model, getValue, axios,storeGet}) {
-  if (
-    !(
-      (await checkIsFeatureEnabled(axios, "stash",storeGet)) &&
-      (await checkIsFeatureEnabled(axios, "stash-presets",storeGet))
-    )
-  ) {
-    return false;
+
+async function backupStatus (model, getValue, axios, storeGet){
+  const isStashPresetEnable = await checkIsFeatureEnabled(axios,"stash-presets",storeGet);
+
+  const tool = getValue(model,'/tool') || '';
+  if(tool === "KubeStash"){
+    const isKubeStashEnable = await checkIsFeatureEnabled(axios,"kubestash",storeGet);
+    return isStashPresetEnable && isKubeStashEnable;
   }
-  const tool = getValue(model, "/tool");
-  return tool === "Stash";
+  else if(tool === 'Stash'){
+    const isStashEnable = await checkIsFeatureEnabled(axios,"stash",storeGet);
+    return isStashPresetEnable && isStashEnable;
+  }
+
+  return false
+}
+
+
+async function initBackupStatus({model, getValue, axios, storeGet, setDiscriminatorValue}) {
+  const tool = getValue(model,'/tool') || '';
+  setDiscriminatorValue('/initialStatus', tool)
+  const status = await backupStatus(model, getValue, axios, storeGet);
+  return status
 }
 
 function onBackupStatusChange({ discriminator, getValue, commit }) {
   const status = getValue(discriminator, "/backupEnabledStatus");
+  const initialStatus = getValue(discriminator, "/initialStatus");
   commit("wizard/model$update", {
     path: "/tool",
-    value: status ? "Stash" : "",
+    value: status ? initialStatus : "",
     force: true,
   });
 }
 
-async function stashEnabled({ axios,storeGet }) {
-  return !(
-    (await checkIsFeatureEnabled(axios, "stash",storeGet)) &&
-    (await checkIsFeatureEnabled(axios, "stash-presets",storeGet))
-  );
+async function stashEnabled({ axios, storeGet,model,getValue }) {
+  const status = await backupStatus(model, getValue, axios, storeGet);
+  return !status;
 }
 
-function getRequirements(){
+function getRequirements() {
   return `To configure backup you need to enable following features
-  - ## **Stash**
-  - ## **Stash Presets**`
+  - ## **Stash or KubeStash**
+  - ## **Stash Presets**`;
 }
-
 
 return {
   initBackupStatus,
