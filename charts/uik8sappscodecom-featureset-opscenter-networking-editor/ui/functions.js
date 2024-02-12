@@ -84,7 +84,7 @@ function getEnabledFeatureInEnableBtnClick(allFeatureSetFeature, isBlockLevel, s
       return (
         item?.status?.enabled ||
         isFeatureRequired(storeGet, featureName) ||
-        item?.spec?.featureBlock === featureBlock
+        (item?.spec?.featureBlock === featureBlock && item?.spec?.recommended === true)
       );
     }else{
       return (
