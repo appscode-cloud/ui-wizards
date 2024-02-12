@@ -239,19 +239,43 @@ function asDatabaseOperation(route) {
   return !!route.query.operation;
 }
 
-function showAndInitName({ route, commit, getValue, model, watchDependency }) {
-  watchDependency("model#/spec/type");
-  const ver = asDatabaseOperation(route);
+function generateOpsRequestNameForClusterUI (getValue, model, route) {
+  const dbName = getValue(model, "/spec/databaseRef/name");
+
   const selectedType = getValue(model, "/spec/type");
   const lowerType = selectedType ? String(selectedType).toLowerCase() : "";
+  
+  const resources = route.params.resource || ""
+  const resource = resources.slice(0,-1);
+  
+  const opsName = dbName ? dbName : resource
+  return  `${opsName}-${Math.floor(Date.now() / 1000)}${lowerType ? '-' + lowerType : ''}`
+} 
+
+function showAndInitName({ route, commit, getValue, model, watchDependency }) {
+  watchDependency("model#/spec/type");
+  watchDependency("model#/spec/databaseRef/name");
+  const ver = asDatabaseOperation(route);
+  
+  const selectedType = getValue(model, "/spec/type");
+  const lowerType = selectedType ? String(selectedType).toLowerCase() : "";
+  
   if (ver) {
+    // For kubedb-ui 
     commit("wizard/model$update", {
       path: "/metadata/name",
       value: `${route.query.name}-${Math.floor(Date.now() / 1000)}-${lowerType}`,
       force: true,
     });
   }
-
+  else {
+    // For cluster-ui
+    commit("wizard/model$update", {
+      path: "/metadata/name",
+      value: generateOpsRequestNameForClusterUI(getValue, model, route),
+      force: true,
+    });
+  }
   return !ver;
 }
 function showAndInitNamespace({ route, commit }) {
