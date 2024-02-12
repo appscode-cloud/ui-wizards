@@ -77,16 +77,28 @@ function getEnabledFeatureInConfigureBtnClick(allFeatureSetFeature, isBlockLevel
 function getEnabledFeatureInEnableBtnClick(allFeatureSetFeature, isBlockLevel, storeGet){
   // filter only (enabled + required + feature block feature)
   const featureBlock = storeGet("/route/query/activeBlock") || "";
+  const isRecommendedFeatureAvailable = allFeatureSetFeature.some((item)=> {
+    return item?.spec?.featureBlock === featureBlock && item?.spec?.recommended
+  });
   const enabledFeatures = allFeatureSetFeature.filter((item) => {
     const featureName = item?.metadata?.name;
 
-    if(isBlockLevel){
-      return (
-        item?.status?.enabled ||
-        isFeatureRequired(storeGet, featureName) ||
-        (item?.spec?.featureBlock === featureBlock && item?.spec?.recommended === true)
-      );
-    }else{
+    if(isBlockLevel) {
+      if(isRecommendedFeatureAvailable) {
+        return (
+          item?.status?.enabled ||
+          isFeatureRequired(storeGet, featureName) ||
+          (item?.spec?.featureBlock === featureBlock && item?.spec?.recommended === true)
+        );
+      } else {
+          return(
+            item?.status?.enabled ||
+            isFeatureRequired(storeGet, featureName) ||
+            (item?.spec?.featureBlock === featureBlock)
+        )
+      }
+    }
+    else {
       return (
         item?.status?.enabled ||
         item?.spec?.recommended ||
