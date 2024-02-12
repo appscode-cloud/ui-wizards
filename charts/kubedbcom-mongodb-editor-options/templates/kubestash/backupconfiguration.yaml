@@ -14,7 +14,7 @@ spec:
     name: {{ include "kubedbcom-mongodb-editor-options.fullname" . }}
     namespace: {{ .Release.Namespace }}
   backends:
-    - name: mongodb-backend
+    - name: default-backend
       storageRef:
         name: {{ .Values.spec.backup.kubestash.storageRef.name }}
         namespace: {{ .Values.spec.backup.kubestash.storageRef.namespace }}
@@ -22,16 +22,16 @@ spec:
         name: {{ .Values.spec.backup.kubestash.retentionPolicy.name }}
         namespace: {{ .Values.spec.backup.kubestash.retentionPolicy.namespace }}
   sessions:
-    - name: mongodb-frequent-backup
+    - name: full-backup
       sessionHistoryLimit: 2
       scheduler:
         schedule: {{ .Values.spec.backup.kubestash.schedule }}
         jobTemplate:
           backoffLimit: 1
       repositories:
-        - name: mongodb-repo
-          backend: mongodb-backend
-          directory: /mongo-repo
+        - name: {{ include "kubedbcom-mongodb-editor-options.fullname" . }}
+          backend: default-backend
+          directory: {{ .Release.Namespace }}/{{ include "kubedbcom-mongodb-editor-options.fullname" . }}
           encryptionSecret:
             name: {{ .Values.spec.backup.kubestash.encryptionSecret.name }}
             namespace: {{ .Values.spec.backup.kubestash.encryptionSecret.namespace }}
@@ -39,10 +39,5 @@ spec:
         name: mongodb-addon
         tasks:
           - name: logical-backup
-        jobTemplate:
-          spec:
-            securityContext:
-              runAsUser: 0
-              runAsGroup: 0
 
 {{- end }}

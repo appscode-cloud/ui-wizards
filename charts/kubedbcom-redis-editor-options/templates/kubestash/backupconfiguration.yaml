@@ -14,7 +14,7 @@ spec:
     name: {{ include "kubedbcom-redis-editor-options.fullname" . }}
     namespace: {{ .Release.Namespace }}
   backends:
-    - name: redis-backend
+    - name: default-backend
       storageRef:
         name: {{ .Values.spec.backup.kubestash.storageRef.name }}
         namespace: {{ .Values.spec.backup.kubestash.storageRef.namespace }}
@@ -22,16 +22,16 @@ spec:
         name: {{ .Values.spec.backup.kubestash.retentionPolicy.name }}
         namespace: {{ .Values.spec.backup.kubestash.retentionPolicy.namespace }}
   sessions:
-    - name: redis-frequent-backup
+    - name: full-backup
       sessionHistoryLimit: 2
       scheduler:
         schedule: {{ .Values.spec.backup.kubestash.schedule }}
         jobTemplate:
           backoffLimit: 1
       repositories:
-        - name: redis-repo
-          backend: redis-backend
-          directory: /redis-repo
+        - name: {{ include "kubedbcom-redis-editor-options.fullname" . }}
+          backend: default-backend
+          directory: {{ .Release.Namespace }}/{{ include "kubedbcom-redis-editor-options.fullname" . }}
           encryptionSecret:
             name: {{ .Values.spec.backup.kubestash.encryptionSecret.name }}
             namespace: {{ .Values.spec.backup.kubestash.encryptionSecret.namespace }}
@@ -39,9 +39,5 @@ spec:
         name: redis-addon
         tasks:
           - name: logical-backup
-        jobTemplate:
-          spec:
-            securityContext:
-              runAsUser: 0
-              runAsGroup: 0
+
 {{- end }}
