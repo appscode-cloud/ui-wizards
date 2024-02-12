@@ -42,9 +42,9 @@ spec:
           effect: "NoSchedule"
       {{- end }}
 {{- else if eq .Values.spec.mode "Dedicated" }}
+  {{- if and .Values.form.capi.provider .Values.form.capi.dedicated }}
   podTemplate:
     spec:
-      {{- if and .Values.form.capi.provider .Values.form.capi.dedicated }}
       nodeSelector:
         nodes.klusters.dev/pool: {{ $poolName }}
       tolerations:
@@ -52,7 +52,7 @@ spec:
           operator: "Equal"
           value: "true"
           effect: "NoSchedule"
-      {{- end }}
+  {{- end }}
   topology:
     master:
       replicas: {{ .Values.spec.topology.master.replicas }}
