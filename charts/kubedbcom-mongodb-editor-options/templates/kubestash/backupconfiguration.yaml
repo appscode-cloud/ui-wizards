@@ -39,5 +39,10 @@ spec:
         name: mongodb-addon
         tasks:
           - name: logical-backup
-
+        {{- if semverCompare "~6.0.0" .Values.spec.version }}
+        jobTemplate:
+          spec:
+            securityContext:
+              runAsUser: 999
+        {{- end }}
 {{- end }}
