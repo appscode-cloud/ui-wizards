@@ -1,6 +1,16 @@
 steps:
 - form:
     elements:
+    - if: isConsole
+      fetch: getDatabases|core.k8s.appscode.com|v1alpha1|genericresources
+      label:
+        text: labels.selectDb
+      refresh: true
+      required: true
+      sortable: true
+      schema:
+        $ref: discriminator#/properties/database
+      type: select
     - computed: getDbName
       label:
         text: metadata.name
@@ -9,16 +19,18 @@ steps:
       type: input
     - computed: getDbNamespace
       disabled: true
+      if: isDbSelected
       label:
         text: metadata.namespace
       schema:
         $ref: schema#/properties/metadata/properties/namespace
       type: input
-    - fetch: getResources|engine.kubevault.com|v1alpha1|secretengines
+    - fetch: getEngines|engine.kubevault.com|v1alpha1|secretengines
       label:
-        text: labels.select
+        text: labels.selectEngine
       refresh: true
       required: true
+      if: isDbSelected
       schema:
         $ref: schema#/properties/spec/properties/secretEngineRef/properties/name
       type: select
@@ -56,5 +68,5 @@ steps:
       type: list-input-form
     type: single-step-form
   id: basic
-  title: Create ElasicSearchRole
+  title: Create MariaDBRole
 type: multi-step-form
