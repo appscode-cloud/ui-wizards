@@ -1,6 +1,48 @@
 // *************************      common functions ********************************************
 // eslint-disable-next-line no-empty-pattern
 
+const backendMap = {
+  azure: {
+    spec: { container: "", maxConnections: 0, prefix: "" },
+    auth: { AZURE_ACCOUNT_KEY: "", AZURE_ACCOUNT_NAME: "" },
+  },
+  b2: {
+    spec: { bucket: "", prefix: "", maxConnections: 0 },
+    auth: { B2_ACCOUNT_ID: "", B2_ACCOUNT_KEY: "" },
+  },
+  gcs: {
+    spec: { bucket: "", prefix: "", maxConnections: 0 },
+    auth: { GOOGLE_PROJECT_ID: "", GOOGLE_SERVICE_ACCOUNT_JSON_KEY: "" },
+  },
+  s3: {
+    spec: { endpoint: "", bucket: "", prefix: "", region: "" },
+    auth: {
+      AWS_ACCESS_KEY_ID: "",
+      AWS_SECRET_ACCESS_KEY: "",
+      CA_CERT_DATA: "",
+    },
+  },
+  swift: {
+    spec: { container: "", prefix: "" },
+    auth: {
+      OS_AUTH_TOKEN: "",
+      OS_AUTH_URL: "",
+      OS_PASSWORD: "",
+      OS_PROJECT_DOMAIN_NAME: "",
+      OS_PROJECT_NAME: "",
+      OS_REGION_NAME: "",
+      OS_STORAGE_URL: "",
+      OS_TENANT_ID: "",
+      OS_TENANT_NAME: "",
+      OS_USERNAME: "",
+      OS_USER_DOMAIN_NAME: "",
+      ST_AUTH: "",
+      ST_KEY: "",
+      ST_USER: "",
+    },
+  },
+};
+
 // get specific feature details
 function getFeatureSetDetails(storeGet) {
   const featureSets = storeGet("/cluster/featureSets/result") || [];
@@ -175,7 +217,6 @@ function onEnabledFeaturesChange({
   storeGet,
 }) {
   const enabledFeatures = getValue(discriminator, "/enabledFeatures") || [];
-
   const allFeatures = storeGet("/cluster/features/result") || [];
 
   allFeatures.forEach((item) => {
@@ -358,6 +399,182 @@ function checkIsResourceLoaded ({commit, storeGet,watchDependency,getValue,discr
   }
 }
 
+
+function showBackendForm({ getValue, model, watchDependency, commit }, value, presetType) {
+
+  const backendProvider = getValue(
+    model,
+    `/resources/helmToolkitFluxcdIoHelmRelease_${presetType}/spec/values/${presetType}/backend/provider`
+  );
+  watchDependency(
+    `model#/resources/helmToolkitFluxcdIoHelmRelease_${presetType}/spec/values/${presetType}/backend/provider`
+  );
+
+  // delete every other backend type from model  exect the selected one
+
+  setTimeout(() => {
+    Object.keys(backendMap).forEach((key) => {
+      if (key !== backendProvider) {
+        commit(
+          "wizard/model$delete",
+          `/resources/helmToolkitFluxcdIoHelmRelease_${presetType}/spec/values/${presetType}/backend/${key}`
+        );
+      }
+    });
+  }, 1000);
+
+  return backendProvider === value;
+}
+
+function checkPresetType({ getValue, model, watchDependency, commit , discriminator}, value) {
+  watchDependency("discriminator#/backupPresetType")
+  const backupType = getValue(discriminator, "/backupPresetType");
+  if(backupType === value)
+  {
+    return true
+  }
+  return false
+}
+
+
+function initStorageSecret({commit})
+{
+  commit("wizard/model$update", {
+    path: "schema#/resources/helmToolkitFluxcdIoHelmRelease_kubestash/spec/values/kubestash/storageSecret/create",
+    value: true,
+    force: true,
+  });
+  return true
+}
+
+function initRetentionPolicyPrune({commit})
+{
+  commit("wizard/model$update", {
+    path: "schema#/resources/helmToolkitFluxcdIoHelmRelease_stash/spec/values/stash/retentionPolicy/prune",
+    value: true,
+    force: true,
+  });
+  return true
+}
+function isStorageSectionOn({getValue,model,watchDependency }, provider, presetType)
+{
+  const backendProvider = getValue(
+    model,
+    `/resources/helmToolkitFluxcdIoHelmRelease_${presetType}/spec/values/${presetType}/backend/provider`
+  );
+  watchDependency(`model#/resources/helmToolkitFluxcdIoHelmRelease_${presetType}/spec/values/${presetType}/storageSecret/create`)
+  watchDependency(`model#/resources/helmToolkitFluxcdIoHelmRelease_${presetType}/spec/values/${presetType}/backend/provider`)
+  const secretStorage = getValue(
+    model,
+    `/resources/helmToolkitFluxcdIoHelmRelease_kubestash/spec/values/kubestash/storageSecret/create`
+  )
+  if(backendProvider === undefined)
+  {
+    return secretStorage
+  }
+    return ( backendProvider=== provider && secretStorage)
+}
+function initTLS({commit}, presetType)
+{
+  commit("wizard/model$update", {
+    path: `schema#/resources/helmToolkitFluxcdIoHelmRelease_${presetType}/spec/values/${presetType}/backend/s3/spec/insecureTLS`,
+    value: false,
+    force: true,
+  });
+  return false
+}
+
+function getPresetList({getValue,discriminator, watchDependency, commit, model})
+{
+  const allPreset = getValue(discriminator, "/isPresetEnabled") || [];
+  const enabledPreset = getValue(discriminator, "/enabledFeatures");
+
+  if(!enabledPreset?.includes('stash-presets'))
+  {
+    // this case if for if stash-presets is not enabled
+    if(enabledPreset!==undefined)
+    {
+        commit(
+          "wizard/model$delete",
+          `/resources/helmToolkitFluxcdIoHelmRelease_stash/spec/values/stash/`
+        );
+
+        commit(
+          "wizard/model$delete",
+          `/resources/helmToolkitFluxcdIoHelmRelease_kubestash/spec/values/kubestash/`
+        );
+      return []
+    }
+  }
+  if(!enabledPreset?.includes('stash'))
+  {
+    if(enabledPreset!==undefined)
+    {
+      delete resources.helmToolkitFluxcdIoHelmRelease_stash?.spec?.values?.stash;
+    }
+  }
+  if(!enabledPreset?.includes('kubestash'))
+  {
+    if(enabledPreset!==undefined)
+    {
+      delete resources.helmToolkitFluxcdIoHelmRelease_kubestash?.spec?.values?.kubestash;
+    }
+  }
+  watchDependency('discriminator#/enabledFeatures')
+  watchDependency('discriminator#/presetType')
+  for (let i = allPreset.length - 1; i >= 0; i--) {
+    const preset = allPreset[i];
+    if (!enabledPreset?.includes(preset)) {
+      allPreset.splice(i, 1);
+    }
+  }
+    return allPreset
+}
+
+function onPresetTypeChange({getValue,commit, discriminator}){
+
+  const backupType = getValue(discriminator, "/backupPresetType");
+  const compliment = backupType === 'stash' ? 'kubestash' : 'stash'
+    commit(
+      "wizard/model$delete",
+      `/resources/helmToolkitFluxcdIoHelmRelease_${compliment}/spec/values/${compliment}/`
+    );
+
+
+}
+function onBackendProviderChange({ commit, getValue, model }, presetType) {
+  const selectedBackendProvider = getValue(
+    model,
+    `/resources/helmToolkitFluxcdIoHelmRelease_${presetType}/spec/values/${presetType}/backend/provider`
+  );
+
+  Object.keys(backendMap).forEach((key) => {
+    if (key !== selectedBackendProvider) {
+      commit(
+        "wizard/model$delete",
+        `/resources/helmToolkitFluxcdIoHelmRelease_${presetType}/spec/values/${presetType}/backend/${key}`
+      );
+    }
+  });
+}
+
+function storageSecretChange({getValue,model, commit}, presetType)
+{
+  const storageSecret = getValue(
+    model,
+    `/resources/helmToolkitFluxcdIoHelmRelease_${presetType}/spec/values/${presetType}/storageSecret/create`
+  );
+  if(!storageSecret)
+  {
+    Object.keys(backendMap).forEach((key) => {
+        commit(
+          "wizard/model$delete",
+          `/resources/helmToolkitFluxcdIoHelmRelease_${presetType}/spec/values/${presetType}/backend/${key}/auth`
+        );
+    });
+  }
+}
+
 return {
   hideThisElement,
   checkIsResourceLoaded,
@@ -371,4 +588,14 @@ return {
   returnFalse,
   setReleaseNameAndNamespaceAndInitializeValues,
   fetchFeatureSetOptions,
+  checkPresetType,
+  onBackendProviderChange,
+  showBackendForm,
+  initStorageSecret,
+  isStorageSectionOn,
+  initRetentionPolicyPrune,
+  initTLS,
+  getPresetList,
+  onPresetTypeChange,
+  storageSecretChange,
 };
