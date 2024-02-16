@@ -93,7 +93,6 @@ async function getEngines(
   const dbValue = getValue(discriminator, "/database") || {};
   const dbName = storeGet("/route/params/name") || dbValue.name || "";
   const dbNamespace = storeGet("/route/query/namespace") || dbValue.namespace || "";
-  console.log(owner);
   if (dbName) {
     try {
       const resp = await axios.get(
