@@ -9,53 +9,57 @@ function isConsole({ storeGet }) {
 async function getDatabases({ axios, storeGet }, group, version, resource) {
   const owner = storeGet("/route/params/user") || "";
   const cluster = storeGet("/route/params/cluster") || "";
-  try {
-    const resp = await axios.get(
-      `/clusters/${owner}/${cluster}/proxy/${group}/${version}/${resource}`,
-      {
-        params: {
-          convertToTable: true,
-          labelSelector: "k8s.io/group=kubedb.com",
-        },
-      }
-    );
+  if (isConsole({ storeGet })) {
+    try {
+      const resp = await axios.get(
+        `/clusters/${owner}/${cluster}/proxy/${group}/${version}/${resource}`,
+        {
+          params: {
+            convertToTable: true,
+            labelSelector: "k8s.io/group=kubedb.com",
+          },
+        }
+      );
 
-    const resources = (resp && resp.data && resp.data.rows) || [];
+      const resources = (resp && resp.data && resp.data.rows) || [];
 
-    resources.map((item) => {
-      const name = (item.cells && item.cells[0].data) || "";
-      const namespace = (item.cells?.length > 0 && item.cells[1].data) || "";
-      const resource = (item.cells?.length > 1 && item.cells[2].data) || "";
-      item.text = name;
-      item.value = {
-        name: name,
-        namespace: namespace,
-        resource: resource,
-      };
-      return true;
-    });
-    return resources;
-  } catch (e) {
-    console.log(e);
-    return [];
+      resources.map((item) => {
+        const name = (item.cells && item.cells[0].data) || "";
+        const namespace = (item.cells?.length > 0 && item.cells[1].data) || "";
+        const resource = (item.cells?.length > 1 && item.cells[2].data) || "";
+        item.text = name;
+        item.value = {
+          name: name,
+          namespace: namespace,
+          resource: resource,
+        };
+        return true;
+      });
+      return resources;
+    } catch (e) {
+      console.log(e);
+      return [];
+    }
   }
 }
 
 function isDbSelected({ getValue, storeGet, discriminator, watchDependency }) {
-  const dbName = getDbName({
-    getValue,
-    storeGet,
-    discriminator,
-    watchDependency,
-  });
-  return dbName ? true : false;
+  if (!isConsole({ storeGet })) return true;
+  watchDependency("discriminator#/database");
+  const val = getValue(discriminator, "/database") || {};
+  return val && val.name ? true : false;
 }
 
 function getDbName({ getValue, storeGet, discriminator, watchDependency }) {
-  watchDependency("discriminator#/database");
-  const val = getValue(discriminator, "/database") || {};
-  const name = storeGet("/route/params/name") || "";
-  return val && val.name ? val.name : name;
+  if (isConsole({ storeGet })) {
+    watchDependency("discriminator#/database");
+    const data = getValue(discriminator, "/database") || {};
+    return data && data.name || "";
+  }
+  else {
+    const name = storeGet("/route/params/name") || "";
+    return name;
+  }
 }
 
 function getEngineName({
@@ -82,10 +86,15 @@ function getDbNamespace({
   discriminator,
   watchDependency,
 }) {
-  watchDependency("discriminator#/database");
-  const data = getValue(discriminator, "/database") || {};
-  const namespace = storeGet("/route/query/namespace") || "";
-  return data && data.namespace ? data.namespace : namespace;
+  if (isConsole({ storeGet })) {
+    watchDependency("discriminator#/database");
+    const data = getValue(discriminator, "/database") || {};
+    return data && data.namespace || "";
+  }
+  else {
+    const namespace = storeGet("/route/query/namespace") || "";
+    return namespace;
+  }
 }
 
 function isVaultSelected({ getValue, watchDependency, discriminator }) {
@@ -181,15 +190,15 @@ function getSpecRef({
   let databaseRefName = getSingularResource(paramResource) || "";
   if (database && database.resource)
     databaseRefName = database.resource.toLowerCase();
+
+  const dbValue = getValue(discriminator, "/database") || {};
+  const dbName = storeGet("/route/params/name") || dbValue.name;
+  const dbNamespace = storeGet("/route/query/namespace") || dbValue.namespace;
+
   const val = {
     databaseRef: {
-      name: getDbName({ getValue, storeGet, discriminator, watchDependency }),
-      namespace: getDbNamespace({
-        getValue,
-        storeGet,
-        discriminator,
-        watchDependency,
-      }),
+      name: dbName,
+      namespace: dbNamespace,
     },
     pluginName: getPluginName({
       storeGet,
