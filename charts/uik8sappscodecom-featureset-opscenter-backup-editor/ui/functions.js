@@ -470,7 +470,7 @@ function isStorageSectionOn({getValue,model,watchDependency }, provider, presetT
   )
   if(backendProvider === undefined)
   {
-    return secretStorage
+    return false
   }
     return ( backendProvider=== provider && secretStorage)
 }
@@ -511,6 +511,7 @@ function getPresetList({getValue,discriminator, watchDependency, commit, model})
     if(enabledPreset!==undefined)
     {
       delete resources.helmToolkitFluxcdIoHelmRelease_stash?.spec?.values?.stash;
+      
     }
   }
   if(!enabledPreset?.includes('kubestash'))
