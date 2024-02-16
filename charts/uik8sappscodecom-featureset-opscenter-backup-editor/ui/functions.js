@@ -399,10 +399,6 @@ function checkIsResourceLoaded ({commit, storeGet,watchDependency,getValue,discr
   }
 }
 
-function onBackupPresetChange({ discriminator, getValue, commit }) {
-  const status = getValue(discriminator, "/backupPresetType");
-  window.console.log(status)
-}
 
 function showBackendForm({ getValue, model, watchDependency, commit }, value, presetType) {
 
@@ -440,16 +436,6 @@ function checkPresetType({ getValue, model, watchDependency, commit , discrimina
   return false
 }
 
-function presetTypeChecker({getValue, discriminator})
-{
-  console.log('called')
-  console.log({discriminator})
-}
-
-function onBackendProviderChange({})
-{
-  console.log('on change is called')
-}
 
 function initStorageSecret({commit})
 {
@@ -482,8 +468,6 @@ function isStorageSectionOn({getValue,model,watchDependency }, provider, presetT
     model,
     `/resources/helmToolkitFluxcdIoHelmRelease_kubestash/spec/values/kubestash/storageSecret/create`
   )
-  console.log(backendProvider, provider)
-  console.log(secretStorage)
   if(backendProvider === undefined)
   {
     return secretStorage
@@ -500,16 +484,41 @@ function initTLS({commit}, presetType)
   return false
 }
 
-function getPresetList({getValue,discriminator, watchDependency, commit})
+function getPresetList({getValue,discriminator, watchDependency, commit, model})
 {
   const allPreset = getValue(discriminator, "/isPresetEnabled") || [];
-  const backupType = getValue(discriminator, "/backupPresetType");
   const enabledPreset = getValue(discriminator, "/enabledFeatures");
 
   if(!enabledPreset?.includes('stash-presets'))
   {
+    // this case if for if stash-presets is not enabled
     if(enabledPreset!==undefined)
-    return []
+    {
+        commit(
+          "wizard/model$delete",
+          `/resources/helmToolkitFluxcdIoHelmRelease_stash/spec/values/stash/`
+        );
+
+        commit(
+          "wizard/model$delete",
+          `/resources/helmToolkitFluxcdIoHelmRelease_kubestash/spec/values/kubestash/`
+        );
+      return []
+    }
+  }
+  if(!enabledPreset?.includes('stash'))
+  {
+    if(enabledPreset!==undefined)
+    {
+      delete resources.helmToolkitFluxcdIoHelmRelease_stash?.spec?.values?.stash;
+    }
+  }
+  if(!enabledPreset?.includes('kubestash'))
+  {
+    if(enabledPreset!==undefined)
+    {
+      delete resources.helmToolkitFluxcdIoHelmRelease_kubestash?.spec?.values?.kubestash;
+    }
   }
   watchDependency('discriminator#/enabledFeatures')
   watchDependency('discriminator#/presetType')
@@ -517,30 +526,53 @@ function getPresetList({getValue,discriminator, watchDependency, commit})
     const preset = allPreset[i];
     if (!enabledPreset?.includes(preset)) {
       allPreset.splice(i, 1);
-      if (preset === backupType) {
-        setTimeout(() => {
-          commit(
-            "wizard/model$delete",
-            `/resources/helmToolkitFluxcdIoHelmRelease_${preset}/spec/values/${preset}/`
-          );
-    }, 1000); 
-      }
     }
   }
     return allPreset
 }
 
-function onPresetTypeChange({}){
+function onPresetTypeChange({getValue,commit, discriminator}){
 
   const backupType = getValue(discriminator, "/backupPresetType");
   const compliment = backupType === 'stash' ? 'kubestash' : 'stash'
-  setTimeout(() => {
     commit(
       "wizard/model$delete",
       `/resources/helmToolkitFluxcdIoHelmRelease_${compliment}/spec/values/${compliment}/`
     );
-}, 1000); 
 
+
+}
+function onBackendProviderChange({ commit, getValue, model }, presetType) {
+  const selectedBackendProvider = getValue(
+    model,
+    `/resources/helmToolkitFluxcdIoHelmRelease_${presetType}/spec/values/${presetType}/backend/provider`
+  );
+
+  Object.keys(backendMap).forEach((key) => {
+    if (key !== selectedBackendProvider) {
+      commit(
+        "wizard/model$delete",
+        `/resources/helmToolkitFluxcdIoHelmRelease_${presetType}/spec/values/${presetType}/backend/${key}`
+      );
+    }
+  });
+}
+
+function storageSecretChange({getValue,model, commit}, presetType)
+{
+  const storageSecret = getValue(
+    model,
+    `/resources/helmToolkitFluxcdIoHelmRelease_${presetType}/spec/values/${presetType}/storageSecret/create`
+  );
+  if(!storageSecret)
+  {
+    Object.keys(backendMap).forEach((key) => {
+        commit(
+          "wizard/model$delete",
+          `/resources/helmToolkitFluxcdIoHelmRelease_${presetType}/spec/values/${presetType}/backend/${key}/auth`
+        );
+    });
+  }
 }
 
 return {
@@ -556,9 +588,7 @@ return {
   returnFalse,
   setReleaseNameAndNamespaceAndInitializeValues,
   fetchFeatureSetOptions,
-  onBackupPresetChange, 
   checkPresetType,
-  presetTypeChecker,
   onBackendProviderChange,
   showBackendForm,
   initStorageSecret,
@@ -567,4 +597,5 @@ return {
   initTLS,
   getPresetList,
   onPresetTypeChange,
+  storageSecretChange,
 };

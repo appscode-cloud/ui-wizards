@@ -38,7 +38,7 @@ steps:
         type: label-element
       - allowUserDefinedOption: true
         fetch: getPresetList
-        onChange: presetTypeChange
+        onChange: onPresetTypeChange
         label:
           text: Select Preset Type
         schema:
@@ -46,8 +46,35 @@ steps:
         type: select
       - elements:
         - label:
+            text: labels.kubestash.schedule
+          schema: 
+            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kubestash/properties/spec/properties/values/properties/kubestash/properties/schedule
+          type: input
+          required: true
+        - label:
+            text: labels.kubestash.retentionPolicy
+          schema: 
+            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kubestash/properties/spec/properties/values/properties/kubestash/properties/retentionPolicy
+          options:
+          - text: Keep 1 Week
+            value: keep-1wk
+          - text: Keep 1 Month
+            value: keep-1mo
+          - text: Keep 3 Month
+            value: keep-3mo
+          - text: Keep 1 Year
+            value: keep-1yr
+          type: select
+          required: true
+        - label:
+            text: labels.kubestash.encryptionSecret
+          schema: 
+            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kubestash/properties/spec/properties/values/properties/kubestash/properties/encryptionSecret
+          type: input
+          required: true
+        - label:
             text: labels.backend.provider
-          onChange: onBackendProviderChange
+          onChange: onBackendProviderChange|kubestash
           options:
           - text: Azure Blob Storage
             value: azure
@@ -76,6 +103,7 @@ steps:
             schema:     
               $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kubestash/properties/spec/properties/values/properties/kubestash/properties/backend/properties/azure/properties/spec/properties/maxConnections
             type: input
+            inputType: number
           type: single-step-form
           if: showBackendForm|azure|kubestash
         - elements:
@@ -95,6 +123,7 @@ steps:
             schema:
               $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kubestash/properties/spec/properties/values/properties/kubestash/properties/backend/properties/gcs/properties/spec/properties/maxConnections
             type: input
+            inputType: number
           type: single-step-form
           if: showBackendForm|gcs|kubestash
         - elements:
@@ -132,6 +161,7 @@ steps:
             text: Storage Secret 
           type: label-element
         - computed: initStorageSecret
+          onChange: storageSecretChange|kubestash
           label:
             text: labels.kubestash.storageSecret
           schema: 
@@ -188,31 +218,64 @@ steps:
             type: editor
           if: isStorageSectionOn|s3|kubestash
           type: single-step-form
-        - label:
-            text: labels.kubestash.encryptionSecret
-          schema: 
-            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kubestash/properties/spec/properties/values/properties/kubestash/properties/encryptionSecret
-          type: input
-          required: true
-        - label:
-            text: labels.kubestash.schedule
-          schema: 
-            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kubestash/properties/spec/properties/values/properties/kubestash/properties/schedule
-          type: input
-          required: true
-        - label:
-            text: labels.kubestash.retentionPolicy
-          schema: 
-            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kubestash/properties/spec/properties/values/properties/kubestash/properties/retentionPolicy
-          type: input
-          required: true
         
         type: single-step-form
         if: checkPresetType|kubestash
       - elements:
         - label:
+            text: labels.kubestash.schedule
+          schema: 
+            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash/properties/spec/properties/values/properties/stash/properties/schedule
+          type: input
+          required: true
+        - label:
+            text: Auth Secret 
+          type: label-element
+        - label:
+            text: labels.stash.authsecret.name
+          required: true
+          schema:
+            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash/properties/spec/properties/values/properties/stash/properties/authSecret/properties/name
+          type: input 
+        - label:
+            text: labels.stash.authsecret.password
+          required: true
+          schema:
+            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash/properties/spec/properties/values/properties/stash/properties/authSecret/properties/password
+          type: input 
+          inputType: password
+        - label:
+            text: Retention Policy 
+          type: label-element
+        - label:
+            text: labels.backend.retentionPolicy.name
+          schema:
+            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash/properties/spec/properties/values/properties/stash/properties/retentionPolicy/properties/name
+          type: input
+          required: true
+        - label:
+            text: labels.backend.retentionPolicy.keepHourly
+          schema:
+            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash/properties/spec/properties/values/properties/stash/properties/retentionPolicy/properties/keepHourly
+          type: input
+          inputType: number
+          required: true
+        - label:
+            text: labels.backend.retentionPolicy.keepDaily
+          schema:
+            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash/properties/spec/properties/values/properties/stash/properties/retentionPolicy/properties/keepDaily
+          type: input
+          inputType: number
+          required: true
+        - computed: initRetentionPolicyPrune
+          label:
+            text: labels.backend.retentionPolicy.prune
+          schema: 
+            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash/properties/spec/properties/values/properties/stash/properties/retentionPolicy/properties/prune
+          type: switch
+        - label:
             text: labels.backend.provider
-          onChange: onBackendProviderChange
+          onChange: onBackendProviderChange|stash
           options:
           - text: Azure Blob Storage
             value: azure
@@ -245,6 +308,7 @@ steps:
             schema:     
               $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash/properties/spec/properties/values/properties/stash/properties/backend/properties/azure/properties/spec/properties/maxConnections
             type: input
+            inputType: number
           - label:
               text: labels.backend.azure.account_name
             schema:
@@ -276,6 +340,7 @@ steps:
             schema:
               $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash/properties/spec/properties/values/properties/stash/properties/backend/properties/gcs/properties/spec/properties/maxConnections
             type: input
+            inputType: number
           - label:
               text: labels.backend.gcs.project_id
             schema:
@@ -356,6 +421,7 @@ steps:
             schema:
               $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash/properties/spec/properties/values/properties/stash/properties/backend/properties/b2/properties/spec/properties/maxConnections
             type: input
+            inputType: number
           - label:
               text: labels.backend.b2.account_id
             schema:
@@ -468,57 +534,6 @@ steps:
             required: true
           type: single-step-form
           if: showBackendForm|swift|stash
-        - label:
-            text: labels.kubestash.schedule
-          schema: 
-            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash/properties/spec/properties/values/properties/stash/properties/schedule
-          type: input
-          required: true
-        - label:
-            text: Auth Secret 
-          type: label-element
-        - label:
-            text: labels.stash.authsecret.name
-          required: true
-          schema:
-            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash/properties/spec/properties/values/properties/stash/properties/authSecret/properties/name
-          type: input 
-        - label:
-            text: labels.stash.authsecret.password
-          required: true
-          schema:
-            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash/properties/spec/properties/values/properties/stash/properties/authSecret/properties/password
-          type: input 
-          inputType: password
-        - label:
-            text: Retention Policy 
-          type: label-element
-        - label:
-            text: labels.backend.retentionPolicy.name
-          schema:
-            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash/properties/spec/properties/values/properties/stash/properties/retentionPolicy/properties/name
-          type: input
-          required: true
-        - label:
-            text: labels.backend.retentionPolicy.keepHourly
-          schema:
-            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash/properties/spec/properties/values/properties/stash/properties/retentionPolicy/properties/keepHourly
-          type: input
-          inputType: number
-          required: true
-        - label:
-            text: labels.backend.retentionPolicy.keepDaily
-          schema:
-            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash/properties/spec/properties/values/properties/stash/properties/retentionPolicy/properties/keepDaily
-          type: input
-          inputType: number
-          required: true
-        - computed: initRetentionPolicyPrune
-          label:
-            text: labels.backend.retentionPolicy.prune
-          schema: 
-            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash/properties/spec/properties/values/properties/stash/properties/retentionPolicy/properties/prune
-          type: switch
         type: single-step-form
         if: checkPresetType|stash
       type: single-step-form
