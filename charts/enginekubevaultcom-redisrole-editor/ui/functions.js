@@ -103,8 +103,8 @@ async function getEngines(
       const resources = (resp && resp.data && resp.data.items) || [];
       const filteredResources = resources.filter(
         (item) =>
-          item.spec?.mariadb?.databaseRef?.name === dbName &&
-          item.spec?.mariadb?.databaseRef?.namespace === dbNamespace
+          item.spec?.redis?.databaseRef?.name === dbName &&
+          item.spec?.redis?.databaseRef?.namespace === dbNamespace
       );
       filteredResources.map((item) => {
         const name = (item.metadata && item.metadata.name) || "";
