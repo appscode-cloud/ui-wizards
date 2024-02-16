@@ -36,7 +36,7 @@ async function getDatabases({ axios, storeGet }, group, version, resource) {
         return true;
       });
       const filteredResources = resources.filter(
-        (item) => item.value.resource === "MariaDB"
+        (item) => item.value.resource.toLowerCase() === "mariadb"
       );
       return filteredResources;
     } catch (e) {
@@ -91,8 +91,8 @@ async function getEngines(
   const owner = storeGet("/route/params/user") || "";
   const cluster = storeGet("/route/params/cluster") || "";
   const dbValue = getValue(discriminator, "/database") || {};
-  const dbName = storeGet("/route/params/name") || dbValue.name;
-  const dbNamespace = storeGet("/route/query/namespace") || dbValue.namespace;
+  const dbName = storeGet("/route/params/name") || dbValue.name || "";
+  const dbNamespace = storeGet("/route/query/namespace") || dbValue.namespace || "";
   console.log(owner);
   if (dbName) {
     try {
