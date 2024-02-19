@@ -192,8 +192,8 @@ function getSpecRef({
     databaseRefName = database.resource.toLowerCase();
 
   const dbValue = getValue(discriminator, "/database") || {};
-  const dbName = storeGet("/route/params/name") || dbValue.name;
-  const dbNamespace = storeGet("/route/query/namespace") || dbValue.namespace;
+  const dbName = storeGet("/route/params/name") || dbValue?.name || "";
+  const dbNamespace = storeGet("/route/query/namespace") || dbValue?.namespace || "";
 
   const val = {
     databaseRef: {
