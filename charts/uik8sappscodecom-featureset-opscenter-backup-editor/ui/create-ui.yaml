@@ -36,7 +36,9 @@ steps:
       - label:
           text: labels.backup.type
         type: label-element
-      - allowUserDefinedOption: true
+        if: isShow
+      - computed: checkConfigure
+        allowUserDefinedOption: true
         fetch: getPresetList
         onChange: onPresetTypeChange
         label:
@@ -44,6 +46,7 @@ steps:
         schema:
           $ref: discriminator#/properties/backupPresetType
         type: select
+        if: isShow
       - elements:
         - label:
             text: labels.kubestash.schedule

@@ -1,6 +1,8 @@
 // *************************      common functions ********************************************
 // eslint-disable-next-line no-empty-pattern
 
+
+
 const backendMap = {
   azure: {
     spec: { container: "", maxConnections: 0, prefix: "" },
@@ -402,6 +404,7 @@ function checkIsResourceLoaded ({commit, storeGet,watchDependency,getValue,discr
 
 function showBackendForm({ getValue, model, watchDependency, commit }, value, presetType) {
 
+
   const backendProvider = getValue(
     model,
     `/resources/helmToolkitFluxcdIoHelmRelease_${presetType}/spec/values/${presetType}/backend/provider`
@@ -426,8 +429,21 @@ function showBackendForm({ getValue, model, watchDependency, commit }, value, pr
   return backendProvider === value;
 }
 
-function checkPresetType({ getValue, model, watchDependency, commit , discriminator}, value) {
+function checkPresetType({ getValue, watchDependency, discriminator}, value) {
   watchDependency("discriminator#/backupPresetType")
+  watchDependency('discriminator#/enabledFeatures')
+
+  const enabledPreset = getValue(discriminator, "/enabledFeatures");
+
+  if(!enabledPreset?.includes('stash-presets') && enabledPreset!== undefined)
+  {
+    return false
+  }
+  if(!(enabledPreset?.includes('stash') || enabledPreset?.includes('kubestash'))  && enabledPreset !== undefined)
+  {
+    return false
+  }
+
   const backupType = getValue(discriminator, "/backupPresetType");
   if(backupType === value)
   {
@@ -437,8 +453,14 @@ function checkPresetType({ getValue, model, watchDependency, commit , discrimina
 }
 
 
-function initStorageSecret({commit})
+function initStorageSecret({commit, getValue, model})
 {
+  const modelStorageSecret = getValue(
+    model,
+    `/resources/helmToolkitFluxcdIoHelmRelease_kubestash/spec/values/kubestash/storageSecret/create`
+  )
+  if(modelStorageSecret !== undefined)
+  return modelStorageSecret
   commit("wizard/model$update", {
     path: "schema#/resources/helmToolkitFluxcdIoHelmRelease_kubestash/spec/values/kubestash/storageSecret/create",
     value: true,
@@ -534,6 +556,7 @@ function getPresetList({getValue,discriminator, watchDependency, commit, model})
 
 function onPresetTypeChange({getValue,commit, discriminator}){
 
+
   const backupType = getValue(discriminator, "/backupPresetType");
   const compliment = backupType === 'stash' ? 'kubestash' : 'stash'
     commit(
@@ -576,6 +599,43 @@ function storageSecretChange({getValue,model, commit}, presetType)
   }
 }
 
+function checkConfigure({getValue, model})
+{
+  const  kubestashData = getValue(
+    model,
+    `/resources/helmToolkitFluxcdIoHelmRelease_kubestash/spec/values/kubestash`
+  );
+  if(kubestashData !== undefined)
+  {
+    return 'kubestash'
+  }
+  const stashData = getValue(
+    model,
+    `/resources/helmToolkitFluxcdIoHelmRelease_stash/spec/values/stash`
+  );
+  if(stashData !== undefined)
+  {
+    return 'stash'
+  }
+  return ''
+}
+
+
+function isShow({getValue, discriminator, watchDependency,setDiscriminatorValue}){
+  const enabledPreset = getValue(discriminator, "/enabledFeatures");
+  watchDependency('discriminator#/enabledFeatures')
+
+  if(!enabledPreset?.includes('stash-presets') && enabledPreset!== undefined)
+  {
+     return false
+  }
+  if(!(enabledPreset?.includes('stash') || enabledPreset?.includes('kubestash'))  && enabledPreset !== undefined)
+  {
+    return false
+  }
+  return true
+}
+
 return {
   hideThisElement,
   checkIsResourceLoaded,
@@ -599,4 +659,6 @@ return {
   getPresetList,
   onPresetTypeChange,
   storageSecretChange,
+  checkConfigure,
+  isShow,
 };
