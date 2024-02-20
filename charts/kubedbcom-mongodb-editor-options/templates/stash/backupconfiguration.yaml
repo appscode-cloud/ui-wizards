@@ -18,7 +18,11 @@ spec:
   runtimeSettings:
     pod:
       securityContext:
+        {{- if semverCompare "~6.0.0" .Values.spec.version }}
+        fsGroup: 999
+        {{- else }}
         fsGroup: 65534
+        {{- end }}
   retentionPolicy:
     {{- .Values.spec.backup.stash.retentionPolicy | toYaml | nindent 4 }}
 
