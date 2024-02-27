@@ -1,3 +1,4 @@
+let storageClassList = [];
 const machines = {
   "db.t.micro": {
     resources: {
@@ -352,6 +353,7 @@ async function getStorageClassNames({ axios, storeGet, commit }) {
     item.value = name;
     return true;
   });
+  storageClassList = resources;
   return resources;
 }
 
@@ -670,6 +672,48 @@ function isVariantAvailable ({storeGet})  {
   return variant ? true : false
 }
 
+function setStorageClass({model, getValue, commit}) {
+  const terminationPolicy = getValue(model, "spec/terminationPolicy") || "";
+  let storageClass = getValue(model, "spec/storageClass/name") || "";
+  const suffix = "-retain"
+  if(terminationPolicy === "WipeOut" || terminationPolicy === "Delete") {
+    const found = storageClassList.find(item => {
+      return item.metadata &&
+      item.metadata.annotations &&
+      item.metadata.annotations["storageclass.kubernetes.io/is-default-class"] && 
+      !item.metadata.name?.endsWith(suffix)
+    })
+    if(found !== 'undefined')
+      storageClass = found?.value;
+    else {
+      found = storageClassList.find(item => {
+        return item.metadata &&
+        item.metadata.annotations &&
+        item.metadata.annotations["storageclass.kubernetes.io/is-default-class"]
+      })
+      if(found !== 'undefined')
+        storageClass = found?.value;
+    }
+  }
+  else{
+    const found = storageClassList.find(item => {
+      return item.metadata && 
+      item.metadata.name &&
+      item.metadata.name.endsWith(suffix)
+    });
+    if(found !== 'undefined')
+      storageClass = found?.value;
+  }
+  if(storageClass) {
+    commit("wizard/model$update", {
+      path: "/spec/storageClass/name",
+      value: storageClass,
+      force: true,
+    });
+  }
+}
+
+
 return {
   isVariantAvailable,
 	fetchJsons,
@@ -699,5 +743,6 @@ return {
   getZones,
   getSKU,
   showMultiselectZone,
-  showSelectZone
+  showSelectZone,
+  setStorageClass,
 }

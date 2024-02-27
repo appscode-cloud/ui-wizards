@@ -136,13 +136,6 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/persistence/properties/size
       type: input
-    - fetch: getStorageClassNames
-      if: isNotEqualToModelPathValue|Sentinel|/spec/mode
-      label:
-        text: labels.storage.class
-      schema:
-        $ref: schema#/properties/spec/properties/storageClass/properties/name
-      type: select
     - hasDescription: true
       label:
         text: labels.terminationPolicy
@@ -161,7 +154,15 @@ steps:
         value: DoNotTerminate
       schema:
         $ref: schema#/properties/spec/properties/terminationPolicy
+      onChange: setStorageClass
       type: radio
+    - fetch: getStorageClassNames
+      if: isNotEqualToModelPathValue|Sentinel|/spec/mode
+      label:
+        text: labels.storage.class
+      schema:
+        $ref: schema#/properties/spec/properties/storageClass/properties/name
+      type: select
     - label:
         text: labels.database.secret
       type: label-element
