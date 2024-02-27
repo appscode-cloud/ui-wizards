@@ -14,7 +14,7 @@ steps:
         backupPresetType:
           type: string
         isPresetEnabled:
-          default: ['stash', 'kubestash']
+          default: ['Stash', 'KubeStash']
           type: array
       elements:
       - computed: getFeatureSetDescription
@@ -37,27 +37,25 @@ steps:
           text: labels.backup.type
         type: label-element
         if: isShow
-      - computed: checkConfigure
-        allowUserDefinedOption: true
-        fetch: getPresetList
+      - fetch: getPresetList
         onChange: onPresetTypeChange
         label:
           text: Select Preset Type
         schema:
-          $ref: discriminator#/properties/backupPresetType
+          $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/tool
         type: select
         if: isShow
       - elements:
         - label:
             text: labels.kubestash.schedule
           schema: 
-            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kubestash/properties/spec/properties/values/properties/kubestash/properties/schedule
+            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/schedule
           type: input
           required: true
         - label:
             text: labels.kubestash.retentionPolicy
           schema: 
-            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kubestash/properties/spec/properties/values/properties/kubestash/properties/retentionPolicy
+            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/retentionPolicy
           options:
           - text: Keep 1 Week
             value: keep-1wk
@@ -72,7 +70,7 @@ steps:
         - label:
             text: labels.kubestash.encryptionSecret
           schema: 
-            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kubestash/properties/spec/properties/values/properties/kubestash/properties/encryptionSecret
+            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/encryptionSecret
           type: input
           required: true
         - label:
@@ -86,25 +84,25 @@ steps:
           - text: AWS S3
             value: s3
           schema:
-            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kubestash/properties/spec/properties/values/properties/kubestash/properties/backend/properties/provider
+            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/provider
           type: select
           required: true
         - elements:
           - label:
               text: labels.backend.prefix
             schema:
-              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kubestash/properties/spec/properties/values/properties/kubestash/properties/backend/properties/azure/properties/spec/properties/prefix
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/azure/properties/spec/properties/prefix
             type: input
           - label:
               text: labels.backend.container
             schema:
-              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kubestash/properties/spec/properties/values/properties/kubestash/properties/backend/properties/azure/properties/spec/properties/container
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/azure/properties/spec/properties/container
             type: input
             required: true
           - label:
               text: labels.backend.max_connections
             schema:     
-              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kubestash/properties/spec/properties/values/properties/kubestash/properties/backend/properties/azure/properties/spec/properties/maxConnections
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/azure/properties/spec/properties/maxConnections
             type: input
             inputType: number
           type: single-step-form
@@ -113,18 +111,18 @@ steps:
           - label:
               text: labels.backend.bucket
             schema:
-              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kubestash/properties/spec/properties/values/properties/kubestash/properties/backend/properties/gcs/properties/spec/properties/bucket
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/gcs/properties/spec/properties/bucket
             type: input
             required: true
           - label:
               text: labels.backend.prefix
             schema:
-              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kubestash/properties/spec/properties/values/properties/kubestash/properties/backend/properties/gcs/properties/spec/properties/prefix
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/gcs/properties/spec/properties/prefix
             type: input
           - label:
               text: labels.backend.max_connections
             schema:
-              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kubestash/properties/spec/properties/values/properties/kubestash/properties/backend/properties/gcs/properties/spec/properties/maxConnections
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/gcs/properties/spec/properties/maxConnections
             type: input
             inputType: number
           type: single-step-form
@@ -133,30 +131,30 @@ steps:
           - label:
               text: labels.backend.endPoint
             schema:
-              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kubestash/properties/spec/properties/values/properties/kubestash/properties/backend/properties/s3/properties/spec/properties/endpoint
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/s3/properties/spec/properties/endpoint
             type: input
             required: true
           - label:
               text: labels.backend.bucket
             schema:
-              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kubestash/properties/spec/properties/values/properties/kubestash/properties/backend/properties/s3/properties/spec/properties/bucket
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/s3/properties/spec/properties/bucket
             type: input
             required: true
           - label:
               text: labels.backend.prefix
             schema:
-              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kubestash/properties/spec/properties/values/properties/kubestash/properties/backend/properties/s3/properties/spec/properties/prefix
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/s3/properties/spec/properties/prefix
             type: input
           - label:
               text: labels.backend.region
             schema:
-              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kubestash/properties/spec/properties/values/properties/kubestash/properties/backend/properties/s3/properties/spec/properties/region
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/s3/properties/spec/properties/region
             type: input
           - computed: initTLS|kubestash
             label:
               text: labels.backend.insecureTLS
             schema:
-              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kubestash/properties/spec/properties/values/properties/kubestash/properties/backend/properties/s3/properties/spec/properties/insecureTLS
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/s3/properties/spec/properties/insecureTLS
             type: switch
           type: single-step-form
           if: showBackendForm|s3|kubestash
@@ -168,19 +166,19 @@ steps:
           label:
             text: labels.kubestash.storageSecret
           schema: 
-            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kubestash/properties/spec/properties/values/properties/kubestash/properties/storageSecret/properties/create
+            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/storageSecret/properties/create
           type: switch
         - elements:
           - label:
               text: labels.backend.azure.account_name
             schema:
-              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kubestash/properties/spec/properties/values/properties/kubestash/properties/backend/properties/azure/properties/auth/properties/AZURE_ACCOUNT_NAME
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/azure/properties/auth/properties/AZURE_ACCOUNT_NAME
             type: input
             required: true
           - label:
               text: labels.backend.azure.account_key
             schema:
-              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kubestash/properties/spec/properties/values/properties/kubestash/properties/backend/properties/azure/properties/auth/properties/AZURE_ACCOUNT_KEY
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/azure/properties/auth/properties/AZURE_ACCOUNT_KEY
             type: input
             required: true
           if: isStorageSectionOn|azure|kubestash
@@ -189,14 +187,14 @@ steps:
           - label:
               text: labels.backend.gcs.project_id
             schema:
-              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kubestash/properties/spec/properties/values/properties/kubestash/properties/backend/properties/gcs/properties/auth/properties/GOOGLE_PROJECT_ID
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/gcs/properties/auth/properties/GOOGLE_PROJECT_ID
             type: input
             required: true
           - label:
               text: labels.backend.gcs.service_account
             language: json
             schema:
-              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kubestash/properties/spec/properties/values/properties/kubestash/properties/backend/properties/gcs/properties/auth/properties/GOOGLE_SERVICE_ACCOUNT_JSON_KEY
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/gcs/properties/auth/properties/GOOGLE_SERVICE_ACCOUNT_JSON_KEY
             type: editor
             required: true
           if: isStorageSectionOn|gcs|kubestash
@@ -205,30 +203,30 @@ steps:
           - label:
               text: labels.backend.s3.access_key_id
             schema:
-              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kubestash/properties/spec/properties/values/properties/kubestash/properties/backend/properties/s3/properties/auth/properties/AWS_ACCESS_KEY_ID
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/s3/properties/auth/properties/AWS_ACCESS_KEY_ID
             type: input
             required: true
           - label:
               text: labels.backend.s3.secret_access_key
             schema:
-              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kubestash/properties/spec/properties/values/properties/kubestash/properties/backend/properties/s3/properties/auth/properties/AWS_SECRET_ACCESS_KEY
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/s3/properties/auth/properties/AWS_SECRET_ACCESS_KEY
             type: input
             required: true
           - label:
               text: labels.backend.s3.ca_cert_data
             schema:
-              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_kubestash/properties/spec/properties/values/properties/kubestash/properties/backend/properties/s3/properties/auth/properties/CA_CERT_DATA
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/kubestash/properties/backend/properties/s3/properties/auth/properties/CA_CERT_DATA
             type: editor
           if: isStorageSectionOn|s3|kubestash
           type: single-step-form
         
         type: single-step-form
-        if: checkPresetType|kubestash
+        if: checkPresetType|KubeStash
       - elements:
         - label:
             text: labels.kubestash.schedule
           schema: 
-            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash/properties/spec/properties/values/properties/stash/properties/schedule
+            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/stash/properties/schedule
           type: input
           required: true
         - label:
@@ -238,13 +236,13 @@ steps:
             text: labels.stash.authsecret.name
           required: true
           schema:
-            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash/properties/spec/properties/values/properties/stash/properties/authSecret/properties/name
+            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/stash/properties/authSecret/properties/name
           type: input 
         - label:
             text: labels.stash.authsecret.password
           required: true
           schema:
-            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash/properties/spec/properties/values/properties/stash/properties/authSecret/properties/password
+            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/stash/properties/authSecret/properties/password
           type: input 
           inputType: password
         - label:
@@ -253,20 +251,20 @@ steps:
         - label:
             text: labels.backend.retentionPolicy.name
           schema:
-            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash/properties/spec/properties/values/properties/stash/properties/retentionPolicy/properties/name
+            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/stash/properties/retentionPolicy/properties/name
           type: input
           required: true
         - label:
             text: labels.backend.retentionPolicy.keepHourly
           schema:
-            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash/properties/spec/properties/values/properties/stash/properties/retentionPolicy/properties/keepHourly
+            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/stash/properties/retentionPolicy/properties/keepHourly
           type: input
           inputType: number
           required: true
         - label:
             text: labels.backend.retentionPolicy.keepDaily
           schema:
-            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash/properties/spec/properties/values/properties/stash/properties/retentionPolicy/properties/keepDaily
+            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/stash/properties/retentionPolicy/properties/keepDaily
           type: input
           inputType: number
           required: true
@@ -274,7 +272,7 @@ steps:
           label:
             text: labels.backend.retentionPolicy.prune
           schema: 
-            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash/properties/spec/properties/values/properties/stash/properties/retentionPolicy/properties/prune
+            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/stash/properties/retentionPolicy/properties/prune
           type: switch
         - label:
             text: labels.backend.provider
@@ -291,37 +289,37 @@ steps:
           - text: OpenStack Swift
             value: swift
           schema:
-            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash/properties/spec/properties/values/properties/stash/properties/backend/properties/provider
+            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/stash/properties/backend/properties/provider
           type: select
           required: true
         - elements:
           - label:
               text: labels.backend.prefix
             schema:
-              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash/properties/spec/properties/values/properties/stash/properties/backend/properties/azure/properties/spec/properties/prefix
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/stash/properties/backend/properties/azure/properties/spec/properties/prefix
             type: input
           - label:
               text: labels.backend.container
             schema:
-              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash/properties/spec/properties/values/properties/stash/properties/backend/properties/azure/properties/spec/properties/container
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/stash/properties/backend/properties/azure/properties/spec/properties/container
             type: input
             required: true
           - label:
               text: labels.backend.max_connections
             schema:     
-              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash/properties/spec/properties/values/properties/stash/properties/backend/properties/azure/properties/spec/properties/maxConnections
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/stash/properties/backend/properties/azure/properties/spec/properties/maxConnections
             type: input
             inputType: number
           - label:
               text: labels.backend.azure.account_name
             schema:
-              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash/properties/spec/properties/values/properties/stash/properties/backend/properties/azure/properties/auth/properties/AZURE_ACCOUNT_NAME
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/stash/properties/backend/properties/azure/properties/auth/properties/AZURE_ACCOUNT_NAME
             type: input
             required: true
           - label:
               text: labels.backend.azure.account_key
             schema:
-              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash/properties/spec/properties/values/properties/stash/properties/backend/properties/azure/properties/auth/properties/AZURE_ACCOUNT_KEY
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/stash/properties/backend/properties/azure/properties/auth/properties/AZURE_ACCOUNT_KEY
             type: input
             required: true
           type: single-step-form
@@ -330,31 +328,31 @@ steps:
           - label:
               text: labels.backend.bucket
             schema:
-              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash/properties/spec/properties/values/properties/stash/properties/backend/properties/gcs/properties/spec/properties/bucket
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/stash/properties/backend/properties/gcs/properties/spec/properties/bucket
             type: input
             required: true
           - label:
               text: labels.backend.prefix
             schema:
-              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash/properties/spec/properties/values/properties/stash/properties/backend/properties/gcs/properties/spec/properties/prefix
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/stash/properties/backend/properties/gcs/properties/spec/properties/prefix
             type: input
           - label:
               text: labels.backend.max_connections
             schema:
-              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash/properties/spec/properties/values/properties/stash/properties/backend/properties/gcs/properties/spec/properties/maxConnections
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/stash/properties/backend/properties/gcs/properties/spec/properties/maxConnections
             type: input
             inputType: number
           - label:
               text: labels.backend.gcs.project_id
             schema:
-              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash/properties/spec/properties/values/properties/stash/properties/backend/properties/gcs/properties/auth/properties/GOOGLE_PROJECT_ID
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/stash/properties/backend/properties/gcs/properties/auth/properties/GOOGLE_PROJECT_ID
             type: input
             required: true
           - label:
               text: labels.backend.gcs.service_account
             language: json
             schema:
-              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash/properties/spec/properties/values/properties/stash/properties/backend/properties/gcs/properties/auth/properties/GOOGLE_SERVICE_ACCOUNT_JSON_KEY
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/stash/properties/backend/properties/gcs/properties/auth/properties/GOOGLE_SERVICE_ACCOUNT_JSON_KEY
             type: editor
             required: true
           type: single-step-form
@@ -363,47 +361,47 @@ steps:
           - label:
               text: labels.backend.endPoint
             schema:
-              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash/properties/spec/properties/values/properties/stash/properties/backend/properties/s3/properties/spec/properties/endpoint
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/stash/properties/backend/properties/s3/properties/spec/properties/endpoint
             type: input
             required: true
           - label:
               text: labels.backend.bucket
             schema:
-              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash/properties/spec/properties/values/properties/stash/properties/backend/properties/s3/properties/spec/properties/bucket
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/stash/properties/backend/properties/s3/properties/spec/properties/bucket
             type: input
             required: true
           - label:
               text: labels.backend.prefix
             schema:
-              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash/properties/spec/properties/values/properties/stash/properties/backend/properties/s3/properties/spec/properties/prefix
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/stash/properties/backend/properties/s3/properties/spec/properties/prefix
             type: input
           - label:
               text: labels.backend.region
             schema:
-              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash/properties/spec/properties/values/properties/stash/properties/backend/properties/s3/properties/spec/properties/region
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/stash/properties/backend/properties/s3/properties/spec/properties/region
             type: input
           - computed: initTLS|stash
             label:
               text: labels.backend.insecureTLS
             schema:
-              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash/properties/spec/properties/values/properties/stash/properties/backend/properties/s3/properties/spec/properties/insecureTLS
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/stash/properties/backend/properties/s3/properties/spec/properties/insecureTLS
             type: switch
           - label:
               text: labels.backend.s3.access_key_id
             schema:
-              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash/properties/spec/properties/values/properties/stash/properties/backend/properties/s3/properties/auth/properties/AWS_ACCESS_KEY_ID
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/stash/properties/backend/properties/s3/properties/auth/properties/AWS_ACCESS_KEY_ID
             type: input
             required: true
           - label:
               text: labels.backend.s3.secret_access_key
             schema:
-              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash/properties/spec/properties/values/properties/stash/properties/backend/properties/s3/properties/auth/properties/AWS_SECRET_ACCESS_KEY
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/stash/properties/backend/properties/s3/properties/auth/properties/AWS_SECRET_ACCESS_KEY
             type: input
             required: true
           - label:
               text: labels.backend.s3.ca_cert_data
             schema:
-              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash/properties/spec/properties/values/properties/stash/properties/backend/properties/s3/properties/auth/properties/CA_CERT_DATA
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/stash/properties/backend/properties/s3/properties/auth/properties/CA_CERT_DATA
             type: editor
           type: single-step-form
           if: showBackendForm|s3|stash
@@ -411,30 +409,30 @@ steps:
           - label:
               text: labels.backend.bucket
             schema:
-              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash/properties/spec/properties/values/properties/stash/properties/backend/properties/b2/properties/spec/properties/bucket
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/stash/properties/backend/properties/b2/properties/spec/properties/bucket
             type: input
             required: true
           - label:
               text: labels.backend.prefix
             schema:
-              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash/properties/spec/properties/values/properties/stash/properties/backend/properties/b2/properties/spec/properties/prefix
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/stash/properties/backend/properties/b2/properties/spec/properties/prefix
             type: input
           - label:
               text: labels.backend.max_connections
             schema:
-              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash/properties/spec/properties/values/properties/stash/properties/backend/properties/b2/properties/spec/properties/maxConnections
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/stash/properties/backend/properties/b2/properties/spec/properties/maxConnections
             type: input
             inputType: number
           - label:
               text: labels.backend.b2.account_id
             schema:
-              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash/properties/spec/properties/values/properties/stash/properties/backend/properties/b2/properties/auth/properties/B2_ACCOUNT_ID
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/stash/properties/backend/properties/b2/properties/auth/properties/B2_ACCOUNT_ID
             type: input 
             required: true
           - label:
               text: labels.backend.b2.account_key
             schema:
-              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash/properties/spec/properties/values/properties/stash/properties/backend/properties/b2/properties/auth/properties/B2_ACCOUNT_KEY
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/stash/properties/backend/properties/b2/properties/auth/properties/B2_ACCOUNT_KEY
             type: input
             required: true
           type: single-step-form
@@ -443,102 +441,102 @@ steps:
           - label:
               text: labels.backend.prefix
             schema:
-              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash/properties/spec/properties/values/properties/stash/properties/backend/properties/swift/properties/spec/properties/prefix
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/stash/properties/backend/properties/swift/properties/spec/properties/prefix
             type: input
           - label:
               text: labels.backend.container
             schema:
-              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash/properties/spec/properties/values/properties/stash/properties/backend/properties/swift/properties/spec/properties/container
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/stash/properties/backend/properties/swift/properties/spec/properties/container
             type: input
             required: true
           - label:
               text: labels.backend.swift.os_auth_token
             schema:
-              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash/properties/spec/properties/values/properties/stash/properties/backend/properties/swift/properties/auth/properties/OS_AUTH_TOKEN
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/stash/properties/backend/properties/swift/properties/auth/properties/OS_AUTH_TOKEN
             type: input
             required: true
           - label:
               text: labels.backend.swift.os_auth_url
             schema:
-              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash/properties/spec/properties/values/properties/stash/properties/backend/properties/swift/properties/auth/properties/OS_AUTH_URL
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/stash/properties/backend/properties/swift/properties/auth/properties/OS_AUTH_URL
             type: input
             required: true
           - label:
               text: labels.backend.swift.os_password
             schema:
-              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash/properties/spec/properties/values/properties/stash/properties/backend/properties/swift/properties/auth/properties/OS_PASSWORD
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/stash/properties/backend/properties/swift/properties/auth/properties/OS_PASSWORD
             type: input
             required: true
           - label:
               text: labels.backend.swift.os_project_domain_name
             schema:
-              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash/properties/spec/properties/values/properties/stash/properties/backend/properties/swift/properties/auth/properties/OS_PROJECT_DOMAIN_NAME
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/stash/properties/backend/properties/swift/properties/auth/properties/OS_PROJECT_DOMAIN_NAME
             type: input
             required: true
           - label:
               text: labels.backend.swift.os_project_name
             schema:
-              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash/properties/spec/properties/values/properties/stash/properties/backend/properties/swift/properties/auth/properties/OS_PROJECT_NAME
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/stash/properties/backend/properties/swift/properties/auth/properties/OS_PROJECT_NAME
             type: input
             required: true
           - label:
               text: labels.backend.swift.os_region_name
             schema:
-              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash/properties/spec/properties/values/properties/stash/properties/backend/properties/swift/properties/auth/properties/OS_REGION_NAME
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/stash/properties/backend/properties/swift/properties/auth/properties/OS_REGION_NAME
             type: input
             required: true
           - label:
               text: labels.backend.swift.os_storage_url
             schema:
-              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash/properties/spec/properties/values/properties/stash/properties/backend/properties/swift/properties/auth/properties/OS_STORAGE_URL
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/stash/properties/backend/properties/swift/properties/auth/properties/OS_STORAGE_URL
             type: input
             required: true
           - label:
               text: labels.backend.swift.os_tenant_id
             schema:
-              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash/properties/spec/properties/values/properties/stash/properties/backend/properties/swift/properties/auth/properties/OS_TENANT_ID
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/stash/properties/backend/properties/swift/properties/auth/properties/OS_TENANT_ID
             type: input
             required: true
           - label:
               text: labels.backend.swift.os_tenant_name
             schema:
-              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash/properties/spec/properties/values/properties/stash/properties/backend/properties/swift/properties/auth/properties/OS_TENANT_NAME
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/stash/properties/backend/properties/swift/properties/auth/properties/OS_TENANT_NAME
             type: input
             required: true
           - label:
               text: labels.backend.swift.os_username
             schema:
-              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash/properties/spec/properties/values/properties/stash/properties/backend/properties/swift/properties/auth/properties/OS_USERNAME
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/stash/properties/backend/properties/swift/properties/auth/properties/OS_USERNAME
             type: input
             required: true
           - label:
               text: labels.backend.swift.os_user_domain_name
             schema:
-              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash/properties/spec/properties/values/properties/stash/properties/backend/properties/swift/properties/auth/properties/OS_USER_DOMAIN_NAME
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/stash/properties/backend/properties/swift/properties/auth/properties/OS_USER_DOMAIN_NAME
             type: input
             required: true
           - label:
               text: labels.backend.swift.st_auth
             schema:
-              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash/properties/spec/properties/values/properties/stash/properties/backend/properties/swift/properties/auth/properties/ST_AUTH
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/stash/properties/backend/properties/swift/properties/auth/properties/ST_AUTH
             type: input
             required: true
           - label:
               text: labels.backend.swift.st_key
             schema:
-              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash/properties/spec/properties/values/properties/stash/properties/backend/properties/swift/properties/auth/properties/ST_KEY
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/stash/properties/backend/properties/swift/properties/auth/properties/ST_KEY
             type: input
             required: true
           - label:
               text: labels.backend.swift.st_user
             schema:
-              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash/properties/spec/properties/values/properties/stash/properties/backend/properties/swift/properties/auth/properties/ST_USER
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/stash/properties/backend/properties/swift/properties/auth/properties/ST_USER
             type: input
             required: true
           type: single-step-form
           if: showBackendForm|swift|stash
         type: single-step-form
-        if: checkPresetType|stash
+        if: checkPresetType|Stash
       type: single-step-form
       
     type: single-step-form

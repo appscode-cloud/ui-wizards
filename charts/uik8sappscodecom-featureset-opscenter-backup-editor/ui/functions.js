@@ -217,13 +217,20 @@ function onEnabledFeaturesChange({
   getValue,
   commit,
   storeGet,
+  model,
 }) {
   const enabledFeatures = getValue(discriminator, "/enabledFeatures") || [];
+
+  if (enabledFeatures.includes("stash-presets")) {
+    isStash = true;
+  } else {
+    isStash = false;
+  }
   const allFeatures = storeGet("/cluster/features/result") || [];
 
   allFeatures.forEach((item) => {
     const featureName = item?.metadata?.name || "";
-    const resourceValuePath = getResourceValuePathFromFeature(item)
+    const resourceValuePath = getResourceValuePathFromFeature(item);
 
     if (enabledFeatures.includes(featureName)) {
       const featureSet = storeGet("/route/params/featureset") || "";
@@ -252,42 +259,92 @@ function onEnabledFeaturesChange({
         "/spec/chart/version"
       );
 
-      const isEnabled = getFeaturePropertyValue(storeGet, featureName, getValue, '/status/enabled')
-      const isManaged = getFeaturePropertyValue(storeGet, featureName, getValue, '/status/managed')
+      const isEnabled = getFeaturePropertyValue(
+        storeGet,
+        featureName,
+        getValue,
+        "/status/enabled"
+      );
+      const isManaged = getFeaturePropertyValue(
+        storeGet,
+        featureName,
+        getValue,
+        "/status/managed"
+      );
 
-
-      if (isEnabled && (!isManaged)) {
+      if (isEnabled && !isManaged) {
         commit("wizard/model$delete", `/resources/${resourceValuePath}`);
-      }
-      else {
-        commit("wizard/model$update", {
-          path: `/resources/${resourceValuePath}`,
-          value: {
-            ...resources?.[resourceValuePath],
-            metadata: {
-              ...resources?.[resourceValuePath]?.metadata,
-              labels: {
-                ...resources?.[resourceValuePath]?.metadata?.labels,
-                "app.kubernetes.io/component": featureName,
-                "app.kubernetes.io/part-of": featureSet,
-              },
-            },
-            spec: {
-              ...resources?.[resourceValuePath]?.spec,
-              chart: {
-                spec: {
-                  chart,
-                  sourceRef,
-                  version,
+      } else {
+        const resourceObject = getValue(model, "/resources") || [];
+        if (
+          resourceValuePath ===
+            "helmToolkitFluxcdIoHelmRelease_stash_presets" &&
+          !resourceObject.hasOwnProperty(
+            "helmToolkitFluxcdIoHelmRelease_stash_presets"
+          )
+        ) {
+          commit("wizard/model$update", {
+            path: `/resources/${resourceValuePath}`,
+            value: {
+              ...resources?.[resourceValuePath],
+              metadata: {
+                ...resources?.[resourceValuePath]?.metadata,
+                labels: {
+                  ...resources?.[resourceValuePath]?.metadata?.labels,
+                  "app.kubernetes.io/component": featureName,
+                  "app.kubernetes.io/part-of": featureSet,
                 },
               },
-              targetNamespace,
+              spec: {
+                ...resources?.[resourceValuePath]?.spec,
+                chart: {
+                  spec: {
+                    chart,
+                    sourceRef,
+                    version,
+                  },
+                },
+                targetNamespace,
+              },
             },
-          },
-          force: true,
-        });
+            force: true,
+          });
+        } else if (
+          (resourceValuePath ===
+            "helmToolkitFluxcdIoHelmRelease_kubestash"
+          )  || (resourceValuePath ===
+            "helmToolkitFluxcdIoHelmRelease_stash"
+          ) || (resourceValuePath ===
+            "helmToolkitFluxcdIoHelmRelease_stash_opscenter")
+        ) {
+          commit("wizard/model$update", {
+            path: `/resources/${resourceValuePath}`,
+            value: {
+              ...resources?.[resourceValuePath],
+              metadata: {
+                ...resources?.[resourceValuePath]?.metadata,
+                labels: {
+                  ...resources?.[resourceValuePath]?.metadata?.labels,
+                  "app.kubernetes.io/component": featureName,
+                  "app.kubernetes.io/part-of": featureSet,
+                },
+              },
+              spec: {
+                ...resources?.[resourceValuePath]?.spec,
+                chart: {
+                  spec: {
+                    chart,
+                    sourceRef,
+                    version,
+                  },
+                },
+                targetNamespace,
+              },
+            },
+            force: true,
+          });
+        }
       }
-
     } else {
       commit("wizard/model$delete", `/resources/${resourceValuePath}`);
     }
@@ -407,10 +464,10 @@ function showBackendForm({ getValue, model, watchDependency, commit }, value, pr
 
   const backendProvider = getValue(
     model,
-    `/resources/helmToolkitFluxcdIoHelmRelease_${presetType}/spec/values/${presetType}/backend/provider`
+    `/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/${presetType}/backend/provider`
   );
   watchDependency(
-    `model#/resources/helmToolkitFluxcdIoHelmRelease_${presetType}/spec/values/${presetType}/backend/provider`
+    `model#/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/${presetType}/backend/provider`
   );
 
   // delete every other backend type from model  exect the selected one
@@ -420,7 +477,7 @@ function showBackendForm({ getValue, model, watchDependency, commit }, value, pr
       if (key !== backendProvider) {
         commit(
           "wizard/model$delete",
-          `/resources/helmToolkitFluxcdIoHelmRelease_${presetType}/spec/values/${presetType}/backend/${key}`
+          `/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/${presetType}/backend/${key}`
         );
       }
     });
@@ -429,10 +486,10 @@ function showBackendForm({ getValue, model, watchDependency, commit }, value, pr
   return backendProvider === value;
 }
 
-function checkPresetType({ getValue, watchDependency, discriminator}, value) {
-  watchDependency("discriminator#/backupPresetType")
+function checkPresetType({ getValue, watchDependency, discriminator, model}, value) {
+  watchDependency("model#/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/tool")
   watchDependency('discriminator#/enabledFeatures')
-
+  const backupType = getValue(model, "/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/tool");
   const enabledPreset = getValue(discriminator, "/enabledFeatures");
 
   if(!enabledPreset?.includes('stash-presets') && enabledPreset!== undefined)
@@ -444,7 +501,7 @@ function checkPresetType({ getValue, watchDependency, discriminator}, value) {
     return false
   }
 
-  const backupType = getValue(discriminator, "/backupPresetType");
+  
   if(backupType === value)
   {
     return true
@@ -457,12 +514,12 @@ function initStorageSecret({commit, getValue, model})
 {
   const modelStorageSecret = getValue(
     model,
-    `/resources/helmToolkitFluxcdIoHelmRelease_kubestash/spec/values/kubestash/storageSecret/create`
+    `/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/kubestash/storageSecret/create`
   )
   if(modelStorageSecret !== undefined)
   return modelStorageSecret
   commit("wizard/model$update", {
-    path: "schema#/resources/helmToolkitFluxcdIoHelmRelease_kubestash/spec/values/kubestash/storageSecret/create",
+    path: "schema#/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/kubestash/storageSecret/create",
     value: true,
     force: true,
   });
@@ -472,7 +529,7 @@ function initStorageSecret({commit, getValue, model})
 function initRetentionPolicyPrune({commit})
 {
   commit("wizard/model$update", {
-    path: "schema#/resources/helmToolkitFluxcdIoHelmRelease_stash/spec/values/stash/retentionPolicy/prune",
+    path: "schema#/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/stash/retentionPolicy/prune",
     value: true,
     force: true,
   });
@@ -482,13 +539,13 @@ function isStorageSectionOn({getValue,model,watchDependency }, provider, presetT
 {
   const backendProvider = getValue(
     model,
-    `/resources/helmToolkitFluxcdIoHelmRelease_${presetType}/spec/values/${presetType}/backend/provider`
+    `/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/${presetType}/backend/provider`
   );
-  watchDependency(`model#/resources/helmToolkitFluxcdIoHelmRelease_${presetType}/spec/values/${presetType}/storageSecret/create`)
-  watchDependency(`model#/resources/helmToolkitFluxcdIoHelmRelease_${presetType}/spec/values/${presetType}/backend/provider`)
+  watchDependency(`model#/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/${presetType}/storageSecret/create`)
+  watchDependency(`model#/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/${presetType}/backend/provider`)
   const secretStorage = getValue(
     model,
-    `/resources/helmToolkitFluxcdIoHelmRelease_kubestash/spec/values/kubestash/storageSecret/create`
+    `/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/kubestash/storageSecret/create`
   )
   if(backendProvider === undefined)
   {
@@ -499,7 +556,7 @@ function isStorageSectionOn({getValue,model,watchDependency }, provider, presetT
 function initTLS({commit}, presetType)
 {
   commit("wizard/model$update", {
-    path: `schema#/resources/helmToolkitFluxcdIoHelmRelease_${presetType}/spec/values/${presetType}/backend/s3/spec/insecureTLS`,
+    path: `schema#/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/${presetType}/backend/s3/spec/insecureTLS`,
     value: false,
     force: true,
   });
@@ -510,6 +567,31 @@ function getPresetList({getValue,discriminator, watchDependency, commit, model})
 {
   const allPreset = getValue(discriminator, "/isPresetEnabled") || [];
   const enabledPreset = getValue(discriminator, "/enabledFeatures");
+  let backupType = getValue(model, "/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/tool");
+  if(backupType==='KubeStash')
+     backupType= 'kubestash'
+  if(backupType === 'Stash')
+    backupType ='stash'
+  for (let i = 0; i < allPreset.length; i++) {
+    if (allPreset[i]=='Stash') 
+      allPreset[i]='stash'
+    if(allPreset[i]=='KubeStash')
+      allPreset[i]='kubestash'
+}
+
+if(!enabledPreset?.includes(backupType) && enabledPreset!== undefined)
+{
+  commit(
+    "wizard/model$delete",
+    `/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/tool/`
+  );
+  delete resources.helmToolkitFluxcdIoHelmRelease_stash_presets?.spec?.values?.tool;
+  commit("wizard/model$update", {
+    path: `schema#/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/tool/`,
+    value: '',
+    force: true,
+  });
+}
 
   if(!enabledPreset?.includes('stash-presets'))
   {
@@ -518,21 +600,31 @@ function getPresetList({getValue,discriminator, watchDependency, commit, model})
     {
         commit(
           "wizard/model$delete",
-          `/resources/helmToolkitFluxcdIoHelmRelease_stash/spec/values/stash/`
+          `/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/stash/`
         );
 
         commit(
           "wizard/model$delete",
-          `/resources/helmToolkitFluxcdIoHelmRelease_kubestash/spec/values/kubestash/`
+          `/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/kubestash/`
+        );
+        delete resources.helmToolkitFluxcdIoHelmRelease_stash_presets?.spec?.values?.tool;
+        commit(
+          "wizard/model$delete",
+          `/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/tool/`
         );
       return []
     }
   }
   if(!enabledPreset?.includes('stash'))
   {
+
     if(enabledPreset!==undefined)
     {
-      delete resources.helmToolkitFluxcdIoHelmRelease_stash?.spec?.values?.stash;
+      delete resources.helmToolkitFluxcdIoHelmRelease_stash_presets?.spec?.values?.stash;
+      commit(
+        "wizard/model$delete",
+        `/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/stash/`
+      );
       
     }
   }
@@ -540,43 +632,51 @@ function getPresetList({getValue,discriminator, watchDependency, commit, model})
   {
     if(enabledPreset!==undefined)
     {
-      delete resources.helmToolkitFluxcdIoHelmRelease_kubestash?.spec?.values?.kubestash;
+      delete resources.helmToolkitFluxcdIoHelmRelease_stash_presets?.spec?.values?.kubestash;
+      commit(
+        "wizard/model$delete",
+        `/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/kubestash/`
+      );
     }
   }
   watchDependency('discriminator#/enabledFeatures')
   watchDependency('discriminator#/presetType')
+  watchDependency("model#/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/tool")
   for (let i = allPreset.length - 1; i >= 0; i--) {
     const preset = allPreset[i];
-    if (!enabledPreset?.includes(preset)) {
+    if (!enabledPreset?.includes(preset) ) {
       allPreset.splice(i, 1);
     }
   }
+  for (let i = 0; i < allPreset.length; i++) {
+    if (allPreset[i]=='stash') 
+      allPreset[i]='Stash'
+    if(allPreset[i]=='kubestash')
+      allPreset[i]='KubeStash'
+}
     return allPreset
 }
 
-function onPresetTypeChange({getValue,commit, discriminator}){
+function onPresetTypeChange({getValue,commit, discriminator, model}){
 
-
-  const backupType = getValue(discriminator, "/backupPresetType");
-  const compliment = backupType === 'stash' ? 'kubestash' : 'stash'
+  const backupType = getValue(model, "/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/tool");
+  const compliment = backupType === 'Stash' ? 'kubestash' : 'stash'
     commit(
       "wizard/model$delete",
-      `/resources/helmToolkitFluxcdIoHelmRelease_${compliment}/spec/values/${compliment}/`
+      `/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/${compliment}/`
     );
-
-
 }
 function onBackendProviderChange({ commit, getValue, model }, presetType) {
   const selectedBackendProvider = getValue(
     model,
-    `/resources/helmToolkitFluxcdIoHelmRelease_${presetType}/spec/values/${presetType}/backend/provider`
+    `/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/${presetType}/backend/provider`
   );
 
   Object.keys(backendMap).forEach((key) => {
     if (key !== selectedBackendProvider) {
       commit(
         "wizard/model$delete",
-        `/resources/helmToolkitFluxcdIoHelmRelease_${presetType}/spec/values/${presetType}/backend/${key}`
+        `/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/${presetType}/backend/${key}`
       );
     }
   });
@@ -586,40 +686,18 @@ function storageSecretChange({getValue,model, commit}, presetType)
 {
   const storageSecret = getValue(
     model,
-    `/resources/helmToolkitFluxcdIoHelmRelease_${presetType}/spec/values/${presetType}/storageSecret/create`
+    `/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/${presetType}/storageSecret/create`
   );
   if(!storageSecret)
   {
     Object.keys(backendMap).forEach((key) => {
         commit(
           "wizard/model$delete",
-          `/resources/helmToolkitFluxcdIoHelmRelease_${presetType}/spec/values/${presetType}/backend/${key}/auth`
+          `/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/${presetType}/backend/${key}/auth`
         );
     });
   }
 }
-
-function checkConfigure({getValue, model})
-{
-  const  kubestashData = getValue(
-    model,
-    `/resources/helmToolkitFluxcdIoHelmRelease_kubestash/spec/values/kubestash`
-  );
-  if(kubestashData !== undefined)
-  {
-    return 'kubestash'
-  }
-  const stashData = getValue(
-    model,
-    `/resources/helmToolkitFluxcdIoHelmRelease_stash/spec/values/stash`
-  );
-  if(stashData !== undefined)
-  {
-    return 'stash'
-  }
-  return ''
-}
-
 
 function isShow({getValue, discriminator, watchDependency,setDiscriminatorValue}){
   const enabledPreset = getValue(discriminator, "/enabledFeatures");
@@ -659,6 +737,5 @@ return {
   getPresetList,
   onPresetTypeChange,
   storageSecretChange,
-  checkConfigure,
   isShow,
 };
