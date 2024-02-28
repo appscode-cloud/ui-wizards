@@ -672,10 +672,7 @@ function setStorageClass({model, getValue, commit}) {
     })
     if(defaultList.length){
       const found = defaultList.find(item => {
-        return item.metadata &&
-        item.metadata.annotations &&
-        item.metadata.annotations["storageclass.kubernetes.io/is-default-class"] && 
-        !item.metadata.name?.endsWith(suffix);
+        return !item.metadata.name?.endsWith(suffix);
       })
       if(found) {
         storageClass = found?.value;
