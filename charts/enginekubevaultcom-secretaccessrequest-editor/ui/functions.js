@@ -126,15 +126,17 @@ function isDbSelected({ getValue, storeGet, discriminator, watchDependency }) {
   return val && val.name ? true : false;
 }
 
-function getDbName({ getValue, storeGet, discriminator, watchDependency }) {
-  if (isConsole({ storeGet })) {
-    watchDependency("discriminator#/database");
-    const data = getValue(discriminator, "/database") || {};
-    return (data && data.name) || "";
-  } else {
-    const name = storeGet("/route/params/name") || "";
-    return name;
-  }
+function setRequestName({ watchDependency, getValue, model }) {
+  watchDependency("model#/spec/roleRef/name");
+  const roleName = getValue(model, "/spec/roleRef/name") || "";
+  
+  let refinedRoleName = roleName;
+  const lastDash = roleName.lastIndexOf('-');
+  if(lastDash !== -1 && !isNaN((roleName).slice(lastDash + 1))) 
+    refinedRoleName = roleName.slice(0, lastDash);
+  
+  const timestamp = `${Math.floor(Date.now() / 1000)}`;
+  return refinedRoleName ? `${refinedRoleName}-request-${timestamp}` : refinedRoleName;
 }
 
 function getDbNamespace({ getValue, storeGet, discriminator, watchDependency }) {
@@ -248,7 +250,7 @@ return {
   isConsole,
   getDatabases,
   isDbSelected,
-  getDbName,
+  setRequestName,
   getDbNamespace,
   getNamespaces,
   getResourceRoleName,
