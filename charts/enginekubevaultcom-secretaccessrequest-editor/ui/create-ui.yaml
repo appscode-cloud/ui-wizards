@@ -1,14 +1,26 @@
 steps:
 - form:
     elements:
-    - computed: getDbName
+    - fetch: getDatabases|core.k8s.appscode.com|v1alpha1|genericresources
+      if: isConsole
+      label:
+        text: labels.selectDb
+      refresh: true
+      required: true
+      sortable: true
+      schema:
+        $ref: discriminator#/properties/database
+      type: select
+    - computed: setRequestName
       label:
         text: metadata.name
+      required: true
       schema:
         $ref: schema#/properties/metadata/properties/name
       type: input
     - computed: getDbNamespace
       disabled: true
+      if: isDbSelected
       label:
         text: metadata.namespace
       schema:
@@ -19,6 +31,7 @@ steps:
         text: labels.select
       refresh: true
       required: true
+      if: isDbSelected
       schema:
         $ref: schema#/properties/spec/properties/roleRef
       type: select

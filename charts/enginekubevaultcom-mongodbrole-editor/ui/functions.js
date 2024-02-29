@@ -53,16 +53,11 @@ function isDbSelected({ getValue, storeGet, discriminator, watchDependency }) {
   return val && val.name ? true : false;
 }
 
-function getDbName({ getValue, storeGet, discriminator, watchDependency }) {
-  if (isConsole({ storeGet })) {
-    watchDependency("discriminator#/database");
-    const data = getValue(discriminator, "/database") || {};
-    return data && data.name || "";
-  }
-  else {
-    const name = storeGet("/route/params/name") || "";
-    return name;
-  }
+function setRoleName({ watchDependency, getValue, model }) {
+  watchDependency("model#/spec/secretEngineRef/name");
+  const engineName = getValue(model, "/spec/secretEngineRef/name") || "";
+  const timestamp = `${Math.floor(Date.now() / 1000)}`;
+  return engineName ? `${engineName}-role-${timestamp}` : engineName;
 }
 
 function getDbNamespace({
@@ -123,7 +118,7 @@ return {
   isConsole,
   getDatabases,
   isDbSelected,
-  getDbName,
+  setRoleName,
   getDbNamespace,
   getEngines,
 };
