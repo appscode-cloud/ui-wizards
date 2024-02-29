@@ -343,6 +343,7 @@ function setDatabaseMode({ model, getValue, watchDependency }) {
   }
 }
 
+let storageClassList = [];
 async function getStorageClassNames({
   axios,
   storeGet,
@@ -366,30 +367,53 @@ async function getStorageClassNames({
 
   resources.map((item) => {
     const name = (item.metadata && item.metadata.name) || "";
-    const isDefault =
-      item.metadata &&
-      item.metadata.annotations &&
-      item.metadata.annotations["storageclass.kubernetes.io/is-default-class"];
-
-    if (isDefault) {
-      const className = getValue(
-        model,
-        "/resources/kubedbComPostgres/spec/storage/storageClassName"
-      );
-      if (!className) {
-        commit("wizard/model$update", {
-          path: "/resources/kubedbComPostgres/spec/storage/storageClassName",
-          value: name,
-          force: true,
-        });
-      }
-    }
-
     item.text = name;
     item.value = name;
     return true;
   });
+
+  storageClassList = resources;
+  setStorageClass({ model, getValue, commit });
   return resources;
+}
+
+function setStorageClass({ model, getValue, commit }) {
+  const terminationPolicy = getValue(model, "spec/terminationPolicy") || "";
+  let storageClass = getValue(model, "spec/storageClass/name") || "";
+  const suffix = "-retain";
+  console.log(storageClassList);
+  if(terminationPolicy === "WipeOut" || terminationPolicy === "Delete") {
+    const defaultList = storageClassList.filter(item => {
+      return item.metadata &&
+      item.metadata.annotations &&
+      item.metadata.annotations["storageclass.kubernetes.io/is-default-class"];
+    })
+    if(defaultList.length){
+      const found = defaultList.find(item => {
+        return !item.metadata.name?.endsWith(suffix);
+      })
+      if(found)
+        storageClass = found?.value;
+      else
+        storageClass = defaultList[0].value;
+    }
+  }
+  else{
+    const found = storageClassList.find(item => {
+      return item.metadata && 
+      item.metadata.name &&
+      item.metadata.name.endsWith(suffix)
+    });
+    if(found)
+      storageClass = found?.value;
+  }
+  if(storageClass) {
+    commit("wizard/model$update", {
+      path: "/resources/kubedbComPostgres/spec/storage/storageClassName",
+      value: storageClass,
+      force: true,
+    });
+  }
 }
 
 function deleteDatabaseModePath({ discriminator, getValue, commit, model }) {
@@ -2029,4 +2053,5 @@ return {
   onSetCustomConfigChange,
   getOpsRequestUrl,
   getCreateNameSpaceUrl,
+  setStorageClass,
 };
