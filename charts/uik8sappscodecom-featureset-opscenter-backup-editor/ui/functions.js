@@ -310,12 +310,9 @@ function onEnabledFeaturesChange({
             force: true,
           });
         } else if (
-          (resourceValuePath ===
-            "helmToolkitFluxcdIoHelmRelease_kubestash"
-          )  || (resourceValuePath ===
-            "helmToolkitFluxcdIoHelmRelease_stash"
-          ) || (resourceValuePath ===
-            "helmToolkitFluxcdIoHelmRelease_stash_opscenter")
+          (resourceValuePath !==
+            "helmToolkitFluxcdIoHelmRelease_stash_presets"
+          ) 
         ) {
           commit("wizard/model$update", {
             path: `/resources/${resourceValuePath}`,
@@ -586,11 +583,6 @@ if(!enabledPreset?.includes(backupType) && enabledPreset!== undefined)
     `/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/tool/`
   );
   delete resources.helmToolkitFluxcdIoHelmRelease_stash_presets?.spec?.values?.tool;
-  commit("wizard/model$update", {
-    path: `schema#/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/tool/`,
-    value: '',
-    force: true,
-  });
 }
 
   if(!enabledPreset?.includes('stash-presets'))
@@ -657,8 +649,7 @@ if(!enabledPreset?.includes(backupType) && enabledPreset!== undefined)
     return allPreset
 }
 
-function onPresetTypeChange({getValue,commit, discriminator, model}){
-
+function onPresetTypeChange({getValue,commit, model}){
   const backupType = getValue(model, "/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/tool");
   const compliment = backupType === 'Stash' ? 'kubestash' : 'stash'
     commit(
@@ -699,19 +690,33 @@ function storageSecretChange({getValue,model, commit}, presetType)
   }
 }
 
-function isShow({getValue, discriminator, watchDependency,setDiscriminatorValue}){
+
+function isPresetConfiguration({getValue, discriminator, watchDependency,setDiscriminatorValue, model, commit}){
   const enabledPreset = getValue(discriminator, "/enabledFeatures");
   watchDependency('discriminator#/enabledFeatures')
-
   if(!enabledPreset?.includes('stash-presets') && enabledPreset!== undefined)
   {
+
      return false
   }
   if(!(enabledPreset?.includes('stash') || enabledPreset?.includes('kubestash'))  && enabledPreset !== undefined)
   {
+
     return false
   }
+
   return true
+}
+
+
+
+
+function initiatePreset({watchDependency, getValue, model, discriminator, commit}){
+  watchDependency("model#/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/tool")
+  const enabledPreset = getValue(discriminator, "/enabledFeatures");
+  const backupType = getValue(model, "/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/tool");
+ 
+  return backupType ? backupType : ' '
 }
 
 return {
@@ -737,5 +742,6 @@ return {
   getPresetList,
   onPresetTypeChange,
   storageSecretChange,
-  isShow,
+  isPresetConfiguration,
+  initiatePreset,
 };

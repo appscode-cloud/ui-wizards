@@ -42,15 +42,16 @@ steps:
       - label:
           text: labels.backup.type
         type: label-element
-        if: isShow
+        if: isPresetConfiguration
       - fetch: getPresetList
+        computed: initiatePreset
         onChange: onPresetTypeChange
         label:
           text: Select Preset Type
         schema:
           $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_stash_presets/properties/spec/properties/values/properties/tool
         type: select
-        if: isShow
+        if: isPresetConfiguration
       - elements:
         - label:
             text: labels.kubestash.schedule
