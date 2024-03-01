@@ -428,8 +428,8 @@ async function getStorageClassNames({
 }
 
 function setStorageClass({ model, getValue, commit }) {
-  const terminationPolicy = getValue(model, "spec/terminationPolicy") || "";
-  let storageClass = getValue(model, "spec/storageClass/name") || "";
+  const terminationPolicy = getValue(model, "/resources/kubedbComRedis/spec/terminationPolicy") || "";
+  let storageClass = getValue(model, "/resources/kubedbComRedis/spec/storage/storageClassName") || "";
   const suffix = "-retain";
   if(terminationPolicy === "WipeOut" || terminationPolicy === "Delete") {
     const defaultList = storageClassList.filter(item => {
