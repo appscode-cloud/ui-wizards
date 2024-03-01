@@ -538,7 +538,6 @@ function setStorageClass({ model, getValue, commit }, path) {
     if(found)
       storageClass = found?.value;
   }
-  console.log({storageClass, path});
   if(storageClass && path) {
     commit("wizard/model$update", {
       path: path,
