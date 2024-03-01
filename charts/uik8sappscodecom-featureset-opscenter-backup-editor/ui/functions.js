@@ -278,10 +278,7 @@ function onEnabledFeaturesChange({
         const resourceObject = getValue(model, "/resources") || [];
         if (
           resourceValuePath ===
-            "helmToolkitFluxcdIoHelmRelease_stash_presets" &&
-          !resourceObject.hasOwnProperty(
             "helmToolkitFluxcdIoHelmRelease_stash_presets"
-          )
         ) {
           commit("wizard/model$update", {
             path: `/resources/${resourceValuePath}`,
@@ -305,15 +302,12 @@ function onEnabledFeaturesChange({
                   },
                 },
                 targetNamespace,
+                values: {...resources?.[resourceValuePath]?.spec?.values}
               },
             },
             force: true,
           });
-        } else if (
-          (resourceValuePath !==
-            "helmToolkitFluxcdIoHelmRelease_stash_presets"
-          ) 
-        ) {
+        } else  {
           commit("wizard/model$update", {
             path: `/resources/${resourceValuePath}`,
             value: {
