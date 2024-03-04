@@ -373,7 +373,9 @@ async function getStorageClassNames({
   });
 
   storageClassList = resources;
-  setStorageClass({ model, getValue, commit });
+  const initialStorageClass = getValue(model, '/resources/kubedbComPostgres/spec/storage/storageClassName')
+  if(!initialStorageClass)
+    setStorageClass({ model, getValue, commit });
   return resources;
 }
 

@@ -381,7 +381,12 @@ async function getStorageClassNames(
     return true;
   });
   storageClassList = resources;
-  setStorageClass({ getValue, commit, model, discriminator })
+  const path = mode === 'shard' 
+    ? "/resources/kubedbComMongoDB/spec/shardTopology/shard/storage/storageClassName"
+    : "/resources/kubedbComMongoDB/spec/storage/storageClassName";
+  const initialStorageClass = getValue(model, path);
+  if(!initialStorageClass)
+    setStorageClass({ getValue, commit, model, discriminator })
   return resources;
 }
 

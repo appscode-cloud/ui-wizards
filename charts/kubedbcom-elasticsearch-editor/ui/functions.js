@@ -802,7 +802,9 @@ async function getStorageClassNames(
     setDiscriminatorValue("/storageClasses", resources);
   }
   storageClassList = resources;
-  setStorageClass({ model, getValue, commit }, path);
+  const initialStorageClass = getValue(model, path);
+  if(!initialStorageClass)
+    setStorageClass({ model, getValue, commit }, path);
   return resources;
 }
 

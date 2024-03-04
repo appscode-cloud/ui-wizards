@@ -344,7 +344,9 @@ async function getStorageClassNames({
     return true;
   });
   storageClassList = resources;
-  setStorageClass({ model, getValue, commit });
+  const initialStorageClass = getValue(model, '/resources/kubedbComMariaDB/spec/storage/storageClassName')
+  if(!initialStorageClass)
+    setStorageClass({ model, getValue, commit });
   return resources;
 }
 

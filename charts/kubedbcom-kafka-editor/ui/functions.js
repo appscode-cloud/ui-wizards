@@ -505,7 +505,9 @@ async function getStorageClassNames(
   }
 
   storageClassList = resources;
-  setStorageClass({ model, getValue, commit }, path);
+  const initialStorageClass = getValue(model, path)
+  if(!initialStorageClass)
+    setStorageClass({ model, getValue, commit }, path);
   return resources;
 }
 
