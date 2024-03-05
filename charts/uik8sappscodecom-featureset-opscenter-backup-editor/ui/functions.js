@@ -312,13 +312,15 @@ function onEnabledFeaturesChange({
             valuesData = { tool: "" };
           }
         }
-        // do we need to update
+        const noStashPreset = !resourceObject.hasOwnProperty(
+          "helmToolkitFluxcdIoHelmRelease_stash_presets"
+        )
+        // update stash_presets with values if we already don't have them or valusData does Kubestash nor stash
         const isUpdateStashPreset =
-          !resourceObject.hasOwnProperty(
-            "helmToolkitFluxcdIoHelmRelease_stash_presets"
-          ) ||
+           noStashPreset ||
           valuesData?.tool === "KubeStash" ||
           valuesData?.tool === "Stash";
+        // updating stash_presets if needed 
         if (
           resourceValuePath ===
             "helmToolkitFluxcdIoHelmRelease_stash_presets" &&
@@ -351,7 +353,8 @@ function onEnabledFeaturesChange({
             },
             force: true,
           });
-        } else if (
+        // for anything else 
+        } else if (    
           resourceValuePath !== "helmToolkitFluxcdIoHelmRelease_stash_presets"
         ) {
           commit("wizard/model$update", {
@@ -545,17 +548,19 @@ function checkPresetType(
     "/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/tool"
   );
   const enabledPreset = getValue(discriminator, "/enabledFeatures");
-
+  // does not have stash-presets enabled & enablePreset is undefined at first 
   if (
     !enabledPreset?.includes("stash-presets") &&
     enabledPreset !== undefined
   ) {
     return false;
   }
+  // does not have stash and kubestash either enabled & enablePreset is undefined at first 
+  const leastEnabled = (
+    enabledPreset?.includes("stash") || enabledPreset?.includes("kubestash")
+  )
   if (
-    !(
-      enabledPreset?.includes("stash") || enabledPreset?.includes("kubestash")
-    ) &&
+    !leastEnabled &&
     enabledPreset !== undefined
   ) {
     return false;
@@ -640,13 +645,14 @@ function getPresetList({
     model,
     "/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/tool"
   );
+  // tool and field name are different 
   if (backupType === "KubeStash") backupType = "kubestash";
   if (backupType === "Stash") backupType = "stash";
   for (let i = 0; i < allPreset.length; i++) {
     if (allPreset[i] == "Stash") allPreset[i] = "stash";
     if (allPreset[i] == "KubeStash") allPreset[i] = "kubestash";
   }
-
+  // some unselect a feature thats selected in preset
   if (!enabledPreset?.includes(backupType) && enabledPreset !== undefined) {
     commit(
       "wizard/model$delete",
@@ -710,6 +716,7 @@ function getPresetList({
 }
 
 function onPresetTypeChange({ getValue, commit, model }) {
+  // currently not in use but probably need in future work
   const backupType = getValue(
     model,
     "/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/tool"
