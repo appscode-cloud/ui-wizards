@@ -351,6 +351,7 @@ function setDatabaseMode({ model, getValue, watchDependency }) {
   }
 }
 
+let storageClassList = [];
 async function getStorageClassNames(
   { axios, storeGet, commit, model, getValue, watchDependency, discriminator },
   mode
@@ -358,7 +359,6 @@ async function getStorageClassNames(
   const owner = storeGet("/route/params/user");
   const cluster = storeGet("/route/params/cluster");
 
-  watchDependency("discriminator#/activeDatabaseMode");
 
   const databaseModeShard =
     getValue(discriminator, "/activeDatabaseMode") === "Sharded";
@@ -376,78 +376,85 @@ async function getStorageClassNames(
 
   resources.map((item) => {
     const name = (item.metadata && item.metadata.name) || "";
-    const isDefault =
-      item.metadata &&
-      item.metadata.annotations &&
-      item.metadata.annotations["storageclass.kubernetes.io/is-default-class"];
-
-    if (isDefault) {
-      const shardClassName = getValue(
-        model,
-        "/resources/kubedbComMongoDB/spec/shardTopology/shard/storage/storageClassName"
-      );
-
-      const configServerClassName = getValue(
-        model,
-        "/resources/kubedbComMongoDB/spec/shardTopology/configServer/storage/storageClassName"
-      );
-
-      if (mode === "shard") {
-        if (!shardClassName && databaseModeShard) {
-          commit("wizard/model$update", {
-            path: "/resources/kubedbComMongoDB/spec/shardTopology/shard/storage/storageClassName",
-            value: name,
-            force: true,
-          });
-        }
-        if (!configServerClassName && databaseModeShard) {
-          commit("wizard/model$update", {
-            path: "/resources/kubedbComMongoDB/spec/shardTopology/configServer/storage/storageClassName",
-            value: name,
-            force: true,
-          });
-        }
-        commit(
-          "wizard/model$delete",
-          "/resources/kubedbComMongoDB/spec/storage"
-        );
-      } else {
-        const className = getValue(
-          model,
-          "/resources/kubedbComMongoDB/spec/storage/storageClassName"
-        );
-        if (!className && !databaseModeShard) {
-          commit("wizard/model$update", {
-            path: "/resources/kubedbComMongoDB/spec/storage/storageClassName",
-            value: name,
-            force: true,
-          });
-        }
-      }
-    }
-
     item.text = name;
     item.value = name;
     return true;
   });
+  storageClassList = resources;
+  const path = mode === 'shard' 
+    ? "/resources/kubedbComMongoDB/spec/shardTopology/shard/storage/storageClassName"
+    : "/resources/kubedbComMongoDB/spec/storage/storageClassName";
+  const initialStorageClass = getValue(model, path);
+  if(!initialStorageClass)
+    setStorageClass({ getValue, commit, model, discriminator })
   return resources;
 }
 
 function setStorageClass({ getValue, commit, model, discriminator }) {
-  const storageClassName = getValue(
-    model,
-    "/resources/kubedbComMongoDB/spec/shardTopology/shard/storage/storageClassName"
-  );
+  const terminationPolicy = getValue(model, "resources/kubedbComMongoDB/spec/terminationPolicy") || "";
+  const suffix = "-retain";
+  let storageClass = "";
+
+  if(terminationPolicy === "WipeOut" || terminationPolicy === "Delete") {
+    const defaultList = storageClassList.filter(item => {
+      return item.metadata &&
+      item.metadata.annotations &&
+      item.metadata.annotations["storageclass.kubernetes.io/is-default-class"];
+    })
+    if(defaultList.length){
+      const found = defaultList.find(item => {
+        return !item.metadata.name?.endsWith(suffix);
+      })
+      if(found)
+        storageClass = found?.value;
+      else
+        storageClass = defaultList[0].value;
+    }
+  }
+  else{
+    const found = storageClassList.find(item => {
+      return item.metadata && 
+      item.metadata.name &&
+      item.metadata.name.endsWith(suffix)
+    });
+    if(found)
+      storageClass = found?.value;
+  }
 
   const mode = getValue(discriminator, "/activeDatabaseMode");
 
-  if (mode === "Sharded" && storageClassName) {
+  if (mode === "Sharded") {
+    commit("wizard/model$update", {
+      path: "/resources/kubedbComMongoDB/spec/shardTopology/shard/storage/storageClassName",
+      value: storageClass,
+      force: true,
+    });
     commit("wizard/model$update", {
       path: "/resources/kubedbComMongoDB/spec/shardTopology/configServer/storage/storageClassName",
-      value: storageClassName,
+      value: storageClass,
+      force: true,
+    });
+    commit(
+      "wizard/model$delete",
+      "/resources/kubedbComMongoDB/spec/storage"
+    );
+  }
+  else {
+    commit("wizard/model$update", {
+      path: "/resources/kubedbComMongoDB/spec/storage/storageClassName",
+      value: storageClass,
       force: true,
     });
   }
+}
+
+function updateConfigServerStorageClass({ getValue, model, commit }) {
+  const storageClass = getValue(model, "/resources/kubedbComMongoDB/spec/shardTopology/shard/storage/storageClassName") || "";
+  commit("wizard/model$update", {
+    path: "/resources/kubedbComMongoDB/spec/shardTopology/configServer/storage/storageClassName",
+    value: storageClass,
+    force: true,
+  });
 }
 
 function deleteDatabaseModePath({ discriminator, getValue, commit, model }) {
@@ -2586,4 +2593,5 @@ return {
   setConfigurationFilesMongos,
   onSetCustomConfigChange,
   getCreateNameSpaceUrl,
+  updateConfigServerStorageClass,
 };

@@ -474,6 +474,7 @@ function setDatabaseMode({ model, getValue }) {
   }
 }
 
+let storageClassList = [];
 async function getStorageClassNames(
   { axios, storeGet, commit, setDiscriminatorValue, getValue, model },
   path
@@ -494,22 +495,6 @@ async function getStorageClassNames(
 
   resources.map((item) => {
     const name = (item.metadata && item.metadata.name) || "";
-    const isDefault =
-      item.metadata &&
-      item.metadata.annotations &&
-      item.metadata.annotations["storageclass.kubernetes.io/is-default-class"];
-
-    if (isDefault && path) {
-      const className = getValue(model, path);
-      if (!className) {
-        commit("wizard/model$update", {
-          path: path,
-          value: name,
-          force: true,
-        });
-      }
-    }
-
     item.text = name;
     item.value = name;
     return true;
@@ -519,7 +504,49 @@ async function getStorageClassNames(
     setDiscriminatorValue("/storageClasses", resources);
   }
 
+  storageClassList = resources;
+  const initialStorageClass = getValue(model, path)
+  if(!initialStorageClass)
+    setStorageClass({ model, getValue, commit }, path);
   return resources;
+}
+
+function setStorageClass({ model, getValue, commit }, path) {
+  const terminationPolicy = getValue(model, "/resource/kubedbComKafka/spec/terminationPolicy") || "";
+  let storageClass = getValue(model, path) || "";
+  const suffix = "-retain";
+  if(terminationPolicy === "WipeOut" || terminationPolicy === "Delete") {
+    const defaultList = storageClassList.filter(item => {
+      return item.metadata &&
+      item.metadata.annotations &&
+      item.metadata.annotations["storageclass.kubernetes.io/is-default-class"];
+    })
+    if(defaultList.length){
+      const found = defaultList.find(item => {
+        return !item.metadata.name?.endsWith(suffix);
+      })
+      if(found)
+        storageClass = found?.value;
+      else
+        storageClass = defaultList[0].value;
+    }
+  }
+  else{
+    const found = storageClassList.find(item => {
+      return item.metadata && 
+      item.metadata.name &&
+      item.metadata.name.endsWith(suffix)
+    });
+    if(found)
+      storageClass = found?.value;
+  }
+  if(storageClass && path) {
+    commit("wizard/model$update", {
+      path: path,
+      value: storageClass,
+      force: true,
+    });
+  }
 }
 
 function deleteDatabaseModePath({ discriminator, getValue, commit }) {
@@ -550,24 +577,7 @@ function getStorageClassNamesFromDiscriminator(
   watchDependency("discriminator#/storageClasses");
   const options = getValue(discriminator, "/storageClasses") || [];
 
-  const val = getValue(model, path || "");
-
-  options.forEach((item) => {
-    const name = (item.metadata && item.metadata.name) || "";
-    const isDefault =
-      item.metadata &&
-      item.metadata.annotations &&
-      item.metadata.annotations["storageclass.kubernetes.io/is-default-class"];
-
-    if (isDefault && path && !val) {
-      commit("wizard/model$update", {
-        path: path,
-        value: name,
-        force: true,
-      });
-    }
-  });
-
+  setStorageClass({ model, getValue, commit }, path);
   return options;
 }
 
@@ -1132,4 +1142,5 @@ return {
   initSetCustomConfig,
   getOpsRequestUrl,
   getCreateNameSpaceUrl,
+  setStorageClass,
 };
