@@ -512,12 +512,12 @@ steps:
         type: single-step-form
       - elements:
         - discriminator:
-            reconfigurationType:
+            reconfigurationType-configServer:
               type: string
           elements:
           - label:
               text: labels.reconfigurationType
-            onChange: onReconfigurationTypeChange|configServer
+            onChange: onReconfigurationTypeChange|configServer|true
             options:
             - text: Select New Config Secret
               value: selectNewConfigSecret
@@ -526,7 +526,7 @@ steps:
             - text: Remove
               value: remove
             schema:
-              $ref: discriminator#/properties/reconfigurationType
+              $ref: discriminator#/properties/reconfigurationType-configServer
             type: radio
           - elements:
             - computed: setValueFromDbDetails|/spec/shardTopology/configServer/configSecret/name
@@ -542,11 +542,11 @@ steps:
                 url:
                   function: createSecretUrl
               type: select
-            if: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
+            if: ifReconfigurationTypeEqualsTo|selectNewConfigSecret|configServer|true
             schema:
               $ref: schema#/properties/spec/properties/configuration/properties/configServer/properties/configSecret
             type: single-step-form
-          - if: ifReconfigurationTypeEqualsTo|inlineConfig
+          - if: ifReconfigurationTypeEqualsTo|inlineConfig|configServer|true
             label:
               text: labels.inlineConfig
             schema:
@@ -560,16 +560,17 @@ steps:
             type: switch
           label:
             text: labels.configServer
+          show_label: true
           schema:
             $ref: schema#/properties/spec/properties/configuration/properties/configServer
           type: single-step-form
         - discriminator:
-            reconfigurationType:
+            reconfigurationType-mongos:
               type: string
           elements:
           - label:
               text: labels.reconfigurationType
-            onChange: onReconfigurationTypeChange|mongos
+            onChange: onReconfigurationTypeChange|mongos|true
             options:
             - text: Select New Config Secret
               value: selectNewConfigSecret
@@ -578,7 +579,7 @@ steps:
             - text: Remove
               value: remove
             schema:
-              $ref: discriminator#/properties/reconfigurationType
+              $ref: discriminator#/properties/reconfigurationType-mongos
             type: radio
           - elements:
             - computed: setValueFromDbDetails|/spec/shardTopology/mongos/configSecret/name
@@ -594,11 +595,11 @@ steps:
                 url:
                   function: createSecretUrl
               type: select
-            if: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
+            if: ifReconfigurationTypeEqualsTo|selectNewConfigSecret|mongos|true
             schema:
               $ref: schema#/properties/spec/properties/configuration/properties/mongos/properties/configSecret
             type: single-step-form
-          - if: ifReconfigurationTypeEqualsTo|inlineConfig
+          - if: ifReconfigurationTypeEqualsTo|inlineConfig|mongos|true
             label:
               text: labels.inlineConfig
             schema:
@@ -612,16 +613,17 @@ steps:
             type: switch
           label:
             text: labels.mongos
+          show_label: true
           schema:
             $ref: schema#/properties/spec/properties/configuration/properties/mongos
           type: single-step-form
         - discriminator:
-            reconfigurationType:
+            reconfigurationType-shard:
               type: string
           elements:
           - label:
               text: labels.reconfigurationType
-            onChange: onReconfigurationTypeChange|shard
+            onChange: onReconfigurationTypeChange|shard|true
             options:
             - text: Select New Config Secret
               value: selectNewConfigSecret
@@ -630,7 +632,7 @@ steps:
             - text: Remove
               value: remove
             schema:
-              $ref: discriminator#/properties/reconfigurationType
+              $ref: discriminator#/properties/reconfigurationType-shard
             type: radio
           - elements:
             - computed: setValueFromDbDetails|/spec/shardTopology/shard/configSecret/name
@@ -646,11 +648,11 @@ steps:
                 url:
                   function: createSecretUrl
               type: select
-            if: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
+            if: ifReconfigurationTypeEqualsTo|selectNewConfigSecret|shard|true
             schema:
               $ref: schema#/properties/spec/properties/configuration/properties/shard/properties/configSecret
             type: single-step-form
-          - if: ifReconfigurationTypeEqualsTo|inlineConfig
+          - if: ifReconfigurationTypeEqualsTo|inlineConfig|shard|true
             label:
               text: labels.inlineConfig
             schema:
@@ -664,6 +666,7 @@ steps:
             type: switch
           label:
             text: labels.shard
+          show_label: true
           schema:
             $ref: schema#/properties/spec/properties/configuration/properties/shard
           type: single-step-form

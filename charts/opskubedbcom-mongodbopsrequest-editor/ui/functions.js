@@ -548,18 +548,26 @@ async function unNamespacedResourceNames(
 // reconfiguration type
 function ifReconfigurationTypeEqualsTo(
   { discriminator, getValue, watchDependency },
-  value
+  value,
+  property,
+  isShard
 ) {
-  const reconfigurationType = getValue(discriminator, "/reconfigurationType");
-  watchDependency("discriminator#/reconfigurationType");
-
+  let path = "/reconfigurationType";
+  if (isShard) path += `-${property}`;
+  const reconfigurationType = getValue(discriminator, path);
+  const watchPath = `discriminator#${path}`;
+  watchDependency(watchPath);
   return reconfigurationType === value;
 }
+
 function onReconfigurationTypeChange(
   { commit, discriminator, getValue },
-  property
+  property,
+  isShard
 ) {
-  const reconfigurationType = getValue(discriminator, "/reconfigurationType");
+  let path = "/reconfigurationType";
+  if (isShard) path += `-${property}`;
+  const reconfigurationType = getValue(discriminator, path);
   if (reconfigurationType === "remove") {
     commit("wizard/model$delete", `/spec/configuration/${property}`);
 
@@ -583,6 +591,7 @@ function onReconfigurationTypeChange(
     );
   }
 }
+
 function disableReconfigurationType(
   { discriminator, getValue, watchDependency, itemCtx },
   dbType,
