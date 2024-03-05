@@ -271,14 +271,27 @@ function onEnabledFeaturesChange({
         getValue,
         "/status/managed"
       );
-
       if (isEnabled && !isManaged) {
         commit("wizard/model$delete", `/resources/${resourceValuePath}`);
       } else {
         const resourceObject = getValue(model, "/resources") || [];
+        let valuesData = {...resources?.[resourceValuePath]?.spec?.values}
+        if(Object.keys(valuesData).length === 0)
+        {
+          valuesData = {tool: ''}
+        }
+        else
+        {
+          if(valuesData?.tool  && !enabledFeatures.includes(valuesData?.tool.toLowerCase()))
+          {
+            valuesData = {tool: ''}
+          }
+        }
+        // do we need to update
+        const isUpdateStashPreset = (!resourceObject.hasOwnProperty('helmToolkitFluxcdIoHelmRelease_stash_presets') || valuesData?.tool === 'KubeStash' || valuesData?.tool=== 'Stash' )
         if (
           resourceValuePath ===
-            "helmToolkitFluxcdIoHelmRelease_stash_presets"
+            "helmToolkitFluxcdIoHelmRelease_stash_presets"  &&  isUpdateStashPreset 
         ) {
           commit("wizard/model$update", {
             path: `/resources/${resourceValuePath}`,
@@ -302,12 +315,13 @@ function onEnabledFeaturesChange({
                   },
                 },
                 targetNamespace,
-                values: {...resources?.[resourceValuePath]?.spec?.values}
+                values: valuesData,
               },
             },
             force: true,
           });
-        } else  {
+        } else if( resourceValuePath !==
+          "helmToolkitFluxcdIoHelmRelease_stash_presets" )  {
           commit("wizard/model$update", {
             path: `/resources/${resourceValuePath}`,
             value: {
@@ -544,8 +558,14 @@ function isStorageSectionOn({getValue,model,watchDependency }, provider, presetT
   }
     return ( backendProvider=== provider && secretStorage)
 }
-function initTLS({commit}, presetType)
+function initTLS({commit, getValue, model}, presetType)
 {
+  const initTLS = getValue(
+    model,
+    `/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/${presetType}/backend/s3/spec/insecureTLS`
+  )
+  if(initTLS !== undefined)
+    return initTLS
   commit("wizard/model$update", {
     path: `schema#/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/${presetType}/backend/s3/spec/insecureTLS`,
     value: false,
@@ -575,10 +595,12 @@ if(!enabledPreset?.includes(backupType) && enabledPreset!== undefined)
   commit(
     "wizard/model$delete",
     `/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/tool/`
+  );;
+  commit(
+    "wizard/model$delete",
+    `/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/${backupType}/`
   );
-  delete resources.helmToolkitFluxcdIoHelmRelease_stash_presets?.spec?.values?.tool;
 }
-
   if(!enabledPreset?.includes('stash-presets'))
   {
     // this case if for if stash-presets is not enabled
@@ -593,7 +615,6 @@ if(!enabledPreset?.includes(backupType) && enabledPreset!== undefined)
           "wizard/model$delete",
           `/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/kubestash/`
         );
-        delete resources.helmToolkitFluxcdIoHelmRelease_stash_presets?.spec?.values?.tool;
         commit(
           "wizard/model$delete",
           `/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/tool/`
@@ -606,7 +627,7 @@ if(!enabledPreset?.includes(backupType) && enabledPreset!== undefined)
 
     if(enabledPreset!==undefined)
     {
-      delete resources.helmToolkitFluxcdIoHelmRelease_stash_presets?.spec?.values?.stash;
+     
       commit(
         "wizard/model$delete",
         `/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/stash/`
@@ -618,7 +639,6 @@ if(!enabledPreset?.includes(backupType) && enabledPreset!== undefined)
   {
     if(enabledPreset!==undefined)
     {
-      delete resources.helmToolkitFluxcdIoHelmRelease_stash_presets?.spec?.values?.kubestash;
       commit(
         "wizard/model$delete",
         `/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/kubestash/`
@@ -626,7 +646,6 @@ if(!enabledPreset?.includes(backupType) && enabledPreset!== undefined)
     }
   }
   watchDependency('discriminator#/enabledFeatures')
-  watchDependency('discriminator#/presetType')
   watchDependency("model#/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/tool")
   for (let i = allPreset.length - 1; i >= 0; i--) {
     const preset = allPreset[i];
@@ -645,11 +664,6 @@ if(!enabledPreset?.includes(backupType) && enabledPreset!== undefined)
 
 function onPresetTypeChange({getValue,commit, model}){
   const backupType = getValue(model, "/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/tool");
-  const compliment = backupType === 'Stash' ? 'kubestash' : 'stash'
-    commit(
-      "wizard/model$delete",
-      `/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/${compliment}/`
-    );
 }
 function onBackendProviderChange({ commit, getValue, model }, presetType) {
   const selectedBackendProvider = getValue(
@@ -685,7 +699,7 @@ function storageSecretChange({getValue,model, commit}, presetType)
 }
 
 
-function isPresetConfiguration({getValue, discriminator, watchDependency,setDiscriminatorValue, model, commit}){
+function isPresetConfiguration({getValue, discriminator, watchDependency}){
   const enabledPreset = getValue(discriminator, "/enabledFeatures");
   watchDependency('discriminator#/enabledFeatures')
   if(!enabledPreset?.includes('stash-presets') && enabledPreset!== undefined)
@@ -705,7 +719,8 @@ function isPresetConfiguration({getValue, discriminator, watchDependency,setDisc
 
 
 
-function initiatePreset({watchDependency, getValue, model, discriminator, commit}){
+function initiatePreset({watchDependency, getValue, model, discriminator
+}){
   watchDependency("model#/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/tool")
   const enabledPreset = getValue(discriminator, "/enabledFeatures");
   const backupType = getValue(model, "/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/tool");
