@@ -412,6 +412,19 @@ async function getConfigSecrets({
   return filteredSecrets;
 }
 
+function createSecretUrl({ storeGet }) {
+  const user = storeGet("/route/params/user");
+  const cluster = storeGet("/route/params/cluster");
+
+  const domain = storeGet("/domain") || "";
+  if (domain.includes("bb.test")) {
+    return `http://console.bb.test:5990/${user}/kubernetes/${cluster}/core/v1/secrets/create`;
+  } else {
+    const editedDomain = domain.replace("kubedb", "console");
+    return `${editedDomain}/${user}/kubernetes/${cluster}/core/v1/secrets/create`;
+  }
+}
+
 function isEqualToValueFromType(
   { discriminator, getValue, watchDependency },
   value
@@ -535,18 +548,26 @@ async function unNamespacedResourceNames(
 // reconfiguration type
 function ifReconfigurationTypeEqualsTo(
   { discriminator, getValue, watchDependency },
-  value
+  value,
+  property,
+  isShard
 ) {
-  const reconfigurationType = getValue(discriminator, "/reconfigurationType");
-  watchDependency("discriminator#/reconfigurationType");
-
+  let path = "/reconfigurationType";
+  if (isShard) path += `-${property}`;
+  const reconfigurationType = getValue(discriminator, path);
+  const watchPath = `discriminator#${path}`;
+  watchDependency(watchPath);
   return reconfigurationType === value;
 }
+
 function onReconfigurationTypeChange(
   { commit, discriminator, getValue },
-  property
+  property,
+  isShard
 ) {
-  const reconfigurationType = getValue(discriminator, "/reconfigurationType");
+  let path = "/reconfigurationType";
+  if (isShard) path += `-${property}`;
+  const reconfigurationType = getValue(discriminator, path);
   if (reconfigurationType === "remove") {
     commit("wizard/model$delete", `/spec/configuration/${property}`);
 
@@ -570,6 +591,7 @@ function onReconfigurationTypeChange(
     );
   }
 }
+
 function disableReconfigurationType(
   { discriminator, getValue, watchDependency, itemCtx },
   dbType,
@@ -803,6 +825,7 @@ return {
 
   ifDbTypeEqualsTo,
   getConfigSecrets,
+  createSecretUrl,
   isEqualToValueFromType,
   getNamespacedResourceList,
   getResourceList,
