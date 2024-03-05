@@ -1,8 +1,6 @@
 // *************************      common functions ********************************************
 // eslint-disable-next-line no-empty-pattern
 
-
-
 const backendMap = {
   azure: {
     spec: { container: "", maxConnections: 0, prefix: "" },
@@ -96,21 +94,27 @@ function isEqualToModelPathValue(
   return modelValue === value;
 }
 
-function isFeatureRequired(storeGet,featureName) {
+function isFeatureRequired(storeGet, featureName) {
   const featureSet = getFeatureSetDetails(storeGet);
   const requiredFeatures = featureSet?.spec?.requiredFeatures || [];
   const isRequired = requiredFeatures.includes(featureName);
   return isRequired;
 }
 
-function getEnabledFeatureInConfigureBtnClick(allFeatureSetFeature, isBlockLevel, storeGet){   
+function getEnabledFeatureInConfigureBtnClick(
+  allFeatureSetFeature,
+  isBlockLevel,
+  storeGet
+) {
   const featureBlock = storeGet("/route/query/activeBlock") || "";
   const enabledFeatures = allFeatureSetFeature.filter((item) => {
     const featureName = item?.metadata?.name;
     return (
       item?.status?.enabled ||
       isFeatureRequired(storeGet, featureName) ||
-      (isBlockLevel && item?.spec?.featureBlock === featureBlock && item?.spec?.recommended)
+      (isBlockLevel &&
+        item?.spec?.featureBlock === featureBlock &&
+        item?.spec?.recommended)
     );
   });
   const enabledFeatureNames =
@@ -118,31 +122,35 @@ function getEnabledFeatureInConfigureBtnClick(allFeatureSetFeature, isBlockLevel
   return enabledFeatureNames;
 }
 
-function getEnabledFeatureInEnableBtnClick(allFeatureSetFeature, isBlockLevel, storeGet){
+function getEnabledFeatureInEnableBtnClick(
+  allFeatureSetFeature,
+  isBlockLevel,
+  storeGet
+) {
   // filter only (enabled + required + feature block feature)
   const featureBlock = storeGet("/route/query/activeBlock") || "";
-  const isRecommendedFeatureAvailable = allFeatureSetFeature.some((item)=> {
-    return item?.spec?.featureBlock === featureBlock && item?.spec?.recommended
+  const isRecommendedFeatureAvailable = allFeatureSetFeature.some((item) => {
+    return item?.spec?.featureBlock === featureBlock && item?.spec?.recommended;
   });
   const enabledFeatures = allFeatureSetFeature.filter((item) => {
     const featureName = item?.metadata?.name;
 
-    if(isBlockLevel) {
-      if(isRecommendedFeatureAvailable) {
+    if (isBlockLevel) {
+      if (isRecommendedFeatureAvailable) {
         return (
           item?.status?.enabled ||
           isFeatureRequired(storeGet, featureName) ||
-          (item?.spec?.featureBlock === featureBlock && item?.spec?.recommended === true)
+          (item?.spec?.featureBlock === featureBlock &&
+            item?.spec?.recommended === true)
         );
       } else {
-          return(
-            item?.status?.enabled ||
-            isFeatureRequired(storeGet, featureName) ||
-            (item?.spec?.featureBlock === featureBlock)
-        )
+        return (
+          item?.status?.enabled ||
+          isFeatureRequired(storeGet, featureName) ||
+          item?.spec?.featureBlock === featureBlock
+        );
       }
-    }
-    else {
+    } else {
       return (
         item?.status?.enabled ||
         item?.spec?.recommended ||
@@ -154,7 +162,6 @@ function getEnabledFeatureInEnableBtnClick(allFeatureSetFeature, isBlockLevel, s
     enabledFeatures.map((item) => item?.metadata?.name) || [];
   return enabledFeatureNames;
 }
-
 
 function getEnabledFeatures({ storeGet }) {
   const allFeatures = storeGet("/cluster/features/result") || [];
@@ -171,29 +178,50 @@ function getEnabledFeatures({ storeGet }) {
     //feature block level
     if (configureMode) {
       // configure btn
-      return getEnabledFeatureInConfigureBtnClick(allFeatureSetFeature, true, storeGet);
+      return getEnabledFeatureInConfigureBtnClick(
+        allFeatureSetFeature,
+        true,
+        storeGet
+      );
     } else {
       // enable btn
-      return getEnabledFeatureInEnableBtnClick(allFeatureSetFeature, true, storeGet)
+      return getEnabledFeatureInEnableBtnClick(
+        allFeatureSetFeature,
+        true,
+        storeGet
+      );
     }
   } else {
     // feature set level
     if (configureMode) {
       // configure btn
-      return getEnabledFeatureInConfigureBtnClick(allFeatureSetFeature, false, storeGet);
+      return getEnabledFeatureInConfigureBtnClick(
+        allFeatureSetFeature,
+        false,
+        storeGet
+      );
     } else {
       // enable btn
-      return getEnabledFeatureInEnableBtnClick(allFeatureSetFeature, false, storeGet)
+      return getEnabledFeatureInEnableBtnClick(
+        allFeatureSetFeature,
+        false,
+        storeGet
+      );
     }
   }
 }
 
-function disableFeatures({getValue, storeGet, itemCtx, discriminator,watchDependency }) {
-
-  watchDependency("discriminator#/isResourceLoaded")
+function disableFeatures({
+  getValue,
+  storeGet,
+  itemCtx,
+  discriminator,
+  watchDependency,
+}) {
+  watchDependency("discriminator#/isResourceLoaded");
 
   const isResourceLoaded = getValue(discriminator, "/isResourceLoaded");
-  if(!isResourceLoaded) return true; 
+  if (!isResourceLoaded) return true;
 
   const featureName = itemCtx.value;
   const featureSet = getFeatureSetDetails(storeGet);
@@ -205,9 +233,7 @@ function disableFeatures({getValue, storeGet, itemCtx, discriminator,watchDepend
 
 function getResourceValuePathFromFeature(feature) {
   const featureName = feature?.metadata?.name || "";
-  const underscoredFeatureName = featureName
-    .toLowerCase()
-    .replaceAll("-", "_");
+  const underscoredFeatureName = featureName.toLowerCase().replaceAll("-", "_");
   const resourceValuePath = `helmToolkitFluxcdIoHelmRelease_${underscoredFeatureName}`;
   return resourceValuePath;
 }
@@ -275,23 +301,28 @@ function onEnabledFeaturesChange({
         commit("wizard/model$delete", `/resources/${resourceValuePath}`);
       } else {
         const resourceObject = getValue(model, "/resources") || [];
-        let valuesData = {...resources?.[resourceValuePath]?.spec?.values}
-        if(Object.keys(valuesData).length === 0)
-        {
-          valuesData = {tool: ''}
-        }
-        else
-        {
-          if(valuesData?.tool  && !enabledFeatures.includes(valuesData?.tool.toLowerCase()))
-          {
-            valuesData = {tool: ''}
+        let valuesData = { ...resources?.[resourceValuePath]?.spec?.values };
+        if (Object.keys(valuesData).length === 0) {
+          valuesData = { tool: "" };
+        } else {
+          if (
+            valuesData?.tool &&
+            !enabledFeatures.includes(valuesData?.tool.toLowerCase())
+          ) {
+            valuesData = { tool: "" };
           }
         }
         // do we need to update
-        const isUpdateStashPreset = (!resourceObject.hasOwnProperty('helmToolkitFluxcdIoHelmRelease_stash_presets') || valuesData?.tool === 'KubeStash' || valuesData?.tool=== 'Stash' )
+        const isUpdateStashPreset =
+          !resourceObject.hasOwnProperty(
+            "helmToolkitFluxcdIoHelmRelease_stash_presets"
+          ) ||
+          valuesData?.tool === "KubeStash" ||
+          valuesData?.tool === "Stash";
         if (
           resourceValuePath ===
-            "helmToolkitFluxcdIoHelmRelease_stash_presets"  &&  isUpdateStashPreset 
+            "helmToolkitFluxcdIoHelmRelease_stash_presets" &&
+          isUpdateStashPreset
         ) {
           commit("wizard/model$update", {
             path: `/resources/${resourceValuePath}`,
@@ -320,8 +351,9 @@ function onEnabledFeaturesChange({
             },
             force: true,
           });
-        } else if( resourceValuePath !==
-          "helmToolkitFluxcdIoHelmRelease_stash_presets" )  {
+        } else if (
+          resourceValuePath !== "helmToolkitFluxcdIoHelmRelease_stash_presets"
+        ) {
           commit("wizard/model$update", {
             path: `/resources/${resourceValuePath}`,
             value: {
@@ -368,7 +400,7 @@ async function setReleaseNameAndNamespaceAndInitializeValues({
   model,
   getValue,
   axios,
-  setDiscriminatorValue
+  setDiscriminatorValue,
 }) {
   const modelResources = getValue(model, "/resources");
   resources = { ...modelResources };
@@ -427,46 +459,55 @@ async function setReleaseNameAndNamespaceAndInitializeValues({
 }
 
 function fetchFeatureSetOptions({ storeGet }) {
-  const features = storeGet('/cluster/features/result') || []
-  const featureSetName = storeGet('/route/params/featureset')
-  const filteredFeatures = features.filter(item => item?.spec?.featureSet === featureSetName)
-  const options = filteredFeatures.map(item => {
-    const { spec, metadata } = item || {}
-    const { title, description, required } = spec || {}
-    const { name } = metadata || {}
+  const features = storeGet("/cluster/features/result") || [];
+  const featureSetName = storeGet("/route/params/featureset");
+  const filteredFeatures = features.filter(
+    (item) => item?.spec?.featureSet === featureSetName
+  );
+  const options = filteredFeatures.map((item) => {
+    const { spec, metadata } = item || {};
+    const { title, description, required } = spec || {};
+    const { name } = metadata || {};
     return {
       text: title,
       value: name,
       description: description,
       statusTag: {
-        text: required ? 'Required' : ''
-      }
-    }
-  })
+        text: required ? "Required" : "",
+      },
+    };
+  });
 
-  return options || []
+  return options || [];
 }
 
 // this element is is used only to catch discriminator value
 // It is not used in create-ui to get or store value
-function hideThisElement () {
-  return false
+function hideThisElement() {
+  return false;
 }
 
 // this computed's main purpose is to watch isResourceLoaded flag
 // and fire the onEnabledFeatureChange function when it's true
-function checkIsResourceLoaded ({commit, storeGet,watchDependency,getValue,discriminator }) {
-  watchDependency("discriminator#/isResourceLoaded")
+function checkIsResourceLoaded({
+  commit,
+  storeGet,
+  watchDependency,
+  getValue,
+  discriminator,
+}) {
+  watchDependency("discriminator#/isResourceLoaded");
   const isResourceLoaded = getValue(discriminator, "/isResourceLoaded");
-  if(isResourceLoaded){
-    onEnabledFeaturesChange({discriminator,getValue, commit, storeGet})
+  if (isResourceLoaded) {
+    onEnabledFeaturesChange({ discriminator, getValue, commit, storeGet });
   }
 }
 
-
-function showBackendForm({ getValue, model, watchDependency, commit }, value, presetType) {
-
-
+function showBackendForm(
+  { getValue, model, watchDependency, commit },
+  value,
+  presetType
+) {
   const backendProvider = getValue(
     model,
     `/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/${presetType}/backend/provider`
@@ -491,179 +532,188 @@ function showBackendForm({ getValue, model, watchDependency, commit }, value, pr
   return backendProvider === value;
 }
 
-function checkPresetType({ getValue, watchDependency, discriminator, model}, value) {
-  watchDependency("model#/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/tool")
-  watchDependency('discriminator#/enabledFeatures')
-  const backupType = getValue(model, "/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/tool");
+function checkPresetType(
+  { getValue, watchDependency, discriminator, model },
+  value
+) {
+  watchDependency(
+    "model#/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/tool"
+  );
+  watchDependency("discriminator#/enabledFeatures");
+  const backupType = getValue(
+    model,
+    "/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/tool"
+  );
   const enabledPreset = getValue(discriminator, "/enabledFeatures");
 
-  if(!enabledPreset?.includes('stash-presets') && enabledPreset!== undefined)
-  {
-    return false
+  if (
+    !enabledPreset?.includes("stash-presets") &&
+    enabledPreset !== undefined
+  ) {
+    return false;
   }
-  if(!(enabledPreset?.includes('stash') || enabledPreset?.includes('kubestash'))  && enabledPreset !== undefined)
-  {
-    return false
+  if (
+    !(
+      enabledPreset?.includes("stash") || enabledPreset?.includes("kubestash")
+    ) &&
+    enabledPreset !== undefined
+  ) {
+    return false;
   }
 
-  
-  if(backupType === value)
-  {
-    return true
+  if (backupType === value) {
+    return true;
   }
-  return false
+  return false;
 }
 
-
-function initStorageSecret({commit, getValue, model})
-{
+function initStorageSecret({ commit, getValue, model }) {
   const modelStorageSecret = getValue(
     model,
     `/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/kubestash/storageSecret/create`
-  )
-  if(modelStorageSecret !== undefined)
-  return modelStorageSecret
+  );
+  if (modelStorageSecret !== undefined) return modelStorageSecret;
   commit("wizard/model$update", {
     path: "schema#/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/kubestash/storageSecret/create",
     value: true,
     force: true,
   });
-  return true
+  return true;
 }
 
-function initRetentionPolicyPrune({commit})
-{
+function initRetentionPolicyPrune({ commit }) {
   commit("wizard/model$update", {
     path: "schema#/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/stash/retentionPolicy/prune",
     value: true,
     force: true,
   });
-  return true
+  return true;
 }
-function isStorageSectionOn({getValue,model,watchDependency }, provider, presetType)
-{
+function isStorageSectionOn(
+  { getValue, model, watchDependency },
+  provider,
+  presetType
+) {
   const backendProvider = getValue(
     model,
     `/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/${presetType}/backend/provider`
   );
-  watchDependency(`model#/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/${presetType}/storageSecret/create`)
-  watchDependency(`model#/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/${presetType}/backend/provider`)
+  watchDependency(
+    `model#/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/${presetType}/storageSecret/create`
+  );
+  watchDependency(
+    `model#/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/${presetType}/backend/provider`
+  );
   const secretStorage = getValue(
     model,
     `/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/kubestash/storageSecret/create`
-  )
-  if(backendProvider === undefined)
-  {
-    return false
+  );
+  if (backendProvider === undefined) {
+    return false;
   }
-    return ( backendProvider=== provider && secretStorage)
+  return backendProvider === provider && secretStorage;
 }
-function initTLS({commit, getValue, model}, presetType)
-{
+function initTLS({ commit, getValue, model }, presetType) {
   const initTLS = getValue(
     model,
     `/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/${presetType}/backend/s3/spec/insecureTLS`
-  )
-  if(initTLS !== undefined)
-    return initTLS
+  );
+  if (initTLS !== undefined) return initTLS;
   commit("wizard/model$update", {
     path: `schema#/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/${presetType}/backend/s3/spec/insecureTLS`,
     value: false,
     force: true,
   });
-  return false
+  return false;
 }
 
-function getPresetList({getValue,discriminator, watchDependency, commit, model})
-{
+function getPresetList({
+  getValue,
+  discriminator,
+  watchDependency,
+  commit,
+  model,
+}) {
   const allPreset = getValue(discriminator, "/isPresetEnabled") || [];
   const enabledPreset = getValue(discriminator, "/enabledFeatures");
-  let backupType = getValue(model, "/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/tool");
-  if(backupType==='KubeStash')
-     backupType= 'kubestash'
-  if(backupType === 'Stash')
-    backupType ='stash'
-  for (let i = 0; i < allPreset.length; i++) {
-    if (allPreset[i]=='Stash') 
-      allPreset[i]='stash'
-    if(allPreset[i]=='KubeStash')
-      allPreset[i]='kubestash'
-}
-
-if(!enabledPreset?.includes(backupType) && enabledPreset!== undefined)
-{
-  commit(
-    "wizard/model$delete",
-    `/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/tool/`
-  );;
-  commit(
-    "wizard/model$delete",
-    `/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/${backupType}/`
+  let backupType = getValue(
+    model,
+    "/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/tool"
   );
-}
-  if(!enabledPreset?.includes('stash-presets'))
-  {
-    // this case if for if stash-presets is not enabled
-    if(enabledPreset!==undefined)
-    {
-        commit(
-          "wizard/model$delete",
-          `/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/stash/`
-        );
-
-        commit(
-          "wizard/model$delete",
-          `/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/kubestash/`
-        );
-        commit(
-          "wizard/model$delete",
-          `/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/tool/`
-        );
-      return []
-    }
+  if (backupType === "KubeStash") backupType = "kubestash";
+  if (backupType === "Stash") backupType = "stash";
+  for (let i = 0; i < allPreset.length; i++) {
+    if (allPreset[i] == "Stash") allPreset[i] = "stash";
+    if (allPreset[i] == "KubeStash") allPreset[i] = "kubestash";
   }
-  if(!enabledPreset?.includes('stash'))
-  {
 
-    if(enabledPreset!==undefined)
-    {
-     
+  if (!enabledPreset?.includes(backupType) && enabledPreset !== undefined) {
+    commit(
+      "wizard/model$delete",
+      `/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/tool/`
+    );
+    commit(
+      "wizard/model$delete",
+      `/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/${backupType}/`
+    );
+  }
+  if (!enabledPreset?.includes("stash-presets")) {
+    // this case if for if stash-presets is not enabled
+    if (enabledPreset !== undefined) {
       commit(
         "wizard/model$delete",
         `/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/stash/`
       );
-      
+
+      commit(
+        "wizard/model$delete",
+        `/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/kubestash/`
+      );
+      commit(
+        "wizard/model$delete",
+        `/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/tool/`
+      );
+      return [];
     }
   }
-  if(!enabledPreset?.includes('kubestash'))
-  {
-    if(enabledPreset!==undefined)
-    {
+  if (!enabledPreset?.includes("stash")) {
+    if (enabledPreset !== undefined) {
+      commit(
+        "wizard/model$delete",
+        `/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/stash/`
+      );
+    }
+  }
+  if (!enabledPreset?.includes("kubestash")) {
+    if (enabledPreset !== undefined) {
       commit(
         "wizard/model$delete",
         `/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/kubestash/`
       );
     }
   }
-  watchDependency('discriminator#/enabledFeatures')
-  watchDependency("model#/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/tool")
+  watchDependency("discriminator#/enabledFeatures");
+  watchDependency(
+    "model#/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/tool"
+  );
   for (let i = allPreset.length - 1; i >= 0; i--) {
     const preset = allPreset[i];
-    if (!enabledPreset?.includes(preset) ) {
+    if (!enabledPreset?.includes(preset)) {
       allPreset.splice(i, 1);
     }
   }
   for (let i = 0; i < allPreset.length; i++) {
-    if (allPreset[i]=='stash') 
-      allPreset[i]='Stash'
-    if(allPreset[i]=='kubestash')
-      allPreset[i]='KubeStash'
-}
-    return allPreset
+    if (allPreset[i] == "stash") allPreset[i] = "Stash";
+    if (allPreset[i] == "kubestash") allPreset[i] = "KubeStash";
+  }
+  return allPreset;
 }
 
-function onPresetTypeChange({getValue,commit, model}){
-  const backupType = getValue(model, "/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/tool");
+function onPresetTypeChange({ getValue, commit, model }) {
+  const backupType = getValue(
+    model,
+    "/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/tool"
+  );
 }
 function onBackendProviderChange({ commit, getValue, model }, presetType) {
   const selectedBackendProvider = getValue(
@@ -681,51 +731,53 @@ function onBackendProviderChange({ commit, getValue, model }, presetType) {
   });
 }
 
-function storageSecretChange({getValue,model, commit}, presetType)
-{
+function storageSecretChange({ getValue, model, commit }, presetType) {
   const storageSecret = getValue(
     model,
     `/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/${presetType}/storageSecret/create`
   );
-  if(!storageSecret)
-  {
+  if (!storageSecret) {
     Object.keys(backendMap).forEach((key) => {
-        commit(
-          "wizard/model$delete",
-          `/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/${presetType}/backend/${key}/auth`
-        );
+      commit(
+        "wizard/model$delete",
+        `/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/${presetType}/backend/${key}/auth`
+      );
     });
   }
 }
 
-
-function isPresetConfiguration({getValue, discriminator, watchDependency}){
+function isPresetConfiguration({ getValue, discriminator, watchDependency }) {
   const enabledPreset = getValue(discriminator, "/enabledFeatures");
-  watchDependency('discriminator#/enabledFeatures')
-  if(!enabledPreset?.includes('stash-presets') && enabledPreset!== undefined)
-  {
-
-     return false
+  watchDependency("discriminator#/enabledFeatures");
+  if (
+    !enabledPreset?.includes("stash-presets") &&
+    enabledPreset !== undefined
+  ) {
+    return false;
   }
-  if(!(enabledPreset?.includes('stash') || enabledPreset?.includes('kubestash'))  && enabledPreset !== undefined)
-  {
-
-    return false
+  if (
+    !(
+      enabledPreset?.includes("stash") || enabledPreset?.includes("kubestash")
+    ) &&
+    enabledPreset !== undefined
+  ) {
+    return false;
   }
 
-  return true
+  return true;
 }
 
-
-
-
-function initiatePreset({watchDependency, getValue, model, discriminator
-}){
-  watchDependency("model#/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/tool")
+function initiatePreset({ watchDependency, getValue, model, discriminator }) {
+  watchDependency(
+    "model#/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/tool"
+  );
   const enabledPreset = getValue(discriminator, "/enabledFeatures");
-  const backupType = getValue(model, "/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/tool");
- 
-  return backupType ? backupType : ' '
+  const backupType = getValue(
+    model,
+    "/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/tool"
+  );
+
+  return backupType ? backupType : " ";
 }
 
 return {
