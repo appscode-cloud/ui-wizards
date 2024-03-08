@@ -355,7 +355,41 @@ async function getElasticSearchVersions(
     (item) => item.spec && !item.spec.deprecated
   );
 
-  filteredElasticSearchVersions.map((item) => {
+  // sort compare function for the version array
+  function sortVersion(a, b) {
+    const aName = a.metadata.name;
+    const bName = b.metadata.name;
+
+    const [aString, aNumbers] = aName.split('-');
+    const [bString, bNumbers] = bName.split('-');
+
+    const aNums = aNumbers.split('.').map(Number);
+    const aNum1 = aNums[0] ? aNums[0] : 0;
+    const aNum2 = aNums[1] ? aNums[1] : 0;
+    const aNum3 = aNums[2] ? aNums[2] : 0;
+
+    const bNums = bNumbers.split('.').map(Number);
+    const bNum1 = bNums[0] ? bNums[0] : 0;
+    const bNum2 = bNums[1] ? bNums[1] : 0;
+    const bNum3 = bNums[2] ? bNums[2] : 0;    
+
+    if (aString !== bString) {
+      return aString.localeCompare(bString);
+    }
+
+    if (aNum1 !== bNum1) {
+      return aNum1 - bNum1;
+    }
+
+    if (aNum2 !== bNum2) {
+      return aNum2 - bNum2;
+    }
+
+    return aNum3 - bNum3;
+  }
+  const sortedVersion = filteredElasticSearchVersions.sort(sortVersion)
+
+  sortedVersion.map((item) => {
     const name = (item.metadata && item.metadata.name) || "";
     const specVersion = (item.spec && item.spec.version) || "";
     item.text = `${name} (${specVersion})`;
@@ -364,9 +398,9 @@ async function getElasticSearchVersions(
     return true;
   });
 
-  setDiscriminatorValue("/elasticVersions", filteredElasticSearchVersions);
+  setDiscriminatorValue("/elasticVersions", sortedVersion);
 
-  return filteredElasticSearchVersions;
+  return sortedVersion;
 }
 
 function onCreateAuthSecretChange({
