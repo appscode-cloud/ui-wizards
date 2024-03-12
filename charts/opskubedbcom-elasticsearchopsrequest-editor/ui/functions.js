@@ -866,15 +866,18 @@ function isVerticalScaleTopologyRequired ({watchDependency, getValue, discrimina
   const key = getValue(discriminator, '/topologyKey');
   const value = getValue(discriminator, '/topologyValue');
 
-
-  commit("wizard/model$update", {
-    path: "/spec/verticalScaling/node/topology",
-    value: {key,value},
-    force: true,
-  });
-
-  if(key || value) return true;
-  else return false
+  if(key || value) {
+    commit("wizard/model$update", {
+      path: "/spec/verticalScaling/node/topology",
+      value: {key,value},
+      force: true,
+    });
+    return true;
+  }
+  else {
+    commit("wizard/model$delete", "/spec/verticalScaling/node/topology");
+    return false
+  }
 }
 
 return {
