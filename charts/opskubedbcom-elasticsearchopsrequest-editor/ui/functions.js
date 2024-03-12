@@ -858,6 +858,25 @@ function setApplyToIfReady(){
   return "IfReady"
 }
 
+function isVerticalScaleTopologyRequired ({watchDependency, getValue, discriminator, commit}) {
+
+  watchDependency("discriminator#/topologyKey")
+  watchDependency("discriminator#/topologyValue")
+
+  const key = getValue(discriminator, '/topologyKey');
+  const value = getValue(discriminator, '/topologyValue');
+
+
+  commit("wizard/model$update", {
+    path: "/spec/verticalScaling/node/topology",
+    value: {key,value},
+    force: true,
+  });
+
+  if(key || value) return true;
+  else return false
+}
+
 return {
   fetchJsons,
   returnFalse,
@@ -908,5 +927,6 @@ return {
   isDatabaseRefDisabled,
   onNamespaceChange,
   onDbChange,
-  setApplyToIfReady
+  setApplyToIfReady,
+  isVerticalScaleTopologyRequired
 };
