@@ -781,6 +781,29 @@ function setApplyToIfReady(){
   return "IfReady"
 }
 
+function isVerticalScaleTopologyRequired ({ watchDependency, getValue, discriminator, commit }) {
+
+  watchDependency("discriminator#/topologyKey");
+  watchDependency("discriminator#/topologyValue");
+
+  const key = getValue(discriminator, '/topologyKey');
+  const value = getValue(discriminator, '/topologyValue');
+  const path = `/spec/verticalScaling/mysql/topology`;
+
+  if(key || value) {
+    commit("wizard/model$update", {
+      path: path,
+      value: {key,value},
+      force: true,
+    });
+    return true;
+  }
+  else {
+    commit("wizard/model$delete", path);
+    return false;
+  }
+}
+
 return {
   fetchJsons,
   returnFalse,
@@ -828,5 +851,6 @@ return {
   isNamespaceDisabled,
   onNamespaceChange,
   onDbChange,
-  setApplyToIfReady
+  setApplyToIfReady,
+  isVerticalScaleTopologyRequired,
 };

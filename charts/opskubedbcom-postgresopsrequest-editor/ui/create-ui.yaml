@@ -115,21 +115,30 @@ steps:
             schema:
               $ref: schema#/properties/spec/properties/verticalScaling/properties/postgres/properties/nodeSelectionPolicy
             type: select
-          - isArray: true
-            keys:
-              label:
-                text: labels.key
+          - type: single-step-form
             label:
               text: labels.topology
-            schema:
-              $ref: schema#/properties/spec/properties/verticalScaling/properties/postgres/properties/topology
-            type: key-value-input-form
-            values:
-              label:
-                text: labels.value
-              schema:
-                $ref: schema#/properties/spec/properties/verticalScaling/properties/postgres/properties/topology
-              type: input
+            show_label: true
+            discriminator:
+              topologyKey: 
+                type: string
+                default: ''
+              topologyValue:
+                type: string
+                default: ''
+            elements:
+              - type: input
+                label:
+                  text: labels.key
+                schema:
+                  $ref: discriminator#/topologyKey
+                required: isVerticalScaleTopologyRequired
+              - type: input
+                label:
+                  text: labels.value
+                schema:
+                  $ref: discriminator#/topologyValue
+                required: isVerticalScaleTopologyRequired
           label:
             text: labels.postgres
           schema:
