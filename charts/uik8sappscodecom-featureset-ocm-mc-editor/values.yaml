@@ -9,13 +9,13 @@ metadata:
     name: RELEASE-NAME
     namespace: default
 resources:
-  helmToolkitFluxcdIoHelmRelease_ace_ocm_addons_mc: # +doc-gen:break
+  helmToolkitFluxcdIoHelmRelease_ace_mc_addons: # +doc-gen:break
     apiVersion: helm.toolkit.fluxcd.io/v2beta2
     kind: HelmRelease
     metadata:
       labels:
-        app.kubernetes.io/component: ace-ocm-addons-mc
-      name: ace-ocm-addons-mc
+        app.kubernetes.io/component: ace-mc-addons
+      name: ace-mc-addons
       namespace: kubeops
     spec:
       chart:
@@ -34,7 +34,7 @@ resources:
         remediation:
           retries: -1
       interval: 5m
-      releaseName: ace-ocm-addons-mc
+      releaseName: ace-mc-addons
       storageNamespace: open-cluster-management-addon
       targetNamespace: open-cluster-management-addon
       timeout: 30m
@@ -44,13 +44,44 @@ resources:
           retries: -1
       values:
         kubeconfigSecretName: multicluster-controlplane-svc-kubeconfig
-  helmToolkitFluxcdIoHelmRelease_cluster_auth_manager_mc: # +doc-gen:break
+  helmToolkitFluxcdIoHelmRelease_ingress_nginx_mc: # +doc-gen:break
     apiVersion: helm.toolkit.fluxcd.io/v2beta2
     kind: HelmRelease
     metadata:
       labels:
-        app.kubernetes.io/component: cluster-auth-manager-mc
-      name: cluster-auth-manager-mc
+        app.kubernetes.io/component: ingress-nginx-mc
+      name: ingress-nginx-mc
+      namespace: kubeops
+    spec:
+      chart:
+        spec:
+          chart: ingress-nginx
+          sourceRef:
+            kind: HelmRepository
+            name: appscode-charts-oci
+            namespace: kubeops
+          version: v2024.2.13
+      install:
+        crds: CreateReplace
+        createNamespace: true
+        remediation:
+          retries: -1
+      interval: 5m
+      releaseName: ingress-nginx-mc
+      storageNamespace: multicluster-controlplane
+      targetNamespace: multicluster-controlplane
+      timeout: 30m
+      upgrade:
+        crds: CreateReplace
+        remediation:
+          retries: -1
+  helmToolkitFluxcdIoHelmRelease_mc_auth_manager: # +doc-gen:break
+    apiVersion: helm.toolkit.fluxcd.io/v2beta2
+    kind: HelmRelease
+    metadata:
+      labels:
+        app.kubernetes.io/component: mc-auth-manager
+      name: mc-auth-manager
       namespace: kubeops
     spec:
       chart:
@@ -71,7 +102,7 @@ resources:
         remediation:
           retries: -1
       interval: 5m
-      releaseName: cluster-auth-manager-mc
+      releaseName: mc-auth-manager
       storageNamespace: open-cluster-management-addon
       targetNamespace: open-cluster-management-addon
       timeout: 30m
@@ -81,13 +112,48 @@ resources:
           retries: -1
       values:
         kubeconfigSecretName: multicluster-controlplane-svc-kubeconfig
-  helmToolkitFluxcdIoHelmRelease_cluster_gateway_manager_mc: # +doc-gen:break
+  helmToolkitFluxcdIoHelmRelease_mc_fluxcd_manager: # +doc-gen:break
     apiVersion: helm.toolkit.fluxcd.io/v2beta2
     kind: HelmRelease
     metadata:
       labels:
-        app.kubernetes.io/component: cluster-gateway-manager-mc
-      name: cluster-gateway-manager-mc
+        app.kubernetes.io/component: mc-fluxcd-manager
+      name: mc-fluxcd-manager
+      namespace: kubeops
+    spec:
+      chart:
+        spec:
+          chart: fluxcd-manager
+          sourceRef:
+            kind: HelmRepository
+            name: appscode-charts-oci
+            namespace: kubeops
+          version: v2024.2.25
+      dependsOn:
+        - name: cluster-manager-hub
+      install:
+        crds: CreateReplace
+        createNamespace: true
+        remediation:
+          retries: -1
+      interval: 5m
+      releaseName: mc-fluxcd-manager
+      storageNamespace: open-cluster-management-addon
+      targetNamespace: open-cluster-management-addon
+      timeout: 30m
+      upgrade:
+        crds: CreateReplace
+        remediation:
+          retries: -1
+      values:
+        kubeconfigSecretName: multicluster-controlplane-svc-kubeconfig
+  helmToolkitFluxcdIoHelmRelease_mc_gateway_manager: # +doc-gen:break
+    apiVersion: helm.toolkit.fluxcd.io/v2beta2
+    kind: HelmRelease
+    metadata:
+      labels:
+        app.kubernetes.io/component: mc-gateway-manager
+      name: mc-gateway-manager
       namespace: kubeops
     spec:
       chart:
@@ -107,7 +173,7 @@ resources:
         remediation:
           retries: -1
       interval: 5m
-      releaseName: cluster-gateway-manager-mc
+      releaseName: mc-gateway-manager
       storageNamespace: open-cluster-management-addon
       targetNamespace: open-cluster-management-addon
       timeout: 30m
@@ -119,83 +185,13 @@ resources:
         konnectivityEgress: true
         kubeconfigSecretName: multicluster-controlplane-svc-kubeconfig
         manualSecretManagement: false
-  helmToolkitFluxcdIoHelmRelease_cluster_proxy_manager_mc: # +doc-gen:break
+  helmToolkitFluxcdIoHelmRelease_mc_license_manager: # +doc-gen:break
     apiVersion: helm.toolkit.fluxcd.io/v2beta2
     kind: HelmRelease
     metadata:
       labels:
-        app.kubernetes.io/component: cluster-proxy-manager-mc
-      name: cluster-proxy-manager-mc
-      namespace: kubeops
-    spec:
-      chart:
-        spec:
-          chart: cluster-proxy
-          sourceRef:
-            kind: HelmRepository
-            name: appscode-charts-oci
-            namespace: kubeops
-          version: v2024.2.25
-      dependsOn:
-        - name: cluster-manager-hub
-      install:
-        crds: CreateReplace
-        createNamespace: true
-        remediation:
-          retries: -1
-      interval: 5m
-      releaseName: cluster-proxy-manager-mc
-      storageNamespace: open-cluster-management-addon
-      targetNamespace: open-cluster-management-addon
-      timeout: 30m
-      upgrade:
-        crds: CreateReplace
-        remediation:
-          retries: -1
-      values:
-        kubeconfigSecretName: multicluster-controlplane-svc-kubeconfig
-  helmToolkitFluxcdIoHelmRelease_fluxcd_manager_mc: # +doc-gen:break
-    apiVersion: helm.toolkit.fluxcd.io/v2beta2
-    kind: HelmRelease
-    metadata:
-      labels:
-        app.kubernetes.io/component: fluxcd-manager-mc
-      name: fluxcd-manager-mc
-      namespace: kubeops
-    spec:
-      chart:
-        spec:
-          chart: fluxcd-manager
-          sourceRef:
-            kind: HelmRepository
-            name: appscode-charts-oci
-            namespace: kubeops
-          version: v2024.2.25
-      dependsOn:
-        - name: cluster-manager-hub
-      install:
-        crds: CreateReplace
-        createNamespace: true
-        remediation:
-          retries: -1
-      interval: 5m
-      releaseName: fluxcd-manager-mc
-      storageNamespace: open-cluster-management-addon
-      targetNamespace: open-cluster-management-addon
-      timeout: 30m
-      upgrade:
-        crds: CreateReplace
-        remediation:
-          retries: -1
-      values:
-        kubeconfigSecretName: multicluster-controlplane-svc-kubeconfig
-  helmToolkitFluxcdIoHelmRelease_license_proxyserver_manager_mc: # +doc-gen:break
-    apiVersion: helm.toolkit.fluxcd.io/v2beta2
-    kind: HelmRelease
-    metadata:
-      labels:
-        app.kubernetes.io/component: license-proxyserver-manager-mc
-      name: license-proxyserver-manager-mc
+        app.kubernetes.io/component: mc-license-manager
+      name: mc-license-manager
       namespace: kubeops
     spec:
       chart:
@@ -214,7 +210,7 @@ resources:
         remediation:
           retries: -1
       interval: 5m
-      releaseName: license-proxyserver-manager-mc
+      releaseName: mc-license-manager
       storageNamespace: open-cluster-management-addon
       targetNamespace: open-cluster-management-addon
       timeout: 30m
@@ -226,13 +222,48 @@ resources:
         kubeconfigSecretName: multicluster-controlplane-svc-kubeconfig
         platform:
           baseURL: https://api.appscode.com
-  helmToolkitFluxcdIoHelmRelease_managed_serviceaccount_manager_mc: # +doc-gen:break
+  helmToolkitFluxcdIoHelmRelease_mc_proxy_manager: # +doc-gen:break
     apiVersion: helm.toolkit.fluxcd.io/v2beta2
     kind: HelmRelease
     metadata:
       labels:
-        app.kubernetes.io/component: managed-serviceaccount-manager-mc
-      name: managed-serviceaccount-manager-mc
+        app.kubernetes.io/component: mc-proxy-manager
+      name: mc-proxy-manager
+      namespace: kubeops
+    spec:
+      chart:
+        spec:
+          chart: cluster-proxy
+          sourceRef:
+            kind: HelmRepository
+            name: appscode-charts-oci
+            namespace: kubeops
+          version: v2024.2.25
+      dependsOn:
+        - name: cluster-manager-hub
+      install:
+        crds: CreateReplace
+        createNamespace: true
+        remediation:
+          retries: -1
+      interval: 5m
+      releaseName: mc-proxy-manager
+      storageNamespace: open-cluster-management-addon
+      targetNamespace: open-cluster-management-addon
+      timeout: 30m
+      upgrade:
+        crds: CreateReplace
+        remediation:
+          retries: -1
+      values:
+        kubeconfigSecretName: multicluster-controlplane-svc-kubeconfig
+  helmToolkitFluxcdIoHelmRelease_mc_serviceaccount_manager: # +doc-gen:break
+    apiVersion: helm.toolkit.fluxcd.io/v2beta2
+    kind: HelmRelease
+    metadata:
+      labels:
+        app.kubernetes.io/component: mc-serviceaccount-manager
+      name: mc-serviceaccount-manager
       namespace: kubeops
     spec:
       chart:
@@ -251,7 +282,7 @@ resources:
         remediation:
           retries: -1
       interval: 5m
-      releaseName: managed-serviceaccount-manager-mc
+      releaseName: mc-serviceaccount-manager
       storageNamespace: open-cluster-management-addon
       targetNamespace: open-cluster-management-addon
       timeout: 30m
@@ -261,13 +292,44 @@ resources:
           retries: -1
       values:
         kubeconfigSecretName: multicluster-controlplane-svc-kubeconfig
-  helmToolkitFluxcdIoHelmRelease_multicluster_controlplane: # +doc-gen:break
+  helmToolkitFluxcdIoHelmRelease_multicluster_ingress_reader: # +doc-gen:break
     apiVersion: helm.toolkit.fluxcd.io/v2beta2
     kind: HelmRelease
     metadata:
       labels:
-        app.kubernetes.io/component: multicluster-controlplane
-      name: multicluster-controlplane
+        app.kubernetes.io/component: multicluster-ingress-reader
+      name: multicluster-ingress-reader
+      namespace: kubeops
+    spec:
+      chart:
+        spec:
+          chart: multicluster-ingress-reader
+          sourceRef:
+            kind: HelmRepository
+            name: appscode-charts-oci
+            namespace: kubeops
+          version: v2024.2.13
+      install:
+        crds: CreateReplace
+        createNamespace: true
+        remediation:
+          retries: -1
+      interval: 5m
+      releaseName: multicluster-ingress-reader
+      storageNamespace: multicluster-controlplane
+      targetNamespace: multicluster-controlplane
+      timeout: 30m
+      upgrade:
+        crds: CreateReplace
+        remediation:
+          retries: -1
+  helmToolkitFluxcdIoHelmRelease_ocm_mc: # +doc-gen:break
+    apiVersion: helm.toolkit.fluxcd.io/v2beta2
+    kind: HelmRelease
+    metadata:
+      labels:
+        app.kubernetes.io/component: ocm-mc
+      name: ocm-mc
       namespace: kubeops
     spec:
       chart:
@@ -284,7 +346,7 @@ resources:
         remediation:
           retries: -1
       interval: 5m
-      releaseName: multicluster-controlplane
+      releaseName: ocm-mc
       storageNamespace: multicluster-controlplane
       targetNamespace: multicluster-controlplane
       timeout: 30m

@@ -9,13 +9,13 @@ metadata:
     name: RELEASE-NAME
     namespace: default
 resources:
-  helmToolkitFluxcdIoHelmRelease_cluster_manager_spoke: # +doc-gen:break
+  helmToolkitFluxcdIoHelmRelease_ocm_spoke: # +doc-gen:break
     apiVersion: helm.toolkit.fluxcd.io/v2beta2
     kind: HelmRelease
     metadata:
       labels:
-        app.kubernetes.io/component: cluster-manager-spoke
-      name: cluster-manager-spoke
+        app.kubernetes.io/component: ocm-spoke
+      name: ocm-spoke
       namespace: kubeops
     spec:
       chart:
@@ -32,9 +32,40 @@ resources:
         remediation:
           retries: -1
       interval: 5m
-      releaseName: cluster-manager-spoke
+      releaseName: ocm-spoke
       storageNamespace: open-cluster-management
       targetNamespace: open-cluster-management
+      timeout: 30m
+      upgrade:
+        crds: CreateReplace
+        remediation:
+          retries: -1
+  helmToolkitFluxcdIoHelmRelease_spoke_cluster_proxy: # +doc-gen:break
+    apiVersion: helm.toolkit.fluxcd.io/v2beta2
+    kind: HelmRelease
+    metadata:
+      labels:
+        app.kubernetes.io/component: spoke-cluster-proxy
+      name: spoke-cluster-proxy
+      namespace: kubeops
+    spec:
+      chart:
+        spec:
+          chart: spoke-cluster-proxy
+          sourceRef:
+            kind: HelmRepository
+            name: appscode-charts-oci
+            namespace: kubeops
+          version: v2024.2.13
+      install:
+        crds: CreateReplace
+        createNamespace: true
+        remediation:
+          retries: -1
+      interval: 5m
+      releaseName: spoke-cluster-proxy
+      storageNamespace: multicluster-controlplane
+      targetNamespace: multicluster-controlplane
       timeout: 30m
       upgrade:
         crds: CreateReplace

@@ -114,37 +114,6 @@ resources:
       values:
         konnectivityEgress: true
         manualSecretManagement: false
-  helmToolkitFluxcdIoHelmRelease_cluster_manager_hub: # +doc-gen:break
-    apiVersion: helm.toolkit.fluxcd.io/v2beta2
-    kind: HelmRelease
-    metadata:
-      labels:
-        app.kubernetes.io/component: cluster-manager-hub
-      name: cluster-manager-hub
-      namespace: kubeops
-    spec:
-      chart:
-        spec:
-          chart: cluster-manager-hub
-          sourceRef:
-            kind: HelmRepository
-            name: appscode-charts-oci
-            namespace: kubeops
-          version: v2024.2.25
-      install:
-        crds: CreateReplace
-        createNamespace: true
-        remediation:
-          retries: -1
-      interval: 5m
-      releaseName: cluster-manager-hub
-      storageNamespace: open-cluster-management
-      targetNamespace: open-cluster-management
-      timeout: 30m
-      upgrade:
-        crds: CreateReplace
-        remediation:
-          retries: -1
   helmToolkitFluxcdIoHelmRelease_cluster_proxy_manager: # +doc-gen:break
     apiVersion: helm.toolkit.fluxcd.io/v2beta2
     kind: HelmRelease
@@ -275,6 +244,37 @@ resources:
       releaseName: managed-serviceaccount-manager
       storageNamespace: open-cluster-management-addon
       targetNamespace: open-cluster-management-addon
+      timeout: 30m
+      upgrade:
+        crds: CreateReplace
+        remediation:
+          retries: -1
+  helmToolkitFluxcdIoHelmRelease_ocm_hub: # +doc-gen:break
+    apiVersion: helm.toolkit.fluxcd.io/v2beta2
+    kind: HelmRelease
+    metadata:
+      labels:
+        app.kubernetes.io/component: ocm-hub
+      name: ocm-hub
+      namespace: kubeops
+    spec:
+      chart:
+        spec:
+          chart: cluster-manager-hub
+          sourceRef:
+            kind: HelmRepository
+            name: appscode-charts-oci
+            namespace: kubeops
+          version: v2024.2.25
+      install:
+        crds: CreateReplace
+        createNamespace: true
+        remediation:
+          retries: -1
+      interval: 5m
+      releaseName: ocm-hub
+      storageNamespace: open-cluster-management
+      targetNamespace: open-cluster-management
       timeout: 30m
       upgrade:
         crds: CreateReplace
