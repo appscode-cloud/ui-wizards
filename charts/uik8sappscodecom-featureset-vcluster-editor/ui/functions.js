@@ -111,17 +111,39 @@ function getEnabledFeatureInEnableBtnClick(allFeatureSetFeature, isBlockLevel, s
   return enabledFeatureNames;
 }
 
+function getEnabledFeaturesFromActiveFeature(allFeatureSetFeature,storeGet){
+  const activeFeature = storeGet("/route/query/activeFeature") || "";
+
+  const enabledFeatures = allFeatureSetFeature.filter((item) => {
+  const featureName = item?.metadata?.name;
+    return (
+      item?.status?.enabled ||
+      isFeatureRequired(storeGet, featureName) ||
+      item?.spec?.recommended ||
+      featureName === activeFeature
+    );
+  })
+  const enabledFeatureNames =
+  enabledFeatures.map((item) => item?.metadata?.name) || [];
+
+  return enabledFeatureNames
+}
 
 function getEnabledFeatures({ storeGet }) {
   const allFeatures = storeGet("/cluster/features/result") || [];
   const featureSet = storeGet("/route/params/featureset") || [];
   const featureBlock = storeGet("/route/query/activeBlock") || "";
   const configureMode = storeGet("/route/query/mode") || "";
+  const activeFeature = storeGet("/route/query/activeFeature") || "";
 
   const allFeatureSetFeature =
     allFeatures.filter((item) => {
       return item?.spec?.featureSet === featureSet;
     }) || [];
+
+  if(activeFeature){
+    return getEnabledFeaturesFromActiveFeature(allFeatureSetFeature,storeGet)
+  }
 
   if (featureBlock) {
     //feature block level
