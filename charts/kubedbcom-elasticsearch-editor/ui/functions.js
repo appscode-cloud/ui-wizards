@@ -812,31 +812,62 @@ function setStorageClass({ model, getValue, commit }, path) {
   const terminationPolicy = getValue(model, "resources/kubedbComElasticsearch/spec/terminationPolicy") || "";
   let storageClass = getValue(model, path) || "";
   const suffix = "-retain";
+
+  const simpleClassList = storageClassList.filter(item => {
+    return !item.metadata?.name?.endsWith(suffix)
+  })
+
+  const retainClassList = storageClassList.filter(item => {
+    return item.metadata?.name?.endsWith(suffix)
+  })
+
+  const defaultSimpleList = simpleClassList.filter(item => {
+    return item.metadata &&
+    item.metadata.annotations &&
+    item.metadata.annotations["storageclass.kubernetes.io/is-default-class"];
+  })
+
+  const defaultRetainList = retainClassList.filter(item => {
+    return item.metadata &&
+    item.metadata.annotations &&
+    item.metadata.annotations["storageclass.kubernetes.io/is-default-class"];
+  })
+
   if(terminationPolicy === "WipeOut" || terminationPolicy === "Delete") {
-    const defaultList = storageClassList.filter(item => {
-      return item.metadata &&
-      item.metadata.annotations &&
-      item.metadata.annotations["storageclass.kubernetes.io/is-default-class"];
-    })
-    if(defaultList.length){
-      const found = defaultList.find(item => {
-        return !item.metadata.name?.endsWith(suffix);
-      })
-      if(found)
-        storageClass = found?.value;
-      else
-        storageClass = defaultList[0].value;
+    if(simpleClassList.length > 1) {
+      const found = defaultSimpleList.length 
+        ? defaultSimpleList[0] 
+        : simpleClassList[0];
+      storageClass = found.value;
+    }
+    else if(simpleClassList.length === 1) {
+      storageClass = simpleClassList[0]?.value;
+    }
+    else {
+      const found = defaultRetainList.length 
+        ? defaultRetainList[0].value 
+        : storageClassList.length ? storageClassList[0].value : "";
+      storageClass = found;
     }
   }
-  else{
-    const found = storageClassList.find(item => {
-      return item.metadata && 
-      item.metadata.name &&
-      item.metadata.name.endsWith(suffix)
-    });
-    if(found)
-      storageClass = found?.value;
+  else {
+    if(retainClassList.length > 1) {
+        const found = defaultRetainList.length 
+          ? defaultRetainList[0] 
+          : retainClassList[0];
+        storageClass = found.value;
+    }
+    else if(retainClassList.length === 1) {
+      storageClass = retainClassList[0]?.value;
+    }
+    else {
+      const found = defaultSimpleList.length 
+        ? defaultSimpleList[0].value
+        : storageClassList.length ? storageClassList[0].value : "";
+      storageClass = found;
+    }
   }
+
   if(storageClass && path) {
     commit("wizard/model$update", {
       path: path,
