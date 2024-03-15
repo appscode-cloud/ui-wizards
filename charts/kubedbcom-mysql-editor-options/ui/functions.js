@@ -651,12 +651,12 @@ function setStorageClass({model, getValue, commit}) {
     }
     else {
       const found = defaultRetainList.length 
-        ? defaultRetainList[0] 
-        : retainClassList[0];
-      storageClass = found.value;
+        ? defaultRetainList[0].value 
+        : storageClassList.length ? storageClassList[0].value : "";
+      storageClass = found;
     }
   }
-  else{
+  else {
     if(retainClassList.length > 1) {
         const found = defaultRetainList.length 
           ? defaultRetainList[0] 
@@ -668,11 +668,12 @@ function setStorageClass({model, getValue, commit}) {
     }
     else {
       const found = defaultSimpleList.length 
-        ? defaultSimpleList[0] 
-        : simpleClassList[0];
-      storageClass = found.value;
+        ? defaultSimpleList[0].value
+        : storageClassList.length ? storageClassList[0].value : "";
+      storageClass = found;
     }
   }
+
   if(storageClass) {
     commit("wizard/model$update", {
       path: "/spec/storageClass/name",
