@@ -18,7 +18,7 @@ spec:
   runtimeSettings:
     pod:
       securityContext:
-        {{- if semverCompare "~6.0.0" .Values.spec.version }}
+        {{- if semverCompare "~6.0.0" (splitList "-" .Values.spec.version | last) }}
         fsGroup: 999
         {{- else }}
         fsGroup: 65534

@@ -39,7 +39,7 @@ spec:
         name: mongodb-addon
         tasks:
           - name: logical-backup
-        {{- if semverCompare "~6.0.0" .Values.spec.version }}
+        {{- if semverCompare "~6.0.0" (splitList "-" .Values.spec.version | last) }}
         jobTemplate:
           spec:
             securityContext:
