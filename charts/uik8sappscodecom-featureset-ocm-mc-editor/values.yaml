@@ -71,6 +71,37 @@ resources:
         crds: CreateReplace
         remediation:
           retries: -1
+  helmToolkitFluxcdIoHelmRelease_kube_ui_server_mc: # +doc-gen:break
+    apiVersion: helm.toolkit.fluxcd.io/v2beta2
+    kind: HelmRelease
+    metadata:
+      labels:
+        app.kubernetes.io/component: kube-ui-server-mc
+      name: kube-ui-server-mc
+      namespace: kubeops
+    spec:
+      chart:
+        spec:
+          chart: kube-ui-server
+          sourceRef:
+            kind: HelmRepository
+            name: appscode-charts-oci
+            namespace: kubeops
+          version: v2023.12.18
+      install:
+        crds: CreateReplace
+        createNamespace: true
+        remediation:
+          retries: -1
+      interval: 5m
+      releaseName: kube-ui-server-mc
+      storageNamespace: kubeops
+      targetNamespace: kubeops
+      timeout: 30m
+      upgrade:
+        crds: CreateReplace
+        remediation:
+          retries: -1
   helmToolkitFluxcdIoHelmRelease_mc_auth_manager: # +doc-gen:break
     apiVersion: helm.toolkit.fluxcd.io/v2beta2
     kind: HelmRelease
