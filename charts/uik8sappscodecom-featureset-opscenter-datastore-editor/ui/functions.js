@@ -385,7 +385,7 @@ function isKubedbSelected({ getValue, discriminator, watchDependency, commit }){
   const enabledFeatures = getValue(discriminator, "/enabledFeatures");
   const target = "kubedb";
   const isSelected = enabledFeatures?.includes(target);
-  if(!isSelected) commit("wizard/model$delete", "resources/helmToolkitFluxcdIoHelmRelease_kubedb")
+  if(!isSelected) commit("wizard/model$delete", "resources/helmToolkitFluxcdIoHelmRelease_kubedb");
   return isSelected;
 }
 
@@ -425,14 +425,15 @@ function onTypeUpdate({ discriminator, commit, getValue }) {
 function typeConvert(commit, enabledTypes) {
   let convertFromArray = {};
   allAvailableTypes?.forEach(item => {
-    convertFromArray[item] = enabledTypes.includes(item);
+    convertFromArray[item] = enabledTypes 
+      ? enabledTypes.includes(item) 
+      : false;
   });
   commit("wizard/model$update", {
     path: "resources/helmToolkitFluxcdIoHelmRelease_kubedb/spec/values/global/featureGates",
     value: convertFromArray,
     force: true,
   });
-  console.log(convertFromArray);
   return convertFromArray;
 }
 
