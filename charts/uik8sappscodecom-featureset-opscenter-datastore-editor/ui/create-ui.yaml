@@ -25,6 +25,14 @@ steps:
         schema:
           $ref: discriminator#/properties/enabledFeatures
         type: checkbox
+      - fetch: getDatabaseTypes
+        onChange: onTypeUpdate
+        if: isKubedbSelected
+        label:
+          text: labels.select_db_types
+        type: multiselect
+        schema:
+          $ref: discriminator#/properties/enabledTypes
       - computed: checkIsResourceLoaded
         if: hideThisElement
         type: input
