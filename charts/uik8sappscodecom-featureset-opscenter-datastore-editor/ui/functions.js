@@ -382,7 +382,7 @@ function checkIsResourceLoaded ({commit, storeGet,watchDependency,getValue,discr
 
 function isKubedbSelected({ getValue, discriminator, watchDependency, commit }){
   watchDependency("discriminator#/enabledFeatures");
-  const enabledFeatures = getValue(discriminator, "/enabledFeatures");
+  const enabledFeatures = getValue(discriminator, "/enabledFeatures") || [];
   const target = "kubedb";
   const isSelected = enabledFeatures?.includes(target);
   if(!isSelected) commit("wizard/model$delete", "resources/helmToolkitFluxcdIoHelmRelease_kubedb");
@@ -418,7 +418,7 @@ function getDatabaseTypes({ setDiscriminatorValue, commit }) {
 }
 
 function onTypeUpdate({ discriminator, commit, getValue }) {
-  const enabledTypes = getValue(discriminator, "/enabledTypes");
+  const enabledTypes = getValue(discriminator, "/enabledTypes") || [];
   typeConvert(commit, enabledTypes);
 }
 
