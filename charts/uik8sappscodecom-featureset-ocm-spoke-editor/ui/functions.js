@@ -388,6 +388,16 @@ function checkIsResourceLoaded ({commit, storeGet,watchDependency,getValue,discr
   }
 }
 
+function checkSpokeComponent({watchDependency,getValue, discriminator}){
+  const enabledFeatures = getValue(discriminator, "/enabledFeatures") || [];
+  watchDependency("discriminator#/enabledFeatures")
+  if(enabledFeatures.includes('cluster-manager-spoke'))
+   return true
+  else
+   return false
+
+}
+
 return {
   hideThisElement,
   checkIsResourceLoaded,
@@ -401,4 +411,5 @@ return {
   returnFalse,
   setReleaseNameAndNamespaceAndInitializeValues,
   fetchFeatureSetOptions,
+  checkSpokeComponent,
 };

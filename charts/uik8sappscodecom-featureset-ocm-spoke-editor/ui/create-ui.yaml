@@ -34,6 +34,33 @@ steps:
         label:
           text: 'Note: Enabling a feature auto enables any prerequisite features'
         type: label-element
+      - elements:
+        - label:
+            text: labels.spoke.clusterInfo
+          type: label-element
+        - label:
+            text: labels.spoke.cluster
+          schema: 
+            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_cluster_manager_spoke/properties/spec/properties/values/properties/clusterName
+          type: input
+          required: true
+        - label:
+            text: labels.spoke.hubInfo
+          type: label-element
+        - label:
+            text: labels.spoke.apiServer
+          schema: 
+            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_cluster_manager_spoke/properties/spec/properties/values/properties/hub/properties/apiServer
+          type: input
+          required: true
+        - label:
+            text: labels.spoke.token
+          schema: 
+            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_cluster_manager_spoke/properties/spec/properties/values/properties/hub/properties/token
+          type: input
+          required: true
+        type: single-step-form
+        if: checkSpokeComponent
       type: single-step-form
     type: single-step-form
   id: opscenter-core
