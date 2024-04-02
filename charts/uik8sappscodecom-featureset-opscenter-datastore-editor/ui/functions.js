@@ -410,8 +410,36 @@ const allAvailableTypes = [
   "Solr",
   "ZooKeeper",
 ];
-function getDatabaseTypes({ setDiscriminatorValue, commit }) {
+async function getDatabaseTypes({ setDiscriminatorValue, commit, storeGet, axios }) {
   const preEnableTypes = ["Elasticsearch", "Kafka", "MariaDB", "MongoDB", "MySQL", "Postgres", "Redis"];
+  const owner = storeGet("/route/params/user") || "";
+  const cluster = storeGet("/route/params/cluster") || "";
+  try{
+    const resp = await axios.get(
+      `/clusters/${owner}/${cluster}/db-status`,
+    );
+    const data = resp.data;
+    console.log(data);
+    for(let key in data) {
+      if(data.hasOwnProperty(key)) {
+        const type = key;
+        if(data[key] === true) {
+          if(!preEnableTypes.includes(type)) {
+            preEnableTypes.push(type);
+          }
+        }
+        else {
+          let ind = preEnableTypes.indexOf(type);
+          if(ind !== -1) {
+            preEnableTypes.splice(ind, 1);
+          }
+        }
+      }
+    }
+  }
+  catch(e){
+    console.log(e);
+  }
   setDiscriminatorValue("/enabledTypes", preEnableTypes);
   typeConvert(commit, preEnableTypes);
   return allAvailableTypes;
