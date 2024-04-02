@@ -34,8 +34,8 @@ steps:
       label:
         text: labels.databaseRef
       onChange: onDbChange
-      required: true
       refresh: true
+      required: true
       schema:
         $ref: schema#/properties/spec/properties/databaseRef/properties/name
       type: select
@@ -186,30 +186,30 @@ steps:
             schema:
               $ref: schema#/properties/spec/properties/verticalScaling/properties/master/properties/nodeSelectionPolicy
             type: select
-          - type: single-step-form
+          - discriminator:
+              topologyKey-master:
+                default: ""
+                type: string
+              topologyValue-master:
+                default: ""
+                type: string
+            elements:
+            - label:
+                text: labels.key
+              required: isVerticalScaleTopologyRequired|master
+              schema:
+                $ref: discriminator#/topologyKey-master
+              type: input
+            - label:
+                text: labels.value
+              required: isVerticalScaleTopologyRequired|master
+              schema:
+                $ref: discriminator#/topologyValue-master
+              type: input
             label:
               text: labels.topology
             show_label: true
-            discriminator:
-              topologyKey-master: 
-                type: string
-                default: ''
-              topologyValue-master:
-                type: string
-                default: ''
-            elements:
-              - type: input
-                label:
-                  text: labels.key
-                schema:
-                  $ref: discriminator#/topologyKey-master
-                required: isVerticalScaleTopologyRequired|master
-              - type: input
-                label:
-                  text: labels.value
-                schema:
-                  $ref: discriminator#/topologyValue-master
-                required: isVerticalScaleTopologyRequired|master
+            type: single-step-form
           if: hasResourceValue|master
           label:
             text: labels.master_node
@@ -234,30 +234,30 @@ steps:
             schema:
               $ref: schema#/properties/spec/properties/verticalScaling/properties/data/properties/nodeSelectionPolicy
             type: select
-          - type: single-step-form
+          - discriminator:
+              topologyKey-data:
+                default: ""
+                type: string
+              topologyValue-data:
+                default: ""
+                type: string
+            elements:
+            - label:
+                text: labels.key
+              required: isVerticalScaleTopologyRequired|data
+              schema:
+                $ref: discriminator#/topologyKey-data
+              type: input
+            - label:
+                text: labels.value
+              required: isVerticalScaleTopologyRequired|data
+              schema:
+                $ref: discriminator#/topologyValue-data
+              type: input
             label:
               text: labels.topology
             show_label: true
-            discriminator:
-              topologyKey-data: 
-                type: string
-                default: ''
-              topologyValue-data:
-                type: string
-                default: ''
-            elements:
-              - type: input
-                label:
-                  text: labels.key
-                schema:
-                  $ref: discriminator#/topologyKey-data
-                required: isVerticalScaleTopologyRequired|data
-              - type: input
-                label:
-                  text: labels.value
-                schema:
-                  $ref: discriminator#/topologyValue-data
-                required: isVerticalScaleTopologyRequired|data
+            type: single-step-form
           if: hasResourceValue|data
           label:
             text: labels.data_node
@@ -282,30 +282,30 @@ steps:
             schema:
               $ref: schema#/properties/spec/properties/verticalScaling/properties/ingest/properties/nodeSelectionPolicy
             type: select
-          - type: single-step-form
+          - discriminator:
+              topologyKey-ingest:
+                default: ""
+                type: string
+              topologyValue-ingest:
+                default: ""
+                type: string
+            elements:
+            - label:
+                text: labels.key
+              required: isVerticalScaleTopologyRequired|ingest
+              schema:
+                $ref: discriminator#/topologyKey-ingest
+              type: input
+            - label:
+                text: labels.value
+              required: isVerticalScaleTopologyRequired|ingest
+              schema:
+                $ref: discriminator#/topologyValue-ingest
+              type: input
             label:
               text: labels.topology
             show_label: true
-            discriminator:
-              topologyKey-ingest: 
-                type: string
-                default: ''
-              topologyValue-ingest:
-                type: string
-                default: ''
-            elements:
-              - type: input
-                label:
-                  text: labels.key
-                schema:
-                  $ref: discriminator#/topologyKey-ingest
-                required: isVerticalScaleTopologyRequired|ingest
-              - type: input
-                label:
-                  text: labels.value
-                schema:
-                  $ref: discriminator#/topologyValue-ingest
-                required: isVerticalScaleTopologyRequired|ingest
+            type: single-step-form
           if: hasResourceValue|ingest
           label:
             text: labels.ingest_node
@@ -330,30 +330,30 @@ steps:
             schema:
               $ref: schema#/properties/spec/properties/verticalScaling/properties/ml/properties/nodeSelectionPolicy
             type: select
-          - type: single-step-form
+          - discriminator:
+              topologyKey-ml:
+                default: ""
+                type: string
+              topologyValue-ml:
+                default: ""
+                type: string
+            elements:
+            - label:
+                text: labels.key
+              required: isVerticalScaleTopologyRequired|ml
+              schema:
+                $ref: discriminator#/topologyKey-ml
+              type: input
+            - label:
+                text: labels.value
+              required: isVerticalScaleTopologyRequired|ml
+              schema:
+                $ref: discriminator#/topologyValue-ml
+              type: input
             label:
               text: labels.topology
             show_label: true
-            discriminator:
-              topologyKey-ml: 
-                type: string
-                default: ''
-              topologyValue-ml:
-                type: string
-                default: ''
-            elements:
-              - type: input
-                label:
-                  text: labels.key
-                schema:
-                  $ref: discriminator#/topologyKey-ml
-                required: isVerticalScaleTopologyRequired|ml
-              - type: input
-                label:
-                  text: labels.value
-                schema:
-                  $ref: discriminator#/topologyValue-ml
-                required: isVerticalScaleTopologyRequired|ml
+            type: single-step-form
           if: hasResourceValue|ml
           label:
             text: labels.ml_mode
@@ -378,30 +378,30 @@ steps:
             schema:
               $ref: schema#/properties/spec/properties/verticalScaling/properties/transform/properties/nodeSelectionPolicy
             type: select
-          - type: single-step-form
+          - discriminator:
+              topologyKey-transform:
+                default: ""
+                type: string
+              topologyValue-transform:
+                default: ""
+                type: string
+            elements:
+            - label:
+                text: labels.key
+              required: isVerticalScaleTopologyRequired|transform
+              schema:
+                $ref: discriminator#/topologyKey-transform
+              type: input
+            - label:
+                text: labels.value
+              required: isVerticalScaleTopologyRequired|transform
+              schema:
+                $ref: discriminator#/topologyValue-transform
+              type: input
             label:
               text: labels.topology
             show_label: true
-            discriminator:
-              topologyKey-transform: 
-                type: string
-                default: ''
-              topologyValue-transform:
-                type: string
-                default: ''
-            elements:
-              - type: input
-                label:
-                  text: labels.key
-                schema:
-                  $ref: discriminator#/topologyKey-transform
-                required: isVerticalScaleTopologyRequired|transform
-              - type: input
-                label:
-                  text: labels.value
-                schema:
-                  $ref: discriminator#/topologyValue-transform
-                required: isVerticalScaleTopologyRequired|transform
+            type: single-step-form
           if: hasResourceValue|transform
           label:
             text: labels.transform_node
@@ -426,30 +426,30 @@ steps:
             schema:
               $ref: schema#/properties/spec/properties/verticalScaling/properties/dataCold/properties/nodeSelectionPolicy
             type: select
-          - type: single-step-form
+          - discriminator:
+              topologyKey-dataCold:
+                default: ""
+                type: string
+              topologyValue-dataCold:
+                default: ""
+                type: string
+            elements:
+            - label:
+                text: labels.key
+              required: isVerticalScaleTopologyRequired|dataCold
+              schema:
+                $ref: discriminator#/topologyKey-dataCold
+              type: input
+            - label:
+                text: labels.value
+              required: isVerticalScaleTopologyRequired|dataCold
+              schema:
+                $ref: discriminator#/topologyValue-dataCold
+              type: input
             label:
               text: labels.topology
             show_label: true
-            discriminator:
-              topologyKey-dataCold: 
-                type: string
-                default: ''
-              topologyValue-dataCold:
-                type: string
-                default: ''
-            elements:
-              - type: input
-                label:
-                  text: labels.key
-                schema:
-                  $ref: discriminator#/topologyKey-dataCold
-                required: isVerticalScaleTopologyRequired|dataCold
-              - type: input
-                label:
-                  text: labels.value
-                schema:
-                  $ref: discriminator#/topologyValue-dataCold
-                required: isVerticalScaleTopologyRequired|dataCold
+            type: single-step-form
           if: hasResourceValue|dataCold
           label:
             text: labels.data_cold_node
@@ -474,30 +474,30 @@ steps:
             schema:
               $ref: schema#/properties/spec/properties/verticalScaling/properties/dataContent/properties/nodeSelectionPolicy
             type: select
-          - type: single-step-form
+          - discriminator:
+              topologyKey-dataContent:
+                default: ""
+                type: string
+              topologyValue-dataContent:
+                default: ""
+                type: string
+            elements:
+            - label:
+                text: labels.key
+              required: isVerticalScaleTopologyRequired|dataContent
+              schema:
+                $ref: discriminator#/topologyKey-dataContent
+              type: input
+            - label:
+                text: labels.value
+              required: isVerticalScaleTopologyRequired|dataContent
+              schema:
+                $ref: discriminator#/topologyValue-dataContent
+              type: input
             label:
               text: labels.topology
             show_label: true
-            discriminator:
-              topologyKey-dataContent: 
-                type: string
-                default: ''
-              topologyValue-dataContent:
-                type: string
-                default: ''
-            elements:
-              - type: input
-                label:
-                  text: labels.key
-                schema:
-                  $ref: discriminator#/topologyKey-dataContent
-                required: isVerticalScaleTopologyRequired|dataContent
-              - type: input
-                label:
-                  text: labels.value
-                schema:
-                  $ref: discriminator#/topologyValue-dataContent
-                required: isVerticalScaleTopologyRequired|dataContent
+            type: single-step-form
           if: hasResourceValue|dataContent
           label:
             text: labels.data_content_node
@@ -522,30 +522,30 @@ steps:
             schema:
               $ref: schema#/properties/spec/properties/verticalScaling/properties/dataFrozen/properties/nodeSelectionPolicy
             type: select
-          - type: single-step-form
+          - discriminator:
+              topologyKey-dataFrozen:
+                default: ""
+                type: string
+              topologyValue-dataFrozen:
+                default: ""
+                type: string
+            elements:
+            - label:
+                text: labels.key
+              required: isVerticalScaleTopologyRequired|dataFrozen
+              schema:
+                $ref: discriminator#/topologyKey-dataFrozen
+              type: input
+            - label:
+                text: labels.value
+              required: isVerticalScaleTopologyRequired|dataFrozen
+              schema:
+                $ref: discriminator#/topologyValue-dataFrozen
+              type: input
             label:
               text: labels.topology
             show_label: true
-            discriminator:
-              topologyKey-dataFrozen: 
-                type: string
-                default: ''
-              topologyValue-dataFrozen:
-                type: string
-                default: ''
-            elements:
-              - type: input
-                label:
-                  text: labels.key
-                schema:
-                  $ref: discriminator#/topologyKey-dataFrozen
-                required: isVerticalScaleTopologyRequired|dataFrozen
-              - type: input
-                label:
-                  text: labels.value
-                schema:
-                  $ref: discriminator#/topologyValue-dataFrozen
-                required: isVerticalScaleTopologyRequired|dataFrozen
+            type: single-step-form
           if: hasResourceValue|dataFrozen
           label:
             text: labels.data_frozen_node
@@ -570,30 +570,30 @@ steps:
             schema:
               $ref: schema#/properties/spec/properties/verticalScaling/properties/dataHot/properties/nodeSelectionPolicy
             type: select
-          - type: single-step-form
+          - discriminator:
+              topologyKey-dataHot:
+                default: ""
+                type: string
+              topologyValue-dataHot:
+                default: ""
+                type: string
+            elements:
+            - label:
+                text: labels.key
+              required: isVerticalScaleTopologyRequired|dataHot
+              schema:
+                $ref: discriminator#/topologyKey-dataHot
+              type: input
+            - label:
+                text: labels.value
+              required: isVerticalScaleTopologyRequired|dataHot
+              schema:
+                $ref: discriminator#/topologyValue-dataHot
+              type: input
             label:
               text: labels.topology
             show_label: true
-            discriminator:
-              topologyKey-dataHot: 
-                type: string
-                default: ''
-              topologyValue-dataHot:
-                type: string
-                default: ''
-            elements:
-              - type: input
-                label:
-                  text: labels.key
-                schema:
-                  $ref: discriminator#/topologyKey-dataHot
-                required: isVerticalScaleTopologyRequired|dataHot
-              - type: input
-                label:
-                  text: labels.value
-                schema:
-                  $ref: discriminator#/topologyValue-dataHot
-                required: isVerticalScaleTopologyRequired|dataHot
+            type: single-step-form
           if: hasResourceValue|dataHot
           label:
             text: labels.dataHot_node
@@ -618,30 +618,30 @@ steps:
             schema:
               $ref: schema#/properties/spec/properties/verticalScaling/properties/dataWarm/properties/nodeSelectionPolicy
             type: select
-          - type: single-step-form
+          - discriminator:
+              topologyKey-dataWarm:
+                default: ""
+                type: string
+              topologyValue-dataWarm:
+                default: ""
+                type: string
+            elements:
+            - label:
+                text: labels.key
+              required: isVerticalScaleTopologyRequired|dataWarm
+              schema:
+                $ref: discriminator#/topologyKey-dataWarm
+              type: input
+            - label:
+                text: labels.value
+              required: isVerticalScaleTopologyRequired|dataWarm
+              schema:
+                $ref: discriminator#/topologyValue-dataWarm
+              type: input
             label:
               text: labels.topology
             show_label: true
-            discriminator:
-              topologyKey-dataWarm: 
-                type: string
-                default: ''
-              topologyValue-dataWarm:
-                type: string
-                default: ''
-            elements:
-              - type: input
-                label:
-                  text: labels.key
-                schema:
-                  $ref: discriminator#/topologyKey-dataWarm
-                required: isVerticalScaleTopologyRequired|dataWarm
-              - type: input
-                label:
-                  text: labels.value
-                schema:
-                  $ref: discriminator#/topologyValue-dataWarm
-                required: isVerticalScaleTopologyRequired|dataWarm
+            type: single-step-form
           if: hasResourceValue|dataWarm
           label:
             text: labels.data_warm_node
@@ -670,30 +670,30 @@ steps:
           schema:
             $ref: schema#/properties/spec/properties/verticalScaling/properties/node/properties/nodeSelectionPolicy
           type: select
-        - type: single-step-form
+        - discriminator:
+            topologyKey-node:
+              default: ""
+              type: string
+            topologyValue-node:
+              default: ""
+              type: string
+          elements:
+          - label:
+              text: labels.key
+            required: isVerticalScaleTopologyRequired|node
+            schema:
+              $ref: discriminator#/topologyKey-node
+            type: input
+          - label:
+              text: labels.value
+            required: isVerticalScaleTopologyRequired|node
+            schema:
+              $ref: discriminator#/topologyValue-node
+            type: input
           label:
             text: labels.topology
           show_label: true
-          discriminator:
-            topologyKey-node: 
-              type: string
-              default: ''
-            topologyValue-node:
-              type: string
-              default: ''
-          elements:
-            - type: input
-              label:
-                text: labels.key
-              schema:
-                $ref: discriminator#/topologyKey-node
-              required: isVerticalScaleTopologyRequired|node
-            - type: input
-              label:
-                text: labels.value
-              schema:
-                $ref: discriminator#/topologyValue-node
-              required: isVerticalScaleTopologyRequired|node
+          type: single-step-form
         if: ifDbTypeEqualsTo|combined|verticalScaling
         label:
           text: labels.node

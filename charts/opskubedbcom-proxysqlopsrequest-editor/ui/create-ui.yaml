@@ -34,8 +34,8 @@ steps:
       label:
         text: labels.databaseRef
       onChange: onDbChange
-      required: true
       refresh: true
+      required: true
       schema:
         $ref: schema#/properties/spec/properties/proxyRef/properties/name
       type: select
@@ -110,30 +110,30 @@ steps:
         schema:
           $ref: schema#/properties/spec/properties/verticalScaling/properties/proxysql/properties/nodeSelectionPolicy
         type: select
-      - type: single-step-form
+      - discriminator:
+          topologyKey:
+            default: ""
+            type: string
+          topologyValue:
+            default: ""
+            type: string
+        elements:
+        - label:
+            text: labels.key
+          required: isVerticalScaleTopologyRequired
+          schema:
+            $ref: discriminator#/topologyKey
+          type: input
+        - label:
+            text: labels.value
+          required: isVerticalScaleTopologyRequired
+          schema:
+            $ref: discriminator#/topologyValue
+          type: input
         label:
           text: labels.topology
         show_label: true
-        discriminator:
-          topologyKey: 
-            type: string
-            default: ''
-          topologyValue:
-            type: string
-            default: ''
-        elements:
-          - type: input
-            label:
-              text: labels.key
-            schema:
-              $ref: discriminator#/topologyKey
-            required: isVerticalScaleTopologyRequired
-          - type: input
-            label:
-              text: labels.value
-            schema:
-              $ref: discriminator#/topologyValue
-            required: isVerticalScaleTopologyRequired
+        type: single-step-form
       if: ifRequestTypeEqualsTo|VerticalScaling
       label:
         text: labels.proxysql

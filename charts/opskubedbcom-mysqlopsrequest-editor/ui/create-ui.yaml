@@ -34,8 +34,8 @@ steps:
       label:
         text: labels.databaseRef
       onChange: onDbChange
-      required: true
       refresh: true
+      required: true
       schema:
         $ref: schema#/properties/spec/properties/databaseRef/properties/name
       type: select
@@ -114,30 +114,30 @@ steps:
           schema:
             $ref: schema#/properties/spec/properties/verticalScaling/properties/mysql/properties/nodeSelectionPolicy
           type: select
-        - type: single-step-form
+        - discriminator:
+            topologyKey:
+              default: ""
+              type: string
+            topologyValue:
+              default: ""
+              type: string
+          elements:
+          - label:
+              text: labels.key
+            required: isVerticalScaleTopologyRequired
+            schema:
+              $ref: discriminator#/topologyKey
+            type: input
+          - label:
+              text: labels.value
+            required: isVerticalScaleTopologyRequired
+            schema:
+              $ref: discriminator#/topologyValue
+            type: input
           label:
             text: labels.topology
           show_label: true
-          discriminator:
-            topologyKey: 
-              type: string
-              default: ''
-            topologyValue:
-              type: string
-              default: ''
-          elements:
-            - type: input
-              label:
-                text: labels.key
-              schema:
-                $ref: discriminator#/topologyKey
-              required: isVerticalScaleTopologyRequired
-            - type: input
-              label:
-                text: labels.value
-              schema:
-                $ref: discriminator#/topologyValue
-              required: isVerticalScaleTopologyRequired
+          type: single-step-form
         label:
           text: labels.mysql
         schema:
@@ -193,18 +193,18 @@ steps:
             $ref: discriminator#/properties/reconfigurationType
           type: radio
         - elements:
-          - computed: setValueFromDbDetails|/spec/configSecret/name
-            fetch: getConfigSecrets
-            label:
-              text: labels.configSecret
-            schema:
-              $ref: schema#/properties/spec/properties/configuration/properties/configSecret/properties/name
-            refresh: true
-            add_new_button:
+          - add_new_button:
               label: labels.createConfig
               target: _blank
               url:
                 function: createSecretUrl
+            computed: setValueFromDbDetails|/spec/configSecret/name
+            fetch: getConfigSecrets
+            label:
+              text: labels.configSecret
+            refresh: true
+            schema:
+              $ref: schema#/properties/spec/properties/configuration/properties/configSecret/properties/name
             type: select
           if: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
           label:

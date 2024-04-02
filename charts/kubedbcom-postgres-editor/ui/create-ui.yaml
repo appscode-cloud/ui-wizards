@@ -27,11 +27,11 @@ steps:
       schema:
         $ref: schema#/properties/metadata/properties/release/properties/namespace
       type: select
-    - fetch: getPostgresVersions|catalog.kubedb.com|v1alpha1|postgresversions
+    - disableUnselect: true
+      fetch: getPostgresVersions|catalog.kubedb.com|v1alpha1|postgresversions
       label:
         text: labels.database.version
       onChange: onVersionChange
-      disableUnselect: true
       schema:
         $ref: schema#/properties/resources/properties/kubedbComPostgres/properties/spec/properties/version
       type: select
@@ -70,6 +70,7 @@ steps:
     - hasDescription: true
       label:
         text: labels.terminationPolicy
+      onChange: setStorageClass
       options:
       - description: options.terminationPolicy.delete.description
         text: options.terminationPolicy.delete.label
@@ -85,7 +86,6 @@ steps:
         value: DoNotTerminate
       schema:
         $ref: schema#/properties/resources/properties/kubedbComPostgres/properties/spec/properties/terminationPolicy
-      onChange: setStorageClass
       type: radio
     - label:
         text: labels.database.secret

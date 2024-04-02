@@ -7,9 +7,9 @@ steps:
         text: labels.selectDb
       refresh: true
       required: true
-      sortable: true
       schema:
         $ref: discriminator#/properties/database
+      sortable: true
       type: select
     - computed: setRequestName
       label:
@@ -27,11 +27,11 @@ steps:
         $ref: schema#/properties/metadata/properties/namespace
       type: input
     - fetch: getDbRoles|engine.kubevault.com|v1alpha1
+      if: isDbSelected
       label:
         text: labels.select
       refresh: true
       required: true
-      if: isDbSelected
       schema:
         $ref: schema#/properties/spec/properties/roleRef
       type: select

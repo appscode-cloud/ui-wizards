@@ -49,6 +49,13 @@ type Postgres struct {
 	Spec              PostgresSpec   `json:"spec,omitempty"`
 	Status            PostgresStatus `json:"status,omitempty"`
 }
+type PostgreSQLMode string
+
+const (
+	PostgreSQLModeStandAlone    PostgreSQLMode = "Standalone"
+	PostgreSQLModeRemoteReplica PostgreSQLMode = "RemoteReplica"
+	PostgreSQLModeCluster       PostgreSQLMode = "Cluster"
+)
 
 type PostgresSpec struct {
 	// AutoOps contains configuration of automatic ops-request-recommendation generation
@@ -66,6 +73,13 @@ type PostgresSpec struct {
 
 	// Streaming mode
 	StreamingMode *PostgresStreamingMode `json:"streamingMode,omitempty"`
+
+	// + optional
+	Mode *PostgreSQLMode `json:"mode,omitempty"`
+	// RemoteReplica implies that the instance will be a MySQL Read Only Replica,
+	// and it will take reference of  appbinding of the source
+	// +optional
+	RemoteReplica *RemoteReplicaSpec `json:"remoteReplica,omitempty"`
 
 	// Leader election configuration
 	// +optional
@@ -142,6 +156,51 @@ type PostgresSpec struct {
 	// +optional
 	// +kubebuilder:default={periodSeconds: 10, timeoutSeconds: 10, failureThreshold: 1}
 	HealthChecker kmapi.HealthCheckSpec `json:"healthChecker"`
+
+	// Archiver controls database backup using Archiver CR
+	// +optional
+	Archiver *Archiver `json:"archiver,omitempty"`
+
+	// Arbiter controls spec for arbiter pods
+	// +optional
+	Arbiter *ArbiterSpec `json:"arbiter,omitempty"`
+
+	// +optional
+	Replication *PostgresReplication `json:"replication,omitempty"`
+}
+
+type WALLimitPolicy string
+
+const (
+	WALKeepSize     WALLimitPolicy = "WALKeepSize"
+	ReplicationSlot WALLimitPolicy = "ReplicationSlot"
+	WALKeepSegment  WALLimitPolicy = "WALKeepSegment"
+)
+
+type PostgresReplication struct {
+	WALLimitPolicy WALLimitPolicy `json:"walLimitPolicy"`
+
+	// +optional
+	WalKeepSizeInMegaBytes *int32 `json:"walKeepSize,omitempty"`
+	// +optional
+	WalKeepSegment *int32 `json:"walKeepSegment,omitempty"`
+	// +optional
+	MaxSlotWALKeepSizeInMegaBytes *int32 `json:"maxSlotWALKeepSize,omitempty"`
+}
+
+type ArbiterSpec struct {
+	// Compute Resources required by the sidecar container.
+	// +optional
+	Resources core.ResourceRequirements `json:"resources,omitempty"`
+	// NodeSelector is a selector which must be true for the pod to fit on a node.
+	// Selector which must match a node's labels for the pod to be scheduled on that node.
+	// More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
+	// +optional
+	// +mapType=atomic
+	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
+	// If specified, the pod's tolerations.
+	// +optional
+	Tolerations []core.Toleration `json:"tolerations,omitempty"`
 }
 
 // PostgreLeaderElectionConfig contains essential attributes of leader election.
@@ -230,6 +289,8 @@ type PostgresStatus struct {
 	Conditions []kmapi.Condition `json:"conditions,omitempty"`
 	// +optional
 	AuthSecret *Age `json:"authSecret,omitempty"`
+	// +optional
+	Gateway *Gateway `json:"gateway,omitempty"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

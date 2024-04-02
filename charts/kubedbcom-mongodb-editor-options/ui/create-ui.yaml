@@ -24,10 +24,10 @@ steps:
       schema:
         $ref: schema#/properties/metadata/properties/release/properties/namespace
       type: select
-    - fetch: getMongoDbVersions|catalog.kubedb.com|v1alpha1|mongodbversions
+    - disableUnselect: true
+      fetch: getMongoDbVersions|catalog.kubedb.com|v1alpha1|mongodbversions
       label:
         text: labels.database.version
-      disableUnselect: true
       schema:
         $ref: schema#/properties/spec/properties/version
       type: select
@@ -133,6 +133,7 @@ steps:
     - hasDescription: true
       label:
         text: labels.terminationPolicy
+      onChange: setStorageClass
       options:
       - description: options.terminationPolicy.delete.description
         text: options.terminationPolicy.delete.label
@@ -148,7 +149,6 @@ steps:
         value: DoNotTerminate
       schema:
         $ref: schema#/properties/spec/properties/terminationPolicy
-      onChange: setStorageClass
       type: radio
     - fetch: getStorageClassNames
       label:

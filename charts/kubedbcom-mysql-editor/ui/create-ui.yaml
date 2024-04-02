@@ -27,10 +27,10 @@ steps:
       schema:
         $ref: schema#/properties/metadata/properties/release/properties/namespace
       type: select
-    - fetch: getMySqlVersions|catalog.kubedb.com|v1alpha1|mysqlversions
+    - disableUnselect: true
+      fetch: getMySqlVersions|catalog.kubedb.com|v1alpha1|mysqlversions
       label:
         text: labels.database.version
-      disableUnselect: true
       schema:
         $ref: schema#/properties/resources/properties/kubedbComMySQL/properties/spec/properties/version
       type: select
@@ -69,6 +69,7 @@ steps:
     - hasDescription: true
       label:
         text: labels.terminationPolicy
+      onChange: setStorageClass
       options:
       - description: options.terminationPolicy.delete.description
         text: options.terminationPolicy.delete.label
@@ -84,7 +85,6 @@ steps:
         value: DoNotTerminate
       schema:
         $ref: schema#/properties/resources/properties/kubedbComMySQL/properties/spec/properties/terminationPolicy
-      onChange: setStorageClass
       type: radio
     - label:
         text: labels.database.secret

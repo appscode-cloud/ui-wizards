@@ -24,11 +24,11 @@ steps:
         $ref: schema#/properties/metadata/properties/release/properties/namespace
       type: select
     - computed: onVersionChange
+      disableUnselect: true
       fetch: getKafkaVersions|catalog.kubedb.com|v1alpha1|kafkaversions
       label:
         text: labels.database.version
       onChange: onVersionChange
-      disableUnselect: true
       schema:
         $ref: schema#/properties/spec/properties/version
       type: select
@@ -138,6 +138,7 @@ steps:
     - hasDescription: true
       label:
         text: labels.terminationPolicy
+      onChange: setStorageClass
       options:
       - description: options.terminationPolicy.wipeOut.description
         text: options.terminationPolicy.wipeOut.label
@@ -147,7 +148,6 @@ steps:
         value: DoNotTerminate
       schema:
         $ref: schema#/properties/spec/properties/terminationPolicy
-      onChange: setStorageClass
       type: radio
     - fetch: getStorageClassNames|/spec/storageClass/name
       label:

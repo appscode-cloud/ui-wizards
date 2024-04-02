@@ -1,0 +1,86 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  creationTimestamp: null
+  name: clusterbindings.kube-bind.appscode.com
+spec:
+  group: kube-bind.appscode.com
+  names:
+    kind: ClusterBinding
+    listKind: ClusterBindingList
+    plural: clusterbindings
+    singular: clusterbinding
+  scope: Namespaced
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: ClusterBinding represents a bound consumer class. It lives in
+          a service provider cluster and is a singleton named "cluster".
+        properties:
+          apiVersion:
+            description: 'APIVersion defines the versioned schema of this representation
+              of an object. Servers should convert recognized schemas to the latest
+              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            type: string
+          kind:
+            description: 'Kind is a string value representing the REST resource this
+              object represents. Servers may infer this from the endpoint the client
+              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: spec represents the data in the newly created ClusterBinding.
+            properties:
+              kubeconfigSecretRef:
+                description: kubeconfigSecretName is the secret ref that contains
+                  the kubeconfig of the service cluster.
+                properties:
+                  key:
+                    description: The key of the secret to select from.  Must be "kubeconfig".
+                    enum:
+                    - kubeconfig
+                    type: string
+                  name:
+                    description: Name of the referent.
+                    minLength: 1
+                    type: string
+                required:
+                - key
+                - name
+                type: object
+                x-kubernetes-validations:
+                - message: kubeconfigSecretRef is immutable
+                  rule: self == oldSelf
+              providerClusterName:
+                description: providerClusterName is the cluster name of the service
+                  provider cluster. This can be shared among different ServiceBindings.
+                minLength: 1
+                type: string
+              serviceProviderSpec:
+                description: serviceProviderSpec contains all the data and information
+                  about the service which has been bound to the service binding request.
+                  The service providers decide what they need and what to configure
+                  based on what then include in this field, such as service region,
+                  type, tiers, etc...
+                type: object
+                x-kubernetes-preserve-unknown-fields: true
+            required:
+            - kubeconfigSecretRef
+            - providerClusterName
+            type: object
+        required:
+        - spec
+        type: object
+        x-kubernetes-validations:
+        - message: cluster binding name should be cluster
+          rule: self.metadata.name == "cluster"
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: null
+  storedVersions: null

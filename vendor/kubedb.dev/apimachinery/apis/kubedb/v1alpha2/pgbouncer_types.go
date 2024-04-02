@@ -128,7 +128,7 @@ type Databases struct {
 
 type ConnectionPoolConfig struct {
 	// Port is the port number on which PgBouncer listens to clients. Default: 5432.
-	// +kubebuilder:default=54342
+	// +kubebuilder:default=5432
 	// +optional
 	Port *int32 `json:"port,omitempty"`
 	// PoolMode is the pooling mechanism type. Default: session.
@@ -205,6 +205,8 @@ type PgBouncerStatus struct {
 	// Conditions applied to the database, such as approval or denial.
 	// +optional
 	Conditions []kmapi.Condition `json:"conditions,omitempty"`
+	// +optional
+	Gateway *Gateway `json:"gateway,omitempty"`
 }
 
 // +kubebuilder:validation:Enum=disable;allow;prefer;require;verify-ca;verify-full

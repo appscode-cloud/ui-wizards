@@ -18,7 +18,6 @@ package v1alpha1
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	mona "kmodules.xyz/monitoring-agent-api/api/v1"
 	api "x-helm.dev/apimachinery/apis/releases/v1alpha1"
 )
 
@@ -51,7 +50,7 @@ type PerconaxtradbAlertsSpecForm struct {
 }
 
 type PerconaXtraDBAlert struct {
-	Enabled mona.SeverityFlag `json:"enabled"`
+	Enabled SeverityFlag      `json:"enabled"`
 	Labels  map[string]string `json:"labels"`
 	// +optional
 	Annotations map[string]string `json:"annotations"`
@@ -70,7 +69,7 @@ type PerconaXtraDBAlertGroups struct {
 }
 
 type PerconaXtraDBDatabaseAlert struct {
-	Enabled mona.SeverityFlag               `json:"enabled"`
+	Enabled SeverityFlag                    `json:"enabled"`
 	Rules   PerconaXtraDBDatabaseAlertRules `json:"rules"`
 }
 
@@ -89,7 +88,7 @@ type PerconaXtraDBDatabaseAlertRules struct {
 }
 
 type PerconaXtraDBClusterAlert struct {
-	Enabled mona.SeverityFlag              `json:"enabled"`
+	Enabled SeverityFlag                   `json:"enabled"`
 	Rules   PerconaXtraDBClusterAlertRules `json:"rules"`
 }
 

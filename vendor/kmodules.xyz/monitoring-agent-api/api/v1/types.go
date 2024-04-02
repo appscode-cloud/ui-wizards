@@ -26,17 +26,21 @@ import (
 )
 
 const (
-	DefaultPrometheusKey   = "monitoring.appscode.com/is-default-prometheus"
-	DefaultAlertmanagerKey = "monitoring.appscode.com/is-default-alertmanager"
-	DefaultGrafanaKey      = "monitoring.appscode.com/is-default-grafana"
+	GroupName                = "monitoring.appscode.com"
+	DefaultPrometheusKey     = GroupName + "/is-default-prometheus"
+	DefaultAlertmanagerKey   = GroupName + "/is-default-alertmanager"
+	DefaultGrafanaKey        = GroupName + "/is-default-grafana"
+	PrometheusKey            = GroupName + "/prometheus"
+	PrometheusValueAuto      = "auto"
+	PrometheusValueFederated = "federated"
 )
 
 // +kubebuilder:validation:Enum=prometheus.io/operator;prometheus.io;prometheus.io/builtin
 type AgentType string
 
 const (
-	KeyAgent   = "monitoring.appscode.com/agent"
-	KeyService = "monitoring.appscode.com/service"
+	KeyAgent   = GroupName + "/agent"
+	KeyService = GroupName + "/service"
 
 	VendorPrometheus = "prometheus.io"
 

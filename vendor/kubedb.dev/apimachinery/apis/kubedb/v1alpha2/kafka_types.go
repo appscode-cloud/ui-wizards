@@ -21,7 +21,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	kmapi "kmodules.xyz/client-go/api/v1"
 	mona "kmodules.xyz/monitoring-agent-api/api/v1"
-	ofst "kmodules.xyz/offshoot-api/api/v1"
+	ofst "kmodules.xyz/offshoot-api/api/v2"
 )
 
 const (
@@ -146,6 +146,16 @@ type KafkaNode struct {
 	// Compute Resources required by the sidecar container.
 	// +optional
 	Resources core.ResourceRequirements `json:"resources,omitempty"`
+
+	// NodeSelector is a selector which must be true for the pod to fit on a node.
+	// Selector which must match a node's labels for the pod to be scheduled on that node.
+	// More info: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
+	// +optional
+	// +mapType=atomic
+	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
+	// If specified, the pod's tolerations.
+	// +optional
+	Tolerations []core.Toleration `json:"tolerations,omitempty"`
 }
 
 // KafkaStatus defines the observed state of Kafka
@@ -160,6 +170,8 @@ type KafkaStatus struct {
 	// Conditions applied to the database, such as approval or denial.
 	// +optional
 	Conditions []kmapi.Condition `json:"conditions,omitempty"`
+	// +optional
+	Gateway *Gateway `json:"gateway,omitempty"`
 }
 
 type KafkaCruiseControl struct {
@@ -218,7 +230,7 @@ type KafkaListenerType string
 const (
 	KafkaListenerBroker     KafkaListenerType = "BROKER"
 	KafkaListenerController KafkaListenerType = "CONTROLLER"
-	KafkaListenerInternal   KafkaListenerType = "INTERNAL"
+	KafkaListenerLocal      KafkaListenerType = "LOCAL"
 	KafkaListenerCC         KafkaListenerType = "CC"
 )
 

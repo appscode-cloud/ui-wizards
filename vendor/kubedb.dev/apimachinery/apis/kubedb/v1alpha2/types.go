@@ -17,10 +17,25 @@ limitations under the License.
 package v1alpha2
 
 import (
+	"sync"
+
 	core "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	kmapi "kmodules.xyz/client-go/api/v1"
 	ofst "kmodules.xyz/offshoot-api/api/v1"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
+
+var (
+	once          sync.Once
+	DefaultClient client.Client
+)
+
+func SetDefaultClient(kc client.Client) {
+	once.Do(func() {
+		DefaultClient = kc
+	})
+}
 
 type InitSpec struct {
 	// Initialized indicates that this database has been initialized.
@@ -30,6 +45,8 @@ type InitSpec struct {
 	// Wait for initial DataRestore condition
 	WaitForInitialRestore bool              `json:"waitForInitialRestore,omitempty"`
 	Script                *ScriptSourceSpec `json:"script,omitempty"`
+
+	Archiver *ArchiverRecovery `json:"archiver,omitempty"`
 }
 
 type ScriptSourceSpec struct {
@@ -56,6 +73,11 @@ type GitRepo struct {
 	// Authentication secret for git repository
 	// +optional
 	AuthSecret *core.LocalObjectReference `json:"authSecret,omitempty"`
+}
+
+type RemoteReplicaSpec struct {
+	// SourceRef specifies the  source object
+	SourceRef core.ObjectReference `json:"sourceRef" protobuf:"bytes,1,opt,name=sourceRef"`
 }
 
 // +kubebuilder:validation:Enum=Provisioning;DataRestoring;Ready;Critical;NotReady;Halted;Unknown
@@ -138,6 +160,8 @@ type NamedServiceTemplateSpec struct {
 }
 
 type KernelSettings struct {
+	// DisableDefaults can be set to false to avoid defaulting via mutator
+	DisableDefaults bool `json:"disableDefaults,omitempty"`
 	// Privileged specifies the status whether the init container
 	// requires privileged access to perform the following commands.
 	// +optional
@@ -187,4 +211,59 @@ type SecretReference struct {
 type Age struct {
 	// Populated by Provisioner when authSecret is created or Ops Manager when authSecret is updated.
 	LastUpdateTimestamp metav1.Time `json:"lastUpdateTimestamp,omitempty"`
+}
+
+type Archiver struct {
+	// Pause is used to stop the archiver backup for the database
+	// +optional
+	Pause bool `json:"pause,omitempty"`
+	// Ref is the name and namespace reference to the Archiver CR
+	Ref kmapi.ObjectReference `json:"ref"`
+}
+
+type ArchiverRecovery struct {
+	RecoveryTimestamp metav1.Time `json:"recoveryTimestamp"`
+	// +optional
+	EncryptionSecret *kmapi.ObjectReference `json:"encryptionSecret,omitempty"`
+	// +optional
+	ManifestRepository *kmapi.ObjectReference `json:"manifestRepository,omitempty"`
+
+	// FullDBRepository means db restore + manifest restore
+	FullDBRepository *kmapi.ObjectReference `json:"fullDBRepository,omitempty"`
+}
+
+type Gateway struct {
+	Name      string `json:"name"`
+	Namespace string `json:"namespace"`
+	// +optional
+	IP string `json:"ip,omitempty"`
+	// +optional
+	Hostname string `json:"hostname,omitempty"`
+	// Services is an optional configuration for services used to expose database
+	// +optional
+	Services []NamedServiceStatus `json:"services,omitempty"`
+	// UI is an optional list of database web uis
+	// +optional
+	UI []NamedURL `json:"ui,omitempty"`
+}
+
+type NamedServiceStatus struct {
+	// Alias represents the identifier of the service.
+	Alias ServiceAlias `json:"alias"`
+
+	Ports []ofst.ServicePort `json:"ports"`
+}
+
+type NamedURL struct {
+	// Alias represents the identifier of the service.
+	// This should match the db ui chart name
+	Alias string `json:"alias"`
+
+	// URL of the database ui
+	URL string `json:"url"`
+
+	// HelmRelease is the name of the helm release used to deploy this ui
+	// The name format is typically <alias>-<db-name>
+	// +optional
+	HelmRelease *core.LocalObjectReference `json:"helmRelease,omitempty"`
 }

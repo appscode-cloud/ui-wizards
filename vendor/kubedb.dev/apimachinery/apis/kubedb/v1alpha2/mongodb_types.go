@@ -155,6 +155,10 @@ type MongoDBSpec struct {
 	// +optional
 	// +kubebuilder:default={periodSeconds: 10, timeoutSeconds: 10, failureThreshold: 1}
 	HealthChecker kmapi.HealthCheckSpec `json:"healthChecker"`
+
+	// Archiver controls database backup using Archiver CR
+	// +optional
+	Archiver *Archiver `json:"archiver,omitempty"`
 }
 
 // +kubebuilder:validation:Enum=server;client;metrics-exporter
@@ -329,6 +333,8 @@ type MongoDBStatus struct {
 	Conditions []kmapi.Condition `json:"conditions,omitempty"`
 	// +optional
 	AuthSecret *Age `json:"authSecret,omitempty"`
+	// +optional
+	Gateway *Gateway `json:"gateway,omitempty"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

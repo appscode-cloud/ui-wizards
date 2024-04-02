@@ -48,6 +48,50 @@ spec:
             type: object
           spec:
             properties:
+              archiver:
+                properties:
+                  addon:
+                    properties:
+                      name:
+                        enum:
+                        - mongodb-addon
+                        - postgres-addon
+                        - mysql-addon
+                        - mariadb-addon
+                        type: string
+                      tasks:
+                        properties:
+                          manifestBackup:
+                            properties:
+                              name:
+                                type: string
+                            required:
+                            - name
+                            type: object
+                          manifestRestore:
+                            properties:
+                              name:
+                                type: string
+                            required:
+                            - name
+                            type: object
+                          volumeSnapshot:
+                            properties:
+                              name:
+                                type: string
+                            required:
+                            - name
+                            type: object
+                        type: object
+                    type: object
+                  walg:
+                    properties:
+                      image:
+                        type: string
+                    required:
+                    - image
+                    type: object
+                type: object
               db:
                 properties:
                   image:
@@ -65,6 +109,13 @@ spec:
                 - MongoDB
                 type: string
               exporter:
+                properties:
+                  image:
+                    type: string
+                required:
+                - image
+                type: object
+              gitSyncer:
                 properties:
                   image:
                     type: string
@@ -91,6 +142,15 @@ spec:
                     type: string
                 required:
                 - image
+                type: object
+              securityContext:
+                properties:
+                  runAsGroup:
+                    format: int64
+                    type: integer
+                  runAsUser:
+                    format: int64
+                    type: integer
                 type: object
               stash:
                 properties:

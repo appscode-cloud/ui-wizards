@@ -20,6 +20,7 @@ import (
 	"fmt"
 
 	"kubedb.dev/apimachinery/apis"
+	catalog "kubedb.dev/apimachinery/apis/catalog/v1alpha1"
 	"kubedb.dev/apimachinery/apis/kubedb"
 	"kubedb.dev/apimachinery/crds"
 
@@ -33,6 +34,7 @@ import (
 	"kmodules.xyz/client-go/apiextensions"
 	core_util "kmodules.xyz/client-go/core/v1"
 	meta_util "kmodules.xyz/client-go/meta"
+	"kmodules.xyz/client-go/policy/secomp"
 	appcat "kmodules.xyz/custom-resources/apis/appcatalog/v1alpha1"
 	mona "kmodules.xyz/monitoring-agent-api/api/v1"
 	ofst "kmodules.xyz/offshoot-api/api/v1"
@@ -177,7 +179,7 @@ func (rs RedisSentinel) StatsServiceLabels() map[string]string {
 	return rs.ServiceLabels(StatsServiceAlias, map[string]string{LabelRole: RoleStats})
 }
 
-func (rs *RedisSentinel) SetDefaults(topology *core_util.Topology) {
+func (rs *RedisSentinel) SetDefaults(rdVersion *catalog.RedisVersion, topology *core_util.Topology) {
 	if rs == nil {
 		return
 	}
@@ -189,6 +191,7 @@ func (rs *RedisSentinel) SetDefaults(topology *core_util.Topology) {
 		rs.Spec.TerminationPolicy = TerminationPolicyDelete
 	}
 
+	rs.setDefaultContainerSecurityContext(rdVersion, &rs.Spec.PodTemplate)
 	if rs.Spec.PodTemplate.Spec.ServiceAccountName == "" {
 		rs.Spec.PodTemplate.Spec.ServiceAccountName = rs.OffshootName()
 	}
@@ -196,6 +199,14 @@ func (rs *RedisSentinel) SetDefaults(topology *core_util.Topology) {
 	rs.setDefaultAffinity(&rs.Spec.PodTemplate, rs.OffshootSelectors(), topology)
 
 	rs.Spec.Monitor.SetDefaults()
+	if rs.Spec.Monitor != nil && rs.Spec.Monitor.Prometheus != nil {
+		if rs.Spec.Monitor.Prometheus.Exporter.SecurityContext.RunAsUser == nil {
+			rs.Spec.Monitor.Prometheus.Exporter.SecurityContext.RunAsUser = rdVersion.Spec.SecurityContext.RunAsUser
+		}
+		if rs.Spec.Monitor.Prometheus.Exporter.SecurityContext.RunAsGroup == nil {
+			rs.Spec.Monitor.Prometheus.Exporter.SecurityContext.RunAsGroup = rdVersion.Spec.SecurityContext.RunAsUser
+		}
+	}
 	rs.SetTLSDefaults()
 	rs.SetHealthCheckerDefaults()
 	apis.SetDefaultResourceLimits(&rs.Spec.PodTemplate.Spec.Resources, DefaultResources)
@@ -270,6 +281,45 @@ func (rs *RedisSentinel) setDefaultAffinity(podTemplate *ofst.PodTemplateSpec, l
 				},
 			},
 		},
+	}
+}
+
+func (rs *RedisSentinel) setDefaultContainerSecurityContext(rdVersion *catalog.RedisVersion, podTemplate *ofst.PodTemplateSpec) {
+	if podTemplate == nil {
+		return
+	}
+	if podTemplate.Spec.ContainerSecurityContext == nil {
+		podTemplate.Spec.ContainerSecurityContext = &corev1.SecurityContext{}
+	}
+	if podTemplate.Spec.SecurityContext == nil {
+		podTemplate.Spec.SecurityContext = &corev1.PodSecurityContext{}
+	}
+	if podTemplate.Spec.SecurityContext.FSGroup == nil {
+		podTemplate.Spec.SecurityContext.FSGroup = rdVersion.Spec.SecurityContext.RunAsUser
+	}
+	rs.assignDefaultContainerSecurityContext(rdVersion, podTemplate.Spec.ContainerSecurityContext)
+}
+
+func (rs *RedisSentinel) assignDefaultContainerSecurityContext(rdVersion *catalog.RedisVersion, sc *corev1.SecurityContext) {
+	if sc.AllowPrivilegeEscalation == nil {
+		sc.AllowPrivilegeEscalation = pointer.BoolP(false)
+	}
+	if sc.Capabilities == nil {
+		sc.Capabilities = &corev1.Capabilities{
+			Drop: []corev1.Capability{"ALL"},
+		}
+	}
+	if sc.RunAsNonRoot == nil {
+		sc.RunAsNonRoot = pointer.BoolP(true)
+	}
+	if sc.RunAsUser == nil {
+		sc.RunAsUser = rdVersion.Spec.SecurityContext.RunAsUser
+	}
+	if sc.RunAsGroup == nil {
+		sc.RunAsGroup = rdVersion.Spec.SecurityContext.RunAsUser
+	}
+	if sc.SeccompProfile == nil {
+		sc.SeccompProfile = secomp.DefaultSeccompProfile()
 	}
 }
 

@@ -1,15 +1,15 @@
 steps:
 - form:
     elements:
-    - if: isConsole
-      fetch: getDatabases|core.k8s.appscode.com|v1alpha1|genericresources
+    - fetch: getDatabases|core.k8s.appscode.com|v1alpha1|genericresources
+      if: isConsole
       label:
         text: labels.selectDb
       refresh: true
       required: true
-      sortable: true
       schema:
         $ref: discriminator#/properties/database
+      sortable: true
       type: select
     - computed: setRoleName
       label:
@@ -27,11 +27,11 @@ steps:
         $ref: schema#/properties/metadata/properties/namespace
       type: input
     - fetch: getEngines|engine.kubevault.com|v1alpha1|secretengines
+      if: isDbSelected
       label:
         text: labels.selectEngine
       refresh: true
       required: true
-      if: isDbSelected
       schema:
         $ref: schema#/properties/spec/properties/secretEngineRef/properties/name
       type: select

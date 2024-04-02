@@ -24,10 +24,10 @@ steps:
       schema:
         $ref: schema#/properties/metadata/properties/release/properties/namespace
       type: select
-    - fetch: getMariaDbVersions|catalog.kubedb.com|v1alpha1|mariadbversions
+    - disableUnselect: true
+      fetch: getMariaDbVersions|catalog.kubedb.com|v1alpha1|mariadbversions
       label:
         text: labels.database.version
-      disableUnselect: true
       schema:
         $ref: schema#/properties/spec/properties/version
       type: select
@@ -82,6 +82,7 @@ steps:
     - hasDescription: true
       label:
         text: labels.terminationPolicy
+      onChange: setStorageClass
       options:
       - description: options.terminationPolicy.delete.description
         text: options.terminationPolicy.delete.label
@@ -97,7 +98,6 @@ steps:
         value: DoNotTerminate
       schema:
         $ref: schema#/properties/spec/properties/terminationPolicy
-      onChange: setStorageClass
       type: radio
     - fetch: getStorageClassNames|/spec/storageClass/name
       label:

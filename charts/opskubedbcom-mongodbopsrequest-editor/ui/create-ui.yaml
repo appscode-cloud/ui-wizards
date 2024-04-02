@@ -34,8 +34,8 @@ steps:
       label:
         text: labels.databaseRef
       onChange: onDbChange
-      required: true
       refresh: true
+      required: true
       schema:
         $ref: schema#/properties/spec/properties/databaseRef/properties/name
       type: select
@@ -170,30 +170,30 @@ steps:
           schema:
             $ref: schema#/properties/spec/properties/verticalScaling/properties/standalone/properties/nodeSelectionPolicy
           type: select
-        - type: single-step-form
+        - discriminator:
+            topologyKey-standalone:
+              default: ""
+              type: string
+            topologyValue-standalone:
+              default: ""
+              type: string
+          elements:
+          - label:
+              text: labels.key
+            required: isVerticalScaleTopologyRequired|standalone
+            schema:
+              $ref: discriminator#/topologyKey-standalone
+            type: input
+          - label:
+              text: labels.value
+            required: isVerticalScaleTopologyRequired|standalone
+            schema:
+              $ref: discriminator#/topologyValue-standalone
+            type: input
           label:
             text: labels.topology
           show_label: true
-          discriminator:
-            topologyKey-standalone:
-              type: string
-              default: ''
-            topologyValue-standalone:
-              type: string
-              default: ''
-          elements:
-            - type: input
-              label:
-                text: labels.key
-              schema:
-                $ref: discriminator#/topologyKey-standalone
-              required: isVerticalScaleTopologyRequired|standalone
-            - type: input
-              label:
-                text: labels.value
-              schema:
-                $ref: discriminator#/topologyValue-standalone
-              required: isVerticalScaleTopologyRequired|standalone
+          type: single-step-form
         if: ifDbTypeEqualsTo|standalone|verticalScaling
         label:
           text: Standalone vertical scaling
@@ -218,30 +218,30 @@ steps:
           schema:
             $ref: schema#/properties/spec/properties/verticalScaling/properties/replicaSet/properties/nodeSelectionPolicy
           type: select
-        - type: single-step-form
+        - discriminator:
+            topologyKey-replicaSet:
+              default: ""
+              type: string
+            topologyValue-replicaSet:
+              default: ""
+              type: string
+          elements:
+          - label:
+              text: labels.key
+            required: isVerticalScaleTopologyRequired|replicaSet
+            schema:
+              $ref: discriminator#/topologyKey-replicaSet
+            type: input
+          - label:
+              text: labels.value
+            required: isVerticalScaleTopologyRequired|replicaSet
+            schema:
+              $ref: discriminator#/topologyValue-replicaSet
+            type: input
           label:
             text: labels.topology
           show_label: true
-          discriminator:
-            topologyKey-replicaSet:
-              type: string
-              default: ''
-            topologyValue-replicaSet:
-              type: string
-              default: ''
-          elements:
-            - type: input
-              label:
-                text: labels.key
-              schema:
-                $ref: discriminator#/topologyKey-replicaSet
-              required: isVerticalScaleTopologyRequired|replicaSet
-            - type: input
-              label:
-                text: labels.value
-              schema:
-                $ref: discriminator#/topologyValue-replicaSet
-              required: isVerticalScaleTopologyRequired|replicaSet
+          type: single-step-form
         if: ifDbTypeEqualsTo|replicaSet|verticalScaling
         label:
           text: Replicaset vertical scaling
@@ -267,30 +267,30 @@ steps:
             schema:
               $ref: schema#/properties/spec/properties/verticalScaling/properties/configServer/properties/nodeSelectionPolicy
             type: select
-          - type: single-step-form
+          - discriminator:
+              topologyKey-configServer:
+                default: ""
+                type: string
+              topologyValue-configServer:
+                default: ""
+                type: string
+            elements:
+            - label:
+                text: labels.key
+              required: isVerticalScaleTopologyRequired|configServer
+              schema:
+                $ref: discriminator#/topologyKey-configServer
+              type: input
+            - label:
+                text: labels.value
+              required: isVerticalScaleTopologyRequired|configServer
+              schema:
+                $ref: discriminator#/topologyValue-configServer
+              type: input
             label:
               text: labels.topology
             show_label: true
-            discriminator:
-              topologyKey-configServer: 
-                type: string
-                default: ''
-              topologyValue-configServer:
-                type: string
-                default: ''
-            elements:
-              - type: input
-                label:
-                  text: labels.key
-                schema:
-                  $ref: discriminator#/topologyKey-configServer
-                required: isVerticalScaleTopologyRequired|configServer
-              - type: input
-                label:
-                  text: labels.value
-                schema:
-                  $ref: discriminator#/topologyValue-configServer
-                required: isVerticalScaleTopologyRequired|configServer
+            type: single-step-form
           label:
             text: Config Server Vertical Scaling
           schema:
@@ -314,30 +314,30 @@ steps:
             schema:
               $ref: schema#/properties/spec/properties/verticalScaling/properties/mongos/properties/nodeSelectionPolicy
             type: select
-          - type: single-step-form
+          - discriminator:
+              topologyKey-mongos:
+                default: ""
+                type: string
+              topologyValue-mongos:
+                default: ""
+                type: string
+            elements:
+            - label:
+                text: labels.key
+              required: isVerticalScaleTopologyRequired|mongos
+              schema:
+                $ref: discriminator#/topologyKey-mongos
+              type: input
+            - label:
+                text: labels.value
+              required: isVerticalScaleTopologyRequired|mongos
+              schema:
+                $ref: discriminator#/topologyValue-mongos
+              type: input
             label:
               text: labels.topology
             show_label: true
-            discriminator:
-              topologyKey-mongos:
-                type: string
-                default: ''
-              topologyValue-mongos:
-                type: string
-                default: ''
-            elements:
-              - type: input
-                label:
-                  text: labels.key
-                schema:
-                  $ref: discriminator#/topologyKey-mongos
-                required: isVerticalScaleTopologyRequired|mongos
-              - type: input
-                label:
-                  text: labels.value
-                schema:
-                  $ref: discriminator#/topologyValue-mongos
-                required: isVerticalScaleTopologyRequired|mongos
+            type: single-step-form
           label:
             text: Mongos Vertical Scaling
           schema:
@@ -361,30 +361,30 @@ steps:
             schema:
               $ref: schema#/properties/spec/properties/verticalScaling/properties/shard/properties/nodeSelectionPolicy
             type: select
-          - type: single-step-form
+          - discriminator:
+              topologyKey-shard:
+                default: ""
+                type: string
+              topologyValue-shard:
+                default: ""
+                type: string
+            elements:
+            - label:
+                text: labels.key
+              required: isVerticalScaleTopologyRequired|shard
+              schema:
+                $ref: discriminator#/topologyKey-shard
+              type: input
+            - label:
+                text: labels.value
+              required: isVerticalScaleTopologyRequired|shard
+              schema:
+                $ref: discriminator#/topologyValue-shard
+              type: input
             label:
               text: labels.topology
             show_label: true
-            discriminator:
-              topologyKey-shard:
-                type: string
-                default: ''
-              topologyValue-shard:
-                type: string
-                default: ''
-            elements:
-              - type: input
-                label:
-                  text: labels.key
-                schema:
-                  $ref: discriminator#/topologyKey-shard
-                required: isVerticalScaleTopologyRequired|shard
-              - type: input
-                label:
-                  text: labels.value
-                schema:
-                  $ref: discriminator#/topologyValue-shard
-                required: isVerticalScaleTopologyRequired|shard
+            type: single-step-form
           label:
             text: Shard Vertical Scaling
           schema:
@@ -463,18 +463,18 @@ steps:
             $ref: discriminator#/properties/reconfigurationType
           type: radio
         - elements:
-          - computed: setValueFromDbDetails|/spec/configSecret/name
-            fetch: getConfigSecrets
-            label:
-              text: labels.configSecret
-            schema:
-              $ref: schema#/properties/spec/properties/configuration/properties/standalone/properties/configSecret/properties/name
-            refresh: true
-            add_new_button:
+          - add_new_button:
               label: labels.createConfig
               target: _blank
               url:
                 function: createSecretUrl
+            computed: setValueFromDbDetails|/spec/configSecret/name
+            fetch: getConfigSecrets
+            label:
+              text: labels.configSecret
+            refresh: true
+            schema:
+              $ref: schema#/properties/spec/properties/configuration/properties/standalone/properties/configSecret/properties/name
             type: select
           if: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
           label:
@@ -518,18 +518,18 @@ steps:
             $ref: discriminator#/properties/reconfigurationType
           type: radio
         - elements:
-          - computed: setValueFromDbDetails|/spec/configSecret/name
-            fetch: getConfigSecrets
-            label:
-              text: labels.configSecret
-            schema:
-              $ref: schema#/properties/spec/properties/configuration/properties/replicaSet/properties/configSecret/properties/name
-            refresh: true
-            add_new_button:
+          - add_new_button:
               label: labels.createConfig
               target: _blank
               url:
                 function: createSecretUrl
+            computed: setValueFromDbDetails|/spec/configSecret/name
+            fetch: getConfigSecrets
+            label:
+              text: labels.configSecret
+            refresh: true
+            schema:
+              $ref: schema#/properties/spec/properties/configuration/properties/replicaSet/properties/configSecret/properties/name
             type: select
           if: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
           label:
@@ -575,18 +575,18 @@ steps:
               $ref: discriminator#/properties/reconfigurationType-configServer
             type: radio
           - elements:
-            - computed: setValueFromDbDetails|/spec/shardTopology/configServer/configSecret/name
-              fetch: getConfigSecrets
-              label:
-                text: labels.configSecret
-              schema:
-                $ref: schema#/properties/spec/properties/configuration/properties/configServer/properties/configSecret/properties/name
-              refresh: true
-              add_new_button:
+            - add_new_button:
                 label: labels.createConfig
                 target: _blank
                 url:
                   function: createSecretUrl
+              computed: setValueFromDbDetails|/spec/shardTopology/configServer/configSecret/name
+              fetch: getConfigSecrets
+              label:
+                text: labels.configSecret
+              refresh: true
+              schema:
+                $ref: schema#/properties/spec/properties/configuration/properties/configServer/properties/configSecret/properties/name
               type: select
             if: ifReconfigurationTypeEqualsTo|selectNewConfigSecret|configServer|true
             schema:
@@ -606,9 +606,9 @@ steps:
             type: switch
           label:
             text: labels.configServer
-          show_label: true
           schema:
             $ref: schema#/properties/spec/properties/configuration/properties/configServer
+          show_label: true
           type: single-step-form
         - discriminator:
             reconfigurationType-mongos:
@@ -628,18 +628,18 @@ steps:
               $ref: discriminator#/properties/reconfigurationType-mongos
             type: radio
           - elements:
-            - computed: setValueFromDbDetails|/spec/shardTopology/mongos/configSecret/name
-              fetch: getConfigSecrets
-              label:
-                text: labels.configSecret
-              schema:
-                $ref: schema#/properties/spec/properties/configuration/properties/mongos/properties/configSecret/properties/name
-              refresh: true
-              add_new_button:
+            - add_new_button:
                 label: labels.createConfig
                 target: _blank
                 url:
                   function: createSecretUrl
+              computed: setValueFromDbDetails|/spec/shardTopology/mongos/configSecret/name
+              fetch: getConfigSecrets
+              label:
+                text: labels.configSecret
+              refresh: true
+              schema:
+                $ref: schema#/properties/spec/properties/configuration/properties/mongos/properties/configSecret/properties/name
               type: select
             if: ifReconfigurationTypeEqualsTo|selectNewConfigSecret|mongos|true
             schema:
@@ -659,9 +659,9 @@ steps:
             type: switch
           label:
             text: labels.mongos
-          show_label: true
           schema:
             $ref: schema#/properties/spec/properties/configuration/properties/mongos
+          show_label: true
           type: single-step-form
         - discriminator:
             reconfigurationType-shard:
@@ -681,18 +681,18 @@ steps:
               $ref: discriminator#/properties/reconfigurationType-shard
             type: radio
           - elements:
-            - computed: setValueFromDbDetails|/spec/shardTopology/shard/configSecret/name
-              fetch: getConfigSecrets
-              label:
-                text: labels.configSecret
-              schema:
-                $ref: schema#/properties/spec/properties/configuration/properties/shard/properties/configSecret/properties/name
-              refresh: true
-              add_new_button:
+            - add_new_button:
                 label: labels.createConfig
                 target: _blank
                 url:
                   function: createSecretUrl
+              computed: setValueFromDbDetails|/spec/shardTopology/shard/configSecret/name
+              fetch: getConfigSecrets
+              label:
+                text: labels.configSecret
+              refresh: true
+              schema:
+                $ref: schema#/properties/spec/properties/configuration/properties/shard/properties/configSecret/properties/name
               type: select
             if: ifReconfigurationTypeEqualsTo|selectNewConfigSecret|shard|true
             schema:
@@ -712,9 +712,9 @@ steps:
             type: switch
           label:
             text: labels.shard
-          show_label: true
           schema:
             $ref: schema#/properties/spec/properties/configuration/properties/shard
+          show_label: true
           type: single-step-form
         if: ifDbTypeEqualsTo|sharded|configuration
         label:

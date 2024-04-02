@@ -6657,12 +6657,6 @@ properties:
                             type: object
                           type: array
                       type: object
-                    failurePolicy:
-                      default: Fail
-                      enum:
-                      - Fail
-                      - Retry
-                      type: string
                     hooks:
                       properties:
                         postBackup:
@@ -13136,50 +13130,6 @@ properties:
                       type: integer
                     timeout:
                       type: string
-                    verificationStrategies:
-                      items:
-                        properties:
-                          name:
-                            type: string
-                          onFailure:
-                            enum:
-                            - Fail
-                            - Retry
-                            type: string
-                          params:
-                            type: object
-                            x-kubernetes-preserve-unknown-fields: true
-                          repository:
-                            type: string
-                          retryConfig:
-                            properties:
-                              delay:
-                                type: string
-                              maxRetry:
-                                default: 1
-                                format: int32
-                                minimum: 1
-                                type: integer
-                            type: object
-                          verifier:
-                            properties:
-                              apiGroup:
-                                type: string
-                              kind:
-                                type: string
-                              name:
-                                type: string
-                              namespace:
-                                type: string
-                            required:
-                            - name
-                            type: object
-                          verifyEvery:
-                            format: int32
-                            minimum: 1
-                            type: integer
-                        type: object
-                      type: array
                   type: object
                 type: array
               target:
@@ -18151,6 +18101,8 @@ properties:
                     required:
                     - name
                     type: object
+                  namespace:
+                    type: string
                   pitr:
                     properties:
                       exclusive:
@@ -42307,6 +42259,8 @@ properties:
                         type: string
                       endpoint:
                         type: string
+                      insecureTLS:
+                        type: boolean
                       prefix:
                         type: string
                       region:
@@ -43195,6 +43149,8 @@ properties:
                         type: string
                       endpoint:
                         type: string
+                      insecureTLS:
+                        type: boolean
                       prefix:
                         type: string
                       region:

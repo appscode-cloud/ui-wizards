@@ -54,6 +54,8 @@ type KafkaVersionSpec struct {
 	Version string `json:"version"`
 	// Database Image
 	DB KafkaVersionDatabase `json:"db"`
+	// Connect Image
+	ConnectCluster ConnectClusterVersion `json:"connectCluster"`
 	// Deprecated versions usable but regarded as obsolete and best avoided, typically due to having been superseded.
 	// +optional
 	Deprecated bool `json:"deprecated,omitempty"`
@@ -67,6 +69,9 @@ type KafkaVersionSpec struct {
 	Stash appcat.StashAddonSpec `json:"stash,omitempty"`
 	// update constraints
 	UpdateConstraints UpdateConstraints `json:"updateConstraints,omitempty"`
+	// SecurityContext is for the additional config for the DB container
+	// +optional
+	SecurityContext SecurityContext `json:"securityContext"`
 }
 
 // KafkaVersionDatabase is the Kafka Database image
@@ -74,7 +79,12 @@ type KafkaVersionDatabase struct {
 	Image string `json:"image"`
 }
 
-// KafkaVersionDatabase is the Kafka Database image
+// ConnectClusterVersion is the Kafka Connect Cluster image
+type ConnectClusterVersion struct {
+	Image string `json:"image"`
+}
+
+// CruiseControlVersionDatabase is the Kafka Database image
 type CruiseControlVersionDatabase struct {
 	Image string `json:"image"`
 }

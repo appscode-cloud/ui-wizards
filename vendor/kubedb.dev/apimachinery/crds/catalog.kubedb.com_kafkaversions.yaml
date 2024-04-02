@@ -45,6 +45,13 @@ spec:
             type: object
           spec:
             properties:
+              connectCluster:
+                properties:
+                  image:
+                    type: string
+                required:
+                - image
+                type: object
               cruiseControl:
                 properties:
                   image:
@@ -67,6 +74,12 @@ spec:
                     type: string
                 required:
                 - databasePolicyName
+                type: object
+              securityContext:
+                properties:
+                  runAsUser:
+                    format: int64
+                    type: integer
                 type: object
               stash:
                 properties:
@@ -129,6 +142,7 @@ spec:
               version:
                 type: string
             required:
+            - connectCluster
             - cruiseControl
             - db
             - version
