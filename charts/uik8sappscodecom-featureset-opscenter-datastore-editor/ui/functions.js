@@ -419,7 +419,6 @@ async function getDatabaseTypes({ setDiscriminatorValue, commit, storeGet, axios
       `/clusters/${owner}/${cluster}/db-status`,
     );
     const data = resp.data;
-    console.log(data);
     for(let key in data) {
       if(data.hasOwnProperty(key)) {
         const type = key;
