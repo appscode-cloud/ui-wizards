@@ -380,6 +380,83 @@ function checkIsResourceLoaded ({commit, storeGet,watchDependency,getValue,discr
   }
 }
 
+function isKubedbSelected({ getValue, discriminator, watchDependency, commit }){
+  watchDependency("discriminator#/enabledFeatures");
+  const enabledFeatures = getValue(discriminator, "/enabledFeatures") || [];
+  const target = "kubedb";
+  const isSelected = enabledFeatures?.includes(target);
+  if(!isSelected) commit("wizard/model$delete", "resources/helmToolkitFluxcdIoHelmRelease_kubedb");
+  return isSelected;
+}
+
+let allAvailableTypes = [
+  "Druid",
+  "Elasticsearch",
+  "FerretDB",
+  "Kafka",
+  "MariaDB",
+  "Memcached",
+  "MicrosoftSQLServer",
+  "MongoDB",
+  "MySQL",
+  "PerconaXtraDB",
+  "PgBouncer",
+  "Pgpool",
+  "Postgres",
+  "ProxySQL",
+  "RabbitMQ",
+  "Redis",
+  "Singlestore",
+  "Solr",
+  "ZooKeeper",
+];
+async function getDatabaseTypes({ setDiscriminatorValue, commit, storeGet, axios }) {
+  let enabledTypes = ["Elasticsearch", "Kafka", "MariaDB", "MongoDB", "MySQL", "Postgres", "Redis"];
+  const owner = storeGet("/route/params/user") || "";
+  const cluster = storeGet("/route/params/cluster") || "";
+  try{
+    const resp = await axios.get(
+      `/clusters/${owner}/${cluster}/db-status`,
+    );
+    const data = resp?.data;
+    if(Object.keys(data).length){
+      enabledTypes = [];
+      allAvailableTypes = [];
+      for(const [key, value] of Object.entries(data)) {
+        if(value === true)
+          enabledTypes.push(key);
+        allAvailableTypes.push(key);
+      }
+    }
+  }
+  catch(e){
+    console.log(e);
+  }
+  setDiscriminatorValue("/enabledTypes", enabledTypes);
+  typeConvert(commit, enabledTypes);
+  return allAvailableTypes;
+}
+
+function onTypeUpdate({ discriminator, commit, getValue }) {
+  const enabledTypes = getValue(discriminator, "/enabledTypes") || [];
+  typeConvert(commit, enabledTypes);
+}
+
+function typeConvert(commit, enabledTypes) {
+  let convertFromArray = {};
+  allAvailableTypes?.forEach(item => {
+    convertFromArray[item] = enabledTypes 
+      ? enabledTypes.includes(item) 
+      : false;
+  });
+  commit("wizard/model$update", {
+    path: "resources/helmToolkitFluxcdIoHelmRelease_kubedb/spec/values/global/featureGates",
+    value: convertFromArray,
+    force: true,
+  });
+  return convertFromArray;
+}
+
 return {
   hideThisElement,
   checkIsResourceLoaded,
@@ -393,4 +470,8 @@ return {
   returnFalse,
   setReleaseNameAndNamespaceAndInitializeValues,
   fetchFeatureSetOptions,
+  isKubedbSelected,
+  getDatabaseTypes,
+  onTypeUpdate,
+  typeConvert,
 };
