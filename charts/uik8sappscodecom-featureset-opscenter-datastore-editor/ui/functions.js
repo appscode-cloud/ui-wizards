@@ -389,7 +389,7 @@ function isKubedbSelected({ getValue, discriminator, watchDependency, commit }){
   return isSelected;
 }
 
-const allAvailableTypes = [
+let allAvailableTypes = [
   "Druid",
   "Elasticsearch",
   "FerretDB",
@@ -411,36 +411,29 @@ const allAvailableTypes = [
   "ZooKeeper",
 ];
 async function getDatabaseTypes({ setDiscriminatorValue, commit, storeGet, axios }) {
-  const preEnableTypes = ["Elasticsearch", "Kafka", "MariaDB", "MongoDB", "MySQL", "Postgres", "Redis"];
+  let enabledTypes = ["Elasticsearch", "Kafka", "MariaDB", "MongoDB", "MySQL", "Postgres", "Redis"];
   const owner = storeGet("/route/params/user") || "";
   const cluster = storeGet("/route/params/cluster") || "";
   try{
     const resp = await axios.get(
       `/clusters/${owner}/${cluster}/db-status`,
     );
-    const data = resp.data;
-    for(let key in data) {
-      if(data.hasOwnProperty(key)) {
-        const type = key;
-        if(data[key] === true) {
-          if(!preEnableTypes.includes(type)) {
-            preEnableTypes.push(type);
-          }
-        }
-        else {
-          let ind = preEnableTypes.indexOf(type);
-          if(ind !== -1) {
-            preEnableTypes.splice(ind, 1);
-          }
-        }
+    const data = resp?.data;
+    if(Object.keys(data).length){
+      enabledTypes = [];
+      allAvailableTypes = [];
+      for(const [key, value] of Object.entries(data)) {
+        if(value === true)
+          enabledTypes.push(key);
+        allAvailableTypes.push(key);
       }
     }
   }
   catch(e){
     console.log(e);
   }
-  setDiscriminatorValue("/enabledTypes", preEnableTypes);
-  typeConvert(commit, preEnableTypes);
+  setDiscriminatorValue("/enabledTypes", enabledTypes);
+  typeConvert(commit, enabledTypes);
   return allAvailableTypes;
 }
 
