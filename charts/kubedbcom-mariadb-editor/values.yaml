@@ -181,6 +181,76 @@ resources:
     spec:
       ca:
         secretName: mariadb-ca
+  coreKubestashComBackupConfiguration: # +doc-gen:break
+    apiVersion: core.kubestash.com/v1alpha1
+    kind: BackupConfiguration
+    metadata:
+      name: mariadb
+      namespace: demo
+    spec:
+      backends:
+        - name: mariadb-backend
+          retentionPolicy:
+            name: mariadb-retention-policy
+            namespace: demo
+          storageRef:
+            name: mariadb-storage
+            namespace: demo
+      sessions:
+        - addon:
+            jobTemplate:
+              spec:
+                securityContext:
+                  runAsGroup: 0
+                  runAsUser: 0
+            name: mariadb-addon
+            tasks:
+              - name: logical-backup
+          name: mariadb-frequent-backup
+          repositories:
+            - backend: mariadb-backend
+              directory: /mariadb-repo
+              encryptionSecret:
+                name: mariadb-encryption-secret
+                namespace: demo
+              name: mariadb-repo
+          scheduler:
+            jobTemplate:
+              backoffLimit: 1
+            schedule: '*/5 * * * *'
+          sessionHistoryLimit: 2
+      target:
+        apiGroup: kubedb.com
+        kind: MySQL
+        name: mariadb
+        namespace: demo
+  coreKubestashComRestoreSession: # +doc-gen:break
+    apiVersion: core.kubestash.com/v1alpha1
+    kind: RestoreSession
+    metadata:
+      name: mariadb
+      namespace: demo
+    spec:
+      addon:
+        jobTemplate:
+          spec:
+            securityContext:
+              runAsGroup: 0
+              runAsUser: 0
+        name: mariadb-addon
+        tasks:
+          - name: logical-backup-restore
+      dataSource:
+        encryptionSecret:
+          name: mariadb-encryption-secret
+          namespace: demo
+        repository: mariadb-repo
+        snapshot: latest
+      target:
+        apiGroup: kubedb.com
+        kind: MySQL
+        name: mariadb
+        namespace: demo
   kubedbComMariaDB: # +doc-gen:break
     apiVersion: kubedb.com/v1alpha2
     kind: MariaDB
@@ -281,6 +351,14 @@ resources:
         max_connections = 200
         read_buffer_size = 1048576
     type: Opaque
+  secret_encryption_secret: # +doc-gen:break
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: mariadb-encryption-secret
+      namespace: demo
+    stringData:
+      RESTIC_PASSWORD: ""
   secret_init_repo_cred: # +doc-gen:break
     apiVersion: v1
     kind: Secret
