@@ -1,5 +1,210 @@
-apiVersion: kubedb.com/v1alpha2
-kind: Solr
+form:
+  alert:
+    additionalRuleLabels: {}
+    annotations: {}
+    enabled: warning
+    groups:
+      database:
+        enabled: warning
+        rules:
+          diskAlmostFull:
+            duration: 1m
+            enabled: true
+            severity: critical
+            val: 0.95
+          diskUsageHigh:
+            duration: 1m
+            enabled: true
+            severity: warning
+            val: 0.8
+          solrDownShards:
+            duration: 30s
+            enabled: true
+            severity: critical
+          solrHighBufferSize:
+            duration: 30s
+            enabled: true
+            severity: warning
+            val: 3e+06
+          solrHighHeapSize:
+            duration: 30s
+            enabled: true
+            severity: warning
+            val: 3e+06
+          solrHighPoolSize:
+            duration: 30s
+            enabled: true
+            severity: warning
+            val: 3e+06
+          solrHighQPS:
+            duration: 30s
+            enabled: true
+            severity: warning
+            val: 1000
+          solrHighThreadRunning:
+            duration: 30s
+            enabled: true
+            severity: warning
+            val: 300
+          solrRecoveryFailedShards:
+            duration: 30s
+            enabled: true
+            severity: critical
+      provisioner:
+        enabled: warning
+        rules:
+          appPhaseCritical:
+            duration: 1m
+            enabled: true
+            severity: warning
+          appPhaseNotReady:
+            duration: 1m
+            enabled: true
+            severity: critical
+    labels:
+      release: kube-prometheus-stack
+  capi:
+    clusterName: ""
+    dedicated: false
+    namespace: ""
+    nodes: 1
+    provider: ""
+    sku: ""
+    zones: []
 metadata:
-  name: solr
-  namespace: default
+  resource:
+    group: kubedb.com
+    version: v1alpha2
+    name: solrs
+    kind: Solr
+    scope: Namespaced
+  release:
+    name: RELEASE-NAME
+    namespace: default
+resources:
+  kubedbComSolr: # +doc-gen:break
+    apiVersion: kubedb.com/v1alpha2
+    kind: Solr
+    metadata:
+      name: solr
+      namespace: solr
+    spec:
+      serviceTemplates:
+        - alias: primary
+          spec:
+            type: LoadBalancer
+      terminationPolicy: Halt
+      topology:
+        coordinator:
+          podTemplate:
+            spec:
+              containers:
+                - name: solr
+                  resources:
+                    requests:
+                      cpu: 500m
+                      memory: 1600Mi
+              nodeSelector:
+                app: kubedb
+                component: solr-database
+                instance: solr
+              tolerations:
+                - effect: NoSchedule
+                  key: app
+                  operator: Equal
+                  value: kubedb
+                - effect: NoSchedule
+                  key: instance
+                  operator: Equal
+                  value: solr
+                - effect: NoSchedule
+                  key: component
+                  operator: Equal
+                  value: solr-database
+                - effect: NoSchedule
+                  key: nodepool_type
+                  operator: Equal
+                  value: n2-standard-2
+          storage:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 700Mi
+        data:
+          podTemplate:
+            spec:
+              containers:
+                - name: solr
+                  resources:
+                    requests:
+                      cpu: 500m
+                      memory: 1600Mi
+              nodeSelector:
+                app: kubedb
+                component: solr-database
+                instance: solr
+              tolerations:
+                - effect: NoSchedule
+                  key: app
+                  operator: Equal
+                  value: kubedb
+                - effect: NoSchedule
+                  key: instance
+                  operator: Equal
+                  value: solr
+                - effect: NoSchedule
+                  key: component
+                  operator: Equal
+                  value: solr-database
+                - effect: NoSchedule
+                  key: nodepool_type
+                  operator: Equal
+                  value: n2-standard-2
+          replicas: 1
+          storage:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 3Gi
+        overseer:
+          podTemplate:
+            spec:
+              containers:
+                - name: solr
+                  resources:
+                    requests:
+                      cpu: 400m
+                      memory: 1600Mi
+              nodeSelector:
+                app: kubedb
+                component: solr-database
+                instance: solr
+              tolerations:
+                - effect: NoSchedule
+                  key: app
+                  operator: Equal
+                  value: kubedb
+                - effect: NoSchedule
+                  key: instance
+                  operator: Equal
+                  value: solr
+                - effect: NoSchedule
+                  key: component
+                  operator: Equal
+                  value: solr-database
+                - effect: NoSchedule
+                  key: nodepool_type
+                  operator: Equal
+                  value: n2-standard-2
+          storage:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 500Mi
+      version: 9.4.1
+      zookeeperRef:
+        name: zookeeper-prod
+        namespace: zookeeper

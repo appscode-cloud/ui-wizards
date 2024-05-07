@@ -1,5 +1,206 @@
-apiVersion: kubedb.com/v1alpha2
-kind: MSSQLServer
+form:
+  alert:
+    additionalRuleLabels: {}
+    annotations: {}
+    enabled: warning
+    groups:
+      database:
+        enabled: warning
+        rules:
+          mongoDBDown:
+            duration: 30s
+            enabled: true
+            severity: critical
+          mongoDBPhaseCritical:
+            duration: 3m
+            enabled: true
+            severity: warning
+          mssqlserverCursorsTimeouts:
+            duration: 2m
+            enabled: true
+            severity: warning
+            val: 100
+          mssqlserverHighLatency:
+            duration: 10m
+            enabled: true
+            severity: warning
+            val: 250000
+          mssqlserverHighTicketUtilization:
+            duration: 10m
+            enabled: true
+            severity: warning
+            val: 75
+          mssqlserverNumberCursorsOpen:
+            duration: 2m
+            enabled: true
+            severity: warning
+            val: 10000
+          mssqlserverRecurrentCursorTimeout:
+            duration: 30m
+            enabled: true
+            severity: warning
+            val: 0
+          mssqlserverRecurrentMemoryPageFaults:
+            duration: 30m
+            enabled: true
+            severity: warning
+            val: 0
+          mssqlserverReplicationLag:
+            duration: 0m
+            enabled: true
+            severity: critical
+            val: 10
+          mssqlserverTooManyConnections:
+            duration: 2m
+            enabled: true
+            severity: warning
+            val: 80
+          mssqlserverVirtualMemoryUsage:
+            duration: 1m
+            enabled: true
+            severity: warning
+            val: 2.097152e+06
+      opsManager:
+        enabled: warning
+        rules:
+          opsRequestFailed:
+            duration: 0m
+            enabled: true
+            severity: critical
+          opsRequestOnProgress:
+            duration: 0m
+            enabled: true
+            severity: info
+          opsRequestStatusProgressingToLong:
+            duration: 30m
+            enabled: true
+            severity: critical
+      provisioner:
+        enabled: warning
+        rules:
+          appPhaseCritical:
+            duration: 15m
+            enabled: true
+            severity: warning
+          appPhaseNotReady:
+            duration: 1m
+            enabled: true
+            severity: critical
+      schemaManager:
+        enabled: warning
+        rules:
+          schemaExpired:
+            duration: 0m
+            enabled: true
+            severity: warning
+          schemaFailed:
+            duration: 0m
+            enabled: true
+            severity: warning
+          schemaInProgressForTooLong:
+            duration: 30m
+            enabled: true
+            severity: warning
+          schemaPendingForTooLong:
+            duration: 30m
+            enabled: true
+            severity: warning
+          schemaTerminatingForTooLong:
+            duration: 30m
+            enabled: true
+            severity: warning
+      stash:
+        enabled: warning
+        rules:
+          backupSessionFailed:
+            duration: 0m
+            enabled: true
+            severity: critical
+          backupSessionPeriodTooLong:
+            duration: 0m
+            enabled: true
+            severity: warning
+            val: 1800
+          noBackupSessionForTooLong:
+            duration: 0m
+            enabled: true
+            severity: warning
+            val: 18000
+          repositoryCorrupted:
+            duration: 5m
+            enabled: true
+            severity: critical
+          repositoryStorageRunningLow:
+            duration: 5m
+            enabled: true
+            severity: warning
+            val: 1.073741824e+10
+          restoreSessionFailed:
+            duration: 0m
+            enabled: true
+            severity: critical
+          restoreSessionPeriodTooLong:
+            duration: 0m
+            enabled: true
+            severity: warning
+            val: 1800
+    labels:
+      release: kube-prometheus-stack
+  capi:
+    clusterName: ""
+    dedicated: false
+    namespace: ""
+    nodes: 1
+    provider: ""
+    sku: ""
+    zones: []
 metadata:
-  name: mssqlserver
-  namespace: default
+  resource:
+    group: kubedb.com
+    version: v1alpha2
+    name: mssqlservers
+    kind: MSSQLServer
+    scope: Namespaced
+  release:
+    name: RELEASE-NAME
+    namespace: default
+resources:
+  certManagerIoIssuer_ca: # +doc-gen:break
+    apiVersion: cert-manager.io/v1
+    kind: Issuer
+    metadata:
+      name: sqlserver-ag-ca
+      namespace: sample
+    spec:
+      ca:
+        secretName: mssqlserver-ca
+  kubedbComMSSQLServer: # +doc-gen:break
+    apiVersion: kubedb.com/v1alpha2
+    kind: MSSQLServer
+    metadata:
+      name: sqlserver-ag
+      namespace: sample
+    spec:
+      internalAuth:
+        endpointCert:
+          issuerRef:
+            apiGroup: cert-manager.io
+            kind: Issuer
+            name: sqlserver-ag-ca
+      replicas: 3
+      storage:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi
+        storageClassName: standard
+      storageType: Durable
+      terminationPolicy: Delete
+      topology:
+        availabilityGroup:
+          databases:
+            - AgDB1
+            - AgDB2
+        mode: AvailabilityGroup
+      version: 2022-cu12

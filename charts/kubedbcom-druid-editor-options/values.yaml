@@ -1,0 +1,255 @@
+# Default values for kubedbcom-druid-editor-options.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+metadata:
+  resource:
+    group: kubedb.com
+    kind: Druid
+    name: druids
+    scope: Namespaced
+    version: v1alpha2
+  release:
+    # Release name
+    name: ""
+    # Release namespace
+    namespace: ""
+
+spec:
+  # List options
+  version: 6.0.12
+
+  # Annotations to add to the database custom resource
+  annotations: {}
+
+  # Labels to add to all the template objects
+  labels: {}
+
+  # Standalone, Replicaset, Sharded
+  mode: Standalone
+  replicaSet:
+    name: rs0
+    replicas: 3
+  shardTopology:
+    shard:
+      replicas: 3
+      shards: 3
+      persistence:
+        size: 10Gi
+    configServer:
+      replicas: 3
+      persistence:
+        size: 2Gi
+    mongos:
+      replicas: 3
+
+  # "keyFile", "sendKeyFile", "sendX509", "x509"
+  clusterAuthMode: keyFile
+
+  # "disabled", "allowSSL", "preferSSL", "requireSSL"
+  sslMode: disabled
+
+  terminationPolicy: WipeOut
+
+  storageClass:
+    name: standard
+
+  persistence:
+    size: 10Gi
+
+  machine: ""
+
+  resources:
+    limits:
+      cpu: 500m
+      memory: 1Gi
+
+  authSecret:
+    name: ""
+    password: ""
+
+  monitoring:
+    # Name of monitoring agent (one of "prometheus.io", "prometheus.io/operator", "prometheus.io/builtin")
+    agent: prometheus.io/operator
+    exporter:
+      resources: # +doc-gen:break
+        requests:
+          cpu: 100m
+          memory: 128Mi
+    serviceMonitor:
+      # Specify the labels for ServiceMonitor.
+      # Prometheus crd will select ServiceMonitor using these labels.
+      # Only usable when monitoring agent is `prometheus.io/webhook server`.
+      labels: {}
+
+  backup:
+    tool: ""
+
+    kubestash:
+      schedule: "0 */2 * * *"
+      storageRef:
+        name: default
+        namespace: ""
+      retentionPolicy:
+        name: "keep-1mo"
+        namespace: ""
+      encryptionSecret:
+        name: default-encryption-secret
+        namespace: ""
+      storageSecret:
+        create: true
+
+    stash:
+      schedule: "0 */2 * * *"
+
+      retentionPolicy:
+        name: keep-last-30d
+        keepHourly: 24
+        keepDaily: 30
+        prune: true
+
+      authSecret:
+        name: ""
+        password: ""
+
+      backend:
+        provider: "" # s3,gcs,azure,swift,b2
+        s3:
+          spec:
+            endpoint: ""
+            bucket: ""
+            # prefix: ""
+            # region: ""
+          auth:
+            AWS_ACCESS_KEY_ID: ""
+            AWS_SECRET_ACCESS_KEY: ""
+            CA_CERT_DATA: ""
+        azure:
+          spec:
+            container: ""
+            # prefix: ""
+            # maxConnections: 0
+          auth:
+            AZURE_ACCOUNT_NAME: ""
+            AZURE_ACCOUNT_KEY: ""
+        gcs:
+          spec:
+            bucket: ""
+            # prefix: ""
+            # maxConnections: 0
+          auth:
+            GOOGLE_PROJECT_ID: ""
+            GOOGLE_SERVICE_ACCOUNT_JSON_KEY: ""
+        swift:
+          spec:
+            container: ""
+            # prefix: ""
+          auth:
+            OS_USERNAME: ""
+            OS_PASSWORD: ""
+            OS_REGION_NAME: ""
+            OS_AUTH_URL: ""
+            OS_USER_DOMAIN_NAME: ""
+            OS_PROJECT_NAME: ""
+            OS_PROJECT_DOMAIN_NAME: ""
+            OS_TENANT_ID: ""
+            OS_TENANT_NAME: ""
+            ST_AUTH: ""
+            ST_USER: ""
+            ST_KEY: ""
+            OS_STORAGE_URL: ""
+            OS_AUTH_TOKEN: ""
+        b2:
+          spec:
+            bucket: ""
+            # prefix: ""
+            # maxConnections: 0
+          auth:
+            B2_ACCOUNT_ID: ""
+            B2_ACCOUNT_KEY: ""
+
+form:
+  alert:
+    ## Enable PrometheusRule alerts
+    enabled: warning
+
+    ## Labels for default rules
+    labels: # +doc-gen:break
+      release: prometheus
+
+    ## Annotations for default rules
+    annotations: {}
+
+    ## Additional labels for PrometheusRule alerts
+    additionalRuleLabels: {}
+
+    ## Prefix for runbook URLs. Use this to override the first part of the runbookURLs that is common to all rules.
+    # runbookUrl: "https://runbooks.prometheus-operator.dev/runbooks"
+
+    groups:
+      database:
+        enabled: warning
+        rules:
+          # Specifies the alert configuration for one of the service of druid is down
+          druidDown:
+            enabled: true
+            duration: "1m"
+            severity: critical
+          # Specifies the alert configuration for Druid lost connection to ZooKeeper
+          zkDisconnected:
+            enabled: true
+            duration: "1m"
+            severity: critical
+          # Specifies the alert configuration for Druid high query time
+          highQueryTime:
+            enabled: true
+            duration: "1m"
+            severity: warning
+          # Specifies the alert configuration for Druid high query wait time
+          highQueryWaitTime:
+            enabled: true
+            duration: "1m"
+            severity: warning
+          # Specifies the alert configuration for high number of segments in pending
+          highSegmentScanPending:
+            enabled: true
+            duration: "1m"
+            severity: warning
+            val: 2
+          # Specifies the alert configuration for high percentage of segment usage
+          highSegmentUsage:
+            enabled: true
+            duration: "1m"
+            severity: critical
+            val: 95
+          # Specifies the alert configuration for high percentage of jvm pool usage
+          highJVMPoolUsage:
+            enabled: true
+            duration: "30s"
+            severity: warning
+            val: 95
+          # Specifies the alert configuration for high percentage of jvm memory usage
+          highJVMMemoryUsage:
+            enabled: true
+            duration: "30s"
+            severity: critical
+            val: 95
+      provisioner:
+        enabled: warning
+        rules:
+          appPhaseNotReady:
+            enabled: true
+            duration: "1m"
+            severity: critical
+          appPhaseCritical:
+            enabled: true
+            duration: "15m"
+            severity: warning
+  capi:
+    provider: ""
+    namespace: ""
+    clusterName: ""
+    dedicated: false
+    nodes: 1
+    sku: ""
+    zones: []

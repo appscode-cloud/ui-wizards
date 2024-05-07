@@ -1,0 +1,373 @@
+{{ $app := (include "kubedbcom-ferretdb-editor-options.fullname" .) }}
+
+{{ if (include "kubedbcom-ferretdb-editor-options.alertsEnabled" .Values.form.alert.enabled) }}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ $app }}
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    {{- include "kubedbcom-ferretdb-editor-options.selectorLabels" . | nindent 4 }}
+{{- if .Values.form.alert.labels }}
+    {{- toYaml .Values.form.alert.labels | nindent 4 }}
+{{- end }}
+{{- if .Values.form.alert.annotations }}
+  annotations:
+    {{- toYaml .Values.form.alert.annotations | nindent 4 }}
+{{- end }}
+spec:
+  groups:
+  {{ with .Values.form.alert.groups.database -}}
+  {{ if (include "kubedbcom-ferretdb-editor-options.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
+  - name: ferretdb.database.{{ $.Release.Namespace }}.{{ $app }}.rules
+    rules:
+    {{ if (include "kubedbcom-ferretdb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.ferretdbVirtualMemoryUsage.enabled .rules.ferretdbVirtualMemoryUsage.severity)) -}}
+    - alert: MongodbVirtualMemoryUsage
+      expr: sum(ferretdb_ss_mem_virtual{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}) BY (job) > {{ .rules.ferretdbVirtualMemoryUsage.val }}
+      for: {{ .rules.ferretdbVirtualMemoryUsage.duration }}
+      labels:
+        severity: {{ .rules.ferretdbVirtualMemoryUsage.severity }}
+        {{- include "kubedbcom-ferretdb-editor-options.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: FerretDB virtual memory usage (instance {{`{{`}} $labels.instance {{`}}`}})
+        description: "High memory usage\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+    {{ if (include "kubedbcom-ferretdb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.ferretdbReplicationLag.enabled .rules.ferretdbReplicationLag.severity)) -}}
+    - alert: MongodbReplicationLag
+      expr: ferretdb_mongod_replset_member_replication_lag{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} > {{ .rules.ferretdbReplicationLag.val }}
+      for: {{ .rules.ferretdbReplicationLag.duration }}
+      labels:
+        severity: {{ .rules.ferretdbReplicationLag.severity }}
+        {{- include "kubedbcom-ferretdb-editor-options.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: FerretDB database has replication lag (instance {{`{{`}} $labels.instance {{`}}`}})
+        description: "Mongodb replication lag is more than {{ .rules.ferretdbReplicationLag.val }}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+    {{ if (include "kubedbcom-ferretdb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.ferretdbNumberCursorsOpen.enabled .rules.ferretdbNumberCursorsOpen.severity)) -}}
+    - alert: MongodbNumberCursorsOpen
+      expr: ferretdb_ss_metrics_cursor_open{csr_type="total",job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} > {{ .rules.ferretdbNumberCursorsOpen.val }}
+      for: {{ .rules.ferretdbNumberCursorsOpen.duration }}
+      labels:
+        severity: {{ .rules.ferretdbNumberCursorsOpen.severity }}
+        {{- include "kubedbcom-ferretdb-editor-options.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: FerretDB number cursors open (instance {{`{{`}} $labels.instance {{`}}`}})
+        description: "Too many cursors opened by FerretDB for clients (> 10k)\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+    {{ if (include "kubedbcom-ferretdb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.ferretdbCursorsTimeouts.enabled .rules.ferretdbCursorsTimeouts.severity)) -}}
+    - alert: MongodbCursorsTimeouts
+      expr: increase(ferretdb_ss_metrics_cursor_timedOut{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}[1m]) > {{ .rules.ferretdbCursorsTimeouts.val }}
+      for: {{ .rules.ferretdbCursorsTimeouts.duration }}
+      labels:
+        severity: {{ .rules.ferretdbCursorsTimeouts.severity }}
+        {{- include "kubedbcom-ferretdb-editor-options.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: FerretDB cursors timeouts (instance {{`{{`}} $labels.instance {{`}}`}})
+        description: "Too many cursors are timing out\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+    {{ if (include "kubedbcom-ferretdb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.ferretdbTooManyConnections.enabled .rules.ferretdbTooManyConnections.severity)) -}}
+    - alert: MongodbTooManyConnections
+      expr: avg by(instance) (rate(ferretdb_ss_connections{conn_type="current",job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}[1m])) / avg by(instance) (sum (ferretdb_ss_connections) by (instance)) * 100 > {{ .rules.ferretdbTooManyConnections.val }}
+      for: {{ .rules.ferretdbTooManyConnections.duration }}
+      labels:
+        severity: {{ .rules.ferretdbTooManyConnections.severity }}
+        {{- include "kubedbcom-ferretdb-editor-options.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: FerretDB too many connections (instance {{`{{`}} $labels.instance {{`}}`}})
+        description: "Too many connections (> 80%)\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+    {{ if (include "kubedbcom-ferretdb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.mongoDBPhaseCritical.enabled .rules.mongoDBPhaseCritical.severity)) -}}
+    - alert: FerretDBPhaseCritical
+      expr: kubedb_com_ferretdb_status_phase{app="{{ $app }}", namespace="{{ $.Release.Namespace }}",phase="Critical"} >= 1
+      for: {{ .rules.mongoDBPhaseCritical.duration }}
+      labels:
+        severity: {{ .rules.mongoDBPhaseCritical.severity }}
+        {{- include "kubedbcom-ferretdb-editor-options.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: FerretDB database is in Critical state (instance {{`{{`}} $labels.instance {{`}}`}})
+        description: "Database in Critical state, one or more database nodes are not working properly.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+    {{ if (include "kubedbcom-ferretdb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.mongoDBDown.enabled .rules.mongoDBDown.severity)) -}}
+    - alert: FerretDBDown
+      expr: kubedb_com_ferretdb_status_phase{app="{{ $app }}", namespace="{{ $.Release.Namespace }}",phase="NotReady"} >= 1
+      for: {{ .rules.mongoDBDown.duration }}
+      labels:
+        severity: {{ .rules.mongoDBDown.severity }}
+        {{- include "kubedbcom-ferretdb-editor-options.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: FerretDB database is in NotReady state (instance {{`{{`}} $labels.instance {{`}}`}})
+        description: "Database in NotReady state, database read/write is failing.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+    {{ if (include "kubedbcom-ferretdb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.ferretdbHighLatency.enabled .rules.ferretdbHighLatency.severity)) -}}
+    - alert: FerretDBHighLatency
+      expr: |
+        rate(ferretdb_ss_opLatencies_latency{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}[5m]) /
+        rate(ferretdb_ss_opLatencies_ops{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}[5m]) > {{ .rules.ferretdbHighLatency.val }}
+      for: {{ .rules.ferretdbHighLatency.duration }}
+      labels:
+        severity: {{ .rules.ferretdbHighLatency.severity }}
+        {{- include "kubedbcom-ferretdb-editor-options.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: High latency in ferretdb instances {{`{{`}} $labels.instance {{`}}`}}
+        description: "High latency in instances\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+    {{ if (include "kubedbcom-ferretdb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.ferretdbHighTicketUtilization.enabled .rules.ferretdbHighTicketUtilization.severity)) -}}
+    - alert: FerretDBHighTicketUtilization
+      expr: |
+        (ferretdb_ss_wt_concurrentTransactions_out{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} /
+        ferretdb_ss_wt_concurrentTransactions_totalTickets{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}) * 100
+        > {{ .rules.ferretdbHighTicketUtilization.val }}
+      for: {{ .rules.ferretdbHighTicketUtilization.duration }}
+      labels:
+        severity: {{ .rules.ferretdbHighTicketUtilization.severity }}
+        {{- include "kubedbcom-ferretdb-editor-options.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: Ticket usage over 75% {{`{{`}} $labels.instance {{`}}`}}
+        description: "Ticket usage over 75%\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+    {{ if (include "kubedbcom-ferretdb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.ferretdbRecurrentCursorTimeout.enabled .rules.ferretdbRecurrentCursorTimeout.severity)) -}}
+    - alert: FerretDBRecurrentCursorTimeout
+      expr: rate(ferretdb_ss_metrics_cursor_timedOut{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}[5m]) > {{ .rules.ferretdbRecurrentCursorTimeout.val }}
+      for: {{ .rules.ferretdbRecurrentCursorTimeout.duration }}
+      labels:
+        severity: {{ .rules.ferretdbRecurrentCursorTimeout.severity }}
+        {{- include "kubedbcom-ferretdb-editor-options.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: Recurrent cursors timeout in instance {{`{{`}} $labels.instance {{`}}`}}
+        description: "Recurrent cursors timeout\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+    {{ if (include "kubedbcom-ferretdb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.ferretdbRecurrentMemoryPageFaults.enabled .rules.ferretdbRecurrentMemoryPageFaults.severity)) -}}
+    - alert: FerretDBRecurrentMemoryPageFaults
+      expr: rate(ferretdb_ss_extra_info_page_faults{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}[5m]) > {{ .rules.ferretdbRecurrentMemoryPageFaults.val }}
+      for: {{ .rules.ferretdbRecurrentMemoryPageFaults.duration }}
+      labels:
+        severity: {{ .rules.ferretdbRecurrentMemoryPageFaults.severity }}
+        {{- include "kubedbcom-ferretdb-editor-options.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: Recurrent memory page faults in instance {{`{{`}} $labels.instance {{`}}`}}
+        description: "Recurrent memory page faults\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+  {{end -}}
+  {{end -}}
+
+
+  {{ with .Values.form.alert.groups.provisioner -}}
+  {{ if (include "kubedbcom-ferretdb-editor-options.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
+  - name: ferretdb.provisioner.{{ $.Release.Namespace }}.{{ $app }}.rules
+    rules:
+    {{ if (include "kubedbcom-ferretdb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseNotReady.enabled .rules.appPhaseNotReady.severity)) -}}
+    - alert: KubeDBFerretDBPhaseNotReady
+      expr: kubedb_com_ferretdb_status_phase{phase="NotReady",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
+      for: {{ .rules.appPhaseNotReady.duration }}
+      labels:
+        severity: {{ .rules.appPhaseNotReady.severity }}
+        {{- include "kubedbcom-ferretdb-editor-options.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: KubeDB FerretDB Phase NotReady (ferretdb {{`{{`}} $labels.ferretdb {{`}}`}})
+        description: "KubeDB FerretDB Phase not ready on {{`{{`}} $labels.ferretdb {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{ end -}}
+    {{ if (include "kubedbcom-ferretdb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseCritical.enabled .rules.appPhaseCritical.severity)) -}}
+    - alert: KubeDBFerretDBPhaseCritical
+      expr: kubedb_com_ferretdb_status_phase{phase="Critical",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
+      for: {{ .rules.appPhaseCritical.duration }}
+      labels:
+        severity: {{ .rules.appPhaseCritical.severity }}
+        {{- include "kubedbcom-ferretdb-editor-options.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: KubeDB FerretDB Phase Critical (ferretdb {{`{{`}} $labels.ferretdb {{`}}`}})
+        description: "KubeDB FerretDB Phase Critical {{`{{`}} $labels.ferretdb {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+  {{ end -}}
+  {{ end -}}
+
+
+  {{ with .Values.form.alert.groups.opsManager -}}
+  {{ if (include "kubedbcom-ferretdb-editor-options.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
+  - name: ferretdb.opsManager.{{ $.Release.Namespace }}.{{ $app }}.rules
+    rules:
+    {{ if (include "kubedbcom-ferretdb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.opsRequestOnProgress.enabled .rules.opsRequestOnProgress.severity)) -}}
+    - alert: KubeDBFerretDBOpsRequestOnProgress
+      expr: ops_kubedb_com_ferretdbopsrequest_status_phase{phase="Progressing",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
+      for: {{ .rules.opsRequestOnProgress.duration }}
+      labels:
+        severity: {{ .rules.opsRequestOnProgress.severity }}
+        {{- include "kubedbcom-ferretdb-editor-options.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: FerretDBOpsRequest on progress (ferretdbopsrequest {{`{{`}} $labels.ferretdbopsrequest {{`}}`}})
+        description: "FerretDBOpsRequest {{`{{`}} $labels.ferretdbopsrequest {{`}}`}} is in progressressing status\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{ end -}}
+    {{ if (include "kubedbcom-ferretdb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.opsRequestStatusProgressingToLong.enabled .rules.opsRequestStatusProgressingToLong.severity)) -}}
+    - alert: KubeDBFerretDBOpsRequestStatusProgressingToLong
+      expr: ops_kubedb_com_ferretdbopsrequest_status_phase{phase="Progressing",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
+      for: {{ .rules.opsRequestStatusProgressingToLong.duration }}
+      labels:
+        severity: {{ .rules.opsRequestStatusProgressingToLong.severity }}
+        {{- include "kubedbcom-ferretdb-editor-options.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: FerretDBOpsRequest is in progressing status for too long (ferretdbopsrequest {{`{{`}} $labels.ferretdbopsrequest {{`}}`}})
+        description: "FerretDBOpsRequest {{`{{`}} $labels.ferretdbopsrequest {{`}}`}} is in progressing status for too long\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{ end -}}
+    {{ if (include "kubedbcom-ferretdb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.opsRequestFailed.enabled .rules.opsRequestFailed.severity)) -}}
+    - alert: KubeDBFerretDBOpsRequestFailed
+      expr: ops_kubedb_com_ferretdbopsrequest_status_phase{phase="Failed",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
+      for: {{ .rules.opsRequestFailed.duration }}
+      labels:
+        severity: {{ .rules.opsRequestFailed.severity }}
+        {{- include "kubedbcom-ferretdb-editor-options.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: FerretDBOpsRequest failed (ferretdbopsrequest {{`{{`}} $labels.ferretdbopsrequest {{`}}`}})
+        description: "FerretDBOpsRequest {{`{{`}} $labels.ferretdbopsrequest {{`}}`}} failed \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+  {{ end -}}
+  {{ end -}}
+
+
+  {{ with .Values.form.alert.groups.stash -}}
+  {{ if (include "kubedbcom-ferretdb-editor-options.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
+  - name: ferretdb.stash.{{ $.Release.Namespace }}.{{ $app }}.rules
+    rules:
+    {{ if (include "kubedbcom-ferretdb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.backupSessionFailed.enabled .rules.backupSessionFailed.severity)) -}}
+    - alert: FerretDBStashBackupSessionFailed
+      expr: stash_backup_session_success * on(invoker_name, invoker_kind) group_left(target_name, target_kind) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ $.Release.Namespace }}"} == 0
+      for: {{ .rules.backupSessionFailed.duration }}
+      labels:
+        severity: {{ .rules.backupSessionFailed.severity }}
+        {{- include "kubedbcom-ferretdb-editor-options.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: FerretDB Stash backup session failed (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
+        description: "FerretDB Stash backupsession failed {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{ end -}}
+    {{ if (include "kubedbcom-ferretdb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.restoreSessionFailed.enabled .rules.restoreSessionFailed.severity)) -}}
+    - alert: FerretDBStashRestoreSessionFailed
+      expr: stash_restore_session_success * on(invoker_name, invoker_kind) group_left(target_name, target_kind) stash_appscode_com_restoresession_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ $.Release.Namespace }}"} == 0
+      for: {{ .rules.restoreSessionFailed.duration }}
+      labels:
+        severity: {{ .rules.restoreSessionFailed.severity }}
+        {{- include "kubedbcom-ferretdb-editor-options.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: FerretDB Stash restore session failed (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
+        description: "FerretDB Stash restore session failed {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{ end -}}
+    {{ if (include "kubedbcom-ferretdb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.noBackupSessionForTooLong.enabled .rules.noBackupSessionForTooLong.severity)) -}}
+    - alert: FerretDBStashNoBackupSessionForTooLong
+      expr: time() - stash_backup_last_success_time_seconds + on(invoker_name, invoker_kind) group_left(target_name, target_kind) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ $.Release.Namespace }}"} - 1 > {{ .rules.noBackupSessionForTooLong.val }}
+      for: {{ .rules.noBackupSessionForTooLong.duration }}
+      labels:
+        severity: {{ .rules.noBackupSessionForTooLong.severity }}
+        {{- include "kubedbcom-ferretdb-editor-options.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: FerretDB Stash no backup for last {{ .rules.noBackupSessionForTooLong.val }} second (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
+        description: "FerretDB Stash no backup for too long {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{ end -}}
+    {{ if (include "kubedbcom-ferretdb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.repositoryCorrupted.enabled .rules.repositoryCorrupted.severity)) -}}
+    - alert: FerretDBStashRepositoryCorrupted
+      expr: stash_repository_integrity * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ $.Release.Namespace }}"}
+      for: {{ .rules.repositoryCorrupted.duration }}
+      labels:
+        severity: {{ .rules.repositoryCorrupted.severity }}
+        {{- include "kubedbcom-ferretdb-editor-options.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: FerretDB Stash repository corrupted (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
+        description: "FerretDB Stash repository corrupted {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{ end -}}
+    {{ if (include "kubedbcom-ferretdb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.repositoryStorageRunningLow.enabled .rules.repositoryStorageRunningLow.severity)) -}}
+    - alert: FerretDBStashRepositoryStorageRunningLow
+      expr: stash_repository_size_bytes * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ $.Release.Namespace }}"} > {{ .rules.repositoryStorageRunningLow.val }}
+      for: {{ .rules.repositoryStorageRunningLow.duration }}
+      labels:
+        severity: {{ .rules.repositoryStorageRunningLow.severity }}
+        {{- include "kubedbcom-ferretdb-editor-options.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: FerretDB Stash Repository storage more than {{ .rules.repositoryStorageRunningLow.val }} byte. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
+        description: "FerretDB Stash Repository storage running low {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+    {{ if (include "kubedbcom-ferretdb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.backupSessionPeriodTooLong.enabled .rules.backupSessionPeriodTooLong.severity)) -}}
+    - alert: FerretDBStashBackupSessionPeriodTooLong
+      expr: stash_backup_session_duration_seconds * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ $.Release.Namespace }}"} > {{ .rules.backupSessionPeriodTooLong.val }}
+      for: {{ .rules.backupSessionPeriodTooLong.duration }}
+      labels:
+        severity: {{ .rules.backupSessionPeriodTooLong.severity }}
+        {{- include "kubedbcom-ferretdb-editor-options.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary:  FerretDB Stash backup session took more than {{ .rules.backupSessionPeriodTooLong.val }} second to complete. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
+        description: "FerretDB Stash backup session taking to long to complete {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{ end -}}
+    {{ if (include "kubedbcom-ferretdb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.restoreSessionPeriodTooLong.enabled .rules.restoreSessionPeriodTooLong.severity)) -}}
+    - alert: FerretDBStashRestoreSessionPeriodTooLong
+      expr: stash_restore_session_duration_seconds * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_appscode_com_restoresession_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ $.Release.Namespace }}"} > {{ .rules.restoreSessionPeriodTooLong.val }}
+      for: {{ .rules.restoreSessionPeriodTooLong.duration }}
+      labels:
+        severity: {{ .rules.restoreSessionPeriodTooLong.severity }}
+        {{- include "kubedbcom-ferretdb-editor-options.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary:  FerretDB Stash restore session took more than {{ .rules.restoreSessionPeriodTooLong.val }} second to complete. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
+        description: "FerretDB Stash restore session taking to long to complete {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+  {{ end -}}
+  {{ end -}}
+
+
+  {{ with .Values.form.alert.groups.schemaManager -}}
+  {{ if (include "kubedbcom-ferretdb-editor-options.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
+  - name: ferretdb.schemaManager.{{ $.Release.Namespace }}.{{ $app }}.rules
+    rules:
+    {{ if (include "kubedbcom-ferretdb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.schemaPendingForTooLong.enabled .rules.schemaPendingForTooLong.severity)) -}}
+    - alert: KubeDBFerretDBSchemaPendingForTooLong
+      expr: schema_kubedb_com_ferretdbdatabase_status_phase{phase="Pending",app="{{ $app }}",app_namespace="{{ $.Release.Namespace }}"} == 1
+      for: {{ .rules.schemaPendingForTooLong.duration }}
+      labels:
+        severity: {{ .rules.schemaPendingForTooLong.severity }}
+        {{- include "kubedbcom-ferretdb-editor-options.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: KubeDB schema pending for too long for (ferretdbdatabase {{`{{`}} $labels.ferretdbdatabase {{`}}`}})
+        description: "KubeDB schema pending for too long.\n {{`{{`}} $labels.ferretdbdatabase {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{ end -}}
+    {{ if (include "kubedbcom-ferretdb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.schemaInProgressForTooLong.enabled .rules.schemaInProgressForTooLong.severity)) -}}
+    - alert: KubeDBFerretDBSchemaInProgressForTooLong
+      expr: schema_kubedb_com_ferretdbdatabase_status_phase{phase="InProgress",app="{{ $app }}",app_namespace="{{ $.Release.Namespace }}"} == 1
+      for: {{ .rules.schemaInProgressForTooLong.duration }}
+      labels:
+        severity: {{ .rules.schemaInProgressForTooLong.severity }}
+        {{- include "kubedbcom-ferretdb-editor-options.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: KubeDB schema is in progress for too long for (ferretdbdatabase {{`{{`}} $labels.ferretdbdatabase {{`}}`}})
+        description: "KubeDB schema is in progress for too long.\n {{`{{`}} $labels.ferretdbdatabase {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{ end -}}
+    {{ if (include "kubedbcom-ferretdb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.schemaTerminatingForTooLong.enabled .rules.schemaTerminatingForTooLong.severity)) -}}
+    - alert: KubeDBFerretDBSchemaTerminatingForTooLong
+      expr: schema_kubedb_com_ferretdbdatabase_status_phase{phase="Terminating",app="{{ $app }}",app_namespace="{{ $.Release.Namespace }}"} == 1
+      for: {{ .rules.schemaTerminatingForTooLong.duration }}
+      labels:
+        severity: {{ .rules.schemaTerminatingForTooLong.severity }}
+        {{- include "kubedbcom-ferretdb-editor-options.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: KubeDB schema terminating for too long for (ferretdbdatabase {{`{{`}} $labels.ferretdbdatabase {{`}}`}})
+        description: "KubeDB schema terminating for too long.\n {{`{{`}} $labels.ferretdbdatabase {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{ end -}}
+    {{ if (include "kubedbcom-ferretdb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.schemaFailed.enabled .rules.schemaFailed.severity)) -}}
+    - alert: KubeDBFerretDBSchemaFailed
+      expr: schema_kubedb_com_ferretdbdatabase_status_phase{phase="Failed",app="{{ $app }}",app_namespace="{{ $.Release.Namespace }}"} == 1
+      for: {{ .rules.schemaFailed.duration }}
+      labels:
+        severity: {{ .rules.schemaFailed.severity }}
+        {{- include "kubedbcom-ferretdb-editor-options.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: KubeDB schema failed for (ferretdbdatabase {{`{{`}} $labels.ferretdbdatabase {{`}}`}})
+        description: "KubeDB schema failed.\n {{`{{`}} $labels.ferretdbdatabase {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{ end -}}
+    {{ if (include "kubedbcom-ferretdb-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.schemaExpired.enabled .rules.schemaExpired.severity)) -}}
+    - alert: KubeDBFerretDBSchemaExpired
+      expr: schema_kubedb_com_ferretdbdatabase_status_phase{phase="Expired",app="{{ $app }}",app_namespace="{{ $.Release.Namespace }}"} == 1
+      for: {{ .rules.schemaExpired.duration }}
+      labels:
+        severity: {{ .rules.schemaExpired.severity }}
+        {{- include "kubedbcom-ferretdb-editor-options.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: KubeDB schema expired for (ferretdbdatabase {{`{{`}} $labels.ferretdbdatabase {{`}}`}})
+        description: "KubeDB schema expired.\n {{`{{`}} $labels.ferretdbdatabase {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+  {{ end -}}
+  {{ end -}}
+
+{{ end }}

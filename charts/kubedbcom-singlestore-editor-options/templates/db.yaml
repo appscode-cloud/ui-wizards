@@ -1,0 +1,74 @@
+{{- $res := .Values.spec.resources -}}
+{{- $machines := .Files.Get "data/machines.yaml" | fromYaml -}}
+{{- if and .Values.spec.machine (hasKey $machines .Values.spec.machine) }}
+  {{- $res = get (get $machines .Values.spec.machine) "resources" }}
+{{- end }}
+{{ $poolName := printf "%s-%s-%s" .Values.form.capi.clusterName .Release.Namespace (include "kubedbcom-singlestore-editor-options.fullname" .) }}
+
+apiVersion: kubedb.com/v1alpha2
+kind: Singlestore
+metadata:
+  name: {{ include "kubedbcom-singlestore-editor-options.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kubedbcom-singlestore-editor-options.labels" . | nindent 4 }}
+{{- if .Values.spec.annotations }}
+  annotations:
+    {{- include "kubedbcom-singlestore-editor-options.annotations" . | nindent 4 }}
+{{- end }}
+spec:
+  version: {{ .Values.spec.version | quote }}
+{{- if eq .Values.spec.mode "Standalone" }}
+  replicas: 1
+{{- else if eq .Values.spec.mode "GroupReplication" }}
+  replicas: {{ .Values.spec.replicas }}
+  topology:
+    mode: GroupReplication
+{{- else if eq .Values.spec.mode "InnoDBCluster" }}
+  replicas: {{ .Values.spec.replicas }}
+  topology:
+    mode: InnoDBCluster
+    innoDBCluster:
+      router:
+        replicas: {{ .Values.spec.innoDBCluster.router.replicas }}
+{{- end }}
+  storageType: Durable
+  storage:
+    storageClassName: {{ .Values.spec.storageClass.name }}
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: {{ .Values.spec.persistence.size }}
+  podTemplate:
+    spec:
+      resources:
+        {{- toYaml $res | nindent 8 }}
+      {{- if and .Values.form.capi.provider .Values.form.capi.dedicated }}
+      nodeSelector:
+        nodes.klusters.dev/pool: {{ $poolName }}
+      tolerations:
+        - key: dedicated
+          operator: "Equal"
+          value: "true"
+          effect: "NoSchedule"
+      {{- end }}
+  terminationPolicy: {{ .Values.spec.terminationPolicy }}
+{{- if .Values.spec.authSecret.name }}
+  authSecret:
+    name: {{ .Values.spec.authSecret.name }}
+{{- end }}
+{{- if (and .Values.spec.monitoring .Values.spec.monitoring.agent) }}
+  monitor:
+    agent: {{ .Values.spec.monitoring.agent }}
+    prometheus:
+    {{- with .Values.spec.monitoring.exporter }}
+      exporter:
+        resources:
+          {{- toYaml .resources | nindent 10 }}
+    {{- end }}
+      serviceMonitor:
+        interval: 30s
+        labels:
+          {{- toYaml .Values.spec.monitoring.serviceMonitor.labels | nindent 10 }}
+{{- end }}

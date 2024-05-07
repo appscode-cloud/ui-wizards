@@ -1,5 +1,154 @@
-apiVersion: kubedb.com/v1alpha2
-kind: ZooKeeper
+form:
+  alert:
+    additionalRuleLabels: {}
+    annotations: {}
+    enabled: warning
+    groups:
+      database:
+        enabled: warning
+        rules:
+          diskAlmostFull:
+            duration: 1m
+            enabled: true
+            severity: critical
+            val: 95
+          diskUsageHigh:
+            duration: 1m
+            enabled: true
+            severity: warning
+            val: 80
+          zookeeperDown:
+            duration: 1m
+            enabled: true
+            severity: critical
+          zookeeperJvmMemoryFilingUp:
+            duration: 1m
+            enabled: true
+            severity: warning
+            val: 0.8
+          zookeeperLeaderElection:
+            duration: 1m
+            enabled: true
+            severity: warning
+            val: 0
+          zookeeperTooBigMemory:
+            duration: 1m
+            enabled: true
+            severity: warning
+            val: 1
+          zookeeperTooHighAvgLatency:
+            duration: 1m
+            enabled: true
+            severity: warning
+            val: 100
+          zookeeperTooLongFsyncTime:
+            duration: 1m
+            enabled: true
+            severity: warning
+            val: 100
+          zookeeperTooLongSnapshotTime:
+            duration: 1m
+            enabled: true
+            severity: warning
+            val: 100
+          zookeeperTooManyConnections:
+            duration: 1m
+            enabled: true
+            severity: warning
+            val: 60
+          zookeeperTooManyNodes:
+            duration: 1m
+            enabled: true
+            severity: warning
+            val: 1e+06
+          zookeeperTooManyOpenFiles:
+            duration: 1m
+            enabled: true
+            severity: warning
+            val: 300
+          zookeeperTooManyWatch:
+            duration: 1m
+            enabled: true
+            severity: warning
+            val: 10000
+      provisioner:
+        enabled: warning
+        rules:
+          appPhaseCritical:
+            duration: 15m
+            enabled: true
+            severity: warning
+          appPhaseNotReady:
+            duration: 1m
+            enabled: true
+            severity: critical
+    labels:
+      release: kube-prometheus-stack
+  capi:
+    clusterName: ""
+    dedicated: false
+    namespace: ""
+    nodes: 1
+    provider: ""
+    sku: ""
+    zones: []
 metadata:
-  name: zookeeper
-  namespace: default
+  resource:
+    group: kubedb.com
+    version: v1alpha2
+    name: zookeepers
+    kind: ZooKeeper
+    scope: Namespaced
+  release:
+    name: RELEASE-NAME
+    namespace: default
+resources:
+  kubedbComZooKeeper: # +doc-gen:break
+    apiVersion: kubedb.com/v1alpha2
+    kind: ZooKeeper
+    metadata:
+      name: zookeeper
+      namespace: zookeeper
+    spec:
+      podTemplate:
+        spec:
+          containers:
+            - name: zookeeper
+              resources:
+                requests:
+                  cpu: 700m
+                  memory: 1200Mi
+          nodeSelector:
+            app: kubedb
+            component: zookeeper-database
+            instance: zookeeper
+          tolerations:
+            - effect: NoSchedule
+              key: app
+              operator: Equal
+              value: kubedb
+            - effect: NoSchedule
+              key: instance
+              operator: Equal
+              value: zookeeper
+            - effect: NoSchedule
+              key: component
+              operator: Equal
+              value: zookeeper-database
+            - effect: NoSchedule
+              key: nodepool_type
+              operator: Equal
+              value: n2-standard-2
+      replicas: 3
+      serviceTemplates:
+        - alias: primary
+          spec:
+            type: LoadBalancer
+      storage:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 100Mi
+      terminationPolicy: Halt
+      version: 3.8.3

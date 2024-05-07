@@ -1,5 +1,196 @@
-apiVersion: kubedb.com/v1alpha2
-kind: Singlestore
+form:
+  alert:
+    additionalRuleLabels: {}
+    annotations: {}
+    enabled: warning
+    groups:
+      database:
+        enabled: warning
+        rules:
+          diskAlmostFull:
+            duration: 1m
+            enabled: true
+            severity: critical
+            val: 95
+          diskUsageHigh:
+            duration: 1m
+            enabled: true
+            severity: warning
+            val: 80
+          singlestoreHighIncomingBytes:
+            duration: 0m
+            enabled: true
+            severity: critical
+            val: 1.048576e+06
+          singlestoreHighOutgoingBytes:
+            duration: 0m
+            enabled: true
+            severity: critical
+            val: 1.048576e+06
+          singlestoreHighQPS:
+            duration: 0m
+            enabled: true
+            severity: critical
+            val: 1000
+          singlestoreHighThreadsRunning:
+            duration: 2m
+            enabled: true
+            severity: warning
+            val: 60
+          singlestoreInstanceDown:
+            duration: 0m
+            enabled: true
+            severity: critical
+          singlestoreRestarted:
+            duration: 0m
+            enabled: true
+            severity: warning
+            val: 60
+          singlestoreServiceDown:
+            duration: 0m
+            enabled: true
+            severity: critical
+          singlestoreTooManyConnections:
+            duration: 2m
+            enabled: true
+            severity: warning
+            val: 80
+      kubeStash:
+        enabled: warning
+        rules:
+          backupSessionFailed:
+            duration: 0m
+            enabled: true
+            severity: critical
+          backupSessionPeriodTooLong:
+            duration: 0m
+            enabled: true
+            severity: warning
+            val: 1800
+          noBackupSessionForTooLong:
+            duration: 0m
+            enabled: true
+            severity: warning
+            val: 18000
+          repositoryCorrupted:
+            duration: 5m
+            enabled: true
+            severity: critical
+          repositoryStorageRunningLow:
+            duration: 5m
+            enabled: true
+            severity: warning
+            val: 1.073741824e+10
+          restoreSessionFailed:
+            duration: 0m
+            enabled: true
+            severity: critical
+          restoreSessionPeriodTooLong:
+            duration: 0m
+            enabled: true
+            severity: warning
+            val: 1800
+      provisioner:
+        enabled: warning
+        rules:
+          appPhaseCritical:
+            duration: 15m
+            enabled: true
+            severity: warning
+          appPhaseNotReady:
+            duration: 1m
+            enabled: true
+            severity: critical
+    labels:
+      release: kube-prometheus-stack
+  capi:
+    clusterName: ""
+    dedicated: false
+    namespace: ""
+    nodes: 1
+    provider: ""
+    sku: ""
+    zones: []
 metadata:
-  name: singlestore
-  namespace: default
+  resource:
+    group: kubedb.com
+    version: v1alpha2
+    name: singlestores
+    kind: Singlestore
+    scope: Namespaced
+  release:
+    name: RELEASE-NAME
+    namespace: default
+resources:
+  kubedbComSinglestore: # +doc-gen:break
+    apiVersion: kubedb.com/v1alpha2
+    kind: Singlestore
+    metadata:
+      name: singlestore
+      namespace: sdb
+    spec:
+      licenseSecret:
+        name: license-secret
+      serviceTemplates:
+        - alias: primary
+          spec:
+            type: LoadBalancer
+      storageType: Durable
+      terminationPolicy: Halt
+      topology:
+        aggregator:
+          podTemplate:
+            spec:
+              containers:
+                - name: singlestore
+                  resources:
+                    requests:
+                      cpu: 600m
+                      memory: 1200Mi
+              nodeSelector:
+                app: kubedb
+                component: sdb-database
+                instance: sdb
+              tolerations:
+                - effect: NoSchedule
+                  key: app
+                  operator: Equal
+                  value: kubedb
+                - effect: NoSchedule
+                  key: instance
+                  operator: Equal
+                  value: sdb
+                - effect: NoSchedule
+                  key: component
+                  operator: Equal
+                  value: sdb-database
+                - effect: NoSchedule
+                  key: nodepool_type
+                  operator: Equal
+                  value: n2-standard-2
+          replicas: 3
+          storage:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 1Gi
+            storageClassName: standard-rwo
+        leaf:
+          podTemplate:
+            spec:
+              containers:
+                - name: singlestore
+                  resources:
+                    requests:
+                      cpu: 700m
+                      memory: 1400Mi
+          replicas: 2
+          storage:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 10Gi
+            storageClassName: standard-rwo
+      version: 8.1.32

@@ -1,5 +1,135 @@
-apiVersion: kubedb.com/v1alpha2
-kind: Pgpool
+form:
+  alert:
+    additionalRuleLabels: {}
+    annotations: {}
+    enabled: warning
+    groups:
+      database:
+        enabled: warning
+        rules:
+          diskAlmostFull:
+            duration: 1m
+            enabled: true
+            severity: critical
+            val: 95
+          diskUsageHigh:
+            duration: 1m
+            enabled: true
+            severity: warning
+            val: 80
+          pgpoolBackendErrorMessageCount:
+            duration: 0m
+            enabled: true
+            severity: critical
+            val: 10
+          pgpoolBackendFatalMessageCount:
+            duration: 0m
+            enabled: true
+            severity: critical
+            val: 10
+          pgpoolBackendPanicMessageCount:
+            duration: 0m
+            enabled: true
+            severity: critical
+            val: 10
+          pgpoolDown:
+            duration: 0m
+            enabled: true
+            severity: critical
+          pgpoolExporterLastScrapeError:
+            duration: 0m
+            enabled: true
+            severity: warning
+          pgpoolLowCacheMemory:
+            duration: 1m
+            enabled: true
+            severity: warning
+            val: 100
+          pgpoolPostgresHealthCheckFailure:
+            duration: 0m
+            enabled: true
+            severity: critical
+            val: 10
+          pgpoolTooManyConnections:
+            duration: 1m
+            enabled: true
+            severity: warning
+            val: 0.1
+      provisioner:
+        enabled: warning
+        rules:
+          appPhaseCritical:
+            duration: 15m
+            enabled: true
+            severity: warning
+          appPhaseNotReady:
+            duration: 1m
+            enabled: true
+            severity: critical
+    labels:
+      release: prometheus
+  capi:
+    clusterName: ""
+    dedicated: false
+    namespace: ""
+    nodes: 1
+    provider: ""
+    sku: ""
+    zones: []
 metadata:
-  name: pgpool
-  namespace: default
+  resource:
+    group: kubedb.com
+    version: v1alpha2
+    name: pgpools
+    kind: Pgpool
+    scope: Namespaced
+  release:
+    name: RELEASE-NAME
+    namespace: default
+resources:
+  kubedbComPgpool: # +doc-gen:break
+    apiVersion: kubedb.com/v1alpha2
+    kind: Pgpool
+    metadata:
+      name: pgpool
+      namespace: pool
+    spec:
+      initConfig:
+        pgpoolConfig:
+          backend_clustering_mode: streaming_replication
+          child_life_time: 300
+          child_max_connections: 0
+          client_idle_limit: 0
+          connection_cache: true
+          connection_life_time: 0
+          failover_on_backend_error: false
+          health_check_period: 0
+          load_balance_mode: true
+          log_min_messages: warning
+          log_per_node_statement: true
+          log_statement: true
+          max_pool: 100
+          memory_cache_enabled: true
+          num_init_children: 5
+          sr_check_period: 0
+          ssl: true
+          statement_level_load_balance: true
+      podTemplate:
+        spec:
+          containers:
+            - name: pgpool
+              resources:
+                requests:
+                  cpu: 700m
+                  memory: 1400Mi
+      postgresRef:
+        name: ha-postgres
+        namespace: demo
+      replicas: 3
+      serviceTemplates:
+        - alias: primary
+          spec:
+            type: LoadBalancer
+      syncUsers: true
+      terminationPolicy: WipeOut
+      version: 4.5.0

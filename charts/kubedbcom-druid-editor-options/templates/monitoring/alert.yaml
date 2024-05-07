@@ -1,0 +1,144 @@
+{{ $app := (include "kubedbcom-druid-editor-options.fullname" .) }}
+
+{{ if (include "kubedbcom-druid-editor-options.alertsEnabled" .Values.form.alert.enabled) }}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ $app }}
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    {{- include "kubedbcom-druid-editor-options.labels" . | nindent 4 }}
+{{- if .Values.form.alert.labels }}
+    {{- toYaml .Values.form.alert.labels | nindent 4 }}
+{{- end }}
+{{- if .Values.form.alert.annotations }}
+  annotations:
+    {{- toYaml .Values.form.alert.annotations | nindent 4 }}
+{{- end }}
+spec:
+  groups:
+  {{ with .Values.form.alert.groups.database -}}
+  {{ if (include "kubedbcom-druid-editor-options.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
+  - name: druid.database.{{ $.Release.Namespace }}.{{ $app }}.rules
+    rules:
+    {{ if (include "kubedbcom-druid-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.druidDown.enabled .rules.druidDown.severity)) -}}
+    - alert: DruidDown
+      expr: min(druid_service_heartbeat{service="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}) == 0
+      for: {{ .rules.druidDown.duration }}
+      labels:
+        severity: {{ .rules.druidDown.severity }}
+        {{- include "kubedbcom-druid-editor-options.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: Druid service down (instance {{`{{`}} $labels.pod {{`}}`}})
+        description: "One of the druid service is down for more than {{ .rules.druidDown.duration }} {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+    {{ if (include "kubedbcom-druid-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.zkDisconnected.enabled .rules.zkDisconnected.severity)) -}}
+    - alert: ZKDisconnected
+      expr: min(druid_zk_connected{service="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}) == 0
+      for: {{ .rules.zkDisconnected.duration }}
+      labels:
+        severity: {{ .rules.zkDisconnected.severity }}
+        {{- include "kubedbcom-druid-editor-options.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: ZooKeeper disconnected (instance {{`{{`}} $labels.pod {{`}}`}})
+        description: "Druid lost connection to ZooKeeper {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+    {{ if (include "kubedbcom-druid-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.highQueryTime.enabled .rules.highQueryTime.severity)) -}}
+    - alert: HighQueryTime
+      expr: max(max without(le) (druid_query_time_bucket{service="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}",le="+Inf", pod=~".*historicals-0"} - on(dataSource, type) group_left(le) druid_query_time_bucket{service="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}",le="1.0", pod=~".*historicals-0"})) > 0
+      for: {{ .rules.highQueryTime.duration }}
+      labels:
+        severity: {{ .rules.highQueryTime.severity }}
+        {{- include "kubedbcom-druid-editor-options.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: Query took more than 1 sec (instance {{`{{`}} $labels.pod {{`}}`}})
+        description: "Druid took more than 1 second to complete a query  {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+    {{ if (include "kubedbcom-druid-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.highQueryWaitTime.enabled .rules.highQueryWaitTime.severity)) -}}
+    - alert: HighQueryWaitTime
+      expr: druid_query_wait_time_bucket{service="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}",pod=~".*historicals-0",le="+Inf"}- on() druid_query_wait_time_bucket{service="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}",pod=~".*historicals-0",le="0.1"} > 0
+      for: {{ .rules.highQueryWaitTime.duration }}
+      labels:
+        severity: {{ .rules.highQueryWaitTime.severity }}
+        {{- include "kubedbcom-druid-editor-options.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: Took more than 1 sec on waiting for a segment scan. (instance {{`{{`}} $labels.pod {{`}}`}})
+        description: "Druid spent more than 1 sec on waiting for a segment to be scanned.  {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+    {{ if (include "kubedbcom-druid-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.highSegmentScanPending.enabled .rules.highSegmentScanPending.severity)) -}}
+    - alert: HighSegmentScanPending
+      expr: max(druid_segment_scan_pending{service="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}) >  {{ .rules.highSegmentScanPending.val }}
+      for: {{ .rules.highSegmentScanPending.duration }}
+      labels:
+        severity: {{ .rules.highSegmentScanPending.severity }}
+        {{- include "kubedbcom-druid-editor-options.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: High number of segments waiting in queue. (instance {{`{{`}} $labels.pod {{`}}`}})
+        description: "More than {{ .rules.highSegmentScanPending.val }} segments are in queue waiting to be scanned for more than {{ .rules.highSegmentScanPending.duration }}. {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+    {{ if (include "kubedbcom-druid-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.highSegmentUsage.enabled .rules.highSegmentUsage.severity)) -}}
+    - alert: HighSegmentUsage
+      expr: max(druid_segment_usedpercent{service="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}) >  {{ .rules.highSegmentUsage.val }}
+      for: {{ .rules.highSegmentUsage.duration }}
+      labels:
+        severity: {{ .rules.highSegmentUsage.severity }}
+        {{- include "kubedbcom-druid-editor-options.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: High space usage by served segments. (instance {{`{{`}} $labels.pod {{`}}`}})
+        description: "More than {{ .rules.highSegmentUsage.val }}% of space used by served segments. {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+    {{ if (include "kubedbcom-druid-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.highJVMPoolUsage.enabled .rules.highJVMPoolUsage.severity)) -}}
+    - alert: HighJVMPoolUsage
+      expr: max(druid_jvm_pool_used{service="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} / on(pod, poolName) druid_jvm_pool_max{service="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}*100) > {{ .rules.highJVMPoolUsage.val }}
+      for: {{ .rules.highJVMPoolUsage.duration }}
+      labels:
+        severity: {{ .rules.highJVMPoolUsage.severity }}
+        {{- include "kubedbcom-druid-editor-options.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: High JVM Pool is being used. (instance {{`{{`}} $labels.pod {{`}}`}})
+        description: "More than {{ .rules.highJVMPoolUsage.val }}% of JVM Pool is being used. {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+    {{ if (include "kubedbcom-druid-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.highJVMMemoryUsage.enabled .rules.highJVMMemoryUsage.severity)) -}}
+    - alert: HighJVMMemoryUsage
+      expr: max(druid_jvm_mem_used{service="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}/on(pod, memKind) druid_jvm_mem_max{service="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}*100) > {{ .rules.highJVMMemoryUsage.val }}
+      for: {{ .rules.highJVMMemoryUsage.duration }}
+      labels:
+        severity: {{ .rules.highJVMMemoryUsage.severity }}
+        {{- include "kubedbcom-druid-editor-options.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: High JVM Memory is being used. (instance {{`{{`}} $labels.pod {{`}}`}})
+        description: "More than {{ .rules.highJVMMemoryUsage.val }}% of JVM Memory is being used. {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+  {{end -}}
+  {{end -}}
+
+  {{ with .Values.form.alert.groups.provisioner -}}
+  {{ if (include "kubedbcom-druid-editor-options.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
+  - name: druid.provisioner.{{ $.Release.Namespace }}.{{ $app }}.rules
+    rules:
+    {{ if (include "kubedbcom-druid-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseNotReady.enabled .rules.appPhaseNotReady.severity)) -}}
+    - alert: KubeDBDruidPhaseNotReady
+      expr: kubedb_com_druid_status_phase{phase="NotReady",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
+      for: {{ .rules.appPhaseNotReady.duration }}
+      labels:
+        severity: {{ .rules.appPhaseNotReady.severity }}
+        {{- include "kubedbcom-druid-editor-options.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: KubeDB Druid Phase NotReady (druid {{`{{`}} $labels.druid {{`}}`}})
+        description: "KubeDB Druid Phase not ready on {{`{{`}} $labels.druid {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{ end -}}
+    {{ if (include "kubedbcom-druid-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseCritical.enabled .rules.appPhaseCritical.severity)) -}}
+    - alert: KubeDBDruidPhaseCritical
+      expr: kubedb_com_druid_status_phase{phase="Critical",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
+      for: {{ .rules.appPhaseCritical.duration }}
+      labels:
+        severity: {{ .rules.appPhaseCritical.severity }}
+        {{- include "kubedbcom-druid-editor-options.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: KubeDB Druid Phase Critical (druid {{`{{`}} $labels.druid {{`}}`}})
+        description: "KubeDB Druid Phase Critical {{`{{`}} $labels.druid {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+  {{ end -}}
+  {{ end -}}
+
+{{ end }}

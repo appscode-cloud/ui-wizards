@@ -1,5 +1,155 @@
-apiVersion: kubedb.com/v1alpha2
-kind: Druid
+form:
+  alert:
+    additionalRuleLabels: {}
+    annotations: {}
+    enabled: warning
+    groups:
+      database:
+        enabled: warning
+        rules:
+          druidDown:
+            duration: 1m
+            enabled: true
+            severity: critical
+          highJVMMemoryUsage:
+            duration: 30s
+            enabled: true
+            severity: critical
+            val: 95
+          highJVMPoolUsage:
+            duration: 30s
+            enabled: true
+            severity: warning
+            val: 95
+          highQueryTime:
+            duration: 1m
+            enabled: true
+            severity: warning
+          highQueryWaitTime:
+            duration: 1m
+            enabled: true
+            severity: warning
+          highSegmentScanPending:
+            duration: 1m
+            enabled: true
+            severity: warning
+            val: 2
+          highSegmentUsage:
+            duration: 1m
+            enabled: true
+            severity: critical
+            val: 95
+          zkDisconnected:
+            duration: 1m
+            enabled: true
+            severity: critical
+      provisioner:
+        enabled: warning
+        rules:
+          appPhaseCritical:
+            duration: 15m
+            enabled: true
+            severity: warning
+          appPhaseNotReady:
+            duration: 1m
+            enabled: true
+            severity: critical
+    labels:
+      release: prometheus
+  capi:
+    clusterName: ""
+    dedicated: false
+    namespace: ""
+    nodes: 1
+    provider: ""
+    sku: ""
+    zones: []
 metadata:
-  name: druid
-  namespace: default
+  resource:
+    group: kubedb.com
+    version: v1alpha2
+    name: druids
+    kind: Druid
+    scope: Namespaced
+  release:
+    name: RELEASE-NAME
+    namespace: default
+resources:
+  kubedbComDruid: # +doc-gen:break
+    apiVersion: kubedb.com/v1alpha2
+    kind: Druid
+    metadata:
+      name: druid
+      namespace: druid
+    spec:
+      deepStorage:
+        configSecret:
+          name: deep-storage-config
+        type: s3
+      metadataStorage:
+        createTables: true
+        name: mysql-cluster
+        namespace: druid
+      serviceTemplates:
+        - alias: primary
+          spec:
+            type: LoadBalancer
+      storageType: Ephemeral
+      topology:
+        brokers:
+          podTemplate:
+            spec:
+              containers:
+                - name: druid
+                  resources:
+                    requests:
+                      cpu: 700m
+                      memory: 1200Mi
+              nodeSelector:
+                app: kubedb
+                component: druid-database
+                instance: druid
+              tolerations:
+                - effect: NoSchedule
+                  key: app
+                  operator: Equal
+                  value: kubedb
+                - effect: NoSchedule
+                  key: instance
+                  operator: Equal
+                  value: druid
+                - effect: NoSchedule
+                  key: component
+                  operator: Equal
+                  value: druid-database
+                - effect: NoSchedule
+                  key: nodepool_type
+                  operator: Equal
+                  value: n2-standard-2
+          replicas: 1
+        coordinators:
+          replicas: 1
+        historicals:
+          replicas: 1
+          storage:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 1Gi
+        middleManagers:
+          replicas: 1
+          storage:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 1Gi
+        overlords:
+          replicas: 1
+        routers:
+          replicas: 1
+      version: 28.0.1
+      zookeeperRef:
+        name: zk-cluster
+        namespace: druid
