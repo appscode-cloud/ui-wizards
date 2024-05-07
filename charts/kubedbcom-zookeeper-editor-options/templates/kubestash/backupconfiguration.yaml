@@ -3,15 +3,15 @@
 apiVersion: core.kubestash.com/v1alpha1
 kind: BackupConfiguration
 metadata:
-  name: {{ include "kubedbcom-zooKeeper-editor-options.fullname" . }}
+  name: {{ include "kubedbcom-zookeeper-editor-options.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "kubedbcom-zooKeeper-editor-options.labels" . | nindent 4 }}
+    {{- include "kubedbcom-zookeeper-editor-options.labels" . | nindent 4 }}
 spec:
   target:
     apiGroup: kubedb.com
     kind: ZooKeeper
-    name: {{ include "kubedbcom-zooKeeper-editor-options.fullname" . }}
+    name: {{ include "kubedbcom-zookeeper-editor-options.fullname" . }}
     namespace: {{ .Release.Namespace }}
   backends:
     - name: default-backend
@@ -29,9 +29,9 @@ spec:
         jobTemplate:
           backoffLimit: 1
       repositories:
-        - name: {{ include "kubedbcom-zooKeeper-editor-options.fullname" . }}
+        - name: {{ include "kubedbcom-zookeeper-editor-options.fullname" . }}
           backend: default-backend
-          directory: {{ .Release.Namespace }}/{{ include "kubedbcom-zooKeeper-editor-options.fullname" . }}
+          directory: {{ .Release.Namespace }}/{{ include "kubedbcom-zookeeper-editor-options.fullname" . }}
           encryptionSecret:
             name: {{ .Values.spec.backup.kubestash.encryptionSecret.name }}
             namespace: {{ .Values.spec.backup.kubestash.encryptionSecret.namespace }}

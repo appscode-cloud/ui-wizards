@@ -7,8 +7,8 @@
 ```bash
 $ helm repo add bytebuilders-ui https://bundles.byte.builders/ui/
 $ helm repo update
-$ helm search repo bytebuilders-ui/kubedbcom-zooKeeper-editor-options --version=v0.4.18
-$ helm upgrade -i kubedbcom-zooKeeper-editor-options bytebuilders-ui/kubedbcom-zooKeeper-editor-options -n kube-system --create-namespace --version=v0.4.18
+$ helm search repo bytebuilders-ui/kubedbcom-zookeeper-editor-options --version=v0.4.18
+$ helm upgrade -i kubedbcom-zookeeper-editor-options bytebuilders-ui/kubedbcom-zookeeper-editor-options -n kube-system --create-namespace --version=v0.4.18
 ```
 
 ## Introduction
@@ -21,10 +21,10 @@ This chart deploys a ZooKeeper Editor UI Options on a [Kubernetes](http://kubern
 
 ## Installing the Chart
 
-To install/upgrade the chart with the release name `kubedbcom-zooKeeper-editor-options`:
+To install/upgrade the chart with the release name `kubedbcom-zookeeper-editor-options`:
 
 ```bash
-$ helm upgrade -i kubedbcom-zooKeeper-editor-options bytebuilders-ui/kubedbcom-zooKeeper-editor-options -n kube-system --create-namespace --version=v0.4.18
+$ helm upgrade -i kubedbcom-zookeeper-editor-options bytebuilders-ui/kubedbcom-zookeeper-editor-options -n kube-system --create-namespace --version=v0.4.18
 ```
 
 The command deploys a ZooKeeper Editor UI Options on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
@@ -33,17 +33,17 @@ The command deploys a ZooKeeper Editor UI Options on the Kubernetes cluster in t
 
 ## Uninstalling the Chart
 
-To uninstall the `kubedbcom-zooKeeper-editor-options`:
+To uninstall the `kubedbcom-zookeeper-editor-options`:
 
 ```bash
-$ helm uninstall kubedbcom-zooKeeper-editor-options -n kube-system
+$ helm uninstall kubedbcom-zookeeper-editor-options -n kube-system
 ```
 
 The command removes all the Kubernetes components associated with the chart and deletes the release.
 
 ## Configuration
 
-The following table lists the configurable parameters of the `kubedbcom-zooKeeper-editor-options` chart and their default values.
+The following table lists the configurable parameters of the `kubedbcom-zookeeper-editor-options` chart and their default values.
 
 |                                   Parameter                                   |                                                                                Description                                                                                |                          Default                          |
 |-------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------|
@@ -243,12 +243,12 @@ The following table lists the configurable parameters of the `kubedbcom-zooKeepe
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm upgrade -i`. For example:
 
 ```bash
-$ helm upgrade -i kubedbcom-zooKeeper-editor-options bytebuilders-ui/kubedbcom-zooKeeper-editor-options -n kube-system --create-namespace --version=v0.4.18 --set metadata.resource.group=kubedb.com
+$ helm upgrade -i kubedbcom-zookeeper-editor-options bytebuilders-ui/kubedbcom-zookeeper-editor-options -n kube-system --create-namespace --version=v0.4.18 --set metadata.resource.group=kubedb.com
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
 installing the chart. For example:
 
 ```bash
-$ helm upgrade -i kubedbcom-zooKeeper-editor-options bytebuilders-ui/kubedbcom-zooKeeper-editor-options -n kube-system --create-namespace --version=v0.4.18 --values values.yaml
+$ helm upgrade -i kubedbcom-zookeeper-editor-options bytebuilders-ui/kubedbcom-zookeeper-editor-options -n kube-system --create-namespace --version=v0.4.18 --values values.yaml
 ```

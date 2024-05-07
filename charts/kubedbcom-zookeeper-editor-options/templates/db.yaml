@@ -3,18 +3,18 @@
 {{- if and .Values.spec.machine (hasKey $machines .Values.spec.machine) }}
   {{- $res = get (get $machines .Values.spec.machine) "resources" }}
 {{- end }}
-{{ $poolName := printf "%s-%s-%s" .Values.form.capi.clusterName .Release.Namespace (include "kubedbcom-zooKeeper-editor-options.fullname" .) }}
+{{ $poolName := printf "%s-%s-%s" .Values.form.capi.clusterName .Release.Namespace (include "kubedbcom-zookeeper-editor-options.fullname" .) }}
 
 apiVersion: kubedb.com/v1alpha2
 kind: ZooKeeper
 metadata:
-  name: {{ include "kubedbcom-zooKeeper-editor-options.fullname" . }}
+  name: {{ include "kubedbcom-zookeeper-editor-options.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "kubedbcom-zooKeeper-editor-options.labels" . | nindent 4 }}
+    {{- include "kubedbcom-zookeeper-editor-options.labels" . | nindent 4 }}
 {{- if .Values.spec.annotations }}
   annotations:
-    {{- include "kubedbcom-zooKeeper-editor-options.annotations" . | nindent 4 }}
+    {{- include "kubedbcom-zookeeper-editor-options.annotations" . | nindent 4 }}
 {{- end }}
 spec:
   version: {{ .Values.spec.version | quote }}

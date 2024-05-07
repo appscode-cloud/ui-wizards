@@ -1,7 +1,7 @@
 {{/*
 Expand the name of the chart.
 */}}
-{{- define "kubedbcom-zooKeeper-editor-options.name" -}}
+{{- define "kubedbcom-zookeeper-editor-options.name" -}}
 {{- .Chart.Name | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
@@ -9,22 +9,22 @@ Expand the name of the chart.
 Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 */}}
-{{- define "kubedbcom-zooKeeper-editor-options.fullname" -}}
+{{- define "kubedbcom-zookeeper-editor-options.fullname" -}}
 {{- .Release.Name | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
 Create chart name and version as used by the chart label.
 */}}
-{{- define "kubedbcom-zooKeeper-editor-options.chart" -}}
+{{- define "kubedbcom-zookeeper-editor-options.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
 Common labels
 */}}
-{{- define "kubedbcom-zooKeeper-editor-options.labels" -}}
-{{ include "kubedbcom-zooKeeper-editor-options.selectorLabels" . }}
+{{- define "kubedbcom-zookeeper-editor-options.labels" -}}
+{{ include "kubedbcom-zookeeper-editor-options.selectorLabels" . }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- range $k, $v := .Values.spec.labels }}
 {{ $k }}: "{{ $v }}"
@@ -34,17 +34,17 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{/*
 Selector labels
 */}}
-{{- define "kubedbcom-zooKeeper-editor-options.selectorLabels" -}}
+{{- define "kubedbcom-zookeeper-editor-options.selectorLabels" -}}
 app.kubernetes.io/name: zooKeepers.kubedb.com
-app.kubernetes.io/instance: {{ include "kubedbcom-zooKeeper-editor-options.fullname" . }}
+app.kubernetes.io/instance: {{ include "kubedbcom-zookeeper-editor-options.fullname" . }}
 {{- end }}
 
 {{/*
 Create the name of the service account to use
 */}}
-{{- define "kubedbcom-zooKeeper-editor-options.serviceAccountName" -}}
+{{- define "kubedbcom-zookeeper-editor-options.serviceAccountName" -}}
 {{- if .Values.spec.serviceAccount.create }}
-{{- default (include "kubedbcom-zooKeeper-editor-options.fullname" .) .Values.spec.serviceAccount.name }}
+{{- default (include "kubedbcom-zookeeper-editor-options.fullname" .) .Values.spec.serviceAccount.name }}
 {{- else }}
 {{- default "default" .Values.spec.serviceAccount.name }}
 {{- end }}
@@ -53,7 +53,7 @@ Create the name of the service account to use
 {{/*
 Common annotations
 */}}
-{{- define "kubedbcom-zooKeeper-editor-options.annotations" -}}
+{{- define "kubedbcom-zookeeper-editor-options.annotations" -}}
 {{- range $k, $v := .Values.spec.annotations }}
 {{ $k }}: "{{ $v }}"
 {{- end -}}
@@ -62,11 +62,11 @@ Common annotations
 {{/*
 Alert labels
 */}}
-{{- define "kubedbcom-zooKeeper-editor-options.alertLabels" -}}
+{{- define "kubedbcom-zookeeper-editor-options.alertLabels" -}}
 k8s_group: {{ .Values.metadata.resource.group }}
 k8s_kind: {{ .Values.metadata.resource.kind }}
 k8s_resource: {{ .Values.metadata.resource.name }}
-app: {{ include "kubedbcom-zooKeeper-editor-options.fullname" . }}
+app: {{ include "kubedbcom-zookeeper-editor-options.fullname" . }}
 app_namespace: {{ .Release.Namespace }}
 {{- if .Values.form.alert.additionalRuleLabels }}
 {{ toYaml .Values.form.alert.additionalRuleLabels }}
@@ -76,7 +76,7 @@ app_namespace: {{ .Release.Namespace }}
 {{/*
 Alerts Enabled
 */}}
-{{- define "kubedbcom-zooKeeper-editor-options.alertsEnabled" -}}
+{{- define "kubedbcom-zookeeper-editor-options.alertsEnabled" -}}
 {{- $ranks := dict "critical" 1 "warning" 2 "info" 3 -}}
 {{- $result := dig . 0 $ranks -}}
 {{- if $result -}}{{ . }}{{- end -}}
@@ -85,7 +85,7 @@ Alerts Enabled
 {{/*
 Alert Group Enabled
 */}}
-{{- define "kubedbcom-zooKeeper-editor-options.alertGroupEnabled" -}}
+{{- define "kubedbcom-zookeeper-editor-options.alertGroupEnabled" -}}
 {{- $ranks := dict "critical" 1 "warning" 2 "info" 3 -}}
 {{- $flags := (mustLast .) -}}
 {{- $group := dig (mustFirst .) 0 $ranks -}}
@@ -101,7 +101,7 @@ Alert Group Enabled
 {{/*
 Alert Enabled
 */}}
-{{- define "kubedbcom-zooKeeper-editor-options.alertEnabled" -}}
+{{- define "kubedbcom-zookeeper-editor-options.alertEnabled" -}}
 {{- $ranks := dict "critical" 1 "warning" 2 "info" 3 -}}
 {{- $sev := dig (mustLast .) 0 $ranks -}}
 {{- $flags := mustInitial . -}}

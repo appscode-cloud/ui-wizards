@@ -1,13 +1,13 @@
-{{ $app := (include "kubedbcom-zooKeeper-editor-options.fullname" .) }}
+{{ $app := (include "kubedbcom-zookeeper-editor-options.fullname" .) }}
 
-{{ if (include "kubedbcom-zooKeeper-editor-options.alertsEnabled" .Values.form.alert.enabled) }}
+{{ if (include "kubedbcom-zookeeper-editor-options.alertsEnabled" .Values.form.alert.enabled) }}
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata:
   name: {{ $app }}
   namespace: {{ $.Release.Namespace }}
   labels:
-    {{- include "kubedbcom-zooKeeper-editor-options.labels" . | nindent 4 }}
+    {{- include "kubedbcom-zookeeper-editor-options.labels" . | nindent 4 }}
 {{- if .Values.form.alert.labels }}
     {{- toYaml .Values.form.alert.labels | nindent 4 }}
 {{- end }}
@@ -18,151 +18,151 @@ metadata:
 spec:
   groups:
   {{ with .Values.form.alert.groups.database -}}
-  {{ if (include "kubedbcom-zooKeeper-editor-options.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
+  {{ if (include "kubedbcom-zookeeper-editor-options.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: zookeeper.database.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "kubedbcom-zooKeeper-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.zookeeperDown.enabled .rules.zookeeperDown.severity)) -}}
+    {{ if (include "kubedbcom-zookeeper-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.zookeeperDown.enabled .rules.zookeeperDown.severity)) -}}
     - alert: ZooKeeperDown
       expr: up{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"} == 0
       for: {{ .rules.zookeeperDown.duration }}
       labels:
         severity: {{ .rules.zookeeperDown.severity }}
-        {{- include "kubedbcom-zooKeeper-editor-options.alertLabels" $ | nindent 8 }}
+        {{- include "kubedbcom-zookeeper-editor-options.alertLabels" $ | nindent 8 }}
       annotations:
         summary: ZooKeeper instance down (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "ZooKeeper instance is down on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{end -}}
-    {{ if (include "kubedbcom-zooKeeper-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.zookeeperTooManyNodes.enabled .rules.zookeeperTooManyNodes.severity)) -}}
+    {{ if (include "kubedbcom-zookeeper-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.zookeeperTooManyNodes.enabled .rules.zookeeperTooManyNodes.severity)) -}}
     - alert: ZooKeeperTooManyNodes
       expr: znode_count{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"}  > {{.rules.zookeeperTooManyNodes.val}}
       for: {{ .rules.zookeeperTooManyNodes.duration }}
       labels:
         severity: {{ .rules.zookeeperTooManyNodes.severity }}
-        {{- include "kubedbcom-zooKeeper-editor-options.alertLabels" $ | nindent 8 }}
+        {{- include "kubedbcom-zookeeper-editor-options.alertLabels" $ | nindent 8 }}
       annotations:
         summary: ZooKeeper missing master (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "ZooKeeper ensemble has too many znodes\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{end -}}
-    {{ if (include "kubedbcom-zooKeeper-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.zookeeperTooManyConnections.enabled .rules.zookeeperTooManyConnections.severity)) -}}
+    {{ if (include "kubedbcom-zookeeper-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.zookeeperTooManyConnections.enabled .rules.zookeeperTooManyConnections.severity)) -}}
     - alert: ZooKeeperTooManyConnections
       expr: num_alive_connections{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"} > {{.rules.zookeeperTooManyConnections.val}}
       for: {{ .rules.zookeeperTooManyConnections.duration }}
       labels:
         severity: {{ .rules.zookeeperTooManyConnections.severity }}
-        {{- include "kubedbcom-zooKeeper-editor-options.alertLabels" $ | nindent 8 }}
+        {{- include "kubedbcom-zookeeper-editor-options.alertLabels" $ | nindent 8 }}
       annotations:
         summary: ZooKeeper too many connections (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "ZooKeeper instance has too many connections . More than {{.rules.zookeeperTooManyConnections.val}} of ZooKeeper connections are in use on {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-zooKeeper-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.zookeeperTooBigMemory.enabled .rules.zookeeperTooBigMemory.severity)) -}}
+    {{ if (include "kubedbcom-zookeeper-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.zookeeperTooBigMemory.enabled .rules.zookeeperTooBigMemory.severity)) -}}
     - alert: ZooKeeperTooBigMemory
       expr: (approximate_data_size{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"}) /1024 /1024 > {{.rules.zookeeperTooBigMemory.val}} * 1024
       for: {{ .rules.zookeeperTooBigMemory.duration }}
       labels:
         severity: {{ .rules.zookeeperTooBigMemory.severity }}
-        {{- include "kubedbcom-zooKeeper-editor-options.alertLabels" $ | nindent 8 }}
+        {{- include "kubedbcom-zookeeper-editor-options.alertLabels" $ | nindent 8 }}
       annotations:
         summary: total occupied memory is too big for znode in (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "ZooKeeper ensemble's znode total occupied memory is too big. \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-zooKeeper-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.zookeeperTooManyWatch.enabled .rules.zookeeperTooManyWatch.severity)) -}}
+    {{ if (include "kubedbcom-zookeeper-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.zookeeperTooManyWatch.enabled .rules.zookeeperTooManyWatch.severity)) -}}
     - alert: ZooKeeperTooManyWatch
       expr: watch_count{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"} > {{.rules.zookeeperTooManyWatch.val}}
       for: {{ .rules.zookeeperTooManyWatch.duration }}
       labels:
         severity: {{ .rules.zookeeperTooManyWatch.severity }}
-        {{- include "kubedbcom-zooKeeper-editor-options.alertLabels" $ | nindent 8 }}
+        {{- include "kubedbcom-zookeeper-editor-options.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Too many watch is set (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Too many watch is set .\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-zooKeeper-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.zookeeperLeaderElection.enabled .rules.zookeeperLeaderElection.severity)) -}}
+    {{ if (include "kubedbcom-zookeeper-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.zookeeperLeaderElection.enabled .rules.zookeeperLeaderElection.severity)) -}}
     - alert: ZooKeeperLeaderElection
       expr:  increase(election_time_count{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"}[5m]) > {{.rules.zookeeperLeaderElection.val}}
       for: {{ .rules.zookeeperLeaderElection.duration }}
       labels:
         severity: {{ .rules.zookeeperLeaderElection.severity }}
-        {{- include "kubedbcom-zooKeeper-editor-options.alertLabels" $ | nindent 8 }}
+        {{- include "kubedbcom-zookeeper-editor-options.alertLabels" $ | nindent 8 }}
       annotations:
         summary: A leader election happened (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "A leader election happened.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-zooKeeper-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.zookeeperTooManyOpenFiles.enabled .rules.zookeeperTooManyOpenFiles.severity)) -}}
+    {{ if (include "kubedbcom-zookeeper-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.zookeeperTooManyOpenFiles.enabled .rules.zookeeperTooManyOpenFiles.severity)) -}}
     - alert: ZooKeeperTooManyOpenFiles
       expr: open_file_descriptor_count{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"} > {{.rules.zookeeperTooManyOpenFiles.val}}
       for: {{ .rules.zookeeperTooManyOpenFiles.duration }}
       labels:
         severity: {{ .rules.zookeeperTooManyOpenFiles.severity }}
-        {{- include "kubedbcom-zooKeeper-editor-options.alertLabels" $ | nindent 8 }}
+        {{- include "kubedbcom-zookeeper-editor-options.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Too many files is open (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Too many files is open .\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-zooKeeper-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.zookeeperTooLongFsyncTime.enabled .rules.zookeeperTooLongFsyncTime.severity)) -}}
+    {{ if (include "kubedbcom-zookeeper-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.zookeeperTooLongFsyncTime.enabled .rules.zookeeperTooLongFsyncTime.severity)) -}}
     - alert: ZooKeeperTooLongFsyncTime
       expr: rate(fsynctime_sum{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"}[1m]) > {{.rules.zookeeperTooLongFsyncTime.val}}
       for: {{ .rules.zookeeperTooLongFsyncTime.duration }}
       labels:
         severity: {{ .rules.zookeeperTooLongFsyncTime.severity }}
-        {{- include "kubedbcom-zooKeeper-editor-options.alertLabels" $ | nindent 8 }}
+        {{- include "kubedbcom-zookeeper-editor-options.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Too long fsync time (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Too long fsync time .\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-zooKeeper-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.zookeeperTooLongSnapshotTime.enabled .rules.zookeeperTooLongSnapshotTime.severity)) -}}
+    {{ if (include "kubedbcom-zookeeper-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.zookeeperTooLongSnapshotTime.enabled .rules.zookeeperTooLongSnapshotTime.severity)) -}}
     - alert: ZooKeeperTooLongSnapshotTime
       expr: rate(snapshottime_sum{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"}[5m]) > {{.rules.zookeeperTooLongSnapshotTime.val}}
       for: {{ .rules.zookeeperTooLongSnapshotTime.duration }}
       labels:
         severity: {{ .rules.zookeeperTooLongSnapshotTime.severity }}
-        {{- include "kubedbcom-zooKeeper-editor-options.alertLabels" $ | nindent 8 }}
+        {{- include "kubedbcom-zookeeper-editor-options.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Time taken for snapshotting is too long (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Too long snapshot time .\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-zooKeeper-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.zookeeperTooHighAvgLatency.enabled .rules.zookeeperTooHighAvgLatency.severity)) -}}
+    {{ if (include "kubedbcom-zookeeper-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.zookeeperTooHighAvgLatency.enabled .rules.zookeeperTooHighAvgLatency.severity)) -}}
     - alert: ZooKeeperTooHighAvgLatency
       expr: avg_latency{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"} > {{.rules.zookeeperTooHighAvgLatency.val}}
       for: {{ .rules.zookeeperTooHighAvgLatency.duration }}
       labels:
         severity: {{ .rules.zookeeperTooHighAvgLatency.severity }}
-        {{- include "kubedbcom-zooKeeper-editor-options.alertLabels" $ | nindent 8 }}
+        {{- include "kubedbcom-zookeeper-editor-options.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Average Latency is too high (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Average Latency is too high .\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-zooKeeper-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.zookeeperJvmMemoryFilingUp.enabled .rules.zookeeperJvmMemoryFilingUp.severity)) -}}
+    {{ if (include "kubedbcom-zookeeper-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.zookeeperJvmMemoryFilingUp.enabled .rules.zookeeperJvmMemoryFilingUp.severity)) -}}
     - alert: ZooKeeperJvmMemoryFilingUp
       expr: jvm_memory_bytes_used{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"} / jvm_memory_bytes_max{area="heap",job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"}  > {{.rules.zookeeperJvmMemoryFilingUp.val}}
       for: {{ .rules.zookeeperJvmMemoryFilingUp.duration }}
       labels:
         severity: {{ .rules.zookeeperJvmMemoryFilingUp.severity }}
-        {{- include "kubedbcom-zooKeeper-editor-options.alertLabels" $ | nindent 8 }}
+        {{- include "kubedbcom-zookeeper-editor-options.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Jvm memory is filling up (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Jvm memory is filling up .\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
     
-    {{ if (include "kubedbcom-zooKeeper-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskUsageHigh.enabled .rules.diskUsageHigh.severity)) -}}
+    {{ if (include "kubedbcom-zookeeper-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskUsageHigh.enabled .rules.diskUsageHigh.severity)) -}}
     - alert: DiskUsageHigh
       expr: (kubelet_volume_stats_used_bytes / on(persistentvolumeclaim) group_left(pod) (kubelet_volume_stats_capacity_bytes + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~\"{{ $.Release.Name }}-.+$\",namespace=~"{{ $.Release.Namespace }}"}) )
         * 100 > {{ .rules.diskUsageHigh.val }}
       for: {{ .rules.diskUsageHigh.duration }}
       labels:
         severity: {{ .rules.diskUsageHigh.severity }}
-        {{- include "kubedbcom-zooKeeper-editor-options.alertLabels" $ | nindent 8 }}
+        {{- include "kubedbcom-zookeeper-editor-options.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Persistent Volume Usages in instance {{`{{`}} $labels.instance {{`}}`}}
         description: "Persistent Volume Usages\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    {{ if (include "kubedbcom-zooKeeper-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskAlmostFull.enabled .rules.diskAlmostFull.severity)) -}}
+    {{ if (include "kubedbcom-zookeeper-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskAlmostFull.enabled .rules.diskAlmostFull.severity)) -}}
     - alert: DiskAlmostFull
       expr: (kubelet_volume_stats_used_bytes / on(persistentvolumeclaim) group_left(pod) (kubelet_volume_stats_capacity_bytes + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~\"{{ $.Release.Name }}-.+$\",namespace=~"{{ $.Release.Namespace }}"}) )
         * 100 > {{ .rules.diskAlmostFull.val }}
       for: {{ .rules.diskAlmostFull.duration }}
       labels:
         severity: {{ .rules.diskAlmostFull.severity }}
-        {{- include "kubedbcom-zooKeeper-editor-options.alertLabels" $ | nindent 8 }}
+        {{- include "kubedbcom-zookeeper-editor-options.alertLabels" $ | nindent 8 }}
       annotations:
         summary: Persistent Volume Usages in instance {{`{{`}} $labels.instance {{`}}`}}
         description: "Persistent Volume Usages\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
@@ -172,27 +172,27 @@ spec:
 
 
   {{ with .Values.form.alert.groups.provisioner -}}
-  {{ if (include "kubedbcom-zooKeeper-editor-options.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
+  {{ if (include "kubedbcom-zookeeper-editor-options.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: zookeeper.provisioner.{{ $.Release.Namespace }}.{{ $app }}.rules
     rules:
-    {{ if (include "kubedbcom-zooKeeper-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseNotReady.enabled .rules.appPhaseNotReady.severity)) -}}
+    {{ if (include "kubedbcom-zookeeper-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseNotReady.enabled .rules.appPhaseNotReady.severity)) -}}
     - alert: KubeDBZooKeeperPhaseNotReady
       expr: kubedb_com_zookeeper_status_phase{phase="NotReady",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
       for: {{ .rules.appPhaseNotReady.duration }}
       labels:
         severity: {{ .rules.appPhaseNotReady.severity }}
-        {{- include "kubedbcom-zooKeeper-editor-options.alertLabels" $ | nindent 8 }}
+        {{- include "kubedbcom-zookeeper-editor-options.alertLabels" $ | nindent 8 }}
       annotations:
         summary: KubeDB ZooKeeper Phase NotReady (zookeeper {{`{{`}} $labels.zookeeper {{`}}`}})
         description: "KubeDB ZooKeeper Phase not ready on {{`{{`}} $labels.zookeeper {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{ end -}}
-    {{ if (include "kubedbcom-zooKeeper-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseCritical.enabled .rules.appPhaseCritical.severity)) -}}
+    {{ if (include "kubedbcom-zookeeper-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseCritical.enabled .rules.appPhaseCritical.severity)) -}}
     - alert: KubeDBZooKeeperPhaseCritical
       expr: kubedb_com_zookeeper_status_phase{phase="Critical",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
       for: {{ .rules.appPhaseCritical.duration }}
       labels:
         severity: {{ .rules.appPhaseCritical.severity }}
-        {{- include "kubedbcom-zooKeeper-editor-options.alertLabels" $ | nindent 8 }}
+        {{- include "kubedbcom-zookeeper-editor-options.alertLabels" $ | nindent 8 }}
       annotations:
         summary: KubeDB ZooKeeper Phase Critical (zookeeper {{`{{`}} $labels.zookeeper {{`}}`}})
         description: "KubeDB ZooKeeper Phase Critical {{`{{`}} $labels.zookeeper {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
