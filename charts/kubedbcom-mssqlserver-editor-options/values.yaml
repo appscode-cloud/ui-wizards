@@ -1,0 +1,348 @@
+# Default values for kubedbcom-mssqlserver-editor-options.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+metadata:
+  resource:
+    group: kubedb.com
+    kind: MSSQLServer
+    name: mssqlservers
+    scope: Namespaced
+    version: v1alpha2
+  release:
+    # Release name
+    name: ""
+    # Release namespace
+    namespace: ""
+
+spec:
+  # List options
+  version: 6.0.12
+
+  # Annotations to add to the database custom resource
+  annotations: {}
+
+  # Labels to add to all the template objects
+  labels: {}
+
+  # Standalone, Replicaset, Sharded
+  mode: Standalone
+  replicaSet:
+    name: rs0
+    replicas: 3
+  shardTopology:
+    shard:
+      replicas: 3
+      shards: 3
+      persistence:
+        size: 10Gi
+    configServer:
+      replicas: 3
+      persistence:
+        size: 2Gi
+    mongos:
+      replicas: 3
+
+  # "keyFile", "sendKeyFile", "sendX509", "x509"
+  clusterAuthMode: keyFile
+
+  # "disabled", "allowSSL", "preferSSL", "requireSSL"
+  sslMode: disabled
+
+  terminationPolicy: WipeOut
+
+  storageClass:
+    name: standard
+
+  persistence:
+    size: 10Gi
+
+  machine: ""
+
+  resources:
+    limits:
+      cpu: 500m
+      memory: 1Gi
+
+  authSecret:
+    name: ""
+    password: ""
+
+  monitoring:
+    # Name of monitoring agent (one of "prometheus.io", "prometheus.io/operator", "prometheus.io/builtin")
+    agent: prometheus.io/operator
+    exporter:
+      resources: # +doc-gen:break
+        requests:
+          cpu: 100m
+          memory: 128Mi
+    serviceMonitor:
+      # Specify the labels for ServiceMonitor.
+      # Prometheus crd will select ServiceMonitor using these labels.
+      # Only usable when monitoring agent is `prometheus.io/webhook server`.
+      labels: {}
+
+  backup:
+    tool: ""
+
+    kubestash:
+      schedule: "0 */2 * * *"
+      storageRef:
+        name: default
+        namespace: ""
+      retentionPolicy:
+        name: "keep-1mo"
+        namespace: ""
+      encryptionSecret:
+        name: default-encryption-secret
+        namespace: ""
+      storageSecret:
+        create: true
+
+    stash:
+      schedule: "0 */2 * * *"
+
+      retentionPolicy:
+        name: keep-last-30d
+        keepHourly: 24
+        keepDaily: 30
+        prune: true
+
+      authSecret:
+        name: ""
+        password: ""
+
+      backend:
+        provider: "" # s3,gcs,azure,swift,b2
+        s3:
+          spec:
+            endpoint: ""
+            bucket: ""
+            # prefix: ""
+            # region: ""
+          auth:
+            AWS_ACCESS_KEY_ID: ""
+            AWS_SECRET_ACCESS_KEY: ""
+            CA_CERT_DATA: ""
+        azure:
+          spec:
+            container: ""
+            # prefix: ""
+            # maxConnections: 0
+          auth:
+            AZURE_ACCOUNT_NAME: ""
+            AZURE_ACCOUNT_KEY: ""
+        gcs:
+          spec:
+            bucket: ""
+            # prefix: ""
+            # maxConnections: 0
+          auth:
+            GOOGLE_PROJECT_ID: ""
+            GOOGLE_SERVICE_ACCOUNT_JSON_KEY: ""
+        swift:
+          spec:
+            container: ""
+            # prefix: ""
+          auth:
+            OS_USERNAME: ""
+            OS_PASSWORD: ""
+            OS_REGION_NAME: ""
+            OS_AUTH_URL: ""
+            OS_USER_DOMAIN_NAME: ""
+            OS_PROJECT_NAME: ""
+            OS_PROJECT_DOMAIN_NAME: ""
+            OS_TENANT_ID: ""
+            OS_TENANT_NAME: ""
+            ST_AUTH: ""
+            ST_USER: ""
+            ST_KEY: ""
+            OS_STORAGE_URL: ""
+            OS_AUTH_TOKEN: ""
+        b2:
+          spec:
+            bucket: ""
+            # prefix: ""
+            # maxConnections: 0
+          auth:
+            B2_ACCOUNT_ID: ""
+            B2_ACCOUNT_KEY: ""
+
+form:
+  alert:
+    ## Enable PrometheusRule alerts
+    enabled: warning
+
+    ## Labels for default rules
+    labels: # +doc-gen:break
+      release: kube-prometheus-stack
+
+    ## Annotations for default rules
+    annotations: {}
+
+    ## Additional labels for PrometheusRule alerts
+    additionalRuleLabels: {}
+
+    ## Prefix for runbook URLs. Use this to override the first part of the runbookURLs that is common to all rules.
+    # runbookUrl: "https://runbooks.prometheus-operator.dev/runbooks"
+
+    groups:
+      database:
+        enabled: warning
+        rules:
+          # Sepcifies the alert configuration for virtual memory usage.
+          mssqlserverVirtualMemoryUsage:
+            enabled: true
+            val: 2097152 # 2GB
+            duration: "1m"
+            severity: warning
+          # Sepcifies the alert configuration for replication lag.
+          mssqlserverReplicationLag:
+            enabled: true
+            val: 10
+            duration: "0m"
+            severity: critical
+          # Sepcifies the alert configuration for number of opened cursors are more than a specified amount.
+          mssqlserverNumberCursorsOpen:
+            enabled: true
+            val: 10000
+            duration: "2m"
+            severity: warning
+          # Sepcifies the alert configuration for timed out cursors.
+          mssqlserverCursorsTimeouts:
+            enabled: true
+            val: 100
+            duration: "2m"
+            severity: warning
+          # Sepcifies the alert configuration for too many connections are opened.
+          mssqlserverTooManyConnections:
+            enabled: true
+            val: 80 # percentage
+            duration: "2m"
+            severity: warning
+          # Sepcifies the alert configuration for database is in Critical phase, that means one or more of the nodes are down but the database read/write are not hampered.
+          mongoDBPhaseCritical:
+            enabled: true
+            duration: "3m"
+            severity: warning
+          # Sepcifies the alert configuration for database is in NotReady phase, that means the database is not accepting connections, read/write are hampered.
+          mongoDBDown:
+            enabled: true
+            duration: "30s"
+            severity: critical
+          # Sepcifies the alert configuration for high latency.
+          mssqlserverHighLatency:
+            enabled: true
+            val: 250000
+            duration: "10m"
+            severity: warning
+          # Sepcifies the alert configuration for high ticket utilizations.
+          mssqlserverHighTicketUtilization:
+            enabled: true
+            val: 75 # percentage
+            duration: "10m"
+            severity: warning
+          # Sepcifies the alert configuration for recurrent cursor timeout.
+          mssqlserverRecurrentCursorTimeout:
+            enabled: true
+            val: 0
+            duration: "30m"
+            severity: warning
+          # Sepcifies the alert configuration for recurrent memory page faults.
+          mssqlserverRecurrentMemoryPageFaults:
+            enabled: true
+            val: 0
+            duration: "30m"
+            severity: warning
+      provisioner:
+        enabled: warning
+        rules:
+          appPhaseNotReady:
+            enabled: true
+            duration: "1m"
+            severity: critical
+          appPhaseCritical:
+            enabled: true
+            duration: "15m"
+            severity: warning
+      opsManager:
+        enabled: warning
+        rules:
+          opsRequestOnProgress:
+            enabled: true
+            duration: "0m"
+            severity: info
+          opsRequestStatusProgressingToLong:
+            enabled: true
+            duration: "30m"
+            severity: critical
+          opsRequestFailed:
+            enabled: true
+            duration: "0m"
+            severity: critical
+      stash:
+        enabled: warning
+        rules:
+          backupSessionFailed:
+            enabled: true
+            duration: "0m"
+            severity: critical
+          restoreSessionFailed:
+            enabled: true
+            duration: "0m"
+            severity: critical
+          noBackupSessionForTooLong:
+            enabled: true
+            duration: "0m"
+            val: 18000
+            severity: warning
+          repositoryCorrupted:
+            enabled: true
+            duration: "5m"
+            severity: critical
+          repositoryStorageRunningLow:
+            enabled: true
+            duration: "5m"
+            val: 10737418240 # 10GB
+            severity: warning
+          backupSessionPeriodTooLong:
+            enabled: true
+            duration: "0m"
+            val: 1800 # 30 minute
+            severity: warning
+          restoreSessionPeriodTooLong:
+            enabled: true
+            duration: "0m"
+            val: 1800 # 30 minute
+            severity: warning
+      schemaManager:
+        enabled: warning
+        rules:
+          schemaPendingForTooLong:
+            enabled: true
+            duration: "30m"
+            severity: warning
+          schemaInProgressForTooLong:
+            enabled: true
+            duration: "30m"
+            severity: warning
+          schemaTerminatingForTooLong:
+            enabled: true
+            duration: "30m"
+            severity: warning
+          schemaFailed:
+            enabled: true
+            duration: "0m"
+            severity: warning
+          schemaExpired:
+            enabled: true
+            duration: "0m"
+            severity: warning
+  capi:
+    provider: ""
+    namespace: ""
+    clusterName: ""
+    dedicated: false
+    nodes: 1
+    sku: ""
+    zones: []

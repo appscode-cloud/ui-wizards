@@ -1,0 +1,267 @@
+# Default values for kubedbcom-rabbitmq-editor-options.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+metadata:
+  resource:
+    group: kubedb.com
+    kind: RabbitMQ
+    name: rabbitmqs
+    scope: Namespaced
+    version: v1alpha2
+  release:
+    # Release name
+    name: ""
+    # Release namespace
+    namespace: ""
+
+spec:
+  # List options
+  version: 6.0.12
+
+  # Annotations to add to the database custom resource
+  annotations: {}
+
+  # Labels to add to all the template objects
+  labels: {}
+
+  # Standalone, Replicaset, Sharded
+  mode: Standalone
+  replicaSet:
+    name: rs0
+    replicas: 3
+  shardTopology:
+    shard:
+      replicas: 3
+      shards: 3
+      persistence:
+        size: 10Gi
+    configServer:
+      replicas: 3
+      persistence:
+        size: 2Gi
+    mongos:
+      replicas: 3
+
+  # "keyFile", "sendKeyFile", "sendX509", "x509"
+  clusterAuthMode: keyFile
+
+  # "disabled", "allowSSL", "preferSSL", "requireSSL"
+  sslMode: disabled
+
+  terminationPolicy: WipeOut
+
+  storageClass:
+    name: standard
+
+  persistence:
+    size: 10Gi
+
+  machine: ""
+
+  resources:
+    limits:
+      cpu: 500m
+      memory: 1Gi
+
+  authSecret:
+    name: ""
+    password: ""
+
+  monitoring:
+    # Name of monitoring agent (one of "prometheus.io", "prometheus.io/operator", "prometheus.io/builtin")
+    agent: prometheus.io/operator
+    exporter:
+      resources: # +doc-gen:break
+        requests:
+          cpu: 100m
+          memory: 128Mi
+    serviceMonitor:
+      # Specify the labels for ServiceMonitor.
+      # Prometheus crd will select ServiceMonitor using these labels.
+      # Only usable when monitoring agent is `prometheus.io/webhook server`.
+      labels: {}
+
+  backup:
+    tool: ""
+
+    kubestash:
+      schedule: "0 */2 * * *"
+      storageRef:
+        name: default
+        namespace: ""
+      retentionPolicy:
+        name: "keep-1mo"
+        namespace: ""
+      encryptionSecret:
+        name: default-encryption-secret
+        namespace: ""
+      storageSecret:
+        create: true
+
+    stash:
+      schedule: "0 */2 * * *"
+
+      retentionPolicy:
+        name: keep-last-30d
+        keepHourly: 24
+        keepDaily: 30
+        prune: true
+
+      authSecret:
+        name: ""
+        password: ""
+
+      backend:
+        provider: "" # s3,gcs,azure,swift,b2
+        s3:
+          spec:
+            endpoint: ""
+            bucket: ""
+            # prefix: ""
+            # region: ""
+          auth:
+            AWS_ACCESS_KEY_ID: ""
+            AWS_SECRET_ACCESS_KEY: ""
+            CA_CERT_DATA: ""
+        azure:
+          spec:
+            container: ""
+            # prefix: ""
+            # maxConnections: 0
+          auth:
+            AZURE_ACCOUNT_NAME: ""
+            AZURE_ACCOUNT_KEY: ""
+        gcs:
+          spec:
+            bucket: ""
+            # prefix: ""
+            # maxConnections: 0
+          auth:
+            GOOGLE_PROJECT_ID: ""
+            GOOGLE_SERVICE_ACCOUNT_JSON_KEY: ""
+        swift:
+          spec:
+            container: ""
+            # prefix: ""
+          auth:
+            OS_USERNAME: ""
+            OS_PASSWORD: ""
+            OS_REGION_NAME: ""
+            OS_AUTH_URL: ""
+            OS_USER_DOMAIN_NAME: ""
+            OS_PROJECT_NAME: ""
+            OS_PROJECT_DOMAIN_NAME: ""
+            OS_TENANT_ID: ""
+            OS_TENANT_NAME: ""
+            ST_AUTH: ""
+            ST_USER: ""
+            ST_KEY: ""
+            OS_STORAGE_URL: ""
+            OS_AUTH_TOKEN: ""
+        b2:
+          spec:
+            bucket: ""
+            # prefix: ""
+            # maxConnections: 0
+          auth:
+            B2_ACCOUNT_ID: ""
+            B2_ACCOUNT_KEY: ""
+
+form:
+  alert:
+    ## Enable PrometheusRule alerts
+    enabled: warning
+
+    ## Labels for default rules
+    labels: # +doc-gen:break
+      release: kube-prometheus-stack
+
+    ## Annotations for default rules
+    annotations: {}
+
+    ## Additional labels for PrometheusRule alerts
+    additionalRuleLabels: {}
+
+    ## Prefix for runbook URLs. Use this to override the first part of the runbookURLs that is common to all rules.
+    # runbookUrl: "https://runbooks.prometheus-operator.dev/runbooks"
+
+    groups:
+      database:
+        enabled: warning
+        rules:
+          # Specifies the alert configuration for database is in Critical phase, that means one or more of the nodes are down but the database read/write are not hampered.
+          rabbitmqPhaseCritical:
+            enabled: true
+            duration: "3m"
+            severity: warning
+          # Specifies the alert configuration for database is in NotReady phase, that means the database is not accepting connections, read/write are hampered.
+          rabbitmqDown:
+            enabled: true
+            duration: "30s"
+            severity: critical
+          # Specifies the alert configuration for high latency.
+          rabbitmqFileDescriptorsNearLimit:
+            enabled: true
+            duration: "30s"
+            severity: warning
+          # Specifies the alert configuration for frequently opening and closing of connections.
+          rabbitmqHighConnectionChurn:
+            enabled: true
+            duration: "30s"
+            severity: warning
+          # Specifies alert configuration for incorrect erlang distributions in nodes
+          rabbitmqInsufficientEstablishedErlangDistributionLinks:
+            enabled: true
+            duration: "30s"
+            severity: warning
+          # Specifies alert configuration for disk space used upto watermark threshold
+          rabbitmqLowDiskWatermarkPredicted:
+            enabled: true
+            duration: "30s"
+            severity: warning
+          # Specifies alert configuration for misconfigured routing of messages
+          rabbitmqUnroutableMessages:
+            enabled: true
+            duration: "30s"
+            severity: warning
+          # Specifies alert configuration for lower number of opened TCP sockets than required
+          rabbitmqTCPSocketsNearLimit:
+            enabled: true
+            duration: "30s"
+            severity: warning
+          # Specifies alert configuration for rapidly growing queues
+          rabbitmqQueueIsGrowing:
+            enabled: true
+            duration: "30s"
+            severity: warning
+          # Sepcifies the alert configuration for persistent volume usages.
+          diskUsageHigh:
+            enabled: true
+            val: 80
+            duration: "1m"
+            severity: warning
+          diskAlmostFull:
+            enabled: true
+            val: 95
+            duration: "1m"
+            severity: critical
+      provisioner:
+        enabled: warning
+        rules:
+          appPhaseNotReady:
+            enabled: true
+            duration: "1m"
+            severity: critical
+          appPhaseCritical:
+            enabled: true
+            duration: "15m"
+            severity: warning
+  capi:
+    provider: ""
+    namespace: ""
+    clusterName: ""
+    dedicated: false
+    nodes: 1
+    sku: ""
+    zones: []

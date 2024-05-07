@@ -1,0 +1,373 @@
+{{ $app := (include "kubedbcom-mssqlserver-editor.fullname" .) }}
+
+{{ if (include "kubedbcom-mssqlserver-editor.alertsEnabled" .Values.form.alert.enabled) }}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ $app }}
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    {{- include "kubedbcom-mssqlserver-editor.selectorLabels" . | nindent 4 }}
+{{- if .Values.form.alert.labels }}
+    {{- toYaml .Values.form.alert.labels | nindent 4 }}
+{{- end }}
+{{- if .Values.form.alert.annotations }}
+  annotations:
+    {{- toYaml .Values.form.alert.annotations | nindent 4 }}
+{{- end }}
+spec:
+  groups:
+  {{ with .Values.form.alert.groups.database -}}
+  {{ if (include "kubedbcom-mssqlserver-editor.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
+  - name: mssqlserver.database.{{ $.Release.Namespace }}.{{ $app }}.rules
+    rules:
+    {{ if (include "kubedbcom-mssqlserver-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.mssqlserverVirtualMemoryUsage.enabled .rules.mssqlserverVirtualMemoryUsage.severity)) -}}
+    - alert: MongodbVirtualMemoryUsage
+      expr: sum(mssqlserver_ss_mem_virtual{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}) BY (job) > {{ .rules.mssqlserverVirtualMemoryUsage.val }}
+      for: {{ .rules.mssqlserverVirtualMemoryUsage.duration }}
+      labels:
+        severity: {{ .rules.mssqlserverVirtualMemoryUsage.severity }}
+        {{- include "kubedbcom-mssqlserver-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: MSSQLServer virtual memory usage (instance {{`{{`}} $labels.instance {{`}}`}})
+        description: "High memory usage\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+    {{ if (include "kubedbcom-mssqlserver-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.mssqlserverReplicationLag.enabled .rules.mssqlserverReplicationLag.severity)) -}}
+    - alert: MongodbReplicationLag
+      expr: mssqlserver_mongod_replset_member_replication_lag{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} > {{ .rules.mssqlserverReplicationLag.val }}
+      for: {{ .rules.mssqlserverReplicationLag.duration }}
+      labels:
+        severity: {{ .rules.mssqlserverReplicationLag.severity }}
+        {{- include "kubedbcom-mssqlserver-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: MSSQLServer database has replication lag (instance {{`{{`}} $labels.instance {{`}}`}})
+        description: "Mongodb replication lag is more than {{ .rules.mssqlserverReplicationLag.val }}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+    {{ if (include "kubedbcom-mssqlserver-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.mssqlserverNumberCursorsOpen.enabled .rules.mssqlserverNumberCursorsOpen.severity)) -}}
+    - alert: MongodbNumberCursorsOpen
+      expr: mssqlserver_ss_metrics_cursor_open{csr_type="total",job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} > {{ .rules.mssqlserverNumberCursorsOpen.val }}
+      for: {{ .rules.mssqlserverNumberCursorsOpen.duration }}
+      labels:
+        severity: {{ .rules.mssqlserverNumberCursorsOpen.severity }}
+        {{- include "kubedbcom-mssqlserver-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: MSSQLServer number cursors open (instance {{`{{`}} $labels.instance {{`}}`}})
+        description: "Too many cursors opened by MSSQLServer for clients (> 10k)\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+    {{ if (include "kubedbcom-mssqlserver-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.mssqlserverCursorsTimeouts.enabled .rules.mssqlserverCursorsTimeouts.severity)) -}}
+    - alert: MongodbCursorsTimeouts
+      expr: increase(mssqlserver_ss_metrics_cursor_timedOut{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}[1m]) > {{ .rules.mssqlserverCursorsTimeouts.val }}
+      for: {{ .rules.mssqlserverCursorsTimeouts.duration }}
+      labels:
+        severity: {{ .rules.mssqlserverCursorsTimeouts.severity }}
+        {{- include "kubedbcom-mssqlserver-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: MSSQLServer cursors timeouts (instance {{`{{`}} $labels.instance {{`}}`}})
+        description: "Too many cursors are timing out\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+    {{ if (include "kubedbcom-mssqlserver-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.mssqlserverTooManyConnections.enabled .rules.mssqlserverTooManyConnections.severity)) -}}
+    - alert: MongodbTooManyConnections
+      expr: avg by(instance) (rate(mssqlserver_ss_connections{conn_type="current",job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}[1m])) / avg by(instance) (sum (mssqlserver_ss_connections) by (instance)) * 100 > {{ .rules.mssqlserverTooManyConnections.val }}
+      for: {{ .rules.mssqlserverTooManyConnections.duration }}
+      labels:
+        severity: {{ .rules.mssqlserverTooManyConnections.severity }}
+        {{- include "kubedbcom-mssqlserver-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: MSSQLServer too many connections (instance {{`{{`}} $labels.instance {{`}}`}})
+        description: "Too many connections (> 80%)\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+    {{ if (include "kubedbcom-mssqlserver-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.mongoDBPhaseCritical.enabled .rules.mongoDBPhaseCritical.severity)) -}}
+    - alert: MSSQLServerPhaseCritical
+      expr: kubedb_com_mssqlserver_status_phase{app="{{ $app }}", namespace="{{ $.Release.Namespace }}",phase="Critical"} >= 1
+      for: {{ .rules.mongoDBPhaseCritical.duration }}
+      labels:
+        severity: {{ .rules.mongoDBPhaseCritical.severity }}
+        {{- include "kubedbcom-mssqlserver-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: MSSQLServer database is in Critical state (instance {{`{{`}} $labels.instance {{`}}`}})
+        description: "Database in Critical state, one or more database nodes are not working properly.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+    {{ if (include "kubedbcom-mssqlserver-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.mongoDBDown.enabled .rules.mongoDBDown.severity)) -}}
+    - alert: MSSQLServerDown
+      expr: kubedb_com_mssqlserver_status_phase{app="{{ $app }}", namespace="{{ $.Release.Namespace }}",phase="NotReady"} >= 1
+      for: {{ .rules.mongoDBDown.duration }}
+      labels:
+        severity: {{ .rules.mongoDBDown.severity }}
+        {{- include "kubedbcom-mssqlserver-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: MSSQLServer database is in NotReady state (instance {{`{{`}} $labels.instance {{`}}`}})
+        description: "Database in NotReady state, database read/write is failing.\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+    {{ if (include "kubedbcom-mssqlserver-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.mssqlserverHighLatency.enabled .rules.mssqlserverHighLatency.severity)) -}}
+    - alert: MSSQLServerHighLatency
+      expr: |
+        rate(mssqlserver_ss_opLatencies_latency{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}[5m]) /
+        rate(mssqlserver_ss_opLatencies_ops{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}[5m]) > {{ .rules.mssqlserverHighLatency.val }}
+      for: {{ .rules.mssqlserverHighLatency.duration }}
+      labels:
+        severity: {{ .rules.mssqlserverHighLatency.severity }}
+        {{- include "kubedbcom-mssqlserver-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: High latency in mssqlserver instances {{`{{`}} $labels.instance {{`}}`}}
+        description: "High latency in instances\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+    {{ if (include "kubedbcom-mssqlserver-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.mssqlserverHighTicketUtilization.enabled .rules.mssqlserverHighTicketUtilization.severity)) -}}
+    - alert: MSSQLServerHighTicketUtilization
+      expr: |
+        (mssqlserver_ss_wt_concurrentTransactions_out{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} /
+        mssqlserver_ss_wt_concurrentTransactions_totalTickets{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}) * 100
+        > {{ .rules.mssqlserverHighTicketUtilization.val }}
+      for: {{ .rules.mssqlserverHighTicketUtilization.duration }}
+      labels:
+        severity: {{ .rules.mssqlserverHighTicketUtilization.severity }}
+        {{- include "kubedbcom-mssqlserver-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: Ticket usage over 75% {{`{{`}} $labels.instance {{`}}`}}
+        description: "Ticket usage over 75%\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+    {{ if (include "kubedbcom-mssqlserver-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.mssqlserverRecurrentCursorTimeout.enabled .rules.mssqlserverRecurrentCursorTimeout.severity)) -}}
+    - alert: MSSQLServerRecurrentCursorTimeout
+      expr: rate(mssqlserver_ss_metrics_cursor_timedOut{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}[5m]) > {{ .rules.mssqlserverRecurrentCursorTimeout.val }}
+      for: {{ .rules.mssqlserverRecurrentCursorTimeout.duration }}
+      labels:
+        severity: {{ .rules.mssqlserverRecurrentCursorTimeout.severity }}
+        {{- include "kubedbcom-mssqlserver-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: Recurrent cursors timeout in instance {{`{{`}} $labels.instance {{`}}`}}
+        description: "Recurrent cursors timeout\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+    {{ if (include "kubedbcom-mssqlserver-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.mssqlserverRecurrentMemoryPageFaults.enabled .rules.mssqlserverRecurrentMemoryPageFaults.severity)) -}}
+    - alert: MSSQLServerRecurrentMemoryPageFaults
+      expr: rate(mssqlserver_ss_extra_info_page_faults{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"}[5m]) > {{ .rules.mssqlserverRecurrentMemoryPageFaults.val }}
+      for: {{ .rules.mssqlserverRecurrentMemoryPageFaults.duration }}
+      labels:
+        severity: {{ .rules.mssqlserverRecurrentMemoryPageFaults.severity }}
+        {{- include "kubedbcom-mssqlserver-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: Recurrent memory page faults in instance {{`{{`}} $labels.instance {{`}}`}}
+        description: "Recurrent memory page faults\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+  {{end -}}
+  {{end -}}
+
+
+  {{ with .Values.form.alert.groups.provisioner -}}
+  {{ if (include "kubedbcom-mssqlserver-editor.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
+  - name: mssqlserver.provisioner.{{ $.Release.Namespace }}.{{ $app }}.rules
+    rules:
+    {{ if (include "kubedbcom-mssqlserver-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseNotReady.enabled .rules.appPhaseNotReady.severity)) -}}
+    - alert: KubeDBMSSQLServerPhaseNotReady
+      expr: kubedb_com_mssqlserver_status_phase{phase="NotReady",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
+      for: {{ .rules.appPhaseNotReady.duration }}
+      labels:
+        severity: {{ .rules.appPhaseNotReady.severity }}
+        {{- include "kubedbcom-mssqlserver-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: KubeDB MSSQLServer Phase NotReady (mssqlserver {{`{{`}} $labels.mssqlserver {{`}}`}})
+        description: "KubeDB MSSQLServer Phase not ready on {{`{{`}} $labels.mssqlserver {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{ end -}}
+    {{ if (include "kubedbcom-mssqlserver-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.appPhaseCritical.enabled .rules.appPhaseCritical.severity)) -}}
+    - alert: KubeDBMSSQLServerPhaseCritical
+      expr: kubedb_com_mssqlserver_status_phase{phase="Critical",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
+      for: {{ .rules.appPhaseCritical.duration }}
+      labels:
+        severity: {{ .rules.appPhaseCritical.severity }}
+        {{- include "kubedbcom-mssqlserver-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: KubeDB MSSQLServer Phase Critical (mssqlserver {{`{{`}} $labels.mssqlserver {{`}}`}})
+        description: "KubeDB MSSQLServer Phase Critical {{`{{`}} $labels.mssqlserver {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+  {{ end -}}
+  {{ end -}}
+
+
+  {{ with .Values.form.alert.groups.opsManager -}}
+  {{ if (include "kubedbcom-mssqlserver-editor.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
+  - name: mssqlserver.opsManager.{{ $.Release.Namespace }}.{{ $app }}.rules
+    rules:
+    {{ if (include "kubedbcom-mssqlserver-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.opsRequestOnProgress.enabled .rules.opsRequestOnProgress.severity)) -}}
+    - alert: KubeDBMSSQLServerOpsRequestOnProgress
+      expr: ops_kubedb_com_mssqlserveropsrequest_status_phase{phase="Progressing",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
+      for: {{ .rules.opsRequestOnProgress.duration }}
+      labels:
+        severity: {{ .rules.opsRequestOnProgress.severity }}
+        {{- include "kubedbcom-mssqlserver-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: MSSQLServerOpsRequest on progress (mssqlserveropsrequest {{`{{`}} $labels.mssqlserveropsrequest {{`}}`}})
+        description: "MSSQLServerOpsRequest {{`{{`}} $labels.mssqlserveropsrequest {{`}}`}} is in progressressing status\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{ end -}}
+    {{ if (include "kubedbcom-mssqlserver-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.opsRequestStatusProgressingToLong.enabled .rules.opsRequestStatusProgressingToLong.severity)) -}}
+    - alert: KubeDBMSSQLServerOpsRequestStatusProgressingToLong
+      expr: ops_kubedb_com_mssqlserveropsrequest_status_phase{phase="Progressing",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
+      for: {{ .rules.opsRequestStatusProgressingToLong.duration }}
+      labels:
+        severity: {{ .rules.opsRequestStatusProgressingToLong.severity }}
+        {{- include "kubedbcom-mssqlserver-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: MSSQLServerOpsRequest is in progressing status for too long (mssqlserveropsrequest {{`{{`}} $labels.mssqlserveropsrequest {{`}}`}})
+        description: "MSSQLServerOpsRequest {{`{{`}} $labels.mssqlserveropsrequest {{`}}`}} is in progressing status for too long\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{ end -}}
+    {{ if (include "kubedbcom-mssqlserver-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.opsRequestFailed.enabled .rules.opsRequestFailed.severity)) -}}
+    - alert: KubeDBMSSQLServerOpsRequestFailed
+      expr: ops_kubedb_com_mssqlserveropsrequest_status_phase{phase="Failed",app="{{ $app }}",namespace="{{ $.Release.Namespace }}"} == 1
+      for: {{ .rules.opsRequestFailed.duration }}
+      labels:
+        severity: {{ .rules.opsRequestFailed.severity }}
+        {{- include "kubedbcom-mssqlserver-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: MSSQLServerOpsRequest failed (mssqlserveropsrequest {{`{{`}} $labels.mssqlserveropsrequest {{`}}`}})
+        description: "MSSQLServerOpsRequest {{`{{`}} $labels.mssqlserveropsrequest {{`}}`}} failed \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+  {{ end -}}
+  {{ end -}}
+
+
+  {{ with .Values.form.alert.groups.stash -}}
+  {{ if (include "kubedbcom-mssqlserver-editor.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
+  - name: mssqlserver.stash.{{ $.Release.Namespace }}.{{ $app }}.rules
+    rules:
+    {{ if (include "kubedbcom-mssqlserver-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.backupSessionFailed.enabled .rules.backupSessionFailed.severity)) -}}
+    - alert: MSSQLServerStashBackupSessionFailed
+      expr: stash_backup_session_success * on(invoker_name, invoker_kind) group_left(target_name, target_kind) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ $.Release.Namespace }}"} == 0
+      for: {{ .rules.backupSessionFailed.duration }}
+      labels:
+        severity: {{ .rules.backupSessionFailed.severity }}
+        {{- include "kubedbcom-mssqlserver-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: MSSQLServer Stash backup session failed (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
+        description: "MSSQLServer Stash backupsession failed {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{ end -}}
+    {{ if (include "kubedbcom-mssqlserver-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.restoreSessionFailed.enabled .rules.restoreSessionFailed.severity)) -}}
+    - alert: MSSQLServerStashRestoreSessionFailed
+      expr: stash_restore_session_success * on(invoker_name, invoker_kind) group_left(target_name, target_kind) stash_appscode_com_restoresession_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ $.Release.Namespace }}"} == 0
+      for: {{ .rules.restoreSessionFailed.duration }}
+      labels:
+        severity: {{ .rules.restoreSessionFailed.severity }}
+        {{- include "kubedbcom-mssqlserver-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: MSSQLServer Stash restore session failed (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
+        description: "MSSQLServer Stash restore session failed {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{ end -}}
+    {{ if (include "kubedbcom-mssqlserver-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.noBackupSessionForTooLong.enabled .rules.noBackupSessionForTooLong.severity)) -}}
+    - alert: MSSQLServerStashNoBackupSessionForTooLong
+      expr: time() - stash_backup_last_success_time_seconds + on(invoker_name, invoker_kind) group_left(target_name, target_kind) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ $.Release.Namespace }}"} - 1 > {{ .rules.noBackupSessionForTooLong.val }}
+      for: {{ .rules.noBackupSessionForTooLong.duration }}
+      labels:
+        severity: {{ .rules.noBackupSessionForTooLong.severity }}
+        {{- include "kubedbcom-mssqlserver-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: MSSQLServer Stash no backup for last {{ .rules.noBackupSessionForTooLong.val }} second (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
+        description: "MSSQLServer Stash no backup for too long {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{ end -}}
+    {{ if (include "kubedbcom-mssqlserver-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.repositoryCorrupted.enabled .rules.repositoryCorrupted.severity)) -}}
+    - alert: MSSQLServerStashRepositoryCorrupted
+      expr: stash_repository_integrity * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ $.Release.Namespace }}"}
+      for: {{ .rules.repositoryCorrupted.duration }}
+      labels:
+        severity: {{ .rules.repositoryCorrupted.severity }}
+        {{- include "kubedbcom-mssqlserver-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: MSSQLServer Stash repository corrupted (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
+        description: "MSSQLServer Stash repository corrupted {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{ end -}}
+    {{ if (include "kubedbcom-mssqlserver-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.repositoryStorageRunningLow.enabled .rules.repositoryStorageRunningLow.severity)) -}}
+    - alert: MSSQLServerStashRepositoryStorageRunningLow
+      expr: stash_repository_size_bytes * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ $.Release.Namespace }}"} > {{ .rules.repositoryStorageRunningLow.val }}
+      for: {{ .rules.repositoryStorageRunningLow.duration }}
+      labels:
+        severity: {{ .rules.repositoryStorageRunningLow.severity }}
+        {{- include "kubedbcom-mssqlserver-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: MSSQLServer Stash Repository storage more than {{ .rules.repositoryStorageRunningLow.val }} byte. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
+        description: "MSSQLServer Stash Repository storage running low {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+    {{ if (include "kubedbcom-mssqlserver-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.backupSessionPeriodTooLong.enabled .rules.backupSessionPeriodTooLong.severity)) -}}
+    - alert: MSSQLServerStashBackupSessionPeriodTooLong
+      expr: stash_backup_session_duration_seconds * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_appscode_com_backupconfiguration_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ $.Release.Namespace }}"} > {{ .rules.backupSessionPeriodTooLong.val }}
+      for: {{ .rules.backupSessionPeriodTooLong.duration }}
+      labels:
+        severity: {{ .rules.backupSessionPeriodTooLong.severity }}
+        {{- include "kubedbcom-mssqlserver-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary:  MSSQLServer Stash backup session took more than {{ .rules.backupSessionPeriodTooLong.val }} second to complete. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
+        description: "MSSQLServer Stash backup session taking to long to complete {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{ end -}}
+    {{ if (include "kubedbcom-mssqlserver-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.restoreSessionPeriodTooLong.enabled .rules.restoreSessionPeriodTooLong.severity)) -}}
+    - alert: MSSQLServerStashRestoreSessionPeriodTooLong
+      expr: stash_restore_session_duration_seconds * on(invoker_name, invoker_kind) group_left(target_name, target_kind, repository) stash_appscode_com_restoresession_info{target_name="{{ $app }}", target_kind="AppBinding", namespace="{{ $.Release.Namespace }}"} > {{ .rules.restoreSessionPeriodTooLong.val }}
+      for: {{ .rules.restoreSessionPeriodTooLong.duration }}
+      labels:
+        severity: {{ .rules.restoreSessionPeriodTooLong.severity }}
+        {{- include "kubedbcom-mssqlserver-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary:  MSSQLServer Stash restore session took more than {{ .rules.restoreSessionPeriodTooLong.val }} second to complete. (invoker_name {{`{{`}} $labels.invoker_name {{`}}`}})
+        description: "MSSQLServer Stash restore session taking to long to complete {{`{{`}} $labels.invoker_name {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+  {{ end -}}
+  {{ end -}}
+
+
+  {{ with .Values.form.alert.groups.schemaManager -}}
+  {{ if (include "kubedbcom-mssqlserver-editor.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
+  - name: mssqlserver.schemaManager.{{ $.Release.Namespace }}.{{ $app }}.rules
+    rules:
+    {{ if (include "kubedbcom-mssqlserver-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.schemaPendingForTooLong.enabled .rules.schemaPendingForTooLong.severity)) -}}
+    - alert: KubeDBMSSQLServerSchemaPendingForTooLong
+      expr: schema_kubedb_com_mssqlserverdatabase_status_phase{phase="Pending",app="{{ $app }}",app_namespace="{{ $.Release.Namespace }}"} == 1
+      for: {{ .rules.schemaPendingForTooLong.duration }}
+      labels:
+        severity: {{ .rules.schemaPendingForTooLong.severity }}
+        {{- include "kubedbcom-mssqlserver-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: KubeDB schema pending for too long for (mssqlserverdatabase {{`{{`}} $labels.mssqlserverdatabase {{`}}`}})
+        description: "KubeDB schema pending for too long.\n {{`{{`}} $labels.mssqlserverdatabase {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{ end -}}
+    {{ if (include "kubedbcom-mssqlserver-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.schemaInProgressForTooLong.enabled .rules.schemaInProgressForTooLong.severity)) -}}
+    - alert: KubeDBMSSQLServerSchemaInProgressForTooLong
+      expr: schema_kubedb_com_mssqlserverdatabase_status_phase{phase="InProgress",app="{{ $app }}",app_namespace="{{ $.Release.Namespace }}"} == 1
+      for: {{ .rules.schemaInProgressForTooLong.duration }}
+      labels:
+        severity: {{ .rules.schemaInProgressForTooLong.severity }}
+        {{- include "kubedbcom-mssqlserver-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: KubeDB schema is in progress for too long for (mssqlserverdatabase {{`{{`}} $labels.mssqlserverdatabase {{`}}`}})
+        description: "KubeDB schema is in progress for too long.\n {{`{{`}} $labels.mssqlserverdatabase {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{ end -}}
+    {{ if (include "kubedbcom-mssqlserver-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.schemaTerminatingForTooLong.enabled .rules.schemaTerminatingForTooLong.severity)) -}}
+    - alert: KubeDBMSSQLServerSchemaTerminatingForTooLong
+      expr: schema_kubedb_com_mssqlserverdatabase_status_phase{phase="Terminating",app="{{ $app }}",app_namespace="{{ $.Release.Namespace }}"} == 1
+      for: {{ .rules.schemaTerminatingForTooLong.duration }}
+      labels:
+        severity: {{ .rules.schemaTerminatingForTooLong.severity }}
+        {{- include "kubedbcom-mssqlserver-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: KubeDB schema terminating for too long for (mssqlserverdatabase {{`{{`}} $labels.mssqlserverdatabase {{`}}`}})
+        description: "KubeDB schema terminating for too long.\n {{`{{`}} $labels.mssqlserverdatabase {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{ end -}}
+    {{ if (include "kubedbcom-mssqlserver-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.schemaFailed.enabled .rules.schemaFailed.severity)) -}}
+    - alert: KubeDBMSSQLServerSchemaFailed
+      expr: schema_kubedb_com_mssqlserverdatabase_status_phase{phase="Failed",app="{{ $app }}",app_namespace="{{ $.Release.Namespace }}"} == 1
+      for: {{ .rules.schemaFailed.duration }}
+      labels:
+        severity: {{ .rules.schemaFailed.severity }}
+        {{- include "kubedbcom-mssqlserver-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: KubeDB schema failed for (mssqlserverdatabase {{`{{`}} $labels.mssqlserverdatabase {{`}}`}})
+        description: "KubeDB schema failed.\n {{`{{`}} $labels.mssqlserverdatabase {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{ end -}}
+    {{ if (include "kubedbcom-mssqlserver-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.schemaExpired.enabled .rules.schemaExpired.severity)) -}}
+    - alert: KubeDBMSSQLServerSchemaExpired
+      expr: schema_kubedb_com_mssqlserverdatabase_status_phase{phase="Expired",app="{{ $app }}",app_namespace="{{ $.Release.Namespace }}"} == 1
+      for: {{ .rules.schemaExpired.duration }}
+      labels:
+        severity: {{ .rules.schemaExpired.severity }}
+        {{- include "kubedbcom-mssqlserver-editor.alertLabels" $ | nindent 8 }}
+      annotations:
+        summary: KubeDB schema expired for (mssqlserverdatabase {{`{{`}} $labels.mssqlserverdatabase {{`}}`}})
+        description: "KubeDB schema expired.\n {{`{{`}} $labels.mssqlserverdatabase {{`}}`}} \n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
+    {{- end }}
+  {{ end -}}
+  {{ end -}}
+
+{{ end }}

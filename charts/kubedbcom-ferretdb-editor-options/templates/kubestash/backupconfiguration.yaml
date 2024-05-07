@@ -1,0 +1,48 @@
+{{- if eq .Values.spec.backup.tool "KubeStash" -}}
+
+apiVersion: core.kubestash.com/v1alpha1
+kind: BackupConfiguration
+metadata:
+  name: {{ include "kubedbcom-ferretdb-editor-options.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kubedbcom-ferretdb-editor-options.labels" . | nindent 4 }}
+spec:
+  target:
+    apiGroup: kubedb.com
+    kind: FerretDB
+    name: {{ include "kubedbcom-ferretdb-editor-options.fullname" . }}
+    namespace: {{ .Release.Namespace }}
+  backends:
+    - name: default-backend
+      storageRef:
+        name: {{ .Values.spec.backup.kubestash.storageRef.name }}
+        namespace: {{ .Values.spec.backup.kubestash.storageRef.namespace }}
+      retentionPolicy:
+        name: {{ .Values.spec.backup.kubestash.retentionPolicy.name }}
+        namespace: {{ .Values.spec.backup.kubestash.retentionPolicy.namespace }}
+  sessions:
+    - name: full-backup
+      sessionHistoryLimit: 2
+      scheduler:
+        schedule: {{ .Values.spec.backup.kubestash.schedule | quote }}
+        jobTemplate:
+          backoffLimit: 1
+      repositories:
+        - name: {{ include "kubedbcom-ferretdb-editor-options.fullname" . }}
+          backend: default-backend
+          directory: {{ .Release.Namespace }}/{{ include "kubedbcom-ferretdb-editor-options.fullname" . }}
+          encryptionSecret:
+            name: {{ .Values.spec.backup.kubestash.encryptionSecret.name }}
+            namespace: {{ .Values.spec.backup.kubestash.encryptionSecret.namespace }}
+      addon:
+        name: ferretdb-addon
+        tasks:
+          - name: logical-backup
+        {{- if semverCompare "~6.0.0" (splitList "-" .Values.spec.version | last) }}
+        jobTemplate:
+          spec:
+            securityContext:
+              runAsUser: 999
+        {{- end }}
+{{- end }}

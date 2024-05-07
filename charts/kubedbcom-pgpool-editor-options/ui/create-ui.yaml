@@ -1,0 +1,360 @@
+steps:
+- form:
+    discriminator:
+      createAuthSecret:
+        default: true
+        type: boolean
+    elements:
+    - disabled: isVariantAvailable
+      label:
+        text: labels.database.name
+      schema:
+        $ref: schema#/properties/metadata/properties/release/properties/name
+      type: input
+    - add_new_button:
+        label: labels.add_new_namespace
+        target: _blank
+        url:
+          function: getCreateNameSpaceUrl
+      disabled: isVariantAvailable
+      fetch: getResources|core|v1|namespaces
+      label:
+        text: labels.namespace
+      refresh: true
+      schema:
+        $ref: schema#/properties/metadata/properties/release/properties/namespace
+      type: select
+    - disableUnselect: true
+      fetch: getMongoDbVersions|catalog.kubedb.com|v1alpha1|pgpoolversions
+      label:
+        text: labels.database.version
+      schema:
+        $ref: schema#/properties/spec/properties/version
+      type: select
+    - isArray: true
+      keys:
+        label:
+          text: labels.labels.key
+      label:
+        text: labels.labels.label
+      schema:
+        $ref: schema#/properties/spec/properties/labels
+      type: key-value-input-form
+      values:
+        label:
+          text: labels.labels.value
+        schema:
+          $ref: schema#/properties/spec/properties/labels/additionalProperties
+        type: input
+    - isArray: true
+      keys:
+        label:
+          text: labels.annotations.key
+      label:
+        text: labels.annotations.label
+      schema:
+        $ref: schema#/properties/spec/properties/annotations
+      type: key-value-input-form
+      values:
+        label:
+          text: labels.annotations.value
+        schema:
+          $ref: schema#/properties/spec/properties/annotations/additionalProperties
+        type: input
+    - hasDescription: true
+      label:
+        text: labels.database.mode
+      options:
+      - description: options.database.mode.Standalone.description
+        text: options.database.mode.Standalone.label
+        value: Standalone
+      - description: options.database.mode.Replicaset.description
+        text: options.database.mode.Replicaset.label
+        value: Replicaset
+      - description: options.database.mode.Sharded.description
+        text: options.database.mode.Sharded.label
+        value: Sharded
+      schema:
+        $ref: schema#/properties/spec/properties/mode
+      type: radio
+    - elements:
+      - label:
+          text: labels.replicaset.name
+        schema:
+          $ref: schema#/properties/spec/properties/replicaSet/properties/name
+        type: input
+      - label:
+          text: labels.replicaset.number
+        schema:
+          $ref: schema#/properties/spec/properties/replicaSet/properties/replicas
+        type: input
+      if: isEqualToModelPathValue|Replicaset|/spec/mode
+      schema:
+        $ref: schema#/properties/spec/properties/replicaSet
+      type: single-step-form
+    - if: showStorageSizeField
+      label:
+        text: labels.storage.size
+      schema:
+        $ref: schema#/properties/spec/properties/persistence/properties/size
+      type: input
+    - elements:
+      - label:
+          text: labels.shardNodes
+        type: label-element
+      - label:
+          text: labels.shards
+        schema:
+          $ref: schema#/properties/spec/properties/shardTopology/properties/shard/properties/shards
+        type: input
+      - label:
+          text: labels.storage.size
+        schema:
+          $ref: schema#/properties/spec/properties/shardTopology/properties/shard/properties/persistence/properties/size
+        type: input
+      - label:
+          text: labels.configServer
+        type: label-element
+      - label:
+          text: labels.storage.size
+        schema:
+          $ref: schema#/properties/spec/properties/shardTopology/properties/configServer/properties/persistence/properties/size
+        type: input
+      - label:
+          text: labels.mongos
+        type: label-element
+      - label:
+          text: labels.replicaset.number
+        schema:
+          $ref: schema#/properties/spec/properties/shardTopology/properties/mongos/properties/replicas
+        type: input
+      if: isEqualToModelPathValue|Sharded|/spec/mode
+      type: single-step-form
+    - hasDescription: true
+      label:
+        text: labels.terminationPolicy
+      onChange: setStorageClass
+      options:
+      - description: options.terminationPolicy.delete.description
+        text: options.terminationPolicy.delete.label
+        value: Delete
+      - description: options.terminationPolicy.halt.description
+        text: options.terminationPolicy.halt.label
+        value: Halt
+      - description: options.terminationPolicy.wipeOut.description
+        text: options.terminationPolicy.wipeOut.label
+        value: WipeOut
+      - description: options.terminationPolicy.doNotTerminate.description
+        text: options.terminationPolicy.doNotTerminate.label
+        value: DoNotTerminate
+      schema:
+        $ref: schema#/properties/spec/properties/terminationPolicy
+      type: radio
+    - fetch: getStorageClassNames
+      label:
+        text: labels.storage.class
+      schema:
+        $ref: schema#/properties/spec/properties/storageClass/properties/name
+      type: select
+    - label:
+        text: labels.database.secret
+      type: label-element
+    - onChange: onCreateAuthSecretChange
+      options:
+      - text: options.database.secret.customSecret.label
+        value: true
+      - text: options.database.secret.existingSecret.label
+        value: false
+      schema:
+        $ref: discriminator#/createAuthSecret
+      type: radio
+    - allowUserDefinedOption: true
+      fetch: getSecrets
+      if: showAuthSecretField
+      label:
+        text: labels.secret
+      schema:
+        $ref: schema#/properties/spec/properties/authSecret/properties/name
+      type: select
+    - if: showAuthPasswordField
+      label:
+        text: labels.password
+      schema:
+        $ref: schema#/properties/spec/properties/authSecret/properties/password
+      type: input
+    - label:
+        text: labels.machine_profile
+      type: label-element
+    - computed: setMachineToCustom
+      fetch: getMachineListForOptions
+      label:
+        text: Machine
+      onChange: setResourceLimit
+      schema:
+        $ref: schema#/properties/spec/properties/machine
+      type: select
+    - computed: setLimitsCpuOrMem|cpu
+      disabled: disableLimit
+      label:
+        text: labels.cpu
+      schema:
+        $ref: schema#/properties/spec/properties/resources/properties/limits/properties/cpu
+      type: input
+    - computed: setLimitsCpuOrMem|memory
+      disabled: disableLimit
+      label:
+        text: labels.memory
+      schema:
+        $ref: schema#/properties/spec/properties/resources/properties/limits/properties/memory
+      type: input
+    - elements:
+      - customClass: mt-10
+        label:
+          text: labels.alert.options
+        options:
+        - text: None
+          value: none
+        - text: Critical
+          value: critical
+        - text: Warning
+          value: warning
+        - text: Info
+          value: info
+        schema:
+          $ref: schema#/properties/form/properties/alert/properties/enabled
+        sortable: true
+        type: select
+      label:
+        text: labels.alert.label
+      schema:
+        $ref: schema#/properties/form/properties/alert
+      show_label: true
+      type: single-step-form
+    - alias: reusable-monitor-option
+      chart:
+        name: uibytebuildersdev-component-monitoring-option
+        version: v0.4.18
+      dataContext:
+        agent:
+          $ref: schema#/properties/spec/properties/monitoring/properties/agent
+      functionCallbacks:
+        updateAgentValue:
+          $ref: functions#/updateAgentValue
+      moduleResolver: fetchJsons
+      schema:
+        $ref: schema#/properties/spec/properties/monitoring/properties/serviceMonitor
+      type: reusable-element
+    - alias: reusable-backup-option
+      chart:
+        name: uibytebuildersdev-component-backup-option
+        version: v0.4.18
+      moduleResolver: fetchJsons
+      schema:
+        $ref: schema#/properties/spec/properties/backup
+      type: reusable-element
+    - elements:
+      - hasDescription: true
+        onChange: dedicatedOnChange
+        options:
+        - description: Create the database in shared node pool
+          text: Shared node pool
+          value: false
+        - description: Create a dedicated node pool for the database
+          text: Dedicated node pool
+          value: true
+        schema:
+          $ref: schema#/properties/form/properties/capi/properties/dedicated
+        type: radio
+      - fetch: getZones
+        if: showMultiselectZone
+        label:
+          text: Zones
+        onChange: zonesOnChange
+        schema:
+          $ref: schema#/properties/form/properties/capi/properties/zones
+        type: multiselect
+      - fetch: getZones
+        if: showSelectZone
+        label:
+          text: Zones
+        onChange: zonesOnChange
+        schema:
+          $ref: schema#/properties/form/properties/capi/properties/zones
+        type: select
+      - fetch: getSKU
+        if: ifZones
+        label:
+          text: SKU
+        schema:
+          $ref: schema#/properties/form/properties/capi/properties/sku
+        type: select
+      if: ifCapiProviderIsNotEmpty
+      label:
+        text: Database Profile
+      show_label: true
+      type: single-step-form
+    - label:
+        text: labels.configOptions
+      type: label-element
+    - cluster:
+        $ref: store#/route/params/cluster
+      hasDependencies: true
+      hasDescription: true
+      options:
+      - description: options.configOptions.alert.description
+        text: options.configOptions.alert.label
+        value: alert
+      - description: options.configOptions.topology.description
+        text: options.configOptions.topology.label
+        value: topology
+      - dependencies:
+        - group: cert-manager.io
+          name: Cert-Manager
+          resource: issuers
+          url: https://cert-manager.io/docs/
+          version: v1
+        description: options.configOptions.tls.description
+        text: options.configOptions.tls.label
+        value: tls
+      - description: options.configOptions.initialization.description
+        text: options.configOptions.initialization.label
+        value: initialization
+      - dependencies:
+        - group: stash.appscode.com
+          name: Stash
+          resource: backupconfigurations
+          url: https://stash.run/
+          version: v1beta1
+        description: options.configOptions.backup.description
+        text: options.configOptions.backup.label
+        value: backupconfiguration
+      - description: options.configOptions.networking.description
+        text: options.configOptions.networking.label
+        value: networking
+      - dependencies:
+        - group: monitoring.coreos.com
+          name: Prometheus Operator
+          resource: servicemonitors
+          url: https://github.com/prometheus-operator
+          version: v1
+        description: options.configOptions.monitoring.description
+        text: options.configOptions.monitoring.label
+        value: monitoring
+      - description: options.configOptions.customConfig.description
+        text: options.configOptions.customConfig.label
+        value: custom-config
+      - dependingSteps:
+        - pod-template-sharded-topology
+        - pod-template-shard
+        - pod-template-config-server
+        - pod-template-mongos
+        description: options.configOptions.podTemplate.description
+        text: options.configOptions.podTemplate.label
+        value: pod-template
+      owner:
+        $ref: store#/route/params/user
+      type: configure-options
+    type: single-step-form
+  id: options
+  title: steps.0.label
+type: multi-step-form
