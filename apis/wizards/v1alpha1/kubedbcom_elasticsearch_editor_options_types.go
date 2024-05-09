@@ -67,6 +67,14 @@ type KubedbcomElasticsearchEditorOptionsSpecSpec struct {
 	AuthSecret AuthSecret                `json:"authSecret"`
 	Monitoring Monitoring                `json:"monitoring"`
 	Backup     BackupToolSpec            `json:"backup"`
+	// KernelSettings contains the additional kernel settings.
+	// +optional
+	KernelSettings KernelSettings `json:"kernelSettings"`
+}
+
+type KernelSettings struct {
+	// DisableDefaults can be set to false to avoid defaulting via mutator
+	DisableDefaults bool `json:"disableDefaults,omitempty"`
 }
 
 // +kubebuilder:validation:Enum=OpenDistro;OpenSearch;SearchGuard;X-Pack

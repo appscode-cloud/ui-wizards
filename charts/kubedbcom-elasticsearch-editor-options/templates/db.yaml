@@ -107,7 +107,7 @@ spec:
   authSecret:
     name: {{ .Values.spec.authSecret.name }}
 {{- end }}
-{{ if not (eq .Values.spec.authPlugin "X-Pack") }}
+{{- if not (eq .Values.spec.authPlugin "X-Pack") }}
   internalUsers:
     admin:
       description: "Elasticsearch admin user"
@@ -138,7 +138,7 @@ spec:
     readall_and_monitor:
       users:
       - metrics_exporter
-{{ end }}
+{{- end }}
 {{- if (and .Values.spec.monitoring .Values.spec.monitoring.agent) }}
   monitor:
     agent: {{ .Values.spec.monitoring.agent }}
@@ -152,4 +152,8 @@ spec:
         interval: 30s
         labels:
           {{- toYaml .Values.spec.monitoring.serviceMonitor.labels | nindent 10 }}
+{{- end }}
+{{- if .Values.spec.kernelSettings.disableDefaults }}
+  kernelSettings:
+    disableDefaults: true
 {{- end }}
