@@ -77,6 +77,30 @@ function getEnabledFeatureInConfigureBtnClick(allFeatureSetFeature, isBlockLevel
 function getEnabledFeatureInEnableBtnClick(allFeatureSetFeature, isBlockLevel, storeGet){
   // filter only (enabled + required + feature block feature)
   const featureBlock = storeGet("/route/query/activeBlock") || "";
+
+  // for OCM
+
+  const getRoute = storeGet("/route")
+  const FeatureList = storeGet("/ocm/featureSet/")
+  const FeatureSet = storeGet("/route/params/featureset")
+
+  if(getRoute.fullPath.includes('/hubs/'))
+  {
+
+    const selectedFeatureSet = FeatureList.result?.filter((item)=>{
+      return  item.name === FeatureSet 
+    }) || []
+    const checkedFeatures = selectedFeatureSet[0].features.filter((item)=>{
+      return item.installed  || item.recommended || item.featureBlock=== featureBlock
+    }) || []
+    const checkedFeatureName = checkedFeatures.map((item)=> {
+      return item.name
+    }) || []
+    checkedFeatureName.push(featureBlock)
+    return checkedFeatureName
+  }
+
+
   const isRecommendedFeatureAvailable = allFeatureSetFeature.some((item)=> {
     return item?.spec?.featureBlock === featureBlock && item?.spec?.recommended
   });
@@ -108,6 +132,9 @@ function getEnabledFeatureInEnableBtnClick(allFeatureSetFeature, isBlockLevel, s
   });
   const enabledFeatureNames =
     enabledFeatures.map((item) => item?.metadata?.name) || [];
+
+
+    console.log('at below', enabledFeatureNames)
   return enabledFeatureNames;
 }
 

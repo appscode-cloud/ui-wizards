@@ -61,6 +61,31 @@ function isFeatureRequired(storeGet, featureName) {
 
 function getEnabledFeatureInConfigureBtnClick(allFeatureSetFeature, isBlockLevel, storeGet){   
   const featureBlock = storeGet("/route/query/activeBlock") || "";
+
+
+  // for OCM
+
+  const getRoute = storeGet("/route")
+  const FeatureList = storeGet("/ocm/featureSet/")
+  const FeatureSet = storeGet("/route/params/featureset")
+
+  if(getRoute.fullPath.includes('/hubs/'))
+  {
+
+    const selectedFeatureSet = FeatureList.result?.filter((item)=>{
+      return  item.name === FeatureSet 
+    }) || []
+    const checkedFeatures = selectedFeatureSet[0].features.filter((item)=>{
+      return item.installed  || item.recommended || item.featureBlock=== featureBlock
+    }) || []
+    const checkedFeatureName = checkedFeatures.map((item)=> {
+      return item.name
+    }) || []
+    checkedFeatureName.push(featureBlock)
+    return checkedFeatureName
+  }
+
+
   const enabledFeatures = allFeatureSetFeature.filter((item) => {
     const featureName = item?.metadata?.name;
     return (
