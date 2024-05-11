@@ -396,7 +396,7 @@ let allAvailableTypes = [
   "Kafka",
   "MariaDB",
   "Memcached",
-  "MicrosoftSQLServer",
+  "MSSQLServer",
   "MongoDB",
   "MySQL",
   "PerconaXtraDB",
