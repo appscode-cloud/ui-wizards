@@ -31,41 +31,7 @@ properties:
                     type: string
                   rules:
                     properties:
-                      mongoDBDown:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      mongoDBPhaseCritical:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      mongodbCursorsTimeouts:
+                      SolrHighBufferSize:
                         properties:
                           duration:
                             type: string
@@ -85,7 +51,7 @@ properties:
                         - severity
                         - val
                         type: object
-                      mongodbHighLatency:
+                      SolrHighHeapSize:
                         properties:
                           duration:
                             type: string
@@ -105,7 +71,7 @@ properties:
                         - severity
                         - val
                         type: object
-                      mongodbHighTicketUtilization:
+                      diskAlmostFull:
                         properties:
                           duration:
                             type: string
@@ -125,7 +91,7 @@ properties:
                         - severity
                         - val
                         type: object
-                      mongodbNumberCursorsOpen:
+                      diskUsageHigh:
                         properties:
                           duration:
                             type: string
@@ -145,7 +111,7 @@ properties:
                         - severity
                         - val
                         type: object
-                      mongodbRecurrentCursorTimeout:
+                      solrDownShards:
                         properties:
                           duration:
                             type: string
@@ -165,7 +131,7 @@ properties:
                         - severity
                         - val
                         type: object
-                      mongodbRecurrentMemoryPageFaults:
+                      solrHighPoolSize:
                         properties:
                           duration:
                             type: string
@@ -185,7 +151,7 @@ properties:
                         - severity
                         - val
                         type: object
-                      mongodbReplicationLag:
+                      solrHighQPS:
                         properties:
                           duration:
                             type: string
@@ -205,7 +171,7 @@ properties:
                         - severity
                         - val
                         type: object
-                      mongodbTooManyConnections:
+                      solrHighThreadsRunning:
                         properties:
                           duration:
                             type: string
@@ -225,7 +191,7 @@ properties:
                         - severity
                         - val
                         type: object
-                      mongodbVirtualMemoryUsage:
+                      solrRecoveryFailedShards:
                         properties:
                           duration:
                             type: string
@@ -246,88 +212,15 @@ properties:
                         - val
                         type: object
                     required:
-                    - mongoDBDown
-                    - mongoDBPhaseCritical
-                    - mongodbCursorsTimeouts
-                    - mongodbHighLatency
-                    - mongodbHighTicketUtilization
-                    - mongodbNumberCursorsOpen
-                    - mongodbRecurrentCursorTimeout
-                    - mongodbRecurrentMemoryPageFaults
-                    - mongodbReplicationLag
-                    - mongodbTooManyConnections
-                    - mongodbVirtualMemoryUsage
-                    type: object
-                required:
-                - enabled
-                - rules
-                type: object
-              opsManager:
-                properties:
-                  enabled:
-                    enum:
-                    - none
-                    - critical
-                    - warning
-                    - info
-                    type: string
-                  rules:
-                    properties:
-                      opsRequestFailed:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      opsRequestOnProgress:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      opsRequestStatusProgressingToLong:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                    required:
-                    - opsRequestFailed
-                    - opsRequestOnProgress
-                    - opsRequestStatusProgressingToLong
+                    - SolrHighBufferSize
+                    - SolrHighHeapSize
+                    - diskAlmostFull
+                    - diskUsageHigh
+                    - solrDownShards
+                    - solrHighPoolSize
+                    - solrHighQPS
+                    - solrHighThreadsRunning
+                    - solrRecoveryFailedShards
                     type: object
                 required:
                 - enabled
@@ -386,274 +279,9 @@ properties:
                 - enabled
                 - rules
                 type: object
-              schemaManager:
-                properties:
-                  enabled:
-                    enum:
-                    - none
-                    - critical
-                    - warning
-                    - info
-                    type: string
-                  rules:
-                    properties:
-                      schemaExpired:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      schemaFailed:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      schemaInProgressForTooLong:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      schemaPendingForTooLong:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      schemaTerminatingForTooLong:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                    required:
-                    - schemaExpired
-                    - schemaFailed
-                    - schemaInProgressForTooLong
-                    - schemaPendingForTooLong
-                    - schemaTerminatingForTooLong
-                    type: object
-                required:
-                - enabled
-                - rules
-                type: object
-              stash:
-                properties:
-                  enabled:
-                    enum:
-                    - none
-                    - critical
-                    - warning
-                    - info
-                    type: string
-                  rules:
-                    properties:
-                      backupSessionFailed:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      backupSessionPeriodTooLong:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                          val:
-                            type: integer
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        - val
-                        type: object
-                      noBackupSessionForTooLong:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                          val:
-                            type: integer
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        - val
-                        type: object
-                      repositoryCorrupted:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      repositoryStorageRunningLow:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                          val:
-                            type: integer
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        - val
-                        type: object
-                      restoreSessionFailed:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      restoreSessionPeriodTooLong:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                          val:
-                            type: integer
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        - val
-                        type: object
-                    required:
-                    - backupSessionFailed
-                    - backupSessionPeriodTooLong
-                    - noBackupSessionForTooLong
-                    - repositoryCorrupted
-                    - repositoryStorageRunningLow
-                    - restoreSessionFailed
-                    - restoreSessionPeriodTooLong
-                    type: object
-                required:
-                - enabled
-                - rules
-                type: object
             required:
             - database
-            - opsManager
             - provisioner
-            - schemaManager
-            - stash
             type: object
           labels:
             additionalProperties:
@@ -1250,13 +878,6 @@ properties:
             - persistence
             - replicas
             type: object
-          mongos:
-            properties:
-              replicas:
-                type: integer
-            required:
-            - replicas
-            type: object
           shard:
             properties:
               persistence:
@@ -1277,7 +898,6 @@ properties:
             type: object
         required:
         - configServer
-        - mongos
         - shard
         type: object
       sslMode:

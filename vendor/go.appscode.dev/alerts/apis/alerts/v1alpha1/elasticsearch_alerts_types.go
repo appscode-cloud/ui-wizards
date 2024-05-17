@@ -18,6 +18,7 @@ package v1alpha1
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	mona "kmodules.xyz/monitoring-agent-api/api/v1"
 	api "x-helm.dev/apimachinery/apis/releases/v1alpha1"
 )
 
@@ -50,7 +51,7 @@ type ElasticsearchAlertsSpecForm struct {
 }
 
 type ElasticsearchAlert struct {
-	Enabled SeverityFlag      `json:"enabled"`
+	Enabled mona.SeverityFlag `json:"enabled"`
 	Labels  map[string]string `json:"labels"`
 	// +optional
 	Annotations map[string]string `json:"annotations"`
@@ -64,10 +65,11 @@ type ElasticsearchAlertGroups struct {
 	Provisioner ProvisionerAlert           `json:"provisioner"`
 	OpsManager  OpsManagerAlert            `json:"opsManager"`
 	Stash       StashAlert                 `json:"stash"`
+	KubeStash   KubeStashAlert             `json:"kubeStash"`
 }
 
 type ElasticsearchDatabaseAlert struct {
-	Enabled SeverityFlag                    `json:"enabled"`
+	Enabled mona.SeverityFlag               `json:"enabled"`
 	Rules   ElasticsearchDatabaseAlertRules `json:"rules"`
 }
 
@@ -85,6 +87,8 @@ type ElasticsearchDatabaseAlertRules struct {
 	ElasticsearchUnassignedShards   FixedAlert  `json:"elasticsearchUnassignedShards"`
 	ElasticsearchPendingTasks       FixedAlert  `json:"elasticsearchPendingTasks"`
 	ElasticsearchNoNewDocuments10M  FixedAlert  `json:"elasticsearchNoNewDocuments10m"`
+	DiskUsageHigh                   IntValAlert `json:"diskUsageHigh"`
+	DiskAlmostFull                  IntValAlert `json:"diskAlmostFull"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

@@ -17,13 +17,12 @@ limitations under the License.
 package v1alpha1
 
 import (
-	alerts "go.appscode.dev/alerts/apis/alerts/v1alpha1"
 	core "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	api "x-helm.dev/apimachinery/apis/releases/v1alpha1"
 )
 
-// KubedbcomFerretdbEditorOptions defines the schama for MongoDB Editor UI Options.
+// KubedbcomFerretdbEditorOptions defines the schama for FerretDB Editor UI Options.
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
@@ -35,7 +34,7 @@ type KubedbcomFerretdbEditorOptions struct {
 	Spec              KubedbcomFerretdbEditorOptionsSpec `json:"spec,omitempty"`
 }
 
-// KubedbcomFerretdbEditorOptionsSpec is the schema for MongoDB profile values file
+// KubedbcomFerretdbEditorOptionsSpec is the schema for FerretDB profile values file
 type KubedbcomFerretdbEditorOptionsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Spec         KubedbcomFerretdbEditorOptionsSpecSpec `json:"spec"`
@@ -48,11 +47,11 @@ type KubedbcomFerretdbEditorOptionsSpecSpec struct {
 	// +optional
 	Labels            map[string]string         `json:"labels"`
 	Version           string                    `json:"version"`
-	Mode              MongoDBMode               `json:"mode"`
-	ReplicaSet        MongoDBReplicaSet         `json:"replicaSet"`
-	ShardTopology     MongoDBShardTopology      `json:"shardTopology"`
-	ClusterAuthMode   MongoDBClusterAuthMode    `json:"clusterAuthMode"`
-	SslMode           MongoDBSSLMode            `json:"sslMode"`
+	Mode              FerretDBMode              `json:"mode"`
+	ReplicaSet        FerretDBReplicaSet        `json:"replicaSet"`
+	ShardTopology     FerretDBShardTopology     `json:"shardTopology"`
+	ClusterAuthMode   FerretDBClusterAuthMode   `json:"clusterAuthMode"`
+	SslMode           FerretDBSSLMode           `json:"sslMode"`
 	TerminationPolicy TerminationPolicy         `json:"terminationPolicy"`
 	StorageClass      StorageClass              `json:"storageClass"`
 	Persistence       Persistence               `json:"persistence"`
@@ -64,43 +63,43 @@ type KubedbcomFerretdbEditorOptionsSpecSpec struct {
 }
 
 // +kubebuilder:validation:Enum=Standalone;Replicaset;Sharded
-type MongoDBMode string
+type FerretDBMode string
 
 // +kubebuilder:validation:Enum=keyFile;sendKeyFile;sendX509;x509
-type MongoDBClusterAuthMode string
+type FerretDBClusterAuthMode string
 
 // +kubebuilder:validation:Enum=disabled;allowSSL;preferSSL;requireSSL
-type MongoDBSSLMode string
+type FerretDBSSLMode string
 
-type MongoDBReplicaSet struct {
+type FerretDBReplicaSet struct {
 	Name     string `json:"name"`
 	Replicas int    `json:"replicas"`
 }
 
-type MongoDBShard struct {
+type FerretDBShard struct {
 	Replicas    int         `json:"replicas"`
 	Shards      int         `json:"shards"`
 	Persistence Persistence `json:"persistence"`
 }
 
-type MongoDBConfigServer struct {
+type FerretDBConfigServer struct {
 	Replicas    int         `json:"replicas"`
 	Persistence Persistence `json:"persistence"`
 }
 
-type MongoDBMongos struct {
+type FerretDBMongos struct {
 	Replicas int `json:"replicas"`
 }
 
-type MongoDBShardTopology struct {
-	Shard        MongoDBShard        `json:"shard"`
-	ConfigServer MongoDBConfigServer `json:"configServer"`
-	Mongos       MongoDBMongos       `json:"mongos"`
+type FerretDBShardTopology struct {
+	Shard        FerretDBShard        `json:"shard"`
+	ConfigServer FerretDBConfigServer `json:"configServer"`
+	Mongos       FerretDBMongos       `json:"mongos"`
 }
 
 type FerretdbAlertsSpecForm struct {
-	Alert alerts.MongoDBAlert `json:"alert"`
-	CAPI  CAPIFormSpec        `json:"capi"`
+	// Alert alerts.FerretDBAlert `json:"alert"`
+	CAPI CAPIFormSpec `json:"capi"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

@@ -18,6 +18,7 @@ package v1alpha1
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	mona "kmodules.xyz/monitoring-agent-api/api/v1"
 	api "x-helm.dev/apimachinery/apis/releases/v1alpha1"
 )
 
@@ -50,7 +51,7 @@ type PostgresAlertsSpecForm struct {
 }
 
 type PostgresAlert struct {
-	Enabled SeverityFlag      `json:"enabled"`
+	Enabled mona.SeverityFlag `json:"enabled"`
 	Labels  map[string]string `json:"labels"`
 	// +optional
 	Annotations map[string]string `json:"annotations"`
@@ -64,11 +65,12 @@ type PostgresAlertGroups struct {
 	Provisioner   ProvisionerAlert      `json:"provisioner"`
 	OpsManager    OpsManagerAlert       `json:"opsManager"`
 	Stash         StashAlert            `json:"stash"`
+	KubeStash     KubeStashAlert        `json:"kubeStash"`
 	SchemaManager SchemaManagerAlert    `json:"schemaManager"`
 }
 
 type PostgresDatabaseAlert struct {
-	Enabled SeverityFlag               `json:"enabled"`
+	Enabled mona.SeverityFlag          `json:"enabled"`
 	Rules   PostgresDatabaseAlertRules `json:"rules"`
 }
 
@@ -83,6 +85,8 @@ type PostgresDatabaseAlertRules struct {
 	PostgresHighRollbackRate     FloatValAlertConfig `json:"postgresHighRollbackRate"`
 	PostgresSplitBrain           FixedAlert          `json:"postgresSplitBrain"`
 	PostgresTooManyLocksAcquired FloatValAlertConfig `json:"postgresTooManyLocksAcquired"`
+	DiskUsageHigh                IntValAlert         `json:"diskUsageHigh"`
+	DiskAlmostFull               IntValAlert         `json:"diskAlmostFull"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

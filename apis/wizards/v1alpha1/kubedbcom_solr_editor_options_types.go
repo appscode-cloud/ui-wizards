@@ -23,7 +23,7 @@ import (
 	api "x-helm.dev/apimachinery/apis/releases/v1alpha1"
 )
 
-// KubedbcomSolrEditorOptions defines the schama for MongoDB Editor UI Options.
+// KubedbcomSolrEditorOptions defines the schama for Solr Editor UI Options.
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
@@ -35,7 +35,7 @@ type KubedbcomSolrEditorOptions struct {
 	Spec              KubedbcomSolrEditorOptionsSpec `json:"spec,omitempty"`
 }
 
-// KubedbcomSolrEditorOptionsSpec is the schema for MongoDB profile values file
+// KubedbcomSolrEditorOptionsSpec is the schema for Solr profile values file
 type KubedbcomSolrEditorOptionsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Spec         KubedbcomSolrEditorOptionsSpecSpec `json:"spec"`
@@ -48,11 +48,11 @@ type KubedbcomSolrEditorOptionsSpecSpec struct {
 	// +optional
 	Labels            map[string]string         `json:"labels"`
 	Version           string                    `json:"version"`
-	Mode              MongoDBMode               `json:"mode"`
-	ReplicaSet        MongoDBReplicaSet         `json:"replicaSet"`
-	ShardTopology     MongoDBShardTopology      `json:"shardTopology"`
-	ClusterAuthMode   MongoDBClusterAuthMode    `json:"clusterAuthMode"`
-	SslMode           MongoDBSSLMode            `json:"sslMode"`
+	Mode              SolrMode                  `json:"mode"`
+	ReplicaSet        SolrReplicaSet            `json:"replicaSet"`
+	ShardTopology     SolrShardTopology         `json:"shardTopology"`
+	ClusterAuthMode   SolrClusterAuthMode       `json:"clusterAuthMode"`
+	SslMode           SolrSSLMode               `json:"sslMode"`
 	TerminationPolicy TerminationPolicy         `json:"terminationPolicy"`
 	StorageClass      StorageClass              `json:"storageClass"`
 	Persistence       Persistence               `json:"persistence"`
@@ -64,43 +64,38 @@ type KubedbcomSolrEditorOptionsSpecSpec struct {
 }
 
 // +kubebuilder:validation:Enum=Standalone;Replicaset;Sharded
-type MongoDBMode string
+type SolrMode string
 
 // +kubebuilder:validation:Enum=keyFile;sendKeyFile;sendX509;x509
-type MongoDBClusterAuthMode string
+type SolrClusterAuthMode string
 
 // +kubebuilder:validation:Enum=disabled;allowSSL;preferSSL;requireSSL
-type MongoDBSSLMode string
+type SolrSSLMode string
 
-type MongoDBReplicaSet struct {
+type SolrReplicaSet struct {
 	Name     string `json:"name"`
 	Replicas int    `json:"replicas"`
 }
 
-type MongoDBShard struct {
+type SolrShard struct {
 	Replicas    int         `json:"replicas"`
 	Shards      int         `json:"shards"`
 	Persistence Persistence `json:"persistence"`
 }
 
-type MongoDBConfigServer struct {
+type SolrConfigServer struct {
 	Replicas    int         `json:"replicas"`
 	Persistence Persistence `json:"persistence"`
 }
 
-type MongoDBMongos struct {
-	Replicas int `json:"replicas"`
-}
-
-type MongoDBShardTopology struct {
-	Shard        MongoDBShard        `json:"shard"`
-	ConfigServer MongoDBConfigServer `json:"configServer"`
-	Mongos       MongoDBMongos       `json:"mongos"`
+type SolrShardTopology struct {
+	Shard        SolrShard        `json:"shard"`
+	ConfigServer SolrConfigServer `json:"configServer"`
 }
 
 type SolrAlertsSpecForm struct {
-	Alert alerts.MongoDBAlert `json:"alert"`
-	CAPI  CAPIFormSpec        `json:"capi"`
+	Alert alerts.SolrAlert `json:"alert"`
+	CAPI  CAPIFormSpec     `json:"capi"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

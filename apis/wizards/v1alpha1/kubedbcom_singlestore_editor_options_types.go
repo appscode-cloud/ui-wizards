@@ -23,36 +23,36 @@ import (
 	api "x-helm.dev/apimachinery/apis/releases/v1alpha1"
 )
 
-// KubedbcomMysqlEditorOptions defines the schama for MySQL Editor UI Options.
+// KubedbcomSingleStoreEditorOptions defines the schama for SingleStore Editor UI Options.
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
 // +kubebuilder:object:root=true
 // +kubebuilder:resource:path=kubedbcomsinglestoreeditoroptionss,singular=kubedbcomsinglestoreeditoroptions
-type KubedbcomMysqlEditorOptions struct {
+type KubedbcomSingleStoreEditorOptions struct {
 	metav1.TypeMeta   `json:",inline,omitempty"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	Spec              KubedbcomMysqlEditorOptionsSpec `json:"spec,omitempty"`
+	Spec              KubedbcomSingleStoreEditorOptionsSpec `json:"spec,omitempty"`
 }
 
-// KubedbcomMysqlEditorOptionsSpec is the schema for MySQL profile values file
-type KubedbcomMysqlEditorOptionsSpec struct {
+// KubedbcomSingleStoreEditorOptionsSpec is the schema for SingleStore profile values file
+type KubedbcomSingleStoreEditorOptionsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
-	Spec         KubedbcomMysqlEditorOptionsSpecSpec `json:"spec"`
-	Form         MysqlAlertsSpecForm                 `json:"form"`
+	Spec         KubedbcomSingleStoreEditorOptionsSpecSpec `json:"spec"`
+	Form         SingleStoreAlertsSpecForm                 `json:"form"`
 }
 
-type KubedbcomMysqlEditorOptionsSpecSpec struct {
+type KubedbcomSingleStoreEditorOptionsSpecSpec struct {
 	Version string `json:"version"`
 	// +optional
 	Annotations map[string]string `json:"annotations"`
 	// +optional
 	Labels map[string]string `json:"labels"`
-	Mode   MysqlMode         `json:"mode"`
+	Mode   SingleStoreMode   `json:"mode"`
 	// +optional
 	Replicas int `json:"replicas,omitempty"`
 	// +optional
-	InnoDBCluster     MySQLInnoDBCluster        `json:"innoDBCluster,omitempty"`
+	InnoDBCluster     SingleStoreInnoDBCluster  `json:"innoDBCluster,omitempty"`
 	TerminationPolicy TerminationPolicy         `json:"terminationPolicy"`
 	StorageClass      StorageClass              `json:"storageClass"`
 	Persistence       Persistence               `json:"persistence"`
@@ -63,28 +63,28 @@ type KubedbcomMysqlEditorOptionsSpecSpec struct {
 	Backup            BackupToolSpec            `json:"backup"`
 }
 
-type MySQLInnoDBCluster struct {
-	Router MySQLRouter `json:"router"`
+type SingleStoreInnoDBCluster struct {
+	Router SingleStoreRouter `json:"router"`
 }
 
-type MySQLRouter struct {
+type SingleStoreRouter struct {
 	Replicas int `json:"replicas"`
 }
 
 // +kubebuilder:validation:Enum=Standalone;GroupReplication;InnoDBCluster
-type MysqlMode string
+type SingleStoreMode string
 
-type MysqlAlertsSpecForm struct {
-	Alert alerts.MySQLAlert `json:"alert"`
-	CAPI  CAPIFormSpec      `json:"capi"`
+type SingleStoreAlertsSpecForm struct {
+	Alert alerts.SinglestoreAlert `json:"alert"`
+	CAPI  CAPIFormSpec            `json:"capi"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
-// KubedbcomMysqlEditorOptionsList is a list of KubedbcomMysqlEditorOptionss
-type KubedbcomMysqlEditorOptionsList struct {
+// KubedbcomSingleStoreEditorOptionsList is a list of KubedbcomSingleStoreEditorOptionss
+type KubedbcomSingleStoreEditorOptionsList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	// Items is a list of KubedbcomMysqlEditorOptions CRD objects
-	Items []KubedbcomMysqlEditorOptions `json:"items,omitempty"`
+	// Items is a list of KubedbcomSingleStoreEditorOptions CRD objects
+	Items []KubedbcomSingleStoreEditorOptions `json:"items,omitempty"`
 }
