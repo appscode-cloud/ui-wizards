@@ -5,17 +5,17 @@ go 1.22.0
 toolchain go1.22.1
 
 require (
-	go.appscode.dev/alerts v0.2.0
+	go.appscode.dev/alerts v0.2.1-0.20240427092953-4753e804e104
 	k8s.io/api v0.29.2
 	k8s.io/apimachinery v0.29.2
-	k8s.io/kube-openapi v0.0.0-20240228011516-70dd3763d340
-	kmodules.xyz/client-go v0.29.13
+	k8s.io/kube-openapi v0.0.0-20240403164606-bc84c2ddaf99
+	kmodules.xyz/client-go v0.29.14
 	kmodules.xyz/monitoring-agent-api v0.29.0
 	kmodules.xyz/objectstore-api v0.29.1
-	kmodules.xyz/offshoot-api v0.29.1
+	kmodules.xyz/offshoot-api v0.29.2
 	kmodules.xyz/schema-checker v0.4.1
-	kubedb.dev/apimachinery v0.44.0
-	stash.appscode.dev/apimachinery v0.33.0
+	kubedb.dev/apimachinery v0.45.2-0.20240515165215-4274e8077062
+	stash.appscode.dev/apimachinery v0.34.0
 	x-helm.dev/apimachinery v0.0.16
 )
 
@@ -66,10 +66,10 @@ require (
 	github.com/yudai/golcs v0.0.0-20170316035057-ecda9a501e82 // indirect
 	github.com/zeebo/xxh3 v1.0.2 // indirect
 	golang.org/x/exp v0.0.0-20230905200255-921286631fa9 // indirect
-	golang.org/x/net v0.21.0 // indirect
+	golang.org/x/net v0.23.0 // indirect
 	golang.org/x/oauth2 v0.15.0 // indirect
-	golang.org/x/sys v0.17.0 // indirect
-	golang.org/x/term v0.17.0 // indirect
+	golang.org/x/sys v0.18.0 // indirect
+	golang.org/x/term v0.18.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	golang.org/x/time v0.5.0 // indirect
 	gomodules.xyz/jsonpatch/v2 v2.4.0 // indirect
@@ -91,7 +91,7 @@ require (
 	kmodules.xyz/custom-resources v0.29.1 // indirect
 	kmodules.xyz/prober v0.29.0 // indirect
 	kubeops.dev/petset v0.0.5 // indirect
-	sigs.k8s.io/controller-runtime v0.17.2 // indirect
+	sigs.k8s.io/controller-runtime v0.17.4 // indirect
 	sigs.k8s.io/gateway-api v0.8.0 // indirect
 	sigs.k8s.io/json v0.0.0-20221116044647-bc3834ca7abd // indirect
 	sigs.k8s.io/structured-merge-diff/v4 v4.4.1 // indirect

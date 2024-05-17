@@ -31,7 +31,7 @@ properties:
                     type: string
                   rules:
                     properties:
-                      mysqlHighIncomingBytes:
+                      diskAlmostFull:
                         properties:
                           duration:
                             type: string
@@ -51,7 +51,7 @@ properties:
                         - severity
                         - val
                         type: object
-                      mysqlHighOutgoingBytes:
+                      diskUsageHigh:
                         properties:
                           duration:
                             type: string
@@ -71,7 +71,7 @@ properties:
                         - severity
                         - val
                         type: object
-                      mysqlHighQPS:
+                      singlestoreHighIncomingBytes:
                         properties:
                           duration:
                             type: string
@@ -91,7 +91,7 @@ properties:
                         - severity
                         - val
                         type: object
-                      mysqlHighThreadsRunning:
+                      singlestoreHighOutgoingBytes:
                         properties:
                           duration:
                             type: string
@@ -111,7 +111,7 @@ properties:
                         - severity
                         - val
                         type: object
-                      mysqlInnoDBLogWaits:
+                      singlestoreHighQPS:
                         properties:
                           duration:
                             type: string
@@ -131,24 +131,7 @@ properties:
                         - severity
                         - val
                         type: object
-                      mysqlInstanceDown:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      mysqlRestarted:
+                      singlestoreHighThreadsRunning:
                         properties:
                           duration:
                             type: string
@@ -168,7 +151,7 @@ properties:
                         - severity
                         - val
                         type: object
-                      mysqlServiceDown:
+                      singlestoreInstanceDown:
                         properties:
                           duration:
                             type: string
@@ -185,24 +168,7 @@ properties:
                         - enabled
                         - severity
                         type: object
-                      mysqlSlowQueries:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      mysqlTooManyConnections:
+                      singlestoreRestarted:
                         properties:
                           duration:
                             type: string
@@ -222,7 +188,24 @@ properties:
                         - severity
                         - val
                         type: object
-                      mysqlTooManyOpenFiles:
+                      singlestoreServiceDown:
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            enum:
+                            - critical
+                            - warning
+                            - info
+                            type: string
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        type: object
+                      singlestoreTooManyConnections:
                         properties:
                           duration:
                             type: string
@@ -243,359 +226,22 @@ properties:
                         - val
                         type: object
                     required:
-                    - mysqlHighIncomingBytes
-                    - mysqlHighOutgoingBytes
-                    - mysqlHighQPS
-                    - mysqlHighThreadsRunning
-                    - mysqlInnoDBLogWaits
-                    - mysqlInstanceDown
-                    - mysqlRestarted
-                    - mysqlServiceDown
-                    - mysqlSlowQueries
-                    - mysqlTooManyConnections
-                    - mysqlTooManyOpenFiles
+                    - diskAlmostFull
+                    - diskUsageHigh
+                    - singlestoreHighIncomingBytes
+                    - singlestoreHighOutgoingBytes
+                    - singlestoreHighQPS
+                    - singlestoreHighThreadsRunning
+                    - singlestoreInstanceDown
+                    - singlestoreRestarted
+                    - singlestoreServiceDown
+                    - singlestoreTooManyConnections
                     type: object
                 required:
                 - enabled
                 - rules
                 type: object
-              group:
-                properties:
-                  enabled:
-                    enum:
-                    - none
-                    - critical
-                    - warning
-                    - info
-                    type: string
-                  rules:
-                    properties:
-                      mysqlHighReplicationApplyTime:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                          val:
-                            format: double
-                            type: number
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        - val
-                        type: object
-                      mysqlHighReplicationDelay:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                          val:
-                            format: double
-                            type: number
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        - val
-                        type: object
-                      mysqlHighReplicationTransportTime:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                          val:
-                            format: double
-                            type: number
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        - val
-                        type: object
-                      mysqlReplicationHighTransactionTime:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                          val:
-                            format: double
-                            type: number
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        - val
-                        type: object
-                    required:
-                    - mysqlHighReplicationApplyTime
-                    - mysqlHighReplicationDelay
-                    - mysqlHighReplicationTransportTime
-                    - mysqlReplicationHighTransactionTime
-                    type: object
-                required:
-                - enabled
-                - rules
-                type: object
-              opsManager:
-                properties:
-                  enabled:
-                    enum:
-                    - none
-                    - critical
-                    - warning
-                    - info
-                    type: string
-                  rules:
-                    properties:
-                      opsRequestFailed:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      opsRequestOnProgress:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      opsRequestStatusProgressingToLong:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                    required:
-                    - opsRequestFailed
-                    - opsRequestOnProgress
-                    - opsRequestStatusProgressingToLong
-                    type: object
-                required:
-                - enabled
-                - rules
-                type: object
-              provisioner:
-                properties:
-                  enabled:
-                    enum:
-                    - none
-                    - critical
-                    - warning
-                    - info
-                    type: string
-                  rules:
-                    properties:
-                      appPhaseCritical:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      appPhaseNotReady:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                    required:
-                    - appPhaseCritical
-                    - appPhaseNotReady
-                    type: object
-                required:
-                - enabled
-                - rules
-                type: object
-              schemaManager:
-                properties:
-                  enabled:
-                    enum:
-                    - none
-                    - critical
-                    - warning
-                    - info
-                    type: string
-                  rules:
-                    properties:
-                      schemaExpired:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      schemaFailed:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      schemaInProgressForTooLong:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      schemaPendingForTooLong:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      schemaTerminatingForTooLong:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                    required:
-                    - schemaExpired
-                    - schemaFailed
-                    - schemaInProgressForTooLong
-                    - schemaPendingForTooLong
-                    - schemaTerminatingForTooLong
-                    type: object
-                required:
-                - enabled
-                - rules
-                type: object
-              stash:
+              kubeStash:
                 properties:
                   enabled:
                     enum:
@@ -750,13 +396,63 @@ properties:
                 - enabled
                 - rules
                 type: object
+              provisioner:
+                properties:
+                  enabled:
+                    enum:
+                    - none
+                    - critical
+                    - warning
+                    - info
+                    type: string
+                  rules:
+                    properties:
+                      appPhaseCritical:
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            enum:
+                            - critical
+                            - warning
+                            - info
+                            type: string
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        type: object
+                      appPhaseNotReady:
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            enum:
+                            - critical
+                            - warning
+                            - info
+                            type: string
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        type: object
+                    required:
+                    - appPhaseCritical
+                    - appPhaseNotReady
+                    type: object
+                required:
+                - enabled
+                - rules
+                type: object
             required:
             - database
-            - group
-            - opsManager
+            - kubeStash
             - provisioner
-            - schemaManager
-            - stash
             type: object
           labels:
             additionalProperties:
