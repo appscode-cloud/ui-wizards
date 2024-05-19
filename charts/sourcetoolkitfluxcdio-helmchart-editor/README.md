@@ -45,18 +45,18 @@ The command removes all the Kubernetes components associated with the chart and 
 
 The following table lists the configurable parameters of the `sourcetoolkitfluxcdio-helmchart-editor` chart and their default values.
 
-|     Parameter      | Description |                    Default                    |
-|--------------------|-------------|-----------------------------------------------|
-| apiVersion         |             | <code>source.toolkit.fluxcd.io/v1beta2</code> |
-| kind               |             | <code>HelmChart</code>                        |
-| metadata.name      |             | <code>helmchart</code>                        |
-| metadata.namespace |             | <code>default</code>                          |
+|     Parameter      | Description |                 Default                  |
+|--------------------|-------------|------------------------------------------|
+| apiVersion         |             | <code>source.toolkit.fluxcd.io/v1</code> |
+| kind               |             | <code>HelmChart</code>                   |
+| metadata.name      |             | <code>helmchart</code>                   |
+| metadata.namespace |             | <code>default</code>                     |
 
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm upgrade -i`. For example:
 
 ```bash
-$ helm upgrade -i sourcetoolkitfluxcdio-helmchart-editor appscode-charts-oci/sourcetoolkitfluxcdio-helmchart-editor -n default --create-namespace --version=v0.4.18 --set apiVersion=source.toolkit.fluxcd.io/v1beta2
+$ helm upgrade -i sourcetoolkitfluxcdio-helmchart-editor appscode-charts-oci/sourcetoolkitfluxcdio-helmchart-editor -n default --create-namespace --version=v0.4.18 --set apiVersion=source.toolkit.fluxcd.io/v1
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while

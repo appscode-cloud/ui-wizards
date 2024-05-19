@@ -47,7 +47,7 @@ The following table lists the configurable parameters of the `imagetoolkitfluxcd
 
 |     Parameter      | Description |                   Default                    |
 |--------------------|-------------|----------------------------------------------|
-| apiVersion         |             | <code>image.toolkit.fluxcd.io/v1beta1</code> |
+| apiVersion         |             | <code>image.toolkit.fluxcd.io/v1beta2</code> |
 | kind               |             | <code>ImageUpdateAutomation</code>           |
 | metadata.name      |             | <code>imageupdateautomation</code>           |
 | metadata.namespace |             | <code>default</code>                         |
@@ -56,7 +56,7 @@ The following table lists the configurable parameters of the `imagetoolkitfluxcd
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm upgrade -i`. For example:
 
 ```bash
-$ helm upgrade -i imagetoolkitfluxcdio-imageupdateautomation-editor appscode-charts-oci/imagetoolkitfluxcdio-imageupdateautomation-editor -n default --create-namespace --version=v0.4.18 --set apiVersion=image.toolkit.fluxcd.io/v1beta1
+$ helm upgrade -i imagetoolkitfluxcdio-imageupdateautomation-editor appscode-charts-oci/imagetoolkitfluxcdio-imageupdateautomation-editor -n default --create-namespace --version=v0.4.18 --set apiVersion=image.toolkit.fluxcd.io/v1beta2
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while

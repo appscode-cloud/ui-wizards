@@ -78,6 +78,8 @@ properties:
                         maxLength: 2048
                         minLength: 1
                         type: string
+                      ignoreMissingValuesFiles:
+                        type: boolean
                       interval:
                         pattern: ^([0-9]+(\.[0-9]+)?(ms|s|m|h))+$
                         type: string
@@ -108,8 +110,6 @@ properties:
                         required:
                         - name
                         type: object
-                      valuesFile:
-                        type: string
                       valuesFiles:
                         items:
                           type: string
@@ -120,6 +120,7 @@ properties:
                             default: cosign
                             enum:
                             - cosign
+                            - notation
                             type: string
                           secretRef:
                             properties:
@@ -140,6 +141,27 @@ properties:
                     type: object
                 required:
                 - spec
+                type: object
+              chartRef:
+                properties:
+                  apiVersion:
+                    type: string
+                  kind:
+                    enum:
+                    - OCIRepository
+                    - HelmChart
+                    type: string
+                  name:
+                    maxLength: 253
+                    minLength: 1
+                    type: string
+                  namespace:
+                    maxLength: 63
+                    minLength: 1
+                    type: string
+                required:
+                - kind
+                - name
                 type: object
               dependsOn:
                 items:
@@ -291,58 +313,6 @@ properties:
                             - patch
                             type: object
                           type: array
-                        patchesJson6902:
-                          items:
-                            properties:
-                              patch:
-                                items:
-                                  properties:
-                                    from:
-                                      type: string
-                                    op:
-                                      enum:
-                                      - test
-                                      - remove
-                                      - add
-                                      - replace
-                                      - move
-                                      - copy
-                                      type: string
-                                    path:
-                                      type: string
-                                    value:
-                                      x-kubernetes-preserve-unknown-fields: true
-                                  required:
-                                  - op
-                                  - path
-                                  type: object
-                                type: array
-                              target:
-                                properties:
-                                  annotationSelector:
-                                    type: string
-                                  group:
-                                    type: string
-                                  kind:
-                                    type: string
-                                  labelSelector:
-                                    type: string
-                                  name:
-                                    type: string
-                                  namespace:
-                                    type: string
-                                  version:
-                                    type: string
-                                type: object
-                            required:
-                            - patch
-                            - target
-                            type: object
-                          type: array
-                        patchesStrategicMerge:
-                          items:
-                            x-kubernetes-preserve-unknown-fields: true
-                          type: array
                       type: object
                   type: object
                 type: array
@@ -468,7 +438,26 @@ properties:
                     type: string
                 type: object
               values:
-                x-kubernetes-preserve-unknown-fields: true
+                properties:
+                  capi:
+                    properties:
+                      clusterName:
+                        type: string
+                      namespace:
+                        type: string
+                      provider:
+                        enum:
+                        - capa
+                        - capg
+                        - capz
+                        type: string
+                    required:
+                    - clusterName
+                    - namespace
+                    type: object
+                required:
+                - capi
+                type: object
               valuesFrom:
                 items:
                   properties:
@@ -497,9 +486,12 @@ properties:
                   type: object
                 type: array
             required:
-            - chart
             - interval
             type: object
+            x-kubernetes-validations:
+            - message: either chart or chartRef must be set
+              rule: (has(self.chart) && !has(self.chartRef)) || (!has(self.chart)
+                && has(self.chartRef))
         type: object
     type: object
 type: object
