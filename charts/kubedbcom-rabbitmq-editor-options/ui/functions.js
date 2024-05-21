@@ -249,8 +249,34 @@ function showAuthSecretField({
 function showStorageSizeField({ model, getValue, watchDependency }) {
   const modelPathValue = getValue(model, "/spec/mode");
   watchDependency("model#/spec/mode");
-  const validType = ["Standalone", "Replicaset"];
+  const validType = ["Standalone", "Cluster"];
   return validType.includes(modelPathValue);
+}
+
+function showReplicaField({ model, getValue, watchDependency }) {
+  const modelPathValue = getValue(model, "/spec/mode");
+  watchDependency("model#/spec/mode");
+  const validType = ["Cluster"];
+  return validType.includes(modelPathValue);
+}
+
+function onModeChange({ model, getValue, watchDependency, commit }){
+  const modelPathValue = getValue(model, "/spec/mode");
+  console.log(modelPathValue)
+  watchDependency("model#/spec/mode");
+  if(modelPathValue==='Cluster'){
+    commit("wizard/model$update", {
+      path: "/spec/replicas",
+      value: 3,
+      force: true,
+    });
+  }else{
+    commit("wizard/model$update", {
+      path: "/spec/replicas",
+      value: 1,
+      force: true,
+    });
+  }
 }
 
 async function getResources(
@@ -721,4 +747,6 @@ return {
   showMultiselectZone,
   showSelectZone,
   setStorageClass,
+  showReplicaField,
+  onModeChange
 }
