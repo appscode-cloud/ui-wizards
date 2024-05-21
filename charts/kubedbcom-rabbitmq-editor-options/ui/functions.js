@@ -262,7 +262,6 @@ function showReplicaField({ model, getValue, watchDependency }) {
 
 function onModeChange({ model, getValue, watchDependency, commit }){
   const modelPathValue = getValue(model, "/spec/mode");
-  console.log(modelPathValue)
   watchDependency("model#/spec/mode");
   if(modelPathValue==='Cluster'){
     commit("wizard/model$update", {
