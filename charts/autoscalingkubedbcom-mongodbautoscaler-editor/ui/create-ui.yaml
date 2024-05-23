@@ -2,6 +2,43 @@ steps:
 - form:
     elements:
     - elements:
+      - label:
+          text: labels.name
+        schema:
+          $ref: schema#/properties/metadata/properties/name
+        type: input
+      - fetch: getNamespaces
+        label:
+          text: labels.selectNamespace
+        onChange: onNamespaceChange
+        schema:
+          $ref: schema#/properties/metadata/properties/namespace
+        type: select
+      - fetch: getMongoDbs
+        label:
+          text: labels.selectDb
+        onChange: initMetadata
+        refresh: true
+        required: true
+        schema:
+          $ref: schema#/properties/spec/properties/databaseRef/properties/name
+        type: select
+      if: isConsole
+      type: single-step-form
+    - label:
+        text: labels.selectType
+      onChange: initMetadata
+      options:
+      - text: Compute
+        value: compute
+      - text: Storage
+        value: storage
+      required: true
+      schema:
+        $ref: discriminator#/properties/autoscalingType
+      if: isConsole
+      type: radio
+    - elements:
       - elements:
         - elements:
           - computed: setTrigger
@@ -68,7 +105,7 @@ steps:
             $ref: schema#/properties/spec/properties/compute/properties/standalone
           type: single-step-form
         label:
-          text: Standalone
+          text: labels.standalone
         show_label: true
         schema:
           $ref: schema#/properties/spec/properties/compute/properties/standalone
@@ -140,7 +177,7 @@ steps:
             $ref: schema#/properties/spec/properties/compute/properties/replicaSet
           type: single-step-form
         label:
-          text: ReplicaSet
+          text: labels.replicaSet
         show_label: true
         schema:
           $ref: schema#/properties/spec/properties/compute/properties/replicaSet
@@ -437,7 +474,7 @@ steps:
             $ref: schema#/properties/spec/properties/storage/properties/standalone/properties/upperBound
           type: input
         label:
-          text: Standalone
+          text: labels.standalone
         show_label: true
         schema:
           $ref: schema#/properties/spec/properties/compute/properties/standalone
@@ -504,7 +541,7 @@ steps:
             $ref: schema#/properties/spec/properties/storage/properties/replicaSet/properties/upperBound
           type: input
         label:
-          text: replicaSet
+          text: labels.replicaSet
         show_label: true
         schema:
           $ref: schema#/properties/spec/properties/compute/properties/replicaSet
