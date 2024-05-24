@@ -790,7 +790,6 @@ function onApplyconfigChange({ discriminator, getValue, commit }) {
     });
   }
 
-  console.log(configObj);
   commit("wizard/model$update", {
     path: "/spec/configuration/applyConfig",
     value: configObj,

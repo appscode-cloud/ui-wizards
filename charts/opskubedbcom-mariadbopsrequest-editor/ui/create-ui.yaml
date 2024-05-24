@@ -212,7 +212,7 @@ steps:
           schema:
             $ref: schema#/properties/spec/properties/configuration/properties/configSecret
           type: single-step-form
-        - addFormLabel: labels.scalingRules
+        - addFormLabel: labels.applyConfig.label
           element:
             discriminator:
               configArray:
@@ -224,11 +224,13 @@ steps:
                 text: labels.applyConfig.key
               schema:
                 $ref: discriminator#/properties/configArray/items/properties/key
+              required: true
             - type: editor
               label:
                 text: labels.applyConfig.value
               schema:
                 $ref: discriminator#/properties/configArray/items/properties/value
+              required: true
             type: single-step-form
           if: ifReconfigurationTypeEqualsTo|applyConfig
           label:
