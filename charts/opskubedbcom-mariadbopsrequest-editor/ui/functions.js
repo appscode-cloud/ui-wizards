@@ -778,6 +778,26 @@ function isVerticalScaleTopologyRequired ({ watchDependency, getValue, discrimin
   }
 }
 
+function onApplyconfigChange({ discriminator, getValue, commit }) {
+  const applyconfig = getValue(discriminator, "/applyconfig");
+
+  const configObj = {};
+
+  if (applyconfig) {
+    applyconfig.forEach((item) => {
+      const { key, value } = item;
+      configObj[key] = value;
+    });
+  }
+
+  console.log(configObj);
+  commit("wizard/model$update", {
+    path: "/spec/configuration/applyConfig",
+    value: configObj,
+    force: true,
+  });
+}
+
 return {
   fetchJsons,
   returnFalse,
@@ -827,4 +847,5 @@ return {
   onDbChange,
   setApplyToIfReady,
   isVerticalScaleTopologyRequired,
+  onApplyconfigChange,
 };
