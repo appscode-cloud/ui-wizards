@@ -31,41 +31,7 @@ properties:
                     type: string
                   rules:
                     properties:
-                      mongoDBDown:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      mongoDBPhaseCritical:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      mongodbCursorsTimeouts:
+                      SolrHighBufferSize:
                         properties:
                           duration:
                             type: string
@@ -85,7 +51,7 @@ properties:
                         - severity
                         - val
                         type: object
-                      mongodbHighLatency:
+                      SolrHighHeapSize:
                         properties:
                           duration:
                             type: string
@@ -105,7 +71,7 @@ properties:
                         - severity
                         - val
                         type: object
-                      mongodbHighTicketUtilization:
+                      diskAlmostFull:
                         properties:
                           duration:
                             type: string
@@ -125,7 +91,7 @@ properties:
                         - severity
                         - val
                         type: object
-                      mongodbNumberCursorsOpen:
+                      diskUsageHigh:
                         properties:
                           duration:
                             type: string
@@ -145,7 +111,7 @@ properties:
                         - severity
                         - val
                         type: object
-                      mongodbRecurrentCursorTimeout:
+                      solrDownShards:
                         properties:
                           duration:
                             type: string
@@ -165,7 +131,7 @@ properties:
                         - severity
                         - val
                         type: object
-                      mongodbRecurrentMemoryPageFaults:
+                      solrHighPoolSize:
                         properties:
                           duration:
                             type: string
@@ -185,7 +151,7 @@ properties:
                         - severity
                         - val
                         type: object
-                      mongodbReplicationLag:
+                      solrHighQPS:
                         properties:
                           duration:
                             type: string
@@ -205,7 +171,7 @@ properties:
                         - severity
                         - val
                         type: object
-                      mongodbTooManyConnections:
+                      solrHighThreadsRunning:
                         properties:
                           duration:
                             type: string
@@ -225,7 +191,7 @@ properties:
                         - severity
                         - val
                         type: object
-                      mongodbVirtualMemoryUsage:
+                      solrRecoveryFailedShards:
                         properties:
                           duration:
                             type: string
@@ -246,88 +212,15 @@ properties:
                         - val
                         type: object
                     required:
-                    - mongoDBDown
-                    - mongoDBPhaseCritical
-                    - mongodbCursorsTimeouts
-                    - mongodbHighLatency
-                    - mongodbHighTicketUtilization
-                    - mongodbNumberCursorsOpen
-                    - mongodbRecurrentCursorTimeout
-                    - mongodbRecurrentMemoryPageFaults
-                    - mongodbReplicationLag
-                    - mongodbTooManyConnections
-                    - mongodbVirtualMemoryUsage
-                    type: object
-                required:
-                - enabled
-                - rules
-                type: object
-              opsManager:
-                properties:
-                  enabled:
-                    enum:
-                    - none
-                    - critical
-                    - warning
-                    - info
-                    type: string
-                  rules:
-                    properties:
-                      opsRequestFailed:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      opsRequestOnProgress:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      opsRequestStatusProgressingToLong:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                    required:
-                    - opsRequestFailed
-                    - opsRequestOnProgress
-                    - opsRequestStatusProgressingToLong
+                    - SolrHighBufferSize
+                    - SolrHighHeapSize
+                    - diskAlmostFull
+                    - diskUsageHigh
+                    - solrDownShards
+                    - solrHighPoolSize
+                    - solrHighQPS
+                    - solrHighThreadsRunning
+                    - solrRecoveryFailedShards
                     type: object
                 required:
                 - enabled
@@ -386,274 +279,9 @@ properties:
                 - enabled
                 - rules
                 type: object
-              schemaManager:
-                properties:
-                  enabled:
-                    enum:
-                    - none
-                    - critical
-                    - warning
-                    - info
-                    type: string
-                  rules:
-                    properties:
-                      schemaExpired:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      schemaFailed:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      schemaInProgressForTooLong:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      schemaPendingForTooLong:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      schemaTerminatingForTooLong:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                    required:
-                    - schemaExpired
-                    - schemaFailed
-                    - schemaInProgressForTooLong
-                    - schemaPendingForTooLong
-                    - schemaTerminatingForTooLong
-                    type: object
-                required:
-                - enabled
-                - rules
-                type: object
-              stash:
-                properties:
-                  enabled:
-                    enum:
-                    - none
-                    - critical
-                    - warning
-                    - info
-                    type: string
-                  rules:
-                    properties:
-                      backupSessionFailed:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      backupSessionPeriodTooLong:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                          val:
-                            type: integer
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        - val
-                        type: object
-                      noBackupSessionForTooLong:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                          val:
-                            type: integer
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        - val
-                        type: object
-                      repositoryCorrupted:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      repositoryStorageRunningLow:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                          val:
-                            type: integer
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        - val
-                        type: object
-                      restoreSessionFailed:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      restoreSessionPeriodTooLong:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                          val:
-                            type: integer
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        - val
-                        type: object
-                    required:
-                    - backupSessionFailed
-                    - backupSessionPeriodTooLong
-                    - noBackupSessionForTooLong
-                    - repositoryCorrupted
-                    - repositoryStorageRunningLow
-                    - restoreSessionFailed
-                    - restoreSessionPeriodTooLong
-                    type: object
-                required:
-                - enabled
-                - rules
-                type: object
             required:
             - database
-            - opsManager
             - provisioner
-            - schemaManager
-            - stash
             type: object
           labels:
             additionalProperties:
@@ -1056,48 +684,15 @@ properties:
         required:
         - tool
         type: object
-      clusterAuthMode:
-        enum:
-        - keyFile
-        - sendKeyFile
-        - sendX509
-        - x509
-        type: string
       labels:
         additionalProperties:
           type: string
         type: object
-      machine:
-        enum:
-        - db.t.micro
-        - db.t.small
-        - db.t.medium
-        - db.t.large
-        - db.t.xlarge
-        - db.t.2xlarge
-        - db.m.small
-        - db.m.large
-        - db.m.xlarge
-        - db.m.2xlarge
-        - db.m.4xlarge
-        - db.m.8xlarge
-        - db.m.12xlarge
-        - db.m.16xlarge
-        - db.m.24xlarge
-        - db.r.large
-        - db.r.xlarge
-        - db.r.2xlarge
-        - db.r.4xlarge
-        - db.r.8xlarge
-        - db.r.12xlarge
-        - db.r.16xlarge
-        - db.r.24xlarge
-        type: string
       mode:
         enum:
         - Standalone
         - Replicaset
-        - Sharded
+        - Topology
         type: string
       monitoring:
         properties:
@@ -1177,116 +772,91 @@ properties:
         required:
         - size
         type: object
+      podResources:
+        properties:
+          machine:
+            enum:
+            - db.t.micro
+            - db.t.small
+            - db.t.medium
+            - db.t.large
+            - db.t.xlarge
+            - db.t.2xlarge
+            - db.m.small
+            - db.m.large
+            - db.m.xlarge
+            - db.m.2xlarge
+            - db.m.4xlarge
+            - db.m.8xlarge
+            - db.m.12xlarge
+            - db.m.16xlarge
+            - db.m.24xlarge
+            - db.r.large
+            - db.r.xlarge
+            - db.r.2xlarge
+            - db.r.4xlarge
+            - db.r.8xlarge
+            - db.r.12xlarge
+            - db.r.16xlarge
+            - db.r.24xlarge
+            type: string
+          resources:
+            description: ResourceRequirements describes the compute resource requirements.
+            properties:
+              claims:
+                description: "Claims lists the names of resources, defined in spec.resourceClaims,\
+                  \ that are used by this container. \n This is an alpha field and\
+                  \ requires enabling the DynamicResourceAllocation feature gate.\
+                  \ \n This field is immutable. It can only be set for containers."
+                items:
+                  description: ResourceClaim references one entry in PodSpec.ResourceClaims.
+                  properties:
+                    name:
+                      description: Name must match the name of one entry in pod.spec.resourceClaims
+                        of the Pod where this field is used. It makes that resource
+                        available inside a container.
+                      type: string
+                  required:
+                  - name
+                  type: object
+                type: array
+                x-kubernetes-list-map-keys:
+                - name
+                x-kubernetes-list-type: map
+              limits:
+                additionalProperties:
+                  anyOf:
+                  - type: integer
+                  - type: string
+                  pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                  x-kubernetes-int-or-string: true
+                description: 'Limits describes the maximum amount of compute resources
+                  allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                type: object
+              requests:
+                additionalProperties:
+                  anyOf:
+                  - type: integer
+                  - type: string
+                  pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                  x-kubernetes-int-or-string: true
+                description: 'Requests describes the minimum amount of compute resources
+                  required. If Requests is omitted for a container, it defaults to
+                  Limits if that is explicitly specified, otherwise to an implementation-defined
+                  value. Requests cannot exceed Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                type: object
+            type: object
+        required:
+        - machine
+        - resources
+        type: object
       replicaSet:
         properties:
-          name:
-            type: string
           replicas:
             type: integer
         required:
-        - name
         - replicas
         type: object
-      resources:
-        description: ResourceRequirements describes the compute resource requirements.
-        properties:
-          claims:
-            description: "Claims lists the names of resources, defined in spec.resourceClaims,\
-              \ that are used by this container. \n This is an alpha field and requires\
-              \ enabling the DynamicResourceAllocation feature gate. \n This field\
-              \ is immutable. It can only be set for containers."
-            items:
-              description: ResourceClaim references one entry in PodSpec.ResourceClaims.
-              properties:
-                name:
-                  description: Name must match the name of one entry in pod.spec.resourceClaims
-                    of the Pod where this field is used. It makes that resource available
-                    inside a container.
-                  type: string
-              required:
-              - name
-              type: object
-            type: array
-            x-kubernetes-list-map-keys:
-            - name
-            x-kubernetes-list-type: map
-          limits:
-            additionalProperties:
-              anyOf:
-              - type: integer
-              - type: string
-              pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
-              x-kubernetes-int-or-string: true
-            description: 'Limits describes the maximum amount of compute resources
-              allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
-            type: object
-          requests:
-            additionalProperties:
-              anyOf:
-              - type: integer
-              - type: string
-              pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
-              x-kubernetes-int-or-string: true
-            description: 'Requests describes the minimum amount of compute resources
-              required. If Requests is omitted for a container, it defaults to Limits
-              if that is explicitly specified, otherwise to an implementation-defined
-              value. Requests cannot exceed Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
-            type: object
-        type: object
-      shardTopology:
-        properties:
-          configServer:
-            properties:
-              persistence:
-                properties:
-                  size:
-                    type: string
-                required:
-                - size
-                type: object
-              replicas:
-                type: integer
-            required:
-            - persistence
-            - replicas
-            type: object
-          mongos:
-            properties:
-              replicas:
-                type: integer
-            required:
-            - replicas
-            type: object
-          shard:
-            properties:
-              persistence:
-                properties:
-                  size:
-                    type: string
-                required:
-                - size
-                type: object
-              replicas:
-                type: integer
-              shards:
-                type: integer
-            required:
-            - persistence
-            - replicas
-            - shards
-            type: object
-        required:
-        - configServer
-        - mongos
-        - shard
-        type: object
-      sslMode:
-        enum:
-        - disabled
-        - allowSSL
-        - preferSSL
-        - requireSSL
-        type: string
       storageClass:
         properties:
           name:
@@ -1301,23 +871,336 @@ properties:
         - WipeOut
         - DoNotTerminate
         type: string
+      topology:
+        properties:
+          coordinator:
+            properties:
+              persistence:
+                properties:
+                  size:
+                    type: string
+                required:
+                - size
+                type: object
+              podResources:
+                properties:
+                  machine:
+                    enum:
+                    - db.t.micro
+                    - db.t.small
+                    - db.t.medium
+                    - db.t.large
+                    - db.t.xlarge
+                    - db.t.2xlarge
+                    - db.m.small
+                    - db.m.large
+                    - db.m.xlarge
+                    - db.m.2xlarge
+                    - db.m.4xlarge
+                    - db.m.8xlarge
+                    - db.m.12xlarge
+                    - db.m.16xlarge
+                    - db.m.24xlarge
+                    - db.r.large
+                    - db.r.xlarge
+                    - db.r.2xlarge
+                    - db.r.4xlarge
+                    - db.r.8xlarge
+                    - db.r.12xlarge
+                    - db.r.16xlarge
+                    - db.r.24xlarge
+                    type: string
+                  resources:
+                    description: ResourceRequirements describes the compute resource
+                      requirements.
+                    properties:
+                      claims:
+                        description: "Claims lists the names of resources, defined\
+                          \ in spec.resourceClaims, that are used by this container.\
+                          \ \n This is an alpha field and requires enabling the DynamicResourceAllocation\
+                          \ feature gate. \n This field is immutable. It can only\
+                          \ be set for containers."
+                        items:
+                          description: ResourceClaim references one entry in PodSpec.ResourceClaims.
+                          properties:
+                            name:
+                              description: Name must match the name of one entry in
+                                pod.spec.resourceClaims of the Pod where this field
+                                is used. It makes that resource available inside a
+                                container.
+                              type: string
+                          required:
+                          - name
+                          type: object
+                        type: array
+                        x-kubernetes-list-map-keys:
+                        - name
+                        x-kubernetes-list-type: map
+                      limits:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: 'Limits describes the maximum amount of compute
+                          resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                        type: object
+                      requests:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: 'Requests describes the minimum amount of compute
+                          resources required. If Requests is omitted for a container,
+                          it defaults to Limits if that is explicitly specified, otherwise
+                          to an implementation-defined value. Requests cannot exceed
+                          Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                        type: object
+                    type: object
+                required:
+                - machine
+                - resources
+                type: object
+              replicas:
+                type: integer
+            required:
+            - persistence
+            - podResources
+            - replicas
+            type: object
+          data:
+            properties:
+              persistence:
+                properties:
+                  size:
+                    type: string
+                required:
+                - size
+                type: object
+              podResources:
+                properties:
+                  machine:
+                    enum:
+                    - db.t.micro
+                    - db.t.small
+                    - db.t.medium
+                    - db.t.large
+                    - db.t.xlarge
+                    - db.t.2xlarge
+                    - db.m.small
+                    - db.m.large
+                    - db.m.xlarge
+                    - db.m.2xlarge
+                    - db.m.4xlarge
+                    - db.m.8xlarge
+                    - db.m.12xlarge
+                    - db.m.16xlarge
+                    - db.m.24xlarge
+                    - db.r.large
+                    - db.r.xlarge
+                    - db.r.2xlarge
+                    - db.r.4xlarge
+                    - db.r.8xlarge
+                    - db.r.12xlarge
+                    - db.r.16xlarge
+                    - db.r.24xlarge
+                    type: string
+                  resources:
+                    description: ResourceRequirements describes the compute resource
+                      requirements.
+                    properties:
+                      claims:
+                        description: "Claims lists the names of resources, defined\
+                          \ in spec.resourceClaims, that are used by this container.\
+                          \ \n This is an alpha field and requires enabling the DynamicResourceAllocation\
+                          \ feature gate. \n This field is immutable. It can only\
+                          \ be set for containers."
+                        items:
+                          description: ResourceClaim references one entry in PodSpec.ResourceClaims.
+                          properties:
+                            name:
+                              description: Name must match the name of one entry in
+                                pod.spec.resourceClaims of the Pod where this field
+                                is used. It makes that resource available inside a
+                                container.
+                              type: string
+                          required:
+                          - name
+                          type: object
+                        type: array
+                        x-kubernetes-list-map-keys:
+                        - name
+                        x-kubernetes-list-type: map
+                      limits:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: 'Limits describes the maximum amount of compute
+                          resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                        type: object
+                      requests:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: 'Requests describes the minimum amount of compute
+                          resources required. If Requests is omitted for a container,
+                          it defaults to Limits if that is explicitly specified, otherwise
+                          to an implementation-defined value. Requests cannot exceed
+                          Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                        type: object
+                    type: object
+                required:
+                - machine
+                - resources
+                type: object
+              replicas:
+                type: integer
+            required:
+            - persistence
+            - podResources
+            - replicas
+            type: object
+          overseer:
+            properties:
+              persistence:
+                properties:
+                  size:
+                    type: string
+                required:
+                - size
+                type: object
+              podResources:
+                properties:
+                  machine:
+                    enum:
+                    - db.t.micro
+                    - db.t.small
+                    - db.t.medium
+                    - db.t.large
+                    - db.t.xlarge
+                    - db.t.2xlarge
+                    - db.m.small
+                    - db.m.large
+                    - db.m.xlarge
+                    - db.m.2xlarge
+                    - db.m.4xlarge
+                    - db.m.8xlarge
+                    - db.m.12xlarge
+                    - db.m.16xlarge
+                    - db.m.24xlarge
+                    - db.r.large
+                    - db.r.xlarge
+                    - db.r.2xlarge
+                    - db.r.4xlarge
+                    - db.r.8xlarge
+                    - db.r.12xlarge
+                    - db.r.16xlarge
+                    - db.r.24xlarge
+                    type: string
+                  resources:
+                    description: ResourceRequirements describes the compute resource
+                      requirements.
+                    properties:
+                      claims:
+                        description: "Claims lists the names of resources, defined\
+                          \ in spec.resourceClaims, that are used by this container.\
+                          \ \n This is an alpha field and requires enabling the DynamicResourceAllocation\
+                          \ feature gate. \n This field is immutable. It can only\
+                          \ be set for containers."
+                        items:
+                          description: ResourceClaim references one entry in PodSpec.ResourceClaims.
+                          properties:
+                            name:
+                              description: Name must match the name of one entry in
+                                pod.spec.resourceClaims of the Pod where this field
+                                is used. It makes that resource available inside a
+                                container.
+                              type: string
+                          required:
+                          - name
+                          type: object
+                        type: array
+                        x-kubernetes-list-map-keys:
+                        - name
+                        x-kubernetes-list-type: map
+                      limits:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: 'Limits describes the maximum amount of compute
+                          resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                        type: object
+                      requests:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: 'Requests describes the minimum amount of compute
+                          resources required. If Requests is omitted for a container,
+                          it defaults to Limits if that is explicitly specified, otherwise
+                          to an implementation-defined value. Requests cannot exceed
+                          Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                        type: object
+                    type: object
+                required:
+                - machine
+                - resources
+                type: object
+              replicas:
+                type: integer
+            required:
+            - persistence
+            - podResources
+            - replicas
+            type: object
+        required:
+        - coordinator
+        - data
+        - overseer
+        type: object
       version:
         type: string
+      zookeeperRef:
+        description: ObjectReference contains enough information to let you inspect
+          or modify the referred object.
+        properties:
+          name:
+            description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names'
+            type: string
+          namespace:
+            description: 'Namespace of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/'
+            type: string
+        required:
+        - name
+        - namespace
+        type: object
     required:
     - authSecret
     - backup
-    - clusterAuthMode
-    - machine
     - mode
     - monitoring
     - persistence
+    - podResources
     - replicaSet
-    - resources
-    - shardTopology
-    - sslMode
     - storageClass
     - terminationPolicy
+    - topology
     - version
+    - zookeeperRef
     type: object
 required:
 - form

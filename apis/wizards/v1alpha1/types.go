@@ -31,6 +31,11 @@ type Persistence struct {
 	Size string `json:"size"`
 }
 
+type PodResources struct {
+	Machine   MachineType               `json:"machine"`
+	Resources core.ResourceRequirements `json:"resources"`
+}
+
 type StorageClass struct {
 	Name string `json:"name"`
 }

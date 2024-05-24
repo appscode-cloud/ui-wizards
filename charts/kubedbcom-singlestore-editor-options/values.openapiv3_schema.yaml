@@ -31,7 +31,7 @@ properties:
                     type: string
                   rules:
                     properties:
-                      mysqlHighIncomingBytes:
+                      diskAlmostFull:
                         properties:
                           duration:
                             type: string
@@ -51,7 +51,7 @@ properties:
                         - severity
                         - val
                         type: object
-                      mysqlHighOutgoingBytes:
+                      diskUsageHigh:
                         properties:
                           duration:
                             type: string
@@ -71,7 +71,7 @@ properties:
                         - severity
                         - val
                         type: object
-                      mysqlHighQPS:
+                      singlestoreHighIncomingBytes:
                         properties:
                           duration:
                             type: string
@@ -91,7 +91,7 @@ properties:
                         - severity
                         - val
                         type: object
-                      mysqlHighThreadsRunning:
+                      singlestoreHighOutgoingBytes:
                         properties:
                           duration:
                             type: string
@@ -111,7 +111,7 @@ properties:
                         - severity
                         - val
                         type: object
-                      mysqlInnoDBLogWaits:
+                      singlestoreHighQPS:
                         properties:
                           duration:
                             type: string
@@ -131,24 +131,7 @@ properties:
                         - severity
                         - val
                         type: object
-                      mysqlInstanceDown:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      mysqlRestarted:
+                      singlestoreHighThreadsRunning:
                         properties:
                           duration:
                             type: string
@@ -168,7 +151,7 @@ properties:
                         - severity
                         - val
                         type: object
-                      mysqlServiceDown:
+                      singlestoreInstanceDown:
                         properties:
                           duration:
                             type: string
@@ -185,24 +168,7 @@ properties:
                         - enabled
                         - severity
                         type: object
-                      mysqlSlowQueries:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      mysqlTooManyConnections:
+                      singlestoreRestarted:
                         properties:
                           duration:
                             type: string
@@ -222,7 +188,24 @@ properties:
                         - severity
                         - val
                         type: object
-                      mysqlTooManyOpenFiles:
+                      singlestoreServiceDown:
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            enum:
+                            - critical
+                            - warning
+                            - info
+                            type: string
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        type: object
+                      singlestoreTooManyConnections:
                         properties:
                           duration:
                             type: string
@@ -243,359 +226,22 @@ properties:
                         - val
                         type: object
                     required:
-                    - mysqlHighIncomingBytes
-                    - mysqlHighOutgoingBytes
-                    - mysqlHighQPS
-                    - mysqlHighThreadsRunning
-                    - mysqlInnoDBLogWaits
-                    - mysqlInstanceDown
-                    - mysqlRestarted
-                    - mysqlServiceDown
-                    - mysqlSlowQueries
-                    - mysqlTooManyConnections
-                    - mysqlTooManyOpenFiles
+                    - diskAlmostFull
+                    - diskUsageHigh
+                    - singlestoreHighIncomingBytes
+                    - singlestoreHighOutgoingBytes
+                    - singlestoreHighQPS
+                    - singlestoreHighThreadsRunning
+                    - singlestoreInstanceDown
+                    - singlestoreRestarted
+                    - singlestoreServiceDown
+                    - singlestoreTooManyConnections
                     type: object
                 required:
                 - enabled
                 - rules
                 type: object
-              group:
-                properties:
-                  enabled:
-                    enum:
-                    - none
-                    - critical
-                    - warning
-                    - info
-                    type: string
-                  rules:
-                    properties:
-                      mysqlHighReplicationApplyTime:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                          val:
-                            format: double
-                            type: number
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        - val
-                        type: object
-                      mysqlHighReplicationDelay:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                          val:
-                            format: double
-                            type: number
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        - val
-                        type: object
-                      mysqlHighReplicationTransportTime:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                          val:
-                            format: double
-                            type: number
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        - val
-                        type: object
-                      mysqlReplicationHighTransactionTime:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                          val:
-                            format: double
-                            type: number
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        - val
-                        type: object
-                    required:
-                    - mysqlHighReplicationApplyTime
-                    - mysqlHighReplicationDelay
-                    - mysqlHighReplicationTransportTime
-                    - mysqlReplicationHighTransactionTime
-                    type: object
-                required:
-                - enabled
-                - rules
-                type: object
-              opsManager:
-                properties:
-                  enabled:
-                    enum:
-                    - none
-                    - critical
-                    - warning
-                    - info
-                    type: string
-                  rules:
-                    properties:
-                      opsRequestFailed:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      opsRequestOnProgress:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      opsRequestStatusProgressingToLong:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                    required:
-                    - opsRequestFailed
-                    - opsRequestOnProgress
-                    - opsRequestStatusProgressingToLong
-                    type: object
-                required:
-                - enabled
-                - rules
-                type: object
-              provisioner:
-                properties:
-                  enabled:
-                    enum:
-                    - none
-                    - critical
-                    - warning
-                    - info
-                    type: string
-                  rules:
-                    properties:
-                      appPhaseCritical:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      appPhaseNotReady:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                    required:
-                    - appPhaseCritical
-                    - appPhaseNotReady
-                    type: object
-                required:
-                - enabled
-                - rules
-                type: object
-              schemaManager:
-                properties:
-                  enabled:
-                    enum:
-                    - none
-                    - critical
-                    - warning
-                    - info
-                    type: string
-                  rules:
-                    properties:
-                      schemaExpired:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      schemaFailed:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      schemaInProgressForTooLong:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      schemaPendingForTooLong:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      schemaTerminatingForTooLong:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                    required:
-                    - schemaExpired
-                    - schemaFailed
-                    - schemaInProgressForTooLong
-                    - schemaPendingForTooLong
-                    - schemaTerminatingForTooLong
-                    type: object
-                required:
-                - enabled
-                - rules
-                type: object
-              stash:
+              kubeStash:
                 properties:
                   enabled:
                     enum:
@@ -750,13 +396,63 @@ properties:
                 - enabled
                 - rules
                 type: object
+              provisioner:
+                properties:
+                  enabled:
+                    enum:
+                    - none
+                    - critical
+                    - warning
+                    - info
+                    type: string
+                  rules:
+                    properties:
+                      appPhaseCritical:
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            enum:
+                            - critical
+                            - warning
+                            - info
+                            type: string
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        type: object
+                      appPhaseNotReady:
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            enum:
+                            - critical
+                            - warning
+                            - info
+                            type: string
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        type: object
+                    required:
+                    - appPhaseCritical
+                    - appPhaseNotReady
+                    type: object
+                required:
+                - enabled
+                - rules
+                type: object
             required:
             - database
-            - group
-            - opsManager
+            - kubeStash
             - provisioner
-            - schemaManager
-            - stash
             type: object
           labels:
             additionalProperties:
@@ -1159,53 +855,14 @@ properties:
         required:
         - tool
         type: object
-      innoDBCluster:
-        properties:
-          router:
-            properties:
-              replicas:
-                type: integer
-            required:
-            - replicas
-            type: object
-        required:
-        - router
-        type: object
       labels:
         additionalProperties:
           type: string
         type: object
-      machine:
-        enum:
-        - db.t.micro
-        - db.t.small
-        - db.t.medium
-        - db.t.large
-        - db.t.xlarge
-        - db.t.2xlarge
-        - db.m.small
-        - db.m.large
-        - db.m.xlarge
-        - db.m.2xlarge
-        - db.m.4xlarge
-        - db.m.8xlarge
-        - db.m.12xlarge
-        - db.m.16xlarge
-        - db.m.24xlarge
-        - db.r.large
-        - db.r.xlarge
-        - db.r.2xlarge
-        - db.r.4xlarge
-        - db.r.8xlarge
-        - db.r.12xlarge
-        - db.r.16xlarge
-        - db.r.24xlarge
-        type: string
       mode:
         enum:
         - Standalone
-        - GroupReplication
-        - InnoDBCluster
+        - Topology
         type: string
       monitoring:
         properties:
@@ -1285,53 +942,83 @@ properties:
         required:
         - size
         type: object
-      replicas:
-        type: integer
-      resources:
-        description: ResourceRequirements describes the compute resource requirements.
+      podResources:
         properties:
-          claims:
-            description: "Claims lists the names of resources, defined in spec.resourceClaims,\
-              \ that are used by this container. \n This is an alpha field and requires\
-              \ enabling the DynamicResourceAllocation feature gate. \n This field\
-              \ is immutable. It can only be set for containers."
-            items:
-              description: ResourceClaim references one entry in PodSpec.ResourceClaims.
-              properties:
-                name:
-                  description: Name must match the name of one entry in pod.spec.resourceClaims
-                    of the Pod where this field is used. It makes that resource available
-                    inside a container.
-                  type: string
-              required:
-              - name
-              type: object
-            type: array
-            x-kubernetes-list-map-keys:
-            - name
-            x-kubernetes-list-type: map
-          limits:
-            additionalProperties:
-              anyOf:
-              - type: integer
-              - type: string
-              pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
-              x-kubernetes-int-or-string: true
-            description: 'Limits describes the maximum amount of compute resources
-              allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+          machine:
+            enum:
+            - db.t.micro
+            - db.t.small
+            - db.t.medium
+            - db.t.large
+            - db.t.xlarge
+            - db.t.2xlarge
+            - db.m.small
+            - db.m.large
+            - db.m.xlarge
+            - db.m.2xlarge
+            - db.m.4xlarge
+            - db.m.8xlarge
+            - db.m.12xlarge
+            - db.m.16xlarge
+            - db.m.24xlarge
+            - db.r.large
+            - db.r.xlarge
+            - db.r.2xlarge
+            - db.r.4xlarge
+            - db.r.8xlarge
+            - db.r.12xlarge
+            - db.r.16xlarge
+            - db.r.24xlarge
+            type: string
+          resources:
+            description: ResourceRequirements describes the compute resource requirements.
+            properties:
+              claims:
+                description: "Claims lists the names of resources, defined in spec.resourceClaims,\
+                  \ that are used by this container. \n This is an alpha field and\
+                  \ requires enabling the DynamicResourceAllocation feature gate.\
+                  \ \n This field is immutable. It can only be set for containers."
+                items:
+                  description: ResourceClaim references one entry in PodSpec.ResourceClaims.
+                  properties:
+                    name:
+                      description: Name must match the name of one entry in pod.spec.resourceClaims
+                        of the Pod where this field is used. It makes that resource
+                        available inside a container.
+                      type: string
+                  required:
+                  - name
+                  type: object
+                type: array
+                x-kubernetes-list-map-keys:
+                - name
+                x-kubernetes-list-type: map
+              limits:
+                additionalProperties:
+                  anyOf:
+                  - type: integer
+                  - type: string
+                  pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                  x-kubernetes-int-or-string: true
+                description: 'Limits describes the maximum amount of compute resources
+                  allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                type: object
+              requests:
+                additionalProperties:
+                  anyOf:
+                  - type: integer
+                  - type: string
+                  pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                  x-kubernetes-int-or-string: true
+                description: 'Requests describes the minimum amount of compute resources
+                  required. If Requests is omitted for a container, it defaults to
+                  Limits if that is explicitly specified, otherwise to an implementation-defined
+                  value. Requests cannot exceed Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                type: object
             type: object
-          requests:
-            additionalProperties:
-              anyOf:
-              - type: integer
-              - type: string
-              pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
-              x-kubernetes-int-or-string: true
-            description: 'Requests describes the minimum amount of compute resources
-              required. If Requests is omitted for a container, it defaults to Limits
-              if that is explicitly specified, otherwise to an implementation-defined
-              value. Requests cannot exceed Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
-            type: object
+        required:
+        - machine
+        - resources
         type: object
       storageClass:
         properties:
@@ -1347,18 +1034,220 @@ properties:
         - WipeOut
         - DoNotTerminate
         type: string
+      topology:
+        properties:
+          aggregator:
+            properties:
+              persistence:
+                properties:
+                  size:
+                    type: string
+                required:
+                - size
+                type: object
+              podResources:
+                properties:
+                  machine:
+                    enum:
+                    - db.t.micro
+                    - db.t.small
+                    - db.t.medium
+                    - db.t.large
+                    - db.t.xlarge
+                    - db.t.2xlarge
+                    - db.m.small
+                    - db.m.large
+                    - db.m.xlarge
+                    - db.m.2xlarge
+                    - db.m.4xlarge
+                    - db.m.8xlarge
+                    - db.m.12xlarge
+                    - db.m.16xlarge
+                    - db.m.24xlarge
+                    - db.r.large
+                    - db.r.xlarge
+                    - db.r.2xlarge
+                    - db.r.4xlarge
+                    - db.r.8xlarge
+                    - db.r.12xlarge
+                    - db.r.16xlarge
+                    - db.r.24xlarge
+                    type: string
+                  resources:
+                    description: ResourceRequirements describes the compute resource
+                      requirements.
+                    properties:
+                      claims:
+                        description: "Claims lists the names of resources, defined\
+                          \ in spec.resourceClaims, that are used by this container.\
+                          \ \n This is an alpha field and requires enabling the DynamicResourceAllocation\
+                          \ feature gate. \n This field is immutable. It can only\
+                          \ be set for containers."
+                        items:
+                          description: ResourceClaim references one entry in PodSpec.ResourceClaims.
+                          properties:
+                            name:
+                              description: Name must match the name of one entry in
+                                pod.spec.resourceClaims of the Pod where this field
+                                is used. It makes that resource available inside a
+                                container.
+                              type: string
+                          required:
+                          - name
+                          type: object
+                        type: array
+                        x-kubernetes-list-map-keys:
+                        - name
+                        x-kubernetes-list-type: map
+                      limits:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: 'Limits describes the maximum amount of compute
+                          resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                        type: object
+                      requests:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: 'Requests describes the minimum amount of compute
+                          resources required. If Requests is omitted for a container,
+                          it defaults to Limits if that is explicitly specified, otherwise
+                          to an implementation-defined value. Requests cannot exceed
+                          Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                        type: object
+                    type: object
+                required:
+                - machine
+                - resources
+                type: object
+              replicas:
+                type: integer
+            required:
+            - persistence
+            - podResources
+            - replicas
+            type: object
+          leaf:
+            properties:
+              persistence:
+                properties:
+                  size:
+                    type: string
+                required:
+                - size
+                type: object
+              podResources:
+                properties:
+                  machine:
+                    enum:
+                    - db.t.micro
+                    - db.t.small
+                    - db.t.medium
+                    - db.t.large
+                    - db.t.xlarge
+                    - db.t.2xlarge
+                    - db.m.small
+                    - db.m.large
+                    - db.m.xlarge
+                    - db.m.2xlarge
+                    - db.m.4xlarge
+                    - db.m.8xlarge
+                    - db.m.12xlarge
+                    - db.m.16xlarge
+                    - db.m.24xlarge
+                    - db.r.large
+                    - db.r.xlarge
+                    - db.r.2xlarge
+                    - db.r.4xlarge
+                    - db.r.8xlarge
+                    - db.r.12xlarge
+                    - db.r.16xlarge
+                    - db.r.24xlarge
+                    type: string
+                  resources:
+                    description: ResourceRequirements describes the compute resource
+                      requirements.
+                    properties:
+                      claims:
+                        description: "Claims lists the names of resources, defined\
+                          \ in spec.resourceClaims, that are used by this container.\
+                          \ \n This is an alpha field and requires enabling the DynamicResourceAllocation\
+                          \ feature gate. \n This field is immutable. It can only\
+                          \ be set for containers."
+                        items:
+                          description: ResourceClaim references one entry in PodSpec.ResourceClaims.
+                          properties:
+                            name:
+                              description: Name must match the name of one entry in
+                                pod.spec.resourceClaims of the Pod where this field
+                                is used. It makes that resource available inside a
+                                container.
+                              type: string
+                          required:
+                          - name
+                          type: object
+                        type: array
+                        x-kubernetes-list-map-keys:
+                        - name
+                        x-kubernetes-list-type: map
+                      limits:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: 'Limits describes the maximum amount of compute
+                          resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                        type: object
+                      requests:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        description: 'Requests describes the minimum amount of compute
+                          resources required. If Requests is omitted for a container,
+                          it defaults to Limits if that is explicitly specified, otherwise
+                          to an implementation-defined value. Requests cannot exceed
+                          Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
+                        type: object
+                    type: object
+                required:
+                - machine
+                - resources
+                type: object
+              replicas:
+                type: integer
+            required:
+            - persistence
+            - podResources
+            - replicas
+            type: object
+        required:
+        - aggregator
+        - leaf
+        type: object
       version:
         type: string
     required:
     - authSecret
     - backup
-    - machine
     - mode
     - monitoring
     - persistence
-    - resources
+    - podResources
     - storageClass
     - terminationPolicy
+    - topology
     - version
     type: object
 required:

@@ -25,12 +25,8 @@ spec:
   # Labels to add to all the template objects
   labels: {}
 
-  # Standalone, GroupReplication, InnoDBCluster
+  # Standalone, Topology
   mode: Standalone
-  replicas: 3
-  innoDBCluster:
-    router:
-      replicas: 3
 
   terminationPolicy: WipeOut
 
@@ -40,12 +36,38 @@ spec:
   persistence:
     size: 10Gi
 
-  machine: ""
+  podResources:
+    machine: ""
 
-  resources:
-    limits:
-      cpu: 500m
-      memory: 1Gi
+    resources:
+      limits:
+        cpu: 500m
+        memory: 2Gi
+  topology:
+    aggregator:
+      persistence:
+        size: 10Gi
+
+      podResources:
+        machine: ""
+
+        resources:
+          limits:
+            cpu: 500m
+            memory: 2Gi
+      replicas: 2
+    leaf:
+      persistence:
+        size: 10Gi
+
+      podResources:
+        machine: ""
+
+        resources:
+          limits:
+            cpu: 500m
+            memory: 2Gi
+      replicas: 3
 
   authSecret:
     name: ""

@@ -28,41 +28,64 @@ spec:
   # Standalone, Replicaset, Sharded
   mode: Standalone
   replicaSet:
-    name: rs0
     replicas: 3
-  shardTopology:
-    shard:
-      replicas: 3
-      shards: 3
+  topology:
+    overseer:
       persistence:
         size: 10Gi
-    configServer:
-      replicas: 3
+
+      podResources:
+        machine: ""
+
+        resources:
+          limits:
+            cpu: 900m
+            memory: 2Gi
+      replicas: 2
+    data:
       persistence:
-        size: 2Gi
-    mongos:
-      replicas: 3
+        size: 10Gi
 
-  # "keyFile", "sendKeyFile", "sendX509", "x509"
-  clusterAuthMode: keyFile
+      podResources:
+        machine: ""
 
-  # "disabled", "allowSSL", "preferSSL", "requireSSL"
-  sslMode: disabled
+        resources:
+          limits:
+            cpu: 900m
+            memory: 2Gi
+      replicas: 2
+    coordinator:
+      persistence:
+        size: 10Gi
+
+      podResources:
+        machine: ""
+
+        resources:
+          limits:
+            cpu: 900m
+            memory: 2Gi
+      replicas: 2
 
   terminationPolicy: WipeOut
 
   storageClass:
     name: standard
 
+  zookeeperRef:
+    name: ""
+    namespace: ""
+
   persistence:
     size: 10Gi
 
-  machine: ""
+  podResources:
+    machine: ""
 
-  resources:
-    limits:
-      cpu: 500m
-      memory: 1Gi
+    resources:
+      limits:
+        cpu: 900m
+        memory: 2Gi
 
   authSecret:
     name: ""
