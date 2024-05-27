@@ -185,8 +185,8 @@ steps:
           options:
           - text: Select New Config Secret
             value: selectNewConfigSecret
-          - text: Inline Config
-            value: inlineConfig
+          - text: Apply Config
+            value: applyConfig
           - text: Remove
             value: remove
           schema:
@@ -212,12 +212,46 @@ steps:
           schema:
             $ref: schema#/properties/spec/properties/configuration/properties/configSecret
           type: single-step-form
-        - if: ifReconfigurationTypeEqualsTo|inlineConfig
+        - addFormLabel: labels.applyConfig.label
+          element:
+            discriminator:
+              configArray:
+                emitAs: applyconfig
+                type: array
+            elements:
+            - type: input
+              label:
+                text: labels.applyConfig.key
+              schema:
+                $ref: discriminator#/properties/configArray/items/properties/key
+              required: true
+            - type: editor
+              label:
+                text: labels.applyConfig.value
+              schema:
+                $ref: discriminator#/properties/configArray/items/properties/value
+              required: true
+            type: single-step-form
+          if: ifReconfigurationTypeEqualsTo|applyConfig
           label:
-            text: labels.inlineConfig
+            text: labels.applyConfig.label
+          onChange: onApplyconfigChange
           schema:
-            $ref: schema#/properties/spec/properties/configuration/properties/inlineConfig
-          type: editor
+            $ref: discriminator#/properties/applyconfig
+          tableContents:
+          - inTableColumn: true
+            label:
+              text: labels.applyConfig.key
+            path: key
+            type: value
+            typeOfValue: string
+          - inTableColumn: true
+            label:
+              text: labels.applyConfig.value
+            path: value
+            type: value
+            typeOfValue: code
+          type: single-step-form-array
         - if: returnFalse
           label:
             text: labels.removeCustomConfig
