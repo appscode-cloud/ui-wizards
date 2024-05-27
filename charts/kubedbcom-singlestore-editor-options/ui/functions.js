@@ -417,8 +417,8 @@ function getMachineListForOptions() {
 }
 
 function setResourceLimit({ commit, model, getValue, watchDependency }) {
-  const modelPathValue = getValue(model, "/spec/machine");
-  watchDependency("model#/spec/machine");
+  const modelPathValue = getValue(model, "/spec/podResources/machine");
+  watchDependency("model#/spec/podResources/machine");
   if (modelPathValue && modelPathValue !== "custom") {
     // to avoiding set value by reference, cpu and memory set separately
     commit("wizard/model$update", {
@@ -498,6 +498,24 @@ function updateAgentValue({commit },val) {
     value: val ? 'warning' : 'none',
     force: true
   });
+}
+
+function onModeChange({ model, getValue, watchDependency, commit }){
+  const modelPathValue = getValue(model, "/spec/mode");
+  watchDependency("model#/spec/mode");
+  if(modelPathValue==='Topology'){
+    commit("wizard/model$update", {
+      path: "/spec/replicas",
+      value: 3,
+      force: true,
+    });
+  }else{
+    commit("wizard/model$update", {
+      path: "/spec/replicas",
+      value: 1,
+      force: true,
+    });
+  }
 }
 
 function getCreateNameSpaceUrl ({ model, getValue, storeGet }){ 
@@ -711,4 +729,5 @@ return {
   showMultiselectZone,
   showSelectZone,
   setStorageClass,
+  onModeChange
 }
