@@ -511,7 +511,7 @@ function ifReconfigurationTypeEqualsTo(
 }
 
 function onApplyconfigChange({ discriminator, getValue, commit }) {
-  const applyconfig = getValue(discriminator, "/applyconfig");
+  const applyconfig = getValue(discriminator, "/applyConfig");
 
   const configObj = {};
 
@@ -529,8 +529,9 @@ function onApplyconfigChange({ discriminator, getValue, commit }) {
   });
 }
 
-function onReconfigurationTypeChange({ commit, discriminator, getValue }) {
+function onReconfigurationTypeChange({ commit, discriminator, getValue, setDiscriminatorValue }) {
   const reconfigurationType = getValue(discriminator, "/reconfigurationType");
+  setDiscriminatorValue("/applyConfig", {});
   if (reconfigurationType === "remove") {
     commit("wizard/model$delete", `/spec/configuration`);
 
@@ -544,8 +545,6 @@ function onReconfigurationTypeChange({ commit, discriminator, getValue }) {
     commit("wizard/model$delete", `/spec/configuration/applyConfig`);
     commit("wizard/model$delete", `/spec/configuration/removeCustomConfig`);
   }
-  if(reconfigurationType === "applyConfig")
-    onApplyconfigChange({ discriminator, getValue, commit });
 }
 
 // for tls

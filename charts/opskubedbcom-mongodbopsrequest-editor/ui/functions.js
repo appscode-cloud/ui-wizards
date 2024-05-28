@@ -561,7 +561,7 @@ function ifReconfigurationTypeEqualsTo(
 }
 
 function onApplyconfigChange({ discriminator, getValue, commit }, type) {
-  const configPath = `/${type}/applyconfig`;
+  const configPath = `/${type}/applyConfig`;
   const applyconfig = getValue(discriminator, configPath);
 
   const configObj = {};
@@ -581,10 +581,11 @@ function onApplyconfigChange({ discriminator, getValue, commit }, type) {
 }
 
 function onReconfigurationTypeChange(
-  { commit, discriminator, getValue },
+  { commit, discriminator, getValue, setDiscriminatorValue },
   property,
   isShard
 ) {
+  setDiscriminatorValue(`/${property}/applyConfig`, []);
   let path = "/reconfigurationType";
   if (isShard) path += `-${property}`;
   const reconfigurationType = getValue(discriminator, path);
@@ -610,8 +611,6 @@ function onReconfigurationTypeChange(
       `/spec/configuration/${property}/removeCustomConfig`
     );
   }
-  if(reconfigurationType === "applyConfig")
-    onApplyconfigChange({ discriminator, getValue, commit }, property);
 }
 
 // for tls
