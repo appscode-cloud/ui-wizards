@@ -455,12 +455,13 @@ steps:
           options:
           - text: Select New Config Secret
             value: selectNewConfigSecret
-          - text: Inline Config
-            value: inlineConfig
+          - text: Apply Config
+            value: applyConfig
           - text: Remove
             value: remove
           schema:
             $ref: discriminator#/properties/reconfigurationType
+          required: true
           type: radio
         - elements:
           - add_new_button:
@@ -472,6 +473,7 @@ steps:
             fetch: getConfigSecrets
             label:
               text: labels.configSecret
+            required: true
             refresh: true
             schema:
               $ref: schema#/properties/spec/properties/configuration/properties/standalone/properties/configSecret/properties/name
@@ -482,12 +484,47 @@ steps:
           schema:
             $ref: schema#/properties/spec/properties/configuration/properties/standalone/properties/configSecret
           type: single-step-form
-        - if: ifReconfigurationTypeEqualsTo|inlineConfig
+        - if: ifReconfigurationTypeEqualsTo|applyConfig
+          addFormLabel: labels.applyConfig.label
+          element:
+            discriminator:
+              configArray:
+                emitAs: standalone/applyconfig
+                type: array
+            elements:
+            - type: input
+              label:
+                text: labels.applyConfig.key
+              schema:
+                $ref: discriminator#/properties/configArray/items/properties/key
+              required: true
+            - type: editor
+              label:
+                text: labels.applyConfig.value
+              schema:
+                $ref: discriminator#/properties/configArray/items/properties/value
+              required: true
+            type: single-step-form
           label:
-            text: labels.inlineConfig
+            text: labels.applyConfig.label
+          onChange: onApplyconfigChange|standalone
+          required: true
           schema:
-            $ref: schema#/properties/spec/properties/configuration/properties/standalone/properties/inlineConfig
-          type: editor
+            $ref: discriminator#/properties/standalone/applyconfig
+          tableContents:
+          - inTableColumn: true
+            label:
+              text: labels.applyConfig.key
+            path: key
+            type: value
+            typeOfValue: string
+          - inTableColumn: true
+            label:
+              text: labels.applyConfig.value
+            path: value
+            type: value
+            typeOfValue: code
+          type: single-step-form-array
         - if: returnFalse
           label:
             text: labels.removeCustomConfig
@@ -510,12 +547,13 @@ steps:
           options:
           - text: Select New Config Secret
             value: selectNewConfigSecret
-          - text: Inline Config
-            value: inlineConfig
+          - text: Apply Config
+            value: applyConfig
           - text: Remove
             value: remove
           schema:
             $ref: discriminator#/properties/reconfigurationType
+          required: true
           type: radio
         - elements:
           - add_new_button:
@@ -528,6 +566,7 @@ steps:
             label:
               text: labels.configSecret
             refresh: true
+            required: true
             schema:
               $ref: schema#/properties/spec/properties/configuration/properties/replicaSet/properties/configSecret/properties/name
             type: select
@@ -537,12 +576,47 @@ steps:
           schema:
             $ref: schema#/properties/spec/properties/configuration/properties/replicaSet/properties/configSecret
           type: single-step-form
-        - if: ifReconfigurationTypeEqualsTo|inlineConfig
+        - if: ifReconfigurationTypeEqualsTo|applyConfig
+          addFormLabel: labels.applyConfig.label
+          element:
+            discriminator:
+              configArray:
+                emitAs: replicaSet/applyconfig
+                type: array
+            elements:
+            - type: input
+              label:
+                text: labels.applyConfig.key
+              schema:
+                $ref: discriminator#/properties/configArray/items/properties/key
+              required: true
+            - type: editor
+              label:
+                text: labels.applyConfig.value
+              schema:
+                $ref: discriminator#/properties/configArray/items/properties/value
+              required: true
+            type: single-step-form
           label:
-            text: labels.inlineConfig
+            text: labels.applyConfig.label
+          onChange: onApplyconfigChange|replicaSet
+          required: true
           schema:
-            $ref: schema#/properties/spec/properties/configuration/properties/replicaSet/properties/inlineConfig
-          type: editor
+            $ref: discriminator#/properties/replicaSet/applyconfig
+          tableContents:
+          - inTableColumn: true
+            label:
+              text: labels.applyConfig.key
+            path: key
+            type: value
+            typeOfValue: string
+          - inTableColumn: true
+            label:
+              text: labels.applyConfig.value
+            path: value
+            type: value
+            typeOfValue: code
+          type: single-step-form-array
         - if: returnFalse
           label:
             text: labels.removeCustomConfig
@@ -550,6 +624,7 @@ steps:
             $ref: schema#/properties/spec/properties/configuration/properties/replicaSet/properties/removeCustomConfig
           type: switch
         if: ifDbTypeEqualsTo|replicaSet|configuration
+        required: true
         label:
           text: labels.replicaSet
         schema:
@@ -567,8 +642,8 @@ steps:
             options:
             - text: Select New Config Secret
               value: selectNewConfigSecret
-            - text: Inline Config
-              value: inlineConfig
+            - text: Apply Config
+              value: applyConfig
             - text: Remove
               value: remove
             schema:
@@ -585,6 +660,7 @@ steps:
               label:
                 text: labels.configSecret
               refresh: true
+              required: true
               schema:
                 $ref: schema#/properties/spec/properties/configuration/properties/configServer/properties/configSecret/properties/name
               type: select
@@ -592,12 +668,47 @@ steps:
             schema:
               $ref: schema#/properties/spec/properties/configuration/properties/configServer/properties/configSecret
             type: single-step-form
-          - if: ifReconfigurationTypeEqualsTo|inlineConfig|configServer|true
+          - if: ifReconfigurationTypeEqualsTo|applyConfig|configServer|true
+            addFormLabel: labels.applyConfig.label
+            element:
+              discriminator:
+                configArray:
+                  emitAs: configServer/applyconfig
+                  type: array
+              elements:
+              - type: input
+                label:
+                  text: labels.applyConfig.key
+                schema:
+                  $ref: discriminator#/properties/configArray/items/properties/key
+                required: true
+              - type: editor
+                label:
+                  text: labels.applyConfig.value
+                schema:
+                  $ref: discriminator#/properties/configArray/items/properties/value
+                required: true
+              type: single-step-form
             label:
-              text: labels.inlineConfig
+              text: labels.applyConfig.label
+            onChange: onApplyconfigChange|configServer
+            required: true
             schema:
-              $ref: schema#/properties/spec/properties/configuration/properties/configServer/properties/inlineConfig
-            type: editor
+              $ref: discriminator#/properties/configServer/applyconfig
+            tableContents:
+            - inTableColumn: true
+              label:
+                text: labels.applyConfig.key
+              path: key
+              type: value
+              typeOfValue: string
+            - inTableColumn: true
+              label:
+                text: labels.applyConfig.value
+              path: value
+              type: value
+              typeOfValue: code
+            type: single-step-form-array
           - if: returnFalse
             label:
               text: labels.removeCustomConfig
@@ -620,8 +731,8 @@ steps:
             options:
             - text: Select New Config Secret
               value: selectNewConfigSecret
-            - text: Inline Config
-              value: inlineConfig
+            - text: Apply Config
+              value: applyConfig
             - text: Remove
               value: remove
             schema:
@@ -638,6 +749,7 @@ steps:
               label:
                 text: labels.configSecret
               refresh: true
+              required: true
               schema:
                 $ref: schema#/properties/spec/properties/configuration/properties/mongos/properties/configSecret/properties/name
               type: select
@@ -645,12 +757,47 @@ steps:
             schema:
               $ref: schema#/properties/spec/properties/configuration/properties/mongos/properties/configSecret
             type: single-step-form
-          - if: ifReconfigurationTypeEqualsTo|inlineConfig|mongos|true
+          - if: ifReconfigurationTypeEqualsTo|applyConfig|mongos|true
+            addFormLabel: labels.applyConfig.label
+            element:
+              discriminator:
+                configArray:
+                  emitAs: mongos/applyconfig
+                  type: array
+              elements:
+              - type: input
+                label:
+                  text: labels.applyConfig.key
+                schema:
+                  $ref: discriminator#/properties/configArray/items/properties/key
+                required: true
+              - type: editor
+                label:
+                  text: labels.applyConfig.value
+                schema:
+                  $ref: discriminator#/properties/configArray/items/properties/value
+                required: true
+              type: single-step-form
             label:
-              text: labels.inlineConfig
+              text: labels.applyConfig.label
+            onChange: onApplyconfigChange|mongos
+            required: true
             schema:
-              $ref: schema#/properties/spec/properties/configuration/properties/mongos/properties/inlineConfig
-            type: editor
+              $ref: discriminator#/properties/mongos/applyconfig
+            tableContents:
+            - inTableColumn: true
+              label:
+                text: labels.applyConfig.key
+              path: key
+              type: value
+              typeOfValue: string
+            - inTableColumn: true
+              label:
+                text: labels.applyConfig.value
+              path: value
+              type: value
+              typeOfValue: code
+            type: single-step-form-array
           - if: returnFalse
             label:
               text: labels.removeCustomConfig
@@ -673,8 +820,8 @@ steps:
             options:
             - text: Select New Config Secret
               value: selectNewConfigSecret
-            - text: Inline Config
-              value: inlineConfig
+            - text: Apply Config
+              value: applyConfig
             - text: Remove
               value: remove
             schema:
@@ -691,6 +838,7 @@ steps:
               label:
                 text: labels.configSecret
               refresh: true
+              required: true
               schema:
                 $ref: schema#/properties/spec/properties/configuration/properties/shard/properties/configSecret/properties/name
               type: select
@@ -698,12 +846,47 @@ steps:
             schema:
               $ref: schema#/properties/spec/properties/configuration/properties/shard/properties/configSecret
             type: single-step-form
-          - if: ifReconfigurationTypeEqualsTo|inlineConfig|shard|true
+          - if: ifReconfigurationTypeEqualsTo|applyConfig|shard|true
+            addFormLabel: labels.applyConfig.label
+            element:
+              discriminator:
+                configArray:
+                  emitAs: shard/applyconfig
+                  type: array
+              elements:
+              - type: input
+                label:
+                  text: labels.applyConfig.key
+                schema:
+                  $ref: discriminator#/properties/configArray/items/properties/key
+                required: true
+              - type: editor
+                label:
+                  text: labels.applyConfig.value
+                schema:
+                  $ref: discriminator#/properties/configArray/items/properties/value
+                required: true
+              type: single-step-form
             label:
-              text: labels.inlineConfig
+              text: labels.applyConfig.label
+            onChange: onApplyconfigChange|shard
+            required: true
             schema:
-              $ref: schema#/properties/spec/properties/configuration/properties/shard/properties/inlineConfig
-            type: editor
+              $ref: discriminator#/properties/shard/applyconfig
+            tableContents:
+            - inTableColumn: true
+              label:
+                text: labels.applyConfig.key
+              path: key
+              type: value
+              typeOfValue: string
+            - inTableColumn: true
+              label:
+                text: labels.applyConfig.value
+              path: value
+              type: value
+              typeOfValue: code
+            type: single-step-form-array
           - if: returnFalse
             label:
               text: labels.removeCustomConfig
