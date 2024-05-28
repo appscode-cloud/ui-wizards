@@ -526,7 +526,7 @@ function ifReconfigurationTypeEqualsTo(
 }
 
 function onApplyconfigChange({ discriminator, getValue, commit }) {
-  const applyconfig = getValue(discriminator, "/applyconfig");
+  const applyconfig = getValue(discriminator, "/applyConfig");
 
   const configObj = {};
   if (applyconfig) {
@@ -548,7 +548,7 @@ function onReconfigurationTypeChange(
   { commit, discriminator, getValue, setDiscriminatorValue }
 ) {
   const reconfigurationType = getValue(discriminator, "/reconfigurationType");
-  setDiscriminatorValue("/applyconfig", {});
+  setDiscriminatorValue("/applyConfig", {});
   if (reconfigurationType === "remove") {
     commit("wizard/model$delete", `/spec/configuration`);
 
