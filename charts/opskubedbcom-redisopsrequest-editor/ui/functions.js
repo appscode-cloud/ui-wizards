@@ -524,10 +524,31 @@ function ifReconfigurationTypeEqualsTo(
 
   return reconfigurationType === value;
 }
+
+function onApplyconfigChange({ discriminator, getValue, commit }) {
+  const applyconfig = getValue(discriminator, "/applyconfig");
+
+  const configObj = {};
+  if (applyconfig) {
+    applyconfig.forEach((item) => {
+      const { key, value } = item;
+      configObj[key] = value;
+    });
+  }
+  
+  console.log(configObj);
+  commit("wizard/model$update", {
+    path: "/spec/configuration/applyConfig",
+    value: configObj,
+    force: true,
+  });
+}
+
 function onReconfigurationTypeChange(
-  { commit, discriminator, getValue }
+  { commit, discriminator, getValue, setDiscriminatorValue }
 ) {
   const reconfigurationType = getValue(discriminator, "/reconfigurationType");
+  setDiscriminatorValue("/applyconfig", {});
   if (reconfigurationType === "remove") {
     commit("wizard/model$delete", `/spec/configuration`);
 
@@ -543,25 +564,13 @@ function onReconfigurationTypeChange(
     );
     commit(
       "wizard/model$delete",
-      `/spec/configuration/inlineConfig`
+      `/spec/configuration/applyConfig`
     );
     commit(
       "wizard/model$delete",
       `/spec/configuration/removeCustomConfig`
     );
   }
-}
-function disableReconfigurationType(
-  { getValue, watchDependency, discriminator, itemCtx },
-) {
-  watchDependency("discriminator#/dbDetails");
-  const dbDetails = getValue(discriminator, "/dbDetails");
-
-  const { spec } = dbDetails || {};
-    if (itemCtx.value === "inlineConfig" || itemCtx.value === "remove") {
-      if (spec.configSecret) return false;
-      else return true;
-    } else return false;
 }
 
 // for tls
@@ -812,7 +821,7 @@ return {
   unNamespacedResourceNames,
   ifReconfigurationTypeEqualsTo,
   onReconfigurationTypeChange,
-  disableReconfigurationType,
+  onApplyconfigChange,
   hasTlsField,
   initIssuerRefApiGroup,
   getIssuerRefsName,
