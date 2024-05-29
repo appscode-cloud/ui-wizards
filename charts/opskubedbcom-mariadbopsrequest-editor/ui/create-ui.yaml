@@ -192,6 +192,7 @@ steps:
           schema:
             $ref: discriminator#/properties/reconfigurationType
           type: radio
+          required: true
         - elements:
           - add_new_button:
               label: labels.createConfig
@@ -203,6 +204,7 @@ steps:
             label:
               text: labels.configSecret
             refresh: true
+            required: true
             schema:
               $ref: schema#/properties/spec/properties/configuration/properties/configSecret/properties/name
             type: select
@@ -212,11 +214,12 @@ steps:
           schema:
             $ref: schema#/properties/spec/properties/configuration/properties/configSecret
           type: single-step-form
-        - addFormLabel: labels.applyConfig.label
+        - if: ifReconfigurationTypeEqualsTo|applyConfig
+          addFormLabel: labels.applyConfig.label
           element:
             discriminator:
               configArray:
-                emitAs: applyconfig
+                emitAs: applyConfig
                 type: array
             elements:
             - type: input
@@ -232,12 +235,11 @@ steps:
                 $ref: discriminator#/properties/configArray/items/properties/value
               required: true
             type: single-step-form
-          if: ifReconfigurationTypeEqualsTo|applyConfig
           label:
             text: labels.applyConfig.label
           onChange: onApplyconfigChange
           schema:
-            $ref: discriminator#/properties/applyconfig
+            $ref: discriminator#/properties/applyConfig
           tableContents:
           - inTableColumn: true
             label:
@@ -251,6 +253,7 @@ steps:
             path: value
             type: value
             typeOfValue: code
+          required: true
           type: single-step-form-array
         - if: returnFalse
           label:

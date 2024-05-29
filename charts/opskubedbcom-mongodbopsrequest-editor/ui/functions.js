@@ -560,11 +560,32 @@ function ifReconfigurationTypeEqualsTo(
   return reconfigurationType === value;
 }
 
+function onApplyconfigChange({ discriminator, getValue, commit }, type) {
+  const configPath = `/${type}/applyConfig`;
+  const applyconfig = getValue(discriminator, configPath);
+
+  const configObj = {};
+
+  if (applyconfig) {
+    applyconfig.forEach((item) => {
+      const { key, value } = item;
+      configObj[key] = value;
+    });
+  }
+
+  commit("wizard/model$update", {
+    path: `/spec/configuration/${type}/applyConfig`,
+    value: configObj,
+    force: true,
+  });
+}
+
 function onReconfigurationTypeChange(
-  { commit, discriminator, getValue },
+  { commit, discriminator, getValue, setDiscriminatorValue },
   property,
   isShard
 ) {
+  setDiscriminatorValue(`/${property}/applyConfig`, []);
   let path = "/reconfigurationType";
   if (isShard) path += `-${property}`;
   const reconfigurationType = getValue(discriminator, path);
@@ -583,40 +604,12 @@ function onReconfigurationTypeChange(
     );
     commit(
       "wizard/model$delete",
-      `/spec/configuration/${property}/inlineConfig`
+      `/spec/configuration/${property}/applyConfig`
     );
     commit(
       "wizard/model$delete",
       `/spec/configuration/${property}/removeCustomConfig`
     );
-  }
-}
-
-function disableReconfigurationType(
-  { discriminator, getValue, watchDependency, itemCtx },
-  dbType,
-  prop
-) {
-  watchDependency("discriminator#/dbDetails");
-  const dbDetails = getValue(discriminator, "/dbDetails");
-
-  const { spec } = dbDetails || {};
-  if (dbType === "standalone" || dbType === "replicaSet") {
-    if (itemCtx.value === "inlineConfig" || itemCtx.value === "remove") {
-      if (spec.configSecret) return false;
-      else return true;
-    } else return false;
-  } else {
-    const { shardTopology } = spec || {};
-    if (itemCtx.value === "inlineConfig" || itemCtx.value === "remove") {
-      if (
-        shardTopology &&
-        shardTopology[prop] &&
-        shardTopology[prop].configSecret
-      )
-        return false;
-      else return true;
-    } else return false;
   }
 }
 
@@ -859,7 +852,7 @@ return {
   unNamespacedResourceNames,
   ifReconfigurationTypeEqualsTo,
   onReconfigurationTypeChange,
-  disableReconfigurationType,
+  onApplyconfigChange,
   hasTlsField,
   initIssuerRefApiGroup,
   getIssuerRefsName,
