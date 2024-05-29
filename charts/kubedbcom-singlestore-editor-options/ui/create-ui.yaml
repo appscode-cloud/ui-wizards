@@ -76,16 +76,19 @@ steps:
       onChange: onModeChange
       type: radio
     - elements:
+
       - label:
           text: labels.replicaset.number
+        computed: setReplicaNumber
         schema:
           $ref: schema#/properties/spec/properties/replicas
         type: input
-      # - label:
-      #     text: labels.replicaset.router_number
-      #   schema:
-      #     $ref: schema#/properties/spec/properties/Topology/properties/aggregator/properties/replicas
-      #   type: input
+      - label:
+          text: labels.replicaset.router_number
+        computed: setRouterNumber
+        schema:
+          $ref: schema#/properties/spec/properties/topology/properties/aggregator/properties/replicas
+        type: input
       if: isEqualToModelPathValue|Topology|/spec/mode
       type: single-step-form
     - label:
