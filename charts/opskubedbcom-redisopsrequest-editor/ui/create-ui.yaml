@@ -196,9 +196,9 @@ steps:
             value: applyConfig
           - text: Remove
             value: remove
+          required: true
           schema:
             $ref: discriminator#/properties/reconfigurationType
-          required: true
           type: radio
         - elements:
           - add_new_button:
@@ -221,30 +221,31 @@ steps:
           schema:
             $ref: schema#/properties/spec/properties/configuration/properties/configSecret
           type: single-step-form
-        - if: ifReconfigurationTypeEqualsTo|applyConfig
-          addFormLabel: labels.applyConfig.label
+        - addFormLabel: labels.applyConfig.label
           element:
             discriminator:
               configArray:
                 emitAs: applyConfig
                 type: array
             elements:
-            - type: input
-              label:
+            - label:
                 text: labels.applyConfig.key
+              required: true
               schema:
                 $ref: discriminator#/properties/configArray/items/properties/key
-              required: true
-            - type: editor
-              label:
+              type: input
+            - label:
                 text: labels.applyConfig.value
+              required: true
               schema:
                 $ref: discriminator#/properties/configArray/items/properties/value
-              required: true
+              type: editor
             type: single-step-form
+          if: ifReconfigurationTypeEqualsTo|applyConfig
           label:
             text: labels.applyConfig.label
           onChange: onApplyconfigChange
+          required: true
           schema:
             $ref: discriminator#/properties/applyConfig
           tableContents:
@@ -260,7 +261,6 @@ steps:
             path: value
             type: value
             typeOfValue: code
-          required: true
           type: single-step-form-array
         - if: returnFalse
           label:
