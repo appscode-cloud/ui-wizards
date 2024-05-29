@@ -459,9 +459,9 @@ steps:
             value: applyConfig
           - text: Remove
             value: remove
+          required: true
           schema:
             $ref: discriminator#/properties/reconfigurationType
-          required: true
           type: radio
         - elements:
           - add_new_button:
@@ -473,8 +473,8 @@ steps:
             fetch: getConfigSecrets
             label:
               text: labels.configSecret
-            required: true
             refresh: true
+            required: true
             schema:
               $ref: schema#/properties/spec/properties/configuration/properties/standalone/properties/configSecret/properties/name
             type: select
@@ -484,27 +484,27 @@ steps:
           schema:
             $ref: schema#/properties/spec/properties/configuration/properties/standalone/properties/configSecret
           type: single-step-form
-        - if: ifReconfigurationTypeEqualsTo|applyConfig
-          addFormLabel: labels.applyConfig.label
+        - addFormLabel: labels.applyConfig.label
           element:
             discriminator:
               configArray:
                 emitAs: standalone/applyConfig
                 type: array
             elements:
-            - type: input
-              label:
+            - label:
                 text: labels.applyConfig.key
+              required: true
               schema:
                 $ref: discriminator#/properties/configArray/items/properties/key
-              required: true
-            - type: editor
-              label:
+              type: input
+            - label:
                 text: labels.applyConfig.value
+              required: true
               schema:
                 $ref: discriminator#/properties/configArray/items/properties/value
-              required: true
+              type: editor
             type: single-step-form
+          if: ifReconfigurationTypeEqualsTo|applyConfig
           label:
             text: labels.applyConfig.label
           onChange: onApplyconfigChange|standalone
@@ -544,6 +544,7 @@ steps:
         elements:
         - label:
             text: labels.reconfigurationType
+          onChange: onReconfigurationTypeChange|replicaSet
           options:
           - text: Select New Config Secret
             value: selectNewConfigSecret
@@ -551,10 +552,9 @@ steps:
             value: applyConfig
           - text: Remove
             value: remove
-          onChange: onReconfigurationTypeChange|replicaSet
+          required: true
           schema:
             $ref: discriminator#/properties/reconfigurationType
-          required: true
           type: radio
         - elements:
           - add_new_button:
@@ -577,27 +577,27 @@ steps:
           schema:
             $ref: schema#/properties/spec/properties/configuration/properties/replicaSet/properties/configSecret
           type: single-step-form
-        - if: ifReconfigurationTypeEqualsTo|applyConfig
-          addFormLabel: labels.applyConfig.label
+        - addFormLabel: labels.applyConfig.label
           element:
             discriminator:
               configArray:
                 emitAs: replicaSet/applyConfig
                 type: array
             elements:
-            - type: input
-              label:
+            - label:
                 text: labels.applyConfig.key
+              required: true
               schema:
                 $ref: discriminator#/properties/configArray/items/properties/key
-              required: true
-            - type: editor
-              label:
+              type: input
+            - label:
                 text: labels.applyConfig.value
+              required: true
               schema:
                 $ref: discriminator#/properties/configArray/items/properties/value
-              required: true
+              type: editor
             type: single-step-form
+          if: ifReconfigurationTypeEqualsTo|applyConfig
           label:
             text: labels.applyConfig.label
           onChange: onApplyconfigChange|replicaSet
@@ -668,27 +668,27 @@ steps:
             schema:
               $ref: schema#/properties/spec/properties/configuration/properties/configServer/properties/configSecret
             type: single-step-form
-          - if: ifReconfigurationTypeEqualsTo|applyConfig|configServer|true
-            addFormLabel: labels.applyConfig.label
+          - addFormLabel: labels.applyConfig.label
             element:
               discriminator:
                 configArray:
                   emitAs: configServer/applyConfig
                   type: array
               elements:
-              - type: input
-                label:
+              - label:
                   text: labels.applyConfig.key
+                required: true
                 schema:
                   $ref: discriminator#/properties/configArray/items/properties/key
-                required: true
-              - type: editor
-                label:
+                type: input
+              - label:
                   text: labels.applyConfig.value
+                required: true
                 schema:
                   $ref: discriminator#/properties/configArray/items/properties/value
-                required: true
+                type: editor
               type: single-step-form
+            if: ifReconfigurationTypeEqualsTo|applyConfig|configServer|true
             label:
               text: labels.applyConfig.label
             onChange: onApplyconfigChange|configServer
@@ -757,27 +757,27 @@ steps:
             schema:
               $ref: schema#/properties/spec/properties/configuration/properties/mongos/properties/configSecret
             type: single-step-form
-          - if: ifReconfigurationTypeEqualsTo|applyConfig|mongos|true
-            addFormLabel: labels.applyConfig.label
+          - addFormLabel: labels.applyConfig.label
             element:
               discriminator:
                 configArray:
                   emitAs: mongos/applyConfig
                   type: array
               elements:
-              - type: input
-                label:
+              - label:
                   text: labels.applyConfig.key
+                required: true
                 schema:
                   $ref: discriminator#/properties/configArray/items/properties/key
-                required: true
-              - type: editor
-                label:
+                type: input
+              - label:
                   text: labels.applyConfig.value
+                required: true
                 schema:
                   $ref: discriminator#/properties/configArray/items/properties/value
-                required: true
+                type: editor
               type: single-step-form
+            if: ifReconfigurationTypeEqualsTo|applyConfig|mongos|true
             label:
               text: labels.applyConfig.label
             onChange: onApplyconfigChange|mongos
@@ -846,27 +846,27 @@ steps:
             schema:
               $ref: schema#/properties/spec/properties/configuration/properties/shard/properties/configSecret
             type: single-step-form
-          - if: ifReconfigurationTypeEqualsTo|applyConfig|shard|true
-            addFormLabel: labels.applyConfig.label
+          - addFormLabel: labels.applyConfig.label
             element:
               discriminator:
                 configArray:
                   emitAs: shard/applyConfig
                   type: array
               elements:
-              - type: input
-                label:
+              - label:
                   text: labels.applyConfig.key
+                required: true
                 schema:
                   $ref: discriminator#/properties/configArray/items/properties/key
-                required: true
-              - type: editor
-                label:
+                type: input
+              - label:
                   text: labels.applyConfig.value
+                required: true
                 schema:
                   $ref: discriminator#/properties/configArray/items/properties/value
-                required: true
+                type: editor
               type: single-step-form
+            if: ifReconfigurationTypeEqualsTo|applyConfig|shard|true
             label:
               text: labels.applyConfig.label
             onChange: onApplyconfigChange|shard

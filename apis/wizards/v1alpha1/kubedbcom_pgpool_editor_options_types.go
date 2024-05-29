@@ -48,11 +48,11 @@ type KubedbcomPgpoolEditorOptionsSpecSpec struct {
 	// +optional
 	Labels            map[string]string         `json:"labels"`
 	Version           string                    `json:"version"`
-	Mode              MongoDBMode               `json:"mode"`
-	ReplicaSet        MongoDBReplicaSet         `json:"replicaSet"`
-	ShardTopology     MongoDBShardTopology      `json:"shardTopology"`
-	ClusterAuthMode   MongoDBClusterAuthMode    `json:"clusterAuthMode"`
-	SslMode           MongoDBSSLMode            `json:"sslMode"`
+	Mode              PgpoolMode                `json:"mode"`
+	ReplicaSet        PgpoolReplicaSet          `json:"replicaSet"`
+	ShardTopology     PgpoolShardTopology       `json:"shardTopology"`
+	ClusterAuthMode   PgpoolClusterAuthMode     `json:"clusterAuthMode"`
+	SslMode           PgpoolSSLMode             `json:"sslMode"`
 	TerminationPolicy TerminationPolicy         `json:"terminationPolicy"`
 	StorageClass      StorageClass              `json:"storageClass"`
 	Persistence       Persistence               `json:"persistence"`
@@ -64,42 +64,42 @@ type KubedbcomPgpoolEditorOptionsSpecSpec struct {
 }
 
 // +kubebuilder:validation:Enum=Standalone;Replicaset;Sharded
-type MongoDBMode string
+type PgpoolMode string
 
 // +kubebuilder:validation:Enum=keyFile;sendKeyFile;sendX509;x509
-type MongoDBClusterAuthMode string
+type PgpoolClusterAuthMode string
 
 // +kubebuilder:validation:Enum=disabled;allowSSL;preferSSL;requireSSL
-type MongoDBSSLMode string
+type PgpoolSSLMode string
 
-type MongoDBReplicaSet struct {
+type PgpoolReplicaSet struct {
 	Name     string `json:"name"`
 	Replicas int    `json:"replicas"`
 }
 
-type MongoDBShard struct {
+type PgpoolShard struct {
 	Replicas    int         `json:"replicas"`
 	Shards      int         `json:"shards"`
 	Persistence Persistence `json:"persistence"`
 }
 
-type MongoDBConfigServer struct {
+type PgpoolConfigServer struct {
 	Replicas    int         `json:"replicas"`
 	Persistence Persistence `json:"persistence"`
 }
 
-type MongoDBMongos struct {
+type PgpoolMongos struct {
 	Replicas int `json:"replicas"`
 }
 
-type MongoDBShardTopology struct {
-	Shard        MongoDBShard        `json:"shard"`
-	ConfigServer MongoDBConfigServer `json:"configServer"`
-	Mongos       MongoDBMongos       `json:"mongos"`
+type PgpoolShardTopology struct {
+	Shard        PgpoolShard        `json:"shard"`
+	ConfigServer PgpoolConfigServer `json:"configServer"`
+	Mongos       PgpoolMongos       `json:"mongos"`
 }
 
 type PgpoolAlertsSpecForm struct {
-	Alert alerts.MongoDBAlert `json:"alert"`
+	Alert alerts.PgpoolAlerts `json:"alert"`
 	CAPI  CAPIFormSpec        `json:"capi"`
 }
 
