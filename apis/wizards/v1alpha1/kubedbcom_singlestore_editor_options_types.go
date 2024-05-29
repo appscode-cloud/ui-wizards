@@ -23,26 +23,26 @@ import (
 	api "x-helm.dev/apimachinery/apis/releases/v1alpha1"
 )
 
-// KubedbcomMysqlEditorOptions defines the schama for MySQL Editor UI Options.
+// KubedbcomSinglestoreEditorOptions defines the schama for Singlestore Editor UI Options.
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
 // +kubebuilder:object:root=true
 // +kubebuilder:resource:path=kubedbcomsinglestoreeditoroptionss,singular=kubedbcomsinglestoreeditoroptions
-type KubedbcomMysqlEditorOptions struct {
+type KubedbcomSinglestoreEditorOptions struct {
 	metav1.TypeMeta   `json:",inline,omitempty"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	Spec              KubedbcomMysqlEditorOptionsSpec `json:"spec,omitempty"`
+	Spec              KubedbcomSinglestoreEditorOptionsSpec `json:"spec,omitempty"`
 }
 
-// KubedbcomMysqlEditorOptionsSpec is the schema for MySQL profile values file
-type KubedbcomMysqlEditorOptionsSpec struct {
+// KubedbcomSinglestoreEditorOptionsSpec is the schema for Singlestore profile values file
+type KubedbcomSinglestoreEditorOptionsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
-	Spec         KubedbcomMysqlEditorOptionsSpecSpec `json:"spec"`
-	Form         MysqlAlertsSpecForm                 `json:"form"`
+	Spec         KubedbcomSinglestoreEditorOptionsSpecSpec `json:"spec"`
+	Form         SinglestoreAlertsSpecForm                 `json:"form"`
 }
 
-type KubedbcomMysqlEditorOptionsSpecSpec struct {
+type KubedbcomSinglestoreEditorOptionsSpecSpec struct {
 	Version string `json:"version"`
 	// +optional
 	Annotations map[string]string `json:"annotations"`
@@ -63,18 +63,7 @@ type KubedbcomMysqlEditorOptionsSpecSpec struct {
 	Backup            BackupToolSpec            `json:"backup"`
 }
 
-type MySQLInnoDBCluster struct {
-	Router MySQLRouter `json:"router"`
-}
-
-type MySQLRouter struct {
-	Replicas int `json:"replicas"`
-}
-
-// +kubebuilder:validation:Enum=Standalone;GroupReplication;InnoDBCluster
-type MysqlMode string
-
-type MysqlAlertsSpecForm struct {
+type SinglestoreAlertsSpecForm struct {
 	Alert alerts.MySQLAlert `json:"alert"`
 	CAPI  CAPIFormSpec      `json:"capi"`
 }
@@ -82,9 +71,9 @@ type MysqlAlertsSpecForm struct {
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
 // KubedbcomMysqlEditorOptionsList is a list of KubedbcomMysqlEditorOptionss
-type KubedbcomMysqlEditorOptionsList struct {
+type KubedbcomSinglestoreEditorOptionsList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
 	// Items is a list of KubedbcomMysqlEditorOptions CRD objects
-	Items []KubedbcomMysqlEditorOptions `json:"items,omitempty"`
+	Items []KubedbcomSinglestoreEditorOptions `json:"items,omitempty"`
 }

@@ -74,7 +74,7 @@ type KubedbcomElasticsearchEditorOptionsSpecSpec struct {
 
 type KernelSettings struct {
 	// DisableDefaults can be set to false to avoid defaulting via mutator
-	DisableDefaults bool `json:"disableDefaults,omitempty"`
+	DisableDefaults bool `json:"disableDefaults"`
 }
 
 // +kubebuilder:validation:Enum=OpenDistro;OpenSearch;SearchGuard;X-Pack

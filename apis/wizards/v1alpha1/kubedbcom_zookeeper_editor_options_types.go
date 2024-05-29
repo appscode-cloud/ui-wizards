@@ -63,41 +63,6 @@ type KubedbcomZookeeperEditorOptionsSpecSpec struct {
 	Backup            BackupToolSpec            `json:"backup"`
 }
 
-// +kubebuilder:validation:Enum=Standalone;Replicaset;Sharded
-type MongoDBMode string
-
-// +kubebuilder:validation:Enum=keyFile;sendKeyFile;sendX509;x509
-type MongoDBClusterAuthMode string
-
-// +kubebuilder:validation:Enum=disabled;allowSSL;preferSSL;requireSSL
-type MongoDBSSLMode string
-
-type MongoDBReplicaSet struct {
-	Name     string `json:"name"`
-	Replicas int    `json:"replicas"`
-}
-
-type MongoDBShard struct {
-	Replicas    int         `json:"replicas"`
-	Shards      int         `json:"shards"`
-	Persistence Persistence `json:"persistence"`
-}
-
-type MongoDBConfigServer struct {
-	Replicas    int         `json:"replicas"`
-	Persistence Persistence `json:"persistence"`
-}
-
-type MongoDBMongos struct {
-	Replicas int `json:"replicas"`
-}
-
-type MongoDBShardTopology struct {
-	Shard        MongoDBShard        `json:"shard"`
-	ConfigServer MongoDBConfigServer `json:"configServer"`
-	Mongos       MongoDBMongos       `json:"mongos"`
-}
-
 type ZookeeperAlertsSpecForm struct {
 	Alert alerts.MongoDBAlert `json:"alert"`
 	CAPI  CAPIFormSpec        `json:"capi"`
