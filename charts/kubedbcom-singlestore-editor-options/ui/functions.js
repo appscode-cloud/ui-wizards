@@ -500,39 +500,17 @@ function updateAgentValue({commit },val) {
   });
 }
 
-
-// function onModeChange({ model, getValue, watchDependency, commit }){
-//   const modelPathValue = getValue(model, "/spec/mode");
-//   watchDependency("model#/spec/mode");
-//   if(modelPathValue==='Topology'){
-//     commit("wizard/model$update", {
-//       path: "/spec/replicas",
-//       value: 3,
-//       force: true,
-//     });
-//   }else{
-//     commit("wizard/model$update", {
-//       path: "/spec/replicas",
-//       value: 1,
-//       force: true,
-//     });
-//   }
-// }
 function setReplicaNumber({model, getValue}){
   const modelPathValue = getValue(model, "/spec/mode");
   if(modelPathValue==='Topology'){
-    return 2
+    return 3
   }else return 1
-  // const replicas = getValue(model,"spec/replicas")
-  //   return 3
 }
 function setRouterNumber({model, getValue}){
   const modelPathValue = getValue(model, "/spec/mode")
   if(modelPathValue==='Topology'){
-    return 2
+    return 3
   }else return 1
-  // const router = getValue(model,"spec/Topology/aggregator/replicas")
-  // return router
 }
 
 function getCreateNameSpaceUrl ({ model, getValue, storeGet }){ 
