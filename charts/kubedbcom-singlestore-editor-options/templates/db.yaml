@@ -1,7 +1,21 @@
-{{- $res := .Values.spec.resources -}}
 {{- $machines := .Files.Get "data/machines.yaml" | fromYaml -}}
-{{- if and .Values.spec.machine (hasKey $machines .Values.spec.machine) }}
-  {{- $res = get (get $machines .Values.spec.machine) "resources" }}
+{{- $res := dict -}}
+{{- $aggregator_res := dict -}}
+{{- $leaf_res := dict -}}
+{{- if eq .Values.spec.mode "Topology" }}
+  {{- $aggregator_res = .Values.spec.topology.aggregator.podResources.resources -}}
+  {{- if and .Values.spec.topology.aggregator.podResources.machine (hasKey $machines .Values.spec.topology.aggregator.podResources.machine) }}
+    {{- $aggregator_res = get (get $machines .Values.spec.topology.aggregator.podResources.machine) "resources" }}
+  {{- end }}
+  {{- $leaf_res = .Values.spec.topology.leaf.podResources.resources -}}
+  {{- if and .Values.spec.topology.leaf.podResources.machine (hasKey $machines .Values.spec.topology.leaf.podResources.machine) }}
+    {{- $leaf_res = get (get $machines .Values.spec.topology.leaf.podResources.machine) "resources" }}
+  {{- end }}
+{{- else }}
+  {{- $res = .Values.spec.podResources.resources -}}
+  {{- if and .Values.spec.podResources.machine (hasKey $machines .Values.spec.podResources.machine) }}
+    {{- $res = get (get $machines .Values.spec.podResources.machine) "resources" }}
+  {{- end }}
 {{- end }}
 {{ $poolName := printf "%s-%s-%s" .Values.form.capi.clusterName .Release.Namespace (include "kubedbcom-singlestore-editor-options.fullname" .) }}
 
@@ -18,25 +32,58 @@ metadata:
 {{- end }}
 spec:
   version: {{ .Values.spec.version | quote }}
-{{- if eq .Values.spec.mode "Standalone" }}
+{{- if eq .Values.spec.mode "Topology" }}
+  topology:
+    aggregator:
+      replicas: {{ .Values.spec.topology.aggregator.replicas }}
+      storage:
+        storageClassName: {{ .Values.spec.storageClass.name }}
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: {{ .Values.spec.topology.aggregator.persistence.size }}
+      podTemplate:
+        spec:
+          resources:
+            {{- toYaml $aggregator_res | nindent 12 }}
+          {{- if and .Values.form.capi.provider .Values.form.capi.dedicated }}
+          nodeSelector:
+            nodes.klusters.dev/pool: {{ $poolName }}
+          tolerations:
+            - key: dedicated
+              operator: "Equal"
+              value: "true"
+              effect: "NoSchedule"
+          {{- end }}
+    leaf:
+      replicas: {{ .Values.spec.topology.leaf.replicas }}
+      storage:
+        storageClassName: {{ .Values.spec.storageClass.name }}
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: {{ .Values.spec.topology.leaf.persistence.size }}
+      podTemplate:
+        spec:
+          resources:
+            {{- toYaml $leaf_res | nindent 12 }}
+          {{- if and .Values.form.capi.provider .Values.form.capi.dedicated }}
+          nodeSelector:
+            nodes.klusters.dev/pool: {{ $poolName }}
+          tolerations:
+            - key: dedicated
+              operator: "Equal"
+              value: "true"
+              effect: "NoSchedule"
+          {{- end }}
+{{- else if eq .Values.spec.mode "Standalone" }}
   replicas: 1
-{{- else if eq .Values.spec.mode "GroupReplication" }}
-  replicas: {{ .Values.spec.replicas }}
-  topology:
-    mode: GroupReplication
-{{- else if eq .Values.spec.mode "InnoDBCluster" }}
-  replicas: {{ .Values.spec.replicas }}
-  topology:
-    mode: InnoDBCluster
-    innoDBCluster:
-      router:
-        replicas: {{ .Values.spec.innoDBCluster.router.replicas }}
-{{- end }}
-  storageType: Durable
   storage:
     storageClassName: {{ .Values.spec.storageClass.name }}
     accessModes:
-    - ReadWriteOnce
+      - ReadWriteOnce
     resources:
       requests:
         storage: {{ .Values.spec.persistence.size }}
@@ -53,6 +100,8 @@ spec:
           value: "true"
           effect: "NoSchedule"
       {{- end }}
+{{- end }}
+  storageType: Durable
   terminationPolicy: {{ .Values.spec.terminationPolicy }}
 {{- if .Values.spec.authSecret.name }}
   authSecret:
