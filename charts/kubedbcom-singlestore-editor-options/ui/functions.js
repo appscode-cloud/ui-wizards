@@ -409,7 +409,7 @@ function disableLimit({ model, getValue, watchDependency }) {
   return modelPathValue !== "custom" && !!modelPathValue;
 }
 
-function disableLimit2({ model, getValue, watchDependency },nodeType) {
+function disableLimitWithNodeType({ model, getValue, watchDependency },nodeType) {
   const modelPathValue = getValue(model, `/spec/topology/${nodeType}/podResources/machine`);
   watchDependency(`model#/spec/topology/${nodeType}/podResources/machine`);  
   return modelPathValue !== "custom" && !!modelPathValue;
@@ -439,7 +439,7 @@ function setResourceLimit({ commit, model, getValue, watchDependency }) {
     });
   }
 }
-function setResourceLimit2({ commit, model, getValue, watchDependency },nodeType) {
+function setResourceLimitWithNodeType({ commit, model, getValue, watchDependency },nodeType) {
   const modelPathValue = getValue(model, `/spec/topology/${nodeType}/podResources/machine`);
   watchDependency(`model#/spec/topology/${nodeType}/podResources/machine`);
   if (modelPathValue && modelPathValue !== "custom") {
@@ -749,6 +749,6 @@ return {
   setStorageClass,
   setReplicaNumber,
   setRouterNumber,
-  setResourceLimit2,
-  disableLimit2
+  disableLimitWithNodeType,
+  setResourceLimitWithNodeType
 }

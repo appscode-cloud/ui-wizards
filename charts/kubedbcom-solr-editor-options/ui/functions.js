@@ -409,7 +409,7 @@ function disableLimit({ model, getValue, watchDependency }) {
   watchDependency("model#/spec/machine");
   return modelPathValue !== "custom" && !!modelPathValue;
 }
-function disableLimit2({ model, getValue, watchDependency },nodeType) {
+function disableLimitWithNodeType({ model, getValue, watchDependency },nodeType) {
   const modelPathValue = getValue(model, `/spec/topology/${nodeType}/podResources/machine`);
   watchDependency(`model#/spec/topology/${nodeType}/podResources/machine`);
   return modelPathValue !== "custom" && !!modelPathValue;
@@ -439,7 +439,7 @@ function setResourceLimit({ commit, model, getValue, watchDependency }) {
     });
   }
 }
-function setResourceLimit2({ commit, model, getValue, watchDependency },nodeType) {
+function setResourceLimitWithNodeType({ commit, model, getValue, watchDependency },nodeType) {
   const modelPathValue = getValue(model, `/spec/topology/${nodeType}/podResources/machine`);
   watchDependency(`model#/spec/topology/${nodeType}/podResources/machine`);
   if (modelPathValue && modelPathValue !== "custom") {
@@ -727,10 +727,10 @@ return {
   onCreateAuthSecretChange,
 	getSecrets,
 	disableLimit,
-	disableLimit2,
+  disableLimitWithNodeType,
 	getMachineListForOptions,
-	setResourceLimit,
-  setResourceLimit2,
+  setResourceLimit,
+  setResourceLimitWithNodeType,
   setLimitsCpuOrMem,
 	setMachineToCustom,
 	updateAgentValue,
