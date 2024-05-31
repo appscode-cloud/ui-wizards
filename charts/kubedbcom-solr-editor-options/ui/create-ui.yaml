@@ -113,14 +113,14 @@ steps:
             $ref: schema#/properties/spec/properties/topology/properties/overseer/properties/podResources/properties/machine
           type: select
         - computed: setLimitsCpuOrMem|cpu
-          disabled: disableLimit
+          disabled: disableLimit2|overseer
           label:
             text: labels.cpu
           schema:
             $ref: schema#/properties/spec/properties/topology/properties/overseer/properties/podResources/properties/resources/properties/limits/cpu
           type: input
         - computed: setLimitsCpuOrMem|memory
-          disabled: disableLimit
+          disabled: disableLimit2|overseer
           label:
             text: labels.memory
           schema:
@@ -131,7 +131,8 @@ steps:
       label:
         text: Overseer
       show_label: true
-      type: single-step-form
+      type: single-step-form 
+    
     - elements:
       - label:
           text: labels.replicaset.number
@@ -148,19 +149,19 @@ steps:
           fetch: getMachineListForOptions
           label:
             text: Machine
-          onChange: setResourceLimit
+          onChange: setResourceLimit2|data
           schema:
             $ref: schema#/properties/spec/properties/topology/properties/data/properties/podResources/properties/machine
           type: select
         - computed: setLimitsCpuOrMem|cpu
-          disabled: disableLimit
+          disabled: disableLimit2|data
           label:
             text: labels.cpu
           schema:
             $ref: schema#/properties/spec/properties/topology/properties/data/properties/podResources/properties/resources/properties/limits/cpu
           type: input
         - computed: setLimitsCpuOrMem|memory
-          disabled: disableLimit
+          disabled: disableLimit2|data
           label:
             text: labels.memory
           schema:
@@ -171,7 +172,9 @@ steps:
       label:
         text: Data
       show_label: true
-      type: single-step-form
+      type: single-step-form 
+
+        
     - elements:
       - label:
           text: labels.replicaset.number
@@ -188,19 +191,19 @@ steps:
           fetch: getMachineListForOptions
           label:
             text: Machine
-          onChange: setResourceLimit
+          onChange: setResourceLimit2|coordinator
           schema:
             $ref: schema#/properties/spec/properties/topology/properties/coordinator/properties/podResources/properties/machine
           type: select
         - computed: setLimitsCpuOrMem|cpu
-          disabled: disableLimit
+          disabled: disableLimit2|coordinator
           label:
             text: labels.cpu
           schema:
             $ref: schema#/properties/spec/properties/topology/properties/coordinator/properties/podResources/properties/resources/properties/limits/cpu
           type: input
         - computed: setLimitsCpuOrMem|memory
-          disabled: disableLimit
+          disabled: disableLimit2|coordinator
           label:
             text: labels.memory
           schema:
@@ -211,8 +214,7 @@ steps:
       label:
         text: Coordinator
       show_label: true
-      type: single-step-form
-    
+      type: single-step-form 
 
     - hasDescription: true
       label:

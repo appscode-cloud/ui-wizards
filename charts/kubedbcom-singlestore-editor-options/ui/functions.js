@@ -404,8 +404,14 @@ async function getSecrets({
 }
 
 function disableLimit({ model, getValue, watchDependency }) {
-  const modelPathValue = getValue(model, "/spec/machine");
-  watchDependency("model#/spec/machine");
+  const modelPathValue = getValue(model, "/spec/podResources/machine");
+  watchDependency("model#/spec/podResources/machine");
+  return modelPathValue !== "custom" && !!modelPathValue;
+}
+
+function disableLimit2({ model, getValue, watchDependency },nodeType) {
+  const modelPathValue = getValue(model, `/spec/topology/${nodeType}/podResources/machine`);
+  watchDependency(`model#/spec/topology/${nodeType}/podResources/machine`);  
   return modelPathValue !== "custom" && !!modelPathValue;
 }
 
@@ -422,12 +428,29 @@ function setResourceLimit({ commit, model, getValue, watchDependency }) {
   if (modelPathValue && modelPathValue !== "custom") {
     // to avoiding set value by reference, cpu and memory set separately
     commit("wizard/model$update", {
-      path: "/spec/resources/limits/cpu",
+      path: "/spec/podResources/resources/limits/cpu",
       value: machines[modelPathValue].resources.limits.cpu,
       force: true,
     });
     commit("wizard/model$update", {
-      path: "/spec/resources/limits/memory",
+      path: "/spec/podResources/resources/limits/memory",
+      value: machines[modelPathValue].resources.limits.memory,
+      force: true,
+    });
+  }
+}
+function setResourceLimit2({ commit, model, getValue, watchDependency },nodeType) {
+  const modelPathValue = getValue(model, `/spec/topology/${nodeType}/podResources/machine`);
+  watchDependency(`model#/spec/topology/${nodeType}/podResources/machine`);
+  if (modelPathValue && modelPathValue !== "custom") {
+    // to avoiding set value by reference, cpu and memory set separately
+    commit("wizard/model$update", {
+      path: `/spec/topology/${nodeType}/podResources/resources/limits/cpu`,
+      value: machines[modelPathValue].resources.limits.cpu,
+      force: true,
+    });
+    commit("wizard/model$update", {
+      path: `/spec/topology/${nodeType}/podResources/resources/limits/memory`,
       value: machines[modelPathValue].resources.limits.memory,
       force: true,
     });
@@ -725,5 +748,7 @@ return {
   showSelectZone,
   setStorageClass,
   setReplicaNumber,
-  setRouterNumber
+  setRouterNumber,
+  setResourceLimit2,
+  disableLimit2
 }

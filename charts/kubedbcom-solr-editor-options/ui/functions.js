@@ -409,6 +409,11 @@ function disableLimit({ model, getValue, watchDependency }) {
   watchDependency("model#/spec/machine");
   return modelPathValue !== "custom" && !!modelPathValue;
 }
+function disableLimit2({ model, getValue, watchDependency },nodeType) {
+  const modelPathValue = getValue(model, `/spec/topology/${nodeType}/podResources/machine`);
+  watchDependency(`model#/spec/topology/${nodeType}/podResources/machine`);
+  return modelPathValue !== "custom" && !!modelPathValue;
+}
 
 function getMachineListForOptions() {
   const array = machineList.map((item) => {
@@ -435,17 +440,17 @@ function setResourceLimit({ commit, model, getValue, watchDependency }) {
   }
 }
 function setResourceLimit2({ commit, model, getValue, watchDependency },nodeType) {
-  const modelPathValue = getValue(model, `model#/spec/topology/${nodeType}/podResources/machine`);
+  const modelPathValue = getValue(model, `/spec/topology/${nodeType}/podResources/machine`);
   watchDependency(`model#/spec/topology/${nodeType}/podResources/machine`);
   if (modelPathValue && modelPathValue !== "custom") {
     // to avoiding set value by reference, cpu and memory set separately
     commit("wizard/model$update", {
-      path: `model#/spec/topology/${nodeType}/podResources/resources/limits/cpu`,
+      path: `/spec/topology/${nodeType}/podResources/resources/limits/cpu`,
       value: machines[modelPathValue].resources.limits.cpu,
       force: true,
     });
     commit("wizard/model$update", {
-      path: `model#/spec/topology/${nodeType}/podResources/resources/limits/memory`,
+      path: `/spec/topology/${nodeType}/podResources/resources/limits/memory`,
       value: machines[modelPathValue].resources.limits.memory,
       force: true,
     });
@@ -722,6 +727,7 @@ return {
   onCreateAuthSecretChange,
 	getSecrets,
 	disableLimit,
+	disableLimit2,
 	getMachineListForOptions,
 	setResourceLimit,
   setResourceLimit2,
