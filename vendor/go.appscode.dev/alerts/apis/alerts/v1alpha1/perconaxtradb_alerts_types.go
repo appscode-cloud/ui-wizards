@@ -18,6 +18,7 @@ package v1alpha1
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	mona "kmodules.xyz/monitoring-agent-api/api/v1"
 	api "x-helm.dev/apimachinery/apis/releases/v1alpha1"
 )
 
@@ -50,7 +51,7 @@ type PerconaxtradbAlertsSpecForm struct {
 }
 
 type PerconaXtraDBAlert struct {
-	Enabled SeverityFlag      `json:"enabled"`
+	Enabled mona.SeverityFlag `json:"enabled"`
 	Labels  map[string]string `json:"labels"`
 	// +optional
 	Annotations map[string]string `json:"annotations"`
@@ -69,7 +70,7 @@ type PerconaXtraDBAlertGroups struct {
 }
 
 type PerconaXtraDBDatabaseAlert struct {
-	Enabled SeverityFlag                    `json:"enabled"`
+	Enabled mona.SeverityFlag               `json:"enabled"`
 	Rules   PerconaXtraDBDatabaseAlertRules `json:"rules"`
 }
 
@@ -85,10 +86,12 @@ type PerconaXtraDBDatabaseAlertRules struct {
 	MySQLHighIncomingBytes  IntValAlert `json:"mysqlHighIncomingBytes"`
 	MySQLHighOutgoingBytes  IntValAlert `json:"mysqlHighOutgoingBytes"`
 	MySQLTooManyOpenFiles   IntValAlert `json:"mysqlTooManyOpenFiles"`
+	DiskUsageHigh           IntValAlert `json:"diskUsageHigh"`
+	DiskAlmostFull          IntValAlert `json:"diskAlmostFull"`
 }
 
 type PerconaXtraDBClusterAlert struct {
-	Enabled SeverityFlag                   `json:"enabled"`
+	Enabled mona.SeverityFlag              `json:"enabled"`
 	Rules   PerconaXtraDBClusterAlertRules `json:"rules"`
 }
 

@@ -31,41 +31,7 @@ properties:
                     type: string
                   rules:
                     properties:
-                      mongoDBDown:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      mongoDBPhaseCritical:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      rabbitmqCursorsTimeouts:
+                      diskAlmostFull:
                         properties:
                           duration:
                             type: string
@@ -85,7 +51,7 @@ properties:
                         - severity
                         - val
                         type: object
-                      rabbitmqHighLatency:
+                      diskUsageHigh:
                         properties:
                           duration:
                             type: string
@@ -105,7 +71,24 @@ properties:
                         - severity
                         - val
                         type: object
-                      rabbitmqHighTicketUtilization:
+                      rabbitmqDown:
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            enum:
+                            - critical
+                            - warning
+                            - info
+                            type: string
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        type: object
+                      rabbitmqFileDescriptorsNearLimit:
                         properties:
                           duration:
                             type: string
@@ -125,7 +108,7 @@ properties:
                         - severity
                         - val
                         type: object
-                      rabbitmqNumberCursorsOpen:
+                      rabbitmqHighConnectionChurn:
                         properties:
                           duration:
                             type: string
@@ -145,7 +128,7 @@ properties:
                         - severity
                         - val
                         type: object
-                      rabbitmqRecurrentCursorTimeout:
+                      rabbitmqInsufficientEstablishedErlangDistributionLinks:
                         properties:
                           duration:
                             type: string
@@ -165,7 +148,7 @@ properties:
                         - severity
                         - val
                         type: object
-                      rabbitmqRecurrentMemoryPageFaults:
+                      rabbitmqLowDiskWatermarkPredicted:
                         properties:
                           duration:
                             type: string
@@ -185,7 +168,24 @@ properties:
                         - severity
                         - val
                         type: object
-                      rabbitmqReplicationLag:
+                      rabbitmqPhaseCritical:
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            enum:
+                            - critical
+                            - warning
+                            - info
+                            type: string
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        type: object
+                      rabbitmqQueueIsGrowing:
                         properties:
                           duration:
                             type: string
@@ -205,7 +205,7 @@ properties:
                         - severity
                         - val
                         type: object
-                      rabbitmqTooManyConnections:
+                      rabbitmqTCPSocketsNearLimit:
                         properties:
                           duration:
                             type: string
@@ -225,7 +225,7 @@ properties:
                         - severity
                         - val
                         type: object
-                      rabbitmqVirtualMemoryUsage:
+                      rabbitmqUnroutableMessages:
                         properties:
                           duration:
                             type: string
@@ -246,88 +246,17 @@ properties:
                         - val
                         type: object
                     required:
-                    - mongoDBDown
-                    - mongoDBPhaseCritical
-                    - rabbitmqCursorsTimeouts
-                    - rabbitmqHighLatency
-                    - rabbitmqHighTicketUtilization
-                    - rabbitmqNumberCursorsOpen
-                    - rabbitmqRecurrentCursorTimeout
-                    - rabbitmqRecurrentMemoryPageFaults
-                    - rabbitmqReplicationLag
-                    - rabbitmqTooManyConnections
-                    - rabbitmqVirtualMemoryUsage
-                    type: object
-                required:
-                - enabled
-                - rules
-                type: object
-              opsManager:
-                properties:
-                  enabled:
-                    enum:
-                    - none
-                    - critical
-                    - warning
-                    - info
-                    type: string
-                  rules:
-                    properties:
-                      opsRequestFailed:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      opsRequestOnProgress:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      opsRequestStatusProgressingToLong:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                    required:
-                    - opsRequestFailed
-                    - opsRequestOnProgress
-                    - opsRequestStatusProgressingToLong
+                    - diskAlmostFull
+                    - diskUsageHigh
+                    - rabbitmqDown
+                    - rabbitmqFileDescriptorsNearLimit
+                    - rabbitmqHighConnectionChurn
+                    - rabbitmqInsufficientEstablishedErlangDistributionLinks
+                    - rabbitmqLowDiskWatermarkPredicted
+                    - rabbitmqPhaseCritical
+                    - rabbitmqQueueIsGrowing
+                    - rabbitmqTCPSocketsNearLimit
+                    - rabbitmqUnroutableMessages
                     type: object
                 required:
                 - enabled
@@ -386,274 +315,9 @@ properties:
                 - enabled
                 - rules
                 type: object
-              schemaManager:
-                properties:
-                  enabled:
-                    enum:
-                    - none
-                    - critical
-                    - warning
-                    - info
-                    type: string
-                  rules:
-                    properties:
-                      schemaExpired:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      schemaFailed:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      schemaInProgressForTooLong:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      schemaPendingForTooLong:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      schemaTerminatingForTooLong:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                    required:
-                    - schemaExpired
-                    - schemaFailed
-                    - schemaInProgressForTooLong
-                    - schemaPendingForTooLong
-                    - schemaTerminatingForTooLong
-                    type: object
-                required:
-                - enabled
-                - rules
-                type: object
-              stash:
-                properties:
-                  enabled:
-                    enum:
-                    - none
-                    - critical
-                    - warning
-                    - info
-                    type: string
-                  rules:
-                    properties:
-                      backupSessionFailed:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      backupSessionPeriodTooLong:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                          val:
-                            type: integer
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        - val
-                        type: object
-                      noBackupSessionForTooLong:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                          val:
-                            type: integer
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        - val
-                        type: object
-                      repositoryCorrupted:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      repositoryStorageRunningLow:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                          val:
-                            type: integer
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        - val
-                        type: object
-                      restoreSessionFailed:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      restoreSessionPeriodTooLong:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                          val:
-                            type: integer
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        - val
-                        type: object
-                    required:
-                    - backupSessionFailed
-                    - backupSessionPeriodTooLong
-                    - noBackupSessionForTooLong
-                    - repositoryCorrupted
-                    - repositoryStorageRunningLow
-                    - restoreSessionFailed
-                    - restoreSessionPeriodTooLong
-                    type: object
-                required:
-                - enabled
-                - rules
-                type: object
             required:
             - database
-            - opsManager
             - provisioner
-            - schemaManager
-            - stash
             type: object
           labels:
             additionalProperties:

@@ -18,6 +18,7 @@ package v1alpha1
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	mona "kmodules.xyz/monitoring-agent-api/api/v1"
 	api "x-helm.dev/apimachinery/apis/releases/v1alpha1"
 )
 
@@ -43,6 +44,7 @@ type MongodbAlerts struct {
 type MongodbAlertsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Form         MongodbAlertsSpecForm `json:"form"`
+	Grafana      Grafana               `json:"grafana"`
 }
 
 type MongodbAlertsSpecForm struct {
@@ -50,7 +52,7 @@ type MongodbAlertsSpecForm struct {
 }
 
 type MongoDBAlert struct {
-	Enabled SeverityFlag      `json:"enabled"`
+	Enabled mona.SeverityFlag `json:"enabled"`
 	Labels  map[string]string `json:"labels"`
 	// +optional
 	Annotations map[string]string `json:"annotations"`
@@ -64,11 +66,12 @@ type MongoDBAlertGroups struct {
 	Provisioner   ProvisionerAlert     `json:"provisioner"`
 	OpsManager    OpsManagerAlert      `json:"opsManager"`
 	Stash         StashAlert           `json:"stash"`
+	KubeStash     KubeStashAlert       `json:"kubeStash"`
 	SchemaManager SchemaManagerAlert   `json:"schemaManager"`
 }
 
 type MongoDBDatabaseAlert struct {
-	Enabled SeverityFlag              `json:"enabled"`
+	Enabled mona.SeverityFlag         `json:"enabled"`
 	Rules   MongoDBDatabaseAlertRules `json:"rules"`
 }
 
@@ -84,6 +87,16 @@ type MongoDBDatabaseAlertRules struct {
 	MongodbHighTicketUtilization     IntValAlert `json:"mongodbHighTicketUtilization"`
 	MongodbRecurrentCursorTimeout    IntValAlert `json:"mongodbRecurrentCursorTimeout"`
 	MongodbRecurrentMemoryPageFaults IntValAlert `json:"mongodbRecurrentMemoryPageFaults"`
+	DiskUsageHigh                    IntValAlert `json:"diskUsageHigh"`
+	DiskAlmostFull                   IntValAlert `json:"diskAlmostFull"`
+}
+
+type Grafana struct {
+	Enabled bool   `json:"enabled"`
+	Version string `json:"version"`
+	JobName string `json:"jobName"`
+	URL     string `json:"url"`
+	ApiKey  string `json:"apikey"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

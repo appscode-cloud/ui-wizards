@@ -18,6 +18,7 @@ package v1alpha1
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	mona "kmodules.xyz/monitoring-agent-api/api/v1"
 	api "x-helm.dev/apimachinery/apis/releases/v1alpha1"
 )
 
@@ -50,7 +51,7 @@ type VaultserverAlertsSpecForm struct {
 }
 
 type VaultserverAlertsAlert struct {
-	Enabled SeverityFlag      `json:"enabled"`
+	Enabled mona.SeverityFlag `json:"enabled"`
 	Labels  map[string]string `json:"labels"`
 	// +optional
 	Annotations map[string]string `json:"annotations"`
@@ -67,7 +68,7 @@ type VaultserverAlertsAlertGroups struct {
 }
 
 type VaultserverAlertsVaultAlert struct {
-	Enabled SeverityFlag                     `json:"enabled"`
+	Enabled mona.SeverityFlag                `json:"enabled"`
 	Rules   VaultserverAlertsVaultAlertRules `json:"rules"`
 }
 
@@ -81,6 +82,8 @@ type VaultserverAlertsVaultAlertRules struct {
 	VaultRequestFailures         FixedAlert  `json:"vaultRequestFailures"`
 	VaultResponseFailures        FixedAlert  `json:"vaultResponseFailures"`
 	VaultTooManyInfinityTokens   IntValAlert `json:"vaultTooManyInfinityTokens"`
+	DiskUsageHigh                IntValAlert `json:"diskUsageHigh"`
+	DiskAlmostFull               IntValAlert `json:"diskAlmostFull"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

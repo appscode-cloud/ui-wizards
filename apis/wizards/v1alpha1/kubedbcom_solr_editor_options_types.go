@@ -23,7 +23,7 @@ import (
 	api "x-helm.dev/apimachinery/apis/releases/v1alpha1"
 )
 
-// KubedbcomSolrEditorOptions defines the schama for MongoDB Editor UI Options.
+// KubedbcomSolrEditorOptions defines the schama for Solr Editor UI Options.
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
@@ -35,7 +35,7 @@ type KubedbcomSolrEditorOptions struct {
 	Spec              KubedbcomSolrEditorOptionsSpec `json:"spec,omitempty"`
 }
 
-// KubedbcomSolrEditorOptionsSpec is the schema for MongoDB profile values file
+// KubedbcomSolrEditorOptionsSpec is the schema for Solr profile values file
 type KubedbcomSolrEditorOptionsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Spec         KubedbcomSolrEditorOptionsSpecSpec `json:"spec"`
@@ -48,11 +48,11 @@ type KubedbcomSolrEditorOptionsSpecSpec struct {
 	// +optional
 	Labels            map[string]string         `json:"labels"`
 	Version           string                    `json:"version"`
-	Mode              MongoDBMode               `json:"mode"`
-	ReplicaSet        MongoDBReplicaSet         `json:"replicaSet"`
-	ShardTopology     MongoDBShardTopology      `json:"shardTopology"`
-	ClusterAuthMode   MongoDBClusterAuthMode    `json:"clusterAuthMode"`
-	SslMode           MongoDBSSLMode            `json:"sslMode"`
+	Mode              SolrMode                  `json:"mode"`
+	ReplicaSet        SolrReplicaSet            `json:"replicaSet"`
+	ShardTopology     SolrShardTopology         `json:"shardTopology"`
+	ClusterAuthMode   SolrClusterAuthMode       `json:"clusterAuthMode"`
+	SslMode           SolrSSLMode               `json:"sslMode"`
 	TerminationPolicy TerminationPolicy         `json:"terminationPolicy"`
 	StorageClass      StorageClass              `json:"storageClass"`
 	Persistence       Persistence               `json:"persistence"`
@@ -63,9 +63,39 @@ type KubedbcomSolrEditorOptionsSpecSpec struct {
 	Backup            BackupToolSpec            `json:"backup"`
 }
 
+// +kubebuilder:validation:Enum=Standalone;Replicaset;Sharded
+type SolrMode string
+
+// +kubebuilder:validation:Enum=keyFile;sendKeyFile;sendX509;x509
+type SolrClusterAuthMode string
+
+// +kubebuilder:validation:Enum=disabled;allowSSL;preferSSL;requireSSL
+type SolrSSLMode string
+
+type SolrReplicaSet struct {
+	Name     string `json:"name"`
+	Replicas int    `json:"replicas"`
+}
+
+type SolrShard struct {
+	Replicas    int         `json:"replicas"`
+	Shards      int         `json:"shards"`
+	Persistence Persistence `json:"persistence"`
+}
+
+type SolrConfigServer struct {
+	Replicas    int         `json:"replicas"`
+	Persistence Persistence `json:"persistence"`
+}
+
+type SolrShardTopology struct {
+	Shard        SolrShard        `json:"shard"`
+	ConfigServer SolrConfigServer `json:"configServer"`
+}
+
 type SolrAlertsSpecForm struct {
-	Alert alerts.MongoDBAlert `json:"alert"`
-	CAPI  CAPIFormSpec        `json:"capi"`
+	Alert alerts.SolrAlert `json:"alert"`
+	CAPI  CAPIFormSpec     `json:"capi"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

@@ -17,13 +17,12 @@ limitations under the License.
 package v1alpha1
 
 import (
-	alerts "go.appscode.dev/alerts/apis/alerts/v1alpha1"
 	core "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	api "x-helm.dev/apimachinery/apis/releases/v1alpha1"
 )
 
-// KubedbcomZookeeperEditorOptions defines the schama for MongoDB Editor UI Options.
+// KubedbcomZookeeperEditorOptions defines the schama for ZooKeeper Editor UI Options.
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
@@ -35,7 +34,7 @@ type KubedbcomZookeeperEditorOptions struct {
 	Spec              KubedbcomZookeeperEditorOptionsSpec `json:"spec,omitempty"`
 }
 
-// KubedbcomZookeeperEditorOptionsSpec is the schema for MongoDB profile values file
+// KubedbcomZookeeperEditorOptionsSpec is the schema for ZooKeeper profile values file
 type KubedbcomZookeeperEditorOptionsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Spec         KubedbcomZookeeperEditorOptionsSpecSpec `json:"spec"`
@@ -48,11 +47,11 @@ type KubedbcomZookeeperEditorOptionsSpecSpec struct {
 	// +optional
 	Labels            map[string]string         `json:"labels"`
 	Version           string                    `json:"version"`
-	Mode              MongoDBMode               `json:"mode"`
-	ReplicaSet        MongoDBReplicaSet         `json:"replicaSet"`
-	ShardTopology     MongoDBShardTopology      `json:"shardTopology"`
-	ClusterAuthMode   MongoDBClusterAuthMode    `json:"clusterAuthMode"`
-	SslMode           MongoDBSSLMode            `json:"sslMode"`
+	Mode              ZooKeeperMode             `json:"mode"`
+	ReplicaSet        ZooKeeperReplicaSet       `json:"replicaSet"`
+	ShardTopology     ZooKeeperShardTopology    `json:"shardTopology"`
+	ClusterAuthMode   ZooKeeperClusterAuthMode  `json:"clusterAuthMode"`
+	SslMode           ZooKeeperSSLMode          `json:"sslMode"`
 	TerminationPolicy TerminationPolicy         `json:"terminationPolicy"`
 	StorageClass      StorageClass              `json:"storageClass"`
 	Persistence       Persistence               `json:"persistence"`
@@ -63,9 +62,43 @@ type KubedbcomZookeeperEditorOptionsSpecSpec struct {
 	Backup            BackupToolSpec            `json:"backup"`
 }
 
+// +kubebuilder:validation:Enum=Standalone;Replicaset;Sharded
+type ZooKeeperMode string
+
+// +kubebuilder:validation:Enum=keyFile;sendKeyFile;sendX509;x509
+type ZooKeeperClusterAuthMode string
+
+// +kubebuilder:validation:Enum=disabled;allowSSL;preferSSL;requireSSL
+type ZooKeeperSSLMode string
+
+type ZooKeeperReplicaSet struct {
+	Name     string `json:"name"`
+	Replicas int    `json:"replicas"`
+}
+
+type ZooKeeperShard struct {
+	Replicas    int         `json:"replicas"`
+	Shards      int         `json:"shards"`
+	Persistence Persistence `json:"persistence"`
+}
+
+type ZooKeeperConfigServer struct {
+	Replicas    int         `json:"replicas"`
+	Persistence Persistence `json:"persistence"`
+}
+
+type ZooKeeperMongos struct {
+	Replicas int `json:"replicas"`
+}
+
+type ZooKeeperShardTopology struct {
+	Shard        ZooKeeperShard        `json:"shard"`
+	ConfigServer ZooKeeperConfigServer `json:"configServer"`
+}
+
 type ZookeeperAlertsSpecForm struct {
-	Alert alerts.MongoDBAlert `json:"alert"`
-	CAPI  CAPIFormSpec        `json:"capi"`
+	// Alert alerts.ZooKeeperAlert `json:"alert"`
+	CAPI CAPIFormSpec `json:"capi"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

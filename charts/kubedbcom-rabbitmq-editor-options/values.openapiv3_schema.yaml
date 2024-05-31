@@ -31,41 +31,7 @@ properties:
                     type: string
                   rules:
                     properties:
-                      mongoDBDown:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      mongoDBPhaseCritical:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      rabbitmqCursorsTimeouts:
+                      diskAlmostFull:
                         properties:
                           duration:
                             type: string
@@ -85,7 +51,7 @@ properties:
                         - severity
                         - val
                         type: object
-                      rabbitmqHighLatency:
+                      diskUsageHigh:
                         properties:
                           duration:
                             type: string
@@ -105,7 +71,24 @@ properties:
                         - severity
                         - val
                         type: object
-                      rabbitmqHighTicketUtilization:
+                      rabbitmqDown:
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            enum:
+                            - critical
+                            - warning
+                            - info
+                            type: string
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        type: object
+                      rabbitmqFileDescriptorsNearLimit:
                         properties:
                           duration:
                             type: string
@@ -125,7 +108,7 @@ properties:
                         - severity
                         - val
                         type: object
-                      rabbitmqNumberCursorsOpen:
+                      rabbitmqHighConnectionChurn:
                         properties:
                           duration:
                             type: string
@@ -145,7 +128,7 @@ properties:
                         - severity
                         - val
                         type: object
-                      rabbitmqRecurrentCursorTimeout:
+                      rabbitmqInsufficientEstablishedErlangDistributionLinks:
                         properties:
                           duration:
                             type: string
@@ -165,7 +148,7 @@ properties:
                         - severity
                         - val
                         type: object
-                      rabbitmqRecurrentMemoryPageFaults:
+                      rabbitmqLowDiskWatermarkPredicted:
                         properties:
                           duration:
                             type: string
@@ -185,7 +168,24 @@ properties:
                         - severity
                         - val
                         type: object
-                      rabbitmqReplicationLag:
+                      rabbitmqPhaseCritical:
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            enum:
+                            - critical
+                            - warning
+                            - info
+                            type: string
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        type: object
+                      rabbitmqQueueIsGrowing:
                         properties:
                           duration:
                             type: string
@@ -205,7 +205,7 @@ properties:
                         - severity
                         - val
                         type: object
-                      rabbitmqTooManyConnections:
+                      rabbitmqTCPSocketsNearLimit:
                         properties:
                           duration:
                             type: string
@@ -225,7 +225,7 @@ properties:
                         - severity
                         - val
                         type: object
-                      rabbitmqVirtualMemoryUsage:
+                      rabbitmqUnroutableMessages:
                         properties:
                           duration:
                             type: string
@@ -246,88 +246,17 @@ properties:
                         - val
                         type: object
                     required:
-                    - mongoDBDown
-                    - mongoDBPhaseCritical
-                    - rabbitmqCursorsTimeouts
-                    - rabbitmqHighLatency
-                    - rabbitmqHighTicketUtilization
-                    - rabbitmqNumberCursorsOpen
-                    - rabbitmqRecurrentCursorTimeout
-                    - rabbitmqRecurrentMemoryPageFaults
-                    - rabbitmqReplicationLag
-                    - rabbitmqTooManyConnections
-                    - rabbitmqVirtualMemoryUsage
-                    type: object
-                required:
-                - enabled
-                - rules
-                type: object
-              opsManager:
-                properties:
-                  enabled:
-                    enum:
-                    - none
-                    - critical
-                    - warning
-                    - info
-                    type: string
-                  rules:
-                    properties:
-                      opsRequestFailed:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      opsRequestOnProgress:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      opsRequestStatusProgressingToLong:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                    required:
-                    - opsRequestFailed
-                    - opsRequestOnProgress
-                    - opsRequestStatusProgressingToLong
+                    - diskAlmostFull
+                    - diskUsageHigh
+                    - rabbitmqDown
+                    - rabbitmqFileDescriptorsNearLimit
+                    - rabbitmqHighConnectionChurn
+                    - rabbitmqInsufficientEstablishedErlangDistributionLinks
+                    - rabbitmqLowDiskWatermarkPredicted
+                    - rabbitmqPhaseCritical
+                    - rabbitmqQueueIsGrowing
+                    - rabbitmqTCPSocketsNearLimit
+                    - rabbitmqUnroutableMessages
                     type: object
                 required:
                 - enabled
@@ -386,274 +315,9 @@ properties:
                 - enabled
                 - rules
                 type: object
-              schemaManager:
-                properties:
-                  enabled:
-                    enum:
-                    - none
-                    - critical
-                    - warning
-                    - info
-                    type: string
-                  rules:
-                    properties:
-                      schemaExpired:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      schemaFailed:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      schemaInProgressForTooLong:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      schemaPendingForTooLong:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      schemaTerminatingForTooLong:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                    required:
-                    - schemaExpired
-                    - schemaFailed
-                    - schemaInProgressForTooLong
-                    - schemaPendingForTooLong
-                    - schemaTerminatingForTooLong
-                    type: object
-                required:
-                - enabled
-                - rules
-                type: object
-              stash:
-                properties:
-                  enabled:
-                    enum:
-                    - none
-                    - critical
-                    - warning
-                    - info
-                    type: string
-                  rules:
-                    properties:
-                      backupSessionFailed:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      backupSessionPeriodTooLong:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                          val:
-                            type: integer
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        - val
-                        type: object
-                      noBackupSessionForTooLong:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                          val:
-                            type: integer
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        - val
-                        type: object
-                      repositoryCorrupted:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      repositoryStorageRunningLow:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                          val:
-                            type: integer
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        - val
-                        type: object
-                      restoreSessionFailed:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      restoreSessionPeriodTooLong:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                          val:
-                            type: integer
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        - val
-                        type: object
-                    required:
-                    - backupSessionFailed
-                    - backupSessionPeriodTooLong
-                    - noBackupSessionForTooLong
-                    - repositoryCorrupted
-                    - repositoryStorageRunningLow
-                    - restoreSessionFailed
-                    - restoreSessionPeriodTooLong
-                    type: object
-                required:
-                - enabled
-                - rules
-                type: object
             required:
             - database
-            - opsManager
             - provisioner
-            - schemaManager
-            - stash
             type: object
           labels:
             additionalProperties:
@@ -751,318 +415,6 @@ properties:
             format: password
             type: string
         type: object
-      backup:
-        properties:
-          kubestash:
-            properties:
-              encryptionSecret:
-                description: ObjectReference contains enough information to let you
-                  inspect or modify the referred object.
-                properties:
-                  name:
-                    description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names'
-                    type: string
-                  namespace:
-                    description: 'Namespace of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/'
-                    type: string
-                required:
-                - name
-                - namespace
-                type: object
-              retentionPolicy:
-                description: ObjectReference contains enough information to let you
-                  inspect or modify the referred object.
-                properties:
-                  name:
-                    description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names'
-                    type: string
-                  namespace:
-                    description: 'Namespace of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/'
-                    type: string
-                required:
-                - name
-                - namespace
-                type: object
-              schedule:
-                description: Schedule specifies the schedule for invoking backup sessions
-                type: string
-              storageRef:
-                description: ObjectReference contains enough information to let you
-                  inspect or modify the referred object.
-                properties:
-                  name:
-                    description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names'
-                    type: string
-                  namespace:
-                    description: 'Namespace of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/'
-                    type: string
-                required:
-                - name
-                - namespace
-                type: object
-              storageSecret:
-                properties:
-                  create:
-                    type: boolean
-                type: object
-            required:
-            - encryptionSecret
-            - retentionPolicy
-            - storageRef
-            - storageSecret
-            type: object
-          stash:
-            properties:
-              authSecret:
-                properties:
-                  name:
-                    type: string
-                  password:
-                    format: password
-                    type: string
-                type: object
-              backend:
-                properties:
-                  azure:
-                    properties:
-                      auth:
-                        properties:
-                          AZURE_ACCOUNT_KEY:
-                            type: string
-                          AZURE_ACCOUNT_NAME:
-                            type: string
-                        required:
-                        - AZURE_ACCOUNT_KEY
-                        - AZURE_ACCOUNT_NAME
-                        type: object
-                      spec:
-                        properties:
-                          container:
-                            type: string
-                          maxConnections:
-                            format: int64
-                            type: integer
-                          prefix:
-                            type: string
-                        required:
-                        - container
-                        type: object
-                    required:
-                    - spec
-                    type: object
-                  b2:
-                    properties:
-                      auth:
-                        properties:
-                          B2_ACCOUNT_ID:
-                            type: string
-                          B2_ACCOUNT_KEY:
-                            type: string
-                        required:
-                        - B2_ACCOUNT_ID
-                        - B2_ACCOUNT_KEY
-                        type: object
-                      spec:
-                        properties:
-                          bucket:
-                            type: string
-                          maxConnections:
-                            format: int64
-                            type: integer
-                          prefix:
-                            type: string
-                        required:
-                        - bucket
-                        type: object
-                    required:
-                    - spec
-                    type: object
-                  gcs:
-                    properties:
-                      auth:
-                        properties:
-                          GOOGLE_PROJECT_ID:
-                            type: string
-                          GOOGLE_SERVICE_ACCOUNT_JSON_KEY:
-                            type: string
-                        required:
-                        - GOOGLE_PROJECT_ID
-                        - GOOGLE_SERVICE_ACCOUNT_JSON_KEY
-                        type: object
-                      spec:
-                        properties:
-                          bucket:
-                            type: string
-                          maxConnections:
-                            format: int64
-                            type: integer
-                          prefix:
-                            type: string
-                        required:
-                        - bucket
-                        type: object
-                    required:
-                    - spec
-                    type: object
-                  provider:
-                    type: string
-                  s3:
-                    properties:
-                      auth:
-                        properties:
-                          AWS_ACCESS_KEY_ID:
-                            type: string
-                          AWS_SECRET_ACCESS_KEY:
-                            type: string
-                          CA_CERT_DATA:
-                            type: string
-                        required:
-                        - AWS_ACCESS_KEY_ID
-                        - AWS_SECRET_ACCESS_KEY
-                        - CA_CERT_DATA
-                        type: object
-                      spec:
-                        properties:
-                          bucket:
-                            type: string
-                          endpoint:
-                            type: string
-                          insecureTLS:
-                            type: boolean
-                          prefix:
-                            type: string
-                          region:
-                            type: string
-                        required:
-                        - bucket
-                        - endpoint
-                        type: object
-                    required:
-                    - spec
-                    type: object
-                  swift:
-                    properties:
-                      auth:
-                        properties:
-                          OS_AUTH_TOKEN:
-                            type: string
-                          OS_AUTH_URL:
-                            type: string
-                          OS_PASSWORD:
-                            type: string
-                          OS_PROJECT_DOMAIN_NAME:
-                            type: string
-                          OS_PROJECT_NAME:
-                            type: string
-                          OS_REGION_NAME:
-                            type: string
-                          OS_STORAGE_URL:
-                            type: string
-                          OS_TENANT_ID:
-                            type: string
-                          OS_TENANT_NAME:
-                            type: string
-                          OS_USER_DOMAIN_NAME:
-                            type: string
-                          OS_USERNAME:
-                            type: string
-                          ST_AUTH:
-                            type: string
-                          ST_KEY:
-                            type: string
-                          ST_USER:
-                            type: string
-                        required:
-                        - OS_AUTH_TOKEN
-                        - OS_AUTH_URL
-                        - OS_PASSWORD
-                        - OS_PROJECT_DOMAIN_NAME
-                        - OS_PROJECT_NAME
-                        - OS_REGION_NAME
-                        - OS_STORAGE_URL
-                        - OS_TENANT_ID
-                        - OS_TENANT_NAME
-                        - OS_USERNAME
-                        - OS_USER_DOMAIN_NAME
-                        - ST_AUTH
-                        - ST_KEY
-                        - ST_USER
-                        type: object
-                      spec:
-                        properties:
-                          container:
-                            type: string
-                          prefix:
-                            type: string
-                        required:
-                        - container
-                        type: object
-                    required:
-                    - spec
-                    type: object
-                required:
-                - provider
-                type: object
-              retentionPolicy:
-                description: RetentionPolicy indicates the policy to follow to clean
-                  old backup snapshots
-                properties:
-                  dryRun:
-                    type: boolean
-                  keepDaily:
-                    format: int64
-                    type: integer
-                  keepHourly:
-                    format: int64
-                    type: integer
-                  keepLast:
-                    format: int64
-                    type: integer
-                  keepMonthly:
-                    format: int64
-                    type: integer
-                  keepTags:
-                    items:
-                      type: string
-                    type: array
-                  keepWeekly:
-                    format: int64
-                    type: integer
-                  keepYearly:
-                    format: int64
-                    type: integer
-                  name:
-                    type: string
-                  prune:
-                    type: boolean
-                required:
-                - name
-                - prune
-                type: object
-              schedule:
-                description: Schedule specifies the schedule for invoking backup sessions
-                type: string
-            required:
-            - authSecret
-            - backend
-            - retentionPolicy
-            type: object
-          tool:
-            default: KubeStash
-            enum:
-            - KubeStash
-            - Stash
-            type: string
-        required:
-        - tool
-        type: object
-      clusterAuthMode:
-        enum:
-        - keyFile
-        - sendKeyFile
-        - sendX509
-        - x509
-        type: string
       labels:
         additionalProperties:
           type: string
@@ -1096,8 +448,7 @@ properties:
       mode:
         enum:
         - Standalone
-        - Replicaset
-        - Sharded
+        - Cluster
         type: string
       monitoring:
         properties:
@@ -1177,16 +528,8 @@ properties:
         required:
         - size
         type: object
-      replicaSet:
-        properties:
-          name:
-            type: string
-          replicas:
-            type: integer
-        required:
-        - name
-        - replicas
-        type: object
+      replicas:
+        type: integer
       resources:
         description: ResourceRequirements describes the compute resource requirements.
         properties:
@@ -1233,60 +576,6 @@ properties:
               value. Requests cannot exceed Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
             type: object
         type: object
-      shardTopology:
-        properties:
-          configServer:
-            properties:
-              persistence:
-                properties:
-                  size:
-                    type: string
-                required:
-                - size
-                type: object
-              replicas:
-                type: integer
-            required:
-            - persistence
-            - replicas
-            type: object
-          mongos:
-            properties:
-              replicas:
-                type: integer
-            required:
-            - replicas
-            type: object
-          shard:
-            properties:
-              persistence:
-                properties:
-                  size:
-                    type: string
-                required:
-                - size
-                type: object
-              replicas:
-                type: integer
-              shards:
-                type: integer
-            required:
-            - persistence
-            - replicas
-            - shards
-            type: object
-        required:
-        - configServer
-        - mongos
-        - shard
-        type: object
-      sslMode:
-        enum:
-        - disabled
-        - allowSSL
-        - preferSSL
-        - requireSSL
-        type: string
       storageClass:
         properties:
           name:
@@ -1305,19 +594,13 @@ properties:
         type: string
     required:
     - authSecret
-    - backup
-    - clusterAuthMode
     - machine
     - mode
     - monitoring
     - persistence
-    - replicaSet
     - resources
-    - shardTopology
-    - sslMode
     - storageClass
     - terminationPolicy
-    - version
     type: object
 required:
 - form

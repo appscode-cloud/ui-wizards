@@ -23,7 +23,7 @@ import (
 	api "x-helm.dev/apimachinery/apis/releases/v1alpha1"
 )
 
-// KubedbcomDruidEditorOptions defines the schama for MongoDB Editor UI Options.
+// KubedbcomDruidEditorOptions defines the schama for Druid Editor UI Options.
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
@@ -35,7 +35,7 @@ type KubedbcomDruidEditorOptions struct {
 	Spec              KubedbcomDruidEditorOptionsSpec `json:"spec,omitempty"`
 }
 
-// KubedbcomDruidEditorOptionsSpec is the schema for MongoDB profile values file
+// KubedbcomDruidEditorOptionsSpec is the schema for Druid profile values file
 type KubedbcomDruidEditorOptionsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Spec         KubedbcomDruidEditorOptionsSpecSpec `json:"spec"`
@@ -48,11 +48,11 @@ type KubedbcomDruidEditorOptionsSpecSpec struct {
 	// +optional
 	Labels            map[string]string         `json:"labels"`
 	Version           string                    `json:"version"`
-	Mode              MongoDBMode               `json:"mode"`
-	ReplicaSet        MongoDBReplicaSet         `json:"replicaSet"`
-	ShardTopology     MongoDBShardTopology      `json:"shardTopology"`
-	ClusterAuthMode   MongoDBClusterAuthMode    `json:"clusterAuthMode"`
-	SslMode           MongoDBSSLMode            `json:"sslMode"`
+	Mode              DruidMode                 `json:"mode"`
+	ReplicaSet        DruidReplicaSet           `json:"replicaSet"`
+	ShardTopology     DruidShardTopology        `json:"shardTopology"`
+	ClusterAuthMode   DruidClusterAuthMode      `json:"clusterAuthMode"`
+	SslMode           DruidSSLMode              `json:"sslMode"`
 	TerminationPolicy TerminationPolicy         `json:"terminationPolicy"`
 	StorageClass      StorageClass              `json:"storageClass"`
 	Persistence       Persistence               `json:"persistence"`
@@ -63,9 +63,39 @@ type KubedbcomDruidEditorOptionsSpecSpec struct {
 	Backup            BackupToolSpec            `json:"backup"`
 }
 
+// +kubebuilder:validation:Enum=Standalone;Replicaset;Sharded
+type DruidMode string
+
+// +kubebuilder:validation:Enum=keyFile;sendKeyFile;sendX509;x509
+type DruidClusterAuthMode string
+
+// +kubebuilder:validation:Enum=disabled;allowSSL;preferSSL;requireSSL
+type DruidSSLMode string
+
+type DruidReplicaSet struct {
+	Name     string `json:"name"`
+	Replicas int    `json:"replicas"`
+}
+
+type DruidShard struct {
+	Replicas    int         `json:"replicas"`
+	Shards      int         `json:"shards"`
+	Persistence Persistence `json:"persistence"`
+}
+
+type DruidConfigServer struct {
+	Replicas    int         `json:"replicas"`
+	Persistence Persistence `json:"persistence"`
+}
+
+type DruidShardTopology struct {
+	Shard        DruidShard        `json:"shard"`
+	ConfigServer DruidConfigServer `json:"configServer"`
+}
+
 type DruidAlertsSpecForm struct {
-	Alert alerts.MongoDBAlert `json:"alert"`
-	CAPI  CAPIFormSpec        `json:"capi"`
+	Alert alerts.DruidAlert `json:"alert"`
+	CAPI  CAPIFormSpec      `json:"capi"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
