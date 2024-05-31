@@ -57,8 +57,8 @@ type KubedbcomMongodbEditorOptionsSpecSpec struct {
 	StorageClass      StorageClass           `json:"storageClass"`
 	Persistence       Persistence            `json:"persistence"`
 	PodResources      PodResources           `json:"podResources"`
-	Arbiter           MongoDBArbiter         `json:"arbiter"`
-	Hidden            MongoDBHidden          `json:"hidden"`
+	Arbiter           *MongoDBArbiter        `json:"arbiter"`
+	Hidden            *MongoDBHidden         `json:"hidden"`
 	AuthSecret        AuthSecret             `json:"authSecret"`
 	Monitoring        Monitoring             `json:"monitoring"`
 	Backup            BackupToolSpec         `json:"backup"`
@@ -108,10 +108,12 @@ type MongoDBShardTopology struct {
 }
 
 type MongoDBArbiter struct {
+	Enabled      bool         `json:"enabled"`
 	PodResources PodResources `json:"podResources"`
 }
 
 type MongoDBHidden struct {
+	Enabled      bool         `json:"enabled"`
 	Replicas     int          `json:"replicas"`
 	PodResources PodResources `json:"podResources"`
 	Persistence  Persistence  `json:"persistence"`

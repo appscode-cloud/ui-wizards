@@ -31,6 +31,46 @@ properties:
                     type: string
                   rules:
                     properties:
+                      diskAlmostFull:
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            enum:
+                            - critical
+                            - warning
+                            - info
+                            type: string
+                          val:
+                            type: integer
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        - val
+                        type: object
+                      diskUsageHigh:
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            enum:
+                            - critical
+                            - warning
+                            - info
+                            type: string
+                          val:
+                            type: integer
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        - val
+                        type: object
                       mysqlHighIncomingBytes:
                         properties:
                           duration:
@@ -243,6 +283,8 @@ properties:
                         - val
                         type: object
                     required:
+                    - diskAlmostFull
+                    - diskUsageHigh
                     - mysqlHighIncomingBytes
                     - mysqlHighOutgoingBytes
                     - mysqlHighQPS
@@ -359,6 +401,161 @@ properties:
                     - mysqlHighReplicationDelay
                     - mysqlHighReplicationTransportTime
                     - mysqlReplicationHighTransactionTime
+                    type: object
+                required:
+                - enabled
+                - rules
+                type: object
+              kubeStash:
+                properties:
+                  enabled:
+                    enum:
+                    - none
+                    - critical
+                    - warning
+                    - info
+                    type: string
+                  rules:
+                    properties:
+                      backupSessionFailed:
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            enum:
+                            - critical
+                            - warning
+                            - info
+                            type: string
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        type: object
+                      backupSessionPeriodTooLong:
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            enum:
+                            - critical
+                            - warning
+                            - info
+                            type: string
+                          val:
+                            type: integer
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        - val
+                        type: object
+                      noBackupSessionForTooLong:
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            enum:
+                            - critical
+                            - warning
+                            - info
+                            type: string
+                          val:
+                            type: integer
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        - val
+                        type: object
+                      repositoryCorrupted:
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            enum:
+                            - critical
+                            - warning
+                            - info
+                            type: string
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        type: object
+                      repositoryStorageRunningLow:
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            enum:
+                            - critical
+                            - warning
+                            - info
+                            type: string
+                          val:
+                            type: integer
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        - val
+                        type: object
+                      restoreSessionFailed:
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            enum:
+                            - critical
+                            - warning
+                            - info
+                            type: string
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        type: object
+                      restoreSessionPeriodTooLong:
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            enum:
+                            - critical
+                            - warning
+                            - info
+                            type: string
+                          val:
+                            type: integer
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        - val
+                        type: object
+                    required:
+                    - backupSessionFailed
+                    - backupSessionPeriodTooLong
+                    - noBackupSessionForTooLong
+                    - repositoryCorrupted
+                    - repositoryStorageRunningLow
+                    - restoreSessionFailed
+                    - restoreSessionPeriodTooLong
                     type: object
                 required:
                 - enabled
@@ -753,6 +950,7 @@ properties:
             required:
             - database
             - group
+            - kubeStash
             - opsManager
             - provisioner
             - schemaManager

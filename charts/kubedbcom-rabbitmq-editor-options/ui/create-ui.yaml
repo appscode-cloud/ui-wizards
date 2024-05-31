@@ -64,71 +64,29 @@ steps:
     - hasDescription: true
       label:
         text: labels.database.mode
+      onChange: onModeChange
       options:
       - description: options.database.mode.Standalone.description
         text: options.database.mode.Standalone.label
         value: Standalone
       - description: options.database.mode.Replicaset.description
         text: options.database.mode.Replicaset.label
-        value: Replicaset
-      - description: options.database.mode.Sharded.description
-        text: options.database.mode.Sharded.label
-        value: Sharded
+        value: Cluster
       schema:
         $ref: schema#/properties/spec/properties/mode
       type: radio
     - elements:
       - label:
-          text: labels.replicaset.name
-        schema:
-          $ref: schema#/properties/spec/properties/replicaSet/properties/name
-        type: input
-      - label:
-          text: labels.replicaset.number
-        schema:
-          $ref: schema#/properties/spec/properties/replicaSet/properties/replicas
-        type: input
-      if: isEqualToModelPathValue|Replicaset|/spec/mode
-      schema:
-        $ref: schema#/properties/spec/properties/replicaSet
-      type: single-step-form
-    - if: showStorageSizeField
-      label:
-        text: labels.storage.size
-      schema:
-        $ref: schema#/properties/spec/properties/persistence/properties/size
-      type: input
-    - elements:
-      - label:
-          text: labels.shardNodes
-        type: label-element
-      - label:
-          text: labels.shards
-        schema:
-          $ref: schema#/properties/spec/properties/shardTopology/properties/shard/properties/shards
-        type: input
-      - label:
           text: labels.storage.size
         schema:
-          $ref: schema#/properties/spec/properties/shardTopology/properties/shard/properties/persistence/properties/size
+          $ref: schema#/properties/spec/properties/persistence/properties/size
         type: input
-      - label:
-          text: labels.configServer
-        type: label-element
-      - label:
-          text: labels.storage.size
-        schema:
-          $ref: schema#/properties/spec/properties/shardTopology/properties/configServer/properties/persistence/properties/size
-        type: input
-      - label:
-          text: labels.mongos
-        type: label-element
-      - label:
+      - if: showReplicaField
+        label:
           text: labels.replicaset.number
         schema:
-          $ref: schema#/properties/spec/properties/shardTopology/properties/mongos/properties/replicas
+          $ref: schema#/properties/spec/properties/replicas
         type: input
-      if: isEqualToModelPathValue|Sharded|/spec/mode
       type: single-step-form
     - hasDescription: true
       label:
@@ -233,7 +191,7 @@ steps:
     - alias: reusable-monitor-option
       chart:
         name: uibytebuildersdev-component-monitoring-option
-        version: v0.4.18
+        version: v0.4.19
       dataContext:
         agent:
           $ref: schema#/properties/spec/properties/monitoring/properties/agent
@@ -243,14 +201,6 @@ steps:
       moduleResolver: fetchJsons
       schema:
         $ref: schema#/properties/spec/properties/monitoring/properties/serviceMonitor
-      type: reusable-element
-    - alias: reusable-backup-option
-      chart:
-        name: uibytebuildersdev-component-backup-option
-        version: v0.4.18
-      moduleResolver: fetchJsons
-      schema:
-        $ref: schema#/properties/spec/properties/backup
       type: reusable-element
     - elements:
       - hasDescription: true

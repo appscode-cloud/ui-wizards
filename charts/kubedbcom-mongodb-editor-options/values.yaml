@@ -26,22 +26,59 @@ spec:
   labels: {}
 
   # Standalone, Replicaset, Sharded
-  mode: Standalone
+  mode: Sharded
   replicaSet:
     name: rs0
     replicas: 3
   shardTopology:
     shard:
       replicas: 3
-      shards: 3
+      shards: 2
+      podResources:
+        machine: ""
+        resources:
+          limits:
+            cpu: 500m
+            memory: 1Gi
       persistence:
         size: 10Gi
     configServer:
       replicas: 3
+      podResources:
+        machine: ""
+        resources:
+          limits:
+            cpu: 500m
+            memory: 1Gi
       persistence:
         size: 2Gi
     mongos:
-      replicas: 3
+      replicas: 2
+      podResources:
+        machine: ""
+        resources:
+          limits:
+            cpu: 500m
+            memory: 1Gi
+  arbiter:
+    enabled: false
+    podResources:
+      machine: ""
+      resources:
+        limits:
+          cpu: 500m
+          memory: 500Mi
+  hidden:
+    enabled: false
+    replicas: 1
+    podResources:
+      machine: ""
+      resources:
+        limits:
+          cpu: 500m
+          memory: 1Gi
+    persistence:
+      size: 10Gi
 
   # "keyFile", "sendKeyFile", "sendX509", "x509"
   clusterAuthMode: keyFile
@@ -57,12 +94,13 @@ spec:
   persistence:
     size: 10Gi
 
-  machine: ""
+  podResources:
+    machine: ""
 
-  resources:
-    limits:
-      cpu: 500m
-      memory: 1Gi
+    resources:
+      limits:
+        cpu: 500m
+        memory: 1Gi
 
   authSecret:
     name: ""

@@ -7,8 +7,8 @@
 ```bash
 $ helm repo add bytebuilders-ui https://bundles.byte.builders/ui/
 $ helm repo update
-$ helm search repo bytebuilders-ui/kubedbcom-druid-editor-options --version=v0.4.18
-$ helm upgrade -i kubedbcom-druid-editor-options bytebuilders-ui/kubedbcom-druid-editor-options -n kube-system --create-namespace --version=v0.4.18
+$ helm search repo bytebuilders-ui/kubedbcom-druid-editor-options --version=v0.4.19
+$ helm upgrade -i kubedbcom-druid-editor-options bytebuilders-ui/kubedbcom-druid-editor-options -n kube-system --create-namespace --version=v0.4.19
 ```
 
 ## Introduction
@@ -24,7 +24,7 @@ This chart deploys a Druid Editor UI Options on a [Kubernetes](http://kubernetes
 To install/upgrade the chart with the release name `kubedbcom-druid-editor-options`:
 
 ```bash
-$ helm upgrade -i kubedbcom-druid-editor-options bytebuilders-ui/kubedbcom-druid-editor-options -n kube-system --create-namespace --version=v0.4.18
+$ helm upgrade -i kubedbcom-druid-editor-options bytebuilders-ui/kubedbcom-druid-editor-options -n kube-system --create-namespace --version=v0.4.19
 ```
 
 The command deploys a Druid Editor UI Options on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
@@ -65,7 +65,6 @@ The following table lists the configurable parameters of the `kubedbcom-druid-ed
 | spec.shardTopology.shard.persistence.size                          |                                                                                                                                                                           | <code>10Gi</code>                                         |
 | spec.shardTopology.configServer.replicas                           |                                                                                                                                                                           | <code>3</code>                                            |
 | spec.shardTopology.configServer.persistence.size                   |                                                                                                                                                                           | <code>2Gi</code>                                          |
-| spec.shardTopology.mongos.replicas                                 |                                                                                                                                                                           | <code>3</code>                                            |
 | spec.clusterAuthMode                                               | "keyFile", "sendKeyFile", "sendX509", "x509"                                                                                                                              | <code>keyFile</code>                                      |
 | spec.sslMode                                                       | "disabled", "allowSSL", "preferSSL", "requireSSL"                                                                                                                         | <code>disabled</code>                                     |
 | spec.terminationPolicy                                             |                                                                                                                                                                           | <code>WipeOut</code>                                      |
@@ -177,12 +176,12 @@ The following table lists the configurable parameters of the `kubedbcom-druid-ed
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm upgrade -i`. For example:
 
 ```bash
-$ helm upgrade -i kubedbcom-druid-editor-options bytebuilders-ui/kubedbcom-druid-editor-options -n kube-system --create-namespace --version=v0.4.18 --set metadata.resource.group=kubedb.com
+$ helm upgrade -i kubedbcom-druid-editor-options bytebuilders-ui/kubedbcom-druid-editor-options -n kube-system --create-namespace --version=v0.4.19 --set metadata.resource.group=kubedb.com
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
 installing the chart. For example:
 
 ```bash
-$ helm upgrade -i kubedbcom-druid-editor-options bytebuilders-ui/kubedbcom-druid-editor-options -n kube-system --create-namespace --version=v0.4.18 --values values.yaml
+$ helm upgrade -i kubedbcom-druid-editor-options bytebuilders-ui/kubedbcom-druid-editor-options -n kube-system --create-namespace --version=v0.4.19 --values values.yaml
 ```
