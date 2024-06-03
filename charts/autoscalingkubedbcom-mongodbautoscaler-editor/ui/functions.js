@@ -40,6 +40,13 @@ function isKubedb({ storeGet }) {
   return !!storeGet("/route/query/operation");
 }
 
+function showOpsRequestOptions({ model, getValue, watchDependency, storeGet, discriminator }) {
+  if (isKubedb({ storeGet }) === true) return true;
+  watchDependency("model#/spec/databaseRef/name");
+  watchDependency("discriminator#/autoscalingType");
+  return !!getValue(model, "/spec/databaseRef/name") && !!getValue(discriminator, "/autoscalingType");
+}
+
 async function getNamespaces({ axios, storeGet }) {
   const owner = storeGet("/route/params/user");
   const cluster = storeGet("/route/params/cluster");
@@ -254,4 +261,5 @@ return {
   setControlledResources,
   setTrigger,
   setApplyToIfReady,
+  showOpsRequestOptions,
 };
