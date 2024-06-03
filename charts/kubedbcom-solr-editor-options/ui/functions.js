@@ -429,12 +429,12 @@ function setResourceLimit({ commit, model, getValue, watchDependency }) {
     // to avoiding set value by reference, cpu and memory set separately
     commit("wizard/model$update", {
       path: "/spec/resources/limits/cpu",
-      value: machines[modelPathValue].resources.limits.cpu,
+      value: machines[modelPathValue]?.resources?.limits?.cpu,
       force: true,
     });
     commit("wizard/model$update", {
       path: "/spec/resources/limits/memory",
-      value: machines[modelPathValue].resources.limits.memory,
+      value: machines[modelPathValue]?.resources?.limits?.memory,
       force: true,
     });
   }
@@ -446,12 +446,12 @@ function setResourceLimitWithNodeType({ commit, model, getValue, watchDependency
     // to avoiding set value by reference, cpu and memory set separately
     commit("wizard/model$update", {
       path: `/spec/topology/${nodeType}/podResources/resources/limits/cpu`,
-      value: machines[modelPathValue].resources.limits.cpu,
+      value: machines[modelPathValue]?.resources?.limits?.cpu,
       force: true,
     });
     commit("wizard/model$update", {
       path: `/spec/topology/${nodeType}/podResources/resources/limits/memory`,
-      value: machines[modelPathValue].resources.limits.memory,
+      value: machines[modelPathValue]?.resources?.limits?.memory,
       force: true,
     });
   }
