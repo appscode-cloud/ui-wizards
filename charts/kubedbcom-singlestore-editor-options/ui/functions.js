@@ -404,8 +404,14 @@ async function getSecrets({
 }
 
 function disableLimit({ model, getValue, watchDependency }) {
-  const modelPathValue = getValue(model, "/spec/machine");
-  watchDependency("model#/spec/machine");
+  const modelPathValue = getValue(model, "/spec/podResources/machine");
+  watchDependency("model#/spec/podResources/machine");
+  return modelPathValue !== "custom" && !!modelPathValue;
+}
+
+function disableLimitWithNodeType({ model, getValue, watchDependency },nodeType) {
+  const modelPathValue = getValue(model, `/spec/topology/${nodeType}/podResources/machine`);
+  watchDependency(`model#/spec/topology/${nodeType}/podResources/machine`);  
   return modelPathValue !== "custom" && !!modelPathValue;
 }
 
@@ -417,18 +423,35 @@ function getMachineListForOptions() {
 }
 
 function setResourceLimit({ commit, model, getValue, watchDependency }) {
-  const modelPathValue = getValue(model, "/spec/machine");
-  watchDependency("model#/spec/machine");
+  const modelPathValue = getValue(model, "/spec/podResources/machine");
+  watchDependency("model#/spec/podResources/machine");
   if (modelPathValue && modelPathValue !== "custom") {
     // to avoiding set value by reference, cpu and memory set separately
     commit("wizard/model$update", {
-      path: "/spec/resources/limits/cpu",
-      value: machines[modelPathValue].resources.limits.cpu,
+      path: "/spec/podResources/resources/limits/cpu",
+      value: machines[modelPathValue]?.resources?.limits?.cpu,
       force: true,
     });
     commit("wizard/model$update", {
-      path: "/spec/resources/limits/memory",
-      value: machines[modelPathValue].resources.limits.memory,
+      path: "/spec/podResources/resources/limits/memory",
+      value: machines[modelPathValue]?.resources?.limits?.memory,
+      force: true,
+    });
+  }
+}
+function setResourceLimitWithNodeType({ commit, model, getValue, watchDependency },nodeType) {
+  const modelPathValue = getValue(model, `/spec/topology/${nodeType}/podResources/machine`);
+  watchDependency(`model#/spec/topology/${nodeType}/podResources/machine`);
+  if (modelPathValue && modelPathValue !== "custom") {
+    // to avoiding set value by reference, cpu and memory set separately
+    commit("wizard/model$update", {
+      path: `/spec/topology/${nodeType}/podResources/resources/limits/cpu`,
+      value: machines[modelPathValue]?.resources?.limits?.cpu,
+      force: true,
+    });
+    commit("wizard/model$update", {
+      path: `/spec/topology/${nodeType}/podResources/resources/limits/memory`,
+      value: machines[modelPathValue]?.resources?.limits?.memory,
       force: true,
     });
   }
@@ -498,6 +521,19 @@ function updateAgentValue({commit },val) {
     value: val ? 'warning' : 'none',
     force: true
   });
+}
+
+function setReplicaNumber({model, getValue}){
+  const modelPathValue = getValue(model, "/spec/mode");
+  if(modelPathValue==='Topology'){
+    return 3
+  }else return 1
+}
+function setRouterNumber({model, getValue}){
+  const modelPathValue = getValue(model, "/spec/mode")
+  if(modelPathValue==='Topology'){
+    return 3
+  }else return 1
 }
 
 function getCreateNameSpaceUrl ({ model, getValue, storeGet }){ 
@@ -711,4 +747,8 @@ return {
   showMultiselectZone,
   showSelectZone,
   setStorageClass,
+  setReplicaNumber,
+  setRouterNumber,
+  disableLimitWithNodeType,
+  setResourceLimitWithNodeType
 }
