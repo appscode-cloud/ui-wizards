@@ -1,7 +1,7 @@
-{{- $res := .Values.spec.resources -}}
 {{- $machines := .Files.Get "data/machines.yaml" | fromYaml -}}
-{{- if and .Values.spec.machine (hasKey $machines .Values.spec.machine) }}
-  {{- $res = get (get $machines .Values.spec.machine) "resources" }}
+{{- $res := .Values.spec.podResources.resources -}}
+{{- if and .Values.spec.podResources.machine (hasKey $machines .Values.spec.podResources.machine) }}
+  {{- $res = get (get $machines .Values.spec.podResources.machine) "resources" }}
 {{- end }}
 {{ $poolName := printf "%s-%s-%s" .Values.form.capi.clusterName .Release.Namespace (include "kubedbcom-rabbitmq-editor-options.fullname" .) }}
 

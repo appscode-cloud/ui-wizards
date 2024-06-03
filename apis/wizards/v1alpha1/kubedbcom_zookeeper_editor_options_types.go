@@ -17,6 +17,7 @@ limitations under the License.
 package v1alpha1
 
 import (
+	alerts "go.appscode.dev/alerts/apis/alerts/v1alpha1"
 	core "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	api "x-helm.dev/apimachinery/apis/releases/v1alpha1"
@@ -97,8 +98,8 @@ type ZooKeeperShardTopology struct {
 }
 
 type ZookeeperAlertsSpecForm struct {
-	// Alert alerts.ZooKeeperAlert `json:"alert"`
-	CAPI CAPIFormSpec `json:"capi"`
+	Alert alerts.ZookeeperAlert `json:"alert"`
+	CAPI  CAPIFormSpec          `json:"capi"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

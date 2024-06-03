@@ -430,8 +430,8 @@ async function getSecrets({
 }
 
 function disableLimit({ model, getValue, watchDependency }) {
-  const modelPathValue = getValue(model, "/spec/machine");
-  watchDependency("model#/spec/machine");
+  const modelPathValue = getValue(model, "/spec/podResources/machine");
+  watchDependency("model#/spec/podResources/machine");
   return modelPathValue !== "custom" && !!modelPathValue;
 }
 
@@ -443,17 +443,17 @@ function getMachineListForOptions() {
 }
 
 function setResourceLimit({ commit, model, getValue, watchDependency }) {
-  const modelPathValue = getValue(model, "/spec/machine");
-  watchDependency("model#/spec/machine");
+  const modelPathValue = getValue(model, "/spec/podResources/machine");
+  watchDependency("model#/spec/podResources/machine");
   if (modelPathValue && modelPathValue !== "custom") {
     // to avoiding set value by reference, cpu and memory set separately
     commit("wizard/model$update", {
-      path: "/spec/resources/limits/cpu",
+      path: "/spec/podResources/resources/limits/cpu",
       value: machines[modelPathValue].resources.limits.cpu,
       force: true,
     });
     commit("wizard/model$update", {
-      path: "/spec/resources/limits/memory",
+      path: "/spec/podResources/resources/limits/memory",
       value: machines[modelPathValue].resources.limits.memory,
       force: true,
     });
@@ -464,7 +464,7 @@ function setLimitsCpuOrMem({ model, getValue, watchDependency }, path) {
 
   watchDependency('model#/spec/version');
   const dbVersion = getValue(model, '/spec/version')
-  const modelPathValue = getValue(model, "/spec/machine");
+  const modelPathValue = getValue(model, "/spec/podResources/machine");
 
   if (modelPathValue && modelPathValue !== "custom") {
     return (

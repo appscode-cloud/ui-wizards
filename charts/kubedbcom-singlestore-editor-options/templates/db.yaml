@@ -45,8 +45,10 @@ spec:
             storage: {{ .Values.spec.topology.aggregator.persistence.size }}
       podTemplate:
         spec:
-          resources:
-            {{- toYaml $aggregator_res | nindent 12 }}
+          containers:
+            - name: singlestore
+              resources:
+                {{- toYaml $aggregator_res | nindent 16 }}
           {{- if and .Values.form.capi.provider .Values.form.capi.dedicated }}
           nodeSelector:
             nodes.klusters.dev/pool: {{ $poolName }}
@@ -67,8 +69,10 @@ spec:
             storage: {{ .Values.spec.topology.leaf.persistence.size }}
       podTemplate:
         spec:
-          resources:
-            {{- toYaml $leaf_res | nindent 12 }}
+          containers:
+            - name: singlestore
+              resources:
+                {{- toYaml $leaf_res | nindent 16 }}
           {{- if and .Values.form.capi.provider .Values.form.capi.dedicated }}
           nodeSelector:
             nodes.klusters.dev/pool: {{ $poolName }}
@@ -89,8 +93,10 @@ spec:
         storage: {{ .Values.spec.persistence.size }}
   podTemplate:
     spec:
-      resources:
-        {{- toYaml $res | nindent 8 }}
+      containers:
+        - name: singlestore
+          resources:
+            {{- toYaml $res | nindent 12 }}
       {{- if and .Values.form.capi.provider .Values.form.capi.dedicated }}
       nodeSelector:
         nodes.klusters.dev/pool: {{ $poolName }}
