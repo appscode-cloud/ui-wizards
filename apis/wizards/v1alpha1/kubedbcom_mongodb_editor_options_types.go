@@ -46,21 +46,27 @@ type KubedbcomMongodbEditorOptionsSpecSpec struct {
 	// +optional
 	Annotations map[string]string `json:"annotations"`
 	// +optional
-	Labels            map[string]string         `json:"labels"`
-	Version           string                    `json:"version"`
-	Mode              MongoDBMode               `json:"mode"`
-	ReplicaSet        MongoDBReplicaSet         `json:"replicaSet"`
-	ShardTopology     MongoDBShardTopology      `json:"shardTopology"`
-	ClusterAuthMode   MongoDBClusterAuthMode    `json:"clusterAuthMode"`
-	SslMode           MongoDBSSLMode            `json:"sslMode"`
-	TerminationPolicy TerminationPolicy         `json:"terminationPolicy"`
-	StorageClass      StorageClass              `json:"storageClass"`
-	Persistence       Persistence               `json:"persistence"`
-	Machine           MachineType               `json:"machine"`
-	Resources         core.ResourceRequirements `json:"resources"`
-	AuthSecret        AuthSecret                `json:"authSecret"`
-	Monitoring        Monitoring                `json:"monitoring"`
-	Backup            BackupToolSpec            `json:"backup"`
+	Labels            map[string]string      `json:"labels"`
+	Version           string                 `json:"version"`
+	Mode              MongoDBMode            `json:"mode"`
+	ReplicaSet        MongoDBReplicaSet      `json:"replicaSet"`
+	ShardTopology     MongoDBShardTopology   `json:"shardTopology"`
+	ClusterAuthMode   MongoDBClusterAuthMode `json:"clusterAuthMode"`
+	SslMode           MongoDBSSLMode         `json:"sslMode"`
+	TerminationPolicy TerminationPolicy      `json:"terminationPolicy"`
+	StorageClass      StorageClass           `json:"storageClass"`
+	Persistence       Persistence            `json:"persistence"`
+	PodResources      PodResources           `json:"podResources"`
+	Arbiter           *MongoDBArbiter        `json:"arbiter"`
+	Hidden            *MongoDBHidden         `json:"hidden"`
+	AuthSecret        AuthSecret             `json:"authSecret"`
+	Monitoring        Monitoring             `json:"monitoring"`
+	Backup            BackupToolSpec         `json:"backup"`
+}
+
+type PodResources struct {
+	Machine   MachineType               `json:"machine"`
+	Resources core.ResourceRequirements `json:"resources"`
 }
 
 // +kubebuilder:validation:Enum=Standalone;Replicaset;Sharded
@@ -78,24 +84,39 @@ type MongoDBReplicaSet struct {
 }
 
 type MongoDBShard struct {
-	Replicas    int         `json:"replicas"`
-	Shards      int         `json:"shards"`
-	Persistence Persistence `json:"persistence"`
+	Replicas     int          `json:"replicas"`
+	Shards       int          `json:"shards"`
+	PodResources PodResources `json:"podResources"`
+	Persistence  Persistence  `json:"persistence"`
 }
 
 type MongoDBConfigServer struct {
-	Replicas    int         `json:"replicas"`
-	Persistence Persistence `json:"persistence"`
+	Replicas     int          `json:"replicas"`
+	PodResources PodResources `json:"podResources"`
+	Persistence  Persistence  `json:"persistence"`
 }
 
 type MongoDBMongos struct {
-	Replicas int `json:"replicas"`
+	Replicas     int          `json:"replicas"`
+	PodResources PodResources `json:"podResources"`
 }
 
 type MongoDBShardTopology struct {
 	Shard        MongoDBShard        `json:"shard"`
 	ConfigServer MongoDBConfigServer `json:"configServer"`
 	Mongos       MongoDBMongos       `json:"mongos"`
+}
+
+type MongoDBArbiter struct {
+	Enabled      bool         `json:"enabled"`
+	PodResources PodResources `json:"podResources"`
+}
+
+type MongoDBHidden struct {
+	Enabled      bool         `json:"enabled"`
+	Replicas     int          `json:"replicas"`
+	PodResources PodResources `json:"podResources"`
+	Persistence  Persistence  `json:"persistence"`
 }
 
 type MongodbAlertsSpecForm struct {

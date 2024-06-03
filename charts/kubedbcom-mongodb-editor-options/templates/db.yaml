@@ -1,7 +1,40 @@
-{{- $res := .Values.spec.resources -}}
 {{- $machines := .Files.Get "data/machines.yaml" | fromYaml -}}
-{{- if and .Values.spec.machine (hasKey $machines .Values.spec.machine) }}
-  {{- $res = get (get $machines .Values.spec.machine) "resources" }}
+{{- $res := dict -}}
+{{- $shard_res := dict -}}
+{{- $configServer_res := dict -}}
+{{- $mongos_res := dict -}}
+{{- $arbiter_res := dict -}}
+{{- $hidden_res := dict -}}
+{{- if eq .Values.spec.mode "Sharded" }}
+  {{- $shard_res = .Values.spec.shardTopology.shard.podResources.resources -}}
+  {{- if and .Values.spec.shardTopology.shard.podResources.machine (hasKey $machines .Values.spec.shardTopology.shard.podResources.machine) }}
+    {{- $shard_res = get (get $machines .Values.spec.shardTopology.shard.podResources.machine) "resources" }}
+  {{- end }}
+  {{- $configServer_res = .Values.spec.shardTopology.configServer.podResources.resources -}}
+  {{- if and .Values.spec.shardTopology.configServer.podResources.machine (hasKey $machines .Values.spec.shardTopology.configServer.podResources.machine) }}
+    {{- $configServer_res = get (get $machines .Values.spec.shardTopology.configServer.podResources.machine) "resources" }}
+  {{- end }}
+  {{- $mongos_res = .Values.spec.shardTopology.mongos.podResources.resources -}}
+  {{- if and .Values.spec.shardTopology.mongos.podResources.machine (hasKey $machines .Values.spec.shardTopology.mongos.podResources.machine) }}
+    {{- $mongos_res = get (get $machines .Values.spec.shardTopology.mongos.podResources.machine) "resources" }}
+  {{- end }}
+{{- else }}
+  {{- $res = .Values.spec.podResources.resources -}}
+  {{- if and .Values.spec.podResources.machine (hasKey $machines .Values.spec.podResources.machine) }}
+    {{- $res = get (get $machines .Values.spec.podResources.machine) "resources" }}
+  {{- end }}
+{{- end }}
+{{- if .Values.spec.arbiter.enabled }}
+  {{- $arbiter_res = .Values.spec.arbiter.podResources.resources -}}
+  {{- if and .Values.spec.arbiter.podResources.machine (hasKey $machines .Values.spec.arbiter.podResources.machine) }}
+    {{- $arbiter_res = get (get $machines .Values.spec.arbiter.podResources.machine) "resources" }}
+  {{- end }}
+{{- end }}
+{{- if .Values.spec.hidden.enabled }}
+  {{- $hidden_res = .Values.spec.hidden.podResources.resources -}}
+  {{- if and .Values.spec.hidden.podResources.machine (hasKey $machines .Values.spec.hidden.podResources.machine) }}
+    {{- $hidden_res = get (get $machines .Values.spec.hidden.podResources.machine) "resources" }}
+  {{- end }}
 {{- end }}
 {{ $poolName := printf "%s-%s-%s" .Values.form.capi.clusterName .Release.Namespace (include "kubedbcom-mongodb-editor-options.fullname" .) }}
 
@@ -40,7 +73,7 @@ spec:
       podTemplate:
         spec:
           resources:
-            {{- toYaml $res | nindent 12 }}
+            {{- toYaml $configServer_res | nindent 12 }}
           {{- if and .Values.form.capi.provider .Values.form.capi.dedicated }}
           nodeSelector:
             nodes.klusters.dev/pool: {{ $poolName }}
@@ -60,7 +93,7 @@ spec:
       podTemplate:
         spec:
           resources:
-            {{- toYaml $res | nindent 12 }}
+            {{- toYaml $mongos_res | nindent 12 }}
           {{- if and .Values.form.capi.provider .Values.form.capi.dedicated }}
           nodeSelector:
             nodes.klusters.dev/pool: {{ $poolName }}
@@ -76,7 +109,7 @@ spec:
       podTemplate:
         spec:
           resources:
-            {{- toYaml $res | nindent 12 }}
+            {{- toYaml $shard_res | nindent 12 }}
           {{- if and .Values.form.capi.provider .Values.form.capi.dedicated }}
           nodeSelector:
             nodes.klusters.dev/pool: {{ $poolName }}
@@ -105,6 +138,44 @@ spec:
           value: "true"
           effect: "NoSchedule"
       {{- end }}
+{{- end }}
+{{- if .Values.spec.arbiter.enabled }}
+  arbiter:
+    podTemplate:
+      spec:
+        resources:
+          {{- toYaml $arbiter_res | nindent 8 }}
+        {{- if and .Values.form.capi.provider .Values.form.capi.dedicated }}
+        nodeSelector:
+          nodes.klusters.dev/pool: {{ $poolName }}
+        tolerations:
+          - key: dedicated
+            operator: "Equal"
+            value: "true"
+            effect: "NoSchedule"
+        {{- end }}
+{{- end }}
+{{- if .Values.spec.hidden.enabled }}
+  hidden:
+    replicas: {{ .Values.spec.hidden.replicas }}
+    podTemplate:
+      spec:
+        resources:
+          {{- toYaml $hidden_res | nindent 8 }}
+        {{- if and .Values.form.capi.provider .Values.form.capi.dedicated }}
+        nodeSelector:
+          nodes.klusters.dev/pool: {{ $poolName }}
+        tolerations:
+          - key: dedicated
+            operator: "Equal"
+            value: "true"
+            effect: "NoSchedule"
+        {{- end }}
+    storage:
+      resources:
+        requests:
+          storage: {{ .Values.spec.hidden.persistence.size }}
+      storageClassName: {{ .Values.spec.storageClass.name }}
 {{- end }}
   terminationPolicy: {{ .Values.spec.terminationPolicy }}
   clusterAuthMode: {{ .Values.spec.clusterAuthMode }}
