@@ -25,21 +25,21 @@ steps:
         type: select
       if: isConsole
       type: single-step-form
-    - label:
+    - hasDescription: true
+      if: isConsole
+      label:
         text: labels.selectType
-      hasDescription: true
       onChange: initMetadata
       options:
-      - text: Compute
+      - description: Scale your CPU Memory based on resource usage
+        text: Compute
         value: compute
-        description: 'Scale your CPU Memory based on resource usage'
-      - text: Storage
+      - description: Expand your database size based on volume usage
+        text: Storage
         value: storage
-        description: 'Expand your database size based on volume usage'
       required: true
       schema:
         $ref: discriminator#/properties/autoscalingType
-      if: isConsole
       type: radio
     - elements:
       - elements:
@@ -48,8 +48,8 @@ steps:
             label:
               text: labels.trigger
             options:
-              - "On"
-              - "Off"
+            - "On"
+            - "Off"
             schema:
               $ref: schema#/properties/spec/properties/compute/properties/standalone/properties/trigger
             type: select
@@ -103,16 +103,15 @@ steps:
             schema:
               $ref: schema#/properties/spec/properties/compute/properties/standalone/properties/controlledResources
             type: multiselect
-
           schema:
             $ref: schema#/properties/spec/properties/compute/properties/standalone
           type: single-step-form
+        if: mongoTypeEqualsTo|standalone
         label:
           text: labels.standalone
-        show_label: true
         schema:
           $ref: schema#/properties/spec/properties/compute/properties/standalone
-        if: mongoTypeEqualsTo|standalone
+        show_label: true
         type: single-step-form
       - elements:
         - elements:
@@ -120,8 +119,8 @@ steps:
             label:
               text: labels.trigger
             options:
-              - "On"
-              - "Off"
+            - "On"
+            - "Off"
             schema:
               $ref: schema#/properties/spec/properties/compute/properties/replicaSet/properties/trigger
             type: select
@@ -175,16 +174,15 @@ steps:
             schema:
               $ref: schema#/properties/spec/properties/compute/properties/replicaSet/properties/controlledResources
             type: multiselect
-
           schema:
             $ref: schema#/properties/spec/properties/compute/properties/replicaSet
           type: single-step-form
+        if: mongoTypeEqualsTo|replicaSet
         label:
           text: labels.replicaSet
-        show_label: true
         schema:
           $ref: schema#/properties/spec/properties/compute/properties/replicaSet
-        if: mongoTypeEqualsTo|replicaSet
+        show_label: true
         type: single-step-form
       - elements:
         - elements:
@@ -192,8 +190,8 @@ steps:
             label:
               text: labels.trigger
             options:
-              - "On"
-              - "Off"
+            - "On"
+            - "Off"
             schema:
               $ref: schema#/properties/spec/properties/compute/properties/shard/properties/trigger
             type: select
@@ -249,17 +247,17 @@ steps:
             type: multiselect
           label:
             text: labels.shard
-          show_label: true
           schema:
             $ref: schema#/properties/spec/properties/compute/properties/shard
+          show_label: true
           type: single-step-form
         - elements:
           - computed: setTrigger
             label:
               text: labels.trigger
             options:
-              - "On"
-              - "Off"
+            - "On"
+            - "Off"
             schema:
               $ref: schema#/properties/spec/properties/compute/properties/configServer/properties/trigger
             type: select
@@ -315,17 +313,17 @@ steps:
             type: multiselect
           label:
             text: labels.configServer
-          show_label: true
           schema:
             $ref: schema#/properties/spec/properties/compute/properties/configServer
+          show_label: true
           type: single-step-form
         - elements:
           - computed: setTrigger
             label:
               text: labels.trigger
             options:
-              - "On"
-              - "Off"
+            - "On"
+            - "Off"
             schema:
               $ref: schema#/properties/spec/properties/compute/properties/mongos/properties/trigger
             type: select
@@ -381,9 +379,9 @@ steps:
             type: multiselect
           label:
             text: labels.mongos
-          show_label: true
           schema:
             $ref: schema#/properties/spec/properties/compute/properties/mongos
+          show_label: true
           type: single-step-form
         if: mongoTypeEqualsTo|sharded
         type: single-step-form
@@ -406,12 +404,11 @@ steps:
           schema:
             $ref: schema#/properties/spec/properties/compute/properties/nodeTopology/properties/scaleDownDiffPercentage
           type: input
-        
         label:
           text: labels.nodeTopology
-        show_label: true
         schema:
           $ref: schema#/properties/spec/properties/compute/properties/nodeTopology
+        show_label: true
         type: single-step-form
       if: ifScalingTypeEqualsTo|compute
       type: single-step-form
@@ -421,8 +418,8 @@ steps:
           label:
             text: labels.trigger
           options:
-            - "On"
-            - "Off"
+          - "On"
+          - "Off"
           schema:
             $ref: schema#/properties/spec/properties/storage/properties/standalone/properties/trigger
           type: select
@@ -453,6 +450,10 @@ steps:
                 $ref: schema#/properties/spec/properties/storage/properties/standalone/properties/scalingRules/items/properties/threshold
               type: input
             type: single-step-form
+          label:
+            text: labels.scalingRules
+          schema:
+            $ref: schema#/properties/spec/properties/storage/properties/standalone/properties/scalingRules
           tableContents:
           - inTableColumn: true
             label:
@@ -466,30 +467,26 @@ steps:
             path: threshold
             type: value
             typeOfValue: string
-          label:
-            text: labels.scalingRules
-          schema:
-              $ref: schema#/properties/spec/properties/storage/properties/standalone/properties/scalingRules
           type: single-step-form-array
         - label:
             text: labels.upperBound
           schema:
             $ref: schema#/properties/spec/properties/storage/properties/standalone/properties/upperBound
           type: input
+        if: mongoTypeEqualsTo|standalone
         label:
           text: labels.standalone
-        show_label: true
         schema:
           $ref: schema#/properties/spec/properties/compute/properties/standalone
-        if: mongoTypeEqualsTo|standalone
+        show_label: true
         type: single-step-form
       - elements:
         - computed: setTrigger
           label:
             text: labels.trigger
           options:
-            - "On"
-            - "Off"
+          - "On"
+          - "Off"
           schema:
             $ref: schema#/properties/spec/properties/storage/properties/replicaSet/properties/trigger
           type: select
@@ -520,6 +517,10 @@ steps:
                 $ref: schema#/properties/spec/properties/storage/properties/replicaSet/properties/scalingRules/items/properties/threshold
               type: input
             type: single-step-form
+          label:
+            text: labels.scalingRules
+          schema:
+            $ref: schema#/properties/spec/properties/storage/properties/replicaSet/properties/scalingRules
           tableContents:
           - inTableColumn: true
             label:
@@ -533,22 +534,18 @@ steps:
             path: threshold
             type: value
             typeOfValue: string
-          label:
-            text: labels.scalingRules
-          schema:
-              $ref: schema#/properties/spec/properties/storage/properties/replicaSet/properties/scalingRules
           type: single-step-form-array
         - label:
             text: labels.upperBound
           schema:
             $ref: schema#/properties/spec/properties/storage/properties/replicaSet/properties/upperBound
           type: input
+        if: mongoTypeEqualsTo|replicaSet
         label:
           text: labels.replicaSet
-        show_label: true
         schema:
           $ref: schema#/properties/spec/properties/compute/properties/replicaSet
-        if: mongoTypeEqualsTo|replicaSet
+        show_label: true
         type: single-step-form
       - elements:
         - elements:
@@ -556,8 +553,8 @@ steps:
             label:
               text: labels.trigger
             options:
-              - "On"
-              - "Off"
+            - "On"
+            - "Off"
             schema:
               $ref: schema#/properties/spec/properties/storage/properties/shard/properties/trigger
             type: select
@@ -588,6 +585,10 @@ steps:
                   $ref: schema#/properties/spec/properties/storage/properties/shard/properties/scalingRules/items/properties/threshold
                 type: input
               type: single-step-form
+            label:
+              text: labels.scalingRules
+            schema:
+              $ref: schema#/properties/spec/properties/storage/properties/shard/properties/scalingRules
             tableContents:
             - inTableColumn: true
               label:
@@ -601,10 +602,6 @@ steps:
               path: threshold
               type: value
               typeOfValue: string
-            label:
-              text: labels.scalingRules
-            schema:
-                $ref: schema#/properties/spec/properties/storage/properties/shard/properties/scalingRules
             type: single-step-form-array
           - label:
               text: labels.upperBound
@@ -613,17 +610,17 @@ steps:
             type: input
           label:
             text: labels.shard
-          show_label: true
           schema:
-              $ref: schema#/properties/spec/properties/storage/properties/shard
+            $ref: schema#/properties/spec/properties/storage/properties/shard
+          show_label: true
           type: single-step-form
         - elements:
           - computed: setTrigger
             label:
               text: labels.trigger
             options:
-              - "On"
-              - "Off"
+            - "On"
+            - "Off"
             schema:
               $ref: schema#/properties/spec/properties/storage/properties/configServer/properties/trigger
             type: select
@@ -654,6 +651,10 @@ steps:
                   $ref: schema#/properties/spec/properties/storage/properties/configServer/properties/scalingRules/items/properties/threshold
                 type: input
               type: single-step-form
+            label:
+              text: labels.scalingRules
+            schema:
+              $ref: schema#/properties/spec/properties/storage/properties/configServer/properties/scalingRules
             tableContents:
             - inTableColumn: true
               label:
@@ -667,10 +668,6 @@ steps:
               path: threshold
               type: value
               typeOfValue: string
-            label:
-              text: labels.scalingRules
-            schema:
-                $ref: schema#/properties/spec/properties/storage/properties/configServer/properties/scalingRules
             type: single-step-form-array
           - label:
               text: labels.upperBound
@@ -679,12 +676,12 @@ steps:
             type: input
           label:
             text: labels.configServer
-          show_label: true
           schema:
-              $ref: schema#/properties/spec/properties/storage/properties/configServer
+            $ref: schema#/properties/spec/properties/storage/properties/configServer
+          show_label: true
           type: single-step-form
         if: mongoTypeEqualsTo|sharded
-        type: single-step-form     
+        type: single-step-form
       if: ifScalingTypeEqualsTo|storage
       type: single-step-form
     - elements:
@@ -738,9 +735,9 @@ steps:
       if: showOpsRequestOptions
       label:
         text: labels.opsRequestOptions
-      show_label: true
       schema:
-          $ref: schema#/properties/spec/properties/opsRequestOptions
+        $ref: schema#/properties/spec/properties/opsRequestOptions
+      show_label: true
       type: single-step-form
     type: single-step-form
   id: basic

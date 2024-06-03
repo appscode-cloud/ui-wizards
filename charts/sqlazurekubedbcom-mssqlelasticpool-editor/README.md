@@ -7,8 +7,8 @@
 ```bash
 $ helm repo add appscode-charts-oci https://bundles.byte.builders/ui/
 $ helm repo update
-$ helm search repo appscode-charts-oci/sqlazurekubedbcom-mssqlelasticpool-editor --version=v0.4.19
-$ helm upgrade -i sqlazurekubedbcom-mssqlelasticpool-editor appscode-charts-oci/sqlazurekubedbcom-mssqlelasticpool-editor -n default --create-namespace --version=v0.4.19
+$ helm search repo appscode-charts-oci/sqlazurekubedbcom-mssqlelasticpool-editor --version=v0.4.20
+$ helm upgrade -i sqlazurekubedbcom-mssqlelasticpool-editor appscode-charts-oci/sqlazurekubedbcom-mssqlelasticpool-editor -n default --create-namespace --version=v0.4.20
 ```
 
 ## Introduction
@@ -24,7 +24,7 @@ This chart deploys a MSSQLElasticPool Editor on a [Kubernetes](http://kubernetes
 To install/upgrade the chart with the release name `sqlazurekubedbcom-mssqlelasticpool-editor`:
 
 ```bash
-$ helm upgrade -i sqlazurekubedbcom-mssqlelasticpool-editor appscode-charts-oci/sqlazurekubedbcom-mssqlelasticpool-editor -n default --create-namespace --version=v0.4.19
+$ helm upgrade -i sqlazurekubedbcom-mssqlelasticpool-editor appscode-charts-oci/sqlazurekubedbcom-mssqlelasticpool-editor -n default --create-namespace --version=v0.4.20
 ```
 
 The command deploys a MSSQLElasticPool Editor on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
@@ -56,12 +56,12 @@ The following table lists the configurable parameters of the `sqlazurekubedbcom-
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm upgrade -i`. For example:
 
 ```bash
-$ helm upgrade -i sqlazurekubedbcom-mssqlelasticpool-editor appscode-charts-oci/sqlazurekubedbcom-mssqlelasticpool-editor -n default --create-namespace --version=v0.4.19 --set apiVersion=sql.azure.kubedb.com/v1alpha1
+$ helm upgrade -i sqlazurekubedbcom-mssqlelasticpool-editor appscode-charts-oci/sqlazurekubedbcom-mssqlelasticpool-editor -n default --create-namespace --version=v0.4.20 --set apiVersion=sql.azure.kubedb.com/v1alpha1
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
 installing the chart. For example:
 
 ```bash
-$ helm upgrade -i sqlazurekubedbcom-mssqlelasticpool-editor appscode-charts-oci/sqlazurekubedbcom-mssqlelasticpool-editor -n default --create-namespace --version=v0.4.19 --values values.yaml
+$ helm upgrade -i sqlazurekubedbcom-mssqlelasticpool-editor appscode-charts-oci/sqlazurekubedbcom-mssqlelasticpool-editor -n default --create-namespace --version=v0.4.20 --values values.yaml
 ```

@@ -74,11 +74,11 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/mode
       type: radio
-    - label:
+    - if: isEqualToModelPathValue|Standalone|/spec/mode
+      label:
         text: labels.storage.size
       schema:
         $ref: schema#/properties/spec/properties/persistence/properties/size
-      if: isEqualToModelPathValue|Standalone|/spec/mode
       type: input
     - elements:
       - label:
@@ -86,9 +86,9 @@ steps:
         schema:
           $ref: schema#/properties/spec/properties/topology/properties/aggregator/properties/persistence/properties/size
         type: input
-      - label:
+      - computed: setReplicaNumber
+        label:
           text: labels.replicaset.number
-        computed: setReplicaNumber
         schema:
           $ref: schema#/properties/spec/properties/topology/properties/aggregator/properties/replicas
         type: input
@@ -125,9 +125,9 @@ steps:
         schema:
           $ref: schema#/properties/spec/properties/topology/properties/leaf/properties/persistence/properties/size
         type: input
-      - label:
+      - computed: setReplicaNumber
+        label:
           text: labels.replicaset.number
-        computed: setReplicaNumber
         schema:
           $ref: schema#/properties/spec/properties/topology/properties/leaf/properties/replicas
         type: input

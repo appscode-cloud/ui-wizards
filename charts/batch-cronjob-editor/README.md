@@ -7,8 +7,8 @@
 ```bash
 $ helm repo add appscode-charts-oci https://bundles.byte.builders/ui/
 $ helm repo update
-$ helm search repo appscode-charts-oci/batch-cronjob-editor --version=v0.4.19
-$ helm upgrade -i batch-cronjob-editor appscode-charts-oci/batch-cronjob-editor -n default --create-namespace --version=v0.4.19
+$ helm search repo appscode-charts-oci/batch-cronjob-editor --version=v0.4.20
+$ helm upgrade -i batch-cronjob-editor appscode-charts-oci/batch-cronjob-editor -n default --create-namespace --version=v0.4.20
 ```
 
 ## Introduction
@@ -24,7 +24,7 @@ This chart deploys a CronJob Editor on a [Kubernetes](http://kubernetes.io) clus
 To install/upgrade the chart with the release name `batch-cronjob-editor`:
 
 ```bash
-$ helm upgrade -i batch-cronjob-editor appscode-charts-oci/batch-cronjob-editor -n default --create-namespace --version=v0.4.19
+$ helm upgrade -i batch-cronjob-editor appscode-charts-oci/batch-cronjob-editor -n default --create-namespace --version=v0.4.20
 ```
 
 The command deploys a CronJob Editor on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
@@ -56,12 +56,12 @@ The following table lists the configurable parameters of the `batch-cronjob-edit
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm upgrade -i`. For example:
 
 ```bash
-$ helm upgrade -i batch-cronjob-editor appscode-charts-oci/batch-cronjob-editor -n default --create-namespace --version=v0.4.19 --set apiVersion=batch/v1
+$ helm upgrade -i batch-cronjob-editor appscode-charts-oci/batch-cronjob-editor -n default --create-namespace --version=v0.4.20 --set apiVersion=batch/v1
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
 installing the chart. For example:
 
 ```bash
-$ helm upgrade -i batch-cronjob-editor appscode-charts-oci/batch-cronjob-editor -n default --create-namespace --version=v0.4.19 --values values.yaml
+$ helm upgrade -i batch-cronjob-editor appscode-charts-oci/batch-cronjob-editor -n default --create-namespace --version=v0.4.20 --values values.yaml
 ```
