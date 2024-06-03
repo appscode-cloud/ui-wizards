@@ -1,7 +1,26 @@
-{{- $res := .Values.spec.resources -}}
 {{- $machines := .Files.Get "data/machines.yaml" | fromYaml -}}
-{{- if and .Values.spec.machine (hasKey $machines .Values.spec.machine) }}
-  {{- $res = get (get $machines .Values.spec.machine) "resources" }}
+{{- $res := dict -}}
+{{- $overseer_res := dict -}}
+{{- $data_res := dict -}}
+{{- $coordinator_res := dict -}}
+{{- if eq .Values.spec.mode "Topology" }}
+  {{- $overseer_res = .Values.spec.topology.overseer.podResources.resources -}}
+  {{- if and .Values.spec.topology.overseer.podResources.machine (hasKey $machines .Values.spec.topology.overseer.podResources.machine) }}
+    {{- $overseer_res = get (get $machines .Values.spec.topology.overseer.podResources.machine) "resources" }}
+  {{- end }}
+  {{- $data_res = .Values.spec.topology.data.podResources.resources -}}
+  {{- if and .Values.spec.topology.data.podResources.machine (hasKey $machines .Values.spec.topology.data.podResources.machine) }}
+    {{- $data_res = get (get $machines .Values.spec.topology.data.podResources.machine) "resources" }}
+  {{- end }}
+  {{- $coordinator_res = .Values.spec.topology.coordinator.podResources.resources -}}
+  {{- if and .Values.spec.topology.coordinator.podResources.machine (hasKey $machines .Values.spec.topology.coordinator.podResources.machine) }}
+    {{- $coordinator_res = get (get $machines .Values.spec.topology.coordinator.podResources.machine) "resources" }}
+  {{- end }}
+{{- else }}
+  {{- $res = .Values.spec.podResources.resources -}}
+  {{- if and .Values.spec.podResources.machine (hasKey $machines .Values.spec.podResources.machine) }}
+    {{- $res = get (get $machines .Values.spec.podResources.machine) "resources" }}
+  {{- end }}
 {{- end }}
 {{ $poolName := printf "%s-%s-%s" .Values.form.capi.clusterName .Release.Namespace (include "kubedbcom-solr-editor-options.fullname" .) }}
 
@@ -18,80 +37,87 @@ metadata:
 {{- end }}
 spec:
   version: {{ .Values.spec.version | quote }}
-{{- if or (eq .Values.spec.mode "Standalone") (eq .Values.spec.mode "Replicaset") }}
-  replicas: {{ (eq .Values.spec.mode "Replicaset") | ternary .Values.spec.replicaSet.replicas 1 }}
-  storageType: Durable
+{{- if eq .Values.spec.mode "Topology" }}
+  topology:
+    overseer:
+      replicas: {{ .Values.spec.topology.overseer.replicas }}
+      storage:
+        storageClassName: {{ .Values.spec.storageClass.name }}
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: {{ .Values.spec.topology.overseer.persistence.size }}
+      podTemplate:
+        spec:
+          resources:
+            {{- toYaml $overseer_res | nindent 12 }}
+          {{- if and .Values.form.capi.provider .Values.form.capi.dedicated }}
+          nodeSelector:
+            nodes.klusters.dev/pool: {{ $poolName }}
+          tolerations:
+            - key: dedicated
+              operator: "Equal"
+              value: "true"
+              effect: "NoSchedule"
+          {{- end }}
+    data:
+      replicas: {{ .Values.spec.topology.data.replicas }}
+      storage:
+        storageClassName: {{ .Values.spec.storageClass.name }}
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: {{ .Values.spec.topology.data.persistence.size }}
+      podTemplate:
+        spec:
+          resources:
+            {{- toYaml $data_res | nindent 12 }}
+          {{- if and .Values.form.capi.provider .Values.form.capi.dedicated }}
+          nodeSelector:
+            nodes.klusters.dev/pool: {{ $poolName }}
+          tolerations:
+            - key: dedicated
+              operator: "Equal"
+              value: "true"
+              effect: "NoSchedule"
+          {{- end }}
+    coordinator:
+      replicas: {{ .Values.spec.topology.coordinator.replicas }}
+      storage:
+        storageClassName: {{ .Values.spec.storageClass.name }}
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: {{ .Values.spec.topology.coordinator.persistence.size }}
+      podTemplate:
+        spec:
+          resources:
+            {{- toYaml $coordinator_res | nindent 12 }}
+          {{- if and .Values.form.capi.provider .Values.form.capi.dedicated }}
+          nodeSelector:
+            nodes.klusters.dev/pool: {{ $poolName }}
+          tolerations:
+            - key: dedicated
+              operator: "Equal"
+              value: "true"
+              effect: "NoSchedule"
+          {{- end }}
+{{- else }}
+  {{- if eq .Values.spec.mode "Replicaset" }}
+  replicas: {{ .Values.spec.replicaSet.replicas }}
+  {{- else }}
+  replicas: 1
+  {{- end }}
   storage:
     storageClassName: {{ .Values.spec.storageClass.name }}
     accessModes:
-    - ReadWriteOnce
+      - ReadWriteOnce
     resources:
       requests:
         storage: {{ .Values.spec.persistence.size }}
-{{- end }}
-{{- if eq .Values.spec.mode "Replicaset" }}
-  replicaSet:
-    name: {{ .Values.spec.replicaSet.name }}
-{{- end }}
-{{- if eq .Values.spec.mode "Sharded" }}
-  shardTopology:
-    configServer:
-      replicas: {{ .Values.spec.shardTopology.configServer.replicas }}
-      podTemplate:
-        spec:
-          resources:
-            {{- toYaml $res | nindent 12 }}
-          {{- if and .Values.form.capi.provider .Values.form.capi.dedicated }}
-          nodeSelector:
-            nodes.klusters.dev/pool: {{ $poolName }}
-          tolerations:
-            - key: dedicated
-              operator: "Equal"
-              value: "true"
-              effect: "NoSchedule"
-          {{- end }}
-      storage:
-        resources:
-          requests:
-            storage: {{ .Values.spec.shardTopology.configServer.persistence.size }}
-        storageClassName: {{ .Values.spec.storageClass.name }}
-    mongos:
-      replicas: {{ .Values.spec.shardTopology.mongos.replicas }}
-      podTemplate:
-        spec:
-          resources:
-            {{- toYaml $res | nindent 12 }}
-          {{- if and .Values.form.capi.provider .Values.form.capi.dedicated }}
-          nodeSelector:
-            nodes.klusters.dev/pool: {{ $poolName }}
-          tolerations:
-            - key: dedicated
-              operator: "Equal"
-              value: "true"
-              effect: "NoSchedule"
-          {{- end }}
-    shard:
-      shards: {{ .Values.spec.shardTopology.shard.shards }}
-      replicas: {{ .Values.spec.shardTopology.shard.replicas }}
-      podTemplate:
-        spec:
-          resources:
-            {{- toYaml $res | nindent 12 }}
-          {{- if and .Values.form.capi.provider .Values.form.capi.dedicated }}
-          nodeSelector:
-            nodes.klusters.dev/pool: {{ $poolName }}
-          tolerations:
-            - key: dedicated
-              operator: "Equal"
-              value: "true"
-              effect: "NoSchedule"
-          {{- end }}
-      storage:
-        resources:
-          requests:
-            storage: {{ .Values.spec.shardTopology.shard.persistence.size }}
-        storageClassName: {{ .Values.spec.storageClass.name }}
-{{- else }}
   podTemplate:
     spec:
       resources:
@@ -106,9 +132,6 @@ spec:
           effect: "NoSchedule"
       {{- end }}
 {{- end }}
-  terminationPolicy: {{ .Values.spec.terminationPolicy }}
-  clusterAuthMode: {{ .Values.spec.clusterAuthMode }}
-  sslMode: {{ .Values.spec.sslMode }}
 {{- if .Values.spec.authSecret.name }}
   authSecret:
     name: {{ .Values.spec.authSecret.name }}

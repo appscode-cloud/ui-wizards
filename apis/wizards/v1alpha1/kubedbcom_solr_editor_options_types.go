@@ -18,7 +18,6 @@ package v1alpha1
 
 import (
 	alerts "go.appscode.dev/alerts/apis/alerts/v1alpha1"
-	core "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	api "x-helm.dev/apimachinery/apis/releases/v1alpha1"
 )
@@ -46,51 +45,38 @@ type KubedbcomSolrEditorOptionsSpecSpec struct {
 	// +optional
 	Annotations map[string]string `json:"annotations"`
 	// +optional
-	Labels            map[string]string         `json:"labels"`
-	Version           string                    `json:"version"`
-	Mode              SolrMode                  `json:"mode"`
-	ReplicaSet        SolrReplicaSet            `json:"replicaSet"`
-	ShardTopology     SolrShardTopology         `json:"shardTopology"`
-	ClusterAuthMode   SolrClusterAuthMode       `json:"clusterAuthMode"`
-	SslMode           SolrSSLMode               `json:"sslMode"`
-	TerminationPolicy TerminationPolicy         `json:"terminationPolicy"`
-	StorageClass      StorageClass              `json:"storageClass"`
-	Persistence       Persistence               `json:"persistence"`
-	Machine           MachineType               `json:"machine"`
-	Resources         core.ResourceRequirements `json:"resources"`
-	AuthSecret        AuthSecret                `json:"authSecret"`
-	Monitoring        Monitoring                `json:"monitoring"`
-	Backup            BackupToolSpec            `json:"backup"`
+	Labels            map[string]string `json:"labels"`
+	Version           string            `json:"version"`
+	Mode              SolrMode          `json:"mode"`
+	ReplicaSet        SolrReplicaSet    `json:"replicaSet"`
+	Topology          SolrTopology      `json:"topology"`
+	TerminationPolicy TerminationPolicy `json:"terminationPolicy"`
+	StorageClass      StorageClass      `json:"storageClass"`
+	ZookeeperRef      ObjectReference   `json:"zookeeperRef"`
+	Persistence       Persistence       `json:"persistence"`
+	PodResources      PodResources      `json:"podResources"`
+	AuthSecret        AuthSecret        `json:"authSecret"`
+	Monitoring        Monitoring        `json:"monitoring"`
+	Backup            BackupToolSpec    `json:"backup"`
 }
 
-// +kubebuilder:validation:Enum=Standalone;Replicaset;Sharded
+// +kubebuilder:validation:Enum=Standalone;Replicaset;Topology
 type SolrMode string
 
-// +kubebuilder:validation:Enum=keyFile;sendKeyFile;sendX509;x509
-type SolrClusterAuthMode string
-
-// +kubebuilder:validation:Enum=disabled;allowSSL;preferSSL;requireSSL
-type SolrSSLMode string
-
 type SolrReplicaSet struct {
-	Name     string `json:"name"`
-	Replicas int    `json:"replicas"`
+	Replicas int `json:"replicas"`
 }
 
-type SolrShard struct {
-	Replicas    int         `json:"replicas"`
-	Shards      int         `json:"shards"`
-	Persistence Persistence `json:"persistence"`
+type SolrNode struct {
+	Replicas     int          `json:"replicas"`
+	PodResources PodResources `json:"podResources"`
+	Persistence  Persistence  `json:"persistence"`
 }
 
-type SolrConfigServer struct {
-	Replicas    int         `json:"replicas"`
-	Persistence Persistence `json:"persistence"`
-}
-
-type SolrShardTopology struct {
-	Shard        SolrShard        `json:"shard"`
-	ConfigServer SolrConfigServer `json:"configServer"`
+type SolrTopology struct {
+	Overseer    *SolrNode `json:"overseer"`
+	Data        *SolrNode `json:"data"`
+	Coordinator *SolrNode `json:"coordinator"`
 }
 
 type SolrAlertsSpecForm struct {

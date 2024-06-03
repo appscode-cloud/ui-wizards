@@ -18,73 +18,71 @@ package v1alpha1
 
 import (
 	alerts "go.appscode.dev/alerts/apis/alerts/v1alpha1"
-	core "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	api "x-helm.dev/apimachinery/apis/releases/v1alpha1"
 )
 
-// KubedbcomSingleStoreEditorOptions defines the schama for SingleStore Editor UI Options.
+// KubedbcomSinglestoreEditorOptions defines the schama for Singlestore Editor UI Options.
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
 // +kubebuilder:object:root=true
 // +kubebuilder:resource:path=kubedbcomsinglestoreeditoroptionss,singular=kubedbcomsinglestoreeditoroptions
-type KubedbcomSingleStoreEditorOptions struct {
+type KubedbcomSinglestoreEditorOptions struct {
 	metav1.TypeMeta   `json:",inline,omitempty"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	Spec              KubedbcomSingleStoreEditorOptionsSpec `json:"spec,omitempty"`
+	Spec              KubedbcomSinglestoreEditorOptionsSpec `json:"spec,omitempty"`
 }
 
-// KubedbcomSingleStoreEditorOptionsSpec is the schema for SingleStore profile values file
-type KubedbcomSingleStoreEditorOptionsSpec struct {
+// KubedbcomSinglestoreEditorOptionsSpec is the schema for Singlestore profile values file
+type KubedbcomSinglestoreEditorOptionsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
-	Spec         KubedbcomSingleStoreEditorOptionsSpecSpec `json:"spec"`
-	Form         SingleStoreAlertsSpecForm                 `json:"form"`
+	Spec         KubedbcomSinglestoreEditorOptionsSpecSpec `json:"spec"`
+	Form         SinglestoreAlertsSpecForm                 `json:"form"`
 }
 
-type KubedbcomSingleStoreEditorOptionsSpecSpec struct {
+type KubedbcomSinglestoreEditorOptionsSpecSpec struct {
 	Version string `json:"version"`
 	// +optional
 	Annotations map[string]string `json:"annotations"`
 	// +optional
-	Labels map[string]string `json:"labels"`
-	Mode   SingleStoreMode   `json:"mode"`
-	// +optional
-	Replicas int `json:"replicas,omitempty"`
-	// +optional
-	InnoDBCluster     SingleStoreInnoDBCluster  `json:"innoDBCluster,omitempty"`
-	TerminationPolicy TerminationPolicy         `json:"terminationPolicy"`
-	StorageClass      StorageClass              `json:"storageClass"`
-	Persistence       Persistence               `json:"persistence"`
-	Machine           MachineType               `json:"machine"`
-	Resources         core.ResourceRequirements `json:"resources"`
-	AuthSecret        AuthSecret                `json:"authSecret"`
-	Monitoring        Monitoring                `json:"monitoring"`
-	Backup            BackupToolSpec            `json:"backup"`
+	Labels            map[string]string   `json:"labels"`
+	Mode              SinglestoreMode     `json:"mode"`
+	TerminationPolicy TerminationPolicy   `json:"terminationPolicy"`
+	StorageClass      StorageClass        `json:"storageClass"`
+	Persistence       Persistence         `json:"persistence"`
+	PodResources      PodResources        `json:"podResources"`
+	Topology          SinglestoreTopology `json:"topology"`
+	AuthSecret        AuthSecret          `json:"authSecret"`
+	Monitoring        Monitoring          `json:"monitoring"`
+	Backup            BackupToolSpec      `json:"backup"`
 }
 
-type SingleStoreInnoDBCluster struct {
-	Router SingleStoreRouter `json:"router"`
+// +kubebuilder:validation:Enum=Standalone;Topology
+type SinglestoreMode string
+
+type SinglestoreTopology struct {
+	Aggregator *SinglestoreNode `json:"aggregator"`
+	Leaf       *SinglestoreNode `json:"leaf"`
 }
 
-type SingleStoreRouter struct {
-	Replicas int `json:"replicas"`
+type SinglestoreNode struct {
+	Replicas     int          `json:"replicas"`
+	PodResources PodResources `json:"podResources"`
+	Persistence  Persistence  `json:"persistence"`
 }
 
-// +kubebuilder:validation:Enum=Standalone;GroupReplication;InnoDBCluster
-type SingleStoreMode string
-
-type SingleStoreAlertsSpecForm struct {
+type SinglestoreAlertsSpecForm struct {
 	Alert alerts.SinglestoreAlert `json:"alert"`
 	CAPI  CAPIFormSpec            `json:"capi"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
-// KubedbcomSingleStoreEditorOptionsList is a list of KubedbcomSingleStoreEditorOptionss
-type KubedbcomSingleStoreEditorOptionsList struct {
+// KubedbcomSinglestoreEditorOptionsList is a list of KubedbcomSinglestoreEditorOptionss
+type KubedbcomSinglestoreEditorOptionsList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	// Items is a list of KubedbcomSingleStoreEditorOptions CRD objects
-	Items []KubedbcomSingleStoreEditorOptions `json:"items,omitempty"`
+	// Items is a list of KubedbcomSinglestoreEditorOptions CRD objects
+	Items []KubedbcomSinglestoreEditorOptions `json:"items,omitempty"`
 }
