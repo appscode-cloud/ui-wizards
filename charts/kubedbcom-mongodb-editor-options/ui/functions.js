@@ -3,188 +3,257 @@ let storageClassList = [];
 const machines = {
   "db.t.micro": {
     resources: {
-      limits: {
-        cpu: "500m",
-        memory: "1Gi",
+      requests: {
+        cpu: "250m",
+        memory: "512Mi"
       },
-    },
+      limits: {
+        memory: "1Gi"
+      }
+    }
   },
   "db.t.small": {
     resources: {
-      limits: {
-        cpu: "2",
-        memory: "2Gi",
+      requests: {
+        cpu: "1",
+        memory: "1Gi"
       },
-    },
+      limits: {
+        memory: "2Gi"
+      }
+    }
   },
   "db.t.medium": {
     resources: {
-      limits: {
-        cpu: "2",
-        memory: "4Gi",
+      requests: {
+        cpu: "1",
+        memory: "2Gi"
       },
-    },
+      limits: {
+        memory: "4Gi"
+      }
+    }
   },
   "db.t.large": {
     resources: {
-      limits: {
-        cpu: "2",
-        memory: "8Gi",
+      requests: {
+        cpu: "1",
+        memory: "4Gi"
       },
-    },
+      limits: {
+        memory: "8Gi"
+      }
+    }
   },
   "db.t.xlarge": {
     resources: {
-      limits: {
-        cpu: "4",
-        memory: "16Gi",
+      requests: {
+        cpu: "2",
+        memory: "8Gi"
       },
-    },
+      limits: {
+        memory: "16Gi"
+      }
+    }
   },
   "db.t.2xlarge": {
     resources: {
-      limits: {
-        cpu: "8",
-        memory: "32Gi",
+      requests: {
+        cpu: "4",
+        memory: "16Gi"
       },
-    },
+      limits: {
+        memory: "32Gi"
+      }
+    }
   },
   "db.m.small": {
     resources: {
-      limits: {
-        cpu: "1",
-        memory: "1825361100",
+      requests: {
+        cpu: "500m",
+        memory: "912680550"
       },
-    },
+      limits: {
+        memory: "1825361100"
+      }
+    }
   },
   "db.m.large": {
     resources: {
-      limits: {
-        cpu: "2",
-        memory: "8Gi",
+      requests: {
+        cpu: "1",
+        memory: "4Gi"
       },
-    },
+      limits: {
+        memory: "8Gi"
+      }
+    }
   },
   "db.m.xlarge": {
     resources: {
-      limits: {
-        cpu: "4",
-        memory: "16Gi",
+      requests: {
+        cpu: "2",
+        memory: "8Gi"
       },
-    },
+      limits: {
+        memory: "16Gi"
+      }
+    }
   },
   "db.m.2xlarge": {
     resources: {
-      limits: {
-        cpu: "8",
-        memory: "32Gi",
+      requests: {
+        cpu: "4",
+        memory: "16Gi"
       },
-    },
+      limits: {
+        memory: "32Gi"
+      }
+    }
   },
   "db.m.4xlarge": {
     resources: {
-      limits: {
-        cpu: "16",
-        memory: "64Gi",
+      requests: {
+        cpu: "8",
+        memory: "32Gi"
       },
-    },
+      limits: {
+        memory: "64Gi"
+      }
+    }
   },
   "db.m.8xlarge": {
     resources: {
-      limits: {
-        cpu: "32",
-        memory: "128Gi",
+      requests: {
+        cpu: "16",
+        memory: "64Gi"
       },
-    },
+      limits: {
+        memory: "128Gi"
+      }
+    }
   },
   "db.m.12xlarge": {
     resources: {
-      limits: {
-        cpu: "48",
-        memory: "192Gi",
+      requests: {
+        cpu: "24",
+        memory: "96Gi"
       },
-    },
+      limits: {
+        memory: "192Gi"
+      }
+    }
   },
   "db.m.16xlarge": {
     resources: {
-      limits: {
-        cpu: "64",
-        memory: "256Gi",
+      requests: {
+        cpu: "32",
+        memory: "128Gi"
       },
-    },
+      limits: {
+        memory: "256Gi"
+      }
+    }
   },
   "db.m.24xlarge": {
     resources: {
-      limits: {
-        cpu: "96",
-        memory: "384Gi",
+      requests: {
+        cpu: "48",
+        memory: "192Gi"
       },
-    },
+      limits: {
+        memory: "384Gi"
+      }
+    }
   },
   "db.r.large": {
     resources: {
-      limits: {
-        cpu: "2",
-        memory: "16Gi",
+      requests: {
+        cpu: "1",
+        memory: "8Gi"
       },
-    },
+      limits: {
+        memory: "16Gi"
+      }
+    }
   },
   "db.r.xlarge": {
     resources: {
-      limits: {
-        cpu: "4",
-        memory: "32Gi",
+      requests: {
+        cpu: "2",
+        memory: "16Gi"
       },
-    },
+      limits: {
+        memory: "32Gi"
+      }
+    }
   },
   "db.r.2xlarge": {
     resources: {
-      limits: {
-        cpu: "8",
-        memory: "64Gi",
+      requests: {
+        cpu: "4",
+        memory: "32Gi"
       },
-    },
+      limits: {
+        memory: "64Gi"
+      }
+    }
   },
   "db.r.4xlarge": {
     resources: {
-      limits: {
-        cpu: "16",
-        memory: "192Gi",
+      requests: {
+        cpu: "8",
+        memory: "96Gi"
       },
-    },
+      limits: {
+        memory: "192Gi"
+      }
+    }
   },
   "db.r.8xlarge": {
     resources: {
-      limits: {
-        cpu: "32",
-        memory: "256Gi",
+      requests: {
+        cpu: "16",
+        memory: "128Gi"
       },
-    },
+      limits: {
+        memory: "256Gi"
+      }
+    }
   },
   "db.r.12xlarge": {
     resources: {
-      limits: {
-        cpu: "48",
-        memory: "384Gi",
+      requests: {
+        cpu: "24",
+        memory: "192Gi"
       },
-    },
+      limits: {
+        memory: "384Gi"
+      }
+    }
   },
   "db.r.16xlarge": {
     resources: {
-      limits: {
-        cpu: "64",
-        memory: "512Gi",
+      requests: {
+        cpu: "32",
+        memory: "256Gi"
       },
-    },
+      limits: {
+        memory: "512Gi"
+      }
+    }
   },
   "db.r.24xlarge": {
     resources: {
-      limits: {
-        cpu: "96",
-        memory: "768Gi",
+      requests: {
+        cpu: "24",
+        memory: "384Gi"
       },
-    },
-  },
+      limits: {
+        memory: "768Gi"
+      }
+    }
+  }
 };
 
 const machineList = [
@@ -404,9 +473,9 @@ async function getSecrets({
   return filteredSecrets;
 }
 
-function disableLimit({ model, getValue, watchDependency }) {
-  const modelPathValue = getValue(model, "/spec/machine");
-  watchDependency("model#/spec/machine");
+function isMachineNotCustom({ model, getValue, watchDependency }, path ) {
+  const modelPathValue = getValue(model, `/spec/${path}`);
+  watchDependency(`model#/spec/${path}`);
   return modelPathValue !== "custom" && !!modelPathValue;
 }
 
@@ -418,41 +487,33 @@ function getMachineListForOptions() {
 }
 
 function setResourceLimit({ commit, model, getValue, watchDependency }) {
-  const modelPathValue = getValue(model, "/spec/machine");
-  watchDependency("model#/spec/machine");
+  const modelPathValue = getValue(model, "/spec/podResources/machine");
+  watchDependency("model#/spec/podResources/machine");
   if (modelPathValue && modelPathValue !== "custom") {
     // to avoiding set value by reference, cpu and memory set separately
     commit("wizard/model$update", {
-      path: "/spec/resources/limits/cpu",
-      value: machines[modelPathValue].resources.limits.cpu,
-      force: true,
-    });
-    commit("wizard/model$update", {
-      path: "/spec/resources/limits/memory",
-      value: machines[modelPathValue].resources.limits.memory,
+      path: "/spec/podResources/resources",
+      value: machines[modelPathValue]?.resources,
       force: true,
     });
   }
 }
 
-function setLimitsCpuOrMem({ model, getValue, watchDependency }, path) {
-
+function setLimitsCpuOrMem({ model, getValue, watchDependency }) {
   watchDependency('model#/spec/version');
-  const dbVersion = getValue(model, '/spec/version')
-  const modelPathValue = getValue(model, "/spec/machine");
+  const modelPathValue = getValue(model, "/spec/podResources/machine");
 
   if (modelPathValue && modelPathValue !== "custom") {
     return (
       machines[modelPathValue] &&
-      machines[modelPathValue].resources &&
-      machines[modelPathValue].resources.limits[path]
+      machines[modelPathValue].resources
     );
   } else {
-    if (path === "cpu") {
-      if(dbVersion >= '6') return "1"
-      else return ".5";
-    } else if (path === "memory") {
-      return "1024Mi";
+    return {
+      limits: {
+        cpu: "1",
+        memory: "1024Mi",
+      },
     }
   }
 }
@@ -692,6 +753,79 @@ function setStorageClass({model, getValue, commit}) {
 }
 
 
+function notStandalone({ model, getValue, watchDependency }) {
+  const modelPathValue = getValue(model, "/spec/mode");
+  watchDependency("model#/spec/mode");
+  return modelPathValue && modelPathValue !== "Standalone";
+}
+
+function setResource({ commit, model, getValue }, type) {
+  const selectedMachine = getValue(model, `/spec/${type}/podResources/machine`) || "";
+  if (selectedMachine && selectedMachine !== "custom") {
+    commit("wizard/model$update", {
+      path: `/spec/${type}/podResources/resources`,
+      value: machines[selectedMachine]?.resources,
+      force: true,
+    });
+  }
+}
+
+function setCpuOrMem({ model, getValue, watchDependency }, type) {
+  watchDependency(`model#/spec/${type}/podResources/machine`);
+  const selectedMachine = getValue(model, `/spec/${type}/podResources/machine`) || ''
+  console.log(selectedMachine)
+  if (selectedMachine && selectedMachine !== 'custom') {
+    console.log({
+      name: machines[selectedMachine] && machines[selectedMachine]?.resources,
+    })
+    return machines[selectedMachine] && machines[selectedMachine]?.resources
+  } else {
+    return {
+      limits: {
+        cpu: '1',
+        memory: '1024Mi',
+      },
+    }
+  }
+}
+
+function setArbiter({ commit }) {
+  commit("wizard/model$update", {
+    path: "/spec/arbiter/enabled",
+    value: false,
+    force: true,
+  });
+  return "Off";
+}
+
+function setHidden() {
+  return "Off";
+}
+
+function isArbiterOn({ watchDependency, model, getValue, commit }) {
+  watchDependency("model#/spec/arbiter/enabled");
+  const isArbiterOn = getValue(model, "/spec/arbiter/enabled") || "";
+  // if(!isArbiterOn) {
+  //   commit(
+  //     "wizard/model$delete",
+  //     "/spec/arbiter/podResources"
+  //   );
+  // }
+  return isArbiterOn;
+}
+
+function isHiddenOn({ watchDependency, model, getValue, commit }) {
+  watchDependency("model#/spec/hidden/enabled");
+  const isHiddenOn = getValue(model, "/spec/hidden/enabled") || "";
+  // if(!isHiddenOn) {
+  //   commit(
+  //     "wizard/model$delete",
+  //     "/spec/hidden/podResources"
+  //   );
+  // }
+  return isHiddenOn;
+}
+
 return {
   isVariantAvailable,
 	fetchJsons,
@@ -704,7 +838,7 @@ return {
   getMongoDbVersions,
   onCreateAuthSecretChange,
 	getSecrets,
-	disableLimit,
+	isMachineNotCustom,
 	getMachineListForOptions,
 	setResourceLimit,
 	setLimitsCpuOrMem,
@@ -721,4 +855,11 @@ return {
   showMultiselectZone,
   showSelectZone,
   setStorageClass,
+  setArbiter,
+  setHidden,
+  isArbiterOn,
+  isHiddenOn,
+  setResource,
+  setCpuOrMem,
+  notStandalone,
 }
