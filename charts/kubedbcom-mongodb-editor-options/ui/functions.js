@@ -474,8 +474,11 @@ async function getSecrets({
 }
 
 function isMachineNotCustom({ model, getValue, watchDependency }, path ) {
-  const modelPathValue = getValue(model, `/spec/${path}`);
-  watchDependency(`model#/spec/${path}`);
+  const fullpath = path
+    ? `/spec/${path}/podResources/machine`
+    : "/spec/podResources/machine";
+  const modelPathValue = getValue(model, fullpath);
+  watchDependency(`model#${fullpath}`);
   return modelPathValue !== "custom" && !!modelPathValue;
 }
 
@@ -772,12 +775,8 @@ function setResource({ commit, model, getValue }, type) {
 
 function setCpuOrMem({ model, getValue, watchDependency }, type) {
   watchDependency(`model#/spec/${type}/podResources/machine`);
-  const selectedMachine = getValue(model, `/spec/${type}/podResources/machine`) || ''
-  console.log(selectedMachine)
+  const selectedMachine = getValue(model, `/spec/${type}/podResources/machine`) || '';
   if (selectedMachine && selectedMachine !== 'custom') {
-    console.log({
-      name: machines[selectedMachine] && machines[selectedMachine]?.resources,
-    })
     return machines[selectedMachine] && machines[selectedMachine]?.resources
   } else {
     return {
