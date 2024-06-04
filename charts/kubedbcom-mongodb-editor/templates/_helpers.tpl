@@ -21,42 +21,11 @@ Create chart name and version as used by the chart label.
 {{- end }}
 
 {{/*
-Common labels
-*/}}
-{{- define "kubedbcom-mongodb-editor.labels" -}}
-{{ include "kubedbcom-mongodb-editor.selectorLabels" . }}
-app.kubernetes.io/managed-by: {{ .Release.Service }}
-{{- range $k, $v := .Values.spec.labels }}
-{{ $k }}: "{{ $v }}"
-{{- end -}}
-{{- end }}
-
-{{/*
 Selector labels
 */}}
 {{- define "kubedbcom-mongodb-editor.selectorLabels" -}}
 app.kubernetes.io/name: mongodbs.kubedb.com
 app.kubernetes.io/instance: {{ include "kubedbcom-mongodb-editor.fullname" . }}
-{{- end }}
-
-{{/*
-Create the name of the service account to use
-*/}}
-{{- define "kubedbcom-mongodb-editor.serviceAccountName" -}}
-{{- if .Values.spec.serviceAccount.create }}
-{{- default (include "kubedbcom-mongodb-editor.fullname" .) .Values.spec.serviceAccount.name }}
-{{- else }}
-{{- default "default" .Values.spec.serviceAccount.name }}
-{{- end }}
-{{- end }}
-
-{{/*
-Common annotations
-*/}}
-{{- define "kubedbcom-mongodb-editor.annotations" -}}
-{{- range $k, $v := .Values.spec.annotations }}
-{{ $k }}: "{{ $v }}"
-{{- end -}}
 {{- end }}
 
 {{/*

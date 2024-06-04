@@ -21,42 +21,11 @@ Create chart name and version as used by the chart label.
 {{- end }}
 
 {{/*
-Common labels
-*/}}
-{{- define "kubedbcom-redis-editor.labels" -}}
-{{ include "kubedbcom-redis-editor.selectorLabels" . }}
-app.kubernetes.io/managed-by: {{ .Release.Service }}
-{{- range $k, $v := .Values.spec.labels }}
-{{ $k }}: "{{ $v }}"
-{{- end -}}
-{{- end }}
-
-{{/*
 Selector labels
 */}}
 {{- define "kubedbcom-redis-editor.selectorLabels" -}}
 app.kubernetes.io/name: redises.kubedb.com
 app.kubernetes.io/instance: {{ include "kubedbcom-redis-editor.fullname" . }}
-{{- end }}
-
-{{/*
-Create the name of the service account to use
-*/}}
-{{- define "kubedbcom-redis-editor.serviceAccountName" -}}
-{{- if .Values.spec.serviceAccount.create }}
-{{- default (include "kubedbcom-redis-editor.fullname" .) .Values.spec.serviceAccount.name }}
-{{- else }}
-{{- default "default" .Values.spec.serviceAccount.name }}
-{{- end }}
-{{- end }}
-
-{{/*
-Common annotations
-*/}}
-{{- define "kubedbcom-redis-editor.annotations" -}}
-{{- range $k, $v := .Values.spec.annotations }}
-{{ $k }}: "{{ $v }}"
-{{- end -}}
 {{- end }}
 
 {{/*

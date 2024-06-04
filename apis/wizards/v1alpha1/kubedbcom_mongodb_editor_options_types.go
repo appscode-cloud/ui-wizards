@@ -18,7 +18,6 @@ package v1alpha1
 
 import (
 	alerts "go.appscode.dev/alerts/apis/alerts/v1alpha1"
-	core "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	api "x-helm.dev/apimachinery/apis/releases/v1alpha1"
 )
@@ -62,11 +61,6 @@ type KubedbcomMongodbEditorOptionsSpecSpec struct {
 	AuthSecret        AuthSecret             `json:"authSecret"`
 	Monitoring        Monitoring             `json:"monitoring"`
 	Backup            BackupToolSpec         `json:"backup"`
-}
-
-type PodResources struct {
-	Machine   MachineType               `json:"machine"`
-	Resources core.ResourceRequirements `json:"resources"`
 }
 
 // +kubebuilder:validation:Enum=Standalone;Replicaset;Sharded

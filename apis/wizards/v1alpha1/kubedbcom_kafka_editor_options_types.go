@@ -17,6 +17,7 @@ limitations under the License.
 package v1alpha1
 
 import (
+	alerts "go.appscode.dev/alerts/apis/alerts/v1alpha1"
 	core "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	api "x-helm.dev/apimachinery/apis/releases/v1alpha1"
@@ -38,6 +39,7 @@ type KubedbcomKafkaEditorOptions struct {
 type KubedbcomKafkaEditorOptionsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Spec         KubedbcomKafkaEditorOptionsSpecSpec `json:"spec"`
+	Form         KafkaAlertsSpecForm                 `json:"form"`
 }
 
 type KubedbcomKafkaEditorOptionsSpecSpec struct {
@@ -76,6 +78,11 @@ type KafkaNode struct {
 	// +optional
 	Machine     string      `json:"machine"`
 	Persistence Persistence `json:"persistence"`
+}
+
+type KafkaAlertsSpecForm struct {
+	Alert alerts.KafkaAlert `json:"alert"`
+	CAPI  CAPIFormSpec      `json:"capi"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

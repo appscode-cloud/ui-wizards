@@ -5,7 +5,7 @@ go 1.22.0
 toolchain go1.22.1
 
 require (
-	go.appscode.dev/alerts v0.2.1-0.20240427092953-4753e804e104
+	go.appscode.dev/alerts v0.2.1-0.20240513084649-2567677e2b0e
 	k8s.io/api v0.29.2
 	k8s.io/apimachinery v0.29.2
 	k8s.io/kube-openapi v0.0.0-20240403164606-bc84c2ddaf99

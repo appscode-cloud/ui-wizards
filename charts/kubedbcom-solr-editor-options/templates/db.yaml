@@ -50,8 +50,10 @@ spec:
             storage: {{ .Values.spec.topology.overseer.persistence.size }}
       podTemplate:
         spec:
-          resources:
-            {{- toYaml $overseer_res | nindent 12 }}
+          containers:
+            - name: solr
+              resources:
+                {{- toYaml $overseer_res | nindent 16 }}
           {{- if and .Values.form.capi.provider .Values.form.capi.dedicated }}
           nodeSelector:
             nodes.klusters.dev/pool: {{ $poolName }}
@@ -72,8 +74,10 @@ spec:
             storage: {{ .Values.spec.topology.data.persistence.size }}
       podTemplate:
         spec:
-          resources:
-            {{- toYaml $data_res | nindent 12 }}
+          containers:
+            - name: solr
+              resources:
+                {{- toYaml $data_res | nindent 16 }}
           {{- if and .Values.form.capi.provider .Values.form.capi.dedicated }}
           nodeSelector:
             nodes.klusters.dev/pool: {{ $poolName }}
@@ -94,8 +98,10 @@ spec:
             storage: {{ .Values.spec.topology.coordinator.persistence.size }}
       podTemplate:
         spec:
-          resources:
-            {{- toYaml $coordinator_res | nindent 12 }}
+          containers:
+            - name: solr
+              resources:
+                {{- toYaml $coordinator_res | nindent 16 }}
           {{- if and .Values.form.capi.provider .Values.form.capi.dedicated }}
           nodeSelector:
             nodes.klusters.dev/pool: {{ $poolName }}
@@ -120,8 +126,10 @@ spec:
         storage: {{ .Values.spec.persistence.size }}
   podTemplate:
     spec:
-      resources:
-        {{- toYaml $res | nindent 8 }}
+      containers:
+        - name: solr
+          resources:
+            {{- toYaml $res | nindent 12 }}
       {{- if and .Values.form.capi.provider .Values.form.capi.dedicated }}
       nodeSelector:
         nodes.klusters.dev/pool: {{ $poolName }}

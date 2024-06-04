@@ -88,9 +88,15 @@ type DruidConfigServer struct {
 	Persistence Persistence `json:"persistence"`
 }
 
+type DruidMongos struct {
+	Replicas    int         `json:"replicas"`
+	Persistence Persistence `json:"persistence"`
+}
+
 type DruidShardTopology struct {
 	Shard        DruidShard        `json:"shard"`
 	ConfigServer DruidConfigServer `json:"configServer"`
+	Mongos       DruidMongos       `json:"mongos"`
 }
 
 type DruidAlertsSpecForm struct {
