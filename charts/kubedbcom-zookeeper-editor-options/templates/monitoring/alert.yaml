@@ -7,7 +7,8 @@ metadata:
   name: {{ $app }}
   namespace: {{ $.Release.Namespace }}
   labels:
-    {{- include "kubedbcom-zookeeper-editor-options.labels" . | nindent 4 }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    {{- include "kubedbcom-zookeeper-editor-options.selectorLabels" . | nindent 4 }}
 {{- if .Values.form.alert.labels }}
     {{- toYaml .Values.form.alert.labels | nindent 4 }}
 {{- end }}
@@ -78,7 +79,7 @@ spec:
     {{- end }}
     {{ if (include "kubedbcom-zookeeper-editor-options.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.zookeeperLeaderElection.enabled .rules.zookeeperLeaderElection.severity)) -}}
     - alert: ZooKeeperLeaderElection
-      expr:  increase(election_time_count{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"}[5m]) > {{.rules.zookeeperLeaderElection.val}}
+      expr:  increase(election_time_count{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"}[5m]) > 0
       for: {{ .rules.zookeeperLeaderElection.duration }}
       labels:
         severity: {{ .rules.zookeeperLeaderElection.severity }}

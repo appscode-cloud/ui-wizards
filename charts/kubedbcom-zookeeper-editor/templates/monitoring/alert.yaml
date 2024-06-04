@@ -79,7 +79,7 @@ spec:
     {{- end }}
     {{ if (include "kubedbcom-zookeeper-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.zookeeperLeaderElection.enabled .rules.zookeeperLeaderElection.severity)) -}}
     - alert: ZooKeeperLeaderElection
-      expr:  increase(election_time_count{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"}[5m]) > {{.rules.zookeeperLeaderElection.val}}
+      expr:  increase(election_time_count{job="{{- $app -}}-stats",namespace="{{ $.Release.Namespace }}"}[5m]) > 0
       for: {{ .rules.zookeeperLeaderElection.duration }}
       labels:
         severity: {{ .rules.zookeeperLeaderElection.severity }}
