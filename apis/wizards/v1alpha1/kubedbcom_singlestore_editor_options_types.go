@@ -46,17 +46,17 @@ type KubedbcomSinglestoreEditorOptionsSpecSpec struct {
 	// +optional
 	Annotations map[string]string `json:"annotations"`
 	// +optional
-	Labels            map[string]string   `json:"labels"`
-	Mode              SinglestoreMode     `json:"mode"`
+	Labels         map[string]string   `json:"labels"`
+	Mode           SinglestoreMode     `json:"mode"`
 	DeletionPolicy TerminationPolicy   `json:"deletionPolicy"`
-	StorageClass      StorageClass        `json:"storageClass"`
-	Persistence       Persistence         `json:"persistence"`
-	PodResources      PodResources        `json:"podResources"`
-	Topology          SinglestoreTopology `json:"topology"`
-	LicenseSecret     LicenseSecret       `json:"licenseSecret"`
-	AuthSecret        AuthSecret          `json:"authSecret"`
-	Monitoring        Monitoring          `json:"monitoring"`
-	Backup            BackupToolSpec      `json:"backup"`
+	StorageClass   StorageClass        `json:"storageClass"`
+	Persistence    Persistence         `json:"persistence"`
+	PodResources   PodResources        `json:"podResources"`
+	Topology       SinglestoreTopology `json:"topology"`
+	LicenseSecret  LicenseSecret       `json:"licenseSecret"`
+	AuthSecret     AuthSecret          `json:"authSecret"`
+	Monitoring     Monitoring          `json:"monitoring"`
+	Backup         BackupToolSpec      `json:"backup"`
 }
 
 // +kubebuilder:validation:Enum=Standalone;Topology
