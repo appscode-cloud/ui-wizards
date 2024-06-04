@@ -9,13 +9,13 @@ metadata:
   labels:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
     {{- include "kubedbcom-proxysql-editor.selectorLabels" . | nindent 4 }}
-  {{- if .Values.form.alert.labels }}
-  {{- toYaml .Values.form.alert.labels | nindent 4 }}
-  {{- end }}
-  {{- if .Values.form.alert.annotations }}
-annotations:
-  {{- toYaml .Values.form.alert.annotations | nindent 4 }}
-  {{- end }}
+{{- if .Values.form.alert.labels }}
+    {{- toYaml .Values.form.alert.labels | nindent 4 }}
+{{- end }}
+{{- if .Values.form.alert.annotations }}
+  annotations:
+    {{- toYaml .Values.form.alert.annotations | nindent 4 }}
+{{- end }}
 spec:
   groups:
   {{ with .Values.form.alert.groups.database -}}

@@ -1,7 +1,7 @@
 {{/*
 Expand the name of the chart.
 */}}
-{{- define "kubedbcom-mysql-editor.name" -}}
+{{- define "kubedbcom-kafka-editor.name" -}}
 {{- .Chart.Name | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
@@ -9,33 +9,33 @@ Expand the name of the chart.
 Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 */}}
-{{- define "kubedbcom-mysql-editor.fullname" -}}
+{{- define "kubedbcom-kafka-editor.fullname" -}}
 {{- .Release.Name | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
 Create chart name and version as used by the chart label.
 */}}
-{{- define "kubedbcom-mysql-editor.chart" -}}
+{{- define "kubedbcom-kafka-editor.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
 Selector labels
 */}}
-{{- define "kubedbcom-mysql-editor.selectorLabels" -}}
-app.kubernetes.io/name: mysqls.kubedb.com
-app.kubernetes.io/instance: {{ include "kubedbcom-mysql-editor.fullname" . }}
+{{- define "kubedbcom-kafka-editor.selectorLabels" -}}
+app.kubernetes.io/name: kafkaes.kubedb.com
+app.kubernetes.io/instance: {{ include "kubedbcom-kafka-editor.fullname" . }}
 {{- end }}
 
 {{/*
 Alert labels
 */}}
-{{- define "kubedbcom-mysql-editor.alertLabels" -}}
+{{- define "kubedbcom-kafka-editor.alertLabels" -}}
 k8s_group: {{ .Values.metadata.resource.group }}
 k8s_kind: {{ .Values.metadata.resource.kind }}
 k8s_resource: {{ .Values.metadata.resource.name }}
-app: {{ include "kubedbcom-mysql-editor.fullname" . }}
+app: {{ include "kubedbcom-kafka-editor.fullname" . }}
 app_namespace: {{ .Release.Namespace }}
 {{- if .Values.form.alert.additionalRuleLabels }}
 {{ toYaml .Values.form.alert.additionalRuleLabels }}
@@ -45,7 +45,7 @@ app_namespace: {{ .Release.Namespace }}
 {{/*
 Alerts Enabled
 */}}
-{{- define "kubedbcom-mysql-editor.alertsEnabled" -}}
+{{- define "kubedbcom-kafka-editor.alertsEnabled" -}}
 {{- $ranks := dict "critical" 1 "warning" 2 "info" 3 -}}
 {{- $result := dig . 0 $ranks -}}
 {{- if $result -}}{{ . }}{{- end -}}
@@ -54,7 +54,7 @@ Alerts Enabled
 {{/*
 Alert Group Enabled
 */}}
-{{- define "kubedbcom-mysql-editor.alertGroupEnabled" -}}
+{{- define "kubedbcom-kafka-editor.alertGroupEnabled" -}}
 {{- $ranks := dict "critical" 1 "warning" 2 "info" 3 -}}
 {{- $flags := (mustLast .) -}}
 {{- $group := dig (mustFirst .) 0 $ranks -}}
@@ -70,7 +70,7 @@ Alert Group Enabled
 {{/*
 Alert Enabled
 */}}
-{{- define "kubedbcom-mysql-editor.alertEnabled" -}}
+{{- define "kubedbcom-kafka-editor.alertEnabled" -}}
 {{- $ranks := dict "critical" 1 "warning" 2 "info" 3 -}}
 {{- $sev := dig (mustLast .) 0 $ranks -}}
 {{- $flags := mustInitial . -}}

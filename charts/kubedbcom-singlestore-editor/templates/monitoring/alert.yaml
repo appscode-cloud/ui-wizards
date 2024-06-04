@@ -7,12 +7,13 @@ metadata:
   name: {{ $app }}
   namespace: {{ $.Release.Namespace }}
   labels:
-    {{- include "kubedbcom-singlestore-editor.labels" . | nindent 4 }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    {{- include "kubedbcom-singlestore-editor.selectorLabels" . | nindent 4 }}
 {{- if .Values.form.alert.labels }}
     {{- toYaml .Values.form.alert.labels | nindent 4 }}
 {{- end }}
 {{- if .Values.form.alert.annotations }}
-annotations:
+  annotations:
     {{- toYaml .Values.form.alert.annotations | nindent 4 }}
 {{- end }}
 spec:

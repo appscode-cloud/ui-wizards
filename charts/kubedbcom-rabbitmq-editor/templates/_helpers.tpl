@@ -21,42 +21,11 @@ Create chart name and version as used by the chart label.
 {{- end }}
 
 {{/*
-Common labels
-*/}}
-{{- define "kubedbcom-rabbitmq-editor.labels" -}}
-{{ include "kubedbcom-rabbitmq-editor.selectorLabels" . }}
-app.kubernetes.io/managed-by: {{ .Release.Service }}
-{{- range $k, $v := .Values.spec.labels }}
-{{ $k }}: "{{ $v }}"
-{{- end -}}
-{{- end }}
-
-{{/*
 Selector labels
 */}}
 {{- define "kubedbcom-rabbitmq-editor.selectorLabels" -}}
 app.kubernetes.io/name: rabbitmqs.kubedb.com
 app.kubernetes.io/instance: {{ include "kubedbcom-rabbitmq-editor.fullname" . }}
-{{- end }}
-
-{{/*
-Create the name of the service account to use
-*/}}
-{{- define "kubedbcom-rabbitmq-editor.serviceAccountName" -}}
-{{- if .Values.spec.serviceAccount.create }}
-{{- default (include "kubedbcom-rabbitmq-editor.fullname" .) .Values.spec.serviceAccount.name }}
-{{- else }}
-{{- default "default" .Values.spec.serviceAccount.name }}
-{{- end }}
-{{- end }}
-
-{{/*
-Common annotations
-*/}}
-{{- define "kubedbcom-rabbitmq-editor.annotations" -}}
-{{- range $k, $v := .Values.spec.annotations }}
-{{ $k }}: "{{ $v }}"
-{{- end -}}
 {{- end }}
 
 {{/*
