@@ -46,21 +46,21 @@ type KubedbcomZookeeperEditorOptionsSpecSpec struct {
 	// +optional
 	Annotations map[string]string `json:"annotations"`
 	// +optional
-	Labels            map[string]string         `json:"labels"`
-	Version           string                    `json:"version"`
-	Mode              ZooKeeperMode             `json:"mode"`
-	ReplicaSet        ZooKeeperReplicaSet       `json:"replicaSet"`
-	ShardTopology     ZooKeeperShardTopology    `json:"shardTopology"`
-	ClusterAuthMode   ZooKeeperClusterAuthMode  `json:"clusterAuthMode"`
-	SslMode           ZooKeeperSSLMode          `json:"sslMode"`
-	TerminationPolicy TerminationPolicy         `json:"terminationPolicy"`
-	StorageClass      StorageClass              `json:"storageClass"`
-	Persistence       Persistence               `json:"persistence"`
-	Machine           MachineType               `json:"machine"`
-	Resources         core.ResourceRequirements `json:"resources"`
-	AuthSecret        AuthSecret                `json:"authSecret"`
-	Monitoring        Monitoring                `json:"monitoring"`
-	Backup            BackupToolSpec            `json:"backup"`
+	Labels          map[string]string         `json:"labels"`
+	Version         string                    `json:"version"`
+	Mode            ZooKeeperMode             `json:"mode"`
+	ReplicaSet      ZooKeeperReplicaSet       `json:"replicaSet"`
+	ShardTopology   ZooKeeperShardTopology    `json:"shardTopology"`
+	ClusterAuthMode ZooKeeperClusterAuthMode  `json:"clusterAuthMode"`
+	SslMode         ZooKeeperSSLMode          `json:"sslMode"`
+	DeletionPolicy  TerminationPolicy         `json:"deletionPolicy"`
+	StorageClass    StorageClass              `json:"storageClass"`
+	Persistence     Persistence               `json:"persistence"`
+	Machine         MachineType               `json:"machine"`
+	Resources       core.ResourceRequirements `json:"resources"`
+	AuthSecret      AuthSecret                `json:"authSecret"`
+	Monitoring      Monitoring                `json:"monitoring"`
+	Backup          BackupToolSpec            `json:"backup"`
 }
 
 // +kubebuilder:validation:Enum=Standalone;Replicaset;Sharded

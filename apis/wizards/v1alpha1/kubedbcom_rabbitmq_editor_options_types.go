@@ -49,14 +49,14 @@ type KubedbcomRabbitMQEditorOptionsSpecSpec struct {
 	// +optional
 	Replicas int `json:"replicas,omitempty"`
 	// +optional
-	Version           string            `json:"version"`
-	Mode              RabbitMQMode      `json:"mode"`
-	TerminationPolicy TerminationPolicy `json:"terminationPolicy"`
-	StorageClass      StorageClass      `json:"storageClass"`
-	Persistence       Persistence       `json:"persistence"`
-	PodResources      PodResources      `json:"podResources"`
-	AuthSecret        AuthSecret        `json:"authSecret"`
-	Monitoring        Monitoring        `json:"monitoring"`
+	Version        string            `json:"version"`
+	Mode           RabbitMQMode      `json:"mode"`
+	DeletionPolicy TerminationPolicy `json:"deletionPolicy"`
+	StorageClass   StorageClass      `json:"storageClass"`
+	Persistence    Persistence       `json:"persistence"`
+	PodResources   PodResources      `json:"podResources"`
+	AuthSecret     AuthSecret        `json:"authSecret"`
+	Monitoring     Monitoring        `json:"monitoring"`
 }
 
 // +kubebuilder:validation:Enum=Standalone;Cluster

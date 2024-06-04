@@ -592,6 +592,13 @@ properties:
             format: password
             type: string
         type: object
+      deletionPolicy:
+        enum:
+        - Halt
+        - Delete
+        - WipeOut
+        - DoNotTerminate
+        type: string
       disableSecurity:
         type: boolean
       labels:
@@ -762,13 +769,6 @@ properties:
         required:
         - name
         type: object
-      terminationPolicy:
-        enum:
-        - Halt
-        - Delete
-        - WipeOut
-        - DoNotTerminate
-        type: string
       topology:
         properties:
           broker:
@@ -810,12 +810,12 @@ properties:
         type: string
     required:
     - authSecret
+    - deletionPolicy
     - disableSecurity
     - mode
     - monitoring
     - resources
     - storageClass
-    - terminationPolicy
     - version
     type: object
 required:

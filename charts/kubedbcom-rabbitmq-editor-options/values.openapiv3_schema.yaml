@@ -415,6 +415,13 @@ properties:
             format: password
             type: string
         type: object
+      deletionPolicy:
+        enum:
+        - Halt
+        - Delete
+        - WipeOut
+        - DoNotTerminate
+        type: string
       labels:
         additionalProperties:
           type: string
@@ -589,23 +596,16 @@ properties:
         required:
         - name
         type: object
-      terminationPolicy:
-        enum:
-        - Halt
-        - Delete
-        - WipeOut
-        - DoNotTerminate
-        type: string
       version:
         type: string
     required:
     - authSecret
+    - deletionPolicy
     - mode
     - monitoring
     - persistence
     - podResources
     - storageClass
-    - terminationPolicy
     type: object
 required:
 - form

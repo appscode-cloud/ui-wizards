@@ -855,6 +855,13 @@ properties:
         required:
         - tool
         type: object
+      deletionPolicy:
+        enum:
+        - Halt
+        - Delete
+        - WipeOut
+        - DoNotTerminate
+        type: string
       labels:
         additionalProperties:
           type: string
@@ -1027,13 +1034,6 @@ properties:
         required:
         - name
         type: object
-      terminationPolicy:
-        enum:
-        - Halt
-        - Delete
-        - WipeOut
-        - DoNotTerminate
-        type: string
       topology:
         properties:
           aggregator:
@@ -1241,12 +1241,12 @@ properties:
     required:
     - authSecret
     - backup
+    - deletionPolicy
     - mode
     - monitoring
     - persistence
     - podResources
     - storageClass
-    - terminationPolicy
     - topology
     - version
     type: object

@@ -46,21 +46,21 @@ type KubedbcomMssqlserverEditorOptionsSpecSpec struct {
 	// +optional
 	Annotations map[string]string `json:"annotations"`
 	// +optional
-	Labels            map[string]string          `json:"labels"`
-	Version           string                     `json:"version"`
-	Mode              MssqlserverMode            `json:"mode"`
-	ReplicaSet        MssqlserverReplicaSet      `json:"replicaSet"`
-	ShardTopology     MssqlserverShardTopology   `json:"shardTopology"`
-	ClusterAuthMode   MssqlserverClusterAuthMode `json:"clusterAuthMode"`
-	SslMode           MssqlserverSSLMode         `json:"sslMode"`
-	TerminationPolicy TerminationPolicy          `json:"terminationPolicy"`
-	StorageClass      StorageClass               `json:"storageClass"`
-	Persistence       Persistence                `json:"persistence"`
-	Machine           MachineType                `json:"machine"`
-	Resources         core.ResourceRequirements  `json:"resources"`
-	AuthSecret        AuthSecret                 `json:"authSecret"`
-	Monitoring        Monitoring                 `json:"monitoring"`
-	Backup            BackupToolSpec             `json:"backup"`
+	Labels          map[string]string          `json:"labels"`
+	Version         string                     `json:"version"`
+	Mode            MssqlserverMode            `json:"mode"`
+	ReplicaSet      MssqlserverReplicaSet      `json:"replicaSet"`
+	ShardTopology   MssqlserverShardTopology   `json:"shardTopology"`
+	ClusterAuthMode MssqlserverClusterAuthMode `json:"clusterAuthMode"`
+	SslMode         MssqlserverSSLMode         `json:"sslMode"`
+	DeletionPolicy  TerminationPolicy          `json:"deletionPolicy"`
+	StorageClass    StorageClass               `json:"storageClass"`
+	Persistence     Persistence                `json:"persistence"`
+	Machine         MachineType                `json:"machine"`
+	Resources       core.ResourceRequirements  `json:"resources"`
+	AuthSecret      AuthSecret                 `json:"authSecret"`
+	Monitoring      Monitoring                 `json:"monitoring"`
+	Backup          BackupToolSpec             `json:"backup"`
 }
 
 // +kubebuilder:validation:Enum=Standalone;Replicaset;Sharded

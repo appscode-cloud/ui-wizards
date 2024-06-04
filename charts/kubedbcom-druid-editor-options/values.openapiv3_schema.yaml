@@ -661,6 +661,13 @@ properties:
         - sendX509
         - x509
         type: string
+      deletionPolicy:
+        enum:
+        - Halt
+        - Delete
+        - WipeOut
+        - DoNotTerminate
+        type: string
       labels:
         additionalProperties:
           type: string
@@ -900,19 +907,13 @@ properties:
         required:
         - name
         type: object
-      terminationPolicy:
-        enum:
-        - Halt
-        - Delete
-        - WipeOut
-        - DoNotTerminate
-        type: string
       version:
         type: string
     required:
     - authSecret
     - backup
     - clusterAuthMode
+    - deletionPolicy
     - machine
     - mode
     - monitoring
@@ -922,7 +923,6 @@ properties:
     - shardTopology
     - sslMode
     - storageClass
-    - terminationPolicy
     - version
     type: object
 required:
