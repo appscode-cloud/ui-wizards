@@ -113,7 +113,7 @@ spec:
     
     {{ if (include "kubedbcom-pgpool-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskUsageHigh.enabled .rules.diskUsageHigh.severity)) -}}
     - alert: DiskUsageHigh
-      expr: (kubelet_volume_stats_used_bytes / on(persistentvolumeclaim) group_left(pod) (kubelet_volume_stats_capacity_bytes + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~\"{{ $.Release.Name }}-.+$\",namespace=~"{{ $.Release.Namespace }}"}) )
+      expr: (kubelet_volume_stats_used_bytes / on(persistentvolumeclaim) group_left(pod) (kubelet_volume_stats_capacity_bytes + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) )
         * 100 > {{ .rules.diskUsageHigh.val }}
       for: {{ .rules.diskUsageHigh.duration }}
       labels:
@@ -125,7 +125,7 @@ spec:
     {{- end }}
     {{ if (include "kubedbcom-pgpool-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskAlmostFull.enabled .rules.diskAlmostFull.severity)) -}}
     - alert: DiskAlmostFull
-      expr: (kubelet_volume_stats_used_bytes / on(persistentvolumeclaim) group_left(pod) (kubelet_volume_stats_capacity_bytes + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~\"{{ $.Release.Name }}-.+$\",namespace=~"{{ $.Release.Namespace }}"}) )
+      expr: (kubelet_volume_stats_used_bytes / on(persistentvolumeclaim) group_left(pod) (kubelet_volume_stats_capacity_bytes + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) )
         * 100 > {{ .rules.diskAlmostFull.val }}
       for: {{ .rules.diskAlmostFull.duration }}
       labels:
