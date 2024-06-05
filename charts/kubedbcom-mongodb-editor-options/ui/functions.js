@@ -755,7 +755,6 @@ function setStorageClass({model, getValue, commit}) {
   }
 }
 
-
 function notEqualToDatabaseMode({ model, getValue, watchDependency }, mode) {
   const modelPathValue = getValue(model, "/spec/mode");
   watchDependency("model#/spec/mode");
@@ -788,41 +787,32 @@ function setCpuOrMem({ model, getValue, watchDependency }, type) {
   }
 }
 
-function setArbiter({ commit }) {
+function showArbiter({ watchDependency, model, getValue }) {
+  watchDependency("model#/spec/arbiter/enabled");
+  const isArbiterOn = getValue(model, "/spec/arbiter/enabled") || "";
+  const notStandalone = notEqualToDatabaseMode({ model, getValue, watchDependency }, "Standalone");
+  return isArbiterOn && notStandalone;
+}
+
+function showHidden({ watchDependency, model, getValue }) {
+  watchDependency("model#/spec/hidden/enabled");
+  const isHiddenOn = getValue(model, "/spec/hidden/enabled") || "";
+  const notStandalone = notEqualToDatabaseMode({ model, getValue, watchDependency }, "Standalone");
+  return isHiddenOn && notStandalone;
+}
+
+function clearArbiterHidden({ commit }) {
   commit("wizard/model$update", {
-    path: "/spec/arbiter/enabled",
+    path: `/spec/arbiter/enabled`,
     value: false,
     force: true,
   });
-  return "Off";
-}
 
-function setHidden() {
-  return "Off";
-}
-
-function isArbiterOn({ watchDependency, model, getValue, commit }) {
-  watchDependency("model#/spec/arbiter/enabled");
-  const isArbiterOn = getValue(model, "/spec/arbiter/enabled") || "";
-  // if(!isArbiterOn) {
-  //   commit(
-  //     "wizard/model$delete",
-  //     "/spec/arbiter/podResources"
-  //   );
-  // }
-  return isArbiterOn;
-}
-
-function isHiddenOn({ watchDependency, model, getValue, commit }) {
-  watchDependency("model#/spec/hidden/enabled");
-  const isHiddenOn = getValue(model, "/spec/hidden/enabled") || "";
-  // if(!isHiddenOn) {
-  //   commit(
-  //     "wizard/model$delete",
-  //     "/spec/hidden/podResources"
-  //   );
-  // }
-  return isHiddenOn;
+  commit("wizard/model$update", {
+    path: `/spec/hidden/enabled`,
+    value: false,
+    force: true,
+  });
 }
 
 return {
@@ -854,11 +844,10 @@ return {
   showMultiselectZone,
   showSelectZone,
   setStorageClass,
-  setArbiter,
-  setHidden,
-  isArbiterOn,
-  isHiddenOn,
+  showArbiter,
+  showHidden,
   setResource,
   setCpuOrMem,
   notEqualToDatabaseMode,
+  clearArbiterHidden,
 }
