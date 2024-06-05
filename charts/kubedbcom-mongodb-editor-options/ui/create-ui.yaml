@@ -106,14 +106,14 @@ steps:
             $ref: schema#/properties/spec/properties/shardTopology/properties/shard/properties/shards
           type: input
         - label:
-            text: labels.storage.size
-          schema:
-            $ref: schema#/properties/spec/properties/shardTopology/properties/shard/properties/persistence/properties/size
-          type: input
-        - label:
             text: labels.replicaset.number
           schema:
             $ref: schema#/properties/spec/properties/shardTopology/properties/shard/properties/replicas
+          type: input
+        - label:
+            text: labels.storage.size
+          schema:
+            $ref: schema#/properties/spec/properties/shardTopology/properties/shard/properties/persistence/properties/size
           type: input
         - elements:
           - computed: setMachineToCustom
@@ -137,6 +137,11 @@ steps:
         show_label: true
         type: single-step-form
       - elements:
+        - label:
+            text: labels.replicaset.number
+          schema:
+            $ref: schema#/properties/spec/properties/shardTopology/properties/configServer/properties/replicas
+          type: input
         - label:
             text: labels.storage.size
           schema:
@@ -315,7 +320,7 @@ steps:
       type: single-step-form
     - fetch: getStorageClassNames
       label:
-        text: labels.storage.class
+        text: labels.storage.select
       schema:
         $ref: schema#/properties/spec/properties/storageClass/properties/name
       type: select
@@ -353,9 +358,6 @@ steps:
       type: switch
     - elements:
       - elements:
-        - label:
-            text: labels.machine_profile
-          type: label-element
         - computed: setMachineToCustom
           fetch: getMachineListForOptions
           onChange: setResource|arbiter
