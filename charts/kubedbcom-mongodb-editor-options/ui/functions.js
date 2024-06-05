@@ -756,10 +756,10 @@ function setStorageClass({model, getValue, commit}) {
 }
 
 
-function notStandalone({ model, getValue, watchDependency }) {
+function notEqualToDatabaseMode({ model, getValue, watchDependency }, mode) {
   const modelPathValue = getValue(model, "/spec/mode");
   watchDependency("model#/spec/mode");
-  return modelPathValue && modelPathValue !== "Standalone";
+  return modelPathValue && modelPathValue !== mode;
 }
 
 function setResource({ commit, model, getValue }, type) {
@@ -860,5 +860,5 @@ return {
   isHiddenOn,
   setResource,
   setCpuOrMem,
-  notStandalone,
+  notEqualToDatabaseMode,
 }
