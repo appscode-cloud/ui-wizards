@@ -52,52 +52,6 @@ properties:
             format: password
             type: string
         type: object
-      databases:
-        items:
-          properties:
-            alias:
-              description: Alias to uniquely identify a target database running inside
-                a specific Postgres instance.
-              type: string
-            databaseName:
-              description: DatabaseName is the name of the target database inside
-                a Postgres instance.
-              type: string
-            databaseRef:
-              description: DatabaseRef specifies the database appbinding reference
-                in any namespace.
-              properties:
-                name:
-                  description: '`name` is the name of the app. Required'
-                  type: string
-                namespace:
-                  description: '`namespace` is the namespace of the app. Required'
-                  type: string
-                parameters:
-                  description: "Parameters is a set of the parameters to be used to\
-                    \ override default parameters. The inline YAML/JSON payload to\
-                    \ be translated into equivalent JSON object. \n The Parameters\
-                    \ field is NOT secret or secured in any way and should NEVER be\
-                    \ used to hold sensitive information."
-                  type: object
-                  x-kubernetes-embedded-resource: true
-                  x-kubernetes-preserve-unknown-fields: true
-              required:
-              - name
-              - namespace
-              type: object
-            syncUsers:
-              description: SyncUsers is a boolean type and when enabled, operator
-                fetches users of backend server from externally managed secrets to
-                the PgBouncer server. Secrets updation or deletion are also synced
-                in pgBouncer when it is enabled.
-              type: boolean
-          required:
-          - alias
-          - databaseName
-          - databaseRef
-          type: object
-        type: array
       labels:
         additionalProperties:
           type: string
