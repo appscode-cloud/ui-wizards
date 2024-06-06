@@ -303,18 +303,6 @@ function isEqualToModelPathValue(
   return modelPathValue === value;
 }
 
-function showAuthSecretField({
-  discriminator,
-  getValue,
-  watchDependency,
-}) {
-  return !showAuthPasswordField({
-    discriminator,
-    getValue,
-    watchDependency,
-  });
-}
-
 function showStorageSizeField({ model, getValue, watchDependency }) {
   const modelPathValue = getValue(model, "/spec/mode");
   watchDependency("model#/spec/mode");
@@ -434,43 +422,6 @@ function onCreateAuthSecretChange({
       "/spec/authSecret/password"
     );
   }
-}
-
-async function getSecrets({
-  storeGet,
-  axios,
-  model,
-  getValue,
-  watchDependency,
-}) {
-  const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/route/params/cluster");
-  const namespace = getValue(model, "/metadata/release/namespace");
-  watchDependency("model#/metadata/release/namespace");
-
-  const resp = await axios.get(
-    `/clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}/secrets`,
-    {
-      params: {
-        filter: { items: { metadata: { name: null }, type: null } },
-      },
-    }
-  );
-
-  const secrets = (resp && resp.data && resp.data.items) || [];
-
-  const filteredSecrets = secrets.filter((item) => {
-    const validType = ["kubernetes.io/service-account-token", "Opaque"];
-    return validType.includes(item.type);
-  });
-
-  filteredSecrets.map((item) => {
-    const name = (item.metadata && item.metadata.name) || "";
-    item.text = name;
-    item.value = name;
-    return true;
-  });
-  return filteredSecrets;
 }
 
 function isMachineNotCustom({ model, getValue, watchDependency }, path ) {
@@ -831,18 +782,20 @@ function clearConfiguration({ discriminator, getValue, commit }) {
   }
 }
 
+function returnFalse() {
+  return false;
+}
+
 return {
   isVariantAvailable,
 	fetchJsons,
 	showAuthPasswordField,
 	isEqualToModelPathValue,
-	showAuthSecretField,
 	showStorageSizeField,
 	getResources,
 	getStorageClassNames,
   getMongoDbVersions,
   onCreateAuthSecretChange,
-	getSecrets,
 	isMachineNotCustom,
 	getMachineListForOptions,
 	setResourceLimit,
@@ -868,4 +821,5 @@ return {
   clearArbiterHidden,
   isConfigDatabaseOn,
   clearConfiguration,
+  returnFalse,
 }

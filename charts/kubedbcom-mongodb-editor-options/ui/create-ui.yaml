@@ -243,26 +243,12 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/storageClass/properties/name
       type: select
-    - label:
-        text: labels.database.secret
-      type: label-element
-    - onChange: onCreateAuthSecretChange
-      options:
-      - text: options.database.secret.customSecret.label
-        value: true
-      - text: options.database.secret.existingSecret.label
-        value: false
+    - computed: returnFalse
+      label:
+        text: Provide authentication credentials?
       schema:
         $ref: discriminator#/createAuthSecret
-      type: radio
-    - allowUserDefinedOption: true
-      fetch: getSecrets
-      if: showAuthSecretField
-      label:
-        text: labels.secret
-      schema:
-        $ref: schema#/properties/spec/properties/authSecret/properties/name
-      type: select
+      type: switch
     - if: showAuthPasswordField
       label:
         text: labels.password
