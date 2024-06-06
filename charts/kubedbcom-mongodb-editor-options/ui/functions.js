@@ -820,6 +820,17 @@ function isConfigDatabaseOn({ watchDependency, discriminator, getValue }) {
   return getValue(discriminator, "/configDatabase");
 }
 
+function clearConfiguration({ discriminator, getValue, commit }) {
+  const configOn = getValue(discriminator, "/configDatabase");
+
+  if (!configOn) {
+    commit(
+      "wizard/model$delete",
+      "/spec/configuration"
+    );
+  }
+}
+
 return {
   isVariantAvailable,
 	fetchJsons,
@@ -856,4 +867,5 @@ return {
   notEqualToDatabaseMode,
   clearArbiterHidden,
   isConfigDatabaseOn,
+  clearConfiguration,
 }

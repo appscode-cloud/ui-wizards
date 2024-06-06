@@ -273,6 +273,7 @@ steps:
         text: Configure Database?
       schema:
         $ref: discriminator#/configDatabase
+      onChange: clearConfiguration
       type: switch
     - label:
         text: Configuration
@@ -318,6 +319,16 @@ steps:
         $ref: schema#/properties/spec/properties/hidden/properties/enabled
       type: switch
     - elements:
+      - label:
+          text: Replicas
+        schema:
+          $ref: schema#/properties/spec/properties/hidden/properties/replicas
+        type: input
+      - label:
+          text: Persistence Size
+        schema:
+          $ref: schema#/properties/spec/properties/hidden/properties/persistence/properties/size
+        type: input
       - computed: setMachineToCustom
         fetch: getMachineListForOptions
         label:
