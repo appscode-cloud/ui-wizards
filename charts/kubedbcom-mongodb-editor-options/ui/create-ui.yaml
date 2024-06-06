@@ -269,6 +269,17 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/authSecret/properties/password
       type: input
+    - label:
+        text: Configure Database?
+      schema:
+        $ref: discriminator#/configDatabase
+      type: switch
+    - label:
+        text: Configuration
+      if: isConfigDatabaseOn
+      schema:
+        $ref: schema#/properties/spec/properties/configuration
+      type: editor
     - if: notEqualToDatabaseMode|Standalone
       label:
         text: Enable Arbiter?

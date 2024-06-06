@@ -815,6 +815,11 @@ function clearArbiterHidden({ commit }) {
   });
 }
 
+function isConfigDatabaseOn({ watchDependency, discriminator, getValue }) {
+  watchDependency("discriminator#/configDatabase");
+  return getValue(discriminator, "/configDatabase");
+}
+
 return {
   isVariantAvailable,
 	fetchJsons,
@@ -850,4 +855,5 @@ return {
   setCpuOrMem,
   notEqualToDatabaseMode,
   clearArbiterHidden,
+  isConfigDatabaseOn,
 }
