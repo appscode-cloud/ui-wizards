@@ -53,6 +53,7 @@ type KubedbcomSinglestoreEditorOptionsSpecSpec struct {
 	Persistence    Persistence         `json:"persistence"`
 	PodResources   PodResources        `json:"podResources"`
 	Topology       SinglestoreTopology `json:"topology"`
+	LicenseSecret  LicenseSecret       `json:"licenseSecret"`
 	AuthSecret     AuthSecret          `json:"authSecret"`
 	Monitoring     Monitoring          `json:"monitoring"`
 	Backup         BackupToolSpec      `json:"backup"`
@@ -70,6 +71,10 @@ type SinglestoreNode struct {
 	Replicas     int          `json:"replicas"`
 	PodResources PodResources `json:"podResources"`
 	Persistence  Persistence  `json:"persistence"`
+}
+
+type LicenseSecret struct {
+	Name string `json:"name"`
 }
 
 type SinglestoreAlertsSpecForm struct {
