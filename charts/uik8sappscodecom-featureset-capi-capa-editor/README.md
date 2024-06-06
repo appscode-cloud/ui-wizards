@@ -7,8 +7,8 @@
 ```bash
 $ helm repo add appscode-charts-oci https://bundles.byte.builders/ui/
 $ helm repo update
-$ helm search repo appscode-charts-oci/uik8sappscodecom-featureset-dbaas-capa-editor --version=v0.4.20
-$ helm upgrade -i uik8sappscodecom-featureset-dbaas-capa-editor appscode-charts-oci/uik8sappscodecom-featureset-dbaas-capa-editor -n default --create-namespace --version=v0.4.20
+$ helm search repo appscode-charts-oci/uik8sappscodecom-featureset-capi-capa-editor --version=v0.4.20
+$ helm upgrade -i uik8sappscodecom-featureset-capi-capa-editor appscode-charts-oci/uik8sappscodecom-featureset-capi-capa-editor -n default --create-namespace --version=v0.4.20
 ```
 
 ## Introduction
@@ -21,10 +21,10 @@ This chart deploys a FeatureSet Editor on a [Kubernetes](http://kubernetes.io) c
 
 ## Installing the Chart
 
-To install/upgrade the chart with the release name `uik8sappscodecom-featureset-dbaas-capa-editor`:
+To install/upgrade the chart with the release name `uik8sappscodecom-featureset-capi-capa-editor`:
 
 ```bash
-$ helm upgrade -i uik8sappscodecom-featureset-dbaas-capa-editor appscode-charts-oci/uik8sappscodecom-featureset-dbaas-capa-editor -n default --create-namespace --version=v0.4.20
+$ helm upgrade -i uik8sappscodecom-featureset-capi-capa-editor appscode-charts-oci/uik8sappscodecom-featureset-capi-capa-editor -n default --create-namespace --version=v0.4.20
 ```
 
 The command deploys a FeatureSet Editor on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
@@ -33,17 +33,17 @@ The command deploys a FeatureSet Editor on the Kubernetes cluster in the default
 
 ## Uninstalling the Chart
 
-To uninstall the `uik8sappscodecom-featureset-dbaas-capa-editor`:
+To uninstall the `uik8sappscodecom-featureset-capi-capa-editor`:
 
 ```bash
-$ helm uninstall uik8sappscodecom-featureset-dbaas-capa-editor -n default
+$ helm uninstall uik8sappscodecom-featureset-capi-capa-editor -n default
 ```
 
 The command removes all the Kubernetes components associated with the chart and deletes the release.
 
 ## Configuration
 
-The following table lists the configurable parameters of the `uik8sappscodecom-featureset-dbaas-capa-editor` chart and their default values.
+The following table lists the configurable parameters of the `uik8sappscodecom-featureset-capi-capa-editor` chart and their default values.
 
 |                             Parameter                              | Description |                                                                                                                                                                                                                                                                                                                                                                                                                        Default                                                                                                                                                                                                                                                                                                                                                                                                                        |
 |--------------------------------------------------------------------|-------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -63,12 +63,12 @@ The following table lists the configurable parameters of the `uik8sappscodecom-f
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm upgrade -i`. For example:
 
 ```bash
-$ helm upgrade -i uik8sappscodecom-featureset-dbaas-capa-editor appscode-charts-oci/uik8sappscodecom-featureset-dbaas-capa-editor -n default --create-namespace --version=v0.4.20 --set metadata.resource.group=ui.k8s.appscode.com
+$ helm upgrade -i uik8sappscodecom-featureset-capi-capa-editor appscode-charts-oci/uik8sappscodecom-featureset-capi-capa-editor -n default --create-namespace --version=v0.4.20 --set metadata.resource.group=ui.k8s.appscode.com
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
 installing the chart. For example:
 
 ```bash
-$ helm upgrade -i uik8sappscodecom-featureset-dbaas-capa-editor appscode-charts-oci/uik8sappscodecom-featureset-dbaas-capa-editor -n default --create-namespace --version=v0.4.20 --values values.yaml
+$ helm upgrade -i uik8sappscodecom-featureset-capi-capa-editor appscode-charts-oci/uik8sappscodecom-featureset-capi-capa-editor -n default --create-namespace --version=v0.4.20 --values values.yaml
 ```

@@ -71,37 +71,6 @@ resources:
         crds: CreateReplace
         remediation:
           retries: -1
-  helmToolkitFluxcdIoHelmRelease_capi_cluster_presets: # +doc-gen:break
-    apiVersion: helm.toolkit.fluxcd.io/v2
-    kind: HelmRelease
-    metadata:
-      labels:
-        app.kubernetes.io/component: capi-cluster-presets
-      name: capi-cluster-presets
-      namespace: kubeops
-    spec:
-      chart:
-        spec:
-          chart: capi-cluster-presets
-          sourceRef:
-            kind: HelmRepository
-            name: appscode-charts-oci
-            namespace: kubeops
-          version: v2023.11.14
-      install:
-        crds: CreateReplace
-        createNamespace: true
-        remediation:
-          retries: -1
-      interval: 5m
-      releaseName: capi-cluster-presets
-      storageNamespace: capi-cluster
-      targetNamespace: capi-cluster
-      timeout: 30m
-      upgrade:
-        crds: CreateReplace
-        remediation:
-          retries: -1
   helmToolkitFluxcdIoHelmRelease_cluster_autoscaler: # +doc-gen:break
     apiVersion: helm.toolkit.fluxcd.io/v2
     kind: HelmRelease
