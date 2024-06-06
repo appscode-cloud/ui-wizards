@@ -18,7 +18,6 @@ package v1alpha1
 
 import (
 	alerts "go.appscode.dev/alerts/apis/alerts/v1alpha1"
-	core "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	api "x-helm.dev/apimachinery/apis/releases/v1alpha1"
 )
@@ -46,56 +45,27 @@ type KubedbcomPgpoolEditorOptionsSpecSpec struct {
 	// +optional
 	Annotations map[string]string `json:"annotations"`
 	// +optional
-	Labels          map[string]string         `json:"labels"`
-	Version         string                    `json:"version"`
-	Mode            PgpoolMode                `json:"mode"`
-	ReplicaSet      PgpoolReplicaSet          `json:"replicaSet"`
-	ShardTopology   PgpoolShardTopology       `json:"shardTopology"`
-	ClusterAuthMode PgpoolClusterAuthMode     `json:"clusterAuthMode"`
-	SslMode         PgpoolSSLMode             `json:"sslMode"`
-	DeletionPolicy  TerminationPolicy         `json:"deletionPolicy"`
-	StorageClass    StorageClass              `json:"storageClass"`
-	Persistence     Persistence               `json:"persistence"`
-	Machine         MachineType               `json:"machine"`
-	Resources       core.ResourceRequirements `json:"resources"`
-	AuthSecret      AuthSecret                `json:"authSecret"`
-	Monitoring      Monitoring                `json:"monitoring"`
-	Backup          BackupToolSpec            `json:"backup"`
+	Labels         map[string]string `json:"labels"`
+	Version        string            `json:"version"`
+	Mode           PgpoolMode        `json:"mode"`
+	Cluster        PgpoolCluster     `json:"cluster"`
+	PostgresRef    ObjectReference   `json:"postgresRef"`
+	SyncUsers      bool              `json:"syncUsers"`
+	DeletionPolicy TerminationPolicy `json:"deletionPolicy"`
+	StorageClass   StorageClass      `json:"storageClass"`
+	Persistence    Persistence       `json:"persistence"`
+	PodResources   PodResources      `json:"podResources"`
+	AuthSecret     AuthSecret        `json:"authSecret"`
+	Configuration  string            `json:"configuration"`
+	Monitoring     Monitoring        `json:"monitoring"`
+	Backup         BackupToolSpec    `json:"backup"`
 }
 
-// +kubebuilder:validation:Enum=Standalone;Replicaset;Sharded
+// +kubebuilder:validation:Enum=Standalone;Cluster
 type PgpoolMode string
 
-// +kubebuilder:validation:Enum=keyFile;sendKeyFile;sendX509;x509
-type PgpoolClusterAuthMode string
-
-// +kubebuilder:validation:Enum=disabled;allowSSL;preferSSL;requireSSL
-type PgpoolSSLMode string
-
-type PgpoolReplicaSet struct {
-	Name     string `json:"name"`
-	Replicas int    `json:"replicas"`
-}
-
-type PgpoolShard struct {
-	Replicas    int         `json:"replicas"`
-	Shards      int         `json:"shards"`
-	Persistence Persistence `json:"persistence"`
-}
-
-type PgpoolConfigServer struct {
-	Replicas    int         `json:"replicas"`
-	Persistence Persistence `json:"persistence"`
-}
-
-type PgpoolMongos struct {
+type PgpoolCluster struct {
 	Replicas int `json:"replicas"`
-}
-
-type PgpoolShardTopology struct {
-	Shard        PgpoolShard        `json:"shard"`
-	ConfigServer PgpoolConfigServer `json:"configServer"`
-	Mongos       PgpoolMongos       `json:"mongos"`
 }
 
 type PgpoolAlertsSpecForm struct {

@@ -18,7 +18,6 @@ package v1alpha1
 
 import (
 	alerts "go.appscode.dev/alerts/apis/alerts/v1alpha1"
-	core "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	api "x-helm.dev/apimachinery/apis/releases/v1alpha1"
 )
@@ -46,55 +45,24 @@ type KubedbcomZookeeperEditorOptionsSpecSpec struct {
 	// +optional
 	Annotations map[string]string `json:"annotations"`
 	// +optional
-	Labels          map[string]string         `json:"labels"`
-	Version         string                    `json:"version"`
-	Mode            ZooKeeperMode             `json:"mode"`
-	ReplicaSet      ZooKeeperReplicaSet       `json:"replicaSet"`
-	ShardTopology   ZooKeeperShardTopology    `json:"shardTopology"`
-	ClusterAuthMode ZooKeeperClusterAuthMode  `json:"clusterAuthMode"`
-	SslMode         ZooKeeperSSLMode          `json:"sslMode"`
-	DeletionPolicy  TerminationPolicy         `json:"deletionPolicy"`
-	StorageClass    StorageClass              `json:"storageClass"`
-	Persistence     Persistence               `json:"persistence"`
-	Machine         MachineType               `json:"machine"`
-	Resources       core.ResourceRequirements `json:"resources"`
-	AuthSecret      AuthSecret                `json:"authSecret"`
-	Monitoring      Monitoring                `json:"monitoring"`
-	Backup          BackupToolSpec            `json:"backup"`
+	Labels         map[string]string `json:"labels"`
+	Version        string            `json:"version"`
+	Mode           ZooKeeperMode     `json:"mode"`
+	Cluster        ZooKeeperCluster  `json:"cluster"`
+	DeletionPolicy TerminationPolicy `json:"deletionPolicy"`
+	StorageClass   StorageClass      `json:"storageClass"`
+	Persistence    Persistence       `json:"persistence"`
+	PodResources   PodResources      `json:"podResources"`
+	AuthSecret     AuthSecret        `json:"authSecret"`
+	Monitoring     Monitoring        `json:"monitoring"`
+	Backup         BackupToolSpec    `json:"backup"`
 }
 
-// +kubebuilder:validation:Enum=Standalone;Replicaset;Sharded
+// +kubebuilder:validation:Enum=Standalone;Cluster
 type ZooKeeperMode string
 
-// +kubebuilder:validation:Enum=keyFile;sendKeyFile;sendX509;x509
-type ZooKeeperClusterAuthMode string
-
-// +kubebuilder:validation:Enum=disabled;allowSSL;preferSSL;requireSSL
-type ZooKeeperSSLMode string
-
-type ZooKeeperReplicaSet struct {
-	Name     string `json:"name"`
-	Replicas int    `json:"replicas"`
-}
-
-type ZooKeeperShard struct {
-	Replicas    int         `json:"replicas"`
-	Shards      int         `json:"shards"`
-	Persistence Persistence `json:"persistence"`
-}
-
-type ZooKeeperConfigServer struct {
-	Replicas    int         `json:"replicas"`
-	Persistence Persistence `json:"persistence"`
-}
-
-type ZooKeeperMongos struct {
+type ZooKeeperCluster struct {
 	Replicas int `json:"replicas"`
-}
-
-type ZooKeeperShardTopology struct {
-	Shard        ZooKeeperShard        `json:"shard"`
-	ConfigServer ZooKeeperConfigServer `json:"configServer"`
 }
 
 type ZookeeperAlertsSpecForm struct {
