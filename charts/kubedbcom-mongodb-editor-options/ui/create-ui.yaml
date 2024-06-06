@@ -64,6 +64,7 @@ steps:
     - hasDescription: true
       label:
         text: labels.database.mode
+      onChange: clearArbiterHidden
       options:
       - description: options.database.mode.Standalone.description
         text: options.database.mode.Standalone.label
@@ -74,7 +75,6 @@ steps:
       - description: options.database.mode.Sharded.description
         text: options.database.mode.Sharded.label
         value: Sharded
-      onChange: clearArbiterHidden
       schema:
         $ref: schema#/properties/spec/properties/mode
       type: radio
@@ -119,9 +119,9 @@ steps:
         - elements:
           - computed: setMachineToCustom
             fetch: getMachineListForOptions
-            onChange: setResource|shardTopology/shard
             label:
               text: Machine
+            onChange: setResource|shardTopology/shard
             schema:
               $ref: schema#/properties/spec/properties/shardTopology/properties/shard/properties/podResources/properties/machine
             type: select
@@ -151,9 +151,9 @@ steps:
         - elements:
           - computed: setMachineToCustom
             fetch: getMachineListForOptions
-            onChange: setResource|shardTopology/configServer
             label:
               text: Machine
+            onChange: setResource|shardTopology/configServer
             schema:
               $ref: schema#/properties/spec/properties/shardTopology/properties/configServer/properties/podResources/properties/machine
             type: select
@@ -178,9 +178,9 @@ steps:
         - elements:
           - computed: setMachineToCustom
             fetch: getMachineListForOptions
-            onChange: setResource|shardTopology/mongos
             label:
               text: Machine
+            onChange: setResource|shardTopology/mongos
             schema:
               $ref: schema#/properties/spec/properties/shardTopology/properties/mongos/properties/podResources/properties/machine
             type: select
@@ -212,9 +212,9 @@ steps:
         schema:
           $ref: schema#/properties/spec/properties/podResources/properties/resources
         type: resource-input-form
+      if: notEqualToDatabaseMode|Sharded
       label:
         text: labels.machine_profile
-      if: notEqualToDatabaseMode|Sharded
       show_label: true
       type: single-step-form
     - hasDescription: true
@@ -269,9 +269,9 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/authSecret/properties/password
       type: input
-    - label:
+    - if: notEqualToDatabaseMode|Standalone
+      label:
         text: Enable Arbiter?
-      if: notEqualToDatabaseMode|Standalone
       schema:
         $ref: schema#/properties/spec/properties/arbiter/properties/enabled
       type: switch
@@ -279,9 +279,9 @@ steps:
       - elements:
         - computed: setMachineToCustom
           fetch: getMachineListForOptions
-          onChange: setResource|arbiter
           label:
             text: Machine
+          onChange: setResource|arbiter
           schema:
             $ref: schema#/properties/spec/properties/arbiter/properties/podResources/properties/machine
           type: select
@@ -293,25 +293,25 @@ steps:
         schema:
           $ref: schema#/properties/spec/properties/arbiter/properties/podResources
         type: single-step-form
+      if: showArbiter
       label:
         text: Arbiter
-      if: showArbiter
-      show_label: true
       schema:
         $ref: schema#/properties/spec/properties/arbiter
+      show_label: true
       type: single-step-form
-    - label:
+    - if: notEqualToDatabaseMode|Standalone
+      label:
         text: Enable hidden?
-      if: notEqualToDatabaseMode|Standalone
       schema:
         $ref: schema#/properties/spec/properties/hidden/properties/enabled
       type: switch
     - elements:
       - computed: setMachineToCustom
         fetch: getMachineListForOptions
-        onChange: setResource|hidden
         label:
           text: Machine
+        onChange: setResource|hidden
         schema:
           $ref: schema#/properties/spec/properties/hidden/properties/podResources/properties/machine
         type: select
@@ -320,12 +320,12 @@ steps:
         schema:
           $ref: schema#/properties/spec/properties/hidden/properties/podResources/properties/resources
         type: resource-input-form
+      if: showHidden
       label:
         text: Hidden
-      if: showHidden
-      show_label: true
       schema:
         $ref: schema#/properties/spec/properties/hidden/properties/podResources
+      show_label: true
       type: single-step-form
     - elements:
       - customClass: mt-10

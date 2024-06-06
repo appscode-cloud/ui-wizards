@@ -59,6 +59,7 @@ type KubedbcomMongodbEditorOptionsSpecSpec struct {
 	Arbiter           *MongoDBArbiter        `json:"arbiter"`
 	Hidden            *MongoDBHidden         `json:"hidden"`
 	AuthSecret        AuthSecret             `json:"authSecret"`
+	Configuration     string                 `json:"configuration"`
 	Monitoring        Monitoring             `json:"monitoring"`
 	Backup            BackupToolSpec         `json:"backup"`
 }

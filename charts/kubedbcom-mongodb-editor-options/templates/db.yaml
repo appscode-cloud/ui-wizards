@@ -184,6 +184,10 @@ spec:
   authSecret:
     name: {{ .Values.spec.authSecret.name }}
 {{- end }}
+{{- if .Values.configuration }}
+  configSecret:
+    name: {{ include "kubedbcom-mongodb-editor-options.fullname" . }}-config
+{{- end }}
 {{- if (and .Values.spec.monitoring .Values.spec.monitoring.agent) }}
   monitor:
     agent: {{ .Values.spec.monitoring.agent }}
