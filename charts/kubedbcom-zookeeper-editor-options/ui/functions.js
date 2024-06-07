@@ -249,7 +249,7 @@ function showAuthSecretField({
 function showStorageSizeField({ model, getValue, watchDependency }) {
   const modelPathValue = getValue(model, "/spec/mode");
   watchDependency("model#/spec/mode");
-  const validType = ["Standalone", "Replicaset"];
+  const validType = ["Standalone", "Cluster"];
   return validType.includes(modelPathValue);
 }
 
@@ -423,12 +423,12 @@ function setResourceLimit({ commit, model, getValue, watchDependency }) {
   if (modelPathValue && modelPathValue !== "custom") {
     // to avoiding set value by reference, cpu and memory set separately
     commit("wizard/model$update", {
-      path: "/spec/resources/limits/cpu",
+      path: "/spec/podResources/resources/limits/cpu",
       value: machines[modelPathValue].resources.limits.cpu,
       force: true,
     });
     commit("wizard/model$update", {
-      path: "/spec/resources/limits/memory",
+      path: "/spec/podResources/resources/limits/memory",
       value: machines[modelPathValue].resources.limits.memory,
       force: true,
     });
