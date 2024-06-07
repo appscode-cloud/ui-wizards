@@ -143,6 +143,40 @@ steps:
         $ref: schema#/properties/spec/properties/authSecret/properties/password
       type: input
     - label:
+        text: Configuration
+      schema:
+        $ref: schema#/properties/spec/properties/configuration
+      type: input
+    - elements:
+      - label:
+          text: labels.postgresRef.name
+        schema:
+          $ref: schema#/properties/spec/properties/postgresRef/properties/name
+        type: input
+      - label:
+          text: labels.postgresRef.namespace
+        schema:
+          $ref: schema#/properties/spec/properties/postgresRef/properties/namespace
+        type: input
+      label:
+        text: labels.postgresRef.label
+      schema:
+        $ref: schema#/properties/spec/properties/postgresRef
+      show_label: true
+      type: single-step-form
+    - elements:
+      - label:
+          text: syncUsers?
+        schema:
+          $ref: schema#/properties/spec/properties/syncUsers
+        type: switch
+      label:
+        text: SyncUsers
+      schema:
+        $ref: schema#/properties/spec/properties/postgresRef
+      show_label: true
+      type: single-step-form
+    - label:
         text: labels.machine_profile
       type: label-element
     - computed: setMachineToCustom
