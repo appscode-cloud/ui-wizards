@@ -8,6 +8,7 @@ const machines = {
         memory: "512Mi"
       },
       limits: {
+        cpu: "500m",
         memory: "1Gi"
       }
     }
@@ -19,6 +20,7 @@ const machines = {
         memory: "1Gi"
       },
       limits: {
+        cpu: "2",
         memory: "2Gi"
       }
     }
@@ -30,6 +32,7 @@ const machines = {
         memory: "2Gi"
       },
       limits: {
+        cpu: "2",
         memory: "4Gi"
       }
     }
@@ -41,6 +44,7 @@ const machines = {
         memory: "4Gi"
       },
       limits: {
+        cpu: "2",
         memory: "8Gi"
       }
     }
@@ -52,6 +56,7 @@ const machines = {
         memory: "8Gi"
       },
       limits: {
+        cpu: "4",
         memory: "16Gi"
       }
     }
@@ -63,6 +68,7 @@ const machines = {
         memory: "16Gi"
       },
       limits: {
+        cpu: "8",
         memory: "32Gi"
       }
     }
@@ -74,6 +80,7 @@ const machines = {
         memory: "912680550"
       },
       limits: {
+        cpu: "1",
         memory: "1825361100"
       }
     }
@@ -85,6 +92,7 @@ const machines = {
         memory: "4Gi"
       },
       limits: {
+        cpu: "2",
         memory: "8Gi"
       }
     }
@@ -96,6 +104,7 @@ const machines = {
         memory: "8Gi"
       },
       limits: {
+        cpu: "4",
         memory: "16Gi"
       }
     }
@@ -107,6 +116,7 @@ const machines = {
         memory: "16Gi"
       },
       limits: {
+        cpu: "8",
         memory: "32Gi"
       }
     }
@@ -118,6 +128,7 @@ const machines = {
         memory: "32Gi"
       },
       limits: {
+        cpu: "16",
         memory: "64Gi"
       }
     }
@@ -129,6 +140,7 @@ const machines = {
         memory: "64Gi"
       },
       limits: {
+        cpu: "32",
         memory: "128Gi"
       }
     }
@@ -140,6 +152,7 @@ const machines = {
         memory: "96Gi"
       },
       limits: {
+        cpu: "48",
         memory: "192Gi"
       }
     }
@@ -151,6 +164,7 @@ const machines = {
         memory: "128Gi"
       },
       limits: {
+        cpu: "64",
         memory: "256Gi"
       }
     }
@@ -162,6 +176,7 @@ const machines = {
         memory: "192Gi"
       },
       limits: {
+        cpu: "96",
         memory: "384Gi"
       }
     }
@@ -173,6 +188,7 @@ const machines = {
         memory: "8Gi"
       },
       limits: {
+        cpu: "2",
         memory: "16Gi"
       }
     }
@@ -184,6 +200,7 @@ const machines = {
         memory: "16Gi"
       },
       limits: {
+        cpu: "4",
         memory: "32Gi"
       }
     }
@@ -195,6 +212,7 @@ const machines = {
         memory: "32Gi"
       },
       limits: {
+        cpu: "8",
         memory: "64Gi"
       }
     }
@@ -206,6 +224,7 @@ const machines = {
         memory: "96Gi"
       },
       limits: {
+        cpu: "16",
         memory: "192Gi"
       }
     }
@@ -217,6 +236,7 @@ const machines = {
         memory: "128Gi"
       },
       limits: {
+        cpu: "32",
         memory: "256Gi"
       }
     }
@@ -228,6 +248,7 @@ const machines = {
         memory: "192Gi"
       },
       limits: {
+        cpu: "48",
         memory: "384Gi"
       }
     }
@@ -239,6 +260,7 @@ const machines = {
         memory: "256Gi"
       },
       limits: {
+        cpu: "64",
         memory: "512Gi"
       }
     }
@@ -250,6 +272,7 @@ const machines = {
         memory: "384Gi"
       },
       limits: {
+        cpu: "96",
         memory: "768Gi"
       }
     }
