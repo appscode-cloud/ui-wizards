@@ -1,5 +1,5 @@
 {{- $machines := .Files.Get "data/machines.yaml" | fromYaml -}}
-{{- $res = .Values.spec.podResources.resources -}}
+{{- $res := .Values.spec.podResources.resources -}}
 {{- if and .Values.spec.podResources.machine (hasKey $machines .Values.spec.podResources.machine) }}
   {{- $res = get (get $machines .Values.spec.podResources.machine) "resources" }}
 {{- end }}
@@ -29,8 +29,10 @@ spec:
         storage: {{ .Values.spec.persistence.size }}
   podTemplate:
     spec:
-      resources:
-        {{- toYaml $res | nindent 8 }}
+      containers:
+        - name: zookeeper
+          resources:
+            {{- toYaml $res | nindent 12 }}
       {{- if and .Values.form.capi.provider .Values.form.capi.dedicated }}
       nodeSelector:
         nodes.klusters.dev/pool: {{ $poolName }}
