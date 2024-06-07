@@ -53,7 +53,7 @@ spec:
 {{- end }}
   initConfig:
     pgpoolConfig:
-      {{- toYaml .Values.configuration | nindent 6 }}
+{{- tpl .Values.spec.configuration . | nindent 6 -}}
 {{- if (and .Values.spec.monitoring .Values.spec.monitoring.agent) }}
   monitor:
     agent: {{ .Values.spec.monitoring.agent }}
