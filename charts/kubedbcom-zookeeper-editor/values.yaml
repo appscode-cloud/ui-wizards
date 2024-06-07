@@ -1,117 +1,94 @@
 form:
   alert:
-    ## Enable PrometheusRule alerts
-    enabled: warning
-
-    ## Labels for default rules
-    labels: # +doc-gen:break
-      release: kube-prometheus-stack
-
-    ## Annotations for default rules
-    annotations: {}
-
-    ## Additional labels for PrometheusRule alerts
     additionalRuleLabels: {}
-
-    ## Prefix for runbook URLs. Use this to override the first part of the runbookURLs that is common to all rules.
-    # runbookUrl: "https://runbooks.prometheus-operator.dev/runbooks"
-
+    annotations: {}
+    enabled: warning
     groups:
       database:
         enabled: warning
         rules:
-          # ZooKeeper is down
-          zookeeperDown:
-            enabled: true
-            duration: "1m"
-            severity: critical
-          # ZooKeeper has way too nodes. Consider scaling up.
-          zookeeperTooManyNodes:
-            enabled: true
-            duration: "1m"
-            val: 1000000
-            severity: warning
-          # ZooKeeper is allocated too big memory
-          zookeeperTooBigMemory:
-            enabled: true
-            duration: "1m"
-            val: 1
-            severity: warning
-          # ZooKeeper is watching many nodes
-          zookeeperTooManyWatch:
-            enabled: true
-            duration: "1m"
-            val: 10000
-            severity: warning
-          # ZooKeeper has created too many connections
-          zookeeperTooManyConnections:
-            enabled: true
-            duration: "1m"
-            val: 60
-            severity: warning
-          # ZooKeeper leader election happened
-          zookeeperLeaderElection:
-            enabled: true
-            duration: "1m"
-            severity: warning
-          # Openfile count in zookeeper is more than 300
-          zookeeperTooManyOpenFiles:
-            enabled: true
-            duration: "1m"
-            val: 300
-            severity: warning
-          # ZooKeeper is taking more time to sync
-          zookeeperTooLongFsyncTime:
-            enabled: true
-            duration: "1m"
-            val: 100
-            severity: warning
-          # ZooKeeper is taking more time when taking snapshots
-          zookeeperTooLongSnapshotTime:
-            enabled: true
-            duration: "1m"
-            val: 100
-            severity: warning
-          # Average latency is too high
-          zookeeperTooHighAvgLatency:
-            enabled: true
-            duration: "1m"
-            val: 100
-            severity: warning
-          # ZooKeeper jvm memory is filling up
-          zookeeperJvmMemoryFilingUp:
-            enabled: true
-            duration: "1m"
-            val: 0.8
-            severity: warning
-          # Sepcifies the alert configuration for persistent volume usages.
-          diskUsageHigh:
-            enabled: true
-            val: 80
-            duration: "1m"
-            severity: warning
           diskAlmostFull:
+            duration: 1m
             enabled: true
-            val: 95
-            duration: "1m"
             severity: critical
+            val: 95
+          diskUsageHigh:
+            duration: 1m
+            enabled: true
+            severity: warning
+            val: 80
+          zookeeperDown:
+            duration: 1m
+            enabled: true
+            severity: critical
+          zookeeperJvmMemoryFilingUp:
+            duration: 1m
+            enabled: true
+            severity: warning
+            val: 0.8
+          zookeeperLeaderElection:
+            duration: 1m
+            enabled: true
+            severity: warning
+          zookeeperTooBigMemory:
+            duration: 1m
+            enabled: true
+            severity: warning
+            val: 1
+          zookeeperTooHighAvgLatency:
+            duration: 1m
+            enabled: true
+            severity: warning
+            val: 100
+          zookeeperTooLongFsyncTime:
+            duration: 1m
+            enabled: true
+            severity: warning
+            val: 100
+          zookeeperTooLongSnapshotTime:
+            duration: 1m
+            enabled: true
+            severity: warning
+            val: 100
+          zookeeperTooManyConnections:
+            duration: 1m
+            enabled: true
+            severity: warning
+            val: 60
+          zookeeperTooManyNodes:
+            duration: 1m
+            enabled: true
+            severity: warning
+            val: 1e+06
+          zookeeperTooManyOpenFiles:
+            duration: 1m
+            enabled: true
+            severity: warning
+            val: 300
+          zookeeperTooManyWatch:
+            duration: 1m
+            enabled: true
+            severity: warning
+            val: 10000
       provisioner:
         enabled: warning
         rules:
-          appPhaseNotReady:
-            enabled: true
-            duration: "1m"
-            severity: critical
           appPhaseCritical:
+            duration: 15m
             enabled: true
-            duration: "15m"
             severity: warning
+          appPhaseNotReady:
+            duration: 1m
+            enabled: true
+            severity: critical
+    labels:
+      release: kube-prometheus-stack
   capi:
-    provider: ""
-    namespace: ""
     clusterName: ""
     dedicated: false
+    namespace: ""
     nodes: 1
+    provider: ""
     sku: ""
     zones: []
 metadata:
@@ -172,5 +149,5 @@ resources:
         resources:
           requests:
             storage: 100Mi
-      deletionPolicy: Halt
+      terminationPolicy: Halt
       version: 3.8.3
