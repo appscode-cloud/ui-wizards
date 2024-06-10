@@ -146,18 +146,20 @@ steps:
         text: Configuration
       schema:
         $ref: schema#/properties/spec/properties/configuration
-      type: input
+      type: textarea 
     - elements:
       - label:
-          text: labels.postgresRef.name
-        schema:
-          $ref: schema#/properties/spec/properties/postgresRef/properties/name
-        type: input
-      - label:
           text: labels.postgresRef.namespace
+        fetch: getResources|core|v1|namespaces
         schema:
           $ref: schema#/properties/spec/properties/postgresRef/properties/namespace
-        type: input
+        type: select
+      - label:
+          text: labels.postgresRef.name
+        fetch: getPostgresList
+        schema:
+          $ref: schema#/properties/spec/properties/postgresRef/properties/name
+        type: select
       label:
         text: labels.postgresRef.label
       schema:
@@ -172,8 +174,6 @@ steps:
         type: switch
       label:
         text: SyncUsers
-      schema:
-        $ref: schema#/properties/spec/properties/postgresRef
       show_label: true
       type: single-step-form
     - label:

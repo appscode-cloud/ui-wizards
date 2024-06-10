@@ -252,7 +252,29 @@ function showStorageSizeField({ model, getValue, watchDependency }) {
   const validType = ["Standalone", "Cluster"];
   return validType.includes(modelPathValue);
 }
-
+async function getPostgresList (
+  { axios,storeGet ,model, getValue, watchDependency },
+  ) {
+    const namespace = getValue(model, "/spec/postgresRef/namespace");
+    watchDependency("model#/spec/postgresRef/namespace");
+    const owner = storeGet("/route/params/user");
+    const cluster = storeGet("/route/params/cluster");
+    if(namespace){
+      const resp = await axios.get(
+        `http://api.bb.test:3003/api/v1/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/postgreses`
+        )
+      const resources = (resp && resp.data && resp.data.items) || [];
+      resources.map((item) => {
+        const name = (item.metadata && item.metadata.name) || "";
+        item.text = name;
+        item.value = name;
+        return true;
+      });
+      return resources;
+    }
+    
+    return []
+  }
 async function getResources(
   { axios, storeGet },
   group,
@@ -700,6 +722,7 @@ return {
 	showAuthSecretField,
 	showStorageSizeField,
 	getResources,
+  getPostgresList,
 	getStorageClassNames,
   getMongoDbVersions,
   onCreateAuthSecretChange,
