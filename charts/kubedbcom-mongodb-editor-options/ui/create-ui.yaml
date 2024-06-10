@@ -29,7 +29,7 @@ steps:
       label:
         text: labels.database.version
       schema:
-        $ref: schema#/properties/spec/properties/version
+        $ref: schema#/properties/spec/properties/adminOptions/properties/versions/properties/default
       type: select
     - isArray: true
       keys:
@@ -249,7 +249,7 @@ steps:
       label:
         text: labels.storage.select
       schema:
-        $ref: schema#/properties/spec/properties/storageClass/properties/name
+        $ref: schema#/properties/spec/properties/adminOptions/properties/storageClasses/properties/default
       type: select
     - computed: returnFalse
       label:
@@ -376,13 +376,13 @@ steps:
         version: v0.4.21
       dataContext:
         agent:
-          $ref: schema#/properties/spec/properties/monitoring/properties/agent
+          $ref: schema#/properties/spec/properties/adminOptions/properties/monitoring/properties/agent
       functionCallbacks:
         updateAgentValue:
           $ref: functions#/updateAgentValue
       moduleResolver: fetchJsons
       schema:
-        $ref: schema#/properties/spec/properties/monitoring/properties/serviceMonitor
+        $ref: schema#/properties/spec/properties/adminOptions/properties/monitoring/properties/serviceMonitor
       type: reusable-element
     - alias: reusable-backup-option
       chart:
@@ -390,7 +390,7 @@ steps:
         version: v0.4.21
       moduleResolver: fetchJsons
       schema:
-        $ref: schema#/properties/spec/properties/backup
+        $ref: schema#/properties/spec/properties/adminOptions/properties/backup
       type: reusable-element
     - elements:
       - hasDescription: true

@@ -1,0 +1,11 @@
+{{- if .Values.spec.admin.webUI.default }}
+apiVersion: catalog.appscode.com/v1alpha1
+kind: MongoDBBinding
+metadata:
+  name: {{ include "kubedbcom-mongodb-editor-options.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  sourceRef:
+    name: {{ include "kubedbcom-mongodb-editor-options.fullname" . }}
+    namespace: {{ .Release.Namespace }}
+{{- end }}

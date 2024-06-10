@@ -36,7 +36,7 @@
     {{- $hidden_res = get (get $machines .Values.spec.hidden.podResources.machine) "resources" }}
   {{- end }}
 {{- end }}
-{{ $poolName := printf "%s-%s-%s" .Values.form.capi.clusterName .Release.Namespace (include "kubedbcom-mongodb-editor-options.fullname" .) }}
+{{ $poolName := printf "my-capi-cluster-%s-%s" .Release.Namespace (include "kubedbcom-mongodb-editor-options.fullname" .) }}
 
 apiVersion: kubedb.com/v1
 kind: MongoDB
@@ -45,17 +45,21 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "kubedbcom-mongodb-editor-options.labels" . | nindent 4 }}
-{{- if .Values.spec.annotations }}
+{{- if .Values.spec.admin.archiver.default }}
+    kubedb.com/archiver: "true"
+{{- end }}
   annotations:
+    app.kubernetes.io/cluster-tier: {{ .Values.spec.admin.clusterTier.default }}
+{{- if .Values.spec.annotations }}
     {{- include "kubedbcom-mongodb-editor-options.annotations" . | nindent 4 }}
 {{- end }}
 spec:
-  version: {{ .Values.spec.version | quote }}
+  version: {{ .Values.spec.admin.databases.MongoDB.versions.default | quote }}
 {{- if or (eq .Values.spec.mode "Standalone") (eq .Values.spec.mode "Replicaset") }}
   replicas: {{ (eq .Values.spec.mode "Replicaset") | ternary .Values.spec.replicaSet.replicas 1 }}
   storageType: Durable
   storage:
-    storageClassName: {{ .Values.spec.storageClass.name }}
+    storageClassName: {{ .Values.spec.admin.storageClasses.default }}
     accessModes:
     - ReadWriteOnce
     resources:
@@ -76,7 +80,7 @@ spec:
             - name: mongodb
               resources:
                 {{- toYaml $configServer_res | nindent 16 }}
-          {{- if and .Values.form.capi.provider .Values.form.capi.dedicated }}
+          {{- if eq .Values.spec.admin.deployment.default "Dedicated" }}
           nodeSelector:
             nodes.klusters.dev/pool: {{ $poolName }}
           tolerations:
@@ -89,7 +93,7 @@ spec:
         resources:
           requests:
             storage: {{ .Values.spec.shardTopology.configServer.persistence.size }}
-        storageClassName: {{ .Values.spec.storageClass.name }}
+        storageClassName: {{ .Values.spec.admin.storageClasses.default }}
     mongos:
       replicas: {{ .Values.spec.shardTopology.mongos.replicas }}
       podTemplate:
@@ -98,7 +102,7 @@ spec:
             - name: mongodb
               resources:
                 {{- toYaml $mongos_res | nindent 16 }}
-          {{- if and .Values.form.capi.provider .Values.form.capi.dedicated }}
+          {{- if eq .Values.spec.admin.deployment.default "Dedicated" }}
           nodeSelector:
             nodes.klusters.dev/pool: {{ $poolName }}
           tolerations:
@@ -116,7 +120,7 @@ spec:
             - name: mongodb
               resources:
                 {{- toYaml $shard_res | nindent 16 }}
-          {{- if and .Values.form.capi.provider .Values.form.capi.dedicated }}
+          {{- if eq .Values.spec.admin.deployment.default "Dedicated" }}
           nodeSelector:
             nodes.klusters.dev/pool: {{ $poolName }}
           tolerations:
@@ -129,7 +133,7 @@ spec:
         resources:
           requests:
             storage: {{ .Values.spec.shardTopology.shard.persistence.size }}
-        storageClassName: {{ .Values.spec.storageClass.name }}
+        storageClassName: {{ .Values.spec.admin.storageClasses.default }}
 {{- else }}
   podTemplate:
     spec:
@@ -137,13 +141,30 @@ spec:
         - name: mongodb
           resources:
             {{- toYaml $res | nindent 12 }}
-      {{- if and .Values.form.capi.provider .Values.form.capi.dedicated }}
+      podPlacementPolicy:
+        name: {{ .Values.spec.admin.clusterTier.placement.default }}
+      {{- if eq .Values.spec.admin.deployment.default "Dedicated" }}
       nodeSelector:
-        nodes.klusters.dev/pool: {{ $poolName }}
+        app: mongodbs.kubedb.com
+        instance: {{ include "kubedbcom-mongodb-editor-options.fullname" . }}
+        namespace: {{ .Release.Namespace }}
+        nodepool: {{ .Values.spec.admin.clusterTier.nodeTopology.default }}
       tolerations:
-        - key: dedicated
+        - key: app
           operator: "Equal"
-          value: "true"
+          value: "mongodbs.kubedb.com"
+          effect: "NoSchedule"
+        - key: instance
+          operator: "Equal"
+          value: {{ include "kubedbcom-mongodb-editor-options.fullname" . }}
+          effect: "NoSchedule"
+        - key: namespace
+          operator: "Equal"
+          value: {{ .Release.Namespace }}
+          effect: "NoSchedule"
+        - key: nodepool
+          operator: "Equal"
+          value: {{ .Values.spec.admin.clusterTier.nodeTopology.default }}
           effect: "NoSchedule"
       {{- end }}
 {{- end }}
@@ -155,7 +176,7 @@ spec:
           - name: mongodb
             resources:
               {{- toYaml $arbiter_res | nindent 14 }}
-        {{- if and .Values.form.capi.provider .Values.form.capi.dedicated }}
+        {{- if eq .Values.spec.admin.deployment.default "Dedicated" }}
         nodeSelector:
           nodes.klusters.dev/pool: {{ $poolName }}
         tolerations:
@@ -174,7 +195,7 @@ spec:
           - name: mongodb
             resources:
               {{- toYaml $hidden_res | nindent 14 }}
-        {{- if and .Values.form.capi.provider .Values.form.capi.dedicated }}
+        {{- if eq .Values.spec.admin.deployment.default "Dedicated" }}
         nodeSelector:
           nodes.klusters.dev/pool: {{ $poolName }}
         tolerations:
@@ -187,7 +208,7 @@ spec:
       resources:
         requests:
           storage: {{ .Values.spec.hidden.persistence.size }}
-      storageClassName: {{ .Values.spec.storageClass.name }}
+      storageClassName: {{ .Values.spec.admin.storageClasses.default }}
 {{- end }}
   deletionPolicy: {{ .Values.spec.deletionPolicy }}
   clusterAuthMode: {{ .Values.spec.clusterAuthMode }}
@@ -204,11 +225,20 @@ spec:
   configSecret:
     name: {{ include "kubedbcom-mongodb-editor-options.fullname" . }}-config
 {{- end }}
-{{- if (and .Values.spec.monitoring .Values.spec.monitoring.agent) }}
+{{- if .Values.spec.admin.tls.default }}
+  tls:
+    issuerRef:
+      apiGroup: "cert-manager.io"
+      kind: ClusterIssuer
+      name: {{ .Values.spec.admin.clusterIssuers.default }}
+  clusterAuthMode: x509
+  sslMode: requireSSL
+{{- end }}
+{{- if (and .Values.spec.admin.monitoring .Values.spec.admin.monitoring.agent) }}
   monitor:
-    agent: {{ .Values.spec.monitoring.agent }}
+    agent: {{ .Values.spec.admin.monitoring.agent }}
     prometheus:
-    {{- with .Values.spec.monitoring.exporter }}
+    {{- with .Values.spec.admin.monitoring.exporter }}
       exporter:
         args:
           - --compatible-mode
@@ -218,5 +248,5 @@ spec:
       serviceMonitor:
         interval: 30s
         labels:
-          {{- toYaml .Values.spec.monitoring.serviceMonitor.labels | nindent 10 }}
+          {{- toYaml .Values.spec.admin.monitoring.serviceMonitor.labels | nindent 10 }}
 {{- end }}
