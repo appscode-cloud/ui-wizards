@@ -18,7 +18,6 @@ package v1alpha1
 
 import (
 	core "k8s.io/api/core/v1"
-	mona "kmodules.xyz/monitoring-agent-api/api/v1"
 )
 
 // +kubebuilder:validation:Enum=db.t.micro;db.t.small;db.t.medium;db.t.large;db.t.xlarge;db.t.2xlarge;db.m.small;db.m.large;db.m.xlarge;db.m.2xlarge;db.m.4xlarge;db.m.8xlarge;db.m.12xlarge;db.m.16xlarge;db.m.24xlarge;db.r.large;db.r.xlarge;db.r.2xlarge;db.r.4xlarge;db.r.8xlarge;db.r.12xlarge;db.r.16xlarge;db.r.24xlarge
@@ -48,27 +47,13 @@ type AuthSecret struct {
 	Password string `json:"password"`
 }
 
+// ObjectReference contains enough information to let you inspect or modify the referred object.
+type ObjectReference struct {
+	Namespace string `json:"namespace"`
+	Name      string `json:"name"`
+}
+
 type OptionalResource struct {
 	// +optional
 	Create bool `json:"create"`
 }
-
-// *** Monitoring *** //
-
-type Monitoring struct {
-	Agent          mona.AgentType             `json:"agent"`
-	Exporter       PrometheusExporter         `json:"exporter"`
-	ServiceMonitor *mona.ServiceMonitorLabels `json:"serviceMonitor"`
-}
-
-type PrometheusExporter struct {
-	// Compute Resources required by the sidecar container.
-	// +optional
-	Resources core.ResourceRequirements `json:"resources"`
-}
-
-// *** Monitoring *** //
-
-// *** Alerts *** //
-
-// *** Alerts *** //
