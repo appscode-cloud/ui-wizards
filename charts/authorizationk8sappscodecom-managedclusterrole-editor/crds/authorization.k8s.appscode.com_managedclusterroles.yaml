@@ -1,0 +1,60 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  creationTimestamp: null
+  name: managedclusterroles.authorization.k8s.appscode.com
+spec:
+  group: authorization.k8s.appscode.com
+  names:
+    kind: ManagedClusterRole
+    listKind: ManagedClusterRoleList
+    plural: managedclusterroles
+    singular: managedclusterrole
+  scope: Namespaced
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        properties:
+          apiVersion:
+            type: string
+          kind:
+            type: string
+          metadata:
+            type: object
+          rules:
+            items:
+              properties:
+                apiGroups:
+                  items:
+                    type: string
+                  type: array
+                nonResourceURLs:
+                  items:
+                    type: string
+                  type: array
+                resourceNames:
+                  items:
+                    type: string
+                  type: array
+                resources:
+                  items:
+                    type: string
+                  type: array
+                verbs:
+                  items:
+                    type: string
+                  type: array
+              required:
+              - verbs
+              type: object
+            type: array
+        type: object
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: null
+  storedVersions: null
