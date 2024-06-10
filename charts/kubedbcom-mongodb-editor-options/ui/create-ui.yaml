@@ -64,6 +64,7 @@ steps:
     - hasDescription: true
       label:
         text: labels.database.mode
+      onChange: clearArbiterHidden
       options:
       - description: options.database.mode.Standalone.description
         text: options.database.mode.Standalone.label
@@ -99,36 +100,130 @@ steps:
         $ref: schema#/properties/spec/properties/persistence/properties/size
       type: input
     - elements:
-      - label:
+      - elements:
+        - label:
+            text: labels.shards
+          schema:
+            $ref: schema#/properties/spec/properties/shardTopology/properties/shard/properties/shards
+          type: input
+        - label:
+            text: labels.replicaset.number
+          schema:
+            $ref: schema#/properties/spec/properties/shardTopology/properties/shard/properties/replicas
+          type: input
+        - label:
+            text: labels.storage.size
+          schema:
+            $ref: schema#/properties/spec/properties/shardTopology/properties/shard/properties/persistence/properties/size
+          type: input
+        - elements:
+          - computed: setMachineToCustom
+            fetch: getMachineListForOptions
+            label:
+              text: Machine
+            onChange: setResource|shardTopology/shard
+            schema:
+              $ref: schema#/properties/spec/properties/shardTopology/properties/shard/properties/podResources/properties/machine
+            type: select
+          - computed: setCpuOrMem|shardTopology/shard
+            disabled: isMachineNotCustom|shardTopology/shard
+            label:
+              text: labels.resources
+            schema:
+              $ref: schema#/properties/spec/properties/shardTopology/properties/shard/properties/podResources/properties/resources
+            type: resource-input-form
+          schema:
+            $ref: schema#/properties/spec/properties/shardTopology/properties/shard/properties/podResources
+          type: single-step-form
+        label:
           text: labels.shardNodes
-        type: label-element
-      - label:
-          text: labels.shards
-        schema:
-          $ref: schema#/properties/spec/properties/shardTopology/properties/shard/properties/shards
-        type: input
-      - label:
-          text: labels.storage.size
-        schema:
-          $ref: schema#/properties/spec/properties/shardTopology/properties/shard/properties/persistence/properties/size
-        type: input
-      - label:
+        show_label: true
+        type: single-step-form
+      - elements:
+        - label:
+            text: labels.replicaset.number
+          schema:
+            $ref: schema#/properties/spec/properties/shardTopology/properties/configServer/properties/replicas
+          type: input
+        - label:
+            text: labels.storage.size
+          schema:
+            $ref: schema#/properties/spec/properties/shardTopology/properties/configServer/properties/persistence/properties/size
+          type: input
+        - elements:
+          - computed: setMachineToCustom
+            fetch: getMachineListForOptions
+            label:
+              text: Machine
+            onChange: setResource|shardTopology/configServer
+            schema:
+              $ref: schema#/properties/spec/properties/shardTopology/properties/configServer/properties/podResources/properties/machine
+            type: select
+          - computed: setCpuOrMem|shardTopology/configServer
+            disabled: isMachineNotCustom|shardTopology/configServer
+            label:
+              text: labels.resources
+            schema:
+              $ref: schema#/properties/spec/properties/shardTopology/properties/configServer/properties/podResources/properties/resources
+            type: resource-input-form
+          schema:
+            $ref: schema#/properties/spec/properties/shardTopology/properties/configServer/properties/podResources
+          type: single-step-form
+        label:
           text: labels.configServer
-        type: label-element
-      - label:
-          text: labels.storage.size
-        schema:
-          $ref: schema#/properties/spec/properties/shardTopology/properties/configServer/properties/persistence/properties/size
-        type: input
-      - label:
+        show_label: true
+        type: single-step-form
+      - elements:
+        - label:
+            text: labels.replicaset.number
+          schema:
+            $ref: schema#/properties/spec/properties/shardTopology/properties/mongos/properties/replicas
+          type: input
+        - elements:
+          - computed: setMachineToCustom
+            fetch: getMachineListForOptions
+            label:
+              text: Machine
+            onChange: setResource|shardTopology/mongos
+            schema:
+              $ref: schema#/properties/spec/properties/shardTopology/properties/mongos/properties/podResources/properties/machine
+            type: select
+          - computed: setCpuOrMem|shardTopology/mongos
+            disabled: isMachineNotCustom|shardTopology/mongos
+            label:
+              text: labels.resources
+            schema:
+              $ref: schema#/properties/spec/properties/shardTopology/properties/mongos/properties/podResources/properties/resources
+            type: resource-input-form
+          schema:
+            $ref: schema#/properties/spec/properties/shardTopology/properties/mongos/properties/podResources
+          type: single-step-form
+        label:
           text: labels.mongos
-        type: label-element
-      - label:
-          text: labels.replicaset.number
-        schema:
-          $ref: schema#/properties/spec/properties/shardTopology/properties/mongos/properties/replicas
-        type: input
+        show_label: true
+        type: single-step-form
       if: isEqualToModelPathValue|Sharded|/spec/mode
+      type: single-step-form
+    - elements:
+      - computed: setMachineToCustom
+        fetch: getMachineListForOptions
+        label:
+          text: Machine
+        onChange: setResourceLimit
+        schema:
+          $ref: schema#/properties/spec/properties/podResources/properties/machine
+        type: select
+      - computed: setLimitsCpuOrMem
+        disabled: isMachineNotCustom
+        label:
+          text: labels.resources
+        schema:
+          $ref: schema#/properties/spec/properties/podResources/properties/resources
+        type: resource-input-form
+      if: notEqualToDatabaseMode|Sharded
+      label:
+        text: labels.machine_profile
+      show_label: true
       type: single-step-form
     - hasDescription: true
       label:
@@ -152,30 +247,16 @@ steps:
       type: radio
     - fetch: getStorageClassNames
       label:
-        text: labels.storage.class
+        text: labels.storage.select
       schema:
         $ref: schema#/properties/spec/properties/storageClass/properties/name
       type: select
-    - label:
-        text: labels.database.secret
-      type: label-element
-    - onChange: onCreateAuthSecretChange
-      options:
-      - text: options.database.secret.customSecret.label
-        value: true
-      - text: options.database.secret.existingSecret.label
-        value: false
+    - computed: returnFalse
+      label:
+        text: Provide Authentication Credentials?
       schema:
         $ref: discriminator#/createAuthSecret
-      type: radio
-    - allowUserDefinedOption: true
-      fetch: getSecrets
-      if: showAuthSecretField
-      label:
-        text: labels.secret
-      schema:
-        $ref: schema#/properties/spec/properties/authSecret/properties/name
-      type: select
+      type: switch
     - if: showAuthPasswordField
       label:
         text: labels.password
@@ -183,30 +264,89 @@ steps:
         $ref: schema#/properties/spec/properties/authSecret/properties/password
       type: input
     - label:
-        text: labels.machine_profile
-      type: label-element
-    - computed: setMachineToCustom
-      fetch: getMachineListForOptions
-      label:
-        text: Machine
-      onChange: setResourceLimit
+        text: Configure Database?
       schema:
-        $ref: schema#/properties/spec/properties/podResources/properties/machine
-      type: select
-    - computed: setLimitsCpuOrMem|cpu
-      disabled: disableLimit
-      label:
-        text: labels.cpu
+        $ref: discriminator#/configDatabase
+      onChange: clearConfiguration
+      type: switch
+    - label:
+        text: Configuration
+      if: isConfigDatabaseOn
       schema:
-        $ref: schema#/properties/spec/properties/podResources/properties/resources/properties/limits/properties/cpu
-      type: input
-    - computed: setLimitsCpuOrMem|memory
-      disabled: disableLimit
+        $ref: schema#/properties/spec/properties/configuration
+      type: editor
+    - if: notEqualToDatabaseMode|Standalone
       label:
-        text: labels.memory
+        text: Enable Arbiter?
       schema:
-        $ref: schema#/properties/spec/properties/podResources/properties/resources/properties/limits/properties/memory
-      type: input
+        $ref: schema#/properties/spec/properties/arbiter/properties/enabled
+      type: switch
+    - elements:
+      - elements:
+        - computed: setMachineToCustom
+          fetch: getMachineListForOptions
+          label:
+            text: Machine
+          onChange: setResource|arbiter
+          schema:
+            $ref: schema#/properties/spec/properties/arbiter/properties/podResources/properties/machine
+          type: select
+        - computed: setCpuOrMem|arbiter
+          disabled: isMachineNotCustom|arbiter
+          label:
+            text: labels.resources
+          schema:
+            $ref: schema#/properties/spec/properties/arbiter/properties/podResources/properties/resources
+          type: resource-input-form
+        schema:
+          $ref: schema#/properties/spec/properties/arbiter/properties/podResources
+        type: single-step-form
+      if: showArbiter
+      label:
+        text: Arbiter
+      schema:
+        $ref: schema#/properties/spec/properties/arbiter
+      show_label: true
+      type: single-step-form
+    - if: notEqualToDatabaseMode|Standalone
+      label:
+        text: Enable hidden?
+      schema:
+        $ref: schema#/properties/spec/properties/hidden/properties/enabled
+      type: switch
+    - elements:
+      - label:
+          text: Replicas
+        schema:
+          $ref: schema#/properties/spec/properties/hidden/properties/replicas
+        type: input
+      - label:
+          text: Persistence Size
+        schema:
+          $ref: schema#/properties/spec/properties/hidden/properties/persistence/properties/size
+        type: input
+      - computed: setMachineToCustom
+        fetch: getMachineListForOptions
+        label:
+          text: Machine
+        onChange: setResource|hidden
+        schema:
+          $ref: schema#/properties/spec/properties/hidden/properties/podResources/properties/machine
+        type: select
+      - computed: setCpuOrMem|hidden
+        disabled: isMachineNotCustom|hidden
+        label:
+          text: labels.resources
+        schema:
+          $ref: schema#/properties/spec/properties/hidden/properties/podResources/properties/resources
+        type: resource-input-form
+      if: showHidden
+      label:
+        text: Hidden
+      schema:
+        $ref: schema#/properties/spec/properties/hidden/properties/podResources
+      show_label: true
+      type: single-step-form
     - elements:
       - customClass: mt-10
         label:

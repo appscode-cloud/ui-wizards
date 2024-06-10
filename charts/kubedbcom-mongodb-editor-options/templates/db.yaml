@@ -144,7 +144,7 @@ spec:
     podTemplate:
       spec:
         resources:
-          {{- toYaml $arbiter_res | nindent 8 }}
+          {{- toYaml $arbiter_res | nindent 10 }}
         {{- if and .Values.form.capi.provider .Values.form.capi.dedicated }}
         nodeSelector:
           nodes.klusters.dev/pool: {{ $poolName }}
@@ -161,7 +161,7 @@ spec:
     podTemplate:
       spec:
         resources:
-          {{- toYaml $hidden_res | nindent 8 }}
+          {{- toYaml $hidden_res | nindent 10 }}
         {{- if and .Values.form.capi.provider .Values.form.capi.dedicated }}
         nodeSelector:
           nodes.klusters.dev/pool: {{ $poolName }}
@@ -183,6 +183,14 @@ spec:
 {{- if .Values.spec.authSecret.name }}
   authSecret:
     name: {{ .Values.spec.authSecret.name }}
+{{- end }}
+{{- if .Values.spec.authSecret.password }}
+  authSecret:
+    name: {{ include "kubedbcom-mongodb-editor-options.fullname" . }}-auth
+{{- end }}
+{{- if .Values.spec.configuration }}
+  configSecret:
+    name: {{ include "kubedbcom-mongodb-editor-options.fullname" . }}-config
 {{- end }}
 {{- if (and .Values.spec.monitoring .Values.spec.monitoring.agent) }}
   monitor:
