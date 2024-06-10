@@ -16,9 +16,6 @@ metadata:
     namespace: ""
 
 spec:
-  # List options
-  version: 6.0.12
-
   # Annotations to add to the database custom resource
   annotations: {}
 
@@ -80,16 +77,7 @@ spec:
     persistence:
       size: 10Gi
 
-  # "keyFile", "sendKeyFile", "sendX509", "x509"
-  clusterAuthMode: keyFile
-
-  # "disabled", "allowSSL", "preferSSL", "requireSSL"
-  sslMode: disabled
-
-  terminationPolicy: WipeOut
-
-  storageClass:
-    name: standard
+  deletionPolicy: WipeOut
 
   persistence:
     size: 10Gi
@@ -206,6 +194,57 @@ spec:
           auth:
             B2_ACCOUNT_ID: ""
             B2_ACCOUNT_KEY: ""
+
+  admin:
+    deployment:
+      default: Dedicated
+      toggle: true
+      capacityType: "on-demand"
+      nodepoolType: "m32"
+    versions:
+      available: ["4.4.26", "6.0.12"]
+      default: "6.0.12"
+      toggle: true
+    storageClasses:
+      available: ["linode-block-storage", "linode-block-storage-retain", "standard"]
+      default: "linode-block-storage"
+      toggle: true
+    volumeSnapshotClasses:
+      available: ["az-vsc", "gke-vsc"]
+      default: "gke-vsc"
+      toggle: true
+
+    tls:
+      default: true
+      toggle: true
+    clusterIssuers:
+      available: ["global-ca"]
+      default: "global-ca"
+      toggle: true
+
+    webUI:
+      default: false
+      toggle: true
+    gateways:
+      available:
+        - name: "mg-gw"
+          namespace: mongo
+        - name: "my-gw"
+          namespace: mysql
+      default:
+        name: "mg-gw"
+        namespace: "mongo"
+      toggle: true
+
+    monitoring:
+      default: true
+      toggle: true
+    alerts:
+      default: "warning"
+      toggle: true
+    backup:
+      default: true
+      toggle: true
 
 form:
   alert:
@@ -380,7 +419,7 @@ form:
   capi:
     provider: ""
     namespace: ""
-    clusterName: ""
+    clusterName: "my-capi-cluster"
     dedicated: false
     nodes: 1
     sku: ""

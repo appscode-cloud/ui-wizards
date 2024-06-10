@@ -937,6 +937,183 @@ properties:
     type: object
   spec:
     properties:
+      adminOptions:
+        properties:
+          alert:
+            properties:
+              default:
+                type: string
+              toggle:
+                type: boolean
+            required:
+            - default
+            - toggle
+            type: object
+          backup:
+            properties:
+              default:
+                type: boolean
+              toggle:
+                type: boolean
+            required:
+            - default
+            - toggle
+            type: object
+          clusterIssuers:
+            properties:
+              available:
+                items:
+                  type: string
+                type: array
+              default:
+                type: string
+              toggle:
+                type: boolean
+            required:
+            - available
+            - default
+            - toggle
+            type: object
+          deployment:
+            properties:
+              default:
+                enum:
+                - Shared
+                - Dedicated
+                type: string
+              toggle:
+                type: boolean
+            required:
+            - default
+            - toggle
+            type: object
+          gateways:
+            properties:
+              available:
+                items:
+                  description: ObjectReference contains enough information to let
+                    you inspect or modify the referred object.
+                  properties:
+                    name:
+                      description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names'
+                      type: string
+                    namespace:
+                      description: 'Namespace of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/'
+                      type: string
+                  required:
+                  - name
+                  - namespace
+                  type: object
+                type: array
+              default:
+                description: ObjectReference contains enough information to let you
+                  inspect or modify the referred object.
+                properties:
+                  name:
+                    description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names'
+                    type: string
+                  namespace:
+                    description: 'Namespace of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/'
+                    type: string
+                required:
+                - name
+                - namespace
+                type: object
+              toggle:
+                type: boolean
+            required:
+            - available
+            - default
+            - toggle
+            type: object
+          monitoring:
+            properties:
+              default:
+                type: boolean
+              toggle:
+                type: boolean
+            required:
+            - default
+            - toggle
+            type: object
+          storageClasses:
+            properties:
+              available:
+                items:
+                  type: string
+                type: array
+              default:
+                type: string
+              toggle:
+                type: boolean
+            required:
+            - available
+            - default
+            - toggle
+            type: object
+          tls:
+            properties:
+              default:
+                type: boolean
+              toggle:
+                type: boolean
+            required:
+            - default
+            - toggle
+            type: object
+          versions:
+            properties:
+              available:
+                items:
+                  type: string
+                type: array
+              default:
+                type: string
+              toggle:
+                type: boolean
+            required:
+            - available
+            - default
+            - toggle
+            type: object
+          volumeSnapshotClasses:
+            properties:
+              available:
+                items:
+                  type: string
+                type: array
+              default:
+                type: string
+              toggle:
+                type: boolean
+            required:
+            - available
+            - default
+            - toggle
+            type: object
+          webUI:
+            properties:
+              default:
+                type: boolean
+              toggle:
+                type: boolean
+            required:
+            - default
+            - toggle
+            type: object
+        required:
+        - alert
+        - backup
+        - clusterIssuers
+        - deployment
+        - gateways
+        - monitoring
+        - storageClasses
+        - tls
+        - versions
+        - volumeSnapshotClasses
+        - webUI
+        type: object
       annotations:
         additionalProperties:
           type: string
@@ -1342,15 +1519,6 @@ properties:
         required:
         - tool
         type: object
-      clusterAuthMode:
-        enum:
-        - keyFile
-        - sendKeyFile
-        - sendX509
-        - x509
-        type: string
-      configuration:
-        type: string
       hidden:
         properties:
           enabled:
@@ -1922,20 +2090,6 @@ properties:
         - mongos
         - shard
         type: object
-      sslMode:
-        enum:
-        - disabled
-        - allowSSL
-        - preferSSL
-        - requireSSL
-        type: string
-      storageClass:
-        properties:
-          name:
-            type: string
-        required:
-        - name
-        type: object
       terminationPolicy:
         enum:
         - Halt
@@ -1943,14 +2097,11 @@ properties:
         - WipeOut
         - DoNotTerminate
         type: string
-      version:
-        type: string
     required:
+    - adminOptions
     - arbiter
     - authSecret
     - backup
-    - clusterAuthMode
-    - configuration
     - hidden
     - mode
     - monitoring
@@ -1958,10 +2109,7 @@ properties:
     - podResources
     - replicaSet
     - shardTopology
-    - sslMode
-    - storageClass
     - terminationPolicy
-    - version
     type: object
 required:
 - form
