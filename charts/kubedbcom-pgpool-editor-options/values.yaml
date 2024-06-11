@@ -17,7 +17,7 @@ metadata:
 
 spec:
   # List options
-  version: 6.0.12
+  version: 4.4.5
 
   # Annotations to add to the database custom resource
   annotations: {}
@@ -25,29 +25,15 @@ spec:
   # Labels to add to all the template objects
   labels: {}
 
-  # Standalone, Replicaset, Sharded
+  # Standalone, Cluster
   mode: Standalone
-  replicaSet:
-    name: rs0
+  cluster:
     replicas: 3
-  shardTopology:
-    shard:
-      replicas: 3
-      shards: 3
-      persistence:
-        size: 10Gi
-    configServer:
-      replicas: 3
-      persistence:
-        size: 2Gi
-    mongos:
-      replicas: 3
 
-  # "keyFile", "sendKeyFile", "sendX509", "x509"
-  clusterAuthMode: keyFile
-
-  # "disabled", "allowSSL", "preferSSL", "requireSSL"
-  sslMode: disabled
+  postgresRef:
+    name: ""
+    namespace: ""
+  syncUsers: true
 
   deletionPolicy: WipeOut
 
@@ -57,16 +43,20 @@ spec:
   persistence:
     size: 10Gi
 
-  machine: ""
-
-  resources:
-    limits:
-      cpu: 500m
-      memory: 1Gi
+  podResources:
+    machine: ""
+    resources:
+      limits:
+        cpu: 500m
+        memory: 1Gi
 
   authSecret:
     name: ""
     password: ""
+
+  configuration: |
+    log_statement: on
+    log_per_node_statement: on
 
   monitoring:
     # Name of monitoring agent (one of "prometheus.io", "prometheus.io/operator", "prometheus.io/builtin")
