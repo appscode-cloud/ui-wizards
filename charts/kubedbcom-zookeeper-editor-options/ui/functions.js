@@ -214,11 +214,7 @@ const machineList = [
   "db.r.24xlarge",
 ];
 
-function showAuthPasswordField({
-  discriminator,
-  getValue,
-  watchDependency,
-}) {
+function showAuthPasswordField({ discriminator, getValue, watchDependency }) {
   const modelPathValue = getValue(discriminator, "/createAuthSecret");
   watchDependency("discriminator#/createAuthSecret");
   return !!modelPathValue;
@@ -234,11 +230,7 @@ function isEqualToModelPathValue(
   return modelPathValue === value;
 }
 
-function showAuthSecretField({
-  discriminator,
-  getValue,
-  watchDependency,
-}) {
+function showAuthSecretField({ discriminator, getValue, watchDependency }) {
   return !showAuthPasswordField({
     discriminator,
     getValue,
@@ -249,16 +241,11 @@ function showAuthSecretField({
 function showStorageSizeField({ model, getValue, watchDependency }) {
   const modelPathValue = getValue(model, "/spec/mode");
   watchDependency("model#/spec/mode");
-  const validType = ["Standalone", "Replicaset"];
+  const validType = ["Standalone", "Cluster"];
   return validType.includes(modelPathValue);
 }
 
-async function getResources(
-  { axios, storeGet },
-  group,
-  version,
-  resource
-) {
+async function getResources({ axios, storeGet }, group, version, resource) {
   const owner = storeGet("/route/params/user");
   const cluster = storeGet("/route/params/cluster");
 
@@ -280,7 +267,13 @@ async function getResources(
   return resources;
 }
 
-async function getStorageClassNames({ axios, storeGet, commit, model, getValue }) {
+async function getStorageClassNames({
+  axios,
+  storeGet,
+  commit,
+  model,
+  getValue,
+}) {
   const owner = storeGet("/route/params/user");
   const cluster = storeGet("/route/params/cluster");
 
@@ -302,7 +295,7 @@ async function getStorageClassNames({ axios, storeGet, commit, model, getValue }
     return true;
   });
   storageClassList = resources;
-  setStorageClass({model, getValue, commit});
+  setStorageClass({ model, getValue, commit });
   return resources;
 }
 
@@ -348,22 +341,12 @@ async function getMongoDbVersions(
   return filteredMongoDbVersions;
 }
 
-function onCreateAuthSecretChange({
-  discriminator,
-  getValue,
-  commit
-}) {
+function onCreateAuthSecretChange({ discriminator, getValue, commit }) {
   const createAuthSecret = getValue(discriminator, "/createAuthSecret");
   if (createAuthSecret) {
-    commit(
-      "wizard/model$delete",
-      "/spec/authSecret/name"
-    );
-  } else if(createAuthSecret === false) {
-    commit(
-      "wizard/model$delete",
-      "/spec/authSecret/password"
-    );
+    commit("wizard/model$delete", "/spec/authSecret/name");
+  } else if (createAuthSecret === false) {
+    commit("wizard/model$delete", "/spec/authSecret/password");
   }
 }
 
@@ -423,12 +406,12 @@ function setResourceLimit({ commit, model, getValue, watchDependency }) {
   if (modelPathValue && modelPathValue !== "custom") {
     // to avoiding set value by reference, cpu and memory set separately
     commit("wizard/model$update", {
-      path: "/spec/resources/limits/cpu",
+      path: "/spec/podResources/resources/limits/cpu",
       value: machines[modelPathValue].resources.limits.cpu,
       force: true,
     });
     commit("wizard/model$update", {
-      path: "/spec/resources/limits/memory",
+      path: "/spec/podResources/resources/limits/memory",
       value: machines[modelPathValue].resources.limits.memory,
       force: true,
     });
@@ -436,9 +419,8 @@ function setResourceLimit({ commit, model, getValue, watchDependency }) {
 }
 
 function setLimitsCpuOrMem({ model, getValue, watchDependency }, path) {
-
-  watchDependency('model#/spec/version');
-  const dbVersion = getValue(model, '/spec/version')
+  watchDependency("model#/spec/version");
+  const dbVersion = getValue(model, "/spec/version");
   const modelPathValue = getValue(model, "/spec/machine");
 
   if (modelPathValue && modelPathValue !== "custom") {
@@ -449,7 +431,7 @@ function setLimitsCpuOrMem({ model, getValue, watchDependency }, path) {
     );
   } else {
     if (path === "cpu") {
-      if(dbVersion >= '6') return "1"
+      if (dbVersion >= "6") return "1";
       else return ".5";
     } else if (path === "memory") {
       return "1024Mi";
@@ -466,7 +448,7 @@ async function fetchJsons({ axios, itemCtx }) {
   let language = {};
   let functions = {};
   const { name, sourceRef, version, packageviewUrlPrefix } = itemCtx.chart;
-  
+
   try {
     ui = await axios.get(
       `${packageviewUrlPrefix}/create-ui.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`
@@ -491,59 +473,56 @@ async function fetchJsons({ axios, itemCtx }) {
   };
 }
 
-function updateAgentValue({commit },val) {
+function updateAgentValue({ commit }, val) {
   commit("wizard/model$update", {
     path: "/spec/monitoring/agent",
     value: val ? "prometheus.io/operator" : "",
-    force: true
+    force: true,
   });
 
   // update alert value depend on monitoring profile
   commit("wizard/model$update", {
     path: "/form/alert/enabled",
-    value: val ? 'warning' : 'none',
-    force: true
+    value: val ? "warning" : "none",
+    force: true,
   });
-
-
 }
 
-function getCreateNameSpaceUrl ({ model, getValue, storeGet }){ 
-
+function getCreateNameSpaceUrl({ model, getValue, storeGet }) {
   const user = storeGet("/route/params/user");
   const cluster = storeGet("/route/params/cluster");
 
-  const domain = storeGet("/domain") || '';
-  if(domain.includes("bb.test")){
-    return `http://console.bb.test:5990/${user}/kubernetes/${cluster}/core/v1/namespaces/create`
-  }else{
-    const editedDomain = domain.replace("kubedb","console");
-    return `${editedDomain}/${user}/kubernetes/${cluster}/core/v1/namespaces/create`
+  const domain = storeGet("/domain") || "";
+  if (domain.includes("bb.test")) {
+    return `http://console.bb.test:5990/${user}/kubernetes/${cluster}/core/v1/namespaces/create`;
+  } else {
+    const editedDomain = domain.replace("kubedb", "console");
+    return `${editedDomain}/${user}/kubernetes/${cluster}/core/v1/namespaces/create`;
   }
 }
 
 const ifCapiProviderIsNotEmpty = ({ model, getValue, watchDependency }) => {
   watchDependency("model#/form/capi/provider");
   const val = getValue(model, "/form/capi/provider");
-  if (val) return true
+  if (val) return true;
 };
 
 const showMultiselectZone = ({ model, getValue, watchDependency }) => {
   watchDependency("model#/form/capi/dedicated");
   const val = getValue(model, "/form/capi/provider");
-  
-  if(val === "capz" && ifDedicated({ model, getValue })) return true;
+
+  if (val === "capz" && ifDedicated({ model, getValue })) return true;
 };
 
 const showSelectZone = ({ model, getValue, watchDependency }) => {
   watchDependency("model#/form/capi/dedicated");
   const val = getValue(model, "/form/capi/provider");
-  if(val !== "capz" && ifDedicated({ model, getValue })) return true;
+  if (val !== "capz" && ifDedicated({ model, getValue })) return true;
 };
 
-const ifDedicated = ({ model, getValue}) => {
+const ifDedicated = ({ model, getValue }) => {
   const val = getValue(model, "form/capi/dedicated");
-  if (val) return true
+  if (val) return true;
 };
 
 const dedicatedOnChange = ({ model, getValue, commit }) => {
@@ -554,13 +533,12 @@ const dedicatedOnChange = ({ model, getValue, commit }) => {
   }
 };
 
-
 const ifZones = ({ model, getValue, watchDependency }) => {
   watchDependency("model#/form/capi/zones");
   watchDependency("model#/form/capi/dedicated");
   const zones = getValue(model, "form/capi/zones") || [];
   const isDedicated = getValue(model, "form/capi/dedicated");
-  if (zones.length && isDedicated) return true
+  if (zones.length && isDedicated) return true;
 };
 
 const zonesOnChange = ({ model, getValue, commit }) => {
@@ -568,18 +546,17 @@ const zonesOnChange = ({ model, getValue, commit }) => {
   if (!zones.length) commit("wizard/model$delete", "form/capi/sku");
 };
 
-async function getZones({storeGet,axios,model,getValue}) {
-  const owner = storeGet("/route/params/user")
-  const cluster = storeGet("/route/params/cluster")
-  const isDedicated = getValue(model,"form/capi/dedicated")
-  if(isDedicated)
-  {
+async function getZones({ storeGet, axios, model, getValue }) {
+  const owner = storeGet("/route/params/user");
+  const cluster = storeGet("/route/params/cluster");
+  const isDedicated = getValue(model, "form/capi/dedicated");
+  if (isDedicated) {
     try {
       const resp = await axios.get(`clustersv2/${owner}/${cluster}/zones`);
-      const val = resp.data.map((item)=>{
-        return {"value":item,"text":item}
-      })
-      return val
+      const val = resp.data.map((item) => {
+        return { value: item, text: item };
+      });
+      return val;
     } catch (e) {
       console.log(e);
       return [];
@@ -587,29 +564,30 @@ async function getZones({storeGet,axios,model,getValue}) {
   }
 }
 
-async function getSKU({storeGet,axios,model,getValue,watchDependency}) {
-  watchDependency("model#/form/capi/zones")
-  const owner = storeGet("/route/params/user")
-  const cluster = storeGet("/route/params/cluster")
-  const zones = getValue(model,"form/capi/zones") || []
-  if(zones.length)
-  {
+async function getSKU({ storeGet, axios, model, getValue, watchDependency }) {
+  watchDependency("model#/form/capi/zones");
+  const owner = storeGet("/route/params/user");
+  const cluster = storeGet("/route/params/cluster");
+  const zones = getValue(model, "form/capi/zones") || [];
+  if (zones.length) {
     try {
-      let url = `clustersv2/${owner}/${cluster}/vms?`
-      if(typeof zones === 'string') {
-        url+=`zones=${encodeURIComponent(zones)}`
-      }
-      else {
+      let url = `clustersv2/${owner}/${cluster}/vms?`;
+      if (typeof zones === "string") {
+        url += `zones=${encodeURIComponent(zones)}`;
+      } else {
         zones.forEach((item) => {
-          url+= `zones=${encodeURIComponent(item)}&`
+          url += `zones=${encodeURIComponent(item)}&`;
         });
-        url = url.slice(0,-1)
+        url = url.slice(0, -1);
       }
       const resp = await axios.get(url);
-      const val = resp.data.map((item)=>{
-        return {"value":item.name,"text":`${item.name} [CPU: ${item.cpu}] [Memory: ${item.memory}mb] `}
-      })
-      return val
+      const val = resp.data.map((item) => {
+        return {
+          value: item.name,
+          text: `${item.name} [CPU: ${item.cpu}] [Memory: ${item.memory}mb] `,
+        };
+      });
+      return val;
     } catch (e) {
       console.log(e);
       return [];
@@ -617,72 +595,75 @@ async function getSKU({storeGet,axios,model,getValue,watchDependency}) {
   }
 }
 
-function isVariantAvailable ({storeGet})  {
+function isVariantAvailable({ storeGet }) {
   const variant = storeGet("/route/query/variant");
-  return variant ? true : false
+  return variant ? true : false;
 }
 
-function setStorageClass({model, getValue, commit}) {
+function setStorageClass({ model, getValue, commit }) {
   const deletionPolicy = getValue(model, "spec/deletionPolicy") || "";
   let storageClass = getValue(model, "spec/storageClass/name") || "";
   const suffix = "-retain";
 
-  const simpleClassList = storageClassList.filter(item => {
-    return !item.metadata?.name?.endsWith(suffix)
-  })
+  const simpleClassList = storageClassList.filter((item) => {
+    return !item.metadata?.name?.endsWith(suffix);
+  });
 
-  const retainClassList = storageClassList.filter(item => {
-    return item.metadata?.name?.endsWith(suffix)
-  })
+  const retainClassList = storageClassList.filter((item) => {
+    return item.metadata?.name?.endsWith(suffix);
+  });
 
-  const defaultSimpleList = simpleClassList.filter(item => {
-    return item.metadata &&
-    item.metadata.annotations &&
-    item.metadata.annotations["storageclass.kubernetes.io/is-default-class"];
-  })
+  const defaultSimpleList = simpleClassList.filter((item) => {
+    return (
+      item.metadata &&
+      item.metadata.annotations &&
+      item.metadata.annotations["storageclass.kubernetes.io/is-default-class"]
+    );
+  });
 
-  const defaultRetainList = retainClassList.filter(item => {
-    return item.metadata &&
-    item.metadata.annotations &&
-    item.metadata.annotations["storageclass.kubernetes.io/is-default-class"];
-  })
+  const defaultRetainList = retainClassList.filter((item) => {
+    return (
+      item.metadata &&
+      item.metadata.annotations &&
+      item.metadata.annotations["storageclass.kubernetes.io/is-default-class"]
+    );
+  });
 
-  if(deletionPolicy === "WipeOut" || deletionPolicy === "Delete") {
-    if(simpleClassList.length > 1) {
-      const found = defaultSimpleList.length 
-        ? defaultSimpleList[0] 
+  if (deletionPolicy === "WipeOut" || deletionPolicy === "Delete") {
+    if (simpleClassList.length > 1) {
+      const found = defaultSimpleList.length
+        ? defaultSimpleList[0]
         : simpleClassList[0];
       storageClass = found.value;
-    }
-    else if(simpleClassList.length === 1) {
+    } else if (simpleClassList.length === 1) {
       storageClass = simpleClassList[0]?.value;
-    }
-    else {
-      const found = defaultRetainList.length 
-        ? defaultRetainList[0].value 
-        : storageClassList.length ? storageClassList[0].value : "";
+    } else {
+      const found = defaultRetainList.length
+        ? defaultRetainList[0].value
+        : storageClassList.length
+        ? storageClassList[0].value
+        : "";
       storageClass = found;
     }
-  }
-  else {
-    if(retainClassList.length > 1) {
-        const found = defaultRetainList.length 
-          ? defaultRetainList[0] 
-          : retainClassList[0];
-        storageClass = found.value;
-    }
-    else if(retainClassList.length === 1) {
+  } else {
+    if (retainClassList.length > 1) {
+      const found = defaultRetainList.length
+        ? defaultRetainList[0]
+        : retainClassList[0];
+      storageClass = found.value;
+    } else if (retainClassList.length === 1) {
       storageClass = retainClassList[0]?.value;
-    }
-    else {
-      const found = defaultSimpleList.length 
+    } else {
+      const found = defaultSimpleList.length
         ? defaultSimpleList[0].value
-        : storageClassList.length ? storageClassList[0].value : "";
+        : storageClassList.length
+        ? storageClassList[0].value
+        : "";
       storageClass = found;
     }
   }
 
-  if(storageClass) {
+  if (storageClass) {
     commit("wizard/model$update", {
       path: "/spec/storageClass/name",
       value: storageClass,
@@ -691,26 +672,25 @@ function setStorageClass({model, getValue, commit}) {
   }
 }
 
-
 return {
   isVariantAvailable,
-	fetchJsons,
-	showAuthPasswordField,
-	isEqualToModelPathValue,
-	showAuthSecretField,
-	showStorageSizeField,
-	getResources,
-	getStorageClassNames,
+  fetchJsons,
+  showAuthPasswordField,
+  isEqualToModelPathValue,
+  showAuthSecretField,
+  showStorageSizeField,
+  getResources,
+  getStorageClassNames,
   getMongoDbVersions,
   onCreateAuthSecretChange,
-	getSecrets,
-	disableLimit,
-	getMachineListForOptions,
-	setResourceLimit,
-	setLimitsCpuOrMem,
-	setMachineToCustom,
-	updateAgentValue,
-	getCreateNameSpaceUrl,
+  getSecrets,
+  disableLimit,
+  getMachineListForOptions,
+  setResourceLimit,
+  setLimitsCpuOrMem,
+  setMachineToCustom,
+  updateAgentValue,
+  getCreateNameSpaceUrl,
   ifCapiProviderIsNotEmpty,
   ifDedicated,
   dedicatedOnChange,
@@ -721,4 +701,4 @@ return {
   showMultiselectZone,
   showSelectZone,
   setStorageClass,
-}
+};
