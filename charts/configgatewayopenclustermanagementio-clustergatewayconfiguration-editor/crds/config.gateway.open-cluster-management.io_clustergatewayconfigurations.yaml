@@ -1,0 +1,101 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  creationTimestamp: null
+  name: clustergatewayconfigurations.config.gateway.open-cluster-management.io
+spec:
+  group: config.gateway.open-cluster-management.io
+  names:
+    kind: ClusterGatewayConfiguration
+    listKind: ClusterGatewayConfigurationList
+    plural: clustergatewayconfigurations
+    singular: clustergatewayconfiguration
+  scope: Cluster
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            properties:
+              egress:
+                properties:
+                  clusterProxy:
+                    properties:
+                      credentials:
+                        properties:
+                          namespace:
+                            type: string
+                          proxyClientCASecretName:
+                            type: string
+                          proxyClientSecretName:
+                            type: string
+                        required:
+                        - namespace
+                        - proxyClientCASecretName
+                        - proxyClientSecretName
+                        type: object
+                      proxyServerHost:
+                        type: string
+                      proxyServerPort:
+                        format: int32
+                        type: integer
+                    required:
+                    - credentials
+                    - proxyServerHost
+                    - proxyServerPort
+                    type: object
+                type: object
+              image:
+                type: string
+              replicas:
+                default: 1
+                description: '`replicas` is the expected replicas of the gateway servers.'
+                format: int32
+                type: integer
+              secretManagement:
+                properties:
+                  managedServiceAccount:
+                    properties:
+                      name:
+                        default: cluster-gateway
+                        type: string
+                    type: object
+                  type:
+                    default: ManagedServiceAccount
+                    enum:
+                    - Manual
+                    - ManagedServiceAccount
+                    type: string
+                type: object
+            required:
+            - egress
+            - image
+            - secretManagement
+            type: object
+        type: object
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: null
+  storedVersions: null
