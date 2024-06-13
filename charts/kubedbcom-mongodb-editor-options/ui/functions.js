@@ -1,5 +1,3 @@
-let storageClassList = [];
-
 const machines = {
   "db.t.micro": {
     resources: {
@@ -360,32 +358,6 @@ async function getResources(
   return resources;
 }
 
-async function getStorageClassNames({ axios, storeGet, commit, model, getValue }) {
-  const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/route/params/cluster");
-
-  const resp = await axios.get(
-    `/clusters/${owner}/${cluster}/proxy/storage.k8s.io/v1/storageclasses`,
-    {
-      params: {
-        filter: { items: { metadata: { name: null, annotations: null } } },
-      },
-    }
-  );
-
-  const resources = (resp && resp.data && resp.data.items) || [];
-
-  resources.map((item) => {
-    const name = (item.metadata && item.metadata.name) || "";
-    item.text = name;
-    item.value = name;
-    return true;
-  });
-  storageClassList = resources;
-  setStorageClass({model, getValue, commit});
-  return resources;
-}
-
 async function getMongoDbVersions(
   { axios, storeGet },
   group,
@@ -529,20 +501,18 @@ async function fetchJsons({ axios, itemCtx }) {
   };
 }
 
-function updateAgentValue({commit },val) {
-  commit("wizard/model$update", {
-    path: "/spec/monitoring/agent",
-    value: val ? "prometheus.io/operator" : "",
-    force: true
-  });
-
+function updateAlertValue({ commit, model, getValue }) {
+  const isMonitorToggleOn = getValue(model, "/spec/admin/monitoring/toggle");
+  const isMonitorEnabled = getValue(model, "/spec/admin/monitoring/default");
+  const commitValue = isMonitorEnabled ? 'warning' : 'none'
   // update alert value depend on monitoring profile
-  commit("wizard/model$update", {
-    path: "/form/alert/enabled",
-    value: val ? 'warning' : 'none',
-    force: true
-  });
-
+  if(isMonitorToggleOn) {
+    commit("wizard/model$update", {
+      path: "/spec/admin/alerts/default",
+      value: commitValue,
+      force: true
+    });
+  }
 
 }
 
@@ -660,69 +630,34 @@ function isVariantAvailable ({storeGet})  {
   return variant ? true : false
 }
 
-function setStorageClass({model, getValue, commit}) {
-  const deletionPolicy = getValue(model, "spec/deletionPolicy") || "";
-  let storageClass = getValue(model, "spec/storageClass/name") || "";
+function setStorageClass({ model, getValue, commit }) {
+  const deletionPolicy = getValue(model, "/spec/deletionPolicy") || "";
+  let storageClass = getValue(model, "/spec/admin/storageClasses/default") || "";
+  const storageClassList = getValue(model, "/spec/admin/storageClasses/available");
   const suffix = "-retain";
 
   const simpleClassList = storageClassList.filter(item => {
-    return !item.metadata?.name?.endsWith(suffix)
+    return !item.endsWith(suffix)
   })
-
   const retainClassList = storageClassList.filter(item => {
-    return item.metadata?.name?.endsWith(suffix)
-  })
-
-  const defaultSimpleList = simpleClassList.filter(item => {
-    return item.metadata &&
-    item.metadata.annotations &&
-    item.metadata.annotations["storageclass.kubernetes.io/is-default-class"];
-  })
-
-  const defaultRetainList = retainClassList.filter(item => {
-    return item.metadata &&
-    item.metadata.annotations &&
-    item.metadata.annotations["storageclass.kubernetes.io/is-default-class"];
+    return item.endsWith(suffix)
   })
 
   if(deletionPolicy === "WipeOut" || deletionPolicy === "Delete") {
-    if(simpleClassList.length > 1) {
-      const found = defaultSimpleList.length 
-        ? defaultSimpleList[0] 
-        : simpleClassList[0];
-      storageClass = found.value;
-    }
-    else if(simpleClassList.length === 1) {
-      storageClass = simpleClassList[0]?.value;
-    }
-    else {
-      const found = defaultRetainList.length 
-        ? defaultRetainList[0].value 
-        : storageClassList.length ? storageClassList[0].value : "";
-      storageClass = found;
-    }
+    storageClass = simpleClassList.length
+      ? simpleClassList[0] 
+      : retainClassList[0]
   }
   else {
-    if(retainClassList.length > 1) {
-        const found = defaultRetainList.length 
-          ? defaultRetainList[0] 
-          : retainClassList[0];
-        storageClass = found.value;
-    }
-    else if(retainClassList.length === 1) {
-      storageClass = retainClassList[0]?.value;
-    }
-    else {
-      const found = defaultSimpleList.length 
-        ? defaultSimpleList[0].value
-        : storageClassList.length ? storageClassList[0].value : "";
-      storageClass = found;
-    }
+    storageClass = retainClassList.length
+      ? retainClassList[0]
+      : simpleClassList[0]
   }
 
-  if(storageClass) {
+  const isChangeable = isToggleOn({ getValue, model }, "storageClasses");
+  if(isChangeable && storageClass) {
     commit("wizard/model$update", {
-      path: "/spec/storageClass/name",
+      path: "/spec/admin/storageClasses/default",
       value: storageClass,
       force: true,
     });
@@ -809,23 +744,56 @@ function returnFalse() {
   return false;
 }
 
+function getAdminOptions({ getValue, model }, type) {
+  const options = getValue(model, `/spec/admin/${type}/available`);
+  return options;
+}
+
+function setGateways({ model, getValue }) {
+  const gateways = getValue(model, "/spec/admin/gateways/default");
+  const convertedText = `${gateways?.namespace}/${gateways?.name}`;
+  return convertedText;
+}
+
+function getGateways({ getValue, model }) {
+  const options = getValue(model, "/spec/admin/gateways/available");
+  const textOptions = options.map(item =>`${item?.namespace}/${item?.name}`);
+  return textOptions;
+}
+
+function onGatewayChange({ discriminator, getValue, commit }) {
+  const gateway = getValue(discriminator, "/gateways");
+  const gatewayObject = {
+    name: gateway.split('/')[1],
+    namespace: gateway.split('/')[0]
+  }
+  commit("wizard/model$update", {
+    path: "/spec/admin/gateways/default",
+    value: gatewayObject,
+    force: true,
+  });
+}
+
+function isToggleOn({ getValue, model }, type) {
+  return getValue(model, `/spec/admin/${type}/toggle`);
+}
+
 return {
   isVariantAvailable,
-	fetchJsons,
-	showAuthPasswordField,
-	isEqualToModelPathValue,
-	showStorageSizeField,
-	getResources,
-	getStorageClassNames,
+  fetchJsons,
+  showAuthPasswordField,
+  isEqualToModelPathValue,
+  showStorageSizeField,
+  getResources,
   getMongoDbVersions,
   onCreateAuthSecretChange,
-	isMachineNotCustom,
-	getMachineListForOptions,
-	setResourceLimit,
-	setLimitsCpuOrMem,
-	setMachineToCustom,
-	updateAgentValue,
-	getCreateNameSpaceUrl,
+  isMachineNotCustom,
+  getMachineListForOptions,
+  setResourceLimit,
+  setLimitsCpuOrMem,
+  setMachineToCustom,
+  updateAlertValue,
+  getCreateNameSpaceUrl,
   ifCapiProviderIsNotEmpty,
   ifDedicated,
   dedicatedOnChange,
@@ -845,4 +813,9 @@ return {
   isConfigDatabaseOn,
   clearConfiguration,
   returnFalse,
+  isToggleOn,
+  setGateways,
+  getGateways,
+  onGatewayChange,
+  getAdminOptions,
 }

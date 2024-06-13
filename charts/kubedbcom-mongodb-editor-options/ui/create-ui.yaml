@@ -24,12 +24,24 @@ steps:
       schema:
         $ref: schema#/properties/metadata/properties/release/properties/namespace
       type: select
+    - if: isToggleOn|deployment
+      label:
+        text: labels.deployment
+      options:
+        - text: Shared
+          value: Shared
+        - text: Dedicated
+          value: Dedicated
+      schema:
+        $ref: schema#/properties/spec/admin/properties/deployment/properties/default
+      type: radio
     - disableUnselect: true
-      fetch: getMongoDbVersions|catalog.kubedb.com|v1alpha1|mongodbversions
+      fetch: getAdminOptions|versions
+      if: isToggleOn|versions
       label:
         text: labels.database.version
       schema:
-        $ref: schema#/properties/spec/properties/adminOptions/properties/versions/properties/default
+        $ref: schema#/properties/spec/admin/properties/versions/properties/default
       type: select
     - isArray: true
       keys:
@@ -101,7 +113,8 @@ steps:
       type: input
     - elements:
       - elements:
-        - label:
+        - customClass: mt-10
+          label:
             text: labels.shards
           schema:
             $ref: schema#/properties/spec/properties/shardTopology/properties/shard/properties/shards
@@ -120,7 +133,7 @@ steps:
           - computed: setMachineToCustom
             fetch: getMachineListForOptions
             label:
-              text: Machine
+              text: labels.machine
             onChange: setResource|shardTopology/shard
             schema:
               $ref: schema#/properties/spec/properties/shardTopology/properties/shard/properties/podResources/properties/machine
@@ -140,7 +153,8 @@ steps:
         show_label: true
         type: single-step-form
       - elements:
-        - label:
+        - customClass: mt-10
+          label:
             text: labels.replicaset.number
           schema:
             $ref: schema#/properties/spec/properties/shardTopology/properties/configServer/properties/replicas
@@ -154,7 +168,7 @@ steps:
           - computed: setMachineToCustom
             fetch: getMachineListForOptions
             label:
-              text: Machine
+              text: labels.machine
             onChange: setResource|shardTopology/configServer
             schema:
               $ref: schema#/properties/spec/properties/shardTopology/properties/configServer/properties/podResources/properties/machine
@@ -174,7 +188,8 @@ steps:
         show_label: true
         type: single-step-form
       - elements:
-        - label:
+        - customClass: mt-10
+          label:
             text: labels.replicaset.number
           schema:
             $ref: schema#/properties/spec/properties/shardTopology/properties/mongos/properties/replicas
@@ -183,7 +198,7 @@ steps:
           - computed: setMachineToCustom
             fetch: getMachineListForOptions
             label:
-              text: Machine
+              text: labels.machine
             onChange: setResource|shardTopology/mongos
             schema:
               $ref: schema#/properties/spec/properties/shardTopology/properties/mongos/properties/podResources/properties/machine
@@ -206,9 +221,10 @@ steps:
       type: single-step-form
     - elements:
       - computed: setMachineToCustom
+        customClass: mt-10
         fetch: getMachineListForOptions
         label:
-          text: Machine
+          text: labels.machine
         onChange: setResourceLimit
         schema:
           $ref: schema#/properties/spec/properties/podResources/properties/machine
@@ -245,11 +261,35 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/deletionPolicy
       type: radio
-    - fetch: getStorageClassNames
+    - fetch: getAdminOptions|storageClasses
+      if: isToggleOn|storageClasses
       label:
         text: labels.storage.select
       schema:
-        $ref: schema#/properties/spec/properties/adminOptions/properties/storageClasses/properties/default
+        $ref: schema#/properties/spec/properties/admin/properties/storageClasses/properties/default
+      type: select
+    - fetch: getAdminOptions|clusterIssuers
+      if: isToggleOn|clusterIssuers
+      label:
+        text: labels.clusterIssuers
+      schema:
+        $ref: schema#/properties/spec/properties/admin/properties/clusterIssuers/properties/default
+      type: select
+    - computed: setGateways
+      fetch: getGateways
+      if: isToggleOn|gateways
+      label:
+        text: labels.gateways
+      onChange: onGatewayChange
+      schema:
+        $ref: discriminator#/gateways
+      type: select
+    - fetch: getAdminOptions|volumeSnapshotClasses
+      if: isToggleOn|volumeSnapshotClasses
+      label:
+        text: labels.volumeSnapshotClasses
+      schema:
+        $ref: schema#/properties/spec/properties/admin/properties/volumeSnapshotClasses/properties/default
       type: select
     - computed: returnFalse
       label:
@@ -275,6 +315,18 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/configuration
       type: editor
+    - if: isToggleOn|tls
+      label:
+        text: Enable TLS?
+      schema:
+        $ref: schema#/properties/spec/properties/admin/properties/tls/properties/default
+      type: switch
+    - if: isToggleOn|webUI
+      label:
+        text: Enable Web UI?
+      schema:
+        $ref: schema#/properties/spec/properties/admin/properties/webUI/properties/default
+      type: switch
     - if: notEqualToDatabaseMode|Standalone
       label:
         text: Enable Arbiter?
@@ -284,9 +336,10 @@ steps:
     - elements:
       - elements:
         - computed: setMachineToCustom
+          customClass: mt-10
           fetch: getMachineListForOptions
           label:
-            text: Machine
+            text: labels.machine
           onChange: setResource|arbiter
           schema:
             $ref: schema#/properties/spec/properties/arbiter/properties/podResources/properties/machine
@@ -315,7 +368,8 @@ steps:
         $ref: schema#/properties/spec/properties/hidden/properties/enabled
       type: switch
     - elements:
-      - label:
+      - customClass: mt-10
+        label:
           text: Replicas
         schema:
           $ref: schema#/properties/spec/properties/hidden/properties/replicas
@@ -328,7 +382,7 @@ steps:
       - computed: setMachineToCustom
         fetch: getMachineListForOptions
         label:
-          text: Machine
+          text: labels.machine
         onChange: setResource|hidden
         schema:
           $ref: schema#/properties/spec/properties/hidden/properties/podResources/properties/machine
@@ -347,51 +401,36 @@ steps:
         $ref: schema#/properties/spec/properties/hidden/properties/podResources
       show_label: true
       type: single-step-form
-    - elements:
-      - customClass: mt-10
-        label:
-          text: labels.alert.options
-        options:
-        - text: None
-          value: none
-        - text: Critical
-          value: critical
-        - text: Warning
-          value: warning
-        - text: Info
-          value: info
-        schema:
-          $ref: schema#/properties/form/properties/alert/properties/enabled
-        sortable: true
-        type: select
+    - customClass: mt-10
       label:
-        text: labels.alert.label
+        text: labels.alert.options
+      options:
+      - text: None
+        value: none
+      - text: Critical
+        value: critical
+      - text: Warning
+        value: warning
+      - text: Info
+        value: info
       schema:
-        $ref: schema#/properties/form/properties/alert
-      show_label: true
-      type: single-step-form
-    - alias: reusable-monitor-option
-      chart:
-        name: uibytebuildersdev-component-monitoring-option
-        version: v0.4.21
-      dataContext:
-        agent:
-          $ref: schema#/properties/spec/properties/adminOptions/properties/monitoring/properties/agent
-      functionCallbacks:
-        updateAgentValue:
-          $ref: functions#/updateAgentValue
-      moduleResolver: fetchJsons
+        $ref: schema#/properties/spec/properties/admin/properties/alerts/properties/default
+      sortable: true
+      if: isToggleOn|alerts
+      type: select
+    - if: isToggleOn|monitoring
+      label:
+        text: labels.enable_monitoring
+      onChange: updateAlertValue
       schema:
-        $ref: schema#/properties/spec/properties/adminOptions/properties/monitoring/properties/serviceMonitor
-      type: reusable-element
-    - alias: reusable-backup-option
-      chart:
-        name: uibytebuildersdev-component-backup-option
-        version: v0.4.21
-      moduleResolver: fetchJsons
+        $ref: schema#/properties/spec/properties/admin/properties/monitoring/properties/default
+      type: switch
+    - if: isToggleOn|backup
+      label:
+        text: Enable Backup?
       schema:
-        $ref: schema#/properties/spec/properties/adminOptions/properties/backup
-      type: reusable-element
+        $ref: schema#/properties/spec/properties/admin/properties/backup/properties/default
+      type: switch
     - elements:
       - hasDescription: true
         onChange: dedicatedOnChange
