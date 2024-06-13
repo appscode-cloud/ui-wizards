@@ -25,13 +25,16 @@ steps:
         $ref: schema#/properties/metadata/properties/release/properties/namespace
       type: select
     - if: isToggleOn|deployment
+      hasDescription: true
       label:
         text: labels.deployment
       options:
         - text: Shared
           value: Shared
+          description: labels.deployment.shared
         - text: Dedicated
           value: Dedicated
+          description: labels.deployment.dedicated
       schema:
         $ref: schema#/properties/spec/admin/properties/deployment/properties/default
       type: radio
@@ -265,32 +268,10 @@ steps:
       if: isToggleOn|storageClasses
       label:
         text: labels.storage.select
+      required: true
       schema:
         $ref: schema#/properties/spec/properties/admin/properties/storageClasses/properties/default
-      type: select
-    - fetch: getAdminOptions|clusterIssuers
-      if: isToggleOn|clusterIssuers
-      label:
-        text: labels.clusterIssuers
-      schema:
-        $ref: schema#/properties/spec/properties/admin/properties/clusterIssuers/properties/default
-      type: select
-    - computed: setGateways
-      fetch: getGateways
-      if: isToggleOn|gateways
-      label:
-        text: labels.gateways
-      onChange: onGatewayChange
-      schema:
-        $ref: discriminator#/gateways
-      type: select
-    - fetch: getAdminOptions|volumeSnapshotClasses
-      if: isToggleOn|volumeSnapshotClasses
-      label:
-        text: labels.volumeSnapshotClasses
-      schema:
-        $ref: schema#/properties/spec/properties/admin/properties/volumeSnapshotClasses/properties/default
-      type: select
+      type: select    
     - computed: returnFalse
       label:
         text: Provide Authentication Credentials?
@@ -315,18 +296,6 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/configuration
       type: editor
-    - if: isToggleOn|tls
-      label:
-        text: Enable TLS?
-      schema:
-        $ref: schema#/properties/spec/properties/admin/properties/tls/properties/default
-      type: switch
-    - if: isToggleOn|webUI
-      label:
-        text: Enable Web UI?
-      schema:
-        $ref: schema#/properties/spec/properties/admin/properties/webUI/properties/default
-      type: switch
     - if: notEqualToDatabaseMode|Standalone
       label:
         text: Enable Arbiter?
@@ -401,7 +370,43 @@ steps:
         $ref: schema#/properties/spec/properties/hidden/properties/podResources
       show_label: true
       type: single-step-form
+    - if: isToggleOn|tls
+      label:
+        text: Enable TLS?
+      schema:
+        $ref: schema#/properties/spec/properties/admin/properties/tls/properties/default
+      type: switch
+    - if: isToggleOn|webUI
+      label:
+        text: Enable Web UI?
+      schema:
+        $ref: schema#/properties/spec/properties/admin/properties/webUI/properties/default
+      type: switch
+    - fetch: getAdminOptions|clusterIssuers
+      if: isToggleOn|clusterIssuers
+      label:
+        text: labels.clusterIssuers
+      schema:
+        $ref: schema#/properties/spec/properties/admin/properties/clusterIssuers/properties/default
+      type: select
+    - computed: setGateways
+      fetch: getGateways
+      if: isToggleOn|gateways
+      label:
+        text: labels.gateways
+      onChange: onGatewayChange
+      schema:
+        $ref: discriminator#/gateways
+      type: select
+    - if: isToggleOn|monitoring
+      label:
+        text: labels.enable_monitoring
+      onChange: updateAlertValue
+      schema:
+        $ref: schema#/properties/spec/properties/admin/properties/monitoring/properties/default
+      type: switch
     - customClass: mt-10
+      if: showAlerts
       label:
         text: labels.alert.options
       options:
@@ -416,18 +421,11 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/admin/properties/alerts/properties/default
       sortable: true
-      if: isToggleOn|alerts
       type: select
-    - if: isToggleOn|monitoring
-      label:
-        text: labels.enable_monitoring
-      onChange: updateAlertValue
-      schema:
-        $ref: schema#/properties/spec/properties/admin/properties/monitoring/properties/default
-      type: switch
     - if: isToggleOn|backup
       label:
         text: Enable Backup?
+      onChange: onBackupSwitch
       schema:
         $ref: schema#/properties/spec/properties/admin/properties/backup/properties/default
       type: switch

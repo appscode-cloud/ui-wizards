@@ -763,10 +763,12 @@ function getGateways({ getValue, model }) {
 
 function onGatewayChange({ discriminator, getValue, commit }) {
   const gateway = getValue(discriminator, "/gateways");
-  const gatewayObject = {
-    name: gateway.split('/')[1],
-    namespace: gateway.split('/')[0]
-  }
+  const gatewayObject = gateway
+    ? {
+      name: gateway?.split('/')[1],
+      namespace: gateway?.split('/')[0]
+    }
+    : {}
   commit("wizard/model$update", {
     path: "/spec/admin/gateways/default",
     value: gatewayObject,
@@ -776,6 +778,21 @@ function onGatewayChange({ discriminator, getValue, commit }) {
 
 function isToggleOn({ getValue, model }, type) {
   return getValue(model, `/spec/admin/${type}/toggle`);
+}
+
+function showAlerts({ watchDependency, model, getValue }) {
+  watchDependency("model#/spec/admin/monitoring/default");
+  const isMonitorEnabled = getValue(model, "/spec/admin/monitoring/default");
+  return isMonitorEnabled && isToggleOn({ getValue, model }, "alerts");
+}
+
+function onBackupSwitch({ model, getValue, commit }) {
+  const isBackupOn = getValue(model, "/spec/admin/backup/default");
+  commit("wizard/model$update", {
+    path: "/spec/backup/tool",
+    value: isBackupOn ? "KubeStash" : "",
+    force: true,
+  });
 }
 
 return {
@@ -818,4 +835,6 @@ return {
   getGateways,
   onGatewayChange,
   getAdminOptions,
+  onBackupSwitch,
+  showAlerts
 }
