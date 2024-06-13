@@ -1319,13 +1319,33 @@ async function getImagePullSecrets({
 
 // FOR Backup Configuration
 
-// schedule bakcup
+// schedule backup
 
 function getBackupConfigsAndAnnotations(getValue, model) {
   const stashAppscodeComBackupConfiguration = getValue(
     model,
     "/resources/stashAppscodeComBackupConfiguration"
   );
+
+  const coreKubestashComBackupConfiguration = getValue(
+    model,
+    "/resources/coreKubestashComBackupConfiguration"
+  );
+  const kubeStashTarget = coreKubestashComBackupConfiguration?.spec?.target;
+
+  const mongoDB = getValue(model, "/resources/kubedbComMongoDB");
+  const mongoDbKind = mongoDB?.apiVersion?.split('/')?.at(0);
+
+  console.log({mongoDbKind})
+  let isKubeStash = false;
+  if (
+    mongoDB?.kind === kubeStashTarget.kind &&
+    mongoDB?.metadata?.name === kubeStashTarget?.name &&
+    mongoDB?.metadata?.namespace === kubeStashTarget?.namespace &&
+    mongoDbKind === kubeStashTarget?.apiGroup
+  ) {
+    isKubeStash = true;
+  }
   const kubedbComMongoDBAnnotations =
     getValue(model, "/resources/kubedbComMongoDB/metadata/annotations") || {};
 
@@ -1339,6 +1359,7 @@ function getBackupConfigsAndAnnotations(getValue, model) {
   return {
     stashAppscodeComBackupConfiguration,
     isBluePrint,
+    isKubeStash,
   };
 }
 
@@ -1455,10 +1476,11 @@ function showBackupForm({ getValue, discriminator, watchDependency }) {
 
 // invoker form
 function initBackupInvoker({ getValue, model }) {
-  const { stashAppscodeComBackupConfiguration, isBluePrint } =
+  const { stashAppscodeComBackupConfiguration, isBluePrint, isKubeStash } =
     getBackupConfigsAndAnnotations(getValue, model);
 
-  if (stashAppscodeComBackupConfiguration) return "backupConfiguration";
+  if(isKubeStash) return "backupConfiguration"
+  else if (stashAppscodeComBackupConfiguration) return "legacyBackupConfiguration";
   else if (isBluePrint) return "backupBlueprint";
   else return undefined;
 }
