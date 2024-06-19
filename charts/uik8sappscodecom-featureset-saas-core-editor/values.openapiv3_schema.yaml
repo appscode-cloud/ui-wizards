@@ -2851,7 +2851,7 @@ properties:
               rule: (has(self.chart) && !has(self.chartRef)) || (!has(self.chart)
                 && has(self.chartRef))
         type: object
-      helmToolkitFluxcdIoHelmRelease_service_presets:
+      helmToolkitFluxcdIoHelmRelease_service_gateway_presets:
         properties:
           apiVersion:
             type: string
@@ -3254,6 +3254,28 @@ properties:
                 type: object
               values:
                 properties:
+                  cluster:
+                    properties:
+                      tls:
+                        properties:
+                          ca:
+                            properties:
+                              cert:
+                                type: string
+                              key:
+                                type: string
+                            type: object
+                          issuer:
+                            enum:
+                            - ca
+                            type: string
+                        required:
+                        - ca
+                        - issuer
+                        type: object
+                    required:
+                    - tls
+                    type: object
                   fullnameOverride:
                     type: string
                   gateway-dns:
@@ -3608,14 +3630,8 @@ properties:
                     type: object
                   nameOverride:
                     type: string
-                  vaultServer:
-                    properties:
-                      name:
-                        type: string
-                    required:
-                    - name
-                    type: object
                 required:
+                - cluster
                 - fullnameOverride
                 - gateway-dns
                 - infra
