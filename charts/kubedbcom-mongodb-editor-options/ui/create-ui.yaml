@@ -36,15 +36,47 @@ steps:
           value: Dedicated
           description: labels.deployment.dedicated
       schema:
-        $ref: schema#/properties/spec/admin/properties/deployment/properties/default
+        $ref: schema#/properties/spec/properties/admin/properties/deployment/properties/default
+      type: radio
+    - if: isToggleOn|clusterTier
+      label:
+        text: labels.clusterTier
+      options:
+      - text: General Purpose
+        value: GeneralPurpose
+      - text: Memory Optimized
+        value: MemoryOptimized
+      - text: CPU Optimized
+        value: CPUOptimized
+      schema:
+        $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/default
+      type: radio
+    - if: isToggleOn|clusterTier/capacity
+      label:
+        text: labels.capacityType
+      options:
+        - text: On-Demand
+          value: on-demand
+        - text: Spot
+          value: spot
+      schema:
+        $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/capacity/properties/default
       type: radio
     - disableUnselect: true
-      fetch: getAdminOptions|versions
-      if: isToggleOn|versions
+      if: isToggleOn|clusterTier/nodePool
+      label:
+        text: labels.nodePool
+      fetch: getAdminOptions|clusterTier/nodePool
+      schema:
+        $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/nodePool/properties/default
+      type: select
+    - disableUnselect: true
+      fetch: getAdminOptions|MongoDB/versions
+      if: isToggleOn|MongoDB/versions
       label:
         text: labels.database.version
       schema:
-        $ref: schema#/properties/spec/admin/properties/versions/properties/default
+        $ref: schema#/properties/spec/properties/admin/properties/MongoDB/properties/versions/properties/default
       type: select
     - isArray: true
       keys:
@@ -398,12 +430,13 @@ steps:
       schema:
         $ref: discriminator#/gateways
       type: select
-    - if: isToggleOn|monitoring
+    - computed: setMonitoring
+      if: isToggleOn|monitoring
       label:
         text: labels.enable_monitoring
       onChange: updateAlertValue
       schema:
-        $ref: schema#/properties/spec/properties/admin/properties/monitoring/properties/default
+        $ref: discriminator#/monitoring
       type: switch
     - customClass: mt-10
       if: showAlerts
@@ -427,7 +460,7 @@ steps:
         text: Enable Backup?
       onChange: onBackupSwitch
       schema:
-        $ref: schema#/properties/spec/properties/admin/properties/backup/properties/default
+        $ref: discriminator#/backup
       type: switch
     - elements:
       - hasDescription: true

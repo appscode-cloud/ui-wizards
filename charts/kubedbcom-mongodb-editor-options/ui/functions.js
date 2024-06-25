@@ -501,19 +501,26 @@ async function fetchJsons({ axios, itemCtx }) {
   };
 }
 
-function updateAlertValue({ commit, model, getValue }) {
+function updateAlertValue({ commit, model, discriminator, getValue }) {
   const isMonitorToggleOn = getValue(model, "/spec/admin/monitoring/toggle");
-  const isMonitorEnabled = getValue(model, "/spec/admin/monitoring/default");
-  const commitValue = isMonitorEnabled ? 'warning' : 'none'
+  const isMonitorEnabled = getValue(discriminator, "/monitoring");
+  const alert = isMonitorEnabled ? "warning" : "none";
   // update alert value depend on monitoring profile
   if(isMonitorToggleOn) {
     commit("wizard/model$update", {
       path: "/spec/admin/alerts/default",
-      value: commitValue,
+      value: alert,
       force: true
     });
   }
-
+  const agent = isMonitorEnabled ? "prometheus.io/operator" : "";
+  if(isMonitorToggleOn) {
+    commit("wizard/model$update", {
+      path: "/spec/admin/monitoring/agent",
+      value: agent,
+      force: true
+    });
+  }
 }
 
 function getCreateNameSpaceUrl ({ model, getValue, storeGet }){ 
@@ -745,7 +752,7 @@ function returnFalse() {
 }
 
 function getAdminOptions({ getValue, model }, type) {
-  const options = getValue(model, `/spec/admin/${type}/available`);
+  const options = getValue(model, `/spec/admin/${type}/available`) || [];
   return options;
 }
 
@@ -762,7 +769,7 @@ function getGateways({ getValue, model }) {
 }
 
 function onGatewayChange({ discriminator, getValue, commit }) {
-  const gateway = getValue(discriminator, "/gateways");
+  const gateway = getValue(discriminator, "/gateways") || "";
   const gatewayObject = gateway
     ? {
       name: gateway?.split('/')[1],
@@ -780,19 +787,32 @@ function isToggleOn({ getValue, model }, type) {
   return getValue(model, `/spec/admin/${type}/toggle`);
 }
 
-function showAlerts({ watchDependency, model, getValue }) {
-  watchDependency("model#/spec/admin/monitoring/default");
-  const isMonitorEnabled = getValue(model, "/spec/admin/monitoring/default");
+function showAlerts({ watchDependency, model, getValue, discriminator }) {
+  watchDependency("discriminator#/monitoring");
+  const isMonitorEnabled = getValue(discriminator, "/monitoring");
   return isMonitorEnabled && isToggleOn({ getValue, model }, "alerts");
 }
 
-function onBackupSwitch({ model, getValue, commit }) {
-  const isBackupOn = getValue(model, "/spec/admin/backup/default");
+function onBackupSwitch({ discriminator, getValue, commit }) {
+  const isBackupOn = getValue(discriminator, "/backup");
   commit("wizard/model$update", {
     path: "/spec/backup/tool",
     value: isBackupOn ? "KubeStash" : "",
     force: true,
   });
+}
+
+function getTierOptions() {
+  return ["GeneralPurpose", "MemoryOptimized", "CPUOptimized"];
+}
+
+function getCapacityOptions() {
+  return ["on-demand", "spot"];
+}
+
+function setMonitoring({ getValue, model }) {
+  const agent = getValue(model, "/spec/admin/monitoring/agent") || "";
+  return !!agent;
 }
 
 return {
@@ -836,5 +856,8 @@ return {
   onGatewayChange,
   getAdminOptions,
   onBackupSwitch,
-  showAlerts
+  showAlerts,
+  getTierOptions,
+  getCapacityOptions,
+  setMonitoring,
 }
