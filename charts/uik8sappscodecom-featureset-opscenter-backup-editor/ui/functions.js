@@ -830,8 +830,12 @@ function initiatePreset({ watchDependency, getValue, model, discriminator }) {
     model,
     "/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/tool"
   );
-
-  return backupType ? backupType : " ";
+   if(enabledPreset?.includes('kubestash'))
+  return backupType ? backupType : "KubeStash";
+  else if(enabledPreset?.includes('stash'))
+  return backupType ? backupType : 'Stash';
+else 
+return backupType ? backupType: ' '
 }
 
 return {
