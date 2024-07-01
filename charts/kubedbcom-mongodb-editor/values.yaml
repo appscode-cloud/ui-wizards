@@ -165,6 +165,31 @@ metadata:
     name: RELEASE-NAME
     namespace: default
 resources:
+  autoscalingKubedbComMongoDBAutoscaler: # +doc-gen:break
+    apiVersion: autoscaling.kubedb.com/v1alpha1
+    kind: MongoDBAutoscaler
+    metadata:
+      name: mongodb
+      namespace: demo
+    spec:
+      compute:
+        nodeTopology:
+          name: standard-basv2-family
+        replicaSet:
+          maxAllowed:
+            cpu: 1
+            memory: 2Gi
+          minAllowed:
+            cpu: 400m
+            memory: 400Mi
+          podLifeTimeThreshold: 10m
+          resourceDiffPercentage: 20
+          trigger: "On"
+      databaseRef:
+        name: repl
+      opsRequestOptions:
+        apply: IfReady
+        timeout: 10m
   certManagerIoIssuer_ca: # +doc-gen:break
     apiVersion: cert-manager.io/v1
     kind: Issuer

@@ -45,17 +45,18 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "kubedbcom-mongodb-editor-options.labels" . | nindent 4 }}
-{{- if .Values.spec.annotations }}
   annotations:
+    app.kubernetes.io/cluster-tier: {{ .Values.spec.admin.clusterTier.default }}
+{{- if .Values.spec.annotations }}
     {{- include "kubedbcom-mongodb-editor-options.annotations" . | nindent 4 }}
 {{- end }}
 spec:
-  version: {{ .Values.spec.version | quote }}
+  version: {{ .Values.spec.admin.MongoDB.versions.default | quote }}
 {{- if or (eq .Values.spec.mode "Standalone") (eq .Values.spec.mode "Replicaset") }}
   replicas: {{ (eq .Values.spec.mode "Replicaset") | ternary .Values.spec.replicaSet.replicas 1 }}
   storageType: Durable
   storage:
-    storageClassName: {{ .Values.spec.storageClass.name }}
+    storageClassName: {{ .Values.spec.admin.storageClasses.default }}
     accessModes:
     - ReadWriteOnce
     resources:
@@ -74,7 +75,7 @@ spec:
         spec:
           resources:
             {{- toYaml $configServer_res | nindent 12 }}
-          {{- if and .Values.form.capi.provider .Values.form.capi.dedicated }}
+          {{- if eq .Values.spec.admin.deployment.default "Dedicated" }}
           nodeSelector:
             nodes.klusters.dev/pool: {{ $poolName }}
           tolerations:
@@ -87,14 +88,14 @@ spec:
         resources:
           requests:
             storage: {{ .Values.spec.shardTopology.configServer.persistence.size }}
-        storageClassName: {{ .Values.spec.storageClass.name }}
+        storageClassName: {{ .Values.spec.admin.storageClasses.default }}
     mongos:
       replicas: {{ .Values.spec.shardTopology.mongos.replicas }}
       podTemplate:
         spec:
           resources:
             {{- toYaml $mongos_res | nindent 12 }}
-          {{- if and .Values.form.capi.provider .Values.form.capi.dedicated }}
+          {{- if eq .Values.spec.admin.deployment.default "Dedicated" }}
           nodeSelector:
             nodes.klusters.dev/pool: {{ $poolName }}
           tolerations:
@@ -110,7 +111,7 @@ spec:
         spec:
           resources:
             {{- toYaml $shard_res | nindent 12 }}
-          {{- if and .Values.form.capi.provider .Values.form.capi.dedicated }}
+          {{- if eq .Values.spec.admin.deployment.default "Dedicated" }}
           nodeSelector:
             nodes.klusters.dev/pool: {{ $poolName }}
           tolerations:
@@ -123,19 +124,39 @@ spec:
         resources:
           requests:
             storage: {{ .Values.spec.shardTopology.shard.persistence.size }}
-        storageClassName: {{ .Values.spec.storageClass.name }}
+        storageClassName: {{ .Values.spec.admin.storageClasses.default }}
 {{- else }}
   podTemplate:
     spec:
       resources:
         {{- toYaml $res | nindent 8 }}
-      {{- if and .Values.form.capi.provider .Values.form.capi.dedicated }}
+      {{- if eq .Values.spec.admin.deployment.default "Dedicated" }}
       nodeSelector:
-        nodes.klusters.dev/pool: {{ $poolName }}
+        app: mongodbs.kubedb.com
+        instance: {{ include "kubedbcom-mongodb-editor-options.fullname" . }}
+        namespace: {{ .Release.Namespace }}
+        capacity-type: {{ .Values.spec.admin.clusterTier.capacity.default }}
+        nodepool: {{ .Values.spec.admin.clusterTier.nodePool.default }}
       tolerations:
-        - key: dedicated
+        - key: app
           operator: "Equal"
-          value: "true"
+          value: "mongodbs.kubedb.com"
+          effect: "NoSchedule"
+        - key: instance
+          operator: "Equal"
+          value: {{ include "kubedbcom-mongodb-editor-options.fullname" . }}
+          effect: "NoSchedule"
+        - key: namespace
+          operator: "Equal"
+          value: {{ .Release.Namespace }}
+          effect: "NoSchedule"
+        - key: capacity-type
+          operator: "Equal"
+          value: {{ .Values.spec.admin.clusterTier.capacity.default }}
+          effect: "NoSchedule"
+        - key: nodepool
+          operator: "Equal"
+          value: {{ .Values.spec.admin.clusterTier.nodePool.default }}
           effect: "NoSchedule"
       {{- end }}
 {{- end }}
@@ -145,7 +166,7 @@ spec:
       spec:
         resources:
           {{- toYaml $arbiter_res | nindent 10 }}
-        {{- if and .Values.form.capi.provider .Values.form.capi.dedicated }}
+        {{- if eq .Values.spec.admin.deployment.default "Dedicated" }}
         nodeSelector:
           nodes.klusters.dev/pool: {{ $poolName }}
         tolerations:
@@ -161,8 +182,8 @@ spec:
     podTemplate:
       spec:
         resources:
-          {{- toYaml $hidden_res | nindent 10 }}
-        {{- if and .Values.form.capi.provider .Values.form.capi.dedicated }}
+          {{- toYaml $hidden_res | nindent 8 }}
+        {{- if eq .Values.spec.admin.deployment.default "Dedicated" }}
         nodeSelector:
           nodes.klusters.dev/pool: {{ $poolName }}
         tolerations:
@@ -175,11 +196,9 @@ spec:
       resources:
         requests:
           storage: {{ .Values.spec.hidden.persistence.size }}
-      storageClassName: {{ .Values.spec.storageClass.name }}
+      storageClassName: {{ .Values.spec.admin.storageClasses.default }}
 {{- end }}
   terminationPolicy: {{ .Values.spec.terminationPolicy }}
-  clusterAuthMode: {{ .Values.spec.clusterAuthMode }}
-  sslMode: {{ .Values.spec.sslMode }}
 {{- if .Values.spec.authSecret.name }}
   authSecret:
     name: {{ .Values.spec.authSecret.name }}
