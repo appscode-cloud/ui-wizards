@@ -802,6 +802,29 @@ function onBackupSwitch({ discriminator, getValue, commit }) {
   });
 }
 
+async function getNodeTopology({ model, getValue, axios, storeGet }) {
+  const owner = storeGet("/route/params/user");
+  const cluster = storeGet("/route/params/cluster");
+  const defaultNodes =  getValue(model, `/spec/admin/clusterTier/nodeTopology/available`) || [];
+  const url = `/clusters/${owner}/${cluster}/proxy/node.k8s.appscode.com/v1alpha1/nodetopologies`
+  
+  try{
+    const resp = await axios.get(url, {
+      params: { filter: { items: { metadata: { name: null } } } },
+    })
+    const mappedResp = resp.data?.items?.map((item) => {
+      const name = (item.metadata && item.metadata.name) || "";
+      return name
+    })
+    return mappedResp
+  }
+  catch(e) {
+    console.log(e);
+  }
+  // if api fails return the default list from values file
+  return defaultNodes;
+}
+
 function getTierOptions() {
   return ["GeneralPurpose", "MemoryOptimized", "CPUOptimized"];
 }
@@ -860,4 +883,5 @@ return {
   getTierOptions,
   getCapacityOptions,
   setMonitoring,
+  getNodeTopology,
 }
