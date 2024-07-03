@@ -507,25 +507,20 @@ async function fetchJsons({ axios, itemCtx }) {
 }
 
 function updateAlertValue({ commit, model, discriminator, getValue }) {
-  const isMonitorToggleOn = getValue(model, "/spec/admin/monitoring/toggle");
   const isMonitorEnabled = getValue(discriminator, "/monitoring");
   const alert = isMonitorEnabled ? "warning" : "none";
   // update alert value depend on monitoring profile
-  if(isMonitorToggleOn) {
-    commit("wizard/model$update", {
-      path: "/spec/admin/alerts/default",
-      value: alert,
-      force: true
-    });
-  }
+  commit("wizard/model$update", {
+    path: "/form/alert/enabled",
+    value: alert,
+    force: true
+  });
   const agent = isMonitorEnabled ? "prometheus.io/operator" : "";
-  if(isMonitorToggleOn) {
-    commit("wizard/model$update", {
-      path: "/spec/admin/monitoring/agent",
-      value: agent,
-      force: true
-    });
-  }
+  commit("wizard/model$update", {
+    path: "/spec/admin/monitoring/agent",
+    value: agent,
+    force: true
+  });
 }
 
 function getCreateNameSpaceUrl ({ model, getValue, storeGet }){ 
