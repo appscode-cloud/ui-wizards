@@ -339,23 +339,28 @@ async function getResources(
 ) {
   const owner = storeGet("/route/params/user");
   const cluster = storeGet("/route/params/cluster");
+  try {
+    const resp = await axios.get(
+      `/clusters/${owner}/${cluster}/proxy/${group}/${version}/${resource}`,
+      {
+        params: { filter: { items: { metadata: { name: null } } } },
+      }
+    );
 
-  const resp = await axios.get(
-    `/clusters/${owner}/${cluster}/proxy/${group}/${version}/${resource}`,
-    {
-      params: { filter: { items: { metadata: { name: null } } } },
-    }
-  );
+    const resources = (resp && resp.data && resp.data.items) || [];
 
-  const resources = (resp && resp.data && resp.data.items) || [];
-
-  resources.map((item) => {
-    const name = (item.metadata && item.metadata.name) || "";
-    item.text = name;
-    item.value = name;
-    return true;
-  });
-  return resources;
+    resources.map((item) => {
+      const name = (item.metadata && item.metadata.name) || "";
+      item.text = name;
+      item.value = name;
+      return true;
+    });
+    return resources;
+  }
+  catch(e) {
+    console.log(e);
+    return [];
+  }
 }
 
 async function getMongoDbVersions(
@@ -463,7 +468,7 @@ function setLimitsCpuOrMem({ model, getValue, watchDependency }) {
         cpu: "1",
         memory: "1024Mi",
       },
-    }
+    };
   }
 }
 
@@ -540,7 +545,7 @@ function getCreateNameSpaceUrl ({ model, getValue, storeGet }){
 const ifCapiProviderIsNotEmpty = ({ model, getValue, watchDependency }) => {
   watchDependency("model#/form/capi/provider");
   const val = getValue(model, "/form/capi/provider");
-  if (val) return true
+  if (val) return true;
 };
 
 const showMultiselectZone = ({ model, getValue, watchDependency }) => {
@@ -575,7 +580,7 @@ const ifZones = ({ model, getValue, watchDependency }) => {
   watchDependency("model#/form/capi/dedicated");
   const zones = getValue(model, "form/capi/zones") || [];
   const isDedicated = getValue(model, "form/capi/dedicated");
-  if (zones.length && isDedicated) return true
+  if (zones.length && isDedicated) return true;
 };
 
 const zonesOnChange = ({ model, getValue, commit }) => {
@@ -591,10 +596,10 @@ async function getZones({storeGet,axios,model,getValue}) {
   {
     try {
       const resp = await axios.get(`clustersv2/${owner}/${cluster}/zones`);
-      const val = resp.data.map((item)=>{
-        return {"value":item,"text":item}
+      const val = resp.data.map((item) => {
+        return { "value": item, "text": item };
       })
-      return val
+      return val;
     } catch (e) {
       console.log(e);
       return [];
@@ -603,15 +608,14 @@ async function getZones({storeGet,axios,model,getValue}) {
 }
 
 async function getSKU({storeGet,axios,model,getValue,watchDependency}) {
-  watchDependency("model#/form/capi/zones")
-  const owner = storeGet("/route/params/user")
-  const cluster = storeGet("/route/params/cluster")
-  const zones = getValue(model,"form/capi/zones") || []
-  if(zones.length)
-  {
+  watchDependency("model#/form/capi/zones");
+  const owner = storeGet("/route/params/user");
+  const cluster = storeGet("/route/params/cluster");
+  const zones = getValue(model,"form/capi/zones") || [];
+  if (zones.length) {
     try {
       let url = `clustersv2/${owner}/${cluster}/vms?`
-      if(typeof zones === 'string') {
+      if (typeof zones === 'string') {
         url+=`zones=${encodeURIComponent(zones)}`
       }
       else {
@@ -621,10 +625,10 @@ async function getSKU({storeGet,axios,model,getValue,watchDependency}) {
         url = url.slice(0,-1)
       }
       const resp = await axios.get(url);
-      const val = resp.data.map((item)=>{
-        return {"value":item.name,"text":`${item.name} [CPU: ${item.cpu}] [Memory: ${item.memory}mb] `}
+      const val = resp.data.map((item) => {
+        return { "value": item.name, "text": `${item.name} [CPU: ${item.cpu}] [Memory: ${item.memory}mb]`};
       })
-      return val
+      return val;
     } catch (e) {
       console.log(e);
       return [];
@@ -634,7 +638,7 @@ async function getSKU({storeGet,axios,model,getValue,watchDependency}) {
 
 function isVariantAvailable ({storeGet})  {
   const variant = storeGet("/route/query/variant");
-  return variant ? true : false
+  return variant ? true : false;
 }
 
 function setStorageClass({ model, getValue, commit }) {
@@ -644,21 +648,21 @@ function setStorageClass({ model, getValue, commit }) {
   const suffix = "-retain";
 
   const simpleClassList = storageClassList.filter(item => {
-    return !item.endsWith(suffix)
+    return !item.endsWith(suffix);
   })
   const retainClassList = storageClassList.filter(item => {
-    return item.endsWith(suffix)
+    return item.endsWith(suffix);
   })
 
   if(deletionPolicy === "WipeOut" || deletionPolicy === "Delete") {
     storageClass = simpleClassList.length
       ? simpleClassList[0] 
-      : retainClassList[0]
+      : retainClassList[0];
   }
   else {
     storageClass = retainClassList.length
       ? retainClassList[0]
-      : simpleClassList[0]
+      : simpleClassList[0];
   }
 
   const isChangeable = isToggleOn({ getValue, model }, "storageClasses");
@@ -806,17 +810,17 @@ async function getNodeTopology({ model, getValue, axios, storeGet }) {
   const owner = storeGet("/route/params/user");
   const cluster = storeGet("/route/params/cluster");
   const defaultNodes =  getValue(model, `/spec/admin/clusterTier/nodeTopology/available`) || [];
-  const url = `/clusters/${owner}/${cluster}/proxy/node.k8s.appscode.com/v1alpha1/nodetopologies`
+  const url = `/clusters/${owner}/${cluster}/proxy/node.k8s.appscode.com/v1alpha1/nodetopologies`;
   
   try{
     const resp = await axios.get(url, {
       params: { filter: { items: { metadata: { name: null } } } },
-    })
+    });
     const mappedResp = resp.data?.items?.map((item) => {
       const name = (item.metadata && item.metadata.name) || "";
       return name
-    })
-    return mappedResp
+    });
+    return mappedResp;
   }
   catch(e) {
     console.log(e);
@@ -836,6 +840,25 @@ function getCapacityOptions() {
 function setMonitoring({ getValue, model }) {
   const agent = getValue(model, "/spec/admin/monitoring/agent") || "";
   return !!agent;
+}
+
+async function isBackupCluster({ axios, storeGet }) {
+  const owner = storeGet("/route/params/user");
+  const cluster = storeGet("/route/params/cluster");
+  const url = `/clusters/${owner}/${cluster}/proxy/ui.k8s.appscode.com/v1alpha1/features`;
+  let isStashEnabled = false;
+  
+  try {
+    const resp = await axios.get(url)
+    const stashPreset = resp.data?.items?.find(
+      (item) => item.metadata?.name === "stash-presets"
+    )
+    isStashEnabled = !!(stashPreset?.status?.enabled && stashPreset?.status?.ready);
+  }
+  catch(e) {
+    console.log(e);
+  }
+  return isStashEnabled;
 }
 
 return {
@@ -884,4 +907,5 @@ return {
   getCapacityOptions,
   setMonitoring,
   getNodeTopology,
+  isBackupCluster,
 }

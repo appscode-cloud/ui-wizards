@@ -65,7 +65,7 @@ steps:
     - disableUnselect: true
       if: isToggleOn|clusterTier/nodeTopology
       label:
-        text: labels.nodePool
+        text: labels.nodeTopology
       fetch: getNodeTopology
       refresh: true
       schema:
@@ -462,7 +462,8 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/admin/properties/archiver/properties/default
       type: switch
-    - if: isToggleOn|backup
+    - computed: isBackupCluster
+      if: isToggleOn|backup
       label:
         text: Enable Backup?
       onChange: onBackupSwitch
