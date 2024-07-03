@@ -795,7 +795,7 @@ function showAlerts({ watchDependency, model, getValue, discriminator }) {
 function onBackupSwitch({ discriminator, getValue, commit }) {
   const isBackupOn = getValue(discriminator, "/backup");
   commit("wizard/model$update", {
-    path: "/spec/backup/tool",
+    path: "/spec/admin/backup/tool",
     value: isBackupOn ? "KubeStash" : "",
     force: true,
   });
@@ -837,7 +837,7 @@ function setMonitoring({ getValue, model }) {
   return !!agent;
 }
 
-async function isBackupCluster({ axios, storeGet }) {
+async function isBackupCluster({ axios, storeGet, commit }) {
   const owner = storeGet("/route/params/user");
   const cluster = storeGet("/route/params/cluster");
   const url = `/clusters/${owner}/${cluster}/proxy/ui.k8s.appscode.com/v1alpha1/features`;
@@ -853,6 +853,11 @@ async function isBackupCluster({ axios, storeGet }) {
   catch(e) {
     console.log(e);
   }
+  commit("wizard/model$update", {
+    path: "/spec/admin/backup/tool",
+    value: isStashEnabled ? "KubeStash" : "",
+    force: true,
+  });
   return isStashEnabled;
 }
 
