@@ -290,8 +290,6 @@ function onEnabledFeaturesChange({
   getValue,
   commit,
   storeGet,
-  model,
-  watchDependency
 }) {
   const enabledFeatures = getValue(discriminator, "/enabledFeatures") || [];
 
@@ -487,7 +485,7 @@ function checkIsResourceLoaded({
   watchDependency("discriminator#/isResourceLoaded");
   const isResourceLoaded = getValue(discriminator, "/isResourceLoaded");
   if (isResourceLoaded) {
-    onEnabledFeaturesChange({ discriminator, getValue, commit, storeGet ,watchDependency});
+    onEnabledFeaturesChange({ discriminator, getValue, commit, storeGet });
   }
 }
 
@@ -500,7 +498,7 @@ function isStashPreset({  getValue, watchDependency, discriminator, commit}){
   else{
     commit("wizard/model$update", {
       path: "/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/tool",
-      value: {},
+      value: '',
       force: true,
     });
     return false
@@ -528,7 +526,6 @@ function presetType({ getValue, watchDependency, model, discriminator}, value){
 watchDependency("model#/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/tool")
 const presetType = getValue(model, "/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/tool")
 const enabledFeatures = getValue(discriminator, "/enabledFeatures") || [];
-console.log(enabledFeatures, value)
 if(!enabledFeatures?.includes(value))
 {
     return false
@@ -541,7 +538,6 @@ function providerType({getValue, watchDependency, model}, value){
   const presetType = getValue(model, "/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/tool")?.toLowerCase()
   watchDependency(`model#/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/${presetType}/backend/provider`)
   const provider= getValue(model,`/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/${presetType}/backend/provider`)
-  console.log(presetType, provider, value)
   return provider === value
 }
 
@@ -552,7 +548,7 @@ function authEnabled({getValue, watchDependency, model}){
   return isEnabled
 }
 
-function initPrune({getValue, watchDependency, model})
+function initPrune({getValue, model})
 {
   const prune= getValue(model,`/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/stash/retentionPolicy/prune`)
   return prune? prune : false
