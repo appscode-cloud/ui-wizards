@@ -290,7 +290,8 @@ function onEnabledFeaturesChange({
   getValue,
   commit,
   storeGet,
-  model
+  model,
+  watchDependency
 }) {
   const enabledFeatures = getValue(discriminator, "/enabledFeatures") || [];
 
@@ -371,13 +372,7 @@ function onEnabledFeaturesChange({
         });
       }
     } else {
-      commit("wizard/model$delete", `/resources/${resourceValuePath}`);
-      //console.log(`/resources/${resourceValuePath}`);
-      if(resourceValuePath === 'helmToolkitFluxcdIoHelmRelease_stash') setTimeout(() => {
-        const reso = getValue(model, '/resources'); 
-        console.log(reso);
-      }, 3000)
-      ;
+        commit("wizard/model$delete", `/resources/${resourceValuePath}`);
     }
   });
 }
@@ -492,22 +487,76 @@ function checkIsResourceLoaded({
   watchDependency("discriminator#/isResourceLoaded");
   const isResourceLoaded = getValue(discriminator, "/isResourceLoaded");
   if (isResourceLoaded) {
-    onEnabledFeaturesChange({ discriminator, getValue, commit, storeGet });
+    onEnabledFeaturesChange({ discriminator, getValue, commit, storeGet ,watchDependency});
   }
 }
 
-function isStashPreset({  getValue,  watchDependency, discriminator}){
+function isStashPreset({  getValue, watchDependency, discriminator, commit}){
   const enabledFeatures = getValue(discriminator, "/enabledFeatures") || [];
   watchDependency("discriminator#/enabledFeatures");
-  if(enabledFeatures?.includes('stash-presets')){
+  if(enabledFeatures?.includes('stash-presets')  && (enabledFeatures.includes('stash') || enabledFeatures.includes('kubestash')) ){
     return true
   }
-  else
-  return false
+  else{
+    commit("wizard/model$update", {
+      path: "/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/tool",
+      value: {},
+      force: true,
+    });
+    return false
+  }
 }
 
+function getProviderList({ getValue, watchDependency, discriminator}){
+  const enabledFeatures = getValue(discriminator, "/enabledFeatures") || [];
+  watchDependency("discriminator#/enabledFeatures");
+  const filteredList = enabledFeatures.filter((item)=>{
+    if(item==='stash-opscenter' || item==='stash-presets')
+      return false
+    return true
+  })
+  const finalList = filteredList.map((item)=>{
+    if(item==='kubestash')
+      return 'KubeStash'
+    else
+      return 'Stash'
+  })
+  return finalList
+}
 
+function presetType({ getValue, watchDependency, model, discriminator}, value){
+watchDependency("model#/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/tool")
+const presetType = getValue(model, "/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/tool")
+const enabledFeatures = getValue(discriminator, "/enabledFeatures") || [];
+console.log(enabledFeatures, value)
+if(!enabledFeatures?.includes(value))
+{
+    return false
+}
+if(presetType?.toLowerCase()=== value)
+  return true
+}
 
+function providerType({getValue, watchDependency, model}, value){
+  const presetType = getValue(model, "/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/tool")?.toLowerCase()
+  watchDependency(`model#/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/${presetType}/backend/provider`)
+  const provider= getValue(model,`/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/${presetType}/backend/provider`)
+  console.log(presetType, provider, value)
+  return provider === value
+}
+
+function authEnabled({getValue, watchDependency, model}){
+  const presetType = getValue(model, "/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/tool")?.toLowerCase()
+  watchDependency(`model#/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/${presetType}/storageSecret/create`)
+  const isEnabled= getValue(model,`/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/${presetType}/storageSecret/create`)
+  return isEnabled
+}
+
+function initPrune({getValue, watchDependency, model})
+{
+  const prune= getValue(model,`/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/stash/retentionPolicy/prune`)
+  return prune? prune : false
+}
 return {
   hideThisElement,
   checkIsResourceLoaded,
@@ -522,4 +571,9 @@ return {
   setReleaseNameAndNamespaceAndInitializeValues,
   fetchFeatureSetOptions,
   isStashPreset,
+  getProviderList,
+  presetType,
+  providerType,
+  authEnabled,
+  initPrune
 };
