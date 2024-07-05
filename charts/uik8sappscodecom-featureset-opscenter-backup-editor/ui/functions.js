@@ -132,26 +132,30 @@ function getEnabledFeatureInEnableBtnClick(
 
   // for OCM
 
-  const getRoute = storeGet("/route")
-  const FeatureList = storeGet("/ocm/featureSet/")
-  const FeatureSet = storeGet("/route/params/featureset")
+  const getRoute = storeGet("/route");
+  const FeatureList = storeGet("/ocm/featureSet/");
+  const FeatureSet = storeGet("/route/params/featureset");
 
-  if(getRoute.fullPath.includes('/hubs/'))
-  {
-
-    const selectedFeatureSet = FeatureList.result?.filter((item)=>{
-      return  item.name === FeatureSet 
-    }) || []
-    const checkedFeatures = selectedFeatureSet[0].features.filter((item)=>{
-      return item.installed  || item.recommended || item.featureBlock=== featureBlock
-    }) || []
-    const checkedFeatureName = checkedFeatures.map((item)=> {
-      return item.name
-    }) || []
-    checkedFeatureName.push(featureBlock)
-    return checkedFeatureName
+  if (getRoute.fullPath.includes("/hubs/")) {
+    const selectedFeatureSet =
+      FeatureList.result?.filter((item) => {
+        return item.name === FeatureSet;
+      }) || [];
+    const checkedFeatures =
+      selectedFeatureSet[0].features.filter((item) => {
+        return (
+          item.installed ||
+          item.recommended ||
+          item.featureBlock === featureBlock
+        );
+      }) || [];
+    const checkedFeatureName =
+      checkedFeatures.map((item) => {
+        return item.name;
+      }) || [];
+    checkedFeatureName.push(featureBlock);
+    return checkedFeatureName;
   }
-
 
   const isRecommendedFeatureAvailable = allFeatureSetFeature.some((item) => {
     return item?.spec?.featureBlock === featureBlock && item?.spec?.recommended;
@@ -187,22 +191,22 @@ function getEnabledFeatureInEnableBtnClick(
   return enabledFeatureNames;
 }
 
-function getEnabledFeaturesFromActiveFeature(allFeatureSetFeature,storeGet){
+function getEnabledFeaturesFromActiveFeature(allFeatureSetFeature, storeGet) {
   const activeFeature = storeGet("/route/query/activeFeature") || "";
 
   const enabledFeatures = allFeatureSetFeature.filter((item) => {
-  const featureName = item?.metadata?.name;
+    const featureName = item?.metadata?.name;
     return (
       item?.status?.enabled ||
       isFeatureRequired(storeGet, featureName) ||
       item?.spec?.recommended ||
       featureName === activeFeature
     );
-  })
+  });
   const enabledFeatureNames =
-  enabledFeatures.map((item) => item?.metadata?.name) || [];
+    enabledFeatures.map((item) => item?.metadata?.name) || [];
 
-  return enabledFeatureNames
+  return enabledFeatureNames;
 }
 
 function getEnabledFeatures({ storeGet }) {
@@ -217,8 +221,8 @@ function getEnabledFeatures({ storeGet }) {
       return item?.spec?.featureSet === featureSet;
     }) || [];
 
-  if(activeFeature){
-    return getEnabledFeaturesFromActiveFeature(allFeatureSetFeature,storeGet)
+  if (activeFeature) {
+    return getEnabledFeaturesFromActiveFeature(allFeatureSetFeature, storeGet);
   }
 
   if (featureBlock) {
@@ -370,7 +374,7 @@ function onEnabledFeaturesChange({
         });
       }
     } else {
-        commit("wizard/model$delete", `/resources/${resourceValuePath}`);
+      commit("wizard/model$delete", `/resources/${resourceValuePath}`);
     }
   });
 }
@@ -489,69 +493,92 @@ function checkIsResourceLoaded({
   }
 }
 
-function isStashPreset({  getValue, watchDependency, discriminator, commit}){
+function isStashPreset({ getValue, watchDependency, discriminator, commit }) {
   const enabledFeatures = getValue(discriminator, "/enabledFeatures") || [];
   watchDependency("discriminator#/enabledFeatures");
-  if(enabledFeatures?.includes('stash-presets')  && (enabledFeatures.includes('stash') || enabledFeatures.includes('kubestash')) ){
-    return true
-  }
-  else{
+  if (
+    enabledFeatures?.includes("stash-presets") &&
+    (enabledFeatures.includes("stash") || enabledFeatures.includes("kubestash"))
+  ) {
+    return true;
+  } else {
     commit("wizard/model$update", {
       path: "/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/tool",
-      value: '',
+      value: "",
       force: true,
     });
-    return false
+    return false;
   }
 }
 
-function getProviderList({ getValue, watchDependency, discriminator}){
+function getProviderList({ getValue, watchDependency, discriminator }) {
   const enabledFeatures = getValue(discriminator, "/enabledFeatures") || [];
   watchDependency("discriminator#/enabledFeatures");
-  const filteredList = enabledFeatures.filter((item)=>{
-    if(item==='stash-opscenter' || item==='stash-presets')
-      return false
-    return true
-  })
-  const finalList = filteredList.map((item)=>{
-    if(item==='kubestash')
-      return 'KubeStash'
-    else
-      return 'Stash'
-  })
-  return finalList
+  const filteredList = enabledFeatures.filter((item) => {
+    if (item === "stash-opscenter" || item === "stash-presets") return false;
+    return true;
+  });
+  const finalList = filteredList.map((item) => {
+    if (item === "kubestash") return "KubeStash";
+    else return "Stash";
+  });
+  return finalList;
 }
 
-function presetType({ getValue, watchDependency, model, discriminator}, value){
-watchDependency("model#/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/tool")
-const presetType = getValue(model, "/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/tool")
-const enabledFeatures = getValue(discriminator, "/enabledFeatures") || [];
-if(!enabledFeatures?.includes(value))
-{
-    return false
-}
-if(presetType?.toLowerCase()=== value)
-  return true
-}
-
-function providerType({getValue, watchDependency, model}, value){
-  const presetType = getValue(model, "/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/tool")?.toLowerCase()
-  watchDependency(`model#/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/${presetType}/backend/provider`)
-  const provider= getValue(model,`/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/${presetType}/backend/provider`)
-  return provider === value
-}
-
-function authEnabled({getValue, watchDependency, model}){
-  const presetType = getValue(model, "/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/tool")?.toLowerCase()
-  watchDependency(`model#/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/${presetType}/storageSecret/create`)
-  const isEnabled= getValue(model,`/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/${presetType}/storageSecret/create`)
-  return isEnabled
+function presetType(
+  { getValue, watchDependency, model, discriminator },
+  value
+) {
+  watchDependency(
+    "model#/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/tool"
+  );
+  const presetType = getValue(
+    model,
+    "/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/tool"
+  );
+  const enabledFeatures = getValue(discriminator, "/enabledFeatures") || [];
+  if (!enabledFeatures?.includes(value)) {
+    return false;
+  }
+  if (presetType?.toLowerCase() === value) return true;
 }
 
-function initPrune({getValue, model})
-{
-  const prune= getValue(model,`/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/stash/retentionPolicy/prune`)
-  return prune? prune : false
+function providerType({ getValue, watchDependency, model }, value) {
+  const presetType = getValue(
+    model,
+    "/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/tool"
+  )?.toLowerCase();
+  watchDependency(
+    `model#/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/${presetType}/backend/provider`
+  );
+  const provider = getValue(
+    model,
+    `/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/${presetType}/backend/provider`
+  );
+  return provider === value;
+}
+
+function authEnabled({ getValue, watchDependency, model }) {
+  const presetType = getValue(
+    model,
+    "/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/tool"
+  )?.toLowerCase();
+  watchDependency(
+    `model#/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/${presetType}/storageSecret/create`
+  );
+  const isEnabled = getValue(
+    model,
+    `/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/${presetType}/storageSecret/create`
+  );
+  return isEnabled;
+}
+
+function initPrune({ getValue, model }) {
+  const prune = getValue(
+    model,
+    `/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/stash/retentionPolicy/prune`
+  );
+  return prune ? prune : false;
 }
 return {
   hideThisElement,
@@ -571,5 +598,5 @@ return {
   presetType,
   providerType,
   authEnabled,
-  initPrune
+  initPrune,
 };
