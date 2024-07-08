@@ -38,7 +38,7 @@
 {{- end }}
 {{ $poolName := printf "%s-%s-%s" .Values.form.capi.clusterName .Release.Namespace (include "kubedbcom-mongodb-editor-options.fullname" .) }}
 
-apiVersion: kubedb.com/v1alpha2
+apiVersion: kubedb.com/v1
 kind: MongoDB
 metadata:
   name: {{ include "kubedbcom-mongodb-editor-options.fullname" . }}
@@ -177,7 +177,7 @@ spec:
           storage: {{ .Values.spec.hidden.persistence.size }}
       storageClassName: {{ .Values.spec.storageClass.name }}
 {{- end }}
-  terminationPolicy: {{ .Values.spec.terminationPolicy }}
+  deletionPolicy: {{ .Values.spec.deletionPolicy }}
   clusterAuthMode: {{ .Values.spec.clusterAuthMode }}
   sslMode: {{ .Values.spec.sslMode }}
 {{- if .Values.spec.authSecret.name }}

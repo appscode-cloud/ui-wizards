@@ -661,7 +661,7 @@ function isVariantAvailable ({storeGet})  {
 }
 
 function setStorageClass({model, getValue, commit}) {
-  const terminationPolicy = getValue(model, "spec/terminationPolicy") || "";
+  const terminationPolicy = getValue(model, "spec/deletionPolicy") || "";
   let storageClass = getValue(model, "spec/storageClass/name") || "";
   const suffix = "-retain";
 
