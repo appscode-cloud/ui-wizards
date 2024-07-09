@@ -4,7 +4,7 @@
   {{- $res = get (get $machines .Values.spec.machine) "resources" }}
 {{- end }}
 
-apiVersion: kubedb.com/v1alpha2
+apiVersion: kubedb.com/v1
 kind: Kafka
 metadata:
   name: {{ include "kubedbcom-kafka-editor-options.fullname" . }}
@@ -29,8 +29,10 @@ spec:
         storage: {{ .Values.spec.persistence.size }}
   podTemplate:
     spec:
-      resources:
-        {{- toYaml $res | nindent 8 }}
+      containers:
+        - name: kafka
+          resources:
+            {{- toYaml $res | nindent 12 }}
 {{- else if eq .Values.spec.mode "Dedicated" }}
   topology:
     controller:
