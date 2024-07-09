@@ -4,7 +4,7 @@
   {{- $res = get (get $machines .Values.spec.machine) "resources" }}
 {{- end }}
 
-apiVersion: kubedb.com/v1alpha2
+apiVersion: kubedb.com/v1
 kind: PgBouncer
 metadata:
   name: {{ include "kubedbcom-pgbouncer-editor-options.fullname" . }}
@@ -28,9 +28,11 @@ spec:
 {{- end }}
   podTemplate:
     spec:
-      resources:
-        {{- toYaml $res | nindent 8 }}
-  terminationPolicy: {{ .Values.spec.terminationPolicy }}
+      containers:
+        - name: pgbouncer
+        resources:
+          {{- toYaml $res | nindent 12 }}
+  deletionPolicy: {{ .Values.spec.deletionPolicy }}
 {{- if (and .Values.spec.monitoring .Values.spec.monitoring.agent) }}
   monitor:
     agent: {{ .Values.spec.monitoring.agent }}
