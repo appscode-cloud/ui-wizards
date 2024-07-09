@@ -37,8 +37,10 @@ spec:
   storageType: Durable
   podTemplate:
     spec:
-      resources:
-        {{- toYaml $res | nindent 8 }}
+      containers:
+        - name: mariadb
+          resources:
+            {{- toYaml $res | nindent 12 }}
       {{- if and .Values.form.capi.provider .Values.form.capi.dedicated }}
       nodeSelector:
         nodes.klusters.dev/pool: {{ $poolName }}
@@ -48,7 +50,7 @@ spec:
           value: "true"
           effect: "NoSchedule"
       {{- end }}
-  terminationPolicy: {{ .Values.spec.terminationPolicy }}
+  deletionPolicy: {{ .Values.spec.deletionPolicy }}
 {{- if (and .Values.spec.monitoring .Values.spec.monitoring.agent) }}
   monitor:
     agent: {{ .Values.spec.monitoring.agent }}
