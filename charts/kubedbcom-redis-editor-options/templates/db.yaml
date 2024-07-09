@@ -42,8 +42,10 @@ spec:
         storage: {{ .Values.spec.persistence.size }}
   podTemplate:
     spec:
-      resources:
-        {{- toYaml $res | nindent 8 }}
+      containers:
+        - name: redis
+          resources:
+            {{- toYaml $res | nindent 12 }}
       {{- if and .Values.form.capi.provider .Values.form.capi.dedicated }}
       nodeSelector:
         nodes.klusters.dev/pool: {{ $poolName }}
@@ -53,7 +55,7 @@ spec:
           value: "true"
           effect: "NoSchedule"
       {{- end }}
-  terminationPolicy: {{ .Values.spec.terminationPolicy }}
+  deletionPolicy: {{ .Values.spec.deletionPolicy }}
 {{- if .Values.spec.authSecret.name }}
   authSecret:
     name: {{ .Values.spec.authSecret.name }}
