@@ -21,11 +21,42 @@ Create chart name and version as used by the chart label.
 {{- end }}
 
 {{/*
+Common labels
+*/}}
+{{- define "kubedbcom-mariadb-editor.labels" -}}
+{{ include "kubedbcom-mariadb-editor.selectorLabels" . }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- range $k, $v := .Values.spec.labels }}
+{{ $k }}: "{{ $v }}"
+{{- end -}}
+{{- end }}
+
+{{/*
 Selector labels
 */}}
 {{- define "kubedbcom-mariadb-editor.selectorLabels" -}}
 app.kubernetes.io/name: mariadbs.kubedb.com
 app.kubernetes.io/instance: {{ include "kubedbcom-mariadb-editor.fullname" . }}
+{{- end }}
+
+{{/*
+Create the name of the service account to use
+*/}}
+{{- define "kubedbcom-mariadb-editor.serviceAccountName" -}}
+{{- if .Values.spec.serviceAccount.create }}
+{{- default (include "kubedbcom-mariadb-editor.fullname" .) .Values.spec.serviceAccount.name }}
+{{- else }}
+{{- default "default" .Values.spec.serviceAccount.name }}
+{{- end }}
+{{- end }}
+
+{{/*
+Common annotations
+*/}}
+{{- define "kubedbcom-mariadb-editor.annotations" -}}
+{{- range $k, $v := .Values.spec.annotations }}
+{{ $k }}: "{{ $v }}"
+{{- end -}}
 {{- end }}
 
 {{/*

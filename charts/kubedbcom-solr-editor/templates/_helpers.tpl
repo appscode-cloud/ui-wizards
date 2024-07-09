@@ -21,11 +21,42 @@ Create chart name and version as used by the chart label.
 {{- end }}
 
 {{/*
+Common labels
+*/}}
+{{- define "kubedbcom-solr-editor.labels" -}}
+{{ include "kubedbcom-solr-editor.selectorLabels" . }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- range $k, $v := .Values.spec.labels }}
+{{ $k }}: "{{ $v }}"
+{{- end -}}
+{{- end }}
+
+{{/*
 Selector labels
 */}}
 {{- define "kubedbcom-solr-editor.selectorLabels" -}}
 app.kubernetes.io/name: solrs.kubedb.com
 app.kubernetes.io/instance: {{ include "kubedbcom-solr-editor.fullname" . }}
+{{- end }}
+
+{{/*
+Create the name of the service account to use
+*/}}
+{{- define "kubedbcom-solr-editor.serviceAccountName" -}}
+{{- if .Values.spec.serviceAccount.create }}
+{{- default (include "kubedbcom-solr-editor.fullname" .) .Values.spec.serviceAccount.name }}
+{{- else }}
+{{- default "default" .Values.spec.serviceAccount.name }}
+{{- end }}
+{{- end }}
+
+{{/*
+Common annotations
+*/}}
+{{- define "kubedbcom-solr-editor.annotations" -}}
+{{- range $k, $v := .Values.spec.annotations }}
+{{ $k }}: "{{ $v }}"
+{{- end -}}
 {{- end }}
 
 {{/*
