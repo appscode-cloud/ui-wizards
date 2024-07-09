@@ -4,7 +4,7 @@
   {{- $res = get (get $machines .Values.spec.machine) "resources" }}
 {{- end }}
 
-apiVersion: kubedb.com/v1alpha2
+apiVersion: kubedb.com/v1
 kind: Memcached
 metadata:
   name: {{ include "kubedbcom-memcached-editor-options.fullname" . }}
@@ -20,9 +20,11 @@ spec:
   replicas: {{ .Values.spec.replicas }}
   podTemplate:
     spec:
-      resources:
-        {{- toYaml $res | nindent 8 }}
-  terminationPolicy: {{ .Values.spec.terminationPolicy }}
+      containers:
+        - name: memcached
+          resources:
+            {{- toYaml $res | nindent 12 }}
+  deletionPolicy: {{ .Values.spec.deletionPolicy }}
 {{- if (and .Values.spec.monitoring .Values.spec.monitoring.agent) }}
   monitor:
     agent: {{ .Values.spec.monitoring.agent }}
