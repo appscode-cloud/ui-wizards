@@ -21,11 +21,42 @@ Create chart name and version as used by the chart label.
 {{- end }}
 
 {{/*
+Common labels
+*/}}
+{{- define "kubedbcom-mysql-editor.labels" -}}
+{{ include "kubedbcom-mysql-editor.selectorLabels" . }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- range $k, $v := .Values.spec.labels }}
+{{ $k }}: "{{ $v }}"
+{{- end -}}
+{{- end }}
+
+{{/*
 Selector labels
 */}}
 {{- define "kubedbcom-mysql-editor.selectorLabels" -}}
 app.kubernetes.io/name: mysqls.kubedb.com
 app.kubernetes.io/instance: {{ include "kubedbcom-mysql-editor.fullname" . }}
+{{- end }}
+
+{{/*
+Create the name of the service account to use
+*/}}
+{{- define "kubedbcom-mysql-editor.serviceAccountName" -}}
+{{- if .Values.spec.serviceAccount.create }}
+{{- default (include "kubedbcom-mysql-editor.fullname" .) .Values.spec.serviceAccount.name }}
+{{- else }}
+{{- default "default" .Values.spec.serviceAccount.name }}
+{{- end }}
+{{- end }}
+
+{{/*
+Common annotations
+*/}}
+{{- define "kubedbcom-mysql-editor.annotations" -}}
+{{- range $k, $v := .Values.spec.annotations }}
+{{ $k }}: "{{ $v }}"
+{{- end -}}
 {{- end }}
 
 {{/*

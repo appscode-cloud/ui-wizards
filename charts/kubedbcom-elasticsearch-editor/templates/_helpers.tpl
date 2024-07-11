@@ -21,11 +21,42 @@ Create chart name and version as used by the chart label.
 {{- end }}
 
 {{/*
+Common labels
+*/}}
+{{- define "kubedbcom-elasticsearch-editor.labels" -}}
+{{ include "kubedbcom-elasticsearch-editor.selectorLabels" . }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{- range $k, $v := .Values.spec.labels }}
+{{ $k }}: "{{ $v }}"
+{{- end -}}
+{{- end }}
+
+{{/*
 Selector labels
 */}}
 {{- define "kubedbcom-elasticsearch-editor.selectorLabels" -}}
 app.kubernetes.io/name: elasticsearches.kubedb.com
 app.kubernetes.io/instance: {{ include "kubedbcom-elasticsearch-editor.fullname" . }}
+{{- end }}
+
+{{/*
+Create the name of the service account to use
+*/}}
+{{- define "kubedbcom-elasticsearch-editor.serviceAccountName" -}}
+{{- if .Values.spec.serviceAccount.create }}
+{{- default (include "kubedbcom-elasticsearch-editor.fullname" .) .Values.spec.serviceAccount.name }}
+{{- else }}
+{{- default "default" .Values.spec.serviceAccount.name }}
+{{- end }}
+{{- end }}
+
+{{/*
+Common annotations
+*/}}
+{{- define "kubedbcom-elasticsearch-editor.annotations" -}}
+{{- range $k, $v := .Values.spec.annotations }}
+{{ $k }}: "{{ $v }}"
+{{- end -}}
 {{- end }}
 
 {{/*
