@@ -526,6 +526,13 @@ properties:
         type: object
       backend:
         type: string
+      deletionPolicy:
+        enum:
+        - Halt
+        - Delete
+        - WipeOut
+        - DoNotTerminate
+        type: string
       labels:
         additionalProperties:
           type: string
@@ -625,24 +632,17 @@ properties:
         type: object
       syncUsers:
         type: boolean
-      deletionPolicy:
-        enum:
-        - Halt
-        - Delete
-        - WipeOut
-        - DoNotTerminate
-        type: string
       version:
         type: string
     required:
     - authSecret
     - backend
+    - deletionPolicy
     - machine
     - monitoring
     - replicas
     - resources
     - syncUsers
-    - deletionPolicy
     - version
     type: object
 required:

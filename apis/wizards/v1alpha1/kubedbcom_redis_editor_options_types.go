@@ -52,16 +52,16 @@ type KubedbcomRedisEditorOptionsSpecSpec struct {
 	// +optional
 	Replicas int `json:"replicas,omitempty"`
 	// +optional
-	Cluster           RedisCluster              `json:"cluster,omitempty"`
-	SentinelRef       NamespacedName            `json:"sentinelRef,omitempty"`
-	TerminationPolicy TerminationPolicy         `json:"terminationPolicy"`
-	StorageClass      StorageClass              `json:"storageClass"`
-	Persistence       Persistence               `json:"persistence"`
-	Machine           MachineType               `json:"machine"`
-	Resources         core.ResourceRequirements `json:"resources"`
-	AuthSecret        AuthSecret                `json:"authSecret"`
-	Monitoring        Monitoring                `json:"monitoring"`
-	Backup            BackupToolSpec            `json:"backup"`
+	Cluster        RedisCluster              `json:"cluster,omitempty"`
+	SentinelRef    NamespacedName            `json:"sentinelRef,omitempty"`
+	DeletionPolicy DeletionPolicy            `json:"deletionPolicy"`
+	StorageClass   StorageClass              `json:"storageClass"`
+	Persistence    Persistence               `json:"persistence"`
+	Machine        MachineType               `json:"machine"`
+	Resources      core.ResourceRequirements `json:"resources"`
+	AuthSecret     AuthSecret                `json:"authSecret"`
+	Monitoring     Monitoring                `json:"monitoring"`
+	Backup         BackupToolSpec            `json:"backup"`
 }
 
 type RedisCluster struct {

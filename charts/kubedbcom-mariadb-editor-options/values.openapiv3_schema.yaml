@@ -1291,6 +1291,13 @@ properties:
         required:
         - tool
         type: object
+      deletionPolicy:
+        enum:
+        - Halt
+        - Delete
+        - WipeOut
+        - DoNotTerminate
+        type: string
       labels:
         additionalProperties:
           type: string
@@ -1457,25 +1464,18 @@ properties:
         required:
         - name
         type: object
-      deletionPolicy:
-        enum:
-        - Halt
-        - Delete
-        - WipeOut
-        - DoNotTerminate
-        type: string
       version:
         type: string
     required:
     - authSecret
     - backup
+    - deletionPolicy
     - machine
     - mode
     - monitoring
     - persistence
     - resources
     - storageClass
-    - deletionPolicy
     - version
     type: object
 required:

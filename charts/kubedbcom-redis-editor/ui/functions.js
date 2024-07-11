@@ -323,16 +323,16 @@ function onVersionChange({ model, getValue, commit }) {
 }
 
 let storageClassList = [];
-function onTerminationPolicyChange({ model, getValue, commit }) {
-  const terminationPolicy = getValue(
+function ondeletionPolicyChange({ model, getValue, commit }) {
+  const deletionPolicy = getValue(
     model,
-    "/resources/kubedbComRedis/spec/terminationPolicy"
+    "/resources/kubedbComRedis/spec/deletionPolicy"
   );
 
   if (hasSentinelObject({ model, getValue })) {
     commit("wizard/model$update", {
-      path: "/resources/kubedbComRedisSentinel_sentinel/spec/terminationPolicy",
-      value: terminationPolicy,
+      path: "/resources/kubedbComRedisSentinel_sentinel/spec/deletionPolicy",
+      value: deletionPolicy,
       force: true,
     });
   }
@@ -430,7 +430,7 @@ async function getStorageClassNames({
 }
 
 function setStorageClass({ model, getValue, commit }) {
-  const terminationPolicy = getValue(model, "/resources/kubedbComRedis/spec/terminationPolicy") || "";
+  const deletionPolicy = getValue(model, "/resources/kubedbComRedis/spec/deletionPolicy") || "";
   let storageClass = getValue(model, "/resources/kubedbComRedis/spec/storage/storageClassName") || "";
   const suffix = "-retain";
 
@@ -454,7 +454,7 @@ function setStorageClass({ model, getValue, commit }) {
     item.metadata.annotations["storageclass.kubernetes.io/is-default-class"];
   })
 
-  if(terminationPolicy === "WipeOut" || terminationPolicy === "Delete") {
+  if(deletionPolicy === "WipeOut" || deletionPolicy === "Delete") {
     if(simpleClassList.length > 1) {
       const found = defaultSimpleList.length 
         ? defaultSimpleList[0] 
@@ -539,7 +539,7 @@ function onCreateSentinelChange({ discriminator, getValue, commit, model }) {
     if (!sentinelObj) {
       const redisSpec = getValue(model, "/resources/kubedbComRedis/spec");
 
-      const { version, tls, storage, monitor, terminationPolicy } =
+      const { version, tls, storage, monitor, deletionPolicy } =
         redisSpec || {};
 
       commit("wizard/model$update", {
@@ -549,7 +549,7 @@ function onCreateSentinelChange({ discriminator, getValue, commit, model }) {
           tls,
           storage,
           monitor,
-          terminationPolicy,
+          deletionPolicy,
         },
         force: true,
       });
@@ -2060,7 +2060,7 @@ return {
   hasSentinelObject,
   getRedisVersions,
   onVersionChange,
-  onTerminationPolicyChange,
+  ondeletionPolicyChange,
   showAuthPasswordField,
   showAuthSecretField,
   showNewSecretCreateField,

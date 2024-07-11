@@ -48,7 +48,7 @@ type KubedbcomSinglestoreEditorOptionsSpecSpec struct {
 	// +optional
 	Labels         map[string]string   `json:"labels"`
 	Mode           SinglestoreMode     `json:"mode"`
-	DeletionPolicy TerminationPolicy   `json:"deletionPolicy"`
+	DeletionPolicy DeletionPolicy      `json:"deletionPolicy"`
 	StorageClass   StorageClass        `json:"storageClass"`
 	Persistence    Persistence         `json:"persistence"`
 	PodResources   PodResources        `json:"podResources"`

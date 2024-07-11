@@ -53,7 +53,7 @@ type KubedbcomDruidEditorOptionsSpecSpec struct {
 	ShardTopology   DruidShardTopology        `json:"shardTopology"`
 	ClusterAuthMode DruidClusterAuthMode      `json:"clusterAuthMode"`
 	SslMode         DruidSSLMode              `json:"sslMode"`
-	DeletionPolicy  TerminationPolicy         `json:"deletionPolicy"`
+	DeletionPolicy  DeletionPolicy            `json:"deletionPolicy"`
 	StorageClass    StorageClass              `json:"storageClass"`
 	Persistence     Persistence               `json:"persistence"`
 	Machine         MachineType               `json:"machine"`

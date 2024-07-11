@@ -391,7 +391,7 @@ async function getStorageClassNames(
 }
 
 function setStorageClass({ getValue, commit, model, discriminator }) {
-  const terminationPolicy = getValue(model, "resources/kubedbComMongoDB/spec/terminationPolicy") || "";
+  const deletionPolicy = getValue(model, "resources/kubedbComMongoDB/spec/deletionPolicy") || "";
   const suffix = "-retain";
   let storageClass = "";
 
@@ -415,7 +415,7 @@ function setStorageClass({ getValue, commit, model, discriminator }) {
     item.metadata.annotations["storageclass.kubernetes.io/is-default-class"];
   })
 
-  if(terminationPolicy === "WipeOut" || terminationPolicy === "Delete") {
+  if(deletionPolicy === "WipeOut" || deletionPolicy === "Delete") {
     if(simpleClassList.length > 1) {
       const found = defaultSimpleList.length 
         ? defaultSimpleList[0] 

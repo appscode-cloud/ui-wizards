@@ -50,7 +50,7 @@ type KubevaultcomVaultserverEditorOptionsSpecSpec struct {
 	Labels map[string]string `json:"labels"`
 	// +optional
 	Replicas          int                       `json:"replicas,omitempty"`
-	TerminationPolicy TerminationPolicy         `json:"terminationPolicy"`
+	TerminationPolicy DeletionPolicy            `json:"terminationPolicy"`
 	Machine           MachineType               `json:"machine"`
 	Resources         core.ResourceRequirements `json:"resources"`
 	Backend           VaultserverBackend        `json:"backend"`

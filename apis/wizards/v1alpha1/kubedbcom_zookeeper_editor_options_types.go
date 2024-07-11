@@ -49,7 +49,7 @@ type KubedbcomZookeeperEditorOptionsSpecSpec struct {
 	Version        string            `json:"version"`
 	Mode           ZooKeeperMode     `json:"mode"`
 	Cluster        ZooKeeperCluster  `json:"cluster"`
-	DeletionPolicy TerminationPolicy `json:"deletionPolicy"`
+	DeletionPolicy DeletionPolicy    `json:"deletionPolicy"`
 	StorageClass   StorageClass      `json:"storageClass"`
 	Persistence    Persistence       `json:"persistence"`
 	PodResources   PodResources      `json:"podResources"`

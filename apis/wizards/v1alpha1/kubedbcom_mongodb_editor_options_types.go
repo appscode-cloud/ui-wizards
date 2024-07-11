@@ -45,23 +45,23 @@ type KubedbcomMongodbEditorOptionsSpecSpec struct {
 	// +optional
 	Annotations map[string]string `json:"annotations"`
 	// +optional
-	Labels            map[string]string      `json:"labels"`
-	Version           string                 `json:"version"`
-	Mode              MongoDBMode            `json:"mode"`
-	ReplicaSet        MongoDBReplicaSet      `json:"replicaSet"`
-	ShardTopology     MongoDBShardTopology   `json:"shardTopology"`
-	ClusterAuthMode   MongoDBClusterAuthMode `json:"clusterAuthMode"`
-	SslMode           MongoDBSSLMode         `json:"sslMode"`
-	TerminationPolicy TerminationPolicy      `json:"terminationPolicy"`
-	StorageClass      StorageClass           `json:"storageClass"`
-	Persistence       Persistence            `json:"persistence"`
-	PodResources      PodResources           `json:"podResources"`
-	Arbiter           *MongoDBArbiter        `json:"arbiter"`
-	Hidden            *MongoDBHidden         `json:"hidden"`
-	AuthSecret        AuthSecret             `json:"authSecret"`
-	Configuration     string                 `json:"configuration"`
-	Monitoring        Monitoring             `json:"monitoring"`
-	Backup            BackupToolSpec         `json:"backup"`
+	Labels          map[string]string      `json:"labels"`
+	Version         string                 `json:"version"`
+	Mode            MongoDBMode            `json:"mode"`
+	ReplicaSet      MongoDBReplicaSet      `json:"replicaSet"`
+	ShardTopology   MongoDBShardTopology   `json:"shardTopology"`
+	ClusterAuthMode MongoDBClusterAuthMode `json:"clusterAuthMode"`
+	SslMode         MongoDBSSLMode         `json:"sslMode"`
+	DeletionPolicy  DeletionPolicy         `json:"deletionPolicy"`
+	StorageClass    StorageClass           `json:"storageClass"`
+	Persistence     Persistence            `json:"persistence"`
+	PodResources    PodResources           `json:"podResources"`
+	Arbiter         *MongoDBArbiter        `json:"arbiter"`
+	Hidden          *MongoDBHidden         `json:"hidden"`
+	AuthSecret      AuthSecret             `json:"authSecret"`
+	Configuration   string                 `json:"configuration"`
+	Monitoring      Monitoring             `json:"monitoring"`
+	Backup          BackupToolSpec         `json:"backup"`
 }
 
 // +kubebuilder:validation:Enum=Standalone;Replicaset;Sharded

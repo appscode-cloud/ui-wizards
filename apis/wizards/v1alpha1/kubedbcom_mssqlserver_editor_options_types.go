@@ -53,7 +53,7 @@ type KubedbcomMssqlserverEditorOptionsSpecSpec struct {
 	ShardTopology   MssqlserverShardTopology   `json:"shardTopology"`
 	ClusterAuthMode MssqlserverClusterAuthMode `json:"clusterAuthMode"`
 	SslMode         MssqlserverSSLMode         `json:"sslMode"`
-	DeletionPolicy  TerminationPolicy          `json:"deletionPolicy"`
+	DeletionPolicy  DeletionPolicy             `json:"deletionPolicy"`
 	StorageClass    StorageClass               `json:"storageClass"`
 	Persistence     Persistence                `json:"persistence"`
 	Machine         MachineType                `json:"machine"`
