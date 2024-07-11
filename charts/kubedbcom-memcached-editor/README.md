@@ -45,18 +45,18 @@ The command removes all the Kubernetes components associated with the chart and 
 
 The following table lists the configurable parameters of the `kubedbcom-memcached-editor` chart and their default values.
 
-|     Parameter      | Description |             Default              |
-|--------------------|-------------|----------------------------------|
-| apiVersion         |             | <code>kubedb.com/v1alpha2</code> |
-| kind               |             | <code>Memcached</code>           |
-| metadata.name      |             | <code>memcached</code>           |
-| metadata.namespace |             | <code>default</code>             |
+|     Parameter      | Description |          Default           |
+|--------------------|-------------|----------------------------|
+| apiVersion         |             | <code>kubedb.com/v1</code> |
+| kind               |             | <code>Memcached</code>     |
+| metadata.name      |             | <code>memcached</code>     |
+| metadata.namespace |             | <code>default</code>       |
 
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm upgrade -i`. For example:
 
 ```bash
-$ helm upgrade -i kubedbcom-memcached-editor appscode-charts-oci/kubedbcom-memcached-editor -n default --create-namespace --version=v0.4.21 --set apiVersion=kubedb.com/v1alpha2
+$ helm upgrade -i kubedbcom-memcached-editor appscode-charts-oci/kubedbcom-memcached-editor -n default --create-namespace --version=v0.4.21 --set apiVersion=kubedb.com/v1
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while

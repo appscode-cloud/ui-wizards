@@ -25,7 +25,7 @@ import (
 type MachineType string
 
 // +kubebuilder:validation:Enum=Halt;Delete;WipeOut;DoNotTerminate
-type TerminationPolicy string
+type DeletionPolicy string
 
 type Persistence struct {
 	Size string `json:"size"`

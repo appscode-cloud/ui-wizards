@@ -52,10 +52,10 @@ type KubedbcomKafkaEditorOptionsSpecSpec struct {
 	// +optional
 	Replicas *int `json:"replicas,omitempty"`
 	// +optional
-	Topology        *KafkaTopology    `json:"topology,omitempty"`
-	DisableSecurity bool              `json:"disableSecurity"`
-	DeletionPolicy  TerminationPolicy `json:"deletionPolicy"`
-	StorageClass    StorageClass      `json:"storageClass"`
+	Topology        *KafkaTopology `json:"topology,omitempty"`
+	DisableSecurity bool           `json:"disableSecurity"`
+	DeletionPolicy  DeletionPolicy `json:"deletionPolicy"`
+	StorageClass    StorageClass   `json:"storageClass"`
 	// +optional
 	Persistence *Persistence `json:"persistence"`
 	// +optional

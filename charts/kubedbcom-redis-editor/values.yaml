@@ -208,6 +208,7 @@ resources:
         name: redis-auth
       configSecret:
         name: redis-config
+      deletionPolicy: WipeOut
       init:
         waitForInitialRestore: true
       mode: Sentinel
@@ -233,7 +234,6 @@ resources:
           requests:
             storage: 1Gi
         storageClassName: standard
-      terminationPolicy: WipeOut
       tls:
         issuerRef:
           apiGroup: cert-manager.io
@@ -247,6 +247,7 @@ resources:
       name: sentinel
       namespace: demo
     spec:
+      deletionPolicy: WipeOut
       replicas: 3
       storage:
         accessModes:
@@ -256,7 +257,6 @@ resources:
             storage: 1Gi
         storageClassName: standard
       storageType: Durable
-      terminationPolicy: WipeOut
       version: 6.2.5
   monitoringCoreosComServiceMonitor: # +doc-gen:break
     apiVersion: monitoring.coreos.com/v1

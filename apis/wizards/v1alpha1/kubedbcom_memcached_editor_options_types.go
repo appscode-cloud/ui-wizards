@@ -44,13 +44,13 @@ type KubedbcomMemcachedEditorOptionsSpecSpec struct {
 	// +optional
 	Annotations map[string]string `json:"annotations"`
 	// +optional
-	Labels            map[string]string         `json:"labels"`
-	Version           string                    `json:"version"`
-	Replicas          int                       `json:"replicas"`
-	TerminationPolicy TerminationPolicy         `json:"terminationPolicy"`
-	Machine           MachineType               `json:"machine"`
-	Resources         core.ResourceRequirements `json:"resources"`
-	Monitoring        Monitoring                `json:"monitoring"`
+	Labels         map[string]string         `json:"labels"`
+	Version        string                    `json:"version"`
+	Replicas       int                       `json:"replicas"`
+	DeletionPolicy DeletionPolicy            `json:"deletionPolicy"`
+	Machine        MachineType               `json:"machine"`
+	Resources      core.ResourceRequirements `json:"resources"`
+	Monitoring     Monitoring                `json:"monitoring"`
 }
 
 // *** Alerts *** //

@@ -47,16 +47,16 @@ type KubedbcomProxysqlEditorOptionsSpecSpec struct {
 	// +optional
 	Annotations map[string]string `json:"annotations"`
 	// +optional
-	Labels            map[string]string                 `json:"labels"`
-	Version           string                            `json:"version"`
-	Replicas          int                               `json:"replicas"`
-	TerminationPolicy TerminationPolicy                 `json:"terminationPolicy"`
-	Machine           MachineType                       `json:"machine"`
-	Resources         core.ResourceRequirements         `json:"resources"`
-	AuthSecret        AuthSecret                        `json:"authSecret"`
-	Monitoring        KubedbcomProxysqlEditorMonitoring `json:"monitoring"`
-	SyncUsers         bool                              `json:"syncUsers"`
-	Backend           string                            `json:"backend"`
+	Labels         map[string]string                 `json:"labels"`
+	Version        string                            `json:"version"`
+	Replicas       int                               `json:"replicas"`
+	DeletionPolicy DeletionPolicy                    `json:"deletionPolicy"`
+	Machine        MachineType                       `json:"machine"`
+	Resources      core.ResourceRequirements         `json:"resources"`
+	AuthSecret     AuthSecret                        `json:"authSecret"`
+	Monitoring     KubedbcomProxysqlEditorMonitoring `json:"monitoring"`
+	SyncUsers      bool                              `json:"syncUsers"`
+	Backend        string                            `json:"backend"`
 }
 
 type KubedbcomProxysqlEditorMonitoring struct {

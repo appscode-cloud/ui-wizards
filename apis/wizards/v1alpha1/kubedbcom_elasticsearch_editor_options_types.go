@@ -54,11 +54,11 @@ type KubedbcomElasticsearchEditorOptionsSpecSpec struct {
 	// +optional
 	Replicas *int `json:"replicas,omitempty"`
 	// +optional
-	Topology          *ElasticsearchTopology `json:"topology,omitempty"`
-	EnableSSL         bool                   `json:"enableSSL"`
-	DisableSecurity   bool                   `json:"disableSecurity"`
-	TerminationPolicy TerminationPolicy      `json:"terminationPolicy"`
-	StorageClass      StorageClass           `json:"storageClass"`
+	Topology        *ElasticsearchTopology `json:"topology,omitempty"`
+	EnableSSL       bool                   `json:"enableSSL"`
+	DisableSecurity bool                   `json:"disableSecurity"`
+	DeletionPolicy  DeletionPolicy         `json:"deletionPolicy"`
+	StorageClass    StorageClass           `json:"storageClass"`
 	// +optional
 	Persistence *Persistence `json:"persistence"`
 	// +optional

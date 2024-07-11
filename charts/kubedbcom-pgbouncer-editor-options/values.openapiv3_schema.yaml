@@ -52,6 +52,13 @@ properties:
             format: password
             type: string
         type: object
+      deletionPolicy:
+        enum:
+        - Halt
+        - Delete
+        - WipeOut
+        - DoNotTerminate
+        type: string
       labels:
         additionalProperties:
           type: string
@@ -201,22 +208,15 @@ properties:
               value. Requests cannot exceed Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
             type: object
         type: object
-      deletionPolicy:
-        enum:
-        - Halt
-        - Delete
-        - WipeOut
-        - DoNotTerminate
-        type: string
       version:
         type: string
     required:
     - authSecret
+    - deletionPolicy
     - machine
     - monitoring
     - replicas
     - resources
-    - deletionPolicy
     - version
     type: object
 required:

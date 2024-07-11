@@ -52,15 +52,15 @@ type KubedbcomMysqlEditorOptionsSpecSpec struct {
 	// +optional
 	Replicas int `json:"replicas,omitempty"`
 	// +optional
-	InnoDBCluster     MySQLInnoDBCluster        `json:"innoDBCluster,omitempty"`
-	TerminationPolicy TerminationPolicy         `json:"terminationPolicy"`
-	StorageClass      StorageClass              `json:"storageClass"`
-	Persistence       Persistence               `json:"persistence"`
-	Machine           MachineType               `json:"machine"`
-	Resources         core.ResourceRequirements `json:"resources"`
-	AuthSecret        AuthSecret                `json:"authSecret"`
-	Monitoring        Monitoring                `json:"monitoring"`
-	Backup            BackupToolSpec            `json:"backup"`
+	InnoDBCluster  MySQLInnoDBCluster        `json:"innoDBCluster,omitempty"`
+	DeletionPolicy DeletionPolicy            `json:"deletionPolicy"`
+	StorageClass   StorageClass              `json:"storageClass"`
+	Persistence    Persistence               `json:"persistence"`
+	Machine        MachineType               `json:"machine"`
+	Resources      core.ResourceRequirements `json:"resources"`
+	AuthSecret     AuthSecret                `json:"authSecret"`
+	Monitoring     Monitoring                `json:"monitoring"`
+	Backup         BackupToolSpec            `json:"backup"`
 }
 
 type MySQLInnoDBCluster struct {

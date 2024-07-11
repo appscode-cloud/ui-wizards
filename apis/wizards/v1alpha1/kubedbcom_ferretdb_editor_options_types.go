@@ -53,7 +53,7 @@ type KubedbcomFerretdbEditorOptionsSpecSpec struct {
 	ShardTopology   FerretDBShardTopology     `json:"shardTopology"`
 	ClusterAuthMode FerretDBClusterAuthMode   `json:"clusterAuthMode"`
 	SslMode         FerretDBSSLMode           `json:"sslMode"`
-	DeletionPolicy  TerminationPolicy         `json:"deletionPolicy"`
+	DeletionPolicy  DeletionPolicy            `json:"deletionPolicy"`
 	StorageClass    StorageClass              `json:"storageClass"`
 	Persistence     Persistence               `json:"persistence"`
 	Machine         MachineType               `json:"machine"`

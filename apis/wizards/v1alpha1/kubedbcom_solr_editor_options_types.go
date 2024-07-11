@@ -50,7 +50,7 @@ type KubedbcomSolrEditorOptionsSpecSpec struct {
 	Mode           SolrMode          `json:"mode"`
 	ReplicaSet     SolrReplicaSet    `json:"replicaSet"`
 	Topology       SolrTopology      `json:"topology"`
-	DeletionPolicy TerminationPolicy `json:"deletionPolicy"`
+	DeletionPolicy DeletionPolicy    `json:"deletionPolicy"`
 	StorageClass   StorageClass      `json:"storageClass"`
 	ZookeeperRef   ObjectReference   `json:"zookeeperRef"`
 	Persistence    Persistence       `json:"persistence"`

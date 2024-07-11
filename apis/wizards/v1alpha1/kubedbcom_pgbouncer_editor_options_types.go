@@ -44,14 +44,14 @@ type KubedbcomPgbouncerEditorOptionsSpecSpec struct {
 	// +optional
 	Annotations map[string]string `json:"annotations"`
 	// +optional
-	Labels            map[string]string         `json:"labels"`
-	Replicas          int                       `json:"replicas"`
-	Version           string                    `json:"version"`
-	TerminationPolicy TerminationPolicy         `json:"terminationPolicy"`
-	Machine           MachineType               `json:"machine"`
-	Resources         core.ResourceRequirements `json:"resources"`
-	AuthSecret        AuthSecret                `json:"authSecret"`
-	Monitoring        Monitoring                `json:"monitoring"`
+	Labels         map[string]string         `json:"labels"`
+	Replicas       int                       `json:"replicas"`
+	Version        string                    `json:"version"`
+	DeletionPolicy DeletionPolicy            `json:"deletionPolicy"`
+	Machine        MachineType               `json:"machine"`
+	Resources      core.ResourceRequirements `json:"resources"`
+	AuthSecret     AuthSecret                `json:"authSecret"`
+	Monitoring     Monitoring                `json:"monitoring"`
 }
 
 // +kubebuilder:validation:Enum=Standalone;Cluster

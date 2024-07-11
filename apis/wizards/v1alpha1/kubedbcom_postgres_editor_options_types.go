@@ -46,17 +46,17 @@ type KubedbcomPostgresEditorOptionsSpecSpec struct {
 	// +optional
 	Annotations map[string]string `json:"annotations"`
 	// +optional
-	Labels            map[string]string         `json:"labels"`
-	Version           string                    `json:"version"`
-	Mode              PostgresMode              `json:"mode"`
-	TerminationPolicy TerminationPolicy         `json:"terminationPolicy"`
-	StorageClass      StorageClass              `json:"storageClass"`
-	Persistence       Persistence               `json:"persistence"`
-	Machine           MachineType               `json:"machine"`
-	Resources         core.ResourceRequirements `json:"resources"`
-	AuthSecret        AuthSecret                `json:"authSecret"`
-	Monitoring        Monitoring                `json:"monitoring"`
-	Backup            BackupToolSpec            `json:"backup"`
+	Labels         map[string]string         `json:"labels"`
+	Version        string                    `json:"version"`
+	Mode           PostgresMode              `json:"mode"`
+	DeletionPolicy DeletionPolicy            `json:"deletionPolicy"`
+	StorageClass   StorageClass              `json:"storageClass"`
+	Persistence    Persistence               `json:"persistence"`
+	Machine        MachineType               `json:"machine"`
+	Resources      core.ResourceRequirements `json:"resources"`
+	AuthSecret     AuthSecret                `json:"authSecret"`
+	Monitoring     Monitoring                `json:"monitoring"`
+	Backup         BackupToolSpec            `json:"backup"`
 }
 
 // +kubebuilder:validation:Enum=Standalone;Cluster

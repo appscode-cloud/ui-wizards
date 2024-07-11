@@ -51,7 +51,7 @@ type KubedbcomPgpoolEditorOptionsSpecSpec struct {
 	Cluster        PgpoolCluster     `json:"cluster"`
 	PostgresRef    ObjectReference   `json:"postgresRef"`
 	SyncUsers      bool              `json:"syncUsers"`
-	DeletionPolicy TerminationPolicy `json:"deletionPolicy"`
+	DeletionPolicy DeletionPolicy    `json:"deletionPolicy"`
 	StorageClass   StorageClass      `json:"storageClass"`
 	Persistence    Persistence       `json:"persistence"`
 	PodResources   PodResources      `json:"podResources"`
