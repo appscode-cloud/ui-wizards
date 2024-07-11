@@ -38,7 +38,7 @@
 {{- end }}
 {{ $poolName := printf "%s-%s-%s" .Values.form.capi.clusterName .Release.Namespace (include "kubedbcom-mongodb-editor-options.fullname" .) }}
 
-apiVersion: kubedb.com/v1alpha2
+apiVersion: kubedb.com/v1
 kind: MongoDB
 metadata:
   name: {{ include "kubedbcom-mongodb-editor-options.fullname" . }}
@@ -72,8 +72,10 @@ spec:
       replicas: {{ .Values.spec.shardTopology.configServer.replicas }}
       podTemplate:
         spec:
-          resources:
-            {{- toYaml $configServer_res | nindent 12 }}
+          containers:
+            - name: mongodb
+              resources:
+                {{- toYaml $configServer_res | nindent 16 }}
           {{- if and .Values.form.capi.provider .Values.form.capi.dedicated }}
           nodeSelector:
             nodes.klusters.dev/pool: {{ $poolName }}
@@ -92,8 +94,10 @@ spec:
       replicas: {{ .Values.spec.shardTopology.mongos.replicas }}
       podTemplate:
         spec:
-          resources:
-            {{- toYaml $mongos_res | nindent 12 }}
+          containers:
+            - name: mongodb
+              resources:
+                {{- toYaml $mongos_res | nindent 16 }}
           {{- if and .Values.form.capi.provider .Values.form.capi.dedicated }}
           nodeSelector:
             nodes.klusters.dev/pool: {{ $poolName }}
@@ -108,8 +112,10 @@ spec:
       replicas: {{ .Values.spec.shardTopology.shard.replicas }}
       podTemplate:
         spec:
-          resources:
-            {{- toYaml $shard_res | nindent 12 }}
+          containers:
+            - name: mongodb
+              resources:
+                {{- toYaml $shard_res | nindent 16 }}
           {{- if and .Values.form.capi.provider .Values.form.capi.dedicated }}
           nodeSelector:
             nodes.klusters.dev/pool: {{ $poolName }}
@@ -127,8 +133,10 @@ spec:
 {{- else }}
   podTemplate:
     spec:
-      resources:
-        {{- toYaml $res | nindent 8 }}
+      containers:
+        - name: mongodb
+          resources:
+            {{- toYaml $res | nindent 12 }}
       {{- if and .Values.form.capi.provider .Values.form.capi.dedicated }}
       nodeSelector:
         nodes.klusters.dev/pool: {{ $poolName }}
@@ -143,8 +151,10 @@ spec:
   arbiter:
     podTemplate:
       spec:
-        resources:
-          {{- toYaml $arbiter_res | nindent 10 }}
+        containers:
+          - name: mongodb
+            resources:
+              {{- toYaml $arbiter_res | nindent 14 }}
         {{- if and .Values.form.capi.provider .Values.form.capi.dedicated }}
         nodeSelector:
           nodes.klusters.dev/pool: {{ $poolName }}
@@ -160,8 +170,10 @@ spec:
     replicas: {{ .Values.spec.hidden.replicas }}
     podTemplate:
       spec:
-        resources:
-          {{- toYaml $hidden_res | nindent 10 }}
+        containers:
+          - name: mongodb
+            resources:
+              {{- toYaml $hidden_res | nindent 14 }}
         {{- if and .Values.form.capi.provider .Values.form.capi.dedicated }}
         nodeSelector:
           nodes.klusters.dev/pool: {{ $poolName }}
@@ -177,7 +189,7 @@ spec:
           storage: {{ .Values.spec.hidden.persistence.size }}
       storageClassName: {{ .Values.spec.storageClass.name }}
 {{- end }}
-  terminationPolicy: {{ .Values.spec.terminationPolicy }}
+  deletionPolicy: {{ .Values.spec.deletionPolicy }}
   clusterAuthMode: {{ .Values.spec.clusterAuthMode }}
   sslMode: {{ .Values.spec.sslMode }}
 {{- if .Values.spec.authSecret.name }}
