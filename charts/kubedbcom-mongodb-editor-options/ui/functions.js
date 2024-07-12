@@ -801,17 +801,20 @@ function onBackupSwitch({ discriminator, getValue, commit }) {
   });
 }
 
-async function getNodeTopology({ model, getValue, axios, storeGet }) {
+async function getNodeTopology({ model, getValue, axios, storeGet, watchDependency }) {
+  watchDependency("model#/spec/admin/deployment/default");
   const owner = storeGet("/route/params/user");
   const cluster = storeGet("/route/params/cluster");
+  const deploymentType = getValue(model, "/spec/admin/deployment/default");
   const defaultNodes =  getValue(model, `/spec/admin/clusterTier/nodeTopology/available`) || [];
   const url = `/clusters/${owner}/${cluster}/proxy/node.k8s.appscode.com/v1alpha1/nodetopologies`;
-  
+
   try{
-    const resp = await axios.get(url, {
-      params: { filter: { items: { metadata: { name: null } } } },
-    });
-    const mappedResp = resp.data?.items?.map((item) => {
+    const resp = await axios.get(url);    
+    const filteredResp = resp.data?.items.filter((item) => 
+      item.metadata.labels?.['node.k8s.appscode.com/tenancy'] === (deploymentType.toLowerCase())
+    );
+    const mappedResp = filteredResp?.map((item) => {
       const name = (item.metadata && item.metadata.name) || "";
       return name
     });
