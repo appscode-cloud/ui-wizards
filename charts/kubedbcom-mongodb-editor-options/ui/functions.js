@@ -639,7 +639,7 @@ function isVariantAvailable ({storeGet})  {
 function setStorageClass({ model, getValue, commit }) {
   const deletionPolicy = getValue(model, "/spec/deletionPolicy") || "";
   let storageClass = getValue(model, "/spec/admin/storageClasses/default") || "";
-  const storageClassList = getValue(model, "/spec/admin/storageClasses/available");
+  const storageClassList = getValue(model, "/spec/admin/storageClasses/available") || [];
   const suffix = "-retain";
 
   const simpleClassList = storageClassList.filter(item => {
@@ -755,33 +755,6 @@ function getAdminOptions({ getValue, model }, type) {
   return options;
 }
 
-function setGateways({ model, getValue }) {
-  const gateways = getValue(model, "/spec/admin/gateways/default");
-  const convertedText = `${gateways?.namespace}/${gateways?.name}`;
-  return convertedText;
-}
-
-function getGateways({ getValue, model }) {
-  const options = getValue(model, "/spec/admin/gateways/available");
-  const textOptions = options.map(item =>`${item?.namespace}/${item?.name}`);
-  return textOptions;
-}
-
-function onGatewayChange({ discriminator, getValue, commit }) {
-  const gateway = getValue(discriminator, "/gateways") || "";
-  const gatewayObject = gateway
-    ? {
-      name: gateway?.split('/')[1],
-      namespace: gateway?.split('/')[0]
-    }
-    : {}
-  commit("wizard/model$update", {
-    path: "/spec/admin/gateways/default",
-    value: gatewayObject,
-    force: true,
-  });
-}
-
 function isToggleOn({ getValue, model }, type) {
   return getValue(model, `/spec/admin/${type}/toggle`);
 }
@@ -805,7 +778,7 @@ async function getNodeTopology({ model, getValue, axios, storeGet, watchDependen
   watchDependency("model#/spec/admin/deployment/default");
   const owner = storeGet("/route/params/user");
   const cluster = storeGet("/route/params/cluster");
-  const deploymentType = getValue(model, "/spec/admin/deployment/default");
+  const deploymentType = getValue(model, "/spec/admin/deployment/default") || "";
   const defaultNodes =  getValue(model, `/spec/admin/clusterTier/nodeTopology/available`) || [];
   const url = `/clusters/${owner}/${cluster}/proxy/node.k8s.appscode.com/v1alpha1/nodetopologies`;
 
@@ -825,6 +798,13 @@ async function getNodeTopology({ model, getValue, axios, storeGet, watchDependen
   }
   // if api fails return the default list from values file
   return defaultNodes;
+}
+
+function showIssuer({ model, getValue, watchDependency }) {
+  watchDependency("model#/spec/admin/tls/default");
+  const isTlsEnabled = getValue(model, "/spec/admin/tls/default");
+  const isIssuerToggleEnabled = isToggleOn({ getValue, model }, "clusterIssuers");
+  return isTlsEnabled && isIssuerToggleEnabled;
 }
 
 function getTierOptions() {
@@ -900,12 +880,10 @@ return {
   clearConfiguration,
   returnFalse,
   isToggleOn,
-  setGateways,
-  getGateways,
-  onGatewayChange,
   getAdminOptions,
   onBackupSwitch,
   showAlerts,
+  showIssuer,
   getTierOptions,
   getCapacityOptions,
   setMonitoring,

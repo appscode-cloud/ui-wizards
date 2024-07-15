@@ -409,28 +409,19 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/admin/properties/tls/properties/default
       type: switch
+    - fetch: getAdminOptions|clusterIssuers
+      if: showIssuer
+      label:
+        text: labels.clusterIssuers
+      schema:
+        $ref: schema#/properties/spec/properties/admin/properties/clusterIssuers/properties/default
+      type: select
     - if: isToggleOn|webUI
       label:
         text: Enable Web UI?
       schema:
         $ref: schema#/properties/spec/properties/admin/properties/webUI/properties/default
       type: switch
-    - fetch: getAdminOptions|clusterIssuers
-      if: isToggleOn|clusterIssuers
-      label:
-        text: labels.clusterIssuers
-      schema:
-        $ref: schema#/properties/spec/properties/admin/properties/clusterIssuers/properties/default
-      type: select
-    - computed: setGateways
-      fetch: getGateways
-      if: isToggleOn|gateways
-      label:
-        text: labels.gateways
-      onChange: onGatewayChange
-      schema:
-        $ref: discriminator#/gateways
-      type: select
     - computed: setMonitoring
       if: isToggleOn|monitoring
       label:
