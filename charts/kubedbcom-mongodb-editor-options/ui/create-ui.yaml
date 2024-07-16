@@ -52,17 +52,15 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/default
       type: radio
-    - if: isToggleOn|clusterTier/capacity
+    - disableUnselect: true
+      if: isToggleOn|clusterTier/placement
       label:
-        text: labels.capacityType
-      options:
-        - text: On-Demand
-          value: on-demand
-        - text: Spot
-          value: spot
+        text: labels.placement
+      fetch: getAdminOptions|clusterTier/placement
+      required: true
       schema:
-        $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/capacity/properties/default
-      type: radio
+        $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/placement/properties/default
+      type: select
     - disableUnselect: true
       if: isToggleOn|clusterTier/nodeTopology
       label:
