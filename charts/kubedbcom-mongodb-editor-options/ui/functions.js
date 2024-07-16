@@ -331,31 +331,29 @@ function showStorageSizeField({ model, getValue, watchDependency }) {
   return validType.includes(modelPathValue);
 }
 
-async function getResources(
-  { axios, storeGet },
-  group,
-  version,
-  resource
-) {
-  const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/route/params/cluster");
+async function getNamespaces({ axios, storeGet }) {
+  const params = storeGet("/route/params");
+  const { user, cluster, group, resource } = params;
   try {
-    const resp = await axios.get(
-      `/clusters/${owner}/${cluster}/proxy/${group}/${version}/${resource}`,
+    const resp = await axios.post(
+      `/clusters/${user}/${cluster}/proxy/identity.k8s.appscode.com/v1alpha1/selfsubjectnamespaceaccessreviews`,
       {
-        params: { filter: { items: { metadata: { name: null } } } },
+        "apiVersion": "identity.k8s.appscode.com/v1alpha1",
+        "kind": "SelfSubjectNamespaceAccessReview",
+        "spec": {
+          "resourceAttributes": [
+            {
+              "verb": "create",
+              "group": group,
+              "version": "*",
+              "resource": resource
+            }
+          ]
+        }
       }
     );
-
-    const resources = (resp && resp.data && resp.data.items) || [];
-
-    resources.map((item) => {
-      const name = (item.metadata && item.metadata.name) || "";
-      item.text = name;
-      item.value = name;
-      return true;
-    });
-    return resources;
+    const namespaces = resp?.data?.status?.namespaces || [];
+    return namespaces;
   }
   catch(e) {
     console.log(e);
@@ -850,7 +848,7 @@ return {
   showAuthPasswordField,
   isEqualToModelPathValue,
   showStorageSizeField,
-  getResources,
+  getNamespaces,
   getMongoDbVersions,
   onCreateAuthSecretChange,
   isMachineNotCustom,
