@@ -1,0 +1,11 @@
+{{- if .Values.spec.admin.webUI.default }}
+apiVersion: catalog.appscode.com/v1alpha1
+kind: PostgresBinding
+metadata:
+  name: {{ include "kubedbcom-postgres-editor-options.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  sourceRef:
+    name: {{ include "kubedbcom-postgres-editor-options.fullname" . }}
+    namespace: {{ .Release.Namespace }}
+{{- end }}
