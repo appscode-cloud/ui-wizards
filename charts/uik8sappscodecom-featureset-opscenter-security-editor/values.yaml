@@ -73,37 +73,6 @@ resources:
         crds: CreateReplace
         remediation:
           retries: -1
-  helmToolkitFluxcdIoHelmRelease_cert_manager_webhook_ace: # +doc-gen:break
-    apiVersion: helm.toolkit.fluxcd.io/v2
-    kind: HelmRelease
-    metadata:
-      labels:
-        app.kubernetes.io/component: cert-manager-webhook-ace
-      name: cert-manager-webhook-ace
-      namespace: kubeops
-    spec:
-      chart:
-        spec:
-          chart: cert-manager-webhook-ace
-          sourceRef:
-            kind: HelmRepository
-            name: appscode-charts-oci
-            namespace: kubeops
-          version: v2023.11.14
-      install:
-        crds: CreateReplace
-        createNamespace: true
-        remediation:
-          retries: -1
-      interval: 5m
-      releaseName: cert-manager-webhook-ace
-      storageNamespace: cert-manager
-      targetNamespace: cert-manager
-      timeout: 30m
-      upgrade:
-        crds: CreateReplace
-        remediation:
-          retries: -1
   helmToolkitFluxcdIoHelmRelease_falco: # +doc-gen:break
     apiVersion: helm.toolkit.fluxcd.io/v2
     kind: HelmRelease
