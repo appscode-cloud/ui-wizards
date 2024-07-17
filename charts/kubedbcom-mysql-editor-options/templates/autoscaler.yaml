@@ -1,0 +1,26 @@
+apiVersion: autoscaling.kubedb.com/v1alpha1
+kind: MySQLAutoscaler
+metadata:
+  name: {{ include "kubedbcom-mysql-editor-options.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  databaseRef:
+    name: {{ include "kubedbcom-mysql-editor-options.fullname" . }}
+  opsRequestOptions:
+    timeout: 10m
+    apply: IfReady
+  compute:
+    mysql:
+      trigger: "Off"
+      podLifeTimeThreshold: 10m
+      resourceDiffPercentage: 20
+      minAllowed:
+        cpu: 400m
+        memory: 400Mi
+      maxAllowed:
+        cpu: 1
+        memory: 2Gi
+{{- if eq .Values.spec.admin.deployment.default "Dedicated" }}
+    nodeTopology:
+      name: {{ .Values.spec.admin.clusterTier.nodeTopology.default }}
+{{- end}}

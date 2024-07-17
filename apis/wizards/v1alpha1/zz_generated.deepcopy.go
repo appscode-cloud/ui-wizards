@@ -1320,12 +1320,10 @@ func (in *KubedbcomMariadbEditorOptionsSpecSpec) DeepCopyInto(out *KubedbcomMari
 			(*out)[key] = val
 		}
 	}
-	out.StorageClass = in.StorageClass
 	out.Persistence = in.Persistence
-	in.Resources.DeepCopyInto(&out.Resources)
+	in.PodResources.DeepCopyInto(&out.PodResources)
 	out.AuthSecret = in.AuthSecret
-	in.Monitoring.DeepCopyInto(&out.Monitoring)
-	in.Backup.DeepCopyInto(&out.Backup)
+	in.AdminOptions.DeepCopyInto(&out.AdminOptions)
 	return
 }
 
@@ -1560,7 +1558,7 @@ func (in *KubedbcomMongodbEditorOptionsSpecSpec) DeepCopyInto(out *KubedbcomMong
 	out.Persistence = in.Persistence
 	in.PodResources.DeepCopyInto(&out.PodResources)
 	out.AuthSecret = in.AuthSecret
-	in.AdminOptions.DeepCopyInto(&out.AdminOptions)
+	in.Admin.DeepCopyInto(&out.Admin)
 	return
 }
 
@@ -1788,12 +1786,10 @@ func (in *KubedbcomMysqlEditorOptionsSpecSpec) DeepCopyInto(out *KubedbcomMysqlE
 		}
 	}
 	out.InnoDBCluster = in.InnoDBCluster
-	out.StorageClass = in.StorageClass
 	out.Persistence = in.Persistence
-	in.Resources.DeepCopyInto(&out.Resources)
+	in.PodResources.DeepCopyInto(&out.PodResources)
 	out.AuthSecret = in.AuthSecret
-	in.Monitoring.DeepCopyInto(&out.Monitoring)
-	in.Backup.DeepCopyInto(&out.Backup)
+	in.AdminOptions.DeepCopyInto(&out.AdminOptions)
 	return
 }
 
@@ -2131,12 +2127,10 @@ func (in *KubedbcomPostgresEditorOptionsSpecSpec) DeepCopyInto(out *KubedbcomPos
 			(*out)[key] = val
 		}
 	}
-	out.StorageClass = in.StorageClass
 	out.Persistence = in.Persistence
-	in.Resources.DeepCopyInto(&out.Resources)
+	in.PodResources.DeepCopyInto(&out.PodResources)
 	out.AuthSecret = in.AuthSecret
-	in.Monitoring.DeepCopyInto(&out.Monitoring)
-	in.Backup.DeepCopyInto(&out.Backup)
+	in.Admin.DeepCopyInto(&out.Admin)
 	return
 }
 
@@ -2495,12 +2489,10 @@ func (in *KubedbcomRedisEditorOptionsSpecSpec) DeepCopyInto(out *KubedbcomRedisE
 	}
 	out.Cluster = in.Cluster
 	out.SentinelRef = in.SentinelRef
-	out.StorageClass = in.StorageClass
 	out.Persistence = in.Persistence
-	in.Resources.DeepCopyInto(&out.Resources)
+	in.PodResources.DeepCopyInto(&out.PodResources)
 	out.AuthSecret = in.AuthSecret
-	in.Monitoring.DeepCopyInto(&out.Monitoring)
-	in.Backup.DeepCopyInto(&out.Backup)
+	in.AdminOptions.DeepCopyInto(&out.AdminOptions)
 	return
 }
 
