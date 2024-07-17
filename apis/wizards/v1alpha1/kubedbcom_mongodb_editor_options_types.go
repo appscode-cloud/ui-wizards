@@ -45,33 +45,22 @@ type KubedbcomMongodbEditorOptionsSpecSpec struct {
 	// +optional
 	Annotations map[string]string `json:"annotations"`
 	// +optional
-	Labels          map[string]string      `json:"labels"`
-	Version         string                 `json:"version"`
-	Mode            MongoDBMode            `json:"mode"`
-	ReplicaSet      MongoDBReplicaSet      `json:"replicaSet"`
-	ShardTopology   MongoDBShardTopology   `json:"shardTopology"`
-	ClusterAuthMode MongoDBClusterAuthMode `json:"clusterAuthMode"`
-	SslMode         MongoDBSSLMode         `json:"sslMode"`
-	DeletionPolicy  DeletionPolicy         `json:"deletionPolicy"`
-	StorageClass    StorageClass           `json:"storageClass"`
-	Persistence     Persistence            `json:"persistence"`
-	PodResources    PodResources           `json:"podResources"`
-	Arbiter         *MongoDBArbiter        `json:"arbiter"`
-	Hidden          *MongoDBHidden         `json:"hidden"`
-	AuthSecret      AuthSecret             `json:"authSecret"`
-	Configuration   string                 `json:"configuration"`
-	Monitoring      Monitoring             `json:"monitoring"`
-	Backup          BackupToolSpec         `json:"backup"`
+	Labels         map[string]string    `json:"labels"`
+	Mode           MongoDBMode          `json:"mode"`
+	ReplicaSet     MongoDBReplicaSet    `json:"replicaSet"`
+	ShardTopology  MongoDBShardTopology `json:"shardTopology"`
+	Arbiter        *MongoDBArbiter      `json:"arbiter"`
+	Hidden         *MongoDBHidden       `json:"hidden"`
+	Persistence    Persistence          `json:"persistence"`
+	PodResources   PodResources         `json:"podResources"`
+	AuthSecret     AuthSecret           `json:"authSecret"`
+	DeletionPolicy DeletionPolicy       `json:"deletionPolicy"`
+	Configuration  string               `json:"configuration"`
+	AdminOptions   AdminOptions         `json:"adminOptions"`
 }
 
 // +kubebuilder:validation:Enum=Standalone;Replicaset;Sharded
 type MongoDBMode string
-
-// +kubebuilder:validation:Enum=keyFile;sendKeyFile;sendX509;x509
-type MongoDBClusterAuthMode string
-
-// +kubebuilder:validation:Enum=disabled;allowSSL;preferSSL;requireSSL
-type MongoDBSSLMode string
 
 type MongoDBReplicaSet struct {
 	Name     string `json:"name"`
@@ -116,7 +105,6 @@ type MongoDBHidden struct {
 
 type MongodbAlertsSpecForm struct {
 	Alert alerts.MongoDBAlert `json:"alert"`
-	CAPI  CAPIFormSpec        `json:"capi"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

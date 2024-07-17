@@ -146,14 +146,6 @@ form:
             val: 1800
     labels:
       release: kube-prometheus-stack
-  capi:
-    clusterName: ""
-    dedicated: false
-    namespace: ""
-    nodes: 1
-    provider: ""
-    sku: ""
-    zones: []
 metadata:
   resource:
     group: kubedb.com
@@ -165,6 +157,41 @@ metadata:
     name: RELEASE-NAME
     namespace: default
 resources:
+  autoscalingKubedbComMongoDBAutoscaler: # +doc-gen:break
+    apiVersion: autoscaling.kubedb.com/v1alpha1
+    kind: MongoDBAutoscaler
+    metadata:
+      name: mongodb
+      namespace: demo
+    spec:
+      compute:
+        nodeTopology:
+          name: standard-basv2-family
+        replicaSet:
+          maxAllowed:
+            cpu: 1
+            memory: 2Gi
+          minAllowed:
+            cpu: 400m
+            memory: 400Mi
+          podLifeTimeThreshold: 10m
+          resourceDiffPercentage: 20
+          trigger: "On"
+      databaseRef:
+        name: repl
+      opsRequestOptions:
+        apply: IfReady
+        timeout: 10m
+  catalogAppscodeComMongoDBBinding: # +doc-gen:break
+    apiVersion: catalog.appscode.com/v1alpha1
+    kind: MongoDBBinding
+    metadata:
+      name: mongodb
+      namespace: demo
+    spec:
+      sourceRef:
+        name: mongodb
+        namespace: demo
   certManagerIoIssuer_ca: # +doc-gen:break
     apiVersion: cert-manager.io/v1
     kind: Issuer
