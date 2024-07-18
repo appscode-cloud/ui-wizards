@@ -361,48 +361,6 @@ async function getNamespaces({ axios, storeGet }) {
   }
 }
 
-async function getMongoDbVersions(
-  { axios, storeGet },
-  group,
-  version,
-  resource
-) {
-  const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/route/params/cluster");
-
-  const queryParams = {
-    filter: {
-      items: {
-        metadata: { name: null },
-        spec: { version: null, deprecated: null },
-      },
-    },
-  };
-
-  const resp = await axios.get(
-    `/clusters/${owner}/${cluster}/proxy/${group}/${version}/${resource}`,
-    {
-      params: queryParams,
-    }
-  );
-
-  const resources = (resp && resp.data && resp.data.items) || [];
-
-  // keep only non deprecated versions
-  const filteredMongoDbVersions = resources.filter(
-    (item) => item.spec && !item.spec.deprecated
-  );
-
-  filteredMongoDbVersions.map((item) => {
-    const name = (item.metadata && item.metadata.name) || "";
-    const specVersion = (item.spec && item.spec.version) || "";
-    item.text = `${name} (${specVersion})`;
-    item.value = name;
-    return true;
-  });
-  return filteredMongoDbVersions;
-}
-
 function onCreateAuthSecretChange({
   discriminator,
   getValue,
@@ -538,7 +496,7 @@ function getCreateNameSpaceUrl ({ model, getValue, storeGet }){
 const ifCapiProviderIsNotEmpty = ({ model, getValue, watchDependency }) => {
   watchDependency("model#/form/capi/provider");
   const val = getValue(model, "/form/capi/provider");
-  if (val) return true;
+  if (val) return true
 };
 
 const showMultiselectZone = ({ model, getValue, watchDependency }) => {
@@ -573,7 +531,7 @@ const ifZones = ({ model, getValue, watchDependency }) => {
   watchDependency("model#/form/capi/dedicated");
   const zones = getValue(model, "form/capi/zones") || [];
   const isDedicated = getValue(model, "form/capi/dedicated");
-  if (zones.length && isDedicated) return true;
+  if (zones.length && isDedicated) return true
 };
 
 const zonesOnChange = ({ model, getValue, commit }) => {
@@ -589,10 +547,10 @@ async function getZones({storeGet,axios,model,getValue}) {
   {
     try {
       const resp = await axios.get(`clustersv2/${owner}/${cluster}/zones`);
-      const val = resp.data.map((item) => {
-        return { "value": item, "text": item };
+      const val = resp.data.map((item)=>{
+        return {"value":item,"text":item}
       })
-      return val;
+      return val
     } catch (e) {
       console.log(e);
       return [];
@@ -910,14 +868,6 @@ function showIssuer({ model, getValue, watchDependency }) {
   return isTlsEnabled && isIssuerToggleEnabled;
 }
 
-function getTierOptions() {
-  return ["GeneralPurpose", "MemoryOptimized", "CPUOptimized"];
-}
-
-function getCapacityOptions() {
-  return ["on-demand", "spot"];
-}
-
 function setMonitoring({ getValue, model }) {
   const agent = getValue(model, "/spec/admin/monitoring/agent") || "";
   return !!agent;
@@ -954,7 +904,6 @@ return {
   isEqualToModelPathValue,
   showStorageSizeField,
   getNamespaces,
-  getMongoDbVersions,
   onCreateAuthSecretChange,
   isMachineNotCustom,
   getMachineListForOptions,
@@ -987,8 +936,6 @@ return {
   onBackupSwitch,
   showAlerts,
   showIssuer,
-  getTierOptions,
-  getCapacityOptions,
   setMonitoring,
   getNodeTopology,
   filterNodeTopology,
