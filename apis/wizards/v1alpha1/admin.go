@@ -81,26 +81,26 @@ type ClusterTierProfile struct {
 // *** Machine-related ends *** //
 
 type DatabasesProfile struct {
-	ClickHouse    DatabaseProfile `json:"clickHouse"`
-	Druid         DatabaseProfile `json:"druid"`
-	Elasticsearch DatabaseProfile `json:"elasticsearch"`
-	FerretDB      DatabaseProfile `json:"ferretDB"`
-	Kafka         DatabaseProfile `json:"kafka"`
-	MariaDB       DatabaseProfile `json:"mariaDB"`
-	Memcached     DatabaseProfile `json:"memcached"`
+	ClickHouse    DatabaseProfile `json:"ClickHouse"`
+	Druid         DatabaseProfile `json:"Druid"`
+	Elasticsearch DatabaseProfile `json:"Elasticsearch"`
+	FerretDB      DatabaseProfile `json:"FerretDB"`
+	Kafka         DatabaseProfile `json:"Kafka"`
+	MariaDB       DatabaseProfile `json:"MariaDB"`
+	Memcached     DatabaseProfile `json:"Memcached"`
 	MongoDB       DatabaseProfile `json:"MongoDB"`
-	MSSQLServer   DatabaseProfile `json:"mssqlServer"`
-	MySQL         DatabaseProfile `json:"mySQL"`
-	PerconaXtraDB DatabaseProfile `json:"perconaXtraDB"`
-	PgBouncer     DatabaseProfile `json:"pgBouncer"`
-	Pgpool        DatabaseProfile `json:"pgpool"`
-	Postgres      DatabaseProfile `json:"postgres"`
-	ProxySQL      DatabaseProfile `json:"proxySQL"`
-	RabbitMQ      DatabaseProfile `json:"rabbitMQ"`
-	Redis         DatabaseProfile `json:"redis"`
-	Singlestore   DatabaseProfile `json:"singlestore"`
-	Solr          DatabaseProfile `json:"solr"`
-	ZooKeeper     DatabaseProfile `json:"zooKeeper"`
+	MSSQLServer   DatabaseProfile `json:"MSSQLServer"`
+	MySQL         DatabaseProfile `json:"MySQL"`
+	PerconaXtraDB DatabaseProfile `json:"PerconaXtraDB"`
+	PgBouncer     DatabaseProfile `json:"PgBouncer"`
+	Pgpool        DatabaseProfile `json:"Pgpool"`
+	Postgres      DatabaseProfile `json:"Postgres"`
+	ProxySQL      DatabaseProfile `json:"ProxySQL"`
+	RabbitMQ      DatabaseProfile `json:"RabbitMQ"`
+	Redis         DatabaseProfile `json:"Redis"`
+	Singlestore   DatabaseProfile `json:"Singlestore"`
+	Solr          DatabaseProfile `json:"Solr"`
+	ZooKeeper     DatabaseProfile `json:"ZooKeeper"`
 }
 
 type DatabaseProfile struct {
