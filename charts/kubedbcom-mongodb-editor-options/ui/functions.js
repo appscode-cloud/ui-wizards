@@ -731,6 +731,7 @@ function onBackupSwitch({ discriminator, getValue, commit }) {
 }
 
 let nodeTopologyListFromApi = [];
+let nodeTopologyApiCalled = false;
 let provider = "";
 
 async function getNodeTopology({ model, getValue, axios, storeGet, watchDependency }) {
@@ -743,11 +744,12 @@ async function getNodeTopology({ model, getValue, axios, storeGet, watchDependen
   const nodeTopologyList =  getValue(model, `/spec/admin/clusterTier/nodeTopology/available`) || [];
   let mappedResp = [];
 
-  if (nodeTopologyListFromApi.length === 0) {
+  if (!nodeTopologyApiCalled) {
     try{
       const url = `/clusters/${owner}/${cluster}/proxy/node.k8s.appscode.com/v1alpha1/nodetopologies`;
       const resp = await axios.get(url);
       nodeTopologyListFromApi = resp.data?.items;
+      nodeTopologyApiCalled = true;
       const filteredResp = resp.data?.items.filter((item) => 
         item.metadata.labels?.['node.k8s.appscode.com/tenancy'] === (deploymentType.toLowerCase())
       );
@@ -786,10 +788,10 @@ async function getNodeTopology({ model, getValue, axios, storeGet, watchDependen
   return filteredList;
 }
 
-function filterNodeTopology(list, tier, provider, map) {
+function filterNodeTopology(list, tier, provider, mappedList) {
   // first filter the list from value that exists from the filtered list got from API
   const filteredlist = list.filter((item) => {
-    return map.includes(item);
+    return mappedList.includes(item);
   })
 
   // filter the list based on clusterTier
