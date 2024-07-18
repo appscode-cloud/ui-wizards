@@ -53,7 +53,7 @@ type KubedbcomPostgresEditorOptionsSpecSpec struct {
 	PodResources   PodResources      `json:"podResources"`
 	AuthSecret     AuthSecret        `json:"authSecret"`
 	Configuration  string            `json:"configuration"`
-	AdminOptions   AdminOptions      `json:"adminOptions"`
+	Admin          AdminOptions      `json:"admin"`
 }
 
 // +kubebuilder:validation:Enum=Standalone;Cluster

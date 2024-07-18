@@ -1560,7 +1560,7 @@ func (in *KubedbcomMongodbEditorOptionsSpecSpec) DeepCopyInto(out *KubedbcomMong
 	out.Persistence = in.Persistence
 	in.PodResources.DeepCopyInto(&out.PodResources)
 	out.AuthSecret = in.AuthSecret
-	in.AdminOptions.DeepCopyInto(&out.AdminOptions)
+	in.Admin.DeepCopyInto(&out.Admin)
 	return
 }
 
@@ -2134,7 +2134,7 @@ func (in *KubedbcomPostgresEditorOptionsSpecSpec) DeepCopyInto(out *KubedbcomPos
 	out.Persistence = in.Persistence
 	in.PodResources.DeepCopyInto(&out.PodResources)
 	out.AuthSecret = in.AuthSecret
-	in.AdminOptions.DeepCopyInto(&out.AdminOptions)
+	in.Admin.DeepCopyInto(&out.Admin)
 	return
 }
 
