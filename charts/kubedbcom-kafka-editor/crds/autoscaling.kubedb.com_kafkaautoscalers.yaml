@@ -1,0 +1,317 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  creationTimestamp: null
+  name: kafkaautoscalers.autoscaling.kubedb.com
+spec:
+  group: autoscaling.kubedb.com
+  names:
+    kind: KafkaAutoscaler
+    listKind: KafkaAutoscalerList
+    plural: kafkaautoscalers
+    singular: kafkaautoscaler
+  scope: Namespaced
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        properties:
+          apiVersion:
+            type: string
+          kind:
+            type: string
+          metadata:
+            type: object
+          spec:
+            properties:
+              compute:
+                properties:
+                  broker:
+                    properties:
+                      containerControlledValues:
+                        enum:
+                        - RequestsAndLimits
+                        - RequestsOnly
+                        type: string
+                      controlledResources:
+                        items:
+                          type: string
+                        type: array
+                      inMemoryStorage:
+                        properties:
+                          scalingFactorPercentage:
+                            format: int32
+                            type: integer
+                          usageThresholdPercentage:
+                            format: int32
+                            type: integer
+                        type: object
+                      maxAllowed:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        type: object
+                      minAllowed:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        type: object
+                      podLifeTimeThreshold:
+                        type: string
+                      resourceDiffPercentage:
+                        format: int32
+                        type: integer
+                      trigger:
+                        type: string
+                    type: object
+                  controller:
+                    properties:
+                      containerControlledValues:
+                        enum:
+                        - RequestsAndLimits
+                        - RequestsOnly
+                        type: string
+                      controlledResources:
+                        items:
+                          type: string
+                        type: array
+                      inMemoryStorage:
+                        properties:
+                          scalingFactorPercentage:
+                            format: int32
+                            type: integer
+                          usageThresholdPercentage:
+                            format: int32
+                            type: integer
+                        type: object
+                      maxAllowed:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        type: object
+                      minAllowed:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        type: object
+                      podLifeTimeThreshold:
+                        type: string
+                      resourceDiffPercentage:
+                        format: int32
+                        type: integer
+                      trigger:
+                        type: string
+                    type: object
+                  node:
+                    properties:
+                      containerControlledValues:
+                        enum:
+                        - RequestsAndLimits
+                        - RequestsOnly
+                        type: string
+                      controlledResources:
+                        items:
+                          type: string
+                        type: array
+                      inMemoryStorage:
+                        properties:
+                          scalingFactorPercentage:
+                            format: int32
+                            type: integer
+                          usageThresholdPercentage:
+                            format: int32
+                            type: integer
+                        type: object
+                      maxAllowed:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        type: object
+                      minAllowed:
+                        additionalProperties:
+                          anyOf:
+                          - type: integer
+                          - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                          x-kubernetes-int-or-string: true
+                        type: object
+                      podLifeTimeThreshold:
+                        type: string
+                      resourceDiffPercentage:
+                        format: int32
+                        type: integer
+                      trigger:
+                        type: string
+                    type: object
+                  nodeTopology:
+                    properties:
+                      name:
+                        type: string
+                      scaleDownDiffPercentage:
+                        default: 25
+                        format: int32
+                        type: integer
+                      scaleUpDiffPercentage:
+                        default: 15
+                        format: int32
+                        type: integer
+                    type: object
+                type: object
+              databaseRef:
+                properties:
+                  name:
+                    default: ""
+                    type: string
+                type: object
+                x-kubernetes-map-type: atomic
+              opsRequestOptions:
+                properties:
+                  apply:
+                    default: IfReady
+                    enum:
+                    - IfReady
+                    - Always
+                    type: string
+                  timeout:
+                    type: string
+                type: object
+              storage:
+                properties:
+                  broker:
+                    properties:
+                      expansionMode:
+                        enum:
+                        - Offline
+                        - Online
+                        type: string
+                      scalingRules:
+                        items:
+                          properties:
+                            appliesUpto:
+                              type: string
+                            threshold:
+                              type: string
+                          required:
+                          - appliesUpto
+                          - threshold
+                          type: object
+                        type: array
+                      scalingThreshold:
+                        format: int32
+                        type: integer
+                      trigger:
+                        type: string
+                      upperBound:
+                        anyOf:
+                        - type: integer
+                        - type: string
+                        pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                        x-kubernetes-int-or-string: true
+                      usageThreshold:
+                        format: int32
+                        type: integer
+                    required:
+                    - expansionMode
+                    type: object
+                  controller:
+                    properties:
+                      expansionMode:
+                        enum:
+                        - Offline
+                        - Online
+                        type: string
+                      scalingRules:
+                        items:
+                          properties:
+                            appliesUpto:
+                              type: string
+                            threshold:
+                              type: string
+                          required:
+                          - appliesUpto
+                          - threshold
+                          type: object
+                        type: array
+                      scalingThreshold:
+                        format: int32
+                        type: integer
+                      trigger:
+                        type: string
+                      upperBound:
+                        anyOf:
+                        - type: integer
+                        - type: string
+                        pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                        x-kubernetes-int-or-string: true
+                      usageThreshold:
+                        format: int32
+                        type: integer
+                    required:
+                    - expansionMode
+                    type: object
+                  node:
+                    properties:
+                      expansionMode:
+                        enum:
+                        - Offline
+                        - Online
+                        type: string
+                      scalingRules:
+                        items:
+                          properties:
+                            appliesUpto:
+                              type: string
+                            threshold:
+                              type: string
+                          required:
+                          - appliesUpto
+                          - threshold
+                          type: object
+                        type: array
+                      scalingThreshold:
+                        format: int32
+                        type: integer
+                      trigger:
+                        type: string
+                      upperBound:
+                        anyOf:
+                        - type: integer
+                        - type: string
+                        pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                        x-kubernetes-int-or-string: true
+                      usageThreshold:
+                        format: int32
+                        type: integer
+                    required:
+                    - expansionMode
+                    type: object
+                type: object
+            required:
+            - databaseRef
+            type: object
+        required:
+        - spec
+        type: object
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: null
+  storedVersions: null

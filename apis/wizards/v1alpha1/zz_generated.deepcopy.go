@@ -955,16 +955,10 @@ func (in *KubedbcomElasticsearchEditorOptionsSpecSpec) DeepCopyInto(out *Kubedbc
 		*out = new(ElasticsearchTopology)
 		**out = **in
 	}
-	out.StorageClass = in.StorageClass
-	if in.Persistence != nil {
-		in, out := &in.Persistence, &out.Persistence
-		*out = new(Persistence)
-		**out = **in
-	}
-	in.Resources.DeepCopyInto(&out.Resources)
+	out.Persistence = in.Persistence
+	in.PodResources.DeepCopyInto(&out.PodResources)
 	out.AuthSecret = in.AuthSecret
-	in.Monitoring.DeepCopyInto(&out.Monitoring)
-	in.Backup.DeepCopyInto(&out.Backup)
+	in.AdminOptions.DeepCopyInto(&out.AdminOptions)
 	out.KernelSettings = in.KernelSettings
 	return
 }
@@ -1202,15 +1196,10 @@ func (in *KubedbcomKafkaEditorOptionsSpecSpec) DeepCopyInto(out *KubedbcomKafkaE
 		*out = new(KafkaTopology)
 		(*in).DeepCopyInto(*out)
 	}
-	out.StorageClass = in.StorageClass
-	if in.Persistence != nil {
-		in, out := &in.Persistence, &out.Persistence
-		*out = new(Persistence)
-		**out = **in
-	}
-	in.Resources.DeepCopyInto(&out.Resources)
+	out.Persistence = in.Persistence
+	in.PodResources.DeepCopyInto(&out.PodResources)
 	out.AuthSecret = in.AuthSecret
-	in.Monitoring.DeepCopyInto(&out.Monitoring)
+	in.AdminOptions.DeepCopyInto(&out.AdminOptions)
 	return
 }
 

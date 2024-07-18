@@ -18,7 +18,6 @@ package v1alpha1
 
 import (
 	alerts "go.appscode.dev/alerts/apis/alerts/v1alpha1"
-	core "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	api "x-helm.dev/apimachinery/apis/releases/v1alpha1"
 )
@@ -57,16 +56,12 @@ type KubedbcomElasticsearchEditorOptionsSpecSpec struct {
 	Topology        *ElasticsearchTopology `json:"topology,omitempty"`
 	EnableSSL       bool                   `json:"enableSSL"`
 	DisableSecurity bool                   `json:"disableSecurity"`
+	Persistence     Persistence            `json:"persistence"`
+	PodResources    PodResources           `json:"podResources"`
+	AuthSecret      AuthSecret             `json:"authSecret"`
 	DeletionPolicy  DeletionPolicy         `json:"deletionPolicy"`
-	StorageClass    StorageClass           `json:"storageClass"`
-	// +optional
-	Persistence *Persistence `json:"persistence"`
-	// +optional
-	Machine    MachineType               `json:"machine"`
-	Resources  core.ResourceRequirements `json:"resources"`
-	AuthSecret AuthSecret                `json:"authSecret"`
-	Monitoring Monitoring                `json:"monitoring"`
-	Backup     BackupToolSpec            `json:"backup"`
+	Configuration   string                 `json:"configuration"`
+	AdminOptions    AdminOptions           `json:"adminOptions"`
 	// KernelSettings contains the additional kernel settings.
 	// +optional
 	KernelSettings KernelSettings `json:"kernelSettings"`
