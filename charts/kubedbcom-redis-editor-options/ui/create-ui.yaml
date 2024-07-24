@@ -2,7 +2,7 @@ steps:
 - form:
     discriminator:
       createAuthSecret:
-        default: true
+        default: false
         type: boolean
     elements:
     - disabled: isVariantAvailable
@@ -17,20 +17,68 @@ steps:
         url:
           function: getCreateNameSpaceUrl
       disabled: isVariantAvailable
-      fetch: getResources|core|v1|namespaces
+      fetch: getNamespaces
       label:
         text: labels.namespace
       refresh: true
       schema:
         $ref: schema#/properties/metadata/properties/release/properties/namespace
       type: select
+    - if: isToggleOn|deployment
+      hasDescription: true
+      label:
+        text: labels.deployment.name
+      options:
+        - text: Shared
+          value: Shared
+          description: labels.deployment.shared
+        - text: Dedicated
+          value: Dedicated
+          description: labels.deployment.dedicated
+      schema:
+        $ref: schema#/properties/spec/properties/admin/properties/deployment/properties/default
+      type: radio
+    - if: isToggleOn|clusterTier
+      label:
+        text: labels.clusterTier
+      options:
+      - text: General Purpose
+        value: GeneralPurpose
+      - text: Memory Optimized
+        value: MemoryOptimized
+      - text: CPU Optimized
+        value: CPUOptimized
+      schema:
+        $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/default
+      type: radio
     - disableUnselect: true
-      fetch: getRedisVersions|catalog.kubedb.com|v1alpha1|redisversions
+      if: isToggleOn|clusterTier/placement
+      label:
+        text: labels.placement
+      fetch: getAdminOptions|clusterTier/placement
+      required: true
+      schema:
+        $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/placement/properties/default
+      type: select
+    - disableUnselect: true
+      if: isToggleOn|clusterTier/nodeTopology
+      label:
+        text: labels.nodeTopology
+      fetch: getNodeTopology
+      refresh: true
+      required: true
+      schema:
+        $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/nodeTopology/properties/default
+      type: select
+    - disableUnselect: true
+      fetch: getAdminOptions|databases/Redis/versions
       label:
         text: labels.database.version
       schema:
-        $ref: schema#/properties/spec/properties/version
+        $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Redis/properties/versions/properties/default
       type: select
+      required: true
+      if: isToggleOn|databases/Redis/versions
     - isArray: true
       keys:
         label:
@@ -137,6 +185,34 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/persistence/properties/size
       type: input
+    - elements:
+      - computed: setMachineToCustom
+        fetch: getMachineListForOptions
+        label:
+          text: Machine
+        onChange: setResourceLimit
+        schema:
+          $ref: schema#/properties/spec/properties/podResources/properties/machine
+        type: select
+      - computed: setLimitsCpuOrMem
+        disabled: isMachineNotCustom
+        label:
+          text: labels.resources
+        schema:
+          $ref: schema#/properties/spec/properties/podResources/properties/resources
+        type: resource-input-form
+      if: notEqualToDatabaseMode|Sharded
+      label:
+        text: labels.machine_profile
+      show_label: true
+      type: single-step-form
+    - computed: setLimitsCpuOrMem|memory
+      disabled: disableLimit
+      label:
+        text: labels.memory
+      schema:
+        $ref: schema#/properties/spec/properties/resources/properties/limits/properties/memory
+      type: input
     - hasDescription: true
       label:
         text: labels.deletionPolicy
@@ -157,32 +233,19 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/deletionPolicy
       type: radio
-    - fetch: getStorageClassNames
+    - fetch: getAdminOptions|storageClasses
       if: isNotEqualToModelPathValue|Sentinel|/spec/mode
+      required: true
       label:
         text: labels.storage.class
       schema:
-        $ref: schema#/properties/spec/properties/storageClass/properties/name
+        $ref: schema#/properties/spec/properties/admin/properties/storageClass/properties/default
       type: select
     - label:
-        text: labels.database.secret
-      type: label-element
-    - options:
-      - text: options.database.secret.customSecret.label
-        value: true
-      - text: options.database.secret.existingSecret.label
-        value: false
+        text: Provide Authentication Credentials?
       schema:
         $ref: discriminator#/createAuthSecret
-      type: radio
-    - allowUserDefinedOption: true
-      fetch: getSecrets
-      if: showAuthSecretField
-      label:
-        text: labels.secret
-      schema:
-        $ref: schema#/properties/spec/properties/authSecret/properties/name
-      type: select
+      type: switch
     - if: showAuthPasswordField
       label:
         text: labels.password
@@ -190,75 +253,75 @@ steps:
         $ref: schema#/properties/spec/properties/authSecret/properties/password
       type: input
     - label:
-        text: labels.machine_profile
-      type: label-element
-    - computed: setMachineToCustom
-      fetch: getMachineListForOptions
-      label:
-        text: Machine
-      onChange: setResourceLimit
+        text: Configure Database?
       schema:
-        $ref: schema#/properties/spec/properties/machine
+        $ref: discriminator#/configDatabase
+      onChange: clearConfiguration
+      type: switch
+    - label:
+        text: Configuration
+      if: isConfigDatabaseOn
+      schema:
+        $ref: schema#/properties/spec/properties/configuration
+      type: editor
+    - if: isToggleOn|tls
+      label:
+        text: Enable TLS?
+      schema:
+        $ref: schema#/properties/spec/properties/admin/properties/tls/properties/default
+      type: switch
+    - fetch: getAdminOptions|clusterIssuers
+      if: showIssuer
+      label:
+        text: labels.clusterIssuers
+      schema:
+        $ref: schema#/properties/spec/properties/admin/properties/clusterIssuers/properties/default
       type: select
-    - computed: setLimitsCpuOrMem|cpu
-      disabled: disableLimit
+    - if: isToggleOn|webUI
       label:
-        text: labels.cpu
+        text: Enable Web UI?
       schema:
-        $ref: schema#/properties/spec/properties/resources/properties/limits/properties/cpu
-      type: input
-    - computed: setLimitsCpuOrMem|memory
-      disabled: disableLimit
+        $ref: schema#/properties/spec/properties/admin/properties/webUI/properties/default
+      type: switch
+    - computed: setMonitoring
+      if: isToggleOn|monitoring
       label:
-        text: labels.memory
+        text: labels.enable_monitoring
+      onChange: updateAlertValue
       schema:
-        $ref: schema#/properties/spec/properties/resources/properties/limits/properties/memory
-      type: input
-    - elements:
-      - customClass: mt-10
-        label:
-          text: labels.alert.options
-        options:
-        - text: None
-          value: none
-        - text: Critical
-          value: critical
-        - text: Warning
-          value: warning
-        - text: Info
-          value: info
-        schema:
-          $ref: schema#/properties/form/properties/alert/properties/enabled
-        sortable: true
-        type: select
+        $ref: discriminator#/monitoring
+      type: switch
+    - customClass: mt-10
+      if: showAlerts
       label:
-        text: labels.alert.label
+        text: labels.alert.options
+      options:
+      - text: None
+        value: none
+      - text: Critical
+        value: critical
+      - text: Warning
+        value: warning
+      - text: Info
+        value: info
       schema:
-        $ref: schema#/properties/form/properties/alert
-      show_label: true
-      type: single-step-form
-    - alias: reusable-monitor-option
-      chart:
-        name: uibytebuildersdev-component-monitoring-option
-        version: v0.4.21
-      dataContext:
-        agent:
-          $ref: schema#/properties/spec/properties/monitoring/properties/agent
-      functionCallbacks:
-        updateAgentValue:
-          $ref: functions#/updateAgentValue
-      moduleResolver: fetchJsons
+        $ref: schema#/properties/form/properties/alert/properties/enabled
+      sortable: true
+      type: select
+    - if: isToggleOn|archiver
+      label:
+        text: Enable Archiver?
       schema:
-        $ref: schema#/properties/spec/properties/monitoring/properties/serviceMonitor
-      type: reusable-element
-    - alias: reusable-backup-option
-      chart:
-        name: uibytebuildersdev-component-backup-option
-        version: v0.4.21
-      moduleResolver: fetchJsons
+        $ref: schema#/properties/spec/properties/admin/properties/archiver/properties/default
+      type: switch
+    - computed: isBackupCluster
+      if: isToggleOn|backup
+      label:
+        text: Enable Backup?
+      onChange: onBackupSwitch
       schema:
-        $ref: schema#/properties/spec/properties/backup
-      type: reusable-element
+        $ref: discriminator#/backup
+      type: switch
     - elements:
       - hasDescription: true
         onChange: dedicatedOnChange
