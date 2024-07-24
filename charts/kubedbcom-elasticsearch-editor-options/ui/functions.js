@@ -1,4 +1,6 @@
 let storageClassList = [];
+let nodeTopologyListFromApi = [];
+let provider = "";
 
 function onVersionChange({ discriminator, getValue, commit, model, watchDependency }) {
   watchDependency("discriminator#/elasticVersions")
@@ -774,6 +776,179 @@ function setStorageClass({model, getValue, commit}) {
 }
 
 
+async function getNamespaces({ axios, storeGet }) {
+  const params = storeGet("/route/params");
+  const { user, cluster, group, version, resource } = params;
+  try {
+    const resp = await axios.post(
+      `/clusters/${user}/${cluster}/proxy/identity.k8s.appscode.com/v1alpha1/selfsubjectnamespaceaccessreviews`,
+      {
+        "apiVersion": "identity.k8s.appscode.com/v1alpha1",
+        "kind": "SelfSubjectNamespaceAccessReview",
+        "spec": {
+          "resourceAttributes": [
+            {
+              "verb": "create",
+              "group": group,
+              "version": version,
+              "resource": resource
+            }
+          ]
+        }
+      }
+    );
+    const namespaces = resp?.data?.status?.namespaces || [];
+    return namespaces;
+  }
+  catch(e) {
+    console.log(e);
+    return [];
+  }
+}
+
+function isToggleOn({ getValue, model }, type) {
+  return getValue(model, `/spec/admin/${type}/toggle`);
+}
+
+function getAdminOptions({ getValue, model }, type) {
+  const options = getValue(model, `/spec/admin/${type}/available`) || [];
+  return options;
+}
+
+
+async function getNodeTopology({ model, getValue, axios, storeGet, watchDependency }) {
+  watchDependency("model#/spec/admin/deployment/default");
+  watchDependency("model#/spec/admin/clusterTier/default");
+  const owner = storeGet("/route/params/user");
+  const cluster = storeGet("/route/params/cluster");
+  const deploymentType = getValue(model, "/spec/admin/deployment/default") || "";
+  const clusterTier = getValue(model, "/spec/admin/clusterTier/default") || "";
+  const nodeTopologyList =  getValue(model, `/spec/admin/clusterTier/nodeTopology/available`) || [];
+  let mappedResp = [];
+  let apiCalled = false;
+
+  if (nodeTopologyListFromApi.length === 0 && !apiCalled) {
+    try{
+      apiCalled = true;
+      const url = `/clusters/${owner}/${cluster}/proxy/node.k8s.appscode.com/v1alpha1/nodetopologies`;
+      const resp = await axios.get(url);
+      nodeTopologyListFromApi = resp.data?.items;
+      const filteredResp = resp.data?.items.filter((item) => 
+        item.metadata.labels?.['node.k8s.appscode.com/tenancy'] === (deploymentType.toLowerCase())
+      );
+      mappedResp = filteredResp?.map((item) => {
+        const name = (item.metadata && item.metadata.name) || "";
+        return name;
+      });
+    }
+    catch(e) {
+      console.log(e);
+    }
+  }
+  else {
+    const filteredResp = nodeTopologyListFromApi.filter((item) => 
+      item.metadata.labels?.['node.k8s.appscode.com/tenancy'] === (deploymentType.toLowerCase())
+    );
+    mappedResp = filteredResp?.map((item) => {
+      const name = (item.metadata && item.metadata.name) || "";
+      return name;
+    });
+  }
+
+  const statusUrl = `/clustersv2/${owner}/${cluster}/status`;
+  if(provider.length === 0){
+    try{
+      const resp = await axios.get(statusUrl);
+      provider = resp.data?.provider;
+    }
+    catch(e) {
+      console.log(e);
+    }
+  }
+
+  const filteredList = filterNodeTopology(nodeTopologyList, clusterTier, provider, mappedResp);
+
+  return filteredList;
+}
+
+function filterNodeTopology(list, tier, provider, mappedResp) {
+  // first filter the list from value that exists from the filtered list got from API
+  const filteredlist = list.filter((item) => {
+    return mappedResp.includes(item);
+  })
+
+  // filter the list based on clusterTier
+  if (provider === "EKS") {
+    return filteredlist.filter((item) => {
+      if(tier === 'CPUOptimized')
+        return item.startsWith('c');
+      else if(tier === 'MemoryOptimized')
+        return item.startsWith('r');
+      else
+        return !item.startsWith('c') && !item.startsWith('r');
+    })
+  }
+  else if (provider === "AKS") {
+    return filteredlist.filter((item) => {
+      if (tier === "CPUOptimized")
+        return item.startsWith("f") || item.startsWith("fx");
+      else if (tier === "MemoryOptimized")
+        return (
+          item.startsWith("e") ||
+          item.startsWith("eb") ||
+          item.startsWith("ec") ||
+          item.startsWith("m") ||
+          item.startsWith("d")
+        );
+      else
+        return (
+          !(item.startsWith("f") || item.startsWith("fx")) &&
+          !(
+            item.startsWith("e") ||
+            item.startsWith("eb") ||
+            item.startsWith("ec") ||
+            item.startsWith("m") ||
+            item.startsWith("d")
+          )
+        );
+    });
+  }
+  else if (provider === "GKE") {
+    return filteredlist.filter((item) => {
+      if (tier === "CPUOptimized")
+        return (
+          item.startsWith("h3") ||
+          item.startsWith("c2") ||
+          item.startsWith("c2d")
+        );
+      else if (tier === "MemoryOptimized")
+        return (
+          item.startsWith("x4") ||
+          item.startsWith("m1") ||
+          item.startsWith("m2") ||
+          item.startsWith("m3")
+        );
+      else
+        return (
+          !(
+            item.startsWith("h3") ||
+            item.startsWith("c2") ||
+            item.startsWith("c2d")
+          ) &&
+          !(
+            item.startsWith("x4") ||
+            item.startsWith("m1") ||
+            item.startsWith("m2") ||
+            item.startsWith("m3")
+          )
+        );
+    });
+  }
+}
+
+
+
+
 
 return {
   isVariantAvailable,
@@ -808,4 +983,9 @@ return {
   showMultiselectZone,
   showSelectZone,
   setStorageClass,
+  getNamespaces,
+  isToggleOn,
+  getAdminOptions,
+  getNodeTopology,
+  filterNodeTopology,
 }
