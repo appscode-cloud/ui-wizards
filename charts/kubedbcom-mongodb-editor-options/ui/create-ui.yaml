@@ -2,7 +2,16 @@ steps:
 - form:
     discriminator:
       createAuthSecret:
-        default: true
+        default: false
+        type: boolean
+      monitoring:
+        default: false
+        type: boolean
+      backup:
+        default: false
+        type: boolean
+      configDatabase:
+        default: false
         type: boolean
     elements:
     - disabled: isVariantAvailable
@@ -302,12 +311,18 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/admin/properties/storageClasses/properties/default
       type: select    
-    - computed: returnFalse
-      label:
+    - label:
         text: Provide Authentication Credentials?
+      onChange: onAuthChange
       schema:
         $ref: discriminator#/createAuthSecret
       type: switch
+    - if: showAuthPasswordField
+      label:
+        text: labels.name
+      schema:
+        $ref: schema#/properties/spec/properties/authSecret/properties/name
+      type: input
     - if: showAuthPasswordField
       label:
         text: labels.password

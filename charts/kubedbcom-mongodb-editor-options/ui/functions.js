@@ -702,10 +702,6 @@ function clearConfiguration({ discriminator, getValue, commit }) {
   }
 }
 
-function returnFalse() {
-  return false;
-}
-
 function getAdminOptions({ getValue, model }, type) {
   const options = getValue(model, `/spec/admin/${type}/available`) || [];
   return options;
@@ -899,6 +895,22 @@ async function isBackupCluster({ axios, storeGet, commit }) {
   return isStashEnabled;
 }
 
+function onAuthChange({ getValue, discriminator, commit }) {
+  const isAuthOn = getValue(discriminator, "/createAuthSecret");
+  if (!isAuthOn) {
+    commit("wizard/model$update", {
+      path: "/spec/authSecret/name",
+      value: "",
+      force: true,
+    });
+    commit("wizard/model$update", {
+      path: "/spec/authSecret/password",
+      value: "",
+      force: true,
+    });
+  }
+}
+
 return {
   isVariantAvailable,
   fetchJsons,
@@ -932,7 +944,6 @@ return {
   clearArbiterHidden,
   isConfigDatabaseOn,
   clearConfiguration,
-  returnFalse,
   isToggleOn,
   getAdminOptions,
   onBackupSwitch,
@@ -942,4 +953,5 @@ return {
   getNodeTopology,
   filterNodeTopology,
   isBackupCluster,
+  onAuthChange,
 }
