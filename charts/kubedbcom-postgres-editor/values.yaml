@@ -139,14 +139,6 @@ form:
             val: 1800
     labels:
       release: kube-prometheus-stack
-  capi:
-    clusterName: ""
-    dedicated: false
-    namespace: ""
-    nodes: 1
-    provider: ""
-    sku: ""
-    zones: []
 metadata:
   resource:
     group: kubedb.com
@@ -158,6 +150,41 @@ metadata:
     name: RELEASE-NAME
     namespace: default
 resources:
+  autoscalingKubedbComPostgresAutoscaler: # +doc-gen:break
+    apiVersion: autoscaling.kubedb.com/v1alpha1
+    kind: PostgresAutoscaler
+    metadata:
+      name: postgres
+      namespace: demo
+    spec:
+      compute:
+        nodeTopology:
+          name: standard-basv2-family
+        postgres:
+          maxAllowed:
+            cpu: 1
+            memory: 2Gi
+          minAllowed:
+            cpu: 400m
+            memory: 400Mi
+          podLifeTimeThreshold: 10m
+          resourceDiffPercentage: 20
+          trigger: "On"
+      databaseRef:
+        name: sample
+      opsRequestOptions:
+        apply: IfReady
+        timeout: 10m
+  catalogAppscodeComPostgresBinding: # +doc-gen:break
+    apiVersion: catalog.appscode.com/v1alpha1
+    kind: PostgresBinding
+    metadata:
+      name: postgres
+      namespace: demo
+    spec:
+      sourceRef:
+        name: postgres
+        namespace: demo
   certManagerIoIssuer_ca: # +doc-gen:break
     apiVersion: cert-manager.io/v1
     kind: Issuer
