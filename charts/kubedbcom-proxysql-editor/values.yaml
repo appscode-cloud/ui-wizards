@@ -85,14 +85,6 @@ form:
             severity: critical
     labels:
       release: kube-prometheus-stack
-  capi:
-    clusterName: ""
-    dedicated: false
-    namespace: ""
-    nodes: 1
-    provider: ""
-    sku: ""
-    zones: []
 metadata:
   resource:
     group: kubedb.com
@@ -104,6 +96,41 @@ metadata:
     name: RELEASE-NAME
     namespace: default
 resources:
+  autoscalingKubedbComProxySQLAutoscaler: # +doc-gen:break
+    apiVersion: autoscaling.kubedb.com/v1alpha1
+    kind: ProxySQLAutoscaler
+    metadata:
+      name: proxysql
+      namespace: demo
+    spec:
+      compute:
+        nodeTopology:
+          name: standard-basv2-family
+        proxysql:
+          maxAllowed:
+            cpu: 1
+            memory: 2Gi
+          minAllowed:
+            cpu: 400m
+            memory: 400Mi
+          podLifeTimeThreshold: 10m
+          resourceDiffPercentage: 20
+          trigger: "On"
+      databaseRef:
+        name: repl
+      opsRequestOptions:
+        apply: IfReady
+        timeout: 10m
+  catalogAppscodeComProxySQLBinding: # +doc-gen:break
+    apiVersion: catalog.appscode.com/v1alpha1
+    kind: ProxySQLBinding
+    metadata:
+      name: proxysql
+      namespace: demo
+    spec:
+      sourceRef:
+        name: proxysql
+        namespace: demo
   certManagerIoIssuer_ca: # +doc-gen:break
     apiVersion: cert-manager.io/v1
     kind: Issuer
