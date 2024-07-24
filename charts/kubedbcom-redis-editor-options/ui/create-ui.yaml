@@ -206,13 +206,6 @@ steps:
         text: labels.machine_profile
       show_label: true
       type: single-step-form
-    - computed: setLimitsCpuOrMem|memory
-      disabled: disableLimit
-      label:
-        text: labels.memory
-      schema:
-        $ref: schema#/properties/spec/properties/resources/properties/limits/properties/memory
-      type: input
     - hasDescription: true
       label:
         text: labels.deletionPolicy
@@ -239,13 +232,20 @@ steps:
       label:
         text: labels.storage.class
       schema:
-        $ref: schema#/properties/spec/properties/admin/properties/storageClass/properties/default
+        $ref: schema#/properties/spec/properties/admin/properties/storageClasses/properties/default
       type: select
     - label:
         text: Provide Authentication Credentials?
+      onChange: onAuthChange
       schema:
         $ref: discriminator#/createAuthSecret
-      type: switch
+      type: switch  
+    - if: showAuthPasswordField
+      label:
+        text: labels.name
+      schema:
+        $ref: schema#/properties/spec/properties/authSecret/properties/name
+      type: input
     - if: showAuthPasswordField
       label:
         text: labels.password

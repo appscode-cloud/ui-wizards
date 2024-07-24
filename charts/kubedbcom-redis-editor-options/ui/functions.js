@@ -1072,6 +1072,22 @@ function notEqualToDatabaseMode({ model, getValue, watchDependency }, mode) {
 }
 
 
+function onAuthChange({ getValue, discriminator, commit }) {
+  const isAuthOn = getValue(discriminator, "/createAuthSecret");
+  if (!isAuthOn) {
+    commit("wizard/model$update", {
+      path: "/spec/authSecret/name",
+      value: "",
+      force: true,
+    });
+    commit("wizard/model$update", {
+      path: "/spec/authSecret/password",
+      value: "",
+      force: true,
+    });
+  }
+}
+
 return {
   isVariantAvailable,
 	fetchJsons,
@@ -1119,4 +1135,5 @@ return {
   setLimitsCpuOrMem,
   isMachineNotCustom,
   notEqualToDatabaseMode,
+  onAuthChange,
 }
