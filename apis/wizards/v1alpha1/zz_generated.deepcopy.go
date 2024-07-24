@@ -2493,12 +2493,10 @@ func (in *KubedbcomRedisEditorOptionsSpecSpec) DeepCopyInto(out *KubedbcomRedisE
 	}
 	out.Cluster = in.Cluster
 	out.SentinelRef = in.SentinelRef
-	out.StorageClass = in.StorageClass
 	out.Persistence = in.Persistence
-	in.Resources.DeepCopyInto(&out.Resources)
+	in.PodResources.DeepCopyInto(&out.PodResources)
 	out.AuthSecret = in.AuthSecret
-	in.Monitoring.DeepCopyInto(&out.Monitoring)
-	in.Backup.DeepCopyInto(&out.Backup)
+	in.AdminOptions.DeepCopyInto(&out.AdminOptions)
 	return
 }
 
