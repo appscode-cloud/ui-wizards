@@ -75,6 +75,41 @@ metadata:
     name: RELEASE-NAME
     namespace: default
 resources:
+  autoscalingKubedbComDruidAutoscaler: # +doc-gen:break
+    apiVersion: autoscaling.kubedb.com/v1alpha1
+    kind: DruidAutoscaler
+    metadata:
+      name: druid
+      namespace: demo
+    spec:
+      compute:
+        node:
+          maxAllowed:
+            cpu: 1
+            memory: 2Gi
+          minAllowed:
+            cpu: 400m
+            memory: 400Mi
+          podLifeTimeThreshold: 10m
+          resourceDiffPercentage: 20
+          trigger: "On"
+        nodeTopology:
+          name: standard-basv2-family
+      databaseRef:
+        name: repl
+      opsRequestOptions:
+        apply: IfReady
+        timeout: 10m
+  catalogAppscodeComDruidBinding: # +doc-gen:break
+    apiVersion: catalog.appscode.com/v1alpha1
+    kind: DruidBinding
+    metadata:
+      name: druid
+      namespace: demo
+    spec:
+      sourceRef:
+        name: druid
+        namespace: demo
   kubedbComDruid: # +doc-gen:break
     apiVersion: kubedb.com/v1alpha2
     kind: Druid
