@@ -67,6 +67,16 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/default
       type: radio
+    - disableUnselect: true
+      if: isToggleOn|clusterTier/nodeTopology
+      label:
+        text: labels.nodeTopology
+      fetch: getNodeTopology
+      refresh: true
+      required: true
+      schema:
+        $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/nodeTopology/properties/default
+      type: select
     - hasDescription: true
       label:
         text: labels.database.mode
@@ -81,16 +91,7 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/mode
       type: radio
-    - disableUnselect: true
-      if: isToggleOn|clusterTier/nodeTopology
-      label:
-        text: labels.nodeTopology
-      fetch: getNodeTopology
-      refresh: true
-      required: true
-      schema:
-        $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/nodeTopology/properties/default
-      type: select
+    
     - if: showStorageSizeField
       label:
         text: labels.storage.size
