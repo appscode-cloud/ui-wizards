@@ -18,6 +18,7 @@ package v1alpha1
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	api "x-helm.dev/apimachinery/apis/releases/v1alpha1"
 )
 
 // ChartsxhelmdevClusterChartPresetEditorOptions defines the schama for ClusterChartPreset Editor UI Options.
@@ -32,7 +33,13 @@ type ChartsxhelmdevClusterChartPresetEditorOptions struct {
 	Spec              ChartsxhelmdevClusterChartPresetEditorOptionsSpec `json:"spec,omitempty"`
 }
 
+// KubedbcomMongodbEditorOptionsSpec is the schema for MongoDB profile values file
 type ChartsxhelmdevClusterChartPresetEditorOptionsSpec struct {
+	api.Metadata `json:"metadata,omitempty"`
+	Spec         ChartsxhelmdevClusterChartPresetEditorOptionsSpecSpec `json:"spec"`
+}
+
+type ChartsxhelmdevClusterChartPresetEditorOptionsSpecSpec struct {
 	KubeDB     AdminOptions      `json:"kubeDB"`
 	Monitoring MonitoringOptions `json:"monitoring"`
 	Stash      StashOptions      `json:"stash"`
