@@ -467,7 +467,7 @@ async function getAppBindings({ axios, storeGet }) {
     const resources = (resp && resp.data && resp.data.items) || [];
 
     const fileredResources = resources
-      .filter((item) => item.spec?.type === 'kubedb.com/mysql' || item.spec?.type === 'kubedb.com/mariadb')
+      .filter((item) => item.spec?.type === 'kubedb.com/postgres' )
       .map((item) => {
         const name = (item.metadata && item.metadata.name) || "";
         return {
