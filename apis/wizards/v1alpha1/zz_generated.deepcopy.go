@@ -2593,14 +2593,12 @@ func (in *KubedbcomSinglestoreEditorOptionsSpecSpec) DeepCopyInto(out *Kubedbcom
 			(*out)[key] = val
 		}
 	}
-	out.StorageClass = in.StorageClass
-	out.Persistence = in.Persistence
-	in.PodResources.DeepCopyInto(&out.PodResources)
 	in.Topology.DeepCopyInto(&out.Topology)
 	out.LicenseSecret = in.LicenseSecret
+	out.Persistence = in.Persistence
+	in.PodResources.DeepCopyInto(&out.PodResources)
 	out.AuthSecret = in.AuthSecret
-	in.Monitoring.DeepCopyInto(&out.Monitoring)
-	in.Backup.DeepCopyInto(&out.Backup)
+	in.Admin.DeepCopyInto(&out.Admin)
 	return
 }
 
@@ -2712,13 +2710,11 @@ func (in *KubedbcomSolrEditorOptionsSpecSpec) DeepCopyInto(out *KubedbcomSolrEdi
 	}
 	out.ReplicaSet = in.ReplicaSet
 	in.Topology.DeepCopyInto(&out.Topology)
-	out.StorageClass = in.StorageClass
 	out.ZookeeperRef = in.ZookeeperRef
 	out.Persistence = in.Persistence
 	in.PodResources.DeepCopyInto(&out.PodResources)
 	out.AuthSecret = in.AuthSecret
-	in.Monitoring.DeepCopyInto(&out.Monitoring)
-	in.Backup.DeepCopyInto(&out.Backup)
+	in.Admin.DeepCopyInto(&out.Admin)
 	return
 }
 
