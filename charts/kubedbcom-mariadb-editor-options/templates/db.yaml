@@ -1,9 +1,8 @@
-{{- $res := .Values.spec.resources -}}
 {{- $machines := .Files.Get "data/machines.yaml" | fromYaml -}}
-{{- if and .Values.spec.machine (hasKey $machines .Values.spec.machine) }}
-  {{- $res = get (get $machines .Values.spec.machine) "resources" }}
+{{- $res := .Values.spec.podResources.resources -}}
+{{- if and .Values.spec.podResources.machine (hasKey $machines .Values.spec.podResources.machine) }}
+  {{- $res = get (get $machines .Values.spec.podResources.machine) "resources" }}
 {{- end }}
-{{ $poolName := printf "%s-%s-%s" .Values.form.capi.clusterName .Release.Namespace (include "kubedbcom-mariadb-editor-options.fullname" .) }}
 
 apiVersion: kubedb.com/v1
 kind: MariaDB
@@ -23,7 +22,7 @@ spec:
     name: {{ .Values.spec.authSecret.name }}
 {{- end }}
 {{- if eq .Values.spec.mode "Cluster" }}
-  replicas: 3
+  replicas: {{ .Values.spec.replicas }}
 {{- else }}
   replicas: 1
 {{- end }}
@@ -33,7 +32,7 @@ spec:
     resources:
       requests:
         storage: {{ .Values.spec.persistence.size }}
-    storageClassName: {{ .Values.spec.storageClass.name }}
+    storageClassName: {{ .Values.spec.admin.storageClasses.default }}
   storageType: Durable
   podTemplate:
     spec:
@@ -41,21 +40,58 @@ spec:
         - name: mariadb
           resources:
             {{- toYaml $res | nindent 12 }}
-      {{- if and .Values.form.capi.provider .Values.form.capi.dedicated }}
+      podPlacementPolicy:
+        name: {{ .Values.spec.admin.clusterTier.placement.default }}
+      {{- if eq .Values.spec.admin.deployment.default "Dedicated" }}
       nodeSelector:
-        nodes.klusters.dev/pool: {{ $poolName }}
+        app: mariadbs.kubedb.com
+        instance: {{ include "kubedbcom-mariadb-editor-options.fullname" . }}
+        namespace: {{ .Release.Namespace }}
+        nodepool: {{ .Values.spec.admin.clusterTier.nodeTopology.default }}
       tolerations:
-        - key: dedicated
+        - key: app
           operator: "Equal"
-          value: "true"
+          value: "mariadbs.kubedb.com"
+          effect: "NoSchedule"
+        - key: instance
+          operator: "Equal"
+          value: {{ include "kubedbcom-mariadb-editor-options.fullname" . }}
+          effect: "NoSchedule"
+        - key: namespace
+          operator: "Equal"
+          value: {{ .Release.Namespace }}
+          effect: "NoSchedule"
+        - key: nodepool
+          operator: "Equal"
+          value: {{ .Values.spec.admin.clusterTier.nodeTopology.default }}
           effect: "NoSchedule"
       {{- end }}
   deletionPolicy: {{ .Values.spec.deletionPolicy }}
-{{- if (and .Values.spec.monitoring .Values.spec.monitoring.agent) }}
+{{- if .Values.spec.authSecret.name }}
+  authSecret:
+    name: {{ .Values.spec.authSecret.name }}
+{{- end }}
+{{- if .Values.spec.authSecret.password }}
+  authSecret:
+    name: {{ include "kubedbcom-mariadb-editor-options.fullname" . }}-auth
+{{- end }}
+{{- if .Values.spec.configuration }}
+  configSecret:
+    name: {{ include "kubedbcom-mariadb-editor-options.fullname" . }}-config
+{{- end }}
+{{- if .Values.spec.admin.tls.default }}
+  tls:
+    issuerRef:
+      apiGroup: "cert-manager.io"
+      kind: ClusterIssuer
+      name: {{ .Values.spec.admin.clusterIssuers.default }}
+  requireSSL: true
+{{- end }}
+{{- if (and .Values.spec.admin.monitoring .Values.spec.admin.monitoring.agent) }}
   monitor:
-    agent: {{ .Values.spec.monitoring.agent }}
+    agent: {{ .Values.spec.admin.monitoring.agent }}
     prometheus:
-    {{- with .Values.spec.monitoring.exporter }}
+    {{- with .Values.spec.admin.monitoring.exporter }}
       exporter:
         resources:
           {{- toYaml .resources | nindent 10 }}
@@ -63,5 +99,5 @@ spec:
       serviceMonitor:
         interval: 30s
         labels:
-          {{- toYaml .Values.spec.monitoring.serviceMonitor.labels | nindent 10 }}
+          {{- toYaml .Values.spec.admin.monitoring.serviceMonitor.labels | nindent 10 }}
 {{- end }}

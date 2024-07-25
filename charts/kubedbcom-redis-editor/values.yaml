@@ -99,14 +99,6 @@ form:
             val: 1800
     labels:
       release: prometheus
-  capi:
-    clusterName: ""
-    dedicated: false
-    namespace: ""
-    nodes: 1
-    provider: ""
-    sku: ""
-    zones: []
 metadata:
   resource:
     group: kubedb.com
@@ -118,6 +110,41 @@ metadata:
     name: RELEASE-NAME
     namespace: default
 resources:
+  autoscalingKubedbComRedisAutoscaler: # +doc-gen:break
+    apiVersion: autoscaling.kubedb.com/v1alpha1
+    kind: RedisAutoscaler
+    metadata:
+      name: redis
+      namespace: demo
+    spec:
+      compute:
+        nodeTopology:
+          name: standard-basv2-family
+        redis:
+          maxAllowed:
+            cpu: 1
+            memory: 2Gi
+          minAllowed:
+            cpu: 400m
+            memory: 400Mi
+          podLifeTimeThreshold: 10m
+          resourceDiffPercentage: 20
+          trigger: "On"
+      databaseRef:
+        name: sample
+      opsRequestOptions:
+        apply: IfReady
+        timeout: 10m
+  catalogAppscodeComRedisBinding: # +doc-gen:break
+    apiVersion: catalog.appscode.com/v1alpha1
+    kind: RedisBinding
+    metadata:
+      name: redis
+      namespace: demo
+    spec:
+      sourceRef:
+        name: redis
+        namespace: demo
   certManagerIoIssuer_ca: # +doc-gen:break
     apiVersion: cert-manager.io/v1
     kind: Issuer

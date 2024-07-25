@@ -20,19 +20,19 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// ClusterChartPresetEditorOptions defines the schama for ClusterChartPreset Editor UI Options.
+// ChartsxhelmdevClusterChartPresetEditorOptions defines the schama for ClusterChartPreset Editor UI Options.
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
 // +kubebuilder:object:root=true
-// +kubebuilder:resource:path=clusterchartpresetss,singular=clusterchartpresets,categories={kubeops,appscode}
-type ClusterChartPresetEditorOptions struct {
+// +kubebuilder:resource:path=chartsxhelmdevclusterchartpreseteditoroptionss,singular=chartsxhelmdevclusterchartpreseteditoroptions
+type ChartsxhelmdevClusterChartPresetEditorOptions struct {
 	metav1.TypeMeta   `json:",inline,omitempty"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	Spec              ClusterChartPresetEditorOptionsSpec `json:"spec,omitempty"`
+	Spec              ChartsxhelmdevClusterChartPresetEditorOptionsSpec `json:"spec,omitempty"`
 }
 
-type ClusterChartPresetEditorOptionsSpec struct {
+type ChartsxhelmdevClusterChartPresetEditorOptionsSpec struct {
 	KubeDB     AdminOptions      `json:"kubeDB"`
 	Monitoring MonitoringOptions `json:"monitoring"`
 	Stash      StashOptions      `json:"stash"`
@@ -44,10 +44,10 @@ type StashOptions struct{}
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
-// ClusterChartPresetEditorOptionsList is a list of ClusterChartPresetEditorOptions
-type ClusterChartPresetEditorOptionsList struct {
+// ChartsxhelmdevClusterChartPresetEditorOptionsList is a list of ChartsxhelmdevClusterChartPresetEditorOptions
+type ChartsxhelmdevClusterChartPresetEditorOptionsList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	// Items is a list of ClusterChartPresetEditorOptions CRD objects
-	Items []ClusterChartPresetEditorOptions `json:"items,omitempty"`
+	// Items is a list of ChartsxhelmdevClusterChartPresetEditorOptions CRD objects
+	Items []ChartsxhelmdevClusterChartPresetEditorOptions `json:"items,omitempty"`
 }
