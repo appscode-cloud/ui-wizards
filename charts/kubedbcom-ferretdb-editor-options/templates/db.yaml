@@ -1,9 +1,8 @@
-{{- $res := .Values.spec.resources -}}
 {{- $machines := .Files.Get "data/machines.yaml" | fromYaml -}}
-{{- if and .Values.spec.machine (hasKey $machines .Values.spec.machine) }}
-  {{- $res = get (get $machines .Values.spec.machine) "resources" }}
+{{- $res := .Values.spec.podResources.resources -}}
+{{- if and .Values.spec.podResources.machine (hasKey $machines .Values.spec.podResources.machine) }}
+  {{- $res = get (get $machines .Values.spec.podResources.machine) "resources" }}
 {{- end }}
-{{ $poolName := printf "%s-%s-%s" .Values.form.capi.clusterName .Release.Namespace (include "kubedbcom-ferretdb-editor-options.fullname" .) }}
 
 apiVersion: kubedb.com/v1alpha2
 kind: FerretDB
@@ -17,107 +16,75 @@ metadata:
     {{- include "kubedbcom-ferretdb-editor-options.annotations" . | nindent 4 }}
 {{- end }}
 spec:
-  version: {{ .Values.spec.version | quote }}
-{{- if or (eq .Values.spec.mode "Standalone") (eq .Values.spec.mode "Replicaset") }}
-  replicas: {{ (eq .Values.spec.mode "Replicaset") | ternary .Values.spec.replicaSet.replicas 1 }}
+  version: {{ .Values.spec.admin.databases.FerretDB.versions.default | quote }}
+  replicas: {{ .Values.spec.replicas }}
   storageType: Durable
   storage:
-    storageClassName: {{ .Values.spec.storageClass.name }}
+    storageClassName: {{ .Values.spec.admin.storageClasses.default }}
     accessModes:
     - ReadWriteOnce
     resources:
       requests:
         storage: {{ .Values.spec.persistence.size }}
-{{- end }}
-{{- if eq .Values.spec.mode "Replicaset" }}
-  replicaSet:
-    name: {{ .Values.spec.replicaSet.name }}
-{{- end }}
-{{- if eq .Values.spec.mode "Sharded" }}
-  shardTopology:
-    configServer:
-      replicas: {{ .Values.spec.shardTopology.configServer.replicas }}
-      podTemplate:
-        spec:
-          resources:
-            {{- toYaml $res | nindent 12 }}
-          {{- if and .Values.form.capi.provider .Values.form.capi.dedicated }}
-          nodeSelector:
-            nodes.klusters.dev/pool: {{ $poolName }}
-          tolerations:
-            - key: dedicated
-              operator: "Equal"
-              value: "true"
-              effect: "NoSchedule"
-          {{- end }}
-      storage:
+  spec:
+    containers:
+      - name: ferretdb
         resources:
-          requests:
-            storage: {{ .Values.spec.shardTopology.configServer.persistence.size }}
-        storageClassName: {{ .Values.spec.storageClass.name }}
-    mongos:
-      replicas: {{ .Values.spec.shardTopology.mongos.replicas }}
-      podTemplate:
-        spec:
-          resources:
-            {{- toYaml $res | nindent 12 }}
-          {{- if and .Values.form.capi.provider .Values.form.capi.dedicated }}
-          nodeSelector:
-            nodes.klusters.dev/pool: {{ $poolName }}
-          tolerations:
-            - key: dedicated
-              operator: "Equal"
-              value: "true"
-              effect: "NoSchedule"
-          {{- end }}
-    shard:
-      shards: {{ .Values.spec.shardTopology.shard.shards }}
-      replicas: {{ .Values.spec.shardTopology.shard.replicas }}
-      podTemplate:
-        spec:
-          resources:
-            {{- toYaml $res | nindent 12 }}
-          {{- if and .Values.form.capi.provider .Values.form.capi.dedicated }}
-          nodeSelector:
-            nodes.klusters.dev/pool: {{ $poolName }}
-          tolerations:
-            - key: dedicated
-              operator: "Equal"
-              value: "true"
-              effect: "NoSchedule"
-          {{- end }}
-      storage:
-        resources:
-          requests:
-            storage: {{ .Values.spec.shardTopology.shard.persistence.size }}
-        storageClassName: {{ .Values.spec.storageClass.name }}
-{{- else }}
-  podTemplate:
-    spec:
-      resources:
-        {{- toYaml $res | nindent 8 }}
-      {{- if and .Values.form.capi.provider .Values.form.capi.dedicated }}
-      nodeSelector:
-        nodes.klusters.dev/pool: {{ $poolName }}
-      tolerations:
-        - key: dedicated
-          operator: "Equal"
-          value: "true"
-          effect: "NoSchedule"
-      {{- end }}
-{{- end }}
+          {{- toYaml $res | nindent 12 }}
+    podPlacementPolicy:
+      name: {{ .Values.spec.admin.clusterTier.placement.default }}
+    {{- if eq .Values.spec.admin.deployment.default "Dedicated" }}
+    nodeSelector:
+      app: ferretdbs.kubedb.com
+      instance: {{ include "kubedbcom-ferretdb-editor-options.fullname" . }}
+      namespace: {{ .Release.Namespace }}
+      nodepool: {{ .Values.spec.admin.clusterTier.nodeTopology.default }}
+    tolerations:
+      - key: app
+        operator: "Equal"
+        value: "ferretdbs.kubedb.com"
+        effect: "NoSchedule"
+      - key: instance
+        operator: "Equal"
+        value: {{ include "kubedbcom-ferretdb-editor-options.fullname" . }}
+        effect: "NoSchedule"
+      - key: namespace
+        operator: "Equal"
+        value: {{ .Release.Namespace }}
+        effect: "NoSchedule"
+      - key: nodepool
+        operator: "Equal"
+        value: {{ .Values.spec.admin.clusterTier.nodeTopology.default }}
+        effect: "NoSchedule"
+    {{- end }}
   deletionPolicy: {{ .Values.spec.deletionPolicy }}
-  clusterAuthMode: {{ .Values.spec.clusterAuthMode }}
   sslMode: {{ .Values.spec.sslMode }}
 {{- if .Values.spec.authSecret.name }}
   authSecret:
     name: {{ .Values.spec.authSecret.name }}
 {{- end }}
-{{- if (and .Values.spec.monitoring .Values.spec.monitoring.agent) }}
+{{- if .Values.spec.authSecret.password }}
+  authSecret:
+    name: {{ include "kubedbcom-ferretdb-editor-options.fullname" . }}-auth
+{{- end }}
+{{- if .Values.spec.configuration }}
+  configSecret:
+    name: {{ include "kubedbcom-ferretdb-editor-options.fullname" . }}-config
+{{- end }}
+{{- if .Values.spec.admin.tls.default }}
+  tls:
+    issuerRef:
+      apiGroup: "cert-manager.io"
+      kind: ClusterIssuer
+      name: {{ .Values.spec.admin.clusterIssuers.default }}
+  clusterAuthMode: x509
+  sslMode: requireSSL
+{{- end }}
+{{- if (and .Values.spec.admin.monitoring .Values.spec.admin.monitoring.agent) }}
   monitor:
-    agent: {{ .Values.spec.monitoring.agent }}
+    agent: {{ .Values.spec.admin.monitoring.agent }}
     prometheus:
-    {{- with .Values.spec.monitoring.exporter }}
+    {{- with .Values.spec.admin.monitoring.exporter }}
       exporter:
         args:
           - --compatible-mode
@@ -127,5 +94,5 @@ spec:
       serviceMonitor:
         interval: 30s
         labels:
-          {{- toYaml .Values.spec.monitoring.serviceMonitor.labels | nindent 10 }}
+          {{- toYaml .Values.spec.admin.monitoring.serviceMonitor.labels | nindent 10 }}
 {{- end }}
