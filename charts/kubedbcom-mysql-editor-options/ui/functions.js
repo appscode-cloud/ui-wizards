@@ -385,12 +385,6 @@ function onCreateAuthSecretChange({
   }
 }
 
-function disableLimit({ model, getValue, watchDependency }) {
-  const modelPathValue = getValue(model, "/spec/machine");
-  watchDependency("model#/spec/machine");
-  return modelPathValue !== "custom" && !!modelPathValue;
-}
-
 function getMachineListForOptions() {
   const array = machineList.map((item) => {
     return { text: item, value: item };
@@ -870,7 +864,6 @@ return {
 	showAuthSecretField,
 	getNamespaces,
   onCreateAuthSecretChange,
-	disableLimit,
 	getMachineListForOptions,
 	setResourceLimit,
 	setLimitsCpuOrMem,
