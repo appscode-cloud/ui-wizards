@@ -17,7 +17,7 @@ metadata:
 {{- end }}
 spec:
   replicas: {{ .Values.spec.replicas }}
-  version: {{ .Values.spec.version | quote }}
+  version: {{ .Values.spec.admin.databases.PgBouncer.versions.default | quote }}
 {{- if .Values.spec.authSecret.name }}
   authSecret:
     name: {{ .Values.spec.authSecret.name }}
@@ -30,20 +30,68 @@ spec:
     spec:
       containers:
         - name: pgbouncer
-        resources:
-          {{- toYaml $res | nindent 12 }}
+          resources:
+            {{- toYaml $res | nindent 12 }}
+      podPlacementPolicy:
+        name: {{ .Values.spec.admin.clusterTier.placement.default }}
+      {{- if eq .Values.spec.admin.deployment.default "Dedicated" }}
+      nodeSelector:
+        app: pgbouncers.kubedb.com
+        instance: {{ include "kubedbcom-pgbouncer-editor-options.fullname" . }}
+        namespace: {{ .Release.Namespace }}
+        nodepool: {{ .Values.spec.admin.clusterTier.nodeTopology.default }}
+      tolerations:
+        - key: app
+          operator: "Equal"
+          value: "pgbouncers.kubedb.com"
+          effect: "NoSchedule"
+        - key: instance
+          operator: "Equal"
+          value: {{ include "kubedbcom-pgbouncer-editor-options.fullname" . }}
+          effect: "NoSchedule"
+        - key: namespace
+          operator: "Equal"
+          value: {{ .Release.Namespace }}
+          effect: "NoSchedule"
+        - key: nodepool
+          operator: "Equal"
+          value: {{ .Values.spec.admin.clusterTier.nodeTopology.default }}
+          effect: "NoSchedule"
+      {{- end }}
   deletionPolicy: {{ .Values.spec.deletionPolicy }}
-{{- if (and .Values.spec.monitoring .Values.spec.monitoring.agent) }}
+{{- if .Values.spec.authSecret.name }}
+  authSecret:
+    name: {{ .Values.spec.authSecret.name }}
+{{- end }}
+{{- if .Values.spec.authSecret.password }}
+  authSecret:
+    name: {{ include "kubedbcom-pgbouncer-editor-options.fullname" . }}-auth
+{{- end }}
+{{- if .Values.spec.configuration }}
+  configSecret:
+    name: {{ include "kubedbcom-pgbouncer-editor-options.fullname" . }}-config
+{{- end }}
+{{- if .Values.spec.admin.tls.default }}
+  tls:
+    issuerRef:
+      apiGroup: "cert-manager.io"
+      kind: ClusterIssuer
+      name: {{ .Values.spec.admin.clusterIssuers.default }}
+  sslMode: requireSSL
+{{- end }}
+{{- if (and .Values.spec.admin.monitoring .Values.spec.admin.monitoring.agent) }}
   monitor:
-    agent: {{ .Values.spec.monitoring.agent }}
+    agent: {{ .Values.spec.admin.monitoring.agent }}
     prometheus:
-    {{- with .Values.spec.monitoring.exporter }}
+    {{- with .Values.spec.admin.monitoring.exporter }}
       exporter:
+        args:
+          - --compatible-mode
         resources:
           {{- toYaml .resources | nindent 10 }}
     {{- end }}
       serviceMonitor:
         interval: 30s
         labels:
-          {{- toYaml .Values.spec.monitoring.serviceMonitor.labels | nindent 10 }}
+          {{- toYaml .Values.spec.admin.monitoring.serviceMonitor.labels | nindent 10 }}
 {{- end }}
