@@ -22,188 +22,280 @@ function onVersionChange({ discriminator, getValue, commit, model, watchDependen
 const machines = {
   "db.t.micro": {
     resources: {
+      requests: {
+        cpu: "250m",
+        memory: "512Mi"
+      },
       limits: {
         cpu: "500m",
-        memory: "1Gi",
-      },
-    },
+        memory: "1Gi"
+      }
+    }
   },
   "db.t.small": {
     resources: {
+      requests: {
+        cpu: "1",
+        memory: "1Gi"
+      },
       limits: {
         cpu: "2",
-        memory: "2Gi",
-      },
-    },
+        memory: "2Gi"
+      }
+    }
   },
   "db.t.medium": {
     resources: {
+      requests: {
+        cpu: "1",
+        memory: "2Gi"
+      },
       limits: {
         cpu: "2",
-        memory: "4Gi",
-      },
-    },
+        memory: "4Gi"
+      }
+    }
   },
   "db.t.large": {
     resources: {
+      requests: {
+        cpu: "1",
+        memory: "4Gi"
+      },
       limits: {
         cpu: "2",
-        memory: "8Gi",
-      },
-    },
+        memory: "8Gi"
+      }
+    }
   },
   "db.t.xlarge": {
     resources: {
+      requests: {
+        cpu: "2",
+        memory: "8Gi"
+      },
       limits: {
         cpu: "4",
-        memory: "16Gi",
-      },
-    },
+        memory: "16Gi"
+      }
+    }
   },
   "db.t.2xlarge": {
     resources: {
+      requests: {
+        cpu: "4",
+        memory: "16Gi"
+      },
       limits: {
         cpu: "8",
-        memory: "32Gi",
-      },
-    },
+        memory: "32Gi"
+      }
+    }
   },
   "db.m.small": {
     resources: {
+      requests: {
+        cpu: "500m",
+        memory: "912680550"
+      },
       limits: {
         cpu: "1",
-        memory: "1825361100",
-      },
-    },
+        memory: "1825361100"
+      }
+    }
   },
   "db.m.large": {
     resources: {
+      requests: {
+        cpu: "1",
+        memory: "4Gi"
+      },
       limits: {
         cpu: "2",
-        memory: "8Gi",
-      },
-    },
+        memory: "8Gi"
+      }
+    }
   },
   "db.m.xlarge": {
     resources: {
+      requests: {
+        cpu: "2",
+        memory: "8Gi"
+      },
       limits: {
         cpu: "4",
-        memory: "16Gi",
-      },
-    },
+        memory: "16Gi"
+      }
+    }
   },
   "db.m.2xlarge": {
     resources: {
+      requests: {
+        cpu: "4",
+        memory: "16Gi"
+      },
       limits: {
         cpu: "8",
-        memory: "32Gi",
-      },
-    },
+        memory: "32Gi"
+      }
+    }
   },
   "db.m.4xlarge": {
     resources: {
+      requests: {
+        cpu: "8",
+        memory: "32Gi"
+      },
       limits: {
         cpu: "16",
-        memory: "64Gi",
-      },
-    },
+        memory: "64Gi"
+      }
+    }
   },
   "db.m.8xlarge": {
     resources: {
+      requests: {
+        cpu: "16",
+        memory: "64Gi"
+      },
       limits: {
         cpu: "32",
-        memory: "128Gi",
-      },
-    },
+        memory: "128Gi"
+      }
+    }
   },
   "db.m.12xlarge": {
     resources: {
+      requests: {
+        cpu: "24",
+        memory: "96Gi"
+      },
       limits: {
         cpu: "48",
-        memory: "192Gi",
-      },
-    },
+        memory: "192Gi"
+      }
+    }
   },
   "db.m.16xlarge": {
     resources: {
+      requests: {
+        cpu: "32",
+        memory: "128Gi"
+      },
       limits: {
         cpu: "64",
-        memory: "256Gi",
-      },
-    },
+        memory: "256Gi"
+      }
+    }
   },
   "db.m.24xlarge": {
     resources: {
+      requests: {
+        cpu: "48",
+        memory: "192Gi"
+      },
       limits: {
         cpu: "96",
-        memory: "384Gi",
-      },
-    },
+        memory: "384Gi"
+      }
+    }
   },
   "db.r.large": {
     resources: {
+      requests: {
+        cpu: "1",
+        memory: "8Gi"
+      },
       limits: {
         cpu: "2",
-        memory: "16Gi",
-      },
-    },
+        memory: "16Gi"
+      }
+    }
   },
   "db.r.xlarge": {
     resources: {
+      requests: {
+        cpu: "2",
+        memory: "16Gi"
+      },
       limits: {
         cpu: "4",
-        memory: "32Gi",
-      },
-    },
+        memory: "32Gi"
+      }
+    }
   },
   "db.r.2xlarge": {
     resources: {
+      requests: {
+        cpu: "4",
+        memory: "32Gi"
+      },
       limits: {
         cpu: "8",
-        memory: "64Gi",
-      },
-    },
+        memory: "64Gi"
+      }
+    }
   },
   "db.r.4xlarge": {
     resources: {
+      requests: {
+        cpu: "8",
+        memory: "96Gi"
+      },
       limits: {
         cpu: "16",
-        memory: "192Gi",
-      },
-    },
+        memory: "192Gi"
+      }
+    }
   },
   "db.r.8xlarge": {
     resources: {
+      requests: {
+        cpu: "16",
+        memory: "128Gi"
+      },
       limits: {
         cpu: "32",
-        memory: "256Gi",
-      },
-    },
+        memory: "256Gi"
+      }
+    }
   },
   "db.r.12xlarge": {
     resources: {
+      requests: {
+        cpu: "24",
+        memory: "192Gi"
+      },
       limits: {
         cpu: "48",
-        memory: "384Gi",
-      },
-    },
+        memory: "384Gi"
+      }
+    }
   },
   "db.r.16xlarge": {
     resources: {
+      requests: {
+        cpu: "32",
+        memory: "256Gi"
+      },
       limits: {
         cpu: "64",
-        memory: "512Gi",
-      },
-    },
+        memory: "512Gi"
+      }
+    }
   },
   "db.r.24xlarge": {
     resources: {
+      requests: {
+        cpu: "24",
+        memory: "384Gi"
+      },
       limits: {
         cpu: "96",
-        memory: "768Gi",
-      },
-    },
-  },
+        memory: "768Gi"
+      }
+    }
+  }
 };
 
 const machineList = [
@@ -232,6 +324,7 @@ const machineList = [
   "db.r.16xlarge",
   "db.r.24xlarge",
 ];
+
 
 function showAuthPasswordField({
   discriminator,
@@ -467,44 +560,25 @@ function disableLimit({ model, getValue, watchDependency }) {
   return modelPathValue !== "custom" && !!modelPathValue;
 }
 
-function getMachineListForOptions() {
-  const array = machineList.map((item) => {
-    return { text: item, value: item };
-  });
-  return array;
-}
 
-function setResourceLimit({ commit, model, getValue, watchDependency }) {
-  const modelPathValue = getValue(model, "/spec/machine");
-  watchDependency("model#/spec/machine");
-  if (modelPathValue && modelPathValue !== "custom") {
-    // to avoiding set value by reference, cpu and memory set separately
-    commit("wizard/model$update", {
-      path: "/spec/resources/limits/cpu",
-      value: machines[modelPathValue].resources.limits.cpu,
-      force: true,
-    });
-    commit("wizard/model$update", {
-      path: "/spec/resources/limits/memory",
-      value: machines[modelPathValue].resources.limits.memory,
-      force: true,
-    });
-  }
-}
 
-function setLimitsCpuOrMem({ model, getValue }, path) {
-  const modelPathValue = getValue(model, "/spec/machine");
+
+
+function setLimitsCpuOrMem({ model, getValue, watchDependency }) {
+  watchDependency('model#/spec/version');
+  const modelPathValue = getValue(model, "/spec/podResources/machine");
+
   if (modelPathValue && modelPathValue !== "custom") {
     return (
       machines[modelPathValue] &&
-      machines[modelPathValue].resources &&
-      machines[modelPathValue].resources.limits[path]
+      machines[modelPathValue].resources
     );
   } else {
-    if (path === "cpu") {
-      return ".5";
-    } else if (path === "memory") {
-      return "1024Mi";
+    return {
+      limits: {
+        cpu: "1",
+        memory: "1024Mi",
+      },
     }
   }
 }
@@ -950,6 +1024,137 @@ function filterNodeTopology(list, tier, provider, mappedResp) {
 
 
 
+function getMachineListForOptions() {
+  const array = machineList.map((item) => {
+    return { text: item, value: item };
+  });
+  return array;
+}
+
+function setResourceLimit({ commit, model, getValue, watchDependency }) {
+  const modelPathValue = getValue(model, "/spec/podResources/machine");
+  watchDependency("model#/spec/podResources/machine");
+  if (modelPathValue && modelPathValue !== "custom") {
+    // to avoiding set value by reference, cpu and memory set separately
+    commit("wizard/model$update", {
+      path: "/spec/podResources/resources",
+      value: machines[modelPathValue]?.resources,
+      force: true,
+    });
+  }
+}
+
+
+function isMachineNotCustom({ model, getValue, watchDependency }, path ) {
+  const fullpath = path
+    ? `/spec/${path}/podResources/machine`
+    : "/spec/podResources/machine";
+  const modelPathValue = getValue(model, fullpath);
+  watchDependency(`model#${fullpath}`);
+  return modelPathValue !== "custom" && !!modelPathValue;
+}
+
+function notEqualToDatabaseMode({ model, getValue, watchDependency }, mode) {
+  const modelPathValue = getValue(model, "/spec/mode");
+  watchDependency("model#/spec/mode");
+  return modelPathValue && modelPathValue !== mode;
+}
+
+
+function onAuthChange({ getValue, discriminator, commit }) {
+  const isAuthOn = getValue(discriminator, "/createAuthSecret");
+  if (!isAuthOn) {
+    commit("wizard/model$update", {
+      path: "/spec/authSecret/name",
+      value: "",
+      force: true,
+    });
+    commit("wizard/model$update", {
+      path: "/spec/authSecret/password",
+      value: "",
+      force: true,
+    });
+  }
+}
+
+function clearConfiguration({ discriminator, getValue, commit }) {
+  const configOn = getValue(discriminator, "/configDatabase");
+
+  if (!configOn) {
+    commit(
+      "wizard/model$delete",
+      "/spec/configuration"
+    );
+  }
+}
+
+function isConfigDatabaseOn({ watchDependency, discriminator, getValue }) {
+  watchDependency("discriminator#/configDatabase");
+  return getValue(discriminator, "/configDatabase");
+}
+
+
+function showIssuer({ model, getValue, watchDependency }) {
+  watchDependency("model#/spec/admin/tls/default");
+  const isTlsEnabled = getValue(model, "/spec/admin/tls/default");
+  const isIssuerToggleEnabled = isToggleOn({ getValue, model }, "clusterIssuers");
+  return isTlsEnabled && isIssuerToggleEnabled;
+}
+
+
+function setMonitoring({ getValue, model }) {
+  const agent = getValue(model, "/spec/admin/monitoring/agent") || "";
+  return !!agent;
+}
+
+function updateAlertValue({ commit, model, discriminator, getValue }) {
+  const isMonitorEnabled = getValue(discriminator, "/monitoring");
+  const alert = isMonitorEnabled ? "warning" : "none";
+  // update alert value depend on monitoring profile
+  commit("wizard/model$update", {
+    path: "/form/alert/enabled",
+    value: alert,
+    force: true
+  });
+  const agent = isMonitorEnabled ? "prometheus.io/operator" : "";
+  commit("wizard/model$update", {
+    path: "/spec/admin/monitoring/agent",
+    value: agent,
+    force: true
+  });
+}
+
+async function isBackupCluster({ axios, storeGet, commit }) {
+  const owner = storeGet("/route/params/user");
+  const cluster = storeGet("/route/params/cluster");
+  const url = `/clusters/${owner}/${cluster}/proxy/ui.k8s.appscode.com/v1alpha1/features`;
+  let isStashEnabled = false;
+
+  try {
+    const resp = await axios.get(url)
+    const stashPreset = resp.data?.items?.find(
+      (item) => item.metadata?.name === "stash-presets"
+    )
+    isStashEnabled = !!(stashPreset?.status?.enabled && stashPreset?.status?.ready);
+  }
+  catch(e) {
+    console.log(e);
+  }
+  commit("wizard/model$update", {
+    path: "/spec/admin/backup/tool",
+    value: isStashEnabled ? "KubeStash" : "",
+    force: true,
+  });
+  return isStashEnabled;
+}
+
+function showAlerts({ watchDependency, model, getValue, discriminator }) {
+  watchDependency("discriminator#/monitoring");
+  const isMonitorEnabled = getValue(discriminator, "/monitoring");
+  return isMonitorEnabled && isToggleOn({ getValue, model }, "alerts");
+}
+
+
 return {
   isVariantAvailable,
   fetchJsons,
@@ -964,8 +1169,6 @@ return {
   onCreateAuthSecretChange,
   getSecrets,
   disableLimit,
-  getMachineListForOptions,
-  setResourceLimit,
   setLimitsCpuOrMem,
   setMachineToCustom,
   disableConfigureOption,
@@ -988,4 +1191,16 @@ return {
   getAdminOptions,
   getNodeTopology,
   filterNodeTopology,
+  getMachineListForOptions,
+  setResourceLimit,
+  isMachineNotCustom,
+  notEqualToDatabaseMode,
+  onAuthChange,
+  clearConfiguration,
+  isConfigDatabaseOn,
+  showIssuer,
+  setMonitoring,
+  updateAlertValue,
+  showAlerts,
+  isBackupCluster
 }
