@@ -9,6 +9,41 @@ metadata:
     name: RELEASE-NAME
     namespace: default
 resources:
+  autoscalingKubedbComPgBouncerAutoscaler: # +doc-gen:break
+    apiVersion: autoscaling.kubedb.com/v1alpha1
+    kind: PgBouncerAutoscaler
+    metadata:
+      name: pgbouncer
+      namespace: demo
+    spec:
+      compute:
+        nodeTopology:
+          name: standard-basv2-family
+        pgbouncer:
+          maxAllowed:
+            cpu: 1
+            memory: 2Gi
+          minAllowed:
+            cpu: 400m
+            memory: 400Mi
+          podLifeTimeThreshold: 10m
+          resourceDiffPercentage: 20
+          trigger: "On"
+      databaseRef:
+        name: repl
+      opsRequestOptions:
+        apply: IfReady
+        timeout: 10m
+  catalogAppscodeComPgBouncerBinding: # +doc-gen:break
+    apiVersion: catalog.appscode.com/v1alpha1
+    kind: PgBouncerBinding
+    metadata:
+      name: pgbouncer
+      namespace: demo
+    spec:
+      sourceRef:
+        name: pgbouncer
+        namespace: demo
   certManagerIoIssuer_ca: # +doc-gen:break
     apiVersion: cert-manager.io/v1
     kind: Issuer
@@ -82,7 +117,7 @@ resources:
         issuerRef:
           apiGroup: cert-manager.io
           kind: Issuer
-          name: proxysql-ca
+          name: pgbouncer-ca
       version: 1.17.0
   monitoringCoreosComServiceMonitor: # +doc-gen:break
     apiVersion: monitoring.coreos.com/v1

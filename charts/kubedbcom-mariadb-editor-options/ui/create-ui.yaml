@@ -1,16 +1,16 @@
 steps:
 - form:
     discriminator:
-      createAuthSecret:
-        default: false
-        type: boolean
-      monitoring:
-        default: false
-        type: boolean
       backup:
         default: false
         type: boolean
       configDatabase:
+        default: false
+        type: boolean
+      createAuthSecret:
+        default: false
+        type: boolean
+      monitoring:
         default: false
         type: boolean
     elements:
@@ -33,17 +33,17 @@ steps:
       schema:
         $ref: schema#/properties/metadata/properties/release/properties/namespace
       type: select
-    - if: isToggleOn|deployment
-      hasDescription: true
+    - hasDescription: true
+      if: isToggleOn|deployment
       label:
         text: labels.deployment.name
       options:
-        - text: Shared
-          value: Shared
-          description: labels.deployment.shared
-        - text: Dedicated
-          value: Dedicated
-          description: labels.deployment.dedicated
+      - description: labels.deployment.shared
+        text: Shared
+        value: Shared
+      - description: labels.deployment.dedicated
+        text: Dedicated
+        value: Dedicated
       schema:
         $ref: schema#/properties/spec/properties/admin/properties/deployment/properties/default
       type: radio
@@ -61,19 +61,19 @@ steps:
         $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/default
       type: radio
     - disableUnselect: true
+      fetch: getAdminOptions|clusterTier/placement
       if: isToggleOn|clusterTier/placement
       label:
         text: labels.placement
-      fetch: getAdminOptions|clusterTier/placement
       required: true
       schema:
         $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/placement/properties/default
       type: select
     - disableUnselect: true
+      fetch: getNodeTopology
       if: isToggleOn|clusterTier/nodeTopology
       label:
         text: labels.nodeTopology
-      fetch: getNodeTopology
       refresh: true
       required: true
       schema:
@@ -203,13 +203,13 @@ steps:
       type: input
     - label:
         text: Configure Database?
+      onChange: clearConfiguration
       schema:
         $ref: discriminator#/configDatabase
-      onChange: clearConfiguration
       type: switch
-    - label:
+    - if: isConfigDatabaseOn
+      label:
         text: Configuration
-      if: isConfigDatabaseOn
       schema:
         $ref: schema#/properties/spec/properties/configuration
       type: editor

@@ -16,42 +16,178 @@ metadata:
     namespace: ""
 
 spec:
-  # List options
-  version: 2.3.2-debian
-
   # Annotations to add to the database custom resource
   annotations: {}
 
   # Labels to add to all the template objects
   labels: {}
 
+  replicas: 1
+  syncUsers: false
+  backend: ""
+
   deletionPolicy: WipeOut
 
-  machine: ""
+  persistence:
+    size: 10Gi
+  podResources:
+    machine: ""
 
-  resources:
-    limits:
-      cpu: 500m
-      memory: 1Gi
+    resources:
+      limits:
+        cpu: 500m
+        memory: 1Gi
 
   authSecret:
     name: ""
+
     password: ""
+  configuration: ""
 
-  monitoring:
-    # Name of monitoring agent (one of "prometheus.io", "prometheus.io/operator", "prometheus.io/builtin")
-    agent: prometheus.io/operator
-    serviceMonitor:
-      # Specify the labels for ServiceMonitor.
-      # Prometheus crd will select ServiceMonitor using these labels.
-      # Only usable when monitoring agent is `prometheus.io/webhook server`.
-      labels: {}
+  admin:
+    deployment:
+      default: Dedicated
+      toggle: true
+    clusterTier:
+      default: "GeneralPurpose"
+      toggle: true
+      nodeTopology:
+        available: [ "m4", "m7gd", "c5d", "c7g", "t4g", "r5a", "r6g", "a-family", "b-family", "d-family" ]
+        default: "c5d"
+        toggle: true
+      placement:
+        available: [ "majority-on-spot", "minority-on-spot", "multizone", "ondemand-only", "one-on-ondemand", "spot-only", "zone-ap-southeast-1a", "zone-ap-southeast-1b", "zone-ap-southeast-1c" ]
+        default: "majority-on-spot"
+        toggle: true
 
-  replicas: 1
+    databases:
+      ProxySQL:
+        versions:
+          available: [ "2.3.2-debian", "2.4.4-debian" ]
+          default: "2.3.2-debian"
+          toggle: true
+    storageClasses:
+      available: [ "linode-block-storage", "linode-block-storage-retain", "standard", "gp2" ]
+      default: "gp2"
+      toggle: true
 
-  syncUsers: false
+    tls:
+      default: true
+      toggle: true
+    clusterIssuers:
+      available: [ "global-ca", "cluster-issuer" ]
+      default: "cluster-issuer"
+      toggle: true
+    webUI:
+      default: true
+      toggle: true
 
-  backend: ""
+    monitoring:
+      # Name of monitoring agent (one of "prometheus.io", "prometheus.io/operator", "prometheus.io/builtin")
+      agent: prometheus.io/operator
+      exporter:
+        resources: # +doc-gen:break
+          requests:
+            cpu: 100m
+            memory: 128Mi
+      serviceMonitor:
+        # Specify the labels for ServiceMonitor.
+        # Prometheus crd will select ServiceMonitor using these labels.
+        # Only usable when monitoring agent is `prometheus.io/webhook server`.
+        labels: { }
+      toggle: true
+    alerts:
+      toggle: true
+
+    archiver:
+      toggle: true
+      default: true
+    backup:
+      tool: ""
+      toggle: true
+
+      kubestash:
+        schedule: "0 */2 * * *"
+        storageRef:
+          name: default
+          namespace: stash
+        retentionPolicy:
+          name: "keep-1mo"
+          namespace: stash
+        encryptionSecret:
+          name: default-encryption-secret
+          namespace: stash
+        storageSecret:
+          create: true
+
+      stash:
+        schedule: "0 */2 * * *"
+
+        retentionPolicy:
+          name: keep-last-30d
+          keepHourly: 24
+          keepDaily: 30
+          prune: true
+
+        authSecret:
+          name: ""
+          password: ""
+
+        backend:
+          provider: "" # s3,gcs,azure,swift,b2
+          s3:
+            spec:
+              endpoint: ""
+              bucket: ""
+              # prefix: ""
+              # region: ""
+            auth:
+              AWS_ACCESS_KEY_ID: ""
+              AWS_SECRET_ACCESS_KEY: ""
+              CA_CERT_DATA: ""
+          azure:
+            spec:
+              container: ""
+              # prefix: ""
+              # maxConnections: 0
+            auth:
+              AZURE_ACCOUNT_NAME: ""
+              AZURE_ACCOUNT_KEY: ""
+          gcs:
+            spec:
+              bucket: ""
+              # prefix: ""
+              # maxConnections: 0
+            auth:
+              GOOGLE_PROJECT_ID: ""
+              GOOGLE_SERVICE_ACCOUNT_JSON_KEY: ""
+          swift:
+            spec:
+              container: ""
+              # prefix: ""
+            auth:
+              OS_USERNAME: ""
+              OS_PASSWORD: ""
+              OS_REGION_NAME: ""
+              OS_AUTH_URL: ""
+              OS_USER_DOMAIN_NAME: ""
+              OS_PROJECT_NAME: ""
+              OS_PROJECT_DOMAIN_NAME: ""
+              OS_TENANT_ID: ""
+              OS_TENANT_NAME: ""
+              ST_AUTH: ""
+              ST_USER: ""
+              ST_KEY: ""
+              OS_STORAGE_URL: ""
+              OS_AUTH_TOKEN: ""
+          b2:
+            spec:
+              bucket: ""
+              # prefix: ""
+              # maxConnections: 0
+            auth:
+              B2_ACCOUNT_ID: ""
+              B2_ACCOUNT_KEY: ""
 
 form:
   alert:
@@ -151,11 +287,3 @@ form:
             enabled: true
             duration: "0m"
             severity: critical
-  capi:
-    provider: ""
-    namespace: ""
-    clusterName: ""
-    dedicated: false
-    nodes: 1
-    sku: ""
-    zones: []

@@ -955,16 +955,10 @@ func (in *KubedbcomElasticsearchEditorOptionsSpecSpec) DeepCopyInto(out *Kubedbc
 		*out = new(ElasticsearchTopology)
 		**out = **in
 	}
-	out.StorageClass = in.StorageClass
-	if in.Persistence != nil {
-		in, out := &in.Persistence, &out.Persistence
-		*out = new(Persistence)
-		**out = **in
-	}
-	in.Resources.DeepCopyInto(&out.Resources)
+	out.Persistence = in.Persistence
+	in.PodResources.DeepCopyInto(&out.PodResources)
 	out.AuthSecret = in.AuthSecret
-	in.Monitoring.DeepCopyInto(&out.Monitoring)
-	in.Backup.DeepCopyInto(&out.Backup)
+	in.Admin.DeepCopyInto(&out.Admin)
 	out.KernelSettings = in.KernelSettings
 	return
 }
@@ -1202,15 +1196,10 @@ func (in *KubedbcomKafkaEditorOptionsSpecSpec) DeepCopyInto(out *KubedbcomKafkaE
 		*out = new(KafkaTopology)
 		(*in).DeepCopyInto(*out)
 	}
-	out.StorageClass = in.StorageClass
-	if in.Persistence != nil {
-		in, out := &in.Persistence, &out.Persistence
-		*out = new(Persistence)
-		**out = **in
-	}
-	in.Resources.DeepCopyInto(&out.Resources)
+	out.Persistence = in.Persistence
+	in.PodResources.DeepCopyInto(&out.PodResources)
 	out.AuthSecret = in.AuthSecret
-	in.Monitoring.DeepCopyInto(&out.Monitoring)
+	in.Admin.DeepCopyInto(&out.Admin)
 	return
 }
 
@@ -1323,7 +1312,7 @@ func (in *KubedbcomMariadbEditorOptionsSpecSpec) DeepCopyInto(out *KubedbcomMari
 	out.Persistence = in.Persistence
 	in.PodResources.DeepCopyInto(&out.PodResources)
 	out.AuthSecret = in.AuthSecret
-	in.AdminOptions.DeepCopyInto(&out.AdminOptions)
+	in.Admin.DeepCopyInto(&out.Admin)
 	return
 }
 
@@ -1789,7 +1778,7 @@ func (in *KubedbcomMysqlEditorOptionsSpecSpec) DeepCopyInto(out *KubedbcomMysqlE
 	out.Persistence = in.Persistence
 	in.PodResources.DeepCopyInto(&out.PodResources)
 	out.AuthSecret = in.AuthSecret
-	in.AdminOptions.DeepCopyInto(&out.AdminOptions)
+	in.Admin.DeepCopyInto(&out.Admin)
 	return
 }
 
@@ -1898,9 +1887,10 @@ func (in *KubedbcomPgbouncerEditorOptionsSpecSpec) DeepCopyInto(out *KubedbcomPg
 			(*out)[key] = val
 		}
 	}
-	in.Resources.DeepCopyInto(&out.Resources)
+	out.Persistence = in.Persistence
+	in.PodResources.DeepCopyInto(&out.PodResources)
 	out.AuthSecret = in.AuthSecret
-	in.Monitoring.DeepCopyInto(&out.Monitoring)
+	in.Admin.DeepCopyInto(&out.Admin)
 	return
 }
 
@@ -2261,9 +2251,10 @@ func (in *KubedbcomProxysqlEditorOptionsSpecSpec) DeepCopyInto(out *KubedbcomPro
 			(*out)[key] = val
 		}
 	}
-	in.Resources.DeepCopyInto(&out.Resources)
+	out.Persistence = in.Persistence
+	in.PodResources.DeepCopyInto(&out.PodResources)
 	out.AuthSecret = in.AuthSecret
-	in.Monitoring.DeepCopyInto(&out.Monitoring)
+	in.Admin.DeepCopyInto(&out.Admin)
 	return
 }
 
@@ -2492,7 +2483,7 @@ func (in *KubedbcomRedisEditorOptionsSpecSpec) DeepCopyInto(out *KubedbcomRedisE
 	out.Persistence = in.Persistence
 	in.PodResources.DeepCopyInto(&out.PodResources)
 	out.AuthSecret = in.AuthSecret
-	in.AdminOptions.DeepCopyInto(&out.AdminOptions)
+	in.Admin.DeepCopyInto(&out.Admin)
 	return
 }
 
