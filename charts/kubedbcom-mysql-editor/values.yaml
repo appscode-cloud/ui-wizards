@@ -187,6 +187,41 @@ metadata:
     name: RELEASE-NAME
     namespace: default
 resources:
+  autoscalingKubedbComMySQLAutoscaler: # +doc-gen:break
+    apiVersion: autoscaling.kubedb.com/v1alpha1
+    kind: MySQLAutoscaler
+    metadata:
+      name: mysql
+      namespace: demo
+    spec:
+      compute:
+        mysql:
+          maxAllowed:
+            cpu: 1
+            memory: 2Gi
+          minAllowed:
+            cpu: 400m
+            memory: 400Mi
+          podLifeTimeThreshold: 10m
+          resourceDiffPercentage: 20
+          trigger: "On"
+        nodeTopology:
+          name: standard-basv2-family
+      databaseRef:
+        name: sample
+      opsRequestOptions:
+        apply: IfReady
+        timeout: 10m
+  catalogAppscodeComMySQLBinding: # +doc-gen:break
+    apiVersion: catalog.appscode.com/v1alpha1
+    kind: MySQLBinding
+    metadata:
+      name: mysql
+      namespace: demo
+    spec:
+      sourceRef:
+        name: mysql
+        namespace: demo
   certManagerIoIssuer_ca: # +doc-gen:break
     apiVersion: cert-manager.io/v1
     kind: Issuer

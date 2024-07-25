@@ -153,14 +153,6 @@ form:
             val: 1800
     labels:
       release: kube-prometheus-stack
-  capi:
-    clusterName: ""
-    dedicated: false
-    namespace: ""
-    nodes: 1
-    provider: ""
-    sku: ""
-    zones: []
 metadata:
   resource:
     group: kubedb.com
@@ -172,6 +164,41 @@ metadata:
     name: RELEASE-NAME
     namespace: default
 resources:
+  autoscalingKubedbComMariaDBAutoscaler: # +doc-gen:break
+    apiVersion: autoscaling.kubedb.com/v1alpha1
+    kind: MariaDBAutoscaler
+    metadata:
+      name: mariadb
+      namespace: demo
+    spec:
+      compute:
+        mariadb:
+          maxAllowed:
+            cpu: 1
+            memory: 2Gi
+          minAllowed:
+            cpu: 400m
+            memory: 400Mi
+          podLifeTimeThreshold: 10m
+          resourceDiffPercentage: 20
+          trigger: "On"
+        nodeTopology:
+          name: standard-basv2-family
+      databaseRef:
+        name: sample
+      opsRequestOptions:
+        apply: IfReady
+        timeout: 10m
+  catalogAppscodeComMariaDBBinding: # +doc-gen:break
+    apiVersion: catalog.appscode.com/v1alpha1
+    kind: MariaDBBinding
+    metadata:
+      name: mariadb
+      namespace: demo
+    spec:
+      sourceRef:
+        name: mariadb
+        namespace: demo
   certManagerIoIssuer_ca: # +doc-gen:break
     apiVersion: cert-manager.io/v1
     kind: Issuer

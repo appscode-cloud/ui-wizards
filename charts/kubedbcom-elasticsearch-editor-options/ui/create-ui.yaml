@@ -1,18 +1,18 @@
 steps:
 - form:
     discriminator:
-      elasticVersions:
-        type: array
-      createAuthSecret:
+      backup:
         default: false
         type: boolean
       configDatabase:
         default: false
         type: boolean
-      monitoring: 
+      createAuthSecret:
         default: false
         type: boolean
-      backup:
+      elasticVersions:
+        type: array
+      monitoring:
         default: false
         type: boolean
     elements:
@@ -35,17 +35,17 @@ steps:
       schema:
         $ref: schema#/properties/metadata/properties/release/properties/namespace
       type: select
-    - if: isToggleOn|deployment
-      hasDescription: true
+    - hasDescription: true
+      if: isToggleOn|deployment
       label:
         text: labels.deployment.name
       options:
-        - text: Shared
-          value: Shared
-          description: labels.deployment.shared
-        - text: Dedicated
-          value: Dedicated
-          description: labels.deployment.dedicated
+      - description: labels.deployment.shared
+        text: Shared
+        value: Shared
+      - description: labels.deployment.dedicated
+        text: Dedicated
+        value: Dedicated
       schema:
         $ref: schema#/properties/spec/properties/admin/properties/deployment/properties/default
       type: radio
@@ -63,32 +63,32 @@ steps:
         $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/default
       type: radio
     - disableUnselect: true
+      fetch: getAdminOptions|clusterTier/placement
       if: isToggleOn|clusterTier/placement
       label:
         text: labels.placement
-      fetch: getAdminOptions|clusterTier/placement
       required: true
       schema:
         $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/placement/properties/default
       type: select
     - disableUnselect: true
+      fetch: getNodeTopology
       if: isToggleOn|clusterTier/nodeTopology
       label:
         text: labels.nodeTopology
-      fetch: getNodeTopology
       required: true
       schema:
         $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/nodeTopology/properties/default
       type: select
     - disableUnselect: true
       fetch: getAdminOptions|databases/Elasticsearch/versions
+      if: isToggleOn|databases/Elasticsearch/versions
       label:
         text: labels.database.version
+      required: true
       schema:
         $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Elasticsearch/properties/versions/properties/default
       type: select
-      required: true
-      if: isToggleOn|databases/Elasticsearch/versions
     - isArray: true
       keys:
         label:
@@ -259,19 +259,19 @@ steps:
       - fetch: getAdminOptions|storageClasses
         label:
           text: labels.storage.class
+        required: true
         schema:
           $ref: schema#/properties/spec/properties/admin/properties/storageClasses/properties/default
-        required: true
         type: select
-      type: single-step-form
-      schema: 
+      schema:
         $ref: schema#/properties/spec/properties/admin/properties/storageClasses
+      type: single-step-form
     - label:
         text: Provide Authentication Credentials?
       onChange: onAuthChange
       schema:
         $ref: discriminator#/createAuthSecret
-      type: switch  
+      type: switch
     - if: showAuthPasswordField
       label:
         text: labels.name
@@ -286,13 +286,13 @@ steps:
       type: input
     - label:
         text: Configure Database?
+      onChange: clearConfiguration
       schema:
         $ref: discriminator#/configDatabase
-      onChange: clearConfiguration
       type: switch
-    - label:
+    - if: isConfigDatabaseOn
+      label:
         text: Configuration
-      if: isConfigDatabaseOn
       schema:
         $ref: schema#/properties/spec/properties/configuration
       type: editor

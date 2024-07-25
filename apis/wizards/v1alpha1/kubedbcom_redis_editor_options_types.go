@@ -18,7 +18,6 @@ package v1alpha1
 
 import (
 	alerts "go.appscode.dev/alerts/apis/alerts/v1alpha1"
-	core "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	api "x-helm.dev/apimachinery/apis/releases/v1alpha1"
 )
@@ -52,16 +51,14 @@ type KubedbcomRedisEditorOptionsSpecSpec struct {
 	// +optional
 	Replicas int `json:"replicas,omitempty"`
 	// +optional
-	Cluster        RedisCluster              `json:"cluster,omitempty"`
-	SentinelRef    NamespacedName            `json:"sentinelRef,omitempty"`
-	DeletionPolicy DeletionPolicy            `json:"deletionPolicy"`
-	StorageClass   StorageClass              `json:"storageClass"`
-	Persistence    Persistence               `json:"persistence"`
-	Machine        MachineType               `json:"machine"`
-	Resources      core.ResourceRequirements `json:"resources"`
-	AuthSecret     AuthSecret                `json:"authSecret"`
-	Monitoring     Monitoring                `json:"monitoring"`
-	Backup         BackupToolSpec            `json:"backup"`
+	Cluster        RedisCluster   `json:"cluster,omitempty"`
+	SentinelRef    NamespacedName `json:"sentinelRef,omitempty"`
+	Persistence    Persistence    `json:"persistence"`
+	PodResources   PodResources   `json:"podResources"`
+	AuthSecret     AuthSecret     `json:"authSecret"`
+	DeletionPolicy DeletionPolicy `json:"deletionPolicy"`
+	Configuration  string         `json:"configuration"`
+	Admin          AdminOptions   `json:"admin"`
 }
 
 type RedisCluster struct {

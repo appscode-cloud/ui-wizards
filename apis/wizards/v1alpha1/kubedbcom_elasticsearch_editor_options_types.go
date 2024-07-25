@@ -61,7 +61,7 @@ type KubedbcomElasticsearchEditorOptionsSpecSpec struct {
 	AuthSecret      AuthSecret             `json:"authSecret"`
 	DeletionPolicy  DeletionPolicy         `json:"deletionPolicy"`
 	Configuration   string                 `json:"configuration"`
-	AdminOptions    AdminOptions           `json:"adminOptions"`
+	Admin           AdminOptions           `json:"admin"`
 	// KernelSettings contains the additional kernel settings.
 	// +optional
 	KernelSettings KernelSettings `json:"kernelSettings"`
