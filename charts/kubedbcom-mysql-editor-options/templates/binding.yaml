@@ -1,0 +1,11 @@
+{{- if .Values.spec.admin.webUI.default }}
+apiVersion: catalog.appscode.com/v1alpha1
+kind: MySQLBinding
+metadata:
+  name: {{ include "kubedbcom-mysql-editor-options.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  sourceRef:
+    name: {{ include "kubedbcom-mysql-editor-options.fullname" . }}
+    namespace: {{ .Release.Namespace }}
+{{- end }}

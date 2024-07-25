@@ -1,8 +1,17 @@
 steps:
 - form:
     discriminator:
+      backup:
+        default: false
+        type: boolean
+      configDatabase:
+        default: false
+        type: boolean
       createAuthSecret:
-        default: true
+        default: false
+        type: boolean
+      monitoring:
+        default: false
         type: boolean
     elements:
     - disabled: isVariantAvailable
@@ -17,7 +26,7 @@ steps:
         url:
           function: getCreateNameSpaceUrl
       disabled: isVariantAvailable
-      fetch: getResources|core|v1|namespaces
+      fetch: getNamespaces
       label:
         text: labels.namespace
       refresh: true
@@ -25,11 +34,11 @@ steps:
         $ref: schema#/properties/metadata/properties/release/properties/namespace
       type: select
     - disableUnselect: true
-      fetch: getPostgresVersions|catalog.kubedb.com|v1alpha1|postgresversions
+      fetch: getAdminOptions|databases/Postgres/versions
       label:
         text: labels.database.version
       schema:
-        $ref: schema#/properties/spec/properties/version
+        $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Postgres/properties/versions/default
       type: select
     - isArray: true
       keys:
@@ -62,8 +71,46 @@ steps:
           $ref: schema#/properties/spec/properties/annotations/additionalProperties
         type: input
     - hasDescription: true
+      if: isToggleOn|deployment
+      label:
+        text: labels.deployment.name
+      options:
+      - description: labels.deployment.shared
+        text: Shared
+        value: Shared
+      - description: labels.deployment.dedicated
+        text: Dedicated
+        value: Dedicated
+      schema:
+        $ref: schema#/properties/spec/properties/admin/properties/deployment/properties/default
+      type: radio
+    - if: isToggleOn|clusterTier
+      label:
+        text: labels.clusterTier
+      options:
+      - text: General Purpose
+        value: GeneralPurpose
+      - text: Memory Optimized
+        value: MemoryOptimized
+      - text: CPU Optimized
+        value: CPUOptimized
+      schema:
+        $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/default
+      type: radio
+    - disableUnselect: true
+      fetch: getNodeTopology
+      if: isToggleOn|clusterTier/nodeTopology
+      label:
+        text: labels.nodeTopology
+      refresh: true
+      required: true
+      schema:
+        $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/nodeTopology/properties/default
+      type: select
+    - hasDescription: true
       label:
         text: labels.database.mode
+      onChange: clearArbiterHidden
       options:
       - description: options.database.mode.Standalone.description
         text: options.database.mode.Standalone.label
@@ -74,11 +121,33 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/mode
       type: radio
-    - label:
+    - if: showStorageSizeField
+      label:
         text: labels.storage.size
       schema:
         $ref: schema#/properties/spec/properties/persistence/properties/size
       type: input
+    - elements:
+      - computed: setMachineToCustom
+        customClass: mt-10
+        fetch: getMachineListForOptions
+        label:
+          text: labels.machine
+        onChange: setResourceLimit
+        schema:
+          $ref: schema#/properties/spec/properties/podResources/properties/machine
+        type: select
+      - computed: setLimitsCpuOrMem
+        disabled: isMachineNotCustom
+        label:
+          text: labels.resources
+        schema:
+          $ref: schema#/properties/spec/properties/podResources/properties/resources
+        type: resource-input-form
+      label:
+        text: labels.machine_profile
+      show_label: true
+      type: single-step-form
     - hasDescription: true
       label:
         text: labels.deletionPolicy
@@ -99,63 +168,70 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/deletionPolicy
       type: radio
-    - fetch: getStorageClassNames
+    - fetch: getAdminOptions|storageClasses
+      if: isToggleOn|storageClasses
       label:
         text: labels.storage.class
+      required: true
       schema:
-        $ref: schema#/properties/spec/properties/storageClass/properties/name
+        $ref: schema#/properties/spec/properties/admin/properties/storageClasses/properties/default
       type: select
-    - label:
-        text: labels.database.secret
-      type: label-element
-    - onChange: onCreateAuthSecretChange
-      options:
-      - text: options.database.secret.customSecret.label
-        value: true
-      - text: options.database.secret.existingSecret.label
-        value: false
+    - computed: returnFalse
+      label:
+        text: Provide Authentication Credentials?
+      onChange: onAuthChange
       schema:
         $ref: discriminator#/createAuthSecret
-      type: radio
-    - allowUserDefinedOption: true
-      fetch: getSecrets
-      if: showAuthSecretField
-      label:
-        text: labels.secret
-      schema:
-        $ref: schema#/properties/spec/properties/authSecret/properties/name
-      type: select
+      type: switch
     - if: showAuthPasswordField
       label:
-        text: labels.password
+        text: labels.authSecret.name
+      schema:
+        $ref: schema#/properties/spec/properties/authSecret/properties/name
+      type: input
+    - if: showAuthPasswordField
+      label:
+        text: labels.authSecret.password
       schema:
         $ref: schema#/properties/spec/properties/authSecret/properties/password
       type: input
     - label:
-        text: labels.machine_profile
-      type: label-element
-    - computed: setMachineToCustom
-      fetch: getMachineListForOptions
-      label:
-        text: Machine
-      onChange: setResourceLimit
+        text: Configure Database?
+      onChange: clearConfiguration
       schema:
-        $ref: schema#/properties/spec/properties/machine
+        $ref: discriminator#/configDatabase
+      type: switch
+    - if: isConfigDatabaseOn
+      label:
+        text: Configuration
+      schema:
+        $ref: schema#/properties/spec/properties/configuration
+      type: editor
+    - if: isToggleOn|tls
+      label:
+        text: Enable TLS?
+      schema:
+        $ref: schema#/properties/spec/properties/admin/properties/tls/properties/default
+      type: switch
+    - fetch: getAdminOptions|clusterIssuers
+      if: showIssuer
+      label:
+        text: labels.clusterIssuers
+      schema:
+        $ref: schema#/properties/spec/properties/admin/properties/clusterIssuers/properties/default
       type: select
-    - computed: setLimitsCpuOrMem|cpu
-      disabled: disableLimit
+    - if: isToggleOn|webUI
       label:
-        text: labels.cpu
+        text: Enable Web UI?
       schema:
-        $ref: schema#/properties/spec/properties/resources/properties/limits/properties/cpu
-      type: input
-    - computed: setLimitsCpuOrMem|memory
-      disabled: disableLimit
+        $ref: schema#/properties/spec/properties/admin/properties/webUI/properties/default
+      type: switch
+    - if: isToggleOn|archiver
       label:
-        text: labels.memory
+        text: Enable Archiver?
       schema:
-        $ref: schema#/properties/spec/properties/resources/properties/limits/properties/memory
-      type: input
+        $ref: schema#/properties/spec/properties/admin/properties/archiver/properties/default
+      type: switch
     - elements:
       - customClass: mt-10
         label:
@@ -193,14 +269,14 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/monitoring/properties/serviceMonitor
       type: reusable-element
-    - alias: reusable-backup-option
-      chart:
-        name: uibytebuildersdev-component-backup-option
-        version: v0.4.21
-      moduleResolver: fetchJsons
+    - computed: isBackupCluster
+      if: isToggleOn|backup
+      label:
+        text: Enable Backup?
+      onChange: onBackupSwitch
       schema:
-        $ref: schema#/properties/spec/properties/backup
-      type: reusable-element
+        $ref: discriminator#/backup
+      type: switch
     - elements:
       - hasDescription: true
         onChange: dedicatedOnChange
@@ -292,7 +368,12 @@ steps:
       - description: options.configOptions.customConfig.description
         text: options.configOptions.customConfig.label
         value: custom-config
-      - description: options.configOptions.podTemplate.description
+      - dependingSteps:
+        - pod-template-sharded-topology
+        - pod-template-shard
+        - pod-template-config-server
+        - pod-template-mongos
+        description: options.configOptions.podTemplate.description
         text: options.configOptions.podTemplate.label
         value: pod-template
       owner:

@@ -1,16 +1,16 @@
 steps:
 - form:
     discriminator:
-      createAuthSecret:
-        default: false
-        type: boolean
-      monitoring:
-        default: false
-        type: boolean
       backup:
         default: false
         type: boolean
       configDatabase:
+        default: false
+        type: boolean
+      createAuthSecret:
+        default: false
+        type: boolean
+      monitoring:
         default: false
         type: boolean
     elements:
@@ -30,21 +30,21 @@ steps:
       label:
         text: labels.namespace
       refresh: true
-      sortable: true
       schema:
         $ref: schema#/properties/metadata/properties/release/properties/namespace
+      sortable: true
       type: select
-    - if: isToggleOn|deployment
-      hasDescription: true
+    - hasDescription: true
+      if: isToggleOn|deployment
       label:
         text: labels.deployment.name
       options:
-        - text: Shared
-          value: Shared
-          description: labels.deployment.shared
-        - text: Dedicated
-          value: Dedicated
-          description: labels.deployment.dedicated
+      - description: labels.deployment.shared
+        text: Shared
+        value: Shared
+      - description: labels.deployment.dedicated
+        text: Dedicated
+        value: Dedicated
       schema:
         $ref: schema#/properties/spec/properties/admin/properties/deployment/properties/default
       type: radio
@@ -62,18 +62,18 @@ steps:
         $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/default
       type: radio
     - disableUnselect: true
+      fetch: getAdminOptions|clusterTier/placement
       if: isToggleOn|clusterTier/placement
       label:
         text: labels.placement
-      fetch: getAdminOptions|clusterTier/placement
       schema:
         $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/placement/properties/default
       type: select
     - disableUnselect: true
+      fetch: getNodeTopology
       if: isToggleOn|clusterTier/nodeTopology
       label:
         text: labels.nodeTopology
-      fetch: getNodeTopology
       schema:
         $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/nodeTopology/properties/default
       type: select
@@ -309,7 +309,7 @@ steps:
         text: labels.storage.select
       schema:
         $ref: schema#/properties/spec/properties/admin/properties/storageClasses/properties/default
-      type: select    
+      type: select
     - label:
         text: Provide Authentication Credentials?
       onChange: onAuthChange
