@@ -368,16 +368,6 @@ function showAuthPasswordField({
   return !!modelPathValue;
 }
 
-function isEqualToModelPathValue(
-  { model, getValue, watchDependency },
-  value,
-  modelPath
-) {
-  const modelPathValue = getValue(model, modelPath);
-  watchDependency("model#" + modelPath);
-  return modelPathValue === value;
-}
-
 async function getNamespaces({ axios, storeGet }) {
   const params = storeGet("/route/params");
   const { user, cluster, group, version, resource } = params;
@@ -456,36 +446,6 @@ function isMachineNotCustom({ model, getValue, watchDependency }, path ) {
   const modelPathValue = getValue(model, fullpath);
   watchDependency(`model#${fullpath}`);
   return modelPathValue !== "custom" && !!modelPathValue;
-}
-
-async function fetchJsons({ axios, itemCtx }) {
-  let ui = {};
-  let language = {};
-  let functions = {};
-  const { name, sourceRef, version, packageviewUrlPrefix } = itemCtx.chart;
-  
-  try {
-    ui = await axios.get(
-      `${packageviewUrlPrefix}/create-ui.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`
-    );
-    language = await axios.get(
-      `${packageviewUrlPrefix}/language.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`
-    );
-    const functionString = await axios.get(
-      `${packageviewUrlPrefix}/functions.js?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}`
-    );
-    // declare evaluate the functionString to get the functions Object
-    const evalFunc = new Function(functionString.data || "");
-    functions = evalFunc();
-  } catch (e) {
-    console.log(e);
-  }
-
-  return {
-    ui: ui.data || {},
-    language: language.data || {},
-    functions,
-  };
 }
 
 function updateAlertValue({ commit, model, discriminator, getValue }) {
@@ -738,9 +698,7 @@ function isToggleOn({ getValue, model }, type) {
 
 return {
   isVariantAvailable,
-  fetchJsons,
   showAuthPasswordField,
-  isEqualToModelPathValue,
   getNamespaces,
   getMachineListForOptions,
   setResourceLimit,
