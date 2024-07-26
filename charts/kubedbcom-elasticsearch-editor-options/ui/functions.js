@@ -1155,6 +1155,15 @@ function showAlerts({ watchDependency, model, getValue, discriminator }) {
 }
 
 
+function onBackupSwitch({ discriminator, getValue, commit }) {
+  const isBackupOn = getValue(discriminator, "/backup");
+  commit("wizard/model$update", {
+    path: "/spec/admin/backup/tool",
+    value: isBackupOn ? "KubeStash" : "",
+    force: true,
+  });
+}
+
 return {
   isVariantAvailable,
   fetchJsons,
@@ -1202,5 +1211,6 @@ return {
   setMonitoring,
   updateAlertValue,
   showAlerts,
-  isBackupCluster
+  isBackupCluster,
+  onBackupSwitch
 }
