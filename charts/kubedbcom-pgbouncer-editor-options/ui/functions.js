@@ -304,7 +304,7 @@ const machineList = [
   "db.r.24xlarge",
 ];
 
-const getAppbinding = async ( { axios, storeGet,getValue, watchDependency, rootModel}) =>{
+async function getAppbinding ( { axios, storeGet,getValue, watchDependency, model}) {
   
   const owner = storeGet("/route/params/user");
   const cluster = storeGet("/route/params/cluster");
@@ -313,11 +313,10 @@ const getAppbinding = async ( { axios, storeGet,getValue, watchDependency, rootM
   const version = 'v1alpha1'
   const resource = 'appbindings'
   
-  watchDependency("rootModel#/databaseRef/namespace");
+  watchDependency("model#/spec/database/ref/namespace");
   
-  
-  const namespace = getValue(rootModel, "/databaseRef/namespace");  
-
+  const namespace = getValue(model, "/spec/database/ref/namespace") || "";  
+  console.log(namespace);
   const resp = await axios.get(
     `/clusters/${owner}/${cluster}/proxy/${group}/${version}/namespaces/${namespace}/${resource}`,
     {

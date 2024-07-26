@@ -161,71 +161,33 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/deletionPolicy
       type: radio
-    - addFormLabel: labels.database.label
-      customClass: mb-20
-      element:
-        elements:
-        - label:
-            text: labels.alias
-          schema:
-            $ref: schema#/properties/spec/properties/databases/items/properties/alias
-          type: input
-        - label:
-            text: labels.database.name
-          schema:
-            $ref: schema#/properties/spec/properties/databases/items/properties/databaseName
-          type: input
-        - elements:
-          - fetch: getResources|core|v1|namespaces
-            label:
-              text: labels.namespace
-            schema:
-              $ref: schema#/properties/spec/properties/databases/items/properties/databaseRef/properties/namespace
-            type: select
-          - fetch: getAppbinding
-            label:
-              text: labels.name
-            schema:
-              $ref: schema#/properties/spec/properties/databases/items/properties/databaseRef/properties/name
-            type: select
-          label:
-            isSubsection: true
-            text: labels.databaseref.label
-          schema:
-            $ref: schema#/properties/spec/properties/databases/items/properties/databaseRef
-          show_label: true
-          type: single-step-form
-        type: single-step-form
-      label:
-        text: labels.database.databases
-      schema:
-        $ref: schema#/properties/spec/properties/databases
-      tableContents:
-      - inTableColumn: true
-        label:
-          text: labels.alias
-        path: alias
-        type: value
-        typeOfValue: string
-      - inTableColumn: true
-        label:
+    - elements:
+      - label:
+          text: labels.sync_users_question
+        schema:
+          $ref: schema#/properties/spec/properties/database/properties/syncUsers
+        type: switch
+      - label:
           text: labels.database.name
-        path: databaseName
-        type: value
-        typeOfValue: string
-      - inTableColumn: true
+        schema:
+          $ref: schema#/properties/spec/properties/database/properties/databaseName
+        type: input
+      - fetch: getNamespaces
         label:
-          text: labels.databaseref.appbinding_name
-        path: databaseRef/name
-        type: value
-        typeOfValue: string
-      - inTableColumn: true
+          text: labels.namespace
+        schema:
+          $ref: schema#/properties/spec/properties/database/properties/ref/properties/namespace
+        type: select
+      - fetch: getAppbinding
         label:
-          text: labels.databaseref.appbinding_namespace
-        path: databaseRef/namespace
-        type: value
-        typeOfValue: string
-      type: single-step-form-array
+          text: labels.name
+        schema:
+          $ref: schema#/properties/spec/properties/database/properties/ref/properties/name
+        type: select
+      label:
+        text: labels.database.label
+      show_label: true
+      type: single-step-form
     - label:
         text: Provide Authentication Credentials?
       onChange: onAuthChange
