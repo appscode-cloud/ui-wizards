@@ -38,7 +38,7 @@ steps:
       label:
         text: labels.database.version
       schema:
-        $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Pgpool/properties/versions/properties/default
+        $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Singlestore/properties/versions/properties/default
       type: select
     - if: isToggleOn|deployment
       hasDescription: true
@@ -143,27 +143,21 @@ steps:
           $ref: schema#/properties/spec/properties/topology/properties/aggregator/properties/replicas
         type: input
       - computed: setMachineToCustom
+        customClass: mt-10
         fetch: getMachineListForOptions
         label:
-          text: Machine
-        onChange: setResourceLimitWithNodeType|aggregator
+          text: labels.machine
+        onChange: setResourceLimit
         schema:
-          $ref: schema#/properties/spec/properties/topology/properties/aggregator/properties/podResources/properties/machine
+          $ref: schema#/properties/spec/properties/topology/properties/aggregator/properties/podResources/machine
         type: select
-      - computed: setLimitsCpuOrMem|cpu
-        disabled: disableLimitWithNodeType|aggregator
+      - computed: setLimitsCpuOrMem
+        disabled: isMachineNotCustom
         label:
-          text: labels.cpu
+          text: labels.resources
         schema:
-          $ref: schema#/properties/spec/properties/topology/properties/aggregator/properties/podResources/properties/resources/properties/limits/cpu
-        type: input
-      - computed: setLimitsCpuOrMem|memory
-        disabled: disableLimitWithNodeType|aggregator
-        label:
-          text: labels.memory
-        schema:
-          $ref: schema#/properties/spec/properties/topology/properties/aggregator/properties/podResources/properties/resources/properties/limits/memory
-        type: input
+          $ref: schema#/properties/spec/properties/topology/properties/aggregator/properties/podResources/properties/resources
+        type: resource-input-form
       if: isEqualToModelPathValue|Topology|/spec/mode
       label:
         text: Aggregator
@@ -182,27 +176,21 @@ steps:
           $ref: schema#/properties/spec/properties/topology/properties/leaf/properties/replicas
         type: input
       - computed: setMachineToCustom
+        customClass: mt-10
         fetch: getMachineListForOptions
         label:
-          text: Machine
-        onChange: setResourceLimitWithNodeType|leaf
+          text: labels.machine
+        onChange: setResourceLimit
         schema:
-          $ref: schema#/properties/spec/properties/topology/properties/leaf/properties/podResources/properties/machine
+          $ref: schema#/properties/spec/properties/topology/properties/leaf/properties/podResources/machine
         type: select
-      - computed: setLimitsCpuOrMem|cpu
-        disabled: disableLimitWithNodeType|leaf
+      - computed: setLimitsCpuOrMem
+        disabled: isMachineNotCustom
         label:
-          text: labels.cpu
+          text: labels.resources
         schema:
-          $ref: schema#/properties/spec/properties/topology/properties/leaf/properties/podResources/properties/resources/properties/limits/cpu
-        type: input
-      - computed: setLimitsCpuOrMem|memory
-        disabled: disableLimitWithNodeType|leaf
-        label:
-          text: labels.memory
-        schema:
-          $ref: schema#/properties/spec/properties/topology/properties/leaf/properties/podResources/properties/resources/properties/limits/memory
-        type: input
+          $ref: schema#/properties/spec/properties/topology/properties/leaf/properties/podResources/properties/resources
+        type: resource-input-form
       if: isEqualToModelPathValue|Topology|/spec/mode
       label:
         text: Leaf
@@ -228,11 +216,13 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/deletionPolicy
       type: radio
-    - fetch: getStorageClassNames
+    - fetch: getAdminOptions|storageClasses
+      if: isToggleOn|storageClasses
       label:
         text: labels.storage.class
+      required: true
       schema:
-        $ref: schema#/properties/spec/properties/storageClass/properties/name
+        $ref: schema#/properties/spec/properties/admin/properties/storageClasses/properties/default
       type: select
     - fetch: getSecrets
       label:
@@ -240,60 +230,86 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/licenseSecret/properties/name
       type: select
-    - label:
-        text: labels.database.secret
-      type: label-element
-    - onChange: onCreateAuthSecretChange
-      options:
-      - text: options.database.secret.customSecret.label
-        value: true
-      - text: options.database.secret.existingSecret.label
-        value: false
-      schema:
-        $ref: discriminator#/createAuthSecret
-      type: radio
-    - allowUserDefinedOption: true
-      fetch: getSecrets
-      if: showAuthSecretField
-      label:
-        text: labels.secret
-      schema:
-        $ref: schema#/properties/spec/properties/authSecret/properties/name
-      type: select
-    - if: showAuthPasswordField
-      label:
-        text: labels.password
-      schema:
-        $ref: schema#/properties/spec/properties/authSecret/properties/password
-      type: input
     - elements:
       - computed: setMachineToCustom
+        customClass: mt-10
         fetch: getMachineListForOptions
         label:
-          text: Machine
+          text: labels.machine
         onChange: setResourceLimit
         schema:
           $ref: schema#/properties/spec/properties/podResources/properties/machine
         type: select
-      - computed: setLimitsCpuOrMem|cpu
-        disabled: disableLimit
+      - computed: setLimitsCpuOrMem
+        disabled: isMachineNotCustom
         label:
-          text: labels.cpu
+          text: labels.resources
         schema:
-          $ref: schema#/properties/spec/properties/podResources/properties/resources/properties/limits/cpu
-        type: input
-      - computed: setLimitsCpuOrMem|memory
-        disabled: disableLimit
-        label:
-          text: labels.memory
-        schema:
-          $ref: schema#/properties/spec/properties/podResources/properties/resources/properties/limits/memory
-        type: input
-      if: isEqualToModelPathValue|Standalone|/spec/mode
+          $ref: schema#/properties/spec/properties/podResources/properties/resources
+        type: resource-input-form
       label:
         text: labels.machine_profile
+      if: isEqualToModelPathValue|Standalone|/spec/mode
       show_label: true
       type: single-step-form
+    - computed: returnFalse
+      label:
+        text: Provide Authentication Credentials?
+      schema:
+        $ref: discriminator#/createAuthSecret
+      onChange: onAuthChange
+      type: switch
+    - if: showAuthPasswordField
+      label:
+        text: labels.authSecret.name
+      schema:
+        $ref: schema#/properties/spec/properties/authSecret/properties/name
+      type: input
+    - if: showAuthPasswordField
+      label:
+        text: labels.authSecret.password
+      schema:
+        $ref: schema#/properties/spec/properties/authSecret/properties/password
+      type: input
+    - label:
+        text: Configure Database?
+      schema:
+        $ref: discriminator#/configDatabase
+      onChange: clearConfiguration
+      type: switch
+    - if: isConfigDatabaseOn
+      label:
+        text: Configuration
+      schema:
+        $ref: schema#/properties/spec/properties/configuration
+      type: editor
+    - if: isToggleOn|tls
+      label:
+        text: Enable TLS?
+      schema:
+        $ref: schema#/properties/spec/properties/admin/properties/tls/properties/default
+      type: switch
+    - fetch: getAdminOptions|clusterIssuers
+      if: showIssuer
+      label:
+        text: labels.clusterIssuers
+      schema:
+        $ref: schema#/properties/spec/properties/admin/properties/clusterIssuers/properties/default
+      type: select
+    - if: isToggleOn|webUI
+      label:
+        text: Enable Web UI?
+      schema:
+        $ref: schema#/properties/spec/properties/admin/properties/webUI/properties/default
+      type: switch
+    - computed: setMonitoring
+      if: isToggleOn|monitoring
+      label:
+        text: labels.enable_monitoring
+      onChange: updateAlertValue
+      schema:
+        $ref: discriminator#/monitoring
+      type: switch
     - elements:
       - customClass: mt-10
         label:
@@ -316,29 +332,27 @@ steps:
       schema:
         $ref: schema#/properties/form/properties/alert
       show_label: true
+      if: showAlerts
       type: single-step-form
-    - alias: reusable-monitor-option
-      chart:
-        name: uibytebuildersdev-component-monitoring-option
-        version: v0.4.21
-      dataContext:
-        agent:
-          $ref: schema#/properties/spec/properties/monitoring/properties/agent
-      functionCallbacks:
-        updateAgentValue:
-          $ref: functions#/updateAgentValue
-      moduleResolver: fetchJsons
+    - label:
+        text: Sync Users?
       schema:
-        $ref: schema#/properties/spec/properties/monitoring/properties/serviceMonitor
-      type: reusable-element
-    - alias: reusable-backup-option
-      chart:
-        name: uibytebuildersdev-component-backup-option
-        version: v0.4.21
-      moduleResolver: fetchJsons
+        $ref: schema#/properties/spec/properties/syncUsers
+      type: switch
+    - if: isToggleOn|archiver
+      label:
+        text: Enable Archiver?
       schema:
-        $ref: schema#/properties/spec/properties/backup
-      type: reusable-element
+        $ref: schema#/properties/spec/properties/admin/properties/archiver/properties/default
+      type: switch
+    - computed: isBackupCluster
+      if: isToggleOn|backup
+      label:
+        text: Enable Backup?
+      onChange: onBackupSwitch
+      schema:
+        $ref: discriminator#/backup
+      type: switch
     - elements:
       - hasDescription: true
         onChange: dedicatedOnChange
