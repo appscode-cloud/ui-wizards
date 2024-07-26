@@ -72,8 +72,6 @@ steps:
       label:
         text: labels.nodeTopology
       fetch: getNodeTopology
-      refresh: true
-      required: true
       schema:
         $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/nodeTopology/properties/default
       type: select
@@ -191,6 +189,25 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/admin/properties/storageClasses/properties/default
       type: select
+    - elements:
+      - fetch: getResources|core|v1|namespaces
+        label:
+          text: labels.postgresRef.namespace
+        schema:
+          $ref: schema#/properties/spec/properties/postgresRef/properties/namespace
+        type: select
+      - fetch: getPostgresList
+        label:
+          text: labels.postgresRef.name
+        schema:
+          $ref: schema#/properties/spec/properties/postgresRef/properties/name
+        type: select
+      label:
+        text: labels.postgresRef.label
+      schema:
+        $ref: schema#/properties/spec/properties/postgresRef
+      show_label: true
+      type: single-step-form
     - computed: returnFalse
       label:
         text: Provide Authentication Credentials?
@@ -247,37 +264,13 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/admin/properties/archiver/properties/default
       type: switch
-    - computed: isBackupCluster
-      if: isToggleOn|backup
+    - computed: setMonitoring
+      if: isToggleOn|monitoring
       label:
-        text: Enable Backup?
-      onChange: onBackupSwitch
+        text: labels.enable_monitoring
+      onChange: updateAlertValue
       schema:
-        $ref: discriminator#/backup
-      type: switch
-    - elements:
-      - fetch: getResources|core|v1|namespaces
-        label:
-          text: labels.postgresRef.namespace
-        schema:
-          $ref: schema#/properties/spec/properties/postgresRef/properties/namespace
-        type: select
-      - fetch: getPostgresList
-        label:
-          text: labels.postgresRef.name
-        schema:
-          $ref: schema#/properties/spec/properties/postgresRef/properties/name
-        type: select
-      label:
-        text: labels.postgresRef.label
-      schema:
-        $ref: schema#/properties/spec/properties/postgresRef
-      show_label: true
-      type: single-step-form
-    - label:
-        text: Sync Users?
-      schema:
-        $ref: schema#/properties/spec/properties/syncUsers
+        $ref: discriminator#/monitoring
       type: switch
     - elements:
       - customClass: mt-10
@@ -302,13 +295,18 @@ steps:
         $ref: schema#/properties/form/properties/alert
       show_label: true
       type: single-step-form
-    - computed: setMonitoring
-      if: isToggleOn|monitoring
-      label:
-        text: labels.enable_monitoring
-      onChange: updateAlertValue
+    - label:
+        text: Sync Users?
       schema:
-        $ref: discriminator#/monitoring
+        $ref: schema#/properties/spec/properties/syncUsers
+      type: switch
+    - computed: isBackupCluster
+      if: isToggleOn|backup
+      label:
+        text: Enable Backup?
+      onChange: onBackupSwitch
+      schema:
+        $ref: discriminator#/backup
       type: switch
     - label:
         text: labels.configOptions
