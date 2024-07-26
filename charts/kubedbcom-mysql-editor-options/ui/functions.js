@@ -324,18 +324,6 @@ function isEqualToModelPathValue(
   return modelPathValue === value;
 }
 
-function showAuthSecretField({
-  discriminator,
-  getValue,
-  watchDependency,
-}) {
-  return !showAuthPasswordField({
-    discriminator,
-    getValue,
-    watchDependency,
-  });
-}
-
 async function getNamespaces({ axios, storeGet }) {
   const params = storeGet("/route/params");
   const { user, cluster, group, version, resource } = params;
@@ -364,31 +352,6 @@ async function getNamespaces({ axios, storeGet }) {
     console.log(e);
     return [];
   }
-}
-
-function onCreateAuthSecretChange({
-  discriminator,
-  getValue,
-  commit
-}) {
-  const createAuthSecret = getValue(discriminator, "/createAuthSecret");
-  if (createAuthSecret) {
-    commit(
-      "wizard/model$delete",
-      "/spec/authSecret/name"
-    );
-  } else if(createAuthSecret === false) {
-    commit(
-      "wizard/model$delete",
-      "/spec/authSecret/password"
-    );
-  }
-}
-
-function disableLimit({ model, getValue, watchDependency }) {
-  const modelPathValue = getValue(model, "/spec/machine");
-  watchDependency("model#/spec/machine");
-  return modelPathValue !== "custom" && !!modelPathValue;
 }
 
 function getMachineListForOptions() {
@@ -438,36 +401,6 @@ function isMachineNotCustom({ model, getValue, watchDependency }, path ) {
   const modelPathValue = getValue(model, fullpath);
   watchDependency(`model#${fullpath}`);
   return modelPathValue !== "custom" && !!modelPathValue;
-}
-
-async function fetchJsons({ axios, itemCtx }) {
-  let ui = {};
-  let language = {};
-  let functions = {};
-  const { name, sourceRef, version, packageviewUrlPrefix } = itemCtx.chart;
-  
-  try {
-    ui = await axios.get(
-      `${packageviewUrlPrefix}/create-ui.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`
-    );
-    language = await axios.get(
-      `${packageviewUrlPrefix}/language.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`
-    );
-    const functionString = await axios.get(
-      `${packageviewUrlPrefix}/functions.js?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}`
-    );
-    // declare evaluate the functionString to get the functions Object
-    const evalFunc = new Function(functionString.data || "");
-    functions = evalFunc();
-  } catch (e) {
-    console.log(e);
-  }
-
-  return {
-    ui: ui.data || {},
-    language: language.data || {},
-    functions,
-  };
 }
 
 function updateAlertValue({ commit, discriminator, getValue }) {
@@ -864,20 +797,16 @@ function clearConfiguration({ discriminator, getValue, commit }) {
 
 return {
   isVariantAvailable,
-	fetchJsons,
-	showAuthPasswordField,
-	isEqualToModelPathValue,
-	showAuthSecretField,
-	getNamespaces,
-  onCreateAuthSecretChange,
-	disableLimit,
-	getMachineListForOptions,
-	setResourceLimit,
-	setLimitsCpuOrMem,
-	setMachineToCustom,
+  showAuthPasswordField,
+  isEqualToModelPathValue,
+  getNamespaces,
+  getMachineListForOptions,
+  setResourceLimit,
+  setLimitsCpuOrMem,
+  setMachineToCustom,
   isMachineNotCustom,
-	updateAlertValue,
-	getCreateNameSpaceUrl,
+  updateAlertValue,
+  getCreateNameSpaceUrl,
   ifCapiProviderIsNotEmpty,
   ifDedicated,
   dedicatedOnChange,
