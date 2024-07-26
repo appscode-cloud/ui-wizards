@@ -146,14 +146,6 @@ form:
             val: 1800
     labels:
       release: kube-prometheus-stack
-  capi:
-    clusterName: ""
-    dedicated: false
-    namespace: ""
-    nodes: 1
-    provider: ""
-    sku: ""
-    zones: []
 metadata:
   resource:
     group: kubedb.com
@@ -165,6 +157,41 @@ metadata:
     name: RELEASE-NAME
     namespace: default
 resources:
+  autoscalingKubedbComFerretDBAutoscaler_db: # +doc-gen:break
+    apiVersion: autoscaling.kubedb.com/v1alpha1
+    kind: FerretDBAutoscaler
+    metadata:
+      name: ferretdb
+      namespace: demo
+    spec:
+      compute:
+        ferretdb:
+          maxAllowed:
+            cpu: 1
+            memory: 2Gi
+          minAllowed:
+            cpu: 400m
+            memory: 400Mi
+          podLifeTimeThreshold: 10m
+          resourceDiffPercentage: 20
+          trigger: "On"
+        nodeTopology:
+          name: standard-basv2-family
+      databaseRef:
+        name: repl
+      opsRequestOptions:
+        apply: IfReady
+        timeout: 10m
+  catalogAppscodeComFerretDBBinding_db: # +doc-gen:break
+    apiVersion: catalog.appscode.com/v1alpha1
+    kind: FerretDBBinding
+    metadata:
+      name: ferretdb
+      namespace: demo
+    spec:
+      sourceRef:
+        name: ferretdb
+        namespace: demo
   kubedbComFerretDB: # +doc-gen:break
     apiVersion: kubedb.com/v1alpha2
     kind: FerretDB
