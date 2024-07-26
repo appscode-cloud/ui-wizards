@@ -137,7 +137,7 @@ steps:
         type: input
       if: isEqualToModelPathValue|Cluster|/spec/mode
       schema:
-        $ref: schema#/properties/spec/properties/replicaSet
+        $ref: schema#/properties/spec
       type: single-step-form
     - if: showStorageSizeField
       label:
@@ -145,38 +145,6 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/persistence/properties/size
       type: input
-    - elements:
-      - label:
-          text: labels.shardNodes
-        type: label-element
-      - label:
-          text: labels.shards
-        schema:
-          $ref: schema#/properties/spec/properties/shardTopology/properties/shard/properties/shards
-        type: input
-      - label:
-          text: labels.storage.size
-        schema:
-          $ref: schema#/properties/spec/properties/shardTopology/properties/shard/properties/persistence/properties/size
-        type: input
-      - label:
-          text: labels.configServer
-        type: label-element
-      - label:
-          text: labels.storage.size
-        schema:
-          $ref: schema#/properties/spec/properties/shardTopology/properties/configServer/properties/persistence/properties/size
-        type: input
-      - label:
-          text: labels.mongos
-        type: label-element
-      - label:
-          text: labels.replicaset.number
-        schema:
-          $ref: schema#/properties/spec/properties/shardTopology/properties/mongos/properties/replicas
-        type: input
-      if: isEqualToModelPathValue|Sharded|/spec/mode
-      type: single-step-form
     - elements:
       - computed: setMachineToCustom
         fetch: getMachineListForOptions
