@@ -66,7 +66,7 @@ type PgpoolCluster struct {
 }
 
 type PgpoolAlertsSpecForm struct {
-	Alert alerts.PgpoolAlerts `json:"alert"`
+	Alert alerts.PgpoolAlert `json:"alert"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

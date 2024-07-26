@@ -1,9 +1,33 @@
-{{- $res := .Values.spec.resources -}}
 {{- $machines := .Files.Get "data/machines.yaml" | fromYaml -}}
-{{- if and .Values.spec.machine (hasKey $machines .Values.spec.machine) }}
-  {{- $res = get (get $machines .Values.spec.machine) "resources" }}
+{{- $res := dict -}}
+{{- $middleManager_res := dict -}}
+{{- $historical_res := dict -}}
+{{- $coordinator_res := dict -}}
+{{- $broker_res := dict -}}
+{{- if eq .Values.spec.mode "Topology" }}
+  {{- $middleManager_res = .Values.spec.topology.shard.podResources.resources -}}
+  {{- if and .Values.spec.topology.shard.podResources.machine (hasKey $machines .Values.spec.topology.shard.podResources.machine) }}
+    {{- $middleManager_res = get (get $machines .Values.spec.topology.shard.podResources.machine) "resources" }}
+  {{- end }}
+  {{- $historical_res = .Values.spec.topology.configServer.podResources.resources -}}
+  {{- if and .Values.spec.topology.configServer.podResources.machine (hasKey $machines .Values.spec.topology.configServer.podResources.machine) }}
+    {{- $historical_res = get (get $machines .Values.spec.topology.configServer.podResources.machine) "resources" }}
+  {{- end }}
+  {{- $coordinator_res = .Values.spec.topology.mongos.podResources.resources -}}
+  {{- if and .Values.spec.topology.mongos.podResources.machine (hasKey $machines .Values.spec.topology.mongos.podResources.machine) }}
+    {{- $coordinator_res = get (get $machines .Values.spec.topology.mongos.podResources.machine) "resources" }}
+  {{- end }}
+  {{- $broker_res = .Values.spec.topology.mongos.podResources.resources -}}
+  {{- if and .Values.spec.topology.mongos.podResources.machine (hasKey $machines .Values.spec.topology.mongos.podResources.machine) }}
+    {{- $broker_res = get (get $machines .Values.spec.topology.mongos.podResources.machine) "resources" }}
+  {{- end }}
+{{- else }}
+  {{- $res = .Values.spec.podResources.resources -}}
+  {{- if and .Values.spec.podResources.machine (hasKey $machines .Values.spec.podResources.machine) }}
+    {{- $res = get (get $machines .Values.spec.podResources.machine) "resources" }}
+  {{- end }}
 {{- end }}
-{{ $poolName := printf "%s-%s-%s" .Values.form.capi.clusterName .Release.Namespace (include "kubedbcom-druid-editor-options.fullname" .) }}
+{{ $poolName := printf "my-capi-cluster-%s-%s" .Release.Namespace (include "kubedbcom-mongodb-editor-options.fullname" .) }}
 
 apiVersion: kubedb.com/v1alpha2
 kind: Druid
@@ -29,14 +53,10 @@ spec:
       requests:
         storage: {{ .Values.spec.persistence.size }}
 {{- end }}
-{{- if eq .Values.spec.mode "Replicaset" }}
-  replicaSet:
-    name: {{ .Values.spec.replicaSet.name }}
-{{- end }}
-{{- if eq .Values.spec.mode "Sharded" }}
-  shardTopology:
+{{- if eq .Values.spec.mode "Topology" }}
+  topology:
     configServer:
-      replicas: {{ .Values.spec.shardTopology.configServer.replicas }}
+      replicas: {{ .Values.spec.topology.configServer.replicas }}
       podTemplate:
         spec:
           resources:
@@ -53,10 +73,10 @@ spec:
       storage:
         resources:
           requests:
-            storage: {{ .Values.spec.shardTopology.configServer.persistence.size }}
+            storage: {{ .Values.spec.topology.configServer.persistence.size }}
         storageClassName: {{ .Values.spec.storageClass.name }}
     mongos:
-      replicas: {{ .Values.spec.shardTopology.mongos.replicas }}
+      replicas: {{ .Values.spec.topology.mongos.replicas }}
       podTemplate:
         spec:
           resources:
@@ -71,8 +91,8 @@ spec:
               effect: "NoSchedule"
           {{- end }}
     shard:
-      shards: {{ .Values.spec.shardTopology.shard.shards }}
-      replicas: {{ .Values.spec.shardTopology.shard.replicas }}
+      shards: {{ .Values.spec.topology.shard.shards }}
+      replicas: {{ .Values.spec.topology.shard.replicas }}
       podTemplate:
         spec:
           resources:
@@ -89,35 +109,68 @@ spec:
       storage:
         resources:
           requests:
-            storage: {{ .Values.spec.shardTopology.shard.persistence.size }}
+            storage: {{ .Values.spec.topology.shard.persistence.size }}
         storageClassName: {{ .Values.spec.storageClass.name }}
 {{- else }}
   podTemplate:
     spec:
-      resources:
-        {{- toYaml $res | nindent 8 }}
-      {{- if and .Values.form.capi.provider .Values.form.capi.dedicated }}
+      containers:
+        - name: mongodb
+          resources:
+            {{- toYaml $res | nindent 12 }}
+      podPlacementPolicy:
+        name: {{ .Values.spec.admin.clusterTier.placement.default }}
+      {{- if eq .Values.spec.admin.deployment.default "Dedicated" }}
       nodeSelector:
-        nodes.klusters.dev/pool: {{ $poolName }}
+        app: mongodbs.kubedb.com
+        instance: {{ include "kubedbcom-mongodb-editor-options.fullname" . }}
+        namespace: {{ .Release.Namespace }}
+        nodepool: {{ .Values.spec.admin.clusterTier.nodeTopology.default }}
       tolerations:
-        - key: dedicated
+        - key: app
           operator: "Equal"
-          value: "true"
+          value: "mongodbs.kubedb.com"
+          effect: "NoSchedule"
+        - key: instance
+          operator: "Equal"
+          value: {{ include "kubedbcom-mongodb-editor-options.fullname" . }}
+          effect: "NoSchedule"
+        - key: namespace
+          operator: "Equal"
+          value: {{ .Release.Namespace }}
+          effect: "NoSchedule"
+        - key: nodepool
+          operator: "Equal"
+          value: {{ .Values.spec.admin.clusterTier.nodeTopology.default }}
           effect: "NoSchedule"
       {{- end }}
 {{- end }}
   deletionPolicy: {{ .Values.spec.deletionPolicy }}
-  clusterAuthMode: {{ .Values.spec.clusterAuthMode }}
-  sslMode: {{ .Values.spec.sslMode }}
 {{- if .Values.spec.authSecret.name }}
   authSecret:
     name: {{ .Values.spec.authSecret.name }}
 {{- end }}
-{{- if (and .Values.spec.monitoring .Values.spec.monitoring.agent) }}
+{{- if .Values.spec.authSecret.password }}
+  authSecret:
+    name: {{ include "kubedbcom-mongodb-editor-options.fullname" . }}-auth
+{{- end }}
+{{- if .Values.spec.configuration }}
+  configSecret:
+    name: {{ include "kubedbcom-mongodb-editor-options.fullname" . }}-config
+{{- end }}
+{{- if .Values.spec.admin.tls.default }}
+  tls:
+    issuerRef:
+      apiGroup: "cert-manager.io"
+      kind: ClusterIssuer
+      name: {{ .Values.spec.admin.clusterIssuers.default }}
+  sslMode: requireSSL
+{{- end }}
+{{- if (and .Values.spec.admin.monitoring .Values.spec.admin.monitoring.agent) }}
   monitor:
-    agent: {{ .Values.spec.monitoring.agent }}
+    agent: {{ .Values.spec.admin.monitoring.agent }}
     prometheus:
-    {{- with .Values.spec.monitoring.exporter }}
+    {{- with .Values.spec.admin.monitoring.exporter }}
       exporter:
         args:
           - --compatible-mode
@@ -127,5 +180,5 @@ spec:
       serviceMonitor:
         interval: 30s
         labels:
-          {{- toYaml .Values.spec.monitoring.serviceMonitor.labels | nindent 10 }}
+          {{- toYaml .Values.spec.admin.monitoring.serviceMonitor.labels | nindent 10 }}
 {{- end }}
