@@ -258,12 +258,6 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/admin/properties/webUI/properties/default
       type: switch
-    - if: isToggleOn|archiver
-      label:
-        text: Enable Archiver?
-      schema:
-        $ref: schema#/properties/spec/properties/admin/properties/archiver/properties/default
-      type: switch
     - computed: setMonitoring
       if: isToggleOn|monitoring
       label:
@@ -294,11 +288,18 @@ steps:
       schema:
         $ref: schema#/properties/form/properties/alert
       show_label: true
+      if: showAlerts
       type: single-step-form
     - label:
         text: Sync Users?
       schema:
         $ref: schema#/properties/spec/properties/syncUsers
+      type: switch
+    - if: isToggleOn|archiver
+      label:
+        text: Enable Archiver?
+      schema:
+        $ref: schema#/properties/spec/properties/admin/properties/archiver/properties/default
       type: switch
     - computed: isBackupCluster
       if: isToggleOn|backup
