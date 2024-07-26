@@ -109,6 +109,15 @@ resources:
       sourceRef:
         name: solr
         namespace: demo
+  certManagerIoIssuer_ca: # +doc-gen:break
+    apiVersion: cert-manager.io/v1
+    kind: Issuer
+    metadata:
+      name: solr-ca
+      namespace: demo
+    spec:
+      ca:
+        secretName: solr-ca
   kubedbComSolr: # +doc-gen:break
     apiVersion: kubedb.com/v1alpha2
     kind: Solr
@@ -235,3 +244,44 @@ resources:
       zookeeperRef:
         name: zookeeper-prod
         namespace: zookeeper
+  monitoringCoreosComServiceMonitor: # +doc-gen:break
+    apiVersion: monitoring.coreos.com/v1
+    kind: ServiceMonitor
+    metadata:
+      name: solr
+      namespace: demo
+    spec:
+      endpoints:
+        - honorLabels: true
+          interval: 30s
+          path: /metrics
+          port: metrics
+      namespaceSelector:
+        matchNames:
+          - demo
+      selector:
+        matchLabels:
+          app.kubernetes.io/instance: solr
+          app.kubernetes.io/name: solrs.kubedb.com
+  secret_auth: # +doc-gen:break
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: solr-auth
+      namespace: demo
+    stringData:
+      password: thisIs1StrongPassword
+      username: root
+    type: Opaque
+  secret_config: # +doc-gen:break
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: solr-config
+      namespace: demo
+    stringData:
+      solr.cnf: |
+        [mysqld]
+        max_connections = 200
+        read_buffer_size = 1048576
+    type: Opaque

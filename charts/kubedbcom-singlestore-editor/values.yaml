@@ -149,6 +149,15 @@ resources:
       sourceRef:
         name: singlestore
         namespace: demo
+  certManagerIoIssuer_ca: # +doc-gen:break
+    apiVersion: cert-manager.io/v1
+    kind: Issuer
+    metadata:
+      name: singlestore-ca
+      namespace: demo
+    spec:
+      ca:
+        secretName: singlestore-ca
   kubedbComSinglestore: # +doc-gen:break
     apiVersion: kubedb.com/v1alpha2
     kind: Singlestore
@@ -221,3 +230,44 @@ resources:
                 storage: 10Gi
             storageClassName: standard-rwo
       version: 8.1.32
+  monitoringCoreosComServiceMonitor: # +doc-gen:break
+    apiVersion: monitoring.coreos.com/v1
+    kind: ServiceMonitor
+    metadata:
+      name: singlestore
+      namespace: demo
+    spec:
+      endpoints:
+        - honorLabels: true
+          interval: 30s
+          path: /metrics
+          port: metrics
+      namespaceSelector:
+        matchNames:
+          - demo
+      selector:
+        matchLabels:
+          app.kubernetes.io/instance: singlestore
+          app.kubernetes.io/name: singlestores.kubedb.com
+  secret_auth: # +doc-gen:break
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: singlestore-auth
+      namespace: demo
+    stringData:
+      password: thisIs1StrongPassword
+      username: root
+    type: Opaque
+  secret_config: # +doc-gen:break
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: singlestore-config
+      namespace: demo
+    stringData:
+      singlestore.cnf: |
+        [mysqld]
+        max_connections = 200
+        read_buffer_size = 1048576
+    type: Opaque
