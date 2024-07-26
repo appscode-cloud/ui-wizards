@@ -38,7 +38,7 @@ steps:
       label:
         text: labels.database.version
       schema:
-        $ref: schema#/properties/spec/properties/admin/properties/databases/properties/ProxySQL/properties/versions/default
+        $ref: schema#/properties/spec/properties/admin/properties/databases/properties/ProxySQL/properties/versions/properties/default
       type: select
     - if: isToggleOn|deployment
       hasDescription: true
@@ -163,6 +163,16 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/admin/properties/storageClasses/properties/default
       type: select
+    - label:
+        text: labels.backend_section
+      type: label-element
+    - fetch: getAppBindings
+      label:
+        text: labels.backend
+      refresh: true
+      schema:
+        $ref: schema#/properties/spec/properties/backend
+      type: select
     - computed: returnFalse
       label:
         text: Provide Authentication Credentials?
@@ -213,22 +223,6 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/admin/properties/webUI/properties/default
       type: switch
-    - if: isToggleOn|archiver
-      label:
-        text: Enable Archiver?
-      schema:
-        $ref: schema#/properties/spec/properties/admin/properties/archiver/properties/default
-      type: switch
-    - label:
-        text: labels.backend_section
-      type: label-element
-    - fetch: getAppBindings
-      label:
-        text: labels.backend
-      refresh: true
-      schema:
-        $ref: schema#/properties/spec/properties/backend
-      type: select
     - label:
         text: labels.sync_users_question
       schema:
@@ -264,7 +258,14 @@ steps:
       schema:
         $ref: schema#/properties/form/properties/alert
       show_label: true
+      if: showAlerts
       type: single-step-form
+    - if: isToggleOn|archiver
+      label:
+        text: Enable Archiver?
+      schema:
+        $ref: schema#/properties/spec/properties/admin/properties/archiver/properties/default
+      type: switch
     - computed: isBackupCluster
       if: isToggleOn|backup
       label:
@@ -273,7 +274,6 @@ steps:
       schema:
         $ref: discriminator#/backup
       type: switch
-    
     - elements:
       - hasDescription: true
         onChange: dedicatedOnChange
