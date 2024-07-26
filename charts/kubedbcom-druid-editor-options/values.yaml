@@ -22,8 +22,6 @@ spec:
   # Labels to add to all the template objects
   labels: {}
 
-  # Standalone, Sharded
-  mode: Standalone
   topology:
     middleManagers:
       replicas: 3
@@ -62,17 +60,18 @@ spec:
             cpu: 500m
             memory: 1Gi
 
+  deepStorage:
+    # s3;google;azure;hdfs
+    type: s3
+    configSecret: deep-storage-config
+  metadataStorage:
+    name: mysql-cluster
+    namespace: druid
+  zookeeperRef:
+    name: zk-cluster
+    namespace: druid
+
   deletionPolicy: WipeOut
-
-  persistence:
-    size: 10Gi
-  podResources:
-    machine: ""
-
-    resources:
-      limits:
-        cpu: 500m
-        memory: 1Gi
 
   authSecret:
     name: ""

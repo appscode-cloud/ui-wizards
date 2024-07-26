@@ -1,33 +1,49 @@
 {{- $machines := .Files.Get "data/machines.yaml" | fromYaml -}}
-{{- $res := dict -}}
-{{- $middleManager_res := dict -}}
-{{- $historical_res := dict -}}
-{{- $coordinator_res := dict -}}
-{{- $broker_res := dict -}}
-{{- if eq .Values.spec.mode "Topology" }}
-  {{- $middleManager_res = .Values.spec.topology.shard.podResources.resources -}}
-  {{- if and .Values.spec.topology.shard.podResources.machine (hasKey $machines .Values.spec.topology.shard.podResources.machine) }}
-    {{- $middleManager_res = get (get $machines .Values.spec.topology.shard.podResources.machine) "resources" }}
-  {{- end }}
-  {{- $historical_res = .Values.spec.topology.configServer.podResources.resources -}}
-  {{- if and .Values.spec.topology.configServer.podResources.machine (hasKey $machines .Values.spec.topology.configServer.podResources.machine) }}
-    {{- $historical_res = get (get $machines .Values.spec.topology.configServer.podResources.machine) "resources" }}
-  {{- end }}
-  {{- $coordinator_res = .Values.spec.topology.mongos.podResources.resources -}}
-  {{- if and .Values.spec.topology.mongos.podResources.machine (hasKey $machines .Values.spec.topology.mongos.podResources.machine) }}
-    {{- $coordinator_res = get (get $machines .Values.spec.topology.mongos.podResources.machine) "resources" }}
-  {{- end }}
-  {{- $broker_res = .Values.spec.topology.mongos.podResources.resources -}}
-  {{- if and .Values.spec.topology.mongos.podResources.machine (hasKey $machines .Values.spec.topology.mongos.podResources.machine) }}
-    {{- $broker_res = get (get $machines .Values.spec.topology.mongos.podResources.machine) "resources" }}
-  {{- end }}
-{{- else }}
-  {{- $res = .Values.spec.podResources.resources -}}
-  {{- if and .Values.spec.podResources.machine (hasKey $machines .Values.spec.podResources.machine) }}
-    {{- $res = get (get $machines .Values.spec.podResources.machine) "resources" }}
-  {{- end }}
+{{- $middleManager_res := .Values.spec.topology.middleManagers.podResources.resources -}}
+{{- if and .Values.spec.topology.middleManagers.podResources.machine (hasKey $machines .Values.spec.topology.middleManagers.podResources.machine) }}
+  {{- $middleManager_res = get (get $machines .Values.spec.topology.middleManagers.podResources.machine) "resources" }}
 {{- end }}
-{{ $poolName := printf "my-capi-cluster-%s-%s" .Release.Namespace (include "kubedbcom-mongodb-editor-options.fullname" .) }}
+{{- $historical_res := .Values.spec.topology.historicals.podResources.resources -}}
+{{- if and .Values.spec.topology.historicals.podResources.machine (hasKey $machines .Values.spec.topology.historicals.podResources.machine) }}
+  {{- $historical_res = get (get $machines .Values.spec.topology.historicals.podResources.machine) "resources" }}
+{{- end }}
+{{- $coordinator_res := .Values.spec.topology.coordinators.podResources.resources -}}
+{{- if and .Values.spec.topology.coordinators.podResources.machine (hasKey $machines .Values.spec.topology.coordinators.podResources.machine) }}
+  {{- $coordinator_res = get (get $machines .Values.spec.topology.coordinators.podResources.machine) "resources" }}
+{{- end }}
+{{- $broker_res := .Values.spec.topology.coordinators.podResources.resources -}}
+{{- if and .Values.spec.topology.coordinators.podResources.machine (hasKey $machines .Values.spec.topology.coordinators.podResources.machine) }}
+  {{- $broker_res = get (get $machines .Values.spec.topology.coordinators.podResources.machine) "resources" }}
+{{- end }}
+
+{{- define "common.placement" -}}
+podPlacementPolicy:
+  name: {{ .Values.spec.admin.clusterTier.placement.default }}
+{{- if eq .Values.spec.admin.deployment.default "Dedicated" }}
+nodeSelector:
+  app: druids.kubedb.com
+  instance: {{ include "kubedbcom-druid-editor-options.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  nodepool: {{ .Values.spec.admin.clusterTier.nodeTopology.default }}
+tolerations:
+  - key: app
+    operator: "Equal"
+    value: "druids.kubedb.com"
+    effect: "NoSchedule"
+  - key: instance
+    operator: "Equal"
+    value: {{ include "kubedbcom-druid-editor-options.fullname" . }}
+    effect: "NoSchedule"
+  - key: namespace
+    operator: "Equal"
+    value: {{ .Release.Namespace }}
+    effect: "NoSchedule"
+  - key: nodepool
+    operator: "Equal"
+    value: {{ .Values.spec.admin.clusterTier.nodeTopology.default }}
+    effect: "NoSchedule"
+{{- end }}
+{{- end }}
 
 apiVersion: kubedb.com/v1alpha2
 kind: Druid
@@ -41,110 +57,65 @@ metadata:
     {{- include "kubedbcom-druid-editor-options.annotations" . | nindent 4 }}
 {{- end }}
 spec:
-  version: {{ .Values.spec.version | quote }}
-{{- if or (eq .Values.spec.mode "Standalone") (eq .Values.spec.mode "Replicaset") }}
-  replicas: {{ (eq .Values.spec.mode "Replicaset") | ternary .Values.spec.replicaSet.replicas 1 }}
-  storageType: Durable
-  storage:
-    storageClassName: {{ .Values.spec.storageClass.name }}
-    accessModes:
-    - ReadWriteOnce
-    resources:
-      requests:
-        storage: {{ .Values.spec.persistence.size }}
-{{- end }}
-{{- if eq .Values.spec.mode "Topology" }}
+  version: {{ .Values.spec.admin.databases.Druid.versions.default | quote }}
   topology:
-    configServer:
-      replicas: {{ .Values.spec.topology.configServer.replicas }}
+    historicals:
+      replicas: {{ .Values.spec.topology.historicals.replicas }}
       podTemplate:
         spec:
-          resources:
-            {{- toYaml $res | nindent 12 }}
-          {{- if and .Values.form.capi.provider .Values.form.capi.dedicated }}
-          nodeSelector:
-            nodes.klusters.dev/pool: {{ $poolName }}
-          tolerations:
-            - key: dedicated
-              operator: "Equal"
-              value: "true"
-              effect: "NoSchedule"
-          {{- end }}
+          containers:
+          - name: druid
+            resources:
+              {{- toYaml $historical_res | nindent 14 }}
+          {{- include "common.placement" . | nindent 10 }}
       storage:
         resources:
           requests:
-            storage: {{ .Values.spec.topology.configServer.persistence.size }}
-        storageClassName: {{ .Values.spec.storageClass.name }}
-    mongos:
-      replicas: {{ .Values.spec.topology.mongos.replicas }}
+            storage: {{ .Values.spec.topology.historicals.persistence.size }}
+        storageClassName: {{ .Values.spec.admin.storageClasses.default }}
+    middleManagers:
+      replicas: {{ .Values.spec.topology.middleManagers.replicas }}
       podTemplate:
         spec:
-          resources:
-            {{- toYaml $res | nindent 12 }}
-          {{- if and .Values.form.capi.provider .Values.form.capi.dedicated }}
-          nodeSelector:
-            nodes.klusters.dev/pool: {{ $poolName }}
-          tolerations:
-            - key: dedicated
-              operator: "Equal"
-              value: "true"
-              effect: "NoSchedule"
-          {{- end }}
-    shard:
-      shards: {{ .Values.spec.topology.shard.shards }}
-      replicas: {{ .Values.spec.topology.shard.replicas }}
-      podTemplate:
-        spec:
-          resources:
-            {{- toYaml $res | nindent 12 }}
-          {{- if and .Values.form.capi.provider .Values.form.capi.dedicated }}
-          nodeSelector:
-            nodes.klusters.dev/pool: {{ $poolName }}
-          tolerations:
-            - key: dedicated
-              operator: "Equal"
-              value: "true"
-              effect: "NoSchedule"
-          {{- end }}
+          containers:
+          - name: druid
+            resources:
+              {{- toYaml $middleManager_res | nindent 14 }}
+          {{- include "common.placement" . | nindent 10 }}
       storage:
         resources:
           requests:
-            storage: {{ .Values.spec.topology.shard.persistence.size }}
-        storageClassName: {{ .Values.spec.storageClass.name }}
-{{- else }}
-  podTemplate:
-    spec:
-      containers:
-        - name: mongodb
-          resources:
-            {{- toYaml $res | nindent 12 }}
-      podPlacementPolicy:
-        name: {{ .Values.spec.admin.clusterTier.placement.default }}
-      {{- if eq .Values.spec.admin.deployment.default "Dedicated" }}
-      nodeSelector:
-        app: mongodbs.kubedb.com
-        instance: {{ include "kubedbcom-mongodb-editor-options.fullname" . }}
-        namespace: {{ .Release.Namespace }}
-        nodepool: {{ .Values.spec.admin.clusterTier.nodeTopology.default }}
-      tolerations:
-        - key: app
-          operator: "Equal"
-          value: "mongodbs.kubedb.com"
-          effect: "NoSchedule"
-        - key: instance
-          operator: "Equal"
-          value: {{ include "kubedbcom-mongodb-editor-options.fullname" . }}
-          effect: "NoSchedule"
-        - key: namespace
-          operator: "Equal"
-          value: {{ .Release.Namespace }}
-          effect: "NoSchedule"
-        - key: nodepool
-          operator: "Equal"
-          value: {{ .Values.spec.admin.clusterTier.nodeTopology.default }}
-          effect: "NoSchedule"
-      {{- end }}
-{{- end }}
+            storage: {{ .Values.spec.topology.middleManagers.persistence.size }}
+        storageClassName: {{ .Values.spec.admin.storageClasses.default }}
+    coordinators:
+      replicas: {{ .Values.spec.topology.coordinators.replicas }}
+      podTemplate:
+        spec:
+          containers:
+          - name: druid
+            resources:
+              {{- toYaml $coordinator_res | nindent 14 }}
+          {{- include "common.placement" . | nindent 10 }}
+    brokers:
+      replicas: {{ .Values.spec.topology.brokers.replicas }}
+      podTemplate:
+        spec:
+          containers:
+          - name: druid
+            resources:
+              {{- toYaml $broker_res | nindent 14 }}
+          {{- include "common.placement" . | nindent 10 }}
+  deepStorage:
+    type: {{ .Values.spec.deepStorage.type }}
+    configSecret:
+      name: {{ .Values.spec.deepStorage.configSecret }}
+  metadataStorage:
+    name: {{ .Values.spec.metadataStorage.name }}
+    namespace: {{ .Values.spec.metadataStorage.namespace }}
+    createTables: true
+  zookeeperRef:
+    name: {{ .Values.spec.zookeeperRef.name }}
+    namespace: {{ .Values.spec.zookeeperRef.namespace }}
   deletionPolicy: {{ .Values.spec.deletionPolicy }}
 {{- if .Values.spec.authSecret.name }}
   authSecret:
@@ -152,11 +123,11 @@ spec:
 {{- end }}
 {{- if .Values.spec.authSecret.password }}
   authSecret:
-    name: {{ include "kubedbcom-mongodb-editor-options.fullname" . }}-auth
+    name: {{ include "kubedbcom-druid-editor-options.fullname" . }}-auth
 {{- end }}
 {{- if .Values.spec.configuration }}
   configSecret:
-    name: {{ include "kubedbcom-mongodb-editor-options.fullname" . }}-config
+    name: {{ include "kubedbcom-druid-editor-options.fullname" . }}-config
 {{- end }}
 {{- if .Values.spec.admin.tls.default }}
   tls:
@@ -172,8 +143,6 @@ spec:
     prometheus:
     {{- with .Values.spec.admin.monitoring.exporter }}
       exporter:
-        args:
-          - --compatible-mode
         resources:
           {{- toYaml .resources | nindent 10 }}
     {{- end }}

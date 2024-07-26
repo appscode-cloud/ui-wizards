@@ -45,19 +45,16 @@ type KubedbcomDruidEditorOptionsSpecSpec struct {
 	// +optional
 	Annotations map[string]string `json:"annotations"`
 	// +optional
-	Labels         map[string]string `json:"labels"`
-	Mode           DruidMode         `json:"mode"`
-	Topology       DruidTopology     `json:"topology"`
-	Persistence    Persistence       `json:"persistence"`
-	PodResources   PodResources      `json:"podResources"`
-	AuthSecret     AuthSecret        `json:"authSecret"`
-	DeletionPolicy DeletionPolicy    `json:"deletionPolicy"`
-	Configuration  string            `json:"configuration"`
-	Admin          AdminOptions      `json:"admin"`
+	Labels          map[string]string `json:"labels"`
+	Topology        DruidTopology     `json:"topology"`
+	DeepStorage     DruidDeepStorage  `json:"deepStorage"`
+	MetadataStorage ObjectReference   `json:"metadataStorage"`
+	ZookeeperRef    ObjectReference   `json:"zookeeperRef"`
+	AuthSecret      AuthSecret        `json:"authSecret"`
+	DeletionPolicy  DeletionPolicy    `json:"deletionPolicy"`
+	Configuration   string            `json:"configuration"`
+	Admin           AdminOptions      `json:"admin"`
 }
-
-// +kubebuilder:validation:Enum=Standalone;Topology
-type DruidMode string
 
 type DruidNode struct {
 	Replicas     int          `json:"replicas"`
@@ -75,6 +72,14 @@ type DruidTopology struct {
 	Historicals    *DruidDataNode `json:"historicals"`
 	Brokers        *DruidNode     `json:"brokers"`
 }
+
+type DruidDeepStorage struct {
+	Type         DruidDeepStorageType `json:"type"`
+	ConfigSecret string               `json:"configSecret"`
+}
+
+// +kubebuilder:validation:Enum=s3;google;azure;hdfs
+type DruidDeepStorageType string
 
 type DruidAlertsSpecForm struct {
 	Alert alerts.DruidAlert `json:"alert"`
