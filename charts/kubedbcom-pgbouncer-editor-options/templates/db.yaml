@@ -58,6 +58,8 @@ spec:
           value: {{ .Values.spec.admin.clusterTier.nodeTopology.default }}
           effect: "NoSchedule"
       {{- end }}
+  database:
+    {{- toYaml .Values.spec.database | nindent 4 }}
   deletionPolicy: {{ .Values.spec.deletionPolicy }}
 {{- if .Values.spec.authSecret.name }}
   authSecret:
@@ -85,8 +87,6 @@ spec:
     prometheus:
     {{- with .Values.spec.admin.monitoring.exporter }}
       exporter:
-        args:
-          - --compatible-mode
         resources:
           {{- toYaml .resources | nindent 10 }}
     {{- end }}
