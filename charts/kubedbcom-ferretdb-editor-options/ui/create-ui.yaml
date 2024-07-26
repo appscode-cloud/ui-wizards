@@ -123,27 +123,19 @@ steps:
       - description: options.database.mode.Standalone.description
         text: options.database.mode.Standalone.label
         value: Standalone
-      - description: options.database.mode.Replicaset.description
-        text: options.database.mode.Replicaset.label
-        value: Replicaset
-      - description: options.database.mode.Sharded.description
-        text: options.database.mode.Sharded.label
-        value: Sharded
+      - description: options.database.mode.Cluster.description
+        text: options.database.mode.Cluster.label
+        value: Cluster
       schema:
         $ref: schema#/properties/spec/properties/mode
       type: radio
     - elements:
       - label:
-          text: labels.replicaset.name
-        schema:
-          $ref: schema#/properties/spec/properties/replicaSet/properties/name
-        type: input
-      - label:
           text: labels.replicaset.number
         schema:
-          $ref: schema#/properties/spec/properties/replicaSet/properties/replicas
+          $ref: schema#/properties/spec/properties/replicas
         type: input
-      if: isEqualToModelPathValue|Replicaset|/spec/mode
+      if: isEqualToModelPathValue|Cluster|/spec/mode
       schema:
         $ref: schema#/properties/spec/properties/replicaSet
       type: single-step-form

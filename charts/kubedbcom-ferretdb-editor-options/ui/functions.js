@@ -345,7 +345,7 @@ function showAuthSecretField({
 function showStorageSizeField({ model, getValue, watchDependency }) {
   const modelPathValue = getValue(model, "/spec/mode");
   watchDependency("model#/spec/mode");
-  const validType = ["Standalone", "Replicaset"];
+  const validType = ["Standalone", "Cluster"];
   return validType.includes(modelPathValue);
 }
 
