@@ -219,14 +219,6 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/admin/properties/archiver/properties/default
       type: switch
-    - computed: isBackupCluster
-      if: isToggleOn|backup
-      label:
-        text: Enable Backup?
-      onChange: onBackupSwitch
-      schema:
-        $ref: discriminator#/backup
-      type: switch
     - label:
         text: labels.backend_section
       type: label-element
@@ -241,6 +233,14 @@ steps:
         text: labels.sync_users_question
       schema:
         $ref: schema#/properties/spec/properties/syncUsers
+      type: switch
+    - computed: setMonitoring
+      if: isToggleOn|monitoring
+      label:
+        text: labels.enable_monitoring
+      onChange: updateAlertValue
+      schema:
+        $ref: discriminator#/monitoring
       type: switch
     - elements:
       - customClass: mt-10
@@ -265,20 +265,15 @@ steps:
         $ref: schema#/properties/form/properties/alert
       show_label: true
       type: single-step-form
-    - alias: reusable-monitor-option
-      chart:
-        name: uibytebuildersdev-component-monitoring-option
-        version: v0.4.21
-      dataContext:
-        agent:
-          $ref: schema#/properties/spec/properties/monitoring/properties/agent
-      functionCallbacks:
-        updateAgentValue:
-          $ref: functions#/updateAgentValue
-      moduleResolver: fetchJsons
+    - computed: isBackupCluster
+      if: isToggleOn|backup
+      label:
+        text: Enable Backup?
+      onChange: onBackupSwitch
       schema:
-        $ref: schema#/properties/spec/properties/monitoring/properties/serviceMonitor
-      type: reusable-element
+        $ref: discriminator#/backup
+      type: switch
+    
     - elements:
       - hasDescription: true
         onChange: dedicatedOnChange
