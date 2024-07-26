@@ -38,7 +38,7 @@ steps:
       label:
         text: labels.database.version
       schema:
-        $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Pgpool/properties/versions/default
+        $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Pgpool/properties/versions/properties/default
       type: select
     - if: isToggleOn|deployment
       hasDescription: true
@@ -302,61 +302,14 @@ steps:
         $ref: schema#/properties/form/properties/alert
       show_label: true
       type: single-step-form
-    - alias: reusable-monitor-option
-      chart:
-        name: uibytebuildersdev-component-monitoring-option
-        version: v0.4.21
-      dataContext:
-        agent:
-          $ref: schema#/properties/spec/properties/monitoring/properties/agent
-      functionCallbacks:
-        updateAgentValue:
-          $ref: functions#/updateAgentValue
-      moduleResolver: fetchJsons
-      schema:
-        $ref: schema#/properties/spec/properties/monitoring/properties/serviceMonitor
-      type: reusable-element
-    - elements:
-      - hasDescription: true
-        onChange: dedicatedOnChange
-        options:
-        - description: Create the database in shared node pool
-          text: Shared node pool
-          value: false
-        - description: Create a dedicated node pool for the database
-          text: Dedicated node pool
-          value: true
-        schema:
-          $ref: schema#/properties/form/properties/capi/properties/dedicated
-        type: radio
-      - fetch: getZones
-        if: showMultiselectZone
-        label:
-          text: Zones
-        onChange: zonesOnChange
-        schema:
-          $ref: schema#/properties/form/properties/capi/properties/zones
-        type: multiselect
-      - fetch: getZones
-        if: showSelectZone
-        label:
-          text: Zones
-        onChange: zonesOnChange
-        schema:
-          $ref: schema#/properties/form/properties/capi/properties/zones
-        type: select
-      - fetch: getSKU
-        if: ifZones
-        label:
-          text: SKU
-        schema:
-          $ref: schema#/properties/form/properties/capi/properties/sku
-        type: select
-      if: ifCapiProviderIsNotEmpty
+    - computed: setMonitoring
+      if: isToggleOn|monitoring
       label:
-        text: Database Profile
-      show_label: true
-      type: single-step-form
+        text: labels.enable_monitoring
+      onChange: updateAlertValue
+      schema:
+        $ref: discriminator#/monitoring
+      type: switch
     - label:
         text: labels.configOptions
       type: label-element
