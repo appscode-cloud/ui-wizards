@@ -226,11 +226,13 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/admin/properties/webUI/properties/default
       type: switch
-    - if: isToggleOn|archiver
+    - computed: setMonitoring
+      if: isToggleOn|monitoring
       label:
-        text: Enable Archiver?
+        text: labels.enable_monitoring
+      onChange: updateAlertValue
       schema:
-        $ref: schema#/properties/spec/properties/admin/properties/archiver/properties/default
+        $ref: discriminator#/monitoring
       type: switch
     - elements:
       - customClass: mt-10
@@ -254,21 +256,14 @@ steps:
       schema:
         $ref: schema#/properties/form/properties/alert
       show_label: true
+      if: showAlerts
       type: single-step-form
-    - alias: reusable-monitor-option
-      chart:
-        name: uibytebuildersdev-component-monitoring-option
-        version: v0.4.21
-      dataContext:
-        agent:
-          $ref: schema#/properties/spec/properties/monitoring/properties/agent
-      functionCallbacks:
-        updateAgentValue:
-          $ref: functions#/updateAgentValue
-      moduleResolver: fetchJsons
+    - if: isToggleOn|archiver
+      label:
+        text: Enable Archiver?
       schema:
-        $ref: schema#/properties/spec/properties/monitoring/properties/serviceMonitor
-      type: reusable-element
+        $ref: schema#/properties/spec/properties/admin/properties/archiver/properties/default
+      type: switch
     - computed: isBackupCluster
       if: isToggleOn|backup
       label:
