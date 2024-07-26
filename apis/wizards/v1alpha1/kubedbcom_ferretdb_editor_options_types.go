@@ -46,6 +46,7 @@ type KubedbcomFerretdbEditorOptionsSpecSpec struct {
 	Annotations map[string]string `json:"annotations"`
 	// +optional
 	Labels            map[string]string `json:"labels"`
+	Mode              FerretDBMode      `json:"mode"`
 	Replicas          int               `json:"replicas"`
 	PostgresRef       ObjectReference   `json:"postgresRef"`
 	ExternallyManaged bool              `json:"externallyManaged"`
@@ -56,6 +57,9 @@ type KubedbcomFerretdbEditorOptionsSpecSpec struct {
 	Configuration     string            `json:"configuration"`
 	Admin             AdminOptions      `json:"admin"`
 }
+
+// +kubebuilder:validation:Enum=Standalone;Cluster
+type FerretDBMode string
 
 type FerretdbAlertsSpecForm struct {
 	Alert alerts.PostgresAlert `json:"alert"`

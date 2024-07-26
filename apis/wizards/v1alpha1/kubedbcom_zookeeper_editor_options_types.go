@@ -46,6 +46,7 @@ type KubedbcomZookeeperEditorOptionsSpecSpec struct {
 	Annotations map[string]string `json:"annotations"`
 	// +optional
 	Labels         map[string]string `json:"labels"`
+	Mode           ZooKeeperMode     `json:"mode"`
 	Replicas       int               `json:"replicas"`
 	Persistence    Persistence       `json:"persistence"`
 	PodResources   PodResources      `json:"podResources"`

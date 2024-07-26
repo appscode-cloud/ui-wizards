@@ -26,37 +26,38 @@ spec:
     resources:
       requests:
         storage: {{ .Values.spec.persistence.size }}
-  spec:
-    containers:
-      - name: ferretdb
-        resources:
-          {{- toYaml $res | nindent 12 }}
-    podPlacementPolicy:
-      name: {{ .Values.spec.admin.clusterTier.placement.default }}
-    {{- if eq .Values.spec.admin.deployment.default "Dedicated" }}
-    nodeSelector:
-      app: ferretdbs.kubedb.com
-      instance: {{ include "kubedbcom-ferretdb-editor-options.fullname" . }}
-      namespace: {{ .Release.Namespace }}
-      nodepool: {{ .Values.spec.admin.clusterTier.nodeTopology.default }}
-    tolerations:
-      - key: app
-        operator: "Equal"
-        value: "ferretdbs.kubedb.com"
-        effect: "NoSchedule"
-      - key: instance
-        operator: "Equal"
-        value: {{ include "kubedbcom-ferretdb-editor-options.fullname" . }}
-        effect: "NoSchedule"
-      - key: namespace
-        operator: "Equal"
-        value: {{ .Release.Namespace }}
-        effect: "NoSchedule"
-      - key: nodepool
-        operator: "Equal"
-        value: {{ .Values.spec.admin.clusterTier.nodeTopology.default }}
-        effect: "NoSchedule"
-    {{- end }}
+  podTemplate:
+    spec:
+      containers:
+        - name: ferretdb
+          resources:
+            {{- toYaml $res | nindent 12 }}
+      podPlacementPolicy:
+        name: {{ .Values.spec.admin.clusterTier.placement.default }}
+      {{- if eq .Values.spec.admin.deployment.default "Dedicated" }}
+      nodeSelector:
+        app: ferretdbs.kubedb.com
+        instance: {{ include "kubedbcom-ferretdb-editor-options.fullname" . }}
+        namespace: {{ .Release.Namespace }}
+        nodepool: {{ .Values.spec.admin.clusterTier.nodeTopology.default }}
+      tolerations:
+        - key: app
+          operator: "Equal"
+          value: "ferretdbs.kubedb.com"
+          effect: "NoSchedule"
+        - key: instance
+          operator: "Equal"
+          value: {{ include "kubedbcom-ferretdb-editor-options.fullname" . }}
+          effect: "NoSchedule"
+        - key: namespace
+          operator: "Equal"
+          value: {{ .Release.Namespace }}
+          effect: "NoSchedule"
+        - key: nodepool
+          operator: "Equal"
+          value: {{ .Values.spec.admin.clusterTier.nodeTopology.default }}
+          effect: "NoSchedule"
+      {{- end }}
   deletionPolicy: {{ .Values.spec.deletionPolicy }}
   sslMode: {{ .Values.spec.sslMode }}
 {{- if .Values.spec.authSecret.name }}
