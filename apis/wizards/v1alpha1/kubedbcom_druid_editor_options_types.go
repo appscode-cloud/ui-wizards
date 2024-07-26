@@ -60,8 +60,8 @@ type KubedbcomDruidEditorOptionsSpecSpec struct {
 type DruidMode string
 
 type DruidNode struct {
-	Replicas    int         `json:"replicas"`
-	Persistence Persistence `json:"persistence"`
+	Replicas     int          `json:"replicas"`
+	PodResources PodResources `json:"podResources"`
 }
 
 type DruidDataNode struct {
