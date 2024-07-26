@@ -4,6 +4,15 @@ steps:
       createAuthSecret:
         default: true
         type: boolean
+      monitoring:
+        default: false
+        type: boolean
+      backup:
+        default: false
+        type: boolean
+      configDatabase:
+        default: false
+        type: boolean
     elements:
     - disabled: isVariantAvailable
       label:
@@ -17,7 +26,7 @@ steps:
         url:
           function: getCreateNameSpaceUrl
       disabled: isVariantAvailable
-      fetch: getResources|core|v1|namespaces
+      fetch: getNamespaces
       label:
         text: labels.namespace
       refresh: true
@@ -25,12 +34,53 @@ steps:
         $ref: schema#/properties/metadata/properties/release/properties/namespace
       type: select
     - disableUnselect: true
-      fetch: getMySqlVersions|catalog.kubedb.com|v1alpha1|singlestoreversions
+      fetch: getAdminOptions|databases/Singlestore/versions
       label:
         text: labels.database.version
       schema:
-        $ref: schema#/properties/spec/properties/version
+        $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Pgpool/properties/versions/properties/default
       type: select
+    - if: isToggleOn|deployment
+      hasDescription: true
+      label:
+        text: labels.deployment.name
+      options:
+        - text: Shared
+          value: Shared
+          description: labels.deployment.shared
+        - text: Dedicated
+          value: Dedicated
+          description: labels.deployment.dedicated
+      schema:
+        $ref: schema#/properties/spec/properties/admin/properties/deployment/properties/default
+      type: radio
+    - if: isToggleOn|clusterTier
+      label:
+        text: labels.clusterTier
+      options:
+      - text: General Purpose
+        value: GeneralPurpose
+      - text: Memory Optimized
+        value: MemoryOptimized
+      - text: CPU Optimized
+        value: CPUOptimized
+      schema:
+        $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/default
+      type: radio
+    - disableUnselect: true
+      if: isToggleOn|clusterTier/nodeTopology
+      label:
+        text: labels.nodeTopology
+      fetch: getNodeTopology
+      schema:
+        $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/nodeTopology/properties/default
+      type: select
+    - if: showStorageSizeField
+      label:
+        text: labels.storage.size
+      schema:
+        $ref: schema#/properties/spec/properties/persistence/properties/size
+      type: input
     - isArray: true
       keys:
         label:
