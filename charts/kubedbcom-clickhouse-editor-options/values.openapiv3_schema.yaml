@@ -71,7 +71,7 @@ properties:
                         - severity
                         - val
                         type: object
-                      postgresExporterError:
+                      mongoDBDown:
                         properties:
                           duration:
                             type: string
@@ -88,28 +88,7 @@ properties:
                         - enabled
                         - severity
                         type: object
-                      postgresHighRollbackRate:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                          val:
-                            format: double
-                            type: number
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        - val
-                        type: object
-                      postgresInstanceDown:
+                      mongoDBPhaseCritical:
                         properties:
                           duration:
                             type: string
@@ -126,7 +105,7 @@ properties:
                         - enabled
                         - severity
                         type: object
-                      postgresNotEnoughConnections:
+                      mongodbCursorsTimeouts:
                         properties:
                           duration:
                             type: string
@@ -146,27 +125,7 @@ properties:
                         - severity
                         - val
                         type: object
-                      postgresReplicationLag:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                          val:
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        - val
-                        type: object
-                      postgresRestarted:
+                      mongodbHighLatency:
                         properties:
                           duration:
                             type: string
@@ -186,41 +145,7 @@ properties:
                         - severity
                         - val
                         type: object
-                      postgresSlowQueries:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      postgresSplitBrain:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      postgresTooManyConnections:
+                      mongodbHighTicketUtilization:
                         properties:
                           duration:
                             type: string
@@ -240,7 +165,7 @@ properties:
                         - severity
                         - val
                         type: object
-                      postgresTooManyLocksAcquired:
+                      mongodbNumberCursorsOpen:
                         properties:
                           duration:
                             type: string
@@ -253,8 +178,107 @@ properties:
                             - info
                             type: string
                           val:
-                            format: double
-                            type: number
+                            type: integer
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        - val
+                        type: object
+                      mongodbRecurrentCursorTimeout:
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            enum:
+                            - critical
+                            - warning
+                            - info
+                            type: string
+                          val:
+                            type: integer
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        - val
+                        type: object
+                      mongodbRecurrentMemoryPageFaults:
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            enum:
+                            - critical
+                            - warning
+                            - info
+                            type: string
+                          val:
+                            type: integer
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        - val
+                        type: object
+                      mongodbReplicationLag:
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            enum:
+                            - critical
+                            - warning
+                            - info
+                            type: string
+                          val:
+                            type: integer
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        - val
+                        type: object
+                      mongodbTooManyConnections:
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            enum:
+                            - critical
+                            - warning
+                            - info
+                            type: string
+                          val:
+                            type: integer
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        - val
+                        type: object
+                      mongodbVirtualMemoryUsage:
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            enum:
+                            - critical
+                            - warning
+                            - info
+                            type: string
+                          val:
+                            type: integer
                         required:
                         - duration
                         - enabled
@@ -264,16 +288,17 @@ properties:
                     required:
                     - diskAlmostFull
                     - diskUsageHigh
-                    - postgresExporterError
-                    - postgresHighRollbackRate
-                    - postgresInstanceDown
-                    - postgresNotEnoughConnections
-                    - postgresReplicationLag
-                    - postgresRestarted
-                    - postgresSlowQueries
-                    - postgresSplitBrain
-                    - postgresTooManyConnections
-                    - postgresTooManyLocksAcquired
+                    - mongoDBDown
+                    - mongoDBPhaseCritical
+                    - mongodbCursorsTimeouts
+                    - mongodbHighLatency
+                    - mongodbHighTicketUtilization
+                    - mongodbNumberCursorsOpen
+                    - mongodbRecurrentCursorTimeout
+                    - mongodbRecurrentMemoryPageFaults
+                    - mongodbReplicationLag
+                    - mongodbTooManyConnections
+                    - mongodbVirtualMemoryUsage
                     type: object
                 required:
                 - enabled
@@ -1853,6 +1878,7 @@ properties:
       mode:
         enum:
         - Standalone
+        - Replicaset
         - Topology
         type: string
       persistence:
@@ -1944,17 +1970,37 @@ properties:
         type: integer
       topology:
         properties:
-          availabilityGroup:
+          clickHouseKeeper:
             properties:
-              databases:
-                items:
-                  type: string
-                type: array
+              host:
+                type: string
+              port:
+                format: int32
+                type: integer
             required:
-            - databases
+            - host
+            - port
             type: object
+          cluster:
+            items:
+              properties:
+                name:
+                  type: string
+                replicas:
+                  format: int32
+                  type: integer
+                shards:
+                  format: int32
+                  type: integer
+              required:
+              - name
+              - replicas
+              - shards
+              type: object
+            type: array
         required:
-        - availabilityGroup
+        - clickHouseKeeper
+        - cluster
         type: object
     required:
     - admin

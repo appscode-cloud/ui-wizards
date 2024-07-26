@@ -3,15 +3,15 @@
 apiVersion: core.kubestash.com/v1alpha1
 kind: BackupConfiguration
 metadata:
-  name: {{ include "kubedbcom-mssqlserver-editor-options.fullname" . }}
+  name: {{ include "kubedbcom-clickhouse-editor-options.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "kubedbcom-mssqlserver-editor-options.labels" . | nindent 4 }}
+    {{- include "kubedbcom-clickhouse-editor-options.labels" . | nindent 4 }}
 spec:
   target:
     apiGroup: kubedb.com
-    kind: MSSQLServer
-    name: {{ include "kubedbcom-mssqlserver-editor-options.fullname" . }}
+    kind: ClickHouse
+    name: {{ include "kubedbcom-clickhouse-editor-options.fullname" . }}
     namespace: {{ .Release.Namespace }}
   backends:
     - name: default-backend
@@ -29,17 +29,17 @@ spec:
         jobTemplate:
           backoffLimit: 1
       repositories:
-        - name: {{ include "kubedbcom-mssqlserver-editor-options.fullname" . }}
+        - name: {{ include "kubedbcom-clickhouse-editor-options.fullname" . }}
           backend: default-backend
-          directory: {{ .Release.Namespace }}/{{ include "kubedbcom-mssqlserver-editor-options.fullname" . }}
+          directory: {{ .Release.Namespace }}/{{ include "kubedbcom-clickhouse-editor-options.fullname" . }}
           encryptionSecret:
             name: {{ .Values.spec.admin.backup.kubestash.encryptionSecret.name }}
             namespace: {{ .Values.spec.admin.backup.kubestash.encryptionSecret.namespace }}
       addon:
-        name: mssqlserver-addon
+        name: clickhouse-addon
         tasks:
           - name: logical-backup
-        {{- if semverCompare "~6.0.0" (splitList "-" .Values.spec.version | last) }}
+        {{- if semverCompare "~6.0.0" (splitList "-" .Values.spec.admin.databases.ClickHouse.versions.default | last) }}
         jobTemplate:
           spec:
             securityContext:

@@ -18,7 +18,6 @@ package v1alpha1
 
 import (
 	alerts "go.appscode.dev/alerts/apis/alerts/v1alpha1"
-	core "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	api "x-helm.dev/apimachinery/apis/releases/v1alpha1"
 )
@@ -46,61 +45,31 @@ type KubedbcomMssqlserverEditorOptionsSpecSpec struct {
 	// +optional
 	Annotations map[string]string `json:"annotations"`
 	// +optional
-	Labels          map[string]string          `json:"labels"`
-	Version         string                     `json:"version"`
-	Mode            MssqlserverMode            `json:"mode"`
-	ReplicaSet      MssqlserverReplicaSet      `json:"replicaSet"`
-	ShardTopology   MssqlserverShardTopology   `json:"shardTopology"`
-	ClusterAuthMode MssqlserverClusterAuthMode `json:"clusterAuthMode"`
-	SslMode         MssqlserverSSLMode         `json:"sslMode"`
-	DeletionPolicy  DeletionPolicy             `json:"deletionPolicy"`
-	StorageClass    StorageClass               `json:"storageClass"`
-	Persistence     Persistence                `json:"persistence"`
-	Machine         MachineType                `json:"machine"`
-	Resources       core.ResourceRequirements  `json:"resources"`
-	AuthSecret      AuthSecret                 `json:"authSecret"`
-	Monitoring      Monitoring                 `json:"monitoring"`
-	Backup          BackupToolSpec             `json:"backup"`
+	Labels         map[string]string   `json:"labels"`
+	Mode           MssqlserverMode     `json:"mode"`
+	Replicas       int                 `json:"replicas"`
+	Topology       MSSQLServerTopology `json:"topology"`
+	Persistence    Persistence         `json:"persistence"`
+	PodResources   PodResources        `json:"podResources"`
+	AuthSecret     AuthSecret          `json:"authSecret"`
+	DeletionPolicy DeletionPolicy      `json:"deletionPolicy"`
+	Configuration  string              `json:"configuration"`
+	Admin          AdminOptions        `json:"admin"`
 }
 
-// +kubebuilder:validation:Enum=Standalone;Replicaset;Sharded
+// +kubebuilder:validation:Enum=Standalone;Topology
 type MssqlserverMode string
 
-// +kubebuilder:validation:Enum=keyFile;sendKeyFile;sendX509;x509
-type MssqlserverClusterAuthMode string
-
-// +kubebuilder:validation:Enum=disabled;allowSSL;preferSSL;requireSSL
-type MssqlserverSSLMode string
-
-type MssqlserverReplicaSet struct {
-	Name     string `json:"name"`
-	Replicas int    `json:"replicas"`
+type MSSQLServerTopology struct {
+	AvailabilityGroup *MSSQLServerAGSpec `json:"availabilityGroup"`
 }
 
-type MssqlserverShard struct {
-	Replicas    int         `json:"replicas"`
-	Shards      int         `json:"shards"`
-	Persistence Persistence `json:"persistence"`
-}
-
-type MssqlserverConfigServer struct {
-	Replicas    int         `json:"replicas"`
-	Persistence Persistence `json:"persistence"`
-}
-
-type MssqlserverMongos struct {
-	Replicas int `json:"replicas"`
-}
-
-type MssqlserverShardTopology struct {
-	Shard        MssqlserverShard        `json:"shard"`
-	ConfigServer MssqlserverConfigServer `json:"configServer"`
-	Mongos       MssqlserverMongos       `json:"mongos"`
+type MSSQLServerAGSpec struct {
+	Databases []string `json:"databases"`
 }
 
 type MssqlserverAlertsSpecForm struct {
 	Alert alerts.PostgresAlert `json:"alert"`
-	CAPI  CAPIFormSpec         `json:"capi"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
