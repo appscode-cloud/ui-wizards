@@ -304,38 +304,39 @@ const machineList = [
   "db.r.24xlarge",
 ];
 
-async function getAppbinding ( { axios, storeGet,getValue, watchDependency, model}) {
-  
+async function getPostgresList({
+  axios,
+  storeGet,
+  model,
+  getValue,
+  watchDependency,
+}) {
+  watchDependency("model#/spec/database/ref/namespace");
+  const namespace = getValue(model, "/spec/database/ref/namespace");
   const owner = storeGet("/route/params/user");
   const cluster = storeGet("/route/params/cluster");
-
-  const group = 'appcatalog.appscode.com'
-  const version = 'v1alpha1'
-  const resource = 'appbindings'
-  
-  watchDependency("model#/spec/database/ref/namespace");
-  
-  const namespace = getValue(model, "/spec/database/ref/namespace") || "";  
-  console.log(namespace);
-  const resp = await axios.get(
-    `/clusters/${owner}/${cluster}/proxy/${group}/${version}/namespaces/${namespace}/${resource}`,
-    {
-      params: {
-        filter: { items: { metadata: { name: null }, type: null } },
-      },
+  if (namespace) {
+    try{
+      const resp = await axios.get(
+        `http://api.bb.test:3003/api/v1/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/postgreses`
+      );
+      const resources = (resp && resp.data && resp.data.items) || [];
+      resources.map((item) => {
+        const name = (item.metadata && item.metadata.name) || "";
+        item.text = name;
+        item.value = name;
+        return true;
+      });
+      return resources;
     }
-  );
+    catch(e) {
+      console.log(e);
+      return [];
+    }
+    
+  }
 
-  const resources = (resp && resp.data && resp.data.items) || [];
-
-  resources.map((item) => {
-    const name = (item.metadata && item.metadata.name) || "";
-    item.text = name;
-    item.value = name;
-    return true;
-  });
-  return resources;
-
+  return [];
 }
 
 const onDatabaseModeChange = ({ discriminator,getValue, commit}) =>{
@@ -705,7 +706,7 @@ return {
   setMachineToCustom,
   isMachineNotCustom,
   updateAlertValue,
-  getAppbinding,
+  getPostgresList,
   onDatabaseModeChange,
   setDatabaseMode,
   getNodeTopology,
