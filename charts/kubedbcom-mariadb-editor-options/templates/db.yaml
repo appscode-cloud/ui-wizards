@@ -16,16 +16,12 @@ metadata:
     {{- include "kubedbcom-mariadb-editor-options.annotations" . | nindent 4 }}
 {{- end }}
 spec:
-  version: {{ .Values.spec.version | quote }}
+  version: {{ .Values.spec.admin.databases.MariaDB.versions.default | quote }}
 {{- if .Values.spec.authSecret.name }}
   authSecret:
     name: {{ .Values.spec.authSecret.name }}
 {{- end }}
-{{- if eq .Values.spec.mode "Cluster" }}
-  replicas: {{ .Values.spec.replicas }}
-{{- else }}
-  replicas: 1
-{{- end }}
+  replicas: {{ (eq .Values.spec.mode "Replicaset") | ternary .Values.spec.replicas 1 }}
   storage:
     accessModes:
     - ReadWriteOnce

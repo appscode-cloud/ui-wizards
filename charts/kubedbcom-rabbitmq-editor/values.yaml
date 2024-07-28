@@ -66,14 +66,6 @@ form:
             severity: critical
     labels:
       release: kube-prometheus-stack
-  capi:
-    clusterName: ""
-    dedicated: false
-    namespace: ""
-    nodes: 1
-    provider: ""
-    sku: ""
-    zones: []
 metadata:
   resource:
     group: kubedb.com
@@ -85,58 +77,160 @@ metadata:
     name: RELEASE-NAME
     namespace: default
 resources:
+  autoscalingKubedbComRabbitMQAutoscaler: # +doc-gen:break
+    apiVersion: autoscaling.kubedb.com/v1alpha1
+    kind: RabbitMQAutoscaler
+    metadata:
+      name: rabbitmq
+      namespace: demo
+    spec:
+      compute:
+        node:
+          maxAllowed:
+            cpu: 1
+            memory: 2Gi
+          minAllowed:
+            cpu: 400m
+            memory: 400Mi
+          podLifeTimeThreshold: 10m
+          resourceDiffPercentage: 20
+          trigger: "On"
+        nodeTopology:
+          name: standard-basv2-family
+      databaseRef:
+        name: repl
+      opsRequestOptions:
+        apply: IfReady
+        timeout: 10m
+  catalogAppscodeComRabbitMQBinding: # +doc-gen:break
+    apiVersion: catalog.appscode.com/v1alpha1
+    kind: RabbitMQBinding
+    metadata:
+      name: rabbitmq
+      namespace: demo
+    spec:
+      sourceRef:
+        name: rabbitmq
+        namespace: demo
+  certManagerIoIssuer_ca: # +doc-gen:break
+    apiVersion: cert-manager.io/v1
+    kind: Issuer
+    metadata:
+      name: rabbitmq-ca
+      namespace: demo
+    spec:
+      ca:
+        secretName: rabbitmq-ca
   kubedbComRabbitMQ: # +doc-gen:break
     apiVersion: kubedb.com/v1alpha2
     kind: RabbitMQ
     metadata:
       name: rabbitmq
-      namespace: rabbit
+      namespace: sdb
     spec:
-      deletionPolicy: WipeOut
-      monitor:
-        agent: prometheus.io/builtin
-      podTemplate:
-        spec:
-          containers:
-            - name: rabbitmq
-              resources:
-                limits:
-                  cpu: "2"
-                  memory: 2Gi
-                requests:
-                  cpu: 800m
-                  memory: 1.5Gi
-          nodeSelector:
-            app: kubedb
-            component: rabbitmq-database
-            instance: rabbitmq
-          tolerations:
-            - effect: NoSchedule
-              key: app
-              operator: Equal
-              value: kubedb
-            - effect: NoSchedule
-              key: instance
-              operator: Equal
-              value: rabbitmq
-            - effect: NoSchedule
-              key: component
-              operator: Equal
-              value: rabbitmq-database
-            - effect: NoSchedule
-              key: nodepool_type
-              operator: Equal
-              value: n2-standard-2
-      replicas: 3
+      deletionPolicy: Halt
+      licenseSecret:
+        name: license-secret
       serviceTemplates:
         - alias: primary
           spec:
             type: LoadBalancer
-      storage:
-        accessModes:
-          - ReadWriteOnce
-        resources:
-          requests:
-            storage: 1Gi
       storageType: Durable
-      version: 3.12.12
+      topology:
+        aggregator:
+          podTemplate:
+            spec:
+              containers:
+                - name: rabbitmq
+                  resources:
+                    requests:
+                      cpu: 600m
+                      memory: 1200Mi
+              nodeSelector:
+                app: kubedb
+                component: sdb-database
+                instance: sdb
+              tolerations:
+                - effect: NoSchedule
+                  key: app
+                  operator: Equal
+                  value: kubedb
+                - effect: NoSchedule
+                  key: instance
+                  operator: Equal
+                  value: sdb
+                - effect: NoSchedule
+                  key: component
+                  operator: Equal
+                  value: sdb-database
+                - effect: NoSchedule
+                  key: nodepool_type
+                  operator: Equal
+                  value: n2-standard-2
+          replicas: 3
+          storage:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 1Gi
+            storageClassName: standard-rwo
+        leaf:
+          podTemplate:
+            spec:
+              containers:
+                - name: rabbitmq
+                  resources:
+                    requests:
+                      cpu: 700m
+                      memory: 1400Mi
+          replicas: 2
+          storage:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 10Gi
+            storageClassName: standard-rwo
+      version: 8.1.32
+  monitoringCoreosComServiceMonitor: # +doc-gen:break
+    apiVersion: monitoring.coreos.com/v1
+    kind: ServiceMonitor
+    metadata:
+      name: rabbitmq
+      namespace: demo
+    spec:
+      endpoints:
+        - honorLabels: true
+          interval: 30s
+          path: /metrics
+          port: metrics
+      namespaceSelector:
+        matchNames:
+          - demo
+      selector:
+        matchLabels:
+          app.kubernetes.io/instance: rabbitmq
+          app.kubernetes.io/name: rabbitmqs.kubedb.com
+  secret_auth: # +doc-gen:break
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: rabbitmq-auth
+      namespace: demo
+    stringData:
+      password: thisIs1StrongPassword
+      username: root
+    type: Opaque
+  secret_config: # +doc-gen:break
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: rabbitmq-config
+      namespace: demo
+    stringData:
+      rabbitmq.cnf: |
+        [mysqld]
+        max_connections = 200
+        read_buffer_size = 1048576
+    type: Opaque

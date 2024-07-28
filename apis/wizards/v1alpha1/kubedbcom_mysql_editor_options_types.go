@@ -72,7 +72,6 @@ type MysqlMode string
 
 type MysqlAlertsSpecForm struct {
 	Alert alerts.MySQLAlert `json:"alert"`
-	CAPI  CAPIFormSpec      `json:"capi"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

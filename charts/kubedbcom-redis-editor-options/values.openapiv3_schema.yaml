@@ -652,39 +652,8 @@ properties:
         - groups
         - labels
         type: object
-      capi:
-        properties:
-          clusterName:
-            type: string
-          dedicated:
-            type: boolean
-          namespace:
-            type: string
-          nodes:
-            type: integer
-          provider:
-            enum:
-            - capa
-            - capg
-            - capz
-            type: string
-          sku:
-            type: string
-          zones:
-            items:
-              type: string
-            type: array
-        required:
-        - clusterName
-        - dedicated
-        - namespace
-        - nodes
-        - sku
-        - zones
-        type: object
     required:
     - alert
-    - capi
     type: object
   metadata:
     properties:
@@ -1709,7 +1678,7 @@ properties:
       mode:
         enum:
         - Standalone
-        - Cluster
+        - Replicaset
         - Sentinel
         type: string
       persistence:
@@ -1809,8 +1778,6 @@ properties:
         - name
         - namespace
         type: object
-      version:
-        type: string
     required:
     - admin
     - authSecret
@@ -1819,7 +1786,6 @@ properties:
     - mode
     - persistence
     - podResources
-    - version
     type: object
 required:
 - form
