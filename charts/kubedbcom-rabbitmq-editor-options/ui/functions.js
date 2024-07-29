@@ -340,14 +340,14 @@ function showStorageSizeField({ model, getValue, watchDependency }) {
 function showReplicaField({ model, getValue, watchDependency }) {
   const modelPathValue = getValue(model, "/spec/mode");
   watchDependency("model#/spec/mode");
-  const validType = ["Cluster"];
+  const validType = ["Replicaset"];
   return validType.includes(modelPathValue);
 }
 
 function onModeChange({ model, getValue, watchDependency, commit }) {
   const modelPathValue = getValue(model, "/spec/mode");
   watchDependency("model#/spec/mode");
-  if (modelPathValue === "Cluster") {
+  if (modelPathValue === "Replicaset") {
     commit("wizard/model$update", {
       path: "/spec/replicas",
       value: 3,
