@@ -933,6 +933,58 @@ function filterNodeTopology(list, tier, provider, mappedList) {
   }
 }
 
+function initiateRefs({ model, getValue, setDiscriminatorValue }, type) {
+  const modelRef = getValue(model, `/spec/${type}`) || {}; 
+  setDiscriminatorValue(`/${type}`, `${modelRef?.namespace}/${modelRef.name}`)
+}
+
+async function getAppBindings({ axios, storeGet }, type) {
+  const owner = storeGet("/route/params/user");
+  const cluster = storeGet("/route/params/cluster");
+  const queryParams = {
+    filter: {
+      items: {
+        metadata: { name: null, namespace: null },
+        spec: { type: null },
+      },
+    },
+  };
+  try {
+    const resp = await axios.get(
+      `/clusters/${owner}/${cluster}/proxy/appcatalog.appscode.com/v1alpha1/appbindings`,
+      queryParams
+    );
+    const resources = (resp && resp.data && resp.data.items) || [];
+
+    const fileredResources = resources
+      .filter((item) => item.spec?.type === `kubedb.com/${type}` )
+      .map((item) => {
+        const name = item.metadata?.name || "";
+        const namespace = item.metadata?.namespace || "";
+        return {
+          text: `${namespace}/${name}`,
+          value: {
+            name: name,
+            namespace: namespace,
+          },
+        };
+      });
+    return fileredResources;
+  } catch (e) {
+    console.log(e);
+    return [];
+  }
+}
+
+function onRefChange({ discriminator, getValue, commit }, type) {
+  const ref = getValue(discriminator, `/${type}`) || {};
+  commit("wizard/model$update", {
+    path: `/spec/${type}`,
+    value: ref,
+    force: true,
+  });
+}
+
 function getAdminOptions({ getValue, model }, type) {
   const options = getValue(model, `/spec/admin/${type}/available`) || [];
   return options;
@@ -980,6 +1032,9 @@ return {
   clearConfiguration,
   getNodeTopology,
   filterNodeTopology,
+  initiateRefs,
+  getAppBindings,
+  onRefChange,
   isToggleOn,
   getAdminOptions,
 }

@@ -12,6 +12,13 @@ steps:
         type: boolean
       configDatabase:
         default: false
+        type: boolean
+      zookeeperRef:
+        default: {}
+        type: object
+      metadataStorage:
+        default: {}
+        type: object
     elements:
     - disabled: isVariantAvailable
       label:
@@ -277,6 +284,41 @@ steps:
         text: labels.storage.class
       schema:
         $ref: schema#/properties/spec/properties/admin/properties/storageClasses/properties/default
+      type: select
+    - label:
+        text: labels.deepStorage
+      options:
+      - s3
+      - google
+      - azure
+      - hdfs
+      schema:
+        $ref: schema#/properties/spec/properties/deepStorage/properties/type
+      type: select
+    - fetch: getSecrets
+      label:
+        text: labels.configSecret
+      refresh: true
+      schema:
+        $ref: schema#/properties/spec/properties/deepStorage/properties/configSecret
+      type: select
+    - fetch: getAppBindings|zookeeper
+      label:
+        text: labels.zookeeperRef
+      onChange: onRefChange|zookeeperRef
+      refresh: true
+      required: true
+      schema:
+        $ref: discriminator#/zookeeperRef
+      type: select
+    - fetch: getAppBindings|mysql
+      label:
+        text: labels.metadataStorage
+      onChange: onRefChange|metadataStorage
+      refresh: true
+      required: true
+      schema:
+        $ref: discriminator#/metadataStorage
       type: select
     - label:
         text: Provide Authentication Credentials?
