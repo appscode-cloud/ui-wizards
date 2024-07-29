@@ -63,14 +63,6 @@ form:
             severity: critical
     labels:
       release: kube-prometheus-stack
-  capi:
-    clusterName: ""
-    dedicated: false
-    namespace: ""
-    nodes: 1
-    provider: ""
-    sku: ""
-    zones: []
 metadata:
   resource:
     group: kubedb.com
@@ -82,6 +74,50 @@ metadata:
     name: RELEASE-NAME
     namespace: default
 resources:
+  autoscalingKubedbComSolrAutoscaler: # +doc-gen:break
+    apiVersion: autoscaling.kubedb.com/v1alpha1
+    kind: SolrAutoscaler
+    metadata:
+      name: solr
+      namespace: demo
+    spec:
+      compute:
+        node:
+          maxAllowed:
+            cpu: 1
+            memory: 2Gi
+          minAllowed:
+            cpu: 400m
+            memory: 400Mi
+          podLifeTimeThreshold: 10m
+          resourceDiffPercentage: 20
+          trigger: "On"
+        nodeTopology:
+          name: standard-basv2-family
+      databaseRef:
+        name: repl
+      opsRequestOptions:
+        apply: IfReady
+        timeout: 10m
+  catalogAppscodeComSolrBinding: # +doc-gen:break
+    apiVersion: catalog.appscode.com/v1alpha1
+    kind: SolrBinding
+    metadata:
+      name: solr
+      namespace: demo
+    spec:
+      sourceRef:
+        name: solr
+        namespace: demo
+  certManagerIoIssuer_ca: # +doc-gen:break
+    apiVersion: cert-manager.io/v1
+    kind: Issuer
+    metadata:
+      name: solr-ca
+      namespace: demo
+    spec:
+      ca:
+        secretName: solr-ca
   kubedbComSolr: # +doc-gen:break
     apiVersion: kubedb.com/v1alpha2
     kind: Solr
@@ -208,3 +244,44 @@ resources:
       zookeeperRef:
         name: zookeeper-prod
         namespace: zookeeper
+  monitoringCoreosComServiceMonitor: # +doc-gen:break
+    apiVersion: monitoring.coreos.com/v1
+    kind: ServiceMonitor
+    metadata:
+      name: solr
+      namespace: demo
+    spec:
+      endpoints:
+        - honorLabels: true
+          interval: 30s
+          path: /metrics
+          port: metrics
+      namespaceSelector:
+        matchNames:
+          - demo
+      selector:
+        matchLabels:
+          app.kubernetes.io/instance: solr
+          app.kubernetes.io/name: solrs.kubedb.com
+  secret_auth: # +doc-gen:break
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: solr-auth
+      namespace: demo
+    stringData:
+      password: thisIs1StrongPassword
+      username: root
+    type: Opaque
+  secret_config: # +doc-gen:break
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: solr-config
+      namespace: demo
+    stringData:
+      solr.cnf: |
+        [mysqld]
+        max_connections = 200
+        read_buffer_size = 1048576
+    type: Opaque
