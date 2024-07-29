@@ -314,16 +314,6 @@ function showAuthPasswordField({
   return !!modelPathValue;
 }
 
-function isEqualToModelPathValue(
-  { model, getValue, watchDependency },
-  value,
-  modelPath
-) {
-  const modelPathValue = getValue(model, modelPath);
-  watchDependency("model#" + modelPath);
-  return modelPathValue === value;
-}
-
 function showAuthSecretField({
   discriminator,
   getValue,
@@ -515,7 +505,6 @@ function setResourceLimit({ commit, model, getValue }, type) {
     ? `/spec/${type}/podResources/machine`
     : "/spec/podResources/machine";
   const selectedMachine = getValue(model, path);
-  console.log(selectedMachine, path);
   if (selectedMachine && selectedMachine !== "custom") {
     commit("wizard/model$update", {
       path: type 
@@ -956,7 +945,6 @@ function isToggleOn({ getValue, model }, type) {
 return {
   isVariantAvailable,
   showAuthPasswordField,
-  isEqualToModelPathValue,
   showAuthSecretField,
   showStorageSizeField,
   getNamespaces,

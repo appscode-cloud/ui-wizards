@@ -113,19 +113,6 @@ steps:
         schema:
           $ref: schema#/properties/spec/properties/annotations/additionalProperties
         type: input
-    - hasDescription: true
-      label:
-        text: labels.database.mode
-      options:
-      - description: options.database.mode.Standalone.description
-        text: options.database.mode.Standalone.label
-        value: Standalone
-      - description: options.database.mode.Topology.description
-        text: options.database.mode.Topology.label
-        value: Topology
-      schema:
-        $ref: schema#/properties/spec/properties/mode
-      type: radio
     - if: showStorageSizeField
       label:
         text: labels.storage.size
@@ -263,7 +250,6 @@ steps:
           text: labels.coordinators
         show_label: true
         type: single-step-form
-      if: isEqualToModelPathValue|Topology|/spec/mode
       type: single-step-form
     - hasDescription: true
       label:
@@ -291,26 +277,6 @@ steps:
         text: labels.storage.class
       schema:
         $ref: schema#/properties/spec/properties/admin/properties/storageClasses/properties/default
-      type: select
-    - label:
-        text: labels.database.secret
-      type: label-element
-    - onChange: onCreateAuthSecretChange
-      options:
-      - text: options.database.secret.customSecret.label
-        value: true
-      - text: options.database.secret.existingSecret.label
-        value: false
-      schema:
-        $ref: discriminator#/createAuthSecret
-      type: radio
-    - allowUserDefinedOption: true
-      fetch: getSecrets
-      if: showAuthSecretField
-      label:
-        text: labels.secret
-      schema:
-        $ref: schema#/properties/spec/properties/authSecret/properties/name
       type: select
     - label:
         text: Provide Authentication Credentials?
