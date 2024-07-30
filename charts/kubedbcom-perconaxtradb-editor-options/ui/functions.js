@@ -1,280 +1,282 @@
+let storageClassList = [];
+
 const machines = {
   "db.t.micro": {
     resources: {
       requests: {
         cpu: "250m",
-        memory: "512Mi"
+        memory: "512Mi",
       },
       limits: {
         cpu: "500m",
-        memory: "1Gi"
-      }
-    }
+        memory: "1Gi",
+      },
+    },
   },
   "db.t.small": {
     resources: {
       requests: {
         cpu: "1",
-        memory: "1Gi"
+        memory: "1Gi",
       },
       limits: {
         cpu: "2",
-        memory: "2Gi"
-      }
-    }
+        memory: "2Gi",
+      },
+    },
   },
   "db.t.medium": {
     resources: {
       requests: {
         cpu: "1",
-        memory: "2Gi"
+        memory: "2Gi",
       },
       limits: {
         cpu: "2",
-        memory: "4Gi"
-      }
-    }
+        memory: "4Gi",
+      },
+    },
   },
   "db.t.large": {
     resources: {
       requests: {
         cpu: "1",
-        memory: "4Gi"
+        memory: "4Gi",
       },
       limits: {
         cpu: "2",
-        memory: "8Gi"
-      }
-    }
+        memory: "8Gi",
+      },
+    },
   },
   "db.t.xlarge": {
     resources: {
       requests: {
         cpu: "2",
-        memory: "8Gi"
+        memory: "8Gi",
       },
       limits: {
         cpu: "4",
-        memory: "16Gi"
-      }
-    }
+        memory: "16Gi",
+      },
+    },
   },
   "db.t.2xlarge": {
     resources: {
       requests: {
         cpu: "4",
-        memory: "16Gi"
+        memory: "16Gi",
       },
       limits: {
         cpu: "8",
-        memory: "32Gi"
-      }
-    }
+        memory: "32Gi",
+      },
+    },
   },
   "db.m.small": {
     resources: {
       requests: {
         cpu: "500m",
-        memory: "912680550"
+        memory: "912680550",
       },
       limits: {
         cpu: "1",
-        memory: "1825361100"
-      }
-    }
+        memory: "1825361100",
+      },
+    },
   },
   "db.m.large": {
     resources: {
       requests: {
         cpu: "1",
-        memory: "4Gi"
+        memory: "4Gi",
       },
       limits: {
         cpu: "2",
-        memory: "8Gi"
-      }
-    }
+        memory: "8Gi",
+      },
+    },
   },
   "db.m.xlarge": {
     resources: {
       requests: {
         cpu: "2",
-        memory: "8Gi"
+        memory: "8Gi",
       },
       limits: {
         cpu: "4",
-        memory: "16Gi"
-      }
-    }
+        memory: "16Gi",
+      },
+    },
   },
   "db.m.2xlarge": {
     resources: {
       requests: {
         cpu: "4",
-        memory: "16Gi"
+        memory: "16Gi",
       },
       limits: {
         cpu: "8",
-        memory: "32Gi"
-      }
-    }
+        memory: "32Gi",
+      },
+    },
   },
   "db.m.4xlarge": {
     resources: {
       requests: {
         cpu: "8",
-        memory: "32Gi"
+        memory: "32Gi",
       },
       limits: {
         cpu: "16",
-        memory: "64Gi"
-      }
-    }
+        memory: "64Gi",
+      },
+    },
   },
   "db.m.8xlarge": {
     resources: {
       requests: {
         cpu: "16",
-        memory: "64Gi"
+        memory: "64Gi",
       },
       limits: {
         cpu: "32",
-        memory: "128Gi"
-      }
-    }
+        memory: "128Gi",
+      },
+    },
   },
   "db.m.12xlarge": {
     resources: {
       requests: {
         cpu: "24",
-        memory: "96Gi"
+        memory: "96Gi",
       },
       limits: {
         cpu: "48",
-        memory: "192Gi"
-      }
-    }
+        memory: "192Gi",
+      },
+    },
   },
   "db.m.16xlarge": {
     resources: {
       requests: {
         cpu: "32",
-        memory: "128Gi"
+        memory: "128Gi",
       },
       limits: {
         cpu: "64",
-        memory: "256Gi"
-      }
-    }
+        memory: "256Gi",
+      },
+    },
   },
   "db.m.24xlarge": {
     resources: {
       requests: {
         cpu: "48",
-        memory: "192Gi"
+        memory: "192Gi",
       },
       limits: {
         cpu: "96",
-        memory: "384Gi"
-      }
-    }
+        memory: "384Gi",
+      },
+    },
   },
   "db.r.large": {
     resources: {
       requests: {
         cpu: "1",
-        memory: "8Gi"
+        memory: "8Gi",
       },
       limits: {
         cpu: "2",
-        memory: "16Gi"
-      }
-    }
+        memory: "16Gi",
+      },
+    },
   },
   "db.r.xlarge": {
     resources: {
       requests: {
         cpu: "2",
-        memory: "16Gi"
+        memory: "16Gi",
       },
       limits: {
         cpu: "4",
-        memory: "32Gi"
-      }
-    }
+        memory: "32Gi",
+      },
+    },
   },
   "db.r.2xlarge": {
     resources: {
       requests: {
         cpu: "4",
-        memory: "32Gi"
+        memory: "32Gi",
       },
       limits: {
         cpu: "8",
-        memory: "64Gi"
-      }
-    }
+        memory: "64Gi",
+      },
+    },
   },
   "db.r.4xlarge": {
     resources: {
       requests: {
         cpu: "8",
-        memory: "96Gi"
+        memory: "96Gi",
       },
       limits: {
         cpu: "16",
-        memory: "192Gi"
-      }
-    }
+        memory: "192Gi",
+      },
+    },
   },
   "db.r.8xlarge": {
     resources: {
       requests: {
         cpu: "16",
-        memory: "128Gi"
+        memory: "128Gi",
       },
       limits: {
         cpu: "32",
-        memory: "256Gi"
-      }
-    }
+        memory: "256Gi",
+      },
+    },
   },
   "db.r.12xlarge": {
     resources: {
       requests: {
         cpu: "24",
-        memory: "192Gi"
+        memory: "192Gi",
       },
       limits: {
         cpu: "48",
-        memory: "384Gi"
-      }
-    }
+        memory: "384Gi",
+      },
+    },
   },
   "db.r.16xlarge": {
     resources: {
       requests: {
         cpu: "32",
-        memory: "256Gi"
+        memory: "256Gi",
       },
       limits: {
         cpu: "64",
-        memory: "512Gi"
-      }
-    }
+        memory: "512Gi",
+      },
+    },
   },
   "db.r.24xlarge": {
     resources: {
       requests: {
         cpu: "24",
-        memory: "384Gi"
+        memory: "384Gi",
       },
       limits: {
         cpu: "96",
-        memory: "768Gi"
-      }
-    }
-  }
+        memory: "768Gi",
+      },
+    },
+  },
 };
 
 const machineList = [
@@ -304,11 +306,7 @@ const machineList = [
   "db.r.24xlarge",
 ];
 
-function showAuthPasswordField({
-  discriminator,
-  getValue,
-  watchDependency,
-}) {
+function showAuthPasswordField({ discriminator, getValue, watchDependency }) {
   const modelPathValue = getValue(discriminator, "/createAuthSecret");
   watchDependency("discriminator#/createAuthSecret");
   return !!modelPathValue;
@@ -321,24 +319,23 @@ async function getNamespaces({ axios, storeGet }) {
     const resp = await axios.post(
       `/clusters/${user}/${cluster}/proxy/identity.k8s.appscode.com/v1alpha1/selfsubjectnamespaceaccessreviews`,
       {
-        "apiVersion": "identity.k8s.appscode.com/v1alpha1",
-        "kind": "SelfSubjectNamespaceAccessReview",
-        "spec": {
-          "resourceAttributes": [
+        apiVersion: "identity.k8s.appscode.com/v1alpha1",
+        kind: "SelfSubjectNamespaceAccessReview",
+        spec: {
+          resourceAttributes: [
             {
-              "verb": "create",
-              "group": group,
-              "version": version,
-              "resource": resource
-            }
-          ]
-        }
+              verb: "create",
+              group: group,
+              version: version,
+              resource: resource,
+            },
+          ],
+        },
       }
     );
     const namespaces = resp?.data?.status?.namespaces || [];
     return namespaces;
-  }
-  catch(e) {
+  } catch (e) {
     console.log(e);
     return [];
   }
@@ -349,19 +346,6 @@ function getMachineListForOptions() {
     return { text: item, value: item };
   });
   return array;
-}
-
-function setResourceLimit({ commit, model, getValue, watchDependency }) {
-  const modelPathValue = getValue(model, "/spec/podResources/machine");
-  watchDependency("model#/spec/podResources/machine");
-  if (modelPathValue && modelPathValue !== "custom") {
-    // to avoiding set value by reference, cpu and memory set separately
-    commit("wizard/model$update", {
-      path: "/spec/podResources/resources",
-      value: machines[modelPathValue]?.resources,
-      force: true,
-    });
-  }
 }
 
 function setLimitsCpuOrMem({ model, getValue }, path) {
@@ -385,7 +369,7 @@ function setMachineToCustom() {
   return "custom";
 }
 
-function isMachineNotCustom({ model, getValue, watchDependency }, path ) {
+function isMachineNotCustom({ model, getValue, watchDependency }, path) {
   const fullpath = path
     ? `/spec/${path}/podResources/machine`
     : "/spec/podResources/machine";
@@ -394,7 +378,7 @@ function isMachineNotCustom({ model, getValue, watchDependency }, path ) {
   return modelPathValue !== "custom" && !!modelPathValue;
 }
 
-function showMonitoringSection({ discriminator, getValue, watchDependency}) {
+function showMonitoringSection({ discriminator, getValue, watchDependency }) {
   watchDependency("discriminator#/monitoringEnabledStatus");
   return !!getValue(discriminator, "/monitoringEnabledStatus");
 }
@@ -411,51 +395,50 @@ function updateAlertValue({ commit, model, discriminator, getValue }) {
   commit("wizard/model$update", {
     path: "/form/alert/enabled",
     value: alert,
-    force: true
+    force: true,
   });
   const agent = isMonitorEnabled ? "prometheus.io/operator" : "";
   commit("wizard/model$update", {
     path: "/spec/admin/monitoring/agent",
     value: agent,
-    force: true
+    force: true,
   });
 }
 
-function getCreateNameSpaceUrl ({ model, getValue, storeGet }){ 
-
+function getCreateNameSpaceUrl({ model, getValue, storeGet }) {
   const user = storeGet("/route/params/user");
   const cluster = storeGet("/route/params/cluster");
 
-  const domain = storeGet("/domain") || '';
-  if(domain.includes("bb.test")){
-    return `http://console.bb.test:5990/${user}/kubernetes/${cluster}/core/v1/namespaces/create`
-  }else{
-    const editedDomain = domain.replace("kubedb","console");
-    return `${editedDomain}/${user}/kubernetes/${cluster}/core/v1/namespaces/create`
+  const domain = storeGet("/domain") || "";
+  if (domain.includes("bb.test")) {
+    return `http://console.bb.test:5990/${user}/kubernetes/${cluster}/core/v1/namespaces/create`;
+  } else {
+    const editedDomain = domain.replace("kubedb", "console");
+    return `${editedDomain}/${user}/kubernetes/${cluster}/core/v1/namespaces/create`;
   }
 }
 const ifCapiProviderIsNotEmpty = ({ model, getValue, watchDependency }) => {
   watchDependency("model#/form/capi/provider");
   const val = getValue(model, "/form/capi/provider");
-  if (val) return true
+  if (val) return true;
 };
 
 const showMultiselectZone = ({ model, getValue, watchDependency }) => {
   watchDependency("model#/form/capi/dedicated");
   const val = getValue(model, "/form/capi/provider");
-  
-  if(val === "capz" && ifDedicated({ model, getValue })) return true;
+
+  if (val === "capz" && ifDedicated({ model, getValue })) return true;
 };
 
 const showSelectZone = ({ model, getValue, watchDependency }) => {
   watchDependency("model#/form/capi/dedicated");
   const val = getValue(model, "/form/capi/provider");
-  if(val !== "capz" && ifDedicated({ model, getValue })) return true;
+  if (val !== "capz" && ifDedicated({ model, getValue })) return true;
 };
 
-const ifDedicated = ({ model, getValue}) => {
+const ifDedicated = ({ model, getValue }) => {
   const val = getValue(model, "form/capi/dedicated");
-  if (val) return true
+  if (val) return true;
 };
 
 const dedicatedOnChange = ({ model, getValue, commit }) => {
@@ -466,13 +449,12 @@ const dedicatedOnChange = ({ model, getValue, commit }) => {
   }
 };
 
-
 const ifZones = ({ model, getValue, watchDependency }) => {
   watchDependency("model#/form/capi/zones");
   watchDependency("model#/form/capi/dedicated");
   const zones = getValue(model, "form/capi/zones") || [];
   const isDedicated = getValue(model, "form/capi/dedicated");
-  if (zones.length && isDedicated) return true
+  if (zones.length && isDedicated) return true;
 };
 
 const zonesOnChange = ({ model, getValue, commit }) => {
@@ -480,18 +462,17 @@ const zonesOnChange = ({ model, getValue, commit }) => {
   if (!zones.length) commit("wizard/model$delete", "form/capi/sku");
 };
 
-async function getZones({storeGet,axios,model,getValue}) {
-  const owner = storeGet("/route/params/user")
-  const cluster = storeGet("/route/params/cluster")
-  const isDedicated = getValue(model,"form/capi/dedicated")
-  if(isDedicated)
-  {
+async function getZones({ storeGet, axios, model, getValue }) {
+  const owner = storeGet("/route/params/user");
+  const cluster = storeGet("/route/params/cluster");
+  const isDedicated = getValue(model, "form/capi/dedicated");
+  if (isDedicated) {
     try {
       const resp = await axios.get(`clustersv2/${owner}/${cluster}/zones`);
-      const val = resp.data.map((item)=>{
-        return {"value":item,"text":item}
-      })
-      return val
+      const val = resp.data.map((item) => {
+        return { value: item, text: item };
+      });
+      return val;
     } catch (e) {
       console.log(e);
       return [];
@@ -499,29 +480,30 @@ async function getZones({storeGet,axios,model,getValue}) {
   }
 }
 
-async function getSKU({storeGet,axios,model,getValue,watchDependency}) {
-  watchDependency("model#/form/capi/zones")
-  const owner = storeGet("/route/params/user")
-  const cluster = storeGet("/route/params/cluster")
-  const zones = getValue(model,"form/capi/zones") || []
-  if(zones.length)
-  {
+async function getSKU({ storeGet, axios, model, getValue, watchDependency }) {
+  watchDependency("model#/form/capi/zones");
+  const owner = storeGet("/route/params/user");
+  const cluster = storeGet("/route/params/cluster");
+  const zones = getValue(model, "form/capi/zones") || [];
+  if (zones.length) {
     try {
-      let url = `clustersv2/${owner}/${cluster}/vms?`
-      if(typeof zones === 'string') {
-        url+=`zones=${encodeURIComponent(zones)}`
-      }
-      else {
+      let url = `clustersv2/${owner}/${cluster}/vms?`;
+      if (typeof zones === "string") {
+        url += `zones=${encodeURIComponent(zones)}`;
+      } else {
         zones.forEach((item) => {
-          url+= `zones=${encodeURIComponent(item)}&`
+          url += `zones=${encodeURIComponent(item)}&`;
         });
-        url = url.slice(0,-1)
+        url = url.slice(0, -1);
       }
       const resp = await axios.get(url);
-      const val = resp.data.map((item)=>{
-        return {"value":item.name,"text":`${item.name} [CPU: ${item.cpu}] [Memory: ${item.memory}mb] `}
-      })
-      return val
+      const val = resp.data.map((item) => {
+        return {
+          value: item.name,
+          text: `${item.name} [CPU: ${item.cpu}] [Memory: ${item.memory}mb] `,
+        };
+      });
+      return val;
     } catch (e) {
       console.log(e);
       return [];
@@ -529,38 +511,39 @@ async function getSKU({storeGet,axios,model,getValue,watchDependency}) {
   }
 }
 
-function isVariantAvailable ({storeGet})  {
+function isVariantAvailable({ storeGet }) {
   const variant = storeGet("/route/query/variant");
-  return variant ? true : false
+  return variant ? true : false;
 }
 
-function setStorageClass({model, getValue, commit}) {
+function setStorageClass({ model, getValue, commit }) {
   const deletionPolicy = getValue(model, "/spec/deletionPolicy") || "";
-  let storageClass = getValue(model, "/spec/admin/storageClasses/default") || "";
-  const storageClassList = getValue(model, "/spec/admin/storageClasses/available") || [];
+  let storageClass =
+    getValue(model, "/spec/admin/storageClasses/default") || "";
+  const storageClassList =
+    getValue(model, "/spec/admin/storageClasses/available") || [];
   const suffix = "-retain";
 
-  const simpleClassList = storageClassList.filter(item => {
-    return !item.endsWith(suffix)
-  })
+  const simpleClassList = storageClassList.filter((item) => {
+    return !item.endsWith(suffix);
+  });
 
-  const retainClassList = storageClassList.filter(item => {
-    return item.endsWith(suffix)
-  })
+  const retainClassList = storageClassList.filter((item) => {
+    return item.endsWith(suffix);
+  });
 
-  if(deletionPolicy === "WipeOut" || deletionPolicy === "Delete") {
+  if (deletionPolicy === "WipeOut" || deletionPolicy === "Delete") {
     storageClass = simpleClassList.length
-      ? simpleClassList[0] 
+      ? simpleClassList[0]
       : retainClassList[0];
-  }
-  else {
+  } else {
     storageClass = retainClassList.length
       ? retainClassList[0]
       : simpleClassList[0];
   }
 
   const isChangeable = isToggleOn({ getValue, model }, "storageClasses");
-  if(isChangeable && storageClass) {
+  if (isChangeable && storageClass) {
     commit("wizard/model$update", {
       path: "/spec/admin/storageClasses/default",
       value: storageClass,
@@ -573,14 +556,22 @@ let nodeTopologyListFromApi = [];
 let nodeTopologyApiCalled = false;
 let provider = "";
 
-async function getNodeTopology({ model, getValue, axios, storeGet, watchDependency }) {
+async function getNodeTopology({
+  model,
+  getValue,
+  axios,
+  storeGet,
+  watchDependency,
+}) {
   watchDependency("model#/spec/admin/deployment/default");
   watchDependency("model#/spec/admin/clusterTier/default");
   const owner = storeGet("/route/params/user");
   const cluster = storeGet("/route/params/cluster");
-  const deploymentType = getValue(model, "/spec/admin/deployment/default") || "";
+  const deploymentType =
+    getValue(model, "/spec/admin/deployment/default") || "";
   const clusterTier = getValue(model, "/spec/admin/clusterTier/default") || "";
-  const nodeTopologyList =  getValue(model, `/spec/admin/clusterTier/nodeTopology/available`) || [];
+  const nodeTopologyList =
+    getValue(model, `/spec/admin/clusterTier/nodeTopology/available`) || [];
   let mappedResp = [];
 
   if (!nodeTopologyApiCalled) {
@@ -589,40 +580,46 @@ async function getNodeTopology({ model, getValue, axios, storeGet, watchDependen
       const resp = await axios.get(url);
       nodeTopologyListFromApi = resp.data?.items;
       nodeTopologyApiCalled = true;
-      const filteredResp = resp.data?.items.filter((item) => 
-        item.metadata.labels?.['node.k8s.appscode.com/tenancy'] === (deploymentType.toLowerCase())
+      const filteredResp = resp.data?.items.filter(
+        (item) =>
+          item.metadata.labels?.["node.k8s.appscode.com/tenancy"] ===
+          deploymentType.toLowerCase()
       );
       mappedResp = filteredResp?.map((item) => {
         const name = (item.metadata && item.metadata.name) || "";
         return name;
       });
-    }
-    catch (e) {
+    } catch (e) {
       console.log(e);
     }
-  }
-  else {
-    const filteredResp = nodeTopologyListFromApi.filter((item) => 
-      item.metadata.labels?.['node.k8s.appscode.com/tenancy'] === (deploymentType.toLowerCase())
+  } else {
+    const filteredResp = nodeTopologyListFromApi.filter(
+      (item) =>
+        item.metadata.labels?.["node.k8s.appscode.com/tenancy"] ===
+        deploymentType.toLowerCase()
     );
     mappedResp = filteredResp?.map((item) => {
       const name = (item.metadata && item.metadata.name) || "";
       return name;
     });
   }
-  
+
   const statusUrl = `/clustersv2/${owner}/${cluster}/status`;
-  if (provider.length === 0){
+  if (provider.length === 0) {
     try {
       const resp = await axios.get(statusUrl);
       provider = resp.data?.provider;
-    }
-    catch (e) {
+    } catch (e) {
       console.log(e);
     }
   }
 
-  const filteredList = filterNodeTopology(nodeTopologyList, clusterTier, provider, mappedResp);
+  const filteredList = filterNodeTopology(
+    nodeTopologyList,
+    clusterTier,
+    provider,
+    mappedResp
+  );
 
   return filteredList;
 }
@@ -631,20 +628,16 @@ function filterNodeTopology(list, tier, provider, mappedList) {
   // first filter the list from value that exists from the filtered list got from API
   const filteredlist = list.filter((item) => {
     return mappedList.includes(item);
-  })
+  });
 
   // filter the list based on clusterTier
   if (provider === "EKS") {
     return filteredlist.filter((item) => {
-      if(tier === 'CPUOptimized')
-        return item.startsWith('c');
-      else if(tier === 'MemoryOptimized')
-        return item.startsWith('r');
-      else
-        return !item.startsWith('c') && !item.startsWith('r');
-    })
-  }
-  else if (provider === "AKS") {
+      if (tier === "CPUOptimized") return item.startsWith("c");
+      else if (tier === "MemoryOptimized") return item.startsWith("r");
+      else return !item.startsWith("c") && !item.startsWith("r");
+    });
+  } else if (provider === "AKS") {
     return filteredlist.filter((item) => {
       if (tier === "CPUOptimized")
         return item.startsWith("f") || item.startsWith("fx");
@@ -668,8 +661,7 @@ function filterNodeTopology(list, tier, provider, mappedList) {
           )
         );
     });
-  }
-  else if (provider === "GKE") {
+  } else if (provider === "GKE") {
     return filteredlist.filter((item) => {
       if (tier === "CPUOptimized")
         return (
@@ -721,7 +713,10 @@ function showAlerts({ watchDependency, model, getValue, discriminator }) {
 function showIssuer({ model, getValue, watchDependency }) {
   watchDependency("model#/spec/admin/tls/default");
   const isTlsEnabled = getValue(model, "/spec/admin/tls/default");
-  const isIssuerToggleEnabled = isToggleOn({ getValue, model }, "clusterIssuers");
+  const isIssuerToggleEnabled = isToggleOn(
+    { getValue, model },
+    "clusterIssuers"
+  );
   return isTlsEnabled && isIssuerToggleEnabled;
 }
 
@@ -746,13 +741,14 @@ async function isBackupCluster({ axios, storeGet, commit }) {
   let isStashEnabled = false;
 
   try {
-    const resp = await axios.get(url)
+    const resp = await axios.get(url);
     const stashPreset = resp.data?.items?.find(
       (item) => item.metadata?.name === "stash-presets"
-    )
-    isStashEnabled = !!(stashPreset?.status?.enabled && stashPreset?.status?.ready);
-  }
-  catch(e) {
+    );
+    isStashEnabled = !!(
+      stashPreset?.status?.enabled && stashPreset?.status?.ready
+    );
+  } catch (e) {
     console.log(e);
   }
   commit("wizard/model$update", {
@@ -788,25 +784,337 @@ function clearConfiguration({ discriminator, getValue, commit }) {
   const configOn = getValue(discriminator, "/configDatabase");
 
   if (!configOn) {
-    commit(
-      "wizard/model$delete",
-      "/spec/configuration"
+    commit("wizard/model$delete", "/spec/configuration");
+  }
+}
+function setResourceLimit({ commit, model, getValue, watchDependency }) {
+  const modelPathValue = getValue(model, "/spec/podResources/machine");
+  watchDependency("model#/spec/podResources/machine");
+  if (modelPathValue && modelPathValue !== "custom") {
+    // to avoiding set value by reference, cpu and memory set separately
+    commit("wizard/model$update", {
+      path: "/spec/podResources/resources",
+      value: machines[modelPathValue]?.resources,
+      force: true,
+    });
+  }
+}
+function clearArbiterHidden({ commit }) {
+  commit("wizard/model$update", {
+    path: `/spec/arbiter/enabled`,
+    value: false,
+    force: true,
+  });
+
+  commit("wizard/model$update", {
+    path: `/spec/hidden/enabled`,
+    value: false,
+    force: true,
+  });
+}
+function returnFalse() {
+  return false;
+}
+function showHidden({ watchDependency, model, getValue }) {
+  watchDependency("model#/spec/hidden/enabled");
+  const isHiddenOn = getValue(model, "/spec/hidden/enabled") || "";
+  const notStandalone = notEqualToDatabaseMode(
+    { model, getValue, watchDependency },
+    "Standalone"
+  );
+  return isHiddenOn && notStandalone;
+}
+function showArbiter({ watchDependency, model, getValue }) {
+  watchDependency("model#/spec/arbiter/enabled");
+  const isArbiterOn = getValue(model, "/spec/arbiter/enabled") || "";
+  const notStandalone = notEqualToDatabaseMode(
+    { model, getValue, watchDependency },
+    "Standalone"
+  );
+  return isArbiterOn && notStandalone;
+}
+async function fetchJsons({ axios, itemCtx }) {
+  let ui = {};
+  let language = {};
+  let functions = {};
+  const { name, sourceRef, version, packageviewUrlPrefix } = itemCtx.chart;
+
+  try {
+    ui = await axios.get(
+      `${packageviewUrlPrefix}/create-ui.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`
     );
+    language = await axios.get(
+      `${packageviewUrlPrefix}/language.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`
+    );
+    const functionString = await axios.get(
+      `${packageviewUrlPrefix}/functions.js?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}`
+    );
+    // declare evaluate the functionString to get the functions Object
+    const evalFunc = new Function(functionString.data || "");
+    functions = evalFunc();
+  } catch (e) {
+    console.log(e);
+  }
+
+  return {
+    ui: ui.data || {},
+    language: language.data || {},
+    functions,
+  };
+}
+
+function isEqualToModelPathValue(
+  { model, getValue, watchDependency },
+  value,
+  modelPath
+) {
+  const modelPathValue = getValue(model, modelPath);
+  watchDependency("model#" + modelPath);
+  return modelPathValue === value;
+}
+
+function showAuthSecretField({ discriminator, getValue, watchDependency }) {
+  return !showAuthPasswordField({
+    discriminator,
+    getValue,
+    watchDependency,
+  });
+}
+function notEqualToDatabaseMode({ model, getValue, watchDependency }, mode) {
+  const modelPathValue = getValue(model, "/spec/mode");
+  watchDependency("model#/spec/mode");
+  return modelPathValue && modelPathValue !== mode;
+}
+function showStorageSizeField({ model, getValue, watchDependency }) {
+  const modelPathValue = getValue(model, "/spec/mode");
+  watchDependency("model#/spec/mode");
+  const validType = [];
+  return !validType.includes(modelPathValue);
+}
+
+async function getResources({ axios, storeGet }, group, version, resource) {
+  const owner = storeGet("/route/params/user");
+  const cluster = storeGet("/route/params/cluster");
+
+  const resp = await axios.get(
+    `/clusters/${owner}/${cluster}/proxy/${group}/${version}/${resource}`,
+    {
+      params: { filter: { items: { metadata: { name: null } } } },
+    }
+  );
+
+  const resources = (resp && resp.data && resp.data.items) || [];
+
+  resources.map((item) => {
+    const name = (item.metadata && item.metadata.name) || "";
+    item.text = name;
+    item.value = name;
+    return true;
+  });
+  return resources;
+}
+
+async function getStorageClassNames({
+  axios,
+  storeGet,
+  commit,
+  model,
+  getValue,
+}) {
+  const owner = storeGet("/route/params/user");
+  const cluster = storeGet("/route/params/cluster");
+
+  const resp = await axios.get(
+    `/clusters/${owner}/${cluster}/proxy/storage.k8s.io/v1/storageclasses`,
+    {
+      params: {
+        filter: { items: { metadata: { name: null, annotations: null } } },
+      },
+    }
+  );
+
+  const resources = (resp && resp.data && resp.data.items) || [];
+
+  resources.map((item) => {
+    const name = (item.metadata && item.metadata.name) || "";
+    item.text = name;
+    item.value = name;
+    return true;
+  });
+  storageClassList = resources;
+  setStorageClass({ model, getValue, commit });
+  return resources;
+}
+async function getMongoDbVersions(
+  { axios, storeGet },
+  group,
+  version,
+  resource
+) {
+  const owner = storeGet("/route/params/user");
+  const cluster = storeGet("/route/params/cluster");
+
+  const queryParams = {
+    filter: {
+      items: {
+        metadata: { name: null },
+        spec: { version: null, deprecated: null },
+      },
+    },
+  };
+
+  const resp = await axios.get(
+    `/clusters/${owner}/${cluster}/proxy/${group}/${version}/${resource}`,
+    {
+      params: queryParams,
+    }
+  );
+
+  const resources = (resp && resp.data && resp.data.items) || [];
+
+  // keep only non deprecated versions
+  const filteredMongoDbVersions = resources.filter(
+    (item) => item.spec && !item.spec.deprecated
+  );
+
+  filteredMongoDbVersions.map((item) => {
+    const name = (item.metadata && item.metadata.name) || "";
+    const specVersion = (item.spec && item.spec.version) || "";
+    item.text = `${name} (${specVersion})`;
+    item.value = name;
+    return true;
+  });
+  return filteredMongoDbVersions;
+}
+function onCreateAuthSecretChange({ discriminator, getValue, commit }) {
+  const createAuthSecret = getValue(discriminator, "/createAuthSecret");
+  if (createAuthSecret) {
+    commit("wizard/model$delete", "/spec/authSecret/name");
+  } else if (createAuthSecret === false) {
+    commit("wizard/model$delete", "/spec/authSecret/password");
   }
 }
 
+async function getSecrets({
+  storeGet,
+  axios,
+  model,
+  getValue,
+  watchDependency,
+}) {
+  const owner = storeGet("/route/params/user");
+  const cluster = storeGet("/route/params/cluster");
+  const namespace = getValue(model, "/metadata/release/namespace");
+  watchDependency("model#/metadata/release/namespace");
+
+  const resp = await axios.get(
+    `/clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}/secrets`,
+    {
+      params: {
+        filter: { items: { metadata: { name: null }, type: null } },
+      },
+    }
+  );
+
+  const secrets = (resp && resp.data && resp.data.items) || [];
+
+  const filteredSecrets = secrets.filter((item) => {
+    const validType = ["kubernetes.io/service-account-token", "Opaque"];
+    return validType.includes(item.type);
+  });
+
+  filteredSecrets.map((item) => {
+    const name = (item.metadata && item.metadata.name) || "";
+    item.text = name;
+    item.value = name;
+    return true;
+  });
+  return filteredSecrets;
+}
+
+function disableLimit({ model, getValue, watchDependency }) {
+  const modelPathValue = getValue(model, "/spec/podResources/machine");
+  watchDependency("model#/spec/podResources/machine");
+  return modelPathValue !== "custom" && !!modelPathValue;
+}
+
+function updateAgentValue({ commit }, val) {
+  commit("wizard/model$update", {
+    path: "/spec/monitoring/agent",
+    value: val ? "prometheus.io/operator" : "",
+    force: true,
+  });
+
+  // update alert value depend on monitoring profile
+  commit("wizard/model$update", {
+    path: "/form/alert/enabled",
+    value: val ? "warning" : "none",
+    force: true,
+  });
+}
+
+function showReplicaField({ model, getValue, watchDependency }) {
+  const modelPathValue = getValue(model, "/spec/mode");
+  watchDependency("model#/spec/mode");
+  const validType = ["Replicaset"];
+  return validType.includes(modelPathValue);
+}
+
+function onModeChange({ model, getValue, watchDependency, commit }) {
+  const modelPathValue = getValue(model, "/spec/mode");
+  watchDependency("model#/spec/mode");
+  if (modelPathValue === "Replicaset") {
+    commit("wizard/model$update", {
+      path: "/spec/replicas",
+      value: 3,
+      force: true,
+    });
+  } else {
+    commit("wizard/model$update", {
+      path: "/spec/replicas",
+      value: 1,
+      force: true,
+    });
+  }
+}
 return {
-  isVariantAvailable,
-  showAuthPasswordField,
   getNamespaces,
+  updateAlertValue,
+  getAdminOptions,
+  isToggleOn,
+  showAlerts,
+  getNodeTopology,
+  clearArbiterHidden,
+  returnFalse,
+  showHidden,
+  isConfigDatabaseOn,
+  notEqualToDatabaseMode,
+  filterNodeTopology,
+  onAuthChange,
+  setMonitoring,
+  isBackupCluster,
+  isMachineNotCustom,
+  showIssuer,
+  showArbiter,
+  clearConfiguration,
+  onBackupSwitch,
+  isVariantAvailable,
+  fetchJsons,
+  showAuthPasswordField,
+  isEqualToModelPathValue,
+  showAuthSecretField,
+  showStorageSizeField,
+  getResources,
+  getStorageClassNames,
+  getMongoDbVersions,
+  onCreateAuthSecretChange,
+  getSecrets,
+  disableLimit,
   getMachineListForOptions,
   setResourceLimit,
   setLimitsCpuOrMem,
   setMachineToCustom,
-  isMachineNotCustom,
-  showMonitoringSection,
-  setMonitoringStatus,
-  updateAlertValue,
+  updateAgentValue,
   getCreateNameSpaceUrl,
   ifCapiProviderIsNotEmpty,
   ifDedicated,
@@ -818,16 +1126,6 @@ return {
   showMultiselectZone,
   showSelectZone,
   setStorageClass,
-  getNodeTopology,
-  filterNodeTopology,
-  getAdminOptions,
-  isToggleOn,
-  showAlerts,
-  showIssuer,
-  onBackupSwitch,
-  setMonitoring,
-  isBackupCluster,
-  onAuthChange,
-  isConfigDatabaseOn,
-  clearConfiguration,
-}
+  showReplicaField,
+  onModeChange,
+};
