@@ -1,8 +1,17 @@
 annotations:
   meta.x-helm.dev/editor: '{"group":"kubedb.com","version":"v1alpha2","resource":"mssqlservers"}'
   meta.x-helm.dev/form-keys: monitoringCoreosComPrometheusRule
-  meta.x-helm.dev/resource-keys: certManagerIoIssuer_ca,kubedbComMSSQLServer
+  meta.x-helm.dev/resource-keys: autoscalingKubedbComMSSQLServerAutoscaler_mssqlserver,catalogAppscodeComMSSQLServerBinding_mssqlserver,certManagerIoIssuer_ca,kubedbComMSSQLServer,monitoringCoreosComServiceMonitor_mssqlserver,secret_mssqlserver_auth,secret_mssqlserver_config
   meta.x-helm.dev/resources: |
+    - group: ""
+      kind: Secret
+      version: v1
+    - group: autoscaling.kubedb.com
+      kind: MSSQLServerAutoscaler
+      version: v1alpha1
+    - group: catalog.appscode.com
+      kind: MSSQLServerBinding
+      version: v1alpha1
     - group: cert-manager.io
       kind: Issuer
       version: v1
@@ -11,6 +20,9 @@ annotations:
       version: v1alpha2
     - group: monitoring.coreos.com
       kind: PrometheusRule
+      version: v1
+    - group: monitoring.coreos.com
+      kind: ServiceMonitor
       version: v1
 apiVersion: v2
 appVersion: v0.4.21

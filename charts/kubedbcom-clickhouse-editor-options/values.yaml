@@ -1,12 +1,12 @@
-# Default values for kubedbcom-mssqlserver-editor-options.
+# Default values for kubedbcom-clickhouse-editor-options.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
 metadata:
   resource:
     group: kubedb.com
-    kind: MSSQLServer
-    name: mssqlservers
+    kind: ClickHouse
+    name: clickhouses
     scope: Namespaced
     version: v1alpha2
   release:
@@ -22,13 +22,20 @@ spec:
   # Labels to add to all the template objects
   labels: {}
 
-  # Standalone, Topology
+  # Standalone, Replicaset, Topology
   mode: Topology
-  topology:
-    availabilityGroup:
-      databases: []
-
   replicas: 3
+  topology:
+    clickHouseKeeper:
+      host: clickhouse-keeper.click-keeper
+      port: 2181
+    cluster:
+    - name: click1
+      replicas: 3
+      shards: 2
+    - name: click2
+      replicas: 2
+      shards: 1
 
   deletionPolicy: WipeOut
 
@@ -65,10 +72,10 @@ spec:
         toggle: true
 
     databases:
-      MSSQLServer:
+      ClickHouse:
         versions:
-          available: ["2022-cu12"]
-          default: "2022-cu12"
+          available: ["24.4.1"]
+          default: "24.4.1"
           toggle: true
     storageClasses:
       available: ["linode-block-storage", "default", "standard", "gp2"]
@@ -216,65 +223,65 @@ form:
         enabled: warning
         rules:
           # Sepcifies the alert configuration for virtual memory usage.
-          mssqlserverVirtualMemoryUsage:
+          clickhouseVirtualMemoryUsage:
             enabled: true
             val: 2097152 # 2GB
             duration: "1m"
             severity: warning
           # Sepcifies the alert configuration for replication lag.
-          mssqlserverReplicationLag:
+          clickhouseReplicationLag:
             enabled: true
             val: 10
             duration: "0m"
             severity: critical
           # Sepcifies the alert configuration for number of opened cursors are more than a specified amount.
-          mssqlserverNumberCursorsOpen:
+          clickhouseNumberCursorsOpen:
             enabled: true
             val: 10000
             duration: "2m"
             severity: warning
           # Sepcifies the alert configuration for timed out cursors.
-          mssqlserverCursorsTimeouts:
+          clickhouseCursorsTimeouts:
             enabled: true
             val: 100
             duration: "2m"
             severity: warning
           # Sepcifies the alert configuration for too many connections are opened.
-          mssqlserverTooManyConnections:
+          clickhouseTooManyConnections:
             enabled: true
             val: 80 # percentage
             duration: "2m"
             severity: warning
           # Sepcifies the alert configuration for database is in Critical phase, that means one or more of the nodes are down but the database read/write are not hampered.
-          mongoDBPhaseCritical:
+          clickhousePhaseCritical:
             enabled: true
             duration: "3m"
             severity: warning
           # Sepcifies the alert configuration for database is in NotReady phase, that means the database is not accepting connections, read/write are hampered.
-          mongoDBDown:
+          clickhouseDown:
             enabled: true
             duration: "30s"
             severity: critical
           # Sepcifies the alert configuration for high latency.
-          mssqlserverHighLatency:
+          clickhouseHighLatency:
             enabled: true
             val: 250000
             duration: "10m"
             severity: warning
           # Sepcifies the alert configuration for high ticket utilizations.
-          mssqlserverHighTicketUtilization:
+          clickhouseHighTicketUtilization:
             enabled: true
             val: 75 # percentage
             duration: "10m"
             severity: warning
           # Sepcifies the alert configuration for recurrent cursor timeout.
-          mssqlserverRecurrentCursorTimeout:
+          clickhouseRecurrentCursorTimeout:
             enabled: true
             val: 0
             duration: "30m"
             severity: warning
           # Sepcifies the alert configuration for recurrent memory page faults.
-          mssqlserverRecurrentMemoryPageFaults:
+          clickhouseRecurrentMemoryPageFaults:
             enabled: true
             val: 0
             duration: "30m"

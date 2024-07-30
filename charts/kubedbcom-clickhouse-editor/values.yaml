@@ -1,5 +1,339 @@
-apiVersion: kubedb.com/v1alpha2
-kind: ClickHouse
+form:
+  alert:
+    additionalRuleLabels: {}
+    annotations: {}
+    enabled: warning
+    groups:
+      database:
+        enabled: warning
+        rules:
+          clickhouseCursorsTimeouts:
+            duration: 2m
+            enabled: true
+            severity: warning
+            val: 100
+          clickhouseDown:
+            duration: 30s
+            enabled: true
+            severity: critical
+          clickhouseHighLatency:
+            duration: 10m
+            enabled: true
+            severity: warning
+            val: 250000
+          clickhouseHighTicketUtilization:
+            duration: 10m
+            enabled: true
+            severity: warning
+            val: 75
+          clickhouseNumberCursorsOpen:
+            duration: 2m
+            enabled: true
+            severity: warning
+            val: 10000
+          clickhousePhaseCritical:
+            duration: 3m
+            enabled: true
+            severity: warning
+          clickhouseRecurrentCursorTimeout:
+            duration: 30m
+            enabled: true
+            severity: warning
+            val: 0
+          clickhouseRecurrentMemoryPageFaults:
+            duration: 30m
+            enabled: true
+            severity: warning
+            val: 0
+          clickhouseReplicationLag:
+            duration: 0m
+            enabled: true
+            severity: critical
+            val: 10
+          clickhouseTooManyConnections:
+            duration: 2m
+            enabled: true
+            severity: warning
+            val: 80
+          clickhouseVirtualMemoryUsage:
+            duration: 1m
+            enabled: true
+            severity: warning
+            val: 2.097152e+06
+      opsManager:
+        enabled: warning
+        rules:
+          opsRequestFailed:
+            duration: 0m
+            enabled: true
+            severity: critical
+          opsRequestOnProgress:
+            duration: 0m
+            enabled: true
+            severity: info
+          opsRequestStatusProgressingToLong:
+            duration: 30m
+            enabled: true
+            severity: critical
+      provisioner:
+        enabled: warning
+        rules:
+          appPhaseCritical:
+            duration: 15m
+            enabled: true
+            severity: warning
+          appPhaseNotReady:
+            duration: 1m
+            enabled: true
+            severity: critical
+      schemaManager:
+        enabled: warning
+        rules:
+          schemaExpired:
+            duration: 0m
+            enabled: true
+            severity: warning
+          schemaFailed:
+            duration: 0m
+            enabled: true
+            severity: warning
+          schemaInProgressForTooLong:
+            duration: 30m
+            enabled: true
+            severity: warning
+          schemaPendingForTooLong:
+            duration: 30m
+            enabled: true
+            severity: warning
+          schemaTerminatingForTooLong:
+            duration: 30m
+            enabled: true
+            severity: warning
+      stash:
+        enabled: warning
+        rules:
+          backupSessionFailed:
+            duration: 0m
+            enabled: true
+            severity: critical
+          backupSessionPeriodTooLong:
+            duration: 0m
+            enabled: true
+            severity: warning
+            val: 1800
+          noBackupSessionForTooLong:
+            duration: 0m
+            enabled: true
+            severity: warning
+            val: 18000
+          repositoryCorrupted:
+            duration: 5m
+            enabled: true
+            severity: critical
+          repositoryStorageRunningLow:
+            duration: 5m
+            enabled: true
+            severity: warning
+            val: 1.073741824e+10
+          restoreSessionFailed:
+            duration: 0m
+            enabled: true
+            severity: critical
+          restoreSessionPeriodTooLong:
+            duration: 0m
+            enabled: true
+            severity: warning
+            val: 1800
+    labels:
+      release: kube-prometheus-stack
 metadata:
-  name: clickhouse
-  namespace: default
+  resource:
+    group: kubedb.com
+    version: v1alpha2
+    name: clickhouses
+    kind: ClickHouse
+    scope: Namespaced
+  release:
+    name: RELEASE-NAME
+    namespace: default
+resources:
+  autoscalingKubedbComClickHouseAutoscaler: # +doc-gen:break
+    apiVersion: autoscaling.kubedb.com/v1alpha1
+    kind: ClickHouseAutoscaler
+    metadata:
+      name: clickhouse
+      namespace: demo
+    spec:
+      compute:
+        clickhouse:
+          maxAllowed:
+            cpu: 1
+            memory: 2Gi
+          minAllowed:
+            cpu: 400m
+            memory: 400Mi
+          podLifeTimeThreshold: 10m
+          resourceDiffPercentage: 20
+          trigger: "On"
+        nodeTopology:
+          name: standard-basv2-family
+      databaseRef:
+        name: repl
+      opsRequestOptions:
+        apply: IfReady
+        timeout: 10m
+  certManagerIoIssuer_ca: # +doc-gen:break
+    apiVersion: cert-manager.io/v1
+    kind: Issuer
+    metadata:
+      name: clickhouse-ca
+      namespace: demo
+    spec:
+      ca:
+        secretName: clickhouse-ca
+  kubedbComClickHouse: # +doc-gen:break
+    apiVersion: kubedb.com/v1alpha2
+    kind: ClickHouse
+    metadata:
+      name: clickhouse
+      namespace: default
+    spec:
+      clusterTopology:
+        clickHouseKeeper:
+          node:
+            host: clickhouse-keeper.click-keeper
+            port: 2181
+        cluster:
+          - name: click1
+            podTemplate:
+              spec:
+                containers:
+                  - name: clickhouse
+                    resources:
+                      limits:
+                        cpu: 500m
+                        memory: 1Gi
+                nodeSelector:
+                  app: clickhouses.kubedb.com
+                  instance: hello
+                  namespace: default
+                  nodepool: standard-bsv2-family
+                podPlacementPolicy:
+                  name: default
+                tolerations:
+                  - effect: NoSchedule
+                    key: app
+                    operator: Equal
+                    value: clickhouses.kubedb.com
+                  - effect: NoSchedule
+                    key: instance
+                    operator: Equal
+                    value: hello
+                  - effect: NoSchedule
+                    key: namespace
+                    operator: Equal
+                    value: default
+                  - effect: NoSchedule
+                    key: nodepool
+                    operator: Equal
+                    value: standard-bsv2-family
+            replicas: 3
+            shards: 2
+            storage:
+              accessModes:
+                - ReadWriteOnce
+              resources:
+                requests:
+                  storage: 10Gi
+              storageClassName: default
+            storageType: Durable
+          - name: click2
+            podTemplate:
+              spec:
+                containers:
+                  - name: clickhouse
+                    resources:
+                      limits:
+                        cpu: 500m
+                        memory: 1Gi
+                nodeSelector:
+                  app: clickhouses.kubedb.com
+                  instance: hello
+                  namespace: default
+                  nodepool: standard-bsv2-family
+                podPlacementPolicy:
+                  name: default
+                tolerations:
+                  - effect: NoSchedule
+                    key: app
+                    operator: Equal
+                    value: clickhouses.kubedb.com
+                  - effect: NoSchedule
+                    key: instance
+                    operator: Equal
+                    value: hello
+                  - effect: NoSchedule
+                    key: namespace
+                    operator: Equal
+                    value: default
+                  - effect: NoSchedule
+                    key: nodepool
+                    operator: Equal
+                    value: standard-bsv2-family
+            replicas: 2
+            shards: 1
+            storage:
+              accessModes:
+                - ReadWriteOnce
+              resources:
+                requests:
+                  storage: 10Gi
+              storageClassName: default
+            storageType: Durable
+      deletionPolicy: WipeOut
+      serviceTemplates:
+        - alias: primary
+          spec:
+            type: LoadBalancer
+      version: 24.4.1
+  monitoringCoreosComServiceMonitor: # +doc-gen:break
+    apiVersion: monitoring.coreos.com/v1
+    kind: ServiceMonitor
+    metadata:
+      name: clickhouse
+      namespace: demo
+    spec:
+      endpoints:
+        - honorLabels: true
+          interval: 30s
+          path: /metrics
+          port: metrics
+      namespaceSelector:
+        matchNames:
+          - demo
+      selector:
+        matchLabels:
+          app.kubernetes.io/instance: clickhouse
+          app.kubernetes.io/name: clickhouses.kubedb.com
+  secret_auth: # +doc-gen:break
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: clickhouse-auth
+      namespace: demo
+    stringData:
+      password: thisIs1StrongPassword
+      username: root
+    type: Opaque
+  secret_config: # +doc-gen:break
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: clickhouse-config
+      namespace: demo
+    stringData:
+      clickhouse.cnf: |
+        [mysqld]
+        max_connections = 200
+        read_buffer_size = 1048576
+    type: Opaque

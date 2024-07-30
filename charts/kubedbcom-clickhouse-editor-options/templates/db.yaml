@@ -1,0 +1,133 @@
+{{- $machines := .Files.Get "data/machines.yaml" | fromYaml -}}
+{{- $res := .Values.spec.podResources.resources -}}
+{{- if and .Values.spec.podResources.machine (hasKey $machines .Values.spec.podResources.machine) }}
+  {{- $res = get (get $machines .Values.spec.podResources.machine) "resources" }}
+{{- end }}
+
+apiVersion: kubedb.com/v1alpha2
+kind: ClickHouse
+metadata:
+  name: {{ include "kubedbcom-clickhouse-editor-options.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kubedbcom-clickhouse-editor-options.labels" . | nindent 4 }}
+{{- if .Values.spec.admin.archiver.default }}
+    kubedb.com/archiver: "true"
+{{- end }}
+  annotations:
+    app.kubernetes.io/cluster-tier: {{ .Values.spec.admin.clusterTier.default }}
+{{- if .Values.spec.annotations }}
+    {{- include "kubedbcom-clickhouse-editor-options.annotations" . | nindent 4 }}
+{{- end }}
+spec:
+  version: {{ .Values.spec.admin.databases.ClickHouse.versions.default | quote }}
+{{- if or (eq .Values.spec.mode "Standalone") (eq .Values.spec.mode "Replicaset") }}
+  replicas: {{ (eq .Values.spec.mode "Replicaset") | ternary .Values.spec.replicas 1 }}
+  storageType: Durable
+  storage:
+    storageClassName: {{ .Values.spec.admin.storageClasses.default }}
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: {{ .Values.spec.persistence.size }}
+{{- end }}
+{{- if eq .Values.spec.mode "Topology" }}
+  clusterTopology:
+    clickHouseKeeper:
+      node:
+        host: {{ .Values.spec.topology.clickHouseKeeper.host }}
+        port: {{ .Values.spec.topology.clickHouseKeeper.port }}
+    cluster:
+    {{- range .Values.spec.topology.cluster }}
+    - name: {{ .name }}
+      shards: {{ .shards }}
+      replicas: {{ .replicas }}
+      storageType: Durable
+      storage:
+        storageClassName: {{ $.Values.spec.admin.storageClasses.default }}
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: {{ $.Values.spec.persistence.size }}
+      podTemplate:
+        spec:
+          containers:
+            - name: clickhouse
+              resources:
+                {{- toYaml $res | nindent 16 }}
+          podPlacementPolicy:
+            name: {{ $.Values.spec.admin.clusterTier.placement.default }}
+          {{- if eq $.Values.spec.admin.deployment.default "Dedicated" }}
+          nodeSelector:
+            app: clickhouses.kubedb.com
+            instance: {{ include "kubedbcom-clickhouse-editor-options.fullname" $ }}
+            namespace: {{ $.Release.Namespace }}
+            nodepool: {{ $.Values.spec.admin.clusterTier.nodeTopology.default }}
+          tolerations:
+            - key: app
+              operator: "Equal"
+              value: "clickhouses.kubedb.com"
+              effect: "NoSchedule"
+            - key: instance
+              operator: "Equal"
+              value: {{ include "kubedbcom-clickhouse-editor-options.fullname" $ }}
+              effect: "NoSchedule"
+            - key: namespace
+              operator: "Equal"
+              value: {{ $.Release.Namespace }}
+              effect: "NoSchedule"
+            - key: nodepool
+              operator: "Equal"
+              value: {{ $.Values.spec.admin.clusterTier.nodeTopology.default }}
+              effect: "NoSchedule"
+          {{- end }}
+    {{- end }}
+{{- else }}
+  podTemplate:
+    spec:
+      containers:
+        - name: clickhouse
+          resources:
+            {{- toYaml $res | nindent 12 }}
+      podPlacementPolicy:
+        name: {{ .Values.spec.admin.clusterTier.placement.default }}
+      {{- if eq .Values.spec.admin.deployment.default "Dedicated" }}
+      nodeSelector:
+        app: clickhouses.kubedb.com
+        instance: {{ include "kubedbcom-clickhouse-editor-options.fullname" . }}
+        namespace: {{ .Release.Namespace }}
+        nodepool: {{ .Values.spec.admin.clusterTier.nodeTopology.default }}
+      tolerations:
+        - key: app
+          operator: "Equal"
+          value: "clickhouses.kubedb.com"
+          effect: "NoSchedule"
+        - key: instance
+          operator: "Equal"
+          value: {{ include "kubedbcom-clickhouse-editor-options.fullname" . }}
+          effect: "NoSchedule"
+        - key: namespace
+          operator: "Equal"
+          value: {{ .Release.Namespace }}
+          effect: "NoSchedule"
+        - key: nodepool
+          operator: "Equal"
+          value: {{ .Values.spec.admin.clusterTier.nodeTopology.default }}
+          effect: "NoSchedule"
+      {{- end }}
+{{- end }}
+  deletionPolicy: {{ .Values.spec.deletionPolicy }}
+{{- if .Values.spec.authSecret.name }}
+  authSecret:
+    name: {{ .Values.spec.authSecret.name }}
+{{- end }}
+{{- if .Values.spec.authSecret.password }}
+  authSecret:
+    name: {{ include "kubedbcom-clickhouse-editor-options.fullname" . }}-auth
+{{- end }}
+{{- if .Values.spec.configuration }}
+  configSecret:
+    name: {{ include "kubedbcom-clickhouse-editor-options.fullname" . }}-config
+{{- end }}
