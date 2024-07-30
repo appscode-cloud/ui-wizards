@@ -1,16 +1,16 @@
 steps:
 - form:
     discriminator:
-      createAuthSecret:
-        default: true
-        type: boolean
-      monitoring:
-        default: false
-        type: boolean
       backup:
         default: false
         type: boolean
       configDatabase:
+        default: false
+        type: boolean
+      createAuthSecret:
+        default: true
+        type: boolean
+      monitoring:
         default: false
         type: boolean
     elements:
@@ -40,17 +40,17 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Singlestore/properties/versions/properties/default
       type: select
-    - if: isToggleOn|deployment
-      hasDescription: true
+    - hasDescription: true
+      if: isToggleOn|deployment
       label:
         text: labels.deployment.name
       options:
-        - text: Shared
-          value: Shared
-          description: labels.deployment.shared
-        - text: Dedicated
-          value: Dedicated
-          description: labels.deployment.dedicated
+      - description: labels.deployment.shared
+        text: Shared
+        value: Shared
+      - description: labels.deployment.dedicated
+        text: Dedicated
+        value: Dedicated
       schema:
         $ref: schema#/properties/spec/properties/admin/properties/deployment/properties/default
       type: radio
@@ -68,10 +68,10 @@ steps:
         $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/default
       type: radio
     - disableUnselect: true
+      fetch: getNodeTopology
       if: isToggleOn|clusterTier/nodeTopology
       label:
         text: labels.nodeTopology
-      fetch: getNodeTopology
       schema:
         $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/nodeTopology/properties/default
       type: select
@@ -247,17 +247,17 @@ steps:
         schema:
           $ref: schema#/properties/spec/properties/podResources/properties/resources
         type: resource-input-form
+      if: isEqualToModelPathValue|Standalone|/spec/mode
       label:
         text: labels.machine_profile
-      if: isEqualToModelPathValue|Standalone|/spec/mode
       show_label: true
       type: single-step-form
     - computed: returnFalse
       label:
         text: Provide Authentication Credentials?
+      onChange: onAuthChange
       schema:
         $ref: discriminator#/createAuthSecret
-      onChange: onAuthChange
       type: switch
     - if: showAuthPasswordField
       label:
@@ -273,9 +273,9 @@ steps:
       type: input
     - label:
         text: Configure Database?
+      onChange: clearConfiguration
       schema:
         $ref: discriminator#/configDatabase
-      onChange: clearConfiguration
       type: switch
     - if: isConfigDatabaseOn
       label:
@@ -327,12 +327,12 @@ steps:
           $ref: schema#/properties/form/properties/alert/properties/enabled
         sortable: true
         type: select
+      if: showAlerts
       label:
         text: labels.alert.label
       schema:
         $ref: schema#/properties/form/properties/alert
       show_label: true
-      if: showAlerts
       type: single-step-form
     - if: isToggleOn|archiver
       label:
