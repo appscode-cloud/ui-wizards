@@ -56,12 +56,11 @@ type KubedbcomPostgresEditorOptionsSpecSpec struct {
 	Admin          AdminOptions      `json:"admin"`
 }
 
-// +kubebuilder:validation:Enum=Standalone;Cluster
+// +kubebuilder:validation:Enum=Standalone;Replicaset
 type PostgresMode string
 
 type PostgresAlertsSpecForm struct {
 	Alert alerts.PostgresAlert `json:"alert"`
-	CAPI  CAPIFormSpec         `json:"capi"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

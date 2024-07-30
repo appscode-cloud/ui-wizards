@@ -1,5 +1,168 @@
-apiVersion: kubedb.com/v1
-kind: Memcached
 metadata:
-  name: memcached
-  namespace: default
+  resource:
+    group: kubedb.com
+    version: v1
+    name: memcacheds
+    kind: Memcached
+    scope: Namespaced
+  release:
+    name: RELEASE-NAME
+    namespace: default
+resources:
+  autoscalingKubedbComMemcachedAutoscaler: # +doc-gen:break
+    apiVersion: autoscaling.kubedb.com/v1alpha1
+    kind: MemcachedAutoscaler
+    metadata:
+      name: memcached
+      namespace: demo
+    spec:
+      compute:
+        node:
+          maxAllowed:
+            cpu: 1
+            memory: 2Gi
+          minAllowed:
+            cpu: 400m
+            memory: 400Mi
+          podLifeTimeThreshold: 10m
+          resourceDiffPercentage: 20
+          trigger: "On"
+        nodeTopology:
+          name: standard-basv2-family
+      databaseRef:
+        name: repl
+      opsRequestOptions:
+        apply: IfReady
+        timeout: 10m
+  catalogAppscodeComMemcachedBinding: # +doc-gen:break
+    apiVersion: catalog.appscode.com/v1alpha1
+    kind: MemcachedBinding
+    metadata:
+      name: memcached
+      namespace: demo
+    spec:
+      sourceRef:
+        name: memcached
+        namespace: demo
+  certManagerIoIssuer_ca: # +doc-gen:break
+    apiVersion: cert-manager.io/v1
+    kind: Issuer
+    metadata:
+      name: memcached-ca
+      namespace: demo
+    spec:
+      ca:
+        secretName: memcached-ca
+  kubedbComMemcached: # +doc-gen:break
+    apiVersion: kubedb.com/v1
+    kind: Memcached
+    metadata:
+      name: memcached
+      namespace: sdb
+    spec:
+      deletionPolicy: Halt
+      licenseSecret:
+        name: license-secret
+      serviceTemplates:
+        - alias: primary
+          spec:
+            type: LoadBalancer
+      storageType: Durable
+      topology:
+        aggregator:
+          podTemplate:
+            spec:
+              containers:
+                - name: memcached
+                  resources:
+                    requests:
+                      cpu: 600m
+                      memory: 1200Mi
+              nodeSelector:
+                app: kubedb
+                component: sdb-database
+                instance: sdb
+              tolerations:
+                - effect: NoSchedule
+                  key: app
+                  operator: Equal
+                  value: kubedb
+                - effect: NoSchedule
+                  key: instance
+                  operator: Equal
+                  value: sdb
+                - effect: NoSchedule
+                  key: component
+                  operator: Equal
+                  value: sdb-database
+                - effect: NoSchedule
+                  key: nodepool_type
+                  operator: Equal
+                  value: n2-standard-2
+          replicas: 3
+          storage:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 1Gi
+            storageClassName: standard-rwo
+        leaf:
+          podTemplate:
+            spec:
+              containers:
+                - name: memcached
+                  resources:
+                    requests:
+                      cpu: 700m
+                      memory: 1400Mi
+          replicas: 2
+          storage:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 10Gi
+            storageClassName: standard-rwo
+      version: 8.1.32
+  monitoringCoreosComServiceMonitor: # +doc-gen:break
+    apiVersion: monitoring.coreos.com/v1
+    kind: ServiceMonitor
+    metadata:
+      name: memcached
+      namespace: demo
+    spec:
+      endpoints:
+        - honorLabels: true
+          interval: 30s
+          path: /metrics
+          port: metrics
+      namespaceSelector:
+        matchNames:
+          - demo
+      selector:
+        matchLabels:
+          app.kubernetes.io/instance: memcached
+          app.kubernetes.io/name: memcacheds.kubedb.com
+  secret_auth: # +doc-gen:break
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: memcached-auth
+      namespace: demo
+    stringData:
+      password: thisIs1StrongPassword
+      username: root
+    type: Opaque
+  secret_config: # +doc-gen:break
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: memcached-config
+      namespace: demo
+    stringData:
+      memcached.cnf: |
+        [mysqld]
+        max_connections = 200
+        read_buffer_size = 1048576
+    type: Opaque

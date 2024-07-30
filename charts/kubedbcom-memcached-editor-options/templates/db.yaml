@@ -1,7 +1,7 @@
-{{- $res := .Values.spec.resources -}}
 {{- $machines := .Files.Get "data/machines.yaml" | fromYaml -}}
-{{- if and .Values.spec.machine (hasKey $machines .Values.spec.machine) }}
-  {{- $res = get (get $machines .Values.spec.machine) "resources" }}
+{{- $res := .Values.spec.podResources.resources -}}
+{{- if and .Values.spec.podResources.machine (hasKey $machines .Values.spec.podResources.machine) }}
+  {{- $res = get (get $machines .Values.spec.podResources.machine) "resources" }}
 {{- end }}
 
 apiVersion: kubedb.com/v1
@@ -16,7 +16,7 @@ metadata:
     {{- include "kubedbcom-memcached-editor-options.annotations" . | nindent 4 }}
 {{- end }}
 spec:
-  version: {{ .Values.spec.version | quote }}
+  version: {{ .Values.spec.admin.databases.Memcached.versions.default | quote }}
   replicas: {{ .Values.spec.replicas }}
   podTemplate:
     spec:
@@ -24,12 +24,58 @@ spec:
         - name: memcached
           resources:
             {{- toYaml $res | nindent 12 }}
+      podPlacementPolicy:
+        name: {{ .Values.spec.admin.clusterTier.placement.default }}
+      {{- if eq .Values.spec.admin.deployment.default "Dedicated" }}
+      nodeSelector:
+        app: memcacheds.kubedb.com
+        instance: {{ include "kubedbcom-memcached-editor-options.fullname" . }}
+        namespace: {{ .Release.Namespace }}
+        nodepool: {{ .Values.spec.admin.clusterTier.nodeTopology.default }}
+      tolerations:
+        - key: app
+          operator: "Equal"
+          value: "memcacheds.kubedb.com"
+          effect: "NoSchedule"
+        - key: instance
+          operator: "Equal"
+          value: {{ include "kubedbcom-memcached-editor-options.fullname" . }}
+          effect: "NoSchedule"
+        - key: namespace
+          operator: "Equal"
+          value: {{ .Release.Namespace }}
+          effect: "NoSchedule"
+        - key: nodepool
+          operator: "Equal"
+          value: {{ .Values.spec.admin.clusterTier.nodeTopology.default }}
+          effect: "NoSchedule"
+      {{- end }}
   deletionPolicy: {{ .Values.spec.deletionPolicy }}
-{{- if (and .Values.spec.monitoring .Values.spec.monitoring.agent) }}
+{{- if .Values.spec.authSecret.name }}
+  authSecret:
+    name: {{ .Values.spec.authSecret.name }}
+{{- end }}
+{{- if .Values.spec.authSecret.password }}
+  authSecret:
+    name: {{ include "kubedbcom-memcached-editor-options.fullname" . }}-auth
+{{- end }}
+{{- if .Values.spec.configuration }}
+  configSecret:
+    name: {{ include "kubedbcom-memcached-editor-options.fullname" . }}-config
+{{- end }}
+{{- if .Values.spec.admin.tls.default }}
+  tls:
+    issuerRef:
+      apiGroup: "cert-manager.io"
+      kind: ClusterIssuer
+      name: {{ .Values.spec.admin.clusterIssuers.default }}
+  requireSSL: true
+{{- end }}
+{{- if (and .Values.spec.admin.monitoring .Values.spec.admin.monitoring.agent) }}
   monitor:
-    agent: {{ .Values.spec.monitoring.agent }}
+    agent: {{ .Values.spec.admin.monitoring.agent }}
     prometheus:
-    {{- with .Values.spec.monitoring.exporter }}
+    {{- with .Values.spec.admin.monitoring.exporter }}
       exporter:
         resources:
           {{- toYaml .resources | nindent 10 }}
@@ -37,5 +83,5 @@ spec:
       serviceMonitor:
         interval: 30s
         labels:
-          {{- toYaml .Values.spec.monitoring.serviceMonitor.labels | nindent 10 }}
+          {{- toYaml .Values.spec.admin.monitoring.serviceMonitor.labels | nindent 10 }}
 {{- end }}

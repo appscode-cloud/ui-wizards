@@ -3,7 +3,6 @@
 {{- if and .Values.spec.podResources.machine (hasKey $machines .Values.spec.podResources.machine) }}
   {{- $res = get (get $machines .Values.spec.podResources.machine) "resources" }}
 {{- end }}
-{{ $poolName := printf "%s-%s-%s" .Values.form.capi.clusterName .Release.Namespace (include "kubedbcom-rabbitmq-editor-options.fullname" .) }}
 
 apiVersion: kubedb.com/v1alpha2
 kind: RabbitMQ
@@ -17,15 +16,11 @@ metadata:
     {{- include "kubedbcom-rabbitmq-editor-options.annotations" . | nindent 4 }}
 {{- end }}
 spec:
-  version: {{ .Values.spec.version | quote }}
-{{- if eq .Values.spec.mode "Standalone" }}
-  replicas: 1
-{{- else if eq .Values.spec.mode "Cluster" }}
-  replicas: {{ .Values.spec.replicas }}
-{{- end }}
+  version: {{ .Values.spec.admin.databases.RabbitMQ.versions.default | quote }}
+  replicas: {{ (eq .Values.spec.mode "Replicaset") | ternary .Values.spec.replicas 1 }}
   storageType: Durable
   storage:
-    storageClassName: {{ .Values.spec.storageClass.name }}
+    storageClassName: {{ .Values.spec.admin.storageClasses.default }}
     accessModes:
     - ReadWriteOnce
     resources:
@@ -34,16 +29,33 @@ spec:
   podTemplate:
     spec:
       containers:
-      - name: "rabbitmq"
-        resources:
-          {{- toYaml $res | nindent 10 }}
-      {{- if and .Values.form.capi.provider .Values.form.capi.dedicated }}
+        - name: rabbitmq
+          resources:
+            {{- toYaml $res | nindent 12 }}
+      podPlacementPolicy:
+        name: {{ .Values.spec.admin.clusterTier.placement.default }}
+      {{- if eq .Values.spec.admin.deployment.default "Dedicated" }}
       nodeSelector:
-        nodes.klusters.dev/pool: {{ $poolName }}
+        app: rabbitmqs.kubedb.com
+        instance: {{ include "kubedbcom-rabbitmq-editor-options.fullname" . }}
+        namespace: {{ .Release.Namespace }}
+        nodepool: {{ .Values.spec.admin.clusterTier.nodeTopology.default }}
       tolerations:
-        - key: dedicated
+        - key: app
           operator: "Equal"
-          value: "true"
+          value: "rabbitmqs.kubedb.com"
+          effect: "NoSchedule"
+        - key: instance
+          operator: "Equal"
+          value: {{ include "kubedbcom-rabbitmq-editor-options.fullname" . }}
+          effect: "NoSchedule"
+        - key: namespace
+          operator: "Equal"
+          value: {{ .Release.Namespace }}
+          effect: "NoSchedule"
+        - key: nodepool
+          operator: "Equal"
+          value: {{ .Values.spec.admin.clusterTier.nodeTopology.default }}
           effect: "NoSchedule"
       {{- end }}
   deletionPolicy: {{ .Values.spec.deletionPolicy }}
@@ -51,12 +63,33 @@ spec:
   authSecret:
     name: {{ .Values.spec.authSecret.name }}
 {{- end }}
-{{- if (and .Values.spec.monitoring .Values.spec.monitoring.agent) }}
+{{- if .Values.spec.authSecret.password }}
+  authSecret:
+    name: {{ include "kubedbcom-rabbitmq-editor-options.fullname" . }}-auth
+{{- end }}
+{{- if .Values.spec.configuration }}
+  configSecret:
+    name: {{ include "kubedbcom-rabbitmq-editor-options.fullname" . }}-config
+{{- end }}
+{{- if .Values.spec.admin.tls.default }}
+  tls:
+    issuerRef:
+      apiGroup: "cert-manager.io"
+      kind: ClusterIssuer
+      name: {{ .Values.spec.admin.clusterIssuers.default }}
+  requireSSL: true
+{{- end }}
+{{- if (and .Values.spec.admin.monitoring .Values.spec.admin.monitoring.agent) }}
   monitor:
-    agent: {{ .Values.spec.monitoring.agent }}
+    agent: {{ .Values.spec.admin.monitoring.agent }}
     prometheus:
+    {{- with .Values.spec.admin.monitoring.exporter }}
+      exporter:
+        resources:
+          {{- toYaml .resources | nindent 10 }}
+    {{- end }}
       serviceMonitor:
         interval: 30s
         labels:
-          {{- toYaml .Values.spec.monitoring.serviceMonitor.labels | nindent 10 }}
+          {{- toYaml .Values.spec.admin.monitoring.serviceMonitor.labels | nindent 10 }}
 {{- end }}
