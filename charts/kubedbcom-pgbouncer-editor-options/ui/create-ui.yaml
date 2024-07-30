@@ -1,11 +1,20 @@
 steps:
 - form:
     discriminator:
+      backup:
+        default: false
+        type: boolean
+      configDatabase:
+        default: false
+        type: boolean
       createAuthSecret:
-        default: true
+        default: false
         type: boolean
       mode:
         type: string
+      monitoring:
+        default: false
+        type: boolean
     elements:
     - disabled: isVariantAvailable
       label:
@@ -14,18 +23,62 @@ steps:
         $ref: schema#/properties/metadata/properties/release/properties/name
       type: input
     - disabled: isVariantAvailable
-      fetch: getResources|core|v1|namespaces
+      fetch: getNamespaces
       label:
         text: labels.namespace
       schema:
         $ref: schema#/properties/metadata/properties/release/properties/namespace
       type: select
+    - hasDescription: true
+      if: isToggleOn|deployment
+      label:
+        text: labels.deployment.name
+      options:
+      - description: labels.deployment.shared
+        text: Shared
+        value: Shared
+      - description: labels.deployment.dedicated
+        text: Dedicated
+        value: Dedicated
+      schema:
+        $ref: schema#/properties/spec/properties/admin/properties/deployment/properties/default
+      type: radio
+    - if: isToggleOn|clusterTier
+      label:
+        text: labels.clusterTier
+      options:
+      - text: General Purpose
+        value: GeneralPurpose
+      - text: Memory Optimized
+        value: MemoryOptimized
+      - text: CPU Optimized
+        value: CPUOptimized
+      schema:
+        $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/default
+      type: radio
     - disableUnselect: true
-      fetch: getProxysqlVersions|catalog.kubedb.com|v1alpha1|pgbouncerversions
+      fetch: getAdminOptions|clusterTier/placement
+      if: isToggleOn|clusterTier/placement
+      label:
+        text: labels.placement
+      schema:
+        $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/placement/properties/default
+      type: select
+    - disableUnselect: true
+      fetch: getNodeTopology
+      if: isToggleOn|clusterTier/nodeTopology
+      label:
+        text: labels.nodeTopology
+      schema:
+        $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/nodeTopology/properties/default
+      type: select
+    - disableUnselect: true
+      fetch: getAdminOptions|databases/PgBouncer/versions
+      if: isToggleOn|databases/PgBouncer/versions
       label:
         text: labels.database.version
       schema:
-        $ref: schema#/properties/spec/properties/version
+        $ref: schema#/properties/spec/properties/admin/properties/databases/properties/PgBouncer/properties/versions/properties/default
       type: select
     - isArray: true
       keys:
@@ -72,6 +125,26 @@ steps:
       schema:
         $ref: discriminator#/properties/mode
       type: radio
+    - elements:
+      - computed: setMachineToCustom
+        fetch: getMachineListForOptions
+        label:
+          text: Machine
+        onChange: setResourceLimit
+        schema:
+          $ref: schema#/properties/spec/properties/podResources/properties/machine
+        type: select
+      - computed: setLimitsCpuOrMem
+        disabled: isMachineNotCustom
+        label:
+          text: labels.resources
+        schema:
+          $ref: schema#/properties/spec/properties/podResources/properties/resources
+        type: resource-input-form
+      label:
+        text: labels.machine_profile
+      show_label: true
+      type: single-step-form
     - hasDescription: true
       label:
         text: labels.deletionPolicy
@@ -88,26 +161,45 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/deletionPolicy
       type: radio
-    - label:
-        text: labels.database.secret
-      type: label-element
-    - onChange: onCreateAuthSecretChange
-      options:
-      - text: options.database.secret.customSecret.label
-        value: true
-      - text: options.database.secret.existingSecret.label
-        value: false
-      schema:
-        $ref: discriminator#/properties/createAuthSecret
-      type: radio
-    - allowUserDefinedOption: true
-      fetch: getSecrets
-      if: showAuthSecretField
+    - elements:
+      - label:
+          text: labels.sync_users_question
+        schema:
+          $ref: schema#/properties/spec/properties/database/properties/syncUsers
+        type: switch
+      - label:
+          text: labels.database.name
+        schema:
+          $ref: schema#/properties/spec/properties/database/properties/databaseName
+        type: input
+      - fetch: getNamespaces
+        label:
+          text: labels.namespace
+        schema:
+          $ref: schema#/properties/spec/properties/database/properties/ref/properties/namespace
+        type: select
+      - fetch: getPostgresList
+        label:
+          text: labels.name
+        schema:
+          $ref: schema#/properties/spec/properties/database/properties/ref/properties/name
+        type: select
       label:
-        text: labels.secret
+        text: labels.databaseref.label
+      show_label: true
+      type: single-step-form
+    - label:
+        text: Provide Authentication Credentials?
+      onChange: onAuthChange
+      schema:
+        $ref: discriminator#/createAuthSecret
+      type: switch
+    - if: showAuthPasswordField
+      label:
+        text: labels.name
       schema:
         $ref: schema#/properties/spec/properties/authSecret/properties/name
-      type: select
+      type: input
     - if: showAuthPasswordField
       label:
         text: labels.password
@@ -115,95 +207,75 @@ steps:
         $ref: schema#/properties/spec/properties/authSecret/properties/password
       type: input
     - label:
-        text: labels.machine_profile
-      type: label-element
-    - computed: setMachineToCustom
-      fetch: getMachineListForOptions
-      label:
-        text: Machine
-      onChange: setResourceLimit
+        text: Configure Database?
+      onChange: clearConfiguration
       schema:
-        $ref: schema#/properties/spec/properties/machine
+        $ref: discriminator#/configDatabase
+      type: switch
+    - if: isConfigDatabaseOn
+      label:
+        text: Configuration
+      schema:
+        $ref: schema#/properties/spec/properties/configuration
+      type: editor
+    - if: isToggleOn|tls
+      label:
+        text: Enable TLS?
+      schema:
+        $ref: schema#/properties/spec/properties/admin/properties/tls/properties/default
+      type: switch
+    - fetch: getAdminOptions|clusterIssuers
+      if: showIssuer
+      label:
+        text: labels.clusterIssuers
+      schema:
+        $ref: schema#/properties/spec/properties/admin/properties/clusterIssuers/properties/default
       type: select
-    - computed: setLimitsCpuOrMem|cpu
-      disabled: disableLimit
+    - if: isToggleOn|webUI
       label:
-        text: labels.cpu
+        text: Enable Web UI?
       schema:
-        $ref: schema#/properties/spec/properties/resources/properties/limits/properties/cpu
-      type: input
-    - computed: setLimitsCpuOrMem|memory
-      disabled: disableLimit
+        $ref: schema#/properties/spec/properties/admin/properties/webUI/properties/default
+      type: switch
+    - computed: setMonitoring
+      if: isToggleOn|monitoring
       label:
-        text: labels.memory
+        text: labels.enable_monitoring
+      onChange: updateAlertValue
       schema:
-        $ref: schema#/properties/spec/properties/resources/properties/limits/properties/memory
-      type: input
-    - addFormLabel: labels.database.label
-      customClass: mb-20
-      element:
-        elements:
-        - label:
-            text: labels.alias
-          schema:
-            $ref: schema#/properties/spec/properties/databases/items/properties/alias
-          type: input
-        - label:
-            text: labels.database.name
-          schema:
-            $ref: schema#/properties/spec/properties/databases/items/properties/databaseName
-          type: input
-        - elements:
-          - fetch: getResources|core|v1|namespaces
-            label:
-              text: labels.namespace
-            schema:
-              $ref: schema#/properties/spec/properties/databases/items/properties/databaseRef/properties/namespace
-            type: select
-          - fetch: getAppbinding
-            label:
-              text: labels.name
-            schema:
-              $ref: schema#/properties/spec/properties/databases/items/properties/databaseRef/properties/name
-            type: select
-          label:
-            isSubsection: true
-            text: labels.databaseref.label
-          schema:
-            $ref: schema#/properties/spec/properties/databases/items/properties/databaseRef
-          show_label: true
-          type: single-step-form
-        type: single-step-form
+        $ref: discriminator#/monitoring
+      type: switch
+    - customClass: mt-10
+      if: showAlerts
       label:
-        text: labels.database.databases
+        text: labels.alert.options
+      options:
+      - text: None
+        value: none
+      - text: Critical
+        value: critical
+      - text: Warning
+        value: warning
+      - text: Info
+        value: info
       schema:
-        $ref: schema#/properties/spec/properties/databases
-      tableContents:
-      - inTableColumn: true
-        label:
-          text: labels.alias
-        path: alias
-        type: value
-        typeOfValue: string
-      - inTableColumn: true
-        label:
-          text: labels.database.name
-        path: databaseName
-        type: value
-        typeOfValue: string
-      - inTableColumn: true
-        label:
-          text: labels.databaseref.appbinding_name
-        path: databaseRef/name
-        type: value
-        typeOfValue: string
-      - inTableColumn: true
-        label:
-          text: labels.databaseref.appbinding_namespace
-        path: databaseRef/namespace
-        type: value
-        typeOfValue: string
-      type: single-step-form-array
+        $ref: schema#/properties/form/properties/alert/properties/enabled
+      sortable: true
+      type: select
+    - if: isToggleOn|archiver
+      label:
+        text: Enable Archiver?
+      schema:
+        $ref: schema#/properties/spec/properties/admin/properties/archiver/properties/default
+      type: switch
+    - computed: isBackupCluster
+      if: isToggleOn|backup
+      label:
+        text: Enable Backup?
+      onChange: onBackupSwitch
+      schema:
+        $ref: discriminator#/backup
+      type: switch
     - label:
         text: labels.configOptions
       type: label-element
