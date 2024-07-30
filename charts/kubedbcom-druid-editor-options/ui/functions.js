@@ -314,24 +314,6 @@ function showAuthPasswordField({
   return !!modelPathValue;
 }
 
-function showAuthSecretField({
-  discriminator,
-  getValue,
-  watchDependency,
-}) {
-  return !showAuthPasswordField({
-    discriminator,
-    getValue,
-    watchDependency,
-  });
-}
-
-function showStorageSizeField({ model, getValue, watchDependency }) {
-  const modelPathValue = getValue(model, "/spec/mode");
-  watchDependency("model#/spec/mode");
-  const validType = ["Standalone", "Replicaset"];
-  return validType.includes(modelPathValue);
-}
 
 async function getNamespaces({ axios, storeGet }) {
   const params = storeGet("/route/params");
@@ -360,93 +342,6 @@ async function getNamespaces({ axios, storeGet }) {
   catch(e) {
     console.log(e);
     return [];
-  }
-}
-
-async function getStorageClassNames({ axios, storeGet, commit, model, getValue }) {
-  const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/route/params/cluster");
-
-  const resp = await axios.get(
-    `/clusters/${owner}/${cluster}/proxy/storage.k8s.io/v1/storageclasses`,
-    {
-      params: {
-        filter: { items: { metadata: { name: null, annotations: null } } },
-      },
-    }
-  );
-
-  const resources = (resp && resp.data && resp.data.items) || [];
-
-  resources.map((item) => {
-    const name = (item.metadata && item.metadata.name) || "";
-    item.text = name;
-    item.value = name;
-    return true;
-  });
-  storageClassList = resources;
-  setStorageClass({model, getValue, commit});
-  return resources;
-}
-
-async function getMongoDbVersions(
-  { axios, storeGet },
-  group,
-  version,
-  resource
-) {
-  const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/route/params/cluster");
-
-  const queryParams = {
-    filter: {
-      items: {
-        metadata: { name: null },
-        spec: { version: null, deprecated: null },
-      },
-    },
-  };
-
-  const resp = await axios.get(
-    `/clusters/${owner}/${cluster}/proxy/${group}/${version}/${resource}`,
-    {
-      params: queryParams,
-    }
-  );
-
-  const resources = (resp && resp.data && resp.data.items) || [];
-
-  // keep only non deprecated versions
-  const filteredMongoDbVersions = resources.filter(
-    (item) => item.spec && !item.spec.deprecated
-  );
-
-  filteredMongoDbVersions.map((item) => {
-    const name = (item.metadata && item.metadata.name) || "";
-    const specVersion = (item.spec && item.spec.version) || "";
-    item.text = `${name} (${specVersion})`;
-    item.value = name;
-    return true;
-  });
-  return filteredMongoDbVersions;
-}
-
-function onCreateAuthSecretChange({
-  discriminator,
-  getValue,
-  commit
-}) {
-  const createAuthSecret = getValue(discriminator, "/createAuthSecret");
-  if (createAuthSecret) {
-    commit(
-      "wizard/model$delete",
-      "/spec/authSecret/name"
-    );
-  } else if(createAuthSecret === false) {
-    commit(
-      "wizard/model$delete",
-      "/spec/authSecret/password"
-    );
   }
 }
 
@@ -550,7 +445,7 @@ function isMachineNotCustom({ model, getValue, watchDependency }, path ) {
   return modelPathValue !== "custom" && !!modelPathValue;
 }
 
-function updateAlertValue({ commit, model, discriminator, getValue }) {
+function updateAlertValue({ commit, discriminator, getValue }) {
   const isMonitorEnabled = getValue(discriminator, "/monitoring");
   const alert = isMonitorEnabled ? "warning" : "none";
   // update alert value depend on monitoring profile
@@ -567,7 +462,7 @@ function updateAlertValue({ commit, model, discriminator, getValue }) {
   });
 }
 
-function getCreateNameSpaceUrl ({ model, getValue, storeGet }){ 
+function getCreateNameSpaceUrl ({ storeGet }){ 
 
   const user = storeGet("/route/params/user");
   const cluster = storeGet("/route/params/cluster");
@@ -578,101 +473,6 @@ function getCreateNameSpaceUrl ({ model, getValue, storeGet }){
   }else{
     const editedDomain = domain.replace("kubedb","console");
     return `${editedDomain}/${user}/kubernetes/${cluster}/core/v1/namespaces/create`
-  }
-}
-
-const ifCapiProviderIsNotEmpty = ({ model, getValue, watchDependency }) => {
-  watchDependency("model#/form/capi/provider");
-  const val = getValue(model, "/form/capi/provider");
-  if (val) return true
-};
-
-const showMultiselectZone = ({ model, getValue, watchDependency }) => {
-  watchDependency("model#/form/capi/dedicated");
-  const val = getValue(model, "/form/capi/provider");
-  
-  if(val === "capz" && ifDedicated({ model, getValue })) return true;
-};
-
-const showSelectZone = ({ model, getValue, watchDependency }) => {
-  watchDependency("model#/form/capi/dedicated");
-  const val = getValue(model, "/form/capi/provider");
-  if(val !== "capz" && ifDedicated({ model, getValue })) return true;
-};
-
-const ifDedicated = ({ model, getValue}) => {
-  const val = getValue(model, "form/capi/dedicated");
-  if (val) return true
-};
-
-const dedicatedOnChange = ({ model, getValue, commit }) => {
-  const val = getValue(model, "form/capi/dedicated");
-  if (!val) {
-    commit("wizard/model$delete", "form/capi/zones");
-    commit("wizard/model$delete", "form/capi/sku");
-  }
-};
-
-
-const ifZones = ({ model, getValue, watchDependency }) => {
-  watchDependency("model#/form/capi/zones");
-  watchDependency("model#/form/capi/dedicated");
-  const zones = getValue(model, "form/capi/zones") || [];
-  const isDedicated = getValue(model, "form/capi/dedicated");
-  if (zones.length && isDedicated) return true
-};
-
-const zonesOnChange = ({ model, getValue, commit }) => {
-  const zones = getValue(model, "form/capi/zones") || [];
-  if (!zones.length) commit("wizard/model$delete", "form/capi/sku");
-};
-
-async function getZones({storeGet,axios,model,getValue}) {
-  const owner = storeGet("/route/params/user")
-  const cluster = storeGet("/route/params/cluster")
-  const isDedicated = getValue(model,"form/capi/dedicated")
-  if(isDedicated)
-  {
-    try {
-      const resp = await axios.get(`clustersv2/${owner}/${cluster}/zones`);
-      const val = resp.data.map((item)=>{
-        return {"value":item,"text":item}
-      })
-      return val
-    } catch (e) {
-      console.log(e);
-      return [];
-    }
-  }
-}
-
-async function getSKU({storeGet,axios,model,getValue,watchDependency}) {
-  watchDependency("model#/form/capi/zones")
-  const owner = storeGet("/route/params/user")
-  const cluster = storeGet("/route/params/cluster")
-  const zones = getValue(model,"form/capi/zones") || []
-  if(zones.length)
-  {
-    try {
-      let url = `clustersv2/${owner}/${cluster}/vms?`
-      if(typeof zones === 'string') {
-        url+=`zones=${encodeURIComponent(zones)}`
-      }
-      else {
-        zones.forEach((item) => {
-          url+= `zones=${encodeURIComponent(item)}&`
-        });
-        url = url.slice(0,-1)
-      }
-      const resp = await axios.get(url);
-      const val = resp.data.map((item)=>{
-        return {"value":item.name,"text":`${item.name} [CPU: ${item.cpu}] [Memory: ${item.memory}mb] `}
-      })
-      return val
-    } catch (e) {
-      console.log(e);
-      return [];
-    }
   }
 }
 
@@ -933,11 +733,6 @@ function filterNodeTopology(list, tier, provider, mappedList) {
   }
 }
 
-function initiateRefs({ model, getValue, setDiscriminatorValue }, type) {
-  const modelRef = getValue(model, `/spec/${type}`) || {}; 
-  setDiscriminatorValue(`/${type}`, `${modelRef?.namespace}/${modelRef.name}`)
-}
-
 async function getAppBindings({ axios, storeGet }, type) {
   const owner = storeGet("/route/params/user");
   const cluster = storeGet("/route/params/cluster");
@@ -997,12 +792,7 @@ function isToggleOn({ getValue, model }, type) {
 return {
   isVariantAvailable,
   showAuthPasswordField,
-  showAuthSecretField,
-  showStorageSizeField,
   getNamespaces,
-  getStorageClassNames,
-  getMongoDbVersions,
-  onCreateAuthSecretChange,
   getSecrets,
   disableLimit,
   getMachineListForOptions,
@@ -1012,15 +802,6 @@ return {
   isMachineNotCustom,
   updateAlertValue,
   getCreateNameSpaceUrl,
-  ifCapiProviderIsNotEmpty,
-  ifDedicated,
-  dedicatedOnChange,
-  ifZones,
-  zonesOnChange,
-  getZones,
-  getSKU,
-  showMultiselectZone,
-  showSelectZone,
   setStorageClass,
   showAlerts,
   showIssuer,
@@ -1032,7 +813,6 @@ return {
   clearConfiguration,
   getNodeTopology,
   filterNodeTopology,
-  initiateRefs,
   getAppBindings,
   onRefChange,
   isToggleOn,
