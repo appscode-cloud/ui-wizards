@@ -1309,13 +1309,6 @@ properties:
             format: password
             type: string
         type: object
-      cluster:
-        properties:
-          replicas:
-            type: integer
-        required:
-        - replicas
-        type: object
       configuration:
         type: string
       deletionPolicy:
@@ -1332,7 +1325,7 @@ properties:
       mode:
         enum:
         - Standalone
-        - Cluster
+        - Replicaset
         type: string
       persistence:
         properties:
@@ -1431,18 +1424,20 @@ properties:
         - name
         - namespace
         type: object
+      replicas:
+        type: integer
       syncUsers:
         type: boolean
     required:
     - admin
     - authSecret
-    - cluster
     - configuration
     - deletionPolicy
     - mode
     - persistence
     - podResources
     - postgresRef
+    - replicas
     - syncUsers
     type: object
 required:

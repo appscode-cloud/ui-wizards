@@ -46,8 +46,8 @@ type KubedbcomPgpoolEditorOptionsSpecSpec struct {
 	Annotations map[string]string `json:"annotations"`
 	// +optional
 	Labels         map[string]string `json:"labels"`
-	Mode           PgpoolMode        `json:"mode"`
-	Cluster        PgpoolCluster     `json:"cluster"`
+	Mode           GeneralMode       `json:"mode"`
+	Replicas       int               `json:"replicas"`
 	PostgresRef    ObjectReference   `json:"postgresRef"`
 	SyncUsers      bool              `json:"syncUsers"`
 	Persistence    Persistence       `json:"persistence"`
@@ -56,13 +56,6 @@ type KubedbcomPgpoolEditorOptionsSpecSpec struct {
 	DeletionPolicy DeletionPolicy    `json:"deletionPolicy"`
 	Configuration  string            `json:"configuration"`
 	Admin          AdminOptions      `json:"admin"`
-}
-
-// +kubebuilder:validation:Enum=Standalone;Cluster
-type PgpoolMode string
-
-type PgpoolCluster struct {
-	Replicas int `json:"replicas"`
 }
 
 type PgpoolAlertsSpecForm struct {

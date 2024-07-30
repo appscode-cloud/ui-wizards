@@ -46,7 +46,7 @@ type KubedbcomPerconaxtradbEditorOptionsSpecSpec struct {
 	Annotations map[string]string `json:"annotations"`
 	// +optional
 	Labels map[string]string `json:"labels"`
-	Mode   PerconaXtraDBMode `json:"mode"`
+	Mode   GeneralMode       `json:"mode"`
 	// +optional
 	Replicas       int            `json:"replicas,omitempty"`
 	Persistence    Persistence    `json:"persistence"`
@@ -56,9 +56,6 @@ type KubedbcomPerconaxtradbEditorOptionsSpecSpec struct {
 	Configuration  string         `json:"configuration"`
 	Admin          AdminOptions   `json:"admin"`
 }
-
-// +kubebuilder:validation:Enum=Standalone;Replicaset
-type PerconaXtraDBMode string
 
 type PerconaxtradbAlertsSpecForm struct {
 	Alert alerts.PerconaXtraDBAlert `json:"alert"`

@@ -46,8 +46,7 @@ type KubedbcomPostgresEditorOptionsSpecSpec struct {
 	Annotations map[string]string `json:"annotations"`
 	// +optional
 	Labels         map[string]string `json:"labels"`
-	Version        string            `json:"version"`
-	Mode           PostgresMode      `json:"mode"`
+	Mode           GeneralMode       `json:"mode"`
 	DeletionPolicy DeletionPolicy    `json:"deletionPolicy"`
 	Persistence    Persistence       `json:"persistence"`
 	PodResources   PodResources      `json:"podResources"`
@@ -55,9 +54,6 @@ type KubedbcomPostgresEditorOptionsSpecSpec struct {
 	Configuration  string            `json:"configuration"`
 	Admin          AdminOptions      `json:"admin"`
 }
-
-// +kubebuilder:validation:Enum=Standalone;Replicaset
-type PostgresMode string
 
 type PostgresAlertsSpecForm struct {
 	Alert alerts.PostgresAlert `json:"alert"`

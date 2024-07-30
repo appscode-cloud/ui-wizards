@@ -16,7 +16,7 @@ metadata:
     {{- include "kubedbcom-pgbouncer-editor-options.annotations" . | nindent 4 }}
 {{- end }}
 spec:
-  replicas: {{ .Values.spec.replicas }}
+  replicas: {{ (eq .Values.spec.mode "Replicaset") | ternary .Values.spec.replicas 1 }}
   version: {{ .Values.spec.admin.databases.PgBouncer.versions.default | quote }}
 {{- if .Values.spec.authSecret.name }}
   authSecret:
@@ -87,8 +87,6 @@ spec:
     prometheus:
     {{- with .Values.spec.admin.monitoring.exporter }}
       exporter:
-        args:
-          - --compatible-mode
         resources:
           {{- toYaml .resources | nindent 10 }}
     {{- end }}

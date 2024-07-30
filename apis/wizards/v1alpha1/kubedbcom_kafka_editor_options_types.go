@@ -42,7 +42,6 @@ type KubedbcomKafkaEditorOptionsSpec struct {
 }
 
 type KubedbcomKafkaEditorOptionsSpecSpec struct {
-	Version string `json:"version"`
 	// +optional
 	Annotations map[string]string `json:"annotations"`
 	// +optional
@@ -51,8 +50,7 @@ type KubedbcomKafkaEditorOptionsSpecSpec struct {
 	// +optional
 	Replicas *int `json:"replicas,omitempty"`
 	// +optional
-	Topology        *KafkaTopology `json:"topology,omitempty"`
-	DisableSecurity bool           `json:"disableSecurity"`
+	Topology *KafkaTopology `json:"topology,omitempty"`
 	// +optional
 	Persistence    Persistence    `json:"persistence"`
 	PodResources   PodResources   `json:"podResources"`

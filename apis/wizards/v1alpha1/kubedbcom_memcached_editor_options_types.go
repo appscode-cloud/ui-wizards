@@ -44,7 +44,7 @@ type KubedbcomMemcachedEditorOptionsSpecSpec struct {
 	Annotations map[string]string `json:"annotations"`
 	// +optional
 	Labels map[string]string `json:"labels"`
-	Mode   MemcachedMode     `json:"mode"`
+	Mode   GeneralMode       `json:"mode"`
 	// +optional
 	Replicas       int            `json:"replicas"`
 	PodResources   PodResources   `json:"podResources"`
@@ -53,9 +53,6 @@ type KubedbcomMemcachedEditorOptionsSpecSpec struct {
 	Configuration  string         `json:"configuration"`
 	Admin          AdminOptions   `json:"admin"`
 }
-
-// +kubebuilder:validation:Enum=Standalone;Replicaset
-type MemcachedMode string
 
 // *** Alerts *** //
 // *** Alerts *** //

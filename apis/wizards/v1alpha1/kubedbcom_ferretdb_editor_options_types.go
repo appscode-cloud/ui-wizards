@@ -45,21 +45,22 @@ type KubedbcomFerretdbEditorOptionsSpecSpec struct {
 	// +optional
 	Annotations map[string]string `json:"annotations"`
 	// +optional
-	Labels            map[string]string `json:"labels"`
-	Mode              FerretDBMode      `json:"mode"`
-	Replicas          int               `json:"replicas"`
-	PostgresRef       ObjectReference   `json:"postgresRef"`
-	ExternallyManaged bool              `json:"externallyManaged"`
-	Persistence       Persistence       `json:"persistence"`
-	PodResources      PodResources      `json:"podResources"`
-	AuthSecret        AuthSecret        `json:"authSecret"`
-	DeletionPolicy    DeletionPolicy    `json:"deletionPolicy"`
-	Configuration     string            `json:"configuration"`
-	Admin             AdminOptions      `json:"admin"`
+	Labels         map[string]string `json:"labels"`
+	Mode           GeneralMode       `json:"mode"`
+	Replicas       int               `json:"replicas"`
+	Backend        FerretDBBackend   `json:"backend"`
+	Persistence    Persistence       `json:"persistence"`
+	PodResources   PodResources      `json:"podResources"`
+	AuthSecret     AuthSecret        `json:"authSecret"`
+	DeletionPolicy DeletionPolicy    `json:"deletionPolicy"`
+	Configuration  string            `json:"configuration"`
+	Admin          AdminOptions      `json:"admin"`
 }
 
-// +kubebuilder:validation:Enum=Standalone;Replicaset
-type FerretDBMode string
+type FerretDBBackend struct {
+	ObjectReference   `json:",inline"`
+	ExternallyManaged bool `json:"externallyManaged"`
+}
 
 type FerretdbAlertsSpecForm struct {
 	Alert alerts.PostgresAlert `json:"alert"`

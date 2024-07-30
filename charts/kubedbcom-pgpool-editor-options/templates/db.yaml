@@ -17,7 +17,7 @@ metadata:
 {{- end }}
 spec:
   version: {{ .Values.spec.admin.databases.Pgpool.versions.default | quote }}
-  replicas: {{ (eq .Values.spec.mode "Cluster") | ternary .Values.spec.cluster.replicas 1 }}
+  replicas: {{ (eq .Values.spec.mode "Replicaset") | ternary .Values.spec.replicas 1 }}
   storageType: Durable
   postgresRef:
     name: {{ .Values.spec.postgresRef.name }}

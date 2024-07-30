@@ -77,8 +77,6 @@ spec:
       apiGroup: "cert-manager.io"
       kind: ClusterIssuer
       name: {{ .Values.spec.admin.clusterIssuers.default }}
-  clusterAuthMode: x509
-  sslMode: requireSSL
 {{- end }}
 {{- if (and .Values.spec.admin.monitoring .Values.spec.admin.monitoring.agent) }}
   monitor:
@@ -86,8 +84,6 @@ spec:
     prometheus:
     {{- with .Values.spec.admin.monitoring.exporter }}
       exporter:
-        args:
-          - --compatible-mode
         resources:
           {{- toYaml .resources | nindent 10 }}
     {{- end }}

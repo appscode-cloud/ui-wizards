@@ -18,6 +18,11 @@ metadata:
 spec:
   version: {{ .Values.spec.admin.databases.FerretDB.versions.default | quote }}
   replicas: {{ .Values.spec.replicas }}
+  backend:
+    externallyManaged: {{ .Values.spec.backend.externallyManaged }}
+    postgresRef:
+      name: {{ .Values.spec.backend.name }}
+      namespace: {{ .Values.spec.backend.namespace }}
   storageType: Durable
   storage:
     storageClassName: {{ .Values.spec.admin.storageClasses.default }}
@@ -59,7 +64,6 @@ spec:
           effect: "NoSchedule"
       {{- end }}
   deletionPolicy: {{ .Values.spec.deletionPolicy }}
-  sslMode: {{ .Values.spec.sslMode }}
 {{- if .Values.spec.authSecret.name }}
   authSecret:
     name: {{ .Values.spec.authSecret.name }}
@@ -78,7 +82,6 @@ spec:
       apiGroup: "cert-manager.io"
       kind: ClusterIssuer
       name: {{ .Values.spec.admin.clusterIssuers.default }}
-  clusterAuthMode: x509
   sslMode: requireSSL
 {{- end }}
 {{- if (and .Values.spec.admin.monitoring .Values.spec.admin.monitoring.agent) }}
@@ -87,8 +90,6 @@ spec:
     prometheus:
     {{- with .Values.spec.admin.monitoring.exporter }}
       exporter:
-        args:
-          - --compatible-mode
         resources:
           {{- toYaml .resources | nindent 10 }}
     {{- end }}

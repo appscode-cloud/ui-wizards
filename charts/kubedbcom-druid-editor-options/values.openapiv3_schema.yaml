@@ -1291,16 +1291,23 @@ properties:
           type: string
         type: object
       metadataStorage:
-        description: ObjectReference contains enough information to let you inspect
-          or modify the referred object.
         properties:
+          externallyManaged:
+            type: boolean
           name:
             type: string
           namespace:
             type: string
+          type:
+            enum:
+            - MySQL
+            - Postgres
+            type: string
         required:
+        - externallyManaged
         - name
         - namespace
+        - type
         type: object
       topology:
         properties:
@@ -1687,14 +1694,15 @@ properties:
         - middleManagers
         type: object
       zookeeperRef:
-        description: ObjectReference contains enough information to let you inspect
-          or modify the referred object.
         properties:
+          externallyManaged:
+            type: boolean
           name:
             type: string
           namespace:
             type: string
         required:
+        - externallyManaged
         - name
         - namespace
         type: object

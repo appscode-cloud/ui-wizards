@@ -113,9 +113,11 @@ spec:
     name: {{ .Values.spec.metadataStorage.name }}
     namespace: {{ .Values.spec.metadataStorage.namespace }}
     createTables: true
+    externallyManaged: {{ .Values.spec.metadataStorage.externallyManaged }}
   zookeeperRef:
     name: {{ .Values.spec.zookeeperRef.name }}
     namespace: {{ .Values.spec.zookeeperRef.namespace }}
+    externallyManaged: {{ .Values.spec.zookeeperRef.externallyManaged }}
   deletionPolicy: {{ .Values.spec.deletionPolicy }}
 {{- if .Values.spec.authSecret.name }}
   authSecret:
@@ -135,7 +137,6 @@ spec:
       apiGroup: "cert-manager.io"
       kind: ClusterIssuer
       name: {{ .Values.spec.admin.clusterIssuers.default }}
-  sslMode: requireSSL
 {{- end }}
 {{- if (and .Values.spec.admin.monitoring .Values.spec.admin.monitoring.agent) }}
   monitor:

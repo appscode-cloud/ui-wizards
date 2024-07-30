@@ -46,7 +46,7 @@ type KubedbcomPgbouncerEditorOptionsSpecSpec struct {
 	Annotations map[string]string `json:"annotations"`
 	// +optional
 	Labels         map[string]string `json:"labels"`
-	Mode           PgbouncerMode     `json:"mode"`
+	Mode           GeneralMode       `json:"mode"`
 	Replicas       int               `json:"replicas"`
 	Database       PgbouncerDatabase `json:"database"`
 	Persistence    Persistence       `json:"persistence"`
@@ -56,9 +56,6 @@ type KubedbcomPgbouncerEditorOptionsSpecSpec struct {
 	Configuration  string            `json:"configuration"`
 	Admin          AdminOptions      `json:"admin"`
 }
-
-// +kubebuilder:validation:Enum=Standalone;Cluster
-type PgbouncerMode string
 
 type PgbouncerDatabase struct {
 	SyncUsers    bool            `json:"syncUsers,omitempty"`
