@@ -1,0 +1,109 @@
+{{- $machines := .Files.Get "data/machines.yaml" | fromYaml -}}
+{{- $res := .Values.spec.podResources.resources -}}
+{{- if and .Values.spec.podResources.machine (hasKey $machines .Values.spec.podResources.machine) }}
+  {{- $res = get (get $machines .Values.spec.podResources.machine) "resources" }}
+{{- end }}
+
+apiVersion: kubedb.com/v1alpha2
+kind: MSSQLServer
+metadata:
+  name: {{ include "kubedbcom-mssqlserver-editor-options.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kubedbcom-mssqlserver-editor-options.labels" . | nindent 4 }}
+{{- if .Values.spec.annotations }}
+  annotations:
+    {{- include "kubedbcom-mssqlserver-editor-options.annotations" . | nindent 4 }}
+{{- end }}
+spec:
+  version: {{ .Values.spec.admin.databases.MSSQLServer.versions.default | quote }}
+  storageType: Durable
+  storage:
+    storageClassName: {{ .Values.spec.admin.storageClasses.default }}
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: {{ .Values.spec.persistence.size }}
+{{- if eq .Values.spec.mode "Topology" }}
+  replicas: {{ .Values.spec.replicas }}
+  topology:
+    mode: AvailabilityGroup
+    availabilityGroup:
+      {{- toYaml .Values.spec.topology.availabilityGroup | nindent 6 }}
+  internalAuth:
+    endpointCert:
+      issuerRef:
+        apiGroup: "cert-manager.io"
+        kind: ClusterIssuer
+        name: {{ .Values.spec.admin.clusterIssuers.default }}
+{{- else }}
+  replicas: 1
+{{- end }}
+  podTemplate:
+    spec:
+      containers:
+        - name: mssql
+          resources:
+            {{- toYaml $res | nindent 12 }}
+      podPlacementPolicy:
+        name: {{ .Values.spec.admin.clusterTier.placement.default }}
+      {{- if eq .Values.spec.admin.deployment.default "Dedicated" }}
+      nodeSelector:
+        app: mssqls.kubedb.com
+        instance: {{ include "kubedbcom-mssqlserver-editor-options.fullname" . }}
+        namespace: {{ .Release.Namespace }}
+        nodepool: {{ .Values.spec.admin.clusterTier.nodeTopology.default }}
+      tolerations:
+        - key: app
+          operator: "Equal"
+          value: "mssqls.kubedb.com"
+          effect: "NoSchedule"
+        - key: instance
+          operator: "Equal"
+          value: {{ include "kubedbcom-mssqlserver-editor-options.fullname" . }}
+          effect: "NoSchedule"
+        - key: namespace
+          operator: "Equal"
+          value: {{ .Release.Namespace }}
+          effect: "NoSchedule"
+        - key: nodepool
+          operator: "Equal"
+          value: {{ .Values.spec.admin.clusterTier.nodeTopology.default }}
+          effect: "NoSchedule"
+      {{- end }}
+  deletionPolicy: {{ .Values.spec.deletionPolicy }}
+{{- if .Values.spec.authSecret.name }}
+  authSecret:
+    name: {{ .Values.spec.authSecret.name }}
+{{- end }}
+{{- if .Values.spec.authSecret.password }}
+  authSecret:
+    name: {{ include "kubedbcom-mssqlserver-editor-options.fullname" . }}-auth
+{{- end }}
+{{- if .Values.spec.configuration }}
+  configSecret:
+    name: {{ include "kubedbcom-mssqlserver-editor-options.fullname" . }}-config
+{{- end }}
+  tls:
+    issuerRef:
+      apiGroup: "cert-manager.io"
+      kind: ClusterIssuer
+      name: {{ .Values.spec.admin.clusterIssuers.default }}
+{{- if .Values.spec.admin.tls.default }}
+    clientTLS: true
+{{- end }}
+{{- if (and .Values.spec.admin.monitoring .Values.spec.admin.monitoring.agent) }}
+  monitor:
+    agent: {{ .Values.spec.admin.monitoring.agent }}
+    prometheus:
+    {{- with .Values.spec.admin.monitoring.exporter }}
+      exporter:
+        resources:
+          {{- toYaml .resources | nindent 10 }}
+    {{- end }}
+      serviceMonitor:
+        interval: 30s
+        labels:
+          {{- toYaml .Values.spec.admin.monitoring.serviceMonitor.labels | nindent 10 }}
+{{- end }}

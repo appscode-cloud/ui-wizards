@@ -1,0 +1,48 @@
+{{- if eq .Values.spec.admin.backup.tool "KubeStash" -}}
+
+apiVersion: core.kubestash.com/v1alpha1
+kind: BackupConfiguration
+metadata:
+  name: {{ include "kubedbcom-mssqlserver-editor-options.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kubedbcom-mssqlserver-editor-options.labels" . | nindent 4 }}
+spec:
+  target:
+    apiGroup: kubedb.com
+    kind: MSSQLServer
+    name: {{ include "kubedbcom-mssqlserver-editor-options.fullname" . }}
+    namespace: {{ .Release.Namespace }}
+  backends:
+    - name: default-backend
+      storageRef:
+        name: {{ .Values.spec.admin.backup.kubestash.storageRef.name }}
+        namespace: {{ .Values.spec.admin.backup.kubestash.storageRef.namespace }}
+      retentionPolicy:
+        name: {{ .Values.spec.admin.backup.kubestash.retentionPolicy.name }}
+        namespace: {{ .Values.spec.admin.backup.kubestash.retentionPolicy.namespace }}
+  sessions:
+    - name: full-backup
+      sessionHistoryLimit: 2
+      scheduler:
+        schedule: {{ .Values.spec.admin.backup.kubestash.schedule | quote }}
+        jobTemplate:
+          backoffLimit: 1
+      repositories:
+        - name: {{ include "kubedbcom-mssqlserver-editor-options.fullname" . }}
+          backend: default-backend
+          directory: {{ .Release.Namespace }}/{{ include "kubedbcom-mssqlserver-editor-options.fullname" . }}
+          encryptionSecret:
+            name: {{ .Values.spec.admin.backup.kubestash.encryptionSecret.name }}
+            namespace: {{ .Values.spec.admin.backup.kubestash.encryptionSecret.namespace }}
+      addon:
+        name: mssqlserver-addon
+        tasks:
+          - name: logical-backup
+        {{- if semverCompare "~6.0.0" (splitList "-" .Values.spec.version | last) }}
+        jobTemplate:
+          spec:
+            securityContext:
+              runAsUser: 999
+        {{- end }}
+{{- end }}
