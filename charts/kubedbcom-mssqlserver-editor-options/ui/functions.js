@@ -1,4 +1,3 @@
-let storageClassList = [];
 let nodeTopologyListFromApi = [];
 let provider = "";
 

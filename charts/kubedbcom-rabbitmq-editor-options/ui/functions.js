@@ -1,5 +1,3 @@
-let storageClassList = [];
-
 const machines = {
   "db.t.micro": {
     resources: {
