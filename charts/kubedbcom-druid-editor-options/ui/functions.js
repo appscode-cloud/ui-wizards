@@ -395,19 +395,30 @@ function getMachineListForOptions() {
   return array;
 }
 
-function setResourceLimit({ commit, model, getValue }, type) {
-  const path = type
-    ? `/spec/${type}/podResources/machine`
-    : "/spec/podResources/machine";
-  const selectedMachine = getValue(model, path);
-  if (selectedMachine && selectedMachine !== "custom") {
-    commit("wizard/model$update", {
-      path: type 
-        ? `/spec/${type}/podResources/resources`
-        : "/spec/podResources/resources",
-      value: machines[selectedMachine]?.resources,
-      force: true,
-    });
+function setResourceLimit({ commit, model, getValue, watchDependency }) {
+  let modelPathValue = getValue(model, "/spec/podResources/machine");
+  const deploymentType = getValue(model, "/spec/admin/deployment/default");
+  if (modelPathValue) {
+    if (modelPathValue === "custom") modelPathValue = "db.t.micro";
+    // to avoiding set value by reference, cpu and memory set separately
+    if (deploymentType === "Dedicated") {
+      commit("wizard/model$update", {
+        path: "/spec/podResources/resources/requests",
+        value: machines[modelPathValue]?.resources.limits,
+        force: true,
+      });
+      commit("wizard/model$update", {
+        path: "/spec/podResources/resources/limits",
+        value: machines[modelPathValue]?.resources.limits,
+        force: true,
+      });
+    } else {
+      commit("wizard/model$update", {
+        path: "/spec/podResources/resources",
+        value: machines[modelPathValue]?.resources,
+        force: true,
+      });
+    }
   }
 }
 
