@@ -438,62 +438,6 @@ async function getKafkaVersions(
   return filteredKafkaVersions;
 }
 
-function onCreateAuthSecretChange({
-  discriminator,
-  getValue,
-  commit
-}) {
-  const createAuthSecret = getValue(discriminator, "/createAuthSecret");
-  if (createAuthSecret) {
-    commit(
-      "wizard/model$delete",
-      "/spec/authSecret/name"
-    );
-  } else if(createAuthSecret === false) {
-    commit(
-      "wizard/model$delete",
-      "/spec/authSecret/password"
-    );
-  }
-}
-
-async function getSecrets({
-  storeGet,
-  axios,
-  model,
-  getValue,
-  watchDependency,
-}) {
-  const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/route/params/cluster");
-  const namespace = getValue(model, "/metadata/release/namespace");
-  watchDependency("model#/metadata/release/namespace");
-
-  const resp = await axios.get(
-    `/clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}/secrets`,
-    {
-      params: {
-        filter: { items: { metadata: { name: null }, type: null } },
-      },
-    }
-  );
-
-  const secrets = (resp && resp.data && resp.data.items) || [];
-
-  const filteredSecrets = secrets.filter((item) => {
-    const validType = ["kubernetes.io/service-account-token", "Opaque"];
-    return validType.includes(item.type);
-  });
-
-  filteredSecrets.map((item) => {
-    const name = (item.metadata && item.metadata.name) || "";
-    item.text = name;
-    item.value = name;
-    return true;
-  });
-  return filteredSecrets;
-}
-
 function disableLimit({ model, getValue, watchDependency }) {
   const modelPathValue = getValue(model, "/spec/machine");
   watchDependency("model#/spec/machine");
@@ -555,84 +499,6 @@ function setLimitsCpuOrMem({ model, getValue, watchDependency }) {
 
 function setMachineToCustom() {
   return "custom";
-}
-
-function disableConfigureOption({ model, getValue, watchDependency, itemCtx }) {
-  watchDependency("model#/spec/authPlugin");
-  const authPlugin = getValue(model, "/spec/authPlugin");
-
-  if(itemCtx.value === "tls") {
-    return !isSecurityEnabled({model, getValue, watchDependency});
-  }
-  else if(itemCtx.value === "internal-users" || itemCtx.value === "roles-mapping") {  
-    return !isSecurityEnabled({model, getValue, watchDependency}) || !authPlugin || authPlugin === "X-Pack";
-  }
-  else if(itemCtx.value === "secure-custom-config") {
-    return authPlugin !== "X-Pack";
-  }
-  return false;
-}
-
-function isSecurityEnabled({model, getValue, watchDependency}) {
-  watchDependency("model#/spec/disableSecurity");
-  const value = getValue(model, "/spec/disableSecurity");
-  return !value;
-}
-
-function onDisableSecurityChange({ model, getValue }) {
-  const disableSecurity = getValue(model, "/resources/kubedbComKafka/spec/disableSecurity");
-
-  if(disableSecurity) {
-    commit(
-      "wizard/model$delete",
-      "/spec/authSecret",
-    );
-  }
-}
-
-async function fetchJsons({ axios, itemCtx }) {
-  let ui = {};
-  let language = {};
-  let functions = {};
-  const { name, sourceRef, version, packageviewUrlPrefix } = itemCtx.chart;
-  
-  try {
-    ui = await axios.get(
-      `${packageviewUrlPrefix}/create-ui.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`
-    );
-    language = await axios.get(
-      `${packageviewUrlPrefix}/language.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`
-    );
-    const functionString = await axios.get(
-      `${packageviewUrlPrefix}/functions.js?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}`
-    );
-    // declare evaluate the functionString to get the functions Object
-    const evalFunc = new Function(functionString.data || "");
-    functions = evalFunc();
-  } catch (e) {
-    console.log(e);
-  }
-
-  return {
-    ui: ui.data || {},
-    language: language.data || {},
-    functions,
-  };
-}
-
-function updateAgentValue({commit },val) {
-  commit("wizard/model$update", {
-    path: "/spec/monitoring/agent",
-    value: val ? "prometheus.io/operator" : "",
-    force: true
-  });
-
-  // update alert value depend on monitoring profile
-  commit("wizard/model$update", {
-    path: "/form/alert/enabled",
-    value: val ? 'warning' : 'none',
-    force: true
-  });
 }
 
 function getCreateNameSpaceUrl ({ model, getValue, storeGet }){ 
@@ -981,7 +847,6 @@ function onBackupSwitch({ discriminator, getValue, commit }) {
 
 return {
   isVariantAvailable,
-	fetchJsons,
 	onVersionChange,
 	showAuthPasswordField,
 	isEqualToModelPathValue,
@@ -989,17 +854,11 @@ return {
 	showStorageSizeField,
 	getResources,
   getKafkaVersions,
-  onCreateAuthSecretChange,
-	getSecrets,
 	disableLimit,
 	getMachineListForOptions,
 	setResourceLimit,
 	setLimitsCpuOrMem,
 	setMachineToCustom,
-	disableConfigureOption,
-	isSecurityEnabled,
-	onDisableSecurityChange,
-	updateAgentValue,
 	getCreateNameSpaceUrl,
   setStorageClass,
   getNamespaces,
