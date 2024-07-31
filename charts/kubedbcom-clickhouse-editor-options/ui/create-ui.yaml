@@ -38,6 +38,7 @@ steps:
       if: isToggleOn|deployment
       label:
         text: labels.deployment.name
+      onChange: setResourceLimit
       options:
       - description: labels.deployment.shared
         text: Shared
@@ -45,7 +46,6 @@ steps:
       - description: labels.deployment.dedicated
         text: Dedicated
         value: Dedicated
-      onChange: setResourceLimit
       schema:
         $ref: schema#/properties/spec/properties/admin/properties/deployment/properties/default
       type: radio
@@ -172,7 +172,7 @@ steps:
           - label:
               text: labels.cluster.name
             schema:
-              $ref: schema#/properties/spec/properties/topology/properties/cluster/items/properties/name            
+              $ref: schema#/properties/spec/properties/topology/properties/cluster/items/properties/name
             type: input
           - label:
               text: labels.cluster.replicas
@@ -187,6 +187,8 @@ steps:
           type: single-step-form
         label:
           text: labels.cluster.cluster
+        schema:
+          $ref: schema#/properties/spec/properties/topology/properties/cluster
         tableContents:
         - inTableColumn: true
           label:
@@ -206,8 +208,6 @@ steps:
           path: shards
           type: value
           typeOfValue: string
-        schema:
-          $ref: schema#/properties/spec/properties/topology/properties/cluster
         type: single-step-form-array
       if: isEqualToModelPathValue|Topology|/spec/mode
       type: single-step-form
@@ -339,14 +339,6 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/admin/properties/archiver/properties/default
       type: switch
-    # - computed: isBackupCluster
-    #   if: isToggleOn|backup
-    #   label:
-    #     text: Enable Backup?
-    #   onChange: onBackupSwitch
-    #   schema:
-    #     $ref: discriminator#/backup
-    #   type: switch
     - label:
         text: labels.configOptions
       type: label-element

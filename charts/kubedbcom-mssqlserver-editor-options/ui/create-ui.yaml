@@ -36,6 +36,7 @@ steps:
       if: isToggleOn|deployment
       label:
         text: labels.deployment.name
+      onChange: setResourceLimit
       options:
       - description: labels.deployment.shared
         text: Shared
@@ -43,7 +44,6 @@ steps:
       - description: labels.deployment.dedicated
         text: Dedicated
         value: Dedicated
-      onChange: setResourceLimit
       schema:
         $ref: schema#/properties/spec/properties/admin/properties/deployment/properties/default
       type: radio
@@ -135,12 +135,12 @@ steps:
         schema:
           $ref: schema#/properties/spec/properties/topology/properties/availabilityGroup/properties/databases
         type: input
+      if: isEqualToModelPathValue|Topology|/spec/mode
       label:
         text: labels.availabilityGroup
       schema:
         $ref: schema#/properties/spec/properties/topology/properties/availabilityGroup
       type: list-input-form
-      if: isEqualToModelPathValue|Topology|/spec/mode
     - if: showStorageSizeField
       label:
         text: labels.storage.size

@@ -2147,7 +2147,6 @@ func (in *KubedbcomPgbouncerEditorOptionsSpecSpec) DeepCopyInto(out *KubedbcomPg
 		}
 	}
 	out.Database = in.Database
-	out.Persistence = in.Persistence
 	in.PodResources.DeepCopyInto(&out.PodResources)
 	out.AuthSecret = in.AuthSecret
 	in.Admin.DeepCopyInto(&out.Admin)
@@ -2261,7 +2260,6 @@ func (in *KubedbcomPgpoolEditorOptionsSpecSpec) DeepCopyInto(out *KubedbcomPgpoo
 		}
 	}
 	out.PostgresRef = in.PostgresRef
-	out.Persistence = in.Persistence
 	in.PodResources.DeepCopyInto(&out.PodResources)
 	out.AuthSecret = in.AuthSecret
 	in.Admin.DeepCopyInto(&out.Admin)
@@ -2508,7 +2506,6 @@ func (in *KubedbcomProxysqlEditorOptionsSpecSpec) DeepCopyInto(out *KubedbcomPro
 			(*out)[key] = val
 		}
 	}
-	out.Persistence = in.Persistence
 	in.PodResources.DeepCopyInto(&out.PodResources)
 	out.AuthSecret = in.AuthSecret
 	in.Admin.DeepCopyInto(&out.Admin)

@@ -51,7 +51,6 @@ type KubedbcomProxysqlEditorOptionsSpecSpec struct {
 	Replicas       int               `json:"replicas"`
 	SyncUsers      bool              `json:"syncUsers"`
 	Backend        string            `json:"backend"`
-	Persistence    Persistence       `json:"persistence"`
 	PodResources   PodResources      `json:"podResources"`
 	AuthSecret     AuthSecret        `json:"authSecret"`
 	DeletionPolicy DeletionPolicy    `json:"deletionPolicy"`

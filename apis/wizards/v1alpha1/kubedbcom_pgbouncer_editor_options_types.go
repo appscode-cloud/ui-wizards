@@ -49,7 +49,6 @@ type KubedbcomPgbouncerEditorOptionsSpecSpec struct {
 	Mode           GeneralMode       `json:"mode"`
 	Replicas       int               `json:"replicas"`
 	Database       PgbouncerDatabase `json:"database"`
-	Persistence    Persistence       `json:"persistence"`
 	PodResources   PodResources      `json:"podResources"`
 	AuthSecret     AuthSecret        `json:"authSecret"`
 	DeletionPolicy DeletionPolicy    `json:"deletionPolicy"`

@@ -50,7 +50,6 @@ type KubedbcomPgpoolEditorOptionsSpecSpec struct {
 	Replicas       int               `json:"replicas"`
 	PostgresRef    ObjectReference   `json:"postgresRef"`
 	SyncUsers      bool              `json:"syncUsers"`
-	Persistence    Persistence       `json:"persistence"`
 	PodResources   PodResources      `json:"podResources"`
 	AuthSecret     AuthSecret        `json:"authSecret"`
 	DeletionPolicy DeletionPolicy    `json:"deletionPolicy"`

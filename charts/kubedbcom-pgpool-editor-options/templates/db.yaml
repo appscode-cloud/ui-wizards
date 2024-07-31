@@ -18,18 +18,10 @@ metadata:
 spec:
   version: {{ .Values.spec.admin.databases.Pgpool.versions.default | quote }}
   replicas: {{ (eq .Values.spec.mode "Replicaset") | ternary .Values.spec.replicas 1 }}
-  storageType: Durable
   postgresRef:
     name: {{ .Values.spec.postgresRef.name }}
     namespace: {{ .Values.spec.postgresRef.namespace }}
   syncUsers: {{ .Values.spec.syncUsers }}
-  storage:
-    storageClassName: {{ .Values.spec.admin.storageClasses.default }}
-    accessModes:
-    - ReadWriteOnce
-    resources:
-      requests:
-        storage: {{ .Values.spec.persistence.size }}
   podTemplate:
     spec:
       containers:

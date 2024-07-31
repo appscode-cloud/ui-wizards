@@ -36,14 +36,14 @@ steps:
       if: isToggleOn|deployment
       label:
         text: labels.deployment.name
-      options:
-        - text: Shared
-          value: Shared
-          description: labels.deployment.shared
-        - text: Dedicated
-          value: Dedicated
-          description: labels.deployment.dedicated
       onChange: setResourceLimit
+      options:
+      - description: labels.deployment.shared
+        text: Shared
+        value: Shared
+      - description: labels.deployment.dedicated
+        text: Dedicated
+        value: Dedicated
       schema:
         $ref: schema#/properties/spec/properties/admin/properties/deployment/properties/default
       type: radio
@@ -235,14 +235,6 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/admin/properties/archiver/properties/default
       type: switch
-    # - computed: isBackupCluster
-    #   if: isToggleOn|backup
-    #   label:
-    #     text: Enable Backup?
-    #   onChange: onBackupSwitch
-    #   schema:
-    #     $ref: discriminator#/backup
-    #   type: switch
     - label:
         text: labels.configOptions
       type: label-element
