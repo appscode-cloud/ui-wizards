@@ -339,24 +339,24 @@ async function getPostgresList({
   return [];
 }
 
-const onDatabaseModeChange = ({ discriminator,getValue, commit}) =>{
+function isEqualToModelPathValue(
+  { model, getValue, watchDependency },
+  value,
+  modelPath
+) {
+  const modelPathValue = getValue(model, modelPath);
+  watchDependency("model#" + modelPath);
+  return modelPathValue === value;
+}
 
-  const databaseMode = getValue(discriminator, "/mode");
-
+const onDatabaseModeChange = ({ model,getValue, commit}) =>{
+  const databaseMode = getValue(model, "/spec/mode");
   commit("wizard/model$update", {
     path: "/spec/replicas",
     value: databaseMode === 'Standalone' ? 1 : 3,
     force: true,
   });
- 
 }
-
-const setDatabaseMode = ({model,getValue}) =>{
-  const replicas = getValue(model,'/spec/replicas')
-
-  return replicas === 1 ? 'Standalone' : 'Cluster'
-}
-
 
 function showAuthPasswordField({
   discriminator,
@@ -712,6 +712,7 @@ function isToggleOn({ getValue, model }, type) {
 
 return {
   isVariantAvailable,
+  isEqualToModelPathValue,
   showAuthPasswordField,
   getNamespaces,
   getMachineListForOptions,
@@ -722,7 +723,6 @@ return {
   updateAlertValue,
   getPostgresList,
   onDatabaseModeChange,
-  setDatabaseMode,
   getNodeTopology,
   filterNodeTopology,
   getAdminOptions,
