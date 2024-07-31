@@ -78,12 +78,12 @@ steps:
         $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/nodeTopology/properties/default
       type: select
     - disableUnselect: true
-      fetch: getAdminOptions|databases/MongoDB/versions
-      if: isToggleOn|databases/MongoDB/versions
+      fetch: getAdminOptions|databases/ClickHouse/versions
+      if: isToggleOn|databases/ClickHouse/versions
       label:
         text: labels.database.version
       schema:
-        $ref: schema#/properties/spec/properties/admin/properties/databases/properties/MongoDB/properties/versions/properties/default
+        $ref: schema#/properties/spec/properties/admin/properties/databases/properties/ClickHouse/properties/versions/properties/default
       type: select
     - isArray: true
       keys:
@@ -126,26 +126,21 @@ steps:
       - description: options.database.mode.Replicaset.description
         text: options.database.mode.Replicaset.label
         value: Replicaset
-      - description: options.database.mode.Sharded.description
-        text: options.database.mode.Sharded.label
-        value: Sharded
+      - description: options.database.mode.Topology.description
+        text: options.database.mode.Topology.label
+        value: Topology
       schema:
         $ref: schema#/properties/spec/properties/mode
       type: radio
     - elements:
       - label:
-          text: labels.replicaset.name
-        schema:
-          $ref: schema#/properties/spec/properties/replicaSet/properties/name
-        type: input
-      - label:
           text: labels.replicaset.number
         schema:
-          $ref: schema#/properties/spec/properties/replicaSet/properties/replicas
+          $ref: schema#/properties/spec/properties/replicas
         type: input
       if: isEqualToModelPathValue|Replicaset|/spec/mode
       schema:
-        $ref: schema#/properties/spec/properties/replicaSet
+        $ref: schema#/properties/spec/properties/replicas
       type: single-step-form
     - if: showStorageSizeField
       label:
@@ -157,109 +152,63 @@ steps:
       - elements:
         - customClass: mt-10
           label:
-            text: labels.shards
+            text: labels.host
           schema:
-            $ref: schema#/properties/spec/properties/shardTopology/properties/shard/properties/shards
+            $ref: schema#/properties/spec/properties/topology/properties/clickHouseKeeper/properties/host
           type: input
         - label:
-            text: labels.replicaset.number
+            text: labels.port
           schema:
-            $ref: schema#/properties/spec/properties/shardTopology/properties/shard/properties/replicas
+            $ref: schema#/properties/spec/properties/topology/properties/clickHouseKeeper/properties/port
           type: input
-        - label:
-            text: labels.storage.size
-          schema:
-            $ref: schema#/properties/spec/properties/shardTopology/properties/shard/properties/persistence/properties/size
-          type: input
-        - elements:
-          - computed: setMachineToCustom
-            fetch: getMachineListForOptions
-            label:
-              text: labels.machine
-            onChange: setResource|shardTopology/shard
-            schema:
-              $ref: schema#/properties/spec/properties/shardTopology/properties/shard/properties/podResources/properties/machine
-            type: select
-          - computed: setCpuOrMem|shardTopology/shard
-            disabled: isMachineNotCustom|shardTopology/shard
-            label:
-              text: labels.resources
-            schema:
-              $ref: schema#/properties/spec/properties/shardTopology/properties/shard/properties/podResources/properties/resources
-            type: resource-input-form
-          schema:
-            $ref: schema#/properties/spec/properties/shardTopology/properties/shard/properties/podResources
-          type: single-step-form
         label:
-          text: labels.shardNodes
+          text: labels.clickHouseKeeper
         show_label: true
         type: single-step-form
-      - elements:
-        - customClass: mt-10
+      - addFormLabel: labels.cluster.cluster
+        element:
+          elements:
+          - label:
+              text: labels.cluster.name
+            schema:
+              $ref: schema#/properties/spec/properties/topology/properties/cluster/items/properties/name            
+            type: input
+          - label:
+              text: labels.cluster.replicas
+            schema:
+              $ref: schema#/properties/spec/properties/topology/properties/cluster/items/properties/replicas
+            type: input
+          - label:
+              text: labels.cluster.shards
+            schema:
+              $ref: schema#/properties/spec/properties/topology/properties/cluster/items/properties/shards
+            type: input
+          type: single-step-form
+        label:
+          text: labels.cluster.cluster
+        tableContents:
+        - inTableColumn: true
           label:
-            text: labels.replicaset.number
-          schema:
-            $ref: schema#/properties/spec/properties/shardTopology/properties/configServer/properties/replicas
-          type: input
-        - label:
-            text: labels.storage.size
-          schema:
-            $ref: schema#/properties/spec/properties/shardTopology/properties/configServer/properties/persistence/properties/size
-          type: input
-        - elements:
-          - computed: setMachineToCustom
-            fetch: getMachineListForOptions
-            label:
-              text: labels.machine
-            onChange: setResource|shardTopology/configServer
-            schema:
-              $ref: schema#/properties/spec/properties/shardTopology/properties/configServer/properties/podResources/properties/machine
-            type: select
-          - computed: setCpuOrMem|shardTopology/configServer
-            disabled: isMachineNotCustom|shardTopology/configServer
-            label:
-              text: labels.resources
-            schema:
-              $ref: schema#/properties/spec/properties/shardTopology/properties/configServer/properties/podResources/properties/resources
-            type: resource-input-form
-          schema:
-            $ref: schema#/properties/spec/properties/shardTopology/properties/configServer/properties/podResources
-          type: single-step-form
-        label:
-          text: labels.configServer
-        show_label: true
-        type: single-step-form
-      - elements:
-        - customClass: mt-10
+            text: labels.cluster.name
+          path: name
+          type: value
+          typeOfValue: string
+        - inTableColumn: true
           label:
-            text: labels.replicaset.number
-          schema:
-            $ref: schema#/properties/spec/properties/shardTopology/properties/mongos/properties/replicas
-          type: input
-        - elements:
-          - computed: setMachineToCustom
-            fetch: getMachineListForOptions
-            label:
-              text: labels.machine
-            onChange: setResource|shardTopology/mongos
-            schema:
-              $ref: schema#/properties/spec/properties/shardTopology/properties/mongos/properties/podResources/properties/machine
-            type: select
-          - computed: setCpuOrMem|shardTopology/mongos
-            disabled: isMachineNotCustom|shardTopology/mongos
-            label:
-              text: labels.resources
-            schema:
-              $ref: schema#/properties/spec/properties/shardTopology/properties/mongos/properties/podResources/properties/resources
-            type: resource-input-form
-          schema:
-            $ref: schema#/properties/spec/properties/shardTopology/properties/mongos/properties/podResources
-          type: single-step-form
-        label:
-          text: labels.mongos
-        show_label: true
-        type: single-step-form
-      if: isEqualToModelPathValue|Sharded|/spec/mode
+            text: labels.cluster.replicas
+          path: replicas
+          type: value
+          typeOfValue: string
+        - inTableColumn: true
+          label:
+            text: labels.cluster.shards
+          path: shards
+          type: value
+          typeOfValue: string
+        schema:
+          $ref: schema#/properties/spec/properties/topology/properties/cluster
+        type: single-step-form-array
+      if: isEqualToModelPathValue|Topology|/spec/mode
       type: single-step-form
     - elements:
       - computed: setMachineToCustom
@@ -278,7 +227,6 @@ steps:
         schema:
           $ref: schema#/properties/spec/properties/podResources/properties/resources
         type: resource-input-form
-      if: notEqualToDatabaseMode|Sharded
       label:
         text: labels.machine_profile
       show_label: true
@@ -340,80 +288,6 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/configuration
       type: editor
-    - if: notEqualToDatabaseMode|Standalone
-      label:
-        text: Enable Arbiter?
-      schema:
-        $ref: schema#/properties/spec/properties/arbiter/properties/enabled
-      type: switch
-    - elements:
-      - elements:
-        - computed: setMachineToCustom
-          customClass: mt-10
-          fetch: getMachineListForOptions
-          label:
-            text: labels.machine
-          onChange: setResource|arbiter
-          schema:
-            $ref: schema#/properties/spec/properties/arbiter/properties/podResources/properties/machine
-          type: select
-        - computed: setCpuOrMem|arbiter
-          disabled: isMachineNotCustom|arbiter
-          label:
-            text: labels.resources
-          schema:
-            $ref: schema#/properties/spec/properties/arbiter/properties/podResources/properties/resources
-          type: resource-input-form
-        schema:
-          $ref: schema#/properties/spec/properties/arbiter/properties/podResources
-        type: single-step-form
-      if: showArbiter
-      label:
-        text: Arbiter
-      schema:
-        $ref: schema#/properties/spec/properties/arbiter
-      show_label: true
-      type: single-step-form
-    - if: notEqualToDatabaseMode|Standalone
-      label:
-        text: Enable hidden?
-      schema:
-        $ref: schema#/properties/spec/properties/hidden/properties/enabled
-      type: switch
-    - elements:
-      - customClass: mt-10
-        label:
-          text: Replicas
-        schema:
-          $ref: schema#/properties/spec/properties/hidden/properties/replicas
-        type: input
-      - label:
-          text: Persistence Size
-        schema:
-          $ref: schema#/properties/spec/properties/hidden/properties/persistence/properties/size
-        type: input
-      - computed: setMachineToCustom
-        fetch: getMachineListForOptions
-        label:
-          text: labels.machine
-        onChange: setResource|hidden
-        schema:
-          $ref: schema#/properties/spec/properties/hidden/properties/podResources/properties/machine
-        type: select
-      - computed: setCpuOrMem|hidden
-        disabled: isMachineNotCustom|hidden
-        label:
-          text: labels.resources
-        schema:
-          $ref: schema#/properties/spec/properties/hidden/properties/podResources/properties/resources
-        type: resource-input-form
-      if: showHidden
-      label:
-        text: Hidden
-      schema:
-        $ref: schema#/properties/spec/properties/hidden/properties/podResources
-      show_label: true
-      type: single-step-form
     - if: isToggleOn|tls
       label:
         text: Enable TLS?
@@ -464,55 +338,14 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/admin/properties/archiver/properties/default
       type: switch
-    - computed: isBackupCluster
-      if: isToggleOn|backup
-      label:
-        text: Enable Backup?
-      onChange: onBackupSwitch
-      schema:
-        $ref: discriminator#/backup
-      type: switch
-    - elements:
-      - hasDescription: true
-        onChange: dedicatedOnChange
-        options:
-        - description: Create the database in shared node pool
-          text: Shared node pool
-          value: false
-        - description: Create a dedicated node pool for the database
-          text: Dedicated node pool
-          value: true
-        schema:
-          $ref: schema#/properties/form/properties/capi/properties/dedicated
-        type: radio
-      - fetch: getZones
-        if: showMultiselectZone
-        label:
-          text: Zones
-        onChange: zonesOnChange
-        schema:
-          $ref: schema#/properties/form/properties/capi/properties/zones
-        type: multiselect
-      - fetch: getZones
-        if: showSelectZone
-        label:
-          text: Zones
-        onChange: zonesOnChange
-        schema:
-          $ref: schema#/properties/form/properties/capi/properties/zones
-        type: select
-      - fetch: getSKU
-        if: ifZones
-        label:
-          text: SKU
-        schema:
-          $ref: schema#/properties/form/properties/capi/properties/sku
-        type: select
-      if: ifCapiProviderIsNotEmpty
-      label:
-        text: Database Profile
-      show_label: true
-      type: single-step-form
+    # - computed: isBackupCluster
+    #   if: isToggleOn|backup
+    #   label:
+    #     text: Enable Backup?
+    #   onChange: onBackupSwitch
+    #   schema:
+    #     $ref: discriminator#/backup
+    #   type: switch
     - label:
         text: labels.configOptions
       type: label-element
