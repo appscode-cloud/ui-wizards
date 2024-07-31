@@ -76,12 +76,6 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/nodeTopology/properties/default
       type: select
-    - if: showStorageSizeField
-      label:
-        text: labels.storage.size
-      schema:
-        $ref: schema#/properties/spec/properties/persistence/properties/size
-      type: input
     - isArray: true
       keys:
         label:
@@ -119,12 +113,18 @@ steps:
       - description: options.database.mode.Standalone.description
         text: options.database.mode.Standalone.label
         value: Standalone
-      - description: options.database.mode.Cluster.description
-        text: options.database.mode.Cluster.label
-        value: Cluster
+      - description: options.database.mode.Replicaset.description
+        text: options.database.mode.Replicaset.label
+        value: Replicaset
       schema:
         $ref: schema#/properties/spec/properties/mode
       type: radio
+    - if: isEqualToModelPathValue|Replicaset|/spec/mode
+      label:
+        text: labels.replicas
+      schema:
+        $ref: schema#/properties/spec/properties/replicas
+      type: input
     - elements:
       - label:
           text: labels.cluster.replicas
@@ -135,12 +135,6 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/cluster
       type: single-step-form
-    - if: showStorageSizeField
-      label:
-        text: labels.storage.size
-      schema:
-        $ref: schema#/properties/spec/properties/persistence/properties/size
-      type: input
     - hasDescription: true
       label:
         text: labels.deletionPolicy
