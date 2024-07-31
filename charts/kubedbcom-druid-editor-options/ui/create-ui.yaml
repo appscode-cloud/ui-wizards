@@ -277,23 +277,57 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/deepStorage/properties/configSecret
       type: select
-    - fetch: getAppBindings|zookeeper
-      label:
-        text: labels.zookeeperRef
-      onChange: onRefChange|zookeeperRef
-      refresh: true
-      required: true
+    - label:
+        text: labels.metadataStorage.external
       schema:
-        $ref: discriminator#/zookeeperRef
+        $ref: schema#/properties/spec/properties/metadataStorage/properties/externallyManaged
+      type: switch
+    - if: isExternallyManaged|metadataStorage
+      label:
+        text: labels.metadataStorage.type
+      onChange: clearRefs|metadataStorage
+      options:
+        - text: MySQL
+          value: MySQL
+        - text: Postgres
+          value: Postgres
+      schema:
+        $ref: schema#/properties/spec/properties/metadataStorage/properties/type
       type: select
     - fetch: getAppBindings|mysql
+      if: isMetadataStorageTypeEqualsTo|MySQL
       label:
-        text: labels.metadataStorage
+        text: labels.metadataStorage.mysql
       onChange: onRefChange|metadataStorage
       refresh: true
       required: true
       schema:
         $ref: discriminator#/metadataStorage
+      type: select
+    - fetch: getAppBindings|postgres
+      if: isMetadataStorageTypeEqualsTo|Postgres
+      label:
+        text: labels.metadataStorage.postgres
+      onChange: onRefChange|metadataStorage
+      refresh: true
+      required: true
+      schema:
+        $ref: discriminator#/metadataStorage
+      type: select
+    - label:
+        text: labels.zookeeperRef.external
+      schema:
+        $ref: schema#/properties/spec/properties/zookeeperRef/properties/externallyManaged
+      type: switch
+    - fetch: getAppBindings|zookeeper
+      if: isExternallyManaged|zookeeperRef
+      label:
+        text: labels.zookeeperRef.zookeeper
+      onChange: onRefChange|zookeeperRef
+      refresh: true
+      required: true
+      schema:
+        $ref: discriminator#/zookeeperRef
       type: select
     - label:
         text: Provide Authentication Credentials?
