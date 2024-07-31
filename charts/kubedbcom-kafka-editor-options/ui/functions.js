@@ -681,74 +681,41 @@ function isVariantAvailable ({storeGet})  {
   return variant ? true : false
 }
 
-function setStorageClass({model, getValue, commit}) {
-  const deletionPolicy = getValue(model, "spec/deletionPolicy") || "";
-  let storageClass = getValue(model, "spec/storageClass/name") || "";
+
+function setStorageClass({ model, getValue, commit }) {
+  const deletionPolicy = getValue(model, "/spec/deletionPolicy") || "";
+  let storageClass =
+    getValue(model, "/spec/admin/storageClasses/default") || "";
+  const storageClassList =
+    getValue(model, "/spec/admin/storageClasses/available") || [];
   const suffix = "-retain";
 
-  const simpleClassList = storageClassList.filter(item => {
-    return !item.metadata?.name?.endsWith(suffix)
-  })
-
-  const retainClassList = storageClassList.filter(item => {
-    return item.metadata?.name?.endsWith(suffix)
-  })
-
-  const defaultSimpleList = simpleClassList.filter(item => {
-    return item.metadata &&
-    item.metadata.annotations &&
-    item.metadata.annotations["storageclass.kubernetes.io/is-default-class"];
-  })
-
-  const defaultRetainList = retainClassList.filter(item => {
-    return item.metadata &&
-    item.metadata.annotations &&
-    item.metadata.annotations["storageclass.kubernetes.io/is-default-class"];
-  })
-
-  if(deletionPolicy === "WipeOut" || deletionPolicy === "Delete") {
-    if(simpleClassList.length > 1) {
-      const found = defaultSimpleList.length 
-        ? defaultSimpleList[0] 
-        : simpleClassList[0];
-      storageClass = found.value;
-    }
-    else if(simpleClassList.length === 1) {
-      storageClass = simpleClassList[0]?.value;
-    }
-    else {
-      const found = defaultRetainList.length 
-        ? defaultRetainList[0].value 
-        : storageClassList.length ? storageClassList[0].value : "";
-      storageClass = found;
-    }
-  }
-  else {
-    if(retainClassList.length > 1) {
-        const found = defaultRetainList.length 
-          ? defaultRetainList[0] 
-          : retainClassList[0];
-        storageClass = found.value;
-    }
-    else if(retainClassList.length === 1) {
-      storageClass = retainClassList[0]?.value;
-    }
-    else {
-      const found = defaultSimpleList.length 
-        ? defaultSimpleList[0].value
-        : storageClassList.length ? storageClassList[0].value : "";
-      storageClass = found;
-    }
+  const simpleClassList = storageClassList.filter((item) => {
+    return !item.endsWith(suffix);
+  });
+  const retainClassList = storageClassList.filter((item) => {
+    return item.endsWith(suffix);
+  });
+  if (deletionPolicy === "WipeOut" || deletionPolicy === "Delete") {
+    storageClass = simpleClassList.length
+      ? simpleClassList[0]
+      : retainClassList[0];
+  } else {
+    storageClass = retainClassList.length
+      ? retainClassList[0]
+      : simpleClassList[0];
   }
 
-  if(storageClass) {
+  const isChangeable = isToggleOn({ getValue, model }, "storageClasses");
+  if (isChangeable && storageClass) {
     commit("wizard/model$update", {
-      path: "/spec/storageClass/name",
+      path: "/spec/admin/storageClasses/default",
       value: storageClass,
       force: true,
     });
   }
 }
+
 
 async function getNamespaces({ axios, storeGet }) {
   const params = storeGet("/route/params");
