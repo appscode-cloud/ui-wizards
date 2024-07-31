@@ -364,43 +364,6 @@ async function getResources(
   return resources;
 }
 
-async function getStorageClassNames({ axios, storeGet, commit }) {
-  const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/route/params/cluster");
-
-  const resp = await axios.get(
-    `/clusters/${owner}/${cluster}/proxy/storage.k8s.io/v1/storageclasses`,
-    {
-      params: {
-        filter: { items: { metadata: { name: null, annotations: null } } },
-      },
-    }
-  );
-
-  const resources = (resp && resp.data && resp.data.items) || [];
-
-  resources.map((item) => {
-    const name = (item.metadata && item.metadata.name) || "";
-    const isDefault =
-      item.metadata &&
-      item.metadata.annotations &&
-      item.metadata.annotations["storageclass.kubernetes.io/is-default-class"];
-
-    if (isDefault) {
-      commit("wizard/model$update", {
-        path: "/spec/storageClass/name",
-        value: name,
-        force: true,
-      });
-    }
-
-    item.text = name;
-    item.value = name;
-    return true;
-  });
-  return resources;
-}
-
 async function getProxysqlVersions(
   { axios, storeGet },
   group,
@@ -1157,7 +1120,6 @@ return {
 	isEqualToModelPathValue,
 	showAuthSecretField,
 	getResources,
-	getStorageClassNames,
   getProxysqlVersions,
   getAppBindings,
   onCreateAuthSecretChange,

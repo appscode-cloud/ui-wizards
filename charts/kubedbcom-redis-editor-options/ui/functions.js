@@ -413,32 +413,6 @@ async function getRedisSentinels(
   }
 }
 
-async function getStorageClassNames({ axios, storeGet, commit, model, getValue }) {
-  const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/route/params/cluster");
-
-  const resp = await axios.get(
-    `/clusters/${owner}/${cluster}/proxy/storage.k8s.io/v1/storageclasses`,
-    {
-      params: {
-        filter: { items: { metadata: { name: null, annotations: null } } },
-      },
-    }
-  );
-
-  const resources = (resp && resp.data && resp.data.items) || [];
-
-  resources.map((item) => {
-    const name = (item.metadata && item.metadata.name) || "";
-    item.text = name;
-    item.value = name;
-    return true;
-  });
-  storageClassList = resources;
-  setStorageClass({model, getValue, commit});
-  return resources;
-}
-
 async function getRedisVersions(
   { axios, storeGet },
   group,
@@ -1111,7 +1085,6 @@ return {
 	showAuthSecretField,
 	getResources,
 	getRedisSentinels,
-	getStorageClassNames,
 	getRedisVersions,
 	getSecrets,
 	disableLimit,
