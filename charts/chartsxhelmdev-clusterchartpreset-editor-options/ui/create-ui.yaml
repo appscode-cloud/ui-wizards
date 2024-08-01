@@ -1,1 +1,156 @@
-null
+steps:
+- form:
+    discriminator:
+      clusterChartPresetOptions:
+        default: "[]"
+        type: array
+    elements:
+    - type: checkbox
+      label:
+        text: ClusterChartPreset Options
+      options:
+      - value: kubeDB
+        text: kubeDB
+      - value: monitoring
+        text: monitoring
+      - value: stash
+        text: stash
+      schema:
+        $ref: discriminator#/clusterChartPresetOptions
+    - discriminator:
+        configureClickHouse :
+          default: false
+          type: boolean
+        configureDruid : 
+          default: false
+          type: boolean
+        configureElasticsearch : 
+          default: false
+          type: boolean
+        configureFerretDB : 
+          default: false
+          type: boolean
+        configureKafka : 
+          default: false
+          type: boolean
+        configureMSSQLServer : 
+          default: false
+          type: boolean
+        configureMariaDB : 
+          default: false
+          type: boolean
+        configureMemcached : 
+          default: false
+          type: boolean
+        configureMongoDB : 
+          default: false
+          type: boolean
+        configureMySQL : 
+          default: false
+          type: boolean
+        configurePerconaXtraDB : 
+          default: false
+          type: boolean
+        configurePgBouncer : 
+          default: false
+          type: boolean
+        configurePgpool : 
+          default: false
+          type: boolean
+        configurePostgres : 
+          default: false
+          type: boolean
+        configureProxySQL : 
+          default: false
+          type: boolean
+        configureRabbitMQ : 
+          default: false
+          type: boolean
+        configureRedis : 
+          default: false
+          type: boolean
+        configureSinglestore : 
+          default: false
+          type: boolean
+        configureSolr : 
+          default: false
+          type: boolean
+        configureZooKeeper : 
+          default: false
+          type: boolean
+      elements:
+      - if: isToggleOn|deployment
+        hasDescription: true
+        label:
+          text: labels.deployment.name
+        options:
+        - text: Shared
+          value: Shared
+          description: labels.deployment.shared
+        - text: Dedicated
+          value: Dedicated
+          description: labels.deployment.dedicated
+        schema:
+          $ref: schema#/properties/spec/properties/kubeDB/properties/deployment/properties/default
+        type: radio
+      - if: isToggleOn|clusterTier
+        label:
+          text: labels.clusterTier
+        options:
+        - text: General Purpose
+          value: GeneralPurpose
+        - text: Memory Optimized
+          value: MemoryOptimized
+        - text: CPU Optimized
+          value: CPUOptimized
+        schema:
+          $ref: schema#/properties/spec/properties/kubeDB/properties/clusterTier/properties/default
+        type: radio
+      - disableUnselect: true
+        fetch: getOptions|clusterTier/placement
+        if: isToggleOn|clusterTier/placement
+        label:
+          text: labels.placement
+        schema:
+          $ref: schema#/properties/spec/properties/kubeDB/properties/clusterTier/properties/placement/properties/default
+        type: select
+      - disableUnselect: true
+        fetch: getNodeTopology
+        if: isToggleOn|clusterTier/nodeTopology
+        label:
+          text: labels.nodeTopology
+        schema:
+          $ref: schema#/properties/spec/properties/kubeDB/properties/clusterTier/properties/nodeTopology/properties/default
+        type: select
+      - label: 
+          text: labels.databases.ClickHouse.configure
+        schema: 
+          $ref: discriminator#/configureClickHouse
+        type: switch
+      - if: isConfigureDb|configureClickHouse
+        fetch: FetchDbVersions|clickhouse
+        label: 
+          text: labels.databases.versions
+        onChange: clearDefaultVersion|ClickHouse
+        schema: 
+          $ref: schema#/properties/spec/properties/kubeDB/properties/databases/properties/ClickHouse/properties/versions/properties/available
+        type: multiselect
+      - if: isConfigureDb|configureClickHouse
+        fetch: availableVersions|ClickHouse
+        label: 
+          text: labels.databases.default
+        schema: 
+          $ref: schema#/properties/spec/properties/kubeDB/properties/databases/properties/ClickHouse/properties/versions/properties/default
+        type: select
+      if: isChecked|kubeDB
+      type: single-step-form
+    - elements: []
+      if: isChecked|monitoring
+      type: single-step-form
+    - elements: []
+      if: isChecked|stash
+      type: single-step-form
+    type: single-step-form
+  id: options
+  title: Basic
+type: multi-step-form
