@@ -349,6 +349,15 @@ function showStorageSizeField({ model, getValue, watchDependency }) {
   return validType.includes(modelPathValue);
 }
 
+function onModeChange({ model, getValue, commit }) {
+  const dbMode = getValue(model, "/spec/mode");
+  commit("wizard/model$update", {
+    path: "/spec/replicas",
+    value: dbMode === "Replicaset" ? 3 : 1,
+    force: true,
+  });
+}
+
 async function getResources(
   { axios, storeGet },
   group,
@@ -1104,6 +1113,7 @@ return {
 	isEqualToModelPathValue,
 	showAuthSecretField,
 	showStorageSizeField,
+  onModeChange,
 	getResources,
   getMongoDbVersions,
   onCreateAuthSecretChange,
