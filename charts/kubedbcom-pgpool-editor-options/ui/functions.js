@@ -1,4 +1,3 @@
-let storageClassList = [];
 const machines = {
   "db.t.micro": {
     resources: {
@@ -385,38 +384,6 @@ async function getResources({ axios, storeGet }, group, version, resource) {
   return resources;
 }
 
-async function getStorageClassNames({
-  axios,
-  storeGet,
-  commit,
-  model,
-  getValue,
-}) {
-  const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/route/params/cluster");
-
-  const resp = await axios.get(
-    `/clusters/${owner}/${cluster}/proxy/storage.k8s.io/v1/storageclasses`,
-    {
-      params: {
-        filter: { items: { metadata: { name: null, annotations: null } } },
-      },
-    }
-  );
-
-  const resources = (resp && resp.data && resp.data.items) || [];
-
-  resources.map((item) => {
-    const name = (item.metadata && item.metadata.name) || "";
-    item.text = name;
-    item.value = name;
-    return true;
-  });
-  storageClassList = resources;
-  setStorageClass({ model, getValue, commit });
-  return resources;
-}
-
 async function getMongoDbVersions(
   { axios, storeGet },
   group,
@@ -698,78 +665,6 @@ async function getSKU({ storeGet, axios, model, getValue, watchDependency }) {
 function isVariantAvailable({ storeGet }) {
   const variant = storeGet("/route/query/variant");
   return variant ? true : false;
-}
-
-function setStorageClass({ model, getValue, commit }) {
-  const deletionPolicy = getValue(model, "spec/deletionPolicy") || "";
-  let storageClass = getValue(model, "spec/storageClass/name") || "";
-  const suffix = "-retain";
-
-  const simpleClassList = storageClassList.filter((item) => {
-    return !item.metadata?.name?.endsWith(suffix);
-  });
-
-  const retainClassList = storageClassList.filter((item) => {
-    return item.metadata?.name?.endsWith(suffix);
-  });
-
-  const defaultSimpleList = simpleClassList.filter((item) => {
-    return (
-      item.metadata &&
-      item.metadata.annotations &&
-      item.metadata.annotations["storageclass.kubernetes.io/is-default-class"]
-    );
-  });
-
-  const defaultRetainList = retainClassList.filter((item) => {
-    return (
-      item.metadata &&
-      item.metadata.annotations &&
-      item.metadata.annotations["storageclass.kubernetes.io/is-default-class"]
-    );
-  });
-
-  if (deletionPolicy === "WipeOut" || deletionPolicy === "Delete") {
-    if (simpleClassList.length > 1) {
-      const found = defaultSimpleList.length
-        ? defaultSimpleList[0]
-        : simpleClassList[0];
-      storageClass = found.value;
-    } else if (simpleClassList.length === 1) {
-      storageClass = simpleClassList[0]?.value;
-    } else {
-      const found = defaultRetainList.length
-        ? defaultRetainList[0].value
-        : storageClassList.length
-        ? storageClassList[0].value
-        : "";
-      storageClass = found;
-    }
-  } else {
-    if (retainClassList.length > 1) {
-      const found = defaultRetainList.length
-        ? defaultRetainList[0]
-        : retainClassList[0];
-      storageClass = found.value;
-    } else if (retainClassList.length === 1) {
-      storageClass = retainClassList[0]?.value;
-    } else {
-      const found = defaultSimpleList.length
-        ? defaultSimpleList[0].value
-        : storageClassList.length
-        ? storageClassList[0].value
-        : "";
-      storageClass = found;
-    }
-  }
-
-  if (storageClass) {
-    commit("wizard/model$update", {
-      path: "/spec/storageClass/name",
-      value: storageClass,
-      force: true,
-    });
-  }
 }
 
 function setStorageClass({ model, getValue, commit }) {
@@ -1161,7 +1056,6 @@ function setResourceLimit({ commit, model, getValue, watchDependency }) {
 return {
   getNamespaces,
   updateAlertValue,
-  setStorageClass,
   getAdminOptions,
   isToggleOn,
   showAlerts,
@@ -1189,7 +1083,6 @@ return {
   showStorageSizeField,
   getResources,
   getPostgresList,
-  getStorageClassNames,
   getMongoDbVersions,
   onCreateAuthSecretChange,
   getSecrets,
