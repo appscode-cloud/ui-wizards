@@ -125,9 +125,9 @@ steps:
       - description: options.database.mode.Standalone.description
         text: options.database.mode.Standalone.label
         value: Standalone
-      - description: options.database.mode.Cluster.description
-        text: options.database.mode.Cluster.label
-        value: Cluster
+      - description: options.database.mode.Replicaset.description
+        text: options.database.mode.Replicaset.label
+        value: Replicaset
       schema:
         $ref: schema#/properties/spec/properties/mode
       type: radio
@@ -135,6 +135,12 @@ steps:
         text: labels.storage.size
       schema:
         $ref: schema#/properties/spec/properties/persistence/properties/size
+      type: input
+    - label:
+        text: labels.replicas
+      schema:
+        $ref: schema#/properties/spec/properties/replicas
+      if: EqualToDatabaseMode|Replicaset
       type: input
     - elements:
       - computed: setMachineToCustom
