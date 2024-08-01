@@ -124,8 +124,8 @@ steps:
       - description: options.database.mode.Standalone.description
         text: options.database.mode.Standalone.label
         value: Standalone
-      - description: options.database.mode.Replicaset.description
-        text: options.database.mode.Replicaset.label
+      - description: options.database.mode.ReplicaSet.description
+        text: options.database.mode.ReplicaSet.label
         value: Replicaset
       schema:
         $ref: schema#/properties/spec/properties/mode
@@ -141,6 +141,12 @@ steps:
         text: labels.storage.size
       schema:
         $ref: schema#/properties/spec/properties/persistence/properties/size
+      type: input
+    - if: EqualToDatabaseMode|Replicaset
+      label:
+        text: labels.replicas
+      schema:
+        $ref: schema#/properties/spec/properties/replicas
       type: input
     - elements:
       - computed: setMachineToCustom
