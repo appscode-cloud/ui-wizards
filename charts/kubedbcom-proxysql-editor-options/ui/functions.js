@@ -1084,7 +1084,14 @@ function isMachineNotCustom({ model, getValue, watchDependency }, path) {
   return modelPathValue !== "custom" && !!modelPathValue;
 }
 
+function EqualToDatabaseMode({ model, getValue, watchDependency }, mode) {
+  const modelPathValue = getValue(model, "/spec/mode");
+  watchDependency("model#/spec/mode");
+  return modelPathValue && modelPathValue === mode;
+}
+
 return {
+  EqualToDatabaseMode,
   getNamespaces,
   updateAlertValue,
   setStorageClass,
