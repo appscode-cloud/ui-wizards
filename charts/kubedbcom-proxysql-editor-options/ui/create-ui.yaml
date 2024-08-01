@@ -69,6 +69,14 @@ steps:
         $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/default
       type: radio
     - disableUnselect: true
+      fetch: getAdminOptions|clusterTier/placement
+      if: isToggleOn|clusterTier/placement
+      label:
+        text: labels.placement
+      schema:
+        $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/placement/properties/default
+      type: select
+    - disableUnselect: true
       fetch: getNodeTopology
       if: isToggleOn|clusterTier/nodeTopology
       label:
@@ -78,13 +86,21 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/nodeTopology/properties/default
       type: select
-    - if: showStorageSizeField
+    - hasDescription: true
       label:
-        text: labels.storage.size
+        text: labels.database.mode
+      options:
+      - description: options.database.mode.Standalone.description
+        text: options.database.mode.Standalone.label
+        value: Standalone
+      - description: options.database.mode.Replicaset.description
+        text: options.database.mode.Replicaset.label
+        value: Replicaset
       schema:
-        $ref: schema#/properties/spec/properties/persistence/properties/size
-      type: input
-    - label:
+        $ref: schema#/properties/spec/properties/mode
+      type: radio
+    - if: isEqualToModelPathValue|Replicaset|/spec/mode
+      label:
         text: labels.replicas
       schema:
         $ref: schema#/properties/spec/properties/replicas

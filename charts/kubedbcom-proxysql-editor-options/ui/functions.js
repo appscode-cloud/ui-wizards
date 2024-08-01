@@ -916,12 +916,6 @@ function notEqualToDatabaseMode({ model, getValue, watchDependency }, mode) {
   watchDependency("model#/spec/mode");
   return modelPathValue && modelPathValue !== mode;
 }
-function showStorageSizeField({ model, getValue, watchDependency }) {
-  const modelPathValue = getValue(model, "/spec/mode");
-  watchDependency("model#/spec/mode");
-  const validType = [];
-  return !validType.includes(modelPathValue);
-}
 function showHidden({ watchDependency, model, getValue }) {
   watchDependency("model#/spec/hidden/enabled");
   const isHiddenOn = getValue(model, "/spec/hidden/enabled") || "";
@@ -1111,7 +1105,6 @@ return {
   showIssuer,
   showArbiter,
   clearConfiguration,
-  showStorageSizeField,
   onBackupSwitch,
   isVariantAvailable,
 	fetchJsons,

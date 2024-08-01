@@ -327,13 +327,6 @@ function showAuthSecretField({ discriminator, getValue, watchDependency }) {
   });
 }
 
-function showStorageSizeField({ model, getValue, watchDependency }) {
-  const modelPathValue = getValue(model, "/spec/mode");
-  watchDependency("model#/spec/mode");
-  const validType = ["Standalone", "Cluster"];
-  return validType.includes(modelPathValue);
-}
-
 async function getPostgresList({
   axios,
   storeGet,
@@ -738,9 +731,9 @@ function clearArbiterHidden({ commit }) {
     force: true,
   });
 }
+
 let nodeTopologyListFromApi = [];
 let provider = "";
-
 async function getNodeTopology({
   model,
   getValue,
@@ -804,24 +797,22 @@ async function getNodeTopology({
   );
   return filteredList;
 }
+
 function returnFalse() {
   return false;
 }
+
 function isConfigDatabaseOn({ watchDependency, discriminator, getValue }) {
   watchDependency("discriminator#/configDatabase");
   return getValue(discriminator, "/configDatabase");
 }
+
 function notEqualToDatabaseMode({ model, getValue, watchDependency }, mode) {
   const modelPathValue = getValue(model, "/spec/mode");
   watchDependency("model#/spec/mode");
   return modelPathValue && modelPathValue !== mode;
 }
-function showStorageSizeField({ model, getValue, watchDependency }) {
-  const modelPathValue = getValue(model, "/spec/mode");
-  watchDependency("model#/spec/mode");
-  const validType = [];
-  return !validType.includes(modelPathValue);
-}
+
 function showHidden({ watchDependency, model, getValue }) {
   watchDependency("model#/spec/hidden/enabled");
   const isHiddenOn = getValue(model, "/spec/hidden/enabled") || "";
@@ -831,11 +822,13 @@ function showHidden({ watchDependency, model, getValue }) {
   );
   return isHiddenOn && notStandalone;
 }
+
 function notEqualToDatabaseMode({ model, getValue, watchDependency }, mode) {
   const modelPathValue = getValue(model, "/spec/mode");
   watchDependency("model#/spec/mode");
   return modelPathValue && modelPathValue !== mode;
 }
+
 function showArbiter({ watchDependency, model, getValue }) {
   watchDependency("model#/spec/arbiter/enabled");
   const isArbiterOn = getValue(model, "/spec/arbiter/enabled") || "";
@@ -845,6 +838,7 @@ function showArbiter({ watchDependency, model, getValue }) {
   );
   return isArbiterOn && notStandalone;
 }
+
 function clearConfiguration({ discriminator, getValue, commit }) {
   const configOn = getValue(discriminator, "/configDatabase");
 
@@ -852,6 +846,7 @@ function clearConfiguration({ discriminator, getValue, commit }) {
     commit("wizard/model$delete", "/spec/configuration");
   }
 }
+
 function filterNodeTopology(list, tier, provider, map) {
   // first filter the list from value that exists from the filtered list got from API
   const filteredlist = list.filter((item) => {
@@ -921,6 +916,7 @@ function filterNodeTopology(list, tier, provider, map) {
     });
   }
 }
+
 function showIssuer({ model, getValue, watchDependency }) {
   watchDependency("model#/spec/admin/tls/default");
   const isTlsEnabled = getValue(model, "/spec/admin/tls/default");
@@ -930,6 +926,7 @@ function showIssuer({ model, getValue, watchDependency }) {
   );
   return isTlsEnabled && isIssuerToggleEnabled;
 }
+
 function onAuthChange({ getValue, discriminator, commit }) {
   const isAuthOn = getValue(discriminator, "/createAuthSecret");
   if (!isAuthOn) {
@@ -945,10 +942,12 @@ function onAuthChange({ getValue, discriminator, commit }) {
     });
   }
 }
+
 function setMonitoring({ getValue, model }) {
   const agent = getValue(model, "/spec/admin/monitoring/agent") || "";
   return !!agent;
 }
+
 async function isBackupCluster({ axios, storeGet, commit }) {
   const owner = storeGet("/route/params/user");
   const cluster = storeGet("/route/params/cluster");
@@ -973,6 +972,7 @@ async function isBackupCluster({ axios, storeGet, commit }) {
   });
   return isStashEnabled;
 }
+
 function isMachineNotCustom({ model, getValue, watchDependency }, path) {
   const fullpath = path
     ? `/spec/${path}/podResources/machine`
@@ -981,6 +981,7 @@ function isMachineNotCustom({ model, getValue, watchDependency }, path) {
   watchDependency(`model#${fullpath}`);
   return modelPathValue !== "custom" && !!modelPathValue;
 }
+
 async function getNamespaces({ axios, storeGet }) {
   const params = storeGet("/route/params");
   const { user, cluster, group, version, resource } = params;
@@ -1009,6 +1010,7 @@ async function getNamespaces({ axios, storeGet }) {
     return [];
   }
 }
+
 function updateAlertValue({ commit, model, discriminator, getValue }) {
   const isMonitorEnabled = getValue(discriminator, "/monitoring");
   const alert = isMonitorEnabled ? "warning" : "none";
@@ -1073,14 +1075,12 @@ return {
   showIssuer,
   showArbiter,
   clearConfiguration,
-  showStorageSizeField,
   onBackupSwitch,
   isVariantAvailable,
   fetchJsons,
   showAuthPasswordField,
   isEqualToModelPathValue,
   showAuthSecretField,
-  showStorageSizeField,
   getResources,
   getPostgresList,
   getMongoDbVersions,

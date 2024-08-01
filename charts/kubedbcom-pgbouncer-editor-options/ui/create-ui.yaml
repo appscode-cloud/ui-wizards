@@ -10,8 +10,6 @@ steps:
       createAuthSecret:
         default: false
         type: boolean
-      mode:
-        type: string
       monitoring:
         default: false
         type: boolean
@@ -111,8 +109,7 @@ steps:
         schema:
           $ref: schema#/properties/spec/properties/annotations/additionalProperties
         type: input
-    - computed: setDatabaseMode
-      hasDescription: true
+    - hasDescription: true
       label:
         text: labels.database.mode
       onChange: onDatabaseModeChange
@@ -120,12 +117,18 @@ steps:
       - description: options.database.mode.Standalone.description
         text: options.database.mode.Standalone.label
         value: Standalone
-      - description: options.database.mode.Cluster.description
-        text: options.database.mode.Cluster.label
-        value: Cluster
+      - description: options.database.mode.Replicaset.description
+        text: options.database.mode.Replicaset.label
+        value: Replicaset
       schema:
-        $ref: discriminator#/properties/mode
+        $ref: schema#/properties/spec/properties/mode
       type: radio
+    - if: isEqualToModelPathValue|Replicaset|/spec/mode
+      label:
+        text: labels.replicaset.number
+      schema:
+        $ref: schema#/properties/spec/properties/replicas
+      type: input
     - elements:
       - computed: setMachineToCustom
         fetch: getMachineListForOptions

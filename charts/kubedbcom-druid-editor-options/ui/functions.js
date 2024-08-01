@@ -785,8 +785,42 @@ async function getAppBindings({ axios, storeGet }, type) {
 function onRefChange({ discriminator, getValue, commit }, type) {
   const ref = getValue(discriminator, `/${type}`) || {};
   commit("wizard/model$update", {
-    path: `/spec/${type}`,
-    value: ref,
+    path: `/spec/${type}/name`,
+    value: ref.name || "",
+    force: true,
+  });
+  commit("wizard/model$update", {
+    path: `/spec/${type}/namespace`,
+    value: ref.namespace || "",
+    force: true,
+  });
+}
+
+function isExternallyManaged({ getValue, model, watchDependency, commit, setDiscriminatorValue }, type) {
+  watchDependency(`model#/spec/${type}/externallyManaged`);
+  const isManaged = getValue(model, `/spec/${type}/externallyManaged`) || false;
+  if(!isManaged) clearRefs({ commit, setDiscriminatorValue }, type);
+  return isManaged;
+}
+
+function isMetadataStorageTypeEqualsTo({ getValue, model, watchDependency }, type) {
+  watchDependency("model#/spec/metadataStorage/type");
+  watchDependency("model#/spec/metadataStorage/externallyManaged");
+  const dbType = getValue(model, "/spec/metadataStorage/type") || "";
+  const isManaged = getValue(model, "/spec/metadataStorage/externallyManaged") || false;
+  return isManaged && dbType === type;
+}
+
+function clearRefs({ commit, setDiscriminatorValue }, type) {
+  setDiscriminatorValue(`/${type}`, "");
+  commit("wizard/model$update", {
+    path: `/spec/${type}/name`,
+    value: "",
+    force: true,
+  });
+  commit("wizard/model$update", {
+    path: `/spec/${type}/namespace`,
+    value: "",
     force: true,
   });
 }
@@ -826,6 +860,9 @@ return {
   filterNodeTopology,
   getAppBindings,
   onRefChange,
+  isExternallyManaged,
+  isMetadataStorageTypeEqualsTo,
+  clearRefs,
   isToggleOn,
   getAdminOptions,
 }
