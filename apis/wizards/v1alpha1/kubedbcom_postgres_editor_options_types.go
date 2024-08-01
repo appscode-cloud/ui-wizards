@@ -47,6 +47,7 @@ type KubedbcomPostgresEditorOptionsSpecSpec struct {
 	// +optional
 	Labels         map[string]string `json:"labels"`
 	Mode           GeneralMode       `json:"mode"`
+	Replicas       int               `json:"replicas"`
 	DeletionPolicy DeletionPolicy    `json:"deletionPolicy"`
 	Persistence    Persistence       `json:"persistence"`
 	PodResources   PodResources      `json:"podResources"`
