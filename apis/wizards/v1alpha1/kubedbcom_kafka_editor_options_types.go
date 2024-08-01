@@ -69,10 +69,9 @@ type KafkaTopology struct {
 }
 
 type KafkaNode struct {
-	Replicas int `json:"replicas"`
-	// +optional
-	Machine     string      `json:"machine"`
-	Persistence Persistence `json:"persistence"`
+	Replicas     int          `json:"replicas"`
+	PodResources PodResources `json:"podResources"`
+	Persistence  Persistence  `json:"persistence"`
 }
 
 type KafkaAlertsSpecForm struct {

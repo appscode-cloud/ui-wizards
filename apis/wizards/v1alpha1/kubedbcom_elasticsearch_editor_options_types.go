@@ -86,10 +86,9 @@ type ElasticsearchTopology struct {
 }
 
 type ElasticsearchNode struct {
-	Replicas int `json:"replicas"`
-	// +optional
-	Machine     string      `json:"machine"`
-	Persistence Persistence `json:"persistence"`
+	Replicas     int          `json:"replicas"`
+	PodResources PodResources `json:"podResources"`
+	Persistence  Persistence  `json:"persistence"`
 }
 
 // +kubebuilder:validation:Enum=Combined;Dedicated

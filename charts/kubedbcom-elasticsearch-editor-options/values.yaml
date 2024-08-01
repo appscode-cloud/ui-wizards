@@ -27,22 +27,40 @@ spec:
   labels: {}
 
   # Combined, Dedicated
-  mode: Combined
+  mode: Dedicated
   replicas: 2
   topology:
     master:
       replicas: 3
-      machine: ""
+      podResources:
+        machine: ""
+
+        resources:
+          limits:
+            cpu: 500m
+            memory: 1Gi
       persistence:
         size: 1Gi
     data:
       replicas: 3
-      machine: ""
+      podResources:
+        machine: ""
+
+        resources:
+          limits:
+            cpu: 500m
+            memory: 1Gi
       persistence:
         size: 10Gi
     ingest:
       replicas: 2
-      machine: ""
+      podResources:
+        machine: ""
+
+        resources:
+          limits:
+            cpu: 500m
+            memory: 1Gi
       persistence:
         size: 1Gi
 

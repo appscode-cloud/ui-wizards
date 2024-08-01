@@ -58,7 +58,7 @@ type KubedbcomPgbouncerEditorOptionsSpecSpec struct {
 
 type PgbouncerDatabase struct {
 	SyncUsers    bool            `json:"syncUsers,omitempty"`
-	Ref          ObjectReference `json:"ref"`
+	DatabaseRef  ObjectReference `json:"databaseRef"`
 	DatabaseName string          `json:"databaseName"`
 }
 
