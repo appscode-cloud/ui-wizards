@@ -20,9 +20,11 @@ spec:
   replicas: {{ .Values.spec.replicas }}
   backend:
     externallyManaged: {{ .Values.spec.backend.externallyManaged }}
+{{- if .Values.spec.backend.externallyManaged }}
     postgresRef:
       name: {{ .Values.spec.backend.name }}
       namespace: {{ .Values.spec.backend.namespace }}
+{{- end }}
   storageType: Durable
   storage:
     storageClassName: {{ .Values.spec.admin.storageClasses.default }}
