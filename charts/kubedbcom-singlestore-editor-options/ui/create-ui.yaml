@@ -132,6 +132,7 @@ steps:
         value: Topology
       schema:
         $ref: schema#/properties/spec/properties/mode
+      onChange: toggleTls
       type: radio
     - if: isEqualToModelPathValue|Standalone|/spec/mode
       label:
@@ -292,7 +293,8 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/configuration
       type: editor
-    - if: isToggleOn|tls
+    - if: isEqualToModelPathValue|Topology|/spec/mode
+      computed: toggleTls
       label:
         text: Enable TLS?
       schema:
