@@ -16,9 +16,6 @@ metadata:
     namespace: ""
 
 spec:
-  # List options
-  version: 6.2.14
-
   # Annotations to add to the database custom resource
   annotations: {}
 
@@ -26,10 +23,10 @@ spec:
   labels: {}
 
   # Standalone, Cluster, Sentinel
-  mode: Standalone
+  mode: Cluster
   cluster:
     master: 3
-    replicas: 1
+    replicas: 2
   sentinelRef:
     name: ""
     namespace: ""
@@ -73,7 +70,7 @@ spec:
       Redis:
         versions:
           available: ["6.2.14", "7.0.15", "7.2.4"]
-          default: "6.0.12"
+          default: "7.0.15"
           toggle: true
     storageClasses:
       available: ["linode-block-storage", "default", "standard", "gp2"]
@@ -109,8 +106,8 @@ spec:
       toggle: true
 
     archiver:
-      toggle: true
-      default: true
+      toggle: false
+      default: false
     backup:
       tool: ""
       toggle: true

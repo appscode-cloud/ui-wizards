@@ -36,6 +36,7 @@ steps:
       if: isToggleOn|deployment
       label:
         text: labels.deployment.name
+      onChange: setResourceLimit
       options:
       - description: labels.deployment.shared
         text: Shared
@@ -236,13 +237,6 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/configuration
       type: editor
-    - computed: setLimitsCpuOrMem|memory
-      disabled: disableLimit
-      label:
-        text: labels.memory
-      schema:
-        $ref: schema#/properties/spec/properties/resources/properties/limits/properties/memory
-      type: input
     - if: isToggleOn|tls
       label:
         text: Enable TLS?

@@ -17,6 +17,7 @@ limitations under the License.
 package v1alpha1
 
 import (
+	alerts "go.appscode.dev/alerts/apis/alerts/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	api "x-helm.dev/apimachinery/apis/releases/v1alpha1"
 )
@@ -37,6 +38,7 @@ type KubedbcomPgbouncerEditorOptions struct {
 type KubedbcomPgbouncerEditorOptionsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Spec         KubedbcomPgbouncerEditorOptionsSpecSpec `json:"spec"`
+	Form         PgbouncerAlertsSpecForm                 `json:"form"`
 }
 
 type KubedbcomPgbouncerEditorOptionsSpecSpec struct {
@@ -44,8 +46,9 @@ type KubedbcomPgbouncerEditorOptionsSpecSpec struct {
 	Annotations map[string]string `json:"annotations"`
 	// +optional
 	Labels         map[string]string `json:"labels"`
+	Mode           GeneralMode       `json:"mode"`
 	Replicas       int               `json:"replicas"`
-	Persistence    Persistence       `json:"persistence"`
+	Database       PgbouncerDatabase `json:"database"`
 	PodResources   PodResources      `json:"podResources"`
 	AuthSecret     AuthSecret        `json:"authSecret"`
 	DeletionPolicy DeletionPolicy    `json:"deletionPolicy"`
@@ -53,8 +56,15 @@ type KubedbcomPgbouncerEditorOptionsSpecSpec struct {
 	Admin          AdminOptions      `json:"admin"`
 }
 
-// +kubebuilder:validation:Enum=Standalone;Cluster
-type PgbouncerMode string
+type PgbouncerDatabase struct {
+	SyncUsers    bool            `json:"syncUsers,omitempty"`
+	DatabaseRef  ObjectReference `json:"databaseRef"`
+	DatabaseName string          `json:"databaseName"`
+}
+
+type PgbouncerAlertsSpecForm struct {
+	Alert alerts.PostgresAlert `json:"alert"`
+}
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 

@@ -22,7 +22,7 @@
     {{- $res = get (get $machines .Values.spec.podResources.machine) "resources" }}
   {{- end }}
 {{- end }}
-{{ $poolName := printf "%s-%s-%s" .Values.form.capi.clusterName .Release.Namespace (include "kubedbcom-solr-editor-options.fullname" .) }}
+{{ $poolName := printf "my-capi-cluster-%s-%s" .Release.Namespace (include "kubedbcom-solr-editor-options.fullname" .) }}
 
 apiVersion: kubedb.com/v1alpha2
 kind: Solr
@@ -36,7 +36,10 @@ metadata:
     {{- include "kubedbcom-solr-editor-options.annotations" . | nindent 4 }}
 {{- end }}
 spec:
-  version: {{ .Values.spec.version | quote }}
+  version: {{ .Values.spec.admin.databases.Solr.versions.default | quote }}
+  zookeeperRef:
+    name: {{ .Values.spec.zookeeperRef.name }}
+    namespace: {{ .Values.spec.zookeeperRef.namespace }}
 {{- if eq .Values.spec.mode "Topology" }}
   topology:
     overseer:
@@ -118,7 +121,7 @@ spec:
   replicas: 1
   {{- end }}
   storage:
-    storageClassName: {{ .Values.spec.storageClass.name }}
+    storageClassName: {{ .Values.spec.admin.storageClasses.default }}
     accessModes:
       - ReadWriteOnce
     resources:
@@ -130,13 +133,30 @@ spec:
         - name: solr
           resources:
             {{- toYaml $res | nindent 12 }}
-      {{- if and .Values.form.capi.provider .Values.form.capi.dedicated }}
+      podPlacementPolicy:
+        name: {{ .Values.spec.admin.clusterTier.placement.default }}
+      {{- if eq .Values.spec.admin.deployment.default "Dedicated" }}
       nodeSelector:
-        nodes.klusters.dev/pool: {{ $poolName }}
+        app: solrs.kubedb.com
+        instance: {{ include "kubedbcom-solr-editor-options.fullname" . }}
+        namespace: {{ .Release.Namespace }}
+        nodepool: {{ .Values.spec.admin.clusterTier.nodeTopology.default }}
       tolerations:
-        - key: dedicated
+        - key: app
           operator: "Equal"
-          value: "true"
+          value: "solrs.kubedb.com"
+          effect: "NoSchedule"
+        - key: instance
+          operator: "Equal"
+          value: {{ include "kubedbcom-solr-editor-options.fullname" . }}
+          effect: "NoSchedule"
+        - key: namespace
+          operator: "Equal"
+          value: {{ .Release.Namespace }}
+          effect: "NoSchedule"
+        - key: nodepool
+          operator: "Equal"
+          value: {{ .Values.spec.admin.clusterTier.nodeTopology.default }}
           effect: "NoSchedule"
       {{- end }}
 {{- end }}
@@ -144,19 +164,33 @@ spec:
   authSecret:
     name: {{ .Values.spec.authSecret.name }}
 {{- end }}
-{{- if (and .Values.spec.monitoring .Values.spec.monitoring.agent) }}
+{{- if .Values.spec.authSecret.password }}
+  authSecret:
+    name: {{ include "kubedbcom-solr-editor-options.fullname" . }}-auth
+{{- end }}
+{{- if .Values.spec.configuration }}
+  configSecret:
+    name: {{ include "kubedbcom-solr-editor-options.fullname" . }}-config
+{{- end }}
+{{- if .Values.spec.admin.tls.default }}
+  tls:
+    issuerRef:
+      apiGroup: "cert-manager.io"
+      kind: ClusterIssuer
+      name: {{ .Values.spec.admin.clusterIssuers.default }}
+  enableSSL: true
+{{- end }}
+{{- if (and .Values.spec.admin.monitoring .Values.spec.admin.monitoring.agent) }}
   monitor:
-    agent: {{ .Values.spec.monitoring.agent }}
+    agent: {{ .Values.spec.admin.monitoring.agent }}
     prometheus:
-    {{- with .Values.spec.monitoring.exporter }}
+    {{- with .Values.spec.admin.monitoring.exporter }}
       exporter:
-        args:
-          - --compatible-mode
         resources:
           {{- toYaml .resources | nindent 10 }}
     {{- end }}
       serviceMonitor:
         interval: 30s
         labels:
-          {{- toYaml .Values.spec.monitoring.serviceMonitor.labels | nindent 10 }}
+          {{- toYaml .Values.spec.admin.monitoring.serviceMonitor.labels | nindent 10 }}
 {{- end }}

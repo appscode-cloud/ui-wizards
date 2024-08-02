@@ -39,6 +39,7 @@ steps:
       if: isToggleOn|deployment
       label:
         text: labels.deployment.name
+      onChange: setResourceLimit
       options:
       - description: labels.deployment.shared
         text: Shared
@@ -235,12 +236,6 @@ steps:
         $ref: schema#/properties/spec/properties/admin/properties/storageClasses/properties/default
       type: select
     - label:
-        text: labels.disable_security_question
-      onChange: onDisableSecurityChange
-      schema:
-        $ref: schema#/properties/spec/properties/disableSecurity
-      type: switch
-    - label:
         text: Provide Authentication Credentials?
       onChange: onAuthChange
       schema:
@@ -320,19 +315,10 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/admin/properties/archiver/properties/default
       type: switch
-    - computed: isBackupCluster
-      if: isToggleOn|backup
-      label:
-        text: Enable Backup?
-      onChange: onBackupSwitch
-      schema:
-        $ref: discriminator#/backup
-      type: switch
     - cluster:
         $ref: store#/route/params/cluster
       hasDependencies: true
       hasDescription: true
-      individualItemDisabilityCheck: disableConfigureOption
       options:
       - description: options.configOptions.topology.description
         text: options.configOptions.topology.label

@@ -1,70 +1,67 @@
 function initNamespace({ route }) {
-  const { namespace } = route.query || {};
-  return namespace || null;
+  const { namespace } = route.query || {}
+  return namespace || null
 }
 
 function labelsDisabilityChecker({ itemCtx }) {
-  const { key } = itemCtx;
-  if (key.startsWith("app.kubernetes.io") || key.includes("helm")) return true;
-  else return false;
+  const { key } = itemCtx
+  if (key.startsWith('app.kubernetes.io') || key.includes('helm')) return true
+  else return false
 }
 
 // backend configuration
 const backendMap = {
   azure: {
-    spec: { container: "", maxConnections: 0, prefix: "" },
-    auth: { AZURE_ACCOUNT_KEY: "", AZURE_ACCOUNT_NAME: "" },
+    spec: { container: '', maxConnections: 0, prefix: '' },
+    auth: { AZURE_ACCOUNT_KEY: '', AZURE_ACCOUNT_NAME: '' },
   },
   b2: {
-    spec: { bucket: "", prefix: "", maxConnections: 0 },
-    auth: { B2_ACCOUNT_ID: "", B2_ACCOUNT_KEY: "" },
+    spec: { bucket: '', prefix: '', maxConnections: 0 },
+    auth: { B2_ACCOUNT_ID: '', B2_ACCOUNT_KEY: '' },
   },
   gcs: {
-    spec: { bucket: "", prefix: "", maxConnections: 0 },
-    auth: { GOOGLE_PROJECT_ID: "", GOOGLE_SERVICE_ACCOUNT_JSON_KEY: "" },
+    spec: { bucket: '', prefix: '', maxConnections: 0 },
+    auth: { GOOGLE_PROJECT_ID: '', GOOGLE_SERVICE_ACCOUNT_JSON_KEY: '' },
   },
   s3: {
-    spec: { endpoint: "", bucket: "", prefix: "", region: "" },
+    spec: { endpoint: '', bucket: '', prefix: '', region: '' },
     auth: {
-      AWS_ACCESS_KEY_ID: "",
-      AWS_SECRET_ACCESS_KEY: "",
-      CA_CERT_DATA: "",
+      AWS_ACCESS_KEY_ID: '',
+      AWS_SECRET_ACCESS_KEY: '',
+      CA_CERT_DATA: '',
     },
   },
   swift: {
-    spec: { container: "", prefix: "" },
+    spec: { container: '', prefix: '' },
     auth: {
-      OS_AUTH_TOKEN: "",
-      OS_AUTH_URL: "",
-      OS_PASSWORD: "",
-      OS_PROJECT_DOMAIN_NAME: "",
-      OS_PROJECT_NAME: "",
-      OS_REGION_NAME: "",
-      OS_STORAGE_URL: "",
-      OS_TENANT_ID: "",
-      OS_TENANT_NAME: "",
-      OS_USERNAME: "",
-      OS_USER_DOMAIN_NAME: "",
-      ST_AUTH: "",
-      ST_KEY: "",
-      ST_USER: "",
+      OS_AUTH_TOKEN: '',
+      OS_AUTH_URL: '',
+      OS_PASSWORD: '',
+      OS_PROJECT_DOMAIN_NAME: '',
+      OS_PROJECT_NAME: '',
+      OS_REGION_NAME: '',
+      OS_STORAGE_URL: '',
+      OS_TENANT_ID: '',
+      OS_TENANT_NAME: '',
+      OS_USERNAME: '',
+      OS_USER_DOMAIN_NAME: '',
+      ST_AUTH: '',
+      ST_KEY: '',
+      ST_USER: '',
     },
   },
-};
+}
 
 function initBackendProvider({ model, getValue }) {
-  const backend = getValue(
-    model,
-    "/resources/stashAppscodeComRepository/spec/backend"
-  );
-  const backendProvider = Object.keys(backend).find((key) => key);
-  return backendProvider || "gcs";
+  const backend = getValue(model, '/resources/stashAppscodeComRepository/spec/backend')
+  const backendProvider = Object.keys(backend).find((key) => key)
+  return backendProvider || 'gcs'
 }
 
 function showBackendForm({ getValue, discriminator, watchDependency }, value) {
-  watchDependency("discriminator#/backendProvider");
-  const backendProvider = getValue(discriminator, "/backendProvider");
-  return backendProvider === value;
+  watchDependency('discriminator#/backendProvider')
+  const backendProvider = getValue(discriminator, '/backendProvider')
+  return backendProvider === value
 }
 
 async function getResources(
@@ -72,14 +69,14 @@ async function getResources(
   group,
   version,
   resource,
-  namespaced
+  namespaced,
 ) {
-  const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/route/params/cluster");
-  let namespace = "";
+  const owner = storeGet('/route/params/user')
+  const cluster = storeGet('/route/params/cluster')
+  let namespace = ''
   if (namespaced) {
-    namespace = getValue(model, "/metadata/release/namespace");
-    watchDependency("model#/metadata/release/namespace");
+    namespace = getValue(model, '/metadata/release/namespace')
+    watchDependency('model#/metadata/release/namespace')
   }
 
   if (!namespaced || namespace) {
@@ -88,78 +85,74 @@ async function getResources(
     try {
       const resp = await axios.get(
         `/clusters/${owner}/${cluster}/proxy/${group}/${version}${
-          namespace ? "/namespaces/" + namespace : ""
+          namespace ? '/namespaces/' + namespace : ''
         }/${resource}`,
         {
           params: { filter: { items: { metadata: { name: null } } } },
-        }
-      );
+        },
+      )
 
-      const resources = (resp && resp.data && resp.data.items) || [];
+      const resources = (resp && resp.data && resp.data.items) || []
 
       resources.map((item) => {
-        const name = (item.metadata && item.metadata.name) || "";
-        item.text = name;
-        item.value = name;
-        return true;
-      });
-      return resources;
+        const name = (item.metadata && item.metadata.name) || ''
+        item.text = name
+        item.value = name
+        return true
+      })
+      return resources
     } catch (e) {
-      console.log(e);
-      return [];
+      console.log(e)
+      return []
     }
-  } else return [];
+  } else return []
 }
 
 async function getSecrets(ctx) {
-  const { axios, storeGet, model, getValue, watchDependency } = ctx;
+  const { axios, storeGet, model, getValue, watchDependency } = ctx
   return getResources(
     { axios, storeGet, model, getValue, watchDependency },
-    "core",
-    "v1",
-    "secrets",
-    true
-  );
+    'core',
+    'v1',
+    'secrets',
+    true,
+  )
 }
 
 function getSecretEditPageLink({ storeGet, getValue, model, watchDependency }) {
-  watchDependency(
-    "model#/resources/stashAppscodeComRepository/spec/backend/storageSecretName"
-  );
+  watchDependency('model#/resources/stashAppscodeComRepository/spec/backend/storageSecretName')
 
-  const cluster = storeGet("/route/params/cluster");
-  const domain = storeGet("/domain") || "";
-  const owner = storeGet("/route/params/user");
-  const namespace = getValue(model, "/metadata/release/namespace");
+  const cluster = storeGet('/route/params/cluster')
+  const domain = storeGet('/domain') || ''
+  const owner = storeGet('/route/params/user')
+  const namespace = getValue(model, '/metadata/release/namespace')
   const secretName = getValue(
     model,
-    "/resources/stashAppscodeComRepository/spec/backend/storageSecretName"
-  );
+    '/resources/stashAppscodeComRepository/spec/backend/storageSecretName',
+  )
 
-  return `${domain}/${owner}/kubernetes/${cluster}/core/v1/secrets/${secretName}?namespace=${namespace}`;
+  return `${domain}/${owner}/kubernetes/${cluster}/core/v1/secrets/${secretName}?namespace=${namespace}`
 }
 
 function onSecretChange({ commit, storeGet, model, getValue }) {
-  const initialSecretObject = storeGet(
-    "/wizard/initialModel/resources/secret_repo_cred"
-  );
+  const initialSecretObject = storeGet('/wizard/initialModel/resources/secret_repo_cred')
   const initialSecretName = storeGet(
-    "/wizard/initialModel/resources/secret_repo_cred/metadata/name"
-  );
+    '/wizard/initialModel/resources/secret_repo_cred/metadata/name',
+  )
   const secretName = getValue(
     model,
-    "/resources/stashAppscodeComRepository/spec/backend/storageSecretName"
-  );
+    '/resources/stashAppscodeComRepository/spec/backend/storageSecretName',
+  )
 
   if (initialSecretObject) {
     if (secretName === initialSecretName) {
-      commit("wizard/model$update", {
-        path: "/resources/secret_repo_cred",
+      commit('wizard/model$update', {
+        path: '/resources/secret_repo_cred',
         value: initialSecretObject,
         force: true,
-      });
+      })
     } else {
-      commit("wizard/model$delete", "/resources/secret_repo_cred");
+      commit('wizard/model$delete', '/resources/secret_repo_cred')
     }
   }
 }
@@ -172,4 +165,4 @@ return {
   getSecrets,
   getSecretEditPageLink,
   onSecretChange,
-};
+}

@@ -16,25 +16,24 @@ metadata:
     namespace: ""
 
 spec:
-  replicas: 1
-
   # Annotations to add to the database custom resource
   annotations: {}
 
   # Labels to add to all the template objects
   labels: {}
 
-  databases:
-  - alias: "testdb"
-    databaseName: "test"
+  # Standalone, Replicaset
+  mode: Replicaset
+  replicas: 3
+  database:
+    syncUsers: true
+    databaseName: "postgres"
     databaseRef:
       name: "demo-pg"
       namespace: demo
 
   deletionPolicy: WipeOut
 
-  persistence:
-    size: 10Gi
   podResources:
     machine: ""
 
@@ -57,12 +56,12 @@ spec:
       default: "GeneralPurpose"
       toggle: true
       nodeTopology:
-        available: [ "m4", "m7gd", "c5d", "c7g", "t4g", "r5a", "r6g", "a-family", "b-family", "d-family" ]
-        default: "c5d"
+        available: ["m4", "m7gd", "c5d", "c7g", "t4g", "r5a", "r6g", "a-family", "b-family", "d-family", "standard-bsv2-family", "standard-ddv4-family", "standard-dv2-family"]
+        default: "standard-bsv2-family"
         toggle: true
       placement:
-        available: [ "majority-on-spot", "minority-on-spot", "multizone", "ondemand-only", "one-on-ondemand", "spot-only", "zone-ap-southeast-1a", "zone-ap-southeast-1b", "zone-ap-southeast-1c" ]
-        default: "majority-on-spot"
+        available: ["majority-on-spot", "minority-on-spot", "multizone", "ondemand-only", "one-on-ondemand", "spot-only", "zone-ap-southeast-1a", "zone-ap-southeast-1b", "zone-ap-southeast-1c", "default"]
+        default: "default"
         toggle: true
 
     databases:
@@ -72,8 +71,8 @@ spec:
           default: "1.18.0"
           toggle: true
     storageClasses:
-      available: [ "linode-block-storage", "linode-block-storage-retain", "standard", "gp2" ]
-      default: "gp2"
+      available: ["linode-block-storage", "default", "standard", "gp2"]
+      default: "default"
       toggle: true
 
     tls:
@@ -84,12 +83,12 @@ spec:
       default: "cluster-issuer"
       toggle: true
     webUI:
-      default: true
-      toggle: true
+      default: false
+      toggle: false
 
     monitoring:
       # Name of monitoring agent (one of "prometheus.io", "prometheus.io/operator", "prometheus.io/builtin")
-      agent: prometheus.io/operator
+      agent: ""
       exporter:
         resources: # +doc-gen:break
           requests:
@@ -100,16 +99,16 @@ spec:
         # Prometheus crd will select ServiceMonitor using these labels.
         # Only usable when monitoring agent is `prometheus.io/webhook server`.
         labels: { }
-      toggle: true
+      toggle: false
     alerts:
       toggle: true
 
     archiver:
-      toggle: true
-      default: true
+      toggle: false
+      default: false
     backup:
       tool: ""
-      toggle: true
+      toggle: false
 
       kubestash:
         schedule: "0 */2 * * *"
@@ -193,3 +192,156 @@ spec:
             auth:
               B2_ACCOUNT_ID: ""
               B2_ACCOUNT_KEY: ""
+
+form:
+  alert:
+    ## Enable PrometheusRule alerts
+    enabled: warning
+
+    ## Labels for default rules
+    labels: # +doc-gen:break
+      release: kube-prometheus-stack
+
+    ## Annotations for default rules
+    annotations: {}
+
+    ## Additional labels for PrometheusRule alerts
+    additionalRuleLabels: {}
+
+    ## Prefix for runbook URLs. Use this to override the first part of the runbookURLs that is common to all rules.
+    # runbookUrl: "https://runbooks.prometheus-operator.dev/runbooks"
+
+    groups:
+      database:
+        enabled: warning
+        rules:
+          postgresInstanceDown:
+            enabled: true
+            duration: "0m"
+            severity: critical
+          postgresRestarted:
+            enabled: true
+            duration: "0m"
+            val: 60
+            severity: critical
+          postgresExporterError:
+            enabled: true
+            duration: "5m"
+            severity: warning
+          postgresTooManyConnections:
+            enabled: true
+            duration: "2m"
+            val: 80
+            severity: warning
+          postgresNotEnoughConnections:
+            enabled: true
+            duration: "2m"
+            val: 5
+            severity: warning
+          postgresSlowQueries:
+            enabled: true
+            duration: "2m"
+            severity: warning
+          postgresReplicationLag:
+            enabled: true
+            duration: "0m"
+            val: 30s
+            severity: critical
+          postgresHighRollbackRate:
+            enabled: true
+            duration: "0m"
+            val: 0.02
+            severity: warning
+          postgresSplitBrain:
+            enabled: true
+            duration: "0m"
+            severity: critical
+          postgresTooManyLocksAcquired:
+            enabled: true
+            duration: "2m"
+            val: 0.20
+            severity: critical
+      provisioner:
+        enabled: warning
+        rules:
+          appPhaseNotReady:
+            enabled: true
+            duration: "1m"
+            severity: critical
+          appPhaseCritical:
+            enabled: true
+            duration: "15m"
+            severity: warning
+      opsManager:
+        enabled: warning
+        rules:
+          opsRequestOnProgress:
+            enabled: true
+            duration: "0m"
+            severity: info
+          opsRequestStatusProgressingToLong:
+            enabled: true
+            duration: "30m"
+            severity: critical
+          opsRequestFailed:
+            enabled: true
+            duration: "0m"
+            severity: critical
+      stash:
+        enabled: warning
+        rules:
+          backupSessionFailed:
+            enabled: true
+            duration: "0m"
+            severity: critical
+          restoreSessionFailed:
+            enabled: true
+            duration: "0m"
+            severity: critical
+          noBackupSessionForTooLong:
+            enabled: true
+            duration: "0m"
+            val: 18000
+            severity: warning
+          repositoryCorrupted:
+            enabled: true
+            duration: "5m"
+            severity: critical
+          repositoryStorageRunningLow:
+            enabled: true
+            duration: "5m"
+            val: 10737418240 # 10GB
+            severity: warning
+          backupSessionPeriodTooLong:
+            enabled: true
+            duration: "0m"
+            val: 1800 # 30 minute
+            severity: warning
+          restoreSessionPeriodTooLong:
+            enabled: true
+            duration: "0m"
+            val: 1800 # 30 minute
+            severity: warning
+      schemaManager:
+        enabled: warning
+        rules:
+          schemaPendingForTooLong:
+            enabled: true
+            duration: "30m"
+            severity: warning
+          schemaInProgressForTooLong:
+            enabled: true
+            duration: "30m"
+            severity: warning
+          schemaTerminatingForTooLong:
+            enabled: true
+            duration: "30m"
+            severity: warning
+          schemaFailed:
+            enabled: true
+            duration: "0m"
+            severity: warning
+          schemaExpired:
+            enabled: true
+            duration: "0m"
+            severity: warning

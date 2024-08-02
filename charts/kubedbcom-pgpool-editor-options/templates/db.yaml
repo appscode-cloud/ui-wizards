@@ -3,7 +3,6 @@
 {{- if and .Values.spec.podResources.machine (hasKey $machines .Values.spec.podResources.machine) }}
   {{- $res = get (get $machines .Values.spec.podResources.machine) "resources" }}
 {{- end }}
-{{ $poolName := printf "%s-%s-%s" .Values.form.capi.clusterName .Release.Namespace (include "kubedbcom-pgpool-editor-options.fullname" .) }}
 
 apiVersion: kubedb.com/v1alpha2
 kind: Pgpool
@@ -17,33 +16,42 @@ metadata:
     {{- include "kubedbcom-pgpool-editor-options.annotations" . | nindent 4 }}
 {{- end }}
 spec:
-  version: {{ .Values.spec.version | quote }}
-  replicas: {{ (eq .Values.spec.mode "Cluster") | ternary .Values.spec.cluster.replicas 1 }}
-  storageType: Durable
+  version: {{ .Values.spec.admin.databases.Pgpool.versions.default | quote }}
+  replicas: {{ (eq .Values.spec.mode "Replicaset") | ternary .Values.spec.replicas 1 }}
   postgresRef:
     name: {{ .Values.spec.postgresRef.name }}
     namespace: {{ .Values.spec.postgresRef.namespace }}
   syncUsers: {{ .Values.spec.syncUsers }}
-  storage:
-    storageClassName: {{ .Values.spec.storageClass.name }}
-    accessModes:
-    - ReadWriteOnce
-    resources:
-      requests:
-        storage: {{ .Values.spec.persistence.size }}
   podTemplate:
     spec:
       containers:
         - name: pgpool
           resources:
             {{- toYaml $res | nindent 12 }}
-      {{- if and .Values.form.capi.provider .Values.form.capi.dedicated }}
+      podPlacementPolicy:
+        name: {{ .Values.spec.admin.clusterTier.placement.default }}
+      {{- if eq .Values.spec.admin.deployment.default "Dedicated" }}
       nodeSelector:
-        nodes.klusters.dev/pool: {{ $poolName }}
+        app: pgpools.kubedb.com
+        instance: {{ include "kubedbcom-pgpool-editor-options.fullname" . }}
+        namespace: {{ .Release.Namespace }}
+        nodepool: {{ .Values.spec.admin.clusterTier.nodeTopology.default }}
       tolerations:
-        - key: dedicated
+        - key: app
           operator: "Equal"
-          value: "true"
+          value: "pgpools.kubedb.com"
+          effect: "NoSchedule"
+        - key: instance
+          operator: "Equal"
+          value: {{ include "kubedbcom-pgpool-editor-options.fullname" . }}
+          effect: "NoSchedule"
+        - key: namespace
+          operator: "Equal"
+          value: {{ .Release.Namespace }}
+          effect: "NoSchedule"
+        - key: nodepool
+          operator: "Equal"
+          value: {{ .Values.spec.admin.clusterTier.nodeTopology.default }}
           effect: "NoSchedule"
       {{- end }}
   deletionPolicy: {{ .Values.spec.deletionPolicy }}
@@ -51,22 +59,33 @@ spec:
   authSecret:
     name: {{ .Values.spec.authSecret.name }}
 {{- end }}
-  initConfig:
-    pgpoolConfig:
-{{- tpl .Values.spec.configuration . | nindent 6 -}}
-{{- if (and .Values.spec.monitoring .Values.spec.monitoring.agent) }}
+{{- if .Values.spec.authSecret.password }}
+  authSecret:
+    name: {{ include "kubedbcom-pgpool-editor-options.fullname" . }}-auth
+{{- end }}
+{{- if .Values.spec.configuration }}
+  configSecret:
+    name: {{ include "kubedbcom-pgpool-editor-options.fullname" . }}-config
+{{- end }}
+{{- if .Values.spec.admin.tls.default }}
+  tls:
+    issuerRef:
+      apiGroup: "cert-manager.io"
+      kind: ClusterIssuer
+      name: {{ .Values.spec.admin.clusterIssuers.default }}
+  sslMode: verify-full
+{{- end }}
+{{- if (and .Values.spec.admin.monitoring .Values.spec.admin.monitoring.agent) }}
   monitor:
-    agent: {{ .Values.spec.monitoring.agent }}
+    agent: {{ .Values.spec.admin.monitoring.agent }}
     prometheus:
-    {{- with .Values.spec.monitoring.exporter }}
+    {{- with .Values.spec.admin.monitoring.exporter }}
       exporter:
-        args:
-          - --compatible-mode
         resources:
           {{- toYaml .resources | nindent 10 }}
     {{- end }}
       serviceMonitor:
         interval: 30s
         labels:
-          {{- toYaml .Values.spec.monitoring.serviceMonitor.labels | nindent 10 }}
+          {{- toYaml .Values.spec.admin.monitoring.serviceMonitor.labels | nindent 10 }}
 {{- end }}

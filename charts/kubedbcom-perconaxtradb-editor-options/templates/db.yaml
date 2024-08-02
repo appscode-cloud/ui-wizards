@@ -1,0 +1,99 @@
+{{- $machines := .Files.Get "data/machines.yaml" | fromYaml -}}
+{{- $res := .Values.spec.podResources.resources -}}
+{{- if and .Values.spec.podResources.machine (hasKey $machines .Values.spec.podResources.machine) }}
+  {{- $res = get (get $machines .Values.spec.podResources.machine) "resources" }}
+{{- end }}
+
+apiVersion: kubedb.com/v1
+kind: PerconaXtraDB
+metadata:
+  name: {{ include "kubedbcom-perconaxtradb-editor-options.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kubedbcom-perconaxtradb-editor-options.labels" . | nindent 4 }}
+{{- if .Values.spec.annotations }}
+  annotations:
+    {{- include "kubedbcom-perconaxtradb-editor-options.annotations" . | nindent 4 }}
+{{- end }}
+spec:
+  version: {{ .Values.spec.admin.databases.PerconaXtraDB.versions.default | quote }}
+{{- if .Values.spec.authSecret.name }}
+  authSecret:
+    name: {{ .Values.spec.authSecret.name }}
+{{- end }}
+  replicas: {{ .Values.spec.replicas }}
+  storage:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: {{ .Values.spec.persistence.size }}
+    storageClassName: {{ .Values.spec.admin.storageClasses.default }}
+  storageType: Durable
+  podTemplate:
+    spec:
+      containers:
+        - name: perconaxtradb
+          resources:
+            {{- toYaml $res | nindent 12 }}
+      podPlacementPolicy:
+        name: {{ .Values.spec.admin.clusterTier.placement.default }}
+      {{- if eq .Values.spec.admin.deployment.default "Dedicated" }}
+      nodeSelector:
+        app: perconaxtradbs.kubedb.com
+        instance: {{ include "kubedbcom-perconaxtradb-editor-options.fullname" . }}
+        namespace: {{ .Release.Namespace }}
+        nodepool: {{ .Values.spec.admin.clusterTier.nodeTopology.default }}
+      tolerations:
+        - key: app
+          operator: "Equal"
+          value: "perconaxtradbs.kubedb.com"
+          effect: "NoSchedule"
+        - key: instance
+          operator: "Equal"
+          value: {{ include "kubedbcom-perconaxtradb-editor-options.fullname" . }}
+          effect: "NoSchedule"
+        - key: namespace
+          operator: "Equal"
+          value: {{ .Release.Namespace }}
+          effect: "NoSchedule"
+        - key: nodepool
+          operator: "Equal"
+          value: {{ .Values.spec.admin.clusterTier.nodeTopology.default }}
+          effect: "NoSchedule"
+      {{- end }}
+  deletionPolicy: {{ .Values.spec.deletionPolicy }}
+{{- if .Values.spec.authSecret.name }}
+  authSecret:
+    name: {{ .Values.spec.authSecret.name }}
+{{- end }}
+{{- if .Values.spec.authSecret.password }}
+  authSecret:
+    name: {{ include "kubedbcom-perconaxtradb-editor-options.fullname" . }}-auth
+{{- end }}
+{{- if .Values.spec.configuration }}
+  configSecret:
+    name: {{ include "kubedbcom-perconaxtradb-editor-options.fullname" . }}-config
+{{- end }}
+{{- if .Values.spec.admin.tls.default }}
+  tls:
+    issuerRef:
+      apiGroup: "cert-manager.io"
+      kind: ClusterIssuer
+      name: {{ .Values.spec.admin.clusterIssuers.default }}
+  requireSSL: true
+{{- end }}
+{{- if (and .Values.spec.admin.monitoring .Values.spec.admin.monitoring.agent) }}
+  monitor:
+    agent: {{ .Values.spec.admin.monitoring.agent }}
+    prometheus:
+    {{- with .Values.spec.admin.monitoring.exporter }}
+      exporter:
+        resources:
+          {{- toYaml .resources | nindent 10 }}
+    {{- end }}
+      serviceMonitor:
+        interval: 30s
+        labels:
+          {{- toYaml .Values.spec.admin.monitoring.serviceMonitor.labels | nindent 10 }}
+{{- end }}

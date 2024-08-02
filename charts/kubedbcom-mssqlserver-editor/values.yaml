@@ -146,14 +146,6 @@ form:
             val: 1800
     labels:
       release: kube-prometheus-stack
-  capi:
-    clusterName: ""
-    dedicated: false
-    namespace: ""
-    nodes: 1
-    provider: ""
-    sku: ""
-    zones: []
 metadata:
   resource:
     group: kubedb.com
@@ -165,6 +157,41 @@ metadata:
     name: RELEASE-NAME
     namespace: default
 resources:
+  autoscalingKubedbComMSSQLServerAutoscaler_mssqlserver: # +doc-gen:break
+    apiVersion: autoscaling.kubedb.com/v1alpha1
+    kind: MSSQLServerAutoscaler
+    metadata:
+      name: mssqlserver
+      namespace: demo
+    spec:
+      compute:
+        mssqlserver:
+          maxAllowed:
+            cpu: 1
+            memory: 2Gi
+          minAllowed:
+            cpu: 400m
+            memory: 400Mi
+          podLifeTimeThreshold: 10m
+          resourceDiffPercentage: 20
+          trigger: "On"
+        nodeTopology:
+          name: standard-basv2-family
+      databaseRef:
+        name: repl
+      opsRequestOptions:
+        apply: IfReady
+        timeout: 10m
+  catalogAppscodeComMSSQLServerBinding_mssqlserver: # +doc-gen:break
+    apiVersion: catalog.appscode.com/v1alpha1
+    kind: MSSQLServerBinding
+    metadata:
+      name: mssqlserver
+      namespace: demo
+    spec:
+      sourceRef:
+        name: mssqlserver
+        namespace: demo
   certManagerIoIssuer_ca: # +doc-gen:break
     apiVersion: cert-manager.io/v1
     kind: Issuer
@@ -204,3 +231,44 @@ resources:
             - AgDB2
         mode: AvailabilityGroup
       version: 2022-cu12
+  monitoringCoreosComServiceMonitor_mssqlserver: # +doc-gen:break
+    apiVersion: monitoring.coreos.com/v1
+    kind: ServiceMonitor
+    metadata:
+      name: mssqlserver
+      namespace: demo
+    spec:
+      endpoints:
+        - honorLabels: true
+          interval: 30s
+          path: /metrics
+          port: metrics
+      namespaceSelector:
+        matchNames:
+          - demo
+      selector:
+        matchLabels:
+          app.kubernetes.io/instance: mssqlserver
+          app.kubernetes.io/name: mssqlservers.kubedb.com
+  secret_mssqlserver_auth: # +doc-gen:break
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: mssqlserver-auth
+      namespace: demo
+    stringData:
+      password: thisIs1StrongPassword
+      username: root
+    type: Opaque
+  secret_mssqlserver_config: # +doc-gen:break
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: mssqlserver-config
+      namespace: demo
+    stringData:
+      mssqlserver.cnf: |
+        [mysqld]
+        max_connections = 200
+        read_buffer_size = 1048576
+    type: Opaque

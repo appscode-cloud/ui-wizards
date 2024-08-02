@@ -38,7 +38,7 @@ steps:
       label:
         text: labels.database.version
       schema:
-        $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Postgres/properties/versions/default
+        $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Postgres/properties/versions/properties/default
       type: select
     - isArray: true
       keys:
@@ -74,6 +74,7 @@ steps:
       if: isToggleOn|deployment
       label:
         text: labels.deployment.name
+      onChange: setResourceLimit
       options:
       - description: labels.deployment.shared
         text: Shared
@@ -98,6 +99,14 @@ steps:
         $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/default
       type: radio
     - disableUnselect: true
+      fetch: getAdminOptions|clusterTier/placement
+      if: isToggleOn|clusterTier/placement
+      label:
+        text: labels.placement
+      schema:
+        $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/placement/properties/default
+      type: select
+    - disableUnselect: true
       fetch: getNodeTopology
       if: isToggleOn|clusterTier/nodeTopology
       label:
@@ -115,9 +124,9 @@ steps:
       - description: options.database.mode.Standalone.description
         text: options.database.mode.Standalone.label
         value: Standalone
-      - description: options.database.mode.Cluster.description
-        text: options.database.mode.Cluster.label
-        value: Cluster
+      - description: options.database.mode.ReplicaSet.description
+        text: options.database.mode.ReplicaSet.label
+        value: Replicaset
       schema:
         $ref: schema#/properties/spec/properties/mode
       type: radio
@@ -126,6 +135,12 @@ steps:
         text: labels.storage.size
       schema:
         $ref: schema#/properties/spec/properties/persistence/properties/size
+      type: input
+    - if: EqualToDatabaseMode|Replicaset
+      label:
+        text: labels.replicas
+      schema:
+        $ref: schema#/properties/spec/properties/replicas
       type: input
     - elements:
       - computed: setMachineToCustom
@@ -226,11 +241,13 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/admin/properties/webUI/properties/default
       type: switch
-    - if: isToggleOn|archiver
+    - computed: setMonitoring
+      if: isToggleOn|monitoring
       label:
-        text: Enable Archiver?
+        text: labels.enable_monitoring
+      onChange: updateAlertValue
       schema:
-        $ref: schema#/properties/spec/properties/admin/properties/archiver/properties/default
+        $ref: discriminator#/monitoring
       type: switch
     - elements:
       - customClass: mt-10
@@ -249,26 +266,19 @@ steps:
           $ref: schema#/properties/form/properties/alert/properties/enabled
         sortable: true
         type: select
+      if: showAlerts
       label:
         text: labels.alert.label
       schema:
         $ref: schema#/properties/form/properties/alert
       show_label: true
       type: single-step-form
-    - alias: reusable-monitor-option
-      chart:
-        name: uibytebuildersdev-component-monitoring-option
-        version: v0.4.21
-      dataContext:
-        agent:
-          $ref: schema#/properties/spec/properties/monitoring/properties/agent
-      functionCallbacks:
-        updateAgentValue:
-          $ref: functions#/updateAgentValue
-      moduleResolver: fetchJsons
+    - if: isToggleOn|archiver
+      label:
+        text: Enable Archiver?
       schema:
-        $ref: schema#/properties/spec/properties/monitoring/properties/serviceMonitor
-      type: reusable-element
+        $ref: schema#/properties/spec/properties/admin/properties/archiver/properties/default
+      type: switch
     - computed: isBackupCluster
       if: isToggleOn|backup
       label:

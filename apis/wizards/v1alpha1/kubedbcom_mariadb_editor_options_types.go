@@ -46,7 +46,7 @@ type KubedbcomMariadbEditorOptionsSpecSpec struct {
 	Annotations map[string]string `json:"annotations"`
 	// +optional
 	Labels map[string]string `json:"labels"`
-	Mode   MariaDBMode       `json:"mode"`
+	Mode   GeneralMode       `json:"mode"`
 	// +optional
 	Replicas       int            `json:"replicas,omitempty"`
 	Persistence    Persistence    `json:"persistence"`
@@ -57,12 +57,8 @@ type KubedbcomMariadbEditorOptionsSpecSpec struct {
 	Admin          AdminOptions   `json:"admin"`
 }
 
-// +kubebuilder:validation:Enum=Standalone;Cluster
-type MariaDBMode string
-
 type MariadbAlertsSpecForm struct {
 	Alert alerts.MariaDBAlert `json:"alert"`
-	CAPI  CAPIFormSpec        `json:"capi"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

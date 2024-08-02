@@ -42,7 +42,6 @@ type KubedbcomKafkaEditorOptionsSpec struct {
 }
 
 type KubedbcomKafkaEditorOptionsSpecSpec struct {
-	Version string `json:"version"`
 	// +optional
 	Annotations map[string]string `json:"annotations"`
 	// +optional
@@ -51,8 +50,7 @@ type KubedbcomKafkaEditorOptionsSpecSpec struct {
 	// +optional
 	Replicas *int `json:"replicas,omitempty"`
 	// +optional
-	Topology        *KafkaTopology `json:"topology,omitempty"`
-	DisableSecurity bool           `json:"disableSecurity"`
+	Topology *KafkaTopology `json:"topology,omitempty"`
 	// +optional
 	Persistence    Persistence    `json:"persistence"`
 	PodResources   PodResources   `json:"podResources"`
@@ -62,7 +60,7 @@ type KubedbcomKafkaEditorOptionsSpecSpec struct {
 	Admin          AdminOptions   `json:"admin"`
 }
 
-// +kubebuilder:validation:Enum=Combined;Dedicated
+// +kubebuilder:validation:Enum=Combined;Topology
 type KafkaMode string
 
 type KafkaTopology struct {
@@ -71,15 +69,13 @@ type KafkaTopology struct {
 }
 
 type KafkaNode struct {
-	Replicas int `json:"replicas"`
-	// +optional
-	Machine     string      `json:"machine"`
-	Persistence Persistence `json:"persistence"`
+	Replicas     int          `json:"replicas"`
+	PodResources PodResources `json:"podResources"`
+	Persistence  Persistence  `json:"persistence"`
 }
 
 type KafkaAlertsSpecForm struct {
 	Alert alerts.KafkaAlert `json:"alert"`
-	CAPI  CAPIFormSpec      `json:"capi"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

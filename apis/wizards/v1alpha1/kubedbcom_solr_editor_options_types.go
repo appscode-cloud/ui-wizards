@@ -46,18 +46,16 @@ type KubedbcomSolrEditorOptionsSpecSpec struct {
 	Annotations map[string]string `json:"annotations"`
 	// +optional
 	Labels         map[string]string `json:"labels"`
-	Version        string            `json:"version"`
 	Mode           SolrMode          `json:"mode"`
 	ReplicaSet     SolrReplicaSet    `json:"replicaSet"`
 	Topology       SolrTopology      `json:"topology"`
-	DeletionPolicy DeletionPolicy    `json:"deletionPolicy"`
-	StorageClass   StorageClass      `json:"storageClass"`
 	ZookeeperRef   ObjectReference   `json:"zookeeperRef"`
 	Persistence    Persistence       `json:"persistence"`
 	PodResources   PodResources      `json:"podResources"`
 	AuthSecret     AuthSecret        `json:"authSecret"`
-	Monitoring     Monitoring        `json:"monitoring"`
-	Backup         BackupToolSpec    `json:"backup"`
+	DeletionPolicy DeletionPolicy    `json:"deletionPolicy"`
+	Configuration  string            `json:"configuration"`
+	Admin          AdminOptions      `json:"admin"`
 }
 
 // +kubebuilder:validation:Enum=Standalone;Replicaset;Topology
@@ -81,7 +79,6 @@ type SolrTopology struct {
 
 type SolrAlertsSpecForm struct {
 	Alert alerts.SolrAlert `json:"alert"`
-	CAPI  CAPIFormSpec     `json:"capi"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

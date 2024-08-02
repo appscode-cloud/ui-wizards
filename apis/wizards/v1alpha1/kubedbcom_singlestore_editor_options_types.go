@@ -42,21 +42,19 @@ type KubedbcomSinglestoreEditorOptionsSpec struct {
 }
 
 type KubedbcomSinglestoreEditorOptionsSpecSpec struct {
-	Version string `json:"version"`
 	// +optional
 	Annotations map[string]string `json:"annotations"`
 	// +optional
 	Labels         map[string]string   `json:"labels"`
 	Mode           SinglestoreMode     `json:"mode"`
-	DeletionPolicy DeletionPolicy      `json:"deletionPolicy"`
-	StorageClass   StorageClass        `json:"storageClass"`
-	Persistence    Persistence         `json:"persistence"`
-	PodResources   PodResources        `json:"podResources"`
 	Topology       SinglestoreTopology `json:"topology"`
 	LicenseSecret  LicenseSecret       `json:"licenseSecret"`
+	Persistence    Persistence         `json:"persistence"`
+	PodResources   PodResources        `json:"podResources"`
 	AuthSecret     AuthSecret          `json:"authSecret"`
-	Monitoring     Monitoring          `json:"monitoring"`
-	Backup         BackupToolSpec      `json:"backup"`
+	DeletionPolicy DeletionPolicy      `json:"deletionPolicy"`
+	Configuration  string              `json:"configuration"`
+	Admin          AdminOptions        `json:"admin"`
 }
 
 // +kubebuilder:validation:Enum=Standalone;Topology
@@ -79,7 +77,6 @@ type LicenseSecret struct {
 
 type SinglestoreAlertsSpecForm struct {
 	Alert alerts.SinglestoreAlert `json:"alert"`
-	CAPI  CAPIFormSpec            `json:"capi"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

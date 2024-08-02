@@ -61,6 +61,8 @@ en:
     certificate: Certificate
     certificates: Certificates
     cluster_ip: Cluster IP
+    clusterIssuers: Cluster Issuer
+    clusterTier: Cluster Tier
     configOptions: Configuration Options
     configServer: Config Server
     config_map_key: ConfigMap Key
@@ -78,6 +80,10 @@ en:
       name: Database Name
       secret: Database Secret
       version: Database Version
+    deployment: 
+      name: Deployment Type
+      shared: For exploring databases when high-performance is not required.
+      dedicated: For production applications with sophisticated workload requirements.
     dns_name: DNS Name
     dns_names: DNS Names
     duration: Duration
@@ -127,6 +133,7 @@ en:
     node_port: Node Port
     node_selector: Node Selector
     node_selector_terms: Node Selector Terms
+    nodeTopology: Node Topology
     operator: Operator
     organization: Organization
     organizational_unit: Organizational Unit
@@ -134,6 +141,7 @@ en:
     organizations: Organizations
     password: Password (leave it blank to auto generate password)
     path: Path
+    placement: Placement Policy
     pod_annotations: Pod Annotations
     pod_spec: Pod Spec
     pod_template: Pod Template
@@ -301,12 +309,12 @@ en:
         text: Stash Backup
     database:
       mode:
-        Cluster:
-          description: Memcached ReplicaSet for high availability.
-          label: Cluster
         Standalone:
           description: Single node Memcached without high availability and sharding.
           label: Standalone
+        Replicaset:
+          description: Memcached ReplicaSet for high availability.
+          label: ReplicaSet
       secret:
         customSecret:
           label: Auto-generate auth secret

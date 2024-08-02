@@ -22,14 +22,14 @@ spec:
   # Labels to add to all the template objects
   labels: {}
 
-  replicas: 1
+  # Standalone, Replicaset
+  mode: Replicaset
+  replicas: 3
   syncUsers: false
   backend: ""
 
   deletionPolicy: WipeOut
 
-  persistence:
-    size: 10Gi
   podResources:
     machine: ""
 
@@ -52,12 +52,12 @@ spec:
       default: "GeneralPurpose"
       toggle: true
       nodeTopology:
-        available: [ "m4", "m7gd", "c5d", "c7g", "t4g", "r5a", "r6g", "a-family", "b-family", "d-family" ]
-        default: "c5d"
+        available: ["m4", "m7gd", "c5d", "c7g", "t4g", "r5a", "r6g", "a-family", "b-family", "d-family", "standard-bsv2-family", "standard-ddv4-family", "standard-dv2-family"]
+        default: "standard-bsv2-family"
         toggle: true
       placement:
-        available: [ "majority-on-spot", "minority-on-spot", "multizone", "ondemand-only", "one-on-ondemand", "spot-only", "zone-ap-southeast-1a", "zone-ap-southeast-1b", "zone-ap-southeast-1c" ]
-        default: "majority-on-spot"
+        available: ["majority-on-spot", "minority-on-spot", "multizone", "ondemand-only", "one-on-ondemand", "spot-only", "zone-ap-southeast-1a", "zone-ap-southeast-1b", "zone-ap-southeast-1c", "default"]
+        default: "default"
         toggle: true
 
     databases:
@@ -67,8 +67,8 @@ spec:
           default: "2.3.2-debian"
           toggle: true
     storageClasses:
-      available: [ "linode-block-storage", "linode-block-storage-retain", "standard", "gp2" ]
-      default: "gp2"
+      available: ["linode-block-storage", "default", "standard", "gp2"]
+      default: "default"
       toggle: true
 
     tls:
@@ -79,8 +79,8 @@ spec:
       default: "cluster-issuer"
       toggle: true
     webUI:
-      default: true
-      toggle: true
+      default: false
+      toggle: false
 
     monitoring:
       # Name of monitoring agent (one of "prometheus.io", "prometheus.io/operator", "prometheus.io/builtin")
@@ -100,11 +100,11 @@ spec:
       toggle: true
 
     archiver:
-      toggle: true
-      default: true
+      toggle: false
+      default: false
     backup:
       tool: ""
-      toggle: true
+      toggle: false
 
       kubestash:
         schedule: "0 */2 * * *"

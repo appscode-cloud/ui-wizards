@@ -46,31 +46,19 @@ type KubedbcomPgpoolEditorOptionsSpecSpec struct {
 	Annotations map[string]string `json:"annotations"`
 	// +optional
 	Labels         map[string]string `json:"labels"`
-	Version        string            `json:"version"`
-	Mode           PgpoolMode        `json:"mode"`
-	Cluster        PgpoolCluster     `json:"cluster"`
+	Mode           GeneralMode       `json:"mode"`
+	Replicas       int               `json:"replicas"`
 	PostgresRef    ObjectReference   `json:"postgresRef"`
 	SyncUsers      bool              `json:"syncUsers"`
-	DeletionPolicy DeletionPolicy    `json:"deletionPolicy"`
-	StorageClass   StorageClass      `json:"storageClass"`
-	Persistence    Persistence       `json:"persistence"`
 	PodResources   PodResources      `json:"podResources"`
 	AuthSecret     AuthSecret        `json:"authSecret"`
+	DeletionPolicy DeletionPolicy    `json:"deletionPolicy"`
 	Configuration  string            `json:"configuration"`
-	Monitoring     Monitoring        `json:"monitoring"`
-	Backup         BackupToolSpec    `json:"backup"`
-}
-
-// +kubebuilder:validation:Enum=Standalone;Cluster
-type PgpoolMode string
-
-type PgpoolCluster struct {
-	Replicas int `json:"replicas"`
+	Admin          AdminOptions      `json:"admin"`
 }
 
 type PgpoolAlertsSpecForm struct {
-	Alert alerts.PgpoolAlerts `json:"alert"`
-	CAPI  CAPIFormSpec        `json:"capi"`
+	Alert alerts.PgpoolAlert `json:"alert"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

@@ -62,16 +62,21 @@ en:
       taskName: Task Name
       title: Backup Configuration
     basic_info: Basic Information
+    brokers: Brokers
     certificate: Certificate
     certificates: Certificates
     cluster_ip: Cluster IP
+    clusterIssuers: Cluster Issuer
+    clusterTier: Cluster Tier
     configOptions: Configuration Options
+    configSecret: Config Secret
     configServer: Config Server
     config_map_key: ConfigMap Key
     config_map_name: ConfigMap Name
     configuration_files: Configuration Files
     configuration_source: Configuration Source
     controller_annotations: Controller Annotations
+    coordinators: Coordinators
     countries: Countries
     country: Country
     cpu: CPU
@@ -82,6 +87,11 @@ en:
       name: Database Name
       secret: Database Secret
       version: Database Version
+    deepStorage: Deep Storage
+    deployment: 
+      name: Deployment Type
+      shared: For exploring databases when high-performance is not required.
+      dedicated: For production applications with sophisticated workload requirements.
     dns_name: DNS Name
     dns_names: DNS Names
     duration: Duration
@@ -99,6 +109,7 @@ en:
     external_traffic_policy: External Traffic Policy
     fs_group: Fs Group
     health_check_node_port: Health Check Node Port
+    historicals: Historicals
     honor_labels: Honor labels
     image_pull_secrets: Image Pull Secrets
     initialization: Pre-populate your Druid from backup/another database
@@ -123,6 +134,12 @@ en:
     match_field: Match Field
     match_fields: Match Fields
     memory: Memory
+    metadataStorage:
+      external: Manage Metadata Storage Externally?
+      mysql: MySQL Metadata Storage
+      postgres: Postgres Metadata Storage
+      type: Metadata Storage Type
+    middleManagers: Middle Managers
     mongos: Mongos
     name: Name
     namespace: Namespace
@@ -130,6 +147,7 @@ en:
     node_port: Node Port
     node_selector: Node Selector
     node_selector_terms: Node Selector Terms
+    nodeTopology: Node Topology
     operator: Operator
     organization: Organization
     organizational_unit: Organizational Unit
@@ -137,6 +155,7 @@ en:
     organizations: Organizations
     password: Password (leave it blank to auto generate password)
     path: Path
+    placement: Placement Policy
     pod_annotations: Pod Annotations
     pod_spec: Pod Spec
     pod_template: Pod Template
@@ -250,6 +269,9 @@ en:
     values: Values
     waitForInitialRestore: Wait For Initial Restore?
     weight: Weight
+    zookeeperRef:
+      external: Manage Externally ZooKeeper Ref?
+      zookeeper: ZooKeeper Ref
     add_new_namespace: Add New Namespace
   options:
     agent:
@@ -307,15 +329,12 @@ en:
         text: Stash Backup
     database:
       mode:
-        Replicaset:
-          description: Druid ReplicaSet for high availability.
-          label: Replicated Cluster
-        Sharded:
-          description: Druid sharded cluster for high performance and high availability.
-          label: Sharded Cluster
         Standalone:
           description: Single node Druid without high availability and sharding.
           label: Standalone
+        Topology:
+          description: Druid Topology cluster for high performance and high availability.
+          label: Topology Cluster
       secret:
         customSecret:
           label: Auto-generate auth secret

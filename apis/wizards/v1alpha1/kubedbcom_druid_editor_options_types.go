@@ -18,7 +18,6 @@ package v1alpha1
 
 import (
 	alerts "go.appscode.dev/alerts/apis/alerts/v1alpha1"
-	core "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	api "x-helm.dev/apimachinery/apis/releases/v1alpha1"
 )
@@ -46,62 +45,58 @@ type KubedbcomDruidEditorOptionsSpecSpec struct {
 	// +optional
 	Annotations map[string]string `json:"annotations"`
 	// +optional
-	Labels          map[string]string         `json:"labels"`
-	Version         string                    `json:"version"`
-	Mode            DruidMode                 `json:"mode"`
-	ReplicaSet      DruidReplicaSet           `json:"replicaSet"`
-	ShardTopology   DruidShardTopology        `json:"shardTopology"`
-	ClusterAuthMode DruidClusterAuthMode      `json:"clusterAuthMode"`
-	SslMode         DruidSSLMode              `json:"sslMode"`
-	DeletionPolicy  DeletionPolicy            `json:"deletionPolicy"`
-	StorageClass    StorageClass              `json:"storageClass"`
-	Persistence     Persistence               `json:"persistence"`
-	Machine         MachineType               `json:"machine"`
-	Resources       core.ResourceRequirements `json:"resources"`
-	AuthSecret      AuthSecret                `json:"authSecret"`
-	Monitoring      Monitoring                `json:"monitoring"`
-	Backup          BackupToolSpec            `json:"backup"`
+	Labels          map[string]string    `json:"labels"`
+	Topology        DruidTopology        `json:"topology"`
+	DeepStorage     DruidDeepStorage     `json:"deepStorage"`
+	MetadataStorage DruidMetadataStorage `json:"metadataStorage"`
+	ZookeeperRef    DruidZooKeeperRef    `json:"zookeeperRef"`
+	AuthSecret      AuthSecret           `json:"authSecret"`
+	DeletionPolicy  DeletionPolicy       `json:"deletionPolicy"`
+	Configuration   string               `json:"configuration"`
+	Admin           AdminOptions         `json:"admin"`
 }
 
-// +kubebuilder:validation:Enum=Standalone;Replicaset;Sharded
-type DruidMode string
-
-// +kubebuilder:validation:Enum=keyFile;sendKeyFile;sendX509;x509
-type DruidClusterAuthMode string
-
-// +kubebuilder:validation:Enum=disabled;allowSSL;preferSSL;requireSSL
-type DruidSSLMode string
-
-type DruidReplicaSet struct {
-	Name     string `json:"name"`
-	Replicas int    `json:"replicas"`
+type DruidNode struct {
+	Replicas     int          `json:"replicas"`
+	PodResources PodResources `json:"podResources"`
 }
 
-type DruidShard struct {
-	Replicas    int         `json:"replicas"`
-	Shards      int         `json:"shards"`
+type DruidDataNode struct {
+	DruidNode   `json:",inline"`
 	Persistence Persistence `json:"persistence"`
 }
 
-type DruidConfigServer struct {
-	Replicas    int         `json:"replicas"`
-	Persistence Persistence `json:"persistence"`
+type DruidTopology struct {
+	Coordinators   *DruidNode     `json:"coordinators"`
+	MiddleManagers *DruidDataNode `json:"middleManagers"`
+	Historicals    *DruidDataNode `json:"historicals"`
+	Brokers        *DruidNode     `json:"brokers"`
 }
 
-type DruidMongos struct {
-	Replicas    int         `json:"replicas"`
-	Persistence Persistence `json:"persistence"`
+type DruidDeepStorage struct {
+	Type         DruidDeepStorageType `json:"type"`
+	ConfigSecret string               `json:"configSecret"`
 }
 
-type DruidShardTopology struct {
-	Shard        DruidShard        `json:"shard"`
-	ConfigServer DruidConfigServer `json:"configServer"`
-	Mongos       DruidMongos       `json:"mongos"`
+// +kubebuilder:validation:Enum=s3;google;azure;hdfs
+type DruidDeepStorageType string
+
+// +kubebuilder:validation:Enum=MySQL;Postgres
+type DruidMetadataStorageType string
+
+type DruidMetadataStorage struct {
+	Type              DruidMetadataStorageType `json:"type"`
+	ObjectReference   `json:",inline"`
+	ExternallyManaged bool `json:"externallyManaged"`
+}
+
+type DruidZooKeeperRef struct {
+	ObjectReference   `json:",inline"`
+	ExternallyManaged bool `json:"externallyManaged"`
 }
 
 type DruidAlertsSpecForm struct {
 	Alert alerts.DruidAlert `json:"alert"`
-	CAPI  CAPIFormSpec      `json:"capi"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

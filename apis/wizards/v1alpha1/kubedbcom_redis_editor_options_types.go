@@ -42,7 +42,6 @@ type KubedbcomRedisEditorOptionsSpec struct {
 }
 
 type KubedbcomRedisEditorOptionsSpecSpec struct {
-	Version string `json:"version"`
 	// +optional
 	Annotations map[string]string `json:"annotations"`
 	// +optional
@@ -76,7 +75,6 @@ type RedisMode string
 
 type RedisAlertsSpecForm struct {
 	Alert alerts.RedisAlert `json:"alert"`
-	CAPI  CAPIFormSpec      `json:"capi"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

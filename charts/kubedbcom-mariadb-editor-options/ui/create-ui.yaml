@@ -37,6 +37,7 @@ steps:
       if: isToggleOn|deployment
       label:
         text: labels.deployment.name
+      onChange: setResourceLimit
       options:
       - description: labels.deployment.shared
         text: Shared
@@ -85,7 +86,7 @@ steps:
       label:
         text: labels.database.version
       schema:
-        $ref: schema#/properties/spec/properties/admin/databases/properties/MariaDB/properties/versions/properties/default
+        $ref: schema#/properties/spec/properties/admin/properties/databases/properties/MariaDB/properties/versions/properties/default
       type: select
     - isArray: true
       keys:
@@ -124,9 +125,9 @@ steps:
       - description: options.database.mode.Standalone.description
         text: options.database.mode.Standalone.label
         value: Standalone
-      - description: options.database.mode.Cluster.description
-        text: options.database.mode.Cluster.label
-        value: Cluster
+      - description: options.database.mode.Replicaset.description
+        text: options.database.mode.Replicaset.label
+        value: Replicaset
       schema:
         $ref: schema#/properties/spec/properties/mode
       type: radio
@@ -134,6 +135,12 @@ steps:
         text: labels.storage.size
       schema:
         $ref: schema#/properties/spec/properties/persistence/properties/size
+      type: input
+    - if: EqualToDatabaseMode|Replicaset
+      label:
+        text: labels.replicas
+      schema:
+        $ref: schema#/properties/spec/properties/replicas
       type: input
     - elements:
       - computed: setMachineToCustom
@@ -213,13 +220,6 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/configuration
       type: editor
-    - computed: setLimitsCpuOrMem|memory
-      disabled: disableLimit
-      label:
-        text: labels.memory
-      schema:
-        $ref: schema#/properties/spec/properties/resources/properties/limits/properties/memory
-      type: input
     - if: isToggleOn|tls
       label:
         text: Enable TLS?

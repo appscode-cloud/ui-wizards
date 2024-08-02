@@ -24,7 +24,7 @@ spec:
   backend:
     name: {{ .Values.spec.backend }}
   syncUsers: {{ .Values.spec.syncUsers }}
-  replicas: {{ .Values.spec.replicas }}
+  replicas: {{ (eq .Values.spec.mode "Replicaset") | ternary .Values.spec.replicas 1 }}
   podTemplate:
     spec:
       containers:
@@ -83,8 +83,6 @@ spec:
     prometheus:
     {{- with .Values.spec.admin.monitoring.exporter }}
       exporter:
-        args:
-          - --compatible-mode
         resources:
           {{- toYaml .resources | nindent 10 }}
     {{- end }}

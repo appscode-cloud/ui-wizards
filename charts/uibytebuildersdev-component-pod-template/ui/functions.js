@@ -1,35 +1,35 @@
 async function fetchJsons({ axios, itemCtx }) {
-  let ui = {};
-  let language = {};
-  let functions = {};
-  const { name, sourceRef, version, packageviewUrlPrefix } = itemCtx.chart;
-  
+  let ui = {}
+  let language = {}
+  let functions = {}
+  const { name, sourceRef, version, packageviewUrlPrefix } = itemCtx.chart
+
   try {
     ui = await axios.get(
-      `${packageviewUrlPrefix}/create-ui.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`
-    );
+      `${packageviewUrlPrefix}/create-ui.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`,
+    )
     language = await axios.get(
-      `${packageviewUrlPrefix}/language.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`
-    );
+      `${packageviewUrlPrefix}/language.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`,
+    )
     const functionString = await axios.get(
-      `${packageviewUrlPrefix}/functions.js?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}`
-    );
+      `${packageviewUrlPrefix}/functions.js?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}`,
+    )
     // declare evaluate the functionString to get the functions Object
-    const evalFunc = new Function(functionString.data || "");
-    functions = evalFunc();
+    const evalFunc = new Function(functionString.data || '')
+    functions = evalFunc()
   } catch (e) {
-    console.log(e);
+    console.log(e)
   }
 
   return {
     ui: ui.data || {},
     language: language.data || {},
     functions,
-  };
+  }
 }
 
 function getOperatorsList() {
-  return ["In", "NotIn", "Exists", "DoesNotExist", "Gt", "Lt"];
+  return ['In', 'NotIn', 'Exists', 'DoesNotExist', 'Gt', 'Lt']
 }
 
 async function getImagePullSecrets({
@@ -39,75 +39,71 @@ async function getImagePullSecrets({
   storeGet,
   reusableElementCtx,
 }) {
-  const namespace = getValue(reusableElementCtx, "/dataContext/namespace");
-  watchDependency("data#/namespace");
+  const namespace = getValue(reusableElementCtx, '/dataContext/namespace')
+  watchDependency('data#/namespace')
 
   let resources = await getNamespacedResourceList(axios, storeGet, {
     namespace,
-    group: "core",
-    version: "v1",
-    resource: "secrets",
-  });
+    group: 'core',
+    version: 'v1',
+    resource: 'secrets',
+  })
 
   resources = resources.filter((item) => {
-    const validType = ["kubernetes.io/dockerconfigjson"];
-    return validType.includes(item.type);
-  });
+    const validType = ['kubernetes.io/dockerconfigjson']
+    return validType.includes(item.type)
+  })
 
   return resources.map((resource) => {
-    const name = (resource.metadata && resource.metadata.name) || "";
+    const name = (resource.metadata && resource.metadata.name) || ''
     return {
       text: name,
       value: { name: name },
-    };
-  });
+    }
+  })
 }
 
-async function getNamespacedResourceList(
-  axios,
-  storeGet,
-  { namespace, group, version, resource }
-) {
-  const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/route/params/cluster");
+async function getNamespacedResourceList(axios, storeGet, { namespace, group, version, resource }) {
+  const owner = storeGet('/route/params/user')
+  const cluster = storeGet('/route/params/cluster')
 
-  const url = `/clusters/${owner}/${cluster}/proxy/${group}/${version}/namespaces/${namespace}/${resource}`;
+  const url = `/clusters/${owner}/${cluster}/proxy/${group}/${version}/namespaces/${namespace}/${resource}`
 
-  let ans = [];
+  let ans = []
   try {
     const resp = await axios.get(url, {
       params: {
         filter: { items: { metadata: { name: null }, type: null } },
       },
-    });
+    })
 
-    const items = (resp && resp.data && resp.data.items) || [];
-    ans = items;
+    const items = (resp && resp.data && resp.data.items) || []
+    ans = items
   } catch (e) {
-    console.log(e);
+    console.log(e)
   }
 
-  return ans;
+  return ans
 }
 
 function showResources({ reusableElementCtx, getValue, watchDependency }) {
-  watchDependency("data#/topology");
-  const topology = getValue(reusableElementCtx, "/dataContext/topology");
-  
-  return !topology;
+  watchDependency('data#/topology')
+  const topology = getValue(reusableElementCtx, '/dataContext/topology')
+
+  return !topology
 }
 
 function disableSpec({ reusableElementCtx }) {
-  const { functionCallbacks } = reusableElementCtx || {};
-  const { isEditWizard } = functionCallbacks || {};
+  const { functionCallbacks } = reusableElementCtx || {}
+  const { isEditWizard } = functionCallbacks || {}
 
-  return isEditWizard && !!isEditWizard();
+  return isEditWizard && !!isEditWizard()
 }
 
 return {
-	fetchJsons,
-	getOperatorsList,
-	getImagePullSecrets,
+  fetchJsons,
+  getOperatorsList,
+  getImagePullSecrets,
   getNamespacedResourceList,
   showResources,
   disableSpec,

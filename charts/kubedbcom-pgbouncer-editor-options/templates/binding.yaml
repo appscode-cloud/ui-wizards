@@ -1,0 +1,11 @@
+{{- if .Values.spec.admin.webUI.default }}
+apiVersion: catalog.appscode.com/v1alpha1
+kind: PgBouncerBinding
+metadata:
+  name: {{ include "kubedbcom-pgbouncer-editor-options.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  sourceRef:
+    name: {{ include "kubedbcom-pgbouncer-editor-options.fullname" . }}
+    namespace: {{ .Release.Namespace }}
+{{- end }}

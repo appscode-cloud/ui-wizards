@@ -39,6 +39,9 @@ type StorageClass struct {
 	Name string `json:"name"`
 }
 
+// +kubebuilder:validation:Enum=Standalone;Replicaset
+type GeneralMode string
+
 type AuthSecret struct {
 	// +optional
 	Name string `json:"name"`

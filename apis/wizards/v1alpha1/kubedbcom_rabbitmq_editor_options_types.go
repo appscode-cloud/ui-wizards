@@ -46,25 +46,19 @@ type KubedbcomRabbitMQEditorOptionsSpecSpec struct {
 	Annotations map[string]string `json:"annotations"`
 	// +optional
 	Labels map[string]string `json:"labels"`
+	Mode   GeneralMode       `json:"mode"`
 	// +optional
-	Replicas int `json:"replicas,omitempty"`
-	// +optional
-	Version        string         `json:"version"`
-	Mode           RabbitMQMode   `json:"mode"`
-	DeletionPolicy DeletionPolicy `json:"deletionPolicy"`
-	StorageClass   StorageClass   `json:"storageClass"`
+	Replicas       int            `json:"replicas,omitempty"`
 	Persistence    Persistence    `json:"persistence"`
 	PodResources   PodResources   `json:"podResources"`
 	AuthSecret     AuthSecret     `json:"authSecret"`
-	Monitoring     Monitoring     `json:"monitoring"`
+	DeletionPolicy DeletionPolicy `json:"deletionPolicy"`
+	Configuration  string         `json:"configuration"`
+	Admin          AdminOptions   `json:"admin"`
 }
-
-// +kubebuilder:validation:Enum=Standalone;Cluster
-type RabbitMQMode string
 
 type RabbitMQAlertsSpecForm struct {
 	Alert alerts.RabbitmqAlert `json:"alert"`
-	CAPI  CAPIFormSpec         `json:"capi"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

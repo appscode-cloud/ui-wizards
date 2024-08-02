@@ -47,10 +47,10 @@ type KubedbcomProxysqlEditorOptionsSpecSpec struct {
 	Annotations map[string]string `json:"annotations"`
 	// +optional
 	Labels         map[string]string `json:"labels"`
+	Mode           GeneralMode       `json:"mode"`
 	Replicas       int               `json:"replicas"`
 	SyncUsers      bool              `json:"syncUsers"`
 	Backend        string            `json:"backend"`
-	Persistence    Persistence       `json:"persistence"`
 	PodResources   PodResources      `json:"podResources"`
 	AuthSecret     AuthSecret        `json:"authSecret"`
 	DeletionPolicy DeletionPolicy    `json:"deletionPolicy"`
@@ -65,7 +65,6 @@ type KubedbcomProxysqlEditorMonitoring struct {
 
 type ProxysqlAlertsSpecForm struct {
 	Alert alerts.ProxySQLAlert `json:"alert"`
-	CAPI  CAPIFormSpec         `json:"capi"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

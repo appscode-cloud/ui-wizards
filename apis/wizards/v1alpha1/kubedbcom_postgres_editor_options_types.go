@@ -46,8 +46,8 @@ type KubedbcomPostgresEditorOptionsSpecSpec struct {
 	Annotations map[string]string `json:"annotations"`
 	// +optional
 	Labels         map[string]string `json:"labels"`
-	Version        string            `json:"version"`
-	Mode           PostgresMode      `json:"mode"`
+	Mode           GeneralMode       `json:"mode"`
+	Replicas       int               `json:"replicas"`
 	DeletionPolicy DeletionPolicy    `json:"deletionPolicy"`
 	Persistence    Persistence       `json:"persistence"`
 	PodResources   PodResources      `json:"podResources"`
@@ -56,12 +56,8 @@ type KubedbcomPostgresEditorOptionsSpecSpec struct {
 	Admin          AdminOptions      `json:"admin"`
 }
 
-// +kubebuilder:validation:Enum=Standalone;Cluster
-type PostgresMode string
-
 type PostgresAlertsSpecForm struct {
 	Alert alerts.PostgresAlert `json:"alert"`
-	CAPI  CAPIFormSpec         `json:"capi"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

@@ -1,28 +1,25 @@
 // *************************      common functions ********************************************
 // eslint-disable-next-line no-empty-pattern
-async function fetchJsons(
-  { axios, itemCtx, setDiscriminatorValue },
-  discriminatorPath
-) {
-  let ui = {};
-  let language = {};
-  let functions = {};
-  const { name, sourceRef, version, packageviewUrlPrefix } = itemCtx.chart;
+async function fetchJsons({ axios, itemCtx, setDiscriminatorValue }, discriminatorPath) {
+  let ui = {}
+  let language = {}
+  let functions = {}
+  const { name, sourceRef, version, packageviewUrlPrefix } = itemCtx.chart
   try {
     ui = await axios.get(
-      `${packageviewUrlPrefix}/create-ui.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`
-    );
+      `${packageviewUrlPrefix}/create-ui.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`,
+    )
     language = await axios.get(
-      `${packageviewUrlPrefix}/language.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`
-    );
+      `${packageviewUrlPrefix}/language.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`,
+    )
     const functionString = await axios.get(
-      `${packageviewUrlPrefix}/functions.js?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}`
-    );
+      `${packageviewUrlPrefix}/functions.js?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}`,
+    )
     // declare evaluate the functionString to get the functions Object
-    const evalFunc = new Function(functionString.data || "");
-    functions = evalFunc();
+    const evalFunc = new Function(functionString.data || '')
+    functions = evalFunc()
   } catch (e) {
-    console.log(e);
+    console.log(e)
   }
 
   if (discriminatorPath) {
@@ -30,221 +27,205 @@ async function fetchJsons(
       ui: ui.data || {},
       language: language.data || {},
       functions,
-    });
+    })
   }
 
   return {
     ui: ui.data || {},
     language: language.data || {},
     functions,
-  };
+  }
 }
 
 function disableLableChecker({ itemCtx }) {
-  const { key } = itemCtx;
-  if (key.startsWith("app.kubernetes.io") || key.includes("helm")) return true;
-  else return false;
+  const { key } = itemCtx
+  if (key.startsWith('app.kubernetes.io') || key.includes('helm')) return true
+  else return false
 }
 
-function isEqualToModelPathValue(
-  { model, getValue, watchDependency },
-  value,
-  modelPath
-) {
-  const modelPathValue = getValue(model, modelPath);
-  watchDependency("model#" + modelPath);
-  return modelPathValue === value;
+function isEqualToModelPathValue({ model, getValue, watchDependency }, value, modelPath) {
+  const modelPathValue = getValue(model, modelPath)
+  watchDependency('model#' + modelPath)
+  return modelPathValue === value
 }
 
 async function getResources({ axios, storeGet }, group, version, resource) {
-  const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/route/params/cluster");
+  const owner = storeGet('/route/params/user')
+  const cluster = storeGet('/route/params/cluster')
 
   try {
     const resp = await axios.get(
       `/clusters/${owner}/${cluster}/proxy/${group}/${version}/${resource}`,
       {
         params: { filter: { items: { metadata: { name: null } } } },
-      }
-    );
+      },
+    )
 
-    const resources = (resp && resp.data && resp.data.items) || [];
+    const resources = (resp && resp.data && resp.data.items) || []
 
     resources.map((item) => {
-      const name = (item.metadata && item.metadata.name) || "";
-      item.text = name;
-      item.value = name;
-      return true;
-    });
-    return resources;
+      const name = (item.metadata && item.metadata.name) || ''
+      item.text = name
+      item.value = name
+      return true
+    })
+    return resources
   } catch (e) {
-    console.log(e);
-    return [];
+    console.log(e)
+    return []
   }
 }
 
 function isEqualToDiscriminatorPath(
   { discriminator, getValue, watchDependency },
   value,
-  discriminatorPath
+  discriminatorPath,
 ) {
-  watchDependency("discriminator#" + discriminatorPath);
-  const discriminatorValue = getValue(discriminator, discriminatorPath);
-  return discriminatorValue === value;
+  watchDependency('discriminator#' + discriminatorPath)
+  const discriminatorValue = getValue(discriminator, discriminatorPath)
+  return discriminatorValue === value
 }
 
 function setValueFromModel({ getValue, model }, path) {
-  return getValue(model, path);
+  return getValue(model, path)
 }
 
-async function getNamespacedResourceList(
-  axios,
-  storeGet,
-  { namespace, group, version, resource }
-) {
-  const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/route/params/cluster");
+async function getNamespacedResourceList(axios, storeGet, { namespace, group, version, resource }) {
+  const owner = storeGet('/route/params/user')
+  const cluster = storeGet('/route/params/cluster')
 
-  const url = `/clusters/${owner}/${cluster}/proxy/${group}/${version}/namespaces/${namespace}/${resource}`;
+  const url = `/clusters/${owner}/${cluster}/proxy/${group}/${version}/namespaces/${namespace}/${resource}`
 
-  let ans = [];
+  let ans = []
   try {
     const resp = await axios.get(url, {
       params: {
         filter: { items: { metadata: { name: null }, type: null } },
       },
-    });
+    })
 
-    const items = (resp && resp.data && resp.data.items) || [];
-    ans = items;
+    const items = (resp && resp.data && resp.data.items) || []
+    ans = items
   } catch (e) {
-    console.log(e);
+    console.log(e)
   }
 
-  return ans;
+  return ans
 }
 
 async function getResourceList(axios, storeGet, { group, version, resource }) {
-  const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/route/params/cluster");
+  const owner = storeGet('/route/params/user')
+  const cluster = storeGet('/route/params/cluster')
 
-  const url = `/clusters/${owner}/${cluster}/proxy/${group}/${version}/${resource}`;
+  const url = `/clusters/${owner}/${cluster}/proxy/${group}/${version}/${resource}`
 
-  let ans = [];
+  let ans = []
   try {
     const resp = await axios.get(url, {
       params: {
         filter: { items: { metadata: { name: null }, type: null } },
       },
-    });
+    })
 
-    const items = (resp && resp.data && resp.data.items) || [];
-    ans = items;
+    const items = (resp && resp.data && resp.data.items) || []
+    ans = items
   } catch (e) {
-    console.log(e);
+    console.log(e)
   }
 
-  return ans;
+  return ans
 }
 
 async function resourceNames(
   { axios, getValue, model, watchDependency, storeGet },
   group,
   version,
-  resource
+  resource,
 ) {
-  const namespace = getValue(model, "/metadata/release/namespace");
-  watchDependency("model#/metadata/release/namespace");
+  const namespace = getValue(model, '/metadata/release/namespace')
+  watchDependency('model#/metadata/release/namespace')
 
   let resources = await getNamespacedResourceList(axios, storeGet, {
     namespace,
     group,
     version,
     resource,
-  });
+  })
 
-  if (resource === "secrets") {
+  if (resource === 'secrets') {
     resources = resources.filter((item) => {
-      const validType = ["kubernetes.io/service-account-token", "Opaque"];
-      return validType.includes(item.type);
-    });
+      const validType = ['kubernetes.io/service-account-token', 'Opaque']
+      return validType.includes(item.type)
+    })
   }
 
   return resources.map((resource) => {
-    const name = (resource.metadata && resource.metadata.name) || "";
+    const name = (resource.metadata && resource.metadata.name) || ''
     return {
       text: name,
       value: name,
-    };
-  });
+    }
+  })
 }
 
-async function unNamespacedResourceNames(
-  { axios, storeGet },
-  group,
-  version,
-  resource
-) {
+async function unNamespacedResourceNames({ axios, storeGet }, group, version, resource) {
   let resources = await getResourceList(axios, storeGet, {
     group,
     version,
     resource,
-  });
+  })
 
-  if (resource === "secrets") {
+  if (resource === 'secrets') {
     resources = resources.filter((item) => {
-      const validType = ["kubernetes.io/service-account-token", "Opaque"];
-      return validType.includes(item.type);
-    });
+      const validType = ['kubernetes.io/service-account-token', 'Opaque']
+      return validType.includes(item.type)
+    })
   }
 
   return resources.map((resource) => {
-    const name = (resource.metadata && resource.metadata.name) || "";
+    const name = (resource.metadata && resource.metadata.name) || ''
     return {
       text: name,
       value: name,
-    };
-  });
+    }
+  })
 }
 
 function returnTrue() {
-  return true;
+  return true
 }
 
 function returnStringYes() {
-  return "yes";
+  return 'yes'
 }
 
 function isDedicatedModeSelected({ model, getValue, watchDependency }) {
-  watchDependency("model#/resources/kubedbComKafka/spec/topology");
-  isDedicatedSelected = getValue(
-    model,
-    "/resources/kubedbComKafka/spec/topology"
-  );
+  watchDependency('model#/resources/kubedbComKafka/spec/topology')
+  isDedicatedSelected = getValue(model, '/resources/kubedbComKafka/spec/topology')
 
-  return !!isDedicatedSelected;
+  return !!isDedicatedSelected
 }
 
 function isCombinedModeSelected({ model, getValue, watchDependency }) {
-  return !isDedicatedSelected({ model, getValue, watchDependency });
+  return !isDedicatedSelected({ model, getValue, watchDependency })
 }
 
 function isDiscriminatorEqualTo(
   { discriminator, getValue, watchDependency },
   discriminatorPath,
-  value
+  value,
 ) {
-  watchDependency("discriminator#" + discriminatorPath);
-  const pathValue = getValue(discriminator, discriminatorPath);
+  watchDependency('discriminator#' + discriminatorPath)
+  const pathValue = getValue(discriminator, discriminatorPath)
 
-  return value === pathValue;
+  return value === pathValue
 }
 
 // ************************* Basic Info **********************************************
 
 async function getKafkaVersions({ axios, storeGet }, group, version, resource) {
-  const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/route/params/cluster");
+  const owner = storeGet('/route/params/user')
+  const cluster = storeGet('/route/params/cluster')
 
   const queryParams = {
     filter: {
@@ -253,101 +234,77 @@ async function getKafkaVersions({ axios, storeGet }, group, version, resource) {
         spec: { version: null, deprecated: null, authPlugin: null },
       },
     },
-  };
+  }
 
   const resp = await axios.get(
     `/clusters/${owner}/${cluster}/proxy/${group}/${version}/${resource}`,
     {
       params: queryParams,
-    }
-  );
+    },
+  )
 
-  const resources = (resp && resp.data && resp.data.items) || [];
+  const resources = (resp && resp.data && resp.data.items) || []
 
   // keep only non deprecated versions
-  const filteredKafkaVersions = resources.filter(
-    (item) => item.spec && !item.spec.deprecated
-  );
+  const filteredKafkaVersions = resources.filter((item) => item.spec && !item.spec.deprecated)
 
   filteredKafkaVersions.map((item) => {
-    const name = (item.metadata && item.metadata.name) || "";
-    const specVersion = (item.spec && item.spec.version) || "";
-    item.text = `${name} (${specVersion})`;
-    item.value = name;
-    return true;
-  });
-  return filteredKafkaVersions;
+    const name = (item.metadata && item.metadata.name) || ''
+    const specVersion = (item.spec && item.spec.version) || ''
+    item.text = `${name} (${specVersion})`
+    item.value = name
+    return true
+  })
+  return filteredKafkaVersions
 }
 
 function isSecurityEnabled({ model, getValue, watchDependency }) {
-  watchDependency("model#/resources/kubedbComKafka/spec/disableSecurity");
-  const value = getValue(
-    model,
-    "/resources/kubedbComKafka/spec/disableSecurity"
-  );
-  return !value;
+  watchDependency('model#/resources/kubedbComKafka/spec/disableSecurity')
+  const value = getValue(model, '/resources/kubedbComKafka/spec/disableSecurity')
+  return !value
 }
 
 function onDisableSecurityChange({ model, getValue, commit }) {
-  const disableSecurity = getValue(
-    model,
-    "/resources/kubedbComKafka/spec/disableSecurity"
-  );
+  const disableSecurity = getValue(model, '/resources/kubedbComKafka/spec/disableSecurity')
 
   if (disableSecurity) {
-    commit("wizard/model$delete", "/resources/kubedbComKafka/spec/authSecret");
-    commit("wizard/model$delete", "/resources/secret_admin_cred");
-    commit("wizard/model$delete", "/resources/kubedbComKafka/spec/tls");
+    commit('wizard/model$delete', '/resources/kubedbComKafka/spec/authSecret')
+    commit('wizard/model$delete', '/resources/secret_admin_cred')
+    commit('wizard/model$delete', '/resources/kubedbComKafka/spec/tls')
   }
 }
 
 function onEnableSSLChange({ model, getValue, commit }) {
-  const enabelSSL = getValue(model, "/resources/kubedbComKafka/spec/enableSSL");
+  const enabelSSL = getValue(model, '/resources/kubedbComKafka/spec/enableSSL')
 
   if (enabelSSL === false) {
-    removeCertificatesOfAliases({ model, getValue, commit }, [
-      "server",
-      "client",
-    ]);
+    removeCertificatesOfAliases({ model, getValue, commit }, ['server', 'client'])
   }
 }
 
-function removeCertificatesOfAliases(
-  { model, getValue, commit },
-  aliasesToRemove
-) {
-  const certificates =
-    getValue(model, "/resources/kubedbComKafka/spec/tls/certificates") || [];
-  const updatedCertificates = certificates.filter(
-    (item) => !aliasesToRemove.includes(item.alias)
-  );
-  commit("wizard/model$update", {
-    path: "/resources/kubedbComKafka/spec/tls/certificates",
+function removeCertificatesOfAliases({ model, getValue, commit }, aliasesToRemove) {
+  const certificates = getValue(model, '/resources/kubedbComKafka/spec/tls/certificates') || []
+  const updatedCertificates = certificates.filter((item) => !aliasesToRemove.includes(item.alias))
+  commit('wizard/model$update', {
+    path: '/resources/kubedbComKafka/spec/tls/certificates',
     value: updatedCertificates,
     force: true,
-  });
+  })
 }
 
 /*************************************  Database Secret Section ********************************************/
 
 function getCreateAuthSecret({ model, getValue }) {
-  const authSecret = getValue(
-    model,
-    "/resources/kubedbComKafka/spec/authSecret"
-  );
+  const authSecret = getValue(model, '/resources/kubedbComKafka/spec/authSecret')
 
-  return !authSecret;
+  return !authSecret
 }
 
-function showExistingSecretSection({
-  getValue,
-  watchDependency,
-  discriminator,
-}) {
-  watchDependency("discriminator#/createAuthSecret");
+function showExistingSecretSection({ getValue, watchDependency, discriminator }) {
+  watchDependency('discriminator#/createAuthSecret')
 
-  const hasAuthSecretName = getValue(discriminator, "/createAuthSecret");
-  return !hasAuthSecretName;
+  const hasAuthSecretName = getValue(discriminator, '/createAuthSecret')
+  return !hasAuthSecretName
 }
 
 function showPasswordSection({ getValue, watchDependency, discriminator }) {
@@ -355,66 +312,57 @@ function showPasswordSection({ getValue, watchDependency, discriminator }) {
     getValue,
     watchDependency,
     discriminator,
-  });
+  })
 }
 
 function setAuthSecretPassword({ model, getValue }) {
-  const encodedPassword = getValue(
-    model,
-    "/resources/secret_admin_cred/data/password"
-  );
-  return encodedPassword ? decodePassword({}, encodedPassword) : "";
+  const encodedPassword = getValue(model, '/resources/secret_admin_cred/data/password')
+  return encodedPassword ? decodePassword({}, encodedPassword) : ''
 }
 
 function onAuthSecretPasswordChange({ getValue, discriminator, commit }) {
-  const stringPassword = getValue(discriminator, "/password");
+  const stringPassword = getValue(discriminator, '/password')
 
   if (stringPassword) {
-    commit("wizard/model$update", {
-      path: "/resources/secret_admin_cred/data/password",
+    commit('wizard/model$update', {
+      path: '/resources/secret_admin_cred/data/password',
       value: encodePassword({}, stringPassword),
       force: true,
-    });
-    commit("wizard/model$update", {
-      path: "/resources/secret_admin_cred/data/username",
-      value: encodePassword({}, "admin"),
+    })
+    commit('wizard/model$update', {
+      path: '/resources/secret_admin_cred/data/username',
+      value: encodePassword({}, 'admin'),
       force: true,
-    });
+    })
   } else {
-    commit("wizard/model$delete", "/resources/secret_admin_cred");
+    commit('wizard/model$delete', '/resources/secret_admin_cred')
   }
 }
 
 // eslint-disable-next-line no-empty-pattern
 function encodePassword({}, value) {
-  return btoa(value);
+  return btoa(value)
 }
 
 // eslint-disable-next-line no-empty-pattern
 function decodePassword({}, value) {
-  return atob(value);
+  return atob(value)
 }
 
 function onCreateAuthSecretChange({ discriminator, getValue, commit }) {
-  const createAuthSecret = getValue(discriminator, "/createAuthSecret");
+  const createAuthSecret = getValue(discriminator, '/createAuthSecret')
   if (createAuthSecret) {
-    commit("wizard/model$delete", "/resources/kubedbComKafka/spec/authSecret");
+    commit('wizard/model$delete', '/resources/kubedbComKafka/spec/authSecret')
   } else if (createAuthSecret === false) {
-    commit("wizard/model$delete", "/resources/secret_admin_cred");
+    commit('wizard/model$delete', '/resources/secret_admin_cred')
   }
 }
 
-async function getSecrets({
-  storeGet,
-  axios,
-  model,
-  getValue,
-  watchDependency,
-}) {
-  const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/route/params/cluster");
-  const namespace = getValue(model, "/metadata/release/namespace");
-  watchDependency("model#/metadata/release/namespace");
+async function getSecrets({ storeGet, axios, model, getValue, watchDependency }) {
+  const owner = storeGet('/route/params/user')
+  const cluster = storeGet('/route/params/cluster')
+  const namespace = getValue(model, '/metadata/release/namespace')
+  watchDependency('model#/metadata/release/namespace')
 
   try {
     const resp = await axios.get(
@@ -423,64 +371,60 @@ async function getSecrets({
         params: {
           filter: { items: { metadata: { name: null }, type: null } },
         },
-      }
-    );
+      },
+    )
 
-    const secrets = (resp && resp.data && resp.data.items) || [];
+    const secrets = (resp && resp.data && resp.data.items) || []
 
     const filteredSecrets = secrets.filter((item) => {
-      const validType = ["kubernetes.io/service-account-token", "Opaque"];
-      return validType.includes(item.type);
-    });
+      const validType = ['kubernetes.io/service-account-token', 'Opaque']
+      return validType.includes(item.type)
+    })
 
     filteredSecrets.map((item) => {
-      const name = (item.metadata && item.metadata.name) || "";
-      item.text = name;
-      item.value = name;
-      return true;
-    });
-    return filteredSecrets;
+      const name = (item.metadata && item.metadata.name) || ''
+      item.text = name
+      item.value = name
+      return true
+    })
+    return filteredSecrets
   } catch (e) {
-    console.log(e);
-    return [];
+    console.log(e)
+    return []
   }
 }
 
 function showSecretSection({ model, getValue, watchDependency, storeGet }) {
-  const steps = storeGet("/wizard/configureOptions");
+  const steps = storeGet('/wizard/configureOptions')
 
   return (
-    !steps.includes("internal-users") &&
-    isSecurityEnabled({ model, getValue, watchDependency })
-  );
+    !steps.includes('internal-users') && isSecurityEnabled({ model, getValue, watchDependency })
+  )
 }
 
 // ********************* Database Mode ***********************
 function isNotCombinedMode({ discriminator, getValue, watchDependency }) {
-  watchDependency("discriminator#/activeDatabaseMode");
-  const mode = getValue(discriminator, "/activeDatabaseMode");
-  return mode !== "Combined";
+  watchDependency('discriminator#/activeDatabaseMode')
+  const mode = getValue(discriminator, '/activeDatabaseMode')
+  return mode !== 'Combined'
 }
 
 function setDatabaseMode({ model, getValue }) {
-  isDedicatedSelected = getValue(
-    model,
-    "/resources/kubedbComKafka/spec/topology"
-  );
+  isDedicatedSelected = getValue(model, '/resources/kubedbComKafka/spec/topology')
   if (isDedicatedSelected) {
-    return "Dedicated";
+    return 'Dedicated'
   } else {
-    return "Combined";
+    return 'Combined'
   }
 }
 
-let storageClassList = [];
+let storageClassList = []
 async function getStorageClassNames(
   { axios, storeGet, commit, setDiscriminatorValue, getValue, model },
-  path
+  path,
 ) {
-  const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/route/params/cluster");
+  const owner = storeGet('/route/params/user')
+  const cluster = storeGet('/route/params/cluster')
 
   const resp = await axios.get(
     `/clusters/${owner}/${cluster}/proxy/storage.k8s.io/v1/storageclasses`,
@@ -488,623 +432,535 @@ async function getStorageClassNames(
       params: {
         filter: { items: { metadata: { name: null, annotations: null } } },
       },
-    }
-  );
+    },
+  )
 
-  const resources = (resp && resp.data && resp.data.items) || [];
+  const resources = (resp && resp.data && resp.data.items) || []
 
   resources.map((item) => {
-    const name = (item.metadata && item.metadata.name) || "";
-    item.text = name;
-    item.value = name;
-    return true;
-  });
+    const name = (item.metadata && item.metadata.name) || ''
+    item.text = name
+    item.value = name
+    return true
+  })
 
   if (!path) {
-    setDiscriminatorValue("/storageClasses", resources);
+    setDiscriminatorValue('/storageClasses', resources)
   }
 
-  storageClassList = resources;
+  storageClassList = resources
   const initialStorageClass = getValue(model, path)
-  if(!initialStorageClass)
-    setStorageClass({ model, getValue, commit }, path);
-  return resources;
+  if (!initialStorageClass) setStorageClass({ model, getValue, commit }, path)
+  return resources
 }
 
 function setStorageClass({ model, getValue, commit }, path) {
-  const deletionPolicy = getValue(model, "/resource/kubedbComKafka/spec/deletionPolicy") || "";
-  let storageClass = getValue(model, path) || "";
-  const suffix = "-retain";
+  const deletionPolicy = getValue(model, '/resource/kubedbComKafka/spec/deletionPolicy') || ''
+  let storageClass = getValue(model, path) || ''
+  const suffix = '-retain'
 
-  const simpleClassList = storageClassList.filter(item => {
+  const simpleClassList = storageClassList.filter((item) => {
     return !item.metadata?.name?.endsWith(suffix)
   })
 
-  const retainClassList = storageClassList.filter(item => {
+  const retainClassList = storageClassList.filter((item) => {
     return item.metadata?.name?.endsWith(suffix)
   })
 
-  const defaultSimpleList = simpleClassList.filter(item => {
-    return item.metadata &&
-    item.metadata.annotations &&
-    item.metadata.annotations["storageclass.kubernetes.io/is-default-class"];
+  const defaultSimpleList = simpleClassList.filter((item) => {
+    return (
+      item.metadata &&
+      item.metadata.annotations &&
+      item.metadata.annotations['storageclass.kubernetes.io/is-default-class']
+    )
   })
 
-  const defaultRetainList = retainClassList.filter(item => {
-    return item.metadata &&
-    item.metadata.annotations &&
-    item.metadata.annotations["storageclass.kubernetes.io/is-default-class"];
+  const defaultRetainList = retainClassList.filter((item) => {
+    return (
+      item.metadata &&
+      item.metadata.annotations &&
+      item.metadata.annotations['storageclass.kubernetes.io/is-default-class']
+    )
   })
 
-  if(deletionPolicy === "WipeOut" || deletionPolicy === "Delete") {
-    if(simpleClassList.length > 1) {
-      const found = defaultSimpleList.length 
-        ? defaultSimpleList[0] 
-        : simpleClassList[0];
-      storageClass = found.value;
+  if (deletionPolicy === 'WipeOut' || deletionPolicy === 'Delete') {
+    if (simpleClassList.length > 1) {
+      const found = defaultSimpleList.length ? defaultSimpleList[0] : simpleClassList[0]
+      storageClass = found.value
+    } else if (simpleClassList.length === 1) {
+      storageClass = simpleClassList[0]?.value
+    } else {
+      const found = defaultRetainList.length
+        ? defaultRetainList[0].value
+        : storageClassList.length
+          ? storageClassList[0].value
+          : ''
+      storageClass = found
     }
-    else if(simpleClassList.length === 1) {
-      storageClass = simpleClassList[0]?.value;
-    }
-    else {
-      const found = defaultRetainList.length 
-        ? defaultRetainList[0].value 
-        : storageClassList.length ? storageClassList[0].value : "";
-      storageClass = found;
-    }
-  }
-  else {
-    if(retainClassList.length > 1) {
-        const found = defaultRetainList.length 
-          ? defaultRetainList[0] 
-          : retainClassList[0];
-        storageClass = found.value;
-    }
-    else if(retainClassList.length === 1) {
-      storageClass = retainClassList[0]?.value;
-    }
-    else {
-      const found = defaultSimpleList.length 
+  } else {
+    if (retainClassList.length > 1) {
+      const found = defaultRetainList.length ? defaultRetainList[0] : retainClassList[0]
+      storageClass = found.value
+    } else if (retainClassList.length === 1) {
+      storageClass = retainClassList[0]?.value
+    } else {
+      const found = defaultSimpleList.length
         ? defaultSimpleList[0].value
-        : storageClassList.length ? storageClassList[0].value : "";
-      storageClass = found;
+        : storageClassList.length
+          ? storageClassList[0].value
+          : ''
+      storageClass = found
     }
   }
 
-  if(storageClass && path) {
-    commit("wizard/model$update", {
+  if (storageClass && path) {
+    commit('wizard/model$update', {
       path: path,
       value: storageClass,
       force: true,
-    });
+    })
   }
 }
 
 function deleteDatabaseModePath({ discriminator, getValue, commit }) {
-  const mode = getValue(discriminator, "/activeDatabaseMode");
-  if (mode === "Dedicated") {
-    commit("wizard/model$delete", "/resources/kubedbComKafka/spec/replicas");
-    commit("wizard/model$delete", "/resources/kubedbComKafka/spec/storage");
-    commit("wizard/model$delete", "/resources/kubedbComKafka/spec/podTemplate");
-  } else if (mode === "Combined") {
-    commit("wizard/model$delete", "/resources/kubedbComKafka/spec/topology");
+  const mode = getValue(discriminator, '/activeDatabaseMode')
+  if (mode === 'Dedicated') {
+    commit('wizard/model$delete', '/resources/kubedbComKafka/spec/replicas')
+    commit('wizard/model$delete', '/resources/kubedbComKafka/spec/storage')
+    commit('wizard/model$delete', '/resources/kubedbComKafka/spec/podTemplate')
+  } else if (mode === 'Combined') {
+    commit('wizard/model$delete', '/resources/kubedbComKafka/spec/topology')
   }
 }
 
-function isEqualToDatabaseMode(
-  { getValue, watchDependency, discriminator },
-  value
-) {
-  watchDependency("discriminator#/activeDatabaseMode");
-  const mode = getValue(discriminator, "/activeDatabaseMode");
+function isEqualToDatabaseMode({ getValue, watchDependency, discriminator }, value) {
+  watchDependency('discriminator#/activeDatabaseMode')
+  const mode = getValue(discriminator, '/activeDatabaseMode')
 
-  return mode === value;
+  return mode === value
 }
 
 function getStorageClassNamesFromDiscriminator(
   { model, discriminator, getValue, watchDependency, commit },
-  path
+  path,
 ) {
-  watchDependency("discriminator#/storageClasses");
-  const options = getValue(discriminator, "/storageClasses") || [];
+  watchDependency('discriminator#/storageClasses')
+  const options = getValue(discriminator, '/storageClasses') || []
 
-  setStorageClass({ model, getValue, commit }, path);
-  return options;
+  setStorageClass({ model, getValue, commit }, path)
+  return options
 }
 
 // ************************** TLS *******************************************
 
 function setApiGroup() {
-  return "cert-manager.io";
+  return 'cert-manager.io'
 }
 
 function setApiGroupEdit({ model, getValue }) {
-  const kind = getValue(
-    model,
-    "/resources/kubedbComKafka/spec/tls/issuerRef/kind"
-  );
-  const name = getValue(
-    model,
-    "/resources/kubedbComKafka/spec/tls/issuerRef/name"
-  );
-  return kind && name ? "cert-manager.io" : "";
+  const kind = getValue(model, '/resources/kubedbComKafka/spec/tls/issuerRef/kind')
+  const name = getValue(model, '/resources/kubedbComKafka/spec/tls/issuerRef/name')
+  return kind && name ? 'cert-manager.io' : ''
 }
 
-async function getIssuerRefsName({
-  axios,
-  storeGet,
-  getValue,
-  model,
-  watchDependency,
-}) {
-  const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/route/params/cluster");
-  watchDependency(
-    "model#/resources/kubedbComKafka/spec/tls/issuerRef/apiGroup"
-  );
-  watchDependency("model#/resources/kubedbComKafka/spec/tls/issuerRef/kind");
-  watchDependency("model#/metadata/release/namespace");
-  const apiGroup = getValue(
-    model,
-    "/resources/kubedbComKafka/spec/tls/issuerRef/apiGroup"
-  );
-  const kind = getValue(
-    model,
-    "/resources/kubedbComKafka/spec/tls/issuerRef/kind"
-  );
-  const namespace = getValue(model, "/metadata/release/namespace");
+async function getIssuerRefsName({ axios, storeGet, getValue, model, watchDependency }) {
+  const owner = storeGet('/route/params/user')
+  const cluster = storeGet('/route/params/cluster')
+  watchDependency('model#/resources/kubedbComKafka/spec/tls/issuerRef/apiGroup')
+  watchDependency('model#/resources/kubedbComKafka/spec/tls/issuerRef/kind')
+  watchDependency('model#/metadata/release/namespace')
+  const apiGroup = getValue(model, '/resources/kubedbComKafka/spec/tls/issuerRef/apiGroup')
+  const kind = getValue(model, '/resources/kubedbComKafka/spec/tls/issuerRef/kind')
+  const namespace = getValue(model, '/metadata/release/namespace')
 
-  let url;
-  if (kind === "Issuer") {
-    url = `/clusters/${owner}/${cluster}/proxy/${apiGroup}/v1/namespaces/${namespace}/issuers`;
-  } else if (kind === "ClusterIssuer") {
-    url = `/clusters/${owner}/${cluster}/proxy/${apiGroup}/v1/clusterissuers`;
+  let url
+  if (kind === 'Issuer') {
+    url = `/clusters/${owner}/${cluster}/proxy/${apiGroup}/v1/namespaces/${namespace}/issuers`
+  } else if (kind === 'ClusterIssuer') {
+    url = `/clusters/${owner}/${cluster}/proxy/${apiGroup}/v1/clusterissuers`
   }
 
   try {
-    const resp = await axios.get(url);
+    const resp = await axios.get(url)
 
-    const resources = (resp && resp.data && resp.data.items) || [];
+    const resources = (resp && resp.data && resp.data.items) || []
 
     resources.map((item) => {
-      const name = (item.metadata && item.metadata.name) || "";
-      item.text = name;
-      item.value = name;
-      return true;
-    });
-    return resources;
+      const name = (item.metadata && item.metadata.name) || ''
+      item.text = name
+      item.value = name
+      return true
+    })
+    return resources
   } catch (e) {
-    console.log(e);
-    return [];
+    console.log(e)
+    return []
   }
 }
 
-async function hasIssuerRefName({
-  axios,
-  storeGet,
-  getValue,
-  model,
-  watchDependency,
-}) {
+async function hasIssuerRefName({ axios, storeGet, getValue, model, watchDependency }) {
   const resp = await getIssuerRefsName({
     axios,
     storeGet,
     getValue,
     model,
     watchDependency,
-  });
+  })
 
-  return !!(resp && resp.length);
+  return !!(resp && resp.length)
 }
 
-async function hasNoIssuerRefName({
-  axios,
-  storeGet,
-  getValue,
-  model,
-  watchDependency,
-}) {
+async function hasNoIssuerRefName({ axios, storeGet, getValue, model, watchDependency }) {
   const resp = await hasIssuerRefName({
     axios,
     storeGet,
     getValue,
     model,
     watchDependency,
-  });
+  })
 
-  return !resp;
+  return !resp
 }
 
 function setClusterAuthMode({ model, getValue }) {
-  const val = getValue(model, "/resources/kubedbComKafka/spec/clusterAuthMode");
-  return val || "x509";
+  const val = getValue(model, '/resources/kubedbComKafka/spec/clusterAuthMode')
+  return val || 'x509'
 }
 
 function setSSLMode({ model, getValue }) {
-  const val = getValue(model, "/resources/kubedbComKafka/spec/sslMode");
-  return val || "requireSSL";
+  const val = getValue(model, '/resources/kubedbComKafka/spec/sslMode')
+  return val || 'requireSSL'
 }
 
 function showTlsConfigureSection({ watchDependency, model, getValue }) {
-  watchDependency("model#/resources/kubedbComKafka/spec/enableSSL");
-  const configureStatus = getValue(
-    model,
-    "/resources/kubedbComKafka/spec/enableSSL"
-  );
-  return configureStatus;
+  watchDependency('model#/resources/kubedbComKafka/spec/enableSSL')
+  const configureStatus = getValue(model, '/resources/kubedbComKafka/spec/enableSSL')
+  return configureStatus
 }
 
 function onTlsConfigureChange({ model, getValue, commit }) {
-  const configureStatus = getValue(
-    model,
-    "/resources/kubedbComKafka/spec/enableSSL"
-  );
+  const configureStatus = getValue(model, '/resources/kubedbComKafka/spec/enableSSL')
   if (configureStatus) {
-    commit("wizard/model$update", {
-      path: "/resources/kubedbComKafka/spec/tls",
+    commit('wizard/model$update', {
+      path: '/resources/kubedbComKafka/spec/tls',
       value: { issuerRef: {}, certificates: [] },
       force: true,
-    });
+    })
   } else {
-    commit("wizard/model$delete", "/resources/kubedbComKafka/spec/tls");
+    commit('wizard/model$delete', '/resources/kubedbComKafka/spec/tls')
   }
 }
 
 async function showTlsRecommendation({ axios, storeGet }) {
-  const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/route/params/cluster");
+  const owner = storeGet('/route/params/user')
+  const cluster = storeGet('/route/params/cluster')
 
-  const url = `/clusters/${owner}/${cluster}/proxy/cert-manager.io/v1/issuers`;
+  const url = `/clusters/${owner}/${cluster}/proxy/cert-manager.io/v1/issuers`
 
   try {
     await axios.get(url, {
       params: { filter: { items: { metadata: { name: null } } } },
-    });
-    return false;
+    })
+    return false
   } catch (err) {
     // if any error response status is 404 or not
     if (err.response && err.response.status === 404) {
-      resp = false;
+      resp = false
     }
-    console.log(err);
-    return true;
+    console.log(err)
+    return true
   }
 }
 
 async function getAliasOptions({ model, getValue, watchDependency }) {
-  watchDependency("model#/resources/kubedbComKafka/spec/enableSSL");
-  watchDependency("model#/resources/kubedbComKafka/spec/monitor");
+  watchDependency('model#/resources/kubedbComKafka/spec/enableSSL')
+  watchDependency('model#/resources/kubedbComKafka/spec/monitor')
 
-  const enableSSL = getValue(model, "/resources/kubedbComKafka/spec/enableSSL");
+  const enableSSL = getValue(model, '/resources/kubedbComKafka/spec/enableSSL')
 
   // always include transport cert alias
-  const aliases = [];
+  const aliases = []
 
   if (enableSSL) {
-    aliases.push("server");
-    aliases.push("client");
+    aliases.push('server')
+    aliases.push('client')
   }
 
-  return aliases;
+  return aliases
 }
 
 /****** Monitoring *********/
 
 function showMonitoringSection({ watchDependency, discriminator, getValue }) {
-  watchDependency("discriminator#/enableMonitoring");
-  const configureStatus = getValue(discriminator, "/enableMonitoring");
-  return configureStatus;
+  watchDependency('discriminator#/enableMonitoring')
+  const configureStatus = getValue(discriminator, '/enableMonitoring')
+  return configureStatus
 }
 
 function onEnableMonitoringChange({ discriminator, getValue, commit }) {
-  const configureStatus = getValue(discriminator, "/enableMonitoring");
+  const configureStatus = getValue(discriminator, '/enableMonitoring')
   if (configureStatus) {
-    commit("wizard/model$update", {
-      path: "/resources/kubedbComKafka/spec/monitor",
+    commit('wizard/model$update', {
+      path: '/resources/kubedbComKafka/spec/monitor',
       value: {},
       force: true,
-    });
+    })
   } else {
-    commit("wizard/model$delete", "/resources/kubedbComKafka/spec/monitor");
+    commit('wizard/model$delete', '/resources/kubedbComKafka/spec/monitor')
   }
 
   // update alert value depend on monitoring profile
-  commit("wizard/model$update", {
-    path: "/form/alert/enabled",
+  commit('wizard/model$update', {
+    path: '/form/alert/enabled',
     value: configureStatus ? 'warning' : 'none',
-    force: true
-  });
+    force: true,
+  })
 }
 
 function isValueExistInModel({ model, getValue }, path) {
-  const modelValue = getValue(model, path);
-  return !!modelValue;
+  const modelValue = getValue(model, path)
+  return !!modelValue
 }
 
 function onNamespaceChange({ commit, model, getValue }) {
-  const namespace = getValue(model, "/metadata/release/namespace");
-  const agent = getValue(model, "/resources/kubedbComKafka/spec/monitor/agent");
-  if (agent === "prometheus.io") {
-    commit("wizard/model$update", {
-      path: "/resources/monitoringCoreosComServiceMonitor/spec/namespaceSelector/matchNames",
+  const namespace = getValue(model, '/metadata/release/namespace')
+  const agent = getValue(model, '/resources/kubedbComKafka/spec/monitor/agent')
+  if (agent === 'prometheus.io') {
+    commit('wizard/model$update', {
+      path: '/resources/monitoringCoreosComServiceMonitor/spec/namespaceSelector/matchNames',
       value: [namespace],
       force: true,
-    });
+    })
   }
 }
 
 function onLabelChange({ commit, model, getValue }) {
-  const labels = getValue(
-    model,
-    "/resources/kubedbComKafka/spec/metadata/labels"
-  );
+  const labels = getValue(model, '/resources/kubedbComKafka/spec/metadata/labels')
 
-  const agent = getValue(model, "/resources/kubedbComKafka/spec/monitor/agent");
+  const agent = getValue(model, '/resources/kubedbComKafka/spec/monitor/agent')
 
-  if (agent === "prometheus.io") {
-    commit("wizard/model$update", {
-      path: "/resources/monitoringCoreosComServiceMonitor/spec/selector/matchLabels",
+  if (agent === 'prometheus.io') {
+    commit('wizard/model$update', {
+      path: '/resources/monitoringCoreosComServiceMonitor/spec/selector/matchLabels',
       value: labels,
       force: true,
-    });
+    })
   }
 }
 
 function onNameChange({ commit, model, getValue }) {
-  const dbName = getValue(model, "/metadata/release/name");
+  const dbName = getValue(model, '/metadata/release/name')
 
-  const agent = getValue(model, "/resources/kubedbComKafka/spec/monitor/agent");
+  const agent = getValue(model, '/resources/kubedbComKafka/spec/monitor/agent')
 
-  const labels = getValue(
-    model,
-    "/resources/kubedbComKafka/spec/metadata/labels"
-  );
+  const labels = getValue(model, '/resources/kubedbComKafka/spec/metadata/labels')
 
-  if (agent === "prometheus.io") {
-    commit("wizard/model$update", {
-      path: "/resources/monitoringCoreosComServiceMonitor/spec/selector/matchLabels",
+  if (agent === 'prometheus.io') {
+    commit('wizard/model$update', {
+      path: '/resources/monitoringCoreosComServiceMonitor/spec/selector/matchLabels',
       value: labels,
       force: true,
-    });
+    })
   }
 
-  const scheduleBackup = getValue(
-    model,
-    "/resources/stashAppscodeComBackupConfiguration"
-  );
+  const scheduleBackup = getValue(model, '/resources/stashAppscodeComBackupConfiguration')
 
   if (scheduleBackup) {
-    commit("wizard/model$update", {
-      path: "/resources/stashAppscodeComBackupConfiguration/spec/target/ref/name",
+    commit('wizard/model$update', {
+      path: '/resources/stashAppscodeComBackupConfiguration/spec/target/ref/name',
       value: dbName,
       force: true,
-    });
-    const creatingNewRepo = getValue(
-      model,
-      "/resources/stashAppscodeComRepository_repo"
-    );
+    })
+    const creatingNewRepo = getValue(model, '/resources/stashAppscodeComRepository_repo')
     if (creatingNewRepo) {
-      commit("wizard/model$update", {
-        path: "/resources/stashAppscodeComBackupConfiguration/spec/repository/name",
+      commit('wizard/model$update', {
+        path: '/resources/stashAppscodeComBackupConfiguration/spec/repository/name',
         value: `${dbName}-repo`,
         force: true,
-      });
+      })
     }
   }
 
-  const prePopulateDatabase = getValue(
-    model,
-    "/resources/stashAppscodeComRestoreSession_init"
-  );
+  const prePopulateDatabase = getValue(model, '/resources/stashAppscodeComRestoreSession_init')
 
   if (prePopulateDatabase) {
-    commit("wizard/model$update", {
-      path: "/resources/stashAppscodeComRestoreSession_init/spec/target/ref/name",
+    commit('wizard/model$update', {
+      path: '/resources/stashAppscodeComRestoreSession_init/spec/target/ref/name',
       value: dbName,
       force: true,
-    });
-    const creatingNewRepo = getValue(
-      model,
-      "/resources/stashAppscodeComRepository_init_repo"
-    );
+    })
+    const creatingNewRepo = getValue(model, '/resources/stashAppscodeComRepository_init_repo')
     if (creatingNewRepo) {
-      commit("wizard/model$update", {
-        path: "/resources/stashAppscodeComRestoreSession_init/spec/repository/name",
+      commit('wizard/model$update', {
+        path: '/resources/stashAppscodeComRestoreSession_init/spec/repository/name',
         value: `${dbName}-init-repo`,
         force: true,
-      });
+      })
     }
   }
 
   // to reset configSecret name field
-  const hasSecretConfig = getValue(model, "/resources/secret_user_config");
+  const hasSecretConfig = getValue(model, '/resources/secret_user_config')
   if (hasSecretConfig) {
-    commit("wizard/model$update", {
-      path: "/resources/kubedbComKafka/spec/configSecret/name",
+    commit('wizard/model$update', {
+      path: '/resources/kubedbComKafka/spec/configSecret/name',
       value: `${dbName}-config`,
       force: true,
-    });
+    })
   }
 }
 
 function returnFalse() {
-  return false;
+  return false
 }
 
 function onAgentChange({ commit, model, getValue }) {
-  const agent = getValue(model, "/resources/kubedbComKafka/spec/monitor/agent");
+  const agent = getValue(model, '/resources/kubedbComKafka/spec/monitor/agent')
 
   if (!agent) {
-    removeCertificatesOfAliases({ model, getValue, commit }, [
-      "metrics-exporter",
-    ]);
+    removeCertificatesOfAliases({ model, getValue, commit }, ['metrics-exporter'])
   }
 
-  if (agent === "prometheus.io") {
-    commit("wizard/model$update", {
-      path: "/resources/monitoringCoreosComServiceMonitor/spec/endpoints",
+  if (agent === 'prometheus.io') {
+    commit('wizard/model$update', {
+      path: '/resources/monitoringCoreosComServiceMonitor/spec/endpoints',
       value: [],
       force: true,
-    });
+    })
 
-    onNamespaceChange({ commit, model, getValue });
-    onLabelChange({ commit, model, getValue });
+    onNamespaceChange({ commit, model, getValue })
+    onLabelChange({ commit, model, getValue })
   } else {
-    commit(
-      "wizard/model$delete",
-      "/resources/monitoringCoreosComServiceMonitor"
-    );
+    commit('wizard/model$delete', '/resources/monitoringCoreosComServiceMonitor')
   }
 }
 
 //////////////////// service monitor ///////////////////
 
 function isEqualToServiceMonitorType({ rootModel, watchDependency }, value) {
-  watchDependency("rootModel#/spec/type");
-  return rootModel && rootModel.spec && rootModel.spec.type === value;
+  watchDependency('rootModel#/spec/type')
+  return rootModel && rootModel.spec && rootModel.spec.type === value
 }
 
 //////////////////// custom config /////////////////
-function onConfigurationSourceChange({
-  getValue,
-  discriminator,
-  commit,
-  model,
-}) {
-  const configurationSource = getValue(discriminator, "/configurationSource");
-  if (configurationSource === "use-existing-config") {
-    commit("wizard/model$delete", "/resources/secret_user_config");
-    commit("wizard/model$delete", "/resources/config_secret");
+function onConfigurationSourceChange({ getValue, discriminator, commit, model }) {
+  const configurationSource = getValue(discriminator, '/configurationSource')
+  if (configurationSource === 'use-existing-config') {
+    commit('wizard/model$delete', '/resources/secret_user_config')
+    commit('wizard/model$delete', '/resources/config_secret')
   } else {
-    const value = getValue(model, "/resources/secret_user_config");
+    const value = getValue(model, '/resources/secret_user_config')
     if (!value) {
-      commit("wizard/model$update", {
-        path: "/resources/secret_user_config",
+      commit('wizard/model$update', {
+        path: '/resources/secret_user_config',
         value: {},
         force: true,
-      });
+      })
     }
-    const configSecretName = `${getValue(
-      model,
-      "/metadata/release/name"
-    )}-config`;
-    commit("wizard/model$update", {
-      path: "/resources/kubedbComKafka/spec/configSecret/name",
+    const configSecretName = `${getValue(model, '/metadata/release/name')}-config`
+    commit('wizard/model$update', {
+      path: '/resources/kubedbComKafka/spec/configSecret/name',
       value: configSecretName,
       force: true,
-    });
+    })
   }
 }
 
 function setConfigurationSource({ model, getValue }) {
-  const modelValue = getValue(model, "/resources/secret_user_config");
+  const modelValue = getValue(model, '/resources/secret_user_config')
   if (modelValue) {
-    return "create-new-config";
+    return 'create-new-config'
   }
-  return "use-existing-config";
+  return 'use-existing-config'
 }
 
-function setConfigFiles({
-  model,
-  getValue,
-  watchDependency,
-  setDiscriminatorValue,
-}) {
-  watchDependency("model#/resources/secret_user_config/stringData");
-  const configFiles = getValue(
-    model,
-    "/resources/secret_user_config/stringData"
-  );
+function setConfigFiles({ model, getValue, watchDependency, setDiscriminatorValue }) {
+  watchDependency('model#/resources/secret_user_config/stringData')
+  const configFiles = getValue(model, '/resources/secret_user_config/stringData')
 
-  const files = [];
+  const files = []
 
   for (const item in configFiles) {
-    const obj = {};
-    obj.key = item;
-    obj.value = configFiles[item];
-    files.push(obj);
+    const obj = {}
+    obj.key = item
+    obj.value = configFiles[item]
+    files.push(obj)
   }
 
-  setDiscriminatorValue("/configFiles", files);
+  setDiscriminatorValue('/configFiles', files)
 
-  return files;
+  return files
 }
 
 function onConfigFilesChange({ discriminator, getValue, commit }) {
-  const files = getValue(discriminator, "/configFiles");
+  const files = getValue(discriminator, '/configFiles')
 
-  const configFiles = {};
+  const configFiles = {}
 
   if (files) {
     files.forEach((item) => {
-      const { key, value } = item;
-      configFiles[key] = value;
-    });
+      const { key, value } = item
+      configFiles[key] = value
+    })
   }
 
-  commit("wizard/model$update", {
-    path: "/resources/secret_user_config/stringData",
+  commit('wizard/model$update', {
+    path: '/resources/secret_user_config/stringData',
     value: configFiles,
     force: true,
-  });
+  })
 }
 
 function onSetCustomConfigChange({ discriminator, getValue, commit }) {
-  const value = getValue(discriminator, "/setCustomConfig");
+  const value = getValue(discriminator, '/setCustomConfig')
 
-  if (value === "no") {
-    commit(
-      "wizard/model$delete",
-      "/resources/kubedbComKafka/spec/configSecret"
-    );
-    commit("wizard/model$delete", "/resources/secret_user_config");
+  if (value === 'no') {
+    commit('wizard/model$delete', '/resources/kubedbComKafka/spec/configSecret')
+    commit('wizard/model$delete', '/resources/secret_user_config')
   }
 }
 
 function initSetCustomConfig({ model, getValue }) {
-  const configSecret = getValue(
-    model,
-    "/resources/kubedbComKafka/spec/configSecret/name"
-  );
+  const configSecret = getValue(model, '/resources/kubedbComKafka/spec/configSecret/name')
 
-  if (configSecret) return "yes";
-  else return "no";
+  if (configSecret) return 'yes'
+  else return 'no'
 }
 
 function getOpsRequestUrl({ storeGet, model, getValue, mode }, reqType) {
-  const cluster = storeGet("/route/params/cluster");
-  const domain = storeGet("/domain") || "";
-  const owner = storeGet("/route/params/user");
-  const dbname = getValue(model, "/metadata/release/name");
-  const group = getValue(model, "/metadata/resource/group");
-  const kind = getValue(model, "/metadata/resource/kind");
-  const namespace = getValue(model, "/metadata/release/namespace");
-  const resource = getValue(model, "/metadata/resource/name");
-  const version = getValue(model, "/metadata/resource/version");
-  const routeRootPath = storeGet("/route/path");
-  const pathPrefix = `${domain}${routeRootPath}`;
+  const cluster = storeGet('/route/params/cluster')
+  const domain = storeGet('/domain') || ''
+  const owner = storeGet('/route/params/user')
+  const dbname = getValue(model, '/metadata/release/name')
+  const group = getValue(model, '/metadata/resource/group')
+  const kind = getValue(model, '/metadata/resource/kind')
+  const namespace = getValue(model, '/metadata/release/namespace')
+  const resource = getValue(model, '/metadata/resource/name')
+  const version = getValue(model, '/metadata/resource/version')
+  const routeRootPath = storeGet('/route/path')
+  const pathPrefix = `${domain}${routeRootPath}`
 
-  if (mode === "standalone-step")
-    return `${pathPrefix}?namespace=${namespace}&applyAction=create-opsrequest-${reqType.toLowerCase()}`;
+  if (mode === 'standalone-step')
+    return `${pathPrefix}?namespace=${namespace}&applyAction=create-opsrequest-${reqType.toLowerCase()}`
   else
-    return `${domain}/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/kafkaopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=${reqType}`;
+    return `${domain}/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/kafkaopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=${reqType}`
 }
 
 function getCreateNameSpaceUrl({ model, getValue, storeGet }) {
-  const user = storeGet("/route/params/user");
-  const cluster = storeGet("/route/params/cluster");
+  const user = storeGet('/route/params/user')
+  const cluster = storeGet('/route/params/cluster')
 
-  const domain = storeGet("/domain") || "";
-  if (domain.includes("bb.test")) {
-    return `http://console.bb.test:5990/${user}/kubernetes/${cluster}/core/v1/namespaces/create`;
+  const domain = storeGet('/domain') || ''
+  if (domain.includes('bb.test')) {
+    return `http://console.bb.test:5990/${user}/kubernetes/${cluster}/core/v1/namespaces/create`
   } else {
-    const editedDomain = domain.replace("kubedb", "console");
-    return `${editedDomain}/${user}/kubernetes/${cluster}/core/v1/namespaces/create`;
+    const editedDomain = domain.replace('kubedb', 'console')
+    return `${editedDomain}/${user}/kubernetes/${cluster}/core/v1/namespaces/create`
   }
 }
 
-function isVariantAvailable ({storeGet})  {
-  const variant = storeGet("/route/query/variant");
+function isVariantAvailable({ storeGet }) {
+  const variant = storeGet('/route/query/variant')
   return variant ? true : false
 }
 
@@ -1174,4 +1030,4 @@ return {
   getOpsRequestUrl,
   getCreateNameSpaceUrl,
   setStorageClass,
-};
+}

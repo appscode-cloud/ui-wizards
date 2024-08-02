@@ -1,5 +1,323 @@
-apiVersion: kubedb.com/v1
-kind: PerconaXtraDB
+form:
+  alert:
+    additionalRuleLabels: {}
+    annotations: {}
+    enabled: warning
+    groups:
+      cluster:
+        enabled: warning
+        rules:
+          galeraReplicationLatencyTooLong:
+            duration: 5m
+            enabled: true
+            severity: warning
+            val: 0.1
+      database:
+        enabled: warning
+        rules:
+          mysqlHighIncomingBytes:
+            duration: 0m
+            enabled: true
+            severity: critical
+            val: 1.048576e+06
+          mysqlHighOutgoingBytes:
+            duration: 0m
+            enabled: true
+            severity: critical
+            val: 1.048576e+06
+          mysqlHighQPS:
+            duration: 0m
+            enabled: true
+            severity: critical
+            val: 1000
+          mysqlHighThreadsRunning:
+            duration: 2m
+            enabled: true
+            severity: warning
+            val: 60
+          mysqlInnoDBLogWaits:
+            duration: 0m
+            enabled: true
+            severity: warning
+            val: 10
+          mysqlInstanceDown:
+            duration: 0m
+            enabled: true
+            severity: critical
+          mysqlRestarted:
+            duration: 0m
+            enabled: true
+            severity: warning
+            val: 60
+          mysqlServiceDown:
+            duration: 0m
+            enabled: true
+            severity: critical
+          mysqlSlowQueries:
+            duration: 2m
+            enabled: true
+            severity: warning
+          mysqlTooManyConnections:
+            duration: 2m
+            enabled: true
+            severity: warning
+            val: 80
+          mysqlTooManyOpenFiles:
+            duration: 2m
+            enabled: true
+            severity: warning
+            val: 80
+      opsManager:
+        enabled: warning
+        rules:
+          opsRequestFailed:
+            duration: 0m
+            enabled: true
+            severity: critical
+          opsRequestOnProgress:
+            duration: 0m
+            enabled: true
+            severity: info
+          opsRequestStatusProgressingToLong:
+            duration: 30m
+            enabled: true
+            severity: critical
+      provisioner:
+        enabled: warning
+        rules:
+          appPhaseCritical:
+            duration: 15m
+            enabled: true
+            severity: warning
+          appPhaseNotReady:
+            duration: 1m
+            enabled: true
+            severity: critical
+      schemaManager:
+        enabled: warning
+        rules:
+          schemaExpired:
+            duration: 0m
+            enabled: true
+            severity: warning
+          schemaFailed:
+            duration: 0m
+            enabled: true
+            severity: warning
+          schemaInProgressForTooLong:
+            duration: 30m
+            enabled: true
+            severity: warning
+          schemaPendingForTooLong:
+            duration: 30m
+            enabled: true
+            severity: warning
+          schemaTerminatingForTooLong:
+            duration: 30m
+            enabled: true
+            severity: warning
+      stash:
+        enabled: warning
+        rules:
+          backupSessionFailed:
+            duration: 0m
+            enabled: true
+            severity: critical
+          backupSessionPeriodTooLong:
+            duration: 0m
+            enabled: true
+            severity: warning
+            val: 1800
+          noBackupSessionForTooLong:
+            duration: 0m
+            enabled: true
+            severity: warning
+            val: 18000
+          repositoryCorrupted:
+            duration: 5m
+            enabled: true
+            severity: critical
+          repositoryStorageRunningLow:
+            duration: 5m
+            enabled: true
+            severity: warning
+            val: 1.073741824e+10
+          restoreSessionFailed:
+            duration: 0m
+            enabled: true
+            severity: critical
+          restoreSessionPeriodTooLong:
+            duration: 0m
+            enabled: true
+            severity: warning
+            val: 1800
+    labels:
+      release: kube-prometheus-stack
 metadata:
-  name: perconaxtradb
-  namespace: default
+  resource:
+    group: kubedb.com
+    version: v1
+    name: perconaxtradbs
+    kind: PerconaXtraDB
+    scope: Namespaced
+  release:
+    name: RELEASE-NAME
+    namespace: default
+resources:
+  autoscalingKubedbComPerconaXtraDBAutoscaler: # +doc-gen:break
+    apiVersion: autoscaling.kubedb.com/v1alpha1
+    kind: PerconaXtraDBAutoscaler
+    metadata:
+      name: perconaxtradb
+      namespace: demo
+    spec:
+      compute:
+        node:
+          maxAllowed:
+            cpu: 1
+            memory: 2Gi
+          minAllowed:
+            cpu: 400m
+            memory: 400Mi
+          podLifeTimeThreshold: 10m
+          resourceDiffPercentage: 20
+          trigger: "On"
+        nodeTopology:
+          name: standard-basv2-family
+      databaseRef:
+        name: repl
+      opsRequestOptions:
+        apply: IfReady
+        timeout: 10m
+  catalogAppscodeComPerconaXtraDBBinding: # +doc-gen:break
+    apiVersion: catalog.appscode.com/v1alpha1
+    kind: PerconaXtraDBBinding
+    metadata:
+      name: perconaxtradb
+      namespace: demo
+    spec:
+      sourceRef:
+        name: perconaxtradb
+        namespace: demo
+  certManagerIoIssuer_ca: # +doc-gen:break
+    apiVersion: cert-manager.io/v1
+    kind: Issuer
+    metadata:
+      name: perconaxtradb-ca
+      namespace: demo
+    spec:
+      ca:
+        secretName: perconaxtradb-ca
+  kubedbComPerconaXtraDB: # +doc-gen:break
+    apiVersion: kubedb.com/v1
+    kind: PerconaXtraDB
+    metadata:
+      name: perconaxtradb
+      namespace: sdb
+    spec:
+      deletionPolicy: Halt
+      licenseSecret:
+        name: license-secret
+      serviceTemplates:
+        - alias: primary
+          spec:
+            type: LoadBalancer
+      storageType: Durable
+      topology:
+        aggregator:
+          podTemplate:
+            spec:
+              containers:
+                - name: perconaxtradb
+                  resources:
+                    requests:
+                      cpu: 600m
+                      memory: 1200Mi
+              nodeSelector:
+                app: kubedb
+                component: sdb-database
+                instance: sdb
+              tolerations:
+                - effect: NoSchedule
+                  key: app
+                  operator: Equal
+                  value: kubedb
+                - effect: NoSchedule
+                  key: instance
+                  operator: Equal
+                  value: sdb
+                - effect: NoSchedule
+                  key: component
+                  operator: Equal
+                  value: sdb-database
+                - effect: NoSchedule
+                  key: nodepool_type
+                  operator: Equal
+                  value: n2-standard-2
+          replicas: 3
+          storage:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 1Gi
+            storageClassName: standard-rwo
+        leaf:
+          podTemplate:
+            spec:
+              containers:
+                - name: perconaxtradb
+                  resources:
+                    requests:
+                      cpu: 700m
+                      memory: 1400Mi
+          replicas: 2
+          storage:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 10Gi
+            storageClassName: standard-rwo
+      version: 8.1.32
+  monitoringCoreosComServiceMonitor: # +doc-gen:break
+    apiVersion: monitoring.coreos.com/v1
+    kind: ServiceMonitor
+    metadata:
+      name: perconaxtradb
+      namespace: demo
+    spec:
+      endpoints:
+        - honorLabels: true
+          interval: 30s
+          path: /metrics
+          port: metrics
+      namespaceSelector:
+        matchNames:
+          - demo
+      selector:
+        matchLabels:
+          app.kubernetes.io/instance: perconaxtradb
+          app.kubernetes.io/name: perconaxtradbs.kubedb.com
+  secret_auth: # +doc-gen:break
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: perconaxtradb-auth
+      namespace: demo
+    stringData:
+      password: thisIs1StrongPassword
+      username: root
+    type: Opaque
+  secret_config: # +doc-gen:break
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: perconaxtradb-config
+      namespace: demo
+    stringData:
+      perconaxtradb.cnf: |
+        [mysqld]
+        max_connections = 200
+        read_buffer_size = 1048576
+    type: Opaque

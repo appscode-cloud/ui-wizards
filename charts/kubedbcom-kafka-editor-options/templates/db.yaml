@@ -2,7 +2,7 @@
 {{- $res := dict -}}
 {{- $controller_res := dict -}}
 {{- $broker_res := dict -}}
-{{- if eq .Values.spec.mode "Dedicated" }}
+{{- if eq .Values.spec.mode "Topology" }}
   {{- $controller_res = .Values.spec.topology.controller.podResources.resources -}}
   {{- if and .Values.spec.topology.controller.podResources.machine (hasKey $machines .Values.spec.topology.controller.podResources.machine) }}
     {{- $controller_res = get (get $machines .Values.spec.topology.controller.podResources.machine) "resources" }}
@@ -73,7 +73,7 @@ spec:
           value: {{ .Values.spec.admin.clusterTier.nodeTopology.default }}
           effect: "NoSchedule"
       {{- end }}
-{{- else if eq .Values.spec.mode "Dedicated" }}
+{{- else if eq .Values.spec.mode "Topology" }}
   topology:
     controller:
       replicas: {{ .Values.spec.topology.controller.replicas }}
@@ -106,7 +106,6 @@ spec:
           requests:
             storage: {{ .Values.spec.topology.broker.persistence.size }}
 {{- end }}
-  disableSecurity: {{ .Values.spec.disableSecurity }}
   deletionPolicy: {{ .Values.spec.deletionPolicy }}
 {{- if .Values.spec.authSecret.name }}
   authSecret:
