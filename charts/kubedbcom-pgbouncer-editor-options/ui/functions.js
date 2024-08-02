@@ -344,9 +344,6 @@ async function getAppBindings({ axios, storeGet }, type) {
 
 function onRefChange({ discriminator, getValue, commit }) {
   const ref = getValue(discriminator, '/pgRef') || {}
-  console.log(ref)
-  console.log(`/spec/database/databaseRef/name`)
-
   commit('wizard/model$update', {
     path: `/spec/database/databaseRef/name`,
     value: ref.name || '',
