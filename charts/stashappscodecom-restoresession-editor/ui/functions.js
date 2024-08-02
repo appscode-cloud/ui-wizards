@@ -3,14 +3,14 @@ async function getResources(
   group,
   version,
   resource,
-  namespaced
+  namespaced,
 ) {
-  const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/route/params/cluster");
-  let namespace = "";
+  const owner = storeGet('/route/params/user')
+  const cluster = storeGet('/route/params/cluster')
+  let namespace = ''
   if (namespaced) {
-    namespace = getValue(model, "/metadata/release/namespace");
-    watchDependency("model#/metadata/release/namespace");
+    namespace = getValue(model, '/metadata/release/namespace')
+    watchDependency('model#/metadata/release/namespace')
   }
 
   if (!namespaced || namespace) {
@@ -19,70 +19,67 @@ async function getResources(
     try {
       const resp = await axios.get(
         `/clusters/${owner}/${cluster}/proxy/${group}/${version}${
-          namespace ? "/namespaces/" + namespace : ""
+          namespace ? '/namespaces/' + namespace : ''
         }/${resource}`,
         {
           params: { filter: { items: { metadata: { name: null } } } },
-        }
-      );
+        },
+      )
 
-      const resources = (resp && resp.data && resp.data.items) || [];
+      const resources = (resp && resp.data && resp.data.items) || []
 
       resources.map((item) => {
-        const name = (item.metadata && item.metadata.name) || "";
-        item.text = name;
-        item.value = name;
-        return true;
-      });
-      return resources;
+        const name = (item.metadata && item.metadata.name) || ''
+        item.text = name
+        item.value = name
+        return true
+      })
+      return resources
     } catch (e) {
-      console.log(e);
-      return [];
+      console.log(e)
+      return []
     }
-  } else return [];
+  } else return []
 }
 
 function initNamespace({ route }) {
-  const { namespace } = route.query || {};
-  return namespace || null;
+  const { namespace } = route.query || {}
+  return namespace || null
 }
 function isNamespaceDisabled({ route }) {
-  return !!initNamespace({ route });
+  return !!initNamespace({ route })
 }
 function isDatabaseSelectDisabled({ route }) {
-  const { database } = route.query || {};
-  return !!database;
+  const { database } = route.query || {}
+  return !!database
 }
 
 function labelsDisabilityChecker({ itemCtx }) {
-  const { key } = itemCtx;
-  if (key.startsWith("app.kubernetes.io") || key.includes("helm")) return true;
-  else return false;
+  const { key } = itemCtx
+  if (key.startsWith('app.kubernetes.io') || key.includes('helm')) return true
+  else return false
 }
 
-async function fetchJsons(
-  { axios, itemCtx, setDiscriminatorValue },
-  discriminatorPath
-) {
-  let ui = {};
-  let language = {};
-  let functions = {};
-  const { name, sourceRef, version, packageviewUrlPrefix } = itemCtx.chart;
+async function fetchJsons({ axios, itemCtx, setDiscriminatorValue }, discriminatorPath) {
+  let ui = {}
+  let language = {}
+  let functions = {}
+  const { name, sourceRef, version, packageviewUrlPrefix } = itemCtx.chart
   try {
     ui = await axios.get(
-      `${packageviewUrlPrefix}/create-ui.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`
-    );
+      `${packageviewUrlPrefix}/create-ui.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`,
+    )
     language = await axios.get(
-      `${packageviewUrlPrefix}/language.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`
-    );
+      `${packageviewUrlPrefix}/language.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`,
+    )
     const functionString = await axios.get(
-      `${packageviewUrlPrefix}/functions.js?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}`
-    );
+      `${packageviewUrlPrefix}/functions.js?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}`,
+    )
     // declare evaluate the functionString to get the functions Object
-    const evalFunc = new Function(functionString.data || "");
-    functions = evalFunc();
+    const evalFunc = new Function(functionString.data || '')
+    functions = evalFunc()
   } catch (e) {
-    console.log(e);
+    console.log(e)
   }
 
   if (discriminatorPath) {
@@ -90,31 +87,24 @@ async function fetchJsons(
       ui: ui.data || {},
       language: language.data || {},
       functions,
-    });
+    })
   }
 
   return {
     ui: ui.data || {},
     language: language.data || {},
     functions,
-  };
+  }
 }
 
-let databaseToTypeMap = {};
+let databaseToTypeMap = {}
 
-async function fetchDatabases({
-  axios,
-  storeGet,
-  model,
-  getValue,
-  watchDependency,
-  commit
-}) {
-  const owner = storeGet("/route/params/user");
-  const database = storeGet('/route/query/database');
-  const cluster = storeGet("/route/params/cluster");
-  const namespace = getValue(model, "/metadata/release/namespace");
-  watchDependency("model#/metadata/release/namespace");
+async function fetchDatabases({ axios, storeGet, model, getValue, watchDependency, commit }) {
+  const owner = storeGet('/route/params/user')
+  const database = storeGet('/route/query/database')
+  const cluster = storeGet('/route/params/cluster')
+  const namespace = getValue(model, '/metadata/release/namespace')
+  watchDependency('model#/metadata/release/namespace')
 
   if (namespace) {
     // call api if user has selected a namespace
@@ -132,67 +122,61 @@ async function fetchDatabases({
               },
             },
           },
-        }
-      );
+        },
+      )
 
-      const resources = (resp && resp.data && resp.data.items) || [];
+      const resources = (resp && resp.data && resp.data.items) || []
 
       const mappedResources = resources
         .filter((item) => {
-          const type = (item.spec && item.spec.type) || "";
-          return type.startsWith("kubedb.com");
+          const type = (item.spec && item.spec.type) || ''
+          return type.startsWith('kubedb.com')
         })
         .map((item) => {
-          const name = (item.metadata && item.metadata.name) || "";
+          const name = (item.metadata && item.metadata.name) || ''
           return {
             text: name,
-            value: name
-          };
-        });
-        
-      // update database to type map
-      databaseToTypeMap = {};
-      resources.forEach((rs) => {
-        const type = (rs.spec && rs.spec.type) || "";
-        const name = (rs.metadata && rs.metadata.name) || "";
-        if (type.startsWith("kubedb.com")) {
-          databaseToTypeMap[name] = type;
-        }
-      });
+            value: name,
+          }
+        })
 
-      if(database) {
+      // update database to type map
+      databaseToTypeMap = {}
+      resources.forEach((rs) => {
+        const type = (rs.spec && rs.spec.type) || ''
+        const name = (rs.metadata && rs.metadata.name) || ''
+        if (type.startsWith('kubedb.com')) {
+          databaseToTypeMap[name] = type
+        }
+      })
+
+      if (database) {
         // if database name is provided in route query
         // find the option matching with database
-        const matchedOption = mappedResources.find(rs => rs.text === database)
-        if(matchedOption) {
+        const matchedOption = mappedResources.find((rs) => rs.text === database)
+        if (matchedOption) {
           // set this value as target
-          commit("wizard/model$update", {
-            path: "/resources/stashAppscodeComRestoreSession/spec/target/ref/name",
+          commit('wizard/model$update', {
+            path: '/resources/stashAppscodeComRestoreSession/spec/target/ref/name',
             value: matchedOption.value,
-            force: true
+            force: true,
           })
         }
       }
 
-      return mappedResources;
+      return mappedResources
     } catch (e) {
-      console.log(e);
-      return [];
+      console.log(e)
+      return []
     }
-  } else return [];
+  } else return []
 }
 
-async function fetchRepositories({
-  axios,
-  storeGet,
-  model,
-  getValue,
-  watchDependency,
-}) {
-  const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/route/params/cluster");
-  const namespace = getValue(model, "/metadata/release/namespace");
-  watchDependency("model#/metadata/release/namespace");
+async function fetchRepositories({ axios, storeGet, model, getValue, watchDependency }) {
+  const owner = storeGet('/route/params/user')
+  const cluster = storeGet('/route/params/cluster')
+  const namespace = getValue(model, '/metadata/release/namespace')
+  watchDependency('model#/metadata/release/namespace')
 
   if (namespace) {
     // call api if user has selected a namespace
@@ -207,65 +191,60 @@ async function fetchRepositories({
               },
             },
           },
-        }
-      );
+        },
+      )
 
-      const resources = (resp && resp.data && resp.data.items) || [];
+      const resources = (resp && resp.data && resp.data.items) || []
 
       const mappedResources = resources.map((item) => {
-        const name = (item.metadata && item.metadata.name) || "";
+        const name = (item.metadata && item.metadata.name) || ''
         return {
           text: name,
           value: name,
-        };
-      });
+        }
+      })
 
-      return mappedResources;
+      return mappedResources
     } catch (e) {
-      console.log(e);
-      return [];
+      console.log(e)
+      return []
     }
-  } else return [];
+  } else return []
 }
 
 function valueExists(value, getValue, path) {
-  const val = getValue(value, path);
-  if (val) return true;
-  else return false;
+  const val = getValue(value, path)
+  if (val) return true
+  else return false
 }
 
-function showInterimVolumneTemplate({
-  model,
-  getValue,
-  watchDependency,
-  commit,
-}) {
-  const appbindingName = getValue(model, "/spec/target/name");
-  watchDependency("model#/spec/target/name");
+function showInterimVolumneTemplate({ model, getValue, watchDependency, commit }) {
+  const appbindingName = getValue(model, '/spec/target/name')
+  watchDependency('model#/spec/target/name')
 
-  let verdict = false;
+  let verdict = false
   if (appbindingName) {
     // find app binding type
-    const type = databaseToTypeMap[appbindingName];
-    if (type === "kubedb.com/elasticsearch") verdict = true;
+    const type = databaseToTypeMap[appbindingName]
+    if (type === 'kubedb.com/elasticsearch') verdict = true
   }
 
   if (!verdict) {
     // delete interimVolumeTempalte if it exists
-    if (valueExists(model, getValue, "/spec/interimVolumeTemplate")) {
-      commit("wizard/model$delete", "/spec/interimVolumeTemplate");
+    if (valueExists(model, getValue, '/spec/interimVolumeTemplate')) {
+      commit('wizard/model$delete', '/spec/interimVolumeTemplate')
     }
   }
 
-  return verdict;
+  return verdict
 }
 
 async function getStorageClassNames(
   { axios, storeGet, commit, setDiscriminatorValue, getValue, model },
-  path
+  path,
 ) {
-  const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/route/params/cluster");
+  const owner = storeGet('/route/params/user')
+  const cluster = storeGet('/route/params/cluster')
 
   const resp = await axios.get(
     `/clusters/${owner}/${cluster}/proxy/storage.k8s.io/v1/storageclasses`,
@@ -273,78 +252,85 @@ async function getStorageClassNames(
       params: {
         filter: { items: { metadata: { name: null, annotations: null } } },
       },
-    }
-  );
+    },
+  )
 
-  const resources = (resp && resp.data && resp.data.items) || [];
+  const resources = (resp && resp.data && resp.data.items) || []
 
   resources.map((item) => {
-    const name = (item.metadata && item.metadata.name) || "";
+    const name = (item.metadata && item.metadata.name) || ''
     const isDefault =
       item.metadata &&
       item.metadata.annotations &&
-      item.metadata.annotations["storageclass.kubernetes.io/is-default-class"];
+      item.metadata.annotations['storageclass.kubernetes.io/is-default-class']
 
     if (isDefault && path) {
-      const className = getValue(model, path);
+      const className = getValue(model, path)
       if (!className) {
-        commit("wizard/model$update", {
+        commit('wizard/model$update', {
           path: path,
           value: name,
           force: true,
-        });
+        })
       }
     }
 
-    item.text = name;
-    item.value = name;
-    return true;
-  });
+    item.text = name
+    item.value = name
+    return true
+  })
 
   if (!path) {
-    setDiscriminatorValue("/storageClasses", resources);
+    setDiscriminatorValue('/storageClasses', resources)
   }
 
-  return resources;
+  return resources
 }
 
 const restoreSessionInitRunTimeSettings = {
   pod: {
-    serviceAccountName: "",
+    serviceAccountName: '',
     securityContext: {
       fsGroup: null,
       runAsUser: null,
       runAsGroup: null,
     },
   },
-};
-function showRuntimeSettingsForm(
-  { discriminator, getValue, watchDependency, commit, model }
-) {
+}
+function showRuntimeSettingsForm({ discriminator, getValue, watchDependency, commit, model }) {
   const customizeRestoreJobRuntimeSettings = getValue(
     discriminator,
-    "/customizeRestoreJobRuntimeSettings"
-  );
-  watchDependency("discriminator#/customizeRestoreJobRuntimeSettings");
+    '/customizeRestoreJobRuntimeSettings',
+  )
+  watchDependency('discriminator#/customizeRestoreJobRuntimeSettings')
 
-  return !!customizeRestoreJobRuntimeSettings;
+  return !!customizeRestoreJobRuntimeSettings
 }
 
-function setCustomizeRestoreJobRuntimeSettings({model, getValue}) {
-  const runtimeSettings = getValue(model, '/resources/stashAppscodeComRestoreSession/spec/runtimeSettings')
-  return !!runtimeSettings;
+function setCustomizeRestoreJobRuntimeSettings({ model, getValue }) {
+  const runtimeSettings = getValue(
+    model,
+    '/resources/stashAppscodeComRestoreSession/spec/runtimeSettings',
+  )
+  return !!runtimeSettings
 }
 
-function onCustomizeRestoreJobRuntimeSettingsChange({discriminator, getValue}) {
-  const customizeRestoreJobRuntimeSettingsStatus = getValue(discriminator, '/customizeRestoreJobRuntimeSettings')
-  
+function onCustomizeRestoreJobRuntimeSettingsChange({ discriminator, getValue }) {
+  const customizeRestoreJobRuntimeSettingsStatus = getValue(
+    discriminator,
+    '/customizeRestoreJobRuntimeSettings',
+  )
+
   if (customizeRestoreJobRuntimeSettingsStatus === false) {
-    commit("wizard/model$delete", "/spec/runtimeSettings");
+    commit('wizard/model$delete', '/spec/runtimeSettings')
   }
 }
 
 function setSnapshot({ model, getValue }) {
-  const snapshot = getValue(model, '/resources/stashAppscodeComRestoreSession/spec/rules/0/snapshots/0')
+  const snapshot = getValue(
+    model,
+    '/resources/stashAppscodeComRestoreSession/spec/rules/0/snapshots/0',
+  )
   return snapshot || ''
 }
 
@@ -352,8 +338,8 @@ function onSnapshotChange({ commit, getValue, discriminator }) {
   const snapshot = getValue(discriminator, '/snapshot')
   commit('wizard/model$update', {
     path: '/resources/stashAppscodeComRestoreSession/spec/rules',
-    value: [{snapshot: [snapshot]}],
-    force: true
+    value: [{ snapshot: [snapshot] }],
+    force: true,
   })
 }
 
@@ -372,5 +358,5 @@ return {
   setCustomizeRestoreJobRuntimeSettings,
   onCustomizeRestoreJobRuntimeSettingsChange,
   setSnapshot,
-  onSnapshotChange
-};
+  onSnapshotChange,
+}

@@ -1,88 +1,79 @@
 async function fetchJsons({ axios, itemCtx }) {
-  let ui = {};
-  let language = {};
-  let functions = {};
-  const { name, sourceRef, version, packageviewUrlPrefix } = itemCtx.chart;
-  
+  let ui = {}
+  let language = {}
+  let functions = {}
+  const { name, sourceRef, version, packageviewUrlPrefix } = itemCtx.chart
+
   try {
     ui = await axios.get(
-      `${packageviewUrlPrefix}/create-ui.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`
-    );
+      `${packageviewUrlPrefix}/create-ui.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`,
+    )
     language = await axios.get(
-      `${packageviewUrlPrefix}/language.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`
-    );
+      `${packageviewUrlPrefix}/language.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`,
+    )
     const functionString = await axios.get(
-      `${packageviewUrlPrefix}/functions.js?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}`
-    );
+      `${packageviewUrlPrefix}/functions.js?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}`,
+    )
     // declare evaluate the functionString to get the functions Object
-    const evalFunc = new Function(functionString.data || "");
-    functions = evalFunc();
+    const evalFunc = new Function(functionString.data || '')
+    functions = evalFunc()
   } catch (e) {
-    console.log(e);
+    console.log(e)
   }
 
   return {
     ui: ui.data || {},
     language: language.data || {},
     functions,
-  };
+  }
 }
 
 function returnFalse() {
-  return false;
+  return false
 }
 
 async function getNamespaces({ axios, storeGet }) {
-  const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/route/params/cluster");
+  const owner = storeGet('/route/params/user')
+  const cluster = storeGet('/route/params/cluster')
 
-  const resp = await axios.get(
-    `/clusters/${owner}/${cluster}/proxy/core/v1/namespaces`,
-    {
-      params: { filter: { items: { metadata: { name: null } } } },
-    }
-  );
+  const resp = await axios.get(`/clusters/${owner}/${cluster}/proxy/core/v1/namespaces`, {
+    params: { filter: { items: { metadata: { name: null } } } },
+  })
 
-  const resources = (resp && resp.data && resp.data.items) || [];
+  const resources = (resp && resp.data && resp.data.items) || []
 
   return resources.map((item) => {
-    const name = (item.metadata && item.metadata.name) || "";
+    const name = (item.metadata && item.metadata.name) || ''
     return {
       text: name,
       value: name,
-    };
-  });
+    }
+  })
 }
 
-async function getVaults({
-  axios,
-  storeGet,
-  model,
-  getValue,
-  watchDependency,
-}) {
-  const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/route/params/cluster");
+async function getVaults({ axios, storeGet, model, getValue, watchDependency }) {
+  const owner = storeGet('/route/params/user')
+  const cluster = storeGet('/route/params/cluster')
 
-  const namespace = getValue(model, "/metadata/namespace");
-  watchDependency("model#/metadata/namespace");
+  const namespace = getValue(model, '/metadata/namespace')
+  watchDependency('model#/metadata/namespace')
 
   const resp = await axios.get(
     `/clusters/${owner}/${cluster}/proxy/kubevault.com/v1alpha2/namespaces/${namespace}/vaultservers`,
     {
       params: { filter: { items: { metadata: { name: null } } } },
-    }
-  );
+    },
+  )
 
-  const resources = (resp && resp.data && resp.data.items) || [];
+  const resources = (resp && resp.data && resp.data.items) || []
 
   return resources.map((item) => {
-    const name = (item.metadata && item.metadata.name) || "";
+    const name = (item.metadata && item.metadata.name) || ''
     return {
       text: name,
       value: name,
-    };
-  });
+    }
+  })
 }
 
 async function getVaultDetails({
@@ -91,381 +82,342 @@ async function getVaultDetails({
   model,
   getValue,
   watchDependency,
-  setDiscriminatorValue
+  setDiscriminatorValue,
 }) {
-  const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/route/params/cluster");
+  const owner = storeGet('/route/params/user')
+  const cluster = storeGet('/route/params/cluster')
 
-  const namespace = getValue(model, "/metadata/namespace");
-  watchDependency("model#/metadata/namespace");
-  const name = getValue(model, "/spec/vaultRef/name");
-  watchDependency("model#/spec/vaultRef/name");
+  const namespace = getValue(model, '/metadata/namespace')
+  watchDependency('model#/metadata/namespace')
+  const name = getValue(model, '/spec/vaultRef/name')
+  watchDependency('model#/spec/vaultRef/name')
 
   if (namespace && name) {
     const resp = await axios.get(
-      `/clusters/${owner}/${cluster}/proxy/kubevault.com/v1alpha2/namespaces/${namespace}/vaultservers/${name}`
-    );
+      `/clusters/${owner}/${cluster}/proxy/kubevault.com/v1alpha2/namespaces/${namespace}/vaultservers/${name}`,
+    )
 
-    setDiscriminatorValue("/vaultDetails", resp.data || {});
+    setDiscriminatorValue('/vaultDetails', resp.data || {})
 
-    return resp.data || {};
-  } else return {};
+    return resp.data || {}
+  } else return {}
 }
 
-function ifRequestTypeEqualsTo(
-  { model, getValue, watchDependency },
-  type
-) {
-  const selectedType = getValue(model, "/spec/type");
-  watchDependency("model#/spec/type");
+function ifRequestTypeEqualsTo({ model, getValue, watchDependency }, type) {
+  const selectedType = getValue(model, '/spec/type')
+  watchDependency('model#/spec/type')
 
-  return selectedType === type;
+  return selectedType === type
 }
 
 function onRequestTypeChange({ model, getValue, commit }) {
-  const selectedType = getValue(model, "/spec/type");
+  const selectedType = getValue(model, '/spec/type')
   const reqTypeMapping = {
-    Restart: "restart",
-    ReconfigureTLS: "tls",
-  };
+    Restart: 'restart',
+    ReconfigureTLS: 'tls',
+  }
 
   Object.keys(reqTypeMapping).forEach((key) => {
-    if (key !== selectedType)
-      commit("wizard/model$delete", `/spec/${reqTypeMapping[key]}`);
-  });
+    if (key !== selectedType) commit('wizard/model$delete', `/spec/${reqTypeMapping[key]}`)
+  })
 }
 
-function getVaultTls({
-  discriminator,
-  getValue,
-  watchDependency,
-}) {
-  watchDependency("discriminator#/vaultDetails");
-  const vaultDetails = getValue(discriminator, "/vaultDetails");
+function getVaultTls({ discriminator, getValue, watchDependency }) {
+  watchDependency('discriminator#/vaultDetails')
+  const vaultDetails = getValue(discriminator, '/vaultDetails')
 
-  const { spec } = vaultDetails || {};
-  return spec?.tls || undefined;
+  const { spec } = vaultDetails || {}
+  return spec?.tls || undefined
 }
 
 function initNamespace({ route }) {
-  const { namespace } = route.query || {};
-  return namespace || null;
+  const { namespace } = route.query || {}
+  return namespace || null
 }
 
 function initVaultRef({ route, watchDependency }) {
-  watchDependency("model#/metadata/namespace");
-  const { name } = route.query || {};
-  return name;
+  watchDependency('model#/metadata/namespace')
+  const { name } = route.query || {}
+  return name
 }
 
-function isEqualToValueFromType(
-  { discriminator, getValue, watchDependency },
-  value
-) {
-  watchDependency("discriminator#/valueFromType");
-  const valueFrom = getValue(discriminator, "/valueFromType");
-  return valueFrom === value;
+function isEqualToValueFromType({ discriminator, getValue, watchDependency }, value) {
+  watchDependency('discriminator#/valueFromType')
+  const valueFrom = getValue(discriminator, '/valueFromType')
+  return valueFrom === value
 }
 
-async function getNamespacedResourceList(
-  axios,
-  storeGet,
-  { namespace, group, version, resource }
-) {
-  const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/route/params/cluster");
+async function getNamespacedResourceList(axios, storeGet, { namespace, group, version, resource }) {
+  const owner = storeGet('/route/params/user')
+  const cluster = storeGet('/route/params/cluster')
 
-  const url = `/clusters/${owner}/${cluster}/proxy/${group}/${version}/namespaces/${namespace}/${resource}`;
+  const url = `/clusters/${owner}/${cluster}/proxy/${group}/${version}/namespaces/${namespace}/${resource}`
 
-  let ans = [];
+  let ans = []
   try {
     const resp = await axios.get(url, {
       params: {
         filter: { items: { metadata: { name: null }, type: null } },
       },
-    });
+    })
 
-    const items = (resp && resp.data && resp.data.items) || [];
-    ans = items;
+    const items = (resp && resp.data && resp.data.items) || []
+    ans = items
   } catch (e) {
-    console.log(e);
+    console.log(e)
   }
 
-  return ans;
+  return ans
 }
-async function getResourceList(
-  axios,
-  storeGet,
-  { group, version, resource }
-) {
-  const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/route/params/cluster");
+async function getResourceList(axios, storeGet, { group, version, resource }) {
+  const owner = storeGet('/route/params/user')
+  const cluster = storeGet('/route/params/cluster')
 
-  const url = `/clusters/${owner}/${cluster}/proxy/${group}/${version}/${resource}`;
+  const url = `/clusters/${owner}/${cluster}/proxy/${group}/${version}/${resource}`
 
-  let ans = [];
+  let ans = []
   try {
     const resp = await axios.get(url, {
       params: {
         filter: { items: { metadata: { name: null }, type: null } },
       },
-    });
+    })
 
-    const items = (resp && resp.data && resp.data.items) || [];
-    ans = items;
+    const items = (resp && resp.data && resp.data.items) || []
+    ans = items
   } catch (e) {
-    console.log(e);
+    console.log(e)
   }
 
-  return ans;
+  return ans
 }
 async function resourceNames(
   { axios, getValue, model, watchDependency, storeGet },
   group,
   version,
-  resource
+  resource,
 ) {
-  const namespace = getValue(model, "/metadata/namespace");
-  watchDependency("model#/metadata/namespace");
+  const namespace = getValue(model, '/metadata/namespace')
+  watchDependency('model#/metadata/namespace')
 
   let resources = await getNamespacedResourceList(axios, storeGet, {
     namespace,
     group,
     version,
     resource,
-  });
+  })
 
-  if (resource === "secrets") {
+  if (resource === 'secrets') {
     resources = resources.filter((item) => {
-      const validType = ["kubernetes.io/service-account-token", "Opaque"];
-      return validType.includes(item.type);
-    });
+      const validType = ['kubernetes.io/service-account-token', 'Opaque']
+      return validType.includes(item.type)
+    })
   }
 
   return resources.map((resource) => {
-    const name = (resource.metadata && resource.metadata.name) || "";
+    const name = (resource.metadata && resource.metadata.name) || ''
     return {
       text: name,
       value: name,
-    };
-  });
+    }
+  })
 }
-async function unNamespacedResourceNames(
-  { axios, storeGet },
-  group,
-  version,
-  resource
-) {
+async function unNamespacedResourceNames({ axios, storeGet }, group, version, resource) {
   let resources = await getResourceList(axios, storeGet, {
     group,
     version,
     resource,
-  });
+  })
 
-  if (resource === "secrets") {
+  if (resource === 'secrets') {
     resources = resources.filter((item) => {
-      const validType = ["kubernetes.io/service-account-token", "Opaque"];
-      return validType.includes(item.type);
-    });
+      const validType = ['kubernetes.io/service-account-token', 'Opaque']
+      return validType.includes(item.type)
+    })
   }
 
   return resources.map((resource) => {
-    const name = (resource.metadata && resource.metadata.name) || "";
+    const name = (resource.metadata && resource.metadata.name) || ''
     return {
       text: name,
       value: name,
-    };
-  });
+    }
+  })
 }
 
 // for tls
-function hasTlsField({
-  discriminator,
-  getValue,
-  watchDependency,
-}) {
+function hasTlsField({ discriminator, getValue, watchDependency }) {
   const tls = getVaultTls({
     discriminator,
     getValue,
     watchDependency,
-  });
+  })
 
-  return !!tls;
+  return !!tls
 }
 
 function initIssuerRefApiGroup({ getValue, model, watchDependency, discriminator }) {
-  const kind = getValue(model, "/spec/tls/issuerRef/kind");
-  watchDependency("model#/spec/tls/issuerRef/kind");
+  const kind = getValue(model, '/spec/tls/issuerRef/kind')
+  watchDependency('model#/spec/tls/issuerRef/kind')
 
   if (kind) {
-    const apiGroup = getValue(discriminator, "/vaultDetails/spec/tls/issuerRef/apiGroup");
-    if(apiGroup) return apiGroup;
-    return "cert-manager.io";
-  } else return undefined;
+    const apiGroup = getValue(discriminator, '/vaultDetails/spec/tls/issuerRef/apiGroup')
+    if (apiGroup) return apiGroup
+    return 'cert-manager.io'
+  } else return undefined
 }
 
-async function getIssuerRefsName({
-  axios,
-  storeGet,
-  getValue,
-  model,
-  watchDependency,
-}) {
-  const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/route/params/cluster");
-  watchDependency("model#/spec/tls/issuerRef/apiGroup");
-  watchDependency("model#/spec/tls/issuerRef/kind");
-  watchDependency("model#/metadata/namespace");
-  const apiGroup = getValue(model, "/spec/tls/issuerRef/apiGroup");
-  const kind = getValue(model, "/spec/tls/issuerRef/kind");
-  const namespace = getValue(model, "/metadata/namespace");
+async function getIssuerRefsName({ axios, storeGet, getValue, model, watchDependency }) {
+  const owner = storeGet('/route/params/user')
+  const cluster = storeGet('/route/params/cluster')
+  watchDependency('model#/spec/tls/issuerRef/apiGroup')
+  watchDependency('model#/spec/tls/issuerRef/kind')
+  watchDependency('model#/metadata/namespace')
+  const apiGroup = getValue(model, '/spec/tls/issuerRef/apiGroup')
+  const kind = getValue(model, '/spec/tls/issuerRef/kind')
+  const namespace = getValue(model, '/metadata/namespace')
 
-  let url;
-  if (kind === "Issuer") {
-    url = `/clusters/${owner}/${cluster}/proxy/${apiGroup}/v1/namespaces/${namespace}/issuers`;
-  } else if (kind === "ClusterIssuer") {
-    url = `/clusters/${owner}/${cluster}/proxy/${apiGroup}/v1/clusterissuers`;
+  let url
+  if (kind === 'Issuer') {
+    url = `/clusters/${owner}/${cluster}/proxy/${apiGroup}/v1/namespaces/${namespace}/issuers`
+  } else if (kind === 'ClusterIssuer') {
+    url = `/clusters/${owner}/${cluster}/proxy/${apiGroup}/v1/clusterissuers`
   }
 
   if (!url) return []
 
-  if(url && apiGroup && namespace) {
+  if (url && apiGroup && namespace) {
     try {
-      const resp = await axios.get(url);
+      const resp = await axios.get(url)
 
-      const resources = (resp && resp.data && resp.data.items) || [];
+      const resources = (resp && resp.data && resp.data.items) || []
 
       resources.map((item) => {
-        const name = (item.metadata && item.metadata.name) || "";
-        item.text = name;
-        item.value = name;
-        return true;
-      });
-      return resources;
+        const name = (item.metadata && item.metadata.name) || ''
+        item.text = name
+        item.value = name
+        return true
+      })
+      return resources
     } catch (e) {
-    console.log(e);
-    return [];
+      console.log(e)
+      return []
     }
   } else {
-    return [];
+    return []
   }
 }
 
 function initTlsOperation() {
-  return "update";
+  return 'update'
 }
 function onTlsOperationChange({ discriminator, getValue, commit }) {
-  const tlsOperation = getValue(discriminator, "/tlsOperation");
+  const tlsOperation = getValue(discriminator, '/tlsOperation')
 
-  commit("wizard/model$delete", "/spec/tls");
+  commit('wizard/model$delete', '/spec/tls')
 
-  if (tlsOperation === "rotate") {
-    commit("wizard/model$update", {
-      path: "/spec/tls/rotateCertificates",
+  if (tlsOperation === 'rotate') {
+    commit('wizard/model$update', {
+      path: '/spec/tls/rotateCertificates',
       value: true,
       force: true,
-    });
-    commit("wizard/model$delete", "/spec/tls/certificates");
-    commit("wizard/model$delete", "/spec/tls/remove");
-  } else if (tlsOperation === "remove") {
-    commit("wizard/model$update", {
-      path: "/spec/tls/remove",
+    })
+    commit('wizard/model$delete', '/spec/tls/certificates')
+    commit('wizard/model$delete', '/spec/tls/remove')
+  } else if (tlsOperation === 'remove') {
+    commit('wizard/model$update', {
+      path: '/spec/tls/remove',
       value: true,
       force: true,
-    });
-    commit("wizard/model$delete", "/spec/tls/certificates");
-    commit("wizard/model$delete", "/spec/tls/rotateCertificates");
+    })
+    commit('wizard/model$delete', '/spec/tls/certificates')
+    commit('wizard/model$delete', '/spec/tls/rotateCertificates')
   }
 }
 
-function showIssuerRefAndCertificates({
-  discriminator,
-  getValue,
-  watchDependency,
-}) {
-  const tlsOperation = getValue(discriminator, "/tlsOperation");
-  watchDependency("discriminator#/tlsOperation");
-  const verd = tlsOperation !== "remove" && tlsOperation !== "rotate";
+function showIssuerRefAndCertificates({ discriminator, getValue, watchDependency }) {
+  const tlsOperation = getValue(discriminator, '/tlsOperation')
+  watchDependency('discriminator#/tlsOperation')
+  const verd = tlsOperation !== 'remove' && tlsOperation !== 'rotate'
 
-  return verd;
+  return verd
 }
 
-function isIssuerRefRequired({
-  discriminator,
-  getValue,
-  watchDependency,
-}) {
+function isIssuerRefRequired({ discriminator, getValue, watchDependency }) {
   const hasTls = hasTlsField({
     discriminator,
     getValue,
     watchDependency,
-  });
+  })
 
-  return !hasTls;
+  return !hasTls
 }
 
 function getRequestTypeFromRoute({ route, model, discriminator, getValue, watchDependency }) {
-  const isDbloading = isVaultDetailsLoading({discriminator, model, getValue, watchDependency});
-  const { query } = route || {};
-  const { requestType } = query || {};
-  return isDbloading ? "" : requestType || "";
+  const isDbloading = isVaultDetailsLoading({ discriminator, model, getValue, watchDependency })
+  const { query } = route || {}
+  const { requestType } = query || {}
+  return isDbloading ? '' : requestType || ''
 }
 
 // ************************************** Set db details *****************************************
 
-function isVaultDetailsLoading({discriminator, model, getValue, watchDependency}) {
-  watchDependency("discriminator#/vaultDetails");
-  watchDependency("model#/spec/vaultRef/name");
-  const vaultDetails = getValue(discriminator, "/vaultDetails");
-  const dbName = getValue(model, "/spec/vaultRef/name");
-  
-  return !vaultDetails || !dbName;
+function isVaultDetailsLoading({ discriminator, model, getValue, watchDependency }) {
+  watchDependency('discriminator#/vaultDetails')
+  watchDependency('model#/spec/vaultRef/name')
+  const vaultDetails = getValue(discriminator, '/vaultDetails')
+  const dbName = getValue(model, '/spec/vaultRef/name')
+
+  return !vaultDetails || !dbName
 }
 
-function setValueFromVaultDetails({discriminator, getValue, watchDependency, commit}, path, commitPath) {
-  watchDependency("discriminator#/vaultDetails");
+function setValueFromVaultDetails(
+  { discriminator, getValue, watchDependency, commit },
+  path,
+  commitPath,
+) {
+  watchDependency('discriminator#/vaultDetails')
 
-  const retValue = getValue(discriminator, `/vaultDetails${path}`);
+  const retValue = getValue(discriminator, `/vaultDetails${path}`)
 
-  if(commitPath && retValue) {
-    const tlsOperation = getValue(discriminator, "/tlsOperation");
-    
+  if (commitPath && retValue) {
+    const tlsOperation = getValue(discriminator, '/tlsOperation')
+
     // computed called when tls fields is not visible
-    if(commitPath.includes("/spec/tls") && tlsOperation !== "update")
-      return undefined; 
+    if (commitPath.includes('/spec/tls') && tlsOperation !== 'update') return undefined
 
     // direct model update required for reusable element.
     // computed property is not applicable for reusable element
-    commit("wizard/model$update", {
+    commit('wizard/model$update', {
       path: commitPath,
       value: retValue,
-      force: true
-    });
+      force: true,
+    })
   }
 
-  return retValue || undefined;
+  return retValue || undefined
 }
 
 function getAliasOptions() {
-  return ["server", "client", "storage"];
+  return ['server', 'client', 'storage']
 }
 
 function isNamespaceDisabled({ route }) {
-  const { namespace } = route.query || {};
-  return !!namespace;
+  const { namespace } = route.query || {}
+  return !!namespace
 }
 
 function isVaultRefDisabled({ route }) {
-  const { name } = route.query || {};
-  return !!name;
+  const { name } = route.query || {}
+  return !!name
 }
 
-function onNamespaceChange({commit}) {
-  commit("wizard/model$delete", "/spec/type");
+function onNamespaceChange({ commit }) {
+  commit('wizard/model$delete', '/spec/type')
 }
 
-function onVaultChange({commit}) {
-  commit("wizard/model$delete", "/spec/type");
+function onVaultChange({ commit }) {
+  commit('wizard/model$delete', '/spec/type')
 }
 
 return {
@@ -499,4 +451,4 @@ return {
   isVaultRefDisabled,
   onNamespaceChange,
   onVaultChange,
-};
+}

@@ -1,160 +1,148 @@
 async function fetchJsons({ axios, itemCtx }) {
-  let ui = {};
-  let language = {};
-  let functions = {};
-  const { name, sourceRef, version, packageviewUrlPrefix } = itemCtx.chart;
+  let ui = {}
+  let language = {}
+  let functions = {}
+  const { name, sourceRef, version, packageviewUrlPrefix } = itemCtx.chart
 
   try {
     ui = await axios.get(
-      `${packageviewUrlPrefix}/create-ui.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`
-    );
+      `${packageviewUrlPrefix}/create-ui.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`,
+    )
     language = await axios.get(
-      `${packageviewUrlPrefix}/language.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`
-    );
+      `${packageviewUrlPrefix}/language.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`,
+    )
     const functionString = await axios.get(
-      `${packageviewUrlPrefix}/functions.js?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}`
-    );
+      `${packageviewUrlPrefix}/functions.js?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}`,
+    )
     // declare evaluate the functionString to get the functions Object
-    const evalFunc = new Function(functionString.data || "");
-    functions = evalFunc();
+    const evalFunc = new Function(functionString.data || '')
+    functions = evalFunc()
   } catch (e) {
-    console.log(e);
+    console.log(e)
   }
 
   return {
     ui: ui.data || {},
     language: language.data || {},
     functions,
-  };
+  }
 }
 
 async function resourceNames(
   { axios, watchDependency, storeGet, reusableElementCtx },
   group,
   version,
-  resource
+  resource,
 ) {
-  const { dataContext } = reusableElementCtx;
-  const { namespace } = dataContext;
-  watchDependency("data#/namespace");
+  const { dataContext } = reusableElementCtx
+  const { namespace } = dataContext
+  watchDependency('data#/namespace')
 
   let resources = await getNamespacedResourceList(axios, storeGet, {
     namespace,
     group,
     version,
     resource,
-  });
+  })
 
-  if (resource === "secrets") {
+  if (resource === 'secrets') {
     resources = resources.filter((item) => {
-      const validType = ["kubernetes.io/service-account-token", "Opaque"];
-      return validType.includes(item.type);
-    });
+      const validType = ['kubernetes.io/service-account-token', 'Opaque']
+      return validType.includes(item.type)
+    })
   }
 
   return resources.map((resource) => {
-    const name = (resource.metadata && resource.metadata.name) || "";
+    const name = (resource.metadata && resource.metadata.name) || ''
     return {
       text: name,
       value: name,
-    };
-  });
+    }
+  })
 }
 
-async function getNamespacedResourceList(
-  axios,
-  storeGet,
-  { namespace, group, version, resource }
-) {
-  const owner = storeGet("/route/params/user");
-  const cluster = storeGet("route/params/cluster");
+async function getNamespacedResourceList(axios, storeGet, { namespace, group, version, resource }) {
+  const owner = storeGet('/route/params/user')
+  const cluster = storeGet('route/params/cluster')
 
-  const url = `/clusters/${owner}/${cluster}/proxy/${group}/${version}/namespaces/${namespace}/${resource}`;
+  const url = `/clusters/${owner}/${cluster}/proxy/${group}/${version}/namespaces/${namespace}/${resource}`
 
-  let ans = [];
+  let ans = []
   try {
     const resp = await axios.get(url, {
       params: {
         filter: { items: { metadata: { name: null }, type: null } },
       },
-    });
+    })
 
-    const items = (resp && resp.data && resp.data.items) || [];
-    ans = items;
+    const items = (resp && resp.data && resp.data.items) || []
+    ans = items
   } catch (e) {
-    console.log(e);
+    console.log(e)
   }
 
-  return ans;
+  return ans
 }
 
-function showAdditionalPodRuntimeSettingsForm({
-  discriminator,
-  getValue,
-  watchDependency,
-}) {
+function showAdditionalPodRuntimeSettingsForm({ discriminator, getValue, watchDependency }) {
   const customizeAdditionalPodRuntimeSettings = getValue(
     discriminator,
-    "/customizeAdditionalPodRuntimeSettings"
-  );
-  watchDependency("discriminator#/customizeAdditionalPodRuntimeSettings");
+    '/customizeAdditionalPodRuntimeSettings',
+  )
+  watchDependency('discriminator#/customizeAdditionalPodRuntimeSettings')
 
-  return !!customizeAdditionalPodRuntimeSettings;
+  return !!customizeAdditionalPodRuntimeSettings
 }
 
-function onAdditionalPodRuntimeSettingsSwitchChange({
-  discriminator,
-  getValue,
-  commit,
-}) {
+function onAdditionalPodRuntimeSettingsSwitchChange({ discriminator, getValue, commit }) {
   const customizeAdditionalPodRuntimeSettings = getValue(
     discriminator,
-    "/customizeAdditionalPodRuntimeSettings"
-  );
+    '/customizeAdditionalPodRuntimeSettings',
+  )
 
   if (customizeAdditionalPodRuntimeSettings === false) {
     // remove additional runtime settings properties
-    commit("wizard/model$delete", "/pod/nodeName");
-    commit("wizard/model$delete", "/pod/podAnnotations");
-    commit("wizard/model$delete", "/pod/nodeSelector");
-    commit("wizard/model$delete", "/pod/affinity");
-    commit("wizard/model$delete", "/pod/tolerations");
+    commit('wizard/model$delete', '/pod/nodeName')
+    commit('wizard/model$delete', '/pod/podAnnotations')
+    commit('wizard/model$delete', '/pod/nodeSelector')
+    commit('wizard/model$delete', '/pod/affinity')
+    commit('wizard/model$delete', '/pod/tolerations')
   }
 }
 
-function setAdditionalPodRuntimeSettingsSwitch({model, getValue}) {
+function setAdditionalPodRuntimeSettingsSwitch({ model, getValue }) {
   const pod = getValue(model, '/pod')
 
-  const { nodeName, podAnnotations, nodeSelector, affinity, tolerations } = pod || {};
+  const { nodeName, podAnnotations, nodeSelector, affinity, tolerations } = pod || {}
 
-  return !!(nodeName || podAnnotations || nodeSelector || affinity || tolerations);
+  return !!(nodeName || podAnnotations || nodeSelector || affinity || tolerations)
 }
 
 async function getNodes({ axios, storeGet }) {
-  const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/route/params/cluster");
+  const owner = storeGet('/route/params/user')
+  const cluster = storeGet('/route/params/cluster')
 
-  const url = `/clusters/${owner}/${cluster}/proxy/core/v1/nodes`;
+  const url = `/clusters/${owner}/${cluster}/proxy/core/v1/nodes`
 
-  let ans = [];
+  let ans = []
   try {
     const resp = await axios.get(url, {
       params: {
         filter: { items: { metadata: { name: null } } },
       },
-    });
+    })
 
-    const items = (resp && resp.data && resp.data.items) || [];
-    ans = items;
+    const items = (resp && resp.data && resp.data.items) || []
+    ans = items
   } catch (e) {
-    console.log(e);
+    console.log(e)
   }
 
-  return ans.map((nd) => nd.metadata.name);
+  return ans.map((nd) => nd.metadata.name)
 }
 
 function getOperatorsList() {
-  return ["In", "NotIn", "Exists", "DoesNotExist", "Gt", "Lt"];
+  return ['In', 'NotIn', 'Exists', 'DoesNotExist', 'Gt', 'Lt']
 }
 
 return {
@@ -165,5 +153,5 @@ return {
   getNodes,
   getOperatorsList,
   setAdditionalPodRuntimeSettingsSwitch,
-  onAdditionalPodRuntimeSettingsSwitchChange
-};
+  onAdditionalPodRuntimeSettingsSwitchChange,
+}

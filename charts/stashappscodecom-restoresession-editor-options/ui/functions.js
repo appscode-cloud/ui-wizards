@@ -3,14 +3,14 @@ async function getResources(
   group,
   version,
   resource,
-  namespaced
+  namespaced,
 ) {
-  const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/route/params/cluster");
-  let namespace = "";
+  const owner = storeGet('/route/params/user')
+  const cluster = storeGet('/route/params/cluster')
+  let namespace = ''
   if (namespaced) {
-    namespace = getValue(model, "/metadata/release/namespace");
-    watchDependency("model#/metadata/release/namespace");
+    namespace = getValue(model, '/metadata/release/namespace')
+    watchDependency('model#/metadata/release/namespace')
   }
 
   if (!namespaced || namespace) {
@@ -19,109 +19,106 @@ async function getResources(
     try {
       const resp = await axios.get(
         `/clusters/${owner}/${cluster}/proxy/${group}/${version}${
-          namespace ? "/namespaces/" + namespace : ""
+          namespace ? '/namespaces/' + namespace : ''
         }/${resource}`,
         {
           params: { filter: { items: { metadata: { name: null } } } },
-        }
-      );
+        },
+      )
 
-      const resources = (resp && resp.data && resp.data.items) || [];
+      const resources = (resp && resp.data && resp.data.items) || []
 
       resources.map((item) => {
-        const name = (item.metadata && item.metadata.name) || "";
-        item.text = name;
-        item.value = name;
-        return true;
-      });
-      return resources;
+        const name = (item.metadata && item.metadata.name) || ''
+        item.text = name
+        item.value = name
+        return true
+      })
+      return resources
     } catch (e) {
-      console.log(e);
-      return [];
+      console.log(e)
+      return []
     }
-  } else return [];
+  } else return []
 }
 
 function hasOperationQuery(route) {
-  const { operation } = route.query;
-  return !!operation;
+  const { operation } = route.query
+  return !!operation
 }
 function showAndInitName({ route, commit }) {
-  const ver = hasOperationQuery(route);
+  const ver = hasOperationQuery(route)
   if (ver) {
-    const { name } = route.query;
+    const { name } = route.query
 
-    commit("wizard/model$update", {
-      path: "metadata/release/name",
+    commit('wizard/model$update', {
+      path: 'metadata/release/name',
       value: `${name}-restore-${new Date().getTime()}`,
       force: true,
-    });
+    })
 
-    return false;
+    return false
   } else {
-    return true;
+    return true
   }
 }
 function showAndInitNamespace({ route, commit }) {
-  const ver = hasOperationQuery(route);
+  const ver = hasOperationQuery(route)
   if (ver) {
-    const { namespace } = route.query;
+    const { namespace } = route.query
 
-    commit("wizard/model$update", {
-      path: "metadata/release/namespace",
+    commit('wizard/model$update', {
+      path: 'metadata/release/namespace',
       value: namespace,
       force: true,
-    });
+    })
 
-    return false;
+    return false
   } else {
-    return true;
+    return true
   }
 }
-function showIfDoesNotHaveOperationQuery({route}) {
-  return !hasOperationQuery(route);
+function showIfDoesNotHaveOperationQuery({ route }) {
+  return !hasOperationQuery(route)
 }
 function initNamespace({ route }) {
-  const { namespace } = route.query || {};
-  return namespace || null;
+  const { namespace } = route.query || {}
+  return namespace || null
 }
 function isNamespaceDisabled({ route }) {
-  return !!initNamespace({ route }) || !isVariantAvailable;
+  return !!initNamespace({ route }) || !isVariantAvailable
 }
 function isDatabaseSelectDisabled({ route }) {
-  const { database } = route.query || {};
-  return !!database;
+  const { database } = route.query || {}
+  return !!database
 }
 
 function labelsDisabilityChecker({ itemCtx }) {
-  const { key } = itemCtx;
-  if (key.startsWith("app.kubernetes.io") || key.includes("helm")) return true;
-  else return false;
+  const { key } = itemCtx
+  if (key.startsWith('app.kubernetes.io') || key.includes('helm')) return true
+  else return false
 }
 
-async function fetchJsons(
-  { axios, itemCtx, setDiscriminatorValue },
-  discriminatorPath
-) {
-  let ui = {};
-  let language = {};
-  let functions = {};
-  const { name, sourceRef, version, packageviewUrlPrefix } = itemCtx.chart;
+async function fetchJsons({ axios, itemCtx, setDiscriminatorValue }, discriminatorPath) {
+  let ui = {}
+  let language = {}
+  let functions = {}
+  const { name, sourceRef, version, packageviewUrlPrefix } = itemCtx.chart
   try {
     ui = await axios.get(
-      `${packageviewUrlPrefix}/create-ui.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`
-    );
+      `${packageviewUrlPrefix}/create-ui.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`,
+    )
     language = await axios.get(
-      `${packageviewUrlPrefix}/language.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`
-    );
+      `${packageviewUrlPrefix}/language.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`,
+    )
     const functionString = await axios.get(
-      `${packageviewUrlPrefix}/functions.js?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}`
-    );
+      `${packageviewUrlPrefix}/functions.js?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}`,
+    )
     // declare evaluate the functionString to get the functions Object
-    const evalFunc = new Function(functionString.data || "");
-    functions = evalFunc();
+    const evalFunc = new Function(functionString.data || '')
+    functions = evalFunc()
   } catch (e) {
-    console.log(e);
+    console.log(e)
   }
 
   if (discriminatorPath) {
@@ -129,31 +126,24 @@ async function fetchJsons(
       ui: ui.data || {},
       language: language.data || {},
       functions,
-    });
+    })
   }
 
   return {
     ui: ui.data || {},
     language: language.data || {},
     functions,
-  };
+  }
 }
 
-let databaseToTypeMap = {};
+let databaseToTypeMap = {}
 
-async function fetchDatabases({
-  axios,
-  storeGet,
-  model,
-  getValue,
-  watchDependency,
-  commit,
-}) {
-  const owner = storeGet("/route/params/user");
-  const name = storeGet("/route/query/name");
-  const cluster = storeGet("/route/params/cluster");
-  const namespace = getValue(model, "/metadata/release/namespace");
-  watchDependency("model#/metadata/release/namespace");
+async function fetchDatabases({ axios, storeGet, model, getValue, watchDependency, commit }) {
+  const owner = storeGet('/route/params/user')
+  const name = storeGet('/route/query/name')
+  const cluster = storeGet('/route/params/cluster')
+  const namespace = getValue(model, '/metadata/release/namespace')
+  watchDependency('model#/metadata/release/namespace')
 
   if (namespace) {
     // call api if user has selected a namespace
@@ -171,21 +161,21 @@ async function fetchDatabases({
               },
             },
           },
-        }
-      );
+        },
+      )
 
-      const resources = (resp && resp.data && resp.data.items) || [];
+      const resources = (resp && resp.data && resp.data.items) || []
 
       const mappedResources = resources
         .filter((item) => {
-          const appRef = (item.spec?.appRef?.apiGroup) || "";
-          return appRef === "kubedb.com" || appRef === "kubevault.com";
+          const appRef = item.spec?.appRef?.apiGroup || ''
+          return appRef === 'kubedb.com' || appRef === 'kubevault.com'
         })
         .map((item) => {
-          const apiVersion = item.apiVersion || "";
-          const kind = item.kind || "";
-          const name = (item.metadata && item.metadata.name) || "";
-          const namespace = (item.metadata && item.metadata.namespace) || "";
+          const apiVersion = item.apiVersion || ''
+          const kind = item.kind || ''
+          const name = (item.metadata && item.metadata.name) || ''
+          const namespace = (item.metadata && item.metadata.namespace) || ''
           return {
             text: name,
             value: {
@@ -194,66 +184,58 @@ async function fetchDatabases({
               name,
               namespace,
             },
-          };
-        });
+          }
+        })
 
       // update database to type map
-      databaseToTypeMap = {};
+      databaseToTypeMap = {}
       resources.forEach((rs) => {
-        const type = (rs.spec && rs.spec.type) || "";
-        const name = (rs.metadata && rs.metadata.name) || "";
-        if (type.startsWith("kubedb.com")) {
-          databaseToTypeMap[name] = type;
+        const type = (rs.spec && rs.spec.type) || ''
+        const name = (rs.metadata && rs.metadata.name) || ''
+        if (type.startsWith('kubedb.com')) {
+          databaseToTypeMap[name] = type
         }
-      });
+      })
 
       if (name) {
         // if database name is provided in route query
         // find the option matching with database
-        const matchedOption = mappedResources.find(
-          (rs) => rs.text === name
-        );
+        const matchedOption = mappedResources.find((rs) => rs.text === name)
         if (matchedOption) {
           // set this value as target
-          commit("wizard/model$update", {
-            path: "/spec/target",
+          commit('wizard/model$update', {
+            path: '/spec/target',
             value: matchedOption.value,
             force: true,
-          });
+          })
         }
       }
 
-      return mappedResources;
+      return mappedResources
     } catch (e) {
-      console.log(e);
-      return [];
+      console.log(e)
+      return []
     }
-  } else return [];
+  } else return []
 }
 
-function showAndInitDatabase({model, getValue, watchDependency, route}) {
+function showAndInitDatabase({ model, getValue, watchDependency, route }) {
   // watch targetRef (database)
   // if provided in query, then it will be set by fetchDatabases
-  const target = getValue(model, '/spec/target');
-  watchDependency('model#/spec/target');
-  
-  const {operation} = route.query;
+  const target = getValue(model, '/spec/target')
+  watchDependency('model#/spec/target')
+
+  const { operation } = route.query
   if (target.name && operation) {
-    return false;
-  } else return true;
+    return false
+  } else return true
 }
 
-async function fetchRepositories({
-  axios,
-  storeGet,
-  model,
-  getValue,
-  watchDependency,
-}) {
-  const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/route/params/cluster");
-  const namespace = getValue(model, "/metadata/release/namespace");
-  watchDependency("model#/metadata/release/namespace");
+async function fetchRepositories({ axios, storeGet, model, getValue, watchDependency }) {
+  const owner = storeGet('/route/params/user')
+  const cluster = storeGet('/route/params/cluster')
+  const namespace = getValue(model, '/metadata/release/namespace')
+  watchDependency('model#/metadata/release/namespace')
 
   if (namespace) {
     // call api if user has selected a namespace
@@ -268,69 +250,64 @@ async function fetchRepositories({
               },
             },
           },
-        }
-      );
+        },
+      )
 
-      const resources = (resp && resp.data && resp.data.items) || [];
+      const resources = (resp && resp.data && resp.data.items) || []
 
       const mappedResources = resources.map((item) => {
-        const name = (item.metadata && item.metadata.name) || "";
-        const namespace = (item.metadata && item.metadata.namespace) || "";
+        const name = (item.metadata && item.metadata.name) || ''
+        const namespace = (item.metadata && item.metadata.namespace) || ''
         return {
           text: name,
           value: {
             name,
             namespace,
           },
-        };
-      });
+        }
+      })
 
-      return mappedResources;
+      return mappedResources
     } catch (e) {
-      console.log(e);
-      return [];
+      console.log(e)
+      return []
     }
-  } else return [];
+  } else return []
 }
 
 function valueExists(value, getValue, path) {
-  const val = getValue(value, path);
-  if (val) return true;
-  else return false;
+  const val = getValue(value, path)
+  if (val) return true
+  else return false
 }
 
-function showInterimVolumneTemplate({
-  model,
-  getValue,
-  watchDependency,
-  commit,
-}) {
-  const appbindingName = getValue(model, "/spec/target/name");
-  watchDependency("model#/spec/target/name");
+function showInterimVolumneTemplate({ model, getValue, watchDependency, commit }) {
+  const appbindingName = getValue(model, '/spec/target/name')
+  watchDependency('model#/spec/target/name')
 
-  let verdict = false;
+  let verdict = false
   if (appbindingName) {
     // find app binding type
-    const type = databaseToTypeMap[appbindingName];
-    if (type === "kubedb.com/elasticsearch") verdict = true;
+    const type = databaseToTypeMap[appbindingName]
+    if (type === 'kubedb.com/elasticsearch') verdict = true
   }
 
   if (!verdict) {
     // delete interimVolumeTempalte if it exists
-    if (valueExists(model, getValue, "/spec/interimVolumeTemplate")) {
-      commit("wizard/model$delete", "/spec/interimVolumeTemplate");
+    if (valueExists(model, getValue, '/spec/interimVolumeTemplate')) {
+      commit('wizard/model$delete', '/spec/interimVolumeTemplate')
     }
   }
 
-  return verdict;
+  return verdict
 }
 
 async function getStorageClassNames(
   { axios, storeGet, commit, setDiscriminatorValue, getValue, model },
-  path
+  path,
 ) {
-  const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/route/params/cluster");
+  const owner = storeGet('/route/params/user')
+  const cluster = storeGet('/route/params/cluster')
 
   const resp = await axios.get(
     `/clusters/${owner}/${cluster}/proxy/storage.k8s.io/v1/storageclasses`,
@@ -338,98 +315,90 @@ async function getStorageClassNames(
       params: {
         filter: { items: { metadata: { name: null, annotations: null } } },
       },
-    }
-  );
+    },
+  )
 
-  const resources = (resp && resp.data && resp.data.items) || [];
+  const resources = (resp && resp.data && resp.data.items) || []
 
   resources.map((item) => {
-    const name = (item.metadata && item.metadata.name) || "";
+    const name = (item.metadata && item.metadata.name) || ''
     const isDefault =
       item.metadata &&
       item.metadata.annotations &&
-      item.metadata.annotations["storageclass.kubernetes.io/is-default-class"];
+      item.metadata.annotations['storageclass.kubernetes.io/is-default-class']
 
     if (isDefault && path) {
-      const className = getValue(model, path);
+      const className = getValue(model, path)
       if (!className) {
-        commit("wizard/model$update", {
+        commit('wizard/model$update', {
           path: path,
           value: name,
           force: true,
-        });
+        })
       }
     }
 
-    item.text = name;
-    item.value = name;
-    return true;
-  });
+    item.text = name
+    item.value = name
+    return true
+  })
 
   if (!path) {
-    setDiscriminatorValue("/storageClasses", resources);
+    setDiscriminatorValue('/storageClasses', resources)
   }
 
-  return resources;
+  return resources
 }
 
 const restoreSessionInitRunTimeSettings = {
   pod: {
-    serviceAccountName: "",
+    serviceAccountName: '',
     securityContext: {
       fsGroup: null,
       runAsUser: null,
       runAsGroup: null,
     },
   },
-};
-function showRuntimeSettingsForm({
-  discriminator,
-  getValue,
-  watchDependency,
-  commit,
-  model,
-}) {
+}
+function showRuntimeSettingsForm({ discriminator, getValue, watchDependency, commit, model }) {
   const customizeRestoreJobRuntimeSettings = getValue(
     discriminator,
-    "/customizeRestoreJobRuntimeSettings"
-  );
-  watchDependency("discriminator#/customizeRestoreJobRuntimeSettings");
+    '/customizeRestoreJobRuntimeSettings',
+  )
+  watchDependency('discriminator#/customizeRestoreJobRuntimeSettings')
 
   if (customizeRestoreJobRuntimeSettings) {
     // set the runtime settings values with default values
-    if (!valueExists(model, getValue, "/spec/runtimeSettings")) {
+    if (!valueExists(model, getValue, '/spec/runtimeSettings')) {
       // set new value
-      commit("wizard/model$update", {
-        path: "/spec/runtimeSettings",
+      commit('wizard/model$update', {
+        path: '/spec/runtimeSettings',
         value: restoreSessionInitRunTimeSettings,
-      });
+      })
     }
   } else {
-    commit("wizard/model$delete", "/spec/runtimeSettings");
+    commit('wizard/model$delete', '/spec/runtimeSettings')
   }
-  return !!customizeRestoreJobRuntimeSettings;
+  return !!customizeRestoreJobRuntimeSettings
 }
 
-function getCreateNameSpaceUrl ({ model, getValue, storeGet }){ 
+function getCreateNameSpaceUrl({ model, getValue, storeGet }) {
+  const user = storeGet('/route/params/user')
+  const cluster = storeGet('/route/params/cluster')
 
-  const user = storeGet("/route/params/user");
-  const cluster = storeGet("/route/params/cluster");
-
-  const domain = storeGet("/domain") || '';
-  if(domain.includes("bb.test")){
+  const domain = storeGet('/domain') || ''
+  if (domain.includes('bb.test')) {
     return `http://console.bb.test:5990/${user}/kubernetes/${cluster}/core/v1/namespaces/create`
-  }else{
-    const editedDomain = domain.replace("kubedb","console");
+  } else {
+    const editedDomain = domain.replace('kubedb', 'console')
     return `${editedDomain}/${user}/kubernetes/${cluster}/core/v1/namespaces/create`
   }
 }
 
-function isVariantAvailable ({storeGet})  {
-  const variant = storeGet("/route/query/variant");
+function isVariantAvailable({ storeGet }) {
+  const variant = storeGet('/route/query/variant')
   return variant ? true : false
 }
-
 
 return {
   isVariantAvailable,
@@ -438,21 +407,21 @@ return {
   showAndInitName,
   showAndInitNamespace,
   showIfDoesNotHaveOperationQuery,
-  
+
   initNamespace,
   isNamespaceDisabled,
   isDatabaseSelectDisabled,
   labelsDisabilityChecker,
   fetchJsons,
-  
+
   fetchDatabases,
   showAndInitDatabase,
-  
+
   fetchRepositories,
 
   showInterimVolumneTemplate,
   getStorageClassNames,
 
   showRuntimeSettingsForm,
-  getCreateNameSpaceUrl
-};
+  getCreateNameSpaceUrl,
+}

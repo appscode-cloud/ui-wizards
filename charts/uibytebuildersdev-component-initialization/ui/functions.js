@@ -1,28 +1,24 @@
-
 // ********************************* Initialization & Backup *************************************
-async function fetchJsons(
-  { axios, itemCtx, setDiscriminatorValue },
-  discriminatorPath
-) {
-  let ui = {};
-  let language = {};
-  let functions = {};
-  const { name, sourceRef, version, packageviewUrlPrefix } = itemCtx.chart;
+async function fetchJsons({ axios, itemCtx, setDiscriminatorValue }, discriminatorPath) {
+  let ui = {}
+  let language = {}
+  let functions = {}
+  const { name, sourceRef, version, packageviewUrlPrefix } = itemCtx.chart
   try {
     ui = await axios.get(
-      `${packageviewUrlPrefix}/create-ui.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`
-    );
+      `${packageviewUrlPrefix}/create-ui.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`,
+    )
     language = await axios.get(
-      `${packageviewUrlPrefix}/language.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`
-    );
+      `${packageviewUrlPrefix}/language.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`,
+    )
     const functionString = await axios.get(
-      `${packageviewUrlPrefix}/functions.js?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}`
-    );
+      `${packageviewUrlPrefix}/functions.js?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}`,
+    )
     // declare evaluate the functionString to get the functions Object
-    const evalFunc = new Function(functionString.data || "");
-    functions = evalFunc();
+    const evalFunc = new Function(functionString.data || '')
+    functions = evalFunc()
   } catch (e) {
-    console.log(e);
+    console.log(e)
   }
 
   if (discriminatorPath) {
@@ -30,83 +26,78 @@ async function fetchJsons(
       ui: ui.data || {},
       language: language.data || {},
       functions,
-    });
+    })
   }
 
   return {
     ui: ui.data || {},
     language: language.data || {},
     functions,
-  };
+  }
 }
 
-async function getNamespacedResourceList(
-  axios,
-  storeGet,
-  { namespace, group, version, resource }
-) {
-  const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/route/params/cluster");
+async function getNamespacedResourceList(axios, storeGet, { namespace, group, version, resource }) {
+  const owner = storeGet('/route/params/user')
+  const cluster = storeGet('/route/params/cluster')
 
-  const url = `/clusters/${owner}/${cluster}/proxy/${group}/${version}/namespaces/${namespace}/${resource}`;
+  const url = `/clusters/${owner}/${cluster}/proxy/${group}/${version}/namespaces/${namespace}/${resource}`
 
   try {
     const resp = await axios.get(url, {
       params: {
         filter: { items: { metadata: { name: null }, type: null } },
       },
-    });
+    })
 
-    const items = (resp && resp.data && resp.data.items) || [];
-    return items;
+    const items = (resp && resp.data && resp.data.items) || []
+    return items
   } catch (e) {
-    console.log(e);
+    console.log(e)
   }
 
-  return [];
+  return []
 }
 
 async function resourceNames(
   { axios, watchDependency, storeGet, reusableElementCtx },
   group,
   version,
-  resource
+  resource,
 ) {
-  const { dataContext } = reusableElementCtx;
-  const { namespace } = dataContext;
-  watchDependency("data#/namespace");
+  const { dataContext } = reusableElementCtx
+  const { namespace } = dataContext
+  watchDependency('data#/namespace')
 
   let resources = await getNamespacedResourceList(axios, storeGet, {
     namespace,
     group,
     version,
     resource,
-  });
+  })
 
   return resources.map((resource) => {
-    const name = (resource.metadata && resource.metadata.name) || "";
+    const name = (resource.metadata && resource.metadata.name) || ''
     return {
       text: name,
       value: name,
-    };
-  });
+    }
+  })
 }
 
 function initPrePopulateDatabase({ model, reusableElementCtx }) {
+  const { functionCallbacks } = reusableElementCtx || {}
+  const { isEditWizard } = functionCallbacks || {}
 
-  const { functionCallbacks } = reusableElementCtx || {};
-  const { isEditWizard } = functionCallbacks || {};
-
-  const isCreateWizard = !(isEditWizard && !!isEditWizard());
+  const isCreateWizard = !(isEditWizard && !!isEditWizard())
 
   // if current wizard is for create step then always set yes
   // otherwise return yes if the model value (initialization value) exist
-  return isCreateWizard || model ? "yes" : "no";
+  return isCreateWizard || model ? 'yes' : 'no'
 }
 
 function isValueExists(value, getValue, path) {
-  const val = getValue(value, path);
-  return !!val;
+  const val = getValue(value, path)
+  return !!val
 }
 
 function onPrePopulateDatabaseChange({
@@ -114,112 +105,84 @@ function onPrePopulateDatabaseChange({
   getValue,
   discriminator,
   model,
-  reusableElementCtx
+  reusableElementCtx,
 }) {
-  const prePopulateDatabase = getValue(discriminator, "/prePopulateDatabase");
+  const prePopulateDatabase = getValue(discriminator, '/prePopulateDatabase')
 
-  if (prePopulateDatabase === "no") {
+  if (prePopulateDatabase === 'no') {
     // delete related properties
-    commit(
-      "wizard/model$delete",
-      "/"
-    );
+    commit('wizard/model$delete', '/')
   } else {
-    const dbName = getValue(reusableElementCtx, "/dataContext/name");
+    const dbName = getValue(reusableElementCtx, '/dataContext/name')
     // set stashAppscodeComRestoreSession_init if it doesn't exist
 
-    if (
-      !isValueExists(
-        model,
-        getValue,
-        "/spec"
-      )
-    ) {
-      commit("wizard/model$update", {
-        path: "/spec/rules",
-        value: [{
-          snapshots: ["latest"],
-        }],
+    if (!isValueExists(model, getValue, '/spec')) {
+      commit('wizard/model$update', {
+        path: '/spec/rules',
+        value: [
+          {
+            snapshots: ['latest'],
+          },
+        ],
         force: true,
-      });
+      })
 
-      commit("wizard/model$update", {
-        path: "/spec/target",
+      commit('wizard/model$update', {
+        path: '/spec/target',
         value: {
           ref: {
-            apiVersion: "appcatalog.appscode.com/v1alpha1",
-            kind: "AppBinding",
+            apiVersion: 'appcatalog.appscode.com/v1alpha1',
+            kind: 'AppBinding',
             name: dbName,
           },
         },
         force: true,
-      });
+      })
     }
   }
 }
 
 function returnFalse() {
-  return false;
+  return false
 }
 
 function showInitializationForm({ getValue, discriminator, watchDependency }) {
-  const prePopulateDatabase = getValue(discriminator, "/prePopulateDatabase");
-  watchDependency("discriminator#/prePopulateDatabase");
-  return prePopulateDatabase === "yes";
+  const prePopulateDatabase = getValue(discriminator, '/prePopulateDatabase')
+  watchDependency('discriminator#/prePopulateDatabase')
+  return prePopulateDatabase === 'yes'
 }
 
 function initCustomizeRestoreJobRuntimeSettings({ getValue, model }) {
-  const runtimeSettings = getValue(
-    model,
-    "/spec/runtimeSettings"
-  );
-  if (runtimeSettings) return "yes";
-  else return "no";
+  const runtimeSettings = getValue(model, '/spec/runtimeSettings')
+  if (runtimeSettings) return 'yes'
+  else return 'no'
 }
 
-function onCustomizeRestoreJobRuntimeSettingsChange({
-  commit,
-  getValue,
-  discriminator,
-  model,
-}) {
+function onCustomizeRestoreJobRuntimeSettingsChange({ commit, getValue, discriminator, model }) {
   const customizeRestoreJobRuntimeSettings = getValue(
     discriminator,
-    "/customizeRestoreJobRuntimeSettings"
-  );
-  if (customizeRestoreJobRuntimeSettings === "no") {
-    commit(
-      "wizard/model$delete",
-      "/spec/runtimeSettings"
-    );
-  } else if (customizeRestoreJobRuntimeSettings === "yes") {
-    if (
-      !isValueExists(
-        model,
-        getValue,
-        "/spec/runtimeSettings"
-      )
-    ) {
+    '/customizeRestoreJobRuntimeSettings',
+  )
+  if (customizeRestoreJobRuntimeSettings === 'no') {
+    commit('wizard/model$delete', '/spec/runtimeSettings')
+  } else if (customizeRestoreJobRuntimeSettings === 'yes') {
+    if (!isValueExists(model, getValue, '/spec/runtimeSettings')) {
       // set new value
-      commit("wizard/model$update", {
-        path:
-          "/spec/runtimeSettings",
+      commit('wizard/model$update', {
+        path: '/spec/runtimeSettings',
         value: {},
-      });
+      })
     }
   }
 }
 
-function showRuntimeForm(
-  { discriminator, getValue, watchDependency },
-  value
-) {
+function showRuntimeForm({ discriminator, getValue, watchDependency }, value) {
   const customizeRestoreJobRuntimeSettings = getValue(
     discriminator,
-    "/customizeRestoreJobRuntimeSettings"
-  );
-  watchDependency("discriminator#/customizeRestoreJobRuntimeSettings");
-  return customizeRestoreJobRuntimeSettings === value;
+    '/customizeRestoreJobRuntimeSettings',
+  )
+  watchDependency('discriminator#/customizeRestoreJobRuntimeSettings')
+  return customizeRestoreJobRuntimeSettings === value
 }
 
 function setSnapshot() {
@@ -230,8 +193,8 @@ function onSnapshotChange({ commit, getValue, discriminator }) {
   const snapshot = getValue(discriminator, '/snapshot')
   commit('wizard/model$update', {
     path: '/spec/rules',
-    value: [{snapshots: [snapshot]}],
-    force: true
+    value: [{ snapshots: [snapshot] }],
+    force: true,
   })
 }
 

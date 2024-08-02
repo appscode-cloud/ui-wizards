@@ -1,14 +1,14 @@
 function isConsole({ storeGet }) {
-  const owner = storeGet("/route/params/user");
-  const path = storeGet("/route/path");
-  const prefix = `/${owner}/kubernetes`;
-  if (path.startsWith(prefix)) return true;
-  return false;
+  const owner = storeGet('/route/params/user')
+  const path = storeGet('/route/path')
+  const prefix = `/${owner}/kubernetes`
+  if (path.startsWith(prefix)) return true
+  return false
 }
 
 async function getDatabases({ axios, storeGet }, group, version, resource) {
-  const owner = storeGet("/route/params/user") || "";
-  const cluster = storeGet("/route/params/cluster") || "";
+  const owner = storeGet('/route/params/user') || ''
+  const cluster = storeGet('/route/params/cluster') || ''
   if (isConsole({ storeGet })) {
     try {
       const resp = await axios.get(
@@ -16,102 +16,91 @@ async function getDatabases({ axios, storeGet }, group, version, resource) {
         {
           params: {
             convertToTable: true,
-            labelSelector: "k8s.io/group=kubedb.com",
+            labelSelector: 'k8s.io/group=kubedb.com',
           },
-        }
-      );
+        },
+      )
 
-      const resources = (resp && resp.data && resp.data.rows) || [];
+      const resources = (resp && resp.data && resp.data.rows) || []
 
       resources.map((item) => {
-        const name = (item.cells && item.cells[0].data) || "";
-        const namespace = (item.cells?.length > 0 && item.cells[1].data) || "";
-        const resource = (item.cells?.length > 1 && item.cells[2].data) || "";
-        item.text = name;
+        const name = (item.cells && item.cells[0].data) || ''
+        const namespace = (item.cells?.length > 0 && item.cells[1].data) || ''
+        const resource = (item.cells?.length > 1 && item.cells[2].data) || ''
+        item.text = name
         item.value = {
           name: name,
           namespace: namespace,
           resource: resource,
-        };
-        return true;
-      });
+        }
+        return true
+      })
       const filteredResources = resources.filter(
-        (item) => item.value.resource.toLowerCase() === "postgres"
-      );
-      return filteredResources;
+        (item) => item.value.resource.toLowerCase() === 'postgres',
+      )
+      return filteredResources
     } catch (e) {
-      console.log(e);
-      return [];
+      console.log(e)
+      return []
     }
-  } else return [];
+  } else return []
 }
 
 function isDbSelected({ getValue, storeGet, discriminator, watchDependency }) {
-  if (!isConsole({ storeGet })) return true;
-  watchDependency("discriminator#/database");
-  const val = getValue(discriminator, "/database") || {};
-  return val && val.name ? true : false;
+  if (!isConsole({ storeGet })) return true
+  watchDependency('discriminator#/database')
+  const val = getValue(discriminator, '/database') || {}
+  return val && val.name ? true : false
 }
 
 function setRoleName({ watchDependency, getValue, model }) {
-  watchDependency("model#/spec/secretEngineRef/name");
-  const engineName = getValue(model, "/spec/secretEngineRef/name") || "";
-  const timestamp = `${Math.floor(Date.now() / 1000)}`;
-  return engineName ? `${engineName}-role-${timestamp}` : engineName;
+  watchDependency('model#/spec/secretEngineRef/name')
+  const engineName = getValue(model, '/spec/secretEngineRef/name') || ''
+  const timestamp = `${Math.floor(Date.now() / 1000)}`
+  return engineName ? `${engineName}-role-${timestamp}` : engineName
 }
 
-function getDbNamespace({
-  getValue,
-  storeGet,
-  discriminator,
-  watchDependency,
-}) {
+function getDbNamespace({ getValue, storeGet, discriminator, watchDependency }) {
   if (isConsole({ storeGet })) {
-    watchDependency("discriminator#/database");
-    const data = getValue(discriminator, "/database") || {};
-    return data && data.namespace || "";
-  }
-  else {
-    const namespace = storeGet("/route/query/namespace") || "";
-    return namespace;
+    watchDependency('discriminator#/database')
+    const data = getValue(discriminator, '/database') || {}
+    return (data && data.namespace) || ''
+  } else {
+    const namespace = storeGet('/route/query/namespace') || ''
+    return namespace
   }
 }
 
-async function getEngines(
-  { axios, storeGet, getValue, discriminator },
-  group,
-  version,
-  resource
-) {
-  const owner = storeGet("/route/params/user") || "";
-  const cluster = storeGet("/route/params/cluster") || "";
-  const dbValue = getValue(discriminator, "/database") || {};
-  const dbName = storeGet("/route/params/name") || dbValue.name || "";
-  const dbNamespace = storeGet("/route/query/namespace") || dbValue.namespace || "";
+async function getEngines({ axios, storeGet, getValue, discriminator }, group, version, resource) {
+  const owner = storeGet('/route/params/user') || ''
+  const cluster = storeGet('/route/params/cluster') || ''
+  const dbValue = getValue(discriminator, '/database') || {}
+  const dbName = storeGet('/route/params/name') || dbValue.name || ''
+  const dbNamespace = storeGet('/route/query/namespace') || dbValue.namespace || ''
   if (dbName) {
     try {
       const resp = await axios.get(
-        `/clusters/${owner}/${cluster}/proxy/${group}/${version}/${resource}`
-      );
+        `/clusters/${owner}/${cluster}/proxy/${group}/${version}/${resource}`,
+      )
 
-      const resources = (resp && resp.data && resp.data.items) || [];
+      const resources = (resp && resp.data && resp.data.items) || []
       const filteredResources = resources.filter(
         (item) =>
           item.spec?.postgres?.databaseRef?.name === dbName &&
-          item.spec?.postgres?.databaseRef?.namespace === dbNamespace
-      );
+          item.spec?.postgres?.databaseRef?.namespace === dbNamespace,
+      )
       filteredResources.map((item) => {
-        const name = (item.metadata && item.metadata.name) || "";
-        item.text = name;
-        item.value = name;
-        return true;
-      });
-      return filteredResources;
+        const name = (item.metadata && item.metadata.name) || ''
+        item.text = name
+        item.value = name
+        return true
+      })
+      return filteredResources
     } catch (e) {
-      console.log(e);
-      return [];
+      console.log(e)
+      return []
     }
-  } else return [];
+  } else return []
 }
 
 return {
@@ -121,4 +110,4 @@ return {
   setRoleName,
   getDbNamespace,
   getEngines,
-};
+}

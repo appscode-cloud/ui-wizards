@@ -1,88 +1,79 @@
 async function fetchJsons({ axios, itemCtx }) {
-  let ui = {};
-  let language = {};
-  let functions = {};
-  const { name, sourceRef, version, packageviewUrlPrefix } = itemCtx.chart;
+  let ui = {}
+  let language = {}
+  let functions = {}
+  const { name, sourceRef, version, packageviewUrlPrefix } = itemCtx.chart
 
   try {
     ui = await axios.get(
-      `${packageviewUrlPrefix}/create-ui.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`
-    );
+      `${packageviewUrlPrefix}/create-ui.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`,
+    )
     language = await axios.get(
-      `${packageviewUrlPrefix}/language.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`
-    );
+      `${packageviewUrlPrefix}/language.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`,
+    )
     const functionString = await axios.get(
-      `${packageviewUrlPrefix}/functions.js?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}`
-    );
+      `${packageviewUrlPrefix}/functions.js?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}`,
+    )
     // declare evaluate the functionString to get the functions Object
-    const evalFunc = new Function(functionString.data || "");
-    functions = evalFunc();
+    const evalFunc = new Function(functionString.data || '')
+    functions = evalFunc()
   } catch (e) {
-    console.log(e);
+    console.log(e)
   }
 
   return {
     ui: ui.data || {},
     language: language.data || {},
     functions,
-  };
+  }
 }
 
 function returnFalse() {
-  return false;
+  return false
 }
 
 async function getNamespaces({ axios, storeGet }) {
-  const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/route/params/cluster");
+  const owner = storeGet('/route/params/user')
+  const cluster = storeGet('/route/params/cluster')
 
-  const resp = await axios.get(
-    `/clusters/${owner}/${cluster}/proxy/core/v1/namespaces`,
-    {
-      params: { filter: { items: { metadata: { name: null } } } },
-    }
-  );
+  const resp = await axios.get(`/clusters/${owner}/${cluster}/proxy/core/v1/namespaces`, {
+    params: { filter: { items: { metadata: { name: null } } } },
+  })
 
-  const resources = (resp && resp.data && resp.data.items) || [];
+  const resources = (resp && resp.data && resp.data.items) || []
 
   return resources.map((item) => {
-    const name = (item.metadata && item.metadata.name) || "";
+    const name = (item.metadata && item.metadata.name) || ''
     return {
       text: name,
       value: name,
-    };
-  });
+    }
+  })
 }
 
-async function getDbs({
-  axios,
-  storeGet,
-  model,
-  getValue,
-  watchDependency,
-}) {
-  const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/route/params/cluster");
+async function getDbs({ axios, storeGet, model, getValue, watchDependency }) {
+  const owner = storeGet('/route/params/user')
+  const cluster = storeGet('/route/params/cluster')
 
-  const namespace = getValue(model, "/metadata/namespace");
-  watchDependency("model#/metadata/namespace");
+  const namespace = getValue(model, '/metadata/namespace')
+  watchDependency('model#/metadata/namespace')
 
   const resp = await axios.get(
     `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/redises`,
     {
       params: { filter: { items: { metadata: { name: null } } } },
-    }
-  );
+    },
+  )
 
-  const resources = (resp && resp.data && resp.data.items) || [];
+  const resources = (resp && resp.data && resp.data.items) || []
 
   return resources.map((item) => {
-    const name = (item.metadata && item.metadata.name) || "";
+    const name = (item.metadata && item.metadata.name) || ''
     return {
       text: name,
       value: name,
-    };
-  });
+    }
+  })
 }
 
 async function getDbDetails({
@@ -91,31 +82,31 @@ async function getDbDetails({
   model,
   getValue,
   watchDependency,
-  setDiscriminatorValue
+  setDiscriminatorValue,
 }) {
-  const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/route/params/cluster");
+  const owner = storeGet('/route/params/user')
+  const cluster = storeGet('/route/params/cluster')
 
-  const namespace = getValue(model, "/metadata/namespace");
-  watchDependency("model#/metadata/namespace");
-  const name = getValue(model, "/spec/databaseRef/name");
-  watchDependency("model#/spec/databaseRef/name");
+  const namespace = getValue(model, '/metadata/namespace')
+  watchDependency('model#/metadata/namespace')
+  const name = getValue(model, '/spec/databaseRef/name')
+  watchDependency('model#/spec/databaseRef/name')
 
   if (namespace && name) {
     const resp = await axios.get(
-      `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/redises/${name}`
-    );
+      `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/redises/${name}`,
+    )
 
-    setDiscriminatorValue("/dbDetails", resp.data || {});
+    setDiscriminatorValue('/dbDetails', resp.data || {})
 
-    return resp.data || {};
-  } else return {};
+    return resp.data || {}
+  } else return {}
 }
 
 async function getDbVersions({ axios, storeGet, watchDependency }) {
-  watchDependency("discriminator#/dbDetails");
-  const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/route/params/cluster");
+  watchDependency('discriminator#/dbDetails')
+  const owner = storeGet('/route/params/user')
+  const cluster = storeGet('/route/params/cluster')
 
   const queryParams = {
     filter: {
@@ -124,240 +115,212 @@ async function getDbVersions({ axios, storeGet, watchDependency }) {
         spec: { version: null, deprecated: null, distribution: null },
       },
     },
-  };
+  }
 
   const resp = await axios.get(
     `/clusters/${owner}/${cluster}/proxy/catalog.kubedb.com/v1alpha1/redisversions`,
     {
       params: queryParams,
-    }
-  );
+    },
+  )
 
-  const resources = (resp && resp.data && resp.data.items) || [];
+  const resources = (resp && resp.data && resp.data.items) || []
 
   // keep only non deprecated versions
   const filteredElasticsearchVersions = resources.filter(
-    (item) => item.spec && !item.spec.deprecated
-  );
+    (item) => item.spec && !item.spec.deprecated,
+  )
 
   return filteredElasticsearchVersions.map((item) => {
-    const name = (item.metadata && item.metadata.name) || "";
-    const specVersion = (item.spec && item.spec.version) || "";
-    const dist = (item.spec && item.spec.distribution) || "";
+    const name = (item.metadata && item.metadata.name) || ''
+    const specVersion = (item.spec && item.spec.version) || ''
+    const dist = (item.spec && item.spec.distribution) || ''
     return {
       text: `${name} (${specVersion})`,
       value: name,
-    };
-  });
+    }
+  })
 }
 
-function ifRequestTypeEqualsTo(
-  { model, getValue, watchDependency },
-  type
-) {
-  const selectedType = getValue(model, "/spec/type");
-  watchDependency("model#/spec/type");
+function ifRequestTypeEqualsTo({ model, getValue, watchDependency }, type) {
+  const selectedType = getValue(model, '/spec/type')
+  watchDependency('model#/spec/type')
 
-  return selectedType === type;
+  return selectedType === type
 }
 
 function onRequestTypeChange({ model, getValue, commit }) {
-  const selectedType = getValue(model, "/spec/type");
+  const selectedType = getValue(model, '/spec/type')
   const reqTypeMapping = {
-    Upgrade: "updateVersion",
-    UpdateVersion: "updateVersion",
-    HorizontalScaling: "horizontalScaling",
-    VerticalScaling: "verticalScaling",
-    VolumeExpansion: "volumeExpansion",
-    Restart: "restart",
-    Reconfigure: "configuration",
-    ReconfigureTLS: "tls",
-  };
+    Upgrade: 'updateVersion',
+    UpdateVersion: 'updateVersion',
+    HorizontalScaling: 'horizontalScaling',
+    VerticalScaling: 'verticalScaling',
+    VolumeExpansion: 'volumeExpansion',
+    Restart: 'restart',
+    Reconfigure: 'configuration',
+    ReconfigureTLS: 'tls',
+  }
 
   Object.keys(reqTypeMapping).forEach((key) => {
-    if (key !== selectedType)
-      commit("wizard/model$delete", `/spec/${reqTypeMapping[key]}`);
-  });
+    if (key !== selectedType) commit('wizard/model$delete', `/spec/${reqTypeMapping[key]}`)
+  })
 }
 
-function disableOpsRequest({
-  itemCtx,
-  discriminator,
-  getValue,
-  watchDependency,
-}) {
-  if (itemCtx.value === "HorizontalScaling") {
+function disableOpsRequest({ itemCtx, discriminator, getValue, watchDependency }) {
+  if (itemCtx.value === 'HorizontalScaling') {
     const dbType = getDbType({
       discriminator,
       getValue,
       watchDependency,
-    });
+    })
 
-    if (dbType === "Standalone") return true;
-    else return false;
-  } else return false;
+    if (dbType === 'Standalone') return true
+    else return false
+  } else return false
 }
 
-function getDbTls({
-  discriminator,
-  getValue,
-  watchDependency,
-}) {
-  watchDependency("discriminator#/dbDetails");
-  const dbDetails = getValue(discriminator, "/dbDetails");
+function getDbTls({ discriminator, getValue, watchDependency }) {
+  watchDependency('discriminator#/dbDetails')
+  const dbDetails = getValue(discriminator, '/dbDetails')
 
-  const { spec } = dbDetails || {};
-  return spec?.tls || undefined;
+  const { spec } = dbDetails || {}
+  return spec?.tls || undefined
 }
 
-function getDbType({
-  discriminator,
-  getValue,
-  watchDependency,
-}) {
-  watchDependency("discriminator#/dbDetails");
-  const dbDetails = getValue(discriminator, "/dbDetails");
+function getDbType({ discriminator, getValue, watchDependency }) {
+  watchDependency('discriminator#/dbDetails')
+  const dbDetails = getValue(discriminator, '/dbDetails')
 
-  const { spec } = dbDetails || {};
-  const { mode } = spec || {};
+  const { spec } = dbDetails || {}
+  const { mode } = spec || {}
 
-  return mode || "Standalone";
+  return mode || 'Standalone'
 }
 
 function initNamespace({ route }) {
-  const { namespace } = route.query || {};
-  return namespace || null;
+  const { namespace } = route.query || {}
+  return namespace || null
 }
 
 function initDatabaseRef({ route, watchDependency }) {
-  watchDependency("model#/metadata/namespace");
-  const { name } = route.query || {};
-  return name;
+  watchDependency('model#/metadata/namespace')
+  const { name } = route.query || {}
+  return name
 }
 
 function asDatabaseOperation(route) {
-  return !!route.query.operation;
+  return !!route.query.operation
 }
 
-function generateOpsRequestNameForClusterUI (getValue, model, route) {
-  const dbName = getValue(model, "/spec/databaseRef/name");
+function generateOpsRequestNameForClusterUI(getValue, model, route) {
+  const dbName = getValue(model, '/spec/databaseRef/name')
 
-  const selectedType = getValue(model, "/spec/type");
-  const lowerType = selectedType ? String(selectedType).toLowerCase() : "";
-  
-  const resources = route.params.resource || ""
-  const resource = resources.slice(0,-1);
-  
+  const selectedType = getValue(model, '/spec/type')
+  const lowerType = selectedType ? String(selectedType).toLowerCase() : ''
+
+  const resources = route.params.resource || ''
+  const resource = resources.slice(0, -1)
+
   const opsName = dbName ? dbName : resource
-  return  `${opsName}-${Math.floor(Date.now() / 1000)}${lowerType ? '-' + lowerType : ''}`
-} 
+  return `${opsName}-${Math.floor(Date.now() / 1000)}${lowerType ? '-' + lowerType : ''}`
+}
 
 function showAndInitName({ route, commit, getValue, model, watchDependency }) {
-  watchDependency("model#/spec/type");
-  watchDependency("model#/spec/databaseRef/name");
-  const ver = asDatabaseOperation(route);
-  
-  const selectedType = getValue(model, "/spec/type");
-  const lowerType = selectedType ? String(selectedType).toLowerCase() : "";
-  
+  watchDependency('model#/spec/type')
+  watchDependency('model#/spec/databaseRef/name')
+  const ver = asDatabaseOperation(route)
+
+  const selectedType = getValue(model, '/spec/type')
+  const lowerType = selectedType ? String(selectedType).toLowerCase() : ''
+
   if (ver) {
-    // For kubedb-ui 
-    commit("wizard/model$update", {
-      path: "/metadata/name",
+    // For kubedb-ui
+    commit('wizard/model$update', {
+      path: '/metadata/name',
       value: `${route.query.name}-${Math.floor(Date.now() / 1000)}-${lowerType}`,
       force: true,
-    });
-  }
-  else {
+    })
+  } else {
     // For cluster-ui
-    commit("wizard/model$update", {
-      path: "/metadata/name",
+    commit('wizard/model$update', {
+      path: '/metadata/name',
       value: generateOpsRequestNameForClusterUI(getValue, model, route),
       force: true,
-    });
+    })
   }
-  return !ver;
+  return !ver
 }
 function showAndInitNamespace({ route, commit }) {
-  const ver = asDatabaseOperation(route);
+  const ver = asDatabaseOperation(route)
   if (ver) {
-    commit("wizard/model$update", {
-      path: "/metadata/namespace",
+    commit('wizard/model$update', {
+      path: '/metadata/namespace',
       value: `${route.query.namespace}`,
       force: true,
-    });
+    })
   }
 
-  return !ver;
+  return !ver
 }
 function showAndInitDatabaseRef({ route, commit }) {
-  const ver = asDatabaseOperation(route);
+  const ver = asDatabaseOperation(route)
   if (ver) {
-    commit("wizard/model$update", {
-      path: "/spec/databaseRef/name",
+    commit('wizard/model$update', {
+      path: '/spec/databaseRef/name',
       value: `${route.query.name}`,
       force: true,
-    });
+    })
   }
 
-  return !ver;
+  return !ver
 }
 function showConfigureOpsrequestLabel({ route }) {
-  return !asDatabaseOperation(route);
+  return !asDatabaseOperation(route)
 }
 function showAndInitOpsRequestType({ route, commit }) {
-  const ver = asDatabaseOperation(route);
+  const ver = asDatabaseOperation(route)
   const opMap = {
-    upgrade: "UpdateVersion",
-    updateVersion: "UpdateVersion",
-    horizontalscaling: "HorizontalScaling",
-    verticalscaling: "VerticalScaling",
-    volumeexpansion: "VolumeExpansion",
-    restart: "Restart",
-    reconfiguretls: "ReconfigureTLS",
-    reconfigure: "Reconfigure",
-  };
+    upgrade: 'UpdateVersion',
+    updateVersion: 'UpdateVersion',
+    horizontalscaling: 'HorizontalScaling',
+    verticalscaling: 'VerticalScaling',
+    volumeexpansion: 'VolumeExpansion',
+    restart: 'Restart',
+    reconfiguretls: 'ReconfigureTLS',
+    reconfigure: 'Reconfigure',
+  }
   if (ver) {
-    const operation = route.query.operation;
-    const match = /^(.*)-opsrequest-(.*)$/.exec(operation);
-    const opstype = match[2];
-    commit("wizard/model$update", {
-      path: "/spec/type",
+    const operation = route.query.operation
+    const match = /^(.*)-opsrequest-(.*)$/.exec(operation)
+    const opstype = match[2]
+    commit('wizard/model$update', {
+      path: '/spec/type',
       value: opMap[opstype],
       force: true,
-    });
+    })
   }
 
-  return !ver;
+  return !ver
 }
 
 // vertical scaling
-function ifDbTypeEqualsTo(
-  { discriminator, getValue, watchDependency, commit },
-  value,
-  opsReqType
-) {
+function ifDbTypeEqualsTo({ discriminator, getValue, watchDependency, commit }, value, opsReqType) {
   const verd = getDbType({
     discriminator,
     getValue,
     watchDependency,
-  });
+  })
 
-  return value === verd;
+  return value === verd
 }
 
 // for config secret
-async function getConfigSecrets({
-  storeGet,
-  axios,
-  model,
-  getValue,
-  watchDependency,
-}) {
-  const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/route/params/cluster");
-  const namespace = getValue(model, "/metadata/namespace");
-  watchDependency("model#/metadata/namespace");
+async function getConfigSecrets({ storeGet, axios, model, getValue, watchDependency }) {
+  const owner = storeGet('/route/params/user')
+  const cluster = storeGet('/route/params/cluster')
+  const namespace = getValue(model, '/metadata/namespace')
+  watchDependency('model#/metadata/namespace')
 
   const resp = await axios.get(
     `/clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}/secrets`,
@@ -365,427 +328,380 @@ async function getConfigSecrets({
       params: {
         filter: { items: { metadata: { name: null }, type: null } },
       },
-    }
-  );
+    },
+  )
 
-  const secrets = (resp && resp.data && resp.data.items) || [];
+  const secrets = (resp && resp.data && resp.data.items) || []
 
-  const filteredSecrets = secrets;
+  const filteredSecrets = secrets
 
   filteredSecrets.map((item) => {
-    const name = (item.metadata && item.metadata.name) || "";
-    item.text = name;
-    item.value = name;
-    return true;
-  });
-  return filteredSecrets;
+    const name = (item.metadata && item.metadata.name) || ''
+    item.text = name
+    item.value = name
+    return true
+  })
+  return filteredSecrets
 }
 
 function createSecretUrl({ storeGet }) {
-  const user = storeGet("/route/params/user");
-  const cluster = storeGet("/route/params/cluster");
+  const user = storeGet('/route/params/user')
+  const cluster = storeGet('/route/params/cluster')
 
-  const domain = storeGet("/domain") || "";
-  if (domain.includes("bb.test")) {
-    return `http://console.bb.test:5990/${user}/kubernetes/${cluster}/core/v1/secrets/create`;
+  const domain = storeGet('/domain') || ''
+  if (domain.includes('bb.test')) {
+    return `http://console.bb.test:5990/${user}/kubernetes/${cluster}/core/v1/secrets/create`
   } else {
-    const editedDomain = domain.replace("kubedb", "console");
-    return `${editedDomain}/${user}/kubernetes/${cluster}/core/v1/secrets/create`;
+    const editedDomain = domain.replace('kubedb', 'console')
+    return `${editedDomain}/${user}/kubernetes/${cluster}/core/v1/secrets/create`
   }
 }
 
-function isEqualToValueFromType(
-  { discriminator, getValue, watchDependency },
-  value
-) {
-  watchDependency("discriminator#/valueFromType");
-  const valueFrom = getValue(discriminator, "/valueFromType");
-  return valueFrom === value;
+function isEqualToValueFromType({ discriminator, getValue, watchDependency }, value) {
+  watchDependency('discriminator#/valueFromType')
+  const valueFrom = getValue(discriminator, '/valueFromType')
+  return valueFrom === value
 }
 
-async function getNamespacedResourceList(
-  axios,
-  storeGet,
-  { namespace, group, version, resource }
-) {
-  const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/route/params/cluster");
+async function getNamespacedResourceList(axios, storeGet, { namespace, group, version, resource }) {
+  const owner = storeGet('/route/params/user')
+  const cluster = storeGet('/route/params/cluster')
 
-  const url = `/clusters/${owner}/${cluster}/proxy/${group}/${version}/namespaces/${namespace}/${resource}`;
+  const url = `/clusters/${owner}/${cluster}/proxy/${group}/${version}/namespaces/${namespace}/${resource}`
 
-  let ans = [];
+  let ans = []
   try {
     const resp = await axios.get(url, {
       params: {
         filter: { items: { metadata: { name: null }, type: null } },
       },
-    });
+    })
 
-    const items = (resp && resp.data && resp.data.items) || [];
-    ans = items;
+    const items = (resp && resp.data && resp.data.items) || []
+    ans = items
   } catch (e) {
-    console.log(e);
+    console.log(e)
   }
 
-  return ans;
+  return ans
 }
-async function getResourceList(
-  axios,
-  storeGet,
-  { group, version, resource }
-) {
-  const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/route/params/cluster");
+async function getResourceList(axios, storeGet, { group, version, resource }) {
+  const owner = storeGet('/route/params/user')
+  const cluster = storeGet('/route/params/cluster')
 
-  const url = `/clusters/${owner}/${cluster}/proxy/${group}/${version}/${resource}`;
+  const url = `/clusters/${owner}/${cluster}/proxy/${group}/${version}/${resource}`
 
-  let ans = [];
+  let ans = []
   try {
     const resp = await axios.get(url, {
       params: {
         filter: { items: { metadata: { name: null }, type: null } },
       },
-    });
+    })
 
-    const items = (resp && resp.data && resp.data.items) || [];
-    ans = items;
+    const items = (resp && resp.data && resp.data.items) || []
+    ans = items
   } catch (e) {
-    console.log(e);
+    console.log(e)
   }
 
-  return ans;
+  return ans
 }
 async function resourceNames(
   { axios, getValue, model, watchDependency, storeGet },
   group,
   version,
-  resource
+  resource,
 ) {
-  const namespace = getValue(model, "/metadata/namespace");
-  watchDependency("model#/metadata/namespace");
+  const namespace = getValue(model, '/metadata/namespace')
+  watchDependency('model#/metadata/namespace')
 
   let resources = await getNamespacedResourceList(axios, storeGet, {
     namespace,
     group,
     version,
     resource,
-  });
+  })
 
-  if (resource === "secrets") {
+  if (resource === 'secrets') {
     resources = resources.filter((item) => {
-      const validType = ["kubernetes.io/service-account-token", "Opaque"];
-      return validType.includes(item.type);
-    });
+      const validType = ['kubernetes.io/service-account-token', 'Opaque']
+      return validType.includes(item.type)
+    })
   }
 
   return resources.map((resource) => {
-    const name = (resource.metadata && resource.metadata.name) || "";
+    const name = (resource.metadata && resource.metadata.name) || ''
     return {
       text: name,
       value: name,
-    };
-  });
+    }
+  })
 }
-async function unNamespacedResourceNames(
-  { axios, storeGet },
-  group,
-  version,
-  resource
-) {
+async function unNamespacedResourceNames({ axios, storeGet }, group, version, resource) {
   let resources = await getResourceList(axios, storeGet, {
     group,
     version,
     resource,
-  });
+  })
 
-  if (resource === "secrets") {
+  if (resource === 'secrets') {
     resources = resources.filter((item) => {
-      const validType = ["kubernetes.io/service-account-token", "Opaque"];
-      return validType.includes(item.type);
-    });
+      const validType = ['kubernetes.io/service-account-token', 'Opaque']
+      return validType.includes(item.type)
+    })
   }
 
   return resources.map((resource) => {
-    const name = (resource.metadata && resource.metadata.name) || "";
+    const name = (resource.metadata && resource.metadata.name) || ''
     return {
       text: name,
       value: name,
-    };
-  });
+    }
+  })
 }
 
 // reconfiguration type
-function ifReconfigurationTypeEqualsTo(
-  { discriminator, getValue, watchDependency },
-  value
-) {
-  const reconfigurationType = getValue(discriminator, "/reconfigurationType");
-  watchDependency("discriminator#/reconfigurationType");
+function ifReconfigurationTypeEqualsTo({ discriminator, getValue, watchDependency }, value) {
+  const reconfigurationType = getValue(discriminator, '/reconfigurationType')
+  watchDependency('discriminator#/reconfigurationType')
 
-  return reconfigurationType === value;
+  return reconfigurationType === value
 }
 
 function onApplyconfigChange({ discriminator, getValue, commit }) {
-  const applyconfig = getValue(discriminator, "/applyConfig");
+  const applyconfig = getValue(discriminator, '/applyConfig')
 
-  const configObj = {};
+  const configObj = {}
   if (applyconfig) {
     applyconfig.forEach((item) => {
-      const { key, value } = item;
-      configObj[key] = value;
-    });
+      const { key, value } = item
+      configObj[key] = value
+    })
   }
-  
-  commit("wizard/model$update", {
-    path: "/spec/configuration/applyConfig",
+
+  commit('wizard/model$update', {
+    path: '/spec/configuration/applyConfig',
     value: configObj,
     force: true,
-  });
+  })
 }
 
-function onReconfigurationTypeChange(
-  { commit, discriminator, getValue, setDiscriminatorValue }
-) {
-  const reconfigurationType = getValue(discriminator, "/reconfigurationType");
-  setDiscriminatorValue("/applyConfig", []);
-  if (reconfigurationType === "remove") {
-    commit("wizard/model$delete", `/spec/configuration`);
+function onReconfigurationTypeChange({ commit, discriminator, getValue, setDiscriminatorValue }) {
+  const reconfigurationType = getValue(discriminator, '/reconfigurationType')
+  setDiscriminatorValue('/applyConfig', [])
+  if (reconfigurationType === 'remove') {
+    commit('wizard/model$delete', `/spec/configuration`)
 
-    commit("wizard/model$update", {
+    commit('wizard/model$update', {
       path: `/spec/configuration/removeCustomConfig`,
       value: true,
       force: true,
-    });
+    })
   } else {
-    commit(
-      "wizard/model$delete",
-      `/spec/configuration/configSecret`
-    );
-    commit(
-      "wizard/model$delete",
-      `/spec/configuration/applyConfig`
-    );
-    commit(
-      "wizard/model$delete",
-      `/spec/configuration/removeCustomConfig`
-    );
+    commit('wizard/model$delete', `/spec/configuration/configSecret`)
+    commit('wizard/model$delete', `/spec/configuration/applyConfig`)
+    commit('wizard/model$delete', `/spec/configuration/removeCustomConfig`)
   }
 }
 
 // for tls
-function hasTlsField({
-  discriminator,
-  getValue,
-  watchDependency,
-}) {
+function hasTlsField({ discriminator, getValue, watchDependency }) {
   const tls = getDbTls({
     discriminator,
     getValue,
     watchDependency,
-  });
+  })
 
-  return !!tls;
+  return !!tls
 }
 
 function initIssuerRefApiGroup({ getValue, model, watchDependency, discriminator }) {
-  const kind = getValue(model, "/spec/tls/issuerRef/kind");
-  watchDependency("model#/spec/tls/issuerRef/kind");
+  const kind = getValue(model, '/spec/tls/issuerRef/kind')
+  watchDependency('model#/spec/tls/issuerRef/kind')
 
   if (kind) {
-    const apiGroup = getValue(discriminator, "/dbDetails/spec/tls/issuerRef/apiGroup");
-    if(apiGroup) return apiGroup;
-    return "cert-manager.io";
-  } else return undefined;
+    const apiGroup = getValue(discriminator, '/dbDetails/spec/tls/issuerRef/apiGroup')
+    if (apiGroup) return apiGroup
+    return 'cert-manager.io'
+  } else return undefined
 }
 
-async function getIssuerRefsName({
-  axios,
-  storeGet,
-  getValue,
-  model,
-  watchDependency,
-}) {
-  const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/route/params/cluster");
-  watchDependency("model#/spec/tls/issuerRef/apiGroup");
-  watchDependency("model#/spec/tls/issuerRef/kind");
-  watchDependency("model#/metadata/namespace");
-  const apiGroup = getValue(model, "/spec/tls/issuerRef/apiGroup");
-  const kind = getValue(model, "/spec/tls/issuerRef/kind");
-  const namespace = getValue(model, "/metadata/namespace");
+async function getIssuerRefsName({ axios, storeGet, getValue, model, watchDependency }) {
+  const owner = storeGet('/route/params/user')
+  const cluster = storeGet('/route/params/cluster')
+  watchDependency('model#/spec/tls/issuerRef/apiGroup')
+  watchDependency('model#/spec/tls/issuerRef/kind')
+  watchDependency('model#/metadata/namespace')
+  const apiGroup = getValue(model, '/spec/tls/issuerRef/apiGroup')
+  const kind = getValue(model, '/spec/tls/issuerRef/kind')
+  const namespace = getValue(model, '/metadata/namespace')
 
-  let url;
-  if (kind === "Issuer") {
-    url = `/clusters/${owner}/${cluster}/proxy/${apiGroup}/v1/namespaces/${namespace}/issuers`;
-  } else if (kind === "ClusterIssuer") {
-    url = `/clusters/${owner}/${cluster}/proxy/${apiGroup}/v1/clusterissuers`;
+  let url
+  if (kind === 'Issuer') {
+    url = `/clusters/${owner}/${cluster}/proxy/${apiGroup}/v1/namespaces/${namespace}/issuers`
+  } else if (kind === 'ClusterIssuer') {
+    url = `/clusters/${owner}/${cluster}/proxy/${apiGroup}/v1/clusterissuers`
   }
 
   if (!url) return []
 
-  if(url && apiGroup && namespace) {
+  if (url && apiGroup && namespace) {
     try {
-      const resp = await axios.get(url);
+      const resp = await axios.get(url)
 
-      const resources = (resp && resp.data && resp.data.items) || [];
+      const resources = (resp && resp.data && resp.data.items) || []
 
       resources.map((item) => {
-        const name = (item.metadata && item.metadata.name) || "";
-        item.text = name;
-        item.value = name;
-        return true;
-      });
-      return resources;
+        const name = (item.metadata && item.metadata.name) || ''
+        item.text = name
+        item.value = name
+        return true
+      })
+      return resources
     } catch (e) {
-    console.log(e);
-    return [];
+      console.log(e)
+      return []
     }
   } else {
-    return [];
+    return []
   }
 }
 
 function initTlsOperation() {
-  return "update";
+  return 'update'
 }
 function onTlsOperationChange({ discriminator, getValue, commit }) {
-  const tlsOperation = getValue(discriminator, "/tlsOperation");
+  const tlsOperation = getValue(discriminator, '/tlsOperation')
 
-  commit("wizard/model$delete", "/spec/tls");
+  commit('wizard/model$delete', '/spec/tls')
 
-  if (tlsOperation === "rotate") {
-    commit("wizard/model$update", {
-      path: "/spec/tls/rotateCertificates",
+  if (tlsOperation === 'rotate') {
+    commit('wizard/model$update', {
+      path: '/spec/tls/rotateCertificates',
       value: true,
       force: true,
-    });
-    commit("wizard/model$delete", "/spec/tls/certificates");
-    commit("wizard/model$delete", "/spec/tls/remove");
-  } else if (tlsOperation === "remove") {
-    commit("wizard/model$update", {
-      path: "/spec/tls/remove",
+    })
+    commit('wizard/model$delete', '/spec/tls/certificates')
+    commit('wizard/model$delete', '/spec/tls/remove')
+  } else if (tlsOperation === 'remove') {
+    commit('wizard/model$update', {
+      path: '/spec/tls/remove',
       value: true,
       force: true,
-    });
-    commit("wizard/model$delete", "/spec/tls/certificates");
-    commit("wizard/model$delete", "/spec/tls/rotateCertificates");
+    })
+    commit('wizard/model$delete', '/spec/tls/certificates')
+    commit('wizard/model$delete', '/spec/tls/rotateCertificates')
   }
 }
 
-function showIssuerRefAndCertificates({
-  discriminator,
-  getValue,
-  watchDependency,
-}) {
-  const tlsOperation = getValue(discriminator, "/tlsOperation");
-  watchDependency("discriminator#/tlsOperation");
-  const verd = tlsOperation !== "remove" && tlsOperation !== "rotate";
+function showIssuerRefAndCertificates({ discriminator, getValue, watchDependency }) {
+  const tlsOperation = getValue(discriminator, '/tlsOperation')
+  watchDependency('discriminator#/tlsOperation')
+  const verd = tlsOperation !== 'remove' && tlsOperation !== 'rotate'
 
-  return verd;
+  return verd
 }
 
-function isIssuerRefRequired({
-  discriminator,
-  getValue,
-  watchDependency,
-}) {
+function isIssuerRefRequired({ discriminator, getValue, watchDependency }) {
   const hasTls = hasTlsField({
     discriminator,
     getValue,
     watchDependency,
-  });
+  })
 
-  return !hasTls;
+  return !hasTls
 }
 
 function getRequestTypeFromRoute({ route, model, discriminator, getValue, watchDependency }) {
-  const isDbloading = isDbDetailsLoading({discriminator, model, getValue, watchDependency});
-  const { query } = route || {};
-  const { requestType } = query || {};
-  return isDbloading ? "" : requestType || "";
+  const isDbloading = isDbDetailsLoading({ discriminator, model, getValue, watchDependency })
+  const { query } = route || {}
+  const { requestType } = query || {}
+  return isDbloading ? '' : requestType || ''
 }
 
 // ************************************** Set db details *****************************************
 
-function isDbDetailsLoading({discriminator, model, getValue, watchDependency}) {
-  watchDependency("discriminator#/dbDetails");
-  watchDependency("model#/spec/databaseRef/name");
-  const dbDetails = getValue(discriminator, "/dbDetails");
-  const dbName = getValue(model, "/spec/databaseRef/name");
+function isDbDetailsLoading({ discriminator, model, getValue, watchDependency }) {
+  watchDependency('discriminator#/dbDetails')
+  watchDependency('model#/spec/databaseRef/name')
+  const dbDetails = getValue(discriminator, '/dbDetails')
+  const dbName = getValue(model, '/spec/databaseRef/name')
 
-  return !dbDetails || !dbName;
+  return !dbDetails || !dbName
 }
 
-function setValueFromDbDetails({discriminator, getValue, watchDependency, commit}, path, commitPath) {
-  watchDependency("discriminator#/dbDetails");
+function setValueFromDbDetails(
+  { discriminator, getValue, watchDependency, commit },
+  path,
+  commitPath,
+) {
+  watchDependency('discriminator#/dbDetails')
 
-  const retValue = getValue(discriminator, `/dbDetails${path}`);
+  const retValue = getValue(discriminator, `/dbDetails${path}`)
 
-  if(commitPath && retValue) {
-    const tlsOperation = getValue(discriminator, "/tlsOperation");
+  if (commitPath && retValue) {
+    const tlsOperation = getValue(discriminator, '/tlsOperation')
 
     // computed called when tls fields is not visible
-    if(commitPath.includes("/spec/tls") && tlsOperation !== "update")
-      return undefined;
+    if (commitPath.includes('/spec/tls') && tlsOperation !== 'update') return undefined
 
     // direct model update required for reusable element.
     // computed property is not applicable for reusable element
-    commit("wizard/model$update", {
+    commit('wizard/model$update', {
       path: commitPath,
       value: retValue,
-      force: true
-    });
+      force: true,
+    })
   }
 
-  return retValue || undefined;
+  return retValue || undefined
 }
 
 function getAliasOptions() {
-  return ["server", "client", "metrics-exporter"];
+  return ['server', 'client', 'metrics-exporter']
 }
 
 function isNamespaceDisabled({ route }) {
-  const { namespace } = route.query || {};
-  return !!namespace;
+  const { namespace } = route.query || {}
+  return !!namespace
 }
 
 function isDatabaseRefDisabled({ route }) {
-  const { name } = route.query || {};
-  return !!name;
+  const { name } = route.query || {}
+  return !!name
 }
 
-function onNamespaceChange({commit}) {
-  commit("wizard/model$delete", "/spec/type");
+function onNamespaceChange({ commit }) {
+  commit('wizard/model$delete', '/spec/type')
 }
 
-function onDbChange({commit}) {
-  commit("wizard/model$delete", "/spec/type");
+function onDbChange({ commit }) {
+  commit('wizard/model$delete', '/spec/type')
 }
 
-function setApplyToIfReady(){
-  return "IfReady"
+function setApplyToIfReady() {
+  return 'IfReady'
 }
 
-function isVerticalScaleTopologyRequired ({ watchDependency, getValue, discriminator, commit }) {
+function isVerticalScaleTopologyRequired({ watchDependency, getValue, discriminator, commit }) {
+  watchDependency('discriminator#/topologyKey')
+  watchDependency('discriminator#/topologyValue')
 
-  watchDependency("discriminator#/topologyKey");
-  watchDependency("discriminator#/topologyValue");
+  const key = getValue(discriminator, '/topologyKey')
+  const value = getValue(discriminator, '/topologyValue')
+  const path = `/spec/verticalScaling/redis/topology`
 
-  const key = getValue(discriminator, '/topologyKey');
-  const value = getValue(discriminator, '/topologyValue');
-  const path = `/spec/verticalScaling/redis/topology`;
-
-  if(key || value) {
-    commit("wizard/model$update", {
+  if (key || value) {
+    commit('wizard/model$update', {
       path: path,
-      value: {key,value},
+      value: { key, value },
       force: true,
-    });
-    return true;
-  }
-  else {
-    commit("wizard/model$delete", path);
-    return false;
+    })
+    return true
+  } else {
+    commit('wizard/model$delete', path)
+    return false
   }
 }
 
@@ -838,4 +754,4 @@ return {
   onDbChange,
   setApplyToIfReady,
   isVerticalScaleTopologyRequired,
-};
+}
