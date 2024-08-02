@@ -1,23 +1,6 @@
 let nodeTopologyListFromApi = []
 let provider = ''
 
-function onVersionChange({ discriminator, getValue, commit, model, watchDependency }) {
-  watchDependency('discriminator#/elasticVersions')
-  const versions = getValue(discriminator, '/elasticVersions')
-
-  const selectedVersion = getValue(model, '/spec/version')
-
-  const version = versions?.find((item) => item.value === selectedVersion) || {}
-
-  commit('wizard/model$update', {
-    path: '/spec/authPlugin',
-    value: version.authPlugin,
-    force: true,
-  })
-
-  return selectedVersion
-}
-
 const machines = {
   'db.t.micro': {
     resources: {
@@ -336,85 +319,11 @@ function isEqualToModelPathValue({ model, getValue, watchDependency }, value, mo
   return modelPathValue === value
 }
 
-function showAuthSecretField({ discriminator, getValue, watchDependency }) {
-  return !showAuthPasswordField({
-    discriminator,
-    getValue,
-    watchDependency,
-  })
-}
-
 function showStorageSizeField({ model, getValue, watchDependency }) {
   const modelPathValue = getValue(model, '/spec/mode')
   watchDependency('model#/spec/mode')
   const validType = ['Standalone', 'Replicaset']
   return validType.includes(modelPathValue)
-}
-
-async function getResources({ axios, storeGet }, group, version, resource) {
-  const owner = storeGet('/route/params/user')
-  const cluster = storeGet('/route/params/cluster')
-
-  const resp = await axios.get(
-    `/clusters/${owner}/${cluster}/proxy/${group}/${version}/${resource}`,
-    {
-      params: { filter: { items: { metadata: { name: null } } } },
-    },
-  )
-
-  const resources = (resp && resp.data && resp.data.items) || []
-
-  resources.map((item) => {
-    const name = (item.metadata && item.metadata.name) || ''
-    item.text = name
-    item.value = name
-    return true
-  })
-  return resources
-}
-
-async function getKafkaVersions(
-  { axios, storeGet, setDiscriminatorValue },
-  group,
-  version,
-  resource,
-) {
-  const owner = storeGet('/route/params/user')
-  const cluster = storeGet('/route/params/cluster')
-
-  const queryParams = {
-    filter: {
-      items: {
-        metadata: { name: null },
-        spec: { version: null, deprecated: null, authPlugin: null },
-      },
-    },
-  }
-
-  const resp = await axios.get(
-    `/clusters/${owner}/${cluster}/proxy/${group}/${version}/${resource}`,
-    {
-      params: queryParams,
-    },
-  )
-
-  const resources = (resp && resp.data && resp.data.items) || []
-
-  // keep only non deprecated versions
-  const filteredKafkaVersions = resources.filter((item) => item.spec && !item.spec.deprecated)
-
-  filteredKafkaVersions.map((item) => {
-    const name = (item.metadata && item.metadata.name) || ''
-    const specVersion = (item.spec && item.spec.version) || ''
-    item.text = `${name} (${specVersion})`
-    item.value = name
-    item.authPlugin = item.spec.authPlugin
-    return true
-  })
-
-  setDiscriminatorValue('/elasticVersions', filteredKafkaVersions)
-
-  return filteredKafkaVersions
 }
 
 function disableLimit({ model, getValue, watchDependency }) {
@@ -785,13 +694,9 @@ function onBackupSwitch({ discriminator, getValue, commit }) {
 
 return {
   isVariantAvailable,
-  onVersionChange,
   showAuthPasswordField,
   isEqualToModelPathValue,
-  showAuthSecretField,
   showStorageSizeField,
-  getResources,
-  getKafkaVersions,
   disableLimit,
   getMachineListForOptions,
   setResourceLimit,

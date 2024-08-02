@@ -1,23 +1,6 @@
 let nodeTopologyListFromApi = []
 let provider = ''
 
-function onVersionChange({ discriminator, getValue, commit, model, watchDependency }) {
-  watchDependency('discriminator#/elasticVersions')
-  const versions = getValue(discriminator, '/elasticVersions')
-
-  const selectedVersion = getValue(model, '/spec/version')
-
-  const version = versions?.find((item) => item.value === selectedVersion) || {}
-
-  commit('wizard/model$update', {
-    path: '/spec/authPlugin',
-    value: version.authPlugin,
-    force: true,
-  })
-
-  return selectedVersion
-}
-
 const machines = {
   'db.t.micro': {
     resources: {
@@ -528,7 +511,7 @@ async function getNamespaces({ axios, storeGet }) {
             },
           ],
         },
-      }
+      },
     )
     const namespaces = resp?.data?.status?.namespaces || []
     return namespaces
@@ -566,7 +549,7 @@ async function getNodeTopology({ model, getValue, axios, storeGet, watchDependen
       nodeTopologyListFromApi = resp.data?.items
       const filteredResp = resp.data?.items.filter(
         (item) =>
-          item.metadata.labels?.['node.k8s.appscode.com/tenancy'] === deploymentType.toLowerCase()
+          item.metadata.labels?.['node.k8s.appscode.com/tenancy'] === deploymentType.toLowerCase(),
       )
       mappedResp = filteredResp?.map((item) => {
         const name = (item.metadata && item.metadata.name) || ''
@@ -578,7 +561,7 @@ async function getNodeTopology({ model, getValue, axios, storeGet, watchDependen
   } else {
     const filteredResp = nodeTopologyListFromApi.filter(
       (item) =>
-        item.metadata.labels?.['node.k8s.appscode.com/tenancy'] === deploymentType.toLowerCase()
+        item.metadata.labels?.['node.k8s.appscode.com/tenancy'] === deploymentType.toLowerCase(),
     )
     mappedResp = filteredResp?.map((item) => {
       const name = (item.metadata && item.metadata.name) || ''
@@ -805,7 +788,6 @@ function onBackupSwitch({ discriminator, getValue, commit }) {
 
 return {
   isVariantAvailable,
-  onVersionChange,
   showAuthPasswordField,
   isEqualToModelPathValue,
   showStorageSizeField,
