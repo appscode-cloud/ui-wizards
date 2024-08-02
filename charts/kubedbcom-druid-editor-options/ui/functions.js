@@ -383,26 +383,34 @@ function getMachineListForOptions() {
   return array
 }
 
-function setResourceLimit({ commit, model, getValue, watchDependency }) {
-  let modelPathValue = getValue(model, '/spec/podResources/machine')
+function setResourceLimitTopology({ commit, model, getValue }) {
+  setResourceLimit({ commit, model, getValue }, 'middleManagers')
+  setResourceLimit({ commit, model, getValue }, 'historicals')
+  setResourceLimit({ commit, model, getValue }, 'brokers')
+  setResourceLimit({ commit, model, getValue }, 'coordinators')
+}
+
+function setResourceLimit({ commit, model, getValue, watchDependency }, topology) {
+  let modelPathValue = getValue(model, `/spec/topology/${topology}/podResources/machine`)
   const deploymentType = getValue(model, '/spec/admin/deployment/default')
+
   if (modelPathValue) {
     if (modelPathValue === 'custom') modelPathValue = 'db.t.micro'
     // to avoiding set value by reference, cpu and memory set separately
     if (deploymentType === 'Dedicated') {
       commit('wizard/model$update', {
-        path: '/spec/podResources/resources/requests',
+        path: `/spec/topology/${topology}/podResources/resources/requests`,
         value: machines[modelPathValue]?.resources.limits,
         force: true,
       })
       commit('wizard/model$update', {
-        path: '/spec/podResources/resources/limits',
+        path: `/spec/topology/${topology}/podResources/resources/limits`,
         value: machines[modelPathValue]?.resources.limits,
         force: true,
       })
     } else {
       commit('wizard/model$update', {
-        path: '/spec/podResources/resources',
+        path: `/spec/topology/${topology}/podResources/resources`,
         value: machines[modelPathValue]?.resources,
         force: true,
       })
@@ -418,6 +426,10 @@ function setLimitsCpuOrMem({ model, getValue }, type) {
     return machines[selectedMachine] && machines[selectedMachine].resources
   } else {
     return {
+      requests: {
+        cpu: '1',
+        memory: '1024Mi',
+      },
       limits: {
         cpu: '1',
         memory: '1024Mi',
@@ -792,6 +804,7 @@ function isToggleOn({ getValue, model }, type) {
 }
 
 return {
+  setResourceLimitTopology,
   isVariantAvailable,
   showAuthPasswordField,
   getNamespaces,
