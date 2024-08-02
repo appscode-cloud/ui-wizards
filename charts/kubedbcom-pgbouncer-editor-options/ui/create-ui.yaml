@@ -10,6 +10,9 @@ steps:
       createAuthSecret:
         default: false
         type: boolean
+      pgRef:
+        default: {}
+        type: object
       monitoring:
         default: false
         type: boolean
@@ -165,33 +168,25 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/deletionPolicy
       type: radio
-    - elements:
-      - label:
-          text: labels.sync_users_question
-        schema:
-          $ref: schema#/properties/spec/properties/database/properties/syncUsers
-        type: switch
-      - label:
-          text: labels.database.name
-        schema:
-          $ref: schema#/properties/spec/properties/database/properties/databaseName
-        type: input
-      - fetch: getNamespaces
-        label:
-          text: labels.namespace
-        schema:
-          $ref: schema#/properties/spec/properties/database/properties/ref/properties/namespace
-        type: select
-      - fetch: getPostgresList
-        label:
-          text: labels.name
-        schema:
-          $ref: schema#/properties/spec/properties/database/properties/ref/properties/name
-        type: select
+    - label:
+        text: labels.sync_users_question
+      schema:
+        $ref: schema#/properties/spec/properties/database/properties/syncUsers
+      type: switch
+    - label:
+        text: labels.database.name
+      schema:
+        $ref: schema#/properties/spec/properties/database/properties/databaseName
+      type: input
+    - fetch: getAppBindings|postgres
       label:
-        text: labels.databaseref.label
-      show_label: true
-      type: single-step-form
+        text: labels.databaseref.select
+      onChange: onRefChange
+      refresh: true
+      required: true
+      schema:
+        $ref: discriminator#/pgRef
+      type: select
     - label:
         text: Provide Authentication Credentials?
       onChange: onAuthChange
