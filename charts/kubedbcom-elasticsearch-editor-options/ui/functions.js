@@ -1,391 +1,378 @@
-let nodeTopologyListFromApi = [];
-let provider = "";
+let nodeTopologyListFromApi = []
+let provider = ''
 
 function onVersionChange({ discriminator, getValue, commit, model, watchDependency }) {
-  watchDependency("discriminator#/elasticVersions")
-  const versions = getValue(discriminator, "/elasticVersions");
+  watchDependency('discriminator#/elasticVersions')
+  const versions = getValue(discriminator, '/elasticVersions')
 
-  const selectedVersion = getValue(model, "/spec/version");
+  const selectedVersion = getValue(model, '/spec/version')
 
-  const version = versions?.find((item) => item.value === selectedVersion) || {};
+  const version = versions?.find((item) => item.value === selectedVersion) || {}
 
-  commit("wizard/model$update", {
-    path: "/spec/authPlugin",
+  commit('wizard/model$update', {
+    path: '/spec/authPlugin',
     value: version.authPlugin,
-    force: true
-  });
+    force: true,
+  })
 
-  return selectedVersion;
+  return selectedVersion
 }
 
 const machines = {
-  "db.t.micro": {
+  'db.t.micro': {
     resources: {
       requests: {
-        cpu: "250m",
-        memory: "512Mi"
+        cpu: '250m',
+        memory: '512Mi',
       },
       limits: {
-        cpu: "500m",
-        memory: "1Gi"
-      }
-    }
+        cpu: '500m',
+        memory: '1Gi',
+      },
+    },
   },
-  "db.t.small": {
+  'db.t.small': {
     resources: {
       requests: {
-        cpu: "1",
-        memory: "1Gi"
+        cpu: '1',
+        memory: '1Gi',
       },
       limits: {
-        cpu: "2",
-        memory: "2Gi"
-      }
-    }
+        cpu: '2',
+        memory: '2Gi',
+      },
+    },
   },
-  "db.t.medium": {
+  'db.t.medium': {
     resources: {
       requests: {
-        cpu: "1",
-        memory: "2Gi"
+        cpu: '1',
+        memory: '2Gi',
       },
       limits: {
-        cpu: "2",
-        memory: "4Gi"
-      }
-    }
+        cpu: '2',
+        memory: '4Gi',
+      },
+    },
   },
-  "db.t.large": {
+  'db.t.large': {
     resources: {
       requests: {
-        cpu: "1",
-        memory: "4Gi"
+        cpu: '1',
+        memory: '4Gi',
       },
       limits: {
-        cpu: "2",
-        memory: "8Gi"
-      }
-    }
+        cpu: '2',
+        memory: '8Gi',
+      },
+    },
   },
-  "db.t.xlarge": {
+  'db.t.xlarge': {
     resources: {
       requests: {
-        cpu: "2",
-        memory: "8Gi"
+        cpu: '2',
+        memory: '8Gi',
       },
       limits: {
-        cpu: "4",
-        memory: "16Gi"
-      }
-    }
+        cpu: '4',
+        memory: '16Gi',
+      },
+    },
   },
-  "db.t.2xlarge": {
+  'db.t.2xlarge': {
     resources: {
       requests: {
-        cpu: "4",
-        memory: "16Gi"
+        cpu: '4',
+        memory: '16Gi',
       },
       limits: {
-        cpu: "8",
-        memory: "32Gi"
-      }
-    }
+        cpu: '8',
+        memory: '32Gi',
+      },
+    },
   },
-  "db.m.small": {
+  'db.m.small': {
     resources: {
       requests: {
-        cpu: "500m",
-        memory: "912680550"
+        cpu: '500m',
+        memory: '912680550',
       },
       limits: {
-        cpu: "1",
-        memory: "1825361100"
-      }
-    }
+        cpu: '1',
+        memory: '1825361100',
+      },
+    },
   },
-  "db.m.large": {
+  'db.m.large': {
     resources: {
       requests: {
-        cpu: "1",
-        memory: "4Gi"
+        cpu: '1',
+        memory: '4Gi',
       },
       limits: {
-        cpu: "2",
-        memory: "8Gi"
-      }
-    }
+        cpu: '2',
+        memory: '8Gi',
+      },
+    },
   },
-  "db.m.xlarge": {
+  'db.m.xlarge': {
     resources: {
       requests: {
-        cpu: "2",
-        memory: "8Gi"
+        cpu: '2',
+        memory: '8Gi',
       },
       limits: {
-        cpu: "4",
-        memory: "16Gi"
-      }
-    }
+        cpu: '4',
+        memory: '16Gi',
+      },
+    },
   },
-  "db.m.2xlarge": {
+  'db.m.2xlarge': {
     resources: {
       requests: {
-        cpu: "4",
-        memory: "16Gi"
+        cpu: '4',
+        memory: '16Gi',
       },
       limits: {
-        cpu: "8",
-        memory: "32Gi"
-      }
-    }
+        cpu: '8',
+        memory: '32Gi',
+      },
+    },
   },
-  "db.m.4xlarge": {
+  'db.m.4xlarge': {
     resources: {
       requests: {
-        cpu: "8",
-        memory: "32Gi"
+        cpu: '8',
+        memory: '32Gi',
       },
       limits: {
-        cpu: "16",
-        memory: "64Gi"
-      }
-    }
+        cpu: '16',
+        memory: '64Gi',
+      },
+    },
   },
-  "db.m.8xlarge": {
+  'db.m.8xlarge': {
     resources: {
       requests: {
-        cpu: "16",
-        memory: "64Gi"
+        cpu: '16',
+        memory: '64Gi',
       },
       limits: {
-        cpu: "32",
-        memory: "128Gi"
-      }
-    }
+        cpu: '32',
+        memory: '128Gi',
+      },
+    },
   },
-  "db.m.12xlarge": {
+  'db.m.12xlarge': {
     resources: {
       requests: {
-        cpu: "24",
-        memory: "96Gi"
+        cpu: '24',
+        memory: '96Gi',
       },
       limits: {
-        cpu: "48",
-        memory: "192Gi"
-      }
-    }
+        cpu: '48',
+        memory: '192Gi',
+      },
+    },
   },
-  "db.m.16xlarge": {
+  'db.m.16xlarge': {
     resources: {
       requests: {
-        cpu: "32",
-        memory: "128Gi"
+        cpu: '32',
+        memory: '128Gi',
       },
       limits: {
-        cpu: "64",
-        memory: "256Gi"
-      }
-    }
+        cpu: '64',
+        memory: '256Gi',
+      },
+    },
   },
-  "db.m.24xlarge": {
+  'db.m.24xlarge': {
     resources: {
       requests: {
-        cpu: "48",
-        memory: "192Gi"
+        cpu: '48',
+        memory: '192Gi',
       },
       limits: {
-        cpu: "96",
-        memory: "384Gi"
-      }
-    }
+        cpu: '96',
+        memory: '384Gi',
+      },
+    },
   },
-  "db.r.large": {
+  'db.r.large': {
     resources: {
       requests: {
-        cpu: "1",
-        memory: "8Gi"
+        cpu: '1',
+        memory: '8Gi',
       },
       limits: {
-        cpu: "2",
-        memory: "16Gi"
-      }
-    }
+        cpu: '2',
+        memory: '16Gi',
+      },
+    },
   },
-  "db.r.xlarge": {
+  'db.r.xlarge': {
     resources: {
       requests: {
-        cpu: "2",
-        memory: "16Gi"
+        cpu: '2',
+        memory: '16Gi',
       },
       limits: {
-        cpu: "4",
-        memory: "32Gi"
-      }
-    }
+        cpu: '4',
+        memory: '32Gi',
+      },
+    },
   },
-  "db.r.2xlarge": {
+  'db.r.2xlarge': {
     resources: {
       requests: {
-        cpu: "4",
-        memory: "32Gi"
+        cpu: '4',
+        memory: '32Gi',
       },
       limits: {
-        cpu: "8",
-        memory: "64Gi"
-      }
-    }
+        cpu: '8',
+        memory: '64Gi',
+      },
+    },
   },
-  "db.r.4xlarge": {
+  'db.r.4xlarge': {
     resources: {
       requests: {
-        cpu: "8",
-        memory: "96Gi"
+        cpu: '8',
+        memory: '96Gi',
       },
       limits: {
-        cpu: "16",
-        memory: "192Gi"
-      }
-    }
+        cpu: '16',
+        memory: '192Gi',
+      },
+    },
   },
-  "db.r.8xlarge": {
+  'db.r.8xlarge': {
     resources: {
       requests: {
-        cpu: "16",
-        memory: "128Gi"
+        cpu: '16',
+        memory: '128Gi',
       },
       limits: {
-        cpu: "32",
-        memory: "256Gi"
-      }
-    }
+        cpu: '32',
+        memory: '256Gi',
+      },
+    },
   },
-  "db.r.12xlarge": {
+  'db.r.12xlarge': {
     resources: {
       requests: {
-        cpu: "24",
-        memory: "192Gi"
+        cpu: '24',
+        memory: '192Gi',
       },
       limits: {
-        cpu: "48",
-        memory: "384Gi"
-      }
-    }
+        cpu: '48',
+        memory: '384Gi',
+      },
+    },
   },
-  "db.r.16xlarge": {
+  'db.r.16xlarge': {
     resources: {
       requests: {
-        cpu: "32",
-        memory: "256Gi"
+        cpu: '32',
+        memory: '256Gi',
       },
       limits: {
-        cpu: "64",
-        memory: "512Gi"
-      }
-    }
+        cpu: '64',
+        memory: '512Gi',
+      },
+    },
   },
-  "db.r.24xlarge": {
+  'db.r.24xlarge': {
     resources: {
       requests: {
-        cpu: "24",
-        memory: "384Gi"
+        cpu: '24',
+        memory: '384Gi',
       },
       limits: {
-        cpu: "96",
-        memory: "768Gi"
-      }
-    }
-  }
-};
-
-const machineList = [
-  "custom",
-  "db.t.micro",
-  "db.t.small",
-  "db.t.medium",
-  "db.t.large",
-  "db.t.xlarge",
-  "db.t.2xlarge",
-  "db.m.small",
-  "db.m.large",
-  "db.m.xlarge",
-  "db.m.2xlarge",
-  "db.m.4xlarge",
-  "db.m.8xlarge",
-  "db.m.12xlarge",
-  "db.m.16xlarge",
-  "db.m.24xlarge",
-  "db.r.large",
-  "db.r.xlarge",
-  "db.r.2xlarge",
-  "db.r.4xlarge",
-  "db.r.8xlarge",
-  "db.r.12xlarge",
-  "db.r.16xlarge",
-  "db.r.24xlarge",
-];
-
-function showAuthPasswordField({
-  discriminator,
-  getValue,
-  watchDependency,
-}) {
-  const modelPathValue = getValue(discriminator, "/createAuthSecret");
-  watchDependency("discriminator#/createAuthSecret");
-  return !!modelPathValue;
+        cpu: '96',
+        memory: '768Gi',
+      },
+    },
+  },
 }
 
-function isEqualToModelPathValue(
-  { model, getValue, watchDependency },
-  value,
-  modelPath
-) {
-  const modelPathValue = getValue(model, modelPath);
-  watchDependency("model#" + modelPath);
-  return modelPathValue === value;
+const machineList = [
+  'custom',
+  'db.t.micro',
+  'db.t.small',
+  'db.t.medium',
+  'db.t.large',
+  'db.t.xlarge',
+  'db.t.2xlarge',
+  'db.m.small',
+  'db.m.large',
+  'db.m.xlarge',
+  'db.m.2xlarge',
+  'db.m.4xlarge',
+  'db.m.8xlarge',
+  'db.m.12xlarge',
+  'db.m.16xlarge',
+  'db.m.24xlarge',
+  'db.r.large',
+  'db.r.xlarge',
+  'db.r.2xlarge',
+  'db.r.4xlarge',
+  'db.r.8xlarge',
+  'db.r.12xlarge',
+  'db.r.16xlarge',
+  'db.r.24xlarge',
+]
+
+function showAuthPasswordField({ discriminator, getValue, watchDependency }) {
+  const modelPathValue = getValue(discriminator, '/createAuthSecret')
+  watchDependency('discriminator#/createAuthSecret')
+  return !!modelPathValue
+}
+
+function isEqualToModelPathValue({ model, getValue, watchDependency }, value, modelPath) {
+  const modelPathValue = getValue(model, modelPath)
+  watchDependency('model#' + modelPath)
+  return modelPathValue === value
 }
 
 function showStorageSizeField({ model, getValue, watchDependency }) {
-  const modelPathValue = getValue(model, "/spec/mode");
-  watchDependency("model#/spec/mode");
-  const validType = ["Standalone", "Replicaset"];
-  return validType.includes(modelPathValue);
+  const modelPathValue = getValue(model, '/spec/mode')
+  watchDependency('model#/spec/mode')
+  const validType = ['Standalone', 'Replicaset']
+  return validType.includes(modelPathValue)
 }
 
-async function getResources(
-  { axios, storeGet },
-  group,
-  version,
-  resource
-) {
-  const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/route/params/cluster");
+async function getResources({ axios, storeGet }, group, version, resource) {
+  const owner = storeGet('/route/params/user')
+  const cluster = storeGet('/route/params/cluster')
 
   const resp = await axios.get(
     `/clusters/${owner}/${cluster}/proxy/${group}/${version}/${resource}`,
     {
       params: { filter: { items: { metadata: { name: null } } } },
-    }
-  );
+    },
+  )
 
-  const resources = (resp && resp.data && resp.data.items) || [];
+  const resources = (resp && resp.data && resp.data.items) || []
 
   resources.map((item) => {
-    const name = (item.metadata && item.metadata.name) || "";
-    item.text = name;
-    item.value = name;
-    return true;
-  });
-  return resources;
+    const name = (item.metadata && item.metadata.name) || ''
+    item.text = name
+    item.value = name
+    return true
+  })
+  return resources
 }
 
 async function getElasticSearchVersions(
   { axios, storeGet, setDiscriminatorValue },
   group,
   version,
-  resource
+  resource,
 ) {
-  const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/route/params/cluster");
+  const owner = storeGet('/route/params/user')
+  const cluster = storeGet('/route/params/cluster')
 
   const queryParams = {
     filter: {
@@ -394,576 +381,528 @@ async function getElasticSearchVersions(
         spec: { version: null, deprecated: null, authPlugin: null },
       },
     },
-  };
+  }
 
   const resp = await axios.get(
     `/clusters/${owner}/${cluster}/proxy/${group}/${version}/${resource}`,
     {
       params: queryParams,
-    }
-  );
+    },
+  )
 
-  const resources = (resp && resp.data && resp.data.items) || [];
+  const resources = (resp && resp.data && resp.data.items) || []
 
   // keep only non deprecated versions
   const filteredElasticSearchVersions = resources.filter(
-    (item) => item.spec && !item.spec.deprecated
-  );
+    (item) => item.spec && !item.spec.deprecated,
+  )
 
   // sort compare function for the version array
   function sortVersion(a, b) {
-    const aName = a.metadata.name;
-    const bName = b.metadata.name;
+    const aName = a.metadata.name
+    const bName = b.metadata.name
 
-    const [aString, aNumbers] = aName.split('-');
-    const [bString, bNumbers] = bName.split('-');
+    const [aString, aNumbers] = aName.split('-')
+    const [bString, bNumbers] = bName.split('-')
 
-    const aNums = aNumbers.split('.').map(Number);
-    const aNum1 = aNums[0] ? aNums[0] : 0;
-    const aNum2 = aNums[1] ? aNums[1] : 0;
-    const aNum3 = aNums[2] ? aNums[2] : 0;
+    const aNums = aNumbers.split('.').map(Number)
+    const aNum1 = aNums[0] ? aNums[0] : 0
+    const aNum2 = aNums[1] ? aNums[1] : 0
+    const aNum3 = aNums[2] ? aNums[2] : 0
 
-    const bNums = bNumbers.split('.').map(Number);
-    const bNum1 = bNums[0] ? bNums[0] : 0;
-    const bNum2 = bNums[1] ? bNums[1] : 0;
-    const bNum3 = bNums[2] ? bNums[2] : 0;    
+    const bNums = bNumbers.split('.').map(Number)
+    const bNum1 = bNums[0] ? bNums[0] : 0
+    const bNum2 = bNums[1] ? bNums[1] : 0
+    const bNum3 = bNums[2] ? bNums[2] : 0
 
     if (aString !== bString) {
-      return aString.localeCompare(bString);
+      return aString.localeCompare(bString)
     }
 
     if (aNum1 !== bNum1) {
-      return aNum1 - bNum1;
+      return aNum1 - bNum1
     }
 
     if (aNum2 !== bNum2) {
-      return aNum2 - bNum2;
+      return aNum2 - bNum2
     }
 
-    return aNum3 - bNum3;
+    return aNum3 - bNum3
   }
   const sortedVersion = filteredElasticSearchVersions.sort(sortVersion)
 
   sortedVersion.map((item) => {
-    const name = (item.metadata && item.metadata.name) || "";
-    const specVersion = (item.spec && item.spec.version) || "";
-    item.text = `${name} (${specVersion})`;
-    item.value = name;
-    item.authPlugin = item.spec.authPlugin;
-    return true;
-  });
+    const name = (item.metadata && item.metadata.name) || ''
+    const specVersion = (item.spec && item.spec.version) || ''
+    item.text = `${name} (${specVersion})`
+    item.value = name
+    item.authPlugin = item.spec.authPlugin
+    return true
+  })
 
-  setDiscriminatorValue("/elasticVersions", sortedVersion);
+  setDiscriminatorValue('/elasticVersions', sortedVersion)
 
-  return sortedVersion;
+  return sortedVersion
 }
 
 function disableLimit({ model, getValue, watchDependency }) {
-  const modelPathValue = getValue(model, "/spec/machine");
-  watchDependency("model#/spec/machine");
-  return modelPathValue !== "custom" && !!modelPathValue;
+  const modelPathValue = getValue(model, '/spec/machine')
+  watchDependency('model#/spec/machine')
+  return modelPathValue !== 'custom' && !!modelPathValue
 }
 
 function setLimitsCpuOrMem({ model, getValue, watchDependency }) {
-  watchDependency('model#/spec/version');
-  const modelPathValue = getValue(model, "/spec/podResources/machine");
+  watchDependency('model#/spec/version')
+  const modelPathValue = getValue(model, '/spec/podResources/machine')
 
-  if (modelPathValue && modelPathValue !== "custom") {
-    return (
-      machines[modelPathValue] &&
-      machines[modelPathValue].resources
-    );
+  if (modelPathValue && modelPathValue !== 'custom') {
+    return machines[modelPathValue] && machines[modelPathValue].resources
   } else {
     return {
       limits: {
-        cpu: "1",
-        memory: "1024Mi",
+        cpu: '1',
+        memory: '1024Mi',
       },
     }
   }
 }
 
 function setMachineToCustom() {
-  return "custom";
+  return 'custom'
 }
 
 function getCreateNameSpaceUrl({ model, getValue, storeGet }) {
+  const user = storeGet('/route/params/user')
+  const cluster = storeGet('/route/params/cluster')
 
-  const user = storeGet("/route/params/user");
-  const cluster = storeGet("/route/params/cluster");
-
-  const domain = storeGet("/domain") || '';
-  if (domain.includes("bb.test")) {
+  const domain = storeGet('/domain') || ''
+  if (domain.includes('bb.test')) {
     return `http://console.bb.test:5990/${user}/kubernetes/${cluster}/core/v1/namespaces/create`
   } else {
-    const editedDomain = domain.replace("kubedb", "console");
+    const editedDomain = domain.replace('kubedb', 'console')
     return `${editedDomain}/${user}/kubernetes/${cluster}/core/v1/namespaces/create`
   }
 }
 
 const ifCapiProviderIsNotEmpty = ({ model, getValue, watchDependency }) => {
-  watchDependency("model#/form/capi/provider");
-  const val = getValue(model, "/form/capi/provider");
+  watchDependency('model#/form/capi/provider')
+  const val = getValue(model, '/form/capi/provider')
   if (val) return true
-};
+}
 
 const showMultiselectZone = ({ model, getValue, watchDependency }) => {
-  watchDependency("model#/form/capi/dedicated");
-  const val = getValue(model, "/form/capi/provider");
-  
-  if(val === "capz" && ifDedicated({ model, getValue })) return true;
-};
+  watchDependency('model#/form/capi/dedicated')
+  const val = getValue(model, '/form/capi/provider')
+
+  if (val === 'capz' && ifDedicated({ model, getValue })) return true
+}
 
 const showSelectZone = ({ model, getValue, watchDependency }) => {
-  watchDependency("model#/form/capi/dedicated");
-  const val = getValue(model, "/form/capi/provider");
-  if(val !== "capz" && ifDedicated({ model, getValue })) return true;
-};
+  watchDependency('model#/form/capi/dedicated')
+  const val = getValue(model, '/form/capi/provider')
+  if (val !== 'capz' && ifDedicated({ model, getValue })) return true
+}
 
-const ifDedicated = ({ model, getValue}) => {
-  const val = getValue(model, "form/capi/dedicated");
+const ifDedicated = ({ model, getValue }) => {
+  const val = getValue(model, 'form/capi/dedicated')
   if (val) return true
-};
+}
 
 const dedicatedOnChange = ({ model, getValue, commit }) => {
-  const val = getValue(model, "form/capi/dedicated");
+  const val = getValue(model, 'form/capi/dedicated')
   if (!val) {
-    commit("wizard/model$delete", "form/capi/zones");
-    commit("wizard/model$delete", "form/capi/sku");
+    commit('wizard/model$delete', 'form/capi/zones')
+    commit('wizard/model$delete', 'form/capi/sku')
   }
-};
-
+}
 
 const ifZones = ({ model, getValue, watchDependency }) => {
-  watchDependency("model#/form/capi/zones");
-  watchDependency("model#/form/capi/dedicated");
-  const zones = getValue(model, "form/capi/zones") || [];
-  const isDedicated = getValue(model, "form/capi/dedicated");
+  watchDependency('model#/form/capi/zones')
+  watchDependency('model#/form/capi/dedicated')
+  const zones = getValue(model, 'form/capi/zones') || []
+  const isDedicated = getValue(model, 'form/capi/dedicated')
   if (zones.length && isDedicated) return true
-};
+}
 
 const zonesOnChange = ({ model, getValue, commit }) => {
-  const zones = getValue(model, "form/capi/zones") || [];
-  if (!zones.length) commit("wizard/model$delete", "form/capi/sku");
-};
+  const zones = getValue(model, 'form/capi/zones') || []
+  if (!zones.length) commit('wizard/model$delete', 'form/capi/sku')
+}
 
-async function getZones({storeGet,axios,model,getValue}) {
-  const owner = storeGet("/route/params/user")
-  const cluster = storeGet("/route/params/cluster")
-  const isDedicated = getValue(model,"form/capi/dedicated")
-  if(isDedicated)
-  {
+async function getZones({ storeGet, axios, model, getValue }) {
+  const owner = storeGet('/route/params/user')
+  const cluster = storeGet('/route/params/cluster')
+  const isDedicated = getValue(model, 'form/capi/dedicated')
+  if (isDedicated) {
     try {
-      const resp = await axios.get(`clustersv2/${owner}/${cluster}/zones`);
-      const val = resp.data.map((item)=>{
-        return {"value":item,"text":item}
+      const resp = await axios.get(`clustersv2/${owner}/${cluster}/zones`)
+      const val = resp.data.map((item) => {
+        return { value: item, text: item }
       })
       return val
     } catch (e) {
-      console.log(e);
-      return [];
+      console.log(e)
+      return []
     }
   }
 }
 
-async function getSKU({storeGet,axios,model,getValue,watchDependency}) {
-  watchDependency("model#/form/capi/zones")
-  const owner = storeGet("/route/params/user")
-  const cluster = storeGet("/route/params/cluster")
-  const zones = getValue(model,"form/capi/zones") || []
-  if(zones.length)
-  {
+async function getSKU({ storeGet, axios, model, getValue, watchDependency }) {
+  watchDependency('model#/form/capi/zones')
+  const owner = storeGet('/route/params/user')
+  const cluster = storeGet('/route/params/cluster')
+  const zones = getValue(model, 'form/capi/zones') || []
+  if (zones.length) {
     try {
       let url = `clustersv2/${owner}/${cluster}/vms?`
-      if(typeof zones === 'string') {
-        url+=`zones=${encodeURIComponent(zones)}`
-      }
-      else {
+      if (typeof zones === 'string') {
+        url += `zones=${encodeURIComponent(zones)}`
+      } else {
         zones.forEach((item) => {
-          url+= `zones=${encodeURIComponent(item)}&`
-        });
-        url = url.slice(0,-1)
+          url += `zones=${encodeURIComponent(item)}&`
+        })
+        url = url.slice(0, -1)
       }
-      const resp = await axios.get(url);
-      const val = resp.data.map((item)=>{
-        return {"value":item.name,"text":`${item.name} [CPU: ${item.cpu}] [Memory: ${item.memory}mb] `}
+      const resp = await axios.get(url)
+      const val = resp.data.map((item) => {
+        return {
+          value: item.name,
+          text: `${item.name} [CPU: ${item.cpu}] [Memory: ${item.memory}mb] `,
+        }
       })
       return val
     } catch (e) {
-      console.log(e);
-      return [];
+      console.log(e)
+      return []
     }
   }
 }
 
-function isVariantAvailable ({storeGet})  {
-  const variant = storeGet("/route/query/variant");
+function isVariantAvailable({ storeGet }) {
+  const variant = storeGet('/route/query/variant')
   return variant ? true : false
 }
 
 function setStorageClass({ model, getValue, commit }) {
-  const deletionPolicy = getValue(model, "/spec/deletionPolicy") || "";
-  let storageClass =
-    getValue(model, "/spec/admin/storageClasses/default") || "";
-  const storageClassList =
-    getValue(model, "/spec/admin/storageClasses/available") || [];
-  const suffix = "-retain";
+  const deletionPolicy = getValue(model, '/spec/deletionPolicy') || ''
+  let storageClass = getValue(model, '/spec/admin/storageClasses/default') || ''
+  const storageClassList = getValue(model, '/spec/admin/storageClasses/available') || []
+  const suffix = '-retain'
 
   const simpleClassList = storageClassList.filter((item) => {
-    return !item.endsWith(suffix);
-  });
+    return !item.endsWith(suffix)
+  })
   const retainClassList = storageClassList.filter((item) => {
-    return item.endsWith(suffix);
-  });
-  if (deletionPolicy === "WipeOut" || deletionPolicy === "Delete") {
-    storageClass = simpleClassList.length
-      ? simpleClassList[0]
-      : retainClassList[0];
+    return item.endsWith(suffix)
+  })
+  if (deletionPolicy === 'WipeOut' || deletionPolicy === 'Delete') {
+    storageClass = simpleClassList.length ? simpleClassList[0] : retainClassList[0]
   } else {
-    storageClass = retainClassList.length
-      ? retainClassList[0]
-      : simpleClassList[0];
+    storageClass = retainClassList.length ? retainClassList[0] : simpleClassList[0]
   }
 
-  const isChangeable = isToggleOn({ getValue, model }, "storageClasses");
+  const isChangeable = isToggleOn({ getValue, model }, 'storageClasses')
   if (isChangeable && storageClass) {
-    commit("wizard/model$update", {
-      path: "/spec/admin/storageClasses/default",
+    commit('wizard/model$update', {
+      path: '/spec/admin/storageClasses/default',
       value: storageClass,
       force: true,
-    });
+    })
   }
 }
 
-
-
 async function getNamespaces({ axios, storeGet }) {
-  const params = storeGet("/route/params");
-  const { user, cluster, group, version, resource } = params;
+  const params = storeGet('/route/params')
+  const { user, cluster, group, version, resource } = params
   try {
     const resp = await axios.post(
       `/clusters/${user}/${cluster}/proxy/identity.k8s.appscode.com/v1alpha1/selfsubjectnamespaceaccessreviews`,
       {
-        "apiVersion": "identity.k8s.appscode.com/v1alpha1",
-        "kind": "SelfSubjectNamespaceAccessReview",
-        "spec": {
-          "resourceAttributes": [
+        apiVersion: 'identity.k8s.appscode.com/v1alpha1',
+        kind: 'SelfSubjectNamespaceAccessReview',
+        spec: {
+          resourceAttributes: [
             {
-              "verb": "create",
-              "group": group,
-              "version": version,
-              "resource": resource
-            }
-          ]
-        }
-      }
-    );
-    const namespaces = resp?.data?.status?.namespaces || [];
-    return namespaces;
-  }
-  catch(e) {
-    console.log(e);
-    return [];
+              verb: 'create',
+              group: group,
+              version: version,
+              resource: resource,
+            },
+          ],
+        },
+      },
+    )
+    const namespaces = resp?.data?.status?.namespaces || []
+    return namespaces
+  } catch (e) {
+    console.log(e)
+    return []
   }
 }
 
 function isToggleOn({ getValue, model }, type) {
-  return getValue(model, `/spec/admin/${type}/toggle`);
+  return getValue(model, `/spec/admin/${type}/toggle`)
 }
 
 function getAdminOptions({ getValue, model }, type) {
-  const options = getValue(model, `/spec/admin/${type}/available`) || [];
-  return options;
+  const options = getValue(model, `/spec/admin/${type}/available`) || []
+  return options
 }
 
-
 async function getNodeTopology({ model, getValue, axios, storeGet, watchDependency }) {
-  watchDependency("model#/spec/admin/deployment/default");
-  watchDependency("model#/spec/admin/clusterTier/default");
-  const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/route/params/cluster");
-  const deploymentType = getValue(model, "/spec/admin/deployment/default") || "";
-  const clusterTier = getValue(model, "/spec/admin/clusterTier/default") || "";
-  const nodeTopologyList =  getValue(model, `/spec/admin/clusterTier/nodeTopology/available`) || [];
-  let mappedResp = [];
-  let apiCalled = false;
+  watchDependency('model#/spec/admin/deployment/default')
+  watchDependency('model#/spec/admin/clusterTier/default')
+  const owner = storeGet('/route/params/user')
+  const cluster = storeGet('/route/params/cluster')
+  const deploymentType = getValue(model, '/spec/admin/deployment/default') || ''
+  const clusterTier = getValue(model, '/spec/admin/clusterTier/default') || ''
+  const nodeTopologyList = getValue(model, `/spec/admin/clusterTier/nodeTopology/available`) || []
+  let mappedResp = []
+  let apiCalled = false
 
   if (nodeTopologyListFromApi.length === 0 && !apiCalled) {
-    try{
-      apiCalled = true;
-      const url = `/clusters/${owner}/${cluster}/proxy/node.k8s.appscode.com/v1alpha1/nodetopologies`;
-      const resp = await axios.get(url);
-      nodeTopologyListFromApi = resp.data?.items;
-      const filteredResp = resp.data?.items.filter((item) => 
-        item.metadata.labels?.['node.k8s.appscode.com/tenancy'] === (deploymentType.toLowerCase())
-      );
+    try {
+      apiCalled = true
+      const url = `/clusters/${owner}/${cluster}/proxy/node.k8s.appscode.com/v1alpha1/nodetopologies`
+      const resp = await axios.get(url)
+      nodeTopologyListFromApi = resp.data?.items
+      const filteredResp = resp.data?.items.filter(
+        (item) =>
+          item.metadata.labels?.['node.k8s.appscode.com/tenancy'] === deploymentType.toLowerCase(),
+      )
       mappedResp = filteredResp?.map((item) => {
-        const name = (item.metadata && item.metadata.name) || "";
-        return name;
-      });
+        const name = (item.metadata && item.metadata.name) || ''
+        return name
+      })
+    } catch (e) {
+      console.log(e)
     }
-    catch(e) {
-      console.log(e);
-    }
-  }
-  else {
-    const filteredResp = nodeTopologyListFromApi.filter((item) => 
-      item.metadata.labels?.['node.k8s.appscode.com/tenancy'] === (deploymentType.toLowerCase())
-    );
+  } else {
+    const filteredResp = nodeTopologyListFromApi.filter(
+      (item) =>
+        item.metadata.labels?.['node.k8s.appscode.com/tenancy'] === deploymentType.toLowerCase(),
+    )
     mappedResp = filteredResp?.map((item) => {
-      const name = (item.metadata && item.metadata.name) || "";
-      return name;
-    });
+      const name = (item.metadata && item.metadata.name) || ''
+      return name
+    })
   }
 
-  const statusUrl = `/clustersv2/${owner}/${cluster}/status`;
-  if(provider.length === 0){
-    try{
-      const resp = await axios.get(statusUrl);
-      provider = resp.data?.provider;
-    }
-    catch(e) {
-      console.log(e);
+  const statusUrl = `/clustersv2/${owner}/${cluster}/status`
+  if (provider.length === 0) {
+    try {
+      const resp = await axios.get(statusUrl)
+      provider = resp.data?.provider
+    } catch (e) {
+      console.log(e)
     }
   }
 
-  const filteredList = filterNodeTopology(nodeTopologyList, clusterTier, provider, mappedResp);
+  const filteredList = filterNodeTopology(nodeTopologyList, clusterTier, provider, mappedResp)
 
-  return filteredList;
+  return filteredList
 }
 
 function filterNodeTopology(list, tier, provider, mappedResp) {
   // first filter the list from value that exists from the filtered list got from API
   const filteredlist = list.filter((item) => {
-    return mappedResp.includes(item);
+    return mappedResp.includes(item)
   })
 
   // filter the list based on clusterTier
-  if (provider === "EKS") {
+  if (provider === 'EKS') {
     return filteredlist.filter((item) => {
-      if(tier === 'CPUOptimized')
-        return item.startsWith('c');
-      else if(tier === 'MemoryOptimized')
-        return item.startsWith('r');
+      if (tier === 'CPUOptimized') return item.startsWith('c')
+      else if (tier === 'MemoryOptimized') return item.startsWith('r')
+      else return !item.startsWith('c') && !item.startsWith('r')
+    })
+  } else if (provider === 'AKS') {
+    return filteredlist.filter((item) => {
+      if (tier === 'CPUOptimized') return item.startsWith('f') || item.startsWith('fx')
+      else if (tier === 'MemoryOptimized')
+        return (
+          item.startsWith('e') ||
+          item.startsWith('eb') ||
+          item.startsWith('ec') ||
+          item.startsWith('m') ||
+          item.startsWith('d')
+        )
       else
-        return !item.startsWith('c') && !item.startsWith('r');
+        return (
+          !(item.startsWith('f') || item.startsWith('fx')) &&
+          !(
+            item.startsWith('e') ||
+            item.startsWith('eb') ||
+            item.startsWith('ec') ||
+            item.startsWith('m') ||
+            item.startsWith('d')
+          )
+        )
+    })
+  } else if (provider === 'GKE') {
+    return filteredlist.filter((item) => {
+      if (tier === 'CPUOptimized')
+        return item.startsWith('h3') || item.startsWith('c2') || item.startsWith('c2d')
+      else if (tier === 'MemoryOptimized')
+        return (
+          item.startsWith('x4') ||
+          item.startsWith('m1') ||
+          item.startsWith('m2') ||
+          item.startsWith('m3')
+        )
+      else
+        return (
+          !(item.startsWith('h3') || item.startsWith('c2') || item.startsWith('c2d')) &&
+          !(
+            item.startsWith('x4') ||
+            item.startsWith('m1') ||
+            item.startsWith('m2') ||
+            item.startsWith('m3')
+          )
+        )
     })
   }
-  else if (provider === "AKS") {
-    return filteredlist.filter((item) => {
-      if (tier === "CPUOptimized")
-        return item.startsWith("f") || item.startsWith("fx");
-      else if (tier === "MemoryOptimized")
-        return (
-          item.startsWith("e") ||
-          item.startsWith("eb") ||
-          item.startsWith("ec") ||
-          item.startsWith("m") ||
-          item.startsWith("d")
-        );
-      else
-        return (
-          !(item.startsWith("f") || item.startsWith("fx")) &&
-          !(
-            item.startsWith("e") ||
-            item.startsWith("eb") ||
-            item.startsWith("ec") ||
-            item.startsWith("m") ||
-            item.startsWith("d")
-          )
-        );
-    });
-  }
-  else if (provider === "GKE") {
-    return filteredlist.filter((item) => {
-      if (tier === "CPUOptimized")
-        return (
-          item.startsWith("h3") ||
-          item.startsWith("c2") ||
-          item.startsWith("c2d")
-        );
-      else if (tier === "MemoryOptimized")
-        return (
-          item.startsWith("x4") ||
-          item.startsWith("m1") ||
-          item.startsWith("m2") ||
-          item.startsWith("m3")
-        );
-      else
-        return (
-          !(
-            item.startsWith("h3") ||
-            item.startsWith("c2") ||
-            item.startsWith("c2d")
-          ) &&
-          !(
-            item.startsWith("x4") ||
-            item.startsWith("m1") ||
-            item.startsWith("m2") ||
-            item.startsWith("m3")
-          )
-        );
-    });
-  }
 }
-
-
-
-
 
 function getMachineListForOptions() {
   const array = machineList.map((item) => {
-    return { text: item, value: item };
-  });
-  return array;
+    return { text: item, value: item }
+  })
+  return array
 }
 
 function setResourceLimit({ commit, model, getValue, watchDependency }) {
-  let modelPathValue = getValue(model, "/spec/podResources/machine");
-  const deploymentType = getValue(model, "/spec/admin/deployment/default");
+  let modelPathValue = getValue(model, '/spec/podResources/machine')
+  const deploymentType = getValue(model, '/spec/admin/deployment/default')
   if (modelPathValue) {
-    if (modelPathValue === "custom") modelPathValue = "db.t.micro";
+    if (modelPathValue === 'custom') modelPathValue = 'db.t.micro'
     // to avoiding set value by reference, cpu and memory set separately
-    if (deploymentType === "Dedicated") {
-      commit("wizard/model$update", {
-        path: "/spec/podResources/resources/requests",
+    if (deploymentType === 'Dedicated') {
+      commit('wizard/model$update', {
+        path: '/spec/podResources/resources/requests',
         value: machines[modelPathValue]?.resources.limits,
         force: true,
-      });
-      commit("wizard/model$update", {
-        path: "/spec/podResources/resources/limits",
+      })
+      commit('wizard/model$update', {
+        path: '/spec/podResources/resources/limits',
         value: machines[modelPathValue]?.resources.limits,
         force: true,
-      });
+      })
     } else {
-      commit("wizard/model$update", {
-        path: "/spec/podResources/resources",
+      commit('wizard/model$update', {
+        path: '/spec/podResources/resources',
         value: machines[modelPathValue]?.resources,
         force: true,
-      });
+      })
     }
   }
 }
 
-
-
-function isMachineNotCustom({ model, getValue, watchDependency }, path ) {
-  const fullpath = path
-    ? `/spec/${path}/podResources/machine`
-    : "/spec/podResources/machine";
-  const modelPathValue = getValue(model, fullpath);
-  watchDependency(`model#${fullpath}`);
-  return modelPathValue !== "custom" && !!modelPathValue;
+function isMachineNotCustom({ model, getValue, watchDependency }, path) {
+  const fullpath = path ? `/spec/${path}/podResources/machine` : '/spec/podResources/machine'
+  const modelPathValue = getValue(model, fullpath)
+  watchDependency(`model#${fullpath}`)
+  return modelPathValue !== 'custom' && !!modelPathValue
 }
 
 function notEqualToDatabaseMode({ model, getValue, watchDependency }, mode) {
-  const modelPathValue = getValue(model, "/spec/mode");
-  watchDependency("model#/spec/mode");
-  return modelPathValue && modelPathValue !== mode;
+  const modelPathValue = getValue(model, '/spec/mode')
+  watchDependency('model#/spec/mode')
+  return modelPathValue && modelPathValue !== mode
 }
 
-
 function onAuthChange({ getValue, discriminator, commit }) {
-  const isAuthOn = getValue(discriminator, "/createAuthSecret");
+  const isAuthOn = getValue(discriminator, '/createAuthSecret')
   if (!isAuthOn) {
-    commit("wizard/model$update", {
-      path: "/spec/authSecret/name",
-      value: "",
+    commit('wizard/model$update', {
+      path: '/spec/authSecret/name',
+      value: '',
       force: true,
-    });
-    commit("wizard/model$update", {
-      path: "/spec/authSecret/password",
-      value: "",
+    })
+    commit('wizard/model$update', {
+      path: '/spec/authSecret/password',
+      value: '',
       force: true,
-    });
+    })
   }
 }
 
 function clearConfiguration({ discriminator, getValue, commit }) {
-  const configOn = getValue(discriminator, "/configDatabase");
+  const configOn = getValue(discriminator, '/configDatabase')
 
   if (!configOn) {
-    commit(
-      "wizard/model$delete",
-      "/spec/configuration"
-    );
+    commit('wizard/model$delete', '/spec/configuration')
   }
 }
 
 function isConfigDatabaseOn({ watchDependency, discriminator, getValue }) {
-  watchDependency("discriminator#/configDatabase");
-  return getValue(discriminator, "/configDatabase");
+  watchDependency('discriminator#/configDatabase')
+  return getValue(discriminator, '/configDatabase')
 }
-
 
 function showIssuer({ model, getValue, watchDependency }) {
-  watchDependency("model#/spec/admin/tls/default");
-  const isTlsEnabled = getValue(model, "/spec/admin/tls/default");
-  const isIssuerToggleEnabled = isToggleOn({ getValue, model }, "clusterIssuers");
-  return isTlsEnabled && isIssuerToggleEnabled;
+  watchDependency('model#/spec/admin/tls/default')
+  const isTlsEnabled = getValue(model, '/spec/admin/tls/default')
+  const isIssuerToggleEnabled = isToggleOn({ getValue, model }, 'clusterIssuers')
+  return isTlsEnabled && isIssuerToggleEnabled
 }
 
-
 function setMonitoring({ getValue, model }) {
-  const agent = getValue(model, "/spec/admin/monitoring/agent") || "";
-  return !!agent;
+  const agent = getValue(model, '/spec/admin/monitoring/agent') || ''
+  return !!agent
 }
 
 function updateAlertValue({ commit, model, discriminator, getValue }) {
-  const isMonitorEnabled = getValue(discriminator, "/monitoring");
-  const alert = isMonitorEnabled ? "warning" : "none";
+  const isMonitorEnabled = getValue(discriminator, '/monitoring')
+  const alert = isMonitorEnabled ? 'warning' : 'none'
   // update alert value depend on monitoring profile
-  commit("wizard/model$update", {
-    path: "/form/alert/enabled",
+  commit('wizard/model$update', {
+    path: '/form/alert/enabled',
     value: alert,
-    force: true
-  });
-  const agent = isMonitorEnabled ? "prometheus.io/operator" : "";
-  commit("wizard/model$update", {
-    path: "/spec/admin/monitoring/agent",
+    force: true,
+  })
+  const agent = isMonitorEnabled ? 'prometheus.io/operator' : ''
+  commit('wizard/model$update', {
+    path: '/spec/admin/monitoring/agent',
     value: agent,
-    force: true
-  });
+    force: true,
+  })
 }
 
 async function isBackupCluster({ axios, storeGet, commit }) {
-  const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/route/params/cluster");
-  const url = `/clusters/${owner}/${cluster}/proxy/ui.k8s.appscode.com/v1alpha1/features`;
-  let isStashEnabled = false;
+  const owner = storeGet('/route/params/user')
+  const cluster = storeGet('/route/params/cluster')
+  const url = `/clusters/${owner}/${cluster}/proxy/ui.k8s.appscode.com/v1alpha1/features`
+  let isStashEnabled = false
 
   try {
     const resp = await axios.get(url)
-    const stashPreset = resp.data?.items?.find(
-      (item) => item.metadata?.name === "stash-presets"
-    )
-    isStashEnabled = !!(stashPreset?.status?.enabled && stashPreset?.status?.ready);
+    const stashPreset = resp.data?.items?.find((item) => item.metadata?.name === 'stash-presets')
+    isStashEnabled = !!(stashPreset?.status?.enabled && stashPreset?.status?.ready)
+  } catch (e) {
+    console.log(e)
   }
-  catch(e) {
-    console.log(e);
-  }
-  commit("wizard/model$update", {
-    path: "/spec/admin/backup/tool",
-    value: isStashEnabled ? "KubeStash" : "",
+  commit('wizard/model$update', {
+    path: '/spec/admin/backup/tool',
+    value: isStashEnabled ? 'KubeStash' : '',
     force: true,
-  });
-  return isStashEnabled;
+  })
+  return isStashEnabled
 }
 
 function showAlerts({ watchDependency, model, getValue, discriminator }) {
-  watchDependency("discriminator#/monitoring");
-  const isMonitorEnabled = getValue(discriminator, "/monitoring");
-  return isMonitorEnabled && isToggleOn({ getValue, model }, "alerts");
+  watchDependency('discriminator#/monitoring')
+  const isMonitorEnabled = getValue(discriminator, '/monitoring')
+  return isMonitorEnabled && isToggleOn({ getValue, model }, 'alerts')
 }
 
-
 function onBackupSwitch({ discriminator, getValue, commit }) {
-  const isBackupOn = getValue(discriminator, "/backup");
-  commit("wizard/model$update", {
-    path: "/spec/admin/backup/tool",
-    value: isBackupOn ? "KubeStash" : "",
+  const isBackupOn = getValue(discriminator, '/backup')
+  commit('wizard/model$update', {
+    path: '/spec/admin/backup/tool',
+    value: isBackupOn ? 'KubeStash' : '',
     force: true,
-  });
+  })
 }
 
 return {
@@ -1005,5 +944,5 @@ return {
   updateAlertValue,
   showAlerts,
   isBackupCluster,
-  onBackupSwitch
+  onBackupSwitch,
 }

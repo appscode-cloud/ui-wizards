@@ -1,10 +1,10 @@
-function isWriteCheckEnabled({model, getValue, watchDependency}) {
+function isWriteCheckEnabled({ model, getValue, watchDependency }) {
   watchDependency('model#/disableWriteCheck')
   const disableWriteCheckStatus = getValue(model, '/disableWriteCheck')
 
-  return !disableWriteCheckStatus;
+  return !disableWriteCheckStatus
 }
 
 return {
-  isWriteCheckEnabled
+  isWriteCheckEnabled,
 }

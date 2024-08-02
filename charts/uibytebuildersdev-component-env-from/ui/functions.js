@@ -2,119 +2,105 @@ async function resourceNames(
   { axios, getValue, watchDependency, storeGet, reusableElementCtx },
   group,
   version,
-  resource
+  resource,
 ) {
-  const namespace = getValue(reusableElementCtx, "/dataContext/namespace");
-  watchDependency("data#/namespace");
+  const namespace = getValue(reusableElementCtx, '/dataContext/namespace')
+  watchDependency('data#/namespace')
 
   let resources = await getNamespacedResourceList(axios, storeGet, {
     namespace,
     group,
     version,
     resource,
-  });
+  })
 
-  if (resource === "secrets") {
+  if (resource === 'secrets') {
     resources = resources.filter((item) => {
-      const validType = ["kubernetes.io/service-account-token", "Opaque"];
-      return validType.includes(item.type);
-    });
+      const validType = ['kubernetes.io/service-account-token', 'Opaque']
+      return validType.includes(item.type)
+    })
   }
 
   return resources.map((resource) => {
-    const name = (resource.metadata && resource.metadata.name) || "";
+    const name = (resource.metadata && resource.metadata.name) || ''
     return {
       text: name,
       value: name,
-    };
-  });
+    }
+  })
 }
 
-async function getNamespacedResourceList(
-  axios,
-  storeGet,
-  { namespace, group, version, resource }
-) {
-  const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/route/params/cluster");
+async function getNamespacedResourceList(axios, storeGet, { namespace, group, version, resource }) {
+  const owner = storeGet('/route/params/user')
+  const cluster = storeGet('/route/params/cluster')
 
-  const url = `/clusters/${owner}/${cluster}/proxy/${group}/${version}/namespaces/${namespace}/${resource}`;
+  const url = `/clusters/${owner}/${cluster}/proxy/${group}/${version}/namespaces/${namespace}/${resource}`
 
-  let ans = [];
+  let ans = []
   try {
     const resp = await axios.get(url, {
       params: {
         filter: { items: { metadata: { name: null }, type: null } },
       },
-    });
+    })
 
-    const items = (resp && resp.data && resp.data.items) || [];
-    ans = items;
+    const items = (resp && resp.data && resp.data.items) || []
+    ans = items
   } catch (e) {
-    console.log(e);
+    console.log(e)
   }
 
-  return ans;
+  return ans
 }
 
 function valueExists(value, getValue, path) {
-  const val = getValue(value, path);
-  if (val) return true;
-  else return false;
+  const val = getValue(value, path)
+  if (val) return true
+  else return false
 }
 
 function showRefType({ itemCtx }) {
-  if (itemCtx.configMapRef) return "ConfigMap";
-  else if (itemCtx.secretRef) return "Secret";
-  else return "-";
+  if (itemCtx.configMapRef) return 'ConfigMap'
+  else if (itemCtx.secretRef) return 'Secret'
+  else return '-'
 }
 
 function showRefName({ itemCtx }) {
   if (itemCtx.configMapRef) {
-    return itemCtx.configMapRef.name;
+    return itemCtx.configMapRef.name
   } else if (itemCtx.secretRef) {
-    return itemCtx.secretRef.name;
+    return itemCtx.secretRef.name
   } else {
-    return "";
+    return ''
   }
 }
 
 function initializeRefType({ rootModel }) {
-  if (rootModel.configMapRef) return "configMap";
-  else return "secret";
+  if (rootModel.configMapRef) return 'configMap'
+  else return 'secret'
 }
 
-function onRefTypeChange({
-  rootModel,
-  getValue,
-  discriminator,
-  updateModelValue,
-}) {
-  const refType = getValue(discriminator, "/refType");
-  if (refType === "configMap") {
+function onRefTypeChange({ rootModel, getValue, discriminator, updateModelValue }) {
+  const refType = getValue(discriminator, '/refType')
+  if (refType === 'configMap') {
     // delete secretRef
-    if (valueExists(rootModel, getValue, "/secretRef"))
-      updateModelValue("secretRef", true);
+    if (valueExists(rootModel, getValue, '/secretRef')) updateModelValue('secretRef', true)
     // add configMapRef
-    if (!valueExists(rootModel, getValue, "/configMapRef"))
-      updateModelValue("configMapRef", false, { name: "" });
+    if (!valueExists(rootModel, getValue, '/configMapRef'))
+      updateModelValue('configMapRef', false, { name: '' })
   } else {
     // delete configMapRef
-    if (valueExists(rootModel, getValue, "/configMapRef"))
-      updateModelValue("configMapRef", true);
+    if (valueExists(rootModel, getValue, '/configMapRef')) updateModelValue('configMapRef', true)
     // add secretRef
-    if (!valueExists(rootModel, getValue, "/secretRef"))
-      updateModelValue("secretRef", false, { name: "" });
+    if (!valueExists(rootModel, getValue, '/secretRef'))
+      updateModelValue('secretRef', false, { name: '' })
   }
 }
 
-function showRefSelect(
-  { discriminator, getValue, watchDependency },
-  value
-) {
-  const refType = getValue(discriminator, "/refType");
-  watchDependency("discriminator#/refType");
-  return refType === value;
+function showRefSelect({ discriminator, getValue, watchDependency }, value) {
+  const refType = getValue(discriminator, '/refType')
+  watchDependency('discriminator#/refType')
+  return refType === value
 }
 
 // return {
@@ -127,14 +113,13 @@ function showRefSelect(
 //   showRefSelect,
 // };
 
-
 return {
-	resourceNames,
-	getNamespacedResourceList,
-	valueExists,
-	showRefType,
-	showRefName,
-	initializeRefType,
-	onRefTypeChange,
-	showRefSelect
+  resourceNames,
+  getNamespacedResourceList,
+  valueExists,
+  showRefType,
+  showRefName,
+  initializeRefType,
+  onRefTypeChange,
+  showRefSelect,
 }
