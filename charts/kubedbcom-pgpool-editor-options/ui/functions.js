@@ -1055,6 +1055,15 @@ function setResourceLimit({ commit, model, getValue, watchDependency }) {
   }
 }
 
+function onModeChange({ model, getValue, commit }) {
+  const dbMode = getValue(model, "/spec/mode");
+  commit("wizard/model$update", {
+    path: "/spec/replicas",
+    value: dbMode === "Replicaset" ? 3 : 1,
+    force: true,
+  });
+}
+
 return {
   getNamespaces,
   updateAlertValue,
@@ -1103,4 +1112,5 @@ return {
   showMultiselectZone,
   showSelectZone,
   setStorageClass,
+  onModeChange,
 };
