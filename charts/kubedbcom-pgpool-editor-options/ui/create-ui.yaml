@@ -8,11 +8,14 @@ steps:
         default: false
         type: boolean
       createAuthSecret:
-        default: true
+        default: false
         type: boolean
       monitoring:
         default: false
         type: boolean
+      postgresRef:
+        default: {}
+        type: object
     elements:
     - disabled: isVariantAvailable
       label:
@@ -44,6 +47,7 @@ steps:
       if: isToggleOn|deployment
       label:
         text: labels.deployment.name
+      onChange: setResourceLimit
       options:
       - description: labels.deployment.shared
         text: Shared
@@ -68,6 +72,14 @@ steps:
         $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/default
       type: radio
     - disableUnselect: true
+      fetch: getAdminOptions|clusterTier/placement
+      if: isToggleOn|clusterTier/placement
+      label:
+        text: labels.placement
+      schema:
+        $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/placement/properties/default
+      type: select
+    - disableUnselect: true
       fetch: getNodeTopology
       if: isToggleOn|clusterTier/nodeTopology
       label:
@@ -75,12 +87,6 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/nodeTopology/properties/default
       type: select
-    - if: showStorageSizeField
-      label:
-        text: labels.storage.size
-      schema:
-        $ref: schema#/properties/spec/properties/persistence/properties/size
-      type: input
     - isArray: true
       keys:
         label:
@@ -114,16 +120,23 @@ steps:
     - hasDescription: true
       label:
         text: labels.database.mode
+      onChange: onModeChange
       options:
       - description: options.database.mode.Standalone.description
         text: options.database.mode.Standalone.label
         value: Standalone
-      - description: options.database.mode.Cluster.description
-        text: options.database.mode.Cluster.label
-        value: Cluster
+      - description: options.database.mode.Replicaset.description
+        text: options.database.mode.Replicaset.label
+        value: Replicaset
       schema:
         $ref: schema#/properties/spec/properties/mode
       type: radio
+    - if: isEqualToModelPathValue|Replicaset|/spec/mode
+      label:
+        text: labels.replicas
+      schema:
+        $ref: schema#/properties/spec/properties/replicas
+      type: input
     - elements:
       - label:
           text: labels.cluster.replicas
@@ -134,12 +147,6 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/cluster
       type: single-step-form
-    - if: showStorageSizeField
-      label:
-        text: labels.storage.size
-      schema:
-        $ref: schema#/properties/spec/properties/persistence/properties/size
-      type: input
     - hasDescription: true
       label:
         text: labels.deletionPolicy
@@ -189,27 +196,16 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/admin/properties/storageClasses/properties/default
       type: select
-    - elements:
-      - fetch: getResources|core|v1|namespaces
-        label:
-          text: labels.postgresRef.namespace
-        schema:
-          $ref: schema#/properties/spec/properties/postgresRef/properties/namespace
-        type: select
-      - fetch: getPostgresList
-        label:
-          text: labels.postgresRef.name
-        schema:
-          $ref: schema#/properties/spec/properties/postgresRef/properties/name
-        type: select
+    - fetch: getAppBindings|postgres
       label:
         text: labels.postgresRef.label
+      onChange: onRefChange|postgresRef
+      refresh: true
+      required: true
       schema:
-        $ref: schema#/properties/spec/properties/postgresRef
-      show_label: true
-      type: single-step-form
-    - computed: returnFalse
-      label:
+        $ref: discriminator#/postgresRef
+      type: select
+    - label:
         text: Provide Authentication Credentials?
       onChange: onAuthChange
       schema:
@@ -266,30 +262,23 @@ steps:
       schema:
         $ref: discriminator#/monitoring
       type: switch
-    - elements:
-      - customClass: mt-10
-        label:
-          text: labels.alert.options
-        options:
-        - text: None
-          value: none
-        - text: Critical
-          value: critical
-        - text: Warning
-          value: warning
-        - text: Info
-          value: info
-        schema:
-          $ref: schema#/properties/form/properties/alert/properties/enabled
-        sortable: true
-        type: select
+    - customClass: mt-10
       if: showAlerts
       label:
-        text: labels.alert.label
+        text: labels.alert.options
+      options:
+      - text: None
+        value: none
+      - text: Critical
+        value: critical
+      - text: Warning
+        value: warning
+      - text: Info
+        value: info
       schema:
-        $ref: schema#/properties/form/properties/alert
-      show_label: true
-      type: single-step-form
+        $ref: schema#/properties/form/properties/alert/properties/enabled
+      sortable: true
+      type: select
     - label:
         text: Sync Users?
       schema:
@@ -301,14 +290,6 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/admin/properties/archiver/properties/default
       type: switch
-    # - computed: isBackupCluster
-    #   if: isToggleOn|backup
-    #   label:
-    #     text: Enable Backup?
-    #   onChange: onBackupSwitch
-    #   schema:
-    #     $ref: discriminator#/backup
-    #   type: switch
     - label:
         text: labels.configOptions
       type: label-element

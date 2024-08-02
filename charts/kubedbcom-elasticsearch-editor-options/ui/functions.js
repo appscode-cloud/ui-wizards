@@ -1,4 +1,3 @@
-let storageClassList = [];
 let nodeTopologyListFromApi = [];
 let provider = "";
 
@@ -325,7 +324,6 @@ const machineList = [
   "db.r.24xlarge",
 ];
 
-
 function showAuthPasswordField({
   discriminator,
   getValue,
@@ -344,18 +342,6 @@ function isEqualToModelPathValue(
   const modelPathValue = getValue(model, modelPath);
   watchDependency("model#" + modelPath);
   return modelPathValue === value;
-}
-
-function showAuthSecretField({
-  discriminator,
-  getValue,
-  watchDependency,
-}) {
-  return !showAuthPasswordField({
-    discriminator,
-    getValue,
-    watchDependency,
-  });
 }
 
 function showStorageSizeField({ model, getValue, watchDependency }) {
@@ -389,32 +375,6 @@ async function getResources(
     item.value = name;
     return true;
   });
-  return resources;
-}
-
-async function getStorageClassNames({ axios, storeGet, commit, model, getValue }) {
-  const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/route/params/cluster");
-
-  const resp = await axios.get(
-    `/clusters/${owner}/${cluster}/proxy/storage.k8s.io/v1/storageclasses`,
-    {
-      params: {
-        filter: { items: { metadata: { name: null, annotations: null } } },
-      },
-    }
-  );
-
-  const resources = (resp && resp.data && resp.data.items) || [];
-
-  resources.map((item) => {
-    const name = (item.metadata && item.metadata.name) || "";
-    item.text = name;
-    item.value = name;
-    return true;
-  });
-  storageClassList = resources;
-  setStorageClass({model, getValue, commit});
   return resources;
 }
 
@@ -498,71 +458,11 @@ async function getElasticSearchVersions(
   return sortedVersion;
 }
 
-function onCreateAuthSecretChange({
-  discriminator,
-  getValue,
-  commit
-}) {
-  const createAuthSecret = getValue(discriminator, "/createAuthSecret");
-  if (createAuthSecret) {
-    commit(
-      "wizard/model$delete",
-      "/spec/authSecret/name"
-    );
-  } else if (createAuthSecret === false) {
-    commit(
-      "wizard/model$delete",
-      "/spec/authSecret/password"
-    );
-  }
-}
-
-async function getSecrets({
-  storeGet,
-  axios,
-  model,
-  getValue,
-  watchDependency,
-}) {
-  const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/route/params/cluster");
-  const namespace = getValue(model, "/metadata/release/namespace");
-  watchDependency("model#/metadata/release/namespace");
-
-  const resp = await axios.get(
-    `/clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}/secrets`,
-    {
-      params: {
-        filter: { items: { metadata: { name: null }, type: null } },
-      },
-    }
-  );
-
-  const secrets = (resp && resp.data && resp.data.items) || [];
-
-  const filteredSecrets = secrets.filter((item) => {
-    const validType = ["kubernetes.io/service-account-token", "Opaque"];
-    return validType.includes(item.type);
-  });
-
-  filteredSecrets.map((item) => {
-    const name = (item.metadata && item.metadata.name) || "";
-    item.text = name;
-    item.value = name;
-    return true;
-  });
-  return filteredSecrets;
-}
-
 function disableLimit({ model, getValue, watchDependency }) {
   const modelPathValue = getValue(model, "/spec/machine");
   watchDependency("model#/spec/machine");
   return modelPathValue !== "custom" && !!modelPathValue;
 }
-
-
-
-
 
 function setLimitsCpuOrMem({ model, getValue, watchDependency }) {
   watchDependency('model#/spec/version');
@@ -585,85 +485,6 @@ function setLimitsCpuOrMem({ model, getValue, watchDependency }) {
 
 function setMachineToCustom() {
   return "custom";
-}
-
-function disableConfigureOption({ model, getValue, watchDependency, itemCtx }) {
-  watchDependency("model#/spec/authPlugin");
-  const authPlugin = getValue(model, "/spec/authPlugin");
-
-  if (itemCtx.value === "tls") {
-    return !isSecurityEnabled({ model, getValue, watchDependency });
-  }
-  else if (itemCtx.value === "internal-users" || itemCtx.value === "roles-mapping") {
-    return !isSecurityEnabled({ model, getValue, watchDependency }) || !authPlugin || authPlugin === "X-Pack";
-  }
-  else if (itemCtx.value === "secure-custom-config") {
-    return authPlugin !== "X-Pack";
-  }
-  return false;
-}
-
-function isSecurityEnabled({ model, getValue, watchDependency }) {
-  watchDependency("model#/spec/disableSecurity");
-  const value = getValue(model, "/spec/disableSecurity");
-  return !value;
-}
-
-function onDisableSecurityChange({ model, getValue }) {
-  const disableSecurity = getValue(model, "/resources/kubedbComElasticsearch/spec/disableSecurity");
-
-  if (disableSecurity) {
-    commit(
-      "wizard/model$delete",
-      "/spec/authSecret",
-    );
-  }
-}
-
-async function fetchJsons({ axios, itemCtx }) {
-  let ui = {};
-  let language = {};
-  let functions = {};
-  const { name, sourceRef, version, packageviewUrlPrefix } = itemCtx.chart;
-
-  try {
-    ui = await axios.get(
-      `${packageviewUrlPrefix}/create-ui.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`
-    );
-    language = await axios.get(
-      `${packageviewUrlPrefix}/language.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`
-    );
-    const functionString = await axios.get(
-      `${packageviewUrlPrefix}/functions.js?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}`
-    );
-    // declare evaluate the functionString to get the functions Object
-    const evalFunc = new Function(functionString.data || "");
-    functions = evalFunc();
-  } catch (e) {
-    console.log(e);
-  }
-
-  return {
-    ui: ui.data || {},
-    language: language.data || {},
-    functions,
-  };
-}
-
-function updateAgentValue({ commit }, val) {
-  commit("wizard/model$update", {
-    path: "/spec/monitoring/agent",
-    value: val ? "prometheus.io/operator" : "",
-    force: true
-  });
-
-  // update alert value depend on monitoring profile
-  commit("wizard/model$update", {
-    path: "/form/alert/enabled",
-    value: val ? 'warning' : 'none',
-    force: true
-  });
-
 }
 
 function getCreateNameSpaceUrl({ model, getValue, storeGet }) {
@@ -780,74 +601,40 @@ function isVariantAvailable ({storeGet})  {
   return variant ? true : false
 }
 
-function setStorageClass({model, getValue, commit}) {
-  const deletionPolicy = getValue(model, "spec/deletionPolicy") || "";
-  let storageClass = getValue(model, "spec/storageClass/name") || "";
+function setStorageClass({ model, getValue, commit }) {
+  const deletionPolicy = getValue(model, "/spec/deletionPolicy") || "";
+  let storageClass =
+    getValue(model, "/spec/admin/storageClasses/default") || "";
+  const storageClassList =
+    getValue(model, "/spec/admin/storageClasses/available") || [];
   const suffix = "-retain";
 
-  const simpleClassList = storageClassList.filter(item => {
-    return !item.metadata?.name?.endsWith(suffix)
-  })
-
-  const retainClassList = storageClassList.filter(item => {
-    return item.metadata?.name?.endsWith(suffix)
-  })
-
-  const defaultSimpleList = simpleClassList.filter(item => {
-    return item.metadata &&
-    item.metadata.annotations &&
-    item.metadata.annotations["storageclass.kubernetes.io/is-default-class"];
-  })
-
-  const defaultRetainList = retainClassList.filter(item => {
-    return item.metadata &&
-    item.metadata.annotations &&
-    item.metadata.annotations["storageclass.kubernetes.io/is-default-class"];
-  })
-
-  if(deletionPolicy === "WipeOut" || deletionPolicy === "Delete") {
-    if(simpleClassList.length > 1) {
-      const found = defaultSimpleList.length 
-        ? defaultSimpleList[0] 
-        : simpleClassList[0];
-      storageClass = found.value;
-    }
-    else if(simpleClassList.length === 1) {
-      storageClass = simpleClassList[0]?.value;
-    }
-    else {
-      const found = defaultRetainList.length 
-        ? defaultRetainList[0].value 
-        : storageClassList.length ? storageClassList[0].value : "";
-      storageClass = found;
-    }
-  }
-  else {
-    if(retainClassList.length > 1) {
-        const found = defaultRetainList.length 
-          ? defaultRetainList[0] 
-          : retainClassList[0];
-        storageClass = found.value;
-    }
-    else if(retainClassList.length === 1) {
-      storageClass = retainClassList[0]?.value;
-    }
-    else {
-      const found = defaultSimpleList.length 
-        ? defaultSimpleList[0].value
-        : storageClassList.length ? storageClassList[0].value : "";
-      storageClass = found;
-    }
+  const simpleClassList = storageClassList.filter((item) => {
+    return !item.endsWith(suffix);
+  });
+  const retainClassList = storageClassList.filter((item) => {
+    return item.endsWith(suffix);
+  });
+  if (deletionPolicy === "WipeOut" || deletionPolicy === "Delete") {
+    storageClass = simpleClassList.length
+      ? simpleClassList[0]
+      : retainClassList[0];
+  } else {
+    storageClass = retainClassList.length
+      ? retainClassList[0]
+      : simpleClassList[0];
   }
 
-  if(storageClass) {
+  const isChangeable = isToggleOn({ getValue, model }, "storageClasses");
+  if (isChangeable && storageClass) {
     commit("wizard/model$update", {
-      path: "/spec/storageClass/name",
+      path: "/spec/admin/storageClasses/default",
       value: storageClass,
       force: true,
     });
   }
 }
+
 
 
 async function getNamespaces({ axios, storeGet }) {
@@ -1032,17 +819,32 @@ function getMachineListForOptions() {
 }
 
 function setResourceLimit({ commit, model, getValue, watchDependency }) {
-  const modelPathValue = getValue(model, "/spec/podResources/machine");
-  watchDependency("model#/spec/podResources/machine");
-  if (modelPathValue && modelPathValue !== "custom") {
+  let modelPathValue = getValue(model, "/spec/podResources/machine");
+  const deploymentType = getValue(model, "/spec/admin/deployment/default");
+  if (modelPathValue) {
+    if (modelPathValue === "custom") modelPathValue = "db.t.micro";
     // to avoiding set value by reference, cpu and memory set separately
-    commit("wizard/model$update", {
-      path: "/spec/podResources/resources",
-      value: machines[modelPathValue]?.resources,
-      force: true,
-    });
+    if (deploymentType === "Dedicated") {
+      commit("wizard/model$update", {
+        path: "/spec/podResources/resources/requests",
+        value: machines[modelPathValue]?.resources.limits,
+        force: true,
+      });
+      commit("wizard/model$update", {
+        path: "/spec/podResources/resources/limits",
+        value: machines[modelPathValue]?.resources.limits,
+        force: true,
+      });
+    } else {
+      commit("wizard/model$update", {
+        path: "/spec/podResources/resources",
+        value: machines[modelPathValue]?.resources,
+        force: true,
+      });
+    }
   }
 }
+
 
 
 function isMachineNotCustom({ model, getValue, watchDependency }, path ) {
@@ -1166,24 +968,15 @@ function onBackupSwitch({ discriminator, getValue, commit }) {
 
 return {
   isVariantAvailable,
-  fetchJsons,
   onVersionChange,
   showAuthPasswordField,
   isEqualToModelPathValue,
-  showAuthSecretField,
   showStorageSizeField,
   getResources,
-  getStorageClassNames,
   getElasticSearchVersions,
-  onCreateAuthSecretChange,
-  getSecrets,
   disableLimit,
   setLimitsCpuOrMem,
   setMachineToCustom,
-  disableConfigureOption,
-  isSecurityEnabled,
-  onDisableSecurityChange,
-  updateAgentValue,
   getCreateNameSpaceUrl,
   ifCapiProviderIsNotEmpty,
   ifDedicated,

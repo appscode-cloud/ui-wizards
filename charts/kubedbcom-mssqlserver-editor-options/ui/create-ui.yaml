@@ -36,6 +36,7 @@ steps:
       if: isToggleOn|deployment
       label:
         text: labels.deployment.name
+      onChange: setResourceLimit
       options:
       - description: labels.deployment.shared
         text: Shared
@@ -118,6 +119,7 @@ steps:
     - hasDescription: true
       label:
         text: labels.database.mode
+      onChange: onModeChange
       options:
       - description: options.database.mode.Standalone.description
         text: options.database.mode.Standalone.label
@@ -134,12 +136,18 @@ steps:
         schema:
           $ref: schema#/properties/spec/properties/topology/properties/availabilityGroup/properties/databases
         type: input
+      if: isEqualToModelPathValue|Topology|/spec/mode
       label:
         text: labels.availabilityGroup
       schema:
         $ref: schema#/properties/spec/properties/topology/properties/availabilityGroup
       type: list-input-form
-      if: isEqualToModelPathValue|Topology|/spec/mode
+    - if: isEqualToModelPathValue|Topology|/spec/mode
+      label:
+        text: labels.replicaset.number
+      schema:
+        $ref: schema#/properties/spec/properties/replicas
+      type: input
     - if: showStorageSizeField
       label:
         text: labels.storage.size

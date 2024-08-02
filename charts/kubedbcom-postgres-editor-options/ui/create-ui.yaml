@@ -74,6 +74,7 @@ steps:
       if: isToggleOn|deployment
       label:
         text: labels.deployment.name
+      onChange: setResourceLimit
       options:
       - description: labels.deployment.shared
         text: Shared
@@ -98,6 +99,14 @@ steps:
         $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/default
       type: radio
     - disableUnselect: true
+      fetch: getAdminOptions|clusterTier/placement
+      if: isToggleOn|clusterTier/placement
+      label:
+        text: labels.placement
+      schema:
+        $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/placement/properties/default
+      type: select
+    - disableUnselect: true
       fetch: getNodeTopology
       if: isToggleOn|clusterTier/nodeTopology
       label:
@@ -115,9 +124,9 @@ steps:
       - description: options.database.mode.Standalone.description
         text: options.database.mode.Standalone.label
         value: Standalone
-      - description: options.database.mode.Cluster.description
-        text: options.database.mode.Cluster.label
-        value: Cluster
+      - description: options.database.mode.ReplicaSet.description
+        text: options.database.mode.ReplicaSet.label
+        value: Replicaset
       schema:
         $ref: schema#/properties/spec/properties/mode
       type: radio
@@ -126,6 +135,12 @@ steps:
         text: labels.storage.size
       schema:
         $ref: schema#/properties/spec/properties/persistence/properties/size
+      type: input
+    - if: EqualToDatabaseMode|Replicaset
+      label:
+        text: labels.replicas
+      schema:
+        $ref: schema#/properties/spec/properties/replicas
       type: input
     - elements:
       - computed: setMachineToCustom

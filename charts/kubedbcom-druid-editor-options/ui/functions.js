@@ -395,19 +395,30 @@ function getMachineListForOptions() {
   return array;
 }
 
-function setResourceLimit({ commit, model, getValue }, type) {
-  const path = type
-    ? `/spec/${type}/podResources/machine`
-    : "/spec/podResources/machine";
-  const selectedMachine = getValue(model, path);
-  if (selectedMachine && selectedMachine !== "custom") {
-    commit("wizard/model$update", {
-      path: type 
-        ? `/spec/${type}/podResources/resources`
-        : "/spec/podResources/resources",
-      value: machines[selectedMachine]?.resources,
-      force: true,
-    });
+function setResourceLimit({ commit, model, getValue, watchDependency }) {
+  let modelPathValue = getValue(model, "/spec/podResources/machine");
+  const deploymentType = getValue(model, "/spec/admin/deployment/default");
+  if (modelPathValue) {
+    if (modelPathValue === "custom") modelPathValue = "db.t.micro";
+    // to avoiding set value by reference, cpu and memory set separately
+    if (deploymentType === "Dedicated") {
+      commit("wizard/model$update", {
+        path: "/spec/podResources/resources/requests",
+        value: machines[modelPathValue]?.resources.limits,
+        force: true,
+      });
+      commit("wizard/model$update", {
+        path: "/spec/podResources/resources/limits",
+        value: machines[modelPathValue]?.resources.limits,
+        force: true,
+      });
+    } else {
+      commit("wizard/model$update", {
+        path: "/spec/podResources/resources",
+        value: machines[modelPathValue]?.resources,
+        force: true,
+      });
+    }
   }
 }
 
@@ -774,8 +785,42 @@ async function getAppBindings({ axios, storeGet }, type) {
 function onRefChange({ discriminator, getValue, commit }, type) {
   const ref = getValue(discriminator, `/${type}`) || {};
   commit("wizard/model$update", {
-    path: `/spec/${type}`,
-    value: ref,
+    path: `/spec/${type}/name`,
+    value: ref.name || "",
+    force: true,
+  });
+  commit("wizard/model$update", {
+    path: `/spec/${type}/namespace`,
+    value: ref.namespace || "",
+    force: true,
+  });
+}
+
+function isExternallyManaged({ getValue, model, watchDependency, commit, setDiscriminatorValue }, type) {
+  watchDependency(`model#/spec/${type}/externallyManaged`);
+  const isManaged = getValue(model, `/spec/${type}/externallyManaged`) || false;
+  if(!isManaged) clearRefs({ commit, setDiscriminatorValue }, type);
+  return isManaged;
+}
+
+function isMetadataStorageTypeEqualsTo({ getValue, model, watchDependency }, type) {
+  watchDependency("model#/spec/metadataStorage/type");
+  watchDependency("model#/spec/metadataStorage/externallyManaged");
+  const dbType = getValue(model, "/spec/metadataStorage/type") || "";
+  const isManaged = getValue(model, "/spec/metadataStorage/externallyManaged") || false;
+  return isManaged && dbType === type;
+}
+
+function clearRefs({ commit, setDiscriminatorValue }, type) {
+  setDiscriminatorValue(`/${type}`, "");
+  commit("wizard/model$update", {
+    path: `/spec/${type}/name`,
+    value: "",
+    force: true,
+  });
+  commit("wizard/model$update", {
+    path: `/spec/${type}/namespace`,
+    value: "",
     force: true,
   });
 }
@@ -815,6 +860,9 @@ return {
   filterNodeTopology,
   getAppBindings,
   onRefChange,
+  isExternallyManaged,
+  isMetadataStorageTypeEqualsTo,
+  clearRefs,
   isToggleOn,
   getAdminOptions,
 }

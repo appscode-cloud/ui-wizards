@@ -1,4 +1,3 @@
-let storageClassList = [];
 let nodeTopologyListFromApi = [];
 let provider = "";
 const machines = {
@@ -411,32 +410,6 @@ async function getRedisSentinels(
   } else {
     return [];
   }
-}
-
-async function getStorageClassNames({ axios, storeGet, commit, model, getValue }) {
-  const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/route/params/cluster");
-
-  const resp = await axios.get(
-    `/clusters/${owner}/${cluster}/proxy/storage.k8s.io/v1/storageclasses`,
-    {
-      params: {
-        filter: { items: { metadata: { name: null, annotations: null } } },
-      },
-    }
-  );
-
-  const resources = (resp && resp.data && resp.data.items) || [];
-
-  resources.map((item) => {
-    const name = (item.metadata && item.metadata.name) || "";
-    item.text = name;
-    item.value = name;
-    return true;
-  });
-  storageClassList = resources;
-  setStorageClass({model, getValue, commit});
-  return resources;
 }
 
 async function getRedisVersions(
@@ -1024,15 +997,29 @@ function getMachineListForOptions() {
 }
 
 function setResourceLimit({ commit, model, getValue, watchDependency }) {
-  const modelPathValue = getValue(model, "/spec/podResources/machine");
-  watchDependency("model#/spec/podResources/machine");
-  if (modelPathValue && modelPathValue !== "custom") {
+  let modelPathValue = getValue(model, "/spec/podResources/machine");
+  const deploymentType = getValue(model, "/spec/admin/deployment/default");
+  if (modelPathValue) {
+    if (modelPathValue === "custom") modelPathValue = "db.t.micro";
     // to avoiding set value by reference, cpu and memory set separately
-    commit("wizard/model$update", {
-      path: "/spec/podResources/resources",
-      value: machines[modelPathValue]?.resources,
-      force: true,
-    });
+    if (deploymentType === "Dedicated") {
+      commit("wizard/model$update", {
+        path: "/spec/podResources/resources/requests",
+        value: machines[modelPathValue]?.resources.limits,
+        force: true,
+      });
+      commit("wizard/model$update", {
+        path: "/spec/podResources/resources/limits",
+        value: machines[modelPathValue]?.resources.limits,
+        force: true,
+      });
+    } else {
+      commit("wizard/model$update", {
+        path: "/spec/podResources/resources",
+        value: machines[modelPathValue]?.resources,
+        force: true,
+      });
+    }
   }
 }
 
@@ -1097,7 +1084,6 @@ return {
 	showAuthSecretField,
 	getResources,
 	getRedisSentinels,
-	getStorageClassNames,
 	getRedisVersions,
 	getSecrets,
 	disableLimit,

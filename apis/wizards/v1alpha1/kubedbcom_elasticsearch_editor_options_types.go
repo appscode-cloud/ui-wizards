@@ -42,7 +42,6 @@ type KubedbcomElasticsearchEditorOptionsSpec struct {
 }
 
 type KubedbcomElasticsearchEditorOptionsSpecSpec struct {
-	Version string `json:"version"`
 	// Authentication plugin used by Elasticsearch cluster
 	AuthPlugin ElasticsearchAuthPlugin `json:"authPlugin"`
 	// +optional
@@ -53,15 +52,13 @@ type KubedbcomElasticsearchEditorOptionsSpecSpec struct {
 	// +optional
 	Replicas *int `json:"replicas,omitempty"`
 	// +optional
-	Topology        *ElasticsearchTopology `json:"topology,omitempty"`
-	EnableSSL       bool                   `json:"enableSSL"`
-	DisableSecurity bool                   `json:"disableSecurity"`
-	Persistence     Persistence            `json:"persistence"`
-	PodResources    PodResources           `json:"podResources"`
-	AuthSecret      AuthSecret             `json:"authSecret"`
-	DeletionPolicy  DeletionPolicy         `json:"deletionPolicy"`
-	Configuration   string                 `json:"configuration"`
-	Admin           AdminOptions           `json:"admin"`
+	Topology       *ElasticsearchTopology `json:"topology,omitempty"`
+	Persistence    Persistence            `json:"persistence"`
+	PodResources   PodResources           `json:"podResources"`
+	AuthSecret     AuthSecret             `json:"authSecret"`
+	DeletionPolicy DeletionPolicy         `json:"deletionPolicy"`
+	Configuration  string                 `json:"configuration"`
+	Admin          AdminOptions           `json:"admin"`
 	// KernelSettings contains the additional kernel settings.
 	// +optional
 	KernelSettings KernelSettings `json:"kernelSettings"`
@@ -89,13 +86,12 @@ type ElasticsearchTopology struct {
 }
 
 type ElasticsearchNode struct {
-	Replicas int `json:"replicas"`
-	// +optional
-	Machine     string      `json:"machine"`
-	Persistence Persistence `json:"persistence"`
+	Replicas     int          `json:"replicas"`
+	PodResources PodResources `json:"podResources"`
+	Persistence  Persistence  `json:"persistence"`
 }
 
-// +kubebuilder:validation:Enum=Combined;Dedicated
+// +kubebuilder:validation:Enum=Combined;Topology
 type ElasticsearchMode string
 
 type ElasticsearchAlertsSpecForm struct {

@@ -70,7 +70,7 @@ type NamespacedName struct {
 	Namespace string `json:"namespace"`
 }
 
-// +kubebuilder:validation:Enum=Standalone;Replicaset;Sentinel
+// +kubebuilder:validation:Enum=Standalone;Cluster;Sentinel
 type RedisMode string
 
 type RedisAlertsSpecForm struct {

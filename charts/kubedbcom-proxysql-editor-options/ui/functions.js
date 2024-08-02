@@ -1,4 +1,3 @@
-let storageClassList = [];
 const machines = {
   "db.t.micro": {
     resources: {
@@ -364,43 +363,6 @@ async function getResources(
   return resources;
 }
 
-async function getStorageClassNames({ axios, storeGet, commit }) {
-  const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/route/params/cluster");
-
-  const resp = await axios.get(
-    `/clusters/${owner}/${cluster}/proxy/storage.k8s.io/v1/storageclasses`,
-    {
-      params: {
-        filter: { items: { metadata: { name: null, annotations: null } } },
-      },
-    }
-  );
-
-  const resources = (resp && resp.data && resp.data.items) || [];
-
-  resources.map((item) => {
-    const name = (item.metadata && item.metadata.name) || "";
-    const isDefault =
-      item.metadata &&
-      item.metadata.annotations &&
-      item.metadata.annotations["storageclass.kubernetes.io/is-default-class"];
-
-    if (isDefault) {
-      commit("wizard/model$update", {
-        path: "/spec/storageClass/name",
-        value: name,
-        force: true,
-      });
-    }
-
-    item.text = name;
-    item.value = name;
-    return true;
-  });
-  return resources;
-}
-
 async function getProxysqlVersions(
   { axios, storeGet },
   group,
@@ -552,17 +514,32 @@ function getMachineListForOptions() {
 }
 
 function setResourceLimit({ commit, model, getValue, watchDependency }) {
-  const modelPathValue = getValue(model, "/spec/podResources/machine");
-  watchDependency("model#/spec/podResources/machine");
-  if (modelPathValue && modelPathValue !== "custom") {
+  let modelPathValue = getValue(model, "/spec/podResources/machine");
+  const deploymentType = getValue(model, "/spec/admin/deployment/default");
+  if (modelPathValue) {
+    if (modelPathValue === "custom") modelPathValue = "db.t.micro";
     // to avoiding set value by reference, cpu and memory set separately
-    commit("wizard/model$update", {
-      path: "/spec/podResources/resources",
-      value: machines[modelPathValue]?.resources,
-      force: true,
-    });
+    if (deploymentType === "Dedicated") {
+      commit("wizard/model$update", {
+        path: "/spec/podResources/resources/requests",
+        value: machines[modelPathValue]?.resources.limits,
+        force: true,
+      });
+      commit("wizard/model$update", {
+        path: "/spec/podResources/resources/limits",
+        value: machines[modelPathValue]?.resources.limits,
+        force: true,
+      });
+    } else {
+      commit("wizard/model$update", {
+        path: "/spec/podResources/resources",
+        value: machines[modelPathValue]?.resources,
+        force: true,
+      });
+    }
   }
 }
+
 
 function setLimitsCpuOrMem({ model, getValue }, path) {
   const modelPathValue = getValue(model, "/spec/machine");
@@ -939,12 +916,6 @@ function notEqualToDatabaseMode({ model, getValue, watchDependency }, mode) {
   watchDependency("model#/spec/mode");
   return modelPathValue && modelPathValue !== mode;
 }
-function showStorageSizeField({ model, getValue, watchDependency }) {
-  const modelPathValue = getValue(model, "/spec/mode");
-  watchDependency("model#/spec/mode");
-  const validType = [];
-  return !validType.includes(modelPathValue);
-}
 function showHidden({ watchDependency, model, getValue }) {
   watchDependency("model#/spec/hidden/enabled");
   const isHiddenOn = getValue(model, "/spec/hidden/enabled") || "";
@@ -1113,7 +1084,14 @@ function isMachineNotCustom({ model, getValue, watchDependency }, path) {
   return modelPathValue !== "custom" && !!modelPathValue;
 }
 
+function EqualToDatabaseMode({ model, getValue, watchDependency }, mode) {
+  const modelPathValue = getValue(model, "/spec/mode");
+  watchDependency("model#/spec/mode");
+  return modelPathValue && modelPathValue === mode;
+}
+
 return {
+  EqualToDatabaseMode,
   getNamespaces,
   updateAlertValue,
   setStorageClass,
@@ -1134,7 +1112,6 @@ return {
   showIssuer,
   showArbiter,
   clearConfiguration,
-  showStorageSizeField,
   onBackupSwitch,
   isVariantAvailable,
 	fetchJsons,
@@ -1142,7 +1119,6 @@ return {
 	isEqualToModelPathValue,
 	showAuthSecretField,
 	getResources,
-	getStorageClassNames,
   getProxysqlVersions,
   getAppBindings,
   onCreateAuthSecretChange,

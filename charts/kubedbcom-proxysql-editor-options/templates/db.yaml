@@ -24,7 +24,7 @@ spec:
   backend:
     name: {{ .Values.spec.backend }}
   syncUsers: {{ .Values.spec.syncUsers }}
-  replicas: {{ .Values.spec.replicas }}
+  replicas: {{ (eq .Values.spec.mode "Replicaset") | ternary .Values.spec.replicas 1 }}
   podTemplate:
     spec:
       containers:

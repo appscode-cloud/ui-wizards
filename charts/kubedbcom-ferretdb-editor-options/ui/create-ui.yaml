@@ -1,6 +1,9 @@
 steps:
 - form:
     discriminator:
+      backend:
+        default: {}
+        type: object
       backup:
         default: false
         type: boolean
@@ -37,6 +40,7 @@ steps:
       if: isToggleOn|deployment
       label:
         text: labels.deployment.name
+      onChange: setResourceLimit
       options:
       - description: labels.deployment.shared
         text: Shared
@@ -119,26 +123,23 @@ steps:
     - hasDescription: true
       label:
         text: labels.database.mode
+      onChange: onModeChange
       options:
       - description: options.database.mode.Standalone.description
         text: options.database.mode.Standalone.label
         value: Standalone
-      - description: options.database.mode.Cluster.description
-        text: options.database.mode.Cluster.label
-        value: Cluster
+      - description: options.database.mode.Replicaset.description
+        text: options.database.mode.Replicaset.label
+        value: Replicaset
       schema:
         $ref: schema#/properties/spec/properties/mode
       type: radio
-    - elements:
-      - label:
-          text: labels.replicaset.number
-        schema:
-          $ref: schema#/properties/spec/properties/replicas
-        type: input
-      if: isEqualToModelPathValue|Cluster|/spec/mode
+    - if: isEqualToModelPathValue|Replicaset|/spec/mode
+      label:
+        text: labels.replicaset.number
       schema:
-        $ref: schema#/properties/spec
-      type: single-step-form
+        $ref: schema#/properties/spec/properties/replicas
+      type: input
     - if: showStorageSizeField
       label:
         text: labels.storage.size
@@ -190,6 +191,21 @@ steps:
         text: labels.storage.class
       schema:
         $ref: schema#/properties/spec/properties/admin/properties/storageClasses/properties/default
+      type: select
+    - label:
+        text: labels.backend.external
+      schema:
+        $ref: schema#/properties/spec/properties/backend/properties/externallyManaged
+      type: switch
+    - fetch: getAppBindings|postgres
+      if: isExternallyManaged|backend
+      label:
+        text: labels.backend.postgres
+      onChange: onRefChange|backend
+      refresh: true
+      required: true
+      schema:
+        $ref: discriminator#/backend
       type: select
     - label:
         text: Provide Authentication Credentials?
@@ -271,14 +287,6 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/admin/properties/archiver/properties/default
       type: switch
-    # - computed: isBackupCluster
-    #   if: isToggleOn|backup
-    #   label:
-    #     text: Enable Backup?
-    #   onChange: onBackupSwitch
-    #   schema:
-    #     $ref: discriminator#/backup
-    #   type: switch
     - elements:
       - hasDescription: true
         onChange: dedicatedOnChange

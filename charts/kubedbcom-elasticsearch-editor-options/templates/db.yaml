@@ -3,7 +3,7 @@
 {{- $data_res := dict -}}
 {{- $master_res := dict -}}
 {{- $ingest_res := dict -}}
-{{- if eq .Values.spec.mode "Dedicated" }}
+{{- if eq .Values.spec.mode "Topology" }}
   {{- $data_res = .Values.spec.topology.data.podResources.resources -}}
   {{- if and .Values.spec.topology.data.podResources.machine (hasKey $machines .Values.spec.topology.data.podResources.machine) }}
     {{- $data_res = get (get $machines .Values.spec.topology.data.podResources.machine) "resources" }}
@@ -127,7 +127,6 @@ spec:
           requests:
             storage: {{ .Values.spec.topology.ingest.persistence.size }}
 {{- end }}
-  disableSecurity: {{ .Values.spec.disableSecurity }}
   deletionPolicy: {{ .Values.spec.deletionPolicy }}
 {{- if .Values.spec.authSecret.name }}
   authSecret:
@@ -183,7 +182,7 @@ spec:
       apiGroup: "cert-manager.io"
       kind: ClusterIssuer
       name: {{ .Values.spec.admin.clusterIssuers.default }}
-  enableSSL: {{ .Values.spec.enableSSL }}
+  enableSSL: true
 {{- end }}
 {{- if (and .Values.spec.admin.monitoring .Values.spec.admin.monitoring.agent) }}
   monitor:

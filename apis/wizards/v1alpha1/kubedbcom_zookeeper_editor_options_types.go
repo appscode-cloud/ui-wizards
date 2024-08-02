@@ -46,7 +46,7 @@ type KubedbcomZookeeperEditorOptionsSpecSpec struct {
 	Annotations map[string]string `json:"annotations"`
 	// +optional
 	Labels         map[string]string `json:"labels"`
-	Mode           ZooKeeperMode     `json:"mode"`
+	Mode           GeneralMode       `json:"mode"`
 	Replicas       int               `json:"replicas"`
 	Persistence    Persistence       `json:"persistence"`
 	PodResources   PodResources      `json:"podResources"`
@@ -55,9 +55,6 @@ type KubedbcomZookeeperEditorOptionsSpecSpec struct {
 	Configuration  string            `json:"configuration"`
 	Admin          AdminOptions      `json:"admin"`
 }
-
-// +kubebuilder:validation:Enum=Standalone;Replicaset
-type ZooKeeperMode string
 
 type ZooKeeperCluster struct {
 	Replicas int `json:"replicas"`

@@ -45,15 +45,15 @@ type KubedbcomDruidEditorOptionsSpecSpec struct {
 	// +optional
 	Annotations map[string]string `json:"annotations"`
 	// +optional
-	Labels          map[string]string `json:"labels"`
-	Topology        DruidTopology     `json:"topology"`
-	DeepStorage     DruidDeepStorage  `json:"deepStorage"`
-	MetadataStorage ObjectReference   `json:"metadataStorage"`
-	ZookeeperRef    ObjectReference   `json:"zookeeperRef"`
-	AuthSecret      AuthSecret        `json:"authSecret"`
-	DeletionPolicy  DeletionPolicy    `json:"deletionPolicy"`
-	Configuration   string            `json:"configuration"`
-	Admin           AdminOptions      `json:"admin"`
+	Labels          map[string]string    `json:"labels"`
+	Topology        DruidTopology        `json:"topology"`
+	DeepStorage     DruidDeepStorage     `json:"deepStorage"`
+	MetadataStorage DruidMetadataStorage `json:"metadataStorage"`
+	ZookeeperRef    DruidZooKeeperRef    `json:"zookeeperRef"`
+	AuthSecret      AuthSecret           `json:"authSecret"`
+	DeletionPolicy  DeletionPolicy       `json:"deletionPolicy"`
+	Configuration   string               `json:"configuration"`
+	Admin           AdminOptions         `json:"admin"`
 }
 
 type DruidNode struct {
@@ -80,6 +80,20 @@ type DruidDeepStorage struct {
 
 // +kubebuilder:validation:Enum=s3;google;azure;hdfs
 type DruidDeepStorageType string
+
+// +kubebuilder:validation:Enum=MySQL;Postgres
+type DruidMetadataStorageType string
+
+type DruidMetadataStorage struct {
+	Type              DruidMetadataStorageType `json:"type"`
+	ObjectReference   `json:",inline"`
+	ExternallyManaged bool `json:"externallyManaged"`
+}
+
+type DruidZooKeeperRef struct {
+	ObjectReference   `json:",inline"`
+	ExternallyManaged bool `json:"externallyManaged"`
+}
 
 type DruidAlertsSpecForm struct {
 	Alert alerts.DruidAlert `json:"alert"`

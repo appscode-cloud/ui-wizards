@@ -339,24 +339,24 @@ async function getPostgresList({
   return [];
 }
 
-const onDatabaseModeChange = ({ discriminator,getValue, commit}) =>{
+function isEqualToModelPathValue(
+  { model, getValue, watchDependency },
+  value,
+  modelPath
+) {
+  const modelPathValue = getValue(model, modelPath);
+  watchDependency("model#" + modelPath);
+  return modelPathValue === value;
+}
 
-  const databaseMode = getValue(discriminator, "/mode");
-
+const onDatabaseModeChange = ({ model,getValue, commit}) =>{
+  const databaseMode = getValue(model, "/spec/mode");
   commit("wizard/model$update", {
     path: "/spec/replicas",
     value: databaseMode === 'Standalone' ? 1 : 3,
     force: true,
   });
- 
 }
-
-const setDatabaseMode = ({model,getValue}) =>{
-  const replicas = getValue(model,'/spec/replicas')
-
-  return replicas === 1 ? 'Standalone' : 'Cluster'
-}
-
 
 function showAuthPasswordField({
   discriminator,
@@ -406,15 +406,29 @@ function getMachineListForOptions() {
 }
 
 function setResourceLimit({ commit, model, getValue, watchDependency }) {
-  const modelPathValue = getValue(model, "/spec/podResources/machine");
-  watchDependency("model#/spec/podResources/machine");
-  if (modelPathValue && modelPathValue !== "custom") {
+  let modelPathValue = getValue(model, "/spec/podResources/machine");
+  const deploymentType = getValue(model, "/spec/admin/deployment/default");
+  if (modelPathValue) {
+    if (modelPathValue === "custom") modelPathValue = "db.t.micro";
     // to avoiding set value by reference, cpu and memory set separately
-    commit("wizard/model$update", {
-      path: "/spec/podResources/resources",
-      value: machines[modelPathValue]?.resources,
-      force: true,
-    });
+    if (deploymentType === "Dedicated") {
+      commit("wizard/model$update", {
+        path: "/spec/podResources/resources/requests",
+        value: machines[modelPathValue]?.resources.limits,
+        force: true,
+      });
+      commit("wizard/model$update", {
+        path: "/spec/podResources/resources/limits",
+        value: machines[modelPathValue]?.resources.limits,
+        force: true,
+      });
+    } else {
+      commit("wizard/model$update", {
+        path: "/spec/podResources/resources",
+        value: machines[modelPathValue]?.resources,
+        force: true,
+      });
+    }
   }
 }
 
@@ -698,6 +712,7 @@ function isToggleOn({ getValue, model }, type) {
 
 return {
   isVariantAvailable,
+  isEqualToModelPathValue,
   showAuthPasswordField,
   getNamespaces,
   getMachineListForOptions,
@@ -708,7 +723,6 @@ return {
   updateAlertValue,
   getPostgresList,
   onDatabaseModeChange,
-  setDatabaseMode,
   getNodeTopology,
   filterNodeTopology,
   getAdminOptions,

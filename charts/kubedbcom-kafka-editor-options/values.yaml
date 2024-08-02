@@ -22,22 +22,32 @@ spec:
   # Labels to add to all the template objects
   labels: {}
 
-  # Combined, Dedicated
+  # Combined, Topology
   mode: Combined
   replicas: 2
   topology:
     controller:
       replicas: 2
-      machine: ""
+      podResources:
+        machine: ""
+
+        resources:
+          limits:
+            cpu: 500m
+            memory: 1Gi
       persistence:
         size: 1Gi
     broker:
       replicas: 2
-      machine: ""
+      podResources:
+        machine: ""
+
+        resources:
+          limits:
+            cpu: 500m
+            memory: 1Gi
       persistence:
         size: 1Gi
-
-  disableSecurity: false
 
   deletionPolicy: WipeOut
 

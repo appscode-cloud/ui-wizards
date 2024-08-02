@@ -44,6 +44,7 @@ steps:
       if: isToggleOn|deployment
       label:
         text: labels.deployment.name
+      onChange: setResourceLimit
       options:
       - description: labels.deployment.shared
         text: Shared
@@ -67,6 +68,14 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/default
       type: radio
+    - disableUnselect: true
+      fetch: getAdminOptions|clusterTier/placement
+      if: isToggleOn|clusterTier/placement
+      label:
+        text: labels.placement
+      schema:
+        $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/placement/properties/default
+      type: select
     - disableUnselect: true
       fetch: getNodeTopology
       if: isToggleOn|clusterTier/nodeTopology
@@ -123,6 +132,7 @@ steps:
         value: Topology
       schema:
         $ref: schema#/properties/spec/properties/mode
+      onChange: toggleTls
       type: radio
     - if: isEqualToModelPathValue|Standalone|/spec/mode
       label:
@@ -283,7 +293,8 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/configuration
       type: editor
-    - if: isToggleOn|tls
+    - if: isEqualToModelPathValue|Topology|/spec/mode
+      computed: toggleTls
       label:
         text: Enable TLS?
       schema:

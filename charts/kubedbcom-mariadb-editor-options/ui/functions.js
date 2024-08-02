@@ -352,17 +352,32 @@ function getMachineListForOptions() {
 }
 
 function setResourceLimit({ commit, model, getValue, watchDependency }) {
-  const modelPathValue = getValue(model, "/spec/podResources/machine");
-  watchDependency("model#/spec/podResources/machine");
-  if (modelPathValue && modelPathValue !== "custom") {
+  let modelPathValue = getValue(model, "/spec/podResources/machine");
+  const deploymentType = getValue(model, "/spec/admin/deployment/default");
+  if (modelPathValue) {
+    if (modelPathValue === "custom") modelPathValue = "db.t.micro";
     // to avoiding set value by reference, cpu and memory set separately
-    commit("wizard/model$update", {
-      path: "/spec/podResources/resources",
-      value: machines[modelPathValue]?.resources,
-      force: true,
-    });
+    if (deploymentType === "Dedicated") {
+      commit("wizard/model$update", {
+        path: "/spec/podResources/resources/requests",
+        value: machines[modelPathValue]?.resources.limits,
+        force: true,
+      });
+      commit("wizard/model$update", {
+        path: "/spec/podResources/resources/limits",
+        value: machines[modelPathValue]?.resources.limits,
+        force: true,
+      });
+    } else {
+      commit("wizard/model$update", {
+        path: "/spec/podResources/resources",
+        value: machines[modelPathValue]?.resources,
+        force: true,
+      });
+    }
   }
 }
+
 
 function setLimitsCpuOrMem({ model, getValue }, path) {
   const modelPathValue = getValue(model, "/spec/machine");
@@ -794,8 +809,14 @@ function clearConfiguration({ discriminator, getValue, commit }) {
     );
   }
 }
+function EqualToDatabaseMode({ model, getValue, watchDependency }, mode) {
+  const modelPathValue = getValue(model, "/spec/mode");
+  watchDependency("model#/spec/mode");
+  return modelPathValue && modelPathValue === mode;
+}
 
 return {
+  EqualToDatabaseMode,
   isVariantAvailable,
   showAuthPasswordField,
   getNamespaces,

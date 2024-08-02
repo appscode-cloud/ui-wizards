@@ -1837,6 +1837,19 @@ properties:
             format: password
             type: string
         type: object
+      backend:
+        properties:
+          externallyManaged:
+            type: boolean
+          name:
+            type: string
+          namespace:
+            type: string
+        required:
+        - externallyManaged
+        - name
+        - namespace
+        type: object
       configuration:
         type: string
       deletionPolicy:
@@ -1846,8 +1859,6 @@ properties:
         - WipeOut
         - DoNotTerminate
         type: string
-      externallyManaged:
-        type: boolean
       labels:
         additionalProperties:
           type: string
@@ -1942,30 +1953,17 @@ properties:
         - machine
         - resources
         type: object
-      postgresRef:
-        description: ObjectReference contains enough information to let you inspect
-          or modify the referred object.
-        properties:
-          name:
-            type: string
-          namespace:
-            type: string
-        required:
-        - name
-        - namespace
-        type: object
       replicas:
         type: integer
     required:
     - admin
     - authSecret
+    - backend
     - configuration
     - deletionPolicy
-    - externallyManaged
     - mode
     - persistence
     - podResources
-    - postgresRef
     - replicas
     type: object
 required:
