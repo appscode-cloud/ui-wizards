@@ -10,8 +10,6 @@ steps:
       createAuthSecret:
         default: false
         type: boolean
-      elasticVersions:
-        type: array
       monitoring:
         default: false
         type: boolean
@@ -127,9 +125,9 @@ steps:
       - description: options.database.mode.Combined.description
         text: options.database.mode.Combined.label
         value: Combined
-      - description: options.database.mode.Dedicated.description
-        text: options.database.mode.Dedicated.label
-        value: Dedicated
+      - description: options.database.mode.Topology.description
+        text: options.database.mode.Topology.label
+        value: Topology
       schema:
         $ref: schema#/properties/spec/properties/mode
       type: radio
@@ -189,7 +187,7 @@ steps:
         schema:
           $ref: schema#/properties/spec/properties/topology/properties/broker
         type: single-step-form
-      if: isEqualToModelPathValue|Dedicated|/spec/mode
+      if: isEqualToModelPathValue|Topology|/spec/mode
       schema:
         $ref: schema#/properties/spec/properties/topology
       type: single-step-form
