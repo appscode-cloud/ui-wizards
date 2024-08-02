@@ -91,7 +91,7 @@ type ElasticsearchNode struct {
 	Persistence  Persistence  `json:"persistence"`
 }
 
-// +kubebuilder:validation:Enum=Combined;Dedicated
+// +kubebuilder:validation:Enum=Combined;Topology
 type ElasticsearchMode string
 
 type ElasticsearchAlertsSpecForm struct {

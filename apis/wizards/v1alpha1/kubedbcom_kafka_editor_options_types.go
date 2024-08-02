@@ -60,7 +60,7 @@ type KubedbcomKafkaEditorOptionsSpecSpec struct {
 	Admin          AdminOptions   `json:"admin"`
 }
 
-// +kubebuilder:validation:Enum=Combined;Dedicated
+// +kubebuilder:validation:Enum=Combined;Topology
 type KafkaMode string
 
 type KafkaTopology struct {
