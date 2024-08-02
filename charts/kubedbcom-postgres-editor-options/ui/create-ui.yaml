@@ -287,47 +287,6 @@ steps:
       schema:
         $ref: discriminator#/backup
       type: switch
-    - elements:
-      - hasDescription: true
-        onChange: dedicatedOnChange
-        options:
-        - description: Create the database in shared node pool
-          text: Shared node pool
-          value: false
-        - description: Create a dedicated node pool for the database
-          text: Dedicated node pool
-          value: true
-        schema:
-          $ref: schema#/properties/form/properties/capi/properties/dedicated
-        type: radio
-      - fetch: getZones
-        if: showMultiselectZone
-        label:
-          text: Zones
-        onChange: zonesOnChange
-        schema:
-          $ref: schema#/properties/form/properties/capi/properties/zones
-        type: multiselect
-      - fetch: getZones
-        if: showSelectZone
-        label:
-          text: Zones
-        onChange: zonesOnChange
-        schema:
-          $ref: schema#/properties/form/properties/capi/properties/zones
-        type: select
-      - fetch: getSKU
-        if: ifZones
-        label:
-          text: SKU
-        schema:
-          $ref: schema#/properties/form/properties/capi/properties/sku
-        type: select
-      if: ifCapiProviderIsNotEmpty
-      label:
-        text: Database Profile
-      show_label: true
-      type: single-step-form
     - label:
         text: labels.configOptions
       type: label-element
