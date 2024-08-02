@@ -809,8 +809,14 @@ function clearConfiguration({ discriminator, getValue, commit }) {
     );
   }
 }
+function EqualToDatabaseMode({ model, getValue, watchDependency }, mode) {
+  const modelPathValue = getValue(model, "/spec/mode");
+  watchDependency("model#/spec/mode");
+  return modelPathValue && modelPathValue === mode;
+}
 
 return {
+  EqualToDatabaseMode,
   isVariantAvailable,
   showAuthPasswordField,
   getNamespaces,

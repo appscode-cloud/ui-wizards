@@ -291,6 +291,26 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/admin/properties/storageClasses/properties/default
       type: select
+    - elements:
+      - computed: setNamespace
+        disabled: true
+        label:
+          text: labels.zookeeperRef.namespace
+        schema:
+          $ref: schema#/properties/spec/properties/zookeeperRef/properties/namespace
+        type: select
+      - fetch: getAppBindings
+        label:
+          text: labels.zookeeperRef.name
+        schema:
+          $ref: schema#/properties/spec/properties/zookeeperRef/properties/name
+        type: select
+      label:
+        text: labels.zookeeperRef.label
+      schema:
+        $ref: schema#/properties/spec/properties/zookeeperRef
+      show_label: true
+      type: single-step-form
     - label:
         text: Provide Authentication Credentials?
       onChange: onAuthChange

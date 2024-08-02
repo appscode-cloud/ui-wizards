@@ -89,6 +89,7 @@ steps:
     - hasDescription: true
       label:
         text: labels.database.mode
+      onChange: clearArbiterHidden
       options:
       - description: options.database.mode.Standalone.description
         text: options.database.mode.Standalone.label
@@ -99,7 +100,7 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/mode
       type: radio
-    - if: isEqualToModelPathValue|Replicaset|/spec/mode
+    - if: EqualToDatabaseMode|Replicaset
       label:
         text: labels.replicas
       schema:
