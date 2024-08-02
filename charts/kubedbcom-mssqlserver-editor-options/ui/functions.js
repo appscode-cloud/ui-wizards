@@ -327,18 +327,6 @@ function isEqualToModelPathValue(
   return modelPathValue === value;
 }
 
-function showAuthSecretField({
-  discriminator,
-  getValue,
-  watchDependency,
-}) {
-  return !showAuthPasswordField({
-    discriminator,
-    getValue,
-    watchDependency,
-  });
-}
-
 function showStorageSizeField({ model, getValue, watchDependency }) {
   const modelPathValue = getValue(model, "/spec/mode");
   watchDependency("model#/spec/mode");
@@ -346,129 +334,13 @@ function showStorageSizeField({ model, getValue, watchDependency }) {
   return validType.includes(modelPathValue);
 }
 
-async function getResources(
-  { axios, storeGet },
-  group,
-  version,
-  resource
-) {
-  const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/route/params/cluster");
-
-  const resp = await axios.get(
-    `/clusters/${owner}/${cluster}/proxy/${group}/${version}/${resource}`,
-    {
-      params: { filter: { items: { metadata: { name: null } } } },
-    }
-  );
-
-  const resources = (resp && resp.data && resp.data.items) || [];
-
-  resources.map((item) => {
-    const name = (item.metadata && item.metadata.name) || "";
-    item.text = name;
-    item.value = name;
-    return true;
+function onModeChange({ model, getValue, commit }) {
+  const dbMode = getValue(model, "/spec/mode");
+  commit("wizard/model$update", {
+    path: "/spec/replicas",
+    value: dbMode === "Topology" ? 3 : 1,
+    force: true,
   });
-  return resources;
-}
-
-async function getMongoDbVersions(
-  { axios, storeGet },
-  group,
-  version,
-  resource
-) {
-  const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/route/params/cluster");
-
-  const queryParams = {
-    filter: {
-      items: {
-        metadata: { name: null },
-        spec: { version: null, deprecated: null },
-      },
-    },
-  };
-
-  const resp = await axios.get(
-    `/clusters/${owner}/${cluster}/proxy/${group}/${version}/${resource}`,
-    {
-      params: queryParams,
-    }
-  );
-
-  const resources = (resp && resp.data && resp.data.items) || [];
-
-  // keep only non deprecated versions
-  const filteredMongoDbVersions = resources.filter(
-    (item) => item.spec && !item.spec.deprecated
-  );
-
-  filteredMongoDbVersions.map((item) => {
-    const name = (item.metadata && item.metadata.name) || "";
-    const specVersion = (item.spec && item.spec.version) || "";
-    item.text = `${name} (${specVersion})`;
-    item.value = name;
-    return true;
-  });
-  return filteredMongoDbVersions;
-}
-
-function onCreateAuthSecretChange({
-  discriminator,
-  getValue,
-  commit
-}) {
-  const createAuthSecret = getValue(discriminator, "/createAuthSecret");
-  if (createAuthSecret) {
-    commit(
-      "wizard/model$delete",
-      "/spec/authSecret/name"
-    );
-  } else if(createAuthSecret === false) {
-    commit(
-      "wizard/model$delete",
-      "/spec/authSecret/password"
-    );
-  }
-}
-
-async function getSecrets({
-  storeGet,
-  axios,
-  model,
-  getValue,
-  watchDependency,
-}) {
-  const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/route/params/cluster");
-  const namespace = getValue(model, "/metadata/release/namespace");
-  watchDependency("model#/metadata/release/namespace");
-
-  const resp = await axios.get(
-    `/clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}/secrets`,
-    {
-      params: {
-        filter: { items: { metadata: { name: null }, type: null } },
-      },
-    }
-  );
-
-  const secrets = (resp && resp.data && resp.data.items) || [];
-
-  const filteredSecrets = secrets.filter((item) => {
-    const validType = ["kubernetes.io/service-account-token", "Opaque"];
-    return validType.includes(item.type);
-  });
-
-  filteredSecrets.map((item) => {
-    const name = (item.metadata && item.metadata.name) || "";
-    item.text = name;
-    item.value = name;
-    return true;
-  });
-  return filteredSecrets;
 }
 
 function disableLimit({ model, getValue, watchDependency }) {
@@ -543,53 +415,6 @@ function setMachineToCustom() {
   return "custom";
 }
 
-async function fetchJsons({ axios, itemCtx }) {
-  let ui = {};
-  let language = {};
-  let functions = {};
-  const { name, sourceRef, version, packageviewUrlPrefix } = itemCtx.chart;
-  
-  try {
-    ui = await axios.get(
-      `${packageviewUrlPrefix}/create-ui.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`
-    );
-    language = await axios.get(
-      `${packageviewUrlPrefix}/language.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`
-    );
-    const functionString = await axios.get(
-      `${packageviewUrlPrefix}/functions.js?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}`
-    );
-    // declare evaluate the functionString to get the functions Object
-    const evalFunc = new Function(functionString.data || "");
-    functions = evalFunc();
-  } catch (e) {
-    console.log(e);
-  }
-
-  return {
-    ui: ui.data || {},
-    language: language.data || {},
-    functions,
-  };
-}
-
-function updateAgentValue({commit },val) {
-  commit("wizard/model$update", {
-    path: "/spec/monitoring/agent",
-    value: val ? "prometheus.io/operator" : "",
-    force: true
-  });
-
-  // update alert value depend on monitoring profile
-  commit("wizard/model$update", {
-    path: "/form/alert/enabled",
-    value: val ? 'warning' : 'none',
-    force: true
-  });
-
-
-}
-
 function getCreateNameSpaceUrl ({ model, getValue, storeGet }){ 
 
   const user = storeGet("/route/params/user");
@@ -635,7 +460,6 @@ const dedicatedOnChange = ({ model, getValue, commit }) => {
     commit("wizard/model$delete", "form/capi/sku");
   }
 };
-
 
 const ifZones = ({ model, getValue, watchDependency }) => {
   watchDependency("model#/form/capi/zones");
@@ -704,7 +528,6 @@ function isVariantAvailable ({storeGet})  {
   return variant ? true : false
 }
 
-
 function setStorageClass({ model, getValue, commit }) {
   const deletionPolicy = getValue(model, "/spec/deletionPolicy") || "";
   let storageClass =
@@ -739,8 +562,6 @@ function setStorageClass({ model, getValue, commit }) {
   }
 }
 
-
-
 async function getNamespaces({ axios, storeGet }) {
   const params = storeGet("/route/params");
   const { user, cluster, group, version, resource } = params;
@@ -774,8 +595,6 @@ async function getNamespaces({ axios, storeGet }) {
 function isToggleOn({ getValue, model }, type) {
   return getValue(model, `/spec/admin/${type}/toggle`);
 }
-
-
 
 function getAdminOptions({ getValue, model }, type) {
   const options = getValue(model, `/spec/admin/${type}/available`) || [];
@@ -912,7 +731,6 @@ function filterNodeTopology(list, tier, provider, mappedResp) {
   }
 }
 
-
 function onAuthChange({ getValue, discriminator, commit }) {
   const isAuthOn = getValue(discriminator, "/createAuthSecret");
   if (!isAuthOn) {
@@ -952,13 +770,12 @@ function showIssuer({ model, getValue, watchDependency }) {
   return isTlsEnabled && isIssuerToggleEnabled;
 }
 
-
 function setMonitoring({ getValue, model }) {
   const agent = getValue(model, "/spec/admin/monitoring/agent") || "";
   return !!agent;
 }
 
-function updateAlertValue({ commit, model, discriminator, getValue }) {
+function updateAlertValue({ commit, discriminator, getValue }) {
   const isMonitorEnabled = getValue(discriminator, "/monitoring");
   const alert = isMonitorEnabled ? "warning" : "none";
   // update alert value depend on monitoring profile
@@ -980,7 +797,6 @@ function showAlerts({ watchDependency, model, getValue, discriminator }) {
   const isMonitorEnabled = getValue(discriminator, "/monitoring");
   return isMonitorEnabled && isToggleOn({ getValue, model }, "alerts");
 }
-
 
 async function isBackupCluster({ axios, storeGet, commit }) {
   const owner = storeGet("/route/params/user");
@@ -1017,21 +833,15 @@ function onBackupSwitch({ discriminator, getValue, commit }) {
 
 return {
   isVariantAvailable,
-	fetchJsons,
 	showAuthPasswordField,
 	isEqualToModelPathValue,
-	showAuthSecretField,
 	showStorageSizeField,
-	getResources,
-  getMongoDbVersions,
-  onCreateAuthSecretChange,
-	getSecrets,
+  onModeChange,
 	disableLimit,
 	getMachineListForOptions,
 	setResourceLimit,
 	setLimitsCpuOrMem,
 	setMachineToCustom,
-	updateAgentValue,
 	getCreateNameSpaceUrl,
   ifCapiProviderIsNotEmpty,
   ifDedicated,
@@ -1053,7 +863,6 @@ return {
   isConfigDatabaseOn,
   showIssuer,
   setMonitoring,
-  updateAgentValue,
   showAlerts,
   isBackupCluster,
   onBackupSwitch,

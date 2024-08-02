@@ -319,152 +319,6 @@ function isEqualToModelPathValue(
   return modelPathValue === value;
 }
 
-function showAuthSecretField({ discriminator, getValue, watchDependency }) {
-  return !showAuthPasswordField({
-    discriminator,
-    getValue,
-    watchDependency,
-  });
-}
-
-async function getPostgresList({
-  axios,
-  storeGet,
-  model,
-  getValue,
-  watchDependency,
-}) {
-  const namespace = getValue(model, "/spec/postgresRef/namespace");
-  watchDependency("model#/spec/postgresRef/namespace");
-  const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/route/params/cluster");
-  if (namespace) {
-    const resp = await axios.get(
-      `http://api.bb.test:3003/api/v1/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/postgreses`
-    );
-    const resources = (resp && resp.data && resp.data.items) || [];
-    resources.map((item) => {
-      const name = (item.metadata && item.metadata.name) || "";
-      item.text = name;
-      item.value = name;
-      return true;
-    });
-    return resources;
-  }
-
-  return [];
-}
-
-async function getResources({ axios, storeGet }, group, version, resource) {
-  const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/route/params/cluster");
-
-  const resp = await axios.get(
-    `/clusters/${owner}/${cluster}/proxy/${group}/${version}/${resource}`,
-    {
-      params: { filter: { items: { metadata: { name: null } } } },
-    }
-  );
-
-  const resources = (resp && resp.data && resp.data.items) || [];
-
-  resources.map((item) => {
-    const name = (item.metadata && item.metadata.name) || "";
-    item.text = name;
-    item.value = name;
-    return true;
-  });
-  return resources;
-}
-
-async function getMongoDbVersions(
-  { axios, storeGet },
-  group,
-  version,
-  resource
-) {
-  const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/route/params/cluster");
-
-  const queryParams = {
-    filter: {
-      items: {
-        metadata: { name: null },
-        spec: { version: null, deprecated: null },
-      },
-    },
-  };
-
-  const resp = await axios.get(
-    `/clusters/${owner}/${cluster}/proxy/${group}/${version}/${resource}`,
-    {
-      params: queryParams,
-    }
-  );
-
-  const resources = (resp && resp.data && resp.data.items) || [];
-
-  // keep only non deprecated versions
-  const filteredMongoDbVersions = resources.filter(
-    (item) => item.spec && !item.spec.deprecated
-  );
-
-  filteredMongoDbVersions.map((item) => {
-    const name = (item.metadata && item.metadata.name) || "";
-    const specVersion = (item.spec && item.spec.version) || "";
-    item.text = `${name} (${specVersion})`;
-    item.value = name;
-    return true;
-  });
-  return filteredMongoDbVersions;
-}
-
-function onCreateAuthSecretChange({ discriminator, getValue, commit }) {
-  const createAuthSecret = getValue(discriminator, "/createAuthSecret");
-  if (createAuthSecret) {
-    commit("wizard/model$delete", "/spec/authSecret/name");
-  } else if (createAuthSecret === false) {
-    commit("wizard/model$delete", "/spec/authSecret/password");
-  }
-}
-
-async function getSecrets({
-  storeGet,
-  axios,
-  model,
-  getValue,
-  watchDependency,
-}) {
-  const owner = storeGet("/route/params/user");
-  const cluster = storeGet("/route/params/cluster");
-  const namespace = getValue(model, "/metadata/release/namespace");
-  watchDependency("model#/metadata/release/namespace");
-
-  const resp = await axios.get(
-    `/clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}/secrets`,
-    {
-      params: {
-        filter: { items: { metadata: { name: null }, type: null } },
-      },
-    }
-  );
-
-  const secrets = (resp && resp.data && resp.data.items) || [];
-
-  const filteredSecrets = secrets.filter((item) => {
-    const validType = ["kubernetes.io/service-account-token", "Opaque"];
-    return validType.includes(item.type);
-  });
-
-  filteredSecrets.map((item) => {
-    const name = (item.metadata && item.metadata.name) || "";
-    item.text = name;
-    item.value = name;
-    return true;
-  });
-  return filteredSecrets;
-}
-
 function disableLimit({ model, getValue, watchDependency }) {
   const modelPathValue = getValue(model, "/spec/machine");
   watchDependency("model#/spec/machine");
@@ -798,10 +652,6 @@ async function getNodeTopology({
   return filteredList;
 }
 
-function returnFalse() {
-  return false;
-}
-
 function isConfigDatabaseOn({ watchDependency, discriminator, getValue }) {
   watchDependency("discriminator#/configDatabase");
   return getValue(discriminator, "/configDatabase");
@@ -1055,6 +905,68 @@ function setResourceLimit({ commit, model, getValue, watchDependency }) {
   }
 }
 
+function onModeChange({ model, getValue, commit }) {
+  const dbMode = getValue(model, "/spec/mode");
+  commit("wizard/model$update", {
+    path: "/spec/replicas",
+    value: dbMode === "Replicaset" ? 3 : 1,
+    force: true,
+  });
+}
+
+
+async function getAppBindings({ axios, storeGet }, type) {
+  const owner = storeGet("/route/params/user");
+  const cluster = storeGet("/route/params/cluster");
+  const queryParams = {
+    filter: {
+      items: {
+        metadata: { name: null, namespace: null },
+        spec: { type: null },
+      },
+    },
+  };
+  try {
+    const resp = await axios.get(
+      `/clusters/${owner}/${cluster}/proxy/appcatalog.appscode.com/v1alpha1/appbindings`,
+      queryParams
+    );
+    const resources = (resp && resp.data && resp.data.items) || [];
+
+    const fileredResources = resources
+      .filter((item) => item.spec?.type === `kubedb.com/${type}` )
+      .map((item) => {
+        const name = item.metadata?.name || "";
+        const namespace = item.metadata?.namespace || "";
+        return {
+          text: `${namespace}/${name}`,
+          value: {
+            name: name,
+            namespace: namespace,
+          },
+        };
+      });
+    return fileredResources;
+  } catch (e) {
+    console.log(e);
+    return [];
+  }
+}
+
+function onRefChange({ discriminator, getValue, commit }, type) {
+  const ref = getValue(discriminator, `/${type}`) || {};
+  commit("wizard/model$update", {
+    path: `/spec/${type}/name`,
+    value: ref.name || "",
+    force: true,
+  });
+  commit("wizard/model$update", {
+    path: `/spec/${type}/namespace`,
+    value: ref.namespace || "",
+    force: true,
+  });
+}
+
 return {
   getNamespaces,
   updateAlertValue,
@@ -1063,7 +975,6 @@ return {
   showAlerts,
   getNodeTopology,
   clearArbiterHidden,
-  returnFalse,
   showHidden,
   isConfigDatabaseOn,
   notEqualToDatabaseMode,
@@ -1080,12 +991,6 @@ return {
   fetchJsons,
   showAuthPasswordField,
   isEqualToModelPathValue,
-  showAuthSecretField,
-  getResources,
-  getPostgresList,
-  getMongoDbVersions,
-  onCreateAuthSecretChange,
-  getSecrets,
   disableLimit,
   getMachineListForOptions,
   setResourceLimit,
@@ -1103,4 +1008,7 @@ return {
   showMultiselectZone,
   showSelectZone,
   setStorageClass,
+  onModeChange,
+  getAppBindings,
+  onRefChange,
 };
