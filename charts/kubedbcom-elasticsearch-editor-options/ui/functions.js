@@ -1,23 +1,6 @@
 let nodeTopologyListFromApi = []
 let provider = ''
 
-function onVersionChange({ discriminator, getValue, commit, model, watchDependency }) {
-  watchDependency('discriminator#/elasticVersions')
-  const versions = getValue(discriminator, '/elasticVersions')
-
-  const selectedVersion = getValue(model, '/spec/version')
-
-  const version = versions?.find((item) => item.value === selectedVersion) || {}
-
-  commit('wizard/model$update', {
-    path: '/spec/authPlugin',
-    value: version.authPlugin,
-    force: true,
-  })
-
-  return selectedVersion
-}
-
 const machines = {
   'db.t.micro': {
     resources: {
@@ -341,108 +324,6 @@ function showStorageSizeField({ model, getValue, watchDependency }) {
   watchDependency('model#/spec/mode')
   const validType = ['Standalone', 'Replicaset']
   return validType.includes(modelPathValue)
-}
-
-async function getResources({ axios, storeGet }, group, version, resource) {
-  const owner = storeGet('/route/params/user')
-  const cluster = storeGet('/route/params/cluster')
-
-  const resp = await axios.get(
-    `/clusters/${owner}/${cluster}/proxy/${group}/${version}/${resource}`,
-    {
-      params: { filter: { items: { metadata: { name: null } } } },
-    },
-  )
-
-  const resources = (resp && resp.data && resp.data.items) || []
-
-  resources.map((item) => {
-    const name = (item.metadata && item.metadata.name) || ''
-    item.text = name
-    item.value = name
-    return true
-  })
-  return resources
-}
-
-async function getElasticSearchVersions(
-  { axios, storeGet, setDiscriminatorValue },
-  group,
-  version,
-  resource,
-) {
-  const owner = storeGet('/route/params/user')
-  const cluster = storeGet('/route/params/cluster')
-
-  const queryParams = {
-    filter: {
-      items: {
-        metadata: { name: null },
-        spec: { version: null, deprecated: null, authPlugin: null },
-      },
-    },
-  }
-
-  const resp = await axios.get(
-    `/clusters/${owner}/${cluster}/proxy/${group}/${version}/${resource}`,
-    {
-      params: queryParams,
-    },
-  )
-
-  const resources = (resp && resp.data && resp.data.items) || []
-
-  // keep only non deprecated versions
-  const filteredElasticSearchVersions = resources.filter(
-    (item) => item.spec && !item.spec.deprecated,
-  )
-
-  // sort compare function for the version array
-  function sortVersion(a, b) {
-    const aName = a.metadata.name
-    const bName = b.metadata.name
-
-    const [aString, aNumbers] = aName.split('-')
-    const [bString, bNumbers] = bName.split('-')
-
-    const aNums = aNumbers.split('.').map(Number)
-    const aNum1 = aNums[0] ? aNums[0] : 0
-    const aNum2 = aNums[1] ? aNums[1] : 0
-    const aNum3 = aNums[2] ? aNums[2] : 0
-
-    const bNums = bNumbers.split('.').map(Number)
-    const bNum1 = bNums[0] ? bNums[0] : 0
-    const bNum2 = bNums[1] ? bNums[1] : 0
-    const bNum3 = bNums[2] ? bNums[2] : 0
-
-    if (aString !== bString) {
-      return aString.localeCompare(bString)
-    }
-
-    if (aNum1 !== bNum1) {
-      return aNum1 - bNum1
-    }
-
-    if (aNum2 !== bNum2) {
-      return aNum2 - bNum2
-    }
-
-    return aNum3 - bNum3
-  }
-  const sortedVersion = filteredElasticSearchVersions.sort(sortVersion)
-
-  sortedVersion.map((item) => {
-    const name = (item.metadata && item.metadata.name) || ''
-    const specVersion = (item.spec && item.spec.version) || ''
-    item.text = `${name} (${specVersion})`
-    item.value = name
-    item.authPlugin = item.spec.authPlugin
-    return true
-  })
-
-  setDiscriminatorValue('/elasticVersions', sortedVersion)
-
-  return sortedVersion
 }
 
 function disableLimit({ model, getValue, watchDependency }) {
@@ -907,12 +788,9 @@ function onBackupSwitch({ discriminator, getValue, commit }) {
 
 return {
   isVariantAvailable,
-  onVersionChange,
   showAuthPasswordField,
   isEqualToModelPathValue,
   showStorageSizeField,
-  getResources,
-  getElasticSearchVersions,
   disableLimit,
   setLimitsCpuOrMem,
   setMachineToCustom,

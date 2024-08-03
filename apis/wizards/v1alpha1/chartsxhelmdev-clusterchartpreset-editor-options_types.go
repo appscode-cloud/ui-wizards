@@ -42,12 +42,31 @@ type ChartsxhelmdevClusterChartPresetEditorOptionsSpec struct {
 type ChartsxhelmdevClusterChartPresetEditorOptionsSpecSpec struct {
 	KubeDB     AdminOptions      `json:"kubeDB"`
 	Monitoring MonitoringOptions `json:"monitoring"`
-	Stash      StashOptions      `json:"stash"`
+	Backup     BackupOptions     `json:"backup"`
 }
 
 type MonitoringOptions struct{}
 
-type StashOptions struct{}
+type BackupOptions struct {
+	ClusterMetadata ClusterMetadata  `json:"clusterMetadata"`
+	Stash           StashInfo        `json:"stash"`
+	KubeStash       KubeStashOptions `json:"kubeStash"`
+	// +kubebuilder:default=KubeStash
+	Tool BackupTool `json:"tool"`
+}
+
+type ClusterMetadata struct {
+	Name string `json:"name"`
+	UID  string `json:"uid"`
+}
+
+type KubeStashOptions struct {
+	EncryptionSecret string            `json:"encryptionSecret"`
+	RetentionPolicy  string            `json:"retentionPolicy"`
+	Schedule         string            `json:"schedule"`
+	StorageSecret    OptionalResource  `json:"storageSecret"`
+	Backend          RepositoryBackend `json:"backend"`
+}
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 

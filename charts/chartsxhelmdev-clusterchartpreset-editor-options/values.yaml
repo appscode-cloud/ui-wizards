@@ -177,4 +177,50 @@ spec:
               B2_ACCOUNT_KEY: ""
 
   monitoring: {}
-  stash: {}
+
+  backup:
+    clusterMetadata:
+      name:
+      uid:
+    stash:
+      authSecret:
+        name:
+        password:
+      backend:
+        provider: s3
+        s3:
+          auth:
+            AWS_ACCESS_KEY_ID:
+            AWS_SECRET_ACCESS_KEY:
+          spec:
+            bucket:
+            endpoint:
+            insecureTLS:
+            prefix:
+            region:
+      retentionPolicy:
+        keepDaily: 5
+        keepHourly: 1
+        name: my-retention
+        prune: true
+      schedule: '*/30 * * * *'
+
+    kubeStash:
+      backend:
+        provider: s3
+        s3:
+          auth:
+            AWS_ACCESS_KEY_ID: 34F9JI2JM8DOJC6NUPII
+            AWS_SECRET_ACCESS_KEY:
+          spec:
+            bucket: arnob
+            endpoint: us-east-1.linodeobjects.com
+            insecureTLS: false
+            prefix: presets
+            region: us-east-1
+      encryptionSecret: asdfg
+      retentionPolicy: keep-1wk
+      schedule: '*/30 * * * *'
+      storageSecret:
+        create: true
+    tool: KubeStash

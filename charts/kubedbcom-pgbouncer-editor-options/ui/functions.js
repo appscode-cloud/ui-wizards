@@ -304,31 +304,56 @@ const machineList = [
   'db.r.24xlarge',
 ]
 
-async function getPostgresList({ axios, storeGet, model, getValue, watchDependency }) {
-  watchDependency('model#/spec/database/ref/namespace')
-  const namespace = getValue(model, '/spec/database/ref/namespace')
+async function getAppBindings({ axios, storeGet }, type) {
   const owner = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
-  if (namespace) {
-    try {
-      const resp = await axios.get(
-        `http://api.bb.test:3003/api/v1/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/postgreses`,
-      )
-      const resources = (resp && resp.data && resp.data.items) || []
-      resources.map((item) => {
-        const name = (item.metadata && item.metadata.name) || ''
-        item.text = name
-        item.value = name
-        return true
-      })
-      return resources
-    } catch (e) {
-      console.log(e)
-      return []
-    }
+  const queryParams = {
+    filter: {
+      items: {
+        metadata: { name: null, namespace: null },
+        spec: { type: null },
+      },
+    },
   }
+  try {
+    const resp = await axios.get(
+      `/clusters/${owner}/${cluster}/proxy/appcatalog.appscode.com/v1alpha1/appbindings`,
+      queryParams,
+    )
+    const resources = (resp && resp.data && resp.data.items) || []
 
-  return []
+    const fileredResources = resources
+      .filter((item) => item.spec?.type === `kubedb.com/${type}`)
+      .map((item) => {
+        const name = item.metadata?.name || ''
+        const namespace = item.metadata?.namespace || ''
+        return {
+          text: `${namespace}/${name}`,
+          value: {
+            name: name,
+            namespace: namespace,
+          },
+        }
+      })
+    return fileredResources
+  } catch (e) {
+    console.log(e)
+    return []
+  }
+}
+
+function onRefChange({ discriminator, getValue, commit }) {
+  const ref = getValue(discriminator, '/pgRef') || {}
+  commit('wizard/model$update', {
+    path: `/spec/database/databaseRef/name`,
+    value: ref.name || '',
+    force: true,
+  })
+  commit('wizard/model$update', {
+    path: `/spec/database/databaseRef/namespace`,
+    value: ref.namespace || '',
+    force: true,
+  })
 }
 
 function isEqualToModelPathValue({ model, getValue, watchDependency }, value, modelPath) {
@@ -671,6 +696,8 @@ function isToggleOn({ getValue, model }, type) {
 }
 
 return {
+  getAppBindings,
+  onRefChange,
   isVariantAvailable,
   isEqualToModelPathValue,
   showAuthPasswordField,
@@ -681,7 +708,6 @@ return {
   setMachineToCustom,
   isMachineNotCustom,
   updateAlertValue,
-  getPostgresList,
   onDatabaseModeChange,
   getNodeTopology,
   filterNodeTopology,

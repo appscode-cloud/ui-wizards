@@ -10,8 +10,6 @@ steps:
       createAuthSecret:
         default: false
         type: boolean
-      elasticVersions:
-        type: array
       monitoring:
         default: false
         type: boolean
@@ -127,9 +125,9 @@ steps:
       - description: options.database.mode.Combined.description
         text: options.database.mode.Combined.label
         value: Combined
-      - description: options.database.mode.Dedicated.description
-        text: options.database.mode.Dedicated.label
-        value: Dedicated
+      - description: options.database.mode.Topology.description
+        text: options.database.mode.Topology.label
+        value: Topology
       schema:
         $ref: schema#/properties/spec/properties/mode
       type: radio
@@ -211,7 +209,7 @@ steps:
         schema:
           $ref: schema#/properties/spec/properties/topology/properties/ingest
         type: single-step-form
-      if: isEqualToModelPathValue|Dedicated|/spec/mode
+      if: isEqualToModelPathValue|Topology|/spec/mode
       schema:
         $ref: schema#/properties/spec/properties/topology
       type: single-step-form
@@ -355,59 +353,11 @@ steps:
       schema:
         $ref: discriminator#/backup
       type: switch
-    - elements:
-      - label:
-          text: labels.disableDefaults
-        schema:
-          $ref: schema#/properties/spec/properties/kernelSettings/properties/disableDefaults
-        type: switch
-      label:
-        text: options.configOptions.kernelSettings.label
+    - label:
+        text: labels.disableDefaults
       schema:
-        $ref: schema#/properties/spec/properties/kernelSettings
-      show_label: true
-      type: single-step-form
-    - elements:
-      - hasDescription: true
-        onChange: dedicatedOnChange
-        options:
-        - description: Create the database in shared node pool
-          text: Shared node pool
-          value: false
-        - description: Create a dedicated node pool for the database
-          text: Dedicated node pool
-          value: true
-        schema:
-          $ref: schema#/properties/form/properties/capi/properties/dedicated
-        type: radio
-      - fetch: getZones
-        if: showMultiselectZone
-        label:
-          text: Zones
-        onChange: zonesOnChange
-        schema:
-          $ref: schema#/properties/form/properties/capi/properties/zones
-        type: multiselect
-      - fetch: getZones
-        if: showSelectZone
-        label:
-          text: Zones
-        onChange: zonesOnChange
-        schema:
-          $ref: schema#/properties/form/properties/capi/properties/zones
-        type: select
-      - fetch: getSKU
-        if: ifZones
-        label:
-          text: SKU
-        schema:
-          $ref: schema#/properties/form/properties/capi/properties/sku
-        type: select
-      if: ifCapiProviderIsNotEmpty
-      label:
-        text: Database Profile
-      show_label: true
-      type: single-step-form
+        $ref: schema#/properties/spec/properties/kernelSettings/properties/disableDefaults
+      type: switch
     - label:
         text: labels.configOptions
       type: label-element
