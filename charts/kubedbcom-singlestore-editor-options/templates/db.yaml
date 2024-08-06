@@ -17,7 +17,35 @@
     {{- $res = get (get $machines .Values.spec.podResources.machine) "resources" }}
   {{- end }}
 {{- end }}
-{{ $poolName := printf "my-capi-cluster-%s-%s" .Release.Namespace (include "kubedbcom-singlestore-editor-options.fullname" .) }}
+
+{{- define "common.placement" -}}
+podPlacementPolicy:
+  name: {{ .Values.spec.admin.clusterTier.placement.default }}
+{{- if eq .Values.spec.admin.deployment.default "Dedicated" }}
+nodeSelector:
+  app: singlestores.kubedb.com
+  instance: {{ include "kubedbcom-singlestore-editor-options.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  nodepool: {{ .Values.spec.admin.clusterTier.nodeTopology.default }}
+tolerations:
+  - key: app
+    operator: "Equal"
+    value: "singlestores.kubedb.com"
+    effect: "NoSchedule"
+  - key: instance
+    operator: "Equal"
+    value: {{ include "kubedbcom-singlestore-editor-options.fullname" . }}
+    effect: "NoSchedule"
+  - key: namespace
+    operator: "Equal"
+    value: {{ .Release.Namespace }}
+    effect: "NoSchedule"
+  - key: nodepool
+    operator: "Equal"
+    value: {{ .Values.spec.admin.clusterTier.nodeTopology.default }}
+    effect: "NoSchedule"
+{{- end }}
+{{- end }}
 
 apiVersion: kubedb.com/v1alpha2
 kind: Singlestore
@@ -39,7 +67,7 @@ spec:
     aggregator:
       replicas: {{ .Values.spec.topology.aggregator.replicas }}
       storage:
-        storageClassName: {{ .Values.spec.storageClass.name }}
+        storageClassName: {{ .Values.spec.admin.storageClasses.default }}
         accessModes:
           - ReadWriteOnce
         resources:
@@ -51,19 +79,11 @@ spec:
             - name: singlestore
               resources:
                 {{- toYaml $aggregator_res | nindent 16 }}
-          {{- if and .Values.form.capi.provider .Values.form.capi.dedicated }}
-          nodeSelector:
-            nodes.klusters.dev/pool: {{ $poolName }}
-          tolerations:
-            - key: dedicated
-              operator: "Equal"
-              value: "true"
-              effect: "NoSchedule"
-          {{- end }}
+          {{- include "common.placement" . | nindent 10 }}
     leaf:
       replicas: {{ .Values.spec.topology.leaf.replicas }}
       storage:
-        storageClassName: {{ .Values.spec.storageClass.name }}
+        storageClassName: {{ .Values.spec.admin.storageClasses.default }}
         accessModes:
           - ReadWriteOnce
         resources:
@@ -75,15 +95,7 @@ spec:
             - name: singlestore
               resources:
                 {{- toYaml $leaf_res | nindent 16 }}
-          {{- if and .Values.form.capi.provider .Values.form.capi.dedicated }}
-          nodeSelector:
-            nodes.klusters.dev/pool: {{ $poolName }}
-          tolerations:
-            - key: dedicated
-              operator: "Equal"
-              value: "true"
-              effect: "NoSchedule"
-          {{- end }}
+          {{- include "common.placement" . | nindent 10 }}
 {{- else if eq .Values.spec.mode "Standalone" }}
   replicas: 1
   storage:
@@ -99,32 +111,7 @@ spec:
         - name: singlestore
           resources:
             {{- toYaml $res | nindent 12 }}
-      podPlacementPolicy:
-        name: {{ .Values.spec.admin.clusterTier.placement.default }}
-      {{- if eq .Values.spec.admin.deployment.default "Dedicated" }}
-      nodeSelector:
-        app: singlestores.kubedb.com
-        instance: {{ include "kubedbcom-singlestore-editor-options.fullname" . }}
-        namespace: {{ .Release.Namespace }}
-        nodepool: {{ .Values.spec.admin.clusterTier.nodeTopology.default }}
-      tolerations:
-        - key: app
-          operator: "Equal"
-          value: "singlestores.kubedb.com"
-          effect: "NoSchedule"
-        - key: instance
-          operator: "Equal"
-          value: {{ include "kubedbcom-singlestore-editor-options.fullname" . }}
-          effect: "NoSchedule"
-        - key: namespace
-          operator: "Equal"
-          value: {{ .Release.Namespace }}
-          effect: "NoSchedule"
-        - key: nodepool
-          operator: "Equal"
-          value: {{ .Values.spec.admin.clusterTier.nodeTopology.default }}
-          effect: "NoSchedule"
-      {{- end }}
+      {{- include "common.placement" . | nindent 6 }}
 {{- end }}
   storageType: Durable
   deletionPolicy: {{ .Values.spec.deletionPolicy }}

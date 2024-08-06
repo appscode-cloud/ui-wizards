@@ -36,7 +36,35 @@
     {{- $hidden_res = get (get $machines .Values.spec.hidden.podResources.machine) "resources" }}
   {{- end }}
 {{- end }}
-{{ $poolName := printf "my-capi-cluster-%s-%s" .Release.Namespace (include "kubedbcom-mongodb-editor-options.fullname" .) }}
+
+{{- define "common.placement" -}}
+podPlacementPolicy:
+  name: {{ .Values.spec.admin.clusterTier.placement.default }}
+{{- if eq .Values.spec.admin.deployment.default "Dedicated" }}
+nodeSelector:
+  app: mongodbs.kubedb.com
+  instance: {{ include "kubedbcom-mongodb-editor-options.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  nodepool: {{ .Values.spec.admin.clusterTier.nodeTopology.default }}
+tolerations:
+  - key: app
+    operator: "Equal"
+    value: "mongodbs.kubedb.com"
+    effect: "NoSchedule"
+  - key: instance
+    operator: "Equal"
+    value: {{ include "kubedbcom-mongodb-editor-options.fullname" . }}
+    effect: "NoSchedule"
+  - key: namespace
+    operator: "Equal"
+    value: {{ .Release.Namespace }}
+    effect: "NoSchedule"
+  - key: nodepool
+    operator: "Equal"
+    value: {{ .Values.spec.admin.clusterTier.nodeTopology.default }}
+    effect: "NoSchedule"
+{{- end }}
+{{- end }}
 
 apiVersion: kubedb.com/v1
 kind: MongoDB
@@ -80,15 +108,7 @@ spec:
             - name: mongodb
               resources:
                 {{- toYaml $configServer_res | nindent 16 }}
-          {{- if eq .Values.spec.admin.deployment.default "Dedicated" }}
-          nodeSelector:
-            nodes.klusters.dev/pool: {{ $poolName }}
-          tolerations:
-            - key: dedicated
-              operator: "Equal"
-              value: "true"
-              effect: "NoSchedule"
-          {{- end }}
+          {{- include "common.placement" . | nindent 10 }}
       storage:
         resources:
           requests:
@@ -102,15 +122,7 @@ spec:
             - name: mongodb
               resources:
                 {{- toYaml $mongos_res | nindent 16 }}
-          {{- if eq .Values.spec.admin.deployment.default "Dedicated" }}
-          nodeSelector:
-            nodes.klusters.dev/pool: {{ $poolName }}
-          tolerations:
-            - key: dedicated
-              operator: "Equal"
-              value: "true"
-              effect: "NoSchedule"
-          {{- end }}
+          {{- include "common.placement" . | nindent 10 }}
     shard:
       shards: {{ .Values.spec.shardTopology.shard.shards }}
       replicas: {{ .Values.spec.shardTopology.shard.replicas }}
@@ -120,15 +132,7 @@ spec:
             - name: mongodb
               resources:
                 {{- toYaml $shard_res | nindent 16 }}
-          {{- if eq .Values.spec.admin.deployment.default "Dedicated" }}
-          nodeSelector:
-            nodes.klusters.dev/pool: {{ $poolName }}
-          tolerations:
-            - key: dedicated
-              operator: "Equal"
-              value: "true"
-              effect: "NoSchedule"
-          {{- end }}
+          {{- include "common.placement" . | nindent 10 }}
       storage:
         resources:
           requests:
@@ -141,32 +145,7 @@ spec:
         - name: mongodb
           resources:
             {{- toYaml $res | nindent 12 }}
-      podPlacementPolicy:
-        name: {{ .Values.spec.admin.clusterTier.placement.default }}
-      {{- if eq .Values.spec.admin.deployment.default "Dedicated" }}
-      nodeSelector:
-        app: mongodbs.kubedb.com
-        instance: {{ include "kubedbcom-mongodb-editor-options.fullname" . }}
-        namespace: {{ .Release.Namespace }}
-        nodepool: {{ .Values.spec.admin.clusterTier.nodeTopology.default }}
-      tolerations:
-        - key: app
-          operator: "Equal"
-          value: "mongodbs.kubedb.com"
-          effect: "NoSchedule"
-        - key: instance
-          operator: "Equal"
-          value: {{ include "kubedbcom-mongodb-editor-options.fullname" . }}
-          effect: "NoSchedule"
-        - key: namespace
-          operator: "Equal"
-          value: {{ .Release.Namespace }}
-          effect: "NoSchedule"
-        - key: nodepool
-          operator: "Equal"
-          value: {{ .Values.spec.admin.clusterTier.nodeTopology.default }}
-          effect: "NoSchedule"
-      {{- end }}
+      {{- include "common.placement" . | nindent 6 }}
 {{- end }}
 {{- if .Values.spec.arbiter.enabled }}
   arbiter:
@@ -176,15 +155,7 @@ spec:
           - name: mongodb
             resources:
               {{- toYaml $arbiter_res | nindent 14 }}
-        {{- if eq .Values.spec.admin.deployment.default "Dedicated" }}
-        nodeSelector:
-          nodes.klusters.dev/pool: {{ $poolName }}
-        tolerations:
-          - key: dedicated
-            operator: "Equal"
-            value: "true"
-            effect: "NoSchedule"
-        {{- end }}
+        {{- include "common.placement" . | nindent 8 }}
 {{- end }}
 {{- if .Values.spec.hidden.enabled }}
   hidden:
@@ -195,15 +166,7 @@ spec:
           - name: mongodb
             resources:
               {{- toYaml $hidden_res | nindent 14 }}
-        {{- if eq .Values.spec.admin.deployment.default "Dedicated" }}
-        nodeSelector:
-          nodes.klusters.dev/pool: {{ $poolName }}
-        tolerations:
-          - key: dedicated
-            operator: "Equal"
-            value: "true"
-            effect: "NoSchedule"
-        {{- end }}
+        {{- include "common.placement" . | nindent 8 }}
     storage:
       resources:
         requests:
