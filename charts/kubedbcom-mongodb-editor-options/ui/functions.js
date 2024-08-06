@@ -414,6 +414,10 @@ function setLimitsCpuOrMem({ model, getValue, watchDependency }) {
         cpu: '1',
         memory: '1024Mi',
       },
+      requests: {
+        cpu: '1',
+        memory: '1024Mi',
+      },
     }
   }
 }
