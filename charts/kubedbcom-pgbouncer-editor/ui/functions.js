@@ -1519,7 +1519,9 @@ function getOpsRequestUrl({ storeGet, model, getValue, mode }, reqType) {
   const resource = getValue(model, '/metadata/resource/name')
   const version = getValue(model, '/metadata/resource/version')
   const routeRootPath = storeGet('/route/path')
-  const pathPrefix = `${domain}${routeRootPath}${routeRootPath.split('/').pop() !== 'operations' ? '/operations' : ''}`
+  const pathPrefix = `${domain}${routeRootPath}${
+    routeRootPath.split('/').pop() !== 'operations' ? '/operations' : ''
+  }`
 
   if (mode === 'standalone-step')
     return `${pathPrefix}?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=${reqType}&showOpsRequestModal=true`
@@ -1562,6 +1564,58 @@ const getAppbinding = async ({ axios, storeGet, getValue, watchDependency, rootM
 function isVariantAvailable({ storeGet }) {
   const variant = storeGet('/route/query/variant')
   return variant ? true : false
+}
+
+function onRefChange({ discriminator, getValue, commit }) {
+  const ref = getValue(discriminator, '/pgRef') || {}
+  commit('wizard/model$update', {
+    path: '/resources/kubedbComPgBouncer/spec/database/databaseRef/name',
+    value: ref.name || '',
+    force: true,
+  })
+  commit('wizard/model$update', {
+    path: '/resources/kubedbComPgBouncer/spec/database/databaseRef/namespace',
+    value: ref.namespace || '',
+    force: true,
+  })
+}
+
+async function getAppBindings({ axios, storeGet }, type) {
+  const owner = storeGet('/route/params/user')
+  const cluster = storeGet('/route/params/cluster')
+  const queryParams = {
+    filter: {
+      items: {
+        metadata: { name: null, namespace: null },
+        spec: { type: null },
+      },
+    },
+  }
+  try {
+    const resp = await axios.get(
+      `/clusters/${owner}/${cluster}/proxy/appcatalog.appscode.com/v1alpha1/appbindings`,
+      queryParams,
+    )
+    const resources = (resp && resp.data && resp.data.items) || []
+
+    const fileredResources = resources
+      .filter((item) => item.spec?.type === `kubedb.com/${type}`)
+      .map((item) => {
+        const name = item.metadata?.name || ''
+        const namespace = item.metadata?.namespace || ''
+        return {
+          text: `${namespace}/${name}`,
+          value: {
+            name: name,
+            namespace: namespace,
+          },
+        }
+      })
+    return fileredResources
+  } catch (e) {
+    console.log(e)
+    return []
+  }
 }
 
 return {
@@ -1664,4 +1718,6 @@ return {
   setConfigurationFiles,
   onSetCustomConfigChange,
   getOpsRequestUrl,
+  onRefChange,
+  getAppBindings,
 }
