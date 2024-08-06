@@ -506,6 +506,10 @@ function setLimitsCpuOrMem({ model, getValue }, type) {
         cpu: '1',
         memory: '1024Mi',
       },
+      requests: {
+        cpu: '1',
+        memory: '1024Mi',
+      },
     }
   }
 }
