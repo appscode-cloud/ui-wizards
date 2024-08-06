@@ -123,6 +123,7 @@ steps:
     - hasDescription: true
       label:
         text: labels.database.mode
+      onChange: toggleTls
       options:
       - description: options.database.mode.Standalone.description
         text: options.database.mode.Standalone.label
@@ -132,7 +133,6 @@ steps:
         value: Topology
       schema:
         $ref: schema#/properties/spec/properties/mode
-      onChange: toggleTls
       type: radio
     - if: isEqualToModelPathValue|Standalone|/spec/mode
       label:
@@ -293,8 +293,8 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/configuration
       type: editor
-    - if: isEqualToModelPathValue|Topology|/spec/mode
-      computed: toggleTls
+    - computed: toggleTls
+      if: isEqualToModelPathValue|Topology|/spec/mode
       label:
         text: Enable TLS?
       schema:
