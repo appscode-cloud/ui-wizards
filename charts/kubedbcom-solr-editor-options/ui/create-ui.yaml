@@ -131,6 +131,7 @@ steps:
         value: Topology
       schema:
         $ref: schema#/properties/spec/properties/mode
+      onChange: setResourceLimitOnModeChange
       type: radio
     - elements:
       - label:
@@ -162,7 +163,7 @@ steps:
           fetch: getMachineListForOptions
           label:
             text: Machine
-          onChange: setResourceLimit|topology/overseer
+          onChange: setResourceLimitTopology|overseer
           schema:
             $ref: schema#/properties/spec/properties/topology/properties/overseer/properties/podResources/properties/machine
           type: select
@@ -195,7 +196,7 @@ steps:
           fetch: getMachineListForOptions
           label:
             text: Machine
-          onChange: setResourceLimit|topology/data
+          onChange: setResourceLimitTopology|data
           schema:
             $ref: schema#/properties/spec/properties/topology/properties/data/properties/podResources/properties/machine
           type: select
@@ -228,7 +229,7 @@ steps:
           fetch: getMachineListForOptions
           label:
             text: Machine
-          onChange: setResourceLimit|topology/coordinator
+          onChange: setResourceLimitTopology|coordinator
           schema:
             $ref: schema#/properties/spec/properties/topology/properties/coordinator/properties/podResources/properties/machine
           type: select
@@ -292,13 +293,6 @@ steps:
         $ref: schema#/properties/spec/properties/admin/properties/storageClasses/properties/default
       type: select
     - elements:
-      - computed: setNamespace
-        disabled: true
-        label:
-          text: labels.zookeeperRef.namespace
-        schema:
-          $ref: schema#/properties/spec/properties/zookeeperRef/properties/namespace
-        type: select
       - fetch: getAppBindings
         label:
           text: labels.zookeeperRef.name
