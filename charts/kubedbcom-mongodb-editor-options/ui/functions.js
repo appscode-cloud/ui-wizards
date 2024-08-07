@@ -400,6 +400,11 @@ function setResourceLimit({ commit, model, getValue, watchDependency }) {
       })
     }
   }
+  setResource({ commit, model, getValue, watchDependency }, 'shardTopology/shard')
+  setResource({ commit, model, getValue, watchDependency }, 'shardTopology/configServer')
+  setResource({ commit, model, getValue, watchDependency }, 'shardTopology/mongos')
+  setResource({ commit, model, getValue, watchDependency }, 'arbiter')
+  setResource({ commit, model, getValue, watchDependency }, 'hidden')
 }
 
 function setLimitsCpuOrMem({ model, getValue, watchDependency }) {
@@ -621,13 +626,29 @@ function notEqualToDatabaseMode({ model, getValue, watchDependency }, mode) {
 }
 
 function setResource({ commit, model, getValue }, type) {
-  const selectedMachine = getValue(model, `/spec/${type}/podResources/machine`) || ''
-  if (selectedMachine && selectedMachine !== 'custom') {
-    commit('wizard/model$update', {
-      path: `/spec/${type}/podResources/resources`,
-      value: machines[selectedMachine]?.resources,
-      force: true,
-    })
+  let selectedMachine = getValue(model, `/spec/${type}/podResources/machine`) || ''
+  const deploymentType = getValue(model, '/spec/admin/deployment/default')
+
+  if (selectedMachine) {
+    if (selectedMachine === 'custom') selectedMachine = 'db.t.micro'
+    if (deploymentType === 'Dedicated') {
+      commit('wizard/model$update', {
+        path: `/spec/${type}/podResources/resources/limits`,
+        value: machines[selectedMachine]?.resources.limits,
+        force: true,
+      })
+      commit('wizard/model$update', {
+        path: `/spec/${type}/podResources/resources/requests`,
+        value: machines[selectedMachine]?.resources.limits,
+        force: true,
+      })
+    } else {
+      commit('wizard/model$update', {
+        path: `/spec/${type}/podResources/resources`,
+        value: machines[selectedMachine]?.resources,
+        force: true,
+      })
+    }
   }
 }
 
@@ -639,6 +660,10 @@ function setCpuOrMem({ model, getValue, watchDependency }, type) {
   } else {
     return {
       limits: {
+        cpu: '1',
+        memory: '1024Mi',
+      },
+      requests: {
         cpu: '1',
         memory: '1024Mi',
       },
@@ -660,7 +685,8 @@ function showHidden({ watchDependency, model, getValue }) {
   return isHiddenOn && notStandalone
 }
 
-function clearArbiterHidden({ commit }) {
+function clearArbiterHidden({ commit, model, getValue }) {
+  window.console.log('clear')
   commit('wizard/model$update', {
     path: `/spec/arbiter/enabled`,
     value: false,
