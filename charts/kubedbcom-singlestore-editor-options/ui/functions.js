@@ -982,6 +982,12 @@ function updateAlertValue({ commit, model, discriminator, getValue }) {
   })
 }
 
+function onDeploymentChange({ commit, model, getValue, watchDependency }) {
+  setResourceLimit({ commit, model, getValue, watchDependency })
+  setResourceLimitTopology({ commit, model, getValue, watchDependency }, 'aggregator')
+  setResourceLimitTopology({ commit, model, getValue, watchDependency }, 'leaf')
+}
+
 function setResourceLimit({ commit, model, getValue, watchDependency }) {
   let modelPathValue = getValue(model, '/spec/podResources/machine')
   const deploymentType = getValue(model, '/spec/admin/deployment/default')
@@ -1008,6 +1014,33 @@ function setResourceLimit({ commit, model, getValue, watchDependency }) {
     }
   }
 }
+function setResourceLimitTopology({ commit, model, getValue, watchDependency }, topology) {
+  let modelPathValue = getValue(model, `/spec/topology/${topology}/podResources/machine`)
+  const deploymentType = getValue(model, '/spec/admin/deployment/default')
+
+  if (modelPathValue) {
+    if (modelPathValue === 'custom') modelPathValue = 'db.t.micro'
+    // to avoiding set value by reference, cpu and memory set separately
+    if (deploymentType === 'Dedicated') {
+      commit('wizard/model$update', {
+        path: `/spec/topology/${topology}/podResources/resources/requests`,
+        value: machines[modelPathValue]?.resources.limits,
+        force: true,
+      })
+      commit('wizard/model$update', {
+        path: `/spec/topology/${topology}/podResources/resources/limits`,
+        value: machines[modelPathValue]?.resources.limits,
+        force: true,
+      })
+    } else {
+      commit('wizard/model$update', {
+        path: `/spec/topology/${topology}/podResources/resources`,
+        value: machines[modelPathValue]?.resources,
+        force: true,
+      })
+    }
+  }
+}
 
 function toggleTls({ commit, model, getValue, watchDependency }) {
   let modelPathValue = getValue(model, '/spec/mode')
@@ -1024,6 +1057,8 @@ function toggleTls({ commit, model, getValue, watchDependency }) {
 }
 
 return {
+  onDeploymentChange,
+  setResourceLimitTopology,
   toggleTls,
   getNamespaces,
   updateAlertValue,
