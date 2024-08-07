@@ -994,7 +994,8 @@ async function isBackupCluster({ axios, storeGet, commit }) {
   return isStashEnabled
 }
 
-async function getAppBindings({ axios, storeGet }) {
+async function getAppBindings({ commit, axios, storeGet, model, getValue }) {
+  const namespace = getValue(model, '/metadata/release/namespace')
   const owner = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
 
@@ -1006,7 +1007,7 @@ async function getAppBindings({ axios, storeGet }) {
       },
     },
   }
-
+  setNamespace({ commit, model, getValue })
   try {
     const resp = await axios.get(
       `/clusters/${owner}/${cluster}/proxy/appcatalog.appscode.com/v1alpha1/appbindings`,
@@ -1022,7 +1023,7 @@ async function getAppBindings({ axios, storeGet }) {
       .map((item) => {
         const name = (item.metadata && item.metadata.name) || ''
         return {
-          text: name,
+          text: `${namespace}/${name}`,
           value: name,
         }
       })

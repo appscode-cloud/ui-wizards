@@ -685,8 +685,7 @@ function showHidden({ watchDependency, model, getValue }) {
   return isHiddenOn && notStandalone
 }
 
-function clearArbiterHidden({ commit, model, getValue }) {
-  window.console.log('clear')
+function clearArbiterHidden({ commit }) {
   commit('wizard/model$update', {
     path: `/spec/arbiter/enabled`,
     value: false,
