@@ -24,12 +24,7 @@ spec:
   authSecret:
     name: {{ .Values.spec.authSecret.name }}
 {{- end }}
-{{- if ge $pgv 11 }}
-  clientAuthMode: scram
-{{- else }}
-  clientAuthMode: md5
-{{- end }}
-{{- if eq .Values.spec.mode "Cluster" }}
+{{- if eq .Values.spec.mode "Replicaset" }}
   replicas: 3
   standbyMode: Hot
   leaderElection:
