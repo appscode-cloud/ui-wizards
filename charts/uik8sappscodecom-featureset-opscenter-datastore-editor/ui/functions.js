@@ -367,13 +367,28 @@ function checkIsResourceLoaded({ commit, storeGet, watchDependency, getValue, di
   }
 }
 
-function isKubedbSelected({ getValue, discriminator, watchDependency, commit }) {
+function isKubedbSelected({ getValue, discriminator, watchDependency, commit, storeGet }) {
   watchDependency('discriminator#/enabledFeatures')
   const enabledFeatures = getValue(discriminator, '/enabledFeatures') || []
-  const target = 'kubedb'
-  const isSelected = enabledFeatures?.includes(target)
-  if (!isSelected) commit('wizard/model$delete', 'resources/helmToolkitFluxcdIoHelmRelease_kubedb')
-  return isSelected
+  const isSelected = enabledFeatures?.includes('kubedb')
+
+  // if not selected return false and remove data
+  if (!isSelected) {
+    commit('wizard/model$delete', 'resources/helmToolkitFluxcdIoHelmRelease_kubedb')
+    return false
+  }
+  const allFeatures = storeGet('/cluster/features/result') || []
+  const kubedbFeature = allFeatures.find((item) => item?.metadata?.name === 'kubedb')
+  if (kubedbFeature) {
+    const featureName = kubedbFeature?.metadata?.name || ''
+    const isEnabled = getFeaturePropertyValue(storeGet, featureName, getValue, '/status/enabled')
+    const isManaged = getFeaturePropertyValue(storeGet, featureName, getValue, '/status/managed')
+    if (isEnabled && !isManaged) {
+      commit('wizard/model$delete', 'resources/helmToolkitFluxcdIoHelmRelease_kubedb')
+      return false
+    }
+  }
+  return true
 }
 
 let allAvailableTypes = [
@@ -397,7 +412,15 @@ let allAvailableTypes = [
   'Solr',
   'ZooKeeper',
 ]
-async function getDatabaseTypes({ setDiscriminatorValue, commit, storeGet, axios }) {
+async function getDatabaseTypes({
+  setDiscriminatorValue,
+  discriminator,
+  watchDependency,
+  commit,
+  storeGet,
+  getValue,
+  axios,
+}) {
   let enabledTypes = ['Elasticsearch', 'Kafka', 'MariaDB', 'MongoDB', 'MySQL', 'Postgres', 'Redis']
   const owner = storeGet('/route/params/user') || ''
   const cluster = storeGet('/route/params/cluster') || ''
@@ -416,7 +439,9 @@ async function getDatabaseTypes({ setDiscriminatorValue, commit, storeGet, axios
     console.log(e)
   }
   setDiscriminatorValue('/enabledTypes', enabledTypes)
-  typeConvert(commit, enabledTypes)
+  if (isKubedbSelected({ getValue, discriminator, watchDependency, commit, storeGet })) {
+    typeConvert(commit, enabledTypes)
+  }
   return allAvailableTypes
 }
 
