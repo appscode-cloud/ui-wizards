@@ -1,22 +1,7 @@
+---
 steps:
 - form:
-    discriminator:
-      clusterChartPresetOptions:
-        default: '[]'
-        type: array
     elements:
-    - label:
-        text: ClusterChartPreset Options
-      options:
-      - text: kubeDB
-        value: kubeDB
-      - text: monitoring
-        value: monitoring
-      - text: stash
-        value: stash
-      schema:
-        $ref: discriminator#/clusterChartPresetOptions
-      type: checkbox
     - discriminator:
         configureClickHouse:
           default: false
@@ -79,53 +64,80 @@ steps:
           default: false
           type: boolean
       elements:
-      - hasDescription: true
-        if: isToggleOn|deployment
+      - elements:
+        - label:
+            text: labels.deployment.toggle
+          schema:
+            "$ref": schema#/properties/spec/properties/kubeDB/properties/deployment/properties/toggle
+          type: switch
+        - hasDescription: true
+          options:
+          - description: labels.deployment.shared
+            text: Shared
+            value: Shared
+          - description: labels.deployment.dedicated
+            text: Dedicated
+            value: Dedicated
+          schema:
+            "$ref": schema#/properties/spec/properties/kubeDB/properties/deployment/properties/default
+          type: radio
         label:
           text: labels.deployment.name
-        options:
-        - description: labels.deployment.shared
-          text: Shared
-          value: Shared
-        - description: labels.deployment.dedicated
-          text: Dedicated
-          value: Dedicated
-        schema:
-          $ref: schema#/properties/spec/properties/kubeDB/properties/deployment/properties/default
-        type: radio
-      - if: isToggleOn|clusterTier
+        show_label: true
+        type: single-step-form
+      - elements:
+        - label:
+            text: labels.clusterTier.toggle
+          schema:
+            "$ref": schema#/properties/spec/properties/kubeDB/properties/clusterTier/properties/toggle
+          type: switch
+        - options:
+          - text: General Purpose
+            value: GeneralPurpose
+          - text: Memory Optimized
+            value: MemoryOptimized
+          - text: CPU Optimized
+            value: CPUOptimized
+          schema:
+            "$ref": schema#/properties/spec/properties/kubeDB/properties/clusterTier/properties/default
+          type: radio
+        - fetch: getNodeTopology
+          label:
+            text: labels.clusterTier.availableNodeTopology
+          schema:
+            "$ref": schema#/properties/spec/properties/kubeDB/properties/databases/properties/ClickHouse/properties/versions/properties/available
+          type: multiselect
+        - disableUnselect: true
+          fetch: getOptions|clusterTier/placement
+          label:
+            text: labels.placement
+          schema:
+            "$ref": schema#/properties/spec/properties/kubeDB/properties/clusterTier/properties/placement/properties/default
+          type: select
+        - fetch: getNodeTopology
+          label:
+            text: labels.clusterTier.availableNodeTopology
+          schema:
+            "$ref": schema#/properties/spec/properties/kubeDB/properties/databases/properties/ClickHouse/properties/versions/properties/available
+          type: multiselect
+        - disableUnselect: true
+          fetch: getOptions|clusterTier/nodeTopology
+          label:
+            text: labels.clusterTier.default
+          schema:
+            "$ref": schema#/properties/spec/properties/kubeDB/properties/clusterTier/properties/nodeTopology/properties/default
+          type: select
         label:
-          text: labels.clusterTier
-        options:
-        - text: General Purpose
-          value: GeneralPurpose
-        - text: Memory Optimized
-          value: MemoryOptimized
-        - text: CPU Optimized
-          value: CPUOptimized
-        schema:
-          $ref: schema#/properties/spec/properties/kubeDB/properties/clusterTier/properties/default
-        type: radio
-      - disableUnselect: true
-        fetch: getOptions|clusterTier/placement
-        if: isToggleOn|clusterTier/placement
-        label:
-          text: labels.placement
-        schema:
-          $ref: schema#/properties/spec/properties/kubeDB/properties/clusterTier/properties/placement/properties/default
-        type: select
-      - disableUnselect: true
-        fetch: getNodeTopology
-        if: isToggleOn|clusterTier/nodeTopology
-        label:
-          text: labels.nodeTopology
-        schema:
-          $ref: schema#/properties/spec/properties/kubeDB/properties/clusterTier/properties/nodeTopology/properties/default
-        type: select
+          text: labels.clusterTier.name
+        show_label: true
+        type: single-step-form
+      - label:
+          text: Configure Databases
+        type: label-element
       - label:
           text: labels.databases.ClickHouse.configure
         schema:
-          $ref: discriminator#/configureClickHouse
+          "$ref": discriminator#/configureClickHouse
         type: switch
       - fetch: FetchDbVersions|clickhouse
         if: isConfigureDb|configureClickHouse
@@ -133,22 +145,421 @@ steps:
           text: labels.databases.versions
         onChange: clearDefaultVersion|ClickHouse
         schema:
-          $ref: schema#/properties/spec/properties/kubeDB/properties/databases/properties/ClickHouse/properties/versions/properties/available
+          "$ref": schema#/properties/spec/properties/kubeDB/properties/databases/properties/ClickHouse/properties/versions/properties/available
         type: multiselect
       - fetch: availableVersions|ClickHouse
         if: isConfigureDb|configureClickHouse
         label:
           text: labels.databases.default
         schema:
-          $ref: schema#/properties/spec/properties/kubeDB/properties/databases/properties/ClickHouse/properties/versions/properties/default
+          "$ref": schema#/properties/spec/properties/kubeDB/properties/databases/properties/ClickHouse/properties/versions/properties/default
         type: select
-      if: isChecked|kubeDB
+      - label:
+          text: labels.databases.ClickHouse.configure
+        schema:
+          "$ref": discriminator#/configureClickHouse
+        type: switch
+      - fetch: FetchDbVersions|clickhouse
+        if: isConfigureDb|configureClickHouse
+        label:
+          text: labels.databases.versions
+        onChange: clearDefaultVersion|ClickHouse
+        schema:
+          "$ref": schema#/properties/spec/properties/kubeDB/properties/databases/properties/ClickHouse/properties/versions/properties/available
+        type: multiselect
+      - fetch: availableVersions|ClickHouse
+        if: isConfigureDb|configureClickHouse
+        label:
+          text: labels.databases.default
+        schema:
+          "$ref": schema#/properties/spec/properties/kubeDB/properties/databases/properties/ClickHouse/properties/versions/properties/default
+        type: select
+      - label:
+          text: labels.databases.ClickHouse.configure
+        schema:
+          "$ref": discriminator#/configureClickHouse
+        type: switch
+      - fetch: FetchDbVersions|clickhouse
+        if: isConfigureDb|configureClickHouse
+        label:
+          text: labels.databases.versions
+        onChange: clearDefaultVersion|ClickHouse
+        schema:
+          "$ref": schema#/properties/spec/properties/kubeDB/properties/databases/properties/ClickHouse/properties/versions/properties/available
+        type: multiselect
+      - fetch: availableVersions|ClickHouse
+        if: isConfigureDb|configureClickHouse
+        label:
+          text: labels.databases.default
+        schema:
+          "$ref": schema#/properties/spec/properties/kubeDB/properties/databases/properties/ClickHouse/properties/versions/properties/default
+        type: select
+      - label:
+          text: labels.databases.ClickHouse.configure
+        schema:
+          "$ref": discriminator#/configureClickHouse
+        type: switch
+      - fetch: FetchDbVersions|clickhouse
+        if: isConfigureDb|configureClickHouse
+        label:
+          text: labels.databases.versions
+        onChange: clearDefaultVersion|ClickHouse
+        schema:
+          "$ref": schema#/properties/spec/properties/kubeDB/properties/databases/properties/ClickHouse/properties/versions/properties/available
+        type: multiselect
+      - fetch: availableVersions|ClickHouse
+        if: isConfigureDb|configureClickHouse
+        label:
+          text: labels.databases.default
+        schema:
+          "$ref": schema#/properties/spec/properties/kubeDB/properties/databases/properties/ClickHouse/properties/versions/properties/default
+        type: select
+      - label:
+          text: labels.databases.ClickHouse.configure
+        schema:
+          "$ref": discriminator#/configureClickHouse
+        type: switch
+      - fetch: FetchDbVersions|clickhouse
+        if: isConfigureDb|configureClickHouse
+        label:
+          text: labels.databases.versions
+        onChange: clearDefaultVersion|ClickHouse
+        schema:
+          "$ref": schema#/properties/spec/properties/kubeDB/properties/databases/properties/ClickHouse/properties/versions/properties/available
+        type: multiselect
+      - fetch: availableVersions|ClickHouse
+        if: isConfigureDb|configureClickHouse
+        label:
+          text: labels.databases.default
+        schema:
+          "$ref": schema#/properties/spec/properties/kubeDB/properties/databases/properties/ClickHouse/properties/versions/properties/default
+        type: select
+      - label:
+          text: labels.databases.ClickHouse.configure
+        schema:
+          "$ref": discriminator#/configureClickHouse
+        type: switch
+      - fetch: FetchDbVersions|clickhouse
+        if: isConfigureDb|configureClickHouse
+        label:
+          text: labels.databases.versions
+        onChange: clearDefaultVersion|ClickHouse
+        schema:
+          "$ref": schema#/properties/spec/properties/kubeDB/properties/databases/properties/ClickHouse/properties/versions/properties/available
+        type: multiselect
+      - fetch: availableVersions|ClickHouse
+        if: isConfigureDb|configureClickHouse
+        label:
+          text: labels.databases.default
+        schema:
+          "$ref": schema#/properties/spec/properties/kubeDB/properties/databases/properties/ClickHouse/properties/versions/properties/default
+        type: select
+      - label:
+          text: labels.databases.ClickHouse.configure
+        schema:
+          "$ref": discriminator#/configureClickHouse
+        type: switch
+      - fetch: FetchDbVersions|clickhouse
+        if: isConfigureDb|configureClickHouse
+        label:
+          text: labels.databases.versions
+        onChange: clearDefaultVersion|ClickHouse
+        schema:
+          "$ref": schema#/properties/spec/properties/kubeDB/properties/databases/properties/ClickHouse/properties/versions/properties/available
+        type: multiselect
+      - fetch: availableVersions|ClickHouse
+        if: isConfigureDb|configureClickHouse
+        label:
+          text: labels.databases.default
+        schema:
+          "$ref": schema#/properties/spec/properties/kubeDB/properties/databases/properties/ClickHouse/properties/versions/properties/default
+        type: select
+      - label:
+          text: labels.databases.ClickHouse.configure
+        schema:
+          "$ref": discriminator#/configureClickHouse
+        type: switch
+      - fetch: FetchDbVersions|clickhouse
+        if: isConfigureDb|configureClickHouse
+        label:
+          text: labels.databases.versions
+        onChange: clearDefaultVersion|ClickHouse
+        schema:
+          "$ref": schema#/properties/spec/properties/kubeDB/properties/databases/properties/ClickHouse/properties/versions/properties/available
+        type: multiselect
+      - fetch: availableVersions|ClickHouse
+        if: isConfigureDb|configureClickHouse
+        label:
+          text: labels.databases.default
+        schema:
+          "$ref": schema#/properties/spec/properties/kubeDB/properties/databases/properties/ClickHouse/properties/versions/properties/default
+        type: select
+      - label:
+          text: labels.databases.ClickHouse.configure
+        schema:
+          "$ref": discriminator#/configureClickHouse
+        type: switch
+      - fetch: FetchDbVersions|clickhouse
+        if: isConfigureDb|configureClickHouse
+        label:
+          text: labels.databases.versions
+        onChange: clearDefaultVersion|ClickHouse
+        schema:
+          "$ref": schema#/properties/spec/properties/kubeDB/properties/databases/properties/ClickHouse/properties/versions/properties/available
+        type: multiselect
+      - fetch: availableVersions|ClickHouse
+        if: isConfigureDb|configureClickHouse
+        label:
+          text: labels.databases.default
+        schema:
+          "$ref": schema#/properties/spec/properties/kubeDB/properties/databases/properties/ClickHouse/properties/versions/properties/default
+        type: select
+      - label:
+          text: labels.databases.ClickHouse.configure
+        schema:
+          "$ref": discriminator#/configureClickHouse
+        type: switch
+      - fetch: FetchDbVersions|clickhouse
+        if: isConfigureDb|configureClickHouse
+        label:
+          text: labels.databases.versions
+        onChange: clearDefaultVersion|ClickHouse
+        schema:
+          "$ref": schema#/properties/spec/properties/kubeDB/properties/databases/properties/ClickHouse/properties/versions/properties/available
+        type: multiselect
+      - fetch: availableVersions|ClickHouse
+        if: isConfigureDb|configureClickHouse
+        label:
+          text: labels.databases.default
+        schema:
+          "$ref": schema#/properties/spec/properties/kubeDB/properties/databases/properties/ClickHouse/properties/versions/properties/default
+        type: select
+      - label:
+          text: labels.databases.ClickHouse.configure
+        schema:
+          "$ref": discriminator#/configureClickHouse
+        type: switch
+      - fetch: FetchDbVersions|clickhouse
+        if: isConfigureDb|configureClickHouse
+        label:
+          text: labels.databases.versions
+        onChange: clearDefaultVersion|ClickHouse
+        schema:
+          "$ref": schema#/properties/spec/properties/kubeDB/properties/databases/properties/ClickHouse/properties/versions/properties/available
+        type: multiselect
+      - fetch: availableVersions|ClickHouse
+        if: isConfigureDb|configureClickHouse
+        label:
+          text: labels.databases.default
+        schema:
+          "$ref": schema#/properties/spec/properties/kubeDB/properties/databases/properties/ClickHouse/properties/versions/properties/default
+        type: select
+      - label:
+          text: labels.databases.ClickHouse.configure
+        schema:
+          "$ref": discriminator#/configureClickHouse
+        type: switch
+      - fetch: FetchDbVersions|clickhouse
+        if: isConfigureDb|configureClickHouse
+        label:
+          text: labels.databases.versions
+        onChange: clearDefaultVersion|ClickHouse
+        schema:
+          "$ref": schema#/properties/spec/properties/kubeDB/properties/databases/properties/ClickHouse/properties/versions/properties/available
+        type: multiselect
+      - fetch: availableVersions|ClickHouse
+        if: isConfigureDb|configureClickHouse
+        label:
+          text: labels.databases.default
+        schema:
+          "$ref": schema#/properties/spec/properties/kubeDB/properties/databases/properties/ClickHouse/properties/versions/properties/default
+        type: select
+      - label:
+          text: labels.databases.ClickHouse.configure
+        schema:
+          "$ref": discriminator#/configureClickHouse
+        type: switch
+      - fetch: FetchDbVersions|clickhouse
+        if: isConfigureDb|configureClickHouse
+        label:
+          text: labels.databases.versions
+        onChange: clearDefaultVersion|ClickHouse
+        schema:
+          "$ref": schema#/properties/spec/properties/kubeDB/properties/databases/properties/ClickHouse/properties/versions/properties/available
+        type: multiselect
+      - fetch: availableVersions|ClickHouse
+        if: isConfigureDb|configureClickHouse
+        label:
+          text: labels.databases.default
+        schema:
+          "$ref": schema#/properties/spec/properties/kubeDB/properties/databases/properties/ClickHouse/properties/versions/properties/default
+        type: select
+      - label:
+          text: labels.databases.ClickHouse.configure
+        schema:
+          "$ref": discriminator#/configureClickHouse
+        type: switch
+      - fetch: FetchDbVersions|clickhouse
+        if: isConfigureDb|configureClickHouse
+        label:
+          text: labels.databases.versions
+        onChange: clearDefaultVersion|ClickHouse
+        schema:
+          "$ref": schema#/properties/spec/properties/kubeDB/properties/databases/properties/ClickHouse/properties/versions/properties/available
+        type: multiselect
+      - fetch: availableVersions|ClickHouse
+        if: isConfigureDb|configureClickHouse
+        label:
+          text: labels.databases.default
+        schema:
+          "$ref": schema#/properties/spec/properties/kubeDB/properties/databases/properties/ClickHouse/properties/versions/properties/default
+        type: select
+      - label:
+          text: labels.databases.ClickHouse.configure
+        schema:
+          "$ref": discriminator#/configureClickHouse
+        type: switch
+      - fetch: FetchDbVersions|clickhouse
+        if: isConfigureDb|configureClickHouse
+        label:
+          text: labels.databases.versions
+        onChange: clearDefaultVersion|ClickHouse
+        schema:
+          "$ref": schema#/properties/spec/properties/kubeDB/properties/databases/properties/ClickHouse/properties/versions/properties/available
+        type: multiselect
+      - fetch: availableVersions|ClickHouse
+        if: isConfigureDb|configureClickHouse
+        label:
+          text: labels.databases.default
+        schema:
+          "$ref": schema#/properties/spec/properties/kubeDB/properties/databases/properties/ClickHouse/properties/versions/properties/default
+        type: select
+      - label:
+          text: labels.databases.ClickHouse.configure
+        schema:
+          "$ref": discriminator#/configureClickHouse
+        type: switch
+      - fetch: FetchDbVersions|clickhouse
+        if: isConfigureDb|configureClickHouse
+        label:
+          text: labels.databases.versions
+        onChange: clearDefaultVersion|ClickHouse
+        schema:
+          "$ref": schema#/properties/spec/properties/kubeDB/properties/databases/properties/ClickHouse/properties/versions/properties/available
+        type: multiselect
+      - fetch: availableVersions|ClickHouse
+        if: isConfigureDb|configureClickHouse
+        label:
+          text: labels.databases.default
+        schema:
+          "$ref": schema#/properties/spec/properties/kubeDB/properties/databases/properties/ClickHouse/properties/versions/properties/default
+        type: select
+      - label:
+          text: labels.databases.ClickHouse.configure
+        schema:
+          "$ref": discriminator#/configureClickHouse
+        type: switch
+      - fetch: FetchDbVersions|clickhouse
+        if: isConfigureDb|configureClickHouse
+        label:
+          text: labels.databases.versions
+        onChange: clearDefaultVersion|ClickHouse
+        schema:
+          "$ref": schema#/properties/spec/properties/kubeDB/properties/databases/properties/ClickHouse/properties/versions/properties/available
+        type: multiselect
+      - fetch: availableVersions|ClickHouse
+        if: isConfigureDb|configureClickHouse
+        label:
+          text: labels.databases.default
+        schema:
+          "$ref": schema#/properties/spec/properties/kubeDB/properties/databases/properties/ClickHouse/properties/versions/properties/default
+        type: select
+      - label:
+          text: labels.databases.ClickHouse.configure
+        schema:
+          "$ref": discriminator#/configureClickHouse
+        type: switch
+      - fetch: FetchDbVersions|clickhouse
+        if: isConfigureDb|configureClickHouse
+        label:
+          text: labels.databases.versions
+        onChange: clearDefaultVersion|ClickHouse
+        schema:
+          "$ref": schema#/properties/spec/properties/kubeDB/properties/databases/properties/ClickHouse/properties/versions/properties/available
+        type: multiselect
+      - fetch: availableVersions|ClickHouse
+        if: isConfigureDb|configureClickHouse
+        label:
+          text: labels.databases.default
+        schema:
+          "$ref": schema#/properties/spec/properties/kubeDB/properties/databases/properties/ClickHouse/properties/versions/properties/default
+        type: select
+      - label:
+          text: labels.databases.ClickHouse.configure
+        schema:
+          "$ref": discriminator#/configureClickHouse
+        type: switch
+      - fetch: FetchDbVersions|clickhouse
+        if: isConfigureDb|configureClickHouse
+        label:
+          text: labels.databases.versions
+        onChange: clearDefaultVersion|ClickHouse
+        schema:
+          "$ref": schema#/properties/spec/properties/kubeDB/properties/databases/properties/ClickHouse/properties/versions/properties/available
+        type: multiselect
+      - fetch: availableVersions|ClickHouse
+        if: isConfigureDb|configureClickHouse
+        label:
+          text: labels.databases.default
+        schema:
+          "$ref": schema#/properties/spec/properties/kubeDB/properties/databases/properties/ClickHouse/properties/versions/properties/default
+        type: select
+      - label:
+          text: labels.databases.ClickHouse.configure
+        schema:
+          "$ref": discriminator#/configureClickHouse
+        type: switch
+      - fetch: FetchDbVersions|clickhouse
+        if: isConfigureDb|configureClickHouse
+        label:
+          text: labels.databases.versions
+        onChange: clearDefaultVersion|ClickHouse
+        schema:
+          "$ref": schema#/properties/spec/properties/kubeDB/properties/databases/properties/ClickHouse/properties/versions/properties/available
+        type: multiselect
+      - fetch: availableVersions|ClickHouse
+        if: isConfigureDb|configureClickHouse
+        label:
+          text: labels.databases.default
+        schema:
+          "$ref": schema#/properties/spec/properties/kubeDB/properties/databases/properties/ClickHouse/properties/versions/properties/default
+        type: select
+      - fetch: getOptions|storageClasses
+        label:
+          text: labels.storage.select
+        schema:
+          "$ref": schema#/properties/spec/properties/kubeDB/properties/storageClasses/properties/default
+        type: select
+      - label:
+          text: labels.tls.select
+        schema:
+          "$ref": schema#/properties/spec/properties/kubeDB/properties/tls/properties/default
+        type: switch
+      - fetch: getOptions|clusterIssuers
+        label:
+          text: labels.clusterIssuers.select
+        schema:
+          "$ref": schema#/properties/spec/properties/kubeDB/properties/clusterIssuers/properties/default
+        type: select
+      - label:
+          text: labels.webUI.select
+        schema:
+          "$ref": schema#/properties/spec/properties/kubeDB/properties/webUI/properties/default
+        type: switch
       type: single-step-form
     - elements: []
-      if: isChecked|monitoring
       type: single-step-form
     - elements: []
-      if: isChecked|stash
       type: single-step-form
     type: single-step-form
   id: options
