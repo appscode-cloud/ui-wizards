@@ -10,13 +10,7 @@ spec:
     timeout: 10m
     apply: IfReady
   compute:
-{{- if eq .Values.spec.mode "Sharded" }}
-    shard:
-{{- else if eq .Values.spec.mode "Replicaset" }}
-    replicaSet:
-{{- else }}
-    standalone:
-{{- end }}
+    solr:
       trigger: "Off"
       podLifeTimeThreshold: 10m
       resourceDiffPercentage: 20
