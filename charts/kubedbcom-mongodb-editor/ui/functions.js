@@ -388,8 +388,8 @@ function setStorageClass({ getValue, commit, model, discriminator }) {
       const found = defaultRetainList.length
         ? defaultRetainList[0].value
         : storageClassList.length
-          ? storageClassList[0].value
-          : ''
+        ? storageClassList[0].value
+        : ''
       storageClass = found
     }
   } else {
@@ -402,8 +402,8 @@ function setStorageClass({ getValue, commit, model, discriminator }) {
       const found = defaultSimpleList.length
         ? defaultSimpleList[0].value
         : storageClassList.length
-          ? storageClassList[0].value
-          : ''
+        ? storageClassList[0].value
+        : ''
       storageClass = found
     }
   }
@@ -1109,13 +1109,33 @@ async function getImagePullSecrets({ getValue, model, watchDependency, axios, st
 
 // FOR Backup Configuration
 
-// schedule bakcup
+// schedule backup
 
 function getBackupConfigsAndAnnotations(getValue, model) {
   const stashAppscodeComBackupConfiguration = getValue(
     model,
     '/resources/stashAppscodeComBackupConfiguration',
   )
+
+  const coreKubestashComBackupConfiguration = getValue(
+    model,
+    '/resources/coreKubestashComBackupConfiguration',
+  )
+  const kubeStashTarget = coreKubestashComBackupConfiguration?.spec?.target
+
+  const mongoDB = getValue(model, '/resources/kubedbComMongoDB')
+  const mongoDbKind = mongoDB?.apiVersion?.split('/')?.at(0)
+
+  let isKubeStash = false
+  if (
+    mongoDB?.kind === kubeStashTarget.kind &&
+    mongoDB?.metadata?.name === kubeStashTarget?.name &&
+    mongoDB?.metadata?.namespace === kubeStashTarget?.namespace &&
+    mongoDbKind === kubeStashTarget?.apiGroup
+  ) {
+    isKubeStash = true
+  }
+
   const kubedbComMongoDBAnnotations =
     getValue(model, '/resources/kubedbComMongoDB/metadata/annotations') || {}
 
@@ -1129,6 +1149,7 @@ function getBackupConfigsAndAnnotations(getValue, model) {
   return {
     stashAppscodeComBackupConfiguration,
     isBluePrint,
+    isKubeStash,
   }
 }
 
@@ -1233,12 +1254,11 @@ function showBackupForm({ getValue, discriminator, watchDependency }) {
 
 // invoker form
 function initBackupInvoker({ getValue, model }) {
-  const { stashAppscodeComBackupConfiguration, isBluePrint } = getBackupConfigsAndAnnotations(
-    getValue,
-    model,
-  )
+  const { stashAppscodeComBackupConfiguration, isBluePrint, isKubeStash } =
+    getBackupConfigsAndAnnotations(getValue, model)
 
-  if (stashAppscodeComBackupConfiguration) return 'backupConfiguration'
+  if (isKubeStash) return 'backupConfiguration'
+  else if (stashAppscodeComBackupConfiguration) return 'legacyBackupConfiguration'
   else if (isBluePrint) return 'backupBlueprint'
   else return undefined
 }
