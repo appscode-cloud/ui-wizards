@@ -351,6 +351,75 @@ function checkSpokeComponent({ watchDependency, getValue, discriminator }) {
   else return false
 }
 
+const testingData = [
+  {
+    name: 'ola',
+    apiServer: 'bola',
+    token: 'sadsa',
+  },
+  {
+    name: 'john',
+    apiServer: 'server1',
+    token: 'token123',
+  },
+  {
+    name: 'jane',
+    apiServer: 'server2',
+    token: 'token456',
+  },
+  {
+    name: 'mike',
+    apiServer: 'server3',
+    token: 'token789',
+  },
+  {
+    name: 'lucy',
+    apiServer: 'server4',
+    token: 'token012',
+  },
+]
+
+function getHubList() {
+  return testingData.map((item) => item.name)
+}
+
+function onHubChange({ commit, getValue, model }) {
+  const hubName = getValue(
+    model,
+    '/resources/helmToolkitFluxcdIoHelmRelease_cluster_manager_spoke/spec/values/hub/name',
+  )
+
+  testingData.forEach((item) => {
+    if (item.name === hubName) {
+      commit('wizard/model$update', {
+        path: '/resources/helmToolkitFluxcdIoHelmRelease_cluster_manager_spoke/spec/values/hub/apiServer',
+        value: item.apiServer,
+        force: true,
+      })
+
+      commit('wizard/model$update', {
+        path: '/resources/helmToolkitFluxcdIoHelmRelease_cluster_manager_spoke/spec/values/hub/token',
+        value: item.token,
+        force: true,
+      })
+    }
+  })
+}
+
+function isHubSelected({ getValue, model, watchDependency }) {
+  watchDependency(
+    'model#/resources/helmToolkitFluxcdIoHelmRelease_cluster_manager_spoke/spec/values/hub/name',
+  )
+  const hubName = getValue(
+    model,
+    '/resources/helmToolkitFluxcdIoHelmRelease_cluster_manager_spoke/spec/values/hub/name',
+  )
+  if (hubName !== undefined && hubName !== '') {
+    return true
+  }
+  return false
+}
+
 return {
   hideThisElement,
   checkIsResourceLoaded,
@@ -365,4 +434,7 @@ return {
   setReleaseNameAndNamespaceAndInitializeValues,
   fetchFeatureSetOptions,
   checkSpokeComponent,
+  getHubList,
+  onHubChange,
+  isHubSelected,
 }
