@@ -410,19 +410,24 @@ function setResourceLimit({ commit, model, getValue, watchDependency }) {
 function setLimitsCpuOrMem({ model, getValue, watchDependency }) {
   watchDependency('model#/spec/version')
   const modelPathValue = getValue(model, '/spec/podResources/machine')
+  const deploymentType = getValue(mode, 'spec/admin/deployment')
+  const cpu = getValue(model, '/spec/podResources/resources/limits/cpu')
+  const memory = getValue(model, '/spec/podResources/resources/limits/memory')
 
   if (modelPathValue && modelPathValue !== 'custom') {
     return machines[modelPathValue] && machines[modelPathValue].resources
   } else {
-    return {
-      limits: {
-        cpu: '1',
-        memory: '1024Mi',
-      },
-      requests: {
-        cpu: '1',
-        memory: '1024Mi',
-      },
+    if (deploymentType === 'dedicated') {
+      return {
+        limits: {
+          cpu: cpu,
+          memory: memory,
+        },
+        requests: {
+          cpu: cpu,
+          memory: memory,
+        },
+      }
     }
   }
 }
@@ -655,18 +660,24 @@ function setResource({ commit, model, getValue }, type) {
 function setCpuOrMem({ model, getValue, watchDependency }, type) {
   watchDependency(`model#/spec/${type}/podResources/machine`)
   const selectedMachine = getValue(model, `/spec/${type}/podResources/machine`) || ''
+  const deploymentType = getValue(mode, 'spec/admin/deployment')
+  const cpu = getValue(model, '/spec/podResources/resources/limits/cpu')
+  const memory = getValue(model, '/spec/podResources/resources/limits/memory')
+
   if (selectedMachine && selectedMachine !== 'custom') {
     return machines[selectedMachine] && machines[selectedMachine]?.resources
   } else {
-    return {
-      limits: {
-        cpu: '1',
-        memory: '1024Mi',
-      },
-      requests: {
-        cpu: '1',
-        memory: '1024Mi',
-      },
+    if (deploymentType === 'dedicated') {
+      return {
+        limits: {
+          cpu: cpu,
+          memory: memory,
+        },
+        requests: {
+          cpu: cpu,
+          memory: memory,
+        },
+      }
     }
   }
 }
