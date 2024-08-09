@@ -466,23 +466,37 @@ function getMachineListForOptions() {
   return array
 }
 
-function setLimitsCpuOrMem({ model, getValue, watchDependency }, path) {
+function setLimitsCpuOrMem({ model, getValue, watchDependency }) {
   watchDependency('model#/spec/version')
-  const dbVersion = getValue(model, '/spec/version')
   const modelPathValue = getValue(model, '/spec/podResources/machine')
-
+  const deploymentType = getValue(model, 'spec/admin/deployment/default')
+  const cpu = getValue(model, '/spec/podResources/resources/limits/cpu')
+  const memory = getValue(model, '/spec/podResources/resources/limits/memory')
   if (modelPathValue && modelPathValue !== 'custom') {
-    return (
-      machines[modelPathValue] &&
-      machines[modelPathValue].resources &&
-      machines[modelPathValue].resources.limits[path]
-    )
+    return machines[modelPathValue] && machines[modelPathValue].resources
   } else {
-    if (path === 'cpu') {
-      if (dbVersion >= '6') return '1'
-      else return '.5'
-    } else if (path === 'memory') {
-      return '1024Mi'
+    if (deploymentType === 'Dedicated') {
+      return {
+        limits: {
+          cpu: cpu,
+          memory: memory,
+        },
+        requests: {
+          cpu: cpu,
+          memory: memory,
+        },
+      }
+    } else {
+      return {
+        limits: {
+          cpu: cpu,
+          memory: memory,
+        },
+        requests: {
+          cpu: '250m',
+          memory: '500Mi',
+        },
+      }
     }
   }
 }
@@ -965,8 +979,7 @@ function updateAlertValue({ commit, model, discriminator, getValue }) {
 function setResourceLimit({ commit, model, getValue, watchDependency }) {
   let modelPathValue = getValue(model, '/spec/podResources/machine')
   const deploymentType = getValue(model, '/spec/admin/deployment/default')
-  if (modelPathValue) {
-    if (modelPathValue === 'custom') modelPathValue = 'db.t.micro'
+  if (modelPathValue && modelPathValue !== 'custom') {
     // to avoiding set value by reference, cpu and memory set separately
     if (deploymentType === 'Dedicated') {
       commit('wizard/model$update', {
