@@ -427,6 +427,17 @@ function setLimitsCpuOrMem({ model, getValue, watchDependency }) {
           memory: memory,
         },
       }
+    } else {
+      return {
+        limits: {
+          cpu: cpu,
+          memory: memory,
+        },
+        requests: {
+          cpu: '250m',
+          memory: '500Mi',
+        },
+      }
     }
   }
 }
@@ -674,6 +685,17 @@ function setCpuOrMem({ model, getValue, watchDependency }, type) {
         requests: {
           cpu: cpu,
           memory: memory,
+        },
+      }
+    } else {
+      return {
+        limits: {
+          cpu: cpu,
+          memory: memory,
+        },
+        requests: {
+          cpu: '250m',
+          memory: '500Mi',
         },
       }
     }
