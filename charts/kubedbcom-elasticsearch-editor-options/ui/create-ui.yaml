@@ -37,7 +37,7 @@ steps:
       if: isToggleOn|deployment
       label:
         text: labels.deployment.name
-      onChange: setResourceLimit
+      onChange: onDeploymentChange
       options:
       - description: labels.deployment.shared
         text: Shared
@@ -160,9 +160,29 @@ steps:
               text: labels.storage.size
             schema:
               $ref: schema#/properties/spec/properties/topology/properties/master/properties/persistence/properties/size
-            type: input
+            type: input    
           schema:
             $ref: schema#/properties/spec/properties/topology/properties/master/properties/persistence
+          type: single-step-form
+        - elements:
+          - computed: setMachineToCustom
+            fetch: getMachineListForOptions
+            label:
+              text: Machine
+            onChange: setResourceLimit|topology/master
+            schema:
+              $ref: schema#/properties/spec/properties/topology/master/podResources/properties/machine
+            type: select
+          - computed: setLimitsCpuOrMem|topology/master
+            disabled: isMachineNotCustom|topology/master
+            label:
+              text: labels.resources
+            schema:
+              $ref: schema#/properties/spec/properties/topology/master/podResources/properties/resources
+            type: resource-input-form
+          label:
+            text: labels.machine_profile
+          show_label: true
           type: single-step-form
         schema:
           $ref: schema#/properties/spec/properties/topology/properties/master
@@ -185,6 +205,26 @@ steps:
           schema:
             $ref: schema#/properties/spec/properties/topology/properties/data/properties/persistence
           type: single-step-form
+        - elements:
+          - computed: setMachineToCustom
+            fetch: getMachineListForOptions
+            label:
+              text: Machine
+            onChange: setResourceLimit|topology/data
+            schema:
+              $ref: schema#/properties/spec/properties/topology/data/podResources/properties/machine
+            type: select
+          - computed: setLimitsCpuOrMem|topology/data
+            disabled: isMachineNotCustom|topology/data
+            label:
+              text: labels.resources
+            schema:
+              $ref: schema#/properties/spec/properties/topology/data/podResources/properties/resources
+            type: resource-input-form
+          label:
+            text: labels.machine_profile
+          show_label: true
+          type: single-step-form
         schema:
           $ref: schema#/properties/spec/properties/topology/properties/data
         type: single-step-form
@@ -206,6 +246,27 @@ steps:
           schema:
             $ref: schema#/properties/spec/properties/topology/properties/ingest/properties/persistence
           type: single-step-form
+        - elements:
+          - computed: setMachineToCustom
+            fetch: getMachineListForOptions
+            label:
+              text: Machine
+            onChange: setResourceLimit|topology/ingest
+            schema:
+              $ref: schema#/properties/spec/properties/topology/ingest/podResources/properties/machine
+            type: select
+          - computed: setLimitsCpuOrMem|topology/ingest
+            disabled: isMachineNotCustom|topology/ingest
+            label:
+              text: labels.resources
+            schema:
+              $ref: schema#/properties/spec/properties/topology/ingest/podResources/properties/resources
+            type: resource-input-form
+          label:
+            text: labels.machine_profile
+          show_label: true
+          type: single-step-form
+        
         schema:
           $ref: schema#/properties/spec/properties/topology/properties/ingest
         type: single-step-form
@@ -229,7 +290,7 @@ steps:
         schema:
           $ref: schema#/properties/spec/properties/podResources/properties/resources
         type: resource-input-form
-      if: notEqualToDatabaseMode|Sharded
+      if: isEqualToModelPathValue|Combined|/spec/mode
       label:
         text: labels.machine_profile
       show_label: true
