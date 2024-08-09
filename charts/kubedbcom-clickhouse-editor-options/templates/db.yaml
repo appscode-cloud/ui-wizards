@@ -21,8 +21,8 @@ metadata:
 {{- end }}
 spec:
   version: {{ .Values.spec.admin.databases.ClickHouse.versions.default | quote }}
-{{- if or (eq .Values.spec.mode "Standalone") (eq .Values.spec.mode "Replicaset") }}
-  replicas: {{ (eq .Values.spec.mode "Replicaset") | ternary .Values.spec.replicas 1 }}
+{{- if eq .Values.spec.mode "Standalone" }}
+  replicas: 1
   storageType: Durable
   storage:
     storageClassName: {{ .Values.spec.admin.storageClasses.default }}
