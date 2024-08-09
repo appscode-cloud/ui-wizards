@@ -338,19 +338,44 @@ function setLimitsCpuOrMem({ model, getValue, watchDependency }, path) {
     model,
     path ? `/spec/${path}/podResources/machine` : '/spec/podResources/machine',
   )
-
+  const deploymentType = getValue(model, 'spec/admin/deployment/default')
+  const cpu = getValue(
+    model,
+    path
+      ? `/spec/${path}/podResources/resources/limits/cpu`
+      : '/spec/podResources/resources/limits/cpu',
+  )
+  const memory = getValue(
+    model,
+    path
+      ? `/spec/${path}/podResources/resources/limits/memory`
+      : '/spec/podResources/resources/limits/memory',
+  )
   if (modelPathValue && modelPathValue !== 'custom') {
     return machines[modelPathValue] && machines[modelPathValue].resources
   } else {
-    return {
-      limits: {
-        cpu: '1',
-        memory: '1024Mi',
-      },
-      requests: {
-        cpu: '1',
-        memory: '1024Mi',
-      },
+    if (deploymentType === 'Dedicated') {
+      return {
+        limits: {
+          cpu: cpu,
+          memory: memory,
+        },
+        requests: {
+          cpu: cpu,
+          memory: memory,
+        },
+      }
+    } else {
+      return {
+        limits: {
+          cpu: cpu,
+          memory: memory,
+        },
+        requests: {
+          cpu: '250m',
+          memory: '500Mi',
+        },
+      }
     }
   }
 }
@@ -663,8 +688,7 @@ function setResourceLimit({ commit, model, getValue, watchDependency }, path) {
   const fullpath = path ? `/spec/${path}/podResources/machine` : '/spec/podResources/machine'
   let modelPathValue = getValue(model, fullpath)
   const deploymentType = getValue(model, '/spec/admin/deployment/default')
-  if (modelPathValue) {
-    if (modelPathValue === 'custom') modelPathValue = 'db.t.micro'
+  if (modelPathValue && modelPathValue !== 'custom') {
     // to avoiding set value by reference, cpu and memory set separately
     if (deploymentType === 'Dedicated') {
       commit('wizard/model$update', {
@@ -806,6 +830,7 @@ function onBackupSwitch({ discriminator, getValue, commit }) {
 }
 
 return {
+  onDeploymentChange,
   isVariantAvailable,
   showAuthPasswordField,
   isEqualToModelPathValue,
