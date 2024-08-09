@@ -449,12 +449,14 @@ function getMachineListForOptions() {
   return array
 }
 
-function setResourceLimitOnModeChange({ commit, model, getValue }) {
+function setResourceLimitOnModeChange({ commit, model, getValue, watchDependency }) {
   let modelPathValue = getValue(model, `/spec/mode`)
   if (modelPathValue === 'Topology') {
     setResourceLimitTopology({ commit, model, getValue }, 'coordinator')
     setResourceLimitTopology({ commit, model, getValue }, 'data')
     setResourceLimitTopology({ commit, model, getValue }, 'overseer')
+  } else {
+    setResourceLimit({ commit, model, getValue, watchDependency })
   }
 }
 
@@ -462,8 +464,7 @@ function setResourceLimitTopology({ commit, model, getValue, watchDependency }, 
   let modelPathValue = getValue(model, `/spec/topology/${topology}/podResources/machine`)
   const deploymentType = getValue(model, '/spec/admin/deployment/default')
 
-  if (modelPathValue) {
-    if (modelPathValue === 'custom') modelPathValue = 'db.t.micro'
+  if (modelPathValue && modelPathValue !== 'custom') {
     // to avoiding set value by reference, cpu and memory set separately
     if (deploymentType === 'Dedicated') {
       commit('wizard/model$update', {
@@ -489,8 +490,7 @@ function setResourceLimitTopology({ commit, model, getValue, watchDependency }, 
 function setResourceLimit({ commit, model, getValue, watchDependency }) {
   let modelPathValue = getValue(model, '/spec/podResources/machine')
   const deploymentType = getValue(model, '/spec/admin/deployment/default')
-  if (modelPathValue) {
-    if (modelPathValue === 'custom') modelPathValue = 'db.t.micro'
+  if (modelPathValue && modelPathValue !== 'custom') {
     // to avoiding set value by reference, cpu and memory set separately
     if (deploymentType === 'Dedicated') {
       commit('wizard/model$update', {
@@ -532,21 +532,46 @@ function setResourceLimitWithNodeType({ commit, model, getValue, watchDependency
 }
 
 function setLimitsCpuOrMem({ model, getValue }, type) {
+  const deploymentType = getValue(model, '/spec/admin/deployment/default')
   const path = type ? `/spec/${type}/podResources/machine` : '/spec/podResources/machine'
   const selectedMachine = getValue(model, path)
-
+  const cpu = getValue(
+    model,
+    type
+      ? `/spec/${type}/podResources/resources/limits/cpu`
+      : `/spec/podResources/resources/limits/cpu`,
+  )
+  const memory = getValue(
+    model,
+    type
+      ? `/spec/${type}/podResources/resources/limits/memory`
+      : `/spec/podResources/resources/limits/memory`,
+  )
   if (selectedMachine && selectedMachine !== 'custom') {
     return machines[selectedMachine] && machines[selectedMachine].resources
   } else {
-    return {
-      limits: {
-        cpu: '1',
-        memory: '1024Mi',
-      },
-      requests: {
-        cpu: '1',
-        memory: '1024Mi',
-      },
+    if (deploymentType === 'Dedicated') {
+      return {
+        limits: {
+          cpu: cpu,
+          memory: memory,
+        },
+        requests: {
+          cpu: cpu,
+          memory: memory,
+        },
+      }
+    } else {
+      return {
+        limits: {
+          cpu: cpu,
+          memory: memory,
+        },
+        requests: {
+          cpu: '250m',
+          memory: '500Mi',
+        },
+      }
     }
   }
 }

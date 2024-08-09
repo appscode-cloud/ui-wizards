@@ -37,7 +37,7 @@ steps:
       if: isToggleOn|deployment
       label:
         text: labels.deployment.name
-      onChange: setResourceLimit
+      onChange: setResourceLimitOnModeChange
       options:
       - description: labels.deployment.shared
         text: Shared
@@ -262,6 +262,7 @@ steps:
         schema:
           $ref: schema#/properties/spec/properties/podResources/properties/resources
         type: resource-input-form
+      if: isEqualToModelPathValue|[Replicaset]|/spec/mode
       label:
         text: labels.machine_profile
       show_label: true
