@@ -437,39 +437,8 @@ properties:
         - groups
         - labels
         type: object
-      capi:
-        properties:
-          clusterName:
-            type: string
-          dedicated:
-            type: boolean
-          namespace:
-            type: string
-          nodes:
-            type: integer
-          provider:
-            enum:
-            - capa
-            - capg
-            - capz
-            type: string
-          sku:
-            type: string
-          zones:
-            items:
-              type: string
-            type: array
-        required:
-        - clusterName
-        - dedicated
-        - namespace
-        - nodes
-        - sku
-        - zones
-        type: object
     required:
     - alert
-    - capi
     type: object
   metadata:
     properties:
@@ -591,6 +560,13 @@ properties:
                         type: string
                     type: object
                 type: object
+              databaseRef:
+                properties:
+                  name:
+                    default: ""
+                    type: string
+                type: object
+                x-kubernetes-map-type: atomic
               opsRequestOptions:
                 properties:
                   apply:
@@ -602,15 +578,8 @@ properties:
                   timeout:
                     type: string
                 type: object
-              proxyRef:
-                properties:
-                  name:
-                    default: ""
-                    type: string
-                type: object
-                x-kubernetes-map-type: atomic
             required:
-            - proxyRef
+            - databaseRef
             type: object
         type: object
       catalogAppscodeComProxySQLBinding:

@@ -1,5 +1,87 @@
-apiVersion: stash.appscode.com/v1beta1
-kind: RestoreSession
 metadata:
-  name: restoresession
-  namespace: default
+  resource:
+    group: stash.appscode.com
+    version: v1beta1
+    name: restoresessions
+    kind: RestoreSession
+    scope: Namespaced
+  release:
+    name: RELEASE-NAME
+    namespace: default
+resources:
+  stashAppscodeComRestoreSession: # +doc-gen:break
+    apiVersion: stash.appscode.com/v1beta1
+    kind: RestoreSession
+    metadata:
+      name: restore-app
+      namespace: demo
+    spec:
+      driver: Restic
+      hooks:
+        postRestore:
+          containerName: stash-init
+          exec:
+            command:
+              - /bin/sh
+              - -c
+              - echo "Sample PostRestore hook demo"
+          executionPolicy: Always
+        preRestore:
+          containerName: stash-init
+          exec:
+            command:
+              - /bin/sh
+              - -c
+              - echo "Sample PreRestore hook demo"
+      repository:
+        name: minio-repo
+        namespace: demo
+      runtimeSettings:
+        container:
+          ionice:
+            class: 2
+            classData: 4
+          nice:
+            adjustment: 5
+          resources:
+            limits:
+              memory: 256M
+            requests:
+              memory: 256M
+          securityContext:
+            runAsGroup: 2000
+            runAsUser: 2000
+        pod:
+          imagePullSecrets:
+            - name: my-private-registry-secret
+          serviceAccountName: my-backup-sa
+      target:
+        alias: my-sts
+        ref:
+          apiVersion: apps/v1
+          kind: StatefulSet
+          name: recovered-statefulset
+        rules:
+          - include:
+              - /source/data/*.json
+            paths:
+              - /source/data
+            sourceHost: my-sts-1
+            targetHosts:
+              - my-sts-3
+              - my-sts-4
+          - exclude:
+              - /source/data/tmp.json
+              - /source/data/*.txt
+            paths:
+              - /source/data
+            sourceHost: ""
+            targetHosts: []
+        volumeMounts:
+          - mountPath: /source/data
+            name: source-data
+      tempDir:
+        disableCaching: false
+        medium: Memory
+        sizeLimit: 2Gi
+      timeOut: 30m

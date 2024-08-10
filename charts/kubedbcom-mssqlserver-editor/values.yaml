@@ -157,11 +157,11 @@ metadata:
     name: RELEASE-NAME
     namespace: default
 resources:
-  autoscalingKubedbComMSSQLServerAutoscaler_mssqlserver: # +doc-gen:break
+  autoscalingKubedbComMSSQLServerAutoscaler: # +doc-gen:break
     apiVersion: autoscaling.kubedb.com/v1alpha1
     kind: MSSQLServerAutoscaler
     metadata:
-      name: mssqlserver
+      name: sqlserver-ag
       namespace: demo
     spec:
       compute:
@@ -182,15 +182,15 @@ resources:
       opsRequestOptions:
         apply: IfReady
         timeout: 10m
-  catalogAppscodeComMSSQLServerBinding_mssqlserver: # +doc-gen:break
+  catalogAppscodeComMSSQLServerBinding: # +doc-gen:break
     apiVersion: catalog.appscode.com/v1alpha1
     kind: MSSQLServerBinding
     metadata:
-      name: mssqlserver
+      name: sqlserver-ag
       namespace: demo
     spec:
       sourceRef:
-        name: mssqlserver
+        name: sqlserver-ag
         namespace: demo
   certManagerIoIssuer_ca: # +doc-gen:break
     apiVersion: cert-manager.io/v1
@@ -231,11 +231,11 @@ resources:
             - AgDB2
         mode: AvailabilityGroup
       version: 2022-cu12
-  monitoringCoreosComServiceMonitor_mssqlserver: # +doc-gen:break
+  monitoringCoreosComServiceMonitor: # +doc-gen:break
     apiVersion: monitoring.coreos.com/v1
     kind: ServiceMonitor
     metadata:
-      name: mssqlserver
+      name: sqlserver-ag
       namespace: demo
     spec:
       endpoints:
@@ -250,21 +250,21 @@ resources:
         matchLabels:
           app.kubernetes.io/instance: mssqlserver
           app.kubernetes.io/name: mssqlservers.kubedb.com
-  secret_mssqlserver_auth: # +doc-gen:break
+  secret_auth: # +doc-gen:break
     apiVersion: v1
     kind: Secret
     metadata:
-      name: mssqlserver-auth
+      name: sqlserver-ag-auth
       namespace: demo
     stringData:
       password: thisIs1StrongPassword
       username: root
     type: Opaque
-  secret_mssqlserver_config: # +doc-gen:break
+  secret_config: # +doc-gen:break
     apiVersion: v1
     kind: Secret
     metadata:
-      name: mssqlserver-config
+      name: sqlserver-ag-config
       namespace: demo
     stringData:
       mssqlserver.cnf: |
