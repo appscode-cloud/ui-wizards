@@ -35,7 +35,7 @@ spec:
         machine: ""
         resources:
           limits:
-            cpu: 500m
+            cpu: 900m
             memory: 1Gi
       persistence:
         size: 10Gi
@@ -45,7 +45,7 @@ spec:
         machine: ""
         resources:
           limits:
-            cpu: 500m
+            cpu: 800m
             memory: 1Gi
       persistence:
         size: 2Gi
@@ -86,7 +86,7 @@ spec:
 
     resources:
       limits:
-        cpu: 500m
+        cpu: 700m
         memory: 1Gi
 
   authSecret:
@@ -145,7 +145,8 @@ spec:
         # Specify the labels for ServiceMonitor.
         # Prometheus crd will select ServiceMonitor using these labels.
         # Only usable when monitoring agent is `prometheus.io/webhook server`.
-        labels: {}
+        labels:
+          monitoring.appscode.com/prometheus: federated
       toggle: true
     alerts:
       toggle: true
@@ -168,8 +169,6 @@ spec:
         encryptionSecret:
           name: default-encryption-secret
           namespace: stash
-        storageSecret:
-          create: true
 
       stash:
         schedule: "0 */2 * * *"

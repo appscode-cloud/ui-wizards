@@ -17,7 +17,7 @@ metadata:
 {{- end }}
 spec:
   version: {{ .Values.spec.admin.databases.ZooKeeper.versions.default | quote }}
-  replicas: {{ .Values.spec.replicas }}
+  replicas: {{ (eq .Values.spec.mode "Replicaset") | ternary .Values.spec.replicas 1 }}
   storageType: Durable
   storage:
     storageClassName: {{ .Values.spec.admin.storageClasses.default }}

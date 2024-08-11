@@ -449,11 +449,48 @@ function getMachineListForOptions() {
   return array
 }
 
+function setResourceLimitOnModeChange({ commit, model, getValue, watchDependency }) {
+  let modelPathValue = getValue(model, `/spec/mode`)
+  if (modelPathValue === 'Topology') {
+    setResourceLimitTopology({ commit, model, getValue }, 'coordinator')
+    setResourceLimitTopology({ commit, model, getValue }, 'data')
+    setResourceLimitTopology({ commit, model, getValue }, 'overseer')
+  } else {
+    setResourceLimit({ commit, model, getValue, watchDependency })
+  }
+}
+
+function setResourceLimitTopology({ commit, model, getValue, watchDependency }, topology) {
+  let modelPathValue = getValue(model, `/spec/topology/${topology}/podResources/machine`)
+  const deploymentType = getValue(model, '/spec/admin/deployment/default')
+
+  if (modelPathValue && modelPathValue !== 'custom') {
+    // to avoiding set value by reference, cpu and memory set separately
+    if (deploymentType === 'Dedicated') {
+      commit('wizard/model$update', {
+        path: `/spec/topology/${topology}/podResources/resources/requests`,
+        value: machines[modelPathValue]?.resources.limits,
+        force: true,
+      })
+      commit('wizard/model$update', {
+        path: `/spec/topology/${topology}/podResources/resources/limits`,
+        value: machines[modelPathValue]?.resources.limits,
+        force: true,
+      })
+    } else {
+      commit('wizard/model$update', {
+        path: `/spec/topology/${topology}/podResources/resources`,
+        value: machines[modelPathValue]?.resources,
+        force: true,
+      })
+    }
+  }
+}
+
 function setResourceLimit({ commit, model, getValue, watchDependency }) {
   let modelPathValue = getValue(model, '/spec/podResources/machine')
   const deploymentType = getValue(model, '/spec/admin/deployment/default')
-  if (modelPathValue) {
-    if (modelPathValue === 'custom') modelPathValue = 'db.t.micro'
+  if (modelPathValue && modelPathValue !== 'custom') {
     // to avoiding set value by reference, cpu and memory set separately
     if (deploymentType === 'Dedicated') {
       commit('wizard/model$update', {
@@ -495,17 +532,46 @@ function setResourceLimitWithNodeType({ commit, model, getValue, watchDependency
 }
 
 function setLimitsCpuOrMem({ model, getValue }, type) {
+  const deploymentType = getValue(model, '/spec/admin/deployment/default')
   const path = type ? `/spec/${type}/podResources/machine` : '/spec/podResources/machine'
   const selectedMachine = getValue(model, path)
-
+  const cpu = getValue(
+    model,
+    type
+      ? `/spec/${type}/podResources/resources/limits/cpu`
+      : `/spec/podResources/resources/limits/cpu`,
+  )
+  const memory = getValue(
+    model,
+    type
+      ? `/spec/${type}/podResources/resources/limits/memory`
+      : `/spec/podResources/resources/limits/memory`,
+  )
   if (selectedMachine && selectedMachine !== 'custom') {
     return machines[selectedMachine] && machines[selectedMachine].resources
   } else {
-    return {
-      limits: {
-        cpu: '1',
-        memory: '1024Mi',
-      },
+    if (deploymentType === 'Dedicated') {
+      return {
+        limits: {
+          cpu: cpu,
+          memory: memory,
+        },
+        requests: {
+          cpu: cpu,
+          memory: memory,
+        },
+      }
+    } else {
+      return {
+        limits: {
+          cpu: cpu,
+          memory: memory,
+        },
+        requests: {
+          cpu: '250m',
+          memory: '500Mi',
+        },
+      }
     }
   }
 }
@@ -953,7 +1019,8 @@ async function isBackupCluster({ axios, storeGet, commit }) {
   return isStashEnabled
 }
 
-async function getAppBindings({ axios, storeGet }) {
+async function getAppBindings({ commit, axios, storeGet, model, getValue }) {
+  const namespace = getValue(model, '/metadata/release/namespace')
   const owner = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
 
@@ -965,7 +1032,7 @@ async function getAppBindings({ axios, storeGet }) {
       },
     },
   }
-
+  setNamespace({ commit, model, getValue })
   try {
     const resp = await axios.get(
       `/clusters/${owner}/${cluster}/proxy/appcatalog.appscode.com/v1alpha1/appbindings`,
@@ -981,7 +1048,7 @@ async function getAppBindings({ axios, storeGet }) {
       .map((item) => {
         const name = (item.metadata && item.metadata.name) || ''
         return {
-          text: name,
+          text: `${namespace}/${name}`,
           value: name,
         }
       })
@@ -1004,6 +1071,8 @@ function setNamespace({ commit, model, getValue }) {
 }
 
 return {
+  setResourceLimitOnModeChange,
+  setResourceLimitTopology,
   setNamespace,
   getAppBindings,
   isVariantAvailable,

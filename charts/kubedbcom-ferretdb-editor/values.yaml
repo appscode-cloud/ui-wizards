@@ -157,11 +157,11 @@ metadata:
     name: RELEASE-NAME
     namespace: default
 resources:
-  autoscalingKubedbComFerretDBAutoscaler_db: # +doc-gen:break
+  autoscalingKubedbComFerretDBAutoscaler: # +doc-gen:break
     apiVersion: autoscaling.kubedb.com/v1alpha1
     kind: FerretDBAutoscaler
     metadata:
-      name: ferretdb
+      name: ferret
       namespace: demo
     spec:
       compute:
@@ -178,20 +178,29 @@ resources:
         nodeTopology:
           name: standard-basv2-family
       databaseRef:
-        name: repl
+        name: ferret
       opsRequestOptions:
         apply: IfReady
         timeout: 10m
-  catalogAppscodeComFerretDBBinding_db: # +doc-gen:break
+  catalogAppscodeComFerretDBBinding: # +doc-gen:break
     apiVersion: catalog.appscode.com/v1alpha1
     kind: FerretDBBinding
     metadata:
-      name: ferretdb
+      name: ferret
       namespace: demo
     spec:
       sourceRef:
-        name: ferretdb
+        name: ferret
         namespace: demo
+  certManagerIoIssuer_ca: # +doc-gen:break
+    apiVersion: cert-manager.io/v1
+    kind: Issuer
+    metadata:
+      name: ferret-ca
+      namespace: sample
+    spec:
+      ca:
+        secretName: ferretdb-ca
   kubedbComFerretDB: # +doc-gen:break
     apiVersion: kubedb.com/v1alpha2
     kind: FerretDB
@@ -243,3 +252,42 @@ resources:
           requests:
             storage: 500Mi
       version: 1.18.0
+  monitoringCoreosComServiceMonitor: # +doc-gen:break
+    apiVersion: monitoring.coreos.com/v1
+    kind: ServiceMonitor
+    metadata:
+      name: ferret
+      namespace: demo
+    spec:
+      endpoints:
+        - honorLabels: true
+          interval: 30s
+          path: /metrics
+          port: metrics
+      namespaceSelector:
+        matchNames:
+          - demo
+      selector:
+        matchLabels:
+          app.kubernetes.io/instance: ferretdb
+          app.kubernetes.io/name: ferretdbs.kubedb.com
+  secret_auth: # +doc-gen:break
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: ferret-auth
+      namespace: demo
+    stringData:
+      password: thisIs1StrongPassword
+      username: root
+    type: Opaque
+  secret_config: # +doc-gen:break
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: ferret-config
+      namespace: demo
+    stringData:
+      mongod.conf: |
+        max_connections = 200
+    type: Opaque

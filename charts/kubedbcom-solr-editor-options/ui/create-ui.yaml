@@ -37,7 +37,7 @@ steps:
       if: isToggleOn|deployment
       label:
         text: labels.deployment.name
-      onChange: setResourceLimit
+      onChange: setResourceLimitOnModeChange
       options:
       - description: labels.deployment.shared
         text: Shared
@@ -119,6 +119,7 @@ steps:
     - hasDescription: true
       label:
         text: labels.database.mode
+      onChange: setResourceLimitOnModeChange
       options:
       - description: options.database.mode.Standalone.description
         text: options.database.mode.Standalone.label
@@ -162,7 +163,7 @@ steps:
           fetch: getMachineListForOptions
           label:
             text: Machine
-          onChange: setResourceLimit|topology/overseer
+          onChange: setResourceLimitTopology|overseer
           schema:
             $ref: schema#/properties/spec/properties/topology/properties/overseer/properties/podResources/properties/machine
           type: select
@@ -195,7 +196,7 @@ steps:
           fetch: getMachineListForOptions
           label:
             text: Machine
-          onChange: setResourceLimit|topology/data
+          onChange: setResourceLimitTopology|data
           schema:
             $ref: schema#/properties/spec/properties/topology/properties/data/properties/podResources/properties/machine
           type: select
@@ -228,7 +229,7 @@ steps:
           fetch: getMachineListForOptions
           label:
             text: Machine
-          onChange: setResourceLimit|topology/coordinator
+          onChange: setResourceLimitTopology|coordinator
           schema:
             $ref: schema#/properties/spec/properties/topology/properties/coordinator/properties/podResources/properties/machine
           type: select
@@ -261,6 +262,7 @@ steps:
         schema:
           $ref: schema#/properties/spec/properties/podResources/properties/resources
         type: resource-input-form
+      if: isEqualToModelPathValue|[Replicaset]|/spec/mode
       label:
         text: labels.machine_profile
       show_label: true
@@ -292,13 +294,6 @@ steps:
         $ref: schema#/properties/spec/properties/admin/properties/storageClasses/properties/default
       type: select
     - elements:
-      - computed: setNamespace
-        disabled: true
-        label:
-          text: labels.zookeeperRef.namespace
-        schema:
-          $ref: schema#/properties/spec/properties/zookeeperRef/properties/namespace
-        type: select
       - fetch: getAppBindings
         label:
           text: labels.zookeeperRef.name

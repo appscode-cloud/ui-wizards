@@ -94,8 +94,6 @@ spec:
         encryptionSecret:
           name: default-encryption-secret
           namespace: stash
-        storageSecret:
-          create: true
       stash:
         schedule: "0 */2 * * *"
 
@@ -168,9 +166,6 @@ spec:
   monitoring: {}
 
   backup:
-    clusterMetadata:
-      name:
-      uid:
     stash:
       authSecret:
         name:
@@ -187,13 +182,56 @@ spec:
             insecureTLS:
             prefix:
             region:
+        azure:
+          spec:
+            container: ""
+            # prefix: ""
+            # maxConnections: 0
+          auth:
+            AZURE_ACCOUNT_NAME: ""
+            AZURE_ACCOUNT_KEY: ""
+        gcs:
+          spec:
+            bucket: ""
+            # prefix: ""
+            # maxConnections: 0
+          auth:
+            GOOGLE_PROJECT_ID: ""
+            GOOGLE_SERVICE_ACCOUNT_JSON_KEY: ""
+        swift:
+          spec:
+            container: ""
+            # prefix: ""
+          auth:
+            OS_USERNAME: ""
+            OS_PASSWORD: ""
+            OS_REGION_NAME: ""
+            OS_AUTH_URL: ""
+            OS_USER_DOMAIN_NAME: ""
+            OS_PROJECT_NAME: ""
+            OS_PROJECT_DOMAIN_NAME: ""
+            OS_TENANT_ID: ""
+            OS_TENANT_NAME: ""
+            ST_AUTH: ""
+            ST_USER: ""
+            ST_KEY: ""
+            OS_STORAGE_URL: ""
+            OS_AUTH_TOKEN: ""
+        b2:
+          spec:
+            bucket: ""
+            # prefix: ""
+            # maxConnections: 0
+          auth:
+            B2_ACCOUNT_ID: ""
+            B2_ACCOUNT_KEY: ""
       retentionPolicy:
         keepDaily: 5
         keepHourly: 1
         name: my-retention
         prune: true
       schedule: '*/30 * * * *'
-    kubeStash:
+    kubestash:
       backend:
         provider: s3
         s3:
@@ -206,6 +244,22 @@ spec:
             insecureTLS: false
             prefix: presets
             region: us-east-1
+        azure:
+          spec:
+            container: ""
+            # prefix: ""
+            # maxConnections: 0
+          auth:
+            AZURE_ACCOUNT_NAME: ""
+            AZURE_ACCOUNT_KEY: ""
+        gcs:
+          spec:
+            bucket: ""
+            # prefix: ""
+            # maxConnections: 0
+          auth:
+            GOOGLE_PROJECT_ID: ""
+            GOOGLE_SERVICE_ACCOUNT_JSON_KEY: ""
       encryptionSecret: asdfg
       retentionPolicy: keep-1wk
       schedule: '*/30 * * * *'

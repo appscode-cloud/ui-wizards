@@ -47,7 +47,6 @@ type KubedbcomClickhouseEditorOptionsSpecSpec struct {
 	// +optional
 	Labels         map[string]string  `json:"labels"`
 	Mode           ClickHouseMode     `json:"mode"`
-	Replicas       int                `json:"replicas"`
 	Topology       ClickHouseTopology `json:"topology"`
 	Persistence    Persistence        `json:"persistence"`
 	PodResources   PodResources       `json:"podResources"`
@@ -57,7 +56,7 @@ type KubedbcomClickhouseEditorOptionsSpecSpec struct {
 	Admin          AdminOptions       `json:"admin"`
 }
 
-// +kubebuilder:validation:Enum=Standalone;Replicaset;Topology
+// +kubebuilder:validation:Enum=Standalone;Topology
 type ClickHouseMode string
 
 type ClickHouseTopology struct {

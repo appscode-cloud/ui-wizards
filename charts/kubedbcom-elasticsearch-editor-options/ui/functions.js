@@ -332,18 +332,50 @@ function disableLimit({ model, getValue, watchDependency }) {
   return modelPathValue !== 'custom' && !!modelPathValue
 }
 
-function setLimitsCpuOrMem({ model, getValue, watchDependency }) {
+function setLimitsCpuOrMem({ model, getValue, watchDependency }, path) {
   watchDependency('model#/spec/version')
-  const modelPathValue = getValue(model, '/spec/podResources/machine')
-
+  const modelPathValue = getValue(
+    model,
+    path ? `/spec/${path}/podResources/machine` : '/spec/podResources/machine',
+  )
+  const deploymentType = getValue(model, 'spec/admin/deployment/default')
+  const cpu = getValue(
+    model,
+    path
+      ? `/spec/${path}/podResources/resources/limits/cpu`
+      : '/spec/podResources/resources/limits/cpu',
+  )
+  const memory = getValue(
+    model,
+    path
+      ? `/spec/${path}/podResources/resources/limits/memory`
+      : '/spec/podResources/resources/limits/memory',
+  )
   if (modelPathValue && modelPathValue !== 'custom') {
     return machines[modelPathValue] && machines[modelPathValue].resources
   } else {
-    return {
-      limits: {
-        cpu: '1',
-        memory: '1024Mi',
-      },
+    if (deploymentType === 'Dedicated') {
+      return {
+        limits: {
+          cpu: cpu,
+          memory: memory,
+        },
+        requests: {
+          cpu: cpu,
+          memory: memory,
+        },
+      }
+    } else {
+      return {
+        limits: {
+          cpu: cpu,
+          memory: memory,
+        },
+        requests: {
+          cpu: '250m',
+          memory: '500Mi',
+        },
+      }
     }
   }
 }
@@ -652,31 +684,42 @@ function getMachineListForOptions() {
   return array
 }
 
-function setResourceLimit({ commit, model, getValue, watchDependency }) {
-  let modelPathValue = getValue(model, '/spec/podResources/machine')
+function setResourceLimit({ commit, model, getValue, watchDependency }, path) {
+  const fullpath = path ? `/spec/${path}/podResources/machine` : '/spec/podResources/machine'
+  let modelPathValue = getValue(model, fullpath)
   const deploymentType = getValue(model, '/spec/admin/deployment/default')
-  if (modelPathValue) {
-    if (modelPathValue === 'custom') modelPathValue = 'db.t.micro'
+  if (modelPathValue && modelPathValue !== 'custom') {
     // to avoiding set value by reference, cpu and memory set separately
     if (deploymentType === 'Dedicated') {
       commit('wizard/model$update', {
-        path: '/spec/podResources/resources/requests',
+        path: path
+          ? `/spec/${path}/podResources/resources/requests`
+          : `/spec/podResources/resources/requests`,
         value: machines[modelPathValue]?.resources.limits,
         force: true,
       })
       commit('wizard/model$update', {
-        path: '/spec/podResources/resources/limits',
+        path: path
+          ? `/spec/${path}/podResources/resources/limits`
+          : `/spec/podResources/resources/limits`,
         value: machines[modelPathValue]?.resources.limits,
         force: true,
       })
     } else {
       commit('wizard/model$update', {
-        path: '/spec/podResources/resources',
+        path: path ? `/spec/${path}/podResources/resources` : `/spec/podResources/resources`,
         value: machines[modelPathValue]?.resources,
         force: true,
       })
     }
   }
+}
+
+function onDeploymentChange({ commit, model, getValue, watchDependency }) {
+  setResourceLimit({ commit, model, getValue, watchDependency })
+  setResourceLimit({ commit, model, getValue, watchDependency }, 'topology/data')
+  setResourceLimit({ commit, model, getValue, watchDependency }, 'topology/master')
+  setResourceLimit({ commit, model, getValue, watchDependency }, 'topology/ingest')
 }
 
 function isMachineNotCustom({ model, getValue, watchDependency }, path) {
@@ -787,6 +830,7 @@ function onBackupSwitch({ discriminator, getValue, commit }) {
 }
 
 return {
+  onDeploymentChange,
   isVariantAvailable,
   showAuthPasswordField,
   isEqualToModelPathValue,

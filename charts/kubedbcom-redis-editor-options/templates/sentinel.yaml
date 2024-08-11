@@ -11,7 +11,7 @@ metadata:
     {{- include "kubedbcom-redis-editor-options.annotations" . | nindent 4 }}
 {{- end }}
 spec:
-  version: {{ .Values.spec.version | quote }}
+  version: {{ .Values.spec.admin.databases.Redis.versions.default | quote }}
   replicas: 3
   storage:
     accessModes:
@@ -19,7 +19,7 @@ spec:
     resources:
       requests:
         storage: 1Gi
-    storageClassName: {{ .Values.spec.storageClass.name }}
+    storageClassName: {{ .Values.spec.admin.storageClasses.default }}
   storageType: Durable
   deletionPolicy: {{ .Values.spec.deletionPolicy }}
 {{ end }}

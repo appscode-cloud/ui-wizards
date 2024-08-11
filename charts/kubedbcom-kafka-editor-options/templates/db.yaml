@@ -18,6 +18,35 @@
   {{- end }}
 {{- end }}
 
+{{- define "common.placement" -}}
+podPlacementPolicy:
+  name: {{ .Values.spec.admin.clusterTier.placement.default }}
+{{- if eq .Values.spec.admin.deployment.default "Dedicated" }}
+nodeSelector:
+  app: kafkas.kubedb.com
+  instance: {{ include "kubedbcom-kafka-editor-options.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  nodepool: {{ .Values.spec.admin.clusterTier.nodeTopology.default }}
+tolerations:
+  - key: app
+    operator: "Equal"
+    value: "kafkas.kubedb.com"
+    effect: "NoSchedule"
+  - key: instance
+    operator: "Equal"
+    value: {{ include "kubedbcom-kafka-editor-options.fullname" . }}
+    effect: "NoSchedule"
+  - key: namespace
+    operator: "Equal"
+    value: {{ .Release.Namespace }}
+    effect: "NoSchedule"
+  - key: nodepool
+    operator: "Equal"
+    value: {{ .Values.spec.admin.clusterTier.nodeTopology.default }}
+    effect: "NoSchedule"
+{{- end }}
+{{- end }}
+
 apiVersion: kubedb.com/v1
 kind: Kafka
 metadata:
@@ -47,44 +76,20 @@ spec:
         - name: kafka
           resources:
             {{- toYaml $res | nindent 12 }}
-      podPlacementPolicy:
-        name: {{ .Values.spec.admin.clusterTier.placement.default }}
-      {{- if eq .Values.spec.admin.deployment.default "Dedicated" }}
-      nodeSelector:
-        app: kafkas.kubedb.com
-        instance: {{ include "kubedbcom-kafka-editor-options.fullname" . }}
-        namespace: {{ .Release.Namespace }}
-        nodepool: {{ .Values.spec.admin.clusterTier.nodeTopology.default }}
-      tolerations:
-        - key: app
-          operator: "Equal"
-          value: "kafkas.kubedb.com"
-          effect: "NoSchedule"
-        - key: instance
-          operator: "Equal"
-          value: {{ include "kubedbcom-kafka-editor-options.fullname" . }}
-          effect: "NoSchedule"
-        - key: namespace
-          operator: "Equal"
-          value: {{ .Release.Namespace }}
-          effect: "NoSchedule"
-        - key: nodepool
-          operator: "Equal"
-          value: {{ .Values.spec.admin.clusterTier.nodeTopology.default }}
-          effect: "NoSchedule"
-      {{- end }}
+      {{- include "common.placement" . | nindent 6 }}
 {{- else if eq .Values.spec.mode "Topology" }}
   topology:
     controller:
       replicas: {{ .Values.spec.topology.controller.replicas }}
-      resources:
-        {{- $resController := .Values.spec.resources -}}
-        {{- if and .Values.spec.topology.controller.machine (hasKey $machines .Values.spec.topology.controller.machine) }}
-          {{- $resController = get (get $machines .Values.spec.topology.controller.machine) "resources" }}
-        {{- end }}
-        {{- toYaml $resController | nindent 8 }}
+      podTemplate:
+        spec:
+          containers:
+            - name: kafka
+              resources:
+                {{- toYaml $controller_res | nindent 16 }}
+          {{- include "common.placement" . | nindent 10 }}
       storage:
-        storageClassName: {{ .Values.spec.storageClass.name }}
+        storageClassName: {{ .Values.spec.admin.storageClasses.default }}
         accessModes:
         - ReadWriteOnce
         resources:
@@ -92,14 +97,15 @@ spec:
             storage: {{ .Values.spec.topology.controller.persistence.size }}
     broker:
       replicas: {{ .Values.spec.topology.broker.replicas }}
-      resources:
-        {{- $resBroker := .Values.spec.resources -}}
-        {{- if and .Values.spec.topology.broker.machine (hasKey $machines .Values.spec.topology.broker.machine) }}
-          {{- $resBroker = get (get $machines .Values.spec.topology.broker.machine) "resources" }}
-        {{- end }}
-        {{- toYaml $resBroker | nindent 8 }}
+      podTemplate:
+        spec:
+          containers:
+            - name: kafka
+              resources:
+                {{- toYaml $broker_res | nindent 16 }}
+          {{- include "common.placement" . | nindent 10 }}
       storage:
-        storageClassName: {{ .Values.spec.storageClass.name }}
+        storageClassName: {{ .Values.spec.admin.storageClasses.default }}
         accessModes:
         - ReadWriteOnce
         resources:

@@ -42,17 +42,7 @@ properties:
     properties:
       backup:
         properties:
-          clusterMetadata:
-            properties:
-              name:
-                type: string
-              uid:
-                type: string
-            required:
-            - name
-            - uid
-            type: object
-          kubeStash:
+          kubestash:
             properties:
               backend:
                 properties:
@@ -79,33 +69,6 @@ properties:
                             type: string
                         required:
                         - container
-                        type: object
-                    required:
-                    - spec
-                    type: object
-                  b2:
-                    properties:
-                      auth:
-                        properties:
-                          B2_ACCOUNT_ID:
-                            type: string
-                          B2_ACCOUNT_KEY:
-                            type: string
-                        required:
-                        - B2_ACCOUNT_ID
-                        - B2_ACCOUNT_KEY
-                        type: object
-                      spec:
-                        properties:
-                          bucket:
-                            type: string
-                          maxConnections:
-                            format: int64
-                            type: integer
-                          prefix:
-                            type: string
-                        required:
-                        - bucket
                         type: object
                     required:
                     - spec
@@ -169,66 +132,6 @@ properties:
                         required:
                         - bucket
                         - endpoint
-                        type: object
-                    required:
-                    - spec
-                    type: object
-                  swift:
-                    properties:
-                      auth:
-                        properties:
-                          OS_AUTH_TOKEN:
-                            type: string
-                          OS_AUTH_URL:
-                            type: string
-                          OS_PASSWORD:
-                            type: string
-                          OS_PROJECT_DOMAIN_NAME:
-                            type: string
-                          OS_PROJECT_NAME:
-                            type: string
-                          OS_REGION_NAME:
-                            type: string
-                          OS_STORAGE_URL:
-                            type: string
-                          OS_TENANT_ID:
-                            type: string
-                          OS_TENANT_NAME:
-                            type: string
-                          OS_USER_DOMAIN_NAME:
-                            type: string
-                          OS_USERNAME:
-                            type: string
-                          ST_AUTH:
-                            type: string
-                          ST_KEY:
-                            type: string
-                          ST_USER:
-                            type: string
-                        required:
-                        - OS_AUTH_TOKEN
-                        - OS_AUTH_URL
-                        - OS_PASSWORD
-                        - OS_PROJECT_DOMAIN_NAME
-                        - OS_PROJECT_NAME
-                        - OS_REGION_NAME
-                        - OS_STORAGE_URL
-                        - OS_TENANT_ID
-                        - OS_TENANT_NAME
-                        - OS_USERNAME
-                        - OS_USER_DOMAIN_NAME
-                        - ST_AUTH
-                        - ST_KEY
-                        - ST_USER
-                        type: object
-                      spec:
-                        properties:
-                          container:
-                            type: string
-                          prefix:
-                            type: string
-                        required:
-                        - container
                         type: object
                     required:
                     - spec
@@ -483,7 +386,6 @@ properties:
                 - prune
                 type: object
               schedule:
-                description: Schedule specifies the schedule for invoking backup sessions
                 type: string
             required:
             - authSecret
@@ -497,8 +399,7 @@ properties:
             - Stash
             type: string
         required:
-        - clusterMetadata
-        - kubeStash
+        - kubestash
         - stash
         - tool
         type: object
@@ -550,8 +451,6 @@ properties:
                     - namespace
                     type: object
                   schedule:
-                    description: Schedule specifies the schedule for invoking backup
-                      sessions
                     type: string
                   storageRef:
                     description: ObjectReference contains enough information to let
@@ -565,16 +464,10 @@ properties:
                     - name
                     - namespace
                     type: object
-                  storageSecret:
-                    properties:
-                      create:
-                        type: boolean
-                    type: object
                 required:
                 - encryptionSecret
                 - retentionPolicy
                 - storageRef
-                - storageSecret
                 type: object
               stash:
                 properties:
@@ -805,8 +698,6 @@ properties:
                     - prune
                     type: object
                   schedule:
-                    description: Schedule specifies the schedule for invoking backup
-                      sessions
                     type: string
                 required:
                 - authSecret

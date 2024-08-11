@@ -22,7 +22,35 @@
     {{- $res = get (get $machines .Values.spec.podResources.machine) "resources" }}
   {{- end }}
 {{- end }}
-{{ $poolName := printf "my-capi-cluster-%s-%s" .Release.Namespace (include "kubedbcom-solr-editor-options.fullname" .) }}
+
+{{- define "common.placement" -}}
+podPlacementPolicy:
+  name: {{ .Values.spec.admin.clusterTier.placement.default }}
+{{- if eq .Values.spec.admin.deployment.default "Dedicated" }}
+nodeSelector:
+  app: solrs.kubedb.com
+  instance: {{ include "kubedbcom-solr-editor-options.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  nodepool: {{ .Values.spec.admin.clusterTier.nodeTopology.default }}
+tolerations:
+  - key: app
+    operator: "Equal"
+    value: "solrs.kubedb.com"
+    effect: "NoSchedule"
+  - key: instance
+    operator: "Equal"
+    value: {{ include "kubedbcom-solr-editor-options.fullname" . }}
+    effect: "NoSchedule"
+  - key: namespace
+    operator: "Equal"
+    value: {{ .Release.Namespace }}
+    effect: "NoSchedule"
+  - key: nodepool
+    operator: "Equal"
+    value: {{ .Values.spec.admin.clusterTier.nodeTopology.default }}
+    effect: "NoSchedule"
+{{- end }}
+{{- end }}
 
 apiVersion: kubedb.com/v1alpha2
 kind: Solr
@@ -45,7 +73,7 @@ spec:
     overseer:
       replicas: {{ .Values.spec.topology.overseer.replicas }}
       storage:
-        storageClassName: {{ .Values.spec.storageClass.name }}
+        storageClassName: {{ .Values.spec.admin.storageClasses.default }}
         accessModes:
           - ReadWriteOnce
         resources:
@@ -57,19 +85,11 @@ spec:
             - name: solr
               resources:
                 {{- toYaml $overseer_res | nindent 16 }}
-          {{- if and .Values.form.capi.provider .Values.form.capi.dedicated }}
-          nodeSelector:
-            nodes.klusters.dev/pool: {{ $poolName }}
-          tolerations:
-            - key: dedicated
-              operator: "Equal"
-              value: "true"
-              effect: "NoSchedule"
-          {{- end }}
+          {{- include "common.placement" . | nindent 10 }}
     data:
       replicas: {{ .Values.spec.topology.data.replicas }}
       storage:
-        storageClassName: {{ .Values.spec.storageClass.name }}
+        storageClassName: {{ .Values.spec.admin.storageClasses.default }}
         accessModes:
           - ReadWriteOnce
         resources:
@@ -81,19 +101,11 @@ spec:
             - name: solr
               resources:
                 {{- toYaml $data_res | nindent 16 }}
-          {{- if and .Values.form.capi.provider .Values.form.capi.dedicated }}
-          nodeSelector:
-            nodes.klusters.dev/pool: {{ $poolName }}
-          tolerations:
-            - key: dedicated
-              operator: "Equal"
-              value: "true"
-              effect: "NoSchedule"
-          {{- end }}
+          {{- include "common.placement" . | nindent 10 }}
     coordinator:
       replicas: {{ .Values.spec.topology.coordinator.replicas }}
       storage:
-        storageClassName: {{ .Values.spec.storageClass.name }}
+        storageClassName: {{ .Values.spec.admin.storageClasses.default }}
         accessModes:
           - ReadWriteOnce
         resources:
@@ -105,15 +117,7 @@ spec:
             - name: solr
               resources:
                 {{- toYaml $coordinator_res | nindent 16 }}
-          {{- if and .Values.form.capi.provider .Values.form.capi.dedicated }}
-          nodeSelector:
-            nodes.klusters.dev/pool: {{ $poolName }}
-          tolerations:
-            - key: dedicated
-              operator: "Equal"
-              value: "true"
-              effect: "NoSchedule"
-          {{- end }}
+          {{- include "common.placement" . | nindent 10 }}
 {{- else }}
   {{- if eq .Values.spec.mode "Replicaset" }}
   replicas: {{ .Values.spec.replicaSet.replicas }}
@@ -133,32 +137,7 @@ spec:
         - name: solr
           resources:
             {{- toYaml $res | nindent 12 }}
-      podPlacementPolicy:
-        name: {{ .Values.spec.admin.clusterTier.placement.default }}
-      {{- if eq .Values.spec.admin.deployment.default "Dedicated" }}
-      nodeSelector:
-        app: solrs.kubedb.com
-        instance: {{ include "kubedbcom-solr-editor-options.fullname" . }}
-        namespace: {{ .Release.Namespace }}
-        nodepool: {{ .Values.spec.admin.clusterTier.nodeTopology.default }}
-      tolerations:
-        - key: app
-          operator: "Equal"
-          value: "solrs.kubedb.com"
-          effect: "NoSchedule"
-        - key: instance
-          operator: "Equal"
-          value: {{ include "kubedbcom-solr-editor-options.fullname" . }}
-          effect: "NoSchedule"
-        - key: namespace
-          operator: "Equal"
-          value: {{ .Release.Namespace }}
-          effect: "NoSchedule"
-        - key: nodepool
-          operator: "Equal"
-          value: {{ .Values.spec.admin.clusterTier.nodeTopology.default }}
-          effect: "NoSchedule"
-      {{- end }}
+      {{- include "common.placement" . | nindent 6 }}
 {{- end }}
 {{- if .Values.spec.authSecret.name }}
   authSecret:

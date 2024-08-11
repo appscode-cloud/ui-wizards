@@ -17,7 +17,7 @@ metadata:
 {{- end }}
 spec:
   version: {{ .Values.spec.admin.databases.Memcached.versions.default | quote }}
-  replicas: {{ .Values.spec.replicas }}
+  replicas: {{ (eq .Values.spec.mode "Replicaset") | ternary .Values.spec.replicas 1 }}
   podTemplate:
     spec:
       containers:

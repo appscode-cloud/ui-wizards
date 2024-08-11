@@ -37,7 +37,7 @@ steps:
       if: isToggleOn|deployment
       label:
         text: labels.deployment.name
-      onChange: setResourceLimit
+      onChange: onDeploymentChange
       options:
       - description: labels.deployment.shared
         text: Shared
@@ -163,6 +163,26 @@ steps:
           schema:
             $ref: schema#/properties/spec/properties/topology/properties/controller/properties/persistence
           type: single-step-form
+        - elements:
+          - computed: setMachineToCustom
+            fetch: getMachineListForOptions
+            label:
+              text: Machine
+            onChange: setResourceLimitTopology|controller
+            schema:
+              $ref: schema#/properties/spec/properties/topology/properties/controller/properties/podResources/properties/machine
+            type: select
+          - computed: setLimitsCpuOrMem|topology/controller
+            disabled: isMachineNotCustom|topology/controller
+            label:
+              text: labels.resources
+            schema:
+              $ref: schema#/properties/spec/properties/topology/properties/controller/properties/podResources/properties/resources
+            type: resource-input-form
+          label:
+            text: labels.machine_profile
+          show_label: true
+          type: single-step-form
         schema:
           $ref: schema#/properties/spec/properties/topology/properties/controller
         type: single-step-form
@@ -183,6 +203,26 @@ steps:
             type: input
           schema:
             $ref: schema#/properties/spec/properties/topology/properties/broker/properties/persistence
+          type: single-step-form
+        - elements:
+          - computed: setMachineToCustom
+            fetch: getMachineListForOptions
+            label:
+              text: Machine
+            onChange: setResourceLimitTopology|broker
+            schema:
+              $ref: schema#/properties/spec/properties/topology/properties/broker/properties/podResources/properties/machine
+            type: select
+          - computed: setLimitsCpuOrMem|topology/broker
+            disabled: isMachineNotCustom|topology/broker
+            label:
+              text: labels.resources
+            schema:
+              $ref: schema#/properties/spec/properties/topology/properties/broker/properties/podResources/properties/resources
+            type: resource-input-form
+          label:
+            text: labels.machine_profile
+          show_label: true
           type: single-step-form
         schema:
           $ref: schema#/properties/spec/properties/topology/properties/broker
@@ -207,7 +247,7 @@ steps:
         schema:
           $ref: schema#/properties/spec/properties/podResources/properties/resources
         type: resource-input-form
-      if: notEqualToDatabaseMode|Sharded
+      if: notEqualToDatabaseMode|Topology
       label:
         text: labels.machine_profile
       show_label: true

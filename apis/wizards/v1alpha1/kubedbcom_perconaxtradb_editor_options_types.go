@@ -45,16 +45,14 @@ type KubedbcomPerconaxtradbEditorOptionsSpecSpec struct {
 	// +optional
 	Annotations map[string]string `json:"annotations"`
 	// +optional
-	Labels map[string]string `json:"labels"`
-	Mode   GeneralMode       `json:"mode"`
-	// +optional
-	Replicas       int            `json:"replicas,omitempty"`
-	Persistence    Persistence    `json:"persistence"`
-	PodResources   PodResources   `json:"podResources"`
-	AuthSecret     AuthSecret     `json:"authSecret"`
-	DeletionPolicy DeletionPolicy `json:"deletionPolicy"`
-	Configuration  string         `json:"configuration"`
-	Admin          AdminOptions   `json:"admin"`
+	Labels         map[string]string `json:"labels"`
+	Replicas       int               `json:"replicas"`
+	Persistence    Persistence       `json:"persistence"`
+	PodResources   PodResources      `json:"podResources"`
+	AuthSecret     AuthSecret        `json:"authSecret"`
+	DeletionPolicy DeletionPolicy    `json:"deletionPolicy"`
+	Configuration  string            `json:"configuration"`
+	Admin          AdminOptions      `json:"admin"`
 }
 
 type PerconaxtradbAlertsSpecForm struct {

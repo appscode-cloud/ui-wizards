@@ -328,23 +328,47 @@ function getMachineListForOptions() {
   return array
 }
 
-function setLimitsCpuOrMem({ model, getValue, watchDependency }, path) {
-  watchDependency('model#/spec/version')
-  const dbVersion = getValue(model, '/spec/version')
-  const modelPathValue = getValue(model, '/spec/machine')
-
-  if (modelPathValue && modelPathValue !== 'custom') {
-    return (
-      machines[modelPathValue] &&
-      machines[modelPathValue].resources &&
-      machines[modelPathValue].resources.limits[path]
-    )
+function setLimitsCpuOrMem({ model, getValue }, type) {
+  const deploymentType = getValue(model, '/spec/admin/deployment/default')
+  const path = type ? `/spec/${type}/podResources/machine` : '/spec/podResources/machine'
+  const selectedMachine = getValue(model, path)
+  const cpu = getValue(
+    model,
+    type
+      ? `/spec/${type}/podResources/resources/limits/cpu`
+      : `/spec/podResources/resources/limits/cpu`,
+  )
+  const memory = getValue(
+    model,
+    type
+      ? `/spec/${type}/podResources/resources/limits/memory`
+      : `/spec/podResources/resources/limits/memory`,
+  )
+  if (selectedMachine && selectedMachine !== 'custom') {
+    return machines[selectedMachine] && machines[selectedMachine].resources
   } else {
-    if (path === 'cpu') {
-      if (dbVersion >= '6') return '1'
-      else return '.5'
-    } else if (path === 'memory') {
-      return '1024Mi'
+    if (deploymentType === 'Dedicated') {
+      return {
+        limits: {
+          cpu: cpu,
+          memory: memory,
+        },
+        requests: {
+          cpu: cpu,
+          memory: memory,
+        },
+      }
+    } else {
+      return {
+        limits: {
+          cpu: cpu,
+          memory: memory,
+        },
+        requests: {
+          cpu: '250m',
+          memory: '500Mi',
+        },
+      }
     }
   }
 }
@@ -832,8 +856,7 @@ function updateAlertValue({ commit, model, discriminator, getValue }) {
 function setResourceLimit({ commit, model, getValue, watchDependency }) {
   let modelPathValue = getValue(model, '/spec/podResources/machine')
   const deploymentType = getValue(model, '/spec/admin/deployment/default')
-  if (modelPathValue) {
-    if (modelPathValue === 'custom') modelPathValue = 'db.t.micro'
+  if (modelPathValue && modelPathValue !== 'custom') {
     // to avoiding set value by reference, cpu and memory set separately
     if (deploymentType === 'Dedicated') {
       commit('wizard/model$update', {

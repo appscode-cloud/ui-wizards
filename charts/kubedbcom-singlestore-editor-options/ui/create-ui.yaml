@@ -44,7 +44,7 @@ steps:
       if: isToggleOn|deployment
       label:
         text: labels.deployment.name
-      onChange: setResourceLimit
+      onChange: onDeploymentChange
       options:
       - description: labels.deployment.shared
         text: Shared
@@ -157,12 +157,12 @@ steps:
         fetch: getMachineListForOptions
         label:
           text: labels.machine
-        onChange: setResourceLimit
+        onChange: setResourceLimitTopology|aggregator
         schema:
           $ref: schema#/properties/spec/properties/topology/properties/aggregator/properties/podResources/properties/machine
         type: select
-      - computed: setLimitsCpuOrMem
-        disabled: isMachineNotCustom
+      - computed: setLimitsCpuOrMem|topology/aggregator
+        disabled: isMachineNotCustom|topology/aggregator
         label:
           text: labels.resources
         schema:
@@ -190,12 +190,12 @@ steps:
         fetch: getMachineListForOptions
         label:
           text: labels.machine
-        onChange: setResourceLimit
+        onChange: setResourceLimitTopology|leaf
         schema:
           $ref: schema#/properties/spec/properties/topology/properties/leaf/properties/podResources/properties/machine
         type: select
-      - computed: setLimitsCpuOrMem
-        disabled: isMachineNotCustom
+      - computed: setLimitsCpuOrMem|topology/leaf
+        disabled: isMachineNotCustom|topology/leaf
         label:
           text: labels.resources
         schema:

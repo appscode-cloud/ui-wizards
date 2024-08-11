@@ -22,7 +22,35 @@
     {{- $res = get (get $machines .Values.spec.podResources.machine) "resources" }}
   {{- end }}
 {{- end }}
-{{ $poolName := printf "my-capi-cluster-%s-%s" .Release.Namespace (include "kubedbcom-elasticsearch-editor-options.fullname" .) }}
+
+{{- define "common.placement" -}}
+podPlacementPolicy:
+  name: {{ .Values.spec.admin.clusterTier.placement.default }}
+{{- if eq .Values.spec.admin.deployment.default "Dedicated" }}
+nodeSelector:
+  app: elasticsearchs.kubedb.com
+  instance: {{ include "kubedbcom-elasticsearch-editor-options.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  nodepool: {{ .Values.spec.admin.clusterTier.nodeTopology.default }}
+tolerations:
+  - key: app
+    operator: "Equal"
+    value: "elasticsearchs.kubedb.com"
+    effect: "NoSchedule"
+  - key: instance
+    operator: "Equal"
+    value: {{ include "kubedbcom-elasticsearch-editor-options.fullname" . }}
+    effect: "NoSchedule"
+  - key: namespace
+    operator: "Equal"
+    value: {{ .Release.Namespace }}
+    effect: "NoSchedule"
+  - key: nodepool
+    operator: "Equal"
+    value: {{ .Values.spec.admin.clusterTier.nodeTopology.default }}
+    effect: "NoSchedule"
+{{- end }}
+{{- end }}
 
 apiVersion: kubedb.com/v1
 kind: Elasticsearch
@@ -53,44 +81,20 @@ spec:
         - name: elasticsearch
           resources:
             {{- toYaml $res | nindent 12 }}
-      podPlacementPolicy:
-        name: {{ .Values.spec.admin.clusterTier.placement.default }}
-      {{- if eq .Values.spec.admin.deployment.default "Dedicated" }}
-      nodeSelector:
-        app: elasticsearches.kubedb.com
-        instance: {{ include "kubedbcom-elasticsearch-editor-options.fullname" . }}
-        namespace: {{ .Release.Namespace }}
-        nodepool: {{ .Values.spec.admin.clusterTier.nodeTopology.default }}
-      tolerations:
-        - key: app
-          operator: "Equal"
-          value: "elasticsearches.kubedb.com"
-          effect: "NoSchedule"
-        - key: instance
-          operator: "Equal"
-          value: {{ include "kubedbcom-elasticsearch-editor-options.fullname" . }}
-          effect: "NoSchedule"
-        - key: namespace
-          operator: "Equal"
-          value: {{ .Release.Namespace }}
-          effect: "NoSchedule"
-        - key: nodepool
-          operator: "Equal"
-          value: {{ .Values.spec.admin.clusterTier.nodeTopology.default }}
-          effect: "NoSchedule"
-      {{- end }}
+      {{- include "common.placement" . | nindent 6 }}
 {{- else }}
   topology:
     master:
       replicas: {{ .Values.spec.topology.master.replicas }}
-      resources:
-        {{- $resMaster := .Values.spec.resources -}}
-        {{- if and .Values.spec.topology.master.machine (hasKey $machines .Values.spec.topology.master.machine) }}
-          {{- $resMaster = get (get $machines .Values.spec.topology.master.machine) "resources" }}
-        {{- end }}
-        {{- toYaml $resMaster | nindent 8 }}
+      podTemplate:
+        spec:
+          containers:
+            - name: elasticsearch
+              resources:
+                {{- toYaml $master_res | nindent 16 }}
+          {{- include "common.placement" . | nindent 10 }}
       storage:
-        storageClassName: {{ .Values.spec.storageClass.name }}
+        storageClassName: {{ .Values.spec.admin.storageClasses.default }}
         accessModes:
         - ReadWriteOnce
         resources:
@@ -98,14 +102,15 @@ spec:
             storage: {{ .Values.spec.topology.master.persistence.size }}
     data:
       replicas: {{ .Values.spec.topology.data.replicas }}
-      resources:
-        {{- $resData := .Values.spec.resources -}}
-        {{- if and .Values.spec.topology.data.machine (hasKey $machines .Values.spec.topology.data.machine) }}
-          {{- $resData = get (get $machines .Values.spec.topology.data.machine) "resources" }}
-        {{- end }}
-        {{- toYaml $resData | nindent 8 }}
+      podTemplate:
+        spec:
+          containers:
+            - name: elasticsearch
+              resources:
+                {{- toYaml $data_res | nindent 16 }}
+          {{- include "common.placement" . | nindent 10 }}
       storage:
-        storageClassName: {{ .Values.spec.storageClass.name }}
+        storageClassName: {{ .Values.spec.admin.storageClasses.default }}
         accessModes:
         - ReadWriteOnce
         resources:
@@ -113,14 +118,15 @@ spec:
             storage: {{ .Values.spec.topology.data.persistence.size }}
     ingest:
       replicas: {{ .Values.spec.topology.ingest.replicas }}
-      resources:
-        {{- $resIngest := .Values.spec.resources -}}
-        {{- if and .Values.spec.topology.ingest.machine (hasKey $machines .Values.spec.topology.ingest.machine) }}
-          {{- $resIngest = get (get $machines .Values.spec.topology.ingest.machine) "resources" }}
-        {{- end }}
-        {{- toYaml $resIngest | nindent 8 }}
+      podTemplate:
+        spec:
+          containers:
+            - name: elasticsearch
+              resources:
+                {{- toYaml $ingest_res | nindent 16 }}
+          {{- include "common.placement" . | nindent 10 }}
       storage:
-        storageClassName: {{ .Values.spec.storageClass.name }}
+        storageClassName: {{ .Values.spec.admin.storageClasses.default }}
         accessModes:
         - ReadWriteOnce
         resources:

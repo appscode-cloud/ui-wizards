@@ -22,9 +22,8 @@ spec:
   # Labels to add to all the template objects
   labels: {}
 
-  # Standalone, Replicaset, Topology
-  mode: Topology
-  replicas: 3
+  # Standalone, Topology
+  mode: Standalone
   topology:
     clickHouseKeeper:
       host: clickhouse-keeper.click-keeper
@@ -105,7 +104,8 @@ spec:
         # Specify the labels for ServiceMonitor.
         # Prometheus crd will select ServiceMonitor using these labels.
         # Only usable when monitoring agent is `prometheus.io/webhook server`.
-        labels: {}
+        labels:
+          monitoring.appscode.com/prometheus: federated
       toggle: false
     alerts:
       toggle: false
@@ -128,8 +128,6 @@ spec:
         encryptionSecret:
           name: default-encryption-secret
           namespace: stash
-        storageSecret:
-          create: true
 
       stash:
         schedule: "0 */2 * * *"
