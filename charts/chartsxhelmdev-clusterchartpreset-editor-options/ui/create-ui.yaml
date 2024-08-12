@@ -821,8 +821,617 @@ steps:
           text: labels.monitoring.name
         show_label: true
         type: single-step-form
+      if: presetNameEqualsTo|kubedb-ui-presets
       type: single-step-form
-    - elements: []
+    - elements:
+      - elements:
+        - fetch: getProviderList
+          label:
+            text: labels.backend.preset
+          required: true
+          schema:
+            $ref: schema#/properties/spec/properties/backup/properties/tool
+          type: select
+        - elements:
+          - elements:
+            - label:
+                text: labels.backend.provider
+              options:
+              - text: Azure Blob Storage
+                value: azure
+              - text: Google Cloud Service
+                value: gcs
+              - text: AWS S3
+                value: s3
+              schema:
+                $ref: schema#/properties/spec/properties/backup/properties/kubestash/properties/backend/properties/provider
+              type: select
+            - elements:
+              - elements:
+                - label:
+                    text: labels.backend.bucket
+                  required: true
+                  schema:
+                    $ref: schema#/properties/spec/properties/backup/properties/kubestash/properties/backend/properties/s3/properties/spec/properties/bucket
+                  type: input
+                - label:
+                    text: labels.backend.endPoint
+                  required: true
+                  schema:
+                    $ref: schema#/properties/spec/properties/backup/properties/kubestash/properties/backend/properties/s3/properties/spec/properties/endpoint
+                  type: input
+                - label:
+                    text: labels.backend.insecureTLS
+                  schema:
+                    $ref: schema#/properties/spec/properties/backup/properties/kubestash/properties/backend/properties/s3/properties/spec/properties/insecureTLS
+                  type: input
+                - label:
+                    text: labels.backend.prefix
+                  schema:
+                    $ref: schema#/properties/spec/properties/backup/properties/kubestash/properties/backend/properties/s3/properties/spec/properties/prefix
+                  type: input
+                - label:
+                    text: labels.backend.region
+                  schema:
+                    $ref: schema#/properties/spec/properties/backup/properties/kubestash/properties/backend/properties/s3/properties/spec/properties/region
+                  type: input
+                schema:
+                  $ref: schema#/properties/spec/properties/backup/properties/kubestash/properties/backend/properties/s3/properties/spec
+                type: single-step-form
+              - elements:
+                - label:
+                    text: labels.backend.s3.access_key_id
+                  required: true
+                  schema:
+                    $ref: schema#/properties/spec/properties/backup/properties/kubestash/properties/backend/properties/s3/properties/auth/properties/AWS_ACCESS_KEY_ID
+                  type: input
+                - label:
+                    text: labels.backend.s3.secret_access_key
+                  required: true
+                  schema:
+                    $ref: schema#/properties/spec/properties/backup/properties/kubestash/properties/backend/properties/s3/properties/auth/properties/AWS_SECRET_ACCESS_KEY
+                  type: input
+                - label:
+                    text: labels.backend.s3.ca_cert_data
+                  schema:
+                    $ref: schema#/properties/spec/properties/backup/properties/kubestash/properties/backend/properties/s3/properties/auth/properties/CA_CERT_DATA
+                  type: input
+                if: authEnabled
+                schema:
+                  $ref: schema#/properties/spec/properties/backup/properties/kubestash/properties/backend/properties/s3/properties/auth
+                type: single-step-form
+              if: providerType|s3
+              schema:
+                $ref: schema#/properties/spec/properties/backup/properties/kubestash/properties/backend/properties/s3
+              type: single-step-form
+            - elements:
+              - elements:
+                - elements:
+                  - label:
+                      text: labels.backend.container
+                    required: true
+                    schema:
+                      $ref: schema#/properties/spec/properties/backup/properties/kubestash/properties/backend/properties/azure/properties/spec/properties/container
+                    type: input
+                  - label:
+                      text: labels.backend.max_connections
+                    schema:
+                      $ref: schema#/properties/spec/properties/backup/properties/kubestash/properties/backend/properties/azure/properties/spec/properties/maxConnections
+                    type: input
+                  - label:
+                      text: labels.backend.prefix
+                    schema:
+                      $ref: schema#/properties/spec/properties/backup/properties/kubestash/properties/backend/properties/azure/properties/spec/properties/prefix
+                    type: input
+                  schema:
+                    $ref: schema#/properties/spec/properties/backup/properties/kubestash/properties/backend/properties/azure/properties/spec
+                  type: single-step-form
+                - elements:
+                  - label:
+                      text: labels.backend.azure.account_name
+                    required: true
+                    schema:
+                      $ref: schema#/properties/spec/properties/backup/properties/kubestash/properties/backend/properties/azure/properties/auth/properties/AZURE_ACCOUNT_NAME
+                    type: input
+                  - label:
+                      text: labels.backend.azure.account_key
+                    required: true
+                    schema:
+                      $ref: schema#/properties/spec/properties/backup/properties/kubestash/properties/backend/properties/azure/properties/auth/properties/AZURE_ACCOUNT_KEY
+                    type: input
+                  if: authEnabled
+                  schema:
+                    $ref: schema#/properties/spec/properties/backup/properties/kubestash/properties/backend/properties/azure/properties/auth
+                  type: single-step-form
+                if: providerType|azure
+                schema:
+                  $ref: schema#/properties/spec/properties/backup/properties/kubestash/properties/backend/properties/azure
+                type: single-step-form
+              - elements:
+                - elements:
+                  - elements:
+                    - label:
+                        text: labels.backend.bucket
+                      required: true
+                      schema:
+                        $ref: schema#/properties/spec/properties/backup/properties/kubestash/properties/backend/properties/gcs/properties/spec/properties/bucket
+                      type: input
+                    - label:
+                        text: labels.backend.max_connections
+                      schema:
+                        $ref: schema#/properties/spec/properties/backup/properties/kubestash/properties/backend/properties/gcs/properties/spec/properties/maxConnections
+                      type: input
+                    - label:
+                        text: labels.backend.prefix
+                      schema:
+                        $ref: schema#/properties/spec/properties/backup/properties/kubestash/properties/backend/properties/gcs/properties/spec/properties/prefix
+                      type: input
+                    schema:
+                      $ref: schema#/properties/spec/properties/backup/properties/kubestash/properties/backend/properties/gcs/properties/spec
+                    type: single-step-form
+                  type: single-step-form
+                - elements:
+                  - elements:
+                    - label:
+                        text: labels.backend.gcs.project_id
+                      required: true
+                      schema:
+                        $ref: schema#/properties/spec/properties/backup/properties/kubestash/properties/backend/properties/gcs/properties/auth/properties/GOOGLE_PROJECT_ID
+                      type: input
+                    - label:
+                        text: labels.backend.gcs.service_account
+                      required: true
+                      schema:
+                        $ref: schema#/properties/spec/properties/backup/properties/kubestash/properties/backend/properties/gcs/properties/auth/properties/GOOGLE_SERVICE_ACCOUNT_JSON_KEY
+                      type: input
+                    if: authEnabled
+                    schema:
+                      $ref: schema#/properties/spec/properties/backup/properties/kubestash/properties/backend/properties/gcs/properties/auth
+                    type: single-step-form
+                  type: single-step-form
+                if: providerType|gcs
+                schema:
+                  $ref: schema#/properties/spec/properties/backup/properties/kubestash/properties/backend/properties/gcs
+                type: single-step-form
+              type: single-step-form
+            schema:
+              $ref: schema#/properties/spec/properties/backup/properties/kubestash/properties/backend
+            type: single-step-form
+          - elements:
+            - label:
+                text: labels.kubestash.storageSecret
+              schema:
+                $ref: schema#/spec/properties/backup/properties/kubestash/properties/storageSecret/properties/create
+              type: switch
+            schema:
+              $ref: schema#/spec/properties/backup/properties/kubestash/properties/storageSecret
+            type: single-step-form
+          - label:
+              text: labels.kubestash.encryptionSecret
+            required: true
+            schema:
+              $ref: schema#/properties/spec/properties/backup/properties/kubestash/properties/encryptionSecret
+            type: input
+          - label:
+              text: labels.kubestash.retentionPolicy
+            options:
+            - text: Keep 1 week
+              value: keep-1wk
+            - text: Keep 1 Month
+              value: keep-1mo
+            - text: Keep 3 Month
+              value: keep-3mo
+            - text: Keep 1 Year
+              value: keep-1yr
+            required: true
+            schema:
+              $ref: schema#/spec/properties/backup/properties/kubestash/properties/retentionPolicy
+            type: select
+          - label:
+              text: labels.kubestash.schedule
+            schema:
+              $ref: schema#/spec/properties/backup/properties/kubestash/properties/schedule
+            type: input
+          if: presetType|kubestash
+          schema:
+            $ref: schema#/properties/spec/properties/backup/properties/kubestash
+          type: single-step-form
+        - elements:
+          - elements:
+            - label:
+                text: labels.backend.provider
+              options:
+              - text: Azure Blob Storage
+                value: azure
+              - text: Backblaze B2
+                value: b2
+              - text: Google Cloud Service
+                value: gcs
+              - text: AWS S3
+                value: s3
+              - text: OpenStack Swift
+                value: swift
+              schema:
+                $ref: schema#/spec/properties/backup/properties/stash/properties/backend/properties/provider
+              type: select
+            - elements:
+              - elements:
+                - label:
+                    text: labels.backend.container
+                  required: true
+                  schema:
+                    $ref: schema#/spec/properties/backup/properties/stash/properties/backend/properties/azure/properties/spec/properties/container
+                  type: input
+                - label:
+                    text: labels.backend.max_connections
+                  schema:
+                    $ref: schema#/spec/properties/backup/properties/stash/properties/backend/properties/azure/properties/spec/properties/maxConnections
+                  type: input
+                - label:
+                    text: labels.backend.prefix
+                  schema:
+                    $ref: schema#/spec/properties/backup/properties/stash/properties/backend/properties/azure/properties/spec/properties/prefix
+                  type: input
+                schema:
+                  $ref: schema#/spec/properties/backup/properties/stash/properties/backend/properties/azure/properties/spec
+                type: single-step-form
+              - elements:
+                - label:
+                    text: labels.backend.azure.account_name
+                  required: true
+                  schema:
+                    $ref: schema#/spec/properties/backup/properties/stash/properties/backend/properties/azure/properties/auth/properties/AZURE_ACCOUNT_NAME
+                  type: input
+                - label:
+                    text: labels.backend.azure.account_key
+                  required: true
+                  schema:
+                    $ref: schema#/spec/properties/backup/properties/stash/properties/backend/properties/azure/properties/auth/properties/AZURE_ACCOUNT_KEY
+                  type: input
+                schema:
+                  $ref: schema#/spec/properties/backup/properties/stash/properties/backend/properties/azure/properties/auth
+                type: single-step-form
+              if: providerType|azure
+              schema:
+                $ref: schema#/spec/properties/backup/properties/stash/properties/backend/properties/azure
+              type: single-step-form
+            - elements:
+              - elements:
+                - label:
+                    text: labels.backend.bucket
+                  required: true
+                  schema:
+                    $ref: schema#/spec/properties/backup/properties/stash/properties/backend/properties/s3/properties/spec/properties/bucket
+                  type: input
+                - label:
+                    text: labels.backend.endPoint
+                  required: true
+                  schema:
+                    $ref: schema#/spec/properties/backup/properties/stash/properties/backend/properties/s3/properties/spec/properties/endpoint
+                  type: input
+                - label:
+                    text: labels.backend.insecureTLS
+                  schema:
+                    $ref: schema#/spec/properties/backup/properties/stash/properties/backend/properties/s3/properties/spec/properties/insecureTLS
+                  type: input
+                - label:
+                    text: labels.backend.prefix
+                  schema:
+                    $ref: schema#/spec/properties/backup/properties/stash/properties/backend/properties/s3/properties/spec/properties/prefix
+                  type: input
+                - label:
+                    text: labels.backend.region
+                  schema:
+                    $ref: schema#/spec/properties/backup/properties/stash/properties/backend/properties/s3/properties/spec/properties/region
+                  type: input
+                schema:
+                  $ref: schema#/spec/properties/backup/properties/stash/properties/backend/properties/s3/properties/spec
+                type: single-step-form
+              - elements:
+                - label:
+                    text: labels.backend.s3.access_key_id
+                  required: true
+                  schema:
+                    $ref: schema#/spec/properties/backup/properties/stash/properties/backend/properties/s3/properties/auth/properties/AWS_ACCESS_KEY_ID
+                  type: input
+                - label:
+                    text: labels.backend.s3.secret_access_key
+                  required: true
+                  schema:
+                    $ref: schema#/spec/properties/backup/properties/stash/properties/backend/properties/s3/properties/auth/properties/AWS_SECRET_ACCESS_KEY
+                  type: input
+                - label:
+                    text: labels.backend.s3.ca_cert_data
+                  schema:
+                    $ref: schema#/spec/properties/backup/properties/stash/properties/backend/properties/s3/properties/auth/properties/CA_CERT_DATA
+                  type: input
+                schema:
+                  $ref: schema#/spec/properties/backup/properties/stash/properties/backend/properties/s3/properties/auth
+                type: single-step-form
+              if: providerType|s3
+              schema:
+                $ref: schema#/spec/properties/backup/properties/stash/properties/backend/properties/s3
+              type: single-step-form
+            - elements:
+              - elements:
+                - label:
+                    text: labels.backend.bucket
+                  required: true
+                  schema:
+                    $ref: schema#/spec/properties/backup/properties/stash/properties/backend/properties/gcs/properties/spec/properties/bucket
+                  type: input
+                - label:
+                    text: labels.backend.max_connections
+                  schema:
+                    $ref: schema#/spec/properties/backup/properties/stash/properties/backend/properties/gcs/properties/spec/properties/maxConnections
+                  type: input
+                - label:
+                    text: labels.backend.prefix
+                  schema:
+                    $ref: schema#/spec/properties/backup/properties/stash/properties/backend/properties/gcs/properties/spec/properties/prefix
+                  type: input
+                schema:
+                  $ref: schema#/spec/properties/backup/properties/stash/properties/backend/properties/gcs/properties/spec
+                type: single-step-form
+              - elements:
+                - label:
+                    text: labels.backend.gcs.project_id
+                  required: true
+                  schema:
+                    $ref: schema#/spec/properties/backup/properties/stash/properties/backend/properties/gcs/properties/auth/properties/GOOGLE_PROJECT_ID
+                  type: input
+                - label:
+                    text: labels.backend.gcs.service_account
+                  required: true
+                  schema:
+                    $ref: schema#/spec/properties/backup/properties/stash/properties/backend/properties/gcs/properties/auth/properties/GOOGLE_SERVICE_ACCOUNT_JSON_KEY
+                  type: input
+                schema:
+                  $ref: schema#/spec/properties/backup/properties/stash/properties/backend/properties/gcs/properties/auth
+                type: single-step-form
+              if: providerType|gcs
+              schema:
+                $ref: schema#/spec/properties/backup/properties/stash/properties/backend/properties/gcs
+              type: single-step-form
+            - elements:
+              - elements:
+                - label:
+                    text: labels.backend.bucket
+                  required: true
+                  schema:
+                    $ref: schema#/spec/properties/backup/properties/stash/properties/backend/properties/b2/properties/spec/properties/bucket
+                  type: input
+                - label:
+                    text: labels.backend.max_connections
+                  schema:
+                    $ref: schema#/spec/properties/backup/properties/stash/properties/backend/properties/b2/properties/spec/properties/maxConnections
+                  type: input
+                - label:
+                    text: labels.backend.prefix
+                  schema:
+                    $ref: schema#/spec/properties/backup/properties/stash/properties/backend/properties/b2/properties/spec/properties/prefix
+                  type: input
+                schema:
+                  $ref: schema#/spec/properties/backup/properties/stash/properties/backend/properties/b2/properties/spec
+                type: single-step-form
+              - elements:
+                - label:
+                    text: labels.backend.b2.account_id
+                  required: true
+                  schema:
+                    $ref: schema#/spec/properties/backup/properties/stash/properties/backend/properties/b2/properties/auth/properties/B2_ACCOUNT_ID
+                  type: input
+                - label:
+                    text: labels.backend.b2.account_key
+                  required: true
+                  schema:
+                    $ref: schema#/spec/properties/backup/properties/stash/properties/backend/properties/b2/properties/auth/properties/B2_ACCOUNT_KEY
+                  type: input
+                schema:
+                  $ref: schema#/spec/properties/backup/properties/stash/properties/backend/properties/b2/properties/auth
+                type: single-step-form
+              if: providerType|b2
+              schema:
+                $ref: schema#/spec/properties/backup/properties/stash/properties/backend/properties/b2
+              type: single-step-form
+            - elements:
+              - elements:
+                - label:
+                    text: labels.backend.container
+                  required: true
+                  schema:
+                    $ref: schema#/spec/properties/backup/properties/stash/properties/backend/properties/swift/properties/spec/properties/container
+                  type: input
+                - label:
+                    text: labels.backend.prefix
+                  schema:
+                    $ref: schema#/spec/properties/backup/properties/stash/properties/backend/properties/swift/properties/spec/properties/prefix
+                  type: input
+                schema:
+                  $ref: schema#/spec/properties/backup/properties/stash/properties/backend/properties/swift/properties/spec
+                type: single-step-form
+              - elements:
+                - label:
+                    text: labels.backend.swift.os_auth_token
+                  required: true
+                  schema:
+                    $ref: schema#/spec/properties/backup/properties/stash/properties/backend/properties/swift/properties/auth/properties/OS_AUTH_TOKEN
+                  type: input
+                - label:
+                    text: labels.backend.swift.os_auth_url
+                  required: true
+                  schema:
+                    $ref: schema#/spec/properties/backup/properties/stash/properties/backend/properties/swift/properties/auth/properties/OS_AUTH_URL
+                  type: input
+                - label:
+                    text: labels.backend.swift.os_password
+                  required: true
+                  schema:
+                    $ref: schema#/spec/properties/backup/properties/stash/properties/backend/properties/swift/properties/auth/properties/OS_PASSWORD
+                  type: input
+                - label:
+                    text: labels.backend.swift.os_project_domain_name
+                  required: true
+                  schema:
+                    $ref: schema#/spec/properties/backup/properties/stash/properties/backend/properties/swift/properties/auth/properties/OS_PROJECT_DOMAIN_NAME
+                  type: input
+                - label:
+                    text: labels.backend.swift.os_project_name
+                  required: true
+                  schema:
+                    $ref: schema#/spec/properties/backup/properties/stash/properties/backend/properties/swift/properties/auth/properties/OS_PROJECT_NAME
+                  type: input
+                - label:
+                    text: labels.backend.swift.os_region_name
+                  required: true
+                  schema:
+                    $ref: schema#/spec/properties/backup/properties/stash/properties/backend/properties/swift/properties/auth/properties/OS_REGION_NAME
+                  type: input
+                - label:
+                    text: labels.backend.swift.os_storage_url
+                  required: true
+                  schema:
+                    $ref: schema#/spec/properties/backup/properties/stash/properties/backend/properties/swift/properties/auth/properties/OS_STORAGE_URL
+                  type: input
+                - label:
+                    text: labels.backend.swift.os_tenant_id
+                  required: true
+                  schema:
+                    $ref: schema#/spec/properties/backup/properties/stash/properties/backend/properties/swift/properties/auth/properties/OS_TENANT_ID
+                  type: input
+                - label:
+                    text: labels.backend.swift.os_tenant_name
+                  required: true
+                  schema:
+                    $ref: schema#/spec/properties/backup/properties/stash/properties/backend/properties/swift/properties/auth/properties/OS_TENANT_NAME
+                  type: input
+                - label:
+                    text: labels.backend.swift.os_username
+                  required: true
+                  schema:
+                    $ref: schema#/spec/properties/backup/properties/stash/properties/backend/properties/swift/properties/auth/properties/OS_USERNAME
+                  type: input
+                - label:
+                    text: labels.backend.swift.os_user_domain_name
+                  required: true
+                  schema:
+                    $ref: schema#/spec/properties/backup/properties/stash/properties/backend/properties/swift/properties/auth/properties/OS_USER_DOMAIN_NAME
+                  type: input
+                - label:
+                    text: labels.backend.swift.st_auth
+                  required: true
+                  schema:
+                    $ref: schema#/spec/properties/backup/properties/stash/properties/backend/properties/swift/properties/auth/properties/ST_AUTH
+                  type: input
+                - label:
+                    text: labels.backend.swift.st_key
+                  required: true
+                  schema:
+                    $ref: schema#/spec/properties/backup/properties/stash/properties/backend/properties/swift/properties/auth/properties/ST_KEY
+                  type: input
+                - label:
+                    text: labels.backend.swift.st_user
+                  required: true
+                  schema:
+                    $ref: schema#/spec/properties/backup/properties/stash/properties/backend/properties/swift/properties/auth/properties/ST_USER
+                  type: input
+                schema:
+                  $ref: schema#/spec/properties/backup/properties/stash/properties/backend/properties/swift/properties/auth
+                type: single-step-form
+              if: providerType|swift
+              schema:
+                $ref: schema#/spec/properties/backup/properties/stash/properties/backend/properties/swift
+              type: single-step-form
+            schema:
+              $ref: schema#/spec/properties/backup/properties/stash/properties/backend
+            type: single-step-form
+          - label:
+              text: labels.backend.schedule
+            schema:
+              $ref: schema#/spec/properties/backup/properties/stash/properties/schedule
+            type: input
+          - label:
+              text: labels.backend.auth_secret
+            type: label-element
+          - elements:
+            - label:
+                text: labels.stash.authsecret.name
+              schema:
+                $ref: schema#/spec/properties/backup/properties/stash/properties/authsecret/properties/name
+              type: input
+            - label:
+                text: labels.stash.authsecret.password
+              schema:
+                $ref: schema#/spec/properties/backup/properties/stash/properties/authsecret/properties/password
+              type: input
+            schema:
+              $ref: schema#/spec/properties/backup/properties/stash/properties/authsecret
+            type: single-step-form
+          - elements:
+            - label:
+                text: labels.kubestash.retentionPolicy
+              type: label-element
+            - elements:
+              - label:
+                  text: labels.backend.retentionPolicy.name
+                required: true
+                schema:
+                  $ref: schema#/spec/properties/backup/properties/stash/properties/retentionPolicy/properties/name
+                type: input
+              - inputType: number
+                label:
+                  text: labels.backend.retentionPolicy.keepHourly
+                schema:
+                  $ref: schema#/spec/properties/backup/properties/stash/properties/retentionPolicy/properties/keepHourly
+                type: input
+              - inputType: number
+                label:
+                  text: labels.backend.retentionPolicy.keepDaily
+                schema:
+                  $ref: schema#/spec/properties/backup/properties/stash/properties/retentionPolicy/properties/keepDaily
+                type: input
+              - inputType: number
+                label:
+                  text: labels.backend.retentionPolicy.keepLast
+                schema:
+                  $ref: schema#/spec/properties/backup/properties/stash/properties/retentionPolicy/properties/keepLast
+                type: input
+              - inputType: number
+                label:
+                  text: labels.backend.retentionPolicy.keepMonthly
+                schema:
+                  $ref: schema#/spec/properties/backup/properties/stash/properties/retentionPolicy/properties/keepMonthly
+                type: input
+              - inputType: number
+                label:
+                  text: labels.backend.retentionPolicy.keepWeekly
+                schema:
+                  $ref: schema#/spec/properties/backup/properties/stash/properties/retentionPolicy/properties/keepWeekly
+                type: input
+              - inputType: number
+                label:
+                  text: labels.backend.retentionPolicy.keepYearly
+                schema:
+                  $ref: schema#/spec/properties/backup/properties/stash/properties/retentionPolicy/properties/keepYearly
+                type: input
+              - computed: initPrune
+                label:
+                  text: labels.backend.retentionPolicy.prune
+                schema:
+                  $ref: schema#/spec/properties/backup/properties/stash/properties/retentionPolicy/properties/prune
+                type: switch
+              type: single-step-form
+            schema:
+              $ref: schema#/spec/properties/backup/properties/stash/properties/retentionPolicy
+            type: single-step-form
+          if: presetType|stash
+          schema:
+            $ref: schema#/properties/spec/properties/backup/properties/stash
+          type: single-step-form
+        schema:
+          $ref: schema#/properties/spec/backup
+        type: single-step-form
+      if: presetNameEqualsTo|stash-presets
       type: single-step-form
     - elements: []
       type: single-step-form

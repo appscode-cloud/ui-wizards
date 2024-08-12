@@ -158,6 +158,40 @@ async function getNamespaces({ axios, storeGet }) {
   }
 }
 
+function getProviderList() {
+  return ['Stash', 'KubeStash']
+}
+
+function presetType({ getValue, watchDependency, model }, value) {
+  watchDependency('model#/spec/backup/tool')
+  const presetType = getValue(model, '/spec/backup/tool')
+  if (presetType?.toLowerCase() === value) return true
+}
+
+function providerType({ getValue, watchDependency, model }, value) {
+  const presetType = getValue(model, '/spec/backup/tool')?.toLowerCase()
+  watchDependency(`model#/spec/backup/${presetType}/backend/provider`)
+  const provider = getValue(model, `/spec/backup/${presetType}/backend/provider`)
+  return provider === value
+}
+
+function authEnabled({ getValue, watchDependency, model }) {
+  const presetType = getValue(model, '/spec/backup/tool')?.toLowerCase()
+  watchDependency(`model#/spec/backup/${presetType}/storageSecret/create`)
+  const isEnabled = getValue(model, `/spec/backup/${presetType}/storageSecret/create`)
+  return isEnabled
+}
+
+function initPrune({ getValue, model }) {
+  const prune = getValue(model, `/spec/backup/stash/retentionPolicy/prune`)
+  return prune ? prune : false
+}
+
+function presetNameEqualsTo({ storeGet }, value) {
+  const presetName = storeGet('/route/params/presetName') || ''
+  return presetName === value
+}
+
 return {
   getOptions,
   getNodeTopology,
@@ -169,4 +203,10 @@ return {
   getStorageClass,
   getClusterIssuers,
   getNamespaces,
+  getProviderList,
+  presetType,
+  providerType,
+  authEnabled,
+  initPrune,
+  presetNameEqualsTo,
 }
