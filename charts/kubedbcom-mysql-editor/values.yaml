@@ -223,6 +223,48 @@ resources:
     spec:
       ca:
         secretName: mysql-ca
+  coreKubestashComBackupBlueprint: # +doc-gen:break
+    apiVersion: core.kubestash.com/v1alpha1
+    kind: BackupBlueprint
+    metadata:
+      name: mysql
+      namespace: demo
+    spec:
+      backupConfigurationTemplate:
+        backends:
+          - name: mysql-backend
+            retentionPolicy:
+              name: mysql-retention-policy
+              namespace: demo
+            storageRef:
+              name: mysql-storage
+              namespace: demo
+        sessions:
+          - addon:
+              jobTemplate:
+                spec:
+                  securityContext:
+                    runAsGroup: 0
+                    runAsUser: 0
+              name: mysql-addon
+              tasks:
+                - name: logical-backup
+            name: mysql-frequent-backup
+            repositories:
+              - backend: mysql-backend
+                directory: /mysql-repo
+                encryptionSecret:
+                  name: mysql-encryption-secret
+                  namespace: demo
+                name: mysql-repo
+            scheduler:
+              jobTemplate:
+                backoffLimit: 1
+              schedule: '*/5 * * * *'
+            sessionHistoryLimit: 2
+      usagePolicy:
+        allowedNamespaces:
+          from: Same
   coreKubestashComBackupConfiguration: # +doc-gen:break
     apiVersion: core.kubestash.com/v1alpha1
     kind: BackupConfiguration

@@ -194,6 +194,48 @@ resources:
     spec:
       ca:
         secretName: postgres-ca
+  coreKubestashComBackupBlueprint: # +doc-gen:break
+    apiVersion: core.kubestash.com/v1alpha1
+    kind: BackupBlueprint
+    metadata:
+      name: postgres
+      namespace: demo
+    spec:
+      backupConfigurationTemplate:
+        backends:
+          - name: postgres-backend
+            retentionPolicy:
+              name: postgres-retention-policy
+              namespace: demo
+            storageRef:
+              name: postgres-storage
+              namespace: demo
+        sessions:
+          - addon:
+              jobTemplate:
+                spec:
+                  securityContext:
+                    runAsGroup: 0
+                    runAsUser: 0
+              name: postgres-addon
+              tasks:
+                - name: logical-backup
+            name: postgres-frequent-backup
+            repositories:
+              - backend: postgres-backend
+                directory: /postgres-repo
+                encryptionSecret:
+                  name: postgres-encryption-secret
+                  namespace: demo
+                name: postgres-repo
+            scheduler:
+              jobTemplate:
+                backoffLimit: 1
+              schedule: '*/5 * * * *'
+            sessionHistoryLimit: 2
+      usagePolicy:
+        allowedNamespaces:
+          from: Same
   coreKubestashComBackupConfiguration: # +doc-gen:break
     apiVersion: core.kubestash.com/v1alpha1
     kind: BackupConfiguration

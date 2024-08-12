@@ -201,6 +201,48 @@ resources:
     spec:
       ca:
         secretName: mongodb-ca
+  coreKubestashComBackupBlueprint: # +doc-gen:break
+    apiVersion: core.kubestash.com/v1alpha1
+    kind: BackupBlueprint
+    metadata:
+      name: mongodb
+      namespace: demo
+    spec:
+      backupConfigurationTemplate:
+        backends:
+          - name: mongodb-backend
+            retentionPolicy:
+              name: mongodb-retention-policy
+              namespace: demo
+            storageRef:
+              name: mongodb-storage
+              namespace: demo
+        sessions:
+          - addon:
+              jobTemplate:
+                spec:
+                  securityContext:
+                    runAsGroup: 0
+                    runAsUser: 0
+              name: mongodb-addon
+              tasks:
+                - name: logical-backup
+            name: mongodb-frequent-backup
+            repositories:
+              - backend: mongodb-backend
+                directory: /mongo-repo
+                encryptionSecret:
+                  name: mongodb-encryption-secret
+                  namespace: demo
+                name: mongodb-repo
+            scheduler:
+              jobTemplate:
+                backoffLimit: 1
+              schedule: '*/5 * * * *'
+            sessionHistoryLimit: 2
+      usagePolicy:
+        allowedNamespaces:
+          from: Same
   coreKubestashComBackupConfiguration: # +doc-gen:break
     apiVersion: core.kubestash.com/v1alpha1
     kind: BackupConfiguration

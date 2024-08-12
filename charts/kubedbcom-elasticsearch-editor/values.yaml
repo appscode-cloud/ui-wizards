@@ -182,6 +182,48 @@ resources:
       namespace: demo
     spec:
       selfSigned: {}
+  coreKubestashComBackupBlueprint: # +doc-gen:break
+    apiVersion: core.kubestash.com/v1alpha1
+    kind: BackupBlueprint
+    metadata:
+      name: elasticsearch
+      namespace: demo
+    spec:
+      backupConfigurationTemplate:
+        backends:
+          - name: elasticsearch-backend
+            retentionPolicy:
+              name: elasticsearch-retention-policy
+              namespace: demo
+            storageRef:
+              name: elasticsearch-storage
+              namespace: demo
+        sessions:
+          - addon:
+              jobTemplate:
+                spec:
+                  securityContext:
+                    runAsGroup: 0
+                    runAsUser: 0
+              name: elasticsearch-addon
+              tasks:
+                - name: logical-backup
+            name: elasticsearch-frequent-backup
+            repositories:
+              - backend: elasticsearch-backend
+                directory: /es-repo
+                encryptionSecret:
+                  name: elasticsearch-encryption-secret
+                  namespace: demo
+                name: elasticsearch-repo
+            scheduler:
+              jobTemplate:
+                backoffLimit: 1
+              schedule: '*/5 * * * *'
+            sessionHistoryLimit: 2
+      usagePolicy:
+        allowedNamespaces:
+          from: Same
   coreKubestashComBackupConfiguration: # +doc-gen:break
     apiVersion: core.kubestash.com/v1alpha1
     kind: BackupConfiguration
