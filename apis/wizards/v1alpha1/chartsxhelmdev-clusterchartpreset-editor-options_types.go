@@ -48,7 +48,6 @@ type ChartsxhelmdevClusterChartPresetEditorOptionsSpecSpec struct {
 type MonitoringOptions struct{}
 
 type BackupOptions struct {
-	Stash     StashInfo        `json:"stash"`
 	Kubestash KubeStashOptions `json:"kubestash"`
 	// +kubebuilder:default=KubeStash
 	Tool BackupTool `json:"tool"`

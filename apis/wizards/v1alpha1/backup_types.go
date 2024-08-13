@@ -24,7 +24,6 @@ type BackupToolSpec struct {
 	// +kubebuilder:default=KubeStash
 	Tool      BackupTool     `json:"tool"`
 	Kubestash *KubeStashInfo `json:"kubestash,omitempty"`
-	Stash     *StashInfo     `json:"stash,omitempty"`
 	Toggle    bool           `json:"toggle"`
 }
 
