@@ -116,7 +116,6 @@ async function getClusterIssuers({ axios, storeGet }) {
   const url = `/clusters/${owner}/${cluster}/proxy/cert-manager.io/v1/clusterissuers`
   try {
     const resp = await axios.get(url)
-    console.log(resp)
     const mappedResp = resp?.data?.items.map((item) => {
       const name = (item.metadata && item.metadata.name) || ''
       return name
