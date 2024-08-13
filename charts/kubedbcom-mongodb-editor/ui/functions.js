@@ -1105,6 +1105,56 @@ async function getImagePullSecrets({ getValue, model, watchDependency, axios, st
   })
 }
 
+function showBackupOptions({ discriminator, getValue, watchDependency }, backup) {
+  const backupEnabled = getValue(discriminator, '/backupEnabled')
+  console.log({ backupEnabled })
+  if (backupEnabled) {
+    if (backup === 'alert') return true
+    else return false
+  } else {
+    if (backup === 'alert') return false
+    else return true
+  }
+}
+async function isBackupEnabled(
+  { getValue, model, setDiscriminatorValue, axios, storeGet },
+  backup,
+) {
+  const apiGroup = getValue(model, '/metadata/resource/group')
+  const kind = getValue(model, '/metadata/resource/kind')
+  const username = storeGet('/route/params/user')
+  const clusterName = storeGet('/route/params/cluster')
+  const name = storeGet('/route/params/name')
+  const namespace = storeGet('/route/query/namespace')
+  const url = `http://bb.test:3003/api/v1/clusters/${username}/${clusterName}/proxy/core.kubestash.com/v1alpha1/backupconfigurations`
+
+  try {
+    const resp = await axios.get(url)
+    let data = resp.data.items
+    data = data.filter((ele) => {
+      return ele.metadata.name === name
+    })
+    if (
+      data[0] &&
+      data[0].spec &&
+      data[0].spec.target.apiGroup === apiGroup &&
+      data[0].spec.target.kind === kind &&
+      data[0].spec.target.name === name &&
+      data[0].spec.target.namespace === namespace
+    ) {
+      if (backup === 'alert') return true
+      else return true
+      // setDiscriminatorValue('/backupEnabled', true)
+    } else {
+      if (backup === 'alert') return false
+      else return true
+      // setDiscriminatorValue('/backupEnabled', false)
+    }
+  } catch (e) {
+    console.log(e)
+  }
+}
+
 // /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // FOR Backup Configuration
@@ -1363,6 +1413,35 @@ function onRepositoryNameChange({ getValue, model, commit }) {
     path: '/resources/stashAppscodeComBackupConfiguration/spec/repository/name',
     value: repositoryName,
   })
+}
+
+function onInputChange(
+  { getValue, discriminator, watchDependency, commit, model },
+  modelPath,
+  field,
+  subfield,
+) {
+  const value = getValue(discriminator, `/${subfield}`)
+  const backends = getValue(model, modelPath)
+  if (field !== 'encryptionSecret') backends[0][field][subfield] = value
+  else backends[0]['repositories'][0][field][subfield] = value
+  watchDependency(`discriminator#/${subfield}`)
+  commit('wizard/model$update', {
+    path: modelPath,
+    value: backends,
+  })
+}
+function getDefault(
+  { getValue, discriminator, watchDependency, commit, model },
+  modelPath,
+  field,
+  subfield,
+) {
+  const backends = getValue(model, modelPath)
+  if (field !== 'encryptionSecret') return backends[0][field][subfield]
+  else {
+    return backends[0]['repositories'][0][field][subfield]
+  }
 }
 
 // backup blueprint form
@@ -2087,6 +2166,10 @@ function showScheduleBackup({ storeGet }) {
 }
 
 return {
+  getDefault,
+  onInputChange,
+  showBackupOptions,
+  isBackupEnabled,
   showScheduleBackup,
   isVariantAvailable,
   fetchJsons,

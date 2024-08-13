@@ -576,7 +576,20 @@ steps:
     - discriminator:
         backupInvoker:
           type: string
+        backupEnabled:
+          type: boolean
+          default: false
       elements:
+      - type: label-element
+        if: isBackupEnabled|alert
+        label:
+          isSubsection: true
+          text: 'Backup already enabled'
+        alertInfo:
+          show: true
+          type: info
+          hideIcon: false
+        customClass: mb-20
       - computed: initBackupInvoker
         label:
           text: labels.backup.invoker
@@ -586,145 +599,102 @@ steps:
           value: backupConfiguration
         - text: Backup Blueprint
           value: backupBlueprint
-        - text: Legacy Backup Configuration
-          value: legacyBackupConfiguration
         schema:
           $ref: discriminator#/properties/backupInvoker
-        type: select
-      - discriminator:
-          targetType:
-            type: string
-        elements:
-        - discriminator:
-            repositoryChoise:
-              default: select
-              type: string
-          elements:
-          - label:
-              isSubsection: true
-              text: labels.repositories.title
-            type: label-element
-          - disabled: isEqualToDiscriminatorPath|yes|/repoInitialSelectionStatus
-            onChange: onRepositoryChoiseChange
-            options:
-            - text: options.createOrSelect.select.text
-              value: select
-            - text: options.createOrSelect.create.text
-              value: create
-            schema:
-              $ref: discriminator#/properties/repositoryChoise
-            type: radio
-          - allowUserDefinedOption: true
-            disabled: isEqualToDiscriminatorPath|yes|/repoInitialSelectionStatus
-            fetch: resourceNames|stash.appscode.com|v1alpha1|repositories
-            if: showRepositorySelectOrCreate|select
-            label:
-              text: labels.repositories.title
-            schema:
-              $ref: schema#/properties/resources/properties/stashAppscodeComBackupConfiguration/properties/spec/properties/repository/properties/name
-            type: select
-          - alias: repository_create_backup
-            chart:
-              name: uibytebuildersdev-component-repository-create
-              version: v0.5.0
-            dataContext:
-              namespace:
-                $ref: schema#/properties/metadata/properties/release/properties/namespace
-            if: showRepositorySelectOrCreate|create
-            moduleResolver: fetchJsons
-            schema:
-              $ref: schema#/properties/resources/properties/stashAppscodeComRepository_repo/properties/spec/properties/backend
-            type: reusable-element
-          type: single-step-form
-        - if: returnFalse
-          label:
-            text: labels.backupConfiguration.targetReference.name
-          schema:
-            $ref: schema#/properties/resources/properties/stashAppscodeComBackupConfiguration/properties/spec/properties/target/properties/ref/properties/name
-          type: input
+        if: isBackupEnabled|backup
+        type: radio
+      - elements:
         - label:
             text: labels.backupConfiguration.schedule
           schema:
             $ref: schema#/properties/resources/properties/stashAppscodeComBackupConfiguration/properties/spec/properties/schedule
           type: input
-        - label:
-            isSubsection: true
-            text: labels.backupConfiguration.retentionPolicy.title
-          type: label-element
-        - label:
-            text: labels.backupConfiguration.retentionPolicy.name
-          schema:
-            $ref: schema#/properties/resources/properties/stashAppscodeComBackupConfiguration/properties/spec/properties/retentionPolicy/properties/name
-          type: input
-        - label:
-            text: labels.backupConfiguration.retentionPolicy.keepLast
-          schema:
-            $ref: schema#/properties/resources/properties/stashAppscodeComBackupConfiguration/properties/spec/properties/retentionPolicy/properties/keepLast
-          type: input
-        - label:
-            text: labels.backupConfiguration.retentionPolicy.keepHourly
-          schema:
-            $ref: schema#/properties/resources/properties/stashAppscodeComBackupConfiguration/properties/spec/properties/retentionPolicy/properties/keepHourly
-          type: input
-        - label:
-            text: labels.backupConfiguration.retentionPolicy.keepDaily
-          schema:
-            $ref: schema#/properties/resources/properties/stashAppscodeComBackupConfiguration/properties/spec/properties/retentionPolicy/properties/keepDaily
-          type: input
-        - label:
-            text: labels.backupConfiguration.retentionPolicy.keepWeekly
-          schema:
-            $ref: schema#/properties/resources/properties/stashAppscodeComBackupConfiguration/properties/spec/properties/retentionPolicy/properties/keepWeekly
-          type: input
-        - label:
-            text: labels.backupConfiguration.retentionPolicy.keepMonthly
-          schema:
-            $ref: schema#/properties/resources/properties/stashAppscodeComBackupConfiguration/properties/spec/properties/retentionPolicy/properties/keepMonthly
-          type: input
-        - label:
-            text: labels.backupConfiguration.retentionPolicy.keepYearly
-          schema:
-            $ref: schema#/properties/resources/properties/stashAppscodeComBackupConfiguration/properties/spec/properties/retentionPolicy/properties/keepYearly
-          type: input
-        - if: returnFalse
-          label:
-            text: labels.backupConfiguration.retentionPolicy.prune
-          schema:
-            $ref: schema#/properties/resources/properties/stashAppscodeComBackupConfiguration/properties/spec/properties/retentionPolicy/properties/prune
-          type: switch
-        - discriminator:
-            customizeRestoreJobRuntimeSettings:
+        - type: single-step-form
+          discriminator:
+            name: 
               type: string
+            namespace: 
+              type: string
+          show_label: true
+          label:
+            text: StorageRef
           elements:
-          - computed: initCustomizeRestoreJobRuntimeSettingsForBackup
-            label:
-              isSubsection: true
-              text: labels.runtimeSettings.choiseForBackup
-            onChange: onCustomizeRestoreJobRuntimeSettingsChangeForBackup
-            options:
-            - text: options.yesOrNo.yes.text
-              value: "yes"
-            - text: options.yesOrNo.no.text
-              value: "no"
-            schema:
-              $ref: discriminator#/properties/customizeRestoreJobRuntimeSettings
-            type: radio
-          - alias: runtime_settings_backup
-            chart:
-              name: uibytebuildersdev-component-runtime-settings
-              version: v0.5.0
-            dataContext:
-              namespace:
-                $ref: schema#/properties/metadata/properties/release/properties/namespace
-            if: showRuntimeForm|yes
-            moduleResolver: fetchJsons
-            schema:
-              $ref: schema#/properties/resources/properties/stashAppscodeComBackupConfiguration/properties/spec/properties/runtimeSettings
-            type: reusable-element
-          type: single-step-form
+            - type: input
+              label:
+                text: Name
+              computed: getDefault|/resources/coreKubestashComBackupConfiguration/spec/backends|storageRef|name
+              onChange: onInputChange|resources/coreKubestashComBackupConfiguration/spec/backends|storageRef|name
+              schema:
+                $ref: discriminator#/name
+            - type: select
+              label:
+                text: Namespace
+              options:
+                - text: stash
+                  value: stash
+              computed: getDefault|/resources/coreKubestashComBackupConfiguration/spec/backends|storageRef|namespace
+              onChange: onInputChange|resources/coreKubestashComBackupConfiguration/spec/backends|storageRef|namespace
+              schema:
+                $ref: discriminator#/namespace
+        - type: single-step-form
+          discriminator:
+            name: 
+              type: string
+            namespace: 
+              type: string
+          show_label: true
+          label:
+            text: retentionPolicy
+          elements:
+            - type: input
+              label:
+                text: Name
+              schema:
+                $ref: discriminator#/name
+                # $ref: schema#/properties/resources/properties/coreKubestashComBackupConfiguration/properties/spec/properties/backends/items/properties/retentionPolicy/properties/name
+              computed: getDefault|/resources/coreKubestashComBackupConfiguration/spec/backends|retentionPolicy|name
+              onChange: onInputChange|resources/coreKubestashComBackupConfiguration/spec/backends|retentionPolicy|name
+            - type: select
+              label:
+                text: Namespace
+              options:
+                - text: stash
+                  value: stash
+              schema:
+                $ref: discriminator#/namespace
+                # $ref: schema#/properties/resources/properties/coreKubestashComBackupConfiguration/properties/spec/properties/backends/items/properties/retentionPolicy/properties/namespace                
+              computed: getDefault|/resources/coreKubestashComBackupConfiguration/spec/backends|retentionPolicy|namespace
+              onChange: onInputChange|resources/coreKubestashComBackupConfiguration/spec/backends|retentionPolicy|namespace
+        - type: single-step-form
+          discriminator:
+            name: 
+              type: string
+            namespace: 
+              type: string
+          show_label: true
+          label:
+            text: encryptionSecret
+          elements:
+            - type: input
+              label:
+                text: Name
+              computed: getDefault|/resources/coreKubestashComBackupConfiguration/spec/sessions|encryptionSecret|name
+              onChange: onInputChange|/resources/coreKubestashComBackupConfiguration/spec/sessions|encryptionSecret|name
+              schema:
+                $ref: discriminator#/name
+                # $ref: schema#/properties/resources/properties/coreKubestashComBackupConfiguration/properties/spec/properties/sessions/items/properties/repositories/items/properties/encryptionSecret/properties/name
+            - type: select
+              label:
+                text: Namespace
+              options:
+                - text: stash
+                  value: stash
+              computed: getDefault|/resources/coreKubestashComBackupConfiguration/spec/sessions|encryptionSecret|namespace
+              onChange: onInputChange|/resources/coreKubestashComBackupConfiguration/spec/sessions|encryptionSecret|namespace
+              schema:
+                $ref: discriminator#/namespace
+                # $ref: schema#/properties/resources/properties/coreKubestashComBackupConfiguration/properties/spec/properties/sessions/items/properties/repositories/items/properties/encryptionSecret/properties/namespace
         if: showInvokerForm|backupConfiguration
-        label:
-          text: Backup Configuration form
         type: single-step-form
       - discriminator:
           backupBlueprintName:
@@ -737,6 +707,74 @@ steps:
             type: object
         elements:
         - label:
+            text: labels.backupConfiguration.schedule
+          schema:
+            $ref: schema#/properties/resources/properties/stashAppscodeComBackupConfiguration/properties/spec/properties/schedule
+          type: input
+        - type: single-step-form
+          show_label: true
+          label:
+            text: StorageRef
+          schema:
+            $ref: schema#/properties/resources/properties/coreKubestashComBackupConfiguration/properties/spec/properties/backends/items/properties/storageRef
+          elements:
+            - type: input
+              label:
+                text: Name
+              schema:
+                $ref: schema#/properties/resources/properties/coreKubestashComBackupConfiguration/properties/spec/properties/backends/items/properties/storageRef/properties/name
+            - type: select
+              label:
+                text: Namespace
+              schema:
+                $ref: schema#/properties/resources/properties/coreKubestashComBackupConfiguration/properties/spec/properties/backends/items/properties/storageRef/properties/namespace
+        - type: single-step-form
+          show_label: true
+          label:
+            text: retentionPolicy
+          schema:
+            $ref: schema#/properties/resources/properties/coreKubestashComBackupConfiguration/properties/spec/properties/backends/items/properties/retentionPolicy
+          elements:
+            - type: input
+              label:
+                text: Name
+              schema:
+                $ref: schema#/properties/resources/properties/coreKubestashComBackupConfiguration/properties/spec/properties/backends/items/properties/retentionPolicy/properties/name
+            - type: input
+              label:
+                text: Namespace
+              schema:
+                $ref: schema#/properties/resources/properties/coreKubestashComBackupConfiguration/properties/spec/properties/backends/items/properties/retentionPolicy/properties/namespace                
+        - type: single-step-form
+          show_label: true
+          label:
+            text: encryptionSecret
+          schema:
+            $ref: schema#/properties/resources/properties/coreKubestashComBackupConfiguration/properties/spec/properties/sessions/items/properties/repositories/items/properties/encryptionSecret
+          elements:
+            - type: input
+              label:
+                text: Name
+              schema:
+                $ref: schema#/properties/resources/properties/coreKubestashComBackupConfiguration/properties/spec/properties/sessions/items/properties/repositories/items/properties/encryptionSecret/properties/name
+            - type: input
+              label:
+                text: Namespace
+              schema:
+                $ref: schema#/properties/resources/properties/coreKubestashComBackupConfiguration/properties/spec/properties/sessions/items/properties/repositories/items/properties/encryptionSecret/properties/namespace
+        - label:
+            text: Usage Policy
+          schema:
+            $ref: schema#/properties/resources/properties/stashAppscodeComRepository_repo/properties/spec/properties/usagePolicy/properties/allowedNamespaces/properties/from/default
+          options:
+            - text: All
+              value: All
+            - text: Same
+              value: Same
+            - text: Selector
+              value: Selector
+          type: select
+        - label:
             text: labels.backupBlueprint.title
           type: label-element
         - allowUserDefinedOption: true
@@ -748,30 +786,6 @@ steps:
           schema:
             $ref: discriminator#/properties/backupBlueprintName
           type: select
-        - computed: initFromAnnotationValue|stash.appscode.com/schedule
-          label:
-            text: labels.backupBlueprint.schedule
-          onChange: onBackupBlueprintScheduleChange
-          schema:
-            $ref: discriminator#/properties/schedule
-          type: input
-        - computed: initFromAnnotationKeyValue|params.stash.appscode.com/
-          isArray: true
-          keys:
-            label:
-              text: Key
-          label:
-            text: labels.backupBlueprint.taskParameters
-          onChange: onTaskParametersChange
-          schema:
-            $ref: discriminator#/properties/taskParameters
-          type: key-value-input-form
-          values:
-            label:
-              text: Value
-            schema:
-              $ref: discriminator#/properties/taskParameters/additionalProperties
-            type: input
         if: showInvokerForm|backupBlueprint
         label:
           text: Backup Blueprint form
