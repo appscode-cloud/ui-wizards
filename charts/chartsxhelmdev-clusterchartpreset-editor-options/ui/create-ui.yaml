@@ -817,8 +817,38 @@ steps:
           schema:
             $ref: schema#/properties/spec/properties/kubeDB/properties/monitoring/properties/agent
           type: radio
+        - label:
+            text: labels.monitoring.exporter.name
+          schema:
+            $ref: schema#/properties/spec/properties/kubeDB/properties/monitoring/properties/exporter/properties/resources 
+          type: resource-input-form
         label:
           text: labels.monitoring.name
+        show_label: true
+        type: single-step-form
+      - elements:
+        - label:
+            text: labels.alert.toggle
+          schema:
+            $ref: schema#/properties/spec/properties/kubeDB/properties/alert/properties/toggle
+          type: switch
+        label:
+          text: labels.alert.name
+        show_label: true
+        type: single-step-form
+      - elements:
+        - label:
+            text: labels.archiver.toggle
+          schema:
+            $ref: schema#/properties/spec/properties/kubeDB/properties/archiver/properties/toggle
+          type: switch
+        - label:
+            text: labels.archiver.default
+          schema:
+            $ref: schema#/properties/spec/properties/kubeDB/properties/archiver/properties/default
+          type: switch
+        label:
+          text: labels.archiver.name
         show_label: true
         type: single-step-form
       if: presetNameEqualsTo|kubedb-ui-presets
