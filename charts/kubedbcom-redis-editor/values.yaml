@@ -154,6 +154,48 @@ resources:
     spec:
       ca:
         secretName: redis-ca
+  coreKubestashComBackupBlueprint: # +doc-gen:break
+    apiVersion: core.kubestash.com/v1alpha1
+    kind: BackupBlueprint
+    metadata:
+      name: redis
+      namespace: demo
+    spec:
+      backupConfigurationTemplate:
+        backends:
+          - name: redis-backend
+            retentionPolicy:
+              name: redis-retention-policy
+              namespace: demo
+            storageRef:
+              name: redis-storage
+              namespace: demo
+        sessions:
+          - addon:
+              jobTemplate:
+                spec:
+                  securityContext:
+                    runAsGroup: 0
+                    runAsUser: 0
+              name: redis-addon
+              tasks:
+                - name: logical-backup
+            name: redis-frequent-backup
+            repositories:
+              - backend: redis-backend
+                directory: /redis-repo
+                encryptionSecret:
+                  name: redis-encryption-secret
+                  namespace: demo
+                name: redis-repo
+            scheduler:
+              jobTemplate:
+                backoffLimit: 1
+              schedule: '*/5 * * * *'
+            sessionHistoryLimit: 2
+      usagePolicy:
+        allowedNamespaces:
+          from: Same
   coreKubestashComBackupConfiguration: # +doc-gen:break
     apiVersion: core.kubestash.com/v1alpha1
     kind: BackupConfiguration

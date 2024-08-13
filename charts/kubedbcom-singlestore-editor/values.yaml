@@ -158,6 +158,118 @@ resources:
     spec:
       ca:
         secretName: singlestore-ca
+  coreKubestashComBackupBlueprint: # +doc-gen:break
+    apiVersion: core.kubestash.com/v1alpha1
+    kind: BackupBlueprint
+    metadata:
+      name: singlestore
+      namespace: demo
+    spec:
+      backupConfigurationTemplate:
+        backends:
+          - name: singlestore-backend
+            retentionPolicy:
+              name: singlestore-retention-policy
+              namespace: demo
+            storageRef:
+              name: singlestore-storage
+              namespace: demo
+        sessions:
+          - addon:
+              jobTemplate:
+                spec:
+                  securityContext:
+                    runAsGroup: 0
+                    runAsUser: 0
+              name: singlestore-addon
+              tasks:
+                - name: logical-backup
+            name: singlestore-frequent-backup
+            repositories:
+              - backend: singlestore-backend
+                directory: /mongo-repo
+                encryptionSecret:
+                  name: singlestore-encryption-secret
+                  namespace: demo
+                name: singlestore-repo
+            scheduler:
+              jobTemplate:
+                backoffLimit: 1
+              schedule: '*/5 * * * *'
+            sessionHistoryLimit: 2
+      usagePolicy:
+        allowedNamespaces:
+          from: Same
+  coreKubestashComBackupConfiguration: # +doc-gen:break
+    apiVersion: core.kubestash.com/v1alpha1
+    kind: BackupConfiguration
+    metadata:
+      name: singlestore
+      namespace: demo
+    spec:
+      backends:
+        - name: singlestore-backend
+          retentionPolicy:
+            name: singlestore-retention-policy
+            namespace: demo
+          storageRef:
+            name: singlestore-storage
+            namespace: demo
+      sessions:
+        - addon:
+            jobTemplate:
+              spec:
+                securityContext:
+                  runAsGroup: 0
+                  runAsUser: 0
+            name: singlestore-addon
+            tasks:
+              - name: logical-backup
+          name: singlestore-frequent-backup
+          repositories:
+            - backend: singlestore-backend
+              directory: /mongo-repo
+              encryptionSecret:
+                name: singlestore-encryption-secret
+                namespace: demo
+              name: singlestore-repo
+          scheduler:
+            jobTemplate:
+              backoffLimit: 1
+            schedule: '*/5 * * * *'
+          sessionHistoryLimit: 2
+      target:
+        apiGroup: kubedb.com
+        kind: Singlestore
+        name: singlestore
+        namespace: demo
+  coreKubestashComRestoreSession: # +doc-gen:break
+    apiVersion: core.kubestash.com/v1alpha1
+    kind: RestoreSession
+    metadata:
+      name: singlestore
+      namespace: demo
+    spec:
+      addon:
+        jobTemplate:
+          spec:
+            securityContext:
+              runAsGroup: 0
+              runAsUser: 0
+        name: singlestore-addon
+        tasks:
+          - name: logical-backup-restore
+      dataSource:
+        encryptionSecret:
+          name: singlestore-encryption-secret
+          namespace: demo
+        repository: singlestore-repo
+        snapshot: latest
+      target:
+        apiGroup: kubedb.com
+        kind: Singlestore
+        name: singlestore
+        namespace: demo
   kubedbComSinglestore: # +doc-gen:break
     apiVersion: kubedb.com/v1alpha2
     kind: Singlestore
