@@ -30,6 +30,15 @@ function setProvider() {
   return 's3'
 }
 
+function setTool({ commit }) {
+  commit('wizard/model$update', {
+    path: '/tool',
+    value: 'KubeStash',
+    force: true,
+  })
+  return 'KubeStash'
+}
+
 function returnFalse() {
   return false
 }
@@ -40,5 +49,6 @@ return {
   setStorageSecret,
   onAuthChange,
   setProvider,
+  setTool,
   returnFalse,
 }
