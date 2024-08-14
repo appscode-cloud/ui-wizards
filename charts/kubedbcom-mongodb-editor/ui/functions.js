@@ -1107,7 +1107,6 @@ async function getImagePullSecrets({ getValue, model, watchDependency, axios, st
 
 function showBackupOptions({ discriminator, getValue, watchDependency }, backup) {
   const backupEnabled = getValue(discriminator, '/backupEnabled')
-  console.log({ backupEnabled })
   if (backupEnabled) {
     if (backup === 'alert') return true
     else return false
@@ -1116,6 +1115,38 @@ function showBackupOptions({ discriminator, getValue, watchDependency }, backup)
     else return true
   }
 }
+
+function isBlueprintOption({ discriminator, getValue, watchDependency }, value) {
+  watchDependency('discriminator#/blueprintOptions')
+  const blueprintOptions = getValue(discriminator, '/blueprintOptions')
+  return blueprintOptions === value
+}
+
+function ifUsagePolicy({ discriminator, getValue, watchDependency, model }, value) {
+  watchDependency(
+    'model#/resources/coreKubestashComBackupBlueprint/spec/usagePolicy/allowedNamespaces/from/default',
+  )
+  const usagePolicy = getValue(
+    model,
+    '/resources/coreKubestashComBackupBlueprint/spec/usagePolicy/allowedNamespaces/from/default',
+  )
+  return usagePolicy === value
+}
+
+async function getBlueprints({ getValue, model, setDiscriminatorValue, axios, storeGet }, backup) {
+  const username = storeGet('/route/params/user')
+  const clusterName = storeGet('/route/params/cluster')
+  const url = `http://bb.test:3003/api/v1/clusters/${username}/${clusterName}/proxy/core.kubestash.com/v1alpha1/backupblueprints`
+
+  try {
+    const resp = await axios.get(url)
+    let data = resp.data.items
+    return data
+  } catch (e) {
+    console.log(e)
+  }
+}
+
 async function isBackupEnabled(
   { getValue, model, setDiscriminatorValue, axios, storeGet },
   backup,
@@ -1144,11 +1175,9 @@ async function isBackupEnabled(
     ) {
       if (backup === 'alert') return true
       else return true
-      // setDiscriminatorValue('/backupEnabled', true)
     } else {
       if (backup === 'alert') return false
       else return true
-      // setDiscriminatorValue('/backupEnabled', false)
     }
   } catch (e) {
     console.log(e)
@@ -1313,6 +1342,13 @@ function initBackupInvoker({ getValue, model }) {
   else return undefined
 }
 
+function initBlueprint() {
+  return 'create'
+}
+function initUsagePolicy() {
+  return 'Same'
+}
+
 function onBackupInvokerChange({ getValue, discriminator, commit, model }) {
   const backupInvoker = getValue(discriminator, '/backupInvoker')
 
@@ -1420,28 +1456,57 @@ function onInputChange(
   modelPath,
   field,
   subfield,
+  discriminatorName,
 ) {
-  const value = getValue(discriminator, `/${subfield}`)
+  const value = getValue(discriminator, `/${discriminatorName}`)
   const backends = getValue(model, modelPath)
+  watchDependency(`discriminator#/${discriminatorName}`)
   if (field !== 'encryptionSecret') backends[0][field][subfield] = value
   else backends[0]['repositories'][0][field][subfield] = value
-  watchDependency(`discriminator#/${subfield}`)
   commit('wizard/model$update', {
     path: modelPath,
     value: backends,
   })
 }
+
+function onInputChangeSchedule(
+  { getValue, discriminator, watchDependency, commit, model },
+  modelPath,
+  discriminatorName,
+) {
+  watchDependency(`discriminator#/${discriminatorName}`)
+  const value = getValue(discriminator, `/${discriminatorName}`)
+  const session = getValue(model, modelPath)
+  session[0].scheduler.schedule = value
+  commit('wizard/model$update', {
+    path: modelPath,
+    value: session,
+  })
+}
+
 function getDefault(
   { getValue, discriminator, watchDependency, commit, model },
   modelPath,
   field,
   subfield,
+  discriminatorName,
 ) {
+  watchDependency(`discriminator#/${discriminatorName}`)
   const backends = getValue(model, modelPath)
   if (field !== 'encryptionSecret') return backends[0][field][subfield]
   else {
     return backends[0]['repositories'][0][field][subfield]
   }
+}
+
+function getDefaultSchedule(
+  { getValue, discriminator, watchDependency, commit, model },
+  modelPath,
+  discriminatorName,
+) {
+  watchDependency(`model#/${modelPath}`)
+  const session = getValue(model, modelPath)
+  return session[0].scheduler.schedule
 }
 
 // backup blueprint form
@@ -2166,6 +2231,13 @@ function showScheduleBackup({ storeGet }) {
 }
 
 return {
+  onInputChangeSchedule,
+  getDefaultSchedule,
+  getBlueprints,
+  ifUsagePolicy,
+  initUsagePolicy,
+  isBlueprintOption,
+  initBlueprint,
   getDefault,
   onInputChange,
   showBackupOptions,
