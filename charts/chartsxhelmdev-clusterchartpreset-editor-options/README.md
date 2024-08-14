@@ -112,6 +112,7 @@ The following table lists the configurable parameters of the `chartsxhelmdev-clu
 | spec.backup.kubestash.retentionPolicy                                  |                                                                                                                                                                           | <code>keep-1wk</code>                                     |
 | spec.backup.kubestash.schedule                                         |                                                                                                                                                                           | <code>'*/30 * * * *'</code>                               |
 | spec.backup.kubestash.storageSecret.create                             |                                                                                                                                                                           | <code>true</code>                                         |
+| spec.backup.kubestash.usePrefix                                        |                                                                                                                                                                           | <code>""</code>                                           |
 
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm upgrade -i`. For example:

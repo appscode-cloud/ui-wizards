@@ -51,6 +51,8 @@ type BackupOptions struct {
 	Kubestash KubeStashOptions `json:"kubestash"`
 	// +kubebuilder:default=KubeStash
 	Tool BackupTool `json:"tool"`
+	// +optional
+	UsePrefix string `json:"usePrefix"`
 }
 
 type KubeStashOptions struct {
