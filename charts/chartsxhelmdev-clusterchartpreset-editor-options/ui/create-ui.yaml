@@ -824,18 +824,34 @@ steps:
       if: presetNameEqualsTo|kubedb-ui-presets
       type: single-step-form
     - elements:
-      - alias: reusable_stash-presets
-        chart:
-          name: uibytebuildersdev-component-stash-presets
-          version: v0.4.21
-        moduleResolver: fetchJsons
+      - elements:
+        - alias: reusable_stash-presets
+          chart:
+            name: uibytebuildersdev-component-stash-presets
+            version: v0.4.21
+          moduleResolver: fetchJsons
+          schema:
+            $ref: schema#/properties/spec/properties/backup/properties/kubestash
+          type: reusable-element
+        - computed: setTool
+          if: returnFalse
+          schema: 
+            $ref: schema#/properties/spec/properties/backup/properties/tool
+          type: input
+        - label:
+            text: labels.usePrefix
+          schema:
+            $ref: schema#/properties/spec/properties/backup/properties/usePrefix
+          type: input
         schema:
-          $ref: schema#/properties/spec/backup
-        type: reusable-element
+          $ref: schema#/properties/spec/properties/backup
+        type: single-step-form
       if: presetNameEqualsTo|stash-presets
       type: single-step-form
     - elements: []
       type: single-step-form
+    schema:
+      $ref: schema#/properties/spec
     type: single-step-form
   id: options
   title: Basic

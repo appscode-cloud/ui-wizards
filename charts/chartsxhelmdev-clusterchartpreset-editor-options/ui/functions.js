@@ -192,6 +192,19 @@ function presetNameEqualsTo({ storeGet }, value) {
   return presetName === value
 }
 
+function setTool({ commit }) {
+  commit('wizard/model$update', {
+    path: '/spec/backup/tool',
+    value: 'KubeStash',
+    force: true,
+  })
+  return 'KubeStash'
+}
+
+function returnFalse() {
+  return false
+}
+
 async function fetchJsons({ axios, itemCtx }) {
   let ui = {}
   let language = {}
@@ -239,5 +252,7 @@ return {
   authEnabled,
   initPrune,
   presetNameEqualsTo,
+  setTool,
+  returnFalse,
   fetchJsons,
 }

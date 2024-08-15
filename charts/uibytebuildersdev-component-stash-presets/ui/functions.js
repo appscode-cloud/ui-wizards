@@ -1,8 +1,8 @@
 let storageSecretSwitch = false
 
 function providerType({ getValue, watchDependency, model }, value) {
-  watchDependency('model#/kubestash/backend/provider')
-  const provider = getValue(model, '/kubestash/backend/provider')
+  watchDependency('model#/backend/provider')
+  const provider = getValue(model, '/backend/provider')
   return provider === value
 }
 
@@ -20,7 +20,7 @@ function onAuthChange({ getValue, discriminator, commit }, type) {
   const auth = getValue(discriminator, `/${type}`) || false
   storageSecretSwitch = auth
   commit('wizard/model$update', {
-    path: '/kubestash/storageSecret/create',
+    path: '/storageSecret/create',
     value: auth,
     force: true,
   })
@@ -28,15 +28,6 @@ function onAuthChange({ getValue, discriminator, commit }, type) {
 
 function setProvider() {
   return 's3'
-}
-
-function setTool({ commit }) {
-  commit('wizard/model$update', {
-    path: '/tool',
-    value: 'KubeStash',
-    force: true,
-  })
-  return 'KubeStash'
 }
 
 function returnFalse() {
@@ -49,6 +40,5 @@ return {
   setStorageSecret,
   onAuthChange,
   setProvider,
-  setTool,
   returnFalse,
 }
