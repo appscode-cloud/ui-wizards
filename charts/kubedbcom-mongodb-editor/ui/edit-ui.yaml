@@ -629,14 +629,15 @@ steps:
             - type: select
               label:
                 text: Namespace
-              fetch: fetchNamespaces|v1alpha1|backupstorages
+              fetch: fetchNamespaces
               computed: getDefault|/resources/coreKubestashComBackupConfiguration/spec/backends|storageRef|namespace|storageRefNamespace
               onChange: onInputChange|resources/coreKubestashComBackupConfiguration/spec/backends|storageRef|namespace|storageRefNamespace
               schema:
                 $ref: discriminator#/storageRefNamespace
-            - type: input
+            - type: select
               label:
                 text: Name
+              fetch: fetchNames|v1alpha1|backupstorages|storageRefNamespace
               computed: getDefault|/resources/coreKubestashComBackupConfiguration/spec/backends|storageRef|name|storageRefName
               onChange: onInputChange|resources/coreKubestashComBackupConfiguration/spec/backends|storageRef|name|storageRefName
               schema:
@@ -654,14 +655,15 @@ steps:
             - type: select
               label:
                 text: Namespace
-              fetch: fetchNamespaces|v1alpha1|retentionpolicies
+              fetch: fetchNamespaces
               schema:
                 $ref: discriminator#/retentionPolicyNamespace
               computed: getDefault|/resources/coreKubestashComBackupConfiguration/spec/backends|retentionPolicy|namespace|retentionPolicyNamespace
               onChange: onInputChange|resources/coreKubestashComBackupConfiguration/spec/backends|retentionPolicy|namespace|retentionPolicyNamespace
-            - type: input
+            - type: select
               label:
                 text: Name
+              fetch: fetchNames|v1alpha1|retentionpolicies|retentionPolicyNamespace
               schema:
                 $ref: discriminator#/retentionPolicyName
               computed: getDefault|/resources/coreKubestashComBackupConfiguration/spec/backends|retentionPolicy|name|retentionPolicyName
@@ -679,14 +681,15 @@ steps:
             - type: select
               label:
                 text: Namespace
-              fetch: fetchNamespaces|v1|secrets
+              fetch: fetchNamespaces
               computed: getDefault|/resources/coreKubestashComBackupConfiguration/spec/sessions|encryptionSecret|namespace|encryptionSecretNamespace
               onChange: onInputChange|/resources/coreKubestashComBackupConfiguration/spec/sessions|encryptionSecret|namespace|encryptionSecretNamespace
               schema:
                 $ref: discriminator#/encryptionSecretNamespace
-            - type: input
+            - type: select
               label:
                 text: Name
+              fetch: fetchNames|v1|secrets|encryptionSecretNamespace
               computed: getDefault|/resources/coreKubestashComBackupConfiguration/spec/sessions|encryptionSecret|name|encryptionSecretName
               onChange: onInputChange|/resources/coreKubestashComBackupConfiguration/spec/sessions|encryptionSecret|name|encryptionSecretName
               schema:
@@ -749,9 +752,10 @@ steps:
                 onChange: onInputChange|resources/coreKubestashComBackupBlueprint/spec/backupConfigurationTemplate/backends|storageRef|namespace|storageRefNamespace
                 schema:
                   $ref: discriminator#/storageRefNamespace
-              - type: input
+              - type: select
                 label:
                   text: Name
+                fetch: fetchNames|v1alpha1|backupstorages|storageRefNamespace
                 computed: getDefault|/resources/coreKubestashComBackupBlueprint/spec/backupConfigurationTemplate/backends|storageRef|name|storageRefName
                 onChange: onInputChange|resources/coreKubestashComBackupBlueprint/spec/backupConfigurationTemplate/backends|storageRef|name|storageRefName
                 schema:
@@ -769,16 +773,17 @@ steps:
               - type: select
                 label:
                   text: Namespace
-                fetch: fetchNamespaces|v1alpha1|retentionpolicies
+                fetch: fetchNamespaces
                 schema:
                   $ref: discriminator#/retentionPolicyNamespace
                 computed: getDefault|/resources/coreKubestashComBackupBlueprint/spec/backupConfigurationTemplate/backends|retentionPolicy|namespace|retentionPolicyNamespace
                 onChange: onInputChange|resources/coreKubestashComBackupBlueprint/spec/backupConfigurationTemplate/backends|retentionPolicy|namespace|retentionPolicyNamespace
-              - type: input
+              - type: select
                 label:
                   text: Name
                 schema:
                   $ref: discriminator#/retentionPolicyName
+                fetch: fetchNames|v1alpha1|retentionpolicies|retentionPolicyNamespace
                 computed: getDefault|/resources/coreKubestashComBackupBlueprint/spec/backupConfigurationTemplate/backends|retentionPolicy|name|retentionPolicyName
                 onChange: onInputChange|resources/coreKubestashComBackupBlueprint/spec/backupConfigurationTemplate/backends|retentionPolicy|name|retentionPolicyName
           - type: single-step-form
@@ -794,14 +799,15 @@ steps:
               - type: select
                 label:
                   text: Namespace
-                fetch: fetchNamespaces|v1|secrets
+                fetch: fetchNamespaces
                 computed: getDefault|/resources/coreKubestashComBackupBlueprint/spec/backupConfigurationTemplate/sessions|encryptionSecret|namespace|encryptionSecretNamespace
                 onChange: onInputChange|/resources/coreKubestashComBackupBlueprint/spec/backupConfigurationTemplate/sessions|encryptionSecret|namespace|encryptionSecretNamespace
                 schema:
                   $ref: discriminator#/encryptionSecretNamespace
-              - type: input
+              - type: select
                 label:
                   text: Name
+                fetch: fetchNames|v1|secrets|encryptionSecretNamespace
                 computed: getDefault|/resources/coreKubestashComBackupBlueprint/spec/backupConfigurationTemplate/sessions|encryptionSecret|name|encryptionSecretName
                 onChange: onInputChange|/resources/coreKubestashComBackupBlueprint/spec/backupConfigurationTemplate/sessions|encryptionSecret|name|encryptionSecretName
                 schema:
