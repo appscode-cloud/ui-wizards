@@ -505,6 +505,10 @@ function returnTrue() {
   return true
 }
 
+function setProvider() {
+  return 's3'
+}
+
 async function fetchJsons({ axios, itemCtx }) {
   let ui = {}
   let language = {}
@@ -557,4 +561,5 @@ return {
   fetchJsons,
   setTool,
   returnTrue,
+  setProvider,
 }
