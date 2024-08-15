@@ -210,27 +210,42 @@ elements:
   schema:
     $ref: schema#/properties/storageSecret
   type: single-step-form
-- label:
-    text: labels.kubestash.encryptionSecret
-  required: true
+- elements:
+  - label:
+      text: labels.kubestash.encryptionSecret.name
+    schema:
+      $ref: schema#/properties/encryptionSecret/properties/name
+    type: input
+  - fetch: getNamespaces
+    label:
+      text: labels.kubestash.encryptionSecret.namespace
+    schema:
+      $ref: schema#/properties/encryptionSecret/properties/namespace
+    type: select
+  label:
+    text: labels.kubestash.encryptionSecret.label
   schema:
     $ref: schema#/properties/encryptionSecret
-  type: input
-- label:
-    text: labels.kubestash.retentionPolicy
-  options:
-  - text: Keep 1 week
-    value: keep-1wk
-  - text: Keep 1 Month
-    value: keep-1mo
-  - text: Keep 3 Month
-    value: keep-3mo
-  - text: Keep 1 Year
-    value: keep-1yr
-  required: true
+  show_label: true
+  type: single-step-form
+- elements:
+  - label:
+      text: labels.kubestash.retentionPolicy.name
+    schema:
+      $ref: schema#/properties/retentionPolicy/properties/name
+    type: input
+  - fetch: getNamespaces
+    label:
+      text: labels.kubestash.retentionPolicy.namespace
+    schema:
+      $ref: schema#/properties/retentionPolicy/properties/namespace
+    type: select
+  label:
+    text: labels.kubestash.retentionPolicy.label
   schema:
     $ref: schema#/properties/retentionPolicy
-  type: select
+  show_label: true
+  type: single-step-form
 - label:
     text: labels.kubestash.schedule
   schema:
