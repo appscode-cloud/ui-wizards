@@ -492,6 +492,19 @@ function initPrune({ getValue, model }) {
   return prune ? prune : false
 }
 
+function setTool({ commit }) {
+  commit('wizard/model$update', {
+    path: '/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/tool',
+    value: 'KubeStash',
+    force: true,
+  })
+  return 'KubeStash'
+}
+
+function returnTrue() {
+  return true
+}
+
 async function fetchJsons({ axios, itemCtx }) {
   let ui = {}
   let language = {}
@@ -542,4 +555,6 @@ return {
   authEnabled,
   initPrune,
   fetchJsons,
+  setTool,
+  returnTrue,
 }
