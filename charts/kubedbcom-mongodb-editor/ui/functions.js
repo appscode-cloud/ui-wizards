@@ -1147,10 +1147,7 @@ async function getBlueprints({ getValue, model, setDiscriminatorValue, axios, st
   }
 }
 
-async function isBackupEnabled(
-  { getValue, model, setDiscriminatorValue, axios, storeGet },
-  backup,
-) {
+async function isBackupEnabled({ getValue, model, axios, storeGet }, backup) {
   const apiGroup = getValue(model, '/metadata/resource/group')
   const kind = getValue(model, '/metadata/resource/kind')
   const username = storeGet('/route/params/user')
@@ -1174,7 +1171,7 @@ async function isBackupEnabled(
       data[0].spec.target.namespace === namespace
     ) {
       if (backup === 'alert') return true
-      else return true
+      else return false
     } else {
       if (backup === 'alert') return false
       else return true
@@ -1182,6 +1179,25 @@ async function isBackupEnabled(
   } catch (e) {
     console.log(e)
   }
+}
+
+async function fetchNamespaces({ getValue, model, axios, storeGet }, version, type) {
+  const username = storeGet('/route/params/user')
+  const clusterName = storeGet('/route/params/cluster')
+  const namespace = storeGet('/route/query/namespace')
+  const url =
+    type !== 'secrets'
+      ? `http://bb.test:3003/api/v1/clusters/${username}/${clusterName}/proxy/storage.kubestash.com/${version}/namespaces/${namespace}/${type}`
+      : `http://bb.test:3003/api/v1/clusters/${username}/${clusterName}/proxy/core/${version}/namespaces/${namespace}/secrets`
+  try {
+    const resp = await axios.get(url)
+    let data = resp.data.items
+    data = data.map((ele) => ele.metadata.name)
+    return data
+  } catch (e) {
+    console.log(e)
+  }
+  return []
 }
 
 // /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2231,6 +2247,7 @@ function showScheduleBackup({ storeGet }) {
 }
 
 return {
+  fetchNamespaces,
   onInputChangeSchedule,
   getDefaultSchedule,
   getBlueprints,
