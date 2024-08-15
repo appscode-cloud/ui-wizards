@@ -501,12 +501,25 @@ function setTool({ commit }) {
   return 'KubeStash'
 }
 
-function returnTrue() {
-  return true
-}
-
 function setProvider() {
   return 's3'
+}
+
+function setStorageSecret({ getValue, model }) {
+  const secret = getValue(
+    model,
+    '/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/kubestash/storageSecret/create',
+  )
+  return secret
+}
+
+function onAuthChange({ getValue, discriminator, commit }, type) {
+  const auth = getValue(discriminator, `/${type}`) || false
+  commit('wizard/model$update', {
+    path: '/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/kubestash/storageSecret/create',
+    value: auth,
+    force: true,
+  })
 }
 
 async function fetchJsons({ axios, itemCtx }) {
@@ -560,6 +573,7 @@ return {
   initPrune,
   fetchJsons,
   setTool,
-  returnTrue,
   setProvider,
+  setStorageSecret,
+  onAuthChange,
 }
