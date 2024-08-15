@@ -48,19 +48,9 @@ type ChartsxhelmdevClusterChartPresetEditorOptionsSpecSpec struct {
 type MonitoringOptions struct{}
 
 type BackupOptions struct {
-	Kubestash KubeStashOptions `json:"kubestash"`
+	Kubestash KubeStashInfo `json:"kubestash"`
 	// +kubebuilder:default=KubeStash
 	Tool BackupTool `json:"tool"`
-	// +optional
-	UsePrefix string `json:"usePrefix"`
-}
-
-type KubeStashOptions struct {
-	StorageSecret    OptionalResource `json:"storageSecret"`
-	Backend          KubeStashBackend `json:"backend"`
-	Schedule         string           `json:"schedule"`
-	EncryptionSecret string           `json:"encryptionSecret"`
-	RetentionPolicy  string           `json:"retentionPolicy"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
