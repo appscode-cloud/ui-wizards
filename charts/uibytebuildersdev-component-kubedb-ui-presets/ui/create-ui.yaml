@@ -724,6 +724,8 @@ elements:
     type: select
   label:
     text: labels.storageClass.name
+  schema:
+    $ref: schema#/properties/storageClasses
   show_label: true
   type: single-step-form
 - elements:
@@ -739,6 +741,8 @@ elements:
     type: switch
   label:
     text: labels.tls.name
+  schema:
+    $ref: schema#/properties/tls
   show_label: true
   type: single-step-form
 - elements:
@@ -761,6 +765,8 @@ elements:
     type: select
   label:
     text: labels.clusterIssuers.name
+  schema:
+    $ref: schema#/properties/clusterIssuers
   show_label: true
   type: single-step-form
 - elements:
@@ -776,6 +782,8 @@ elements:
     type: switch
   label:
     text: labels.webUI.name
+  schema:
+    $ref: schema#/properties/webUI
   show_label: true
   type: single-step-form
 - elements:
@@ -796,13 +804,19 @@ elements:
     schema:
       $ref: schema#/properties/monitoring/properties/agent
     type: radio
-  - label:
-      text: labels.monitoring.exporter.name
+  - elements:
+    - label:
+        text: labels.monitoring.exporter.name
+      schema:
+        $ref: schema#/properties/monitoring/properties/exporter/properties/resources 
+      type: resource-input-form
     schema:
-      $ref: schema#/properties/monitoring/properties/exporter/properties/resources 
-    type: resource-input-form
+      $ref: schema#/properties/monitoring/properties/exporter
+    type: single-step-form
   label:
     text: labels.monitoring.name
+  schema:
+    $ref: schema#/properties/monitoring
   show_label: true
   type: single-step-form
 - elements:
@@ -813,6 +827,8 @@ elements:
     type: switch
   label:
     text: labels.alert.name
+  schema:
+    $ref: schema#/properties/alert
   show_label: true
   type: single-step-form
 - elements:
@@ -828,6 +844,8 @@ elements:
     type: switch
   label:
     text: labels.archiver.name
+  schema:
+    $ref: schema#/properties/archiver
   show_label: true
   type: single-step-form
 - if: returnFalse
