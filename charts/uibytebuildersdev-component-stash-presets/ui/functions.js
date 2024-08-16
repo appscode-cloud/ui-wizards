@@ -50,7 +50,6 @@ async function fetchNames({ getValue, axios, storeGet, watchDependency, model },
     }
   } catch (e) {
     console.log(e)
-    return []
   }
   return []
 }

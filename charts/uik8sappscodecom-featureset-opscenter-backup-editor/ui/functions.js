@@ -412,10 +412,7 @@ function checkIsResourceLoaded({ commit, storeGet, watchDependency, getValue, di
 function isStashPreset({ getValue, watchDependency, discriminator, commit }) {
   const enabledFeatures = getValue(discriminator, '/enabledFeatures') || []
   watchDependency('discriminator#/enabledFeatures')
-  if (
-    enabledFeatures?.includes('stash-presets') &&
-    (enabledFeatures.includes('stash') || enabledFeatures.includes('kubestash'))
-  ) {
+  if (enabledFeatures?.includes('stash-presets') && enabledFeatures?.includes('kubestash')) {
     return true
   } else {
     commit('wizard/model$update', {
