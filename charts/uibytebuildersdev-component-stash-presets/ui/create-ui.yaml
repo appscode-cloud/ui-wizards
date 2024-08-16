@@ -1,0 +1,277 @@
+elements:
+- elements:
+  - computed: setProvider
+    disableUnselect: true
+    label:
+      text: labels.backend.provider
+    options:
+    - text: Azure Blob Storage
+      value: azure
+    - text: Google Cloud Service
+      value: gcs
+    - text: AWS S3
+      value: s3
+    required: true
+    schema:
+      $ref: schema#/properties/backend/properties/provider
+    type: select
+  - elements:
+    - discriminator:
+        s3:
+          default: false
+          type: boolean
+      elements:
+      - label:
+          text: labels.backend.bucket
+        required: true
+        schema:
+          $ref: schema#/properties/backend/properties/s3/properties/spec/properties/bucket
+        type: input
+      - label:
+          text: labels.backend.endPoint
+        required: true
+        schema:
+          $ref: schema#/properties/backend/properties/s3/properties/spec/properties/endpoint
+        type: input
+      - label:
+          text: labels.backend.insecureTLS
+        schema:
+          $ref: schema#/properties/backend/properties/s3/properties/spec/properties/insecureTLS
+        type: input
+      - label:
+          text: labels.backend.prefix
+        schema:
+          $ref: schema#/properties/backend/properties/s3/properties/spec/properties/prefix
+        type: input
+      - label:
+          text: labels.backend.region
+        schema:
+          $ref: schema#/properties/backend/properties/s3/properties/spec/properties/region
+        type: input
+      schema:
+        $ref: schema#/properties/backend/properties/s3/properties/spec
+      type: single-step-form
+    - computed: setStorageSecret
+      label:
+        text: labels.kubestash.storageSecret.switch
+      onChange: onAuthChange|s3
+      schema:
+        $ref: discriminator#/s3
+      type: switch
+    - elements:
+      - label:
+          text: labels.backend.s3.access_key_id
+        required: true
+        schema:
+          $ref: schema#/properties/backend/properties/s3/properties/auth/properties/AWS_ACCESS_KEY_ID
+        type: input
+      - label:
+          text: labels.backend.s3.secret_access_key
+        required: true
+        schema:
+          $ref: schema#/properties/backend/properties/s3/properties/auth/properties/AWS_SECRET_ACCESS_KEY
+        type: input
+      - label:
+          text: labels.backend.s3.ca_cert_data
+        schema:
+          $ref: schema#/properties/backend/properties/s3/properties/auth/properties/CA_CERT_DATA
+        type: input
+      if: isSwitchOn|s3
+      label:
+        text: labels.kubestash.storageSecret.label
+      schema:
+        $ref: schema#/properties/backend/properties/s3/properties/auth
+      show_label: true
+      type: single-step-form
+    if: providerType|s3
+    schema:
+      $ref: schema#/properties/backend/properties/s3
+    type: single-step-form
+  - elements:
+    - discriminator:
+        azure:
+          default: false
+          type: boolean
+      elements:
+      - label:
+          text: labels.backend.container
+        required: true
+        schema:
+          $ref: schema#/properties/backend/properties/azure/properties/spec/properties/container
+        type: input
+      - label:
+          text: labels.backend.max_connections
+        schema:
+          $ref: schema#/properties/backend/properties/azure/properties/spec/properties/maxConnections
+        type: input
+      - label:
+          text: labels.backend.prefix
+        schema:
+          $ref: schema#/properties/backend/properties/azure/properties/spec/properties/prefix
+        type: input
+      schema:
+        $ref: schema#/properties/backend/properties/azure/properties/spec
+      type: single-step-form
+    - computed: setStorageSecret
+      label:
+        text: labels.kubestash.storageSecret.switch
+      onChange: onAuthChange|azure
+      schema:
+        $ref: discriminator#/azure
+      type: switch
+    - elements:
+      - label:
+          text: labels.backend.azure.account_name
+        required: true
+        schema:
+          $ref: schema#/properties/backend/properties/azure/properties/auth/properties/AZURE_ACCOUNT_NAME
+        type: input
+      - label:
+          text: labels.backend.azure.account_key
+        required: true
+        schema:
+          $ref: schema#/properties/backend/properties/azure/properties/auth/properties/AZURE_ACCOUNT_KEY
+        type: input
+      if: isSwitchOn|azure
+      label:
+        text: labels.kubestash.storageSecret.label
+      schema:
+        $ref: schema#/properties/backend/properties/azure/properties/auth
+      show_label: true
+      type: single-step-form
+    if: providerType|azure
+    schema:
+      $ref: schema#/properties/backend/properties/azure
+    type: single-step-form
+  - elements:
+    - discriminator:
+        gcs:
+          default: false
+          type: boolean
+      elements:
+      - label:
+          text: labels.backend.bucket
+        required: true
+        schema:
+          $ref: schema#/properties/backend/properties/gcs/properties/spec/properties/bucket
+        type: input
+      - label:
+          text: labels.backend.max_connections
+        schema:
+          $ref: schema#/properties/backend/properties/gcs/properties/spec/properties/maxConnections
+        type: input
+      - label:
+          text: labels.backend.prefix
+        schema:
+          $ref: schema#/properties/backend/properties/gcs/properties/spec/properties/prefix
+        type: input
+      schema:
+        $ref: schema#/properties/backend/properties/gcs/properties/spec
+      type: single-step-form
+    - computed: setStorageSecret
+      label:
+        text: labels.kubestash.storageSecret.switch
+      onChange: onAuthChange|gcs
+      schema:
+        $ref: discriminator#/gcs
+      type: switch
+    - elements:
+      - label:
+          text: labels.backend.gcs.project_id
+        required: true
+        schema:
+          $ref: schema#/properties/backend/properties/gcs/properties/auth/properties/GOOGLE_PROJECT_ID
+        type: input
+      - label:
+          text: labels.backend.gcs.service_account
+        required: true
+        schema:
+          $ref: schema#/properties/backend/properties/gcs/properties/auth/properties/GOOGLE_SERVICE_ACCOUNT_JSON_KEY
+        type: input
+      if: isSwitchOn|gcs
+      label:
+        text: labels.kubestash.storageSecret.label
+      schema:
+        $ref: schema#/properties/backend/properties/gcs/properties/auth
+      show_label: true
+      type: single-step-form
+    if: providerType|gcs
+    schema:
+      $ref: schema#/properties/backend/properties/gcs
+    type: single-step-form
+  schema:
+    $ref: schema#/properties/backend
+  type: single-step-form
+- elements:
+  - computed: setStorageSecret
+    if: returnFalse
+    label:
+      text: labels.kubestash.storageSecret
+    schema:
+      $ref: schema#/properties/storageSecret/properties/create
+    type: switch
+  schema:
+    $ref: schema#/properties/storageSecret
+  type: single-step-form
+- elements:
+  - label:
+      text: labels.kubestash.encryptionSecret.name
+    schema:
+      $ref: schema#/properties/encryptionSecret/properties/name
+    type: input
+  - fetch: getNamespaces
+    label:
+      text: labels.kubestash.encryptionSecret.namespace
+    schema:
+      $ref: schema#/properties/encryptionSecret/properties/namespace
+    type: select
+  label:
+    text: labels.kubestash.encryptionSecret.label
+  schema:
+    $ref: schema#/properties/encryptionSecret
+  show_label: true
+  type: single-step-form
+- elements:
+  - label:
+      text: labels.kubestash.retentionPolicy.name
+    schema:
+      $ref: schema#/properties/retentionPolicy/properties/name
+    type: input
+  - fetch: getNamespaces
+    label:
+      text: labels.kubestash.retentionPolicy.namespace
+    schema:
+      $ref: schema#/properties/retentionPolicy/properties/namespace
+    type: select
+  label:
+    text: labels.kubestash.retentionPolicy.label
+  schema:
+    $ref: schema#/properties/retentionPolicy
+  show_label: true
+  type: single-step-form
+- elements:
+  - label:
+      text: labels.kubestash.storageRef.name
+    schema:
+      $ref: schema#/properties/storageRef/properties/name
+    type: input
+  - fetch: getNamespaces
+    label:
+      text: labels.kubestash.retentionPolicy.namespace
+    schema:
+      $ref: schema#/properties/storageRef/properties/namespace
+    type: select
+  label:
+    text: labels.kubestash.storageRef.label
+  schema:
+    $ref: schema#/properties/storageRef
+  show_label: true
+  type: single-step-form
+- label:
+    text: labels.kubestash.schedule
+  schema:
+    $ref: schema#/properties/schedule
+  type: input
+schema:
+  $ref: schema#/
+type: single-step-form

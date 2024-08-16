@@ -821,8 +821,27 @@ steps:
           text: labels.monitoring.name
         show_label: true
         type: single-step-form
+      if: presetNameEqualsTo|kubedb-ui-presets
       type: single-step-form
-    - elements: []
+    - elements:
+      - elements:
+        - alias: reusable_stash-presets
+          chart:
+            name: uibytebuildersdev-component-stash-presets
+            version: v0.4.21
+          moduleResolver: fetchJsons
+          schema:
+            $ref: schema#/properties/spec/properties/backup/properties/kubestash
+          type: reusable-element
+        - computed: setTool
+          if: returnFalse
+          schema: 
+            $ref: schema#/properties/spec/properties/backup/properties/tool
+          type: input
+        schema:
+          $ref: schema#/properties/spec/properties/backup
+        type: single-step-form
+      if: presetNameEqualsTo|stash-presets
       type: single-step-form
     - elements: []
       type: single-step-form
