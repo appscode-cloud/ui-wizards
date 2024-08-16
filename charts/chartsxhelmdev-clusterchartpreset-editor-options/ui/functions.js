@@ -29,34 +29,26 @@ async function getNodeTopology({ axios, storeGet, commit }) {
   }
 }
 
+async function FetchAllDbVersions({ storeGet, axios, setDiscriminatorValue }) {
+  const owner = storeGet('/route/params/user')
+  const cluster = storeGet('/route/params/cluster')
+  const url = `/clusters/${owner}/${cluster}/proxy/catalog.kubedb.com/v1alpha1/all-available`
+
+  const resp = await axios.get(url)
+
+  setDiscriminatorValue(`/allDbVersions`, resp.data)
+  return resp.data
+}
+
 function isConfigureDb({ getValue, discriminator, watchDependency }, value) {
   watchDependency(`discriminator#/${value}/isConfigure`)
   const resp = getValue(discriminator, `/${value}/isConfigure`)
   return resp
 }
 
-async function FetchDbVersions(
-  { storeGet, axios, getValue, setDiscriminatorValue, discriminator },
-  db,
-) {
-  const owner = storeGet('/route/params/user')
-  const cluster = storeGet('/route/params/cluster')
-  const isApiCalled = getValue(discriminator, `/${db}/isApiCalled`)
-  const url = `/clusters/${owner}/${cluster}/proxy/catalog.kubedb.com/v1alpha1/${db}versions`
-  let data = []
-  if (!isApiCalled) {
-    const resp = await axios.get(url)
-    data = resp.data.items.map((item) => {
-      return {
-        text: item.spec.version,
-        value: item.spec.version,
-      }
-    })
-    setDiscriminatorValue(`/${db}/isApiCalled`, true)
-    setDiscriminatorValue(`/${db}/versions`, data)
-  } else {
-    data = getValue(discriminator, `/${db}/versions`)
-  }
+async function FetchDbVersions({ watchDependency, getValue, discriminator }, db) {
+  watchDependency(`discriminator#/allDbVersions`)
+  data = getValue(discriminator, `allDbVersions/${db}Version`)
   return data
 }
 
@@ -205,9 +197,27 @@ function presetNameEqualsTo({ storeGet }, value) {
   return presetName === value
 }
 
+async function fetchBackup({ storeGet, axios, commit }) {
+  const owner = storeGet('/route/params/user')
+  const cluster = storeGet('/route/params/cluster')
+  const url = `/clusters/${owner}/${cluster}/proxy/charts.x-helm.dev/v1alpha1/clusterchartpresets/stash-presets`
+
+  const resp = await axios.get(url)
+  console.log(resp.data)
+
+  commit('wizard/model$update', {
+    path: '/spec/kubeDB/backup',
+    value: resp.data.spec.values.spec.backup,
+    force: true,
+  })
+
+  return resp.data.spec.values.spec.backup
+}
+
 return {
   getOptions,
   getNodeTopology,
+  FetchAllDbVersions,
   isConfigureDb,
   FetchDbVersions,
   availableVersions,
@@ -220,4 +230,5 @@ return {
   returnFalse,
   fetchJsons,
   presetNameEqualsTo,
+  fetchBackup,
 }
