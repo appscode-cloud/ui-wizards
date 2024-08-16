@@ -76,7 +76,7 @@ function availableVersions({ getValue, model, watchDependency }, db) {
 async function getPlacements({ axios, storeGet, commit }) {
   const owner = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
-  const url = `/clusters/${owner}/${cluster}/proxy/node.k8s.appscode.com/v1alpha1/nodetopologies`
+  const url = `/clusters/${owner}/${cluster}/proxy/apps.k8s.appscode.com/v1/placementpolicies`
   try {
     const resp = await axios.get(url)
 
