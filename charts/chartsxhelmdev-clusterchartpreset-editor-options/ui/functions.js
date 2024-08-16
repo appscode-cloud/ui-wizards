@@ -201,6 +201,11 @@ async function fetchJsons({ axios, itemCtx }) {
   }
 }
 
+function presetNameEqualsTo({ storeGet }, value) {
+  const presetName = storeGet('/route/params/presetName') || ''
+  return presetName === value
+}
+
 return {
   getOptions,
   getNodeTopology,
@@ -215,4 +220,5 @@ return {
   setTool,
   returnFalse,
   fetchJsons,
+  presetNameEqualsTo,
 }
