@@ -45,10 +45,10 @@ type StoragekubestashcomBackupstorageEditorOptionsSpecSpec struct {
 	// +optional
 	Labels        map[string]string `json:"labels"`
 	StorageSecret OptionalResource  `json:"storageSecret"`
-	Backend       BackupStorage     `json:"backend"`
+	Backend       KubeStashBackend  `json:"backend"`
 }
 
-type BackupStorage struct {
+type KubeStashBackend struct {
 	Provider string `json:"provider"`
 	// +optional
 	S3 S3 `json:"s3"`

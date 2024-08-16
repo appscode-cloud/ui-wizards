@@ -1,0 +1,112 @@
+# Default values for chartsxhelmdev-clusterchartpreset-editor-options.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+metadata:
+  resource:
+    group: charts.x-helm.dev
+    kind: ClusterChartPreset
+    name: clusterchartpresets
+    scope: Cluster
+    version: v1alpha1
+  release:
+    # Release name
+    name: ""
+    # Release namespace
+    namespace: ""
+
+spec:
+  kubeDB:
+    deployment:
+      default: Dedicated
+      toggle: true
+    clusterTier:
+      default: "GeneralPurpose"
+      toggle: true
+      nodeTopology:
+        available: ["m4", "m7gd", "c5d", "c7g", "t4g", "r5a", "r6g", "a-family", "b-family", "d-family", "standard-bsv2-family", "standard-ddv4-family", "standard-dv2-family"]
+        default: "standard-bsv2-family"
+        toggle: true
+      placement:
+        available: ["majority-on-spot", "minority-on-spot", "multizone", "ondemand-only", "one-on-ondemand", "spot-only", "zone-ap-southeast-1a", "zone-ap-southeast-1b", "zone-ap-southeast-1c", "default"]
+        default: "default"
+        toggle: true
+    databases:
+      MongoDB:
+        versions:
+          available: ["4.4.26", "6.0.12"]
+          default: "6.0.12"
+          toggle: true
+      MySQL:
+        versions:
+          available: [ "5.7.44", "8.0.35" ]
+          default: "8.0.35"
+          toggle: true
+      Postgres:
+        versions:
+          available: [ "13.13", "14.10", "15.5", "16.1" ]
+          default: "15.5"
+          toggle: true
+    storageClasses:
+      available: ["linode-block-storage", "default", "standard", "gp2"]
+      default: "default"
+      toggle: true
+    tls:
+      default: true
+      toggle: true
+    clusterIssuers:
+      available: ["global-ca", "cluster-issuer"]
+      default: "cluster-issuer"
+      toggle: true
+    webUI:
+      default: true
+      toggle: true
+    monitoring:
+      # Name of monitoring agent (one of "prometheus.io", "prometheus.io/operator", "prometheus.io/builtin")
+      agent: prometheus.io/operator
+      exporter:
+        resources: # +doc-gen:break
+          requests:
+            cpu: 100m
+            memory: 128Mi
+      serviceMonitor:
+        # Specify the labels for ServiceMonitor.
+        # Prometheus crd will select ServiceMonitor using these labels.
+        # Only usable when monitoring agent is `prometheus.io/webhook server`.
+        labels: {}
+      toggle: true
+    alerts:
+      toggle: true
+    archiver:
+      toggle: true
+      default: true
+    backup:
+      tool: KubeStash
+      toggle: true
+      kubestash:
+        schedule: "0 */2 * * *"
+        storageRef:
+          name: default
+          namespace: stash
+        retentionPolicy:
+          name: "keep-1mo"
+          namespace: stash
+        encryptionSecret:
+          name: default-encryption-secret
+          namespace: stash
+
+  monitoring: {}
+
+  backup:
+    tool: KubeStash
+    kubestash:
+      encryptionSecret:
+        name:
+        namespace:
+      retentionPolicy:
+        name:
+        namespace:
+      schedule: '*/30 * * * *'
+      storageRef:
+        name:
+        namespace:

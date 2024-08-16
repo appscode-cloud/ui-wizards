@@ -24,7 +24,6 @@ type BackupToolSpec struct {
 	// +kubebuilder:default=KubeStash
 	Tool      BackupTool     `json:"tool"`
 	Kubestash *KubeStashInfo `json:"kubestash,omitempty"`
-	Stash     *StashInfo     `json:"stash,omitempty"`
 	Toggle    bool           `json:"toggle"`
 }
 
@@ -37,21 +36,16 @@ const (
 )
 
 type KubeStashInfo struct {
-	// Schedule specifies the schedule for invoking backup sessions
-	// +optional
-	Schedule         string           `json:"schedule,omitempty"`
-	StorageRef       ObjectReference  `json:"storageRef"`
-	RetentionPolicy  ObjectReference  `json:"retentionPolicy"`
-	EncryptionSecret ObjectReference  `json:"encryptionSecret"`
-	StorageSecret    OptionalResource `json:"storageSecret"`
+	Schedule         string          `json:"schedule,omitempty"`
+	StorageRef       ObjectReference `json:"storageRef"`
+	RetentionPolicy  ObjectReference `json:"retentionPolicy"`
+	EncryptionSecret ObjectReference `json:"encryptionSecret"`
 }
 
 type StashInfo struct {
-	// Schedule specifies the schedule for invoking backup sessions
-	// +optional
 	Schedule string `json:"schedule,omitempty"`
 	// RetentionPolicy indicates the policy to follow to clean old backup snapshots
 	RetentionPolicy stashv1alpha1.RetentionPolicy `json:"retentionPolicy"`
 	AuthSecret      AuthSecret                    `json:"authSecret"`
-	Backend         RepositoryBackend             `json:"backend"`
+	Backend         StashRepoBackend              `json:"backend"`
 }

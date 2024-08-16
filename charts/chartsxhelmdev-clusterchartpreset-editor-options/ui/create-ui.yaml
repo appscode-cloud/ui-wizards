@@ -1,0 +1,851 @@
+steps:
+- form:
+    elements:
+    - elements:
+      - elements:
+        - label:
+            text: labels.deployment.toggle
+          schema:
+            $ref: schema#/properties/spec/properties/kubeDB/properties/deployment/properties/toggle
+          type: switch
+        - hasDescription: true
+          options:
+          - description: labels.deployment.shared
+            text: Shared
+            value: Shared
+          - description: labels.deployment.dedicated
+            text: Dedicated
+            value: Dedicated
+          schema:
+            $ref: schema#/properties/spec/properties/kubeDB/properties/deployment/properties/default
+          type: radio
+        label:
+          text: labels.deployment.name
+        show_label: true
+        type: single-step-form
+      - elements:
+        - label:
+            text: labels.clusterTier.toggle
+          schema:
+            $ref: schema#/properties/spec/properties/kubeDB/properties/clusterTier/properties/toggle
+          type: switch
+        - options:
+          - text: General Purpose
+            value: GeneralPurpose
+          - text: Memory Optimized
+            value: MemoryOptimized
+          - text: CPU Optimized
+            value: CPUOptimized
+          schema:
+            $ref: schema#/properties/spec/properties/kubeDB/properties/clusterTier/properties/default
+          type: radio
+        - label:
+            text: labels.clusterTier.placement.toggle
+          schema:
+            $ref: schema#/properties/spec/properties/kubeDB/properties/clusterTier/properties/placement/properties/toggle
+          type: switch
+        - fetch: getPlacements
+          label:
+            text: labels.clusterTier.placement.availablePlacement
+          schema:
+            $ref: schema#/properties/spec/properties/kubeDB/properties/clusterTier/properties/placement/properties/available
+          type: multiselect
+        - disableUnselect: true
+          fetch: getOptions|clusterTier/placement
+          label:
+            text: labels.clusterTier.placement.default
+          schema:
+            $ref: schema#/properties/spec/properties/kubeDB/properties/clusterTier/properties/placement/properties/default
+          type: select
+        - label:
+            text: labels.clusterTier.nodeTopology.toggle
+          schema:
+            $ref: schema#/properties/spec/properties/kubeDB/properties/clusterTier/properties/nodeTopology/properties/toggle
+          type: switch
+        - fetch: getNodeTopology
+          label:
+            text: labels.clusterTier.nodeTopology.availableNodeTopology
+          schema:
+            $ref: schema#/properties/spec/properties/kubeDB/properties/clusterTier/properties/nodeTopology/properties/available
+          type: multiselect
+        - disableUnselect: true
+          fetch: getOptions|clusterTier/nodeTopology
+          label:
+            text: labels.clusterTier.nodeTopology.default
+          schema:
+            $ref: schema#/properties/spec/properties/kubeDB/properties/clusterTier/properties/nodeTopology/properties/default
+          type: select
+        label:
+          text: labels.clusterTier.name
+        show_label: true
+        type: single-step-form
+      - discriminator:
+          clickhouse:
+            default:
+              isApiCalled: false
+              isConfigure: false
+              versions: []
+            type: object
+          druid:
+            default:
+              isApiCalled: false
+              isConfigure: false
+              versions: []
+            type: object
+          elasticsearch:
+            default:
+              isApiCalled: false
+              isConfigure: false
+              versions: []
+            type: object
+          ferretdb:
+            default:
+              isApiCalled: false
+              isConfigure: false
+              versions: []
+            type: object
+          kafka:
+            default:
+              isApiCalled: false
+              isConfigure: false
+              versions: []
+            type: object
+          mariadb:
+            default:
+              isApiCalled: false
+              isConfigure: false
+              versions: []
+            type: object
+          memcached:
+            default:
+              isApiCalled: false
+              isConfigure: false
+              versions: []
+            type: object
+          mongodb:
+            default:
+              isApiCalled: false
+              isConfigure: false
+              versions: []
+            type: object
+          mssqlserver:
+            default:
+              isApiCalled: false
+              isConfigure: false
+              versions: []
+            type: object
+          mysql:
+            default:
+              isApiCalled: false
+              isConfigure: false
+              versions: []
+            type: object
+          perconaxtradb:
+            default:
+              isApiCalled: false
+              isConfigure: false
+              versions: []
+            type: object
+          pgbouncer:
+            default:
+              isApiCalled: false
+              isConfigure: false
+              versions: []
+            type: object
+          pgpool:
+            default:
+              isApiCalled: false
+              isConfigure: false
+              versions: []
+            type: object
+          postgres:
+            default:
+              isApiCalled: false
+              isConfigure: false
+              versions: []
+            type: object
+          proxysql:
+            default:
+              isApiCalled: false
+              isConfigure: false
+              versions: []
+            type: object
+          rabbitmq:
+            default:
+              isApiCalled: false
+              isConfigure: false
+              versions: []
+            type: object
+          redis:
+            default:
+              isApiCalled: false
+              isConfigure: false
+              versions: []
+            type: object
+          singlestore:
+            default:
+              isApiCalled: false
+              isConfigure: false
+              versions: []
+            type: object
+          solr:
+            default:
+              isApiCalled: false
+              isConfigure: false
+              versions: []
+            type: object
+          zookeeper:
+            default:
+              isApiCalled: false
+              isConfigure: false
+              versions: []
+            type: object
+        elements:
+        - label:
+            text: labels.databases.ClickHouse.configure
+          schema:
+            $ref: discriminator#/clickhouse/isConfigure
+          type: switch
+        - elements:
+          - label:
+              text: labels.databases.ClickHouse.toggle
+            schema:
+              $ref: schema#/properties/spec/properties/kubeDB/properties/databases/properties/ClickHouse/properties/versions/properties/toggle
+            type: switch
+          - fetch: FetchDbVersions|clickhouse
+            label:
+              text: labels.databases.versions
+            onChange: clearDefaultVersion|ClickHouse
+            schema:
+              $ref: schema#/properties/spec/properties/kubeDB/properties/databases/properties/ClickHouse/properties/versions/properties/available
+            type: multiselect
+          - fetch: availableVersions|ClickHouse
+            label:
+              text: labels.databases.default
+            schema:
+              $ref: schema#/properties/spec/properties/kubeDB/properties/databases/properties/ClickHouse/properties/versions/properties/default
+            type: select
+          if: isConfigureDb|clickhouse
+          type: single-step-form
+        - label:
+            text: labels.databases.Druid.configure
+          schema:
+            $ref: discriminator#/druid/isConfigure
+          type: switch
+        - elements:
+          - label:
+              text: labels.databases.Druid.toggle
+            schema:
+              $ref: schema#/properties/spec/properties/kubeDB/properties/databases/properties/Druid/properties/versions/properties/toggle
+            type: switch
+          - fetch: FetchDbVersions|druid
+            label:
+              text: labels.databases.versions
+            onChange: clearDefaultVersion|Druid
+            schema:
+              $ref: schema#/properties/spec/properties/kubeDB/properties/databases/properties/Druid/properties/versions/properties/available
+            type: multiselect
+          - fetch: availableVersions|Druid
+            label:
+              text: labels.databases.default
+            schema:
+              $ref: schema#/properties/spec/properties/kubeDB/properties/databases/properties/Druid/properties/versions/properties/default
+            type: select
+          if: isConfigureDb|druid
+          type: single-step-form
+        - label:
+            text: labels.databases.Elasticsearch.configure
+          schema:
+            $ref: discriminator#/elasticsearch/isConfigure
+          type: switch
+        - elements:
+          - label:
+              text: labels.databases.Elasticsearch.toggle
+            schema:
+              $ref: schema#/properties/spec/properties/kubeDB/properties/databases/properties/Elasticsearch/properties/versions/properties/toggle
+            type: switch
+          - fetch: FetchDbVersions|elasticsearch
+            label:
+              text: labels.databases.versions
+            onChange: clearDefaultVersion|Elasticsearch
+            schema:
+              $ref: schema#/properties/spec/properties/kubeDB/properties/databases/properties/Elasticsearch/properties/versions/properties/available
+            type: multiselect
+          - fetch: availableVersions|Elasticsearch
+            label:
+              text: labels.databases.default
+            schema:
+              $ref: schema#/properties/spec/properties/kubeDB/properties/databases/properties/Elasticsearch/properties/versions/properties/default
+            type: select
+          if: isConfigureDb|Elasticsearch
+          type: single-step-form
+        - label:
+            text: labels.databases.FerretDB.configure
+          schema:
+            $ref: discriminator#/ferretdb/isConfigure
+          type: switch
+        - elements:
+          - label:
+              text: labels.databases.FerretDB.toggle
+            schema:
+              $ref: schema#/properties/spec/properties/kubeDB/properties/databases/properties/FerretDB/properties/versions/properties/toggle
+            type: switch
+          - fetch: FetchDbVersions|ferretdb
+            label:
+              text: labels.databases.versions
+            onChange: clearDefaultVersion|ferretdb
+            schema:
+              $ref: schema#/properties/spec/properties/kubeDB/properties/databases/properties/FerretDB/properties/versions/properties/available
+            type: multiselect
+          - fetch: availableVersions|FerretDB
+            label:
+              text: labels.databases.default
+            schema:
+              $ref: schema#/properties/spec/properties/kubeDB/properties/databases/properties/FerretDB/properties/versions/properties/default
+            type: select
+          if: isConfigureDb|ferretdb
+          type: single-step-form
+        - label:
+            text: labels.databases.Kafka.configure
+          schema:
+            $ref: discriminator#/kafka/isConfigure
+          type: switch
+        - if: isConfigureDb|kafka
+          label:
+            text: labels.databases.Kafka.toggle
+          schema:
+            $ref: schema#/properties/spec/properties/kubeDB/properties/databases/properties/Kafka/properties/versions/properties/toggle
+          type: switch
+        - fetch: FetchDbVersions|kafka
+          if: isConfigureDb|kafka
+          label:
+            text: labels.databases.versions
+          onChange: clearDefaultVersion|kafka
+          schema:
+            $ref: schema#/properties/spec/properties/kubeDB/properties/databases/properties/Kafka/properties/versions/properties/available
+          type: multiselect
+        - fetch: availableVersions|Kafka
+          if: isConfigureDb|kafka
+          label:
+            text: labels.databases.default
+          schema:
+            $ref: schema#/properties/spec/properties/kubeDB/properties/databases/properties/Kafka/properties/versions/properties/default
+          type: select
+        - label:
+            text: labels.databases.MSSQLServer.configure
+          schema:
+            $ref: discriminator#/mssqlserver/isConfigure
+          type: switch
+        - if: isConfigureDb|mssqlserver
+          label:
+            text: labels.databases.MSSQLServer.toggle
+          schema:
+            $ref: schema#/properties/spec/properties/kubeDB/properties/databases/properties/MSSQLServer/properties/versions/properties/toggle
+          type: switch
+        - fetch: FetchDbVersions|mssqlserver
+          if: isConfigureDb|mssqlserver
+          label:
+            text: labels.databases.versions
+          onChange: clearDefaultVersion|mssqlserver
+          schema:
+            $ref: schema#/properties/spec/properties/kubeDB/properties/databases/properties/MSSQLServer/properties/versions/properties/available
+          type: multiselect
+        - fetch: availableVersions|MSSQLServer
+          if: isConfigureDb|mssqlserver
+          label:
+            text: labels.databases.default
+          schema:
+            $ref: schema#/properties/spec/properties/kubeDB/properties/databases/properties/MSSQLServer/properties/versions/properties/default
+          type: select
+        - label:
+            text: labels.databases.MariaDB.configure
+          schema:
+            $ref: discriminator#/mariadb/isConfigure
+          type: switch
+        - if: isConfigureDb|mariadb
+          label:
+            text: labels.databases.MariaDB.toggle
+          schema:
+            $ref: schema#/properties/spec/properties/kubeDB/properties/databases/properties/MariaDB/properties/versions/properties/toggle
+          type: switch
+        - fetch: FetchDbVersions|mariadb
+          if: isConfigureDb|mariadb
+          label:
+            text: labels.databases.versions
+          onChange: clearDefaultVersion|mariadb
+          schema:
+            $ref: schema#/properties/spec/properties/kubeDB/properties/databases/properties/MariaDB/properties/versions/properties/available
+          type: multiselect
+        - fetch: availableVersions|MariaDB
+          if: isConfigureDb|mariadb
+          label:
+            text: labels.databases.default
+          schema:
+            $ref: schema#/properties/spec/properties/kubeDB/properties/databases/properties/MariaDB/properties/versions/properties/default
+          type: select
+        - label:
+            text: labels.databases.Memcached.configure
+          schema:
+            $ref: discriminator#/memcached/isConfigure
+          type: switch
+        - if: isConfigureDb|memcached
+          label:
+            text: labels.databases.Memcached.toggle
+          schema:
+            $ref: schema#/properties/spec/properties/kubeDB/properties/databases/properties/Memcached/properties/versions/properties/toggle
+          type: switch
+        - fetch: FetchDbVersions|memcached
+          if: isConfigureDb|memcached
+          label:
+            text: labels.databases.versions
+          onChange: clearDefaultVersion|memcached
+          schema:
+            $ref: schema#/properties/spec/properties/kubeDB/properties/databases/properties/Memcached/properties/versions/properties/available
+          type: multiselect
+        - fetch: availableVersions|Memcached
+          if: isConfigureDb|memcached
+          label:
+            text: labels.databases.default
+          schema:
+            $ref: schema#/properties/spec/properties/kubeDB/properties/databases/properties/Memcached/properties/versions/properties/default
+          type: select
+        - label:
+            text: labels.databases.MongoDB.configure
+          schema:
+            $ref: discriminator#/mongodb/isConfigure
+          type: switch
+        - if: isConfigureDb|mongodb
+          label:
+            text: labels.databases.MongoDB.toggle
+          schema:
+            $ref: schema#/properties/spec/properties/kubeDB/properties/databases/properties/MongoDB/properties/versions/properties/toggle
+          type: switch
+        - fetch: FetchDbVersions|mongodb
+          if: isConfigureDb|mongodb
+          label:
+            text: labels.databases.versions
+          onChange: clearDefaultVersion|mongodb
+          schema:
+            $ref: schema#/properties/spec/properties/kubeDB/properties/databases/properties/MongoDB/properties/versions/properties/available
+          type: multiselect
+        - fetch: availableVersions|MongoDB
+          if: isConfigureDb|mongodb
+          label:
+            text: labels.databases.default
+          schema:
+            $ref: schema#/properties/spec/properties/kubeDB/properties/databases/properties/MongoDB/properties/versions/properties/default
+          type: select
+        - label:
+            text: labels.databases.MySQL.configure
+          schema:
+            $ref: discriminator#/mysql/isConfigure
+          type: switch
+        - if: isConfigureDb|mysql
+          label:
+            text: labels.databases.MySQL.toggle
+          schema:
+            $ref: schema#/properties/spec/properties/kubeDB/properties/databases/properties/MySQL/properties/versions/properties/toggle
+          type: switch
+        - fetch: FetchDbVersions|mysql
+          if: isConfigureDb|mysql
+          label:
+            text: labels.databases.versions
+          onChange: clearDefaultVersion|mysql
+          schema:
+            $ref: schema#/properties/spec/properties/kubeDB/properties/databases/properties/MySQL/properties/versions/properties/available
+          type: multiselect
+        - fetch: availableVersions|MySQL
+          if: isConfigureDb|mysql
+          label:
+            text: labels.databases.default
+          schema:
+            $ref: schema#/properties/spec/properties/kubeDB/properties/databases/properties/MySQL/properties/versions/properties/default
+          type: select
+        - label:
+            text: labels.databases.PerconaXtraDB.configure
+          schema:
+            $ref: discriminator#/perconaxtradb/isConfigure
+          type: switch
+        - if: isConfigureDb|perconaxtradb
+          label:
+            text: labels.databases.PerconaXtraDB.toggle
+          schema:
+            $ref: schema#/properties/spec/properties/kubeDB/properties/databases/properties/PerconaXtraDB/properties/versions/properties/toggle
+          type: switch
+        - fetch: FetchDbVersions|perconaxtradb
+          if: isConfigureDb|perconaxtradb
+          label:
+            text: labels.databases.versions
+          onChange: clearDefaultVersion|perconaxtradb
+          schema:
+            $ref: schema#/properties/spec/properties/kubeDB/properties/databases/properties/PerconaXtraDB/properties/versions/properties/available
+          type: multiselect
+        - fetch: availableVersions|PerconaXtraDB
+          if: isConfigureDb|perconaxtradb
+          label:
+            text: labels.databases.default
+          schema:
+            $ref: schema#/properties/spec/properties/kubeDB/properties/databases/properties/PerconaXtraDB/properties/versions/properties/default
+          type: select
+        - label:
+            text: labels.databases.PgBouncer.configure
+          schema:
+            $ref: discriminator#/pgbouncer/isConfigure
+          type: switch
+        - if: isConfigureDb|pgbouncer
+          label:
+            text: labels.databases.PgBouncer.toggle
+          schema:
+            $ref: schema#/properties/spec/properties/kubeDB/properties/databases/properties/PgBouncer/properties/versions/properties/toggle
+          type: switch
+        - fetch: FetchDbVersions|pgbouncer
+          if: isConfigureDb|pgbouncer
+          label:
+            text: labels.databases.versions
+          onChange: clearDefaultVersion|pgbouncer
+          schema:
+            $ref: schema#/properties/spec/properties/kubeDB/properties/databases/properties/PgBouncer/properties/versions/properties/available
+          type: multiselect
+        - fetch: availableVersions|PgBouncer
+          if: isConfigureDb|pgbouncer
+          label:
+            text: labels.databases.default
+          schema:
+            $ref: schema#/properties/spec/properties/kubeDB/properties/databases/properties/PgBouncer/properties/versions/properties/default
+          type: select
+        - label:
+            text: labels.databases.Pgpool.configure
+          schema:
+            $ref: discriminator#/pgpool/isConfigure
+          type: switch
+        - if: isConfigureDb|pgpool
+          label:
+            text: labels.databases.Pgpool.toggle
+          schema:
+            $ref: schema#/properties/spec/properties/kubeDB/properties/databases/properties/Pgpool/properties/versions/properties/toggle
+          type: switch
+        - fetch: FetchDbVersions|pgpool
+          if: isConfigureDb|pgpool
+          label:
+            text: labels.databases.versions
+          onChange: clearDefaultVersion|pgpool
+          schema:
+            $ref: schema#/properties/spec/properties/kubeDB/properties/databases/properties/Pgpool/properties/versions/properties/available
+          type: multiselect
+        - fetch: availableVersions|Pgpool
+          if: isConfigureDb|pgpool
+          label:
+            text: labels.databases.default
+          schema:
+            $ref: schema#/properties/spec/properties/kubeDB/properties/databases/properties/Pgpool/properties/versions/properties/default
+          type: select
+        - label:
+            text: labels.databases.Postgres.configure
+          schema:
+            $ref: discriminator#/postgres/isConfigure
+          type: switch
+        - if: isConfigureDb|postgres
+          label:
+            text: labels.databases.Postgres.toggle
+          schema:
+            $ref: schema#/properties/spec/properties/kubeDB/properties/databases/properties/Postgres/properties/versions/properties/toggle
+          type: switch
+        - fetch: FetchDbVersions|postgres
+          if: isConfigureDb|postgres
+          label:
+            text: labels.databases.versions
+          onChange: clearDefaultVersion|postgres
+          schema:
+            $ref: schema#/properties/spec/properties/kubeDB/properties/databases/properties/Postgres/properties/versions/properties/available
+          type: multiselect
+        - fetch: availableVersions|Postgres
+          if: isConfigureDb|postgres
+          label:
+            text: labels.databases.default
+          schema:
+            $ref: schema#/properties/spec/properties/kubeDB/properties/databases/properties/Postgres/properties/versions/properties/default
+          type: select
+        - label:
+            text: labels.databases.ProxySQL.configure
+          schema:
+            $ref: discriminator#/proxysql/isConfigure
+          type: switch
+        - if: isConfigureDb|proxysql
+          label:
+            text: labels.databases.ProxySQL.toggle
+          schema:
+            $ref: schema#/properties/spec/properties/kubeDB/properties/databases/properties/ProxySQL/properties/versions/properties/toggle
+          type: switch
+        - fetch: FetchDbVersions|proxysql
+          if: isConfigureDb|proxysql
+          label:
+            text: labels.databases.versions
+          onChange: clearDefaultVersion|proxysql
+          schema:
+            $ref: schema#/properties/spec/properties/kubeDB/properties/databases/properties/ProxySQL/properties/versions/properties/available
+          type: multiselect
+        - fetch: availableVersions|ProxySQL
+          if: isConfigureDb|proxysql
+          label:
+            text: labels.databases.default
+          schema:
+            $ref: schema#/properties/spec/properties/kubeDB/properties/databases/properties/ProxySQL/properties/versions/properties/default
+          type: select
+        - label:
+            text: labels.databases.RabbitMQ.configure
+          schema:
+            $ref: discriminator#/rabbitmq/isConfigure
+          type: switch
+        - if: isConfigureDb|rabbitmq
+          label:
+            text: labels.databases.RabbitMQ.toggle
+          schema:
+            $ref: schema#/properties/spec/properties/kubeDB/properties/databases/properties/RabbitMQ/properties/versions/properties/toggle
+          type: switch
+        - fetch: FetchDbVersions|rabbitmq
+          if: isConfigureDb|rabbitmq
+          label:
+            text: labels.databases.versions
+          onChange: clearDefaultVersion|rabbitmq
+          schema:
+            $ref: schema#/properties/spec/properties/kubeDB/properties/databases/properties/RabbitMQ/properties/versions/properties/available
+          type: multiselect
+        - fetch: availableVersions|RabbitMQ
+          if: isConfigureDb|rabbitmq
+          label:
+            text: labels.databases.default
+          schema:
+            $ref: schema#/properties/spec/properties/kubeDB/properties/databases/properties/RabbitMQ/properties/versions/properties/default
+          type: select
+        - label:
+            text: labels.databases.Redis.configure
+          schema:
+            $ref: discriminator#/redis/isConfigure
+          type: switch
+        - if: isConfigureDb|redis
+          label:
+            text: labels.databases.Redis.toggle
+          schema:
+            $ref: schema#/properties/spec/properties/kubeDB/properties/databases/properties/Redis/properties/versions/properties/toggle
+          type: switch
+        - fetch: FetchDbVersions|redis
+          if: isConfigureDb|redis
+          label:
+            text: labels.databases.versions
+          onChange: clearDefaultVersion|redis
+          schema:
+            $ref: schema#/properties/spec/properties/kubeDB/properties/databases/properties/Redis/properties/versions/properties/available
+          type: multiselect
+        - fetch: availableVersions|Redis
+          if: isConfigureDb|redis
+          label:
+            text: labels.databases.default
+          schema:
+            $ref: schema#/properties/spec/properties/kubeDB/properties/databases/properties/Redis/properties/versions/properties/default
+          type: select
+        - label:
+            text: labels.databases.Singlestore.configure
+          schema:
+            $ref: discriminator#/singlestore/isConfigure
+          type: switch
+        - if: isConfigureDb|singlestore
+          label:
+            text: labels.databases.Singlestore.toggle
+          schema:
+            $ref: schema#/properties/spec/properties/kubeDB/properties/databases/properties/Singlestore/properties/versions/properties/toggle
+          type: switch
+        - fetch: FetchDbVersions|singlestore
+          if: isConfigureDb|singlestore
+          label:
+            text: labels.databases.versions
+          onChange: clearDefaultVersion|singlestore
+          schema:
+            $ref: schema#/properties/spec/properties/kubeDB/properties/databases/properties/Singlestore/properties/versions/properties/available
+          type: multiselect
+        - fetch: availableVersions|Singlestore
+          if: isConfigureDb|singlestore
+          label:
+            text: labels.databases.default
+          schema:
+            $ref: schema#/properties/spec/properties/kubeDB/properties/databases/properties/Singlestore/properties/versions/properties/default
+          type: select
+        - label:
+            text: labels.databases.Solr.configure
+          schema:
+            $ref: discriminator#/solr/isConfigure
+          type: switch
+        - if: isConfigureDb|solr
+          label:
+            text: labels.databases.Solr.toggle
+          schema:
+            $ref: schema#/properties/spec/properties/kubeDB/properties/databases/properties/Solr/properties/versions/properties/toggle
+          type: switch
+        - fetch: FetchDbVersions|solr
+          if: isConfigureDb|solr
+          label:
+            text: labels.databases.versions
+          onChange: clearDefaultVersion|solr
+          schema:
+            $ref: schema#/properties/spec/properties/kubeDB/properties/databases/properties/Solr/properties/versions/properties/available
+          type: multiselect
+        - fetch: availableVersions|Solr
+          if: isConfigureDb|solr
+          label:
+            text: labels.databases.default
+          schema:
+            $ref: schema#/properties/spec/properties/kubeDB/properties/databases/properties/Solr/properties/versions/properties/default
+          type: select
+        - label:
+            text: labels.databases.ZooKeeper.configure
+          schema:
+            $ref: discriminator#/zookeeper/isConfigure
+          type: switch
+        - if: isConfigureDb|zookeeper
+          label:
+            text: labels.databases.ZooKeeper.toggle
+          schema:
+            $ref: schema#/properties/spec/properties/kubeDB/properties/databases/properties/ZooKeeper/properties/versions/properties/toggle
+          type: switch
+        - fetch: FetchDbVersions|zookeeper
+          if: isConfigureDb|zookeeper
+          label:
+            text: labels.databases.versions
+          onChange: clearDefaultVersion|zookeeper
+          schema:
+            $ref: schema#/properties/spec/properties/kubeDB/properties/databases/properties/ZooKeeper/properties/versions/properties/available
+          type: multiselect
+        - fetch: availableVersions|ZooKeeper
+          if: isConfigureDb|zookeeper
+          label:
+            text: labels.databases.default
+          schema:
+            $ref: schema#/properties/spec/properties/kubeDB/properties/databases/properties/ZooKeeper/properties/versions/properties/default
+          type: select
+        label:
+          text: labels.databases.name
+        show_label: true
+        type: single-step-form
+      - elements:
+        - label:
+            text: labels.storageClass.toggle
+          schema:
+            $ref: schema#/properties/spec/properties/kubeDB/properties/storageClasses/properties/toggle
+          type: switch
+        - fetch: getStorageClass
+          label:
+            text: labels.storageClass.available
+          schema:
+            $ref: schema#/properties/spec/properties/kubeDB/properties/storageClasses/properties/available
+          type: multiselect
+        - fetch: getOptions|storageClasses
+          label:
+            text: labels.storageClass.default
+          schema:
+            $ref: schema#/properties/spec/properties/kubeDB/properties/storageClasses/properties/default
+          type: select
+        label:
+          text: labels.storageClass.name
+        show_label: true
+        type: single-step-form
+      - elements:
+        - label:
+            text: labels.storageClass.toggle
+          schema:
+            $ref: schema#/properties/spec/properties/kubeDB/properties/tls/properties/toggle
+          type: switch
+        - label:
+            text: labels.tls.default
+          schema:
+            $ref: schema#/properties/spec/properties/kubeDB/properties/tls/properties/default
+          type: switch
+        label:
+          text: labels.tls.name
+        show_label: true
+        type: single-step-form
+      - elements:
+        - label:
+            text: labels.clusterIssuers.toggle
+          schema:
+            $ref: schema#/properties/spec/properties/kubeDB/properties/clusterIssuers/properties/toggle
+          type: switch
+        - fetch: getClusterIssuers
+          label:
+            text: labels.clusterIssuers.available
+          schema:
+            $ref: schema#/properties/spec/properties/kubeDB/properties/clusterIssuers/properties/available
+          type: multiselect
+        - fetch: getOptions|clusterIssuers
+          label:
+            text: labels.clusterIssuers.default
+          schema:
+            $ref: schema#/properties/spec/properties/kubeDB/properties/clusterIssuers/properties/default
+          type: select
+        label:
+          text: labels.clusterIssuers.name
+        show_label: true
+        type: single-step-form
+      - elements:
+        - label:
+            text: labels.webUI.toggle
+          schema:
+            $ref: schema#/properties/spec/properties/kubeDB/properties/webUI/properties/toggle
+          type: switch
+        - label:
+            text: labels.webUI.default
+          schema:
+            $ref: schema#/properties/spec/properties/kubeDB/properties/webUI/properties/default
+          type: switch
+        label:
+          text: labels.webUI.name
+        show_label: true
+        type: single-step-form
+      - elements:
+        - label:
+            text: labels.monitoring.toggle
+          schema:
+            $ref: schema#/properties/spec/properties/kubeDB/properties/monitoring/properties/toggle
+          type: switch
+        - label:
+            text: labels.monitoring.agent
+          options:
+          - text: prometheus.io/operator
+            value: prometheus.io/operator
+          - text: prometheus.io
+            value: prometheus.io
+          - text: prometheus.io/builtin
+            value: prometheus.io/builtin
+          schema:
+            $ref: schema#/properties/spec/properties/kubeDB/properties/monitoring/properties/agent
+          type: radio
+        label:
+          text: labels.monitoring.name
+        show_label: true
+        type: single-step-form
+      if: presetNameEqualsTo|kubedb-ui-presets
+      type: single-step-form
+    - elements:
+      - elements:
+        - alias: reusable_stash-presets
+          chart:
+            name: uibytebuildersdev-component-stash-presets
+            version: v0.4.21
+          moduleResolver: fetchJsons
+          schema:
+            $ref: schema#/properties/spec/properties/backup/properties/kubestash
+          type: reusable-element
+        - computed: setTool
+          if: returnFalse
+          schema:
+            $ref: schema#/properties/spec/properties/backup/properties/tool
+          type: input
+        schema:
+          $ref: schema#/properties/spec/properties/backup
+        type: single-step-form
+      if: presetNameEqualsTo|stash-presets
+      type: single-step-form
+    - elements: []
+      type: single-step-form
+    type: single-step-form
+  id: options
+  title: Basic
+type: multi-step-form

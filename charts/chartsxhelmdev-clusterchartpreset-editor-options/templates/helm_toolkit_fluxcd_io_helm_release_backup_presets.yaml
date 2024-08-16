@@ -1,0 +1,34 @@
+{{- if .Values.spec.backup }}
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  labels:
+    app.kubernetes.io/component: stash-presets
+  name: stash-presets
+  namespace: kubeops
+spec:
+  chart:
+    spec:
+      chart: stash-presets
+      sourceRef:
+        kind: HelmRepository
+        name: appscode-charts-oci
+        namespace: kubeops
+      version: v2024.5.17
+  install:
+    crds: CreateReplace
+    createNamespace: true
+    remediation:
+      retries: -1
+  interval: 5m
+  releaseName: stash-presets
+  storageNamespace: stash
+  targetNamespace: stash
+  timeout: 30m
+  upgrade:
+    crds: CreateReplace
+    remediation:
+      retries: -1
+  values:
+{{- toYaml .Values.spec.backup | nindent 4 }}
+{{- end }}

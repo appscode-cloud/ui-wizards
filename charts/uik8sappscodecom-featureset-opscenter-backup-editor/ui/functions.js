@@ -491,6 +491,67 @@ function initPrune({ getValue, model }) {
   )
   return prune ? prune : false
 }
+
+function setTool({ commit }) {
+  commit('wizard/model$update', {
+    path: '/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/tool',
+    value: 'KubeStash',
+    force: true,
+  })
+  return 'KubeStash'
+}
+
+function setProvider() {
+  return 's3'
+}
+
+function setStorageSecret({ getValue, model }) {
+  const secret = getValue(
+    model,
+    '/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/kubestash/storageSecret/create',
+  )
+  return secret
+}
+
+function onAuthChange({ getValue, discriminator, commit }, type) {
+  const auth = getValue(discriminator, `/${type}`) || false
+  commit('wizard/model$update', {
+    path: '/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/kubestash/storageSecret/create',
+    value: auth,
+    force: true,
+  })
+}
+
+async function fetchJsons({ axios, itemCtx }) {
+  let ui = {}
+  let language = {}
+  let functions = {}
+  const { name, sourceRef, version, packageviewUrlPrefix } = itemCtx.chart
+
+  try {
+    ui = await axios.get(
+      `${packageviewUrlPrefix}/create-ui.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`,
+    )
+    language = await axios.get(
+      `${packageviewUrlPrefix}/language.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`,
+    )
+    const functionString = await axios.get(
+      `${packageviewUrlPrefix}/functions.js?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}`,
+    )
+    // declare evaluate the functionString to get the functions Object
+    const evalFunc = new Function(functionString.data || '')
+    functions = evalFunc()
+  } catch (e) {
+    console.log(e)
+  }
+
+  return {
+    ui: ui.data || {},
+    language: language.data || {},
+    functions,
+  }
+}
+
 return {
   hideThisElement,
   checkIsResourceLoaded,
@@ -510,4 +571,9 @@ return {
   providerType,
   authEnabled,
   initPrune,
+  fetchJsons,
+  setTool,
+  setProvider,
+  setStorageSecret,
+  onAuthChange,
 }
