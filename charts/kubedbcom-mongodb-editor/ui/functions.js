@@ -1181,33 +1181,39 @@ async function isBackupEnabled({ getValue, model, axios, storeGet }, backup) {
   }
 }
 
-async function fetchNamespaces({ getValue, model, axios, storeGet }) {
+async function fetchNamespaces(
+  { getValue, model, axios, storeGet, discriminator },
+  discriminatorName,
+) {
   const username = storeGet('/route/params/user')
   const clusterName = storeGet('/route/params/cluster')
   const group = storeGet('/route/params/group')
   const version = storeGet('/route/params/version')
   const resource = storeGet('/route/params/resource')
+  const namespace = getValue(discriminator, `${discriminatorName}`)
 
   const url = `http://bb.test:3003/api/v1/clusters/${username}/${clusterName}/proxy/identity.k8s.appscode.com/v1alpha1/selfsubjectnamespaceaccessreviews`
 
   try {
-    const resp = await axios.post(url, {
-      _recurringCall: false,
-      apiVersion: 'identity.k8s.appscode.com/v1alpha1',
-      kind: 'SelfSubjectNamespaceAccessReview',
-      spec: {
-        resourceAttributes: [
-          {
-            verb: 'create',
-            group: group,
-            version: version,
-            resource: resource,
-          },
-        ],
-      },
-    })
-    let data = resp.data.status.namespaces
-    return data
+    if (namespace) {
+      const resp = await axios.post(url, {
+        _recurringCall: false,
+        apiVersion: 'identity.k8s.appscode.com/v1alpha1',
+        kind: 'SelfSubjectNamespaceAccessReview',
+        spec: {
+          resourceAttributes: [
+            {
+              verb: 'create',
+              group: group,
+              version: version,
+              resource: resource,
+            },
+          ],
+        },
+      })
+      let data = resp.data.status.namespaces
+      return data
+    }
   } catch (e) {
     console.log(e)
   }
@@ -1229,10 +1235,12 @@ async function fetchNames(
       ? `http://bb.test:3003/api/v1/clusters/${username}/${clusterName}/proxy/storage.kubestash.com/${version}/namespaces/${namespace}/${type}`
       : `http://bb.test:3003/api/v1/clusters/${username}/${clusterName}/proxy/core/${version}/namespaces/${namespace}/${type}`
   try {
-    const resp = await axios.get(url)
-    let data = resp.data.items
-    data = data.map((ele) => ele.metadata.name)
-    return data
+    if (namespace) {
+      const resp = await axios.get(url)
+      let data = resp.data.items
+      data = data.map((ele) => ele.metadata.name)
+      return data
+    }
   } catch (e) {
     console.log(e)
   }
@@ -1685,6 +1693,7 @@ function onInputChangeSchedule(
     value: session,
   })
 }
+
 function setInitSchedule(
   { getValue, discriminator, watchDependency, commit, model },
   modelPath,
