@@ -208,6 +208,48 @@ resources:
     spec:
       ca:
         secretName: mariadb-ca
+  coreKubestashComBackupBlueprint: # +doc-gen:break
+    apiVersion: core.kubestash.com/v1alpha1
+    kind: BackupBlueprint
+    metadata:
+      name: mariadb
+      namespace: demo
+    spec:
+      backupConfigurationTemplate:
+        backends:
+          - name: mariadb-backend
+            retentionPolicy:
+              name: mariadb-retention-policy
+              namespace: demo
+            storageRef:
+              name: mariadb-storage
+              namespace: demo
+        sessions:
+          - addon:
+              jobTemplate:
+                spec:
+                  securityContext:
+                    runAsGroup: 0
+                    runAsUser: 0
+              name: mariadb-addon
+              tasks:
+                - name: logical-backup
+            name: mariadb-frequent-backup
+            repositories:
+              - backend: mariadb-backend
+                directory: /mariadb-repo
+                encryptionSecret:
+                  name: mariadb-encryption-secret
+                  namespace: demo
+                name: mariadb-repo
+            scheduler:
+              jobTemplate:
+                backoffLimit: 1
+              schedule: '*/5 * * * *'
+            sessionHistoryLimit: 2
+      usagePolicy:
+        allowedNamespaces:
+          from: Same
   coreKubestashComBackupConfiguration: # +doc-gen:break
     apiVersion: core.kubestash.com/v1alpha1
     kind: BackupConfiguration

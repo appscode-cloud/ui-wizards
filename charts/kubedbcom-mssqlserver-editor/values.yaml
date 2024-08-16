@@ -201,6 +201,118 @@ resources:
     spec:
       ca:
         secretName: mssqlserver-ca
+  coreKubestashComBackupBlueprint: # +doc-gen:break
+    apiVersion: core.kubestash.com/v1alpha1
+    kind: BackupBlueprint
+    metadata:
+      name: sqlserver-ag
+      namespace: demo
+    spec:
+      backupConfigurationTemplate:
+        backends:
+          - name: sqlserver-ag-backend
+            retentionPolicy:
+              name: sqlserver-ag-retention-policy
+              namespace: demo
+            storageRef:
+              name: sqlserver-ag-storage
+              namespace: demo
+        sessions:
+          - addon:
+              jobTemplate:
+                spec:
+                  securityContext:
+                    runAsGroup: 0
+                    runAsUser: 0
+              name: mssqlserver-addon
+              tasks:
+                - name: logical-backup
+            name: sqlserver-ag-frequent-backup
+            repositories:
+              - backend: sqlserver-ag-backend
+                directory: /sqlserver-ag-repo
+                encryptionSecret:
+                  name: sqlserver-ag-encryption-secret
+                  namespace: demo
+                name: sqlserver-ag-repo
+            scheduler:
+              jobTemplate:
+                backoffLimit: 1
+              schedule: '*/5 * * * *'
+            sessionHistoryLimit: 2
+      usagePolicy:
+        allowedNamespaces:
+          from: Same
+  coreKubestashComBackupConfiguration: # +doc-gen:break
+    apiVersion: core.kubestash.com/v1alpha1
+    kind: BackupConfiguration
+    metadata:
+      name: sqlserver-ag
+      namespace: demo
+    spec:
+      backends:
+        - name: sqlserver-ag-backend
+          retentionPolicy:
+            name: sqlserver-ag-retention-policy
+            namespace: demo
+          storageRef:
+            name: sqlserver-ag-storage
+            namespace: demo
+      sessions:
+        - addon:
+            jobTemplate:
+              spec:
+                securityContext:
+                  runAsGroup: 0
+                  runAsUser: 0
+            name: mssqlserver-addon
+            tasks:
+              - name: logical-backup
+          name: sqlserver-ag-frequent-backup
+          repositories:
+            - backend: sqlserver-ag-backend
+              directory: /sqlserver-ag-repo
+              encryptionSecret:
+                name: sqlserver-ag-encryption-secret
+                namespace: demo
+              name: sqlserver-ag-repo
+          scheduler:
+            jobTemplate:
+              backoffLimit: 1
+            schedule: '*/5 * * * *'
+          sessionHistoryLimit: 2
+      target:
+        apiGroup: kubedb.com
+        kind: MSSQLServer
+        name: sqlserver-ag
+        namespace: demo
+  coreKubestashComRestoreSession: # +doc-gen:break
+    apiVersion: core.kubestash.com/v1alpha1
+    kind: RestoreSession
+    metadata:
+      name: sqlserver-ag
+      namespace: demo
+    spec:
+      addon:
+        jobTemplate:
+          spec:
+            securityContext:
+              runAsGroup: 0
+              runAsUser: 0
+        name: mssqlserver-addon
+        tasks:
+          - name: logical-backup-restore
+      dataSource:
+        encryptionSecret:
+          name: sqlserver-ag-encryption-secret
+          namespace: demo
+        repository: sqlserver-ag-repo
+        snapshot: latest
+      target:
+        apiGroup: kubedb.com
+        kind: MSSQLServer
+        name: sqlserver-ag
+        namespace: demo
   kubedbComMSSQLServer: # +doc-gen:break
     apiVersion: kubedb.com/v1alpha2
     kind: MSSQLServer
