@@ -1,0 +1,35 @@
+{{ $root:= . }}
+apiVersion: core.kubestash.com/v1alpha1
+kind: RestoreSession
+metadata:
+  name: {{ include "corekubestashcom-restoresession-editor-options.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "corekubestashcom-restoresession-editor-options.labels" . | nindent 4 }}
+  {{- if .Values.spec.annotations }}
+  annotations:
+    {{- include "corekubestashcom-restoresession-editor-options.annotations" . | nindent 4 }}
+  {{- end }}
+spec:
+  datasource:
+    repository: {{ .Values.spec.datasource.repository.name }}
+    namespace: {{ .Values.spec.datasource.repository.namespace }}
+    snapshot: {{ .Values.spec.datasource.snapshot }}
+    encryptionSecret:
+      {{- toYaml .Values.spec.datasource.encryptionSecret | nindent 6 }}
+  target:
+    {{- toYaml .Values.spec.target | nindent 4 }}
+  addon:
+    name: {{ .Values.spec.addon.name }}
+    tasks:
+    {{- range .Values.spec.addon.tasks }}
+      - name: {{ .name }}
+        {{- if .params }}
+        params: {{ .params }}
+        {{- end }}
+    {{- end }}
+    {{- if .Values.spec.addon.jobTemplate.securityContext }}
+    jobTemplate:
+      spec:
+        securityContext: {{ .Values.spec.addon.jobTemplate.securityContext }}
+    {{- end }}
