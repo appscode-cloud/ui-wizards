@@ -132,10 +132,6 @@ function getTasks({ watchDependency, model, getValue }) {
   return tasks
 }
 
-function setTask({ getValue, discriminator, commit }) {
-  const task = getValue(discriminator, '/task')
-}
-
 function returnFalse() {
   return false
 }
