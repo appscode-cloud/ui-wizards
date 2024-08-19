@@ -40,7 +40,7 @@ async function fetchNames({ getValue, axios, storeGet, watchDependency, model },
       : 'backupstorages'
   const core = suffix === 'secrets' ? 'core' : 'storage.kubestash.com'
   const version = suffix === 'secrets' ? 'v1' : 'v1alpha1'
-  const url = `http://bb.test:3003/api/v1/clusters/${username}/${clusterName}/proxy/${core}/${version}/namespaces/${namespace}/${suffix}`
+  const url = `/clusters/${username}/${clusterName}/proxy/${core}/${version}/namespaces/${namespace}/${suffix}`
   try {
     if (namespace) {
       const resp = await axios.get(url)
