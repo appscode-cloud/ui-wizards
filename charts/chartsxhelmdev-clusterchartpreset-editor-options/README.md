@@ -7,8 +7,8 @@
 ```bash
 $ helm repo add bytebuilders-ui https://bundles.byte.builders/ui/
 $ helm repo update
-$ helm search repo bytebuilders-ui/chartsxhelmdev-clusterchartpreset-editor-options --version=v0.4.21
-$ helm upgrade -i chartsxhelmdev-clusterchartpreset-editor-options bytebuilders-ui/chartsxhelmdev-clusterchartpreset-editor-options -n kube-system --create-namespace --version=v0.4.21
+$ helm search repo bytebuilders-ui/uibytebuildersdev-component-kubedb-ui-presets --version=v0.4.21
+$ helm upgrade -i chartsxhelmdev-clusterchartpreset-editor-options bytebuilders-ui/uibytebuildersdev-component-kubedb-ui-presets -n kube-system --create-namespace --version=v0.4.21
 ```
 
 ## Introduction
@@ -24,7 +24,7 @@ This chart deploys A ClusterChartPresets Editor UI Options on a [Kubernetes](htt
 To install/upgrade the chart with the release name `chartsxhelmdev-clusterchartpreset-editor-options`:
 
 ```bash
-$ helm upgrade -i chartsxhelmdev-clusterchartpreset-editor-options bytebuilders-ui/chartsxhelmdev-clusterchartpreset-editor-options -n kube-system --create-namespace --version=v0.4.21
+$ helm upgrade -i chartsxhelmdev-clusterchartpreset-editor-options bytebuilders-ui/uibytebuildersdev-component-kubedb-ui-presets -n kube-system --create-namespace --version=v0.4.21
 ```
 
 The command deploys A ClusterChartPresets Editor UI Options on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
@@ -43,7 +43,7 @@ The command removes all the Kubernetes components associated with the chart and 
 
 ## Configuration
 
-The following table lists the configurable parameters of the `chartsxhelmdev-clusterchartpreset-editor-options` chart and their default values.
+The following table lists the configurable parameters of the `uibytebuildersdev-component-kubedb-ui-presets` chart and their default values.
 
 |                        Parameter                        |                                                                                Description                                                                                |                          Default                          |
 |---------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------|
@@ -80,7 +80,7 @@ The following table lists the configurable parameters of the `chartsxhelmdev-clu
 | spec.kubeDB.monitoring.exporter.resources               |                                                                                                                                                                           | <code>{"requests":{"cpu":"100m","memory":"128Mi"}}</code> |
 | spec.kubeDB.monitoring.serviceMonitor.labels            | Specify the labels for ServiceMonitor. Prometheus crd will select ServiceMonitor using these labels. Only usable when monitoring agent is `prometheus.io/webhook server`. | <code>{}</code>                                           |
 | spec.kubeDB.monitoring.toggle                           |                                                                                                                                                                           | <code>true</code>                                         |
-| spec.kubeDB.alerts.toggle                               |                                                                                                                                                                           | <code>true</code>                                         |
+| spec.kubeDB.alert.toggle                                |                                                                                                                                                                           | <code>true</code>                                         |
 | spec.kubeDB.archiver.toggle                             |                                                                                                                                                                           | <code>true</code>                                         |
 | spec.kubeDB.archiver.default                            |                                                                                                                                                                           | <code>true</code>                                         |
 | spec.kubeDB.backup.tool                                 |                                                                                                                                                                           | <code>KubeStash</code>                                    |
@@ -92,7 +92,6 @@ The following table lists the configurable parameters of the `chartsxhelmdev-clu
 | spec.kubeDB.backup.kubestash.retentionPolicy.namespace  |                                                                                                                                                                           | <code>stash</code>                                        |
 | spec.kubeDB.backup.kubestash.encryptionSecret.name      |                                                                                                                                                                           | <code>default-encryption-secret</code>                    |
 | spec.kubeDB.backup.kubestash.encryptionSecret.namespace |                                                                                                                                                                           | <code>stash</code>                                        |
-| spec.monitoring                                         |                                                                                                                                                                           | <code>{}</code>                                           |
 | spec.backup.tool                                        |                                                                                                                                                                           | <code>KubeStash</code>                                    |
 | spec.backup.kubestash.encryptionSecret.name             |                                                                                                                                                                           | <code></code>                                             |
 | spec.backup.kubestash.encryptionSecret.namespace        |                                                                                                                                                                           | <code></code>                                             |
@@ -106,12 +105,12 @@ The following table lists the configurable parameters of the `chartsxhelmdev-clu
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm upgrade -i`. For example:
 
 ```bash
-$ helm upgrade -i chartsxhelmdev-clusterchartpreset-editor-options bytebuilders-ui/chartsxhelmdev-clusterchartpreset-editor-options -n kube-system --create-namespace --version=v0.4.21 --set metadata.resource.group=charts.x-helm.dev
+$ helm upgrade -i chartsxhelmdev-clusterchartpreset-editor-options bytebuilders-ui/uibytebuildersdev-component-kubedb-ui-presets -n kube-system --create-namespace --version=v0.4.21 --set metadata.resource.group=charts.x-helm.dev
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
 installing the chart. For example:
 
 ```bash
-$ helm upgrade -i chartsxhelmdev-clusterchartpreset-editor-options bytebuilders-ui/chartsxhelmdev-clusterchartpreset-editor-options -n kube-system --create-namespace --version=v0.4.21 --values values.yaml
+$ helm upgrade -i chartsxhelmdev-clusterchartpreset-editor-options bytebuilders-ui/uibytebuildersdev-component-kubedb-ui-presets -n kube-system --create-namespace --version=v0.4.21 --values values.yaml
 ```
