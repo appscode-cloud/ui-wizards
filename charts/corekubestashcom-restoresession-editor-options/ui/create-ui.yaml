@@ -6,16 +6,49 @@ steps:
       schema:
         $ref: discriminator#/addons
       type: input
+    - isArray: true
+      keys:
+        label:
+          text: labels.labels.key
+      label:
+        text: labels.labels.label
+      schema:
+        $ref: schema#/properties/spec/properties/labels
+      type: key-value-input-form
+      values:
+        label:
+          text: labels.labels.value
+        schema:
+          $ref: schema#/properties/spec/properties/labels/additionalProperties
+        type: input
+    - isArray: true
+      keys:
+        label:
+          text: labels.annotations.key
+      label:
+        text: labels.annotations.label
+      schema:
+        $ref: schema#/properties/spec/properties/annotations
+      type: key-value-input-form
+      values:
+        label:
+          text: labels.annotations.value
+        schema:
+          $ref: schema#/properties/spec/properties/annotations/additionalProperties
+        type: input
     - elements:
       - elements:
-        - fetch: getNamespaces
+        - computed: setNamespace
+          disableUnselect: true
+          fetch: getNamespaces
           label:
             text: labels.namespace
           refresh: true
           schema:
             $ref: schema#/properties/spec/properties/dataSource/properties/repository/properties/namespace
           type: select
-        - fetch: fetchNames|repository
+        - disableUnselect: true
+          fetch: fetchNames|repository
           label:
             text: labels.name
           refresh: true
@@ -28,7 +61,8 @@ steps:
           $ref: schema#/properties/spec/properties/dataSource/properties/repository
         show_label: true
         type: single-step-form
-      - fetch: getSnapshots
+      - disableUnselect: true
+        fetch: getSnapshots
         label:
           text: labels.dataSource.snapshot
         refresh: true
@@ -36,14 +70,17 @@ steps:
           $ref: schema#/properties/spec/properties/dataSource/properties/snapshot
         type: select
       - elements:
-        - fetch: getNamespaces
+        - computed: setNamespace
+          disableUnselect: true
+          fetch: getNamespaces
           label:
             text: labels.namespace
           refresh: true
           schema:
             $ref: schema#/properties/spec/properties/dataSource/properties/encryptionSecret/properties/namespace
           type: select
-        - fetch: fetchNames|encryptionSecret
+        - disableUnselect: true
+          fetch: fetchNames|encryptionSecret
           label:
             text: labels.name
           refresh: true
@@ -66,12 +103,12 @@ steps:
       elements:
       - fetch: getAddons
         label:
-          text: labels.addon
+          text: labels.name
         refresh: true
         schema:
           $ref: schema#/properties/spec/properties/addon/properties/name
         type: select
-      - addFormLabel: labels.scalingRules
+      - addFormLabel: labels.addon.tasks
         element:
           discriminator:
             taksName:
@@ -80,7 +117,7 @@ steps:
           elements:
           - fetch: getTasks
             label:
-              text: labels.addon.tasks
+              text: labels.name
             schema:
               $ref: schema#/properties/spec/properties/addon/properties/tasks/items/properties/name
             type: select
@@ -91,7 +128,7 @@ steps:
             type: editor
           type: single-step-form
         label:
-          text: labels.addons.tasks
+          text: labels.addon.tasks
         schema:
           $ref: schema#/properties/spec/properties/addon/properties/tasks
         tableContents:
@@ -110,15 +147,18 @@ steps:
         type: single-step-form-array
       - elements:
         - label:
-            text: labels.addons.securityContext
+            text: labels.addon.securityContext
           schema:
             $ref: schema#/properties/spec/properties/addon/properties/jobTemplate/properties/securityContext
           type: input
         schema:
           $ref: schema#/properties/spec/properties/addon/properties/jobTemplate
         type: single-step-form
+      label:
+        text: labels.addon.label
       schema:
         $ref: schema#/properties/spec/properties/addon
+      show_label: true
       type: single-step-form
     schema:
       $ref: schema#/properties/spec

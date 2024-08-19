@@ -47,6 +47,11 @@ async function getNamespaces({ axios, storeGet }) {
   }
 }
 
+function setNamespace({ storeGet }) {
+  const namespace = storeGet('/route/query/namespace') || ''
+  return namespace
+}
+
 async function fetchNames({ getValue, model, storeGet, watchDependency, axios }, type) {
   watchDependency(`model#/spec/dataSource/${type}/namespace`) || ''
   const user = storeGet('/route/params/user') || ''
@@ -87,8 +92,7 @@ async function getSnapshots({ watchDependency, model, storeGet, getValue, axios 
       snapshots.map((item, idx) => {
         const name = item?.metadata?.name
         item.value = name
-        idx === 0 ? (item.text = name + ' (Latest)') : name
-        // console.log(item)
+        item.text = idx === 0 ? name + ' (Latest)' : name
         return true
       })
       console.log(snapshots)
@@ -139,6 +143,7 @@ function returnFalse() {
 return {
   setTarget,
   getNamespaces,
+  setNamespace,
   fetchNames,
   getSnapshots,
   getAddons,
