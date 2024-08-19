@@ -40,12 +40,9 @@ type ChartsxhelmdevClusterChartPresetEditorOptionsSpec struct {
 }
 
 type ChartsxhelmdevClusterChartPresetEditorOptionsSpecSpec struct {
-	KubeDB     AdminOptions      `json:"kubeDB"`
-	Monitoring MonitoringOptions `json:"monitoring"`
-	Backup     BackupOptions     `json:"backup"`
+	KubeDB AdminOptions  `json:"kubeDB"`
+	Backup BackupOptions `json:"backup"`
 }
-
-type MonitoringOptions struct{}
 
 type BackupOptions struct {
 	Kubestash KubeStashInfo `json:"kubestash"`
