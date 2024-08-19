@@ -1,143 +1,82 @@
 steps:
 - form:
     elements:
-    - disabled: isVariantAvailable
-      if: showAndInitName
-      label:
-        text: labels.restoresession.name
+    - if: returnFalse
+      computed: setTarget
       schema:
-        $ref: schema#/properties/metadata/properties/release/properties/name
+        $ref: discriminator#/addons
       type: input
-    - add_new_button:
-        label: labels.add_new_namespace
-        target: _blank
-        url:
-          function: getCreateNameSpaceUrl
-      computed: initNamespace
-      disabled: isNamespaceDisabled
-      fetch: getResources|core|v1|namespaces
-      if: showAndInitNamespace
-      label:
-        text: labels.namespace
-      refresh: true
-      schema:
-        $ref: schema#/properties/metadata/properties/release/properties/namespace
-      type: select
     - elements:
-      - if: showIfDoesNotHaveOperationQuery
-        individualItemDisabilityCheck: labelsDisabilityChecker
-        isArray: true
-        keys:
-          label:
-            text: labels.key
-        label:
-          text: labels.restoresession.labels
-        schema:
-          $ref: schema#/properties/spec/properties/labels
-        type: key-value-input-form
-        values:
-          label:
-            text: labels.value
-          schema:
-            $ref: schema#/properties/spec/properties/labels/additionalProperties
-          type: input
-      - if: showIfDoesNotHaveOperationQuery
-        isArray: true
-        keys:
-          label:
-            text: labels.key
-        label:
-          text: labels.restoresession.annotations
-        schema:
-          $ref: schema#/properties/spec/properties/annotations
-        type: key-value-input-form
-        values:
-          label:
-            text: labels.value
-          schema:
-            $ref: schema#/properties/spec/properties/annotations/additionalProperties
-          type: input
-      - disabled: isDatabaseSelectDisabled
-        fetch: fetchDatabases
-        if: showAndInitDatabase
-        label:
-          text: labels.restoresession.database
-        refresh: true
-        schema:
-          $ref: schema#/properties/spec/properties/target
-        type: select
-      - add_new_button:
-          label: labels.repository.create
-          target: _blank
-          url:
-            params:
-              cluster:
-                $ref: store#/route/params/cluster
-              namespace:
-                $ref: model#/metadata/release/namespace
-              user:
-                $ref: store#/route/params/user
-            path: /${user}/${cluster}/core.kubestash.com/v1alpha1/repositories/create?namespace=${namespace}
-        fetch: fetchRepositories
-        label:
-          text: labels.repository.select
-        refresh: true
-        schema:
-          $ref: schema#/properties/spec/properties/repository
-        type: select
-      - label:
-          text: labels.restoresession.snapshot
-        schema:
-          $ref: schema#/properties/spec/properties/snapshot
-        type: input
       - elements:
-        - fetch: getStorageClassNames|/spec/interimVolumeTemplate/spec/storageClassName
+        - fetch: getNamespaces
           label:
-            text: labels.storage.class
+            text: labels.namespace
           schema:
-            $ref: schema#/properties/spec/properties/interimVolumeTemplate/properties/spec/properties/storageClassName
+            $ref: schema#/properties/spec/properties/dataSource/properties/repository/properties/namespace
           type: select
-        - label:
-            text: labels.storage.size
+        - fetch: fetchNames|repository
+          label:
+            text: labels.name
           schema:
-            $ref: schema#/properties/spec/properties/interimVolumeTemplate/properties/spec/properties/resources/properties/requests/properties/storage
-          type: input
-        if: showInterimVolumneTemplate
+            $ref: schema#/properties/spec/properties/dataSource/properties/repository/properties/name
+          type: select
         label:
-          text: labels.interimVolumeTemplate
+          text: labels.dataSource.repository
         schema:
-          $ref: schema#/properties/spec/properties/interimVolumeTemplate
+          $ref: schema#/properties/spec/properties/dataSource/properties/repository
         show_label: true
         type: single-step-form
-      - discriminator:
-          customizeRestoreJobRuntimeSettings:
-            default: false
-            type: boolean
-        elements:
-        - label:
-            text: labels.runtimeSettings.choise
-          schema:
-            $ref: discriminator#/properties/customizeRestoreJobRuntimeSettings
-          type: switch
-        - alias: database-restore-runtime-settings
-          chart:
-            name: uibytebuildersdev-component-database-runtime-settings
-            version: v0.4.21
-          dataContext:
-            namespace:
-              $ref: schema#/properties/metadata/properties/release/properties/namespace
-          if: showRuntimeSettingsForm
-          moduleResolver: fetchJsons
-          schema:
-            $ref: schema#/properties/spec/properties/runtimeSettings
-          type: reusable-element
+      - fetch: getSnapshots
         label:
-          text: Runtime Settings
+          text: labels.dataSource.snapshot
+        schema:
+          $ref: schema#/properties/spec/properties/dataSource/properties/snapshot
+        type: select
+      - elements:
+        - fetch: getNamespaces
+          label:
+            text: labels.namespace
+          schema:
+            $ref: schema#/properties/spec/properties/dataSource/properties/encryptionSecret/properties/namespace
+          type: select
+        - fetch: fetchNames|encryptionSecret
+          label:
+            text: labels.name
+          schema:
+            $ref: schema#/properties/spec/properties/dataSource/properties/encryptionSecret/properties/name
+          type: select
+        label:
+          text: labels.dataSource.encryptionSecret
+        schema:
+          $ref: schema#/properties/spec/properties/dataSource/properties/encryptionSecret
         show_label: true
         type: single-step-form
       schema:
-        $ref: schema#/properties/spec
+        $ref: schema#/properties/spec/properties/dataSource
       type: single-step-form
+    - discriminator:
+        task:
+          default: ''
+          type: string
+      elements:
+      - fetch: getAddons
+        label:
+          text: labels.addon
+        schema:
+          $ref: schema#/properties/spec/properties/addon/properties/name
+        type: select
+      - fetch: getTasks
+        label:
+          text: labels.tasks
+        onChange: setTask
+        schema:
+          $ref: discriminator#/properties/task
+        type: select
+      schema:
+        $ref: schema#/properties/spec/properties/addon
+      type: single-step-form
+    schema:
+      $ref: schema#/properties/spec
     type: single-step-form
   id: options
   title: steps.0.label
