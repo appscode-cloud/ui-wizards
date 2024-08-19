@@ -1136,7 +1136,7 @@ function ifUsagePolicy({ discriminator, getValue, watchDependency, model }, valu
 async function getBlueprints({ getValue, model, setDiscriminatorValue, axios, storeGet }, backup) {
   const username = storeGet('/route/params/user')
   const clusterName = storeGet('/route/params/cluster')
-  const url = `http://bb.test:3003/api/v1/clusters/${username}/${clusterName}/proxy/core.kubestash.com/v1alpha1/backupblueprints`
+  const url = `clusters/${username}/${clusterName}/proxy/core.kubestash.com/v1alpha1/backupblueprints`
 
   try {
     const resp = await axios.get(url)
@@ -1158,7 +1158,7 @@ async function fetchNamespaces(
   const resource = storeGet('/route/params/resource')
   const namespace = getValue(discriminator, `${discriminatorName}`)
 
-  const url = `http://bb.test:3003/api/v1/clusters/${username}/${clusterName}/proxy/identity.k8s.appscode.com/v1alpha1/selfsubjectnamespaceaccessreviews`
+  const url = `clusters/${username}/${clusterName}/proxy/identity.k8s.appscode.com/v1alpha1/selfsubjectnamespaceaccessreviews`
 
   try {
     if (namespace) {
@@ -1198,8 +1198,8 @@ async function fetchNames(
   const namespace = getValue(discriminator, `${discriminatorName}`)
   const url =
     type !== 'secrets'
-      ? `http://bb.test:3003/api/v1/clusters/${username}/${clusterName}/proxy/storage.kubestash.com/${version}/namespaces/${namespace}/${type}`
-      : `http://bb.test:3003/api/v1/clusters/${username}/${clusterName}/proxy/core/${version}/namespaces/${namespace}/${type}`
+      ? `clusters/${username}/${clusterName}/proxy/storage.kubestash.com/${version}/namespaces/${namespace}/${type}`
+      : `clusters/${username}/${clusterName}/proxy/core/${version}/namespaces/${namespace}/${type}`
   try {
     if (namespace) {
       const resp = await axios.get(url)
@@ -1376,7 +1376,7 @@ async function initBackupInvoker({ getValue, model, storeGet, commit, axios }) {
   const resource = storeGet('/route/params/resource')
   let labels = {}
 
-  const url = `http://bb.test:3003/api/v1/clusters/${username}/${clusterName}/proxy/${group}/${version}/namespaces/${namespace}/${resource}/${name}`
+  const url = `clusters/${username}/${clusterName}/proxy/${group}/${version}/namespaces/${namespace}/${resource}/${name}`
 
   try {
     const resp = await axios.get(url)
@@ -1440,7 +1440,7 @@ async function initBackupInvoker({ getValue, model, storeGet, commit, axios }) {
 
   if (isStashPresetEnable) {
     try {
-      const url = `http://bb.test:3003/api/v1/clusters/${username}/${clusterName}/proxy/charts.x-helm.dev/v1alpha1/clusterchartpresets/stash-presets`
+      const url = `clusters/${username}/${clusterName}/proxy/charts.x-helm.dev/v1alpha1/clusterchartpresets/stash-presets`
       const resp = await axios.get(url)
       schedule = resp.data.spec.values.spec.backup.kubestash.schedule
       storageRefName = resp.data.spec.values.spec.backup.kubestash.storageRef.name
