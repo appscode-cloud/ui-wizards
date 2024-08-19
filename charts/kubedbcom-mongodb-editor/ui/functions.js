@@ -1147,40 +1147,6 @@ async function getBlueprints({ getValue, model, setDiscriminatorValue, axios, st
   }
 }
 
-async function isBackupEnabled({ getValue, model, axios, storeGet }, backup) {
-  const apiGroup = getValue(model, '/metadata/resource/group')
-  const kind = getValue(model, '/metadata/resource/kind')
-  const username = storeGet('/route/params/user')
-  const clusterName = storeGet('/route/params/cluster')
-  const name = storeGet('/route/params/name')
-  const namespace = storeGet('/route/query/namespace')
-  const url = `http://bb.test:3003/api/v1/clusters/${username}/${clusterName}/proxy/core.kubestash.com/v1alpha1/backupconfigurations`
-
-  try {
-    const resp = await axios.get(url)
-    let data = resp.data.items
-    data = data.filter((ele) => {
-      return ele.metadata.name === name
-    })
-    if (
-      data[0] &&
-      data[0].spec &&
-      data[0].spec.target.apiGroup === apiGroup &&
-      data[0].spec.target.kind === kind &&
-      data[0].spec.target.name === name &&
-      data[0].spec.target.namespace === namespace
-    ) {
-      if (backup === 'alert') return true
-      else return false
-    } else {
-      if (backup === 'alert') return false
-      else return true
-    }
-  } catch (e) {
-    console.log(e)
-  }
-}
-
 async function fetchNamespaces(
   { getValue, model, axios, storeGet, discriminator },
   discriminatorName,
@@ -2467,7 +2433,6 @@ return {
   getDefault,
   onInputChange,
   showBackupOptions,
-  isBackupEnabled,
   showScheduleBackup,
   isVariantAvailable,
   fetchJsons,
