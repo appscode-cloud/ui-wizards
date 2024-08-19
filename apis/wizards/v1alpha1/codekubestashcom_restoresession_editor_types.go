@@ -63,7 +63,8 @@ type KubeStashAddon struct {
 }
 
 type TaskRef struct {
-	Name   string `json:"name"`
+	Name string `json:"name"`
+	// +optional
 	Params string `json:"params"`
 }
 
