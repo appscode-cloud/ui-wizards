@@ -183,521 +183,681 @@ elements:
     schema:
       $ref: discriminator#/clickhouse/isConfigure
     type: switch
-  - if: isConfigureDb|clickhouse
-    label:
-      text: labels.databases.ClickHouse.toggle
+  - elements: 
+    - elements:
+      - if: isConfigureDb|clickhouse
+        label:
+          text: labels.databases.ClickHouse.toggle
+        schema:
+          $ref: schema#/properties/databases/properties/ClickHouse/properties/versions/properties/toggle
+        type: switch
+      - fetch: FetchDbVersions|ClickHouse
+        if: isConfigureDb|clickhouse
+        label:
+          text: labels.databases.versions
+        onChange: clearDefaultVersion|ClickHouse
+        schema:
+          $ref: schema#/properties/databases/properties/ClickHouse/properties/versions/properties/available
+        type: multiselect
+      - fetch: availableVersions|ClickHouse
+        if: isConfigureDb|clickhouse
+        label:
+          text: labels.databases.default
+        schema:
+          $ref: schema#/properties/databases/properties/ClickHouse/properties/versions/properties/default
+        type: select
+      schema:
+        $ref: schema#/properties/databases/properties/ClickHouse/properties/versions
+      type: single-step-form
     schema:
-      $ref: schema#/properties/databases/properties/ClickHouse/properties/versions/properties/toggle
-    type: switch
-  - fetch: FetchDbVersions|ClickHouse
-    if: isConfigureDb|clickhouse
-    label:
-      text: labels.databases.versions
-    onChange: clearDefaultVersion|ClickHouse
-    schema:
-      $ref: schema#/properties/databases/properties/ClickHouse/properties/versions/properties/available
-    type: multiselect
-  - fetch: availableVersions|ClickHouse
-    if: isConfigureDb|clickhouse
-    label:
-      text: labels.databases.default
-    schema:
-      $ref: schema#/properties/databases/properties/ClickHouse/properties/versions/properties/default
-    type: select
+      $ref: schema#/properties/databases/properties/ClickHouse
+    type: single-step-form
   - label:
       text: labels.databases.Druid.configure
     schema:
       $ref: discriminator#/druid/isConfigure
     type: switch
-  - if: isConfigureDb|druid
-    label:
-      text: labels.databases.Druid.toggle
+  - elements: 
+    - elements:
+      - if: isConfigureDb|druid
+        label:
+          text: labels.databases.Druid.toggle
+        schema:
+          $ref: schema#/properties/databases/properties/Druid/properties/versions/properties/toggle
+        type: switch
+      - fetch: FetchDbVersions|Druid
+        if: isConfigureDb|druid
+        label:
+          text: labels.databases.versions
+        onChange: clearDefaultVersion|Druid
+        schema:
+          $ref: schema#/properties/databases/properties/Druid/properties/versions/properties/available
+        type: multiselect
+      - fetch: availableVersions|Druid
+        if: isConfigureDb|druid
+        label:
+          text: labels.databases.default
+        schema:
+          $ref: schema#/properties/databases/properties/Druid/properties/versions/properties/default
+        type: select
+      schema:
+        $ref: schema#/properties/databases/properties/Druid/properties/versions
+      type: single-step-form
     schema:
-      $ref: schema#/properties/databases/properties/Druid/properties/versions/properties/toggle
-    type: switch
-  - fetch: FetchDbVersions|Druid
-    if: isConfigureDb|druid
-    label:
-      text: labels.databases.versions
-    onChange: clearDefaultVersion|Druid
-    schema:
-      $ref: schema#/properties/databases/properties/Druid/properties/versions/properties/available
-    type: multiselect
-  - fetch: availableVersions|Druid
-    if: isConfigureDb|druid
-    label:
-      text: labels.databases.default
-    schema:
-      $ref: schema#/properties/databases/properties/Druid/properties/versions/properties/default
-    type: select
+      $ref: schema#/properties/databases/properties/Druid
+    type: single-step-form
   - label:
       text: labels.databases.Elasticsearch.configure
     schema:
       $ref: discriminator#/elasticsearch/isConfigure
     type: switch
-  - if: isConfigureDb|elasticsearch
-    label:
-      text: labels.databases.Elasticsearch.toggle
+  - elements: 
+    - elements:
+      - if: isConfigureDb|elasticsearch
+        label:
+          text: labels.databases.Elasticsearch.toggle
+        schema:
+          $ref: schema#/properties/databases/properties/Elasticsearch/properties/versions/properties/toggle
+        type: switch
+      - fetch: FetchDbVersions|Elasticsearch
+        if: isConfigureDb|elasticsearch
+        label:
+          text: labels.databases.versions
+        onChange: clearDefaultVersion|Elasticsearch
+        schema:
+          $ref: schema#/properties/databases/properties/Elasticsearch/properties/versions/properties/available
+        type: multiselect
+      - fetch: availableVersions|Elasticsearch
+        if: isConfigureDb|elasticsearch
+        label:
+          text: labels.databases.default
+        schema:
+          $ref: schema#/properties/databases/properties/Elasticsearch/properties/versions/properties/default
+        type: select
+      schema:
+        $ref: schema#/properties/databases/properties/Elasticsearch/properties/versions
+      type: single-step-form
     schema:
-      $ref: schema#/properties/databases/properties/Elasticsearch/properties/versions/properties/toggle
-    type: switch
-  - fetch: FetchDbVersions|Elasticsearch
-    if: isConfigureDb|elasticsearch
-    label:
-      text: labels.databases.versions
-    onChange: clearDefaultVersion|Elasticsearch
-    schema:
-      $ref: schema#/properties/databases/properties/Elasticsearch/properties/versions/properties/available
-    type: multiselect
-  - fetch: availableVersions|Elasticsearch
-    if: isConfigureDb|elasticsearch
-    label:
-      text: labels.databases.default
-    schema:
-      $ref: schema#/properties/databases/properties/Elasticsearch/properties/versions/properties/default
-    type: select
+      $ref: schema#/properties/databases/properties/Elasticsearch
+    type: single-step-form
   - label:
       text: labels.databases.FerretDB.configure
     schema:
       $ref: discriminator#/ferretdb/isConfigure
     type: switch
-  - if: isConfigureDb|ferretdb
-    label:
-      text: labels.databases.FerretDB.toggle
+  - elements: 
+    - elements:
+      - if: isConfigureDb|ferretdb
+        label:
+          text: labels.databases.FerretDB.toggle
+        schema:
+          $ref: schema#/properties/databases/properties/FerretDB/properties/versions/properties/toggle
+        type: switch
+      - fetch: FetchDbVersions|FerretDB
+        if: isConfigureDb|ferretdb
+        label:
+          text: labels.databases.versions
+        onChange: clearDefaultVersion|ferretdb
+        schema:
+          $ref: schema#/properties/databases/properties/FerretDB/properties/versions/properties/available
+        type: multiselect
+      - fetch: availableVersions|FerretDB
+        if: isConfigureDb|ferretdb
+        label:
+          text: labels.databases.default
+        schema:
+          $ref: schema#/properties/databases/properties/FerretDB/properties/versions/properties/default
+        type: select
+      schema:
+        $ref: schema#/properties/databases/properties/FerretDB/properties/versions
+      type: single-step-form
     schema:
-      $ref: schema#/properties/databases/properties/FerretDB/properties/versions/properties/toggle
-    type: switch
-  - fetch: FetchDbVersions|FerretDB
-    if: isConfigureDb|ferretdb
-    label:
-      text: labels.databases.versions
-    onChange: clearDefaultVersion|ferretdb
-    schema:
-      $ref: schema#/properties/databases/properties/FerretDB/properties/versions/properties/available
-    type: multiselect
-  - fetch: availableVersions|FerretDB
-    if: isConfigureDb|ferretdb
-    label:
-      text: labels.databases.default
-    schema:
-      $ref: schema#/properties/databases/properties/FerretDB/properties/versions/properties/default
-    type: select
+      $ref: schema#/properties/databases/properties/FerretDB
+    type: single-step-form
   - label:
       text: labels.databases.Kafka.configure
     schema:
       $ref: discriminator#/kafka/isConfigure
     type: switch
-  - if: isConfigureDb|kafka
-    label:
-      text: labels.databases.Kafka.toggle
+  - elements: 
+    - elements:
+      - if: isConfigureDb|kafka
+        label:
+          text: labels.databases.Kafka.toggle
+        schema:
+          $ref: schema#/properties/databases/properties/Kafka/properties/versions/properties/toggle
+        type: switch
+      - fetch: FetchDbVersions|Kafka
+        if: isConfigureDb|kafka
+        label:
+          text: labels.databases.versions
+        onChange: clearDefaultVersion|kafka
+        schema:
+          $ref: schema#/properties/databases/properties/Kafka/properties/versions/properties/available
+        type: multiselect
+      - fetch: availableVersions|Kafka
+        if: isConfigureDb|kafka
+        label:
+          text: labels.databases.default
+        schema:
+          $ref: schema#/properties/databases/properties/Kafka/properties/versions/properties/default
+        type: select
+      schema:
+        $ref: schema#/properties/databases/properties/Kafka/properties/versions
+      type: single-step-form
     schema:
-      $ref: schema#/properties/databases/properties/Kafka/properties/versions/properties/toggle
-    type: switch
-  - fetch: FetchDbVersions|Kafka
-    if: isConfigureDb|kafka
-    label:
-      text: labels.databases.versions
-    onChange: clearDefaultVersion|kafka
-    schema:
-      $ref: schema#/properties/databases/properties/Kafka/properties/versions/properties/available
-    type: multiselect
-  - fetch: availableVersions|Kafka
-    if: isConfigureDb|kafka
-    label:
-      text: labels.databases.default
-    schema:
-      $ref: schema#/properties/databases/properties/Kafka/properties/versions/properties/default
-    type: select
+      $ref: schema#/properties/databases/properties/Kafka
+    type: single-step-form
   - label:
       text: labels.databases.MSSQLServer.configure
     schema:
       $ref: discriminator#/mssqlserver/isConfigure
     type: switch
-  - if: isConfigureDb|mssqlserver
-    label:
-      text: labels.databases.MSSQLServer.toggle
+  - elements: 
+    - elements:
+      - if: isConfigureDb|mssqlserver
+        label:
+          text: labels.databases.MSSQLServer.toggle
+        schema:
+          $ref: schema#/properties/databases/properties/MSSQLServer/properties/versions/properties/toggle
+        type: switch
+      - fetch: FetchDbVersions|MSSQLServer
+        if: isConfigureDb|mssqlserver
+        label:
+          text: labels.databases.versions
+        onChange: clearDefaultVersion|mssqlserver
+        schema:
+          $ref: schema#/properties/databases/properties/MSSQLServer/properties/versions/properties/available
+        type: multiselect
+      - fetch: availableVersions|MSSQLServer
+        if: isConfigureDb|mssqlserver
+        label:
+          text: labels.databases.default
+        schema:
+          $ref: schema#/properties/databases/properties/MSSQLServer/properties/versions/properties/default
+        type: select
+      schema:
+        $ref: schema#/properties/databases/properties/MSSQLServer/properties/versions
+      type: single-step-form
     schema:
-      $ref: schema#/properties/databases/properties/MSSQLServer/properties/versions/properties/toggle
-    type: switch
-  - fetch: FetchDbVersions|MSSQLServer
-    if: isConfigureDb|mssqlserver
-    label:
-      text: labels.databases.versions
-    onChange: clearDefaultVersion|mssqlserver
-    schema:
-      $ref: schema#/properties/databases/properties/MSSQLServer/properties/versions/properties/available
-    type: multiselect
-  - fetch: availableVersions|MSSQLServer
-    if: isConfigureDb|mssqlserver
-    label:
-      text: labels.databases.default
-    schema:
-      $ref: schema#/properties/databases/properties/MSSQLServer/properties/versions/properties/default
-    type: select
+      $ref: schema#/properties/databases/properties/MSSQLServer
+    type: single-step-form
   - label:
       text: labels.databases.MariaDB.configure
     schema:
       $ref: discriminator#/mariadb/isConfigure
     type: switch
-  - if: isConfigureDb|mariadb
-    label:
-      text: labels.databases.MariaDB.toggle
+  - elements: 
+    - elements:
+      - if: isConfigureDb|mariadb
+        label:
+          text: labels.databases.MariaDB.toggle
+        schema:
+          $ref: schema#/properties/databases/properties/MariaDB/properties/versions/properties/toggle
+        type: switch
+      - fetch: FetchDbVersions|MariaDB
+        if: isConfigureDb|mariadb
+        label:
+          text: labels.databases.versions
+        onChange: clearDefaultVersion|mariadb
+        schema:
+          $ref: schema#/properties/databases/properties/MariaDB/properties/versions/properties/available
+        type: multiselect
+      - fetch: availableVersions|MariaDB
+        if: isConfigureDb|mariadb
+        label:
+          text: labels.databases.default
+        schema:
+          $ref: schema#/properties/databases/properties/MariaDB/properties/versions/properties/default
+        type: select
+      schema:
+        $ref: schema#/properties/databases/properties/MariaDB/properties/versions
+      type: single-step-form
     schema:
-      $ref: schema#/properties/databases/properties/MariaDB/properties/versions/properties/toggle
-    type: switch
-  - fetch: FetchDbVersions|MariaDB
-    if: isConfigureDb|mariadb
-    label:
-      text: labels.databases.versions
-    onChange: clearDefaultVersion|mariadb
-    schema:
-      $ref: schema#/properties/databases/properties/MariaDB/properties/versions/properties/available
-    type: multiselect
-  - fetch: availableVersions|MariaDB
-    if: isConfigureDb|mariadb
-    label:
-      text: labels.databases.default
-    schema:
-      $ref: schema#/properties/databases/properties/MariaDB/properties/versions/properties/default
-    type: select
+      $ref: schema#/properties/databases/properties/MariaDB
+    type: single-step-form
   - label:
       text: labels.databases.Memcached.configure
     schema:
       $ref: discriminator#/memcached/isConfigure
     type: switch
-  - if: isConfigureDb|memcached
-    label:
-      text: labels.databases.Memcached.toggle
+  - elements: 
+    - elements:
+      - if: isConfigureDb|memcached
+        label:
+          text: labels.databases.Memcached.toggle
+        schema:
+          $ref: schema#/properties/databases/properties/Memcached/properties/versions/properties/toggle
+        type: switch
+      - fetch: FetchDbVersions|Memcached
+        if: isConfigureDb|memcached
+        label:
+          text: labels.databases.versions
+        onChange: clearDefaultVersion|memcached
+        schema:
+          $ref: schema#/properties/databases/properties/Memcached/properties/versions/properties/available
+        type: multiselect
+      - fetch: availableVersions|Memcached
+        if: isConfigureDb|memcached
+        label:
+          text: labels.databases.default
+        schema:
+          $ref: schema#/properties/databases/properties/Memcached/properties/versions/properties/default
+        type: select
+      schema:
+        $ref: schema#/properties/databases/properties/Memcached/properties/versions
+      type: single-step-form
     schema:
-      $ref: schema#/properties/databases/properties/Memcached/properties/versions/properties/toggle
-    type: switch
-  - fetch: FetchDbVersions|Memcached
-    if: isConfigureDb|memcached
-    label:
-      text: labels.databases.versions
-    onChange: clearDefaultVersion|memcached
-    schema:
-      $ref: schema#/properties/databases/properties/Memcached/properties/versions/properties/available
-    type: multiselect
-  - fetch: availableVersions|Memcached
-    if: isConfigureDb|memcached
-    label:
-      text: labels.databases.default
-    schema:
-      $ref: schema#/properties/databases/properties/Memcached/properties/versions/properties/default
-    type: select
+      $ref: schema#/properties/databases/properties/Memcached
+    type: single-step-form
   - label:
       text: labels.databases.MongoDB.configure
     schema:
       $ref: discriminator#/mongodb/isConfigure
     type: switch
-  - if: isConfigureDb|mongodb
-    label:
-      text: labels.databases.MongoDB.toggle
+  - elements: 
+    - elements:
+      - if: isConfigureDb|mongodb
+        label:
+          text: labels.databases.MongoDB.toggle
+        schema:
+          $ref: schema#/properties/databases/properties/MongoDB/properties/versions/properties/toggle
+        type: switch
+      - fetch: FetchDbVersions|MongoDB
+        if: isConfigureDb|mongodb
+        label:
+          text: labels.databases.versions
+        onChange: clearDefaultVersion|mongodb
+        schema:
+          $ref: schema#/properties/databases/properties/MongoDB/properties/versions/properties/available
+        type: multiselect
+      - fetch: availableVersions|MongoDB
+        if: isConfigureDb|mongodb
+        label:
+          text: labels.databases.default
+        schema:
+          $ref: schema#/properties/databases/properties/MongoDB/properties/versions/properties/default
+        type: select
+      schema:
+        $ref: schema#/properties/databases/properties/MongoDB/properties/versions
+      type: single-step-form
     schema:
-      $ref: schema#/properties/databases/properties/MongoDB/properties/versions/properties/toggle
-    type: switch
-  - fetch: FetchDbVersions|MongoDB
-    if: isConfigureDb|mongodb
-    label:
-      text: labels.databases.versions
-    onChange: clearDefaultVersion|mongodb
-    schema:
-      $ref: schema#/properties/databases/properties/MongoDB/properties/versions/properties/available
-    type: multiselect
-  - fetch: availableVersions|MongoDB
-    if: isConfigureDb|mongodb
-    label:
-      text: labels.databases.default
-    schema:
-      $ref: schema#/properties/databases/properties/MongoDB/properties/versions/properties/default
-    type: select
+      $ref: schema#/properties/databases/properties/MongoDB
+    type: single-step-form
   - label:
       text: labels.databases.MySQL.configure
     schema:
       $ref: discriminator#/mysql/isConfigure
     type: switch
-  - if: isConfigureDb|mysql
-    label:
-      text: labels.databases.MySQL.toggle
+  - elements: 
+    - elements:
+      - if: isConfigureDb|mysql
+        label:
+          text: labels.databases.MySQL.toggle
+        schema:
+          $ref: schema#/properties/databases/properties/MySQL/properties/versions/properties/toggle
+        type: switch
+      - fetch: FetchDbVersions|MySQL
+        if: isConfigureDb|mysql
+        label:
+          text: labels.databases.versions
+        onChange: clearDefaultVersion|mysql
+        schema:
+          $ref: schema#/properties/databases/properties/MySQL/properties/versions/properties/available
+        type: multiselect
+      - fetch: availableVersions|MySQL
+        if: isConfigureDb|mysql
+        label:
+          text: labels.databases.default
+        schema:
+          $ref: schema#/properties/databases/properties/MySQL/properties/versions/properties/default
+        type: select
+      schema:
+        $ref: schema#/properties/databases/properties/MySQL/properties/versions
+      type: single-step-form
     schema:
-      $ref: schema#/properties/databases/properties/MySQL/properties/versions/properties/toggle
-    type: switch
-  - fetch: FetchDbVersions|MySQL
-    if: isConfigureDb|mysql
-    label:
-      text: labels.databases.versions
-    onChange: clearDefaultVersion|mysql
-    schema:
-      $ref: schema#/properties/databases/properties/MySQL/properties/versions/properties/available
-    type: multiselect
-  - fetch: availableVersions|MySQL
-    if: isConfigureDb|mysql
-    label:
-      text: labels.databases.default
-    schema:
-      $ref: schema#/properties/databases/properties/MySQL/properties/versions/properties/default
-    type: select
+      $ref: schema#/properties/databases/properties/MySQL
+    type: single-step-form
   - label:
       text: labels.databases.PerconaXtraDB.configure
     schema:
       $ref: discriminator#/perconaxtradb/isConfigure
     type: switch
-  - if: isConfigureDb|perconaxtradb
-    label:
-      text: labels.databases.PerconaXtraDB.toggle
+  - elements: 
+    - elements:
+      - if: isConfigureDb|perconaxtradb
+        label:
+          text: labels.databases.PerconaXtraDB.toggle
+        schema:
+          $ref: schema#/properties/databases/properties/PerconaXtraDB/properties/versions/properties/toggle
+        type: switch
+      - fetch: FetchDbVersions|PerconaXtraDB
+        if: isConfigureDb|perconaxtradb
+        label:
+          text: labels.databases.versions
+        onChange: clearDefaultVersion|perconaxtradb
+        schema:
+          $ref: schema#/properties/databases/properties/PerconaXtraDB/properties/versions/properties/available
+        type: multiselect
+      - fetch: availableVersions|PerconaXtraDB
+        if: isConfigureDb|perconaxtradb
+        label:
+          text: labels.databases.default
+        schema:
+          $ref: schema#/properties/databases/properties/PerconaXtraDB/properties/versions/properties/default
+        type: select
+      schema:
+        $ref: schema#/properties/databases/properties/PerconaXtraDB/properties/versions
+      type: single-step-form
     schema:
-      $ref: schema#/properties/databases/properties/PerconaXtraDB/properties/versions/properties/toggle
-    type: switch
-  - fetch: FetchDbVersions|PerconaXtraDB
-    if: isConfigureDb|perconaxtradb
-    label:
-      text: labels.databases.versions
-    onChange: clearDefaultVersion|perconaxtradb
-    schema:
-      $ref: schema#/properties/databases/properties/PerconaXtraDB/properties/versions/properties/available
-    type: multiselect
-  - fetch: availableVersions|PerconaXtraDB
-    if: isConfigureDb|perconaxtradb
-    label:
-      text: labels.databases.default
-    schema:
-      $ref: schema#/properties/databases/properties/PerconaXtraDB/properties/versions/properties/default
-    type: select
+      $ref: schema#/properties/databases/properties/PerconaXtraDB
+    type: single-step-form
   - label:
       text: labels.databases.PgBouncer.configure
     schema:
       $ref: discriminator#/pgbouncer/isConfigure
     type: switch
-  - if: isConfigureDb|pgbouncer
-    label:
-      text: labels.databases.PgBouncer.toggle
+  - elements: 
+    - elements:
+      - if: isConfigureDb|pgbouncer
+        label:
+          text: labels.databases.PgBouncer.toggle
+        schema:
+          $ref: schema#/properties/databases/properties/PgBouncer/properties/versions/properties/toggle
+        type: switch
+      - fetch: FetchDbVersions|PgBouncer
+        if: isConfigureDb|pgbouncer
+        label:
+          text: labels.databases.versions
+        onChange: clearDefaultVersion|pgbouncer
+        schema:
+          $ref: schema#/properties/databases/properties/PgBouncer/properties/versions/properties/available
+        type: multiselect
+      - fetch: availableVersions|PgBouncer
+        if: isConfigureDb|pgbouncer
+        label:
+          text: labels.databases.default
+        schema:
+          $ref: schema#/properties/databases/properties/PgBouncer/properties/versions/properties/default
+        type: select
+      schema:
+        $ref: schema#/properties/databases/properties/PgBouncer/properties/versions
+      type: single-step-form
     schema:
-      $ref: schema#/properties/databases/properties/PgBouncer/properties/versions/properties/toggle
-    type: switch
-  - fetch: FetchDbVersions|PgBouncer
-    if: isConfigureDb|pgbouncer
-    label:
-      text: labels.databases.versions
-    onChange: clearDefaultVersion|pgbouncer
-    schema:
-      $ref: schema#/properties/databases/properties/PgBouncer/properties/versions/properties/available
-    type: multiselect
-  - fetch: availableVersions|PgBouncer
-    if: isConfigureDb|pgbouncer
-    label:
-      text: labels.databases.default
-    schema:
-      $ref: schema#/properties/databases/properties/PgBouncer/properties/versions/properties/default
-    type: select
+      $ref: schema#/properties/databases/properties/PgBouncer
+    type: single-step-form
   - label:
       text: labels.databases.Pgpool.configure
     schema:
       $ref: discriminator#/pgpool/isConfigure
     type: switch
-  - if: isConfigureDb|pgpool
-    label:
-      text: labels.databases.Pgpool.toggle
+  - elements: 
+    - elements:
+      - if: isConfigureDb|pgpool
+        label:
+          text: labels.databases.Pgpool.toggle
+        schema:
+          $ref: schema#/properties/databases/properties/Pgpool/properties/versions/properties/toggle
+        type: switch
+      - fetch: FetchDbVersions|Pgpool
+        if: isConfigureDb|pgpool
+        label:
+          text: labels.databases.versions
+        onChange: clearDefaultVersion|pgpool
+        schema:
+          $ref: schema#/properties/databases/properties/Pgpool/properties/versions/properties/available
+        type: multiselect
+      - fetch: availableVersions|Pgpool
+        if: isConfigureDb|pgpool
+        label:
+          text: labels.databases.default
+        schema:
+          $ref: schema#/properties/databases/properties/Pgpool/properties/versions/properties/default
+        type: select
+      schema:
+        $ref: schema#/properties/databases/properties/Pgpool/properties/versions
+      type: single-step-form
     schema:
-      $ref: schema#/properties/databases/properties/Pgpool/properties/versions/properties/toggle
-    type: switch
-  - fetch: FetchDbVersions|Pgpool
-    if: isConfigureDb|pgpool
-    label:
-      text: labels.databases.versions
-    onChange: clearDefaultVersion|pgpool
-    schema:
-      $ref: schema#/properties/databases/properties/Pgpool/properties/versions/properties/available
-    type: multiselect
-  - fetch: availableVersions|Pgpool
-    if: isConfigureDb|pgpool
-    label:
-      text: labels.databases.default
-    schema:
-      $ref: schema#/properties/databases/properties/Pgpool/properties/versions/properties/default
-    type: select
+      $ref: schema#/properties/databases/properties/Pgpool
+    type: single-step-form
   - label:
       text: labels.databases.Postgres.configure
     schema:
       $ref: discriminator#/postgres/isConfigure
     type: switch
-  - if: isConfigureDb|postgres
-    label:
-      text: labels.databases.Postgres.toggle
+  - elements: 
+    - elements:
+      - if: isConfigureDb|postgres
+        label:
+          text: labels.databases.Postgres.toggle
+        schema:
+          $ref: schema#/properties/databases/properties/Postgres/properties/versions/properties/toggle
+        type: switch
+      - fetch: FetchDbVersions|Postgres
+        if: isConfigureDb|postgres
+        label:
+          text: labels.databases.versions
+        onChange: clearDefaultVersion|postgres
+        schema:
+          $ref: schema#/properties/databases/properties/Postgres/properties/versions/properties/available
+        type: multiselect
+      - fetch: availableVersions|Postgres
+        if: isConfigureDb|postgres
+        label:
+          text: labels.databases.default
+        schema:
+          $ref: schema#/properties/databases/properties/Postgres/properties/versions/properties/default
+        type: select
+      schema:
+        $ref: schema#/properties/databases/properties/Postgres/properties/versions
+      type: single-step-form
     schema:
-      $ref: schema#/properties/databases/properties/Postgres/properties/versions/properties/toggle
-    type: switch
-  - fetch: FetchDbVersions|Postgres
-    if: isConfigureDb|postgres
-    label:
-      text: labels.databases.versions
-    onChange: clearDefaultVersion|postgres
-    schema:
-      $ref: schema#/properties/databases/properties/Postgres/properties/versions/properties/available
-    type: multiselect
-  - fetch: availableVersions|Postgres
-    if: isConfigureDb|postgres
-    label:
-      text: labels.databases.default
-    schema:
-      $ref: schema#/properties/databases/properties/Postgres/properties/versions/properties/default
-    type: select
+      $ref: schema#/properties/databases/properties/Postgres
+    type: single-step-form
   - label:
       text: labels.databases.ProxySQL.configure
     schema:
       $ref: discriminator#/proxysql/isConfigure
     type: switch
-  - if: isConfigureDb|proxysql
-    label:
-      text: labels.databases.ProxySQL.toggle
+  - elements: 
+    - elements:
+      - if: isConfigureDb|proxysql
+        label:
+          text: labels.databases.ProxySQL.toggle
+        schema:
+          $ref: schema#/properties/databases/properties/ProxySQL/properties/versions/properties/toggle
+        type: switch
+      - fetch: FetchDbVersions|ProxySQL
+        if: isConfigureDb|proxysql
+        label:
+          text: labels.databases.versions
+        onChange: clearDefaultVersion|proxysql
+        schema:
+          $ref: schema#/properties/databases/properties/ProxySQL/properties/versions/properties/available
+        type: multiselect
+      - fetch: availableVersions|ProxySQL
+        if: isConfigureDb|proxysql
+        label:
+          text: labels.databases.default
+        schema:
+          $ref: schema#/properties/databases/properties/ProxySQL/properties/versions/properties/default
+        type: select
+      schema:
+        $ref: schema#/properties/databases/properties/ProxySQL/properties/versions
+      type: single-step-form
     schema:
-      $ref: schema#/properties/databases/properties/ProxySQL/properties/versions/properties/toggle
-    type: switch
-  - fetch: FetchDbVersions|ProxySQL
-    if: isConfigureDb|proxysql
-    label:
-      text: labels.databases.versions
-    onChange: clearDefaultVersion|proxysql
-    schema:
-      $ref: schema#/properties/databases/properties/ProxySQL/properties/versions/properties/available
-    type: multiselect
-  - fetch: availableVersions|ProxySQL
-    if: isConfigureDb|proxysql
-    label:
-      text: labels.databases.default
-    schema:
-      $ref: schema#/properties/databases/properties/ProxySQL/properties/versions/properties/default
-    type: select
+      $ref: schema#/properties/databases/properties/ProxySQL
+    type: single-step-form
   - label:
       text: labels.databases.RabbitMQ.configure
     schema:
       $ref: discriminator#/rabbitmq/isConfigure
     type: switch
-  - if: isConfigureDb|rabbitmq
-    label:
-      text: labels.databases.RabbitMQ.toggle
+  - elements: 
+    - elements:
+      - if: isConfigureDb|rabbitmq
+        label:
+          text: labels.databases.RabbitMQ.toggle
+        schema:
+          $ref: schema#/properties/databases/properties/RabbitMQ/properties/versions/properties/toggle
+        type: switch
+      - fetch: FetchDbVersions|RabbitMQ
+        if: isConfigureDb|rabbitmq
+        label:
+          text: labels.databases.versions
+        onChange: clearDefaultVersion|rabbitmq
+        schema:
+          $ref: schema#/properties/databases/properties/RabbitMQ/properties/versions/properties/available
+        type: multiselect
+      - fetch: availableVersions|RabbitMQ
+        if: isConfigureDb|rabbitmq
+        label:
+          text: labels.databases.default
+        schema:
+          $ref: schema#/properties/databases/properties/RabbitMQ/properties/versions/properties/default
+        type: select
+      schema:
+        $ref: schema#/properties/databases/properties/RabbitMQ/properties/versions
+      type: single-step-form
     schema:
-      $ref: schema#/properties/databases/properties/RabbitMQ/properties/versions/properties/toggle
-    type: switch
-  - fetch: FetchDbVersions|RabbitMQ
-    if: isConfigureDb|rabbitmq
-    label:
-      text: labels.databases.versions
-    onChange: clearDefaultVersion|rabbitmq
-    schema:
-      $ref: schema#/properties/databases/properties/RabbitMQ/properties/versions/properties/available
-    type: multiselect
-  - fetch: availableVersions|RabbitMQ
-    if: isConfigureDb|rabbitmq
-    label:
-      text: labels.databases.default
-    schema:
-      $ref: schema#/properties/databases/properties/RabbitMQ/properties/versions/properties/default
-    type: select
+      $ref: schema#/properties/databases/properties/RabbitMQ
+    type: single-step-form
   - label:
       text: labels.databases.Redis.configure
     schema:
       $ref: discriminator#/redis/isConfigure
     type: switch
-  - if: isConfigureDb|redis
-    label:
-      text: labels.databases.Redis.toggle
+  - elements: 
+    - elements:
+      - if: isConfigureDb|redis
+        label:
+          text: labels.databases.Redis.toggle
+        schema:
+          $ref: schema#/properties/databases/properties/Redis/properties/versions/properties/toggle
+        type: switch
+      - fetch: FetchDbVersions|Redis
+        if: isConfigureDb|redis
+        label:
+          text: labels.databases.versions
+        onChange: clearDefaultVersion|redis
+        schema:
+          $ref: schema#/properties/databases/properties/Redis/properties/versions/properties/available
+        type: multiselect
+      - fetch: availableVersions|Redis
+        if: isConfigureDb|redis
+        label:
+          text: labels.databases.default
+        schema:
+          $ref: schema#/properties/databases/properties/Redis/properties/versions/properties/default
+        type: select
+      schema:
+        $ref: schema#/properties/databases/properties/Redis/properties/versions
+      type: single-step-form
     schema:
-      $ref: schema#/properties/databases/properties/Redis/properties/versions/properties/toggle
-    type: switch
-  - fetch: FetchDbVersions|Redis
-    if: isConfigureDb|redis
-    label:
-      text: labels.databases.versions
-    onChange: clearDefaultVersion|redis
-    schema:
-      $ref: schema#/properties/databases/properties/Redis/properties/versions/properties/available
-    type: multiselect
-  - fetch: availableVersions|Redis
-    if: isConfigureDb|redis
-    label:
-      text: labels.databases.default
-    schema:
-      $ref: schema#/properties/databases/properties/Redis/properties/versions/properties/default
-    type: select
+      $ref: schema#/properties/databases/properties/Redis
+    type: single-step-form
   - label:
       text: labels.databases.Singlestore.configure
     schema:
       $ref: discriminator#/singlestore/isConfigure
     type: switch
-  - if: isConfigureDb|singlestore
-    label:
-      text: labels.databases.Singlestore.toggle
+  - elements: 
+    - elements:
+      - if: isConfigureDb|singlestore
+        label:
+          text: labels.databases.Singlestore.toggle
+        schema:
+          $ref: schema#/properties/databases/properties/Singlestore/properties/versions/properties/toggle
+        type: switch
+      - fetch: FetchDbVersions|Singlestore
+        if: isConfigureDb|singlestore
+        label:
+          text: labels.databases.versions
+        onChange: clearDefaultVersion|singlestore
+        schema:
+          $ref: schema#/properties/databases/properties/Singlestore/properties/versions/properties/available
+        type: multiselect
+      - fetch: availableVersions|Singlestore
+        if: isConfigureDb|singlestore
+        label:
+          text: labels.databases.default
+        schema:
+          $ref: schema#/properties/databases/properties/Singlestore/properties/versions/properties/default
+        type: select
+      schema:
+        $ref: schema#/properties/databases/properties/Singlestore/properties/versions
+      type: single-step-form
     schema:
-      $ref: schema#/properties/databases/properties/Singlestore/properties/versions/properties/toggle
-    type: switch
-  - fetch: FetchDbVersions|Singlestore
-    if: isConfigureDb|singlestore
-    label:
-      text: labels.databases.versions
-    onChange: clearDefaultVersion|singlestore
-    schema:
-      $ref: schema#/properties/databases/properties/Singlestore/properties/versions/properties/available
-    type: multiselect
-  - fetch: availableVersions|Singlestore
-    if: isConfigureDb|singlestore
-    label:
-      text: labels.databases.default
-    schema:
-      $ref: schema#/properties/databases/properties/Singlestore/properties/versions/properties/default
-    type: select
+      $ref: schema#/properties/databases/properties/Singlestore
+    type: single-step-form
   - label:
       text: labels.databases.Solr.configure
     schema:
       $ref: discriminator#/solr/isConfigure
     type: switch
-  - if: isConfigureDb|solr
-    label:
-      text: labels.databases.Solr.toggle
+  - elements: 
+    - elements:
+      - if: isConfigureDb|solr
+        label:
+          text: labels.databases.Solr.toggle
+        schema:
+          $ref: schema#/properties/databases/properties/Solr/properties/versions/properties/toggle
+        type: switch
+      - fetch: FetchDbVersions|Solr
+        if: isConfigureDb|solr
+        label:
+          text: labels.databases.versions
+        onChange: clearDefaultVersion|solr
+        schema:
+          $ref: schema#/properties/databases/properties/Solr/properties/versions/properties/available
+        type: multiselect
+      - fetch: availableVersions|Solr
+        if: isConfigureDb|solr
+        label:
+          text: labels.databases.default
+        schema:
+          $ref: schema#/properties/databases/properties/Solr/properties/versions/properties/default
+        type: select
+      schema:
+        $ref: schema#/properties/databases/properties/Solr/properties/versions
+      type: single-step-form
     schema:
-      $ref: schema#/properties/databases/properties/Solr/properties/versions/properties/toggle
-    type: switch
-  - fetch: FetchDbVersions|Solr
-    if: isConfigureDb|solr
-    label:
-      text: labels.databases.versions
-    onChange: clearDefaultVersion|solr
-    schema:
-      $ref: schema#/properties/databases/properties/Solr/properties/versions/properties/available
-    type: multiselect
-  - fetch: availableVersions|Solr
-    if: isConfigureDb|solr
-    label:
-      text: labels.databases.default
-    schema:
-      $ref: schema#/properties/databases/properties/Solr/properties/versions/properties/default
-    type: select
+      $ref: schema#/properties/databases/properties/Solr
+    type: single-step-form
   - label:
       text: labels.databases.ZooKeeper.configure
     schema:
       $ref: discriminator#/zookeeper/isConfigure
     type: switch
-  - if: isConfigureDb|zookeeper
-    label:
-      text: labels.databases.ZooKeeper.toggle
+  - elements: 
+    - elements:
+      - if: isConfigureDb|zookeeper
+        label:
+          text: labels.databases.ZooKeeper.toggle
+        schema:
+          $ref: schema#/properties/databases/properties/ZooKeeper/properties/versions/properties/toggle
+        type: switch
+      - fetch: FetchDbVersions|ZooKeeper
+        if: isConfigureDb|zookeeper
+        label:
+          text: labels.databases.versions
+        onChange: clearDefaultVersion|zookeeper
+        schema:
+          $ref: schema#/properties/databases/properties/ZooKeeper/properties/versions/properties/available
+        type: multiselect
+      - fetch: availableVersions|ZooKeeper
+        if: isConfigureDb|zookeeper
+        label:
+          text: labels.databases.default
+        schema:
+          $ref: schema#/properties/databases/properties/ZooKeeper/properties/versions/properties/default
+        type: select
+      schema:
+        $ref: schema#/properties/databases/properties/ZooKeeper/properties/versions
+      type: single-step-form
     schema:
-      $ref: schema#/properties/databases/properties/ZooKeeper/properties/versions/properties/toggle
-    type: switch
-  - fetch: FetchDbVersions|ZooKeeper
-    if: isConfigureDb|zookeeper
-    label:
-      text: labels.databases.versions
-    onChange: clearDefaultVersion|zookeeper
-    schema:
-      $ref: schema#/properties/databases/properties/ZooKeeper/properties/versions/properties/available
-    type: multiselect
-  - fetch: availableVersions|ZooKeeper
-    if: isConfigureDb|zookeeper
-    label:
-      text: labels.databases.default
-    schema:
-      $ref: schema#/properties/databases/properties/ZooKeeper/properties/versions/properties/default
-    type: select
+      $ref: schema#/properties/databases/properties/ZooKeeper
+    type: single-step-form
   label:
     text: labels.databases.name
   schema:
