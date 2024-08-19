@@ -95,7 +95,6 @@ async function getSnapshots({ watchDependency, model, storeGet, getValue, axios 
         item.text = idx === 0 ? name + ' (Latest)' : name
         return true
       })
-      console.log(snapshots)
 
       return snapshots
     }
@@ -109,13 +108,11 @@ async function getAddons({ storeGet, axios, setDiscriminatorValue }) {
   const user = storeGet('/route/params/user') || ''
   const cluster = storeGet('/route/params/cluster') || ''
   const url = `/clusters/${user}/${cluster}/proxy/addons.kubestash.com/v1alpha1/addons`
-  console.log(url)
 
   try {
     const resp = await axios.get(url)
     let addons = resp?.data?.items
     addonList = addons
-    console.log(addonList)
 
     addons = addons.map((item) => item?.metadata?.name)
     return addons
@@ -129,9 +126,7 @@ function getTasks({ watchDependency, model, getValue }) {
   watchDependency('model#/spec/addon/name')
   const addon = getValue(model, '/spec/addon/name')
   const addonDetails = addonList?.find((item) => item?.metadata?.name === addon)
-
   let tasks = addonDetails?.spec?.restoreTasks
-  console.log(tasks)
   tasks = tasks?.map((item) => item?.name)
   return tasks
 }
