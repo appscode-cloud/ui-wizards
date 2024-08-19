@@ -7,8 +7,8 @@
 ```bash
 $ helm repo add appscode-charts-oci https://bundles.byte.builders/ui/
 $ helm repo update
-$ helm search repo appscode-charts-oci/rbacauthorizationk8sio-rolebinding-editor --version=v0.4.21
-$ helm upgrade -i rbacauthorizationk8sio-rolebinding-editor appscode-charts-oci/rbacauthorizationk8sio-rolebinding-editor -n default --create-namespace --version=v0.4.21
+$ helm search repo appscode-charts-oci/rbacauthorizationk8sio-rolebinding-editor --version=v0.5.0
+$ helm upgrade -i rbacauthorizationk8sio-rolebinding-editor appscode-charts-oci/rbacauthorizationk8sio-rolebinding-editor -n default --create-namespace --version=v0.5.0
 ```
 
 ## Introduction
@@ -24,7 +24,7 @@ This chart deploys a RoleBinding Editor on a [Kubernetes](http://kubernetes.io) 
 To install/upgrade the chart with the release name `rbacauthorizationk8sio-rolebinding-editor`:
 
 ```bash
-$ helm upgrade -i rbacauthorizationk8sio-rolebinding-editor appscode-charts-oci/rbacauthorizationk8sio-rolebinding-editor -n default --create-namespace --version=v0.4.21
+$ helm upgrade -i rbacauthorizationk8sio-rolebinding-editor appscode-charts-oci/rbacauthorizationk8sio-rolebinding-editor -n default --create-namespace --version=v0.5.0
 ```
 
 The command deploys a RoleBinding Editor on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
@@ -56,12 +56,12 @@ The following table lists the configurable parameters of the `rbacauthorizationk
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm upgrade -i`. For example:
 
 ```bash
-$ helm upgrade -i rbacauthorizationk8sio-rolebinding-editor appscode-charts-oci/rbacauthorizationk8sio-rolebinding-editor -n default --create-namespace --version=v0.4.21 --set apiVersion=rbac.authorization.k8s.io/v1
+$ helm upgrade -i rbacauthorizationk8sio-rolebinding-editor appscode-charts-oci/rbacauthorizationk8sio-rolebinding-editor -n default --create-namespace --version=v0.5.0 --set apiVersion=rbac.authorization.k8s.io/v1
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
 installing the chart. For example:
 
 ```bash
-$ helm upgrade -i rbacauthorizationk8sio-rolebinding-editor appscode-charts-oci/rbacauthorizationk8sio-rolebinding-editor -n default --create-namespace --version=v0.4.21 --values values.yaml
+$ helm upgrade -i rbacauthorizationk8sio-rolebinding-editor appscode-charts-oci/rbacauthorizationk8sio-rolebinding-editor -n default --create-namespace --version=v0.5.0 --values values.yaml
 ```
