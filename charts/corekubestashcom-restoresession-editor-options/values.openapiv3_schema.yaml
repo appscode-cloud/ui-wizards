@@ -1,0 +1,138 @@
+properties:
+  metadata:
+    properties:
+      release:
+        properties:
+          name:
+            type: string
+          namespace:
+            type: string
+        required:
+        - name
+        - namespace
+        type: object
+      resource:
+        description: ResourceID identifies a resource
+        properties:
+          group:
+            type: string
+          kind:
+            description: Kind is the serialized kind of the resource.  It is normally
+              CamelCase and singular.
+            type: string
+          name:
+            description: 'Name is the plural name of the resource to serve.  It must
+              match the name of the CustomResourceDefinition-registration too: plural.group
+              and it must be all lowercase.'
+            type: string
+          scope:
+            description: ResourceScope is an enum defining the different scopes available
+              to a custom resource
+            type: string
+          version:
+            type: string
+        required:
+        - group
+        type: object
+    required:
+    - release
+    - resource
+    type: object
+  spec:
+    properties:
+      addon:
+        properties:
+          jobTemplate:
+            properties:
+              securityContext:
+                format: int64
+                type: integer
+            required:
+            - securityContext
+            type: object
+          name:
+            type: string
+          tasks:
+            items:
+              properties:
+                name:
+                  type: string
+                params:
+                  type: string
+              required:
+              - name
+              - params
+              type: object
+            type: array
+        required:
+        - jobTemplate
+        - name
+        - tasks
+        type: object
+      annotations:
+        additionalProperties:
+          type: string
+        type: object
+      dataSource:
+        properties:
+          encryptionSecret:
+            description: ObjectReference contains enough information to let you inspect
+              or modify the referred object.
+            properties:
+              name:
+                description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names'
+                type: string
+              namespace:
+                description: 'Namespace of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/'
+                type: string
+            required:
+            - name
+            type: object
+          repository:
+            description: ObjectReference contains enough information to let you inspect
+              or modify the referred object.
+            properties:
+              name:
+                description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names'
+                type: string
+              namespace:
+                description: 'Namespace of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/'
+                type: string
+            required:
+            - name
+            type: object
+          snapshot:
+            type: string
+        required:
+        - encryptionSecret
+        - repository
+        - snapshot
+        type: object
+      labels:
+        additionalProperties:
+          type: string
+        type: object
+      target:
+        description: TypedObjectReference represents an typed namespaced object.
+        properties:
+          apiGroup:
+            type: string
+          kind:
+            type: string
+          name:
+            description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names'
+            type: string
+          namespace:
+            description: 'Namespace of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/'
+            type: string
+        required:
+        - name
+        type: object
+    required:
+    - addon
+    - dataSource
+    - target
+    type: object
+required:
+- spec
+type: object
