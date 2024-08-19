@@ -1,6 +1,6 @@
 // *************************      common functions ********************************************
 // eslint-disable-next-line no-empty-pattern
-
+let enabledFeaturesChanged = false
 const backendMap = {
   azure: {
     spec: { container: '', maxConnections: 0, prefix: '' },
@@ -180,44 +180,68 @@ function getEnabledFeaturesFromActiveFeature(allFeatureSetFeature, storeGet) {
 }
 
 function getEnabledFeatures({ storeGet }) {
-  const allFeatures = storeGet('/cluster/features/result') || []
-  const featureSet = storeGet('/route/params/featureset') || []
-  const featureBlock = storeGet('/route/query/activeBlock') || ''
-  const configureMode = storeGet('/route/query/mode') || ''
-  const activeFeature = storeGet('/route/query/activeFeature') || ''
+  // fire computed function only on modal startup
+  if (!enabledFeaturesChanged) {
+    const allFeatures = storeGet('/cluster/features/result') || []
+    const featureSet = storeGet('/route/params/featureset') || []
+    const featureBlock = storeGet('/route/query/activeBlock') || ''
+    const configureMode = storeGet('/route/query/mode') || ''
+    const activeFeature = storeGet('/route/query/activeFeature') || ''
 
-  const allFeatureSetFeature =
-    allFeatures.filter((item) => {
-      return item?.spec?.featureSet === featureSet
-    }) || []
+    const allFeatureSetFeature =
+      allFeatures.filter((item) => {
+        return item?.spec?.featureSet === featureSet
+      }) || []
 
-  if (activeFeature) {
-    return getEnabledFeaturesFromActiveFeature(allFeatureSetFeature, storeGet)
-  }
-
-  if (featureBlock) {
-    //feature block level
-    if (configureMode) {
-      // configure btn
-      return getEnabledFeatureInConfigureBtnClick(allFeatureSetFeature, true, storeGet)
-    } else {
-      // enable btn
-      return getEnabledFeatureInEnableBtnClick(allFeatureSetFeature, true, storeGet)
+    if (activeFeature) {
+      return getEnabledFeaturesFromActiveFeature(allFeatureSetFeature, storeGet)
     }
-  } else {
-    // feature set level
-    if (configureMode) {
-      // configure btn
-      return getEnabledFeatureInConfigureBtnClick(allFeatureSetFeature, false, storeGet)
+
+    if (featureBlock) {
+      //feature block level
+      if (configureMode) {
+        // configure btn
+        return getEnabledFeatureInConfigureBtnClick(allFeatureSetFeature, true, storeGet)
+      } else {
+        // enable btn
+        return getEnabledFeatureInEnableBtnClick(allFeatureSetFeature, true, storeGet)
+      }
     } else {
-      // enable btn
-      return getEnabledFeatureInEnableBtnClick(allFeatureSetFeature, false, storeGet)
+      // feature set level
+      if (configureMode) {
+        // configure btn
+        return getEnabledFeatureInConfigureBtnClick(allFeatureSetFeature, false, storeGet)
+      } else {
+        // enable btn
+        return getEnabledFeatureInEnableBtnClick(allFeatureSetFeature, false, storeGet)
+      }
     }
   }
 }
 
-function disableFeatures({ getValue, storeGet, itemCtx, discriminator, watchDependency }) {
+function disableFeatures({
+  getValue,
+  storeGet,
+  itemCtx,
+  discriminator,
+  watchDependency,
+  setDiscriminatorValue,
+}) {
   watchDependency('discriminator#/isResourceLoaded')
+
+  // unchecking stash-presets and disabling when kubestash is unchecked
+  watchDependency('discriminator#/enabledFeatures')
+  const enabledFeatures = getValue(discriminator, '/enabledFeatures')
+  if (!enabledFeatures?.includes('kubestash') && itemCtx.value === 'stash-presets') {
+    enabledFeaturesChanged = true
+    const idx = enabledFeatures?.indexOf('stash-presets')
+    if (idx !== -1) {
+      enabledFeatures?.splice(idx, 1)
+      setDiscriminatorValue('/enabledFeatures', enabledFeatures)
+      // update discriminator when kubestash not found but stash-presets enabled
+    }
+    return true
+  }
 
   const isResourceLoaded = getValue(discriminator, '/isResourceLoaded')
   if (!isResourceLoaded) return true
@@ -412,10 +436,7 @@ function checkIsResourceLoaded({ commit, storeGet, watchDependency, getValue, di
 function isStashPreset({ getValue, watchDependency, discriminator, commit }) {
   const enabledFeatures = getValue(discriminator, '/enabledFeatures') || []
   watchDependency('discriminator#/enabledFeatures')
-  if (
-    enabledFeatures?.includes('stash-presets') &&
-    (enabledFeatures.includes('stash') || enabledFeatures.includes('kubestash'))
-  ) {
+  if (enabledFeatures?.includes('stash-presets') && enabledFeatures?.includes('kubestash')) {
     return true
   } else {
     commit('wizard/model$update', {

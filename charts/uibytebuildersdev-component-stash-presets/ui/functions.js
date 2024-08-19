@@ -1,37 +1,3 @@
-function providerType({ getValue, watchDependency, model }, value) {
-  watchDependency('model#/backend/provider')
-  const provider = getValue(model, '/backend/provider')
-  return provider === value
-}
-
-function isSwitchOn({ watchDependency, getValue, discriminator, model }, type) {
-  watchDependency(`discriminator#/${type}`)
-  const val = getValue(discriminator, `/${type}`) || false
-  return val
-}
-
-function setStorageSecret({ getValue, model }) {
-  const secret = getValue(model, '/storageSecret/create')
-  return secret
-}
-
-function onAuthChange({ getValue, discriminator, commit }, type) {
-  const auth = getValue(discriminator, `/${type}`) || false
-  commit('wizard/model$update', {
-    path: '/storageSecret/create',
-    value: auth,
-    force: true,
-  })
-}
-
-function setProvider() {
-  return 's3'
-}
-
-function returnFalse() {
-  return false
-}
-
 async function getNamespaces({ axios, storeGet }) {
   const params = storeGet('/route/params')
   const { user, cluster, group, version, resource } = params
@@ -61,12 +27,34 @@ async function getNamespaces({ axios, storeGet }) {
   }
 }
 
+async function fetchNames({ getValue, axios, storeGet, watchDependency, model }, type) {
+  watchDependency(`model#/${type}/namespace`)
+  const username = storeGet('/route/params/user')
+  const clusterName = storeGet('/route/params/cluster')
+  const namespace = getValue(model, `/${type}/namespace`)
+  const suffix =
+    type === 'encryptionSecret'
+      ? 'secrets'
+      : type === 'retentionPolicy'
+      ? 'retentionpolicies'
+      : 'backupstorages'
+  const core = suffix === 'secrets' ? 'core' : 'storage.kubestash.com'
+  const version = suffix === 'secrets' ? 'v1' : 'v1alpha1'
+  const url = `/clusters/${username}/${clusterName}/proxy/${core}/${version}/namespaces/${namespace}/${suffix}`
+  try {
+    if (namespace) {
+      const resp = await axios.get(url)
+      let names = resp?.data?.items
+      names = names.map((ele) => ele?.metadata?.name)
+      return names
+    }
+  } catch (e) {
+    console.log(e)
+  }
+  return []
+}
+
 return {
-  providerType,
-  isSwitchOn,
-  setStorageSecret,
-  onAuthChange,
-  setProvider,
-  returnFalse,
   getNamespaces,
+  fetchNames,
 }

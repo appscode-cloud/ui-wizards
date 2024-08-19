@@ -347,7 +347,6 @@ function fetchFeatureSetOptions({ storeGet }) {
       },
     }
   })
-
   return options || []
 }
 
@@ -463,6 +462,44 @@ function typeConvert(commit, enabledTypes) {
   return convertFromArray
 }
 
+async function fetchJsons({ axios, itemCtx }) {
+  let ui = {}
+  let language = {}
+  let functions = {}
+  const { name, sourceRef, version, packageviewUrlPrefix } = itemCtx.chart
+
+  try {
+    ui = await axios.get(
+      `${packageviewUrlPrefix}/create-ui.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`,
+    )
+    language = await axios.get(
+      `${packageviewUrlPrefix}/language.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`,
+    )
+    const functionString = await axios.get(
+      `${packageviewUrlPrefix}/functions.js?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}`,
+    )
+    // declare evaluate the functionString to get the functions Object
+    const evalFunc = new Function(functionString.data || '')
+    functions = evalFunc()
+  } catch (e) {
+    console.log(e)
+  }
+
+  return {
+    ui: ui.data || {},
+    language: language.data || {},
+    functions,
+  }
+}
+
+function isKubedbUiPreset({ getValue, watchDependency, discriminator }) {
+  const enabledFeatures = getValue(discriminator, '/enabledFeatures') || []
+  watchDependency('discriminator#/enabledFeatures')
+  if (enabledFeatures?.includes('kubedb-ui-presets')) {
+    return true
+  } else return false
+}
+
 return {
   hideThisElement,
   checkIsResourceLoaded,
@@ -480,4 +517,6 @@ return {
   getDatabaseTypes,
   onTypeUpdate,
   typeConvert,
+  fetchJsons,
+  isKubedbUiPreset,
 }
