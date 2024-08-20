@@ -1,4 +1,3 @@
-{{ $root:= . }}
 apiVersion: core.kubestash.com/v1alpha1
 kind: RestoreSession
 metadata:
@@ -28,7 +27,7 @@ spec:
         params: {{ .params }}
         {{- end }}
     {{- end }}
-    {{- if .Values.spec.addon.jobTemplate.securityContext }}
+    {{- if and .Values.spec.addon.jobTemplate .Values.spec.addon.jobTemplate.securityContext }}
     jobTemplate:
       spec:
         securityContext: {{ .Values.spec.addon.jobTemplate.securityContext }}

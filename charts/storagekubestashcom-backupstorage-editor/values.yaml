@@ -1,5 +1,41 @@
-apiVersion: storage.kubestash.com/v1alpha1
-kind: BackupStorage
 metadata:
-  name: backupstorage
-  namespace: default
+  resource:
+    group: storage.kubestash.com
+    version: v1alpha1
+    name: backupstorages
+    kind: BackupStorage
+    scope: Namespaced
+  release:
+    name: RELEASE-NAME
+    namespace: default
+resources:
+  secret_secret: # +doc-gen:break
+    apiVersion: v1
+    data:
+      AWS_ACCESS_KEY_ID: <AWS Access Key ID>
+      AWS_SECRET_ACCESS_KEY: <AWS Secret Access Key>
+    kind: Secret
+    metadata:
+      name: s3-secret
+      namespace: ""
+    type: Opaque
+  storageKubestashComBackupStorage_storage: # +doc-gen:break
+    apiVersion: storage.kubestash.com/v1alpha1
+    kind: BackupStorage
+    metadata:
+      name: s3-storage
+      namespace: demo
+    spec:
+      default: true
+      deletionPolicy: WipeOut
+      storage:
+        provider: s3
+        s3:
+          bucket: kubestash-demo
+          endpoint: s3.amazonaws.com
+          prefix: /kubestash-backup
+          region: us-west-1
+          secret: s3-secret
+      usagePolicy:
+        allowedNamespaces:
+          from: All
