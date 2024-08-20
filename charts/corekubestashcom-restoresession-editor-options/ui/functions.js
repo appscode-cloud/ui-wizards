@@ -1,10 +1,23 @@
 let addonList = []
 
-function setTarget({ storeGet, commit }) {
+function initMetadata({ storeGet, commit }) {
   const resource = storeGet('/resource')
   const { group, kind } = resource.layout?.result?.resource
   const name = storeGet('/route/query/name') || ''
   const namespace = storeGet('route/query/namespace') || ''
+
+  // set metadata name namespace
+  commit('wizard/model$update', {
+    path: '/metadata/release/name',
+    value: `${name}-${Math.floor(Date.now() / 1000)}-restore`,
+    force: true,
+  })
+  commit('wizard/model$update', {
+    path: '/metadata/release/namespace',
+    value: namespace,
+    force: true,
+  })
+
   const target = {
     apiGroup: group,
     kind: kind,
@@ -78,11 +91,13 @@ async function fetchNames({ getValue, model, storeGet, watchDependency, axios },
 
 async function getSnapshots({ watchDependency, model, storeGet, getValue, axios }) {
   watchDependency('model#/spec/dataSource/repository/namespace')
+  watchDependency('model#/spec/dataSource/repository/name')
   const user = storeGet('/route/params/user') || ''
   const cluster = storeGet('/route/params/cluster') || ''
   const core = 'storage.kubestash.com'
   const version = 'v1alpha1'
   const namespace = getValue(model, '/spec/dataSource/repository/namespace') || ''
+  const repository = getValue(model, '/spec/dataSource/repository/name') || ''
   const url = `/clusters/${user}/${cluster}/proxy/${core}/${version}/namespaces/${namespace}/snapshots`
 
   try {
@@ -96,7 +111,13 @@ async function getSnapshots({ watchDependency, model, storeGet, getValue, axios 
         return true
       })
 
-      return snapshots
+      const filteredSnapshots = snapshots.filter((item) => {
+        const owners = item?.metadata?.ownerReferences
+        return owners[0]?.name === repository && owners[0]?.kind === 'Repository'
+      })
+      console.log(filteredSnapshots)
+
+      return filteredSnapshots
     }
   } catch (e) {
     console.log(e)
@@ -136,7 +157,7 @@ function returnFalse() {
 }
 
 return {
-  setTarget,
+  initMetadata,
   getNamespaces,
   setNamespace,
   fetchNames,
