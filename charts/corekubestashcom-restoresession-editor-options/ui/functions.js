@@ -1,8 +1,8 @@
 let addonList = []
 
 function initMetadata({ storeGet, commit }) {
-  const resource = storeGet('/resource')
-  const { group, kind } = resource.layout?.result?.resource
+  const resource = storeGet('/resource') || {}
+  const { group, kind } = resource?.layout?.result?.resource
   const name = storeGet('/route/query/name') || ''
   const namespace = storeGet('route/query/namespace') || ''
 
@@ -80,7 +80,20 @@ async function fetchNames({ getValue, model, storeGet, watchDependency, axios },
     if (namespace) {
       const resp = await axios.get(url)
       let names = resp?.data?.items
-      names = names.map((item) => item?.metadata?.name)
+      names.map((item) => {
+        item.value = item?.metadata?.name
+        item.text = item?.metadata?.name
+        return true
+      })
+
+      if (type === 'repository') {
+        const resource = storeGet('/resource') || {}
+        const { group, kind } = resource?.layout?.result?.resource
+        const filteredRepo = names.filter((item) => {
+          return item?.spec?.appRef?.apiGroup === group && item?.spec?.appRef?.kind === kind
+        })
+        return filteredRepo
+      }
       return names
     }
   } catch (e) {
@@ -115,8 +128,6 @@ async function getSnapshots({ watchDependency, model, storeGet, getValue, axios 
         const owners = item?.metadata?.ownerReferences
         return owners[0]?.name === repository && owners[0]?.kind === 'Repository'
       })
-      console.log(filteredSnapshots)
-
       return filteredSnapshots
     }
   } catch (e) {
