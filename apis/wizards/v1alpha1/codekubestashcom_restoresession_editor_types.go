@@ -57,8 +57,9 @@ type RestoreDataSource struct {
 }
 
 type KubeStashAddon struct {
-	Name        string      `json:"name"`
-	Tasks       []TaskRef   `json:"tasks"`
+	Name  string    `json:"name"`
+	Tasks []TaskRef `json:"tasks"`
+	// +optional
 	JobTemplate JobTemplate `json:"jobTemplate"`
 }
 
@@ -69,6 +70,7 @@ type TaskRef struct {
 }
 
 type JobTemplate struct {
+	// +optional
 	SecurityContext int64 `json:"securityContext"`
 }
 

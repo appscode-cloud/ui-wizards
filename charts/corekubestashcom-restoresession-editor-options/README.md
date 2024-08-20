@@ -56,12 +56,13 @@ The following table lists the configurable parameters of the `corekubestashcom-r
 | metadata.release.namespace                 | Release namespace                                  | <code>""</code>                 |
 | spec.annotations                           | Annotations to add to the database custom resource | <code>{}</code>                 |
 | spec.labels                                | Labels to add to all the template objects          | <code>{}</code>                 |
-| spec.datasource.repository.name            |                                                    | <code>""</code>                 |
-| spec.datasource.repository.namespace       |                                                    | <code>""</code>                 |
-| spec.datasource.snapshot                   |                                                    | <code>latest</code>             |
-| spec.datasource.encryptionSecret.name      |                                                    | <code>""</code>                 |
-| spec.datasource.encryptionSecret.namespace |                                                    | <code>""</code>                 |
+| spec.dataSource.repository.name            |                                                    | <code>""</code>                 |
+| spec.dataSource.repository.namespace       |                                                    | <code>""</code>                 |
+| spec.dataSource.snapshot                   |                                                    | <code>latest</code>             |
+| spec.dataSource.encryptionSecret.name      |                                                    | <code>""</code>                 |
+| spec.dataSource.encryptionSecret.namespace |                                                    | <code>""</code>                 |
 | spec.addon.name                            |                                                    | <code>""</code>                 |
+| spec.addon.tasks                           |                                                    | <code>[]</code>                 |
 | spec.addon.jobTemplate.securityContext     |                                                    | <code></code>                   |
 | spec.target.apiGroup                       |                                                    | <code>""</code>                 |
 | spec.target.kind                           |                                                    | <code>""</code>                 |
