@@ -117,17 +117,19 @@ async function getSnapshots({ watchDependency, model, storeGet, getValue, axios 
     if (namespace) {
       const resp = await axios.get(url)
       let snapshots = resp?.data?.items
-      snapshots.map((item, idx) => {
+      snapshots.map((item) => {
         const name = item?.metadata?.name
         item.value = name
-        item.text = idx === 0 ? name + ' (Latest)' : name
+        item.text = name
         return true
       })
 
       const filteredSnapshots = snapshots.filter((item) => {
         const owners = item?.metadata?.ownerReferences
-        return owners[0]?.name === repository && owners[0]?.kind === 'Repository'
+        if (owners.length) return owners[0].name === repository && owners[0].kind === 'Repository'
       })
+      if (filteredSnapshots.length)
+        filteredSnapshots[0].text = filteredSnapshots[0].text + ' (Latest)'
       return filteredSnapshots
     }
   } catch (e) {
