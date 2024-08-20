@@ -383,8 +383,8 @@ function setStorageClass({ model, getValue, commit }) {
       const found = defaultRetainList.length
         ? defaultRetainList[0].value
         : storageClassList.length
-          ? storageClassList[0].value
-          : ''
+        ? storageClassList[0].value
+        : ''
       storageClass = found
     }
   } else {
@@ -397,8 +397,8 @@ function setStorageClass({ model, getValue, commit }) {
       const found = defaultSimpleList.length
         ? defaultSimpleList[0].value
         : storageClassList.length
-          ? storageClassList[0].value
-          : ''
+        ? storageClassList[0].value
+        : ''
       storageClass = found
     }
   }
@@ -1137,10 +1137,148 @@ function showBackupForm({ getValue, discriminator, watchDependency }) {
 }
 
 // invoker form
-function initBackupInvoker({ getValue, model }) {
+async function initBackupInvoker({ getValue, model, storeGet, commit, axios }) {
   const { stashAppscodeComBackupConfiguration, isBluePrint } = getBackupConfigsAndAnnotations(
     getValue,
     model,
+  )
+
+  const apiGroup = getValue(model, '/metadata/resource/group')
+  let kind = getValue(model, '/metadata/resource/kind')
+  const username = storeGet('/route/params/user')
+  const clusterName = storeGet('/route/params/cluster')
+  const name = storeGet('/route/params/name')
+  const namespace = storeGet('/route/query/namespace')
+  const group = storeGet('/route/params/group')
+  const version = storeGet('/route/params/version')
+  const resource = storeGet('/route/params/resource')
+  let labels = {}
+
+  const url = `clusters/${username}/${clusterName}/proxy/${group}/${version}/namespaces/${namespace}/${resource}/${name}`
+
+  try {
+    const resp = await axios.get(url)
+    labels = resp.data.metadata.labels
+    kind = resp.data.kind
+  } catch (e) {
+    console.log(e)
+  }
+
+  commit('wizard/model$update', {
+    path: '/metadata/release',
+    value: {
+      labels: labels,
+      name: name,
+      namespace: namespace,
+    },
+    force: true,
+  })
+
+  commit('wizard/model$update', {
+    path: '/resources/coreKubestashComBackupConfiguration/metadata',
+    value: {
+      labels: labels,
+      name: name,
+      namespace: namespace,
+    },
+    force: true,
+  })
+
+  commit('wizard/model$update', {
+    path: '/resources/coreKubestashComBackupConfiguration/spec/target',
+    value: {
+      apiGroup: apiGroup,
+      kind: kind,
+      name: name,
+      namespace: namespace,
+    },
+    force: true,
+  })
+
+  let isStashPresetEnable = false
+  try {
+    const url = `/clusters/${username}/${clusterName}/proxy/ui.k8s.appscode.com/v1alpha1/features`
+    const resp = await axios.get(url)
+    const stashFeature = resp.data.items.filter((item) => {
+      return item.metadata.name === 'stash-presets'
+    })
+    if (stashFeature[0].status?.enabled) {
+      isStashPresetEnable = true
+    }
+  } catch (e) {
+    console.log(e)
+  }
+  let schedule = ''
+  let storageRefName = ''
+  let storageRefNamespace = ''
+  let retentionPolicyName = ''
+  let retentionPolicyNamespace = ''
+  let encryptionSecretName = ''
+  let encryptionSecretNamespace = ''
+
+  if (isStashPresetEnable) {
+    try {
+      const url = `clusters/${username}/${clusterName}/proxy/charts.x-helm.dev/v1alpha1/clusterchartpresets/stash-presets`
+      const resp = await axios.get(url)
+      schedule = resp.data.spec.values.spec.backup.kubestash.schedule
+      storageRefName = resp.data.spec.values.spec.backup.kubestash.storageRef.name
+      storageRefNamespace = resp.data.spec.values.spec.backup.kubestash.storageRef.namespace
+      retentionPolicyName = resp.data.spec.values.spec.backup.kubestash.retentionPolicy.name
+      retentionPolicyNamespace =
+        resp.data.spec.values.spec.backup.kubestash.retentionPolicy.namespace
+      encryptionSecretName = resp.data.spec.values.spec.backup.kubestash.encryptionSecret.name
+      encryptionSecretNamespace =
+        resp.data.spec.values.spec.backup.kubestash.encryptionSecret.namespace
+    } catch (e) {
+      console.log(e)
+    }
+  }
+  setInitSchedule(
+    { getValue, commit, model },
+    'resources/coreKubestashComBackupConfiguration/spec/sessions/',
+    schedule,
+  )
+  setFileValueFromStash(
+    { getValue, commit, model },
+    'resources/coreKubestashComBackupConfiguration/spec/backends',
+    'storageRef',
+    'namespace',
+    storageRefNamespace,
+  )
+  setFileValueFromStash(
+    { getValue, commit, model },
+    'resources/coreKubestashComBackupConfiguration/spec/backends',
+    'storageRef',
+    'name',
+    storageRefName,
+  )
+  setFileValueFromStash(
+    { getValue, commit, model },
+    'resources/coreKubestashComBackupConfiguration/spec/backends',
+    'retentionPolicy',
+    'namespace',
+    retentionPolicyNamespace,
+  )
+  setFileValueFromStash(
+    { getValue, commit, model },
+    'resources/coreKubestashComBackupConfiguration/spec/backends',
+    'retentionPolicy',
+    'name',
+    retentionPolicyName,
+  )
+  setFileValueFromStash(
+    { getValue, commit, model },
+    'resources/coreKubestashComBackupConfiguration/spec/sessions',
+    'encryptionSecret',
+    'namespace',
+    encryptionSecretNamespace,
+  )
+  setFileValueFromStash(
+    { getValue, commit, model },
+    'resources/coreKubestashComBackupConfiguration/spec/sessions',
+    'encryptionSecret',
+    'name',
+    encryptionSecretName,
   )
 
   if (stashAppscodeComBackupConfiguration) return 'backupConfiguration'
@@ -1666,7 +1804,215 @@ function showScheduleBackup({ storeGet }) {
   return !isBackupOperation
 }
 
+function showBackupOptions({ discriminator, getValue, watchDependency }, backup) {
+  const backupEnabled = getValue(discriminator, '/backupEnabled')
+  if (backupEnabled) {
+    if (backup === 'alert') return true
+    else return false
+  } else {
+    if (backup === 'alert') return false
+    else return true
+  }
+}
+
+function isBlueprintOption({ discriminator, getValue, watchDependency }, value) {
+  watchDependency('discriminator#/blueprintOptions')
+  const blueprintOptions = getValue(discriminator, '/blueprintOptions')
+  return blueprintOptions === value
+}
+
+function ifUsagePolicy({ discriminator, getValue, watchDependency, model }, value) {
+  watchDependency(
+    'model#/resources/coreKubestashComBackupBlueprint/spec/usagePolicy/allowedNamespaces/from/default',
+  )
+  const usagePolicy = getValue(
+    model,
+    '/resources/coreKubestashComBackupBlueprint/spec/usagePolicy/allowedNamespaces/from/default',
+  )
+  return usagePolicy === value
+}
+
+async function getBlueprints({ getValue, model, setDiscriminatorValue, axios, storeGet }, backup) {
+  const username = storeGet('/route/params/user')
+  const clusterName = storeGet('/route/params/cluster')
+  const url = `clusters/${username}/${clusterName}/proxy/core.kubestash.com/v1alpha1/backupblueprints`
+
+  try {
+    const resp = await axios.get(url)
+    let data = resp.data.items
+    return data
+  } catch (e) {
+    console.log(e)
+  }
+}
+
+async function fetchNamespaces(
+  { getValue, model, axios, storeGet, discriminator },
+  discriminatorName,
+) {
+  const username = storeGet('/route/params/user')
+  const clusterName = storeGet('/route/params/cluster')
+  const group = storeGet('/route/params/group')
+  const version = storeGet('/route/params/version')
+  const resource = storeGet('/route/params/resource')
+  const namespace = getValue(discriminator, `${discriminatorName}`)
+
+  const url = `clusters/${username}/${clusterName}/proxy/identity.k8s.appscode.com/v1alpha1/selfsubjectnamespaceaccessreviews`
+
+  try {
+    if (namespace) {
+      const resp = await axios.post(url, {
+        _recurringCall: false,
+        apiVersion: 'identity.k8s.appscode.com/v1alpha1',
+        kind: 'SelfSubjectNamespaceAccessReview',
+        spec: {
+          resourceAttributes: [
+            {
+              verb: 'create',
+              group: group,
+              version: version,
+              resource: resource,
+            },
+          ],
+        },
+      })
+      let data = resp.data.status.namespaces
+      return data
+    }
+  } catch (e) {
+    console.log(e)
+  }
+  return []
+}
+
+async function fetchNames(
+  { getValue, axios, storeGet, watchDependency, discriminator },
+  version,
+  type,
+  discriminatorName,
+) {
+  watchDependency(`discriminator#/${discriminatorName}`)
+  const username = storeGet('/route/params/user')
+  const clusterName = storeGet('/route/params/cluster')
+  const namespace = getValue(discriminator, `${discriminatorName}`)
+  const url =
+    type !== 'secrets'
+      ? `clusters/${username}/${clusterName}/proxy/storage.kubestash.com/${version}/namespaces/${namespace}/${type}`
+      : `clusters/${username}/${clusterName}/proxy/core/${version}/namespaces/${namespace}/${type}`
+  try {
+    if (namespace) {
+      const resp = await axios.get(url)
+      let data = resp.data.items
+      data = data.map((ele) => ele.metadata.name)
+      return data
+    }
+  } catch (e) {
+    console.log(e)
+  }
+  return []
+}
+
+function initBlueprint() {
+  return 'create'
+}
+function initUsagePolicy() {
+  return 'Same'
+}
+
+function onInputChange(
+  { getValue, discriminator, watchDependency, commit, model },
+  modelPath,
+  field,
+  subfield,
+  discriminatorName,
+) {
+  const value = getValue(discriminator, `/${discriminatorName}`)
+  const backends = getValue(model, modelPath)
+  watchDependency(`discriminator#/${discriminatorName}`)
+  if (field !== 'encryptionSecret') backends[0][field][subfield] = value
+  else backends[0]['repositories'][0][field][subfield] = value
+  commit('wizard/model$update', {
+    path: modelPath,
+    value: backends,
+  })
+}
+function setFileValueFromStash({ getValue, commit, model }, modelPath, field, subfield, value) {
+  const backends = getValue(model, modelPath)
+  if (field !== 'encryptionSecret') backends[0][field][subfield] = value
+  else backends[0]['repositories'][0][field][subfield] = value
+  commit('wizard/model$update', {
+    path: modelPath,
+    value: backends,
+  })
+}
+
+function onInputChangeSchedule(
+  { getValue, discriminator, watchDependency, commit, model },
+  modelPath,
+  discriminatorName,
+) {
+  watchDependency(`discriminator#/${discriminatorName}`)
+  const value = getValue(discriminator, `/${discriminatorName}`)
+  const session = getValue(model, modelPath)
+  session[0].scheduler.schedule = value
+  commit('wizard/model$update', {
+    path: modelPath,
+    value: session,
+  })
+}
+
+function setInitSchedule(
+  { getValue, discriminator, watchDependency, commit, model },
+  modelPath,
+  value,
+) {
+  const session = getValue(model, modelPath)
+  session[0].scheduler.schedule = value
+  commit('wizard/model$update', {
+    path: modelPath,
+    value: session,
+  })
+}
+
+function getDefault(
+  { getValue, discriminator, watchDependency, commit, model },
+  modelPath,
+  field,
+  subfield,
+  discriminatorName,
+) {
+  watchDependency(`discriminator#/${discriminatorName}`)
+  const backends = getValue(model, modelPath)
+  if (field !== 'encryptionSecret') return backends[0][field][subfield]
+  else {
+    return backends[0]['repositories'][0][field][subfield]
+  }
+}
+
+function getDefaultSchedule(
+  { getValue, discriminator, watchDependency, commit, model },
+  modelPath,
+  discriminatorName,
+) {
+  watchDependency(`model#/${modelPath}`)
+  const session = getValue(model, modelPath)
+  return session[0].scheduler.schedule
+}
+
 return {
+  setInitSchedule,
+  fetchNames,
+  fetchNamespaces,
+  onInputChangeSchedule,
+  getDefaultSchedule,
+  getBlueprints,
+  ifUsagePolicy,
+  initUsagePolicy,
+  isBlueprintOption,
+  initBlueprint,
+  getDefault,
+  onInputChange,
+  showBackupOptions,
   showScheduleBackup,
   isVariantAvailable,
   fetchJsons,

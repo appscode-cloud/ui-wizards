@@ -114,53 +114,18 @@ steps:
         schema:
           $ref: schema#/properties/spec/properties/annotations/additionalProperties
         type: input
-    - hasDescription: true
-      label:
-        text: labels.database.mode
-      onChange: onModeChange
-      options:
-      - description: options.database.mode.Standalone.description
-        text: options.database.mode.Standalone.label
-        value: Standalone
-      - description: options.database.mode.Replicaset.description
-        text: options.database.mode.Replicaset.label
-        value: Replicaset
-      schema:
-        $ref: schema#/properties/spec/properties/mode
-      type: radio
     - elements:
       - label:
           text: labels.storage.size
         schema:
           $ref: schema#/properties/spec/properties/persistence/properties/size
         type: input
-      - if: showReplicaField
-        label:
+      - label:
           text: labels.replicaset.number
         schema:
           $ref: schema#/properties/spec/properties/replicas
         type: input
       type: single-step-form
-    - hasDescription: true
-      label:
-        text: labels.deletionPolicy
-      onChange: setStorageClass
-      options:
-      - description: options.deletionPolicy.delete.description
-        text: options.deletionPolicy.delete.label
-        value: Delete
-      - description: options.deletionPolicy.halt.description
-        text: options.deletionPolicy.halt.label
-        value: Halt
-      - description: options.deletionPolicy.wipeOut.description
-        text: options.deletionPolicy.wipeOut.label
-        value: WipeOut
-      - description: options.deletionPolicy.doNotTerminate.description
-        text: options.deletionPolicy.doNotTerminate.label
-        value: DoNotTerminate
-      schema:
-        $ref: schema#/properties/spec/properties/deletionPolicy
-      type: radio
     - elements:
       - computed: setMachineToCustom
         customClass: mt-10
@@ -182,6 +147,26 @@ steps:
         text: labels.machine_profile
       show_label: true
       type: single-step-form
+    - hasDescription: true
+      label:
+        text: labels.deletionPolicy
+      onChange: setStorageClass
+      options:
+      - description: options.deletionPolicy.delete.description
+        text: options.deletionPolicy.delete.label
+        value: Delete
+      - description: options.deletionPolicy.halt.description
+        text: options.deletionPolicy.halt.label
+        value: Halt
+      - description: options.deletionPolicy.wipeOut.description
+        text: options.deletionPolicy.wipeOut.label
+        value: WipeOut
+      - description: options.deletionPolicy.doNotTerminate.description
+        text: options.deletionPolicy.doNotTerminate.label
+        value: DoNotTerminate
+      schema:
+        $ref: schema#/properties/spec/properties/deletionPolicy
+      type: radio
     - fetch: getAdminOptions|storageClasses
       if: isToggleOn|storageClasses
       label:
