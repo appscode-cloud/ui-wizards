@@ -1,4 +1,3 @@
-{{ $root:= . }}
 apiVersion: core.kubestash.com/v1alpha1
 kind: RestoreSession
 metadata:
@@ -11,12 +10,12 @@ metadata:
     {{- include "corekubestashcom-restoresession-editor-options.annotations" . | nindent 4 }}
   {{- end }}
 spec:
-  datasource:
-    repository: {{ .Values.spec.datasource.repository.name }}
-    namespace: {{ .Values.spec.datasource.repository.namespace }}
-    snapshot: {{ .Values.spec.datasource.snapshot }}
+  dataSource:
+    repository: {{ .Values.spec.dataSource.repository.name }}
+    namespace: {{ .Values.spec.dataSource.repository.namespace }}
+    snapshot: {{ .Values.spec.dataSource.snapshot }}
     encryptionSecret:
-      {{- toYaml .Values.spec.datasource.encryptionSecret | nindent 6 }}
+      {{- toYaml .Values.spec.dataSource.encryptionSecret | nindent 6 }}
   target:
     {{- toYaml .Values.spec.target | nindent 4 }}
   addon:
@@ -28,7 +27,7 @@ spec:
         params: {{ .params }}
         {{- end }}
     {{- end }}
-    {{- if .Values.spec.addon.jobTemplate.securityContext }}
+    {{- if and .Values.spec.addon.jobTemplate .Values.spec.addon.jobTemplate.securityContext }}
     jobTemplate:
       spec:
         securityContext: {{ .Values.spec.addon.jobTemplate.securityContext }}
