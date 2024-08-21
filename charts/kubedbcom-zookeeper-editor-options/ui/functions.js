@@ -854,7 +854,7 @@ function filterNodeTopology(list, tier, provider, mappedResp) {
           )
         )
     })
-  }
+  } else return filteredlist
 }
 
 function isMachineNotCustom({ model, getValue, watchDependency }, path) {

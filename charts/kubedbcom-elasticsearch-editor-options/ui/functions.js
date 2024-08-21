@@ -674,7 +674,7 @@ function filterNodeTopology(list, tier, provider, mappedResp) {
           )
         )
     })
-  }
+  } else return filteredlist
 }
 
 function getMachineListForOptions() {
