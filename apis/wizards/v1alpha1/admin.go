@@ -109,8 +109,9 @@ type DatabaseProfile struct {
 
 type ClusterScopedProfile struct {
 	Available []string `json:"available"`
-	Default   string   `json:"default"`
-	Toggle    bool     `json:"toggle"`
+	// +optional
+	Default string `json:"default"`
+	Toggle  bool   `json:"toggle"`
 }
 
 type NamespaceScopedProfile struct {
