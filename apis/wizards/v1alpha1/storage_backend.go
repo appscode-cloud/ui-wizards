@@ -27,7 +27,7 @@ type S3 struct {
 type S3Auth struct {
 	AwsAccessKeyID     string `json:"AWS_ACCESS_KEY_ID"`
 	AwsSecretAccessKey string `json:"AWS_SECRET_ACCESS_KEY"`
-	CaCertData         string `json:"CA_CERT_DATA"`
+	CaCertData         string `json:"CA_CERT_DATA,omitempty"`
 }
 
 type Azure struct {
