@@ -1517,7 +1517,7 @@ async function initBackupInvoker({ getValue, model, storeGet, commit, axios }) {
   if (isKubeStash) return 'backupConfiguration'
   else if (stashAppscodeComBackupConfiguration) return 'legacyBackupConfiguration'
   else if (isBluePrint) return 'backupBlueprint'
-  else return undefined
+  else return 'backupConfiguration'
 }
 
 function initBlueprint() {
