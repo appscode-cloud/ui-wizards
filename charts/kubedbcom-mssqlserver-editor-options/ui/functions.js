@@ -720,7 +720,7 @@ function filterNodeTopology(list, tier, provider, mappedResp) {
           )
         )
     })
-  }
+  } else return filteredlist
 }
 
 function onAuthChange({ getValue, discriminator, commit }) {

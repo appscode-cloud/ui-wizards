@@ -701,7 +701,7 @@ function filterNodeTopology(list, tier, provider, mappedList) {
           )
         )
     })
-  }
+  } else return filteredlist
 }
 
 function getAdminOptions({ getValue, model }, type) {

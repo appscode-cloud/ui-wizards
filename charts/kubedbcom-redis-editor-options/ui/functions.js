@@ -826,7 +826,7 @@ function filterNodeTopology(list, tier, provider, mappedResp) {
           )
         )
     })
-  }
+  } else return filteredlist
 }
 
 function updateAlertValue({ commit, model, discriminator, getValue }) {

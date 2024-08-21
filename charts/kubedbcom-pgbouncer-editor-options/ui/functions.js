@@ -632,7 +632,7 @@ function filterNodeTopology(list, tier, provider, mappedList) {
           )
         )
     })
-  }
+  } else return filteredlist
 }
 
 function showAlerts({ watchDependency, model, getValue, discriminator }) {

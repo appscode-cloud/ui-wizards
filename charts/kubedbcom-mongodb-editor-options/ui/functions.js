@@ -882,7 +882,7 @@ function filterNodeTopology(list, tier, provider, mappedList) {
           )
         )
     })
-  }
+  } else return filteredlist
 }
 
 function showIssuer({ model, getValue, watchDependency }) {
