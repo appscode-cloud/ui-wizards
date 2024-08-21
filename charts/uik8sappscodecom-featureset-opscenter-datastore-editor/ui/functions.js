@@ -231,30 +231,33 @@ function onEnabledFeaturesChange({ discriminator, getValue, commit, storeGet }) 
       if (isEnabled && !isManaged) {
         commit('wizard/model$delete', `/resources/${resourceValuePath}`)
       } else {
-        commit('wizard/model$update', {
-          path: `/resources/${resourceValuePath}`,
-          value: {
-            ...resources?.[resourceValuePath],
-            metadata: {
-              ...resources?.[resourceValuePath]?.metadata,
-              labels: {
-                ...resources?.[resourceValuePath]?.metadata?.labels,
-                'app.kubernetes.io/component': featureName,
-                'app.kubernetes.io/part-of': featureSet,
-              },
-            },
-            spec: {
-              ...resources?.[resourceValuePath]?.spec,
-              chart: {
-                spec: {
-                  chart,
-                  sourceRef,
-                  version,
-                },
-              },
-              targetNamespace,
+        const value = {
+          ...resources?.[resourceValuePath],
+          metadata: {
+            ...resources?.[resourceValuePath]?.metadata,
+            labels: {
+              ...resources?.[resourceValuePath]?.metadata?.labels,
+              'app.kubernetes.io/component': featureName,
+              'app.kubernetes.io/part-of': featureSet,
             },
           },
+          spec: {
+            ...resources?.[resourceValuePath]?.spec,
+            chart: {
+              spec: {
+                chart,
+                sourceRef,
+                version,
+              },
+            },
+            targetNamespace,
+          },
+        }
+        const path = `/resources/${resourceValuePath}`
+
+        commit('wizard/model$update', {
+          path: path,
+          value: value,
           force: true,
         })
       }
@@ -419,6 +422,7 @@ async function getDatabaseTypes({
   storeGet,
   getValue,
   axios,
+  model,
 }) {
   let enabledTypes = ['Elasticsearch', 'Kafka', 'MariaDB', 'MongoDB', 'MySQL', 'Postgres', 'Redis']
   const owner = storeGet('/route/params/user') || ''
@@ -439,24 +443,26 @@ async function getDatabaseTypes({
   }
   setDiscriminatorValue('/enabledTypes', enabledTypes)
   if (isKubedbSelected({ getValue, discriminator, watchDependency, commit, storeGet })) {
-    typeConvert(commit, enabledTypes)
+    typeConvert(commit, enabledTypes, model, getValue)
   }
   return allAvailableTypes
 }
 
-function onTypeUpdate({ discriminator, commit, getValue }) {
+function onTypeUpdate({ discriminator, commit, getValue, model }) {
   const enabledTypes = getValue(discriminator, '/enabledTypes') || []
-  typeConvert(commit, enabledTypes)
+  typeConvert(commit, enabledTypes, model, getValue)
 }
 
-function typeConvert(commit, enabledTypes) {
+function typeConvert(commit, enabledTypes, model, getValue) {
   let convertFromArray = {}
   allAvailableTypes?.forEach((item) => {
     convertFromArray[item] = enabledTypes ? enabledTypes.includes(item) : false
   })
+  const value = getValue(model, 'resources/helmToolkitFluxcdIoHelmRelease_kubedb')
+  value.spec.values.global.featureGates = convertFromArray
   commit('wizard/model$update', {
-    path: 'resources/helmToolkitFluxcdIoHelmRelease_kubedb/spec/values/global/featureGates',
-    value: convertFromArray,
+    path: 'resources/helmToolkitFluxcdIoHelmRelease_kubedb',
+    value: value,
     force: true,
   })
   return convertFromArray
@@ -516,7 +522,6 @@ return {
   isKubedbSelected,
   getDatabaseTypes,
   onTypeUpdate,
-  typeConvert,
   fetchJsons,
   isKubedbUiPreset,
 }
