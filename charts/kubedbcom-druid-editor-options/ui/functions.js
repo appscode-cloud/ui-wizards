@@ -722,7 +722,7 @@ function filterNodeTopology(list, tier, provider, mappedList) {
           )
         )
     })
-  }
+  } else return filteredlist
 }
 
 async function getAppBindings({ axios, storeGet }, type) {

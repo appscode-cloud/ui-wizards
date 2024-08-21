@@ -912,7 +912,7 @@ function filterNodeTopology(list, tier, provider, map) {
           )
         )
     })
-  }
+  } else return filteredlist
 }
 function showIssuer({ model, getValue, watchDependency }) {
   watchDependency('model#/spec/admin/tls/default')
