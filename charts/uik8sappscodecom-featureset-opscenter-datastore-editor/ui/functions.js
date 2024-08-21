@@ -458,8 +458,10 @@ function typeConvert(commit, enabledTypes, model, getValue) {
   allAvailableTypes?.forEach((item) => {
     convertFromArray[item] = enabledTypes ? enabledTypes.includes(item) : false
   })
-  const value = getValue(model, 'resources/helmToolkitFluxcdIoHelmRelease_kubedb')
-  value?.spec?.values?.global?.featureGates = convertFromArray
+  let value = getValue(model, 'resources/helmToolkitFluxcdIoHelmRelease_kubedb')
+  if (value?.spec?.values?.global?.featureGates) {
+    value.spec.values.global.featureGates = convertFromArray
+  }
   commit('wizard/model$update', {
     path: 'resources/helmToolkitFluxcdIoHelmRelease_kubedb',
     value: value,
