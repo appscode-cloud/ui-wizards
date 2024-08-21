@@ -22,7 +22,7 @@ steps:
       label:
         text: labels.database.version
       schema:
-        $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/version
+        $ref: schema#/properties/resources/properties/kubedbComSinglestore/properties/spec/properties/version
       type: select
     - individualItemDisabilityCheck: disableLableChecker
       isArray: true
@@ -33,13 +33,13 @@ steps:
         text: labels.labels.label
       onChange: onLabelChange
       schema:
-        $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/metadata/properties/labels
+        $ref: schema#/properties/resources/properties/kubedbComSinglestore/properties/metadata/properties/labels
       type: key-value-input-form
       values:
         label:
           text: labels.labels.value
         schema:
-          $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/metadata/properties/labels/additionalProperties
+          $ref: schema#/properties/resources/properties/kubedbComSinglestore/properties/metadata/properties/labels/additionalProperties
         type: input
     - isArray: true
       keys:
@@ -48,13 +48,13 @@ steps:
       label:
         text: labels.annotations.label
       schema:
-        $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/metadata/properties/annotations
+        $ref: schema#/properties/resources/properties/kubedbComSinglestore/properties/metadata/properties/annotations
       type: key-value-input-form
       values:
         label:
           text: labels.annotations.value
         schema:
-          $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/metadata/properties/annotations/additionalProperties
+          $ref: schema#/properties/resources/properties/kubedbComSinglestore/properties/metadata/properties/annotations/additionalProperties
         type: input
     - hasDescription: true
       label:
@@ -73,13 +73,13 @@ steps:
         text: options.deletionPolicy.doNotTerminate.label
         value: DoNotTerminate
       schema:
-        $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/deletionPolicy
+        $ref: schema#/properties/resources/properties/kubedbComSinglestore/properties/spec/properties/deletionPolicy
       type: radio
     - disabled: true
       label:
         text: labels.secret
       schema:
-        $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/authSecret/properties/name
+        $ref: schema#/properties/resources/properties/kubedbComSinglestore/properties/spec/properties/authSecret/properties/name
       type: input
     type: single-step-form
   id: basic
@@ -158,12 +158,12 @@ steps:
         - label:
             text: labels.replicaset.name
           schema:
-            $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/replicaSet/properties/name
+            $ref: schema#/properties/resources/properties/kubedbComSinglestore/properties/spec/properties/replicaSet/properties/name
           type: input
         - label:
             text: labels.replicaset.number
           schema:
-            $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/replicas
+            $ref: schema#/properties/resources/properties/kubedbComSinglestore/properties/spec/properties/replicas
           type: input
         if: isEqualToDatabaseMode|Replicaset
         type: single-step-form
@@ -173,12 +173,12 @@ steps:
           label:
             text: labels.storage.class
           schema:
-            $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/storage/properties/storageClassName
+            $ref: schema#/properties/resources/properties/kubedbComSinglestore/properties/spec/properties/storage/properties/storageClassName
           type: select
         - label:
             text: labels.storage.size
           schema:
-            $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/storage/properties/resources/properties/requests/properties/storage
+            $ref: schema#/properties/resources/properties/kubedbComSinglestore/properties/spec/properties/storage/properties/resources/properties/requests/properties/storage
           type: input
         if: showCommonStorageClassAndSizeField
         type: single-step-form
@@ -190,7 +190,7 @@ steps:
               text: labels.storage.class
             onChange: setStorageClass
             schema:
-              $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/shardTopology/properties/shard/properties/storage/properties/storageClassName
+              $ref: schema#/properties/resources/properties/kubedbComSinglestore/properties/spec/properties/shardTopology/properties/shard/properties/storage/properties/storageClassName
             type: select
           - label:
               text: labels.shardNodes
@@ -200,24 +200,24 @@ steps:
               - label:
                   text: labels.storage.size
                 schema:
-                  $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/shardTopology/properties/shard/properties/storage/properties/resources/properties/requests/properties/storage
+                  $ref: schema#/properties/resources/properties/kubedbComSinglestore/properties/spec/properties/shardTopology/properties/shard/properties/storage/properties/resources/properties/requests/properties/storage
                 type: input
               schema:
-                $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/shardTopology/properties/shard/properties/storage/properties/resources/properties/requests
+                $ref: schema#/properties/resources/properties/kubedbComSinglestore/properties/spec/properties/shardTopology/properties/shard/properties/storage/properties/resources/properties/requests
               type: single-step-form
             schema:
-              $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/shardTopology/properties/shard/properties/storage/properties/resources
+              $ref: schema#/properties/resources/properties/kubedbComSinglestore/properties/spec/properties/shardTopology/properties/shard/properties/storage/properties/resources
             type: single-step-form
           type: single-step-form
         - label:
             text: labels.shards
           schema:
-            $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/shardTopology/properties/shard/properties/shards
+            $ref: schema#/properties/resources/properties/kubedbComSinglestore/properties/spec/properties/shardTopology/properties/shard/properties/shards
           type: input
         - label:
             text: labels.replicaset.number
           schema:
-            $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/shardTopology/properties/shard/properties/replicas
+            $ref: schema#/properties/resources/properties/kubedbComSinglestore/properties/spec/properties/shardTopology/properties/shard/properties/replicas
           type: input
         - label:
             text: labels.configServer
@@ -229,24 +229,24 @@ steps:
                 - label:
                     text: labels.storage.size
                   schema:
-                    $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/shardTopology/properties/configServer/properties/storage/properties/resources/properties/requests/properties/storage
+                    $ref: schema#/properties/resources/properties/kubedbComSinglestore/properties/spec/properties/shardTopology/properties/configServer/properties/storage/properties/resources/properties/requests/properties/storage
                   type: input
                 schema:
-                  $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/shardTopology/properties/configServer/properties/storage/properties/resources/properties/requests
+                  $ref: schema#/properties/resources/properties/kubedbComSinglestore/properties/spec/properties/shardTopology/properties/configServer/properties/storage/properties/resources/properties/requests
                 type: single-step-form
               schema:
-                $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/shardTopology/properties/configServer/properties/storage/properties/resources
+                $ref: schema#/properties/resources/properties/kubedbComSinglestore/properties/spec/properties/shardTopology/properties/configServer/properties/storage/properties/resources
               type: single-step-form
             schema:
-              $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/shardTopology/properties/configServer/properties/storage
+              $ref: schema#/properties/resources/properties/kubedbComSinglestore/properties/spec/properties/shardTopology/properties/configServer/properties/storage
             type: single-step-form
           - label:
               text: labels.replicaset.number
             schema:
-              $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/shardTopology/properties/configServer/properties/replicas
+              $ref: schema#/properties/resources/properties/kubedbComSinglestore/properties/spec/properties/shardTopology/properties/configServer/properties/replicas
             type: input
           schema:
-            $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/shardTopology/properties/configServer
+            $ref: schema#/properties/resources/properties/kubedbComSinglestore/properties/spec/properties/shardTopology/properties/configServer
           type: single-step-form
         - label:
             text: labels.mongos
@@ -255,10 +255,10 @@ steps:
           - label:
               text: labels.replicaset.number
             schema:
-              $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/shardTopology/properties/mongos/properties/replicas
+              $ref: schema#/properties/resources/properties/kubedbComSinglestore/properties/spec/properties/shardTopology/properties/mongos/properties/replicas
             type: input
           schema:
-            $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/shardTopology/properties/mongos
+            $ref: schema#/properties/resources/properties/kubedbComSinglestore/properties/spec/properties/shardTopology/properties/mongos
           type: single-step-form
         if: isEqualToDatabaseMode|Sharded
         type: single-step-form
@@ -300,7 +300,7 @@ steps:
           version:
             $ref: model#/metadata/resource/version
         path: ${domain}/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/mongodbopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=ReconfigureTLS
-    - computed: isValueExistInModel|/resources/kubedbComMongoDB/spec/tls
+    - computed: isValueExistInModel|/resources/kubedbComSinglestore/spec/tls
       disabled: true
       label:
         text: labels.enable_tls
@@ -323,7 +323,7 @@ steps:
         - text: sendKeyFile
           value: sendKeyFile
         schema:
-          $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/clusterAuthMode
+          $ref: schema#/properties/resources/properties/kubedbComSinglestore/properties/spec/properties/clusterAuthMode
         type: radio
       - computed: setSSLMode
         label:
@@ -336,7 +336,7 @@ steps:
         - text: allowSSL
           value: allowSSL
         schema:
-          $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/sslMode
+          $ref: schema#/properties/resources/properties/kubedbComSinglestore/properties/spec/properties/sslMode
         type: radio
       - elements:
         - computed: setApiGroup
@@ -344,7 +344,7 @@ steps:
           label:
             text: labels.api_group
           schema:
-            $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/issuerRef/properties/apiGroup
+            $ref: schema#/properties/resources/properties/kubedbComSinglestore/properties/spec/properties/tls/properties/issuerRef/properties/apiGroup
           type: input
         - label:
             text: labels.kind
@@ -354,19 +354,19 @@ steps:
           - text: ClusterIssuer
             value: ClusterIssuer
           schema:
-            $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/issuerRef/properties/kind
+            $ref: schema#/properties/resources/properties/kubedbComSinglestore/properties/spec/properties/tls/properties/issuerRef/properties/kind
           type: select
         - allowUserDefinedOption: true
           fetch: getIssuerRefsName
           label:
             text: labels.name
           schema:
-            $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/issuerRef/properties/name
+            $ref: schema#/properties/resources/properties/kubedbComSinglestore/properties/spec/properties/tls/properties/issuerRef/properties/name
           type: select
         label:
           text: labels.issuer_ref
         schema:
-          $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/issuerRef
+          $ref: schema#/properties/resources/properties/kubedbComSinglestore/properties/spec/properties/tls/properties/issuerRef
         type: single-step-form
       - alias: reusable_certificates
         chart:
@@ -374,7 +374,7 @@ steps:
           version: v0.5.0
         moduleResolver: fetchJsons
         schema:
-          $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/tls/properties/certificates
+          $ref: schema#/properties/resources/properties/kubedbComSinglestore/properties/spec/properties/tls/properties/certificates
         type: reusable-element
       if: showTlsConfigureSection
       type: single-step-form
@@ -423,7 +423,7 @@ steps:
           - label:
               text: labels.script.path
             schema:
-              $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/init/properties/script/properties/scriptPath
+              $ref: schema#/properties/resources/properties/kubedbComSinglestore/properties/spec/properties/init/properties/script/properties/scriptPath
             type: input
           - label:
               text: labels.script.volume
@@ -446,7 +446,7 @@ steps:
             label:
               text: labels.script.volumeName
             schema:
-              $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/init/properties/script/properties/configMap/properties/name
+              $ref: schema#/properties/resources/properties/kubedbComSinglestore/properties/spec/properties/init/properties/script/properties/configMap/properties/name
             type: select
           - allowUserDefinedOption: true
             fetch: resourceNames|core|v1|secrets
@@ -454,7 +454,7 @@ steps:
             label:
               text: labels.script.volumeName
             schema:
-              $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/init/properties/script/properties/secret/properties/secretName
+              $ref: schema#/properties/resources/properties/kubedbComSinglestore/properties/spec/properties/init/properties/script/properties/secret/properties/secretName
             type: select
           if: showScriptOrStashForm|script
           type: single-step-form
@@ -544,7 +544,7 @@ steps:
           label:
             text: labels.waitForInitialRestore
           schema:
-            $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/init/properties/waitForInitialRestore
+            $ref: schema#/properties/resources/properties/kubedbComSinglestore/properties/spec/properties/init/properties/waitForInitialRestore
           type: switch
         if: showInitializationForm
         type: single-step-form
@@ -867,7 +867,7 @@ steps:
         default: true
         type: boolean
     elements:
-    - computed: isValueExistInModel|/resources/kubedbComMongoDB/spec/monitor
+    - computed: isValueExistInModel|/resources/kubedbComSinglestore/spec/monitor
       label:
         text: labels.enable_monitoring
       onChange: onEnableMonitoringChange
@@ -894,15 +894,15 @@ steps:
           text: options.agent.prometheus_builtin.label
           value: prometheus.io/builtin
         schema:
-          $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/agent
+          $ref: schema#/properties/resources/properties/kubedbComSinglestore/properties/spec/properties/monitor/properties/agent
         type: radio
       - elements:
         - label:
             text: labels.scrapping_interval
           schema:
-            $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/serviceMonitor/properties/interval
+            $ref: schema#/properties/resources/properties/kubedbComSinglestore/properties/spec/properties/monitor/properties/prometheus/properties/serviceMonitor/properties/interval
           type: input
-        if: isEqualToModelPathValue|prometheus.io/operator|/resources/kubedbComMongoDB/spec/monitor/agent
+        if: isEqualToModelPathValue|prometheus.io/operator|/resources/kubedbComSinglestore/spec/monitor/agent
         label:
           text: labels.service_monitor_configuration
         show_label: true
@@ -997,14 +997,14 @@ steps:
           schema:
             $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec
           type: single-step-form
-        if: isEqualToModelPathValue|prometheus.io|/resources/kubedbComMongoDB/spec/monitor/agent
+        if: isEqualToModelPathValue|prometheus.io|/resources/kubedbComSinglestore/spec/monitor/agent
         label:
           text: labels.service_monitor
         schema:
           $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor
         show_label: true
         type: single-step-form
-      - if: isEqualToModelPathValue|prometheus.io|/resources/kubedbComMongoDB/spec/monitor/agent
+      - if: isEqualToModelPathValue|prometheus.io|/resources/kubedbComSinglestore/spec/monitor/agent
         individualItemDisabilityCheck: disableLableChecker
         isArray: true
         keys:
@@ -1034,7 +1034,7 @@ steps:
         - label:
             text: labels.resources
           schema:
-            $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/resources
+            $ref: schema#/properties/resources/properties/kubedbComSinglestore/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/resources
           type: resource-input-form
         - label:
             text: labels.security_context
@@ -1042,30 +1042,30 @@ steps:
         - label:
             text: labels.run_as_user
           schema:
-            $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/securityContext/properties/runAsUser
+            $ref: schema#/properties/resources/properties/kubedbComSinglestore/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/securityContext/properties/runAsUser
           type: input
         - customClass: mb-0
           label:
             text: labels.run_as_group
           schema:
-            $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/securityContext/properties/runAsGroup
+            $ref: schema#/properties/resources/properties/kubedbComSinglestore/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/securityContext/properties/runAsGroup
           type: input
         - label:
             text: labels.port
           schema:
-            $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/port
+            $ref: schema#/properties/resources/properties/kubedbComSinglestore/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/port
           type: input
         - element:
             label:
               isSubsection: true
               text: labels.args
             schema:
-              $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/args/items
+              $ref: schema#/properties/resources/properties/kubedbComSinglestore/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/args/items
             type: input
           label:
             text: labels.args
           schema:
-            $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/args
+            $ref: schema#/properties/resources/properties/kubedbComSinglestore/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/args
           type: list-input-form
         - alias: reusable_env
           chart:
@@ -1076,7 +1076,7 @@ steps:
               $ref: schema#/properties/metadata/properties/release/properties/namespace
           moduleResolver: fetchJsons
           schema:
-            $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env
+            $ref: schema#/properties/resources/properties/kubedbComSinglestore/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env
           type: reusable-element
         if: showCustomizeExporterSection
         type: single-step-form
@@ -1100,7 +1100,7 @@ steps:
             $ref: functions#/returnTrue
         moduleResolver: fetchJsons
         schema:
-          $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/podTemplate
+          $ref: schema#/properties/resources/properties/kubedbComSinglestore/properties/spec/properties/podTemplate
         type: reusable-element
       type: single-step-form
     type: single-step-form
@@ -1124,7 +1124,7 @@ steps:
                 $ref: functions#/returnTrue
             moduleResolver: fetchJsons
             schema:
-              $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/shardTopology/properties/shard/properties/podTemplate
+              $ref: schema#/properties/resources/properties/kubedbComSinglestore/properties/spec/properties/shardTopology/properties/shard/properties/podTemplate
             type: reusable-element
           type: single-step-form
         type: single-step-form
@@ -1145,7 +1145,7 @@ steps:
                 $ref: functions#/returnTrue
             moduleResolver: fetchJsons
             schema:
-              $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/shardTopology/properties/configServer/properties/podTemplate
+              $ref: schema#/properties/resources/properties/kubedbComSinglestore/properties/spec/properties/shardTopology/properties/configServer/properties/podTemplate
             type: reusable-element
           type: single-step-form
         type: single-step-form
@@ -1166,7 +1166,7 @@ steps:
                 $ref: functions#/returnTrue
             moduleResolver: fetchJsons
             schema:
-              $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/shardTopology/properties/mongos/properties/podTemplate
+              $ref: schema#/properties/resources/properties/kubedbComSinglestore/properties/spec/properties/shardTopology/properties/mongos/properties/podTemplate
             type: reusable-element
           type: single-step-form
         type: single-step-form
@@ -1184,7 +1184,7 @@ steps:
         version: v0.5.0
       moduleResolver: fetchJsons
       schema:
-        $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/serviceTemplates
+        $ref: schema#/properties/resources/properties/kubedbComSinglestore/properties/spec/properties/serviceTemplates
       type: reusable-element
     type: single-step-form
   id: networking
@@ -1240,7 +1240,7 @@ steps:
           label:
             text: labels.name
           schema:
-            $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/configSecret/properties/name
+            $ref: schema#/properties/resources/properties/kubedbComSinglestore/properties/spec/properties/configSecret/properties/name
           type: select
         if: isNotShardModeSelected
         type: single-step-form
@@ -1282,7 +1282,7 @@ steps:
             text: labels.config_secret
           onChange: onConfigSecretModelChange|shard|use-existing-config
           schema:
-            $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/shardTopology/properties/shard/properties/configSecret/properties/name
+            $ref: schema#/properties/resources/properties/kubedbComSinglestore/properties/spec/properties/shardTopology/properties/shard/properties/configSecret/properties/name
           type: select
         - customClass: mb-10
           label:
@@ -1311,7 +1311,7 @@ steps:
             text: labels.config_secret
           onChange: onConfigSecretModelChange|configserver|use-existing-config
           schema:
-            $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/shardTopology/properties/configServer/properties/configSecret/properties/name
+            $ref: schema#/properties/resources/properties/kubedbComSinglestore/properties/spec/properties/shardTopology/properties/configServer/properties/configSecret/properties/name
           type: select
         - customClass: mb-10
           label:
@@ -1340,7 +1340,7 @@ steps:
             text: labels.config_secret
           onChange: onConfigSecretModelChange|mongos|use-existing-config
           schema:
-            $ref: schema#/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/shardTopology/properties/mongos/properties/configSecret/properties/name
+            $ref: schema#/properties/resources/properties/kubedbComSinglestore/properties/spec/properties/shardTopology/properties/mongos/properties/configSecret/properties/name
           type: select
         if: isShardModeSelected
         type: single-step-form

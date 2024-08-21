@@ -84,15 +84,15 @@ function setValueFromModel({ getValue, model }, path) {
 }
 
 function isNotShardModeSelected({ model, getValue, watchDependency }) {
-  watchDependency('model#/resources/kubedbComMongoDB/spec')
-  const hasShardTopology = getValue(model, '/resources/kubedbComMongoDB/spec/shardTopology')
+  watchDependency('model#/resources/kubedbComMSSQLServer/spec')
+  const hasShardTopology = getValue(model, '/resources/kubedbComMSSQLServer/spec/shardTopology')
   return !hasShardTopology
 }
 
 function isShardModeSelected({ model, getValue, watchDependency, commit }) {
   const resp = !isNotShardModeSelected({ model, getValue, watchDependency })
   if (resp) {
-    commit('wizard/model$delete', '/resources/kubedbComMongoDB/spec/configSecret')
+    commit('wizard/model$delete', '/resources/kubedbComMSSQLServer/spec/configSecret')
     commit('wizard/model$delete', '/resources/secret_config')
   }
   return resp
@@ -262,8 +262,8 @@ function showAuthPasswordField({ model, getValue, watchDependency }) {
 }
 
 function showAuthSecretField({ model, getValue, watchDependency }) {
-  watchDependency('model#/resources/kubedbComMongoDB/spec')
-  const modelPathValue = getValue(model, '/resources/kubedbComMongoDB/spec')
+  watchDependency('model#/resources/kubedbComMSSQLServer/spec')
+  const modelPathValue = getValue(model, '/resources/kubedbComMSSQLServer/spec')
   return !!(modelPathValue && modelPathValue.authSecret && modelPathValue.authSecret.name)
 }
 
@@ -300,9 +300,9 @@ function showCommonStorageClassAndSizeField({ discriminator, getValue, watchDepe
   return validType.includes(mode)
 }
 function setDatabaseMode({ model, getValue, watchDependency }) {
-  const modelPathValue = getValue(model, '/resources/kubedbComMongoDB/spec')
+  const modelPathValue = getValue(model, '/resources/kubedbComMSSQLServer/spec')
 
-  watchDependency('model#/resources/kubedbComMongoDB/spec')
+  watchDependency('model#/resources/kubedbComMSSQLServer/spec')
   if (modelPathValue.shardTopology) {
     return 'Sharded'
   } else if (modelPathValue.replicaSet) {
@@ -342,15 +342,15 @@ async function getStorageClassNames(
   storageClassList = resources
   const path =
     mode === 'shard'
-      ? '/resources/kubedbComMongoDB/spec/shardTopology/shard/storage/storageClassName'
-      : '/resources/kubedbComMongoDB/spec/storage/storageClassName'
+      ? '/resources/kubedbComMSSQLServer/spec/shardTopology/shard/storage/storageClassName'
+      : '/resources/kubedbComMSSQLServer/spec/storage/storageClassName'
   const initialStorageClass = getValue(model, path)
   if (!initialStorageClass) setStorageClass({ getValue, commit, model, discriminator })
   return resources
 }
 
 function setStorageClass({ getValue, commit, model, discriminator }) {
-  const deletionPolicy = getValue(model, 'resources/kubedbComMongoDB/spec/deletionPolicy') || ''
+  const deletionPolicy = getValue(model, 'resources/kubedbComMSSQLServer/spec/deletionPolicy') || ''
   const suffix = '-retain'
   let storageClass = ''
 
@@ -412,19 +412,19 @@ function setStorageClass({ getValue, commit, model, discriminator }) {
 
   if (mode === 'Sharded') {
     commit('wizard/model$update', {
-      path: '/resources/kubedbComMongoDB/spec/shardTopology/shard/storage/storageClassName',
+      path: '/resources/kubedbComMSSQLServer/spec/shardTopology/shard/storage/storageClassName',
       value: storageClass,
       force: true,
     })
     commit('wizard/model$update', {
-      path: '/resources/kubedbComMongoDB/spec/shardTopology/configServer/storage/storageClassName',
+      path: '/resources/kubedbComMSSQLServer/spec/shardTopology/configServer/storage/storageClassName',
       value: storageClass,
       force: true,
     })
-    commit('wizard/model$delete', '/resources/kubedbComMongoDB/spec/storage')
+    commit('wizard/model$delete', '/resources/kubedbComMSSQLServer/spec/storage')
   } else {
     commit('wizard/model$update', {
-      path: '/resources/kubedbComMongoDB/spec/storage/storageClassName',
+      path: '/resources/kubedbComMSSQLServer/spec/storage/storageClassName',
       value: storageClass,
       force: true,
     })
@@ -435,10 +435,10 @@ function updateConfigServerStorageClass({ getValue, model, commit }) {
   const storageClass =
     getValue(
       model,
-      '/resources/kubedbComMongoDB/spec/shardTopology/shard/storage/storageClassName',
+      '/resources/kubedbComMSSQLServer/spec/shardTopology/shard/storage/storageClassName',
     ) || ''
   commit('wizard/model$update', {
-    path: '/resources/kubedbComMongoDB/spec/shardTopology/configServer/storage/storageClassName',
+    path: '/resources/kubedbComMSSQLServer/spec/shardTopology/configServer/storage/storageClassName',
     value: storageClass,
     force: true,
   })
@@ -446,19 +446,19 @@ function updateConfigServerStorageClass({ getValue, model, commit }) {
 
 function deleteDatabaseModePath({ discriminator, getValue, commit, model }) {
   const mode = getValue(discriminator, '/activeDatabaseMode')
-  const modelSpec = getValue(model, '/resources/kubedbComMongoDB/spec')
+  const modelSpec = getValue(model, '/resources/kubedbComMSSQLServer/spec')
   if (mode === 'Sharded') {
-    commit('wizard/model$delete', '/resources/kubedbComMongoDB/spec/replicaSet')
-    commit('wizard/model$delete', '/resources/kubedbComMongoDB/spec/replicas')
-    commit('wizard/model$delete', '/resources/kubedbComMongoDB/spec/storage')
-    commit('wizard/model$delete', '/resources/kubedbComMongoDB/spec/podTemplate')
-    commit('wizard/model$delete', '/resources/kubedbComMongoDB/spec/configSecret')
+    commit('wizard/model$delete', '/resources/kubedbComMSSQLServer/spec/replicaSet')
+    commit('wizard/model$delete', '/resources/kubedbComMSSQLServer/spec/replicas')
+    commit('wizard/model$delete', '/resources/kubedbComMSSQLServer/spec/storage')
+    commit('wizard/model$delete', '/resources/kubedbComMSSQLServer/spec/podTemplate')
+    commit('wizard/model$delete', '/resources/kubedbComMSSQLServer/spec/configSecret')
 
     commit('wizard/model$delete', '/resources/secret_config')
 
     if (!modelSpec.shardTopology) {
       commit('wizard/model$update', {
-        path: '/resources/kubedbComMongoDB/spec/shardTopology',
+        path: '/resources/kubedbComMSSQLServer/spec/shardTopology',
         value: {
           configServer: {
             replicas: 3,
@@ -489,7 +489,7 @@ function deleteDatabaseModePath({ discriminator, getValue, commit, model }) {
       })
     }
   } else if (mode === 'Replicaset') {
-    commit('wizard/model$delete', '/resources/kubedbComMongoDB/spec/shardTopology')
+    commit('wizard/model$delete', '/resources/kubedbComMSSQLServer/spec/shardTopology')
 
     commit('wizard/model$delete', '/resources/secret_shard_config')
     commit('wizard/model$delete', '/resources/secret_configserver_config')
@@ -497,21 +497,21 @@ function deleteDatabaseModePath({ discriminator, getValue, commit, model }) {
 
     if (!modelSpec.replicaSet) {
       commit('wizard/model$update', {
-        path: '/resources/kubedbComMongoDB/spec/replicaSet',
+        path: '/resources/kubedbComMSSQLServer/spec/replicaSet',
         value: { name: '' },
         force: true,
       })
       commit('wizard/model$update', {
-        path: '/resources/kubedbComMongoDB/spec/replicas',
+        path: '/resources/kubedbComMSSQLServer/spec/replicas',
         value: 3,
         force: true,
       })
     }
   } else if (mode === 'Standalone') {
-    commit('wizard/model$delete', '/resources/kubedbComMongoDB/spec/shardTopology')
+    commit('wizard/model$delete', '/resources/kubedbComMSSQLServer/spec/shardTopology')
 
-    commit('wizard/model$delete', '/resources/kubedbComMongoDB/spec/replicaSet')
-    commit('wizard/model$delete', '/resources/kubedbComMongoDB/spec/replicas')
+    commit('wizard/model$delete', '/resources/kubedbComMSSQLServer/spec/replicaSet')
+    commit('wizard/model$delete', '/resources/kubedbComMSSQLServer/spec/replicas')
 
     commit('wizard/model$delete', '/resources/secret_shard_config')
     commit('wizard/model$delete', '/resources/secret_configserver_config')
@@ -534,11 +534,11 @@ function setApiGroup() {
 async function getIssuerRefsName({ axios, storeGet, getValue, model, watchDependency }) {
   const owner = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
-  watchDependency('model#/resources/kubedbComMongoDB/spec/tls/issuerRef/apiGroup')
-  watchDependency('model#/resources/kubedbComMongoDB/spec/tls/issuerRef/kind')
+  watchDependency('model#/resources/kubedbComMSSQLServer/spec/tls/issuerRef/apiGroup')
+  watchDependency('model#/resources/kubedbComMSSQLServer/spec/tls/issuerRef/kind')
   watchDependency('model#/metadata/release/namespace')
-  const apiGroup = getValue(model, '/resources/kubedbComMongoDB/spec/tls/issuerRef/apiGroup')
-  const kind = getValue(model, '/resources/kubedbComMongoDB/spec/tls/issuerRef/kind')
+  const apiGroup = getValue(model, '/resources/kubedbComMSSQLServer/spec/tls/issuerRef/apiGroup')
+  const kind = getValue(model, '/resources/kubedbComMSSQLServer/spec/tls/issuerRef/kind')
   const namespace = getValue(model, '/metadata/release/namespace')
 
   let url
@@ -593,12 +593,12 @@ async function hasNoIssuerRefName({ axios, storeGet, getValue, model, watchDepen
 }
 
 function setClusterAuthMode({ model, getValue }) {
-  const val = getValue(model, '/resources/kubedbComMongoDB/spec/clusterAuthMode')
+  const val = getValue(model, '/resources/kubedbComMSSQLServer/spec/clusterAuthMode')
   return val || 'x509'
 }
 
 function setSSLMode({ model, getValue }) {
-  const val = getValue(model, '/resources/kubedbComMongoDB/spec/sslMode')
+  const val = getValue(model, '/resources/kubedbComMSSQLServer/spec/sslMode')
   return val || 'requireSSL'
 }
 
@@ -612,14 +612,14 @@ function onTlsConfigureChange({ discriminator, getValue, commit }) {
   const configureStatus = getValue(discriminator, '/configureTLS')
   if (configureStatus) {
     commit('wizard/model$update', {
-      path: '/resources/kubedbComMongoDB/spec/tls',
+      path: '/resources/kubedbComMSSQLServer/spec/tls',
       value: { issuerRef: {}, certificates: [] },
       force: true,
     })
   } else {
-    commit('wizard/model$delete', '/resources/kubedbComMongoDB/spec/tls')
-    commit('wizard/model$delete', '/resources/kubedbComMongoDB/spec/clusterAuthMode')
-    commit('wizard/model$delete', '/resources/kubedbComMongoDB/spec/sslMode')
+    commit('wizard/model$delete', '/resources/kubedbComMSSQLServer/spec/tls')
+    commit('wizard/model$delete', '/resources/kubedbComMSSQLServer/spec/clusterAuthMode')
+    commit('wizard/model$delete', '/resources/kubedbComMSSQLServer/spec/sslMode')
   }
 }
 
@@ -639,12 +639,12 @@ function onEnableMonitoringChange({ discriminator, getValue, commit }) {
   const configureStatus = getValue(discriminator, '/enableMonitoring')
   if (configureStatus) {
     commit('wizard/model$update', {
-      path: '/resources/kubedbComMongoDB/spec/monitor',
+      path: '/resources/kubedbComMSSQLServer/spec/monitor',
       value: {},
       force: true,
     })
   } else {
-    commit('wizard/model$delete', '/resources/kubedbComMongoDB/spec/monitor')
+    commit('wizard/model$delete', '/resources/kubedbComMSSQLServer/spec/monitor')
   }
 
   // update alert value depend on monitoring profile
@@ -665,12 +665,15 @@ function onCustomizeExporterChange({ discriminator, getValue, commit }) {
   const configureStatus = getValue(discriminator, '/customizeExporter')
   if (configureStatus) {
     commit('wizard/model$update', {
-      path: '/resources/kubedbComMongoDB/spec/monitor/prometheus/exporter',
+      path: '/resources/kubedbComMSSQLServer/spec/monitor/prometheus/exporter',
       value: {},
       force: true,
     })
   } else {
-    commit('wizard/model$delete', '/resources/kubedbComMongoDB/spec/monitor/prometheus/exporter')
+    commit(
+      'wizard/model$delete',
+      '/resources/kubedbComMSSQLServer/spec/monitor/prometheus/exporter',
+    )
   }
 }
 
@@ -796,8 +799,8 @@ const stashAppscodeComBackupConfiguration = {
 }
 
 function disableInitializationSection({ model, getValue, watchDependency }) {
-  const initialized = getValue(model, '/resources/kubedbComMongoDB/spec/init/initialized')
-  watchDependency('model#/resources/kubedbComMongoDB/spec/init/initialized')
+  const initialized = getValue(model, '/resources/kubedbComMSSQLServer/spec/init/initialized')
+  watchDependency('model#/resources/kubedbComMSSQLServer/spec/init/initialized')
   return !!initialized
 }
 
@@ -810,13 +813,13 @@ function valueExists(value, getValue, path) {
 function initPrePopulateDatabase({ getValue, model }) {
   const waitForInitialRestore = getValue(
     model,
-    '/resources/kubedbComMongoDB/spec/init/waitForInitialRestore',
+    '/resources/kubedbComMSSQLServer/spec/init/waitForInitialRestore',
   )
   const stashAppscodeComRestoreSession_init = getValue(
     model,
     '/resources/stashAppscodeComRestoreSession_init',
   )
-  const script = getValue(model, '/resources/kubedbComMongoDB/spec/init/script')
+  const script = getValue(model, '/resources/kubedbComMSSQLServer/spec/init/script')
 
   return waitForInitialRestore || !!stashAppscodeComRestoreSession_init || !!script ? 'yes' : 'no'
 }
@@ -826,11 +829,11 @@ function onPrePopulateDatabaseChange({ commit, getValue, discriminator, model })
   if (prePopulateDatabase === 'no') {
     // delete related properties
     commit('wizard/model$update', {
-      path: '/resources/kubedbComMongoDB/spec/init/waitForInitialRestore',
+      path: '/resources/kubedbComMSSQLServer/spec/init/waitForInitialRestore',
       value: false,
     })
     commit('wizard/model$delete', '/resources/stashAppscodeComRestoreSession_init')
-    commit('wizard/model$delete', '/resources/kubedbComMongoDB/spec/init/script')
+    commit('wizard/model$delete', '/resources/kubedbComMSSQLServer/spec/init/script')
     commit('wizard/model$delete', '/resources/stashAppscodeComRepository_init_repo')
   } else {
     const dbName = getValue(model, '/metadata/release/name')
@@ -852,7 +855,7 @@ function onPrePopulateDatabaseChange({ commit, getValue, discriminator, model })
 }
 
 function initDataSource({ getValue, model }) {
-  const script = getValue(model, '/resources/kubedbComMongoDB/spec/init/script')
+  const script = getValue(model, '/resources/kubedbComMSSQLServer/spec/init/script')
   const stashAppscodeComRestoreSession_init = getValue(
     model,
     '/resources/stashAppscodeComRestoreSession_init',
@@ -867,7 +870,7 @@ function onDataSourceChange({ commit, getValue, discriminator, model }) {
   const dataSource = getValue(discriminator, '/dataSource')
 
   commit('wizard/model$update', {
-    path: '/resources/kubedbComMongoDB/spec/init/waitForInitialRestore',
+    path: '/resources/kubedbComMSSQLServer/spec/init/waitForInitialRestore',
     value: dataSource === 'stashBackup',
     force: true,
   })
@@ -876,13 +879,13 @@ function onDataSourceChange({ commit, getValue, discriminator, model }) {
     commit('wizard/model$delete', '/resources/stashAppscodeComRestoreSession_init')
 
     // create a new script if there is no script property
-    if (!valueExists(model, getValue, '/resources/kubedbComMongoDB/spec/init/script'))
+    if (!valueExists(model, getValue, '/resources/kubedbComMSSQLServer/spec/init/script'))
       commit('wizard/model$update', {
-        path: '/resources/kubedbComMongoDB/spec/init/script',
+        path: '/resources/kubedbComMSSQLServer/spec/init/script',
         value: initScript,
       })
   } else if (dataSource === 'stashBackup') {
-    commit('wizard/model$delete', '/resources/kubedbComMongoDB/spec/init/script')
+    commit('wizard/model$delete', '/resources/kubedbComMSSQLServer/spec/init/script')
 
     // create a new stashAppscodeComRestoreSession_init if there is no stashAppscodeComRestoreSession_init property
     if (!valueExists(model, getValue, '/resources/stashAppscodeComRestoreSession_init')) {
@@ -904,8 +907,14 @@ function onDataSourceChange({ commit, getValue, discriminator, model }) {
 
 // // for script
 function initVolumeType({ getValue, model }) {
-  const configMap = getValue(model, '/resources/kubedbComMongoDB/spec/init/script/configMap/name')
-  const secret = getValue(model, '/resources/kubedbComMongoDB/spec/init/script/secret/secretName')
+  const configMap = getValue(
+    model,
+    '/resources/kubedbComMSSQLServer/spec/init/script/configMap/name',
+  )
+  const secret = getValue(
+    model,
+    '/resources/kubedbComMSSQLServer/spec/init/script/secret/secretName',
+  )
 
   if (configMap) return 'configMap'
   else if (secret) return 'secret'
@@ -916,11 +925,13 @@ function onVolumeTypeChange({ commit, getValue, discriminator, model }) {
   const sourceVolumeType = getValue(discriminator, '/sourceVolumeType')
   if (sourceVolumeType === 'configMap') {
     // add configMap object and delete secret object
-    commit('wizard/model$delete', '/resources/kubedbComMongoDB/spec/init/script/secret')
+    commit('wizard/model$delete', '/resources/kubedbComMSSQLServer/spec/init/script/secret')
 
-    if (!valueExists(model, getValue, '/resources/kubedbComMongoDB/spec/init/script/configMap')) {
+    if (
+      !valueExists(model, getValue, '/resources/kubedbComMSSQLServer/spec/init/script/configMap')
+    ) {
       commit('wizard/model$update', {
-        path: '/resources/kubedbComMongoDB/spec/init/script/configMap',
+        path: '/resources/kubedbComMSSQLServer/spec/init/script/configMap',
         value: {
           name: '',
         },
@@ -928,11 +939,11 @@ function onVolumeTypeChange({ commit, getValue, discriminator, model }) {
     }
   } else if (sourceVolumeType === 'secret') {
     // delete configMap object and add secret object
-    commit('wizard/model$delete', '/resources/kubedbComMongoDB/spec/init/script/configMap')
+    commit('wizard/model$delete', '/resources/kubedbComMSSQLServer/spec/init/script/configMap')
 
-    if (!valueExists(model, getValue, '/resources/kubedbComMongoDB/spec/init/script/secret')) {
+    if (!valueExists(model, getValue, '/resources/kubedbComMSSQLServer/spec/init/script/secret')) {
       commit('wizard/model$update', {
-        path: '/resources/kubedbComMongoDB/spec/init/script/secret',
+        path: '/resources/kubedbComMSSQLServer/spec/init/script/secret',
         value: {
           secretName: '',
         },
@@ -1231,7 +1242,7 @@ function getBackupConfigsAndAnnotations(getValue, model) {
   )
   const kubeStashTarget = coreKubestashComBackupConfiguration?.spec?.target
 
-  const mongoDB = getValue(model, '/resources/kubedbComMongoDB')
+  const mongoDB = getValue(model, '/resources/kubedbComMSSQLServer')
   const mongoDbKind = mongoDB?.apiVersion?.split('/')?.at(0)
 
   let isKubeStash = false
@@ -1244,10 +1255,10 @@ function getBackupConfigsAndAnnotations(getValue, model) {
     isKubeStash = true
   }
 
-  const kubedbComMongoDBAnnotations =
-    getValue(model, '/resources/kubedbComMongoDB/metadata/annotations') || {}
+  const kubedbComMSSQLServerAnnotations =
+    getValue(model, '/resources/kubedbComMSSQLServer/metadata/annotations') || {}
 
-  const isBluePrint = Object.keys(kubedbComMongoDBAnnotations).some(
+  const isBluePrint = Object.keys(kubedbComMSSQLServerAnnotations).some(
     (k) =>
       k === 'stash.appscode.com/backup-blueprint' ||
       k === 'stash.appscode.com/schedule' ||
@@ -1262,7 +1273,7 @@ function getBackupConfigsAndAnnotations(getValue, model) {
 }
 
 function deleteKubeDbComMongDbAnnotation(getValue, model, commit) {
-  const annotations = getValue(model, '/resources/kubedbComMongoDB/metadata/annotations') || {}
+  const annotations = getValue(model, '/resources/kubedbComMSSQLServer/metadata/annotations') || {}
   const filteredKeyList =
     Object.keys(annotations).filter(
       (k) =>
@@ -1275,13 +1286,13 @@ function deleteKubeDbComMongDbAnnotation(getValue, model, commit) {
     filteredAnnotations[k] = annotations[k]
   })
   commit('wizard/model$update', {
-    path: '/resources/kubedbComMongoDB/metadata/annotations',
+    path: '/resources/kubedbComMSSQLServer/metadata/annotations',
     value: filteredAnnotations,
   })
 }
 
 function addKubeDbComMongDbAnnotation(getValue, model, commit, key, value, force) {
-  const annotations = getValue(model, '/resources/kubedbComMongoDB/metadata/annotations') || {}
+  const annotations = getValue(model, '/resources/kubedbComMSSQLServer/metadata/annotations') || {}
 
   if (annotations[key] === undefined) {
     annotations[key] = value
@@ -1290,7 +1301,7 @@ function addKubeDbComMongDbAnnotation(getValue, model, commit, key, value, force
   }
 
   commit('wizard/model$update', {
-    path: '/resources/kubedbComMongoDB/metadata/annotations',
+    path: '/resources/kubedbComMSSQLServer/metadata/annotations',
     value: annotations,
     force: true,
   })
@@ -1325,7 +1336,7 @@ function onScheduleBackupChange({ commit, getValue, discriminator, model }) {
     // delete stashAppscodeComBackupConfiguration
     commit('wizard/model$delete', '/resources/stashAppscodeComBackupConfiguration')
     commit('wizard/model$delete', '/resources/stashAppscodeComRepository_repo')
-    // delete annotation from KubeDBComMongoDB annotation
+    // delete annotation from kubedbComMSSQLServer annotation
     deleteKubeDbComMongDbAnnotation(getValue, model, commit)
   } else {
     const { isBluePrint } = getBackupConfigsAndAnnotations(getValue, model)
@@ -1700,7 +1711,7 @@ function getDefaultSchedule(
 
 // backup blueprint form
 function getMongoAnnotations(getValue, model) {
-  const annotations = getValue(model, '/resources/kubedbComMongoDB/metadata/annotations')
+  const annotations = getValue(model, '/resources/kubedbComMSSQLServer/metadata/annotations')
   return { ...annotations } || {}
 }
 
@@ -1751,7 +1762,8 @@ function onTaskParametersChange({ getValue, discriminator, model, commit }) {
   const taskParamterKeys = Object.keys(taskParameters).map(
     (tp) => `params.stash.appscode.com/${tp}`,
   )
-  const oldAnnotations = getValue(model, '/resources/kubedbComMongoDB/metadata/annotations') || {}
+  const oldAnnotations =
+    getValue(model, '/resources/kubedbComMSSQLServer/metadata/annotations') || {}
   const newAnnotations = {}
 
   const filteredAnnotationKeys = Object.keys(oldAnnotations).filter(
@@ -1767,7 +1779,7 @@ function onTaskParametersChange({ getValue, discriminator, model, commit }) {
   })
 
   commit('wizard/model$update', {
-    path: '/resources/kubedbComMongoDB/metadata/annotations',
+    path: '/resources/kubedbComMSSQLServer/metadata/annotations',
     value: newAnnotations,
   })
 }
@@ -1779,7 +1791,7 @@ function isValueExistInModel({ model, getValue }, path) {
 
 function onNamespaceChange({ commit, model, getValue }) {
   const namespace = getValue(model, '/metadata/release/namespace')
-  const agent = getValue(model, '/resources/kubedbComMongoDB/spec/monitor/agent')
+  const agent = getValue(model, '/resources/kubedbComMSSQLServer/spec/monitor/agent')
   if (agent === 'prometheus.io') {
     commit('wizard/model$update', {
       path: '/resources/monitoringCoreosComServiceMonitor/spec/namespaceSelector/matchNames',
@@ -1790,9 +1802,9 @@ function onNamespaceChange({ commit, model, getValue }) {
 }
 
 function onLabelChange({ commit, model, getValue }) {
-  const labels = getValue(model, '/resources/kubedbComMongoDB/spec/metadata/labels')
+  const labels = getValue(model, '/resources/kubedbComMSSQLServer/spec/metadata/labels')
 
-  const agent = getValue(model, '/resources/kubedbComMongoDB/spec/monitor/agent')
+  const agent = getValue(model, '/resources/kubedbComMSSQLServer/spec/monitor/agent')
 
   if (agent === 'prometheus.io') {
     commit('wizard/model$update', {
@@ -1806,9 +1818,9 @@ function onLabelChange({ commit, model, getValue }) {
 function onNameChange({ commit, model, getValue }) {
   const dbName = getValue(model, '/metadata/release/name')
 
-  const agent = getValue(model, '/resources/kubedbComMongoDB/spec/monitor/agent')
+  const agent = getValue(model, '/resources/kubedbComMSSQLServer/spec/monitor/agent')
 
-  const labels = getValue(model, '/resources/kubedbComMongoDB/spec/metadata/labels')
+  const labels = getValue(model, '/resources/kubedbComMSSQLServer/spec/metadata/labels')
 
   if (agent === 'prometheus.io') {
     commit('wizard/model$update', {
@@ -1858,7 +1870,7 @@ function onNameChange({ commit, model, getValue }) {
   const hasSecretConfig = getValue(model, '/resources/secret_config')
   if (hasSecretConfig) {
     commit('wizard/model$update', {
-      path: '/resources/kubedbComMongoDB/spec/configSecret/name',
+      path: '/resources/kubedbComMSSQLServer/spec/configSecret/name',
       value: `${dbName}-config`,
       force: true,
     })
@@ -1868,7 +1880,7 @@ function onNameChange({ commit, model, getValue }) {
   const hasSecretShardConfig = getValue(model, '/resources/secret_shard_config')
   if (hasSecretShardConfig) {
     commit('wizard/model$update', {
-      path: '/resources/kubedbComMongoDB/spec/shardTopology/shard/configSecret/name',
+      path: '/resources/kubedbComMSSQLServer/spec/shardTopology/shard/configSecret/name',
       value: `${dbName}-shard-config`,
       force: true,
     })
@@ -1878,7 +1890,7 @@ function onNameChange({ commit, model, getValue }) {
   const hasSecretConfigServerConfig = getValue(model, '/resources/secret_configserver_config')
   if (hasSecretConfigServerConfig) {
     commit('wizard/model$update', {
-      path: '/resources/kubedbComMongoDB/spec/shardTopology/configServer/configSecret/name',
+      path: '/resources/kubedbComMSSQLServer/spec/shardTopology/configServer/configSecret/name',
       value: `${dbName}-configserver-config`,
       force: true,
     })
@@ -1888,7 +1900,7 @@ function onNameChange({ commit, model, getValue }) {
   const hasSecretMongosConfig = getValue(model, '/resources/secret_mongos_config')
   if (hasSecretMongosConfig) {
     commit('wizard/model$update', {
-      path: '/resources/kubedbComMongoDB/spec/shardTopology/mongos/configSecret/name',
+      path: '/resources/kubedbComMSSQLServer/spec/shardTopology/mongos/configSecret/name',
       value: `${dbName}-mongos-config`,
       force: true,
     })
@@ -1900,7 +1912,7 @@ function returnFalse() {
 }
 
 function onAgentChange({ commit, model, getValue }) {
-  const agent = getValue(model, '/resources/kubedbComMongoDB/spec/monitor/agent')
+  const agent = getValue(model, '/resources/kubedbComMSSQLServer/spec/monitor/agent')
   if (agent === 'prometheus.io') {
     commit('wizard/model$update', {
       path: '/resources/monitoringCoreosComServiceMonitor/spec/endpoints',
@@ -1918,7 +1930,7 @@ function onAgentChange({ commit, model, getValue }) {
 /*************************************  Database Secret Section ********************************************/
 
 function getCreateAuthSecret({ model, getValue }) {
-  const authSecret = getValue(model, '/resources/kubedbComMongoDB/spec/authSecret')
+  const authSecret = getValue(model, '/resources/kubedbComMSSQLServer/spec/authSecret')
 
   return !authSecret
 }
@@ -1975,7 +1987,7 @@ function decodePassword({}, value) {
 function onCreateAuthSecretChange({ discriminator, getValue, commit }) {
   const createAuthSecret = getValue(discriminator, '/createAuthSecret')
   if (createAuthSecret) {
-    commit('wizard/model$delete', '/resources/kubedbComMongoDB/spec/authSecret')
+    commit('wizard/model$delete', '/resources/kubedbComMSSQLServer/spec/authSecret')
   } else if (createAuthSecret === false) {
     commit('wizard/model$delete', '/resources/secret_auth')
   }
@@ -2042,7 +2054,7 @@ function onConfigurationSourceChange({ getValue, discriminator, commit, model })
     }
     const configSecretName = `${getValue(model, '/metadata/release/name')}-config`
     commit('wizard/model$update', {
-      path: '/resources/kubedbComMongoDB/spec/configSecret/name',
+      path: '/resources/kubedbComMSSQLServer/spec/configSecret/name',
       value: configSecretName,
       force: true,
     })
@@ -2058,7 +2070,7 @@ function onConfigurationChange({ getValue, commit, discriminator, model }) {
   })
   const configSecretName = `${getValue(model, '/metadata/release/name')}-config`
   commit('wizard/model$update', {
-    path: '/resources/kubedbComMongoDB/spec/configSecret/name',
+    path: '/resources/kubedbComMSSQLServer/spec/configSecret/name',
     value: configSecretName,
     force: true,
   })
@@ -2178,7 +2190,7 @@ function onConfigurationSourceMongosChange({ getValue, discriminator, commit, mo
       })
     }
     commit('wizard/model$update', {
-      path: '/resources/kubedbComMongoDB/spec/shardTopology/mongos/configSecret/name',
+      path: '/resources/kubedbComMSSQLServer/spec/shardTopology/mongos/configSecret/name',
       value: configSecretName,
       force: true,
     })
@@ -2216,7 +2228,7 @@ function onConfigurationSourceShardChange({ getValue, discriminator, commit, mod
       })
     }
     commit('wizard/model$update', {
-      path: '/resources/kubedbComMongoDB/spec/shardTopology/shard/configSecret/name',
+      path: '/resources/kubedbComMSSQLServer/spec/shardTopology/shard/configSecret/name',
       value: configSecretName,
       force: true,
     })
@@ -2254,7 +2266,7 @@ function onConfigurationSourceConfigServerChange({ getValue, discriminator, comm
       })
     }
     commit('wizard/model$update', {
-      path: '/resources/kubedbComMongoDB/spec/shardTopology/configServer/configSecret/name',
+      path: '/resources/kubedbComMSSQLServer/spec/shardTopology/configServer/configSecret/name',
       value: configSecretName,
       force: true,
     })
@@ -2284,15 +2296,15 @@ function onConfigurationSourceConfigServerChange({ getValue, discriminator, comm
 }
 
 function transferConfigSecret({ commit, model, getValue }, src, des) {
-  const isShardedMode = getValue(model, '/resources/kubedbComMongoDB/spec/shardTopology')
+  const isShardedMode = getValue(model, '/resources/kubedbComMSSQLServer/spec/shardTopology')
   if (isShardedMode) {
     commit('wizard/model$update', {
-      path: `/resources/kubedbComMongoDB/spec/shardTopology/${
+      path: `/resources/kubedbComMSSQLServer/spec/shardTopology/${
         des === 'configserver' ? 'configServer' : des
       }/configSecret/name`,
       value: getValue(
         model,
-        `/resources/kubedbComMongoDB/spec/shardTopology/${
+        `/resources/kubedbComMSSQLServer/spec/shardTopology/${
           src === 'configserver' ? 'configServer' : src
         }/configSecret/name`,
       ),
@@ -2375,18 +2387,18 @@ function onSetCustomConfigChange({ discriminator, getValue, commit }) {
   const value = getValue(discriminator, '/setCustomConfig')
 
   if (value === 'no') {
-    commit('wizard/model$delete', '/resources/kubedbComMongoDB/spec/configSecret')
+    commit('wizard/model$delete', '/resources/kubedbComMSSQLServer/spec/configSecret')
     commit(
       'wizard/model$delete',
-      '/resources/kubedbComMongoDB/spec/shardTopology/shard/configSecret',
+      '/resources/kubedbComMSSQLServer/spec/shardTopology/shard/configSecret',
     )
     commit(
       'wizard/model$delete',
-      '/resources/kubedbComMongoDB/spec/shardTopology/configServer/configSecret',
+      '/resources/kubedbComMSSQLServer/spec/shardTopology/configServer/configSecret',
     )
     commit(
       'wizard/model$delete',
-      '/resources/kubedbComMongoDB/spec/shardTopology/mongos/configSecret',
+      '/resources/kubedbComMSSQLServer/spec/shardTopology/mongos/configSecret',
     )
     commit('wizard/model$delete', '/resources/secret_config')
     commit('wizard/model$delete', '/resources/secret_shard_config')
