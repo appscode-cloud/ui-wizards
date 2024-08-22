@@ -1376,6 +1376,16 @@ async function initBackupInvoker({ getValue, model, storeGet, commit, axios }) {
   const resource = storeGet('/route/params/resource')
   let labels = {}
 
+  const sessions = getValue(model, '/resources/coreKubestashComBackupConfiguration/spec/sessions')
+  sessions[0].repositories[0].name = name
+  sessions[0].repositories[0].directory = `/${name}`
+
+  commit('wizard/model$update', {
+    path: '/resources/coreKubestashComBackupConfiguration/spec/sessions',
+    value: sessions,
+    force: true,
+  })
+
   const url = `clusters/${username}/${clusterName}/proxy/${group}/${version}/namespaces/${namespace}/${resource}/${name}`
 
   try {
