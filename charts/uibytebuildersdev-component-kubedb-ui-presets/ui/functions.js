@@ -197,22 +197,6 @@ function presetNameEqualsTo({ storeGet }, value) {
   return presetName === value
 }
 
-async function fetchBackup({ storeGet, axios, commit }) {
-  const owner = storeGet('/route/params/user')
-  const cluster = storeGet('/route/params/cluster')
-  const url = `/clusters/${owner}/${cluster}/proxy/charts.x-helm.dev/v1alpha1/clusterchartpresets/stash-presets`
-
-  const resp = await axios.get(url)
-
-  commit('wizard/model$update', {
-    path: '/spec/kubeDB/backup',
-    value: resp.data.spec.values.spec.backup,
-    force: true,
-  })
-
-  return resp.data.spec.values.spec.backup
-}
-
 function isKubedbUiPreset({ getValue, watchDependency, discriminator, storeGet }) {
   const presetName = storeGet('/route/params/presetName') || ''
   if (presetName === 'kubedb-ui-presets') return true
@@ -237,6 +221,5 @@ return {
   getNamespaces,
   returnFalse,
   presetNameEqualsTo,
-  fetchBackup,
   isKubedbUiPreset,
 }
