@@ -1,4 +1,4 @@
-{{- if eq .Values.spec.admin.backup.tool "KubeStash" -}}
+{{- if eq .Values.spec.backup.tool "KubeStash" -}}
 
 apiVersion: core.kubestash.com/v1alpha1
 kind: BackupConfiguration
@@ -16,16 +16,16 @@ spec:
   backends:
     - name: default-backend
       storageRef:
-        name: {{ .Values.spec.admin.backup.kubestash.storageRef.name }}
-        namespace: {{ .Values.spec.admin.backup.kubestash.storageRef.namespace }}
+        name: {{ .Values.spec.backup.kubestash.storageRef.name }}
+        namespace: {{ .Values.spec.backup.kubestash.storageRef.namespace }}
       retentionPolicy:
-        name: {{ .Values.spec.admin.backup.kubestash.retentionPolicy.name }}
-        namespace: {{ .Values.spec.admin.backup.kubestash.retentionPolicy.namespace }}
+        name: {{ .Values.spec.backup.kubestash.retentionPolicy.name }}
+        namespace: {{ .Values.spec.backup.kubestash.retentionPolicy.namespace }}
   sessions:
     - name: full-backup
       sessionHistoryLimit: 2
       scheduler:
-        schedule: {{ .Values.spec.admin.backup.kubestash.schedule | quote }}
+        schedule: {{ .Values.spec.backup.kubestash.schedule | quote }}
         jobTemplate:
           backoffLimit: 1
       repositories:
@@ -33,8 +33,8 @@ spec:
           backend: default-backend
           directory: {{ .Release.Namespace }}/{{ include "kubedbcom-elasticsearch-editor-options.fullname" . }}
           encryptionSecret:
-            name: {{ .Values.spec.admin.backup.kubestash.encryptionSecret.name }}
-            namespace: {{ .Values.spec.admin.backup.kubestash.encryptionSecret.namespace }}
+            name: {{ .Values.spec.backup.kubestash.encryptionSecret.name }}
+            namespace: {{ .Values.spec.backup.kubestash.encryptionSecret.namespace }}
       addon:
         name: elasticsearch-addon
         tasks:
