@@ -52,12 +52,14 @@ type KubedbcomKafkaEditorOptionsSpecSpec struct {
 	// +optional
 	Topology *KafkaTopology `json:"topology,omitempty"`
 	// +optional
-	Persistence    Persistence    `json:"persistence"`
-	PodResources   PodResources   `json:"podResources"`
-	AuthSecret     AuthSecret     `json:"authSecret"`
-	DeletionPolicy DeletionPolicy `json:"deletionPolicy"`
-	Configuration  string         `json:"configuration"`
-	Admin          AdminOptions   `json:"admin"`
+	Persistence    Persistence        `json:"persistence"`
+	PodResources   PodResources       `json:"podResources"`
+	AuthSecret     AuthSecret         `json:"authSecret"`
+	DeletionPolicy DeletionPolicy     `json:"deletionPolicy"`
+	Configuration  string             `json:"configuration"`
+	Admin          AdminOptions       `json:"admin"`
+	Backup         BackupToolSpec     `json:"backup"`
+	Monitoring     MonitoringOperator `json:"monitoring"`
 }
 
 // +kubebuilder:validation:Enum=Combined;Topology

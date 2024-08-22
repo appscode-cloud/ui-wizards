@@ -50,14 +50,16 @@ type KubedbcomRedisEditorOptionsSpecSpec struct {
 	// +optional
 	Replicas int `json:"replicas,omitempty"`
 	// +optional
-	Cluster        RedisCluster   `json:"cluster,omitempty"`
-	SentinelRef    NamespacedName `json:"sentinelRef,omitempty"`
-	Persistence    Persistence    `json:"persistence"`
-	PodResources   PodResources   `json:"podResources"`
-	AuthSecret     AuthSecret     `json:"authSecret"`
-	DeletionPolicy DeletionPolicy `json:"deletionPolicy"`
-	Configuration  string         `json:"configuration"`
-	Admin          AdminOptions   `json:"admin"`
+	Cluster        RedisCluster       `json:"cluster,omitempty"`
+	SentinelRef    NamespacedName     `json:"sentinelRef,omitempty"`
+	Persistence    Persistence        `json:"persistence"`
+	PodResources   PodResources       `json:"podResources"`
+	AuthSecret     AuthSecret         `json:"authSecret"`
+	DeletionPolicy DeletionPolicy     `json:"deletionPolicy"`
+	Configuration  string             `json:"configuration"`
+	Admin          AdminOptions       `json:"admin"`
+	Backup         BackupToolSpec     `json:"backup"`
+	Monitoring     MonitoringOperator `json:"monitoring"`
 }
 
 type RedisCluster struct {

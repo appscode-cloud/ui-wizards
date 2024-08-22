@@ -45,15 +45,17 @@ type KubedbcomPostgresEditorOptionsSpecSpec struct {
 	// +optional
 	Annotations map[string]string `json:"annotations"`
 	// +optional
-	Labels         map[string]string `json:"labels"`
-	Mode           GeneralMode       `json:"mode"`
-	Replicas       int               `json:"replicas"`
-	DeletionPolicy DeletionPolicy    `json:"deletionPolicy"`
-	Persistence    Persistence       `json:"persistence"`
-	PodResources   PodResources      `json:"podResources"`
-	AuthSecret     AuthSecret        `json:"authSecret"`
-	Configuration  string            `json:"configuration"`
-	Admin          AdminOptions      `json:"admin"`
+	Labels         map[string]string  `json:"labels"`
+	Mode           GeneralMode        `json:"mode"`
+	Replicas       int                `json:"replicas"`
+	DeletionPolicy DeletionPolicy     `json:"deletionPolicy"`
+	Persistence    Persistence        `json:"persistence"`
+	PodResources   PodResources       `json:"podResources"`
+	AuthSecret     AuthSecret         `json:"authSecret"`
+	Configuration  string             `json:"configuration"`
+	Admin          AdminOptions       `json:"admin"`
+	Backup         BackupToolSpec     `json:"backup"`
+	Monitoring     MonitoringOperator `json:"monitoring"`
 }
 
 type PostgresAlertsSpecForm struct {

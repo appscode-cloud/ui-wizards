@@ -48,15 +48,17 @@ type KubedbcomSolrEditorOptionsSpecSpec struct {
 	Labels map[string]string `json:"labels"`
 	Mode   SolrMode          `json:"mode"`
 	// +optional
-	Replicas       int             `json:"replicas"`
-	Topology       SolrTopology    `json:"topology"`
-	ZookeeperRef   ObjectReference `json:"zookeeperRef"`
-	Persistence    Persistence     `json:"persistence"`
-	PodResources   PodResources    `json:"podResources"`
-	AuthSecret     AuthSecret      `json:"authSecret"`
-	DeletionPolicy DeletionPolicy  `json:"deletionPolicy"`
-	Configuration  string          `json:"configuration"`
-	Admin          AdminOptions    `json:"admin"`
+	Replicas       int                `json:"replicas"`
+	Topology       SolrTopology       `json:"topology"`
+	ZookeeperRef   ObjectReference    `json:"zookeeperRef"`
+	Persistence    Persistence        `json:"persistence"`
+	PodResources   PodResources       `json:"podResources"`
+	AuthSecret     AuthSecret         `json:"authSecret"`
+	DeletionPolicy DeletionPolicy     `json:"deletionPolicy"`
+	Configuration  string             `json:"configuration"`
+	Admin          AdminOptions       `json:"admin"`
+	Backup         BackupToolSpec     `json:"backup"`
+	Monitoring     MonitoringOperator `json:"monitoring"`
 }
 
 // +kubebuilder:validation:Enum=Standalone;Replicaset;Topology

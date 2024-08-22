@@ -113,35 +113,35 @@ spec:
           requests:
             cpu: 100m
             memory: 128Mi
-      serviceMonitor:
-        # Specify the labels for ServiceMonitor.
-        # Prometheus crd will select ServiceMonitor using these labels.
-        # Only usable when monitoring agent is `prometheus.io/webhook server`.
-        labels:
-          monitoring.appscode.com/prometheus: federated
       toggle: true
-    alerts:
+    alert:
       toggle: true
 
     archiver:
       toggle: false
       default: false
-    backup:
-      tool: ""
-      toggle: false
 
-      kubestash:
-        schedule: "0 */2 * * *"
-        storageRef:
-          name: default
-          namespace: stash
-        retentionPolicy:
-          name: "keep-1mo"
-          namespace: stash
-        encryptionSecret:
-          name: default-encryption-secret
-          namespace: stash
-
+  backup:
+    tool: ""
+    toggle: true
+    kubestash:
+      schedule: "0 */2 * * *"
+      storageRef:
+        name: default
+        namespace: stash
+      retentionPolicy:
+        name: "keep-1mo"
+        namespace: stash
+      encryptionSecret:
+        name: default-encryption-secret
+        namespace: stash
+  monitoring:
+    serviceMonitor:
+      # Specify the labels for ServiceMonitor.
+      # Prometheus crd will select ServiceMonitor using these labels.
+      # Only usable when monitoring agent is `prometheus.io/webhook server`.
+      labels:
+        monitoring.appscode.com/prometheus: federated
 
 form:
   alert:

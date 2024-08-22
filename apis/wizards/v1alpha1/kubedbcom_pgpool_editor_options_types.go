@@ -45,16 +45,18 @@ type KubedbcomPgpoolEditorOptionsSpecSpec struct {
 	// +optional
 	Annotations map[string]string `json:"annotations"`
 	// +optional
-	Labels         map[string]string `json:"labels"`
-	Mode           GeneralMode       `json:"mode"`
-	Replicas       int               `json:"replicas"`
-	PostgresRef    ObjectReference   `json:"postgresRef"`
-	SyncUsers      bool              `json:"syncUsers"`
-	PodResources   PodResources      `json:"podResources"`
-	AuthSecret     AuthSecret        `json:"authSecret"`
-	DeletionPolicy DeletionPolicy    `json:"deletionPolicy"`
-	Configuration  string            `json:"configuration"`
-	Admin          AdminOptions      `json:"admin"`
+	Labels         map[string]string  `json:"labels"`
+	Mode           GeneralMode        `json:"mode"`
+	Replicas       int                `json:"replicas"`
+	PostgresRef    ObjectReference    `json:"postgresRef"`
+	SyncUsers      bool               `json:"syncUsers"`
+	PodResources   PodResources       `json:"podResources"`
+	AuthSecret     AuthSecret         `json:"authSecret"`
+	DeletionPolicy DeletionPolicy     `json:"deletionPolicy"`
+	Configuration  string             `json:"configuration"`
+	Admin          AdminOptions       `json:"admin"`
+	Backup         BackupToolSpec     `json:"backup"`
+	Monitoring     MonitoringOperator `json:"monitoring"`
 }
 
 type PgpoolAlertsSpecForm struct {
