@@ -784,7 +784,7 @@ function updateAlertValue({ commit, discriminator, getValue }) {
 function showAlerts({ watchDependency, model, getValue, discriminator }) {
   watchDependency('discriminator#/monitoring')
   const isMonitorEnabled = getValue(discriminator, '/monitoring')
-  return isMonitorEnabled && isToggleOn({ getValue, model }, 'alerts')
+  return isMonitorEnabled && isToggleOn({ getValue, model }, 'alert')
 }
 
 async function isBackupCluster({ axios, storeGet, commit }) {

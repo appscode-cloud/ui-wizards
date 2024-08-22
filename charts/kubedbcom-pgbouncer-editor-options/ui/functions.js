@@ -638,7 +638,7 @@ function filterNodeTopology(list, tier, provider, mappedList) {
 function showAlerts({ watchDependency, model, getValue, discriminator }) {
   watchDependency('discriminator#/monitoring')
   const isMonitorEnabled = getValue(discriminator, '/monitoring')
-  const isAlertToggleEnabled = isToggleOn({ getValue, model }, 'alerts')
+  const isAlertToggleEnabled = isToggleOn({ getValue, model }, 'alert')
   return isMonitorEnabled && isAlertToggleEnabled
 }
 

@@ -532,7 +532,7 @@ function setStorageClass({ model, getValue, commit }) {
 function showAlerts({ watchDependency, model, getValue, discriminator }) {
   watchDependency('discriminator#/monitoring')
   const isMonitorEnabled = getValue(discriminator, '/monitoring')
-  const isAlertToggleEnabled = isToggleOn({ getValue, model }, 'alerts')
+  const isAlertToggleEnabled = isToggleOn({ getValue, model }, 'alert')
   return isMonitorEnabled && isAlertToggleEnabled
 }
 
