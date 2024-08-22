@@ -1,16 +1,3 @@
-function setTool({ commit }) {
-  commit('wizard/model$update', {
-    path: '/spec/backup/tool',
-    value: 'KubeStash',
-    force: true,
-  })
-  return 'KubeStash'
-}
-
-function returnFalse() {
-  return false
-}
-
 async function fetchJsons({ axios, itemCtx }) {
   let ui = {}
   let language = {}
@@ -47,8 +34,6 @@ function presetNameEqualsTo({ storeGet }, value) {
 }
 
 return {
-  setTool,
-  returnFalse,
   fetchJsons,
   presetNameEqualsTo,
 }

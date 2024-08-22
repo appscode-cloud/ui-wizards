@@ -992,13 +992,13 @@ function showAlerts({ watchDependency, model, getValue, discriminator }) {
 function onBackupSwitch({ discriminator, getValue, commit }) {
   const isBackupOn = getValue(discriminator, '/backup')
   commit('wizard/model$update', {
-    path: '/spec/admin/backup/tool',
+    path: '/spec/backup/tool',
     value: isBackupOn ? 'KubeStash' : '',
     force: true,
   })
 }
 
-async function isBackupCluster({ axios, storeGet, commit }) {
+async function isNotBackupCluster({ axios, storeGet, commit }) {
   const owner = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
   const url = `/clusters/${owner}/${cluster}/proxy/ui.k8s.appscode.com/v1alpha1/features`
@@ -1012,11 +1012,11 @@ async function isBackupCluster({ axios, storeGet, commit }) {
     console.log(e)
   }
   commit('wizard/model$update', {
-    path: '/spec/admin/backup/tool',
+    path: '/spec/backup/tool',
     value: isStashEnabled ? 'KubeStash' : '',
     force: true,
   })
-  return isStashEnabled
+  return !isStashEnabled
 }
 
 async function getAppBindings({ commit, axios, storeGet, model, getValue }) {
@@ -1118,5 +1118,5 @@ return {
   updateAlertValue,
   showAlerts,
   onBackupSwitch,
-  isBackupCluster,
+  isNotBackupCluster,
 }
