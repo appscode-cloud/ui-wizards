@@ -706,6 +706,7 @@ function getAdminOptions({ getValue, model }, type) {
 }
 
 function isToggleOn({ getValue, model }, type) {
+  if (type === 'backup') return getValue(model, '/spec/backup/toggle')
   return getValue(model, `/spec/admin/${type}/toggle`)
 }
 
