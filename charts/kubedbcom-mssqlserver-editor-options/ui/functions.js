@@ -801,12 +801,12 @@ async function isNotBackupCluster({ axios, storeGet, commit }) {
   } catch (e) {
     console.log(e)
   }
-  commit('wizard/model$update', {
-    path: '/spec/backup/tool',
-    value: isStashEnabled ? 'KubeStash' : '',
-    force: true,
-  })
   return !isStashEnabled
+}
+
+function setBackup({ model, getValue }) {
+  const backup = getValue(model, '/spec/backup/tool')
+  return !!backup.length
 }
 
 function onBackupSwitch({ discriminator, getValue, commit }) {
@@ -854,4 +854,5 @@ return {
   isNotBackupCluster,
   onBackupSwitch,
   updateAlertValue,
+  setBackup,
 }
