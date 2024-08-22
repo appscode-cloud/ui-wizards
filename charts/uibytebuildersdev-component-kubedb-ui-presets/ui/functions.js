@@ -203,7 +203,6 @@ async function fetchBackup({ storeGet, axios, commit }) {
   const url = `/clusters/${owner}/${cluster}/proxy/charts.x-helm.dev/v1alpha1/clusterchartpresets/stash-presets`
 
   const resp = await axios.get(url)
-  console.log(resp.data)
 
   commit('wizard/model$update', {
     path: '/spec/kubeDB/backup',

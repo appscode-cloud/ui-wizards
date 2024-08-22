@@ -118,7 +118,6 @@ function getEnabledFeatureInEnableBtnClick(allFeatureSetFeature, isBlockLevel, s
   })
   const enabledFeatureNames = enabledFeatures.map((item) => item?.metadata?.name) || []
 
-  console.log('at below', enabledFeatureNames)
   return enabledFeatureNames
 }
 
