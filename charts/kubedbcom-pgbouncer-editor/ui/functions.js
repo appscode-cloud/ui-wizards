@@ -1457,7 +1457,6 @@ function onConfigurationChange({ getValue, commit, discriminator, model }) {
 function onConfigurationChangeEdit({ getValue, commit, discriminator, model }) {
   const value = getValue(discriminator, '/configuration')
 
-  console.log(btoa(value))
   commit('wizard/model$update', {
     path: '/resources/secret_config/data/pgbouncer.ini',
     value: btoa(value),

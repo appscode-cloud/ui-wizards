@@ -203,7 +203,6 @@ async function fetchBackup({ storeGet, axios, commit }) {
   const url = `/clusters/${owner}/${cluster}/proxy/charts.x-helm.dev/v1alpha1/clusterchartpresets/stash-presets`
 
   const resp = await axios.get(url)
-  console.log(resp.data)
 
   commit('wizard/model$update', {
     path: '/spec/kubeDB/backup',
@@ -212,6 +211,14 @@ async function fetchBackup({ storeGet, axios, commit }) {
   })
 
   return resp.data.spec.values.spec.backup
+}
+
+function isKubedbUiPreset({ getValue, watchDependency, discriminator }) {
+  const enabledFeatures = getValue(discriminator, '/enabledFeatures') || []
+  watchDependency('discriminator#/enabledFeatures')
+  if (enabledFeatures?.includes('kubedb-ui-presets')) {
+    return true
+  } else return false
 }
 
 return {
@@ -229,4 +236,5 @@ return {
   returnFalse,
   presetNameEqualsTo,
   fetchBackup,
+  isKubedbUiPreset,
 }
