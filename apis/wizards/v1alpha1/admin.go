@@ -131,6 +131,12 @@ type MonitoringOperator struct {
 }
 
 type Monitoring struct {
+	Agent          mona.AgentType             `json:"agent"`
+	Exporter       PrometheusExporter         `json:"exporter"`
+	ServiceMonitor *mona.ServiceMonitorLabels `json:"serviceMonitor"`
+}
+
+type Monitoring struct {
 	Agent    mona.AgentType     `json:"agent"`
 	Exporter PrometheusExporter `json:"exporter"`
 	Toggle   bool               `json:"toggle"`
