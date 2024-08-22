@@ -213,6 +213,14 @@ async function fetchBackup({ storeGet, axios, commit }) {
   return resp.data.spec.values.spec.backup
 }
 
+function isKubedbUiPreset({ getValue, watchDependency, discriminator }) {
+  const enabledFeatures = getValue(discriminator, '/enabledFeatures') || []
+  watchDependency('discriminator#/enabledFeatures')
+  if (enabledFeatures?.includes('kubedb-ui-presets')) {
+    return true
+  } else return false
+}
+
 return {
   getOptions,
   getNodeTopology,
@@ -228,4 +236,5 @@ return {
   returnFalse,
   presetNameEqualsTo,
   fetchBackup,
+  isKubedbUiPreset,
 }
