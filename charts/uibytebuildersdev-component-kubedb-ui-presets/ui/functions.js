@@ -205,7 +205,7 @@ async function fetchBackup({ storeGet, axios, commit }) {
   const resp = await axios.get(url)
 
   commit('wizard/model$update', {
-    path: '/spec/kubeDB/backup',
+    path: 'backup',
     value: resp.data.spec.values.spec.backup,
     force: true,
   })
