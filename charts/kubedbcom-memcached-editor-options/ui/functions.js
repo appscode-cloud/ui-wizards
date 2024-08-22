@@ -533,7 +533,7 @@ function showAlerts({ watchDependency, model, getValue, discriminator }) {
 function onBackupSwitch({ discriminator, getValue, commit }) {
   const isBackupOn = getValue(discriminator, '/backup')
   commit('wizard/model$update', {
-    path: '/spec/admin/backup/tool',
+    path: '/spec/backup/tool',
     value: isBackupOn ? 'KubeStash' : '',
     force: true,
   })
@@ -551,7 +551,7 @@ function setMonitoring({ getValue, model }) {
   return !!agent
 }
 
-async function isBackupCluster({ axios, storeGet, commit }) {
+async function isNotBackupCluster({ axios, storeGet, commit }) {
   const owner = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
   const url = `/clusters/${owner}/${cluster}/proxy/ui.k8s.appscode.com/v1alpha1/features`
@@ -564,12 +564,12 @@ async function isBackupCluster({ axios, storeGet, commit }) {
   } catch (e) {
     console.log(e)
   }
-  commit('wizard/model$update', {
-    path: '/spec/admin/backup/tool',
-    value: isStashEnabled ? 'KubeStash' : '',
-    force: true,
-  })
-  return isStashEnabled
+  return !isStashEnabled
+}
+
+function setBackup({ model, getValue }) {
+  const backup = getValue(model, '/spec/backup/tool')
+  return !!backup.length
 }
 
 function onAuthChange({ getValue, discriminator, commit }) {
@@ -735,6 +735,7 @@ function getAdminOptions({ getValue, model }, type) {
 }
 
 function isToggleOn({ getValue, model }, type) {
+  if (type === 'backup') return getValue(model, '/spec/backup/toggle')
   return getValue(model, `/spec/admin/${type}/toggle`)
 }
 
@@ -756,7 +757,7 @@ return {
   onBackupSwitch,
   showIssuer,
   setMonitoring,
-  isBackupCluster,
+  isNotBackupCluster,
   onAuthChange,
   isConfigDatabaseOn,
   clearConfiguration,
@@ -765,4 +766,5 @@ return {
   updateAgentValue,
   getAdminOptions,
   isToggleOn,
+  setBackup,
 }
