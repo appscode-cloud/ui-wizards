@@ -40,64 +40,7 @@ properties:
     type: object
   spec:
     properties:
-      backup:
-        properties:
-          kubestash:
-            properties:
-              encryptionSecret:
-                description: ObjectReference contains enough information to let you
-                  inspect or modify the referred object.
-                properties:
-                  name:
-                    type: string
-                  namespace:
-                    type: string
-                required:
-                - name
-                - namespace
-                type: object
-              retentionPolicy:
-                description: ObjectReference contains enough information to let you
-                  inspect or modify the referred object.
-                properties:
-                  name:
-                    type: string
-                  namespace:
-                    type: string
-                required:
-                - name
-                - namespace
-                type: object
-              schedule:
-                type: string
-              storageRef:
-                description: ObjectReference contains enough information to let you
-                  inspect or modify the referred object.
-                properties:
-                  name:
-                    type: string
-                  namespace:
-                    type: string
-                required:
-                - name
-                - namespace
-                type: object
-            required:
-            - encryptionSecret
-            - retentionPolicy
-            - storageRef
-            type: object
-          tool:
-            default: KubeStash
-            enum:
-            - KubeStash
-            - Stash
-            type: string
-        required:
-        - kubestash
-        - tool
-        type: object
-      kubeDB:
+      admin:
         properties:
           alert:
             properties:
@@ -115,65 +58,6 @@ properties:
             required:
             - default
             - toggle
-            type: object
-          backup:
-            properties:
-              kubestash:
-                properties:
-                  encryptionSecret:
-                    description: ObjectReference contains enough information to let
-                      you inspect or modify the referred object.
-                    properties:
-                      name:
-                        type: string
-                      namespace:
-                        type: string
-                    required:
-                    - name
-                    - namespace
-                    type: object
-                  retentionPolicy:
-                    description: ObjectReference contains enough information to let
-                      you inspect or modify the referred object.
-                    properties:
-                      name:
-                        type: string
-                      namespace:
-                        type: string
-                    required:
-                    - name
-                    - namespace
-                    type: object
-                  schedule:
-                    type: string
-                  storageRef:
-                    description: ObjectReference contains enough information to let
-                      you inspect or modify the referred object.
-                    properties:
-                      name:
-                        type: string
-                      namespace:
-                        type: string
-                    required:
-                    - name
-                    - namespace
-                    type: object
-                required:
-                - encryptionSecret
-                - retentionPolicy
-                - storageRef
-                type: object
-              toggle:
-                type: boolean
-              tool:
-                default: KubeStash
-                enum:
-                - KubeStash
-                - Stash
-                type: string
-            required:
-            - toggle
-            - tool
             type: object
           clusterIssuers:
             properties:
@@ -762,7 +646,6 @@ properties:
         required:
         - alert
         - archiver
-        - backup
         - clusterIssuers
         - clusterTier
         - databases
@@ -773,8 +656,7 @@ properties:
         - webUI
         type: object
     required:
-    - backup
-    - kubeDB
+    - admin
     type: object
 required:
 - spec

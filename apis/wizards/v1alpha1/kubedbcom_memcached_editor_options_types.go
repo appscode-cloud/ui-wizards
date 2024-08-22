@@ -46,12 +46,14 @@ type KubedbcomMemcachedEditorOptionsSpecSpec struct {
 	Labels map[string]string `json:"labels"`
 	Mode   GeneralMode       `json:"mode"`
 	// +optional
-	Replicas       int            `json:"replicas"`
-	PodResources   PodResources   `json:"podResources"`
-	AuthSecret     AuthSecret     `json:"authSecret"`
-	DeletionPolicy DeletionPolicy `json:"deletionPolicy"`
-	Configuration  string         `json:"configuration"`
-	Admin          AdminOptions   `json:"admin"`
+	Replicas       int                `json:"replicas"`
+	PodResources   PodResources       `json:"podResources"`
+	AuthSecret     AuthSecret         `json:"authSecret"`
+	DeletionPolicy DeletionPolicy     `json:"deletionPolicy"`
+	Configuration  string             `json:"configuration"`
+	Admin          AdminOptions       `json:"admin"`
+	Backup         BackupToolSpec     `json:"backup"`
+	Monitoring     MonitoringOperator `json:"monitoring"`
 }
 
 // *** Alerts *** //

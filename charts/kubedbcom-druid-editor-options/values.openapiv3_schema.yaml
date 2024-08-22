@@ -325,65 +325,6 @@ properties:
             - default
             - toggle
             type: object
-          backup:
-            properties:
-              kubestash:
-                properties:
-                  encryptionSecret:
-                    description: ObjectReference contains enough information to let
-                      you inspect or modify the referred object.
-                    properties:
-                      name:
-                        type: string
-                      namespace:
-                        type: string
-                    required:
-                    - name
-                    - namespace
-                    type: object
-                  retentionPolicy:
-                    description: ObjectReference contains enough information to let
-                      you inspect or modify the referred object.
-                    properties:
-                      name:
-                        type: string
-                      namespace:
-                        type: string
-                    required:
-                    - name
-                    - namespace
-                    type: object
-                  schedule:
-                    type: string
-                  storageRef:
-                    description: ObjectReference contains enough information to let
-                      you inspect or modify the referred object.
-                    properties:
-                      name:
-                        type: string
-                      namespace:
-                        type: string
-                    required:
-                    - name
-                    - namespace
-                    type: object
-                required:
-                - encryptionSecret
-                - retentionPolicy
-                - storageRef
-                type: object
-              toggle:
-                type: boolean
-              tool:
-                default: KubeStash
-                enum:
-                - KubeStash
-                - Stash
-                type: string
-            required:
-            - toggle
-            - tool
-            type: object
           clusterIssuers:
             properties:
               available:
@@ -971,7 +912,6 @@ properties:
         required:
         - alert
         - archiver
-        - backup
         - clusterIssuers
         - clusterTier
         - databases
@@ -992,6 +932,65 @@ properties:
           password:
             format: password
             type: string
+        type: object
+      backup:
+        properties:
+          kubestash:
+            properties:
+              encryptionSecret:
+                description: ObjectReference contains enough information to let you
+                  inspect or modify the referred object.
+                properties:
+                  name:
+                    type: string
+                  namespace:
+                    type: string
+                required:
+                - name
+                - namespace
+                type: object
+              retentionPolicy:
+                description: ObjectReference contains enough information to let you
+                  inspect or modify the referred object.
+                properties:
+                  name:
+                    type: string
+                  namespace:
+                    type: string
+                required:
+                - name
+                - namespace
+                type: object
+              schedule:
+                type: string
+              storageRef:
+                description: ObjectReference contains enough information to let you
+                  inspect or modify the referred object.
+                properties:
+                  name:
+                    type: string
+                  namespace:
+                    type: string
+                required:
+                - name
+                - namespace
+                type: object
+            required:
+            - encryptionSecret
+            - retentionPolicy
+            - storageRef
+            type: object
+          toggle:
+            type: boolean
+          tool:
+            default: KubeStash
+            enum:
+            - KubeStash
+            - Stash
+            type: string
+        required:
+        - toggle
+        - tool
         type: object
       configuration:
         type: string
@@ -1039,6 +1038,18 @@ properties:
         - name
         - namespace
         - type
+        type: object
+      monitoring:
+        properties:
+          serviceMonitor:
+            properties:
+              labels:
+                additionalProperties:
+                  type: string
+                type: object
+            type: object
+        required:
+        - serviceMonitor
         type: object
       topology:
         properties:
@@ -1440,10 +1451,12 @@ properties:
     required:
     - admin
     - authSecret
+    - backup
     - configuration
     - deepStorage
     - deletionPolicy
     - metadataStorage
+    - monitoring
     - topology
     - zookeeperRef
     type: object

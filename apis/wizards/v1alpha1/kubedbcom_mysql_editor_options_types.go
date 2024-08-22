@@ -57,6 +57,8 @@ type KubedbcomMysqlEditorOptionsSpecSpec struct {
 	DeletionPolicy DeletionPolicy     `json:"deletionPolicy"`
 	Configuration  string             `json:"configuration"`
 	Admin          AdminOptions       `json:"admin"`
+	Backup         BackupToolSpec     `json:"backup"`
+	Monitoring     MonitoringOperator `json:"monitoring"`
 }
 
 type MySQLInnoDBCluster struct {

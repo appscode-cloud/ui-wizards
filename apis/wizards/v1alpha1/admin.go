@@ -61,7 +61,6 @@ type AdminOptions struct {
 	Alert      Alert      `json:"alert"`
 
 	Archiver ToggleProfileOnBoolean `json:"archiver"`
-	Backup   BackupToolSpec         `json:"backup"`
 }
 
 // *** Machine-related starts *** //
@@ -126,6 +125,10 @@ type ToggleProfileOnBoolean struct {
 }
 
 // *** Monitoring starts *** //
+
+type MonitoringOperator struct {
+	ServiceMonitor *mona.ServiceMonitorLabels `json:"serviceMonitor"`
+}
 
 type Monitoring struct {
 	Agent          mona.AgentType             `json:"agent"`
