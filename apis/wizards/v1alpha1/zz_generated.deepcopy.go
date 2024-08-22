@@ -3722,11 +3722,6 @@ func (in *MongodbAlertsSpecForm) DeepCopy() *MongodbAlertsSpecForm {
 func (in *Monitoring) DeepCopyInto(out *Monitoring) {
 	*out = *in
 	in.Exporter.DeepCopyInto(&out.Exporter)
-	if in.ServiceMonitor != nil {
-		in, out := &in.ServiceMonitor, &out.ServiceMonitor
-		*out = new(v1.ServiceMonitorLabels)
-		(*in).DeepCopyInto(*out)
-	}
 	return
 }
 
