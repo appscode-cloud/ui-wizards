@@ -1,4 +1,4 @@
-{{- if eq .Values.spec.admin.backup.tool "Stash" -}}
+{{- if eq .Values.spec.backup.tool "Stash" -}}
 apiVersion: stash.appscode.com/v1beta1
 kind: BackupConfiguration
 metadata:
@@ -7,7 +7,7 @@ metadata:
   labels:
     {{- include "kubedbcom-mongodb-editor-options.labels" . | nindent 4 }}
 spec:
-  schedule: {{ .Values.spec.admin.backup.stash.schedule | quote }}
+  schedule: {{ .Values.spec.backup.stash.schedule | quote }}
   repository:
     name: {{ include "kubedbcom-mongodb-editor-options.fullname" . }}-repo
   target:
@@ -24,6 +24,6 @@ spec:
         fsGroup: 65534
         {{- end }}
   retentionPolicy:
-    {{- .Values.spec.admin.backup.stash.retentionPolicy | toYaml | nindent 4 }}
+    {{- .Values.spec.backup.stash.retentionPolicy | toYaml | nindent 4 }}
 
 {{- end }}

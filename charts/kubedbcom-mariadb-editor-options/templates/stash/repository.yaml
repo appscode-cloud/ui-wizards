@@ -1,4 +1,4 @@
-{{- if eq .Values.spec.admin.backup.tool "Stash" -}}
+{{- if eq .Values.spec.backup.tool "Stash" -}}
 apiVersion: stash.appscode.com/v1alpha1
 kind: Repository
 metadata:
@@ -8,10 +8,10 @@ metadata:
     {{- include "kubedbcom-mariadb-editor-options.labels" . | nindent 4 }}
 spec:
   backend:
-    storageSecretName: {{ default (printf "%s-repo-cred" (include "kubedbcom-mariadb-editor-options.fullname" .)) .Values.spec.admin.backup.stash.authSecret.name }}
+    storageSecretName: {{ default (printf "%s-repo-cred" (include "kubedbcom-mariadb-editor-options.fullname" .)) .Values.spec.backup.stash.authSecret.name }}
 
-  {{- if eq .Values.spec.admin.backup.stash.backend.provider "s3" }}
-    {{- with .Values.spec.admin.backup.stash.backend.s3.spec }}
+  {{- if eq .Values.spec.backup.stash.backend.provider "s3" }}
+    {{- with .Values.spec.backup.stash.backend.s3.spec }}
     s3:
       endpoint: {{ .endpoint }}
       bucket: {{ .bucket }}
@@ -24,8 +24,8 @@ spec:
     {{- end }}
   {{- end }}
 
-  {{- if eq .Values.spec.admin.backup.stash.backend.provider "azure" }}
-    {{- with .Values.spec.admin.backup.stash.backend.azure.spec }}
+  {{- if eq .Values.spec.backup.stash.backend.provider "azure" }}
+    {{- with .Values.spec.backup.stash.backend.azure.spec }}
     azure:
       container: {{ .container }}
       {{- with .prefix }}
@@ -37,8 +37,8 @@ spec:
     {{- end }}
   {{- end }}
 
-  {{- if eq .Values.spec.admin.backup.stash.backend.provider "gcs" }}
-    {{- with .Values.spec.admin.backup.stash.backend.gcs.spec }}
+  {{- if eq .Values.spec.backup.stash.backend.provider "gcs" }}
+    {{- with .Values.spec.backup.stash.backend.gcs.spec }}
     gcs:
       bucket: {{ .bucket }}
       {{- with .prefix }}
@@ -50,8 +50,8 @@ spec:
     {{- end }}
   {{- end }}
 
-  {{- if eq .Values.spec.admin.backup.stash.backend.provider "swift" }}
-    {{- with .Values.spec.admin.backup.stash.backend.swift.spec }}
+  {{- if eq .Values.spec.backup.stash.backend.provider "swift" }}
+    {{- with .Values.spec.backup.stash.backend.swift.spec }}
     swift:
       container: {{ .container }}
       {{- with .prefix }}
@@ -60,8 +60,8 @@ spec:
     {{- end }}
   {{- end }}
 
-  {{- if eq .Values.spec.admin.backup.stash.backend.provider "b2" }}
-    {{- with .Values.spec.admin.backup.stash.backend.b2.spec }}
+  {{- if eq .Values.spec.backup.stash.backend.provider "b2" }}
+    {{- with .Values.spec.backup.stash.backend.b2.spec }}
     b2:
       bucket: {{ .bucket }}
       {{- with .prefix }}
