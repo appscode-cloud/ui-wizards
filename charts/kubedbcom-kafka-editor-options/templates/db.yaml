@@ -19,8 +19,10 @@
 {{- end }}
 
 {{- define "common.placement" -}}
+{{- if .Values.spec.admin.clusterTier.placement.default }}
 podPlacementPolicy:
   name: {{ .Values.spec.admin.clusterTier.placement.default }}
+{{- end }}
 {{- if eq .Values.spec.admin.deployment.default "Dedicated" }}
 nodeSelector:
   app: kafkas.kubedb.com
