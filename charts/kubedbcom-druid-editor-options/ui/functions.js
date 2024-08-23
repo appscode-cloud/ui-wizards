@@ -609,7 +609,6 @@ function clearConfiguration({ discriminator, getValue, commit }) {
 
 let nodeTopologyListFromApi = []
 let nodeTopologyApiCalled = false
-let provider = ''
 
 async function getNodeTopology({ model, getValue, axios, storeGet, watchDependency }) {
   watchDependency('model#/spec/admin/deployment/default')
@@ -618,7 +617,7 @@ async function getNodeTopology({ model, getValue, axios, storeGet, watchDependen
   const cluster = storeGet('/route/params/cluster')
   const deploymentType = getValue(model, '/spec/admin/deployment/default') || ''
   const clusterTier = getValue(model, '/spec/admin/clusterTier/default') || ''
-  const nodeTopologyList = getValue(model, `/spec/admin/clusterTier/nodeTopology/available`) || []
+  let nodeTopologyList = getValue(model, `/spec/admin/clusterTier/nodeTopology/available`) || []
   let mappedResp = []
 
   if (!nodeTopologyApiCalled) {
@@ -649,14 +648,13 @@ async function getNodeTopology({ model, getValue, axios, storeGet, watchDependen
     })
   }
 
-  const statusUrl = `/clustersv2/${owner}/${cluster}/status`
-  if (provider.length === 0) {
-    try {
-      const resp = await axios.get(statusUrl)
-      provider = resp.data?.provider
-    } catch (e) {
-      console.log(e)
-    }
+  const provider = storeGet('/cluster/clusterDefinition/result/provider') || ''
+
+  if (nodeTopologyList.length === 0) {
+    nodeTopologyList = nodeTopologyListFromApi?.map((item) => {
+      const name = (item.metadata && item.metadata.name) || ''
+      return name
+    })
   }
 
   const filteredList = filterNodeTopology(nodeTopologyList, clusterTier, provider, mappedResp)
