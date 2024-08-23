@@ -4,7 +4,7 @@ function getOptions({ getValue, model, watchDependency }, type) {
   return options
 }
 
-async function getNodeTopology({ axios, storeGet, commit }) {
+async function getNodeTopology({ axios, storeGet, commit, route }) {
   const owner = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
 
@@ -22,6 +22,15 @@ async function getNodeTopology({ axios, storeGet, commit }) {
       value: mappedResp,
       force: true,
     })
+
+    if (route.path.includes('featuresets/opscenter-datastore')) {
+      commit('wizard/model$update', {
+        path: `/clusterTier/nodeTopology/available`,
+        value: mappedResp,
+        force: true,
+      })
+    }
+
     return mappedResp
   } catch (e) {
     console.log(e)
@@ -65,7 +74,7 @@ function availableVersions({ getValue, model, watchDependency }, db) {
   return getValue(model, `/databases/${db}/versions/available`)
 }
 
-async function getPlacements({ axios, storeGet }) {
+async function getPlacements({ axios, storeGet, route, commit }) {
   const owner = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
   const url = `/clusters/${owner}/${cluster}/proxy/apps.k8s.appscode.com/v1/placementpolicies`
@@ -77,6 +86,14 @@ async function getPlacements({ axios, storeGet }) {
       return name
     })
 
+    if (route.path.includes('featuresets/opscenter-datastore')) {
+      commit('wizard/model$update', {
+        path: `/clusterTier/placement/available`,
+        value: mappedResp,
+        force: true,
+      })
+    }
+
     return mappedResp
   } catch (e) {
     console.log(e)
@@ -84,7 +101,7 @@ async function getPlacements({ axios, storeGet }) {
   }
 }
 
-async function getStorageClass({ axios, storeGet }) {
+async function getStorageClass({ axios, storeGet, route, commit }) {
   const owner = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
   const url = `/clusters/${owner}/${cluster}/proxy/storage.k8s.io/v1/storageclasses`
@@ -95,6 +112,14 @@ async function getStorageClass({ axios, storeGet }) {
       return name
     })
 
+    if (route.path.includes('featuresets/opscenter-datastore')) {
+      commit('wizard/model$update', {
+        path: `/storageClasses/available`,
+        value: mappedResp,
+        force: true,
+      })
+    }
+
     return mappedResp
   } catch (e) {
     console.log(e)
@@ -102,7 +127,7 @@ async function getStorageClass({ axios, storeGet }) {
   }
 }
 
-async function getClusterIssuers({ axios, storeGet }) {
+async function getClusterIssuers({ axios, storeGet, route, commit }) {
   const owner = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
   const url = `/clusters/${owner}/${cluster}/proxy/cert-manager.io/v1/clusterissuers`
@@ -112,6 +137,14 @@ async function getClusterIssuers({ axios, storeGet }) {
       const name = (item.metadata && item.metadata.name) || ''
       return name
     })
+
+    if (route.path.includes('featuresets/opscenter-datastore')) {
+      commit('wizard/model$update', {
+        path: `/clusterIssuers/available`,
+        value: mappedResp,
+        force: true,
+      })
+    }
 
     return mappedResp
   } catch (e) {
