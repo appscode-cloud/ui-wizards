@@ -744,8 +744,8 @@ async function fetchOptions({ axios, storeGet }, type) {
   let url = ''
   if (type === 'clusterTier/placement') {
     url = `/clusters/${owner}/${cluster}/proxy/apps.k8s.appscode.com/v1/placementpolicies`
-  } else if (type === 'databases/MongoDB/versions') {
-    url = `/clusters/${owner}/${cluster}/proxy/catalog.kubedb.com/v1alpha1/mongodbversions`
+  } else if (type === 'databases/ZooKeeper/versions') {
+    url = `/clusters/${owner}/${cluster}/proxy/catalog.kubedb.com/v1alpha1/zookeeperversions`
   } else if (type === 'storageClasses') {
     url = `/clusters/${owner}/${cluster}/proxy/storage.k8s.io/v1/storageclasses`
   } else if (type === 'clusterIssuers') {
