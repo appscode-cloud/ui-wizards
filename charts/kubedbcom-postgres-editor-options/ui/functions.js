@@ -740,8 +740,39 @@ function setStorageClass({ model, getValue, commit }) {
   }
 }
 
-function getAdminOptions({ getValue, model }, type) {
+async function fetchOptions({ axios, storeGet }, type) {
+  const owner = storeGet('/route/params/user')
+  const cluster = storeGet('/route/params/cluster')
+  let url = ''
+  if (type === 'clusterTier/placement') {
+    url = `/clusters/${owner}/${cluster}/proxy/apps.k8s.appscode.com/v1/placementpolicies`
+  } else if (type === 'databases/MongoDB/versions') {
+    url = `/clusters/${owner}/${cluster}/proxy/catalog.kubedb.com/v1alpha1/mongodbversions`
+  } else if (type === 'storageClasses') {
+    url = `/clusters/${owner}/${cluster}/proxy/storage.k8s.io/v1/storageclasses`
+  } else if (type === 'clusterIssuers') {
+    url = `/clusters/${owner}/${cluster}/proxy/cert-manager.io/v1/clusterissuers`
+  }
+
+  try {
+    const resp = await axios.get(url)
+    const options = resp.data?.items.map((item) => {
+      const name = (item.metadata && item.metadata.name) || ''
+      return name
+    })
+    return options
+  } catch (e) {
+    console.log(e)
+  }
+  return []
+}
+
+function getAdminOptions({ getValue, model, axios, storeGet }, type) {
   const options = getValue(model, `/spec/admin/${type}/available`) || []
+  if (options.length === 0) {
+    return fetchOptions({ axios, storeGet }, type)
+  }
+
   return options
 }
 
