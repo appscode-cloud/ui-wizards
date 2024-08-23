@@ -31,8 +31,10 @@ spec:
         - name: proxysql
           resources:
             {{- toYaml $res | nindent 12 }}
+      {{- if .Values.spec.admin.clusterTier.placement.default }}
       podPlacementPolicy:
         name: {{ .Values.spec.admin.clusterTier.placement.default }}
+      {{- end }}
       {{- if eq .Values.spec.admin.deployment.default "Dedicated" }}
       nodeSelector:
         app: proxysqls.kubedb.com

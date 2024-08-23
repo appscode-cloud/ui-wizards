@@ -50,8 +50,8 @@ type AdminOptions struct {
 	Deployment  DeploymentProfile  `json:"deployment"`
 	ClusterTier ClusterTierProfile `json:"clusterTier"`
 
-	Databases      DatabasesProfile     `json:"databases"`
-	StorageClasses ClusterScopedProfile `json:"storageClasses"`
+	Databases      DatabasesProfile             `json:"databases"`
+	StorageClasses RequiredClusterScopedProfile `json:"storageClasses"`
 
 	TLS            ToggleProfileOnBoolean `json:"tls"`
 	ClusterIssuers ClusterScopedProfile   `json:"clusterIssuers"`
@@ -103,7 +103,7 @@ type DatabasesProfile struct {
 }
 
 type DatabaseProfile struct {
-	Versions ClusterScopedProfile `json:"versions"`
+	Versions RequiredClusterScopedProfile `json:"versions"`
 }
 
 type ClusterScopedProfile struct {
@@ -111,6 +111,12 @@ type ClusterScopedProfile struct {
 	// +optional
 	Default string `json:"default"`
 	Toggle  bool   `json:"toggle"`
+}
+
+type RequiredClusterScopedProfile struct {
+	Available []string `json:"available"`
+	Default   string   `json:"default"`
+	Toggle    bool     `json:"toggle"`
 }
 
 type NamespaceScopedProfile struct {
