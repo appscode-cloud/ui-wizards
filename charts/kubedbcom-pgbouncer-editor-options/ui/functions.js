@@ -519,7 +519,6 @@ function isVariantAvailable({ storeGet }) {
 
 let nodeTopologyListFromApi = []
 let nodeTopologyApiCalled = false
-let provider = ''
 
 async function getNodeTopology({ model, getValue, axios, storeGet, watchDependency }) {
   watchDependency('model#/spec/admin/deployment/default')
@@ -528,7 +527,7 @@ async function getNodeTopology({ model, getValue, axios, storeGet, watchDependen
   const cluster = storeGet('/route/params/cluster')
   const deploymentType = getValue(model, '/spec/admin/deployment/default') || ''
   const clusterTier = getValue(model, '/spec/admin/clusterTier/default') || ''
-  const nodeTopologyList = getValue(model, `/spec/admin/clusterTier/nodeTopology/available`) || []
+  let nodeTopologyList = getValue(model, `/spec/admin/clusterTier/nodeTopology/available`) || []
   let mappedResp = []
 
   if (!nodeTopologyApiCalled) {
@@ -559,14 +558,13 @@ async function getNodeTopology({ model, getValue, axios, storeGet, watchDependen
     })
   }
 
-  const statusUrl = `/clustersv2/${owner}/${cluster}/status`
-  if (provider.length === 0) {
-    try {
-      const resp = await axios.get(statusUrl)
-      provider = resp.data?.provider
-    } catch (e) {
-      console.log(e)
-    }
+  const provider = storeGet('/cluster/clusterDefinition/result/provider') || ''
+
+  if (nodeTopologyList.length === 0) {
+    nodeTopologyList = nodeTopologyListFromApi?.map((item) => {
+      const name = (item.metadata && item.metadata.name) || ''
+      return name
+    })
   }
 
   const filteredList = filterNodeTopology(nodeTopologyList, clusterTier, provider, mappedResp)
@@ -713,8 +711,39 @@ function clearConfiguration({ discriminator, getValue, commit }) {
   }
 }
 
-function getAdminOptions({ getValue, model }, type) {
+async function fetchOptions({ axios, storeGet }, type) {
+  const owner = storeGet('/route/params/user')
+  const cluster = storeGet('/route/params/cluster')
+  let url = ''
+  if (type === 'clusterTier/placement') {
+    url = `/clusters/${owner}/${cluster}/proxy/apps.k8s.appscode.com/v1/placementpolicies`
+  } else if (type === 'databases/PgBouncer/versions') {
+    url = `/clusters/${owner}/${cluster}/proxy/catalog.kubedb.com/v1alpha1/pgbouncerversions`
+  } else if (type === 'storageClasses') {
+    url = `/clusters/${owner}/${cluster}/proxy/storage.k8s.io/v1/storageclasses`
+  } else if (type === 'clusterIssuers') {
+    url = `/clusters/${owner}/${cluster}/proxy/cert-manager.io/v1/clusterissuers`
+  }
+
+  try {
+    const resp = await axios.get(url)
+    const options = resp.data?.items.map((item) => {
+      const name = (item.metadata && item.metadata.name) || ''
+      return name
+    })
+    return options
+  } catch (e) {
+    console.log(e)
+  }
+  return []
+}
+
+function getAdminOptions({ getValue, model, axios, storeGet }, type) {
   const options = getValue(model, `/spec/admin/${type}/available`) || []
+  if (options.length === 0) {
+    return fetchOptions({ axios, storeGet }, type)
+  }
+
   return options
 }
 
