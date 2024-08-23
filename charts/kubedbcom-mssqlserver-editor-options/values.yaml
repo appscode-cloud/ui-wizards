@@ -50,37 +50,37 @@ spec:
 
   admin:
     deployment:
-      default: Dedicated
+      default: Shared
       toggle: true
     clusterTier:
       default: "GeneralPurpose"
       toggle: true
       nodeTopology:
-        available: ["m4", "m7gd", "c5d", "c7g", "t4g", "r5a", "r6g", "a-family", "b-family", "d-family", "standard-bsv2-family", "standard-ddv4-family", "standard-dv2-family"]
-        default: "standard-bsv2-family"
+        available: []
+        default: ""
         toggle: true
       placement:
-        available: ["majority-on-spot", "minority-on-spot", "multizone", "ondemand-only", "one-on-ondemand", "spot-only", "zone-ap-southeast-1a", "zone-ap-southeast-1b", "zone-ap-southeast-1c", "default"]
-        default: "default"
+        available: []
+        default: ""
         toggle: true
 
     databases:
       MSSQLServer:
         versions:
-          available: ["2022-cu12"]
-          default: "2022-cu12"
+          available: []
+          default: ""
           toggle: true
     storageClasses:
-      available: ["linode-block-storage", "default", "standard", "gp2"]
-      default: "default"
+      available: []
+      default: ""
       toggle: true
 
     tls:
-      default: true
+      default: false
       toggle: true
     clusterIssuers:
-      available: ["global-ca", "cluster-issuer"]
-      default: "cluster-issuer"
+      available: []
+      default: ""
       toggle: true
     webUI:
       default: false
@@ -100,29 +100,28 @@ spec:
 
     archiver:
       toggle: true
-      default: true
+      default: false
 
   backup:
     tool: ""
     toggle: true
     kubestash:
-      schedule: "0 */2 * * *"
+      schedule: ""
       storageRef:
-        name: default
-        namespace: stash
+        name: ""
+        namespace: ""
       retentionPolicy:
-        name: "keep-1mo"
-        namespace: stash
+        name: ""
+        namespace: ""
       encryptionSecret:
-        name: default-encryption-secret
-        namespace: stash
+        name: ""
+        namespace: ""
   monitoring:
     serviceMonitor:
       # Specify the labels for ServiceMonitor.
       # Prometheus crd will select ServiceMonitor using these labels.
       # Only usable when monitoring agent is `prometheus.io/webhook server`.
-      labels:
-        monitoring.appscode.com/prometheus: federated
+      labels: {}
 
 form:
   alert:

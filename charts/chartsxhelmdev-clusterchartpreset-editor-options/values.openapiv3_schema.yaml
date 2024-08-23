@@ -647,8 +647,66 @@ properties:
         - tls
         - webUI
         type: object
+      backup:
+        properties:
+          kubestash:
+            properties:
+              encryptionSecret:
+                description: ObjectReference contains enough information to let you
+                  inspect or modify the referred object.
+                properties:
+                  name:
+                    type: string
+                  namespace:
+                    type: string
+                required:
+                - name
+                - namespace
+                type: object
+              retentionPolicy:
+                description: ObjectReference contains enough information to let you
+                  inspect or modify the referred object.
+                properties:
+                  name:
+                    type: string
+                  namespace:
+                    type: string
+                required:
+                - name
+                - namespace
+                type: object
+              schedule:
+                type: string
+              storageRef:
+                description: ObjectReference contains enough information to let you
+                  inspect or modify the referred object.
+                properties:
+                  name:
+                    type: string
+                  namespace:
+                    type: string
+                required:
+                - name
+                - namespace
+                type: object
+            required:
+            - encryptionSecret
+            - retentionPolicy
+            - storageRef
+            type: object
+          tool:
+            default: KubeStash
+            enum:
+            - KubeStash
+            - Stash
+            type: string
+        required:
+        - kubestash
+        - tool
+        type: object
     required:
     - admin
+    - backup
     type: object
 required:
 - spec

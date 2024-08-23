@@ -40,7 +40,8 @@ type ChartsxhelmdevClusterChartPresetEditorOptionsSpec struct {
 }
 
 type ChartsxhelmdevClusterChartPresetEditorOptionsSpecSpec struct {
-	Admin AdminOptions `json:"admin"`
+	Admin  AdminOptions  `json:"admin"`
+	Backup BackupOptions `json:"backup"`
 }
 
 type BackupOptions struct {

@@ -302,6 +302,7 @@ func (in *ChartsxhelmdevClusterChartPresetEditorOptionsSpec) DeepCopy() *Chartsx
 func (in *ChartsxhelmdevClusterChartPresetEditorOptionsSpecSpec) DeepCopyInto(out *ChartsxhelmdevClusterChartPresetEditorOptionsSpecSpec) {
 	*out = *in
 	in.Admin.DeepCopyInto(&out.Admin)
+	out.Backup = in.Backup
 	return
 }
 
