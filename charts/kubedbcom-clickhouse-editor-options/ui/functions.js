@@ -693,10 +693,6 @@ function setStorageClass({ model, getValue, commit, discriminator, watchDependen
   }
 }
 
-function returnFalse() {
-  return false
-}
-
 let placement = []
 let versions = []
 let storageClass = []
@@ -760,137 +756,25 @@ function isToggleOn({ getValue, model, discriminator, watchDependency }, type) {
   return getValue(model, `/spec/admin/${type}/toggle`) && bundleApiLoaded
 }
 
-function showAlerts({ watchDependency, model, getValue, discriminator }) {
-  watchDependency('discriminator#/monitoring')
-  const isMonitorEnabled = getValue(discriminator, '/monitoring')
-  return (
-    isMonitorEnabled && isToggleOn({ getValue, model, watchDependency, discriminator }, 'alert')
-  )
-}
-
-function onBackupSwitch({ discriminator, getValue, commit }) {
-  const isBackupOn = getValue(discriminator, '/backup')
-  commit('wizard/model$update', {
-    path: '/spec/backup/tool',
-    value: isBackupOn ? 'KubeStash' : '',
-    force: true,
-  })
-}
-
-function clearArbiterHidden({ commit }) {
-  commit('wizard/model$update', {
-    path: `/spec/arbiter/enabled`,
-    value: false,
-    force: true,
-  })
-
-  commit('wizard/model$update', {
-    path: `/spec/hidden/enabled`,
-    value: false,
-    force: true,
-  })
-}
-let nodeTopologyListFromApi = []
-let nodeTopologyApiCalled = false
-
 async function getNodeTopology({ model, getValue, axios, storeGet, watchDependency }) {
   watchDependency('model#/spec/admin/deployment/default')
   watchDependency('model#/spec/admin/clusterTier/default')
-  const owner = storeGet('/route/params/user')
-  const cluster = storeGet('/route/params/cluster')
   const deploymentType = getValue(model, '/spec/admin/deployment/default') || ''
   const clusterTier = getValue(model, '/spec/admin/clusterTier/default') || ''
   let nodeTopologyList = getValue(model, `/spec/admin/clusterTier/nodeTopology/available`) || []
-  let mappedResp = []
-
-  if (!nodeTopologyApiCalled) {
-    try {
-      const url = `/clusters/${owner}/${cluster}/proxy/node.k8s.appscode.com/v1alpha1/nodetopologies`
-      const resp = await axios.get(url)
-      nodeTopologyListFromApi = resp.data?.items
-      nodeTopologyApiCalled = true
-      const filteredResp = resp.data?.items.filter(
-        (item) =>
-          item.metadata.labels?.['node.k8s.appscode.com/tenancy'] === deploymentType.toLowerCase(),
-      )
-      mappedResp = filteredResp?.map((item) => {
-        const name = (item.metadata && item.metadata.name) || ''
-        return name
-      })
-    } catch (e) {
-      console.log(e)
-    }
-  } else {
-    const filteredResp = nodeTopologyListFromApi.filter(
-      (item) =>
-        item.metadata.labels?.['node.k8s.appscode.com/tenancy'] === deploymentType.toLowerCase(),
-    )
-    mappedResp = filteredResp?.map((item) => {
-      const name = (item.metadata && item.metadata.name) || ''
-      return name
-    })
-  }
 
   const provider = storeGet('/cluster/clusterDefinition/result/provider') || ''
 
-  if (nodeTopologyList.length === 0) {
-    nodeTopologyList = nodeTopologyListFromApi?.map((item) => {
-      const name = (item.metadata && item.metadata.name) || ''
-      return name
-    })
-  }
+  if (deploymentType === 'Shared') nodeTopologyList = nodetopologiesShared
+  else if (deploymentType === 'Dedicated') nodeTopologyList = nodetopologiesDedicated
 
-  const filteredList = filterNodeTopology(nodeTopologyList, clusterTier, provider, mappedResp)
-
+  const filteredList = filterNodeTopology(nodeTopologyList, clusterTier, provider)
   return filteredList
 }
-function returnFalse() {
-  return false
-}
-function isConfigDatabaseOn({ watchDependency, discriminator, getValue }) {
-  watchDependency('discriminator#/configDatabase')
-  return getValue(discriminator, '/configDatabase')
-}
-function notEqualToDatabaseMode({ model, getValue, watchDependency }, mode) {
-  const modelPathValue = getValue(model, '/spec/mode')
-  watchDependency('model#/spec/mode')
-  return modelPathValue && modelPathValue !== mode
-}
-function showStorageSizeField({ model, getValue, watchDependency }) {
-  const modelPathValue = getValue(model, '/spec/mode')
-  watchDependency('model#/spec/mode')
-  const validType = []
-  return !validType.includes(modelPathValue)
-}
-function showHidden({ watchDependency, model, getValue }) {
-  watchDependency('model#/spec/hidden/enabled')
-  const isHiddenOn = getValue(model, '/spec/hidden/enabled') || ''
-  const notStandalone = notEqualToDatabaseMode({ model, getValue, watchDependency }, 'Standalone')
-  return isHiddenOn && notStandalone
-}
-function notEqualToDatabaseMode({ model, getValue, watchDependency }, mode) {
-  const modelPathValue = getValue(model, '/spec/mode')
-  watchDependency('model#/spec/mode')
-  return modelPathValue && modelPathValue !== mode
-}
-function showArbiter({ watchDependency, model, getValue }) {
-  watchDependency('model#/spec/arbiter/enabled')
-  const isArbiterOn = getValue(model, '/spec/arbiter/enabled') || ''
-  const notStandalone = notEqualToDatabaseMode({ model, getValue, watchDependency }, 'Standalone')
-  return isArbiterOn && notStandalone
-}
-function clearConfiguration({ discriminator, getValue, commit }) {
-  const configOn = getValue(discriminator, '/configDatabase')
 
-  if (!configOn) {
-    commit('wizard/model$delete', '/spec/configuration')
-  }
-}
-function filterNodeTopology(list, tier, provider, map) {
+function filterNodeTopology(list, tier, provider) {
   // first filter the list from value that exists from the filtered list got from API
-  const filteredlist = list.filter((item) => {
-    return map.includes(item)
-  })
+  const filteredlist = list
 
   // filter the list based on clusterTier
   if (provider === 'EKS') {
@@ -946,6 +830,82 @@ function filterNodeTopology(list, tier, provider, map) {
     })
   } else return filteredlist
 }
+
+function returnFalse() {
+  return false
+}
+
+function showAlerts({ watchDependency, model, getValue, discriminator }) {
+  watchDependency('discriminator#/monitoring')
+  const isMonitorEnabled = getValue(discriminator, '/monitoring')
+  return (
+    isMonitorEnabled && isToggleOn({ getValue, model, watchDependency, discriminator }, 'alert')
+  )
+}
+
+function onBackupSwitch({ discriminator, getValue, commit }) {
+  const isBackupOn = getValue(discriminator, '/backup')
+  commit('wizard/model$update', {
+    path: '/spec/backup/tool',
+    value: isBackupOn ? 'KubeStash' : '',
+    force: true,
+  })
+}
+
+function clearArbiterHidden({ commit }) {
+  commit('wizard/model$update', {
+    path: `/spec/arbiter/enabled`,
+    value: false,
+    force: true,
+  })
+
+  commit('wizard/model$update', {
+    path: `/spec/hidden/enabled`,
+    value: false,
+    force: true,
+  })
+}
+
+function isConfigDatabaseOn({ watchDependency, discriminator, getValue }) {
+  watchDependency('discriminator#/configDatabase')
+  return getValue(discriminator, '/configDatabase')
+}
+function notEqualToDatabaseMode({ model, getValue, watchDependency }, mode) {
+  const modelPathValue = getValue(model, '/spec/mode')
+  watchDependency('model#/spec/mode')
+  return modelPathValue && modelPathValue !== mode
+}
+function showStorageSizeField({ model, getValue, watchDependency }) {
+  const modelPathValue = getValue(model, '/spec/mode')
+  watchDependency('model#/spec/mode')
+  const validType = []
+  return !validType.includes(modelPathValue)
+}
+function showHidden({ watchDependency, model, getValue }) {
+  watchDependency('model#/spec/hidden/enabled')
+  const isHiddenOn = getValue(model, '/spec/hidden/enabled') || ''
+  const notStandalone = notEqualToDatabaseMode({ model, getValue, watchDependency }, 'Standalone')
+  return isHiddenOn && notStandalone
+}
+function notEqualToDatabaseMode({ model, getValue, watchDependency }, mode) {
+  const modelPathValue = getValue(model, '/spec/mode')
+  watchDependency('model#/spec/mode')
+  return modelPathValue && modelPathValue !== mode
+}
+function showArbiter({ watchDependency, model, getValue }) {
+  watchDependency('model#/spec/arbiter/enabled')
+  const isArbiterOn = getValue(model, '/spec/arbiter/enabled') || ''
+  const notStandalone = notEqualToDatabaseMode({ model, getValue, watchDependency }, 'Standalone')
+  return isArbiterOn && notStandalone
+}
+function clearConfiguration({ discriminator, getValue, commit }) {
+  const configOn = getValue(discriminator, '/configDatabase')
+
+  if (!configOn) {
+    commit('wizard/model$delete', '/spec/configuration')
+  }
+}
+
 function showIssuer({ model, getValue, watchDependency, discriminator }) {
   watchDependency('model#/spec/admin/tls/default')
   const isTlsEnabled = getValue(model, '/spec/admin/tls/default')
@@ -955,6 +915,7 @@ function showIssuer({ model, getValue, watchDependency, discriminator }) {
   )
   return isTlsEnabled && isIssuerToggleEnabled
 }
+
 function onAuthChange({ getValue, discriminator, commit }) {
   const isAuthOn = getValue(discriminator, '/createAuthSecret')
   if (!isAuthOn) {
@@ -1081,7 +1042,6 @@ return {
   showAlerts,
   getNodeTopology,
   clearArbiterHidden,
-  returnFalse,
   showHidden,
   isConfigDatabaseOn,
   notEqualToDatabaseMode,
