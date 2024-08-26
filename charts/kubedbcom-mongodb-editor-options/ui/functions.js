@@ -746,6 +746,10 @@ function clearConfiguration({ discriminator, getValue, commit }) {
   }
 }
 
+function returnFalse() {
+  return false
+}
+
 let placement = []
 let versions = []
 let storageClass = []
@@ -792,13 +796,13 @@ function fetchOptions(type) {
 }
 
 function getAdminOptions({ getValue, model, axios, storeGet }, type) {
-  // const options = getValue(model, `/spec/admin/${type}/available`) || []
+  const options = getValue(model, `/spec/admin/${type}/available`) || []
 
-  // if (options.length === 0) {
-  return fetchOptions(type)
-  // }
+  if (options.length === 0) {
+    return fetchOptions(type)
+  }
 
-  // return options
+  return options
 }
 
 function isToggleOn({ getValue, model, discriminator, watchDependency }, type) {
@@ -808,6 +812,8 @@ function isToggleOn({ getValue, model, discriminator, watchDependency }, type) {
   if (type === 'backup') return getValue(model, '/spec/backup/toggle')
   return getValue(model, `/spec/admin/${type}/toggle`) && bundleApiLoaded
 }
+
+
 
 function showAlerts({ watchDependency, model, getValue, discriminator }) {
   watchDependency('discriminator#/monitoring')
@@ -824,10 +830,6 @@ function onBackupSwitch({ discriminator, getValue, commit }) {
     value: isBackupOn ? 'KubeStash' : '',
     force: true,
   })
-}
-
-function returnFalse() {
-  return false
 }
 
 async function getNodeTopology({ model, getValue, axios, storeGet, watchDependency }) {
