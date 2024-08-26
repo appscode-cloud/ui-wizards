@@ -414,6 +414,8 @@ let allAvailableTypes = [
   'Solr',
   'ZooKeeper',
 ]
+let data = {}
+let isFetching = false
 async function getDatabaseTypes({
   setDiscriminatorValue,
   discriminator,
@@ -428,8 +430,13 @@ async function getDatabaseTypes({
   const owner = storeGet('/route/params/user') || ''
   const cluster = storeGet('/route/params/cluster') || ''
   try {
-    const resp = await axios.get(`/clusters/${owner}/${cluster}/db-status`)
-    const data = resp?.data
+    if (!Object.keys(data).length && !isFetching) {
+      isFetching = true
+      enabledTypes = []
+      const resp = await axios.get(`/clusters/${owner}/${cluster}/db-status`)
+      data = resp?.data
+      isFetching = false
+    }
     if (Object.keys(data).length) {
       enabledTypes = []
       allAvailableTypes = []
