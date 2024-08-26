@@ -1,6 +1,3 @@
-let nodeTopologyListFromApi = []
-let nodeTopologyApiCalled = false
-
 const machines = {
   'db.t.micro': {
     resources: {
@@ -542,7 +539,7 @@ function isVariantAvailable({ storeGet }) {
   return variant ? true : false
 }
 
-function setStorageClass({ model, getValue, commit }) {
+function setStorageClass({ model, getValue, commit, discriminator, watchDependency }) {
   const deletionPolicy = getValue(model, '/spec/deletionPolicy') || ''
   let storageClass = getValue(model, '/spec/admin/storageClasses/default') || ''
   const storageClassList = getValue(model, '/spec/admin/storageClasses/available') || []
@@ -560,7 +557,10 @@ function setStorageClass({ model, getValue, commit }) {
     storageClass = retainClassList.length ? retainClassList[0] : simpleClassList[0]
   }
 
-  const isChangeable = isToggleOn({ getValue, model }, 'storageClasses')
+  const isChangeable = isToggleOn(
+    { getValue, model, discriminator, watchDependency },
+    'storageClasses',
+  )
   if (isChangeable && storageClass) {
     commit('wizard/model$update', {
       path: '/spec/admin/storageClasses/default',
@@ -599,104 +599,187 @@ async function getNamespaces({ axios, storeGet }) {
   }
 }
 
-function isToggleOn({ getValue, model }, type) {
-  if (type === 'backup') return getValue(model, '/spec/backup/toggle')
-  return getValue(model, `/spec/admin/${type}/toggle`)
+function onAuthChange({ getValue, discriminator, commit }) {
+  const isAuthOn = getValue(discriminator, '/createAuthSecret')
+  if (!isAuthOn) {
+    commit('wizard/model$update', {
+      path: '/spec/authSecret/name',
+      value: '',
+      force: true,
+    })
+    commit('wizard/model$update', {
+      path: '/spec/authSecret/password',
+      value: '',
+      force: true,
+    })
+  }
 }
 
-async function fetchOptions({ axios, storeGet }, type) {
+function clearConfiguration({ discriminator, getValue, commit }) {
+  const configOn = getValue(discriminator, '/configDatabase')
+
+  if (!configOn) {
+    commit('wizard/model$delete', '/spec/configuration')
+  }
+}
+
+function isConfigDatabaseOn({ watchDependency, discriminator, getValue }) {
+  watchDependency('discriminator#/configDatabase')
+  return getValue(discriminator, '/configDatabase')
+}
+
+function showIssuer({ model, getValue, watchDependency, discriminator }) {
+  watchDependency('model#/spec/admin/tls/default')
+  const isTlsEnabled = getValue(model, '/spec/admin/tls/default')
+  const isIssuerToggleEnabled = isToggleOn(
+    { getValue, model, watchDependency, discriminator },
+    'clusterIssuers',
+  )
+  return isTlsEnabled && isIssuerToggleEnabled
+}
+
+function setMonitoring({ getValue, model }) {
+  const agent = getValue(model, '/spec/admin/monitoring/agent') || ''
+  return !!agent
+}
+
+function updateAlertValue({ commit, discriminator, getValue }) {
+  const isMonitorEnabled = getValue(discriminator, '/monitoring')
+  const alert = isMonitorEnabled ? 'warning' : 'none'
+  // update alert value depend on monitoring profile
+  commit('wizard/model$update', {
+    path: '/form/alert/enabled',
+    value: alert,
+    force: true,
+  })
+  const agent = isMonitorEnabled ? 'prometheus.io/operator' : ''
+  commit('wizard/model$update', {
+    path: '/spec/admin/monitoring/agent',
+    value: agent,
+    force: true,
+  })
+}
+
+function showAlerts({ watchDependency, model, getValue, discriminator }) {
+  watchDependency('discriminator#/monitoring')
+  const isMonitorEnabled = getValue(discriminator, '/monitoring')
+  return (
+    isMonitorEnabled && isToggleOn({ getValue, model, discriminator, watchDependency }, 'alert')
+  )
+}
+
+async function isNotBackupCluster({ axios, storeGet, commit }) {
   const owner = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
-  let url = ''
-  if (type === 'clusterTier/placement') {
-    url = `/clusters/${owner}/${cluster}/proxy/apps.k8s.appscode.com/v1/placementpolicies`
-  } else if (type === 'databases/MSSQLServer/versions') {
-    url = `/clusters/${owner}/${cluster}/proxy/catalog.kubedb.com/v1alpha1/mssqlserverversions`
-  } else if (type === 'storageClasses') {
-    url = `/clusters/${owner}/${cluster}/proxy/storage.k8s.io/v1/storageclasses`
-  } else if (type === 'clusterIssuers') {
-    url = `/clusters/${owner}/${cluster}/proxy/cert-manager.io/v1/clusterissuers`
-  }
+  const url = `/clusters/${owner}/${cluster}/proxy/ui.k8s.appscode.com/v1alpha1/features`
+  let isStashEnabled = false
 
   try {
     const resp = await axios.get(url)
-    const options = resp.data?.items.map((item) => {
-      const name = (item.metadata && item.metadata.name) || ''
-      return name
-    })
-    return options
+    const stashPreset = resp.data?.items?.find((item) => item.metadata?.name === 'stash-presets')
+    isStashEnabled = !!(stashPreset?.status?.enabled && stashPreset?.status?.ready)
   } catch (e) {
     console.log(e)
   }
+  return !isStashEnabled
+}
+
+function setBackup({ model, getValue }) {
+  const backup = getValue(model, '/spec/backup/tool')
+  return !!backup.length
+}
+
+function onBackupSwitch({ discriminator, getValue, commit }) {
+  const isBackupOn = getValue(discriminator, '/backup')
+  commit('wizard/model$update', {
+    path: '/spec/backup/tool',
+    value: isBackupOn ? 'KubeStash' : '',
+    force: true,
+  })
+}
+
+let placement = []
+let versions = []
+let storageClass = []
+let clusterIssuers = []
+let nodetopologiesShared = []
+let nodetopologiesDedicated = []
+
+async function initBundle({ axios, storeGet, setDiscriminatorValue }) {
+  const owner = storeGet('/route/params/user')
+  const cluster = storeGet('/route/params/cluster')
+  let url = `clusters/${owner}/${cluster}/db-bundle?type=common,versions&deployment=dedicated&db-singular=mongodb`
+  try {
+    const resp = await axios.get(url)
+    placement = resp.data.placementpolicies || []
+    versions = resp.data.versions || []
+    storageClass = resp.data.storageclasses || []
+    clusterIssuers = resp.data.clusterissuers || []
+    nodetopologiesDedicated = resp.data.nodetopologies || []
+  } catch (e) {
+    console.log(e)
+  }
+  url = `clusters/${owner}/${cluster}/db-bundle?type=common&deployment=shared`
+  try {
+    const resp = await axios.get(url)
+    nodetopologiesShared = resp.data.nodetopologies || []
+  } catch (e) {
+    console.log(e)
+  }
+  setDiscriminatorValue('/bundleApiLoaded', true)
+}
+
+function fetchOptions(type) {
+  if (type === 'clusterTier/placement') {
+    return placement
+  } else if (type === 'databases/MongoDB/versions') {
+    return versions
+  } else if (type === 'storageClasses') {
+    return storageClass
+  } else if (type === 'clusterIssuers') {
+    return clusterIssuers
+  }
+
   return []
 }
 
-function getAdminOptions({ getValue, model, axios, storeGet }, type) {
+function getAdminOptions({ getValue, model }, type) {
   const options = getValue(model, `/spec/admin/${type}/available`) || []
+
   if (options.length === 0) {
-    return fetchOptions({ axios, storeGet }, type)
+    return fetchOptions(type)
   }
 
   return options
 }
 
+function isToggleOn({ getValue, model, discriminator, watchDependency }, type) {
+  watchDependency('discriminator#/bundleApiLoaded')
+
+  const bundleApiLoaded = getValue(discriminator, '/bundleApiLoaded')
+  if (type === 'backup') return getValue(model, '/spec/backup/toggle')
+  return getValue(model, `/spec/admin/${type}/toggle`) && bundleApiLoaded
+}
+
 async function getNodeTopology({ model, getValue, axios, storeGet, watchDependency }) {
   watchDependency('model#/spec/admin/deployment/default')
   watchDependency('model#/spec/admin/clusterTier/default')
-  const owner = storeGet('/route/params/user')
-  const cluster = storeGet('/route/params/cluster')
   const deploymentType = getValue(model, '/spec/admin/deployment/default') || ''
   const clusterTier = getValue(model, '/spec/admin/clusterTier/default') || ''
   let nodeTopologyList = getValue(model, `/spec/admin/clusterTier/nodeTopology/available`) || []
-  let mappedResp = []
-
-  if (!nodeTopologyApiCalled) {
-    try {
-      const url = `/clusters/${owner}/${cluster}/proxy/node.k8s.appscode.com/v1alpha1/nodetopologies`
-      const resp = await axios.get(url)
-      nodeTopologyListFromApi = resp.data?.items
-      nodeTopologyApiCalled = true
-      const filteredResp = resp.data?.items.filter(
-        (item) =>
-          item.metadata.labels?.['node.k8s.appscode.com/tenancy'] === deploymentType.toLowerCase(),
-      )
-      mappedResp = filteredResp?.map((item) => {
-        const name = (item.metadata && item.metadata.name) || ''
-        return name
-      })
-    } catch (e) {
-      console.log(e)
-    }
-  } else {
-    const filteredResp = nodeTopologyListFromApi.filter(
-      (item) =>
-        item.metadata.labels?.['node.k8s.appscode.com/tenancy'] === deploymentType.toLowerCase(),
-    )
-    mappedResp = filteredResp?.map((item) => {
-      const name = (item.metadata && item.metadata.name) || ''
-      return name
-    })
-  }
 
   const provider = storeGet('/cluster/clusterDefinition/result/provider') || ''
 
-  if (nodeTopologyList.length === 0) {
-    nodeTopologyList = nodeTopologyListFromApi?.map((item) => {
-      const name = (item.metadata && item.metadata.name) || ''
-      return name
-    })
-  }
+  if (deploymentType === 'Shared') nodeTopologyList = nodetopologiesShared
+  else if (deploymentType === 'Dedicated') nodeTopologyList = nodetopologiesDedicated
 
-  const filteredList = filterNodeTopology(nodeTopologyList, clusterTier, provider, mappedResp)
-
+  const filteredList = filterNodeTopology(nodeTopologyList, clusterTier, provider)
   return filteredList
 }
 
-function filterNodeTopology(list, tier, provider, mappedResp) {
+function filterNodeTopology(list, tier, provider) {
   // first filter the list from value that exists from the filtered list got from API
-  const filteredlist = list.filter((item) => {
-    return mappedResp.includes(item)
-  })
+  const filteredlist = list
 
   // filter the list based on clusterTier
   if (provider === 'EKS') {
@@ -753,101 +836,13 @@ function filterNodeTopology(list, tier, provider, mappedResp) {
   } else return filteredlist
 }
 
-function onAuthChange({ getValue, discriminator, commit }) {
-  const isAuthOn = getValue(discriminator, '/createAuthSecret')
-  if (!isAuthOn) {
-    commit('wizard/model$update', {
-      path: '/spec/authSecret/name',
-      value: '',
-      force: true,
-    })
-    commit('wizard/model$update', {
-      path: '/spec/authSecret/password',
-      value: '',
-      force: true,
-    })
-  }
-}
-
-function clearConfiguration({ discriminator, getValue, commit }) {
-  const configOn = getValue(discriminator, '/configDatabase')
-
-  if (!configOn) {
-    commit('wizard/model$delete', '/spec/configuration')
-  }
-}
-
-function isConfigDatabaseOn({ watchDependency, discriminator, getValue }) {
-  watchDependency('discriminator#/configDatabase')
-  return getValue(discriminator, '/configDatabase')
-}
-
-function showIssuer({ model, getValue, watchDependency }) {
-  watchDependency('model#/spec/admin/tls/default')
-  const isTlsEnabled = getValue(model, '/spec/admin/tls/default')
-  const isIssuerToggleEnabled = isToggleOn({ getValue, model }, 'clusterIssuers')
-  return isTlsEnabled && isIssuerToggleEnabled
-}
-
-function setMonitoring({ getValue, model }) {
-  const agent = getValue(model, '/spec/admin/monitoring/agent') || ''
-  return !!agent
-}
-
-function updateAlertValue({ commit, discriminator, getValue }) {
-  const isMonitorEnabled = getValue(discriminator, '/monitoring')
-  const alert = isMonitorEnabled ? 'warning' : 'none'
-  // update alert value depend on monitoring profile
-  commit('wizard/model$update', {
-    path: '/form/alert/enabled',
-    value: alert,
-    force: true,
-  })
-  const agent = isMonitorEnabled ? 'prometheus.io/operator' : ''
-  commit('wizard/model$update', {
-    path: '/spec/admin/monitoring/agent',
-    value: agent,
-    force: true,
-  })
-}
-
-function showAlerts({ watchDependency, model, getValue, discriminator }) {
-  watchDependency('discriminator#/monitoring')
-  const isMonitorEnabled = getValue(discriminator, '/monitoring')
-  return isMonitorEnabled && isToggleOn({ getValue, model }, 'alert')
-}
-
-async function isNotBackupCluster({ axios, storeGet, commit }) {
-  const owner = storeGet('/route/params/user')
-  const cluster = storeGet('/route/params/cluster')
-  const url = `/clusters/${owner}/${cluster}/proxy/ui.k8s.appscode.com/v1alpha1/features`
-  let isStashEnabled = false
-
-  try {
-    const resp = await axios.get(url)
-    const stashPreset = resp.data?.items?.find((item) => item.metadata?.name === 'stash-presets')
-    isStashEnabled = !!(stashPreset?.status?.enabled && stashPreset?.status?.ready)
-  } catch (e) {
-    console.log(e)
-  }
-  return !isStashEnabled
-}
-
-function setBackup({ model, getValue }) {
-  const backup = getValue(model, '/spec/backup/tool')
-  return !!backup.length
-}
-
-function onBackupSwitch({ discriminator, getValue, commit }) {
-  const isBackupOn = getValue(discriminator, '/backup')
-  commit('wizard/model$update', {
-    path: '/spec/backup/tool',
-    value: isBackupOn ? 'KubeStash' : '',
-    force: true,
-  })
+function returnFalse() {
+  return false
 }
 
 return {
+  initBundle,
+  returnFalse,
   isVariantAvailable,
   showAuthPasswordField,
   isEqualToModelPathValue,
