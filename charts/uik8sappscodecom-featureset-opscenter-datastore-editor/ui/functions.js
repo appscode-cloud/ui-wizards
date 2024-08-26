@@ -392,7 +392,6 @@ function isKubedbSelected({ getValue, discriminator, watchDependency, commit, st
 
   const kubedbFeatur = getFeatureDetails(storeGet, 'kubedb')
   if (kubedbFeatur) {
-    window.console.log({ kubedbFeatur })
     const isEnabled = kubedbFeatur?.status?.enabled || false
     const isManaged = kubedbFeatur?.status?.manager || false
     // const isEnabled = getFeaturePropertyValue(storeGet, featureName, getValue, '/status/enabled')
