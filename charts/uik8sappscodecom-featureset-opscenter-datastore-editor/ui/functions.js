@@ -194,7 +194,7 @@ function getResourceValuePathFromFeature(feature) {
   return resourceValuePath
 }
 
-function onEnabledFeaturesChange({ discriminator, getValue, commit, storeGet }) {
+function onEnabledFeaturesChange({ discriminator, getValue, commit, storeGet, model }) {
   const enabledFeatures = getValue(discriminator, '/enabledFeatures') || []
 
   const allFeatures = storeGet('/cluster/features/result') || []
@@ -265,6 +265,9 @@ function onEnabledFeaturesChange({ discriminator, getValue, commit, storeGet }) 
       commit('wizard/model$delete', `/resources/${resourceValuePath}`)
     }
   })
+
+  const enabledTypes = getValue(discriminator, '/enabledTypes') || []
+  typeConvert(commit, enabledTypes, model, getValue)
 }
 
 let resources = {}
@@ -414,6 +417,8 @@ let allAvailableTypes = [
   'Solr',
   'ZooKeeper',
 ]
+let data = {}
+let isFetching = false
 async function getDatabaseTypes({
   setDiscriminatorValue,
   discriminator,
@@ -428,8 +433,13 @@ async function getDatabaseTypes({
   const owner = storeGet('/route/params/user') || ''
   const cluster = storeGet('/route/params/cluster') || ''
   try {
-    const resp = await axios.get(`/clusters/${owner}/${cluster}/db-status`)
-    const data = resp?.data
+    if (!Object.keys(data).length && !isFetching) {
+      isFetching = true
+      enabledTypes = []
+      const resp = await axios.get(`/clusters/${owner}/${cluster}/db-status`)
+      data = resp?.data
+      isFetching = false
+    }
     if (Object.keys(data).length) {
       enabledTypes = []
       allAvailableTypes = []
@@ -458,13 +468,10 @@ function typeConvert(commit, enabledTypes, model, getValue) {
   allAvailableTypes?.forEach((item) => {
     convertFromArray[item] = enabledTypes ? enabledTypes.includes(item) : false
   })
-  let value = getValue(model, 'resources/helmToolkitFluxcdIoHelmRelease_kubedb')
-  if (value?.spec?.values?.global?.featureGates) {
-    value.spec.values.global.featureGates = convertFromArray
-  }
+
   commit('wizard/model$update', {
-    path: 'resources/helmToolkitFluxcdIoHelmRelease_kubedb',
-    value: value,
+    path: 'resources/helmToolkitFluxcdIoHelmRelease_kubedb/spec/values/global/featureGates',
+    value: convertFromArray,
     force: true,
   })
   return convertFromArray
