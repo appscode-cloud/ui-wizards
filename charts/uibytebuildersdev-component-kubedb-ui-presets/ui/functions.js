@@ -23,7 +23,7 @@ async function getNodeTopology({ axios, storeGet, commit, route }) {
       force: true,
     })
 
-    if (route.path.includes('featuresets/opscenter-datastore')) {
+    if (route.path.includes('featuresets/opscenter-datastore') && !isKubedbPresetEnable(storeGet)) {
       commit('wizard/model$update', {
         path: `/clusterTier/nodeTopology/available`,
         value: mappedResp,
@@ -74,6 +74,18 @@ function availableVersions({ getValue, model, watchDependency }, db) {
   return getValue(model, `/databases/${db}/versions/available`)
 }
 
+function isKubedbPresetEnable(storeGet) {
+  const featureSets = storeGet('/cluster/featureSets/result') || []
+  const featureSetName = storeGet('/route/params/featureset') || ''
+  const featureSet = featureSets.find((item) => item?.metadata?.name === featureSetName)
+
+  const features = featureSet?.status?.features || []
+  const isKubedbPresetEnable = features.some((feature) => {
+    if (feature.name === 'kubedb-ui-presets') return true
+  })
+  return isKubedbPresetEnable
+}
+
 async function getPlacements({ axios, storeGet, route, commit }) {
   const owner = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
@@ -86,7 +98,7 @@ async function getPlacements({ axios, storeGet, route, commit }) {
       return name
     })
 
-    if (route.path.includes('featuresets/opscenter-datastore')) {
+    if (route.path.includes('featuresets/opscenter-datastore') && !isKubedbPresetEnable(storeGet)) {
       commit('wizard/model$update', {
         path: `/clusterTier/placement/available`,
         value: mappedResp,
@@ -112,7 +124,7 @@ async function getStorageClass({ axios, storeGet, route, commit }) {
       return name
     })
 
-    if (route.path.includes('featuresets/opscenter-datastore')) {
+    if (route.path.includes('featuresets/opscenter-datastore') && !isKubedbPresetEnable(storeGet)) {
       commit('wizard/model$update', {
         path: `/storageClasses/available`,
         value: mappedResp,
@@ -138,7 +150,7 @@ async function getClusterIssuers({ axios, storeGet, route, commit }) {
       return name
     })
 
-    if (route.path.includes('featuresets/opscenter-datastore')) {
+    if (route.path.includes('featuresets/opscenter-datastore') && !isKubedbPresetEnable(storeGet)) {
       commit('wizard/model$update', {
         path: `/clusterIssuers/available`,
         value: mappedResp,
