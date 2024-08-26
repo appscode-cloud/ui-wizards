@@ -232,7 +232,7 @@ function onEnabledFeaturesChange({ discriminator, getValue, commit, storeGet, mo
       // )
       const version = featureDetails?.spec?.chart?.version
       const isEnabled = featureDetails?.status?.enabled || false
-      const isManaged = featureDetails?.status?.manager || false
+      const isManaged = featureDetails?.status?.managed || false
 
       // const isEnabled = getFeaturePropertyValue(storeGet, featureName, getValue, '/status/enabled')
       // const isManaged = getFeaturePropertyValue(storeGet, featureName, getValue, '/status/managed')
@@ -393,7 +393,7 @@ function isKubedbSelected({ getValue, discriminator, watchDependency, commit, st
   const kubedbFeatur = getFeatureDetails(storeGet, 'kubedb')
   if (kubedbFeatur) {
     const isEnabled = kubedbFeatur?.status?.enabled || false
-    const isManaged = kubedbFeatur?.status?.manager || false
+    const isManaged = kubedbFeatur?.status?.managed || false
     // const isEnabled = getFeaturePropertyValue(storeGet, featureName, getValue, '/status/enabled')
     // const isManaged = getFeaturePropertyValue(storeGet, featureName, getValue, '/status/managed')
     if (isEnabled && !isManaged) {
