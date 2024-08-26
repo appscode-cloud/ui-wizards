@@ -603,10 +603,14 @@ let clusterIssuers = []
 let nodetopologiesShared = []
 let nodetopologiesDedicated = []
 
-async function initBundle({ axios, storeGet, setDiscriminatorValue }) {
+async function initBundle({ model, getValue, axios, storeGet, setDiscriminatorValue }) {
   const owner = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
-  let url = `clusters/${owner}/${cluster}/db-bundle?type=common,versions&deployment=dedicated&db-singular=mongodb`
+
+  let db = getValue(model, '/metadata/resource/kind')
+  db = db.toLowerCase()
+  let url = `clusters/${owner}/${cluster}/db-bundle?type=common,versions&deployment=dedicated&db-singular=${db}`
+
   try {
     const resp = await axios.get(url)
     placement = resp.data.placementpolicies || []
