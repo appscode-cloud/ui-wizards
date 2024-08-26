@@ -809,10 +809,12 @@ async function initBundle({ model, getValue, axios, storeGet, setDiscriminatorVa
   setDiscriminatorValue('/bundleApiLoaded', true)
 }
 
-function fetchOptions(type) {
+function fetchOptions({ model, getValue }, type) {
+  let kind = getValue(model, '/metadata/resource/kind')
+
   if (type === 'clusterTier/placement') {
     return placement
-  } else if (type === 'databases/MongoDB/versions') {
+  } else if (type === `databases/${kind}/versions`) {
     return versions
   } else if (type === 'storageClasses') {
     return storageClass
@@ -827,7 +829,7 @@ function getAdminOptions({ getValue, model }, type) {
   const options = getValue(model, `/spec/admin/${type}/available`) || []
 
   if (options.length === 0) {
-    return fetchOptions(type)
+    return fetchOptions({ model, getValue }, type)
   }
 
   return options
