@@ -27,6 +27,9 @@ steps:
         schema:
           $ref: discriminator#/properties/enabledFeatures
         type: checkbox
+      - fetch: checkIsResourceLoaded
+        if: hideThisElement
+        type: input
       - fetch: getDatabaseTypes
         if: isKubedbSelected
         label:
@@ -35,9 +38,6 @@ steps:
         schema:
           $ref: discriminator#/properties/enabledTypes
         type: multiselect
-      - computed: checkIsResourceLoaded
-        if: hideThisElement
-        type: input
       - alertInfo:
           show: true
           type: info

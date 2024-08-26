@@ -29,11 +29,11 @@ function getFeatureDetails(storeGet, name) {
 }
 
 // get specific attribute's value of a feature
-function getFeaturePropertyValue(storeGet, name, getValue, path) {
-  const feature = getFeatureDetails(storeGet, name)
-  const value = getValue(feature, path)
-  return value
-}
+// function getFeaturePropertyValue(storeGet, name, getValue, path) {
+//   const feature = getFeatureDetails(storeGet, name)
+//   const value = getValue(feature, path)
+//   return value
+// }
 
 function isEqualToModelPathValue({ model, getValue, watchDependency }, path, value) {
   watchDependency(`model#${path}`)
@@ -48,6 +48,8 @@ function isFeatureRequired(storeGet, featureName) {
   const isRequired = requiredFeatures.includes(featureName)
   return isRequired
 }
+
+let resources = {}
 
 function getEnabledFeatureInConfigureBtnClick(allFeatureSetFeature, isBlockLevel, storeGet) {
   const featureBlock = storeGet('/route/query/activeBlock') || ''
@@ -202,31 +204,39 @@ function onEnabledFeaturesChange({ discriminator, getValue, commit, storeGet, mo
   allFeatures.forEach((item) => {
     const featureName = item?.metadata?.name || ''
     const resourceValuePath = getResourceValuePathFromFeature(item)
+    const featureSet = storeGet('/route/params/featureset') || ''
 
     if (enabledFeatures.includes(featureName)) {
-      const featureSet = storeGet('/route/params/featureset') || ''
-      const chart = getFeaturePropertyValue(storeGet, featureName, getValue, '/spec/chart/name')
-      const targetNamespace = getFeaturePropertyValue(
-        storeGet,
-        featureName,
-        getValue,
-        '/spec/chart/namespace',
-      )
-      const sourceRef = getFeaturePropertyValue(
-        storeGet,
-        featureName,
-        getValue,
-        '/spec/chart/sourceRef',
-      )
-      const version = getFeaturePropertyValue(
-        storeGet,
-        featureName,
-        getValue,
-        '/spec/chart/version',
-      )
+      const featureDetails = getFeatureDetails(storeGet, featureName)
+      // const chart = getFeaturePropertyValue(storeGet, featureName, getValue, '/spec/chart/name')
+      const chart = featureDetails?.spec?.chart?.name || ''
+      // const targetNamespace = getFeaturePropertyValue(
+      //   storeGet,
+      //   featureName,
+      //   getValue,
+      //   '/spec/chart/namespace',
+      // )
+      const targetNamespace = featureDetails?.spec?.chart?.namespace || ''
+      // const sourceRef = getFeaturePropertyValue(
+      //   storeGet,
+      //   featureName,
+      //   getValue,
+      //   '/spec/chart/sourceRef',
+      // )
+      const sourceRef = featureDetails?.spec?.chart?.sourceRef
+      // const version = getFeaturePropertyValue(
+      //   storeGet,
+      //   featureName,
+      //   getValue,
+      //   '/spec/chart/version',
+      // )
+      const version = featureDetails?.spec?.chart?.version
+      const isEnabled = featureDetails?.status?.enabled || false
+      const isManaged = featureDetails?.status?.manager || false
 
-      const isEnabled = getFeaturePropertyValue(storeGet, featureName, getValue, '/status/enabled')
-      const isManaged = getFeaturePropertyValue(storeGet, featureName, getValue, '/status/managed')
+      // const isEnabled = getFeaturePropertyValue(storeGet, featureName, getValue, '/status/enabled')
+      // const isManaged = getFeaturePropertyValue(storeGet, featureName, getValue, '/status/managed')
+      // window.console.log({ chart, targetNamespace, sourceRef, version, isEnabled, isManaged })
 
       if (isEnabled && !isManaged) {
         commit('wizard/model$delete', `/resources/${resourceValuePath}`)
@@ -254,7 +264,6 @@ function onEnabledFeaturesChange({ discriminator, getValue, commit, storeGet, mo
           },
         }
         const path = `/resources/${resourceValuePath}`
-
         commit('wizard/model$update', {
           path: path,
           value: value,
@@ -269,8 +278,6 @@ function onEnabledFeaturesChange({ discriminator, getValue, commit, storeGet, mo
   const enabledTypes = getValue(discriminator, '/enabledTypes') || []
   typeConvert(commit, enabledTypes, model, getValue)
 }
-
-let resources = {}
 
 function returnFalse() {
   return false
@@ -382,12 +389,14 @@ function isKubedbSelected({ getValue, discriminator, watchDependency, commit, st
     commit('wizard/model$delete', 'resources/helmToolkitFluxcdIoHelmRelease_kubedb')
     return false
   }
-  const allFeatures = storeGet('/cluster/features/result') || []
-  const kubedbFeature = allFeatures.find((item) => item?.metadata?.name === 'kubedb')
-  if (kubedbFeature) {
-    const featureName = kubedbFeature?.metadata?.name || ''
-    const isEnabled = getFeaturePropertyValue(storeGet, featureName, getValue, '/status/enabled')
-    const isManaged = getFeaturePropertyValue(storeGet, featureName, getValue, '/status/managed')
+
+  const kubedbFeatur = getFeatureDetails(storeGet, 'kubedb')
+  if (kubedbFeatur) {
+    window.console.log({ kubedbFeatur })
+    const isEnabled = kubedbFeatur?.status?.enabled || false
+    const isManaged = kubedbFeatur?.status?.manager || false
+    // const isEnabled = getFeaturePropertyValue(storeGet, featureName, getValue, '/status/enabled')
+    // const isManaged = getFeaturePropertyValue(storeGet, featureName, getValue, '/status/managed')
     if (isEnabled && !isManaged) {
       commit('wizard/model$delete', 'resources/helmToolkitFluxcdIoHelmRelease_kubedb')
       return false
