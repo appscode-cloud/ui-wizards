@@ -418,7 +418,7 @@ let allAvailableTypes = [
   'ZooKeeper',
 ]
 let data = {}
-let isFetching = false
+let isFetching = 'stale'
 async function getDatabaseTypes({
   setDiscriminatorValue,
   discriminator,
@@ -432,25 +432,27 @@ async function getDatabaseTypes({
   let enabledTypes = ['Elasticsearch', 'Kafka', 'MariaDB', 'MongoDB', 'MySQL', 'Postgres', 'Redis']
   const owner = storeGet('/route/params/user') || ''
   const cluster = storeGet('/route/params/cluster') || ''
-  try {
-    if (!Object.keys(data).length && !isFetching) {
-      isFetching = true
-      enabledTypes = []
+  if (isFetching === 'success') {
+    enabledTypes = getValue(discriminator, '/enabledTypes') || []
+  } else if (isFetching !== 'pending') {
+    try {
+      isFetching = 'pending'
       const resp = await axios.get(`/clusters/${owner}/${cluster}/db-status`)
       data = resp?.data
-      isFetching = false
-    }
-    if (Object.keys(data).length) {
-      enabledTypes = []
-      allAvailableTypes = []
-      for (const [key, value] of Object.entries(data)) {
-        if (value === true) enabledTypes.push(key)
-        allAvailableTypes.push(key)
+      isFetching = 'success'
+      if (Object.keys(data).length) {
+        enabledTypes = []
+        allAvailableTypes = []
+        for (const [key, value] of Object.entries(data)) {
+          if (value === true) enabledTypes.push(key)
+          allAvailableTypes.push(key)
+        }
       }
+    } catch (e) {
+      console.log(e)
     }
-  } catch (e) {
-    console.log(e)
-  }
+  } else
+    enabledTypes = ['Elasticsearch', 'Kafka', 'MariaDB', 'MongoDB', 'MySQL', 'Postgres', 'Redis']
   setDiscriminatorValue('/enabledTypes', enabledTypes)
   if (isKubedbSelected({ getValue, discriminator, watchDependency, commit, storeGet })) {
     typeConvert(commit, enabledTypes, model, getValue)
