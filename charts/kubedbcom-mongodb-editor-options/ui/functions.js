@@ -605,7 +605,7 @@ function isVariantAvailable({ storeGet }) {
   return variant ? true : false
 }
 
-function setStorageClass({ model, getValue, commit }) {
+function setStorageClass({ model, commit, getValue, discriminator, watchDependency }) {
   const deletionPolicy = getValue(model, '/spec/deletionPolicy') || ''
   let storageClass = getValue(model, '/spec/admin/storageClasses/default') || ''
   const storageClassList = getValue(model, '/spec/admin/storageClasses/available') || []
@@ -624,7 +624,10 @@ function setStorageClass({ model, getValue, commit }) {
     storageClass = retainClassList.length ? retainClassList[0] : simpleClassList[0]
   }
 
-  const isChangeable = isToggleOn({ getValue, model }, 'storageClasses')
+  const isChangeable = isToggleOn(
+    { getValue, model, discriminator, watchDependency },
+    'storageClasses',
+  )
   if (isChangeable && storageClass) {
     commit('wizard/model$update', {
       path: '/spec/admin/storageClasses/default',
@@ -743,51 +746,75 @@ function clearConfiguration({ discriminator, getValue, commit }) {
   }
 }
 
-async function fetchOptions({ axios, storeGet }, type) {
+let placement = []
+let versions = []
+let storageClass = []
+let clusterIssuers = []
+let nodetopologiesShared = []
+let nodetopologiesDedicated = []
+
+async function initBundle({ axios, storeGet, discriminator, setDiscriminatorValue }) {
   const owner = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
-  let url = ''
-  if (type === 'clusterTier/placement') {
-    url = `/clusters/${owner}/${cluster}/proxy/apps.k8s.appscode.com/v1/placementpolicies`
-  } else if (type === 'databases/MongoDB/versions') {
-    url = `/clusters/${owner}/${cluster}/proxy/catalog.kubedb.com/v1alpha1/mongodbversions`
-  } else if (type === 'storageClasses') {
-    url = `/clusters/${owner}/${cluster}/proxy/storage.k8s.io/v1/storageclasses`
-  } else if (type === 'clusterIssuers') {
-    url = `/clusters/${owner}/${cluster}/proxy/cert-manager.io/v1/clusterissuers`
-  }
-
+  let url = `clusters/${owner}/${cluster}/db-bundle?type=common,versions&deployment=dedicated&db-singular=mongodb`
   try {
     const resp = await axios.get(url)
-    const options = resp.data?.items.map((item) => {
-      const name = (item.metadata && item.metadata.name) || ''
-      return name
-    })
-    return options
+    placement = resp.data.placementpolicies || []
+    versions = resp.data.versions || []
+    storageClass = resp.data.storageclasses || []
+    clusterIssuers = resp.data.clusterissuers || []
+    nodetopologiesDedicated = resp.data.nodetopologies || []
   } catch (e) {
     console.log(e)
   }
+  url = `clusters/${owner}/${cluster}/db-bundle?type=common&deployment=shared`
+  try {
+    const resp = await axios.get(url)
+    nodetopologiesShared = resp.data.nodetopologies || []
+  } catch (e) {
+    console.log(e)
+  }
+  setDiscriminatorValue('/bundleApiLoaded', true)
+}
+
+function fetchOptions(type) {
+  if (type === 'clusterTier/placement') {
+    return placement
+  } else if (type === 'databases/MongoDB/versions') {
+    return versions
+  } else if (type === 'storageClasses') {
+    return storageClass
+  } else if (type === 'clusterIssuers') {
+    return clusterIssuers
+  }
+
   return []
 }
 
 function getAdminOptions({ getValue, model, axios, storeGet }, type) {
-  const options = getValue(model, `/spec/admin/${type}/available`) || []
-  if (options.length === 0) {
-    return fetchOptions({ axios, storeGet }, type)
-  }
+  // const options = getValue(model, `/spec/admin/${type}/available`) || []
 
-  return options
+  // if (options.length === 0) {
+  return fetchOptions(type)
+  // }
+
+  // return options
 }
 
-function isToggleOn({ getValue, model }, type) {
+function isToggleOn({ getValue, model, discriminator, watchDependency }, type) {
+  watchDependency('discriminator#/bundleApiLoaded')
+
+  const bundleApiLoaded = getValue(discriminator, '/bundleApiLoaded')
   if (type === 'backup') return getValue(model, '/spec/backup/toggle')
-  return getValue(model, `/spec/admin/${type}/toggle`)
+  return getValue(model, `/spec/admin/${type}/toggle`) && bundleApiLoaded
 }
 
 function showAlerts({ watchDependency, model, getValue, discriminator }) {
   watchDependency('discriminator#/monitoring')
   const isMonitorEnabled = getValue(discriminator, '/monitoring')
-  return isMonitorEnabled && isToggleOn({ getValue, model }, 'alert')
+  return (
+    isMonitorEnabled && isToggleOn({ getValue, model, discriminator, watchDependency }, 'alert')
+  )
 }
 
 function onBackupSwitch({ discriminator, getValue, commit }) {
@@ -799,66 +826,29 @@ function onBackupSwitch({ discriminator, getValue, commit }) {
   })
 }
 
-let nodeTopologyListFromApi = []
-let nodeTopologyApiCalled = false
+function returnFalse() {
+  return false
+}
 
 async function getNodeTopology({ model, getValue, axios, storeGet, watchDependency }) {
   watchDependency('model#/spec/admin/deployment/default')
   watchDependency('model#/spec/admin/clusterTier/default')
-  const owner = storeGet('/route/params/user')
-  const cluster = storeGet('/route/params/cluster')
   const deploymentType = getValue(model, '/spec/admin/deployment/default') || ''
   const clusterTier = getValue(model, '/spec/admin/clusterTier/default') || ''
   let nodeTopologyList = getValue(model, `/spec/admin/clusterTier/nodeTopology/available`) || []
-  let mappedResp = []
-
-  if (!nodeTopologyApiCalled) {
-    try {
-      const url = `/clusters/${owner}/${cluster}/proxy/node.k8s.appscode.com/v1alpha1/nodetopologies`
-      const resp = await axios.get(url)
-      nodeTopologyListFromApi = resp.data?.items
-      nodeTopologyApiCalled = true
-      const filteredResp = resp.data?.items.filter(
-        (item) =>
-          item.metadata.labels?.['node.k8s.appscode.com/tenancy'] === deploymentType.toLowerCase(),
-      )
-      mappedResp = filteredResp?.map((item) => {
-        const name = (item.metadata && item.metadata.name) || ''
-        return name
-      })
-    } catch (e) {
-      console.log(e)
-    }
-  } else {
-    const filteredResp = nodeTopologyListFromApi.filter(
-      (item) =>
-        item.metadata.labels?.['node.k8s.appscode.com/tenancy'] === deploymentType.toLowerCase(),
-    )
-    mappedResp = filteredResp?.map((item) => {
-      const name = (item.metadata && item.metadata.name) || ''
-      return name
-    })
-  }
 
   const provider = storeGet('/cluster/clusterDefinition/result/provider') || ''
 
-  if (nodeTopologyList.length === 0) {
-    nodeTopologyList = nodeTopologyListFromApi?.map((item) => {
-      const name = (item.metadata && item.metadata.name) || ''
-      return name
-    })
-  }
+  if (deploymentType === 'Shared') nodeTopologyList = nodetopologiesShared
+  else if (deploymentType === 'Dedicated') nodeTopologyList = nodetopologiesDedicated
 
-  const filteredList = filterNodeTopology(nodeTopologyList, clusterTier, provider, mappedResp)
-
+  const filteredList = filterNodeTopology(nodeTopologyList, clusterTier, provider)
   return filteredList
 }
 
-function filterNodeTopology(list, tier, provider, mappedList) {
+function filterNodeTopology(list, tier, provider) {
   // first filter the list from value that exists from the filtered list got from API
-  const filteredlist = list.filter((item) => {
-    return mappedList.includes(item)
-  })
+  const filteredlist = list
 
   // filter the list based on clusterTier
   if (provider === 'EKS') {
@@ -915,10 +905,13 @@ function filterNodeTopology(list, tier, provider, mappedList) {
   } else return filteredlist
 }
 
-function showIssuer({ model, getValue, watchDependency }) {
+function showIssuer({ model, getValue, watchDependency, discriminator }) {
   watchDependency('model#/spec/admin/tls/default')
   const isTlsEnabled = getValue(model, '/spec/admin/tls/default')
-  const isIssuerToggleEnabled = isToggleOn({ getValue, model }, 'clusterIssuers')
+  const isIssuerToggleEnabled = isToggleOn(
+    { getValue, model, discriminator, watchDependency },
+    'clusterIssuers',
+  )
   return isTlsEnabled && isIssuerToggleEnabled
 }
 
@@ -965,6 +958,8 @@ function onAuthChange({ getValue, discriminator, commit }) {
 }
 
 return {
+  returnFalse,
+  initBundle,
   isVariantAvailable,
   fetchJsons,
   showAuthPasswordField,
