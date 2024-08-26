@@ -477,36 +477,6 @@ function typeConvert(commit, enabledTypes, model, getValue) {
   return convertFromArray
 }
 
-async function fetchJsons({ axios, itemCtx }) {
-  let ui = {}
-  let language = {}
-  let functions = {}
-  const { name, sourceRef, version, packageviewUrlPrefix } = itemCtx.chart
-
-  try {
-    ui = await axios.get(
-      `${packageviewUrlPrefix}/create-ui.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`,
-    )
-    language = await axios.get(
-      `${packageviewUrlPrefix}/language.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`,
-    )
-    const functionString = await axios.get(
-      `${packageviewUrlPrefix}/functions.js?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}`,
-    )
-    // declare evaluate the functionString to get the functions Object
-    const evalFunc = new Function(functionString.data || '')
-    functions = evalFunc()
-  } catch (e) {
-    console.log(e)
-  }
-
-  return {
-    ui: ui.data || {},
-    language: language.data || {},
-    functions,
-  }
-}
-
 function isKubedbUiPreset({ getValue, watchDependency, discriminator }) {
   const enabledFeatures = getValue(discriminator, '/enabledFeatures') || []
   watchDependency('discriminator#/enabledFeatures')
@@ -722,10 +692,6 @@ function setTool({ commit }) {
   return 'KubeStash'
 }
 
-function returnFalse() {
-  return false
-}
-
 function presetNameEqualsTo({ storeGet }, value) {
   const presetName = storeGet('/route/params/presetName') || ''
   return presetName === value
@@ -741,13 +707,11 @@ return {
   getEnabledFeatures,
   disableFeatures,
   onEnabledFeaturesChange,
-  returnFalse,
   setReleaseNameAndNamespaceAndInitializeValues,
   fetchFeatureSetOptions,
   isKubedbSelected,
   getDatabaseTypes,
   onTypeUpdate,
-  fetchJsons,
   isKubedbUiPreset,
   getOptions,
   getNodeTopology,
