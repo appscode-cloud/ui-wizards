@@ -430,7 +430,6 @@ let isFetching = 'stale'
 async function getDatabaseTypes({
   setDiscriminatorValue,
   discriminator,
-  watchDependency,
   commit,
   storeGet,
   getValue,
@@ -459,10 +458,13 @@ async function getDatabaseTypes({
     } catch (e) {
       console.log(e)
     }
-  } else
+  } else {
     enabledTypes = ['Elasticsearch', 'Kafka', 'MariaDB', 'MongoDB', 'MySQL', 'Postgres', 'Redis']
+  }
   setDiscriminatorValue('/enabledTypes', enabledTypes)
-  if (isKubedbSelected({ getValue, discriminator, watchDependency, commit, storeGet })) {
+  const enabledFeatures = getValue(discriminator, '/enabledFeatures') || []
+  const isSelected = enabledFeatures?.includes('kubedb')
+  if (isSelected) {
     typeConvert(commit, enabledTypes, model, getValue)
   }
   return allAvailableTypes
