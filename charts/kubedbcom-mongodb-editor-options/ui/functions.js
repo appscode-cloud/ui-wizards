@@ -775,13 +775,6 @@ async function initBundle({ model, getValue, axios, storeGet, setDiscriminatorVa
   } catch (e) {
     console.log(e)
   }
-  url = `clusters/${owner}/${cluster}/db-bundle?type=common&deployment=shared`
-  try {
-    const resp = await axios.get(url)
-    nodetopologiesShared = resp.data.nodetopologies || []
-  } catch (e) {
-    console.log(e)
-  }
   setDiscriminatorValue('/bundleApiLoaded', true)
 }
 
