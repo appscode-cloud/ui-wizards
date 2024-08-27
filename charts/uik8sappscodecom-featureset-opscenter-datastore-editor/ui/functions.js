@@ -497,11 +497,13 @@ function typeConvert(commit, enabledTypes, model, getValue) {
 function isKubedbUiPreset({ getValue, storeGet, watchDependency, discriminator }) {
   watchDependency('discriminator#/enabledFeatures')
   const enabledFeatures = getValue(discriminator, '/enabledFeatures') || []
-  const featureDetails = getFeatureDetails(storeGet, 'kubedb-ui-presets')
-  const isManaged = featureDetails?.status?.managed || false
   const isPresetEnabled = enabledFeatures?.includes('kubedb-ui-presets') || false
 
-  if (isPresetEnabled && !isManaged) {
+  const featureDetails = getFeatureDetails(storeGet, 'kubedb-ui-presets')
+  const isManagedInFeature = featureDetails?.status?.managed || false
+  const isEnableInFeature = featureDetails?.status?.enabled || false
+
+  if (isEnableInFeature && !isManagedInFeature) {
     return false
   } else if (isPresetEnabled) {
     return true
