@@ -619,7 +619,7 @@ function checkIfFeatureOn({ getValue, model }, type) {
     return features.includes('backup') && backupVal === 'KubeStash'
   } else if (type === 'tls') {
     return features.includes('tls') && val
-  } else if (type === 'webUI') {
+  } else if (type === 'expose') {
     return features.includes('binding') && val
   } else if (type === 'monitoring') {
     return features.includes('monitoring') && val
@@ -635,7 +635,7 @@ function isToggleOn({ getValue, model, discriminator, watchDependency }, type) {
   if (
     type === 'tls' ||
     type === 'backup' ||
-    type === 'webUI' ||
+    type === 'expose' ||
     type === 'monitoring' ||
     type === 'archiver'
   ) {
