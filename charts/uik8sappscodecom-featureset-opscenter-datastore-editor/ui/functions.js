@@ -304,6 +304,16 @@ async function setReleaseNameAndNamespaceAndInitializeValues({
     force: true,
   })
 
+  const resource = getValue(model, '/metadata/resource')
+  commit('wizard/model$update', {
+    path: '/metadata/resource',
+    value: {
+      ...resource,
+      name: isFeatureSetInstalled ? 'features' : 'featuresets',
+    },
+    force: true,
+  })
+
   // delete extra values from model if the feature does not exist
   const allFeatures = storeGet('/cluster/features/result') || []
   const allFeatureResourceValuePathNames = allFeatures.map((feature) =>
