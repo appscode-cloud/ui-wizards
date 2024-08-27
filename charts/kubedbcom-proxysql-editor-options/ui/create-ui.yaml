@@ -37,13 +37,6 @@ steps:
       schema:
         $ref: schema#/properties/metadata/properties/release/properties/namespace
       type: select
-    - disableUnselect: true
-      fetch: getAdminOptions|databases/ProxySQL/versions
-      label:
-        text: labels.database.version
-      schema:
-        $ref: schema#/properties/spec/properties/admin/properties/databases/properties/ProxySQL/properties/versions/properties/default
-      type: select
     - hasDescription: true
       if: isToggleOn|deployment
       label:
@@ -88,6 +81,14 @@ steps:
       refresh: true
       schema:
         $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/nodeTopology/properties/default
+      type: select
+    - disableUnselect: true
+      fetch: getAdminOptions|databases/ProxySQL/versions
+      if: isToggleOn|databases/ProxySQL/versions
+      label:
+        text: labels.database.version
+      schema:
+        $ref: schema#/properties/spec/properties/admin/properties/databases/properties/ProxySQL/properties/versions/properties/default
       type: select
     - hasDescription: true
       label:

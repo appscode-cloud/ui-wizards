@@ -37,13 +37,6 @@ steps:
       schema:
         $ref: schema#/properties/metadata/properties/release/properties/namespace
       type: select
-    - disableUnselect: true
-      fetch: getAdminOptions|databases/RabbitMQ/versions
-      label:
-        text: labels.database.version
-      schema:
-        $ref: schema#/properties/spec/properties/admin/properties/databases/properties/RabbitMQ/properties/versions/properties/default
-      type: select
     - hasDescription: true
       if: isToggleOn|deployment
       label:
@@ -87,6 +80,14 @@ steps:
         text: labels.nodeTopology
       schema:
         $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/nodeTopology/properties/default
+      type: select
+    - disableUnselect: true
+      fetch: getAdminOptions|databases/RabbitMQ/versions
+      if: isToggleOn|databases/RabbitMQ/versions
+      label:
+        text: labels.database.version
+      schema:
+        $ref: schema#/properties/spec/properties/admin/properties/databases/properties/RabbitMQ/properties/versions/properties/default
       type: select
     - isArray: true
       keys:
