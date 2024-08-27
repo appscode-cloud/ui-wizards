@@ -68,14 +68,14 @@ async function getNamespaces({ axios, storeGet }) {
   })
 }
 
-async function getMariaDbs({ axios, storeGet, model, getValue, watchDependency }) {
+async function getDbs({ axios, storeGet, model, getValue, watchDependency }) {
   watchDependency('model#/metadata/namespace')
   const namespace = getValue(model, '/metadata/namespace')
   const owner = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
 
   const resp = await axios.get(
-    `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/mariadbs`,
+    `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/redises`,
     {
       params: { filter: { items: { metadata: { name: null } } } },
     },
@@ -92,6 +92,57 @@ async function getMariaDbs({ axios, storeGet, model, getValue, watchDependency }
   })
 }
 
+async function getDbDetails({ axios, storeGet, getValue, model }) {
+  const owner = storeGet('/route/params/user') || ''
+  const cluster = storeGet('/route/params/cluster') || ''
+  const namespace =
+    storeGet('/route/query/namespace') || getValue(model, '/metadata/namespace') || ''
+  const name = storeGet('/route/query/name') || getValue(model, '/spec/databaseRef/name') || ''
+
+  if (namespace && name) {
+    try {
+      const resp = await axios.get(
+        `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/redises/${name}`,
+      )
+      dbDetails = resp.data || {}
+    } catch (e) {
+      console.log(e)
+    }
+  }
+}
+
+async function dbTypeEqualsTo({ axios, storeGet, watchDependency, model, getValue, commit }, type) {
+  watchDependency('model#/spec/databaseRef/name')
+
+  const dbName = getValue(model, '/spec/databaseRef/name')
+  if (dbName !== dbDetails?.metadata?.name)
+    await getDbDetails({ axios, storeGet, getValue, model, watchDependency })
+
+  const { spec } = dbDetails || {}
+  const { cluster, sentinelRef } = spec || {}
+  let verd = ''
+  if (cluster) verd = 'cluster'
+  else {
+    if (sentinelRef) verd = 'sentinel'
+    else verd = 'standalone'
+  }
+  clearSpecModel({ commit }, verd)
+  return type === verd
+}
+
+function clearSpecModel({ commit }, dbtype) {
+  if (dbtype === 'standalone') {
+    commit('wizard/model$delete', `/spec/${autoscaleType}/cluster`)
+    commit('wizard/model$delete', `/spec/${autoscaleType}/sentinel`)
+  } else if (dbtype === 'cluster') {
+    commit('wizard/model$delete', `/spec/${autoscaleType}/standalone`)
+    commit('wizard/model$delete', `/spec/${autoscaleType}/sentinel`)
+  } else if (dbtype === 'sentinel') {
+    commit('wizard/model$delete', `/spec/${autoscaleType}/standalone`)
+    commit('wizard/model$delete', `/spec/${autoscaleType}/cluster`)
+  }
+}
+
 function initMetadata({ getValue, discriminator, model, commit, storeGet }) {
   const dbName = getValue(model, '/spec/databaseRef/name') || ''
   const type = getValue(discriminator, '/autoscalingType') || ''
@@ -106,7 +157,7 @@ function initMetadata({ getValue, discriminator, model, commit, storeGet }) {
       force: true,
     })
 
-  // delete the other type object from vuex wizard model
+  // delete the other type object from model
   if (type === 'compute') commit('wizard/model$delete', '/spec/storage')
   if (type === 'storage') commit('wizard/model$delete', '/spec/compute')
 }
@@ -180,8 +231,11 @@ function setApplyToIfReady() {
 return {
   isConsole,
   getNamespaces,
-  getMariaDbs,
+  getDbs,
   isKubedb,
+  getDbDetails,
+  dbTypeEqualsTo,
+  clearSpecModel,
   initMetadata,
   onNamespaceChange,
   ifScalingTypeEqualsTo,

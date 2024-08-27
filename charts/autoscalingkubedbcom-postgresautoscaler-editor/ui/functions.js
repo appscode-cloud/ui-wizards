@@ -68,14 +68,14 @@ async function getNamespaces({ axios, storeGet }) {
   })
 }
 
-async function getMariaDbs({ axios, storeGet, model, getValue, watchDependency }) {
+async function getPostgresDbs({ axios, storeGet, model, getValue, watchDependency }) {
   watchDependency('model#/metadata/namespace')
   const namespace = getValue(model, '/metadata/namespace')
   const owner = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
 
   const resp = await axios.get(
-    `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/mariadbs`,
+    `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/postgreses`,
     {
       params: { filter: { items: { metadata: { name: null } } } },
     },
@@ -180,7 +180,7 @@ function setApplyToIfReady() {
 return {
   isConsole,
   getNamespaces,
-  getMariaDbs,
+  getPostgresDbs,
   isKubedb,
   initMetadata,
   onNamespaceChange,

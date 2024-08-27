@@ -138,15 +138,18 @@ async function fetchNodeTopology({ axios, storeGet }) {
   const owner = storeGet('/route/params/user') || ''
   const cluster = storeGet('/route/params/cluster') || ''
   const url = `/clusters/${owner}/${cluster}/proxy/node.k8s.appscode.com/v1alpha1/nodetopologies`
-  let list = []
   try {
     const resp = await axios.get(url)
-    const items = (resp && resp.data?.items) || []
-    list = items
+    const list = (resp && resp.data?.items) || []
+    const mappedList = list.map((item) => {
+      const name = (item.metadata && item.metadata.name) || ''
+      return name
+    })
+    return mappedList
   } catch (e) {
     console.log(e)
   }
-  return list
+  return []
 }
 
 function isNodeTopologySelected({ watchDependency, model, getValue }) {
