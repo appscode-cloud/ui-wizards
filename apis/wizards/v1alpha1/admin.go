@@ -55,7 +55,7 @@ type AdminOptions struct {
 
 	TLS            ToggleProfileOnBoolean `json:"tls"`
 	ClusterIssuers ClusterScopedProfile   `json:"clusterIssuers"`
-	WebUI          ToggleProfileOnBoolean `json:"webUI"`
+	Expose         ToggleProfileOnBoolean `json:"expose"`
 
 	Monitoring Monitoring `json:"monitoring"`
 	Alert      Alert      `json:"alert"`

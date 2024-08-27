@@ -36,7 +36,7 @@ func (in *AdminOptions) DeepCopyInto(out *AdminOptions) {
 	in.StorageClasses.DeepCopyInto(&out.StorageClasses)
 	out.TLS = in.TLS
 	in.ClusterIssuers.DeepCopyInto(&out.ClusterIssuers)
-	out.WebUI = in.WebUI
+	out.Expose = in.Expose
 	in.Monitoring.DeepCopyInto(&out.Monitoring)
 	out.Alert = in.Alert
 	out.Archiver = in.Archiver

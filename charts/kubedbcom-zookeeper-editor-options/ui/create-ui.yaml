@@ -4,6 +4,9 @@ steps:
       backup:
         default: false
         type: boolean
+      bundleApiLoaded:
+        default: false
+        type: boolean
       configDatabase:
         default: false
         type: boolean
@@ -13,14 +16,11 @@ steps:
       monitoring:
         default: false
         type: boolean
-      bundleApiLoaded:
-        default: false
-        type: boolean
     elements:
     - computed: initBundle
-      label:
-        text: ''
       if: returnFalse
+      label:
+        text: ""
       type: label-element
     - disabled: isVariantAvailable
       label:
@@ -237,11 +237,11 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/admin/properties/clusterIssuers/properties/default
       type: select
-    - if: isToggleOn|webUI
+    - if: isToggleOn|expose
       label:
-        text: Enable Web UI?
+        text: Expose via Gateway?
       schema:
-        $ref: schema#/properties/spec/properties/admin/properties/webUI/properties/default
+        $ref: schema#/properties/spec/properties/admin/properties/expose/properties/default
       type: switch
     - computed: setMonitoring
       if: isToggleOn|monitoring
