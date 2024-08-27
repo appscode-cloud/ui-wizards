@@ -28,13 +28,6 @@ function getFeatureDetails(storeGet, name) {
   return feature
 }
 
-// get specific attribute's value of a feature
-function getFeaturePropertyValue(storeGet, name, getValue, path) {
-  const feature = getFeatureDetails(storeGet, name)
-  const value = getValue(feature, path)
-  return value
-}
-
 function isEqualToModelPathValue({ model, getValue, watchDependency }, path, value) {
   watchDependency(`model#${path}`)
 
@@ -48,6 +41,8 @@ function isFeatureRequired(storeGet, featureName) {
   const isRequired = requiredFeatures.includes(featureName)
   return isRequired
 }
+
+let resources = {}
 
 function getEnabledFeatureInConfigureBtnClick(allFeatureSetFeature, isBlockLevel, storeGet) {
   const featureBlock = storeGet('/route/query/activeBlock') || ''
@@ -194,7 +189,39 @@ function getResourceValuePathFromFeature(feature) {
   return resourceValuePath
 }
 
-function onEnabledFeaturesChange({ discriminator, getValue, commit, storeGet, model }) {
+function generatePresetValued(featureName, featureSet, storeGet) {
+  const featureDetails = getFeatureDetails(storeGet, featureName)
+  const resourceValuePath = getResourceValuePathFromFeature(featureDetails)
+  const chart = featureDetails?.spec?.chart?.name || ''
+  const targetNamespace = featureDetails?.spec?.chart?.namespace || ''
+  const sourceRef = featureDetails?.spec?.chart?.sourceRef
+  const version = featureDetails?.spec?.chart?.version
+
+  return {
+    ...resources?.[resourceValuePath],
+    metadata: {
+      ...resources?.[resourceValuePath]?.metadata,
+      labels: {
+        ...resources?.[resourceValuePath]?.metadata?.labels,
+        'app.kubernetes.io/component': featureName,
+        'app.kubernetes.io/part-of': featureSet,
+      },
+    },
+    spec: {
+      ...resources?.[resourceValuePath]?.spec,
+      chart: {
+        spec: {
+          chart,
+          sourceRef,
+          version,
+        },
+      },
+      targetNamespace,
+    },
+  }
+}
+
+function onEnabledFeaturesChange({ discriminator, getValue, commit, storeGet }) {
   const enabledFeatures = getValue(discriminator, '/enabledFeatures') || []
 
   const allFeatures = storeGet('/cluster/features/result') || []
@@ -202,59 +229,18 @@ function onEnabledFeaturesChange({ discriminator, getValue, commit, storeGet, mo
   allFeatures.forEach((item) => {
     const featureName = item?.metadata?.name || ''
     const resourceValuePath = getResourceValuePathFromFeature(item)
+    const featureSet = storeGet('/route/params/featureset') || ''
 
     if (enabledFeatures.includes(featureName)) {
-      const featureSet = storeGet('/route/params/featureset') || ''
-      const chart = getFeaturePropertyValue(storeGet, featureName, getValue, '/spec/chart/name')
-      const targetNamespace = getFeaturePropertyValue(
-        storeGet,
-        featureName,
-        getValue,
-        '/spec/chart/namespace',
-      )
-      const sourceRef = getFeaturePropertyValue(
-        storeGet,
-        featureName,
-        getValue,
-        '/spec/chart/sourceRef',
-      )
-      const version = getFeaturePropertyValue(
-        storeGet,
-        featureName,
-        getValue,
-        '/spec/chart/version',
-      )
-
-      const isEnabled = getFeaturePropertyValue(storeGet, featureName, getValue, '/status/enabled')
-      const isManaged = getFeaturePropertyValue(storeGet, featureName, getValue, '/status/managed')
+      const featureDetails = getFeatureDetails(storeGet, featureName)
+      const isEnabled = featureDetails?.status?.enabled || false
+      const isManaged = featureDetails?.status?.managed || false
 
       if (isEnabled && !isManaged) {
         commit('wizard/model$delete', `/resources/${resourceValuePath}`)
       } else {
-        const value = {
-          ...resources?.[resourceValuePath],
-          metadata: {
-            ...resources?.[resourceValuePath]?.metadata,
-            labels: {
-              ...resources?.[resourceValuePath]?.metadata?.labels,
-              'app.kubernetes.io/component': featureName,
-              'app.kubernetes.io/part-of': featureSet,
-            },
-          },
-          spec: {
-            ...resources?.[resourceValuePath]?.spec,
-            chart: {
-              spec: {
-                chart,
-                sourceRef,
-                version,
-              },
-            },
-            targetNamespace,
-          },
-        }
+        const value = generatePresetValued(featureName, featureSet, storeGet)
         const path = `/resources/${resourceValuePath}`
-
         commit('wizard/model$update', {
           path: path,
           value: value,
@@ -267,10 +253,8 @@ function onEnabledFeaturesChange({ discriminator, getValue, commit, storeGet, mo
   })
 
   const enabledTypes = getValue(discriminator, '/enabledTypes') || []
-  typeConvert(commit, enabledTypes, model, getValue)
+  typeConvert(commit, enabledTypes, storeGet)
 }
-
-let resources = {}
 
 function returnFalse() {
   return false
@@ -382,12 +366,13 @@ function isKubedbSelected({ getValue, discriminator, watchDependency, commit, st
     commit('wizard/model$delete', 'resources/helmToolkitFluxcdIoHelmRelease_kubedb')
     return false
   }
-  const allFeatures = storeGet('/cluster/features/result') || []
-  const kubedbFeature = allFeatures.find((item) => item?.metadata?.name === 'kubedb')
-  if (kubedbFeature) {
-    const featureName = kubedbFeature?.metadata?.name || ''
-    const isEnabled = getFeaturePropertyValue(storeGet, featureName, getValue, '/status/enabled')
-    const isManaged = getFeaturePropertyValue(storeGet, featureName, getValue, '/status/managed')
+
+  const kubedbFeatur = getFeatureDetails(storeGet, 'kubedb')
+  if (kubedbFeatur) {
+    const isEnabled = kubedbFeatur?.status?.enabled || false
+    const isManaged = kubedbFeatur?.status?.managed || false
+    // const isEnabled = getFeaturePropertyValue(storeGet, featureName, getValue, '/status/enabled')
+    // const isManaged = getFeaturePropertyValue(storeGet, featureName, getValue, '/status/managed')
     if (isEnabled && !isManaged) {
       commit('wizard/model$delete', 'resources/helmToolkitFluxcdIoHelmRelease_kubedb')
       return false
@@ -418,71 +403,91 @@ let allAvailableTypes = [
   'ZooKeeper',
 ]
 let data = {}
-let isFetching = false
+let isFetching = 'stale'
 async function getDatabaseTypes({
   setDiscriminatorValue,
   discriminator,
-  watchDependency,
   commit,
   storeGet,
   getValue,
   axios,
-  model,
 }) {
   let enabledTypes = ['Elasticsearch', 'Kafka', 'MariaDB', 'MongoDB', 'MySQL', 'Postgres', 'Redis']
   const owner = storeGet('/route/params/user') || ''
   const cluster = storeGet('/route/params/cluster') || ''
-  try {
-    if (!Object.keys(data).length && !isFetching) {
-      isFetching = true
-      enabledTypes = []
+  if (isFetching === 'success') {
+    enabledTypes = getValue(discriminator, '/enabledTypes') || []
+  } else if (isFetching !== 'pending') {
+    try {
+      isFetching = 'pending'
       const resp = await axios.get(`/clusters/${owner}/${cluster}/db-status`)
       data = resp?.data
-      isFetching = false
-    }
-    if (Object.keys(data).length) {
-      enabledTypes = []
-      allAvailableTypes = []
-      for (const [key, value] of Object.entries(data)) {
-        if (value === true) enabledTypes.push(key)
-        allAvailableTypes.push(key)
+      isFetching = 'success'
+      if (Object.keys(data).length) {
+        enabledTypes = []
+        allAvailableTypes = []
+        for (const [key, value] of Object.entries(data)) {
+          if (value === true) enabledTypes.push(key)
+          allAvailableTypes.push(key)
+        }
       }
+    } catch (e) {
+      console.log(e)
     }
-  } catch (e) {
-    console.log(e)
+  } else {
+    enabledTypes = ['Elasticsearch', 'Kafka', 'MariaDB', 'MongoDB', 'MySQL', 'Postgres', 'Redis']
   }
   setDiscriminatorValue('/enabledTypes', enabledTypes)
-  if (isKubedbSelected({ getValue, discriminator, watchDependency, commit, storeGet })) {
-    typeConvert(commit, enabledTypes, model, getValue)
+  const enabledFeatures = getValue(discriminator, '/enabledFeatures') || []
+  const isSelected = enabledFeatures?.includes('kubedb')
+  if (isSelected) {
+    typeConvert(commit, enabledTypes, storeGet)
   }
   return allAvailableTypes
 }
 
-function onTypeUpdate({ discriminator, commit, getValue, model }) {
+function onTypeUpdate({ discriminator, commit, getValue, storeGet }) {
   const enabledTypes = getValue(discriminator, '/enabledTypes') || []
-  typeConvert(commit, enabledTypes, model, getValue)
+  typeConvert(commit, enabledTypes, storeGet)
 }
 
-function typeConvert(commit, enabledTypes, model, getValue) {
+function typeConvert(commit, enabledTypes, storeGet) {
   let convertFromArray = {}
   allAvailableTypes?.forEach((item) => {
     convertFromArray[item] = enabledTypes ? enabledTypes.includes(item) : false
   })
 
-  commit('wizard/model$update', {
-    path: 'resources/helmToolkitFluxcdIoHelmRelease_kubedb/spec/values/global/featureGates',
-    value: convertFromArray,
-    force: true,
-  })
+  const kubedbValue = resources['helmToolkitFluxcdIoHelmRelease_kubedb']
+  if (kubedbValue) {
+    const featureSet = storeGet('/route/params/featureset') || ''
+    const formattedValue = generatePresetValued('kubedb', featureSet, storeGet)
+    formattedValue.spec.values.global.featureGates = convertFromArray
+    commit('wizard/model$update', {
+      path: 'resources/helmToolkitFluxcdIoHelmRelease_kubedb',
+      value: formattedValue,
+      force: true,
+    })
+  }
+
   return convertFromArray
 }
 
-function isKubedbUiPreset({ getValue, watchDependency, discriminator }) {
-  const enabledFeatures = getValue(discriminator, '/enabledFeatures') || []
+function isKubedbUiPreset({ getValue, storeGet, watchDependency, discriminator }) {
   watchDependency('discriminator#/enabledFeatures')
-  if (enabledFeatures?.includes('kubedb-ui-presets')) {
+  const enabledFeatures = getValue(discriminator, '/enabledFeatures') || []
+  const isPresetEnabled = enabledFeatures?.includes('kubedb-ui-presets') || false
+
+  const featureDetails = getFeatureDetails(storeGet, 'kubedb-ui-presets')
+  const isManagedInFeature = featureDetails?.status?.managed || false
+  const isEnableInFeature = featureDetails?.status?.enabled || false
+
+  if (isEnableInFeature && !isManagedInFeature) {
+    return false
+  } else if (isPresetEnabled) {
     return true
-  } else return false
+  } else {
+    return false
+  }
 }
 
 function getOptions({ getValue, model, watchDependency }, type) {
@@ -496,7 +501,7 @@ function getOptions({ getValue, model, watchDependency }, type) {
   return options
 }
 
-async function getNodeTopology({ axios, storeGet, commit, route }) {
+async function getNodeTopology({ axios, storeGet, commit }) {
   const owner = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
 
@@ -569,10 +574,10 @@ function isKubedbPresetEnable(storeGet) {
   const featureSet = featureSets.find((item) => item?.metadata?.name === featureSetName)
 
   const features = featureSet?.status?.features || []
-  const isKubedbPresetEnable = features.some((feature) => {
+  const isEnabled = features.some((feature) => {
     if (feature.name === 'kubedb-ui-presets') return true
   })
-  return isKubedbPresetEnable
+  return isEnabled
 }
 
 async function getPlacements({ axios, storeGet, route, commit }) {
