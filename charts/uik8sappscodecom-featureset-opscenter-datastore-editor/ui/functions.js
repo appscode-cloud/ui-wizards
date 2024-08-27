@@ -559,7 +559,7 @@ function isKubedbPresetEnable(storeGet) {
 
   const features = featureSet?.status?.features || []
   const isEnabled = features.some((feature) => {
-    if (feature.name === 'kubedb-ui-presets') return true
+    if (feature.name === 'kubedb-ui-presets') return feature.enabled
   })
   return isEnabled
 }
@@ -588,7 +588,7 @@ async function getPlacements({
   watchDependency('discriminator#/bundle')
   const placements = getValue(discriminator, '/bundle/placementpolicies')
 
-  if (route.path.includes('featuresets/opscenter-datastore') && !isKubedbPresetEnable(storeGet)) {
+  if (!isKubedbPresetEnable(storeGet)) {
     commit('wizard/model$update', {
       path: `/resources/helmToolkitFluxcdIoHelmRelease_kubedb_ui_presets/spec/values/clusterTier/placement/available`,
       value: placements,
@@ -610,7 +610,7 @@ async function getNodeTopology({
   watchDependency('discriminator#/bundle')
   const nodeTopology = getValue(discriminator, '/bundle/nodetopologies')
 
-  if (route.path.includes('featuresets/opscenter-datastore') && !isKubedbPresetEnable(storeGet)) {
+  if (!isKubedbPresetEnable(storeGet)) {
     commit('wizard/model$update', {
       path: '/resources/helmToolkitFluxcdIoHelmRelease_kubedb_ui_presets/spec/values/clusterTier/nodeTopology/available',
       value: nodeTopology,
@@ -632,7 +632,7 @@ async function getStorageClass({
   watchDependency('discriminator#/bundle')
   const storageClasses = getValue(discriminator, '/bundle/storageclasses')
 
-  if (route.path.includes('featuresets/opscenter-datastore') && !isKubedbPresetEnable(storeGet)) {
+  if (!isKubedbPresetEnable(storeGet)) {
     commit('wizard/model$update', {
       path: `/resources/helmToolkitFluxcdIoHelmRelease_kubedb_ui_presets/spec/values/storageClasses/available`,
       value: storageClasses,
@@ -643,18 +643,11 @@ async function getStorageClass({
   return storageClasses
 }
 
-async function getClusterIssuers({
-  storeGet,
-  watchDependency,
-  getValue,
-  discriminator,
-  commit,
-  route,
-}) {
+async function getClusterIssuers({ storeGet, watchDependency, getValue, discriminator, commit }) {
   watchDependency('discriminator#/bundle')
   const clusterIssuers = getValue(discriminator, '/bundle/clusterissuers')
 
-  if (route.path.includes('featuresets/opscenter-datastore') && !isKubedbPresetEnable(storeGet)) {
+  if (!isKubedbPresetEnable(storeGet)) {
     commit('wizard/model$update', {
       path: `/resources/helmToolkitFluxcdIoHelmRelease_kubedb_ui_presets/spec/values/clusterIssuers/available`,
       value: clusterIssuers,
