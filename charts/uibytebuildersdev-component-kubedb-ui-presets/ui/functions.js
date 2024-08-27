@@ -4,40 +4,6 @@ function getOptions({ getValue, model, watchDependency }, type) {
   return options
 }
 
-async function getNodeTopology({ axios, storeGet, commit, route }) {
-  const owner = storeGet('/route/params/user')
-  const cluster = storeGet('/route/params/cluster')
-
-  try {
-    const url = `/clusters/${owner}/${cluster}/proxy/node.k8s.appscode.com/v1alpha1/nodetopologies`
-    const resp = await axios.get(url)
-    const nodeTopologyListFromApi = resp.data?.items
-
-    const mappedResp = nodeTopologyListFromApi?.map((item) => {
-      const name = (item.metadata && item.metadata.name) || ''
-      return name
-    })
-    commit('wizard/model$update', {
-      path: '/spec/kubeDB/clusterTier/nodeTopology/available',
-      value: mappedResp,
-      force: true,
-    })
-
-    if (route.path.includes('featuresets/opscenter-datastore') && !isKubedbPresetEnable(storeGet)) {
-      commit('wizard/model$update', {
-        path: `/clusterTier/nodeTopology/available`,
-        value: mappedResp,
-        force: true,
-      })
-    }
-
-    return mappedResp
-  } catch (e) {
-    console.log(e)
-    return []
-  }
-}
-
 async function FetchAllDbVersions({ storeGet, axios, setDiscriminatorValue }) {
   const owner = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
@@ -86,83 +52,45 @@ function isKubedbPresetEnable(storeGet) {
   return isKubedbPresetEnable
 }
 
-async function getPlacements({ axios, storeGet, route, commit }) {
+async function FetchDbBundle({ axios, storeGet, setDiscriminatorValue, discriminator }) {
   const owner = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
-  const url = `/clusters/${owner}/${cluster}/proxy/apps.k8s.appscode.com/v1/placementpolicies`
+  const url = `/clusters/${owner}/${cluster}/db-bundle?type=common&deployment=all`
   try {
     const resp = await axios.get(url)
-
-    const mappedResp = resp?.data?.items.map((item) => {
-      const name = (item.metadata && item.metadata.name) || ''
-      return name
-    })
-
-    if (route.path.includes('featuresets/opscenter-datastore') && !isKubedbPresetEnable(storeGet)) {
-      commit('wizard/model$update', {
-        path: `/clusterTier/placement/available`,
-        value: mappedResp,
-        force: true,
-      })
-    }
-
-    return mappedResp
+    setDiscriminatorValue('/bundle', resp.data)
   } catch (e) {
     console.log(e)
     return []
   }
 }
 
-async function getStorageClass({ axios, storeGet, route, commit }) {
-  const owner = storeGet('/route/params/user')
-  const cluster = storeGet('/route/params/cluster')
-  const url = `/clusters/${owner}/${cluster}/proxy/storage.k8s.io/v1/storageclasses`
-  try {
-    const resp = await axios.get(url)
-    const mappedResp = resp?.data?.items.map((item) => {
-      const name = (item.metadata && item.metadata.name) || ''
-      return name
-    })
+function getPlacements({ watchDependency, getValue, discriminator }) {
+  watchDependency('discriminator#/bundle')
+  const placements = getValue(discriminator, '/bundle/placementpolicies')
 
-    if (route.path.includes('featuresets/opscenter-datastore') && !isKubedbPresetEnable(storeGet)) {
-      commit('wizard/model$update', {
-        path: `/storageClasses/available`,
-        value: mappedResp,
-        force: true,
-      })
-    }
-
-    return mappedResp
-  } catch (e) {
-    console.log(e)
-    return []
-  }
+  return placements
 }
 
-async function getClusterIssuers({ axios, storeGet, route, commit }) {
-  const owner = storeGet('/route/params/user')
-  const cluster = storeGet('/route/params/cluster')
-  const url = `/clusters/${owner}/${cluster}/proxy/cert-manager.io/v1/clusterissuers`
-  try {
-    const resp = await axios.get(url)
-    const mappedResp = resp?.data?.items.map((item) => {
-      const name = (item.metadata && item.metadata.name) || ''
-      return name
-    })
+function getNodeTopology({ watchDependency, getValue, discriminator }) {
+  watchDependency('discriminator#/bundle')
+  const nodeTopology = getValue(discriminator, '/bundle/nodetopologies')
 
-    if (route.path.includes('featuresets/opscenter-datastore') && !isKubedbPresetEnable(storeGet)) {
-      commit('wizard/model$update', {
-        path: `/clusterIssuers/available`,
-        value: mappedResp,
-        force: true,
-      })
-    }
+  return nodeTopology
+}
 
-    return mappedResp
-  } catch (e) {
-    console.log(e)
-    return []
-  }
+function getStorageClass({ watchDependency, getValue, discriminator }) {
+  watchDependency('discriminator#/bundle')
+  const storageClasses = getValue(discriminator, '/bundle/storageclasses')
+
+  return storageClasses
+}
+
+function getClusterIssuers({ watchDependency, getValue, discriminator }) {
+  watchDependency('discriminator#/bundle')
+  const clusterIssuers = getValue(discriminator, '/bundle/clusterissuers')
+
+  return clusterIssuers
 }
 
 async function getNamespaces({ axios, storeGet }) {
@@ -267,4 +195,5 @@ return {
   returnFalse,
   presetNameEqualsTo,
   isKubedbUiPreset,
+  FetchDbBundle,
 }
