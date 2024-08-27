@@ -28,13 +28,6 @@ function getFeatureDetails(storeGet, name) {
   return feature
 }
 
-// get specific attribute's value of a feature
-// function getFeaturePropertyValue(storeGet, name, getValue, path) {
-//   const feature = getFeatureDetails(storeGet, name)
-//   const value = getValue(feature, path)
-//   return value
-// }
-
 function isEqualToModelPathValue({ model, getValue, watchDependency }, path, value) {
   watchDependency(`model#${path}`)
 
@@ -196,7 +189,39 @@ function getResourceValuePathFromFeature(feature) {
   return resourceValuePath
 }
 
-function onEnabledFeaturesChange({ discriminator, getValue, commit, storeGet, model }) {
+function generatePresetValued(featureName, featureSet, storeGet) {
+  const featureDetails = getFeatureDetails(storeGet, featureName)
+  const resourceValuePath = getResourceValuePathFromFeature(featureDetails)
+  const chart = featureDetails?.spec?.chart?.name || ''
+  const targetNamespace = featureDetails?.spec?.chart?.namespace || ''
+  const sourceRef = featureDetails?.spec?.chart?.sourceRef
+  const version = featureDetails?.spec?.chart?.version
+
+  return {
+    ...resources?.[resourceValuePath],
+    metadata: {
+      ...resources?.[resourceValuePath]?.metadata,
+      labels: {
+        ...resources?.[resourceValuePath]?.metadata?.labels,
+        'app.kubernetes.io/component': featureName,
+        'app.kubernetes.io/part-of': featureSet,
+      },
+    },
+    spec: {
+      ...resources?.[resourceValuePath]?.spec,
+      chart: {
+        spec: {
+          chart,
+          sourceRef,
+          version,
+        },
+      },
+      targetNamespace,
+    },
+  }
+}
+
+function onEnabledFeaturesChange({ discriminator, getValue, commit, storeGet }) {
   const enabledFeatures = getValue(discriminator, '/enabledFeatures') || []
 
   const allFeatures = storeGet('/cluster/features/result') || []
@@ -208,61 +233,13 @@ function onEnabledFeaturesChange({ discriminator, getValue, commit, storeGet, mo
 
     if (enabledFeatures.includes(featureName)) {
       const featureDetails = getFeatureDetails(storeGet, featureName)
-      // const chart = getFeaturePropertyValue(storeGet, featureName, getValue, '/spec/chart/name')
-      const chart = featureDetails?.spec?.chart?.name || ''
-      // const targetNamespace = getFeaturePropertyValue(
-      //   storeGet,
-      //   featureName,
-      //   getValue,
-      //   '/spec/chart/namespace',
-      // )
-      const targetNamespace = featureDetails?.spec?.chart?.namespace || ''
-      // const sourceRef = getFeaturePropertyValue(
-      //   storeGet,
-      //   featureName,
-      //   getValue,
-      //   '/spec/chart/sourceRef',
-      // )
-      const sourceRef = featureDetails?.spec?.chart?.sourceRef
-      // const version = getFeaturePropertyValue(
-      //   storeGet,
-      //   featureName,
-      //   getValue,
-      //   '/spec/chart/version',
-      // )
-      const version = featureDetails?.spec?.chart?.version
       const isEnabled = featureDetails?.status?.enabled || false
       const isManaged = featureDetails?.status?.managed || false
-
-      // const isEnabled = getFeaturePropertyValue(storeGet, featureName, getValue, '/status/enabled')
-      // const isManaged = getFeaturePropertyValue(storeGet, featureName, getValue, '/status/managed')
-      // window.console.log({ chart, targetNamespace, sourceRef, version, isEnabled, isManaged })
 
       if (isEnabled && !isManaged) {
         commit('wizard/model$delete', `/resources/${resourceValuePath}`)
       } else {
-        const value = {
-          ...resources?.[resourceValuePath],
-          metadata: {
-            ...resources?.[resourceValuePath]?.metadata,
-            labels: {
-              ...resources?.[resourceValuePath]?.metadata?.labels,
-              'app.kubernetes.io/component': featureName,
-              'app.kubernetes.io/part-of': featureSet,
-            },
-          },
-          spec: {
-            ...resources?.[resourceValuePath]?.spec,
-            chart: {
-              spec: {
-                chart,
-                sourceRef,
-                version,
-              },
-            },
-            targetNamespace,
-          },
-        }
+        const value = generatePresetValued(featureName, featureSet, storeGet)
         const path = `/resources/${resourceValuePath}`
         commit('wizard/model$update', {
           path: path,
@@ -276,7 +253,7 @@ function onEnabledFeaturesChange({ discriminator, getValue, commit, storeGet, mo
   })
 
   const enabledTypes = getValue(discriminator, '/enabledTypes') || []
-  typeConvert(commit, enabledTypes, model, getValue)
+  typeConvert(commit, enabledTypes, storeGet)
 }
 
 function returnFalse() {
@@ -434,7 +411,6 @@ async function getDatabaseTypes({
   storeGet,
   getValue,
   axios,
-  model,
 }) {
   let enabledTypes = ['Elasticsearch', 'Kafka', 'MariaDB', 'MongoDB', 'MySQL', 'Postgres', 'Redis']
   const owner = storeGet('/route/params/user') || ''
@@ -465,17 +441,17 @@ async function getDatabaseTypes({
   const enabledFeatures = getValue(discriminator, '/enabledFeatures') || []
   const isSelected = enabledFeatures?.includes('kubedb')
   if (isSelected) {
-    typeConvert(commit, enabledTypes, model, getValue)
+    typeConvert(commit, enabledTypes, storeGet)
   }
   return allAvailableTypes
 }
 
-function onTypeUpdate({ discriminator, commit, getValue, model }) {
+function onTypeUpdate({ discriminator, commit, getValue, storeGet }) {
   const enabledTypes = getValue(discriminator, '/enabledTypes') || []
-  typeConvert(commit, enabledTypes, model, getValue)
+  typeConvert(commit, enabledTypes, storeGet)
 }
 
-function typeConvert(commit, enabledTypes, model, getValue) {
+function typeConvert(commit, enabledTypes, storeGet) {
   let convertFromArray = {}
   allAvailableTypes?.forEach((item) => {
     convertFromArray[item] = enabledTypes ? enabledTypes.includes(item) : false
@@ -483,10 +459,12 @@ function typeConvert(commit, enabledTypes, model, getValue) {
 
   const kubedbValue = resources['helmToolkitFluxcdIoHelmRelease_kubedb']
   if (kubedbValue) {
-    kubedbValue.spec.values.global.featureGates = convertFromArray
+    const featureSet = storeGet('/route/params/featureset') || ''
+    const formattedValue = generatePresetValued('kubedb', featureSet, storeGet)
+    formattedValue.spec.values.global.featureGates = convertFromArray
     commit('wizard/model$update', {
       path: 'resources/helmToolkitFluxcdIoHelmRelease_kubedb',
-      value: kubedbValue,
+      value: formattedValue,
       force: true,
     })
   }
@@ -523,7 +501,7 @@ function getOptions({ getValue, model, watchDependency }, type) {
   return options
 }
 
-async function getNodeTopology({ axios, storeGet, commit, route }) {
+async function getNodeTopology({ axios, storeGet, commit }) {
   const owner = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
 
@@ -596,10 +574,10 @@ function isKubedbPresetEnable(storeGet) {
   const featureSet = featureSets.find((item) => item?.metadata?.name === featureSetName)
 
   const features = featureSet?.status?.features || []
-  const isKubedbPresetEnable = features.some((feature) => {
+  const isEnabled = features.some((feature) => {
     if (feature.name === 'kubedb-ui-presets') return true
   })
-  return isKubedbPresetEnable
+  return isEnabled
 }
 
 async function getPlacements({ axios, storeGet, route, commit }) {
