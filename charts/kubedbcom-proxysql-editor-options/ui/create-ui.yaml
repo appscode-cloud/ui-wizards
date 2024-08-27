@@ -4,6 +4,9 @@ steps:
       backup:
         default: false
         type: boolean
+      bundleApiLoaded:
+        default: false
+        type: boolean
       configDatabase:
         default: false
         type: boolean
@@ -14,7 +17,8 @@ steps:
         default: false
         type: boolean
     elements:
-    - disabled: isVariantAvailable
+    - computed: initBundle
+      disabled: isVariantAvailable
       label:
         text: labels.database.name
       schema:
@@ -32,13 +36,6 @@ steps:
       refresh: true
       schema:
         $ref: schema#/properties/metadata/properties/release/properties/namespace
-      type: select
-    - disableUnselect: true
-      fetch: getAdminOptions|databases/ProxySQL/versions
-      label:
-        text: labels.database.version
-      schema:
-        $ref: schema#/properties/spec/properties/admin/properties/databases/properties/ProxySQL/properties/versions/properties/default
       type: select
     - hasDescription: true
       if: isToggleOn|deployment
@@ -84,6 +81,14 @@ steps:
       refresh: true
       schema:
         $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/nodeTopology/properties/default
+      type: select
+    - disableUnselect: true
+      fetch: getAdminOptions|databases/ProxySQL/versions
+      if: isToggleOn|databases/ProxySQL/versions
+      label:
+        text: labels.database.version
+      schema:
+        $ref: schema#/properties/spec/properties/admin/properties/databases/properties/ProxySQL/properties/versions/properties/default
       type: select
     - hasDescription: true
       label:
@@ -233,11 +238,11 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/admin/properties/clusterIssuers/properties/default
       type: select
-    - if: isToggleOn|webUI
+    - if: isToggleOn|expose
       label:
-        text: Enable Web UI?
+        text: Expose via Gateway?
       schema:
-        $ref: schema#/properties/spec/properties/admin/properties/webUI/properties/default
+        $ref: schema#/properties/spec/properties/admin/properties/expose/properties/default
       type: switch
     - label:
         text: labels.sync_users_question

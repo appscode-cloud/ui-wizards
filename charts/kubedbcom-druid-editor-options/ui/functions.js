@@ -499,7 +499,7 @@ function isVariantAvailable({ storeGet }) {
   return variant ? true : false
 }
 
-function setStorageClass({ model, getValue, commit }) {
+function setStorageClass({ model, getValue, commit, discriminator, watchDependency }) {
   const deletionPolicy = getValue(model, '/spec/deletionPolicy') || ''
   let storageClass = getValue(model, '/spec/admin/storageClasses/default') || ''
   const storageClassList = getValue(model, '/spec/admin/storageClasses/available') || []
@@ -519,7 +519,10 @@ function setStorageClass({ model, getValue, commit }) {
     storageClass = retainClassList.length ? retainClassList[0] : simpleClassList[0]
   }
 
-  const isChangeable = isToggleOn({ getValue, model }, 'storageClasses')
+  const isChangeable = isToggleOn(
+    { getValue, model, discriminator, watchDependency },
+    'storageClasses',
+  )
   if (isChangeable && storageClass) {
     commit('wizard/model$update', {
       path: '/spec/admin/storageClasses/default',
@@ -532,14 +535,20 @@ function setStorageClass({ model, getValue, commit }) {
 function showAlerts({ watchDependency, model, getValue, discriminator }) {
   watchDependency('discriminator#/monitoring')
   const isMonitorEnabled = getValue(discriminator, '/monitoring')
-  const isAlertToggleEnabled = isToggleOn({ getValue, model }, 'alert')
+  const isAlertToggleEnabled = isToggleOn(
+    { getValue, model, discriminator, watchDependency },
+    'alert',
+  )
   return isMonitorEnabled && isAlertToggleEnabled
 }
 
-function showIssuer({ model, getValue, watchDependency }) {
+function showIssuer({ model, getValue, watchDependency, discriminator }) {
   watchDependency('model#/spec/admin/tls/default')
   const isTlsEnabled = getValue(model, '/spec/admin/tls/default')
-  const isIssuerToggleEnabled = isToggleOn({ getValue, model }, 'clusterIssuers')
+  const isIssuerToggleEnabled = isToggleOn(
+    { getValue, model, discriminator, watchDependency },
+    'clusterIssuers',
+  )
   return isTlsEnabled && isIssuerToggleEnabled
 }
 
@@ -575,7 +584,7 @@ async function isNotBackupCluster({ axios, storeGet, commit }) {
 
 function setBackup({ model, getValue }) {
   const backup = getValue(model, '/spec/backup/tool')
-  return !!backup.length
+  return backup === 'KubeStash' && features.includes('backup')
 }
 
 function onAuthChange({ getValue, discriminator, commit }) {
@@ -605,122 +614,6 @@ function clearConfiguration({ discriminator, getValue, commit }) {
   if (!configOn) {
     commit('wizard/model$delete', '/spec/configuration')
   }
-}
-
-let nodeTopologyListFromApi = []
-let nodeTopologyApiCalled = false
-
-async function getNodeTopology({ model, getValue, axios, storeGet, watchDependency }) {
-  watchDependency('model#/spec/admin/deployment/default')
-  watchDependency('model#/spec/admin/clusterTier/default')
-  const owner = storeGet('/route/params/user')
-  const cluster = storeGet('/route/params/cluster')
-  const deploymentType = getValue(model, '/spec/admin/deployment/default') || ''
-  const clusterTier = getValue(model, '/spec/admin/clusterTier/default') || ''
-  let nodeTopologyList = getValue(model, `/spec/admin/clusterTier/nodeTopology/available`) || []
-  let mappedResp = []
-
-  if (!nodeTopologyApiCalled) {
-    try {
-      const url = `/clusters/${owner}/${cluster}/proxy/node.k8s.appscode.com/v1alpha1/nodetopologies`
-      const resp = await axios.get(url)
-      nodeTopologyListFromApi = resp.data?.items
-      nodeTopologyApiCalled = true
-      const filteredResp = resp.data?.items.filter(
-        (item) =>
-          item.metadata.labels?.['node.k8s.appscode.com/tenancy'] === deploymentType.toLowerCase(),
-      )
-      mappedResp = filteredResp?.map((item) => {
-        const name = (item.metadata && item.metadata.name) || ''
-        return name
-      })
-    } catch (e) {
-      console.log(e)
-    }
-  } else {
-    const filteredResp = nodeTopologyListFromApi.filter(
-      (item) =>
-        item.metadata.labels?.['node.k8s.appscode.com/tenancy'] === deploymentType.toLowerCase(),
-    )
-    mappedResp = filteredResp?.map((item) => {
-      const name = (item.metadata && item.metadata.name) || ''
-      return name
-    })
-  }
-
-  const provider = storeGet('/cluster/clusterDefinition/result/provider') || ''
-
-  if (nodeTopologyList.length === 0) {
-    nodeTopologyList = nodeTopologyListFromApi?.map((item) => {
-      const name = (item.metadata && item.metadata.name) || ''
-      return name
-    })
-  }
-
-  const filteredList = filterNodeTopology(nodeTopologyList, clusterTier, provider, mappedResp)
-
-  return filteredList
-}
-
-function filterNodeTopology(list, tier, provider, mappedList) {
-  // first filter the list from value that exists from the filtered list got from API
-  const filteredlist = list.filter((item) => {
-    return mappedList.includes(item)
-  })
-
-  // filter the list based on clusterTier
-  if (provider === 'EKS') {
-    return filteredlist.filter((item) => {
-      if (tier === 'CPUOptimized') return item.startsWith('c')
-      else if (tier === 'MemoryOptimized') return item.startsWith('r')
-      else return !item.startsWith('c') && !item.startsWith('r')
-    })
-  } else if (provider === 'AKS') {
-    return filteredlist.filter((item) => {
-      if (tier === 'CPUOptimized') return item.startsWith('f') || item.startsWith('fx')
-      else if (tier === 'MemoryOptimized')
-        return (
-          item.startsWith('e') ||
-          item.startsWith('eb') ||
-          item.startsWith('ec') ||
-          item.startsWith('m') ||
-          item.startsWith('d')
-        )
-      else
-        return (
-          !(item.startsWith('f') || item.startsWith('fx')) &&
-          !(
-            item.startsWith('e') ||
-            item.startsWith('eb') ||
-            item.startsWith('ec') ||
-            item.startsWith('m') ||
-            item.startsWith('d')
-          )
-        )
-    })
-  } else if (provider === 'GKE') {
-    return filteredlist.filter((item) => {
-      if (tier === 'CPUOptimized')
-        return item.startsWith('h3') || item.startsWith('c2') || item.startsWith('c2d')
-      else if (tier === 'MemoryOptimized')
-        return (
-          item.startsWith('x4') ||
-          item.startsWith('m1') ||
-          item.startsWith('m2') ||
-          item.startsWith('m3')
-        )
-      else
-        return (
-          !(item.startsWith('h3') || item.startsWith('c2') || item.startsWith('c2d')) &&
-          !(
-            item.startsWith('x4') ||
-            item.startsWith('m1') ||
-            item.startsWith('m2') ||
-            item.startsWith('m3')
-          )
-        )
-    })
-  } else return filteredlist
 }
 
 async function getAppBindings({ axios, storeGet }, type) {
@@ -807,48 +700,176 @@ function clearRefs({ commit, setDiscriminatorValue }, type) {
   })
 }
 
-async function fetchOptions({ axios, storeGet }, type) {
+let placement = []
+let versions = []
+let storageClass = []
+let clusterIssuers = []
+let nodetopologiesShared = []
+let nodetopologiesDedicated = []
+let features = []
+async function initBundle({ model, getValue, axios, storeGet, setDiscriminatorValue }) {
   const owner = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
-  let url = ''
-  if (type === 'clusterTier/placement') {
-    url = `/clusters/${owner}/${cluster}/proxy/apps.k8s.appscode.com/v1/placementpolicies`
-  } else if (type === 'databases/Druid/versions') {
-    url = `/clusters/${owner}/${cluster}/proxy/catalog.kubedb.com/v1alpha1/druidversions`
-  } else if (type === 'storageClasses') {
-    url = `/clusters/${owner}/${cluster}/proxy/storage.k8s.io/v1/storageclasses`
-  } else if (type === 'clusterIssuers') {
-    url = `/clusters/${owner}/${cluster}/proxy/cert-manager.io/v1/clusterissuers`
-  }
 
+  let db = getValue(model, '/metadata/resource/kind')
+  db = db.toLowerCase()
+  let url = `clusters/${owner}/${cluster}/db-bundle?type=features,common,versions&db-singular=${db}`
   try {
     const resp = await axios.get(url)
-    const options = resp.data?.items.map((item) => {
-      const name = (item.metadata && item.metadata.name) || ''
-      return name
-    })
-    return options
+    features = resp.data.features || []
+    placement = resp.data.placementpolicies || []
+    versions = resp.data.versions || []
+    storageClass = resp.data.storageclasses || []
+    clusterIssuers = resp.data.clusterissuers || []
+    nodetopologiesDedicated = resp.data.dedicated || []
+    nodetopologiesShared = resp.data.shared || []
   } catch (e) {
     console.log(e)
   }
+  setDiscriminatorValue('/bundleApiLoaded', true)
+}
+
+function fetchOptions({ model, getValue }, type) {
+  let kind = getValue(model, '/metadata/resource/kind')
+
+  if (type === 'clusterTier/placement') {
+    return placement
+  } else if (type === `databases/${kind}/versions`) {
+    return versions
+  } else if (type === 'storageClasses') {
+    return storageClass
+  } else if (type === 'clusterIssuers') {
+    return clusterIssuers
+  }
+
   return []
 }
 
-function getAdminOptions({ getValue, model, axios, storeGet }, type) {
+function getAdminOptions({ getValue, model }, type) {
   const options = getValue(model, `/spec/admin/${type}/available`) || []
+
   if (options.length === 0) {
-    return fetchOptions({ axios, storeGet }, type)
+    return fetchOptions({ model, getValue }, type)
   }
 
   return options
 }
 
-function isToggleOn({ getValue, model }, type) {
-  if (type === 'backup') return getValue(model, '/spec/backup/toggle')
-  return getValue(model, `/spec/admin/${type}/toggle`)
+function checkIfFeatureOn({ getValue, model }, type) {
+  let val = getValue(model, `/spec/admin/${type}/toggle`)
+  const backupVal = getValue(model, '/spec/backup/tool')
+
+  if (type === 'backup') {
+    return features.includes('backup') && backupVal === 'KubeStash'
+  } else if (type === 'tls') {
+    return features.includes('tls') && val
+  } else if (type === 'expose') {
+    return features.includes('binding') && val
+  } else if (type === 'monitoring') {
+    return features.includes('monitoring') && val
+  } else if (type === 'archiver') {
+    return features.includes('backup') && backupVal === 'KubeStash' && val
+  }
+}
+
+function isToggleOn({ getValue, model, discriminator, watchDependency }, type) {
+  watchDependency('discriminator#/bundleApiLoaded')
+  const bundleApiLoaded = getValue(discriminator, '/bundleApiLoaded')
+
+  if (
+    type === 'tls' ||
+    type === 'backup' ||
+    type === 'expose' ||
+    type === 'monitoring' ||
+    type === 'archiver'
+  ) {
+    return checkIfFeatureOn({ getValue, model }, type)
+  }
+  return getValue(model, `/spec/admin/${type}/toggle`) && bundleApiLoaded
+}
+
+async function getNodeTopology({ model, getValue, axios, storeGet, watchDependency }) {
+  watchDependency('model#/spec/admin/deployment/default')
+  watchDependency('model#/spec/admin/clusterTier/default')
+  const deploymentType = getValue(model, '/spec/admin/deployment/default') || ''
+  const clusterTier = getValue(model, '/spec/admin/clusterTier/default') || ''
+  let nodeTopologyList = getValue(model, `/spec/admin/clusterTier/nodeTopology/available`) || []
+
+  const provider = storeGet('/cluster/clusterDefinition/result/provider') || ''
+
+  if (deploymentType === 'Shared') nodeTopologyList = nodetopologiesShared
+  else if (deploymentType === 'Dedicated') nodeTopologyList = nodetopologiesDedicated
+
+  const filteredList = filterNodeTopology(nodeTopologyList, clusterTier, provider)
+  return filteredList
+}
+
+function filterNodeTopology(list, tier, provider) {
+  // first filter the list from value that exists from the filtered list got from API
+  const filteredlist = list
+
+  // filter the list based on clusterTier
+  if (provider === 'EKS') {
+    return filteredlist.filter((item) => {
+      if (tier === 'CPUOptimized') return item.startsWith('c')
+      else if (tier === 'MemoryOptimized') return item.startsWith('r')
+      else return !item.startsWith('c') && !item.startsWith('r')
+    })
+  } else if (provider === 'AKS') {
+    return filteredlist.filter((item) => {
+      if (tier === 'CPUOptimized') return item.startsWith('f') || item.startsWith('fx')
+      else if (tier === 'MemoryOptimized')
+        return (
+          item.startsWith('e') ||
+          item.startsWith('eb') ||
+          item.startsWith('ec') ||
+          item.startsWith('m') ||
+          item.startsWith('d')
+        )
+      else
+        return (
+          !(item.startsWith('f') || item.startsWith('fx')) &&
+          !(
+            item.startsWith('e') ||
+            item.startsWith('eb') ||
+            item.startsWith('ec') ||
+            item.startsWith('m') ||
+            item.startsWith('d')
+          )
+        )
+    })
+  } else if (provider === 'GKE') {
+    return filteredlist.filter((item) => {
+      if (tier === 'CPUOptimized')
+        return item.startsWith('h3') || item.startsWith('c2') || item.startsWith('c2d')
+      else if (tier === 'MemoryOptimized')
+        return (
+          item.startsWith('x4') ||
+          item.startsWith('m1') ||
+          item.startsWith('m2') ||
+          item.startsWith('m3')
+        )
+      else
+        return (
+          !(item.startsWith('h3') || item.startsWith('c2') || item.startsWith('c2d')) &&
+          !(
+            item.startsWith('x4') ||
+            item.startsWith('m1') ||
+            item.startsWith('m2') ||
+            item.startsWith('m3')
+          )
+        )
+    })
+  } else return filteredlist
+}
+
+function returnFalse() {
+  return false
 }
 
 return {
+  returnFalse,
+  initBundle,
   setResourceLimitTopology,
   isVariantAvailable,
   showAuthPasswordField,
