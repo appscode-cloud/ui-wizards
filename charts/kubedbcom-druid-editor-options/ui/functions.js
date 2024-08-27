@@ -584,7 +584,7 @@ async function isNotBackupCluster({ axios, storeGet, commit }) {
 
 function setBackup({ model, getValue }) {
   const backup = getValue(model, '/spec/backup/tool')
-  return !!backup.length
+  return backup === 'KubeStash' && features.includes('backup')
 }
 
 function onAuthChange({ getValue, discriminator, commit }) {
@@ -706,28 +706,23 @@ let storageClass = []
 let clusterIssuers = []
 let nodetopologiesShared = []
 let nodetopologiesDedicated = []
-
+let features = []
 async function initBundle({ model, getValue, axios, storeGet, setDiscriminatorValue }) {
   const owner = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
 
   let db = getValue(model, '/metadata/resource/kind')
   db = db.toLowerCase()
-  let url = `clusters/${owner}/${cluster}/db-bundle?type=common,versions&deployment=dedicated&db-singular=${db}`
+  let url = `clusters/${owner}/${cluster}/db-bundle?type=features,common,versions&db-singular=${db}`
   try {
     const resp = await axios.get(url)
+    features = resp.data.features || []
     placement = resp.data.placementpolicies || []
     versions = resp.data.versions || []
     storageClass = resp.data.storageclasses || []
     clusterIssuers = resp.data.clusterissuers || []
-    nodetopologiesDedicated = resp.data.nodetopologies || []
-  } catch (e) {
-    console.log(e)
-  }
-  url = `clusters/${owner}/${cluster}/db-bundle?type=common&deployment=shared`
-  try {
-    const resp = await axios.get(url)
-    nodetopologiesShared = resp.data.nodetopologies || []
+    nodetopologiesDedicated = resp.data.dedicated || []
+    nodetopologiesShared = resp.data.shared || []
   } catch (e) {
     console.log(e)
   }
@@ -760,11 +755,36 @@ function getAdminOptions({ getValue, model }, type) {
   return options
 }
 
+function checkIfFeatureOn({ getValue, model }, type) {
+  let val = getValue(model, `/spec/admin/${type}/toggle`)
+  const backupVal = getValue(model, '/spec/backup/tool')
+
+  if (type === 'backup') {
+    return features.includes('backup') && backupVal === 'KubeStash'
+  } else if (type === 'tls') {
+    return features.includes('tls') && val
+  } else if (type === 'webUI') {
+    return features.includes('binding') && val
+  } else if (type === 'monitoring') {
+    return features.includes('monitoring') && val
+  } else if (type === 'archiver') {
+    return features.includes('backup') && backupVal === 'KubeStash' && val
+  }
+}
+
 function isToggleOn({ getValue, model, discriminator, watchDependency }, type) {
   watchDependency('discriminator#/bundleApiLoaded')
-
   const bundleApiLoaded = getValue(discriminator, '/bundleApiLoaded')
-  if (type === 'backup') return getValue(model, '/spec/backup/toggle')
+
+  if (
+    type === 'tls' ||
+    type === 'backup' ||
+    type === 'webUI' ||
+    type === 'monitoring' ||
+    type === 'archiver'
+  ) {
+    return checkIfFeatureOn({ getValue, model }, type)
+  }
   return getValue(model, `/spec/admin/${type}/toggle`) && bundleApiLoaded
 }
 

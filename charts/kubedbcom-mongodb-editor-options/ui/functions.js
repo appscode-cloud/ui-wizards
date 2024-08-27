@@ -762,7 +762,7 @@ async function initBundle({ model, getValue, axios, storeGet, setDiscriminatorVa
   const cluster = storeGet('/route/params/cluster')
   let db = getValue(model, '/metadata/resource/kind')
   db = db.toLowerCase()
-  let url = `clusters/${owner}/${cluster}/db-bundle?type=features,common,versions&deployment=dedicated&db-singular=${db}`
+  let url = `clusters/${owner}/${cluster}/db-bundle?type=features,common,versions&db-singular=${db}`
   try {
     const resp = await axios.get(url)
     features = resp.data.features || []
@@ -770,7 +770,8 @@ async function initBundle({ model, getValue, axios, storeGet, setDiscriminatorVa
     versions = resp.data.versions || []
     storageClass = resp.data.storageclasses || []
     clusterIssuers = resp.data.clusterissuers || []
-    nodetopologiesDedicated = resp.data.nodetopologies || []
+    nodetopologiesDedicated = resp.data.dedicated || []
+    nodetopologiesShared = resp.data.shared || []
   } catch (e) {
     console.log(e)
   }
