@@ -144,23 +144,25 @@ resources:
           Druid:
             versions:
               available:
-                - 25.0.0
                 - 28.0.1
-              default: 28.0.1
+                - 30.0.0
+              default: 30.0.0
               toggle: true
           Elasticsearch:
             versions:
               available:
-                - opensearch-2.5.0
-                - xpack-7.16.3
-                - xpack-8.6.2
-              default: xpack-8.6.2
+                - xpack-8.14.1
+                - xpack-7.17.15
+                - opensearch-1.3.13
+                - opensearch-2.14.0
+              default: xpack-8.14.1
               toggle: true
           FerretDB:
             versions:
               available:
                 - 1.18.0
-              default: 1.18.0
+                - 1.23.0
+              default: 1.23.0
               toggle: true
           Kafka:
             versions:
@@ -195,6 +197,7 @@ resources:
             versions:
               available:
                 - 4.4.26
+                - 5.0.26
                 - 6.0.12
               default: 6.0.12
               toggle: true
@@ -202,8 +205,9 @@ resources:
             versions:
               available:
                 - 5.7.44
-                - 8.0.35
-              default: 8.0.35
+                - 8.0.36
+                - 8.2.0
+              default: 8.0.36
               toggle: true
           PerconaXtraDB:
             versions:
@@ -218,14 +222,16 @@ resources:
               available:
                 - 1.17.0
                 - 1.18.0
-              default: 1.18.0
+                - 1.23.1
+              default: 1.23.1
               toggle: true
           Pgpool:
             versions:
               available:
                 - 4.4.5
                 - 4.5.0
-              default: 4.4.5
+                - 4.5.3
+              default: 4.5.0
               toggle: true
           Postgres:
             versions:
@@ -254,33 +260,39 @@ resources:
             versions:
               available:
                 - 6.2.14
-                - 7.0.15
                 - 7.2.4
-              default: 7.0.15
+                - 7.4.0
+              default: 7.2.4
               toggle: true
           Singlestore:
             versions:
               available:
                 - 8.1.32
-                - 8.5.7
-              default: 8.1.32
+                - 8.5.30
+                - 8.7.9
+              default: 8.7.9
               toggle: true
           Solr:
             versions:
               available:
                 - 8.11.2
                 - 9.4.1
-              default: 8.11.2
+                - 9.6.1
+              default: 9.6.1
               toggle: true
           ZooKeeper:
             versions:
               available:
+                - 3.7.2
                 - 3.8.3
                 - 3.9.1
               default: 3.8.3
               toggle: true
         deployment:
           default: Shared
+          toggle: true
+        expose:
+          default: false
           toggle: true
         monitoring:
           agent: prometheus.io/operator
@@ -289,17 +301,13 @@ resources:
               requests:
                 cpu: 100m
                 memory: 128Mi
-          serviceMonitor:
-            labels: {}
           toggle: true
+        showPreview: false
         storageClasses:
           available: []
           default: ""
           toggle: true
         tls:
-          default: false
-          toggle: true
-        expose:
           default: false
           toggle: true
   helmToolkitFluxcdIoHelmRelease_prepare_cluster: # +doc-gen:break
