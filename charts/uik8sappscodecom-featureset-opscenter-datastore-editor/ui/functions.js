@@ -511,32 +511,6 @@ function getOptions({ getValue, model, watchDependency }, type) {
   return options
 }
 
-async function getNodeTopology({ axios, storeGet, commit }) {
-  const owner = storeGet('/route/params/user')
-  const cluster = storeGet('/route/params/cluster')
-
-  try {
-    const url = `/clusters/${owner}/${cluster}/proxy/node.k8s.appscode.com/v1alpha1/nodetopologies`
-    const resp = await axios.get(url)
-    const nodeTopologyListFromApi = resp.data?.items
-
-    const mappedResp = nodeTopologyListFromApi?.map((item) => {
-      const name = (item.metadata && item.metadata.name) || ''
-      return name
-    })
-    commit('wizard/model$update', {
-      path: '/resources/helmToolkitFluxcdIoHelmRelease_kubedb_ui_presets/spec/values/clusterTier/nodeTopology/available',
-      value: mappedResp,
-      force: true,
-    })
-
-    return mappedResp
-  } catch (e) {
-    console.log(e)
-    return []
-  }
-}
-
 async function FetchAllDbVersions({ storeGet, axios, setDiscriminatorValue }) {
   const owner = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
@@ -585,88 +559,92 @@ function isKubedbPresetEnable(storeGet) {
 
   const features = featureSet?.status?.features || []
   const isEnabled = features.some((feature) => {
-    if (feature.name === 'kubedb-ui-presets') return true
+    if (feature.name === 'kubedb-ui-presets') return feature.enabled
   })
   return isEnabled
 }
 
-async function getPlacements({ axios, storeGet, route, commit }) {
+async function FetchDbBundle({ axios, storeGet, setDiscriminatorValue }) {
   const owner = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
-  const url = `/clusters/${owner}/${cluster}/proxy/apps.k8s.appscode.com/v1/placementpolicies`
+  const url = `/clusters/${owner}/${cluster}/db-bundle?type=common&deployment=all`
   try {
     const resp = await axios.get(url)
-
-    const mappedResp = resp?.data?.items.map((item) => {
-      const name = (item.metadata && item.metadata.name) || ''
-      return name
-    })
-
-    if (route.path.includes('featuresets/opscenter-datastore') && !isKubedbPresetEnable(storeGet)) {
-      commit('wizard/model$update', {
-        path: `/resources/helmToolkitFluxcdIoHelmRelease_kubedb_ui_presets/spec/values/clusterTier/placement/available`,
-        value: mappedResp,
-        force: true,
-      })
-    }
-
-    return mappedResp
+    setDiscriminatorValue('/bundle', resp.data)
   } catch (e) {
     console.log(e)
     return []
   }
 }
 
-async function getStorageClass({ axios, storeGet, route, commit }) {
-  const owner = storeGet('/route/params/user')
-  const cluster = storeGet('/route/params/cluster')
-  const url = `/clusters/${owner}/${cluster}/proxy/storage.k8s.io/v1/storageclasses`
-  try {
-    const resp = await axios.get(url)
-    const mappedResp = resp?.data?.items.map((item) => {
-      const name = (item.metadata && item.metadata.name) || ''
-      return name
+async function getPlacements({ storeGet, watchDependency, getValue, discriminator, commit }) {
+  watchDependency('discriminator#/bundle')
+  const placements = getValue(discriminator, '/bundle/placementpolicies')
+
+  if (!isKubedbPresetEnable(storeGet)) {
+    commit('wizard/model$update', {
+      path: `/resources/helmToolkitFluxcdIoHelmRelease_kubedb_ui_presets/spec/values/clusterTier/placement/available`,
+      value: placements,
+      force: true,
     })
-
-    if (route.path.includes('featuresets/opscenter-datastore') && !isKubedbPresetEnable(storeGet)) {
-      commit('wizard/model$update', {
-        path: `/resources/helmToolkitFluxcdIoHelmRelease_kubedb_ui_presets/spec/values/storageClasses/available`,
-        value: mappedResp,
-        force: true,
-      })
-    }
-
-    return mappedResp
-  } catch (e) {
-    console.log(e)
-    return []
   }
+
+  return placements
 }
 
-async function getClusterIssuers({ axios, storeGet, route, commit }) {
-  const owner = storeGet('/route/params/user')
-  const cluster = storeGet('/route/params/cluster')
-  const url = `/clusters/${owner}/${cluster}/proxy/cert-manager.io/v1/clusterissuers`
-  try {
-    const resp = await axios.get(url)
-    const mappedResp = resp?.data?.items.map((item) => {
-      const name = (item.metadata && item.metadata.name) || ''
-      return name
+async function getNodeTopology({ storeGet, watchDependency, getValue, discriminator, commit }) {
+  watchDependency('discriminator#/bundle')
+  const shared = getValue(discriminator, '/bundle/shared')
+  const dedicated = getValue(discriminator, '/bundle/shared')
+
+  const nodeTopology = []
+
+  shared.map((item) => {
+    nodeTopology.push(item + ' (shared)')
+  })
+  dedicated.map((item) => {
+    nodeTopology.push(item + ' (dedicated)')
+  })
+
+  if (!isKubedbPresetEnable(storeGet)) {
+    commit('wizard/model$update', {
+      path: '/resources/helmToolkitFluxcdIoHelmRelease_kubedb_ui_presets/spec/values/clusterTier/nodeTopology/available',
+      value: nodeTopology,
+      force: true,
     })
-
-    if (route.path.includes('featuresets/opscenter-datastore') && !isKubedbPresetEnable(storeGet)) {
-      commit('wizard/model$update', {
-        path: `/resources/helmToolkitFluxcdIoHelmRelease_kubedb_ui_presets/spec/values/clusterIssuers/available`,
-        value: mappedResp,
-        force: true,
-      })
-    }
-
-    return mappedResp
-  } catch (e) {
-    console.log(e)
-    return []
   }
+
+  return nodeTopology
+}
+
+async function getStorageClass({ storeGet, watchDependency, getValue, discriminator, commit }) {
+  watchDependency('discriminator#/bundle')
+  const storageClasses = getValue(discriminator, '/bundle/storageclasses')
+
+  if (!isKubedbPresetEnable(storeGet)) {
+    commit('wizard/model$update', {
+      path: `/resources/helmToolkitFluxcdIoHelmRelease_kubedb_ui_presets/spec/values/storageClasses/available`,
+      value: storageClasses,
+      force: true,
+    })
+  }
+
+  return storageClasses
+}
+
+async function getClusterIssuers({ storeGet, watchDependency, getValue, discriminator, commit }) {
+  watchDependency('discriminator#/bundle')
+  const clusterIssuers = getValue(discriminator, '/bundle/clusterissuers')
+
+  if (!isKubedbPresetEnable(storeGet)) {
+    commit('wizard/model$update', {
+      path: `/resources/helmToolkitFluxcdIoHelmRelease_kubedb_ui_presets/spec/values/clusterIssuers/available`,
+      value: clusterIssuers,
+      force: true,
+    })
+  }
+
+  return clusterIssuers
 }
 
 async function getNamespaces({ axios, storeGet }) {
@@ -741,4 +719,5 @@ return {
   getNamespaces,
   returnFalse,
   presetNameEqualsTo,
+  FetchDbBundle,
 }
