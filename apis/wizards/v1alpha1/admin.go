@@ -50,6 +50,8 @@ type AdminOptions struct {
 	Deployment  DeploymentProfile  `json:"deployment"`
 	ClusterTier ClusterTierProfile `json:"clusterTier"`
 
+	ShowPreview bool `json:"showPreview"`
+
 	Databases      DatabasesProfile             `json:"databases"`
 	StorageClasses RequiredClusterScopedProfile `json:"storageClasses"`
 
@@ -107,6 +109,7 @@ type DatabaseProfile struct {
 }
 
 type ClusterScopedProfile struct {
+	// +optional
 	Available []string `json:"available"`
 	// +optional
 	Default string `json:"default"`
