@@ -738,7 +738,8 @@ function fetchOptions({ model, getValue }, type) {
   return []
 }
 
-function getAdminOptions({ getValue, model }, type) {
+function getAdminOptions({ getValue, model, watchDependency }, type) {
+  watchDependency('discriminator#/bundleApiLoaded')
   const options = getValue(model, `/spec/admin/${type}/available`) || []
 
   if (options.length === 0) {
