@@ -564,7 +564,7 @@ function isKubedbPresetEnable(storeGet) {
   return isEnabled
 }
 
-async function FetchDbBundle({ axios, storeGet, setDiscriminatorValue, discriminator }) {
+async function FetchDbBundle({ axios, storeGet, setDiscriminatorValue }) {
   const owner = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
   const url = `/clusters/${owner}/${cluster}/db-bundle?type=common&deployment=all`
@@ -577,14 +577,7 @@ async function FetchDbBundle({ axios, storeGet, setDiscriminatorValue, discrimin
   }
 }
 
-async function getPlacements({
-  storeGet,
-  watchDependency,
-  getValue,
-  discriminator,
-  commit,
-  route,
-}) {
+async function getPlacements({ storeGet, watchDependency, getValue, discriminator, commit }) {
   watchDependency('discriminator#/bundle')
   const placements = getValue(discriminator, '/bundle/placementpolicies')
 
@@ -599,16 +592,19 @@ async function getPlacements({
   return placements
 }
 
-async function getNodeTopology({
-  storeGet,
-  watchDependency,
-  getValue,
-  discriminator,
-  commit,
-  route,
-}) {
+async function getNodeTopology({ storeGet, watchDependency, getValue, discriminator, commit }) {
   watchDependency('discriminator#/bundle')
-  const nodeTopology = getValue(discriminator, '/bundle/nodetopologies')
+  const shared = getValue(discriminator, '/bundle/shared')
+  const dedicated = getValue(discriminator, '/bundle/shared')
+
+  const nodeTopology = []
+
+  shared.map((item) => {
+    nodeTopology.push(item + ' (shared)')
+  })
+  dedicated.map((item) => {
+    nodeTopology.push(item + ' (dedicated)')
+  })
 
   if (!isKubedbPresetEnable(storeGet)) {
     commit('wizard/model$update', {
@@ -621,14 +617,7 @@ async function getNodeTopology({
   return nodeTopology
 }
 
-async function getStorageClass({
-  storeGet,
-  watchDependency,
-  getValue,
-  discriminator,
-  commit,
-  route,
-}) {
+async function getStorageClass({ storeGet, watchDependency, getValue, discriminator, commit }) {
   watchDependency('discriminator#/bundle')
   const storageClasses = getValue(discriminator, '/bundle/storageclasses')
 

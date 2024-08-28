@@ -74,7 +74,17 @@ function getPlacements({ watchDependency, getValue, discriminator }) {
 
 function getNodeTopology({ watchDependency, getValue, discriminator }) {
   watchDependency('discriminator#/bundle')
-  const nodeTopology = getValue(discriminator, '/bundle/nodetopologies')
+  const shared = getValue(discriminator, '/bundle/shared')
+  const dedicated = getValue(discriminator, '/bundle/shared')
+
+  const nodeTopology = []
+
+  shared.map((item) => {
+    nodeTopology.push(item + ' (shared)')
+  })
+  dedicated.map((item) => {
+    nodeTopology.push(item + ' (dedicated)')
+  })
 
   return nodeTopology
 }
