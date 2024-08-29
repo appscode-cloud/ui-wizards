@@ -45,18 +45,18 @@ The command removes all the Kubernetes components associated with the chart and 
 
 The following table lists the configurable parameters of the `gatewaynetworkingk8sio-grpcroute-editor` chart and their default values.
 
-|     Parameter      | Description |                     Default                     |
-|--------------------|-------------|-------------------------------------------------|
-| apiVersion         |             | <code>gateway.networking.k8s.io/v1alpha2</code> |
-| kind               |             | <code>GRPCRoute</code>                          |
-| metadata.name      |             | <code>grpcroute</code>                          |
-| metadata.namespace |             | <code>default</code>                            |
+|     Parameter      | Description |                  Default                  |
+|--------------------|-------------|-------------------------------------------|
+| apiVersion         |             | <code>gateway.networking.k8s.io/v1</code> |
+| kind               |             | <code>GRPCRoute</code>                    |
+| metadata.name      |             | <code>grpcroute</code>                    |
+| metadata.namespace |             | <code>default</code>                      |
 
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm upgrade -i`. For example:
 
 ```bash
-$ helm upgrade -i gatewaynetworkingk8sio-grpcroute-editor appscode-charts-oci/gatewaynetworkingk8sio-grpcroute-editor -n default --create-namespace --version=v0.5.0 --set apiVersion=gateway.networking.k8s.io/v1alpha2
+$ helm upgrade -i gatewaynetworkingk8sio-grpcroute-editor appscode-charts-oci/gatewaynetworkingk8sio-grpcroute-editor -n default --create-namespace --version=v0.5.0 --set apiVersion=gateway.networking.k8s.io/v1
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
