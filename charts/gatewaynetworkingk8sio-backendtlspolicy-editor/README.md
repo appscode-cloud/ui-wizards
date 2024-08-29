@@ -47,7 +47,7 @@ The following table lists the configurable parameters of the `gatewaynetworkingk
 
 |     Parameter      | Description |                     Default                     |
 |--------------------|-------------|-------------------------------------------------|
-| apiVersion         |             | <code>gateway.networking.k8s.io/v1alpha2</code> |
+| apiVersion         |             | <code>gateway.networking.k8s.io/v1alpha3</code> |
 | kind               |             | <code>BackendTLSPolicy</code>                   |
 | metadata.name      |             | <code>backendtlspolicy</code>                   |
 | metadata.namespace |             | <code>default</code>                            |
@@ -56,7 +56,7 @@ The following table lists the configurable parameters of the `gatewaynetworkingk
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm upgrade -i`. For example:
 
 ```bash
-$ helm upgrade -i gatewaynetworkingk8sio-backendtlspolicy-editor appscode-charts-oci/gatewaynetworkingk8sio-backendtlspolicy-editor -n default --create-namespace --version=v0.5.0 --set apiVersion=gateway.networking.k8s.io/v1alpha2
+$ helm upgrade -i gatewaynetworkingk8sio-backendtlspolicy-editor appscode-charts-oci/gatewaynetworkingk8sio-backendtlspolicy-editor -n default --create-namespace --version=v0.5.0 --set apiVersion=gateway.networking.k8s.io/v1alpha3
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
