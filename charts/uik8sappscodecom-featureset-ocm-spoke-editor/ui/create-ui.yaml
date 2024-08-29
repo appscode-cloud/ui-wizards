@@ -34,7 +34,10 @@ steps:
         label:
           text: 'Note: Enabling a feature auto enables any prerequisite features'
         type: label-element
-      - elements:
+      - discriminator:
+          hubName: 
+            type: string
+        elements:
         - label:
             text: labels.spoke.hubInfo
           type: label-element
@@ -43,7 +46,7 @@ steps:
           fetch: getHubList
           onChange: onHubChange
           schema:
-            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_cluster_manager_spoke/properties/spec/properties/values/properties/hub/properties/name
+            $ref: discriminator#/properties/hubName
           required: true
           type: select
         - label:
@@ -65,11 +68,14 @@ steps:
         - label:
             text: labels.spoke.clusterInfo
           type: label-element
-        - label:
+        - computed: getClusterName
+          description: 
+            text: "Cluster Name Must not Be Same As any Managed Cluster "
+          label:
             text: labels.spoke.cluster
           required: true
           schema:
-            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_cluster_manager_spoke/properties/spec/properties/values/properties/clusterName
+            $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_cluster_manager_spoke/properties/spec/properties/values/properties/clusterMetadata/properties/name
           type: input
         if: checkSpokeComponent
         type: single-step-form

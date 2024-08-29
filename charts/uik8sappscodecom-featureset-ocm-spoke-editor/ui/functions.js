@@ -351,45 +351,24 @@ function checkSpokeComponent({ watchDependency, getValue, discriminator }) {
   else return false
 }
 
-const testingData = [
-  {
-    name: 'ola',
-    apiServer: 'bola',
-    token: 'sadsa',
-  },
-  {
-    name: 'john',
-    apiServer: 'server1',
-    token: 'token123',
-  },
-  {
-    name: 'jane',
-    apiServer: 'server2',
-    token: 'token456',
-  },
-  {
-    name: 'mike',
-    apiServer: 'server3',
-    token: 'token789',
-  },
-  {
-    name: 'lucy',
-    apiServer: 'server4',
-    token: 'token012',
-  },
-]
+let hubData = []
 
-function getHubList() {
-  return testingData.map((item) => item.name)
+async function getHubList({ axios, storeGet }) {
+  const owner = storeGet('/route/params/user')
+  const resp = await axios.get(`/clustersv2/${owner}/hub-info`)
+
+  hubData = Object.entries(resp.data).map(([name, info]) => ({
+    name,
+    apiServer: info.apiServer,
+    token: info.token,
+  }))
+  return hubData.map((item) => item.name)
 }
 
-function onHubChange({ commit, getValue, model }) {
-  const hubName = getValue(
-    model,
-    '/resources/helmToolkitFluxcdIoHelmRelease_cluster_manager_spoke/spec/values/hub/name',
-  )
+function onHubChange({ commit, getValue, discriminator }) {
+  const hubName = getValue(discriminator, '/hubName')
 
-  testingData.forEach((item) => {
+  hubData.forEach((item) => {
     if (item.name === hubName) {
       commit('wizard/model$update', {
         path: '/resources/helmToolkitFluxcdIoHelmRelease_cluster_manager_spoke/spec/values/hub/apiServer',
@@ -406,18 +385,20 @@ function onHubChange({ commit, getValue, model }) {
   })
 }
 
-function isHubSelected({ getValue, model, watchDependency }) {
+function isHubSelected({ getValue, discriminator, watchDependency }) {
   watchDependency(
-    'model#/resources/helmToolkitFluxcdIoHelmRelease_cluster_manager_spoke/spec/values/hub/name',
+    'model#/resources/helmToolkitFluxcdIoHelmRelease_cluster_manager_spoke/spec/values/hub/token',
   )
-  const hubName = getValue(
-    model,
-    '/resources/helmToolkitFluxcdIoHelmRelease_cluster_manager_spoke/spec/values/hub/name',
-  )
+  const hubName = getValue(discriminator, '/hubName')
+
   if (hubName !== undefined && hubName !== '') {
     return true
   }
   return false
+}
+
+function getClusterName({ storeGet }) {
+  return storeGet('/route/params/cluster')
 }
 
 return {
@@ -437,4 +418,5 @@ return {
   getHubList,
   onHubChange,
   isHubSelected,
+  getClusterName,
 }
