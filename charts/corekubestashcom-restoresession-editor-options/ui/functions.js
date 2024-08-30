@@ -108,8 +108,6 @@ async function getDbs({ axios, storeGet, model, getValue, watchDependency }) {
 
 function initTarget({ getValue, discriminator, commit }) {
   const target = getValue(discriminator, '/database') || {}
-  console.log(target)
-
   commit('wizard/model$update', {
     path: '/metadata/release/name',
     value: `${target.name}-${Math.floor(Date.now() / 1000)}-restore` || '',
