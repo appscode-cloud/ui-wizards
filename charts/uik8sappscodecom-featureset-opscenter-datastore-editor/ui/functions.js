@@ -392,6 +392,7 @@ function isKubedbSelected({ getValue, discriminator, watchDependency, commit, st
 }
 
 let allAvailableTypes = [
+  'ClickHouse',
   'Druid',
   'Elasticsearch',
   'FerretDB',
@@ -524,8 +525,16 @@ async function FetchAllDbVersions({ storeGet, axios, setDiscriminatorValue }) {
 
 function isConfigureDb({ getValue, discriminator, watchDependency }, value) {
   watchDependency(`discriminator#/${value}/isConfigure`)
+  watchDependency('discriminator#/enabledTypes')
+  const enabledTypes = getValue(discriminator, '/enabledTypes')
+  let isEnabled = false
+  enabledTypes.forEach((item) => {
+    if (item.toLowerCase() === value) {
+      isEnabled = true
+    }
+  })
   const resp = getValue(discriminator, `/${value}/isConfigure`)
-  return resp
+  return resp && isEnabled
 }
 
 async function FetchDbVersions({ watchDependency, getValue, discriminator }, db) {
@@ -690,6 +699,15 @@ function presetNameEqualsTo({ storeGet }, value) {
   return presetName === value
 }
 
+function isDbTypeSelected(
+  { getValue, discriminator, watchDependency, setDiscriminatorValue },
+  type,
+) {
+  watchDependency('discriminator#/enabledTypes')
+  const enabledTypes = getValue(discriminator, '/enabledTypes')
+  return enabledTypes.includes(type)
+}
+
 return {
   hideThisElement,
   checkIsResourceLoaded,
@@ -720,4 +738,5 @@ return {
   returnFalse,
   presetNameEqualsTo,
   FetchDbBundle,
+  isDbTypeSelected,
 }
