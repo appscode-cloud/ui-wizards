@@ -178,8 +178,11 @@ async function fetchDatabases({
 
       const mappedResources = resources
         .filter((item) => {
-          const appRef = (item.spec?.appRef?.apiGroup) || "";
-          return appRef === "kubedb.com" || appRef === "kubevault.com";
+          if(item?.spec?.appRef) {
+            const appRef = (item.spec?.appRef?.apiGroup) || "";
+            return appRef === "kubedb.com" || appRef === "kubevault.com";
+          }
+          else return true
         })
         .map((item) => {
           const apiVersion = item.apiVersion || "";
@@ -196,7 +199,7 @@ async function fetchDatabases({
             },
           };
         });
-
+      
       // update database to type map
       databaseToTypeMap = {};
       resources.forEach((rs) => {
