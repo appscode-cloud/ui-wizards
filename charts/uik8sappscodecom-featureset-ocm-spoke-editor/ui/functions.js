@@ -351,6 +351,56 @@ function checkSpokeComponent({ watchDependency, getValue, discriminator }) {
   else return false
 }
 
+let hubData = []
+
+async function getHubList({ axios, storeGet }) {
+  const owner = storeGet('/route/params/user')
+  const resp = await axios.get(`/clustersv2/${owner}/hub-info`)
+
+  hubData = Object.entries(resp.data).map(([name, info]) => ({
+    name,
+    apiServer: info.apiServer,
+    token: info.token,
+  }))
+  return hubData.map((item) => item.name)
+}
+
+function onHubChange({ commit, getValue, discriminator }) {
+  const hubName = getValue(discriminator, '/hubName')
+
+  hubData.forEach((item) => {
+    if (item.name === hubName) {
+      commit('wizard/model$update', {
+        path: '/resources/helmToolkitFluxcdIoHelmRelease_cluster_manager_spoke/spec/values/hub/apiServer',
+        value: item.apiServer,
+        force: true,
+      })
+
+      commit('wizard/model$update', {
+        path: '/resources/helmToolkitFluxcdIoHelmRelease_cluster_manager_spoke/spec/values/hub/token',
+        value: item.token,
+        force: true,
+      })
+    }
+  })
+}
+
+function isHubSelected({ getValue, discriminator, watchDependency }) {
+  watchDependency(
+    'model#/resources/helmToolkitFluxcdIoHelmRelease_cluster_manager_spoke/spec/values/hub/token',
+  )
+  const hubName = getValue(discriminator, '/hubName')
+
+  if (hubName !== undefined && hubName !== '') {
+    return true
+  }
+  return false
+}
+
+function getClusterName({ storeGet }) {
+  return storeGet('/route/params/cluster')
+}
+
 return {
   hideThisElement,
   checkIsResourceLoaded,
@@ -365,4 +415,8 @@ return {
   setReleaseNameAndNamespaceAndInitializeValues,
   fetchFeatureSetOptions,
   checkSpokeComponent,
+  getHubList,
+  onHubChange,
+  isHubSelected,
+  getClusterName,
 }
