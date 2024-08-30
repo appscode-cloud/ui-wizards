@@ -595,14 +595,14 @@ async function getPlacements({ storeGet, watchDependency, getValue, discriminato
 async function getNodeTopology({ storeGet, watchDependency, getValue, discriminator, commit }) {
   watchDependency('discriminator#/bundle')
   const shared = getValue(discriminator, '/bundle/shared')
-  const dedicated = getValue(discriminator, '/bundle/shared')
+  const dedicated = getValue(discriminator, '/bundle/dedicated')
 
   const nodeTopology = []
 
-  shared.map((item) => {
+  shared?.map((item) => {
     nodeTopology.push(item + ' (shared)')
   })
-  dedicated.map((item) => {
+  dedicated?.map((item) => {
     nodeTopology.push(item + ' (dedicated)')
   })
 
