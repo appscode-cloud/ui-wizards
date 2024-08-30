@@ -1,34 +1,40 @@
 let addonList = []
 
+function isConsole({ storeGet }) {
+  isKube = storeGet('/route/query/operation')
+  return !isKube
+}
+
 function initMetadata({ storeGet, commit }) {
   const resource = storeGet('/resource') || {}
   const { group, kind } = resource?.layout?.result?.resource
   const name = storeGet('/route/query/name') || ''
   const namespace = storeGet('route/query/namespace') || ''
+  if (!isConsole({ storeGet })) {
+    // set metadata name namespace
+    commit('wizard/model$update', {
+      path: '/metadata/release/name',
+      value: `${name}-${Math.floor(Date.now() / 1000)}-restore`,
+      force: true,
+    })
+    commit('wizard/model$update', {
+      path: '/metadata/release/namespace',
+      value: namespace,
+      force: true,
+    })
 
-  // set metadata name namespace
-  commit('wizard/model$update', {
-    path: '/metadata/release/name',
-    value: `${name}-${Math.floor(Date.now() / 1000)}-restore`,
-    force: true,
-  })
-  commit('wizard/model$update', {
-    path: '/metadata/release/namespace',
-    value: namespace,
-    force: true,
-  })
-
-  const target = {
-    apiGroup: group,
-    kind: kind,
-    name: name,
-    namespace: namespace,
+    const target = {
+      apiGroup: group,
+      kind: kind,
+      name: name,
+      namespace: namespace,
+    }
+    commit('wizard/model$update', {
+      path: '/spec/target',
+      value: target,
+      force: true,
+    })
   }
-  commit('wizard/model$update', {
-    path: '/spec/target',
-    value: target,
-    force: true,
-  })
 }
 
 async function getNamespaces({ axios, storeGet }) {
@@ -60,9 +66,60 @@ async function getNamespaces({ axios, storeGet }) {
   }
 }
 
-function setNamespace({ storeGet }) {
-  const namespace = storeGet('/route/query/namespace') || ''
+function setNamespace({ storeGet, model, getValue }) {
+  const namespaceFromModel = getValue(model, '/metadata/release/namespace')
+  const namespace = storeGet('/route/query/namespace') || namespaceFromModel || ''
   return namespace
+}
+
+async function getDbs({ axios, storeGet, model, getValue, watchDependency }) {
+  watchDependency('model#/metadata/release/namespace')
+  const namespace = getValue(model, '/metadata/release/namespace')
+  const owner = storeGet('/route/params/user')
+  const cluster = storeGet('/route/params/cluster')
+
+  const resp = await axios.get(
+    `/clusters/${owner}/${cluster}/proxy/core.k8s.appscode.com/v1alpha1/namespaces/${namespace}/genericresources`,
+    {
+      params: {
+        convertToTable: true,
+        labelSelector: 'k8s.io/group=kubedb.com',
+      },
+    },
+  )
+
+  const resources = (resp && resp.data && resp.data.rows) || []
+
+  return resources.map((item) => {
+    const name = (item.cells?.length > 0 && item.cells[0].data) || ''
+    const kind = (item.cells?.length > 2 && item.cells[2].data) || ''
+    const dbObject = {
+      apiGroup: 'kubedb.com',
+      kind: kind,
+      name: name,
+      namespace: namespace,
+    }
+    return {
+      text: name,
+      value: dbObject,
+    }
+  })
+}
+
+function initTarget({ getValue, discriminator, commit }) {
+  const target = getValue(discriminator, '/database') || {}
+  console.log(target)
+
+  commit('wizard/model$update', {
+    path: '/metadata/release/name',
+    value: `${target.name}-${Math.floor(Date.now() / 1000)}-restore` || '',
+    force: true,
+  })
+  commit('wizard/model$update', {
+    path: '/spec/target',
+    value: target,
+    force: true,
+  })
 }
 
 async function fetchNames({ getValue, model, storeGet, watchDependency, axios }, type) {
@@ -70,8 +127,9 @@ async function fetchNames({ getValue, model, storeGet, watchDependency, axios },
   const user = storeGet('/route/params/user') || ''
   const cluster = storeGet('/route/params/cluster') || ''
   const namespace = getValue(model, `/spec/dataSource/${type}/namespace`) || ''
-  const suffix =
-    type === 'encryptionSecret' ? 'secrets' : type === 'repository' ? 'repositories' : type
+  let suffix = type
+  if (type === 'encryptionSecret') suffix = 'secrets'
+  else if (type === 'repository') suffix = 'repositories'
   const core = suffix === 'secrets' ? 'core' : 'storage.kubestash.com'
   const version = suffix === 'secrets' ? 'v1' : 'v1alpha1'
   const url = `/clusters/${user}/${cluster}/proxy/${core}/${version}/namespaces/${namespace}/${suffix}`
@@ -81,16 +139,24 @@ async function fetchNames({ getValue, model, storeGet, watchDependency, axios },
       const resp = await axios.get(url)
       let names = resp?.data?.items
       names.map((item) => {
-        item.value = item?.metadata?.name
-        item.text = item?.metadata?.name
+        item.value = item?.metadata?.name || ''
+        item.text = item?.metadata?.name || ''
         return true
       })
 
       if (type === 'repository') {
-        const resource = storeGet('/resource') || {}
-        const { group, kind } = resource?.layout?.result?.resource
+        const resource = storeGet('/resource/layout/result/resource') || {}
+        let group = resource?.group || ''
+        let kind = resource?.kind || ''
+
+        if (isConsole({ storeGet })) {
+          group = getValue(model, '/spec/target/apiGroup') || ''
+          kind = getValue(model, '/spec/target/kind') || ''
+        }
+
         const filteredRepo = names.filter((item) => {
-          return item?.spec?.appRef?.apiGroup === group && item?.spec?.appRef?.kind === kind
+          const appRef = item?.spec?.appRef || {}
+          return appRef?.apiGroup === group && appRef?.kind === kind
         })
         return filteredRepo
       }
@@ -165,17 +231,29 @@ function getTasks({ watchDependency, model, getValue }) {
   return tasks
 }
 
+function databaseSelected({ storeGet, watchDependency, getValue, discriminator }) {
+  isKube = storeGet('/route/query/operation')
+  if (isKube) return true
+  watchDependency('discriminator#/database')
+  const target = getValue(discriminator, '/database') || {}
+  return !!target.name
+}
+
 function returnFalse() {
   return false
 }
 
 return {
+  isConsole,
   initMetadata,
   getNamespaces,
   setNamespace,
+  getDbs,
+  initTarget,
   fetchNames,
   getSnapshots,
   getAddons,
   getTasks,
+  databaseSelected,
   returnFalse,
 }
