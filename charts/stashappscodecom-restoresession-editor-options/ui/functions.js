@@ -168,8 +168,11 @@ async function fetchDatabases({ axios, storeGet, model, getValue, watchDependenc
 
       const mappedResources = resources
         .filter((item) => {
-          const appRef = item.spec?.appRef?.apiGroup || ''
-          return appRef === 'kubedb.com' || appRef === 'kubevault.com'
+          if(item?.spec?.appRef) {
+            const appRef = (item.spec?.appRef?.apiGroup) || "";
+            return appRef === "kubedb.com" || appRef === "kubevault.com";
+          }
+          else return true
         })
         .map((item) => {
           const apiVersion = item.apiVersion || ''
@@ -184,9 +187,8 @@ async function fetchDatabases({ axios, storeGet, model, getValue, watchDependenc
               name,
               namespace,
             },
-          }
-        })
-
+          };
+        });
       // update database to type map
       databaseToTypeMap = {}
       resources.forEach((rs) => {
