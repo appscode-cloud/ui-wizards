@@ -4,6 +4,8 @@ kind: KafkaBinding
 metadata:
   name: {{ include "kubedbcom-kafka-editor-options.fullname" . }}
   namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kubedbcom-kafka-editor-options.labels" . | nindent 4 }}
 spec:
   sourceRef:
     name: {{ include "kubedbcom-kafka-editor-options.fullname" . }}

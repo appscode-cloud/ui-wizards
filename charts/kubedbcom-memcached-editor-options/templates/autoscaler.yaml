@@ -3,6 +3,8 @@ kind: MemcachedAutoscaler
 metadata:
   name: {{ include "kubedbcom-memcached-editor-options.fullname" . }}
   namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kubedbcom-memcached-editor-options.labels" . | nindent 4 }}
 spec:
   databaseRef:
     name: {{ include "kubedbcom-memcached-editor-options.fullname" . }}

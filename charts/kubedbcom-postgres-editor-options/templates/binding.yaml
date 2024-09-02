@@ -4,6 +4,8 @@ kind: PostgresBinding
 metadata:
   name: {{ include "kubedbcom-postgres-editor-options.fullname" . }}
   namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kubedbcom-postgres-editor-options.labels" . | nindent 4 }}
 spec:
   sourceRef:
     name: {{ include "kubedbcom-postgres-editor-options.fullname" . }}

@@ -3,6 +3,8 @@ kind: MongoDBAutoscaler
 metadata:
   name: {{ include "kubedbcom-mongodb-editor-options.fullname" . }}
   namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kubedbcom-mongodb-editor-options.labels" . | nindent 4 }}
 spec:
   databaseRef:
     name: {{ include "kubedbcom-mongodb-editor-options.fullname" . }}

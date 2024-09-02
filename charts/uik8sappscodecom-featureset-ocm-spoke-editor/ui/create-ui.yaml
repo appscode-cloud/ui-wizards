@@ -35,42 +35,42 @@ steps:
           text: 'Note: Enabling a feature auto enables any prerequisite features'
         type: label-element
       - discriminator:
-          hubName: 
+          hubName:
             type: string
         elements:
         - label:
             text: labels.spoke.hubInfo
           type: label-element
-        - label:
+        - fetch: getHubList
+          label:
             text: labels.selectHub
-          fetch: getHubList
           onChange: onHubChange
+          required: true
           schema:
             $ref: discriminator#/properties/hubName
-          required: true
           type: select
-        - label:
+        - disabled: true
+          if: isHubSelected
+          label:
             text: labels.spoke.apiServer
           required: true
           schema:
             $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_cluster_manager_spoke/properties/spec/properties/values/properties/hub/properties/apiServer
           type: input
-          disabled: true
+        - disabled: true
           if: isHubSelected
-        - label:
+          label:
             text: labels.spoke.token
           required: true
           schema:
             $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_cluster_manager_spoke/properties/spec/properties/values/properties/hub/properties/token
           type: input
-          disabled: true
-          if: isHubSelected
         - label:
             text: labels.spoke.clusterInfo
           type: label-element
         - computed: getClusterName
-          description: 
-            text: "Cluster Name Must not Be Same As any Managed Cluster "
+          description:
+            text: 'Cluster Name Must not Be Same As any Managed Cluster '
           label:
             text: labels.spoke.cluster
           required: true

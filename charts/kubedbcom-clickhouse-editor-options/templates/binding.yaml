@@ -4,6 +4,8 @@ kind: ClickHouseBinding
 metadata:
   name: {{ include "kubedbcom-clickhouse-editor-options.fullname" . }}
   namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kubedbcom-clickhouse-editor-options.labels" . | nindent 4 }}
 spec:
   sourceRef:
     name: {{ include "kubedbcom-clickhouse-editor-options.fullname" . }}

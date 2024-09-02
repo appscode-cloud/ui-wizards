@@ -3,6 +3,8 @@ kind: MSSQLServerAutoscaler
 metadata:
   name: {{ include "kubedbcom-mssqlserver-editor-options.fullname" . }}
   namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kubedbcom-mssqlserver-editor-options.labels" . | nindent 4 }}
 spec:
   databaseRef:
     name: {{ include "kubedbcom-mssqlserver-editor-options.fullname" . }}

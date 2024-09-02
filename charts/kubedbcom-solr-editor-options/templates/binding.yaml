@@ -4,6 +4,8 @@ kind: SolrBinding
 metadata:
   name: {{ include "kubedbcom-solr-editor-options.fullname" . }}
   namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kubedbcom-solr-editor-options.labels" . | nindent 4 }}
 spec:
   sourceRef:
     name: {{ include "kubedbcom-solr-editor-options.fullname" . }}

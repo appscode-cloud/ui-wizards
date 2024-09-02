@@ -4,6 +4,8 @@ kind: RabbitMQBinding
 metadata:
   name: {{ include "kubedbcom-rabbitmq-editor-options.fullname" . }}
   namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kubedbcom-rabbitmq-editor-options.labels" . | nindent 4 }}
 spec:
   sourceRef:
     name: {{ include "kubedbcom-rabbitmq-editor-options.fullname" . }}

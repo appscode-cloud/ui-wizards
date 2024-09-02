@@ -3,6 +3,8 @@ kind: FerretDBAutoscaler
 metadata:
   name: {{ include "kubedbcom-ferretdb-editor-options.fullname" . }}
   namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kubedbcom-ferretdb-editor-options.labels" . | nindent 4 }}
 spec:
   databaseRef:
     name: {{ include "kubedbcom-ferretdb-editor-options.fullname" . }}

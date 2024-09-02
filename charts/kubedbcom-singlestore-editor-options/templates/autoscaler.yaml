@@ -3,6 +3,8 @@ kind: SinglestoreAutoscaler
 metadata:
   name: {{ include "kubedbcom-singlestore-editor-options.fullname" . }}
   namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kubedbcom-singlestore-editor-options.labels" . | nindent 4 }}
 spec:
   databaseRef:
     name: {{ include "kubedbcom-singlestore-editor-options.fullname" . }}

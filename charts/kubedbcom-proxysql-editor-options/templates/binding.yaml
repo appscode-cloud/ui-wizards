@@ -4,6 +4,8 @@ kind: ProxySQLBinding
 metadata:
   name: {{ include "kubedbcom-proxysql-editor-options.fullname" . }}
   namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kubedbcom-proxysql-editor-options.labels" . | nindent 4 }}
 spec:
   sourceRef:
     name: {{ include "kubedbcom-proxysql-editor-options.fullname" . }}
