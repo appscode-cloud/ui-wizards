@@ -3,6 +3,8 @@ kind: ClickHouseAutoscaler
 metadata:
   name: {{ include "kubedbcom-clickhouse-editor-options.fullname" . }}
   namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kubedbcom-clickhouse-editor-options.labels" . | nindent 4 }}
 spec:
   databaseRef:
     name: {{ include "kubedbcom-clickhouse-editor-options.fullname" . }}

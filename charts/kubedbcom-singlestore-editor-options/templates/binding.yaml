@@ -4,6 +4,8 @@ kind: SinglestoreBinding
 metadata:
   name: {{ include "kubedbcom-singlestore-editor-options.fullname" . }}
   namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kubedbcom-singlestore-editor-options.labels" . | nindent 4 }}
 spec:
   sourceRef:
     name: {{ include "kubedbcom-singlestore-editor-options.fullname" . }}

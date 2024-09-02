@@ -4,6 +4,8 @@ kind: PgBouncerBinding
 metadata:
   name: {{ include "kubedbcom-pgbouncer-editor-options.fullname" . }}
   namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kubedbcom-pgbouncer-editor-options.labels" . | nindent 4 }}
 spec:
   sourceRef:
     name: {{ include "kubedbcom-pgbouncer-editor-options.fullname" . }}

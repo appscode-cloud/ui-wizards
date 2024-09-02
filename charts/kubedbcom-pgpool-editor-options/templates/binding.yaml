@@ -4,6 +4,8 @@ kind: PgpoolBinding
 metadata:
   name: {{ include "kubedbcom-pgpool-editor-options.fullname" . }}
   namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kubedbcom-pgpool-editor-options.labels" . | nindent 4 }}
 spec:
   sourceRef:
     name: {{ include "kubedbcom-pgpool-editor-options.fullname" . }}

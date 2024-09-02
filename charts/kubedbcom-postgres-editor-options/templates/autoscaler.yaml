@@ -3,6 +3,8 @@ kind: PostgresAutoscaler
 metadata:
   name: {{ include "kubedbcom-postgres-editor-options.fullname" . }}
   namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kubedbcom-postgres-editor-options.labels" . | nindent 4 }}
 spec:
   databaseRef:
     name: {{ include "kubedbcom-postgres-editor-options.fullname" . }}

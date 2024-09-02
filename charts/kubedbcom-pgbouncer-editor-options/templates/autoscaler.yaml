@@ -3,6 +3,8 @@ kind: PgBouncerAutoscaler
 metadata:
   name: {{ include "kubedbcom-pgbouncer-editor-options.fullname" . }}
   namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kubedbcom-pgbouncer-editor-options.labels" . | nindent 4 }}
 spec:
   databaseRef:
     name: {{ include "kubedbcom-pgbouncer-editor-options.fullname" . }}

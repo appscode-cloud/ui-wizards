@@ -4,6 +4,8 @@ kind: MariaDBBinding
 metadata:
   name: {{ include "kubedbcom-mariadb-editor-options.fullname" . }}
   namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kubedbcom-mariadb-editor-options.labels" . | nindent 4 }}
 spec:
   sourceRef:
     name: {{ include "kubedbcom-mariadb-editor-options.fullname" . }}

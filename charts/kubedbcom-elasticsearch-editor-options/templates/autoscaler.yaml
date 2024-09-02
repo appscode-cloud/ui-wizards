@@ -3,6 +3,8 @@ kind: ElasticsearchAutoscaler
 metadata:
   name: {{ include "kubedbcom-elasticsearch-editor-options.fullname" . }}
   namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kubedbcom-elasticsearch-editor-options.labels" . | nindent 4 }}
 spec:
   databaseRef:
     name: {{ include "kubedbcom-elasticsearch-editor-options.fullname" . }}

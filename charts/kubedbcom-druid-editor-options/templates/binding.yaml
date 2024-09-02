@@ -4,6 +4,8 @@ kind: DruidBinding
 metadata:
   name: {{ include "kubedbcom-druid-editor-options.fullname" . }}
   namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kubedbcom-druid-editor-options.labels" . | nindent 4 }}
 spec:
   sourceRef:
     name: {{ include "kubedbcom-druid-editor-options.fullname" . }}

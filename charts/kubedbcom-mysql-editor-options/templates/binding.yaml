@@ -4,6 +4,8 @@ kind: MySQLBinding
 metadata:
   name: {{ include "kubedbcom-mysql-editor-options.fullname" . }}
   namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kubedbcom-mysql-editor-options.labels" . | nindent 4 }}
 spec:
   sourceRef:
     name: {{ include "kubedbcom-mysql-editor-options.fullname" . }}

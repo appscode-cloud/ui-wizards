@@ -3,6 +3,8 @@ kind: RedisAutoscaler
 metadata:
   name: {{ include "kubedbcom-redis-editor-options.fullname" . }}
   namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kubedbcom-redis-editor-options.labels" . | nindent 4 }}
 spec:
   databaseRef:
     name: {{ include "kubedbcom-redis-editor-options.fullname" . }}
