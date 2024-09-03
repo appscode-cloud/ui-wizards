@@ -144,8 +144,6 @@ function getEnabledFeatures({ storeGet }) {
       return item?.spec?.featureSet === featureSet
     }) || []
 
-  console.log(allFeatureSetFeature)
-
   if (activeFeature) {
     return getEnabledFeaturesFromActiveFeature(allFeatureSetFeature, storeGet)
   }
