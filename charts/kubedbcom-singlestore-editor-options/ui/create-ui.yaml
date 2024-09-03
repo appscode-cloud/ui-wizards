@@ -17,70 +17,9 @@ steps:
         default: false
         type: boolean
     elements:
-    - computed: initBundle
-      disabled: isVariantAvailable
-      label:
-        text: labels.database.name
-      schema:
-        $ref: schema#/properties/metadata/properties/release/properties/name
-      type: input
-    - add_new_button:
-        label: labels.add_new_namespace
-        target: _blank
-        url:
-          function: getCreateNameSpaceUrl
-      disabled: isVariantAvailable
-      fetch: getNamespaces
-      label:
-        text: labels.namespace
-      refresh: true
-      schema:
-        $ref: schema#/properties/metadata/properties/release/properties/namespace
-      type: select
-    - hasDescription: true
-      if: isToggleOn|deployment
-      label:
-        text: labels.deployment.name
-      onChange: onDeploymentChange
-      options:
-      - description: labels.deployment.shared
-        text: Shared
-        value: Shared
-      - description: labels.deployment.dedicated
-        text: Dedicated
-        value: Dedicated
-      schema:
-        $ref: schema#/properties/spec/properties/admin/properties/deployment/properties/default
-      type: radio
-    - if: isToggleOn|clusterTier
-      label:
-        text: labels.clusterTier
-      options:
-      - text: General Purpose
-        value: GeneralPurpose
-      - text: Memory Optimized
-        value: MemoryOptimized
-      - text: CPU Optimized
-        value: CPUOptimized
-      schema:
-        $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/default
-      type: radio
-    - disableUnselect: true
-      fetch: getAdminOptions|clusterTier/placement
-      if: isToggleOn|clusterTier/placement
-      label:
-        text: labels.placement
-      schema:
-        $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/placement/properties/default
-      type: select
-    - disableUnselect: true
-      fetch: getNodeTopology
-      if: isToggleOn|clusterTier/nodeTopology
-      label:
-        text: labels.nodeTopology
-      schema:
-        $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/nodeTopology/properties/default
-      type: select
+    - if: returnFalse
+      computed: initBundle
+      type: label-element 
     - disableUnselect: true
       fetch: getAdminOptions|databases/Singlestore/versions
       if: isToggleOn|databases/Singlestore/versions
@@ -89,42 +28,6 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Singlestore/properties/versions/properties/default
       type: select
-    - if: showStorageSizeField
-      label:
-        text: labels.storage.size
-      schema:
-        $ref: schema#/properties/spec/properties/persistence/properties/size
-      type: input
-    - isArray: true
-      keys:
-        label:
-          text: labels.labels.key
-      label:
-        text: labels.labels.label
-      schema:
-        $ref: schema#/properties/spec/properties/labels
-      type: key-value-input-form
-      values:
-        label:
-          text: labels.labels.value
-        schema:
-          $ref: schema#/properties/spec/properties/labels/additionalProperties
-        type: input
-    - isArray: true
-      keys:
-        label:
-          text: labels.annotations.key
-      label:
-        text: labels.annotations.label
-      schema:
-        $ref: schema#/properties/spec/properties/annotations
-      type: key-value-input-form
-      values:
-        label:
-          text: labels.annotations.value
-        schema:
-          $ref: schema#/properties/spec/properties/annotations/additionalProperties
-        type: input
     - hasDescription: true
       label:
         text: labels.database.mode
@@ -139,12 +42,6 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/mode
       type: radio
-    - if: isEqualToModelPathValue|Standalone|/spec/mode
-      label:
-        text: labels.storage.size
-      schema:
-        $ref: schema#/properties/spec/properties/persistence/properties/size
-      type: input
     - elements:
       - label:
           text: labels.storage.size
@@ -211,39 +108,6 @@ steps:
         text: Leaf
       show_label: true
       type: single-step-form
-    - hasDescription: true
-      label:
-        text: labels.deletionPolicy
-      onChange: setStorageClass
-      options:
-      - description: options.deletionPolicy.delete.description
-        text: options.deletionPolicy.delete.label
-        value: Delete
-      - description: options.deletionPolicy.halt.description
-        text: options.deletionPolicy.halt.label
-        value: Halt
-      - description: options.deletionPolicy.wipeOut.description
-        text: options.deletionPolicy.wipeOut.label
-        value: WipeOut
-      - description: options.deletionPolicy.doNotTerminate.description
-        text: options.deletionPolicy.doNotTerminate.label
-        value: DoNotTerminate
-      schema:
-        $ref: schema#/properties/spec/properties/deletionPolicy
-      type: radio
-    - fetch: getAdminOptions|storageClasses
-      if: isToggleOn|storageClasses
-      label:
-        text: labels.storage.class
-      schema:
-        $ref: schema#/properties/spec/properties/admin/properties/storageClasses/properties/default
-      type: select
-    - fetch: getSecrets
-      label:
-        text: labels.licenseSecret
-      schema:
-        $ref: schema#/properties/spec/properties/licenseSecret/properties/name
-      type: select
     - elements:
       - computed: setMachineToCustom
         customClass: mt-10
@@ -266,6 +130,81 @@ steps:
         text: labels.machine_profile
       show_label: true
       type: single-step-form
+    - fetch: getAdminOptions|storageClasses
+      if: isToggleOn|storageClasses
+      label:
+        text: labels.storage.class
+      schema:
+        $ref: schema#/properties/spec/properties/admin/properties/storageClasses/properties/default
+      type: select
+    - if: isEqualToModelPathValue|Standalone|/spec/mode
+      label:
+        text: labels.storage.size
+      schema:
+        $ref: schema#/properties/spec/properties/persistence/properties/size
+      type: input
+    - type: single-step-form
+      show_label: true
+      hideForm: true
+      label:
+        text: Labels & Annotations
+      elements:
+      - isArray: true
+        keys:
+          label:
+            text: labels.labels.key
+        label:
+          text: labels.labels.label
+        schema:
+          $ref: schema#/properties/spec/properties/labels
+        type: key-value-input-form
+        values:
+          label:
+            text: labels.labels.value
+          schema:
+            $ref: schema#/properties/spec/properties/labels/additionalProperties
+          type: input
+      - isArray: true
+        keys:
+          label:
+            text: labels.annotations.key
+        label:
+          text: labels.annotations.label
+        schema:
+          $ref: schema#/properties/spec/properties/annotations
+        type: key-value-input-form
+        values:
+          label:
+            text: labels.annotations.value
+          schema:
+            $ref: schema#/properties/spec/properties/annotations/additionalProperties
+          type: input
+    - label:
+        text: labels.deletionPolicy
+      customClass: mt-20
+      onChange: setStorageClass
+      options:
+      - description: options.deletionPolicy.delete.description
+        text: options.deletionPolicy.delete.label
+        value: Delete
+      - description: options.deletionPolicy.halt.description
+        text: options.deletionPolicy.halt.label
+        value: Halt
+      - description: options.deletionPolicy.wipeOut.description
+        text: options.deletionPolicy.wipeOut.label
+        value: WipeOut
+      - description: options.deletionPolicy.doNotTerminate.description
+        text: options.deletionPolicy.doNotTerminate.label
+        value: DoNotTerminate
+      schema:
+        $ref: schema#/properties/spec/properties/deletionPolicy
+      type: select
+    - fetch: getSecrets
+      label:
+        text: labels.licenseSecret
+      schema:
+        $ref: schema#/properties/spec/properties/licenseSecret/properties/name
+      type: select
     - computed: returnFalse
       label:
         text: Provide Authentication Credentials?
@@ -297,26 +236,51 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/configuration
       type: editor
-    - computed: toggleTls
-      if: isEqualToModelPathValue|Topology|/spec/mode
+    - hasDescription: true
+      if: isToggleOn|deployment
       label:
-        text: Enable TLS?
+        text: labels.deployment.name
+      onChange: onDeploymentChange
+      options:
+      - description: labels.deployment.shared
+        text: Shared
+        value: Shared
+      - description: labels.deployment.dedicated
+        text: Dedicated
+        value: Dedicated
       schema:
-        $ref: schema#/properties/spec/properties/admin/properties/tls/properties/default
-      type: switch
-    - fetch: getAdminOptions|clusterIssuers
-      if: showIssuer
+        $ref: schema#/properties/spec/properties/admin/properties/deployment/properties/default
+      type: radio
+    - if: isToggleOn|clusterTier
       label:
-        text: labels.clusterIssuers
+        text: labels.clusterTier
+      options:
+      - text: General Purpose
+        value: GeneralPurpose
+      - text: Memory Optimized
+        value: MemoryOptimized
+      - text: CPU Optimized
+        value: CPUOptimized
       schema:
-        $ref: schema#/properties/spec/properties/admin/properties/clusterIssuers/properties/default
+        $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/default
+      isHorizontal: true
+      type: radio
+    - disableUnselect: true
+      fetch: getAdminOptions|clusterTier/placement
+      if: isToggleOn|clusterTier/placement
+      label:
+        text: labels.placement
+      schema:
+        $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/placement/properties/default
       type: select
-    - if: isToggleOn|expose
+    - disableUnselect: true
+      fetch: getNodeTopology
+      if: isToggleOn|clusterTier/nodeTopology
       label:
-        text: Expose via Gateway?
+        text: labels.nodeTopology
       schema:
-        $ref: schema#/properties/spec/properties/admin/properties/expose/properties/default
-      type: switch
+        $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/nodeTopology/properties/default
+      type: select
     - computed: setMonitoring
       if: isToggleOn|monitoring
       label:
@@ -349,6 +313,26 @@ steps:
         $ref: schema#/properties/form/properties/alert
       show_label: true
       type: single-step-form
+    - computed: toggleTls
+      if: isEqualToModelPathValue|Topology|/spec/mode
+      label:
+        text: Enable TLS?
+      schema:
+        $ref: schema#/properties/spec/properties/admin/properties/tls/properties/default
+      type: switch
+    - fetch: getAdminOptions|clusterIssuers
+      if: showIssuer
+      label:
+        text: labels.clusterIssuers
+      schema:
+        $ref: schema#/properties/spec/properties/admin/properties/clusterIssuers/properties/default
+      type: select
+    - if: isToggleOn|expose
+      label:
+        text: Expose via Gateway?
+      schema:
+        $ref: schema#/properties/spec/properties/admin/properties/expose/properties/default
+      type: switch
     - if: isToggleOn|archiver
       label:
         text: Enable Archiver?

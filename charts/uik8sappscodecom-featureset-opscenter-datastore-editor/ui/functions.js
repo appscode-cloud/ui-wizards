@@ -392,6 +392,7 @@ function isKubedbSelected({ getValue, discriminator, watchDependency, commit, st
 }
 
 let allAvailableTypes = [
+  'ClickHouse',
   'Druid',
   'Elasticsearch',
   'FerretDB',
