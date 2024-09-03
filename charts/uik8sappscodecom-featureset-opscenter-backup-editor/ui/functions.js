@@ -122,7 +122,7 @@ function getEnabledFeatureInEnableBtnClick(allFeatureSetFeature, isBlockLevel, s
       }) || []
     const checkedFeatures =
       selectedFeatureSet[0].features.filter((item) => {
-        return item.installed || item.recommended || item.featureBlock === featureBlock
+        return item.installed || item.recommended
       }) || []
     const checkedFeatureName =
       checkedFeatures.map((item) => {
