@@ -370,24 +370,11 @@ async function getSecrets({ storeGet, axios, model, getValue, watchDependency })
   return filteredSecrets
 }
 
-function disableLimit({ model, getValue, watchDependency }) {
-  const modelPathValue = getValue(model, '/spec/machine')
-  watchDependency('model#/spec/machine')
-  return modelPathValue !== 'custom' && !!modelPathValue
-}
-
 function getMachineListForOptions() {
   const array = machineList.map((item) => {
     return { text: item, value: item }
   })
   return array
-}
-
-function setResourceLimitTopology({ commit, model, getValue }) {
-  setResourceLimit({ commit, model, getValue }, 'middleManagers')
-  setResourceLimit({ commit, model, getValue }, 'historicals')
-  setResourceLimit({ commit, model, getValue }, 'brokers')
-  setResourceLimit({ commit, model, getValue }, 'coordinators')
 }
 
 function onMachineChange({ commit, model, getValue }, type) {
@@ -880,12 +867,10 @@ function returnFalse() {
 return {
   returnFalse,
   initBundle,
-  setResourceLimitTopology,
   isVariantAvailable,
   showAuthPasswordField,
   getNamespaces,
   getSecrets,
-  disableLimit,
   getMachineListForOptions,
   onMachineChange,
   setLimits,

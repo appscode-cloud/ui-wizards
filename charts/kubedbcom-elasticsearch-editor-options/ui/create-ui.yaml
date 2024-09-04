@@ -73,17 +73,26 @@ steps:
             fetch: getMachineListForOptions
             label:
               text: Machine
-            onChange: setResourceLimit|topology/master
+            onChange: onMachineChange|topology/master
             schema:
-              $ref: schema#/properties/spec/properties/topology/master/podResources/properties/machine
+              $ref: schema#/properties/spec/properties/topology/properties/master/properties/podResources/properties/machine
             type: select
-          - computed: setLimitsCpuOrMem|topology/master
+          - computed: setLimits|cpu|topology/master
             disabled: isMachineNotCustom|topology/master
             label:
-              text: labels.resources
+              text: labels.cpu
+            onChange: setRequests|cpu|topology/master
             schema:
-              $ref: schema#/properties/spec/properties/topology/master/podResources/properties/resources
-            type: resource-input-form
+              $ref: schema#/properties/spec/properties/topology/properties/master/properties/podResources/properties/resources/properties/limits/properties/cpu
+            type: input
+          - computed: setLimits|memory|topology/master
+            disabled: isMachineNotCustom|topology/master
+            label:
+              text: labels.memory
+            onChange: setRequests|memory|topology/master
+            schema:
+              $ref: schema#/properties/spec/properties/topology/properties/master/properties/podResources/properties/resources/properties/limits/properties/memory
+            type: input
           label:
             text: labels.machine_profile
           show_label: true
@@ -114,17 +123,26 @@ steps:
             fetch: getMachineListForOptions
             label:
               text: Machine
-            onChange: setResourceLimit|topology/data
+            onChange: onMachineChange|topology/data
             schema:
-              $ref: schema#/properties/spec/properties/topology/data/podResources/properties/machine
+              $ref: schema#/properties/spec/properties/topology/properties/data/properties/podResources/properties/machine
             type: select
-          - computed: setLimitsCpuOrMem|topology/data
+          - computed: setLimits|cpu|topology/data
             disabled: isMachineNotCustom|topology/data
             label:
-              text: labels.resources
+              text: labels.cpu
+            onChange: setRequests|cpu|topology/data
             schema:
-              $ref: schema#/properties/spec/properties/topology/data/podResources/properties/resources
-            type: resource-input-form
+              $ref: schema#/properties/spec/properties/topology/properties/data/properties/podResources/properties/resources/properties/limits/properties/cpu
+            type: input
+          - computed: setLimits|memory|topology/data
+            disabled: isMachineNotCustom|memoryustom|topology/data
+            label:
+              text: labels.memory
+            onChange: setRequests|memory|topology/data
+            schema:
+              $ref: schema#/properties/spec/properties/topology/properties/data/properties/podResources/properties/resources/properties/limits/properties/memory
+            type: input
           label:
             text: labels.machine_profile
           show_label: true
@@ -155,17 +173,26 @@ steps:
             fetch: getMachineListForOptions
             label:
               text: Machine
-            onChange: setResourceLimit|topology/ingest
+            onChange: onMachineChange|topology/ingest
             schema:
-              $ref: schema#/properties/spec/properties/topology/ingest/podResources/properties/machine
+              $ref: schema#/properties/spec/properties/topology/properties/ingest/properties/podResources/properties/machine
             type: select
-          - computed: setLimitsCpuOrMem|topology/ingest
+          - computed: setLimits|cpu|topology/ingest
             disabled: isMachineNotCustom|topology/ingest
             label:
-              text: labels.resources
+              text: labels.cpu
+            onChange: setRequests|cpu|topology/ingest
             schema:
-              $ref: schema#/properties/spec/properties/topology/ingest/podResources/properties/resources
-            type: resource-input-form
+              $ref: schema#/properties/spec/properties/topology/properties/ingest/properties/podResources/properties/resources/properties/limits/properties/cpu
+            type: input
+          - computed: setLimits|memory|topology/ingest
+            disabled: isMachineNotCustom|topology/ingest
+            label:
+              text: labels.memory
+            onChange: setRequests|memory|topology/ingest
+            schema:
+              $ref: schema#/properties/spec/properties/topology/properties/ingest/properties/podResources/properties/resources/properties/limits/properties/memory
+            type: input
           label:
             text: labels.machine_profile
           show_label: true
@@ -182,17 +209,26 @@ steps:
         fetch: getMachineListForOptions
         label:
           text: Machine
-        onChange: setResourceLimit
+        onChange: onMachineChange
         schema:
           $ref: schema#/properties/spec/properties/podResources/properties/machine
         type: select
-      - computed: setLimitsCpuOrMem
+      - computed: setLimits|cpu
         disabled: isMachineNotCustom
         label:
-          text: labels.resources
+          text: labels.cpu
+        onChange: setRequests|cpu
         schema:
-          $ref: schema#/properties/spec/properties/podResources/properties/resources
-        type: resource-input-form
+          $ref: schema#/properties/spec/properties/podResources/properties/resources/properties/limits/properties/cpu
+        type: input
+      - computed: setLimits|memory
+        disabled: isMachineNotCustom
+        label:
+          text: labels.cpu
+        onChange: setRequests|memory
+        schema:
+          $ref: schema#/properties/spec/properties/podResources/properties/resources/properties/limits/properties/memory
+        type: input
       if: isEqualToModelPathValue|Combined|/spec/mode
       label:
         text: labels.machine_profile
@@ -300,7 +336,6 @@ steps:
       if: isToggleOn|deployment
       label:
         text: labels.deployment.name
-      onChange: onDeploymentChange
       options:
       - description: labels.deployment.shared
         text: Shared
