@@ -381,9 +381,17 @@ function onMachineChange({ commit, model, getValue }, type) {
   const path = type ? `/spec/${type}/podResources/machine` : '/spec/podResources/machine'
   let selectedMachine = getValue(model, path)
   if (selectedMachine && selectedMachine !== 'custom') {
+    const commitPathPrefix = type
+      ? `/spec/${type}/podResources/resources`
+      : '/spec/podResources/resources'
     commit('wizard/model$update', {
-      path: '/spec/podResources/resources',
-      value: machines[selectedMachine]?.resources,
+      path: `${commitPathPrefix}/limits/cpu`,
+      value: machines[selectedMachine]?.resources.limits.cpu,
+      force: true,
+    })
+    commit('wizard/model$update', {
+      path: `${commitPathPrefix}/limits/memory`,
+      value: machines[selectedMachine]?.resources.limits.memory,
       force: true,
     })
   }
