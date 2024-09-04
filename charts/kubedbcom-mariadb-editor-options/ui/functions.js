@@ -665,8 +665,9 @@ function checkIfFeatureOn({ getValue, model }, type) {
 
 function isToggleOn({ getValue, model, discriminator, watchDependency }, type) {
   watchDependency('discriminator#/bundleApiLoaded')
+  watchDependency('model#/spec/admin/deployment/default')
   const bundleApiLoaded = getValue(discriminator, '/bundleApiLoaded')
-
+  let deploymentType = getValue(model, `/spec/admin/deployment/default`)
   if (
     type === 'tls' ||
     type === 'backup' ||
@@ -675,8 +676,14 @@ function isToggleOn({ getValue, model, discriminator, watchDependency }, type) {
     type === 'archiver'
   ) {
     return checkIfFeatureOn({ getValue, model }, type)
-  }
-  return getValue(model, `/spec/admin/${type}/toggle`) && bundleApiLoaded
+  } else if (
+    type === 'clusterTier' ||
+    type === 'clusterTier/placement' ||
+    type === 'clusterTier/nodeTopology'
+  ) {
+    if (deploymentType === 'Dedicated' && bundleApiLoaded) return true
+    else return false
+  } else return getValue(model, `/spec/admin/${type}/toggle`) && bundleApiLoaded
 }
 
 async function getNodeTopology({ model, getValue, axios, storeGet, watchDependency }) {
