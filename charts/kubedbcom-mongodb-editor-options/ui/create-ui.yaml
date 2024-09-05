@@ -83,17 +83,26 @@ steps:
             fetch: getMachineListForOptions
             label:
               text: labels.machine
-            onChange: setResource|shardTopology/shard
+            onChange: onMachineChange|shardTopology/shard
             schema:
               $ref: schema#/properties/spec/properties/shardTopology/properties/shard/properties/podResources/properties/machine
             type: select
-          - computed: setCpuOrMem|shardTopology/shard
+          - computed: setLimits|cpu|shardTopology/shard
             disabled: isMachineNotCustom|shardTopology/shard
             label:
-              text: labels.resources
+              text: labels.cpu
+            onChange: setRequests|cpu|shardTopology/shard
             schema:
-              $ref: schema#/properties/spec/properties/shardTopology/properties/shard/properties/podResources/properties/resources
-            type: resource-input-form
+              $ref: schema#/properties/spec/properties/shardTopology/properties/shard/properties/podResources/properties/resources/properties/limits/properties/cpu
+            type: input
+          - computed: setLimits|memory|shardTopology/shard
+            disabled: isMachineNotCustom|shardTopology/shard
+            label:
+              text: labels.memory
+            onChange: setRequests|memory|shardTopology/shard
+            schema:
+              $ref: schema#/properties/spec/properties/shardTopology/properties/shard/properties/podResources/properties/resources/properties/limits/properties/memory
+            type: input
           schema:
             $ref: schema#/properties/spec/properties/shardTopology/properties/shard/properties/podResources
           type: single-step-form
@@ -118,17 +127,26 @@ steps:
             fetch: getMachineListForOptions
             label:
               text: labels.machine
-            onChange: setResource|shardTopology/configServer
+            onChange: onMachineChange|shardTopology/configServer
             schema:
               $ref: schema#/properties/spec/properties/shardTopology/properties/configServer/properties/podResources/properties/machine
             type: select
-          - computed: setCpuOrMem|shardTopology/configServer
+          - computed: setLimits|cpu|shardTopology/configServer
             disabled: isMachineNotCustom|shardTopology/configServer
             label:
-              text: labels.resources
+              text: labels.cpu
+            onChange: setRequests|cpu|shardTopology/configServer
             schema:
-              $ref: schema#/properties/spec/properties/shardTopology/properties/configServer/properties/podResources/properties/resources
-            type: resource-input-form
+              $ref: schema#/properties/spec/properties/shardTopology/properties/configServer/properties/podResources/properties/resources/properties/limits/properties/cpu
+            type: input
+          - computed: setLimits|memory|shardTopology/configServer
+            disabled: isMachineNotCustom|shardTopology/configServer
+            label:
+              text: labels.memory
+            onChange: setRequests|memory|shardTopology/configServer
+            schema:
+              $ref: schema#/properties/spec/properties/shardTopology/properties/configServer/properties/podResources/properties/resources/properties/limits/properties/memory
+            type: input
           schema:
             $ref: schema#/properties/spec/properties/shardTopology/properties/configServer/properties/podResources
           type: single-step-form
@@ -148,17 +166,26 @@ steps:
             fetch: getMachineListForOptions
             label:
               text: labels.machine
-            onChange: setResource|shardTopology/mongos
+            onChange: onMachineChange|shardTopology/mongos
             schema:
               $ref: schema#/properties/spec/properties/shardTopology/properties/mongos/properties/podResources/properties/machine
             type: select
-          - computed: setCpuOrMem|shardTopology/mongos
+          - computed: setLimits|cpu|shardTopology/mongos
             disabled: isMachineNotCustom|shardTopology/mongos
             label:
-              text: labels.resources
+              text: labels.cpu
+            onChange: setRequests|cpu|shardTopology/mongos
             schema:
-              $ref: schema#/properties/spec/properties/shardTopology/properties/mongos/properties/podResources/properties/resources
-            type: resource-input-form
+              $ref: schema#/properties/spec/properties/shardTopology/properties/mongos/properties/podResources/properties/resources/properties/limits/properties/cpu
+            type: input
+          - computed: setLimits|memory|shardTopology/mongos
+            disabled: isMachineNotCustom|shardTopology/mongos
+            label:
+              text: labels.memory
+            onChange: setRequests|memory|shardTopology/mongos
+            schema:
+              $ref: schema#/properties/spec/properties/shardTopology/properties/mongos/properties/podResources/properties/resources/properties/limits/properties/memory
+            type: input
           schema:
             $ref: schema#/properties/spec/properties/shardTopology/properties/mongos/properties/podResources
           type: single-step-form
@@ -174,17 +201,26 @@ steps:
         fetch: getMachineListForOptions
         label:
           text: labels.machine
-        onChange: setResourceLimit
+        onChange: onMachineChange
         schema:
           $ref: schema#/properties/spec/properties/podResources/properties/machine
         type: select
-      - computed: setLimitsCpuOrMem
+      - computed: setLimits|cpu
         disabled: isMachineNotCustom
         label:
-          text: labels.resources
+          text: labels.cpu
+        onChange: setRequests|cpu
         schema:
-          $ref: schema#/properties/spec/properties/podResources/properties/resources
-        type: resource-input-form
+          $ref: schema#/properties/spec/properties/podResources/properties/resources/properties/limits/properties/cpu
+        type: input
+      - computed: setLimits|memory
+        disabled: isMachineNotCustom
+        onChange: setRequests|memory
+        label:
+          text: labels.memory
+        schema:
+          $ref: schema#/properties/spec/properties/podResources/properties/resources/properties/limits/properties/memory
+        type: input
       if: notEqualToDatabaseMode|Sharded
       label:
         text: labels.machine_profile
@@ -302,17 +338,26 @@ steps:
           fetch: getMachineListForOptions
           label:
             text: labels.machine
-          onChange: setResource|arbiter
+          onChange: onMachineChange|arbiter
           schema:
             $ref: schema#/properties/spec/properties/arbiter/properties/podResources/properties/machine
           type: select
-        - computed: setCpuOrMem|arbiter
+        - computed: setLimits|cpu|arbiter
           disabled: isMachineNotCustom|arbiter
           label:
-            text: labels.resources
+            text: labels.cpu
+          onChange: setRequests|cpu|arbiter
           schema:
-            $ref: schema#/properties/spec/properties/arbiter/properties/podResources/properties/resources
-          type: resource-input-form
+            $ref: schema#/properties/spec/properties/arbiter/properties/podResources/properties/resources/properties/limits/properties/cpu
+          type: input
+        - computed: setLimits|memory|arbiter
+          disabled: isMachineNotCustom|arbiter
+          label:
+            text: labels.memory
+          onChange: setRequests|memory|arbiter
+          schema:
+            $ref: schema#/properties/spec/properties/arbiter/properties/podResources/properties/resources/properties/limits/properties/memory
+          type: input
         schema:
           $ref: schema#/properties/spec/properties/arbiter/properties/podResources
         type: single-step-form
@@ -345,17 +390,24 @@ steps:
         fetch: getMachineListForOptions
         label:
           text: labels.machine
-        onChange: setResource|hidden
+        onChange: onMachineChange|hidden
         schema:
           $ref: schema#/properties/spec/properties/hidden/properties/podResources/properties/machine
         type: select
-      - computed: setCpuOrMem|hidden
+      - computed: setLimits|cpu|hidden
         disabled: isMachineNotCustom|hidden
         label:
-          text: labels.resources
+          text: labels.cpu
         schema:
-          $ref: schema#/properties/spec/properties/hidden/properties/podResources/properties/resources
-        type: resource-input-form
+          $ref: schema#/properties/spec/properties/hidden/properties/podResources/properties/resources/properties/limits/properties/cpu
+        type: input
+      - computed: setLimits|memory|hidden
+        disabled: isMachineNotCustom|hidden
+        label:
+          text: labels.memory
+        schema:
+          $ref: schema#/properties/spec/properties/hidden/properties/podResources/properties/resources/properties/limits/properties/memory
+        type: input
       if: showHidden
       label:
         text: Hidden
@@ -367,7 +419,6 @@ steps:
       if: isToggleOn|deployment
       label:
         text: labels.deployment.name
-      onChange: setResourceLimit
       options:
       - description: labels.deployment.shared
         text: Shared

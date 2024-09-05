@@ -56,17 +56,26 @@ steps:
         fetch: getMachineListForOptions
         label:
           text: Machine
-        onChange: setResourceLimit
+        onChange: onMachineChange
         schema:
           $ref: schema#/properties/spec/properties/podResources/properties/machine
         type: select
-      - computed: setLimitsCpuOrMem
+      - computed: setLimits|cpu
         disabled: isMachineNotCustom
         label:
-          text: labels.resources
+          text: labels.cpu
+        onChange: setRequests|cpu
         schema:
-          $ref: schema#/properties/spec/properties/podResources/properties/resources
-        type: resource-input-form
+          $ref: schema#/properties/spec/properties/podResources/properties/resources/properties/limits/properties/cpu
+        type: input
+      - computed: setLimits|memory
+        disabled: isMachineNotCustom
+        label:
+          text: labels.memory
+        onChange: setRequests|memory
+        schema:
+          $ref: schema#/properties/spec/properties/podResources/properties/resources/properties/limits/properties/memory
+        type: input
       label:
         text: labels.machine_profile
       show_label: true
@@ -188,7 +197,6 @@ steps:
       if: isToggleOn|deployment
       label:
         text: labels.deployment.name
-      onChange: setResourceLimit
       options:
       - description: labels.deployment.shared
         text: Shared
