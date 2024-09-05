@@ -534,11 +534,29 @@ function setProvider({ getValue, model }) {
 }
 
 function setStorageSecret({ getValue, model }) {
-  const secret = getValue(
-    model,
-    '/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/kubestash/storageSecret/create',
+  const provider = getValue(
+      model,
+      `/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/kubestash/backend/provider`,
   )
-  return secret
+  if (provider === undefined){
+    return false
+  }
+
+  const enabled = getValue(
+      model,
+      '/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/kubestash/storageSecret/create',
+  )
+
+  if (enabled !== undefined){
+    return true
+  }
+
+  const authValues = getValue(
+      model,
+      `/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/kubestash/backend/${provider}/auth`,
+  )
+
+  return authValues !== undefined;
 }
 
 function onAuthChange({ getValue, discriminator, commit }, type) {
