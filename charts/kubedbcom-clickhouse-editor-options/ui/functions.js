@@ -453,12 +453,6 @@ async function getSecrets({ storeGet, axios, model, getValue, watchDependency })
   return filteredSecrets
 }
 
-function disableLimit({ model, getValue, watchDependency }) {
-  const modelPathValue = getValue(model, '/spec/podResources/machine')
-  watchDependency('model#/spec/podResources/machine')
-  return modelPathValue !== 'custom' && !!modelPathValue
-}
-
 function getMachineListForOptions() {
   const array = machineList.map((item) => {
     return { text: item, value: item }
@@ -466,39 +460,64 @@ function getMachineListForOptions() {
   return array
 }
 
-function setLimitsCpuOrMem({ model, getValue, watchDependency }) {
-  watchDependency('model#/spec/version')
-  const modelPathValue = getValue(model, '/spec/podResources/machine')
-  const deploymentType = getValue(model, 'spec/admin/deployment/default')
-  const cpu = getValue(model, '/spec/podResources/resources/limits/cpu')
-  const memory = getValue(model, '/spec/podResources/resources/limits/memory')
-  if (modelPathValue && modelPathValue !== 'custom') {
-    return machines[modelPathValue] && machines[modelPathValue].resources
-  } else {
-    if (deploymentType === 'Dedicated') {
-      return {
-        limits: {
-          cpu: cpu,
-          memory: memory,
-        },
-        requests: {
-          cpu: cpu,
-          memory: memory,
-        },
-      }
-    } else {
-      return {
-        limits: {
-          cpu: cpu,
-          memory: memory,
-        },
-        requests: {
-          cpu: '250m',
-          memory: '500Mi',
-        },
-      }
-    }
+function onMachineChange({ commit, model, getValue }) {
+  let selectedMachine = getValue(model, '/spec/podResources/machine')
+  if (selectedMachine && selectedMachine !== 'custom') {
+    commit('wizard/model$update', {
+      path: '/spec/podResources/resources/limits/cpu',
+      value: machines[selectedMachine]?.resources.limits.cpu,
+      force: true,
+    })
+    commit('wizard/model$update', {
+      path: '/spec/podResources/resources/limits/memory',
+      value: machines[selectedMachine]?.resources.limits.memory,
+      force: true,
+    })
   }
+}
+
+function setLimits({ model, getValue, commit }, resource) {
+  const path = '/spec/podResources/machine'
+  const selectedMachine = getValue(model, path)
+  const reqCommitPath = `/spec/podResources/resources/requests/${resource}`
+  if (selectedMachine && selectedMachine !== 'custom') {
+    if (resource === 'cpu') {
+      commit('wizard/model$update', {
+        path: reqCommitPath,
+        value: machines[selectedMachine]?.resources?.limits?.cpu,
+        force: true,
+      })
+      return machines[selectedMachine]?.resources?.limits?.cpu
+    } else if (resource === 'memory') {
+      commit('wizard/model$update', {
+        path: reqCommitPath,
+        value: machines[selectedMachine]?.resources?.limits?.memory,
+        force: true,
+      })
+      return machines[selectedMachine]?.resources?.limits?.memory
+    }
+  } else {
+    const modelPath = `/spec/podResources/resources/limits/${resource}`
+    const val = getValue(model, modelPath)
+    commit('wizard/model$update', {
+      path: reqCommitPath,
+      value: val,
+      force: true,
+    })
+    if (resource === 'cpu') return val || '250m'
+    else return val || '500Mi'
+  }
+}
+
+function setRequests({ getValue, model, commit }, resource) {
+  const modelPath = `/spec/podResources/resources/limits/${resource}`
+  const val = getValue(model, modelPath)
+  commitPath = `/spec/podResources/resources/requests/${resource}`
+  commit('wizard/model$update', {
+    path: commitPath,
+    value: val,
+    force: true,
+  })
 }
 
 function setMachineToCustom() {
@@ -995,6 +1014,7 @@ function isMachineNotCustom({ model, getValue, watchDependency }, path) {
   watchDependency(`model#${fullpath}`)
   return modelPathValue !== 'custom' && !!modelPathValue
 }
+
 async function getNamespaces({ axios, storeGet }) {
   const params = storeGet('/route/params')
   const { user, cluster, group, version, resource } = params
@@ -1023,6 +1043,7 @@ async function getNamespaces({ axios, storeGet }) {
     return []
   }
 }
+
 function updateAlertValue({ commit, model, discriminator, getValue }) {
   const isMonitorEnabled = getValue(discriminator, '/monitoring')
   const alert = isMonitorEnabled ? 'warning' : 'none'
@@ -1038,32 +1059,6 @@ function updateAlertValue({ commit, model, discriminator, getValue }) {
     value: agent,
     force: true,
   })
-}
-
-function setResourceLimit({ commit, model, getValue, watchDependency }) {
-  let modelPathValue = getValue(model, '/spec/podResources/machine')
-  const deploymentType = getValue(model, '/spec/admin/deployment/default')
-  if (modelPathValue && modelPathValue !== 'custom') {
-    // to avoiding set value by reference, cpu and memory set separately
-    if (deploymentType === 'Dedicated') {
-      commit('wizard/model$update', {
-        path: '/spec/podResources/resources/requests',
-        value: machines[modelPathValue]?.resources.limits,
-        force: true,
-      })
-      commit('wizard/model$update', {
-        path: '/spec/podResources/resources/limits',
-        value: machines[modelPathValue]?.resources.limits,
-        force: true,
-      })
-    } else {
-      commit('wizard/model$update', {
-        path: '/spec/podResources/resources',
-        value: machines[modelPathValue]?.resources,
-        force: true,
-      })
-    }
-  }
 }
 
 return {
@@ -1099,10 +1094,10 @@ return {
   getMongoDbVersions,
   onCreateAuthSecretChange,
   getSecrets,
-  disableLimit,
   getMachineListForOptions,
-  setResourceLimit,
-  setLimitsCpuOrMem,
+  onMachineChange,
+  setLimits,
+  setRequests,
   setMachineToCustom,
   updateAgentValue,
   getCreateNameSpaceUrl,

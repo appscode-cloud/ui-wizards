@@ -50,17 +50,26 @@ steps:
           fetch: getMachineListForOptions
           label:
             text: Machine
-          onChange: setResourceLimit|middleManagers
+          onChange: onMachineChange|topology/middleManagers
           schema:
             $ref: schema#/properties/spec/properties/topology/properties/middleManagers/properties/podResources/properties/machine
           type: select
-        - computed: setLimitsCpuOrMem|topology/middleManagers
+        - computed: setLimits|cpu|topology/middleManagers
           disabled: isMachineNotCustom|topology/middleManagers
           label:
-            text: labels.resources
+            text: labels.cpu
+          onChange: setRequests|cpu|topology/middleManagers
           schema:
-            $ref: schema#/properties/spec/properties/topology/properties/middleManagers/properties/podResources/properties/resources
-          type: resource-input-form
+            $ref: schema#/properties/spec/properties/topology/properties/middleManagers/properties/podResources/properties/resources/properties/limits/properties/cpu
+          type: input
+        - computed: setLimits|memory|topology/middleManagers
+          disabled: isMachineNotCustom|topology/middleManagers
+          label:
+            text: labels.memory
+          onChange: setRequests|memory|topology/middleManagers
+          schema:
+            $ref: schema#/properties/spec/properties/topology/properties/middleManagers/properties/podResources/properties/resources/properties/limits/properties/memory
+          type: input
         label:
           text: labels.middleManagers
         show_label: true
@@ -80,17 +89,26 @@ steps:
           fetch: getMachineListForOptions
           label:
             text: Machine
-          onChange: setResourceLimit|historicals
+          onChange: onMachineChange|topology/historicals
           schema:
             $ref: schema#/properties/spec/properties/topology/properties/historicals/properties/podResources/properties/machine
           type: select
-        - computed: setLimitsCpuOrMem|topology/historicals
+        - computed: setLimits|cpu|topology/historicals
           disabled: isMachineNotCustom|topology/historicals
           label:
-            text: labels.resources
+            text: labels.cpu
+          onChange: setRequests|cpu|topology/historicals
           schema:
-            $ref: schema#/properties/spec/properties/topology/properties/historicals/properties/podResources/properties/resources
-          type: resource-input-form
+            $ref: schema#/properties/spec/properties/topology/properties/historicals/properties/podResources/properties/resources/properties/limits/properties/cpu
+          type: input
+        - computed: setLimits|memory|topology/historicals
+          disabled: isMachineNotCustom|topology/historicals
+          label:
+            text: labels.memory
+          onChange: setRequests|memory|topology/historicals
+          schema:
+            $ref: schema#/properties/spec/properties/topology/properties/historicals/properties/podResources/properties/resources/properties/limits/properties/memory
+          type: input
         label:
           text: labels.historicals
         show_label: true
@@ -105,17 +123,26 @@ steps:
           fetch: getMachineListForOptions
           label:
             text: Machine
-          onChange: setResourceLimit|brokers
+          onChange: onMachineChange|topology/brokers
           schema:
             $ref: schema#/properties/spec/properties/topology/properties/brokers/properties/podResources/properties/machine
           type: select
-        - computed: setLimitsCpuOrMem|topology/brokers
+        - computed: setLimits|cpu|topology/brokers
           disabled: isMachineNotCustom|topology/brokers
           label:
-            text: labels.resources
+            text: labels.cpu
+          onChange: setRequests|cpu|topology/brokers
           schema:
-            $ref: schema#/properties/spec/properties/topology/properties/brokers/properties/podResources/properties/resources
-          type: resource-input-form
+            $ref: schema#/properties/spec/properties/topology/properties/brokers/properties/podResources/properties/resources/properties/limits/properties/cpu
+          type: input
+        - computed: setLimits|memory|topology/brokers
+          disabled: isMachineNotCustom|topology/brokers
+          label:
+            text: labels.cpu
+          onChange: setRequests|memory|topology/brokers
+          schema:
+            $ref: schema#/properties/spec/properties/topology/properties/brokers/properties/podResources/properties/resources/properties/limits/properties/memory
+          type: input
         label:
           text: labels.brokers
         show_label: true
@@ -130,17 +157,26 @@ steps:
           fetch: getMachineListForOptions
           label:
             text: Machine
-          onChange: setResourceLimit|coordinators
+          onChange: onMachineChange|topology/coordinators
           schema:
             $ref: schema#/properties/spec/properties/topology/properties/coordinators/properties/podResources/properties/machine
           type: select
-        - computed: setLimitsCpuOrMem|topology/coordinators
+        - computed: setLimits|cpu|topology/coordinators
           disabled: isMachineNotCustom|topology/coordinators
           label:
-            text: labels.resources
+            text: labels.cpu
+          onChange: setRequests|cpu|topology/coordinators
           schema:
-            $ref: schema#/properties/spec/properties/topology/properties/coordinators/properties/podResources/properties/resources
-          type: resource-input-form
+            $ref: schema#/properties/spec/properties/topology/properties/coordinators/properties/podResources/properties/resources/properties/limits/properties/cpu
+          type: input
+        - computed: setLimits|memory|topology/coordinators
+          disabled: isMachineNotCustom|topology/coordinators
+          label:
+            text: labels.memory
+          onChange: setRequests|memory|topology/coordinators
+          schema:
+            $ref: schema#/properties/spec/properties/topology/properties/coordinators/properties/podResources/properties/resources/properties/limits/properties/memory
+          type: input
         label:
           text: labels.coordinators
         show_label: true
@@ -313,7 +349,6 @@ steps:
       if: isToggleOn|deployment
       label:
         text: labels.deployment.name
-      onChange: setResourceLimitTopology
       options:
       - description: labels.deployment.shared
         text: Shared
