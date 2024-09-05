@@ -522,8 +522,15 @@ function setTool({ commit }) {
   return 'KubeStash'
 }
 
-function setProvider() {
-  return 's3'
+function setProvider({ getValue, model }) {
+  const provider = getValue(
+      model,
+      `/resources/helmToolkitFluxcdIoHelmRelease_stash_presets/spec/values/kubestash/backend/provider`,
+  )
+  if (provider === undefined){
+    return 's3'
+  }
+  return provider
 }
 
 function setStorageSecret({ getValue, model }) {
