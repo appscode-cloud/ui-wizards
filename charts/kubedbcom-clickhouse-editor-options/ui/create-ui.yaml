@@ -292,6 +292,7 @@ steps:
           $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/nodeTopology/properties/default
         type: select
     - type: single-step-form
+      if: showAdditionalSettings
       show_label: true
       label:
         text: Additional Settings
@@ -332,31 +333,39 @@ steps:
           $ref: schema#/properties/form/properties/alert/properties/enabled
         sortable: true
         type: select
-      - if: isToggleOn|tls
-        label:
-          text: Enable TLS?
-        schema:
-          $ref: schema#/properties/spec/properties/admin/properties/tls/properties/default
-        type: switch
-      - fetch: getAdminOptions|clusterIssuers
+      - type: single-step-form
+        if: isToggleOn|tls
+        elements:
+        - label:
+            text: Enable TLS?
+          schema:
+            $ref: schema#/properties/spec/properties/admin/properties/tls/properties/default
+          type: switch
+      - type: single-step-form
         if: showIssuer
-        label:
-          text: labels.clusterIssuers
-        schema:
-          $ref: schema#/properties/spec/properties/admin/properties/clusterIssuers/properties/default
-        type: select
-      - if: isToggleOn|expose
-        label:
-          text: Expose via Gateway?
-        schema:
-          $ref: schema#/properties/spec/properties/admin/properties/expose/properties/default
-        type: switch
-      - if: isToggleOn|archiver
-        label:
-          text: Enable Archiver?
-        schema:
-          $ref: schema#/properties/spec/properties/admin/properties/archiver/properties/default
-        type: switch
+        elements:
+        - fetch: getAdminOptions|clusterIssuers
+          label:
+            text: labels.clusterIssuers
+          schema:
+            $ref: schema#/properties/spec/properties/admin/properties/clusterIssuers/properties/default
+          type: select
+      - type: single-step-form
+        elements: 
+        - if: isToggleOn|expose
+          label:
+            text: Expose via Gateway?
+          schema:
+            $ref: schema#/properties/spec/properties/admin/properties/expose/properties/default
+          type: switch
+      - type: single-step-form
+        elements:
+        - if: isToggleOn|archiver
+          label:
+            text: Enable Archiver?
+          schema:
+            $ref: schema#/properties/spec/properties/admin/properties/archiver/properties/default
+          type: switch
     - label:
         text: labels.configOptions
       type: label-element

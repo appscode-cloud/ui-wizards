@@ -785,6 +785,11 @@ function checkIfFeatureOn({ getValue, model }, type) {
   }
 }
 
+function showAdditionalSettings({ watchDependency }) {
+  watchDependency('discriminator#/bundleApiLoaded')
+  return features.length
+}
+
 function isToggleOn({ getValue, model, discriminator, watchDependency }, type) {
   watchDependency('discriminator#/bundleApiLoaded')
   watchDependency('model#/spec/admin/deployment/default')
@@ -1062,6 +1067,7 @@ function updateAlertValue({ commit, model, discriminator, getValue }) {
 }
 
 return {
+  showAdditionalSettings,
   returnFalse,
   initBundle,
   getNamespaces,
