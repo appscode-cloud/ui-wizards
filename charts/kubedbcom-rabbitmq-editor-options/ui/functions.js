@@ -997,22 +997,6 @@ function setMonitoring({ getValue, model }) {
   return !!agent
 }
 
-async function isNotBackupCluster({ axios, storeGet, commit }) {
-  const owner = storeGet('/route/params/user')
-  const cluster = storeGet('/route/params/cluster')
-  const url = `/clusters/${owner}/${cluster}/proxy/ui.k8s.appscode.com/v1alpha1/features`
-  let isStashEnabled = false
-
-  try {
-    const resp = await axios.get(url)
-    const stashPreset = resp.data?.items?.find((item) => item.metadata?.name === 'stash-presets')
-    isStashEnabled = !!(stashPreset?.status?.enabled && stashPreset?.status?.ready)
-  } catch (e) {
-    console.log(e)
-  }
-  return !isStashEnabled
-}
-
 function setBackup({ model, getValue }) {
   const backup = getValue(model, '/spec/backup/tool')
   return backup === 'KubeStash' && features.includes('backup')
@@ -1071,6 +1055,11 @@ function updateAlertValue({ commit, model, discriminator, getValue }) {
   })
 }
 
+function showAdditionalSettings({ watchDependency }) {
+  watchDependency('discriminator#/bundleApiLoaded')
+  return features.length
+}
+
 return {
   initBundle,
   getNamespaces,
@@ -1087,7 +1076,6 @@ return {
   filterNodeTopology,
   onAuthChange,
   setMonitoring,
-  isNotBackupCluster,
   isMachineNotCustom,
   showIssuer,
   showArbiter,
@@ -1124,4 +1112,5 @@ return {
   showReplicaField,
   onModeChange,
   setBackup,
+  showAdditionalSettings,
 }
