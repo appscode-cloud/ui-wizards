@@ -249,7 +249,7 @@ steps:
           type: boolean
         monitoring:
           default: false
-          type: boolean        
+          type: boolean
       show_label: true
       accordion: true
       hideForm: true
@@ -258,7 +258,11 @@ steps:
       description: 
         text: Enable Backup, Monitoring, TLS etc.
       elements:
-      - type: single-step-form
+      - discriminator:
+          monitoring:
+            default: false
+            type: boolean
+        type: single-step-form
         elements:
         - computed: setMonitoring
           if: isToggleOn|monitoring
@@ -316,17 +320,14 @@ steps:
           schema:
             $ref: schema#/properties/spec/properties/admin/properties/archiver/properties/default
           type: switch
-      - type: single-step-form
-        elements:
-        - computed: setBackup
-          disabled: isNotBackupCluster
-          if: isToggleOn|backup
-          label:
-            text: Enable Backup?
-          onChange: onBackupSwitch
-          schema:
-            $ref: discriminator#/backup
-          type: switch
+      - computed: setBackup
+        if: isToggleOn|backup
+        label:
+          text: Enable Backup?
+        onChange: onBackupSwitch
+        schema:
+          $ref: discriminator#/backup
+        type: switch
     - label:
         text: labels.configOptions
       type: label-element
