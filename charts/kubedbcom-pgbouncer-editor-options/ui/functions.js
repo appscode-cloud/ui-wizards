@@ -767,7 +767,13 @@ function clearConfiguration({ discriminator, getValue, commit }) {
   }
 }
 
+function showAdditionalSettings({ watchDependency }) {
+  watchDependency('discriminator#/bundleApiLoaded')
+  return features.length
+}
+
 return {
+  showAdditionalSettings,
   initBundle,
   returnFalse,
   getAppBindings,
