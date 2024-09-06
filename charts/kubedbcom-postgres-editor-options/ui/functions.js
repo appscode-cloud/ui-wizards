@@ -1043,6 +1043,11 @@ function EqualToDatabaseMode({ model, getValue, watchDependency }, mode) {
   return modelPathValue && modelPathValue === mode
 }
 
+function showAdditionalSettings({ watchDependency }) {
+  watchDependency('discriminator#/bundleApiLoaded')
+  return features.length
+}
+
 return {
   initBundle,
   returnFalse,
@@ -1097,4 +1102,5 @@ return {
   showSelectZone,
   setStorageClass,
   setBackup,
+  showAdditionalSettings,
 }

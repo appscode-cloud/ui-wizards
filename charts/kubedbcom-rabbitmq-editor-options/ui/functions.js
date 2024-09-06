@@ -1071,6 +1071,11 @@ function updateAlertValue({ commit, model, discriminator, getValue }) {
   })
 }
 
+function showAdditionalSettings({ watchDependency }) {
+  watchDependency('discriminator#/bundleApiLoaded')
+  return features.length
+}
+
 return {
   initBundle,
   getNamespaces,
@@ -1124,4 +1129,5 @@ return {
   showReplicaField,
   onModeChange,
   setBackup,
+  showAdditionalSettings,
 }

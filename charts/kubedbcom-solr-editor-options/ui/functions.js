@@ -1068,6 +1068,11 @@ function setNamespace({ commit, model, getValue }) {
   }
 }
 
+function showAdditionalSettings({ watchDependency }) {
+  watchDependency('discriminator#/bundleApiLoaded')
+  return features.length
+}
+
 return {
   initBundle,
   returnFalse,
@@ -1116,4 +1121,5 @@ return {
   onBackupSwitch,
   isNotBackupCluster,
   setBackup,
+  showAdditionalSettings,
 }

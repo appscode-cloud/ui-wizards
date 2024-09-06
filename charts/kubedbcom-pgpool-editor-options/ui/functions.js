@@ -988,6 +988,11 @@ function onRefChange({ discriminator, getValue, commit }, type) {
   })
 }
 
+function showAdditionalSettings({ watchDependency }) {
+  watchDependency('discriminator#/bundleApiLoaded')
+  return features.length
+}
+
 return {
   returnFalse,
   initBundle,
@@ -1035,4 +1040,5 @@ return {
   getAppBindings,
   onRefChange,
   setBackup,
+  showAdditionalSettings,
 }

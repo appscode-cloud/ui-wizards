@@ -1,19 +1,7 @@
 steps:
 - form:
     discriminator:
-      backup:
-        default: false
-        type: boolean
       bundleApiLoaded:
-        default: false
-        type: boolean
-      configDatabase:
-        default: false
-        type: boolean
-      createAuthSecret:
-        default: true
-        type: boolean
-      monitoring:
         default: false
         type: boolean
     elements:
@@ -170,210 +158,244 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/persistence/properties/size
       type: input
-    - type: single-step-form
-      show_label: true
+    - discriminator:
+        configDatabase:
+          default: false
+          type: boolean
+        createAuthSecret:
+          default: false
+          type: boolean
+      elements:
+      - type: single-step-form
+        show_label: true
+        hideForm: true
+        label:
+          text: Labels & Annotations
+        elements:
+        - isArray: true
+          keys:
+            label:
+              text: labels.labels.key
+          label:
+            text: labels.labels.label
+          schema:
+            $ref: schema#/properties/spec/properties/labels
+          type: key-value-input-form
+          values:
+            label:
+              text: labels.labels.value
+            schema:
+              $ref: schema#/properties/spec/properties/labels/additionalProperties
+            type: input
+        - isArray: true
+          keys:
+            label:
+              text: labels.annotations.key
+          label:
+            text: labels.annotations.label
+          schema:
+            $ref: schema#/properties/spec/properties/annotations
+          type: key-value-input-form
+          values:
+            label:
+              text: labels.annotations.value
+            schema:
+              $ref: schema#/properties/spec/properties/annotations/additionalProperties
+            type: input
+      - label:
+          text: labels.deletionPolicy
+        customClass: mt-20
+        onChange: setStorageClass
+        options:
+        - description: options.deletionPolicy.delete.description
+          text: options.deletionPolicy.delete.label
+          value: Delete
+        - description: options.deletionPolicy.halt.description
+          text: options.deletionPolicy.halt.label
+          value: Halt
+        - description: options.deletionPolicy.wipeOut.description
+          text: options.deletionPolicy.wipeOut.label
+          value: WipeOut
+        - description: options.deletionPolicy.doNotTerminate.description
+          text: options.deletionPolicy.doNotTerminate.label
+          value: DoNotTerminate
+        schema:
+          $ref: schema#/properties/spec/properties/deletionPolicy
+        type: select
+      - fetch: getSecrets
+        label:
+          text: labels.licenseSecret
+        schema:
+          $ref: schema#/properties/spec/properties/licenseSecret/properties/name
+        type: select
+      - label:
+          text: Provide Authentication Credentials?
+        onChange: onAuthChange
+        schema:
+          $ref: discriminator#/createAuthSecret
+        type: switch
+      - if: showAuthPasswordField
+        label:
+          text: labels.authSecret.name
+        schema:
+          $ref: schema#/properties/spec/properties/authSecret/properties/name
+        type: input
+      - if: showAuthPasswordField
+        label:
+          text: labels.authSecret.password
+        schema:
+          $ref: schema#/properties/spec/properties/authSecret/properties/password
+        type: input
+      - label:
+          text: Configure Database?
+        onChange: clearConfiguration
+        schema:
+          $ref: discriminator#/configDatabase
+        type: switch
+      - if: isConfigDatabaseOn
+        label:
+          text: Configuration
+        schema:
+          $ref: schema#/properties/spec/properties/configuration
+        type: editor
+      - hasDescription: true
+        if: isToggleOn|deployment
+        label:
+          text: labels.deployment.name
+        options:
+        - description: labels.deployment.shared
+          text: Shared
+          value: Shared
+        - description: labels.deployment.dedicated
+          text: Dedicated
+          value: Dedicated
+        schema:
+          $ref: schema#/properties/spec/properties/admin/properties/deployment/properties/default
+        type: radio
+      - if: isToggleOn|clusterTier
+        label:
+          text: labels.clusterTier
+        options:
+        - text: General Purpose
+          value: GeneralPurpose
+        - text: Memory Optimized
+          value: MemoryOptimized
+        - text: CPU Optimized
+          value: CPUOptimized
+        schema:
+          $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/default
+        isHorizontal: true
+        type: radio
+      - disableUnselect: true
+        fetch: getAdminOptions|clusterTier/placement
+        if: isToggleOn|clusterTier/placement
+        label:
+          text: labels.placement
+        schema:
+          $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/placement/properties/default
+        type: select
+      - disableUnselect: true
+        fetch: getNodeTopology
+        if: isToggleOn|clusterTier/nodeTopology
+        label:
+          text: labels.nodeTopology
+        schema:
+          $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/nodeTopology/properties/default
+        type: select
+      accordion: true
+      description:
+        text: Configure Credentials, Deployment Mode etc.
       hideForm: true
       label:
-        text: Labels & Annotations
-      elements:
-      - isArray: true
-        keys:
-          label:
-            text: labels.labels.key
-        label:
-          text: labels.labels.label
-        schema:
-          $ref: schema#/properties/spec/properties/labels
-        type: key-value-input-form
-        values:
-          label:
-            text: labels.labels.value
-          schema:
-            $ref: schema#/properties/spec/properties/labels/additionalProperties
-          type: input
-      - isArray: true
-        keys:
-          label:
-            text: labels.annotations.key
-        label:
-          text: labels.annotations.label
-        schema:
-          $ref: schema#/properties/spec/properties/annotations
-        type: key-value-input-form
-        values:
-          label:
-            text: labels.annotations.value
-          schema:
-            $ref: schema#/properties/spec/properties/annotations/additionalProperties
-          type: input
-    - label:
-        text: labels.deletionPolicy
-      customClass: mt-20
-      onChange: setStorageClass
-      options:
-      - description: options.deletionPolicy.delete.description
-        text: options.deletionPolicy.delete.label
-        value: Delete
-      - description: options.deletionPolicy.halt.description
-        text: options.deletionPolicy.halt.label
-        value: Halt
-      - description: options.deletionPolicy.wipeOut.description
-        text: options.deletionPolicy.wipeOut.label
-        value: WipeOut
-      - description: options.deletionPolicy.doNotTerminate.description
-        text: options.deletionPolicy.doNotTerminate.label
-        value: DoNotTerminate
-      schema:
-        $ref: schema#/properties/spec/properties/deletionPolicy
-      type: select
-    - fetch: getSecrets
-      label:
-        text: labels.licenseSecret
-      schema:
-        $ref: schema#/properties/spec/properties/licenseSecret/properties/name
-      type: select
-    - computed: returnFalse
-      label:
-        text: Provide Authentication Credentials?
-      onChange: onAuthChange
-      schema:
-        $ref: discriminator#/createAuthSecret
-      type: switch
-    - if: showAuthPasswordField
-      label:
-        text: labels.authSecret.name
-      schema:
-        $ref: schema#/properties/spec/properties/authSecret/properties/name
-      type: input
-    - if: showAuthPasswordField
-      label:
-        text: labels.authSecret.password
-      schema:
-        $ref: schema#/properties/spec/properties/authSecret/properties/password
-      type: input
-    - label:
-        text: Configure Database?
-      onChange: clearConfiguration
-      schema:
-        $ref: discriminator#/configDatabase
-      type: switch
-    - if: isConfigDatabaseOn
-      label:
-        text: Configuration
-      schema:
-        $ref: schema#/properties/spec/properties/configuration
-      type: editor
-    - hasDescription: true
-      if: isToggleOn|deployment
-      label:
-        text: labels.deployment.name
-      options:
-      - description: labels.deployment.shared
-        text: Shared
-        value: Shared
-      - description: labels.deployment.dedicated
-        text: Dedicated
-        value: Dedicated
-      schema:
-        $ref: schema#/properties/spec/properties/admin/properties/deployment/properties/default
-      type: radio
-    - if: isToggleOn|clusterTier
-      label:
-        text: labels.clusterTier
-      options:
-      - text: General Purpose
-        value: GeneralPurpose
-      - text: Memory Optimized
-        value: MemoryOptimized
-      - text: CPU Optimized
-        value: CPUOptimized
-      schema:
-        $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/default
-      isHorizontal: true
-      type: radio
-    - disableUnselect: true
-      fetch: getAdminOptions|clusterTier/placement
-      if: isToggleOn|clusterTier/placement
-      label:
-        text: labels.placement
-      schema:
-        $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/placement/properties/default
-      type: select
-    - disableUnselect: true
-      fetch: getNodeTopology
-      if: isToggleOn|clusterTier/nodeTopology
-      label:
-        text: labels.nodeTopology
-      schema:
-        $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/nodeTopology/properties/default
-      type: select
-    - computed: setMonitoring
-      if: isToggleOn|monitoring
-      label:
-        text: labels.enable_monitoring
-      onChange: updateAlertValue
-      schema:
-        $ref: discriminator#/monitoring
-      type: switch
-    - elements:
-      - customClass: mt-10
-        label:
-          text: labels.alert.options
-        options:
-        - text: None
-          value: none
-        - text: Critical
-          value: critical
-        - text: Warning
-          value: warning
-        - text: Info
-          value: info
-        schema:
-          $ref: schema#/properties/form/properties/alert/properties/enabled
-        sortable: true
-        type: select
-      if: showAlerts
-      label:
-        text: labels.alert.label
-      schema:
-        $ref: schema#/properties/form/properties/alert
+        text: Advanced Configuration
       show_label: true
       type: single-step-form
-    - computed: toggleTls
-      if: isEqualToModelPathValue|Topology|/spec/mode
+    - discriminator:
+        backup:
+          default: false
+          type: boolean
+      elements:
+      - discriminator:
+          monitoring:
+            default: false
+            type: boolean
+        elements:
+        - computed: setMonitoring
+          label:
+            text: labels.enable_monitoring
+          onChange: updateAlertValue
+          schema:
+            $ref: discriminator#/monitoring
+          type: switch
+        - customClass: mt-10
+          if: showAlerts
+          label:
+            text: labels.alert.options
+          options:
+          - text: None
+            value: none
+          - text: Critical
+            value: critical
+          - text: Warning
+            value: warning
+          - text: Info
+            value: info
+          schema:
+            $ref: schema#/properties/form/properties/alert/properties/enabled
+          sortable: true
+          type: select
+        if: isToggleOn|monitoring
+        type: single-step-form
+      - elements:
+        - computed: toggleTls
+          label:
+            text: Enable TLS?
+          schema:
+            $ref: schema#/properties/spec/properties/admin/properties/tls/properties/default
+          type: switch
+        - fetch: getAdminOptions|clusterIssuers
+          if: showIssuer
+          label:
+            text: labels.clusterIssuers
+          schema:
+            $ref: schema#/properties/spec/properties/admin/properties/clusterIssuers/properties/default
+          type: select
+        if: isEqualToModelPathValue|Topology|/spec/mode
+        type: single-step-form
+      - elements:
+        - if: isToggleOn|expose
+          label:
+            text: Expose via Gateway?
+          schema:
+            $ref: schema#/properties/spec/properties/admin/properties/expose/properties/default
+          type: switch
+        type: single-step-form
+      - elements:
+        - if: isToggleOn|archiver
+          label:
+            text: Enable Archiver?
+          schema:
+            $ref: schema#/properties/spec/properties/admin/properties/archiver/properties/default
+          type: switch
+        type: single-step-form
+      - computed: setBackup
+        disabled: isNotBackupCluster
+        if: isToggleOn|backup
+        label:
+          text: Enable Backup?
+        onChange: onBackupSwitch
+        schema:
+          $ref: discriminator#/backup
+        type: switch
+      accordion: true
+      description:
+        text: Enable Backup, Monitoring, TLS etc.
+      if: showAdditionalSettings
+      hideForm: true
       label:
-        text: Enable TLS?
-      schema:
-        $ref: schema#/properties/spec/properties/admin/properties/tls/properties/default
-      type: switch
-    - fetch: getAdminOptions|clusterIssuers
-      if: showIssuer
-      label:
-        text: labels.clusterIssuers
-      schema:
-        $ref: schema#/properties/spec/properties/admin/properties/clusterIssuers/properties/default
-      type: select
-    - if: isToggleOn|expose
-      label:
-        text: Expose via Gateway?
-      schema:
-        $ref: schema#/properties/spec/properties/admin/properties/expose/properties/default
-      type: switch
-    - if: isToggleOn|archiver
-      label:
-        text: Enable Archiver?
-      schema:
-        $ref: schema#/properties/spec/properties/admin/properties/archiver/properties/default
-      type: switch
-    - computed: setBackup
-      disabled: isNotBackupCluster
-      if: isToggleOn|backup
-      label:
-        text: Enable Backup?
-      onChange: onBackupSwitch
-      schema:
-        $ref: discriminator#/backup
-      type: switch
+        text: Additional Settings
+      show_label: true
+      type: single-step-form
     - label:
         text: labels.configOptions
       type: label-element

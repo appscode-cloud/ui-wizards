@@ -853,6 +853,11 @@ function EqualToDatabaseMode({ model, getValue, watchDependency }, mode) {
   return modelPathValue && modelPathValue === mode
 }
 
+function showAdditionalSettings({ watchDependency }) {
+  watchDependency('discriminator#/bundleApiLoaded')
+  return features.length
+}
+
 return {
   returnFalse,
   initBundle,
@@ -893,4 +898,5 @@ return {
   isConfigDatabaseOn,
   clearConfiguration,
   setBackup,
+  showAdditionalSettings,
 }
