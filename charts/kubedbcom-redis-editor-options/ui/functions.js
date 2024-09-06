@@ -1065,6 +1065,11 @@ function onAuthChange({ getValue, discriminator, commit }) {
   }
 }
 
+function showAdditionalSettings({ watchDependency }) {
+  watchDependency('discriminator#/bundleApiLoaded')
+  return features.length
+}
+
 return {
   initBundle,
   returnFalse,
@@ -1115,4 +1120,5 @@ return {
   notEqualToDatabaseMode,
   onAuthChange,
   setBackup,
+  showAdditionalSettings,
 }

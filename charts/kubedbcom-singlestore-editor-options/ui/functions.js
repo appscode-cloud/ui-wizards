@@ -1083,6 +1083,11 @@ function toggleTls({ commit, model, getValue, watchDependency }) {
   })
 }
 
+function showAdditionalSettings({ watchDependency }) {
+  watchDependency('discriminator#/bundleApiLoaded')
+  return features.length
+}
+
 return {
   initBundle,
   returnFalse,
@@ -1137,4 +1142,5 @@ return {
   setReplicaNumber,
   setRouterNumber,
   setBackup,
+  showAdditionalSettings,
 }
