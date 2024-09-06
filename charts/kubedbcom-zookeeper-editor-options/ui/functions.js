@@ -999,6 +999,11 @@ function onBackupSwitch({ discriminator, getValue, commit }) {
   })
 }
 
+function showAdditionalSettings({ watchDependency }) {
+  watchDependency('discriminator#/bundleApiLoaded')
+  return features.length
+}
+
 return {
   initBundle,
   returnFalse,
@@ -1045,4 +1050,5 @@ return {
   isNotBackupCluster,
   onBackupSwitch,
   setBackup,
+  showAdditionalSettings,
 }
