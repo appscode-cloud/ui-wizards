@@ -775,7 +775,13 @@ function returnFalse() {
   return false
 }
 
+function showAdditionalSettings({ watchDependency }) {
+  watchDependency('discriminator#/bundleApiLoaded')
+  return features.length
+}
+
 return {
+  showAdditionalSettings,
   initBundle,
   returnFalse,
   isVariantAvailable,

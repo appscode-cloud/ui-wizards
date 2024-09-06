@@ -933,7 +933,13 @@ async function getAppBindings({ axios, storeGet }, type) {
   }
 }
 
+function showAdditionalSettings({ watchDependency }) {
+  watchDependency('discriminator#/bundleApiLoaded')
+  return features.length
+}
+
 return {
+  showAdditionalSettings,
   initBundle,
   returnFalse,
   isVariantAvailable,

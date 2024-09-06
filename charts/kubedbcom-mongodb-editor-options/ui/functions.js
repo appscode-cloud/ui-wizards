@@ -933,7 +933,13 @@ function onAuthChange({ getValue, discriminator, commit }) {
   }
 }
 
+function showAdditionalSettings({ watchDependency }) {
+  watchDependency('discriminator#/bundleApiLoaded')
+  return features.length
+}
+
 return {
+  showAdditionalSettings,
   returnFalse,
   initBundle,
   isVariantAvailable,

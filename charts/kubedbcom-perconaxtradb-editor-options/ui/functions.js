@@ -456,6 +456,7 @@ function getCreateNameSpaceUrl({ model, getValue, storeGet }) {
     return `${editedDomain}/${user}/kubernetes/${cluster}/core/v1/namespaces/create`
   }
 }
+
 const ifCapiProviderIsNotEmpty = ({ model, getValue, watchDependency }) => {
   watchDependency('model#/form/capi/provider')
   const val = getValue(model, '/form/capi/provider')
@@ -595,6 +596,7 @@ let clusterIssuers = []
 let nodetopologiesShared = []
 let nodetopologiesDedicated = []
 let features = []
+
 async function initBundle({ model, getValue, axios, storeGet, setDiscriminatorValue }) {
   const owner = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
@@ -862,21 +864,25 @@ function clearArbiterHidden({ commit }) {
     force: true,
   })
 }
+
 function returnFalse() {
   return false
 }
+
 function showHidden({ watchDependency, model, getValue }) {
   watchDependency('model#/spec/hidden/enabled')
   const isHiddenOn = getValue(model, '/spec/hidden/enabled') || ''
   const notStandalone = notEqualToDatabaseMode({ model, getValue, watchDependency }, 'Standalone')
   return isHiddenOn && notStandalone
 }
+
 function showArbiter({ watchDependency, model, getValue }) {
   watchDependency('model#/spec/arbiter/enabled')
   const isArbiterOn = getValue(model, '/spec/arbiter/enabled') || ''
   const notStandalone = notEqualToDatabaseMode({ model, getValue, watchDependency }, 'Standalone')
   return isArbiterOn && notStandalone
 }
+
 async function fetchJsons({ axios, itemCtx }) {
   let ui = {}
   let language = {}
@@ -920,11 +926,13 @@ function showAuthSecretField({ discriminator, getValue, watchDependency }) {
     watchDependency,
   })
 }
+
 function notEqualToDatabaseMode({ model, getValue, watchDependency }, mode) {
   const modelPathValue = getValue(model, '/spec/mode')
   watchDependency('model#/spec/mode')
   return modelPathValue && modelPathValue !== mode
 }
+
 function showStorageSizeField({ model, getValue, watchDependency }) {
   const modelPathValue = getValue(model, '/spec/mode')
   watchDependency('model#/spec/mode')
@@ -988,6 +996,7 @@ async function getMongoDbVersions({ axios, storeGet }, group, version, resource)
   })
   return filteredMongoDbVersions
 }
+
 function onCreateAuthSecretChange({ discriminator, getValue, commit }) {
   const createAuthSecret = getValue(discriminator, '/createAuthSecret')
   if (createAuthSecret) {
@@ -1067,7 +1076,14 @@ function onModeChange({ model, getValue, watchDependency, commit }) {
     })
   }
 }
+
+function showAdditionalSettings({ watchDependency }) {
+  watchDependency('discriminator#/bundleApiLoaded')
+  return features.length
+}
+
 return {
+  showAdditionalSettings,
   initBundle,
   returnFalse,
   getNamespaces,
