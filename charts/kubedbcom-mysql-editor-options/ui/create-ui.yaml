@@ -5,8 +5,8 @@ steps:
         default: false
         type: boolean
     elements:
-    - if: returnFalse
-      computed: initBundle
+    - computed: initBundle
+      if: returnFalse
       type: label-element
     - disableUnselect: true
       fetch: getAdminOptions|databases/MySQL/versions
@@ -94,28 +94,18 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/persistence/properties/size
       type: input
-    - type: single-step-form
+    - accordion: true
+      description:
+        text: Configure Credentials, Deployment Mode etc.
       discriminator:
         configDatabase:
           default: false
           type: boolean
         createAuthSecret:
           default: false
-          type: boolean        
-      show_label: true
-      accordion: true
-      hideForm: true
-      label:
-        text: Advanced Configuration
-      description: 
-        text: Configure Credentials, Deployment Mode etc.
+          type: boolean
       elements:
-      - type: single-step-form 
-        hideForm: true
-        show_label: true
-        label:
-          text: Labels & Annotations
-        elements:
+      - elements:
         - isArray: true
           keys:
             label:
@@ -146,9 +136,14 @@ steps:
             schema:
               $ref: schema#/properties/spec/properties/annotations/additionalProperties
             type: input
-      - label:
+        hideForm: true
+        label:
+          text: Labels & Annotations
+        show_label: true
+        type: single-step-form
+      - customClass: mt-20
+        label:
           text: labels.deletionPolicy
-        customClass: mt-20 
         onChange: setStorageClass
         options:
         - description: options.deletionPolicy.delete.description
@@ -241,8 +236,14 @@ steps:
         schema:
           $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/nodeTopology/properties/default
         type: select
-    - type: single-step-form
-      if: showAdditionalSettings
+      hideForm: true
+      label:
+        text: Advanced Configuration
+      show_label: true
+      type: single-step-form
+    - accordion: true
+      description:
+        text: Enable Backup, Monitoring, TLS etc.
       discriminator:
         backup:
           default: false
@@ -250,19 +251,11 @@ steps:
         monitoring:
           default: false
           type: boolean
-      show_label: true
-      accordion: true
-      hideForm: true
-      label:
-        text: Additional Settings
-      description: 
-        text: Enable Backup, Monitoring, TLS etc.
       elements:
       - discriminator:
           monitoring:
             default: false
             type: boolean
-        type: single-step-form
         elements:
         - computed: setMonitoring
           if: isToggleOn|monitoring
@@ -289,8 +282,8 @@ steps:
             $ref: schema#/properties/form/properties/alert/properties/enabled
           sortable: true
           type: select
-      - type: single-step-form
-        elements:
+        type: single-step-form
+      - elements:
         - if: isToggleOn|tls
           label:
             text: Enable TLS?
@@ -304,22 +297,23 @@ steps:
           schema:
             $ref: schema#/properties/spec/properties/admin/properties/clusterIssuers/properties/default
           type: select
-      - type: single-step-form
-        elements:
+        type: single-step-form
+      - elements:
         - if: isToggleOn|expose
           label:
             text: Expose via Gateway?
           schema:
             $ref: schema#/properties/spec/properties/admin/properties/expose/properties/default
           type: switch
-      - type: single-step-form
-        elements:
+        type: single-step-form
+      - elements:
         - if: isToggleOn|archiver
           label:
             text: Enable Archiver?
           schema:
             $ref: schema#/properties/spec/properties/admin/properties/archiver/properties/default
           type: switch
+        type: single-step-form
       - computed: setBackup
         if: isToggleOn|backup
         label:
@@ -328,6 +322,12 @@ steps:
         schema:
           $ref: discriminator#/backup
         type: switch
+      hideForm: true
+      if: showAdditionalSettings
+      label:
+        text: Additional Settings
+      show_label: true
+      type: single-step-form
     - label:
         text: labels.configOptions
       type: label-element

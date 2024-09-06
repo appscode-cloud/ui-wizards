@@ -5,9 +5,9 @@ steps:
         default: false
         type: boolean
     elements:
-    - if: returnFalse
-      computed: initBundle
-      type: label-element 
+    - computed: initBundle
+      if: returnFalse
+      type: label-element
     - disableUnselect: true
       fetch: getAdminOptions|databases/Solr/versions
       if: isToggleOn|databases/Solr/versions
@@ -207,8 +207,11 @@ steps:
         text: labels.storage.size
       schema:
         $ref: schema#/properties/spec/properties/persistence/properties/size
-      type: input    
-    - discriminator:
+      type: input
+    - accordion: true
+      description:
+        text: Configure Credentials, Deployment Mode etc.
+      discriminator:
         configDatabase:
           default: false
           type: boolean
@@ -216,12 +219,7 @@ steps:
           default: false
           type: boolean
       elements:
-      - type: single-step-form
-        show_label: true
-        hideForm: true
-        label:
-          text: Labels & Annotations
-        elements:
+      - elements:
         - isArray: true
           keys:
             label:
@@ -252,9 +250,14 @@ steps:
             schema:
               $ref: schema#/properties/spec/properties/annotations/additionalProperties
             type: input
-      - label:
+        hideForm: true
+        label:
+          text: Labels & Annotations
+        show_label: true
+        type: single-step-form
+      - customClass: mt-20
+        label:
           text: labels.deletionPolicy
-        customClass: mt-20
         onChange: setStorageClass
         options:
         - description: options.deletionPolicy.delete.description
@@ -330,6 +333,7 @@ steps:
           $ref: schema#/properties/spec/properties/admin/properties/deployment/properties/default
         type: radio
       - if: isToggleOn|clusterTier
+        isHorizontal: true
         label:
           text: labels.clusterTier
         options:
@@ -341,7 +345,6 @@ steps:
           value: CPUOptimized
         schema:
           $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/default
-        isHorizontal: true
         type: radio
       - disableUnselect: true
         fetch: getAdminOptions|clusterTier/placement
@@ -359,15 +362,15 @@ steps:
         schema:
           $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/nodeTopology/properties/default
         type: select
-      accordion: true
-      description:
-        text: Configure Credentials, Deployment Mode etc.
       hideForm: true
       label:
         text: Advanced Configuration
       show_label: true
       type: single-step-form
-    - discriminator:
+    - accordion: true
+      description:
+        text: Enable Backup, Monitoring, TLS etc.
+      discriminator:
         backup:
           default: false
           type: boolean
@@ -425,7 +428,7 @@ steps:
             $ref: schema#/properties/spec/properties/admin/properties/expose/properties/default
           type: switch
         type: single-step-form
-      - elements: 
+      - elements:
         - if: isToggleOn|archiver
           label:
             text: Enable Archiver?
@@ -444,11 +447,8 @@ steps:
       - label:
           text: labels.configOptions
         type: label-element
-      accordion: true
-      description:
-        text: Enable Backup, Monitoring, TLS etc.
-      if: showAdditionalSettings
       hideForm: true
+      if: showAdditionalSettings
       label:
         text: Additional Settings
       show_label: true

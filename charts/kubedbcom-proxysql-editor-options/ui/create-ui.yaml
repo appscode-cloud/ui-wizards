@@ -5,9 +5,9 @@ steps:
         default: false
         type: boolean
     elements:
-    - if: returnFalse
-      computed: initBundle
-      type: label-element 
+    - computed: initBundle
+      if: returnFalse
+      type: label-element
     - disableUnselect: true
       fetch: getAdminOptions|databases/ProxySQL/versions
       if: isToggleOn|databases/ProxySQL/versions
@@ -73,20 +73,18 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/admin/properties/storageClasses/properties/default
       type: select
-    - discriminator:
+    - accordion: true
+      description:
+        text: Configure Credentials, Deployment Mode etc.
+      discriminator:
         configDatabase:
           default: false
           type: boolean
         createAuthSecret:
           default: false
-          type: boolean  
+          type: boolean
       elements:
-      - type: single-step-form
-        hideForm: true
-        show_label: true
-        label:
-          text: Labels & Annotation
-        elements:
+      - elements:
         - isArray: true
           keys:
             label:
@@ -117,9 +115,14 @@ steps:
             schema:
               $ref: schema#/properties/spec/properties/annotations/additionalProperties
             type: input
-      - label:
+        hideForm: true
+        label:
+          text: Labels & Annotation
+        show_label: true
+        type: single-step-form
+      - customClass: mt-20
+        label:
           text: labels.deletionPolicy
-        customClass: mt-20
         options:
         - description: options.deletionPolicy.delete.description
           text: options.deletionPolicy.delete.label
@@ -223,15 +226,15 @@ steps:
         schema:
           $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/nodeTopology/properties/default
         type: select
-      accordion: true
-      description:
-        text: Configure Credentials, Deployment Mode etc.
       hideForm: true
       label:
         text: Advanced Settings
       show_label: true
       type: single-step-form
-    - elements:
+    - accordion: true
+      description:
+        text: Enable Backup, Monitoring, TLS etc.
+      elements:
       - discriminator:
           monitoring:
             default: false
@@ -245,6 +248,7 @@ steps:
             $ref: discriminator#/monitoring
           type: switch
         - customClass: mt-10
+          if: showAlerts
           label:
             text: labels.alert.options
           options:
@@ -260,7 +264,6 @@ steps:
             $ref: schema#/properties/form/properties/alert/properties/enabled
           sortable: true
           type: select
-          if: showAlerts
         if: isToggleOn|monitoring
         type: single-step-form
       - elements:
@@ -294,11 +297,8 @@ steps:
             $ref: schema#/properties/spec/properties/admin/properties/archiver/properties/default
           type: switch
         type: single-step-form
-      accordion: true
-      description:
-        text: Enable Backup, Monitoring, TLS etc.
-      if: showAdditionalSettings
       hideForm: true
+      if: showAdditionalSettings
       label:
         text: Additional Settings
       show_label: true
