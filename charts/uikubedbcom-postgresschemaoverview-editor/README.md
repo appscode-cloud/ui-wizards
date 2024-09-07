@@ -1,6 +1,6 @@
 # PostgresSchemaOverview Editor
 
-[PostgresSchemaOverview Editor by AppsCode](https://byte.builders) - PostgresSchemaOverview Editor
+[PostgresSchemaOverview Editor by AppsCode](https://appscode.com) - PostgresSchemaOverview Editor
 
 ## TL;DR;
 

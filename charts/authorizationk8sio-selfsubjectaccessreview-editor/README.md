@@ -1,6 +1,6 @@
 # SelfSubjectAccessReview Editor
 
-[SelfSubjectAccessReview Editor by AppsCode](https://byte.builders) - SelfSubjectAccessReview Editor
+[SelfSubjectAccessReview Editor by AppsCode](https://appscode.com) - SelfSubjectAccessReview Editor
 
 ## TL;DR;
 

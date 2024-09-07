@@ -1,6 +1,6 @@
 # ServerKey Editor
 
-[ServerKey Editor by AppsCode](https://byte.builders) - ServerKey Editor
+[ServerKey Editor by AppsCode](https://appscode.com) - ServerKey Editor
 
 ## TL;DR;
 

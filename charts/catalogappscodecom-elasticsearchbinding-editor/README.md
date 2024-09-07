@@ -1,6 +1,6 @@
 # ElasticsearchBinding Editor
 
-[ElasticsearchBinding Editor by AppsCode](https://byte.builders) - ElasticsearchBinding Editor
+[ElasticsearchBinding Editor by AppsCode](https://appscode.com) - ElasticsearchBinding Editor
 
 ## TL;DR;
 

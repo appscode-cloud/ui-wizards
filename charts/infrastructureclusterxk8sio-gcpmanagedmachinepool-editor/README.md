@@ -1,6 +1,6 @@
 # GCPManagedMachinePool Editor
 
-[GCPManagedMachinePool Editor by AppsCode](https://byte.builders) - GCPManagedMachinePool Editor
+[GCPManagedMachinePool Editor by AppsCode](https://appscode.com) - GCPManagedMachinePool Editor
 
 ## TL;DR;
 

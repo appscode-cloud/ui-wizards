@@ -1,6 +1,6 @@
 # ClusterBinding Editor
 
-[ClusterBinding Editor by AppsCode](https://byte.builders) - ClusterBinding Editor
+[ClusterBinding Editor by AppsCode](https://appscode.com) - ClusterBinding Editor
 
 ## TL;DR;
 

@@ -1,6 +1,6 @@
 # ResourceLayout Editor
 
-[ResourceLayout Editor by AppsCode](https://byte.builders) - ResourceLayout Editor
+[ResourceLayout Editor by AppsCode](https://appscode.com) - ResourceLayout Editor
 
 ## TL;DR;
 

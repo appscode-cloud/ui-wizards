@@ -1,6 +1,6 @@
 # FerretDBOpsRequest Editor
 
-[FerretDBOpsRequest Editor by AppsCode](https://byte.builders) - FerretDBOpsRequest Editor
+[FerretDBOpsRequest Editor by AppsCode](https://appscode.com) - FerretDBOpsRequest Editor
 
 ## TL;DR;
 

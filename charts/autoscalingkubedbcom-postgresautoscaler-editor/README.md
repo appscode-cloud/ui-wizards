@@ -1,6 +1,6 @@
 # PostgresAutoscaler Editor
 
-[PostgresAutoscaler Editor by AppsCode](https://byte.builders) - PostgresAutoscaler Editor
+[PostgresAutoscaler Editor by AppsCode](https://appscode.com) - PostgresAutoscaler Editor
 
 ## TL;DR;
 

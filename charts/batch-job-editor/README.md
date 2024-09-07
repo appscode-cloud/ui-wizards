@@ -1,6 +1,6 @@
 # Job Editor
 
-[Job Editor by AppsCode](https://byte.builders) - Job Editor
+[Job Editor by AppsCode](https://appscode.com) - Job Editor
 
 ## TL;DR;
 

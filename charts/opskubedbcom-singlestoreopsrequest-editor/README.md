@@ -1,6 +1,6 @@
 # SinglestoreOpsRequest Editor
 
-[SinglestoreOpsRequest Editor by AppsCode](https://byte.builders) - SinglestoreOpsRequest Editor
+[SinglestoreOpsRequest Editor by AppsCode](https://appscode.com) - SinglestoreOpsRequest Editor
 
 ## TL;DR;
 

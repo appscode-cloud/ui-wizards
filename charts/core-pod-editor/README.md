@@ -1,6 +1,6 @@
 # Pod Editor
 
-[Pod Editor by AppsCode](https://byte.builders) - Pod Editor
+[Pod Editor by AppsCode](https://appscode.com) - Pod Editor
 
 ## TL;DR;
 

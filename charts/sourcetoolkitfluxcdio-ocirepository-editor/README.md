@@ -1,6 +1,6 @@
 # OCIRepository Editor
 
-[OCIRepository Editor by AppsCode](https://byte.builders) - OCIRepository Editor
+[OCIRepository Editor by AppsCode](https://appscode.com) - OCIRepository Editor
 
 ## TL;DR;
 

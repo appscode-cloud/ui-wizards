@@ -1,6 +1,6 @@
 # ProxySQLInsight Editor
 
-[ProxySQLInsight Editor by AppsCode](https://byte.builders) - ProxySQLInsight Editor
+[ProxySQLInsight Editor by AppsCode](https://appscode.com) - ProxySQLInsight Editor
 
 ## TL;DR;
 

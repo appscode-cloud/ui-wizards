@@ -1,6 +1,6 @@
 # RedisRole Editor
 
-[RedisRole Editor by AppsCode](https://byte.builders) - RedisRole Editor
+[RedisRole Editor by AppsCode](https://appscode.com) - RedisRole Editor
 
 ## TL;DR;
 

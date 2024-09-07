@@ -1,6 +1,6 @@
 # ElasticsearchOpsRequest Editor
 
-[ElasticsearchOpsRequest Editor by AppsCode](https://byte.builders) - ElasticsearchOpsRequest Editor
+[ElasticsearchOpsRequest Editor by AppsCode](https://appscode.com) - ElasticsearchOpsRequest Editor
 
 ## TL;DR;
 

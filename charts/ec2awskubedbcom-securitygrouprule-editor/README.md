@@ -1,6 +1,6 @@
 # SecurityGroupRule Editor
 
-[SecurityGroupRule Editor by AppsCode](https://byte.builders) - SecurityGroupRule Editor
+[SecurityGroupRule Editor by AppsCode](https://appscode.com) - SecurityGroupRule Editor
 
 ## TL;DR;
 

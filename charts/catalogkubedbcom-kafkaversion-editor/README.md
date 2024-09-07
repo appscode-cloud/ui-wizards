@@ -1,6 +1,6 @@
 # KafkaVersion Editor
 
-[KafkaVersion Editor by AppsCode](https://byte.builders) - KafkaVersion Editor
+[KafkaVersion Editor by AppsCode](https://appscode.com) - KafkaVersion Editor
 
 ## TL;DR;
 

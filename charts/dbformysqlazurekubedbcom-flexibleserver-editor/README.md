@@ -1,6 +1,6 @@
 # FlexibleServer Editor
 
-[FlexibleServer Editor by AppsCode](https://byte.builders) - FlexibleServer Editor
+[FlexibleServer Editor by AppsCode](https://appscode.com) - FlexibleServer Editor
 
 ## TL;DR;
 

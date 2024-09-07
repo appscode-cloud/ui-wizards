@@ -1,6 +1,6 @@
 # ElasticsearchDashboard Editor
 
-[ElasticsearchDashboard Editor by AppsCode](https://byte.builders) - ElasticsearchDashboard Editor
+[ElasticsearchDashboard Editor by AppsCode](https://appscode.com) - ElasticsearchDashboard Editor
 
 ## TL;DR;
 

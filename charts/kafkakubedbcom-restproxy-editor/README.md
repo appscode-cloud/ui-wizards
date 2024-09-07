@@ -1,6 +1,6 @@
 # RestProxy Editor
 
-[RestProxy Editor by AppsCode](https://byte.builders) - RestProxy Editor
+[RestProxy Editor by AppsCode](https://appscode.com) - RestProxy Editor
 
 ## TL;DR;
 

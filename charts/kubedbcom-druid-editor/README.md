@@ -1,6 +1,6 @@
 # Druid Editor
 
-[Druid Editor by AppsCode](https://byte.builders) - Druid Editor
+[Druid Editor by AppsCode](https://appscode.com) - Druid Editor
 
 ## TL;DR;
 

@@ -1,6 +1,6 @@
 # RedisSentinel Editor
 
-[RedisSentinel Editor by AppsCode](https://byte.builders) - RedisSentinel Editor
+[RedisSentinel Editor by AppsCode](https://appscode.com) - RedisSentinel Editor
 
 ## TL;DR;
 

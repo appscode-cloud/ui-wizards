@@ -1,6 +1,6 @@
 # KinesisStreamingDestination Editor
 
-[KinesisStreamingDestination Editor by AppsCode](https://byte.builders) - KinesisStreamingDestination Editor
+[KinesisStreamingDestination Editor by AppsCode](https://appscode.com) - KinesisStreamingDestination Editor
 
 ## TL;DR;
 

@@ -1,6 +1,6 @@
 # MariaDBRole Editor
 
-[MariaDBRole Editor by AppsCode](https://byte.builders) - MariaDBRole Editor
+[MariaDBRole Editor by AppsCode](https://appscode.com) - MariaDBRole Editor
 
 ## TL;DR;
 

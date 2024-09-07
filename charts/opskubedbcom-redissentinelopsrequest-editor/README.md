@@ -1,6 +1,6 @@
 # RedisSentinelOpsRequest Editor
 
-[RedisSentinelOpsRequest Editor by AppsCode](https://byte.builders) - RedisSentinelOpsRequest Editor
+[RedisSentinelOpsRequest Editor by AppsCode](https://appscode.com) - RedisSentinelOpsRequest Editor
 
 ## TL;DR;
 

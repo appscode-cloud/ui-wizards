@@ -1,6 +1,6 @@
 # PodView Editor
 
-[PodView Editor by AppsCode](https://byte.builders) - PodView Editor
+[PodView Editor by AppsCode](https://appscode.com) - PodView Editor
 
 ## TL;DR;
 

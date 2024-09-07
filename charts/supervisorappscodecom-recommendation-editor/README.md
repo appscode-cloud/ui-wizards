@@ -1,6 +1,6 @@
 # Recommendation Editor
 
-[Recommendation Editor by AppsCode](https://byte.builders) - Recommendation Editor
+[Recommendation Editor by AppsCode](https://appscode.com) - Recommendation Editor
 
 ## TL;DR;
 

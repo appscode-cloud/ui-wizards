@@ -1,6 +1,6 @@
 # Task Editor
 
-[Task Editor by AppsCode](https://byte.builders) - Task Editor
+[Task Editor by AppsCode](https://appscode.com) - Task Editor
 
 ## TL;DR;
 

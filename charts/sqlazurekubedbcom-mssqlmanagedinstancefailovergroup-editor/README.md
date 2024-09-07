@@ -1,6 +1,6 @@
 # MSSQLManagedInstanceFailoverGroup Editor
 
-[MSSQLManagedInstanceFailoverGroup Editor by AppsCode](https://byte.builders) - MSSQLManagedInstanceFailoverGroup Editor
+[MSSQLManagedInstanceFailoverGroup Editor by AppsCode](https://appscode.com) - MSSQLManagedInstanceFailoverGroup Editor
 
 ## TL;DR;
 

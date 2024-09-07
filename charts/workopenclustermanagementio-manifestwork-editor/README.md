@@ -1,6 +1,6 @@
 # ManifestWork Editor
 
-[ManifestWork Editor by AppsCode](https://byte.builders) - ManifestWork Editor
+[ManifestWork Editor by AppsCode](https://appscode.com) - ManifestWork Editor
 
 ## TL;DR;
 

@@ -1,6 +1,6 @@
 # APIServiceExport Editor
 
-[APIServiceExport Editor by AppsCode](https://byte.builders) - APIServiceExport Editor
+[APIServiceExport Editor by AppsCode](https://appscode.com) - APIServiceExport Editor
 
 ## TL;DR;
 

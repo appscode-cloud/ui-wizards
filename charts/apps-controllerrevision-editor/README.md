@@ -1,6 +1,6 @@
 # ControllerRevision Editor
 
-[ControllerRevision Editor by AppsCode](https://byte.builders) - ControllerRevision Editor
+[ControllerRevision Editor by AppsCode](https://appscode.com) - ControllerRevision Editor
 
 ## TL;DR;
 

@@ -1,6 +1,6 @@
 # Tag Editor
 
-[Tag Editor by AppsCode](https://byte.builders) - Tag Editor
+[Tag Editor by AppsCode](https://appscode.com) - Tag Editor
 
 ## TL;DR;
 

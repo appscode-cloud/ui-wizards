@@ -1,6 +1,6 @@
 # ExpansionTemplate Editor
 
-[ExpansionTemplate Editor by AppsCode](https://byte.builders) - ExpansionTemplate Editor
+[ExpansionTemplate Editor by AppsCode](https://appscode.com) - ExpansionTemplate Editor
 
 ## TL;DR;
 

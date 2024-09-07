@@ -1,6 +1,6 @@
 # SQLTrigger Editor
 
-[SQLTrigger Editor by AppsCode](https://byte.builders) - SQLTrigger Editor
+[SQLTrigger Editor by AppsCode](https://appscode.com) - SQLTrigger Editor
 
 ## TL;DR;
 

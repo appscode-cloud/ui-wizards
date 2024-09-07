@@ -1,6 +1,6 @@
 # AWSMachineTemplate Editor
 
-[AWSMachineTemplate Editor by AppsCode](https://byte.builders) - AWSMachineTemplate Editor
+[AWSMachineTemplate Editor by AppsCode](https://appscode.com) - AWSMachineTemplate Editor
 
 ## TL;DR;
 

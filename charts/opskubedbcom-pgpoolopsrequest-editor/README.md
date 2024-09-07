@@ -1,6 +1,6 @@
 # PgpoolOpsRequest Editor
 
-[PgpoolOpsRequest Editor by AppsCode](https://byte.builders) - PgpoolOpsRequest Editor
+[PgpoolOpsRequest Editor by AppsCode](https://appscode.com) - PgpoolOpsRequest Editor
 
 ## TL;DR;
 

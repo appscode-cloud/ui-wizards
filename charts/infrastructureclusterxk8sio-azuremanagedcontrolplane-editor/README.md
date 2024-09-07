@@ -1,6 +1,6 @@
 # AzureManagedControlPlane Editor
 
-[AzureManagedControlPlane Editor by AppsCode](https://byte.builders) - AzureManagedControlPlane Editor
+[AzureManagedControlPlane Editor by AppsCode](https://appscode.com) - AzureManagedControlPlane Editor
 
 ## TL;DR;
 

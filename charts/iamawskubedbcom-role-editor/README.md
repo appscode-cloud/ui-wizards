@@ -1,6 +1,6 @@
 # Role Editor
 
-[Role Editor by AppsCode](https://byte.builders) - Role Editor
+[Role Editor by AppsCode](https://appscode.com) - Role Editor
 
 ## TL;DR;
 

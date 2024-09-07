@@ -1,6 +1,6 @@
 # ClusterGatewayConfiguration Editor
 
-[ClusterGatewayConfiguration Editor by AppsCode](https://byte.builders) - ClusterGatewayConfiguration Editor
+[ClusterGatewayConfiguration Editor by AppsCode](https://appscode.com) - ClusterGatewayConfiguration Editor
 
 ## TL;DR;
 

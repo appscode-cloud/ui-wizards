@@ -1,6 +1,6 @@
 # ResourceTableDefinition Editor
 
-[ResourceTableDefinition Editor by AppsCode](https://byte.builders) - ResourceTableDefinition Editor
+[ResourceTableDefinition Editor by AppsCode](https://appscode.com) - ResourceTableDefinition Editor
 
 ## TL;DR;
 

@@ -1,6 +1,6 @@
 # BackupBlueprint Editor
 
-[BackupBlueprint Editor by AppsCode](https://byte.builders) - BackupBlueprint Editor
+[BackupBlueprint Editor by AppsCode](https://appscode.com) - BackupBlueprint Editor
 
 ## TL;DR;
 

@@ -1,6 +1,6 @@
 # CSIStorageCapacity Editor
 
-[CSIStorageCapacity Editor by AppsCode](https://byte.builders) - CSIStorageCapacity Editor
+[CSIStorageCapacity Editor by AppsCode](https://appscode.com) - CSIStorageCapacity Editor
 
 ## TL;DR;
 

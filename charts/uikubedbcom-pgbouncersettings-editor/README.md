@@ -1,6 +1,6 @@
 # PgBouncerSettings Editor
 
-[PgBouncerSettings Editor by AppsCode](https://byte.builders) - PgBouncerSettings Editor
+[PgBouncerSettings Editor by AppsCode](https://appscode.com) - PgBouncerSettings Editor
 
 ## TL;DR;
 

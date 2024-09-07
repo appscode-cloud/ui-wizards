@@ -1,6 +1,6 @@
 # Key Editor
 
-[Key Editor by AppsCode](https://byte.builders) - Key Editor
+[Key Editor by AppsCode](https://appscode.com) - Key Editor
 
 ## TL;DR;
 

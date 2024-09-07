@@ -1,6 +1,6 @@
 # AzureMachinePool Editor
 
-[AzureMachinePool Editor by AppsCode](https://byte.builders) - AzureMachinePool Editor
+[AzureMachinePool Editor by AppsCode](https://appscode.com) - AzureMachinePool Editor
 
 ## TL;DR;
 

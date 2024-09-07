@@ -1,6 +1,6 @@
 # Repository Editor
 
-[Repository Editor by AppsCode](https://byte.builders) - Repository Editor
+[Repository Editor by AppsCode](https://appscode.com) - Repository Editor
 
 ## TL;DR;
 

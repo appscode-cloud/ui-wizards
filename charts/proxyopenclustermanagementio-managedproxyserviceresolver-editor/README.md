@@ -1,6 +1,6 @@
 # ManagedProxyServiceResolver Editor
 
-[ManagedProxyServiceResolver Editor by AppsCode](https://byte.builders) - ManagedProxyServiceResolver Editor
+[ManagedProxyServiceResolver Editor by AppsCode](https://appscode.com) - ManagedProxyServiceResolver Editor
 
 ## TL;DR;
 

@@ -1,6 +1,6 @@
 # MongoDBOpsRequest Editor
 
-[MongoDBOpsRequest Editor by AppsCode](https://byte.builders) - MongoDBOpsRequest Editor
+[MongoDBOpsRequest Editor by AppsCode](https://appscode.com) - MongoDBOpsRequest Editor
 
 ## TL;DR;
 

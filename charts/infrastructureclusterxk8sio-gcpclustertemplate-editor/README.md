@@ -1,6 +1,6 @@
 # GCPClusterTemplate Editor
 
-[GCPClusterTemplate Editor by AppsCode](https://byte.builders) - GCPClusterTemplate Editor
+[GCPClusterTemplate Editor by AppsCode](https://appscode.com) - GCPClusterTemplate Editor
 
 ## TL;DR;
 

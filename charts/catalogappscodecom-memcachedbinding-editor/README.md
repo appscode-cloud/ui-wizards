@@ -1,6 +1,6 @@
 # MemcachedBinding Editor
 
-[MemcachedBinding Editor by AppsCode](https://byte.builders) - MemcachedBinding Editor
+[MemcachedBinding Editor by AppsCode](https://appscode.com) - MemcachedBinding Editor
 
 ## TL;DR;
 

@@ -1,6 +1,6 @@
 # ConnectCluster Editor
 
-[ConnectCluster Editor by AppsCode](https://byte.builders) - ConnectCluster Editor
+[ConnectCluster Editor by AppsCode](https://appscode.com) - ConnectCluster Editor
 
 ## TL;DR;
 

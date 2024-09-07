@@ -1,6 +1,6 @@
 # ReplicationGroup Editor
 
-[ReplicationGroup Editor by AppsCode](https://byte.builders) - ReplicationGroup Editor
+[ReplicationGroup Editor by AppsCode](https://appscode.com) - ReplicationGroup Editor
 
 ## TL;DR;
 

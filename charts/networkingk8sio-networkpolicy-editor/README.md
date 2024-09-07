@@ -1,6 +1,6 @@
 # NetworkPolicy Editor
 
-[NetworkPolicy Editor by AppsCode](https://byte.builders) - NetworkPolicy Editor
+[NetworkPolicy Editor by AppsCode](https://appscode.com) - NetworkPolicy Editor
 
 ## TL;DR;
 

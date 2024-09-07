@@ -1,6 +1,6 @@
 # PersistentVolumeClaim Editor
 
-[PersistentVolumeClaim Editor by AppsCode](https://byte.builders) - PersistentVolumeClaim Editor
+[PersistentVolumeClaim Editor by AppsCode](https://appscode.com) - PersistentVolumeClaim Editor
 
 ## TL;DR;
 

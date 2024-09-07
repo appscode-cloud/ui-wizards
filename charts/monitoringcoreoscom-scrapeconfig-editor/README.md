@@ -1,6 +1,6 @@
 # ScrapeConfig Editor
 
-[ScrapeConfig Editor by AppsCode](https://byte.builders) - ScrapeConfig Editor
+[ScrapeConfig Editor by AppsCode](https://appscode.com) - ScrapeConfig Editor
 
 ## TL;DR;
 

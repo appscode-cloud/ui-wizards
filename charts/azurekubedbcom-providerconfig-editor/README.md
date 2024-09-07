@@ -1,6 +1,6 @@
 # ProviderConfig Editor
 
-[ProviderConfig Editor by AppsCode](https://byte.builders) - ProviderConfig Editor
+[ProviderConfig Editor by AppsCode](https://appscode.com) - ProviderConfig Editor
 
 ## TL;DR;
 

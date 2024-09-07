@@ -1,6 +1,6 @@
 # Event Editor
 
-[Event Editor by AppsCode](https://byte.builders) - Event Editor
+[Event Editor by AppsCode](https://appscode.com) - Event Editor
 
 ## TL;DR;
 

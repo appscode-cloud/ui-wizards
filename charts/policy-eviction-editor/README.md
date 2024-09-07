@@ -1,6 +1,6 @@
 # Eviction Editor
 
-[Eviction Editor by AppsCode](https://byte.builders) - Eviction Editor
+[Eviction Editor by AppsCode](https://appscode.com) - Eviction Editor
 
 ## TL;DR;
 

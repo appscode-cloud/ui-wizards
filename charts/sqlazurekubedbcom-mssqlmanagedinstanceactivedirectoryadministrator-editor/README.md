@@ -1,6 +1,6 @@
 # MSSQLManagedInstanceActiveDirectoryAdministrator Editor
 
-[MSSQLManagedInstanceActiveDirectoryAdministrator Editor by AppsCode](https://byte.builders) - MSSQLManagedInstanceActiveDirectoryAdministrator Editor
+[MSSQLManagedInstanceActiveDirectoryAdministrator Editor by AppsCode](https://appscode.com) - MSSQLManagedInstanceActiveDirectoryAdministrator Editor
 
 ## TL;DR;
 

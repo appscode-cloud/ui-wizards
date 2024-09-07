@@ -1,6 +1,6 @@
 # EnvoyProxy Editor
 
-[EnvoyProxy Editor by AppsCode](https://byte.builders) - EnvoyProxy Editor
+[EnvoyProxy Editor by AppsCode](https://appscode.com) - EnvoyProxy Editor
 
 ## TL;DR;
 

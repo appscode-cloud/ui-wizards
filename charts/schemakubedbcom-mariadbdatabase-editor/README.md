@@ -1,6 +1,6 @@
 # MariaDBDatabase Editor
 
-[MariaDBDatabase Editor by AppsCode](https://byte.builders) - MariaDBDatabase Editor
+[MariaDBDatabase Editor by AppsCode](https://appscode.com) - MariaDBDatabase Editor
 
 ## TL;DR;
 

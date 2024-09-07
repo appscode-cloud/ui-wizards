@@ -1,6 +1,6 @@
 # FlexibleDatabase Editor
 
-[FlexibleDatabase Editor by AppsCode](https://byte.builders) - FlexibleDatabase Editor
+[FlexibleDatabase Editor by AppsCode](https://appscode.com) - FlexibleDatabase Editor
 
 ## TL;DR;
 

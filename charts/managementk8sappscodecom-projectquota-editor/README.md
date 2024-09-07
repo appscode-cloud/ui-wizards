@@ -1,6 +1,6 @@
 # ProjectQuota Editor
 
-[ProjectQuota Editor by AppsCode](https://byte.builders) - ProjectQuota Editor
+[ProjectQuota Editor by AppsCode](https://appscode.com) - ProjectQuota Editor
 
 ## TL;DR;
 

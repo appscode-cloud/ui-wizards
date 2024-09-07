@@ -1,6 +1,6 @@
 # PgBouncerInsight Editor
 
-[PgBouncerInsight Editor by AppsCode](https://byte.builders) - PgBouncerInsight Editor
+[PgBouncerInsight Editor by AppsCode](https://appscode.com) - PgBouncerInsight Editor
 
 ## TL;DR;
 

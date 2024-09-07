@@ -1,6 +1,6 @@
 # HookTemplate Editor
 
-[HookTemplate Editor by AppsCode](https://byte.builders) - HookTemplate Editor
+[HookTemplate Editor by AppsCode](https://appscode.com) - HookTemplate Editor
 
 ## TL;DR;
 

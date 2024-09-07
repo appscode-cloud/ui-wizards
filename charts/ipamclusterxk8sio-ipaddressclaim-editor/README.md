@@ -1,6 +1,6 @@
 # IPAddressClaim Editor
 
-[IPAddressClaim Editor by AppsCode](https://byte.builders) - IPAddressClaim Editor
+[IPAddressClaim Editor by AppsCode](https://appscode.com) - IPAddressClaim Editor
 
 ## TL;DR;
 

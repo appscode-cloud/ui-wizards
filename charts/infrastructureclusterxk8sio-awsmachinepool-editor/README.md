@@ -1,6 +1,6 @@
 # AWSMachinePool Editor
 
-[AWSMachinePool Editor by AppsCode](https://byte.builders) - AWSMachinePool Editor
+[AWSMachinePool Editor by AppsCode](https://appscode.com) - AWSMachinePool Editor
 
 ## TL;DR;
 

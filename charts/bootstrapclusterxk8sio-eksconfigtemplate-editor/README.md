@@ -1,6 +1,6 @@
 # EKSConfigTemplate Editor
 
-[EKSConfigTemplate Editor by AppsCode](https://byte.builders) - EKSConfigTemplate Editor
+[EKSConfigTemplate Editor by AppsCode](https://appscode.com) - EKSConfigTemplate Editor
 
 ## TL;DR;
 

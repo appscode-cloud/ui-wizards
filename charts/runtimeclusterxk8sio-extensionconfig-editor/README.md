@@ -1,6 +1,6 @@
 # ExtensionConfig Editor
 
-[ExtensionConfig Editor by AppsCode](https://byte.builders) - ExtensionConfig Editor
+[ExtensionConfig Editor by AppsCode](https://appscode.com) - ExtensionConfig Editor
 
 ## TL;DR;
 

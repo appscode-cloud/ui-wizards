@@ -1,6 +1,6 @@
 # PerconaXtraDB Editor
 
-[PerconaXtraDB Editor by AppsCode](https://byte.builders) - PerconaXtraDB Editor
+[PerconaXtraDB Editor by AppsCode](https://appscode.com) - PerconaXtraDB Editor
 
 ## TL;DR;
 

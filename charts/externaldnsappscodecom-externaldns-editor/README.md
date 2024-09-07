@@ -1,6 +1,6 @@
 # ExternalDNS Editor
 
-[ExternalDNS Editor by AppsCode](https://byte.builders) - ExternalDNS Editor
+[ExternalDNS Editor by AppsCode](https://appscode.com) - ExternalDNS Editor
 
 ## TL;DR;
 

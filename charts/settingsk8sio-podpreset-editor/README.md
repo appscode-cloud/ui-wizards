@@ -1,6 +1,6 @@
 # PodPreset Editor
 
-[PodPreset Editor by AppsCode](https://byte.builders) - PodPreset Editor
+[PodPreset Editor by AppsCode](https://appscode.com) - PodPreset Editor
 
 ## TL;DR;
 

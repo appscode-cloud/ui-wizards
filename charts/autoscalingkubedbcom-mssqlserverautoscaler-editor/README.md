@@ -1,6 +1,6 @@
 # MSSQLServerAutoscaler Editor
 
-[MSSQLServerAutoscaler Editor by AppsCode](https://byte.builders) - MSSQLServerAutoscaler Editor
+[MSSQLServerAutoscaler Editor by AppsCode](https://appscode.com) - MSSQLServerAutoscaler Editor
 
 ## TL;DR;
 

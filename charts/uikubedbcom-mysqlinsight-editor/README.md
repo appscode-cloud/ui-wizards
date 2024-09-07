@@ -1,6 +1,6 @@
 # MySQLInsight Editor
 
-[MySQLInsight Editor by AppsCode](https://byte.builders) - MySQLInsight Editor
+[MySQLInsight Editor by AppsCode](https://appscode.com) - MySQLInsight Editor
 
 ## TL;DR;
 

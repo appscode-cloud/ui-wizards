@@ -1,6 +1,6 @@
 # MetricsConfiguration Editor
 
-[MetricsConfiguration Editor by AppsCode](https://byte.builders) - MetricsConfiguration Editor
+[MetricsConfiguration Editor by AppsCode](https://appscode.com) - MetricsConfiguration Editor
 
 ## TL;DR;
 

@@ -1,6 +1,6 @@
 # ComponentStatus Editor
 
-[ComponentStatus Editor by AppsCode](https://byte.builders) - ComponentStatus Editor
+[ComponentStatus Editor by AppsCode](https://appscode.com) - ComponentStatus Editor
 
 ## TL;DR;
 

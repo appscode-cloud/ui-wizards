@@ -1,6 +1,6 @@
 # RedisEnterpriseCluster Editor
 
-[RedisEnterpriseCluster Editor by AppsCode](https://byte.builders) - RedisEnterpriseCluster Editor
+[RedisEnterpriseCluster Editor by AppsCode](https://appscode.com) - RedisEnterpriseCluster Editor
 
 ## TL;DR;
 

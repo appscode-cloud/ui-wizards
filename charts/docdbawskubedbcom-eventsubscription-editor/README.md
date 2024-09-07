@@ -1,6 +1,6 @@
 # EventSubscription Editor
 
-[EventSubscription Editor by AppsCode](https://byte.builders) - EventSubscription Editor
+[EventSubscription Editor by AppsCode](https://appscode.com) - EventSubscription Editor
 
 ## TL;DR;
 

@@ -1,6 +1,6 @@
 # Binding Editor
 
-[Binding Editor by AppsCode](https://byte.builders) - Binding Editor
+[Binding Editor by AppsCode](https://appscode.com) - Binding Editor
 
 ## TL;DR;
 

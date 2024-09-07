@@ -1,6 +1,6 @@
 # ClickHouseOpsRequest Editor
 
-[ClickHouseOpsRequest Editor by AppsCode](https://byte.builders) - ClickHouseOpsRequest Editor
+[ClickHouseOpsRequest Editor by AppsCode](https://appscode.com) - ClickHouseOpsRequest Editor
 
 ## TL;DR;
 

@@ -1,6 +1,6 @@
 # SecretRoleBinding Editor
 
-[SecretRoleBinding Editor by AppsCode](https://byte.builders) - SecretRoleBinding Editor
+[SecretRoleBinding Editor by AppsCode](https://appscode.com) - SecretRoleBinding Editor
 
 ## TL;DR;
 

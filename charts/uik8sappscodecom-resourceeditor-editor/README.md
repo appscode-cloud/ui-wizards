@@ -1,6 +1,6 @@
 # ResourceEditor Editor
 
-[ResourceEditor Editor by AppsCode](https://byte.builders) - ResourceEditor Editor
+[ResourceEditor Editor by AppsCode](https://appscode.com) - ResourceEditor Editor
 
 ## TL;DR;
 

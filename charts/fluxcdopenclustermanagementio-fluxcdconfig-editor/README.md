@@ -1,6 +1,6 @@
 # FluxCDConfig Editor
 
-[FluxCDConfig Editor by AppsCode](https://byte.builders) - FluxCDConfig Editor
+[FluxCDConfig Editor by AppsCode](https://appscode.com) - FluxCDConfig Editor
 
 ## TL;DR;
 

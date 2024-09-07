@@ -1,6 +1,6 @@
 # VaultOpsRequest Editor
 
-[VaultOpsRequest Editor by AppsCode](https://byte.builders) - VaultOpsRequest Editor
+[VaultOpsRequest Editor by AppsCode](https://appscode.com) - VaultOpsRequest Editor
 
 ## TL;DR;
 

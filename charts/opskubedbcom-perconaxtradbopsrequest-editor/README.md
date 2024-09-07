@@ -1,6 +1,6 @@
 # PerconaXtraDBOpsRequest Editor
 
-[PerconaXtraDBOpsRequest Editor by AppsCode](https://byte.builders) - PerconaXtraDBOpsRequest Editor
+[PerconaXtraDBOpsRequest Editor by AppsCode](https://appscode.com) - PerconaXtraDBOpsRequest Editor
 
 ## TL;DR;
 

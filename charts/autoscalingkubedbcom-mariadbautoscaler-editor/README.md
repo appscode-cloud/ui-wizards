@@ -1,6 +1,6 @@
 # MariaDBAutoscaler Editor
 
-[MariaDBAutoscaler Editor by AppsCode](https://byte.builders) - MariaDBAutoscaler Editor
+[MariaDBAutoscaler Editor by AppsCode](https://appscode.com) - MariaDBAutoscaler Editor
 
 ## TL;DR;
 

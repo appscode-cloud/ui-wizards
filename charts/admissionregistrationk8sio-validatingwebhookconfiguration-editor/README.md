@@ -1,6 +1,6 @@
 # ValidatingWebhookConfiguration Editor
 
-[ValidatingWebhookConfiguration Editor by AppsCode](https://byte.builders) - ValidatingWebhookConfiguration Editor
+[ValidatingWebhookConfiguration Editor by AppsCode](https://appscode.com) - ValidatingWebhookConfiguration Editor
 
 ## TL;DR;
 

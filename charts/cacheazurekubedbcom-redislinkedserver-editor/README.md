@@ -1,6 +1,6 @@
 # RedisLinkedServer Editor
 
-[RedisLinkedServer Editor by AppsCode](https://byte.builders) - RedisLinkedServer Editor
+[RedisLinkedServer Editor by AppsCode](https://appscode.com) - RedisLinkedServer Editor
 
 ## TL;DR;
 

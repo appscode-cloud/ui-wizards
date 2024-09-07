@@ -1,6 +1,6 @@
 # ClusterManager Editor
 
-[ClusterManager Editor by AppsCode](https://byte.builders) - ClusterManager Editor
+[ClusterManager Editor by AppsCode](https://appscode.com) - ClusterManager Editor
 
 ## TL;DR;
 

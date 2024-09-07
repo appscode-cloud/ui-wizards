@@ -1,6 +1,6 @@
 # Domain Editor
 
-[Domain Editor by AppsCode](https://byte.builders) - Domain Editor
+[Domain Editor by AppsCode](https://appscode.com) - Domain Editor
 
 ## TL;DR;
 

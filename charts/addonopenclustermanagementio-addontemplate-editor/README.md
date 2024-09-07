@@ -1,6 +1,6 @@
 # AddOnTemplate Editor
 
-[AddOnTemplate Editor by AppsCode](https://byte.builders) - AddOnTemplate Editor
+[AddOnTemplate Editor by AppsCode](https://appscode.com) - AddOnTemplate Editor
 
 ## TL;DR;
 

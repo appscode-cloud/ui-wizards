@@ -1,6 +1,6 @@
 # EndpointSlice Editor
 
-[EndpointSlice Editor by AppsCode](https://byte.builders) - EndpointSlice Editor
+[EndpointSlice Editor by AppsCode](https://appscode.com) - EndpointSlice Editor
 
 ## TL;DR;
 

@@ -1,6 +1,6 @@
 # Account Editor
 
-[Account Editor by AppsCode](https://byte.builders) - Account Editor
+[Account Editor by AppsCode](https://appscode.com) - Account Editor
 
 ## TL;DR;
 

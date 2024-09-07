@@ -1,6 +1,6 @@
 # RedisFirewallRule Editor
 
-[RedisFirewallRule Editor by AppsCode](https://byte.builders) - RedisFirewallRule Editor
+[RedisFirewallRule Editor by AppsCode](https://appscode.com) - RedisFirewallRule Editor
 
 ## TL;DR;
 

@@ -1,6 +1,6 @@
 # CassandraCluster Editor
 
-[CassandraCluster Editor by AppsCode](https://byte.builders) - CassandraCluster Editor
+[CassandraCluster Editor by AppsCode](https://appscode.com) - CassandraCluster Editor
 
 ## TL;DR;
 

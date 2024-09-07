@@ -1,6 +1,6 @@
 # VerticalPodAutoscalerCheckpoint Editor
 
-[VerticalPodAutoscalerCheckpoint Editor by AppsCode](https://byte.builders) - VerticalPodAutoscalerCheckpoint Editor
+[VerticalPodAutoscalerCheckpoint Editor by AppsCode](https://appscode.com) - VerticalPodAutoscalerCheckpoint Editor
 
 ## TL;DR;
 

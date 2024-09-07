@@ -1,6 +1,6 @@
 # GrafanaDashboard Editor
 
-[GrafanaDashboard Editor by AppsCode](https://byte.builders) - GrafanaDashboard Editor
+[GrafanaDashboard Editor by AppsCode](https://appscode.com) - GrafanaDashboard Editor
 
 ## TL;DR;
 

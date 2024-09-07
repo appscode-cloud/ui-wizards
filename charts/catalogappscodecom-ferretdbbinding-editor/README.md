@@ -1,6 +1,6 @@
 # FerretDBBinding Editor
 
-[FerretDBBinding Editor by AppsCode](https://byte.builders) - FerretDBBinding Editor
+[FerretDBBinding Editor by AppsCode](https://appscode.com) - FerretDBBinding Editor
 
 ## TL;DR;
 

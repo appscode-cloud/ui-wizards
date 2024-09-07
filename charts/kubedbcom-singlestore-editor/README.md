@@ -1,6 +1,6 @@
 # Singlestore Editor
 
-[Singlestore Editor by AppsCode](https://byte.builders) - Singlestore Editor
+[Singlestore Editor by AppsCode](https://appscode.com) - Singlestore Editor
 
 ## TL;DR;
 

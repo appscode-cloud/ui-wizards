@@ -1,6 +1,6 @@
 # ProxyDefaultTargetGroup Editor
 
-[ProxyDefaultTargetGroup Editor by AppsCode](https://byte.builders) - ProxyDefaultTargetGroup Editor
+[ProxyDefaultTargetGroup Editor by AppsCode](https://appscode.com) - ProxyDefaultTargetGroup Editor
 
 ## TL;DR;
 

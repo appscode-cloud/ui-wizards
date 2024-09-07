@@ -1,6 +1,6 @@
 # FlexibleServerConfiguration Editor
 
-[FlexibleServerConfiguration Editor by AppsCode](https://byte.builders) - FlexibleServerConfiguration Editor
+[FlexibleServerConfiguration Editor by AppsCode](https://appscode.com) - FlexibleServerConfiguration Editor
 
 ## TL;DR;
 

@@ -1,6 +1,6 @@
 # MSSQLFirewallRule Editor
 
-[MSSQLFirewallRule Editor by AppsCode](https://byte.builders) - MSSQLFirewallRule Editor
+[MSSQLFirewallRule Editor by AppsCode](https://appscode.com) - MSSQLFirewallRule Editor
 
 ## TL;DR;
 

@@ -1,6 +1,6 @@
 # VaultPolicyBinding Editor
 
-[VaultPolicyBinding Editor by AppsCode](https://byte.builders) - VaultPolicyBinding Editor
+[VaultPolicyBinding Editor by AppsCode](https://appscode.com) - VaultPolicyBinding Editor
 
 ## TL;DR;
 

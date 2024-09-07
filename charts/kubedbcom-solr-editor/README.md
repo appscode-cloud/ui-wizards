@@ -1,6 +1,6 @@
 # Solr Editor
 
-[Solr Editor by AppsCode](https://byte.builders) - Solr Editor
+[Solr Editor by AppsCode](https://appscode.com) - Solr Editor
 
 ## TL;DR;
 

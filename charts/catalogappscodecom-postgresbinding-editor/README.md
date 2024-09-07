@@ -1,6 +1,6 @@
 # PostgresBinding Editor
 
-[PostgresBinding Editor by AppsCode](https://byte.builders) - PostgresBinding Editor
+[PostgresBinding Editor by AppsCode](https://appscode.com) - PostgresBinding Editor
 
 ## TL;DR;
 

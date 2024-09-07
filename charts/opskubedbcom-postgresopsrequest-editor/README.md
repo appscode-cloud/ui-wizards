@@ -1,6 +1,6 @@
 # PostgresOpsRequest Editor
 
-[PostgresOpsRequest Editor by AppsCode](https://byte.builders) - PostgresOpsRequest Editor
+[PostgresOpsRequest Editor by AppsCode](https://appscode.com) - PostgresOpsRequest Editor
 
 ## TL;DR;
 

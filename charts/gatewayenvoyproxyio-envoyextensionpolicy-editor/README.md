@@ -1,6 +1,6 @@
 # EnvoyExtensionPolicy Editor
 
-[EnvoyExtensionPolicy Editor by AppsCode](https://byte.builders) - EnvoyExtensionPolicy Editor
+[EnvoyExtensionPolicy Editor by AppsCode](https://appscode.com) - EnvoyExtensionPolicy Editor
 
 ## TL;DR;
 

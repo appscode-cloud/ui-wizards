@@ -1,6 +1,6 @@
 # RedisBinding Editor
 
-[RedisBinding Editor by AppsCode](https://byte.builders) - RedisBinding Editor
+[RedisBinding Editor by AppsCode](https://appscode.com) - RedisBinding Editor
 
 ## TL;DR;
 

@@ -1,6 +1,6 @@
 # ReplicationController Editor
 
-[ReplicationController Editor by AppsCode](https://byte.builders) - ReplicationController Editor
+[ReplicationController Editor by AppsCode](https://appscode.com) - ReplicationController Editor
 
 ## TL;DR;
 

@@ -1,6 +1,6 @@
 # SolrAutoscaler Editor
 
-[SolrAutoscaler Editor by AppsCode](https://byte.builders) - SolrAutoscaler Editor
+[SolrAutoscaler Editor by AppsCode](https://appscode.com) - SolrAutoscaler Editor
 
 ## TL;DR;
 

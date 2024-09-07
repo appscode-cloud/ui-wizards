@@ -1,6 +1,6 @@
 # ZooKeeperAutoscaler Editor
 
-[ZooKeeperAutoscaler Editor by AppsCode](https://byte.builders) - ZooKeeperAutoscaler Editor
+[ZooKeeperAutoscaler Editor by AppsCode](https://appscode.com) - ZooKeeperAutoscaler Editor
 
 ## TL;DR;
 

@@ -1,6 +1,6 @@
 # IPAddress Editor
 
-[IPAddress Editor by AppsCode](https://byte.builders) - IPAddress Editor
+[IPAddress Editor by AppsCode](https://appscode.com) - IPAddress Editor
 
 ## TL;DR;
 

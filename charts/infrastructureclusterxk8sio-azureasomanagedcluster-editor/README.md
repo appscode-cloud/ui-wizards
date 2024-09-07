@@ -1,6 +1,6 @@
 # AzureASOManagedCluster Editor
 
-[AzureASOManagedCluster Editor by AppsCode](https://byte.builders) - AzureASOManagedCluster Editor
+[AzureASOManagedCluster Editor by AppsCode](https://appscode.com) - AzureASOManagedCluster Editor
 
 ## TL;DR;
 

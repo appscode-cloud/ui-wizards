@@ -1,6 +1,6 @@
 # Scale Editor
 
-[Scale Editor by AppsCode](https://byte.builders) - Scale Editor
+[Scale Editor by AppsCode](https://appscode.com) - Scale Editor
 
 ## TL;DR;
 

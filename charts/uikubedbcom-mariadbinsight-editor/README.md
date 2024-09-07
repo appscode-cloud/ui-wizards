@@ -1,6 +1,6 @@
 # MariaDBInsight Editor
 
-[MariaDBInsight Editor by AppsCode](https://byte.builders) - MariaDBInsight Editor
+[MariaDBInsight Editor by AppsCode](https://appscode.com) - MariaDBInsight Editor
 
 ## TL;DR;
 

@@ -1,6 +1,6 @@
 # MSSQLManagedDatabase Editor
 
-[MSSQLManagedDatabase Editor by AppsCode](https://byte.builders) - MSSQLManagedDatabase Editor
+[MSSQLManagedDatabase Editor by AppsCode](https://appscode.com) - MSSQLManagedDatabase Editor
 
 ## TL;DR;
 

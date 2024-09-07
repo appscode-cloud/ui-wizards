@@ -1,6 +1,6 @@
 # RabbitMQBinding Editor
 
-[RabbitMQBinding Editor by AppsCode](https://byte.builders) - RabbitMQBinding Editor
+[RabbitMQBinding Editor by AppsCode](https://appscode.com) - RabbitMQBinding Editor
 
 ## TL;DR;
 

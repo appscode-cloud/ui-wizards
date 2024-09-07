@@ -1,6 +1,6 @@
 # PgpoolAutoscaler Editor
 
-[PgpoolAutoscaler Editor by AppsCode](https://byte.builders) - PgpoolAutoscaler Editor
+[PgpoolAutoscaler Editor by AppsCode](https://appscode.com) - PgpoolAutoscaler Editor
 
 ## TL;DR;
 

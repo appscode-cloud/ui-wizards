@@ -1,6 +1,6 @@
 # ClusterChartPreset Editor
 
-[ClusterChartPreset Editor by AppsCode](https://byte.builders) - ClusterChartPreset Editor
+[ClusterChartPreset Editor by AppsCode](https://appscode.com) - ClusterChartPreset Editor
 
 ## TL;DR;
 

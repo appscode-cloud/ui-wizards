@@ -1,6 +1,6 @@
 # ClusterStatus Editor
 
-[ClusterStatus Editor by AppsCode](https://byte.builders) - ClusterStatus Editor
+[ClusterStatus Editor by AppsCode](https://appscode.com) - ClusterStatus Editor
 
 ## TL;DR;
 

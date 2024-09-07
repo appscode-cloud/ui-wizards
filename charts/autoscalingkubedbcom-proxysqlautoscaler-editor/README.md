@@ -1,6 +1,6 @@
 # ProxySQLAutoscaler Editor
 
-[ProxySQLAutoscaler Editor by AppsCode](https://byte.builders) - ProxySQLAutoscaler Editor
+[ProxySQLAutoscaler Editor by AppsCode](https://appscode.com) - ProxySQLAutoscaler Editor
 
 ## TL;DR;
 

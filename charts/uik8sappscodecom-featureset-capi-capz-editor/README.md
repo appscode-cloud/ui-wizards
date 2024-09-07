@@ -1,6 +1,6 @@
 # FeatureSet Editor
 
-[FeatureSet Editor by AppsCode](https://byte.builders) - FeatureSet Editor
+[FeatureSet Editor by AppsCode](https://appscode.com) - FeatureSet Editor
 
 ## TL;DR;
 

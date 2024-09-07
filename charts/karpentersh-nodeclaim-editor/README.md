@@ -1,6 +1,6 @@
 # NodeClaim Editor
 
-[NodeClaim Editor by AppsCode](https://byte.builders) - NodeClaim Editor
+[NodeClaim Editor by AppsCode](https://appscode.com) - NodeClaim Editor
 
 ## TL;DR;
 

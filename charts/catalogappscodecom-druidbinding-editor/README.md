@@ -1,6 +1,6 @@
 # DruidBinding Editor
 
-[DruidBinding Editor by AppsCode](https://byte.builders) - DruidBinding Editor
+[DruidBinding Editor by AppsCode](https://appscode.com) - DruidBinding Editor
 
 ## TL;DR;
 

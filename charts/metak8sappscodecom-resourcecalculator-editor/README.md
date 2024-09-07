@@ -1,6 +1,6 @@
 # ResourceCalculator Editor
 
-[ResourceCalculator Editor by AppsCode](https://byte.builders) - ResourceCalculator Editor
+[ResourceCalculator Editor by AppsCode](https://appscode.com) - ResourceCalculator Editor
 
 ## TL;DR;
 

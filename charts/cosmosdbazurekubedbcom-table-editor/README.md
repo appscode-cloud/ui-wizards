@@ -1,6 +1,6 @@
 # Table Editor
 
-[Table Editor by AppsCode](https://byte.builders) - Table Editor
+[Table Editor by AppsCode](https://appscode.com) - Table Editor
 
 ## TL;DR;
 

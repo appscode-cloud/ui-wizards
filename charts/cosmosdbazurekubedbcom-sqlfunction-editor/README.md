@@ -1,6 +1,6 @@
 # SQLFunction Editor
 
-[SQLFunction Editor by AppsCode](https://byte.builders) - SQLFunction Editor
+[SQLFunction Editor by AppsCode](https://appscode.com) - SQLFunction Editor
 
 ## TL;DR;
 

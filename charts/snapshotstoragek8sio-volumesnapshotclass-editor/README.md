@@ -1,6 +1,6 @@
 # VolumeSnapshotClass Editor
 
-[VolumeSnapshotClass Editor by AppsCode](https://byte.builders) - VolumeSnapshotClass Editor
+[VolumeSnapshotClass Editor by AppsCode](https://appscode.com) - VolumeSnapshotClass Editor
 
 ## TL;DR;
 

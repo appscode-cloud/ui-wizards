@@ -1,6 +1,6 @@
 # Restic Editor
 
-[Restic Editor by AppsCode](https://byte.builders) - Restic Editor
+[Restic Editor by AppsCode](https://appscode.com) - Restic Editor
 
 ## TL;DR;
 

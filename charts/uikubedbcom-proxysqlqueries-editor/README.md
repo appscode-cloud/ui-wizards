@@ -1,6 +1,6 @@
 # ProxySQLQueries Editor
 
-[ProxySQLQueries Editor by AppsCode](https://byte.builders) - ProxySQLQueries Editor
+[ProxySQLQueries Editor by AppsCode](https://appscode.com) - ProxySQLQueries Editor
 
 ## TL;DR;
 

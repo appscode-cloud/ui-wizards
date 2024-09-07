@@ -1,6 +1,6 @@
 # RedisEnterpriseDatabase Editor
 
-[RedisEnterpriseDatabase Editor by AppsCode](https://byte.builders) - RedisEnterpriseDatabase Editor
+[RedisEnterpriseDatabase Editor by AppsCode](https://appscode.com) - RedisEnterpriseDatabase Editor
 
 ## TL;DR;
 

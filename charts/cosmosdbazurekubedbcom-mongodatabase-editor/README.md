@@ -1,6 +1,6 @@
 # MongoDatabase Editor
 
-[MongoDatabase Editor by AppsCode](https://byte.builders) - MongoDatabase Editor
+[MongoDatabase Editor by AppsCode](https://appscode.com) - MongoDatabase Editor
 
 ## TL;DR;
 

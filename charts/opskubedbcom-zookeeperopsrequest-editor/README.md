@@ -1,6 +1,6 @@
 # ZooKeeperOpsRequest Editor
 
-[ZooKeeperOpsRequest Editor by AppsCode](https://byte.builders) - ZooKeeperOpsRequest Editor
+[ZooKeeperOpsRequest Editor by AppsCode](https://appscode.com) - ZooKeeperOpsRequest Editor
 
 ## TL;DR;
 

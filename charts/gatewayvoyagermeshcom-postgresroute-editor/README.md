@@ -1,6 +1,6 @@
 # PostgresRoute Editor
 
-[PostgresRoute Editor by AppsCode](https://byte.builders) - PostgresRoute Editor
+[PostgresRoute Editor by AppsCode](https://appscode.com) - PostgresRoute Editor
 
 ## TL;DR;
 

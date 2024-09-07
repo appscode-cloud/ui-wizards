@@ -1,6 +1,6 @@
 # Service Editor
 
-[Service Editor by AppsCode](https://byte.builders) - Service Editor
+[Service Editor by AppsCode](https://appscode.com) - Service Editor
 
 ## TL;DR;
 

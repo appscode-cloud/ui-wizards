@@ -1,6 +1,6 @@
 # Placement Editor
 
-[Placement Editor by AppsCode](https://byte.builders) - Placement Editor
+[Placement Editor by AppsCode](https://appscode.com) - Placement Editor
 
 ## TL;DR;
 

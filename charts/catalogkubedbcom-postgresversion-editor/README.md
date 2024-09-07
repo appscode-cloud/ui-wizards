@@ -1,6 +1,6 @@
 # PostgresVersion Editor
 
-[PostgresVersion Editor by AppsCode](https://byte.builders) - PostgresVersion Editor
+[PostgresVersion Editor by AppsCode](https://appscode.com) - PostgresVersion Editor
 
 ## TL;DR;
 

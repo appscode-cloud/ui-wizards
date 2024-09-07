@@ -1,6 +1,6 @@
 # SQLDedicatedGateway Editor
 
-[SQLDedicatedGateway Editor by AppsCode](https://byte.builders) - SQLDedicatedGateway Editor
+[SQLDedicatedGateway Editor by AppsCode](https://appscode.com) - SQLDedicatedGateway Editor
 
 ## TL;DR;
 

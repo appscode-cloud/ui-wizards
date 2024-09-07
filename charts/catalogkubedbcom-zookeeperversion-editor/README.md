@@ -1,6 +1,6 @@
 # ZooKeeperVersion Editor
 
-[ZooKeeperVersion Editor by AppsCode](https://byte.builders) - ZooKeeperVersion Editor
+[ZooKeeperVersion Editor by AppsCode](https://appscode.com) - ZooKeeperVersion Editor
 
 ## TL;DR;
 

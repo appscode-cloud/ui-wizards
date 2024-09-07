@@ -1,6 +1,6 @@
 # TableReplica Editor
 
-[TableReplica Editor by AppsCode](https://byte.builders) - TableReplica Editor
+[TableReplica Editor by AppsCode](https://appscode.com) - TableReplica Editor
 
 ## TL;DR;
 

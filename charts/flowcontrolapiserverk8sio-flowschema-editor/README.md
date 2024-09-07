@@ -1,6 +1,6 @@
 # FlowSchema Editor
 
-[FlowSchema Editor by AppsCode](https://byte.builders) - FlowSchema Editor
+[FlowSchema Editor by AppsCode](https://appscode.com) - FlowSchema Editor
 
 ## TL;DR;
 

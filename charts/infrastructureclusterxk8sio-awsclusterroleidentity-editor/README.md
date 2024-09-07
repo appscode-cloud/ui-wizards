@@ -1,6 +1,6 @@
 # AWSClusterRoleIdentity Editor
 
-[AWSClusterRoleIdentity Editor by AppsCode](https://byte.builders) - AWSClusterRoleIdentity Editor
+[AWSClusterRoleIdentity Editor by AppsCode](https://appscode.com) - AWSClusterRoleIdentity Editor
 
 ## TL;DR;
 

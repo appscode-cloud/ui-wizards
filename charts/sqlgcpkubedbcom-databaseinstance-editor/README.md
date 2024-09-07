@@ -1,6 +1,6 @@
 # DatabaseInstance Editor
 
-[DatabaseInstance Editor by AppsCode](https://byte.builders) - DatabaseInstance Editor
+[DatabaseInstance Editor by AppsCode](https://appscode.com) - DatabaseInstance Editor
 
 ## TL;DR;
 

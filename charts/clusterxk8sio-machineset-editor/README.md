@@ -1,6 +1,6 @@
 # MachineSet Editor
 
-[MachineSet Editor by AppsCode](https://byte.builders) - MachineSet Editor
+[MachineSet Editor by AppsCode](https://appscode.com) - MachineSet Editor
 
 ## TL;DR;
 

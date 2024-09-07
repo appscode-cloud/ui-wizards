@@ -1,6 +1,6 @@
 # MSSQLJobAgent Editor
 
-[MSSQLJobAgent Editor by AppsCode](https://byte.builders) - MSSQLJobAgent Editor
+[MSSQLJobAgent Editor by AppsCode](https://appscode.com) - MSSQLJobAgent Editor
 
 ## TL;DR;
 

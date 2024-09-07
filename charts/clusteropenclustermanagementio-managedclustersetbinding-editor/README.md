@@ -1,6 +1,6 @@
 # ManagedClusterSetBinding Editor
 
-[ManagedClusterSetBinding Editor by AppsCode](https://byte.builders) - ManagedClusterSetBinding Editor
+[ManagedClusterSetBinding Editor by AppsCode](https://appscode.com) - ManagedClusterSetBinding Editor
 
 ## TL;DR;
 

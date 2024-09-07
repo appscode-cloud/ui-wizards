@@ -1,6 +1,6 @@
 # FirewallRule Editor
 
-[FirewallRule Editor by AppsCode](https://byte.builders) - FirewallRule Editor
+[FirewallRule Editor by AppsCode](https://appscode.com) - FirewallRule Editor
 
 ## TL;DR;
 

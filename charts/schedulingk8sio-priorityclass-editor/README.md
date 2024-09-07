@@ -1,6 +1,6 @@
 # PriorityClass Editor
 
-[PriorityClass Editor by AppsCode](https://byte.builders) - PriorityClass Editor
+[PriorityClass Editor by AppsCode](https://appscode.com) - PriorityClass Editor
 
 ## TL;DR;
 

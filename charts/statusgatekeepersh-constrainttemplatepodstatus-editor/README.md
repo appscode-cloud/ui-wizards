@@ -1,6 +1,6 @@
 # ConstraintTemplatePodStatus Editor
 
-[ConstraintTemplatePodStatus Editor by AppsCode](https://byte.builders) - ConstraintTemplatePodStatus Editor
+[ConstraintTemplatePodStatus Editor by AppsCode](https://appscode.com) - ConstraintTemplatePodStatus Editor
 
 ## TL;DR;
 

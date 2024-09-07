@@ -1,6 +1,6 @@
 # ProxySQLBinding Editor
 
-[ProxySQLBinding Editor by AppsCode](https://byte.builders) - ProxySQLBinding Editor
+[ProxySQLBinding Editor by AppsCode](https://appscode.com) - ProxySQLBinding Editor
 
 ## TL;DR;
 

@@ -1,6 +1,6 @@
 # Application Editor
 
-[Application Editor by AppsCode](https://byte.builders) - Application Editor
+[Application Editor by AppsCode](https://appscode.com) - Application Editor
 
 ## TL;DR;
 

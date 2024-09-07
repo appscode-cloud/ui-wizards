@@ -1,6 +1,6 @@
 # PostgresInsight Editor
 
-[PostgresInsight Editor by AppsCode](https://byte.builders) - PostgresInsight Editor
+[PostgresInsight Editor by AppsCode](https://appscode.com) - PostgresInsight Editor
 
 ## TL;DR;
 

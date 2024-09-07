@@ -1,6 +1,6 @@
 # RedisOpsRequest Editor
 
-[RedisOpsRequest Editor by AppsCode](https://byte.builders) - RedisOpsRequest Editor
+[RedisOpsRequest Editor by AppsCode](https://appscode.com) - RedisOpsRequest Editor
 
 ## TL;DR;
 

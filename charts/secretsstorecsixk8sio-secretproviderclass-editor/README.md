@@ -1,6 +1,6 @@
 # SecretProviderClass Editor
 
-[SecretProviderClass Editor by AppsCode](https://byte.builders) - SecretProviderClass Editor
+[SecretProviderClass Editor by AppsCode](https://appscode.com) - SecretProviderClass Editor
 
 ## TL;DR;
 

@@ -1,6 +1,6 @@
 # AppliedManifestWork Editor
 
-[AppliedManifestWork Editor by AppsCode](https://byte.builders) - AppliedManifestWork Editor
+[AppliedManifestWork Editor by AppsCode](https://appscode.com) - AppliedManifestWork Editor
 
 ## TL;DR;
 

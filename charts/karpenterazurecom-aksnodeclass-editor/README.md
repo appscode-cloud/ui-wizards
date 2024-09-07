@@ -1,6 +1,6 @@
 # AKSNodeClass Editor
 
-[AKSNodeClass Editor by AppsCode](https://byte.builders) - AKSNodeClass Editor
+[AKSNodeClass Editor by AppsCode](https://appscode.com) - AKSNodeClass Editor
 
 ## TL;DR;
 

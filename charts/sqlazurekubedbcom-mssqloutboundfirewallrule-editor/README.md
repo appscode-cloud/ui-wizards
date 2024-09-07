@@ -1,6 +1,6 @@
 # MSSQLOutboundFirewallRule Editor
 
-[MSSQLOutboundFirewallRule Editor by AppsCode](https://byte.builders) - MSSQLOutboundFirewallRule Editor
+[MSSQLOutboundFirewallRule Editor by AppsCode](https://appscode.com) - MSSQLOutboundFirewallRule Editor
 
 ## TL;DR;
 

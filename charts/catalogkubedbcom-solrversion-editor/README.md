@@ -1,6 +1,6 @@
 # SolrVersion Editor
 
-[SolrVersion Editor by AppsCode](https://byte.builders) - SolrVersion Editor
+[SolrVersion Editor by AppsCode](https://appscode.com) - SolrVersion Editor
 
 ## TL;DR;
 

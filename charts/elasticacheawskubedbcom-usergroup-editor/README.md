@@ -1,6 +1,6 @@
 # UserGroup Editor
 
-[UserGroup Editor by AppsCode](https://byte.builders) - UserGroup Editor
+[UserGroup Editor by AppsCode](https://appscode.com) - UserGroup Editor
 
 ## TL;DR;
 

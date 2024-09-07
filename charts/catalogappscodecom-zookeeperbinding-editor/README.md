@@ -1,6 +1,6 @@
 # ZooKeeperBinding Editor
 
-[ZooKeeperBinding Editor by AppsCode](https://byte.builders) - ZooKeeperBinding Editor
+[ZooKeeperBinding Editor by AppsCode](https://appscode.com) - ZooKeeperBinding Editor
 
 ## TL;DR;
 

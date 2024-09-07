@@ -1,6 +1,6 @@
 # ResourceGroup Editor
 
-[ResourceGroup Editor by AppsCode](https://byte.builders) - ResourceGroup Editor
+[ResourceGroup Editor by AppsCode](https://appscode.com) - ResourceGroup Editor
 
 ## TL;DR;
 

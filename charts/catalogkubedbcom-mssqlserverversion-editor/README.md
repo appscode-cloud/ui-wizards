@@ -1,6 +1,6 @@
 # MSSQLServerVersion Editor
 
-[MSSQLServerVersion Editor by AppsCode](https://byte.builders) - MSSQLServerVersion Editor
+[MSSQLServerVersion Editor by AppsCode](https://appscode.com) - MSSQLServerVersion Editor
 
 ## TL;DR;
 

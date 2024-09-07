@@ -1,6 +1,6 @@
 # PriorityLevelConfiguration Editor
 
-[PriorityLevelConfiguration Editor by AppsCode](https://byte.builders) - PriorityLevelConfiguration Editor
+[PriorityLevelConfiguration Editor by AppsCode](https://appscode.com) - PriorityLevelConfiguration Editor
 
 ## TL;DR;
 

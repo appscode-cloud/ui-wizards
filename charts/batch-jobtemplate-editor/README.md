@@ -1,6 +1,6 @@
 # JobTemplate Editor
 
-[JobTemplate Editor by AppsCode](https://byte.builders) - JobTemplate Editor
+[JobTemplate Editor by AppsCode](https://appscode.com) - JobTemplate Editor
 
 ## TL;DR;
 

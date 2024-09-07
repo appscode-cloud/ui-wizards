@@ -1,6 +1,6 @@
 # GitRepository Editor
 
-[GitRepository Editor by AppsCode](https://byte.builders) - GitRepository Editor
+[GitRepository Editor by AppsCode](https://appscode.com) - GitRepository Editor
 
 ## TL;DR;
 

@@ -1,6 +1,6 @@
 # Deployment Editor
 
-[Deployment Editor by AppsCode](https://byte.builders) - Deployment Editor
+[Deployment Editor by AppsCode](https://appscode.com) - Deployment Editor
 
 ## TL;DR;
 

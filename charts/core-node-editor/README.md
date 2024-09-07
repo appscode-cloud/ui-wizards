@@ -1,6 +1,6 @@
 # Node Editor
 
-[Node Editor by AppsCode](https://byte.builders) - Node Editor
+[Node Editor by AppsCode](https://appscode.com) - Node Editor
 
 ## TL;DR;
 

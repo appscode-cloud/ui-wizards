@@ -1,6 +1,6 @@
 # ConfigurationRevision Editor
 
-[ConfigurationRevision Editor by AppsCode](https://byte.builders) - ConfigurationRevision Editor
+[ConfigurationRevision Editor by AppsCode](https://appscode.com) - ConfigurationRevision Editor
 
 ## TL;DR;
 

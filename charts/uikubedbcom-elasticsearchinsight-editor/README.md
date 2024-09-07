@@ -1,6 +1,6 @@
 # ElasticsearchInsight Editor
 
-[ElasticsearchInsight Editor by AppsCode](https://byte.builders) - ElasticsearchInsight Editor
+[ElasticsearchInsight Editor by AppsCode](https://appscode.com) - ElasticsearchInsight Editor
 
 ## TL;DR;
 

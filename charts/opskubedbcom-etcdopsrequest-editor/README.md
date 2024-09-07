@@ -1,6 +1,6 @@
 # EtcdOpsRequest Editor
 
-[EtcdOpsRequest Editor by AppsCode](https://byte.builders) - EtcdOpsRequest Editor
+[EtcdOpsRequest Editor by AppsCode](https://appscode.com) - EtcdOpsRequest Editor
 
 ## TL;DR;
 

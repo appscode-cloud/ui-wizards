@@ -1,6 +1,6 @@
 # GlobalCluster Editor
 
-[GlobalCluster Editor by AppsCode](https://byte.builders) - GlobalCluster Editor
+[GlobalCluster Editor by AppsCode](https://appscode.com) - GlobalCluster Editor
 
 ## TL;DR;
 

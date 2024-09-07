@@ -1,6 +1,6 @@
 # DomainSAMLOptions Editor
 
-[DomainSAMLOptions Editor by AppsCode](https://byte.builders) - DomainSAMLOptions Editor
+[DomainSAMLOptions Editor by AppsCode](https://appscode.com) - DomainSAMLOptions Editor
 
 ## TL;DR;
 

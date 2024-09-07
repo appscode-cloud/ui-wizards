@@ -1,6 +1,6 @@
 # Server Editor
 
-[Server Editor by AppsCode](https://byte.builders) - Server Editor
+[Server Editor by AppsCode](https://appscode.com) - Server Editor
 
 ## TL;DR;
 

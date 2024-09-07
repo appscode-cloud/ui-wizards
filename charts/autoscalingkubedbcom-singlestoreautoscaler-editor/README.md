@@ -1,6 +1,6 @@
 # SinglestoreAutoscaler Editor
 
-[SinglestoreAutoscaler Editor by AppsCode](https://byte.builders) - SinglestoreAutoscaler Editor
+[SinglestoreAutoscaler Editor by AppsCode](https://appscode.com) - SinglestoreAutoscaler Editor
 
 ## TL;DR;
 

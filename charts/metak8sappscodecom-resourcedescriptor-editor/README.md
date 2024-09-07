@@ -1,6 +1,6 @@
 # ResourceDescriptor Editor
 
-[ResourceDescriptor Editor by AppsCode](https://byte.builders) - ResourceDescriptor Editor
+[ResourceDescriptor Editor by AppsCode](https://appscode.com) - ResourceDescriptor Editor
 
 ## TL;DR;
 

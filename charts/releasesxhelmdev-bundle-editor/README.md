@@ -1,6 +1,6 @@
 # Bundle Editor
 
-[Bundle Editor by AppsCode](https://byte.builders) - Bundle Editor
+[Bundle Editor by AppsCode](https://appscode.com) - Bundle Editor
 
 ## TL;DR;
 

@@ -1,6 +1,6 @@
 # AssignMetadata Editor
 
-[AssignMetadata Editor by AppsCode](https://byte.builders) - AssignMetadata Editor
+[AssignMetadata Editor by AppsCode](https://appscode.com) - AssignMetadata Editor
 
 ## TL;DR;
 

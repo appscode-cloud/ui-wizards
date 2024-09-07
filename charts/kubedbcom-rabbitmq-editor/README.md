@@ -1,6 +1,6 @@
 # RabbitMQ Editor
 
-[RabbitMQ Editor by AppsCode](https://byte.builders) - RabbitMQ Editor
+[RabbitMQ Editor by AppsCode](https://appscode.com) - RabbitMQ Editor
 
 ## TL;DR;
 

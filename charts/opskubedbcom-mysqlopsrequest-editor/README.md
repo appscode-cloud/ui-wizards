@@ -1,6 +1,6 @@
 # MySQLOpsRequest Editor
 
-[MySQLOpsRequest Editor by AppsCode](https://byte.builders) - MySQLOpsRequest Editor
+[MySQLOpsRequest Editor by AppsCode](https://appscode.com) - MySQLOpsRequest Editor
 
 ## TL;DR;
 

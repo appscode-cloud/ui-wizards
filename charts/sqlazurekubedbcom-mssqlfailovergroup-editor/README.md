@@ -1,6 +1,6 @@
 # MSSQLFailoverGroup Editor
 
-[MSSQLFailoverGroup Editor by AppsCode](https://byte.builders) - MSSQLFailoverGroup Editor
+[MSSQLFailoverGroup Editor by AppsCode](https://appscode.com) - MSSQLFailoverGroup Editor
 
 ## TL;DR;
 

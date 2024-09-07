@@ -1,6 +1,6 @@
 # MSSQLServerTransparentDataEncryption Editor
 
-[MSSQLServerTransparentDataEncryption Editor by AppsCode](https://byte.builders) - MSSQLServerTransparentDataEncryption Editor
+[MSSQLServerTransparentDataEncryption Editor by AppsCode](https://appscode.com) - MSSQLServerTransparentDataEncryption Editor
 
 ## TL;DR;
 

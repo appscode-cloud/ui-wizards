@@ -1,6 +1,6 @@
 # AssignImage Editor
 
-[AssignImage Editor by AppsCode](https://byte.builders) - AssignImage Editor
+[AssignImage Editor by AppsCode](https://appscode.com) - AssignImage Editor
 
 ## TL;DR;
 

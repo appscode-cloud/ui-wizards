@@ -1,6 +1,6 @@
 # AppBinding Editor
 
-[AppBinding Editor by AppsCode](https://byte.builders) - AppBinding Editor
+[AppBinding Editor by AppsCode](https://appscode.com) - AppBinding Editor
 
 ## TL;DR;
 

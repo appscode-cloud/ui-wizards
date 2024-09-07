@@ -1,6 +1,6 @@
 # ImageUpdateAutomation Editor
 
-[ImageUpdateAutomation Editor by AppsCode](https://byte.builders) - ImageUpdateAutomation Editor
+[ImageUpdateAutomation Editor by AppsCode](https://appscode.com) - ImageUpdateAutomation Editor
 
 ## TL;DR;
 

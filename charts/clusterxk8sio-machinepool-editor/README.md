@@ -1,6 +1,6 @@
 # MachinePool Editor
 
-[MachinePool Editor by AppsCode](https://byte.builders) - MachinePool Editor
+[MachinePool Editor by AppsCode](https://appscode.com) - MachinePool Editor
 
 ## TL;DR;
 

@@ -1,6 +1,6 @@
 # Menu Editor
 
-[Menu Editor by AppsCode](https://byte.builders) - Menu Editor
+[Menu Editor by AppsCode](https://appscode.com) - Menu Editor
 
 ## TL;DR;
 

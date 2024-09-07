@@ -1,6 +1,6 @@
 # EtcdAutoscaler Editor
 
-[EtcdAutoscaler Editor by AppsCode](https://byte.builders) - EtcdAutoscaler Editor
+[EtcdAutoscaler Editor by AppsCode](https://appscode.com) - EtcdAutoscaler Editor
 
 ## TL;DR;
 

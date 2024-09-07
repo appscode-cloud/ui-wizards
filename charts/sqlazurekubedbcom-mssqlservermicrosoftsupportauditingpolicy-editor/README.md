@@ -1,6 +1,6 @@
 # MSSQLServerMicrosoftSupportAuditingPolicy Editor
 
-[MSSQLServerMicrosoftSupportAuditingPolicy Editor by AppsCode](https://byte.builders) - MSSQLServerMicrosoftSupportAuditingPolicy Editor
+[MSSQLServerMicrosoftSupportAuditingPolicy Editor by AppsCode](https://appscode.com) - MSSQLServerMicrosoftSupportAuditingPolicy Editor
 
 ## TL;DR;
 

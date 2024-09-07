@@ -1,6 +1,6 @@
 # PostgresQueries Editor
 
-[PostgresQueries Editor by AppsCode](https://byte.builders) - PostgresQueries Editor
+[PostgresQueries Editor by AppsCode](https://appscode.com) - PostgresQueries Editor
 
 ## TL;DR;
 

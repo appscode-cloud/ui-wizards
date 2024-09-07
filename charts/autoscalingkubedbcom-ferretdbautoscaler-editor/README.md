@@ -1,6 +1,6 @@
 # FerretDBAutoscaler Editor
 
-[FerretDBAutoscaler Editor by AppsCode](https://byte.builders) - FerretDBAutoscaler Editor
+[FerretDBAutoscaler Editor by AppsCode](https://appscode.com) - FerretDBAutoscaler Editor
 
 ## TL;DR;
 

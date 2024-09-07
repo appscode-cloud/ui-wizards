@@ -1,6 +1,6 @@
 # InstanceIAMMember Editor
 
-[InstanceIAMMember Editor by AppsCode](https://byte.builders) - InstanceIAMMember Editor
+[InstanceIAMMember Editor by AppsCode](https://appscode.com) - InstanceIAMMember Editor
 
 ## TL;DR;
 

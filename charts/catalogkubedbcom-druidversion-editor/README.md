@@ -1,6 +1,6 @@
 # DruidVersion Editor
 
-[DruidVersion Editor by AppsCode](https://byte.builders) - DruidVersion Editor
+[DruidVersion Editor by AppsCode](https://appscode.com) - DruidVersion Editor
 
 ## TL;DR;
 

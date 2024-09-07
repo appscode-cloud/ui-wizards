@@ -1,6 +1,6 @@
 # SchemaRegistry Editor
 
-[SchemaRegistry Editor by AppsCode](https://byte.builders) - SchemaRegistry Editor
+[SchemaRegistry Editor by AppsCode](https://appscode.com) - SchemaRegistry Editor
 
 ## TL;DR;
 

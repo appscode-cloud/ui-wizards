@@ -1,6 +1,6 @@
 # SinglestoreVersion Editor
 
-[SinglestoreVersion Editor by AppsCode](https://byte.builders) - SinglestoreVersion Editor
+[SinglestoreVersion Editor by AppsCode](https://appscode.com) - SinglestoreVersion Editor
 
 ## TL;DR;
 

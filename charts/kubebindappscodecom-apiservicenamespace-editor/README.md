@@ -1,6 +1,6 @@
 # APIServiceNamespace Editor
 
-[APIServiceNamespace Editor by AppsCode](https://byte.builders) - APIServiceNamespace Editor
+[APIServiceNamespace Editor by AppsCode](https://appscode.com) - APIServiceNamespace Editor
 
 ## TL;DR;
 

@@ -1,6 +1,6 @@
 # ParameterGroup Editor
 
-[ParameterGroup Editor by AppsCode](https://byte.builders) - ParameterGroup Editor
+[ParameterGroup Editor by AppsCode](https://appscode.com) - ParameterGroup Editor
 
 ## TL;DR;
 

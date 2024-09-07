@@ -1,6 +1,6 @@
 # PodSecurityPolicy Editor
 
-[PodSecurityPolicy Editor by AppsCode](https://byte.builders) - PodSecurityPolicy Editor
+[PodSecurityPolicy Editor by AppsCode](https://appscode.com) - PodSecurityPolicy Editor
 
 ## TL;DR;
 

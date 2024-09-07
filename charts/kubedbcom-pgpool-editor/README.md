@@ -1,6 +1,6 @@
 # Pgpool Editor
 
-[Pgpool Editor by AppsCode](https://byte.builders) - Pgpool Editor
+[Pgpool Editor by AppsCode](https://appscode.com) - Pgpool Editor
 
 ## TL;DR;
 

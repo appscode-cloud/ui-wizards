@@ -1,6 +1,6 @@
 # ResourceQuota Editor
 
-[ResourceQuota Editor by AppsCode](https://byte.builders) - ResourceQuota Editor
+[ResourceQuota Editor by AppsCode](https://appscode.com) - ResourceQuota Editor
 
 ## TL;DR;
 

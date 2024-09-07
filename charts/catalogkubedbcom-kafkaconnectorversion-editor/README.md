@@ -1,6 +1,6 @@
 # KafkaConnectorVersion Editor
 
-[KafkaConnectorVersion Editor by AppsCode](https://byte.builders) - KafkaConnectorVersion Editor
+[KafkaConnectorVersion Editor by AppsCode](https://appscode.com) - KafkaConnectorVersion Editor
 
 ## TL;DR;
 

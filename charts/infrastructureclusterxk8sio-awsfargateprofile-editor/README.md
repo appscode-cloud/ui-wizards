@@ -1,6 +1,6 @@
 # AWSFargateProfile Editor
 
-[AWSFargateProfile Editor by AppsCode](https://byte.builders) - AWSFargateProfile Editor
+[AWSFargateProfile Editor by AppsCode](https://appscode.com) - AWSFargateProfile Editor
 
 ## TL;DR;
 

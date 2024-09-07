@@ -1,6 +1,6 @@
 # VaultPolicy Editor
 
-[VaultPolicy Editor by AppsCode](https://byte.builders) - VaultPolicy Editor
+[VaultPolicy Editor by AppsCode](https://appscode.com) - VaultPolicy Editor
 
 ## TL;DR;
 

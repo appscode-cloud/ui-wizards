@@ -1,6 +1,6 @@
 # MSSQLElasticPool Editor
 
-[MSSQLElasticPool Editor by AppsCode](https://byte.builders) - MSSQLElasticPool Editor
+[MSSQLElasticPool Editor by AppsCode](https://appscode.com) - MSSQLElasticPool Editor
 
 ## TL;DR;
 

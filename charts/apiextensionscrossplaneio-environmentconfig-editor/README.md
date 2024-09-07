@@ -1,6 +1,6 @@
 # EnvironmentConfig Editor
 
-[EnvironmentConfig Editor by AppsCode](https://byte.builders) - EnvironmentConfig Editor
+[EnvironmentConfig Editor by AppsCode](https://appscode.com) - EnvironmentConfig Editor
 
 ## TL;DR;
 

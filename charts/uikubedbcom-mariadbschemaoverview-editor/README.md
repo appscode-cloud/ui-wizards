@@ -1,6 +1,6 @@
 # MariaDBSchemaOverview Editor
 
-[MariaDBSchemaOverview Editor by AppsCode](https://byte.builders) - MariaDBSchemaOverview Editor
+[MariaDBSchemaOverview Editor by AppsCode](https://appscode.com) - MariaDBSchemaOverview Editor
 
 ## TL;DR;
 

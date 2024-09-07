@@ -1,6 +1,6 @@
 # PetSet Editor
 
-[PetSet Editor by AppsCode](https://byte.builders) - PetSet Editor
+[PetSet Editor by AppsCode](https://appscode.com) - PetSet Editor
 
 ## TL;DR;
 

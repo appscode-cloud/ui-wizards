@@ -1,6 +1,6 @@
 # GrafanaDatasource Editor
 
-[GrafanaDatasource Editor by AppsCode](https://byte.builders) - GrafanaDatasource Editor
+[GrafanaDatasource Editor by AppsCode](https://appscode.com) - GrafanaDatasource Editor
 
 ## TL;DR;
 

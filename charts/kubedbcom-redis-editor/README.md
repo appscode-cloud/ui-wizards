@@ -1,6 +1,6 @@
 # Redis Editor
 
-[Redis Editor by AppsCode](https://byte.builders) - Redis Editor
+[Redis Editor by AppsCode](https://appscode.com) - Redis Editor
 
 ## TL;DR;
 

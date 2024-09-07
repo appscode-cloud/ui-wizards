@@ -1,6 +1,6 @@
 # TokenReview Editor
 
-[TokenReview Editor by AppsCode](https://byte.builders) - TokenReview Editor
+[TokenReview Editor by AppsCode](https://appscode.com) - TokenReview Editor
 
 ## TL;DR;
 

@@ -1,6 +1,6 @@
 # PostgresRole Editor
 
-[PostgresRole Editor by AppsCode](https://byte.builders) - PostgresRole Editor
+[PostgresRole Editor by AppsCode](https://appscode.com) - PostgresRole Editor
 
 ## TL;DR;
 

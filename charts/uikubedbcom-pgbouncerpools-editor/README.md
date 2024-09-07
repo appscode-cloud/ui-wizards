@@ -1,6 +1,6 @@
 # PgBouncerPools Editor
 
-[PgBouncerPools Editor by AppsCode](https://byte.builders) - PgBouncerPools Editor
+[PgBouncerPools Editor by AppsCode](https://appscode.com) - PgBouncerPools Editor
 
 ## TL;DR;
 

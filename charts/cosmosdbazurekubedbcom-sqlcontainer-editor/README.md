@@ -1,6 +1,6 @@
 # SQLContainer Editor
 
-[SQLContainer Editor by AppsCode](https://byte.builders) - SQLContainer Editor
+[SQLContainer Editor by AppsCode](https://appscode.com) - SQLContainer Editor
 
 ## TL;DR;
 

@@ -1,6 +1,6 @@
 # GCPManagedCluster Editor
 
-[GCPManagedCluster Editor by AppsCode](https://byte.builders) - GCPManagedCluster Editor
+[GCPManagedCluster Editor by AppsCode](https://appscode.com) - GCPManagedCluster Editor
 
 ## TL;DR;
 

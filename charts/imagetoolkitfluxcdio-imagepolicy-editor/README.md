@@ -1,6 +1,6 @@
 # ImagePolicy Editor
 
-[ImagePolicy Editor by AppsCode](https://byte.builders) - ImagePolicy Editor
+[ImagePolicy Editor by AppsCode](https://appscode.com) - ImagePolicy Editor
 
 ## TL;DR;
 

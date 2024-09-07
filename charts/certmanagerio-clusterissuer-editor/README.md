@@ -1,6 +1,6 @@
 # ClusterIssuer Editor
 
-[ClusterIssuer Editor by AppsCode](https://byte.builders) - ClusterIssuer Editor
+[ClusterIssuer Editor by AppsCode](https://appscode.com) - ClusterIssuer Editor
 
 ## TL;DR;
 

@@ -1,6 +1,6 @@
 # Secret Editor
 
-[Secret Editor by AppsCode](https://byte.builders) - Secret Editor
+[Secret Editor by AppsCode](https://appscode.com) - Secret Editor
 
 ## TL;DR;
 

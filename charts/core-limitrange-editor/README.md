@@ -1,6 +1,6 @@
 # LimitRange Editor
 
-[LimitRange Editor by AppsCode](https://byte.builders) - LimitRange Editor
+[LimitRange Editor by AppsCode](https://appscode.com) - LimitRange Editor
 
 ## TL;DR;
 

@@ -1,6 +1,6 @@
 # Issuer Editor
 
-[Issuer Editor by AppsCode](https://byte.builders) - Issuer Editor
+[Issuer Editor by AppsCode](https://appscode.com) - Issuer Editor
 
 ## TL;DR;
 

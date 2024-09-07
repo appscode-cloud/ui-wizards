@@ -1,6 +1,6 @@
 # StatefulSet Editor
 
-[StatefulSet Editor by AppsCode](https://byte.builders) - StatefulSet Editor
+[StatefulSet Editor by AppsCode](https://appscode.com) - StatefulSet Editor
 
 ## TL;DR;
 

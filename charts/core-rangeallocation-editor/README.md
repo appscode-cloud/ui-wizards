@@ -1,6 +1,6 @@
 # RangeAllocation Editor
 
-[RangeAllocation Editor by AppsCode](https://byte.builders) - RangeAllocation Editor
+[RangeAllocation Editor by AppsCode](https://appscode.com) - RangeAllocation Editor
 
 ## TL;DR;
 

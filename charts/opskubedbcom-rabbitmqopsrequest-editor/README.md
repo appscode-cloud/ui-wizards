@@ -1,6 +1,6 @@
 # RabbitMQOpsRequest Editor
 
-[RabbitMQOpsRequest Editor by AppsCode](https://byte.builders) - RabbitMQOpsRequest Editor
+[RabbitMQOpsRequest Editor by AppsCode](https://appscode.com) - RabbitMQOpsRequest Editor
 
 ## TL;DR;
 

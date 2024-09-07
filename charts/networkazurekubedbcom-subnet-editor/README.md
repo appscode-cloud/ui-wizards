@@ -1,6 +1,6 @@
 # Subnet Editor
 
-[Subnet Editor by AppsCode](https://byte.builders) - Subnet Editor
+[Subnet Editor by AppsCode](https://appscode.com) - Subnet Editor
 
 ## TL;DR;
 

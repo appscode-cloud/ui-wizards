@@ -1,6 +1,6 @@
 # RestoreBatch Editor
 
-[RestoreBatch Editor by AppsCode](https://byte.builders) - RestoreBatch Editor
+[RestoreBatch Editor by AppsCode](https://appscode.com) - RestoreBatch Editor
 
 ## TL;DR;
 

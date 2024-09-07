@@ -1,6 +1,6 @@
 # NodeTopology Editor
 
-[NodeTopology Editor by AppsCode](https://byte.builders) - NodeTopology Editor
+[NodeTopology Editor by AppsCode](https://appscode.com) - NodeTopology Editor
 
 ## TL;DR;
 

@@ -1,6 +1,6 @@
 # TokenRequest Editor
 
-[TokenRequest Editor by AppsCode](https://byte.builders) - TokenRequest Editor
+[TokenRequest Editor by AppsCode](https://appscode.com) - TokenRequest Editor
 
 ## TL;DR;
 

@@ -1,6 +1,6 @@
 # Memcached Editor
 
-[Memcached Editor by AppsCode](https://byte.builders) - Memcached Editor
+[Memcached Editor by AppsCode](https://appscode.com) - Memcached Editor
 
 ## TL;DR;
 

@@ -1,6 +1,6 @@
 # RedisInsight Editor
 
-[RedisInsight Editor by AppsCode](https://byte.builders) - RedisInsight Editor
+[RedisInsight Editor by AppsCode](https://appscode.com) - RedisInsight Editor
 
 ## TL;DR;
 

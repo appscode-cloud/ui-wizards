@@ -1,6 +1,6 @@
 # ManagedCluster Editor
 
-[ManagedCluster Editor by AppsCode](https://byte.builders) - ManagedCluster Editor
+[ManagedCluster Editor by AppsCode](https://appscode.com) - ManagedCluster Editor
 
 ## TL;DR;
 

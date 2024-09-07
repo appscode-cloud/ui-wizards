@@ -1,6 +1,6 @@
 # DruidOpsRequest Editor
 
-[DruidOpsRequest Editor by AppsCode](https://byte.builders) - DruidOpsRequest Editor
+[DruidOpsRequest Editor by AppsCode](https://appscode.com) - DruidOpsRequest Editor
 
 ## TL;DR;
 

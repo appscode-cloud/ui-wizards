@@ -1,6 +1,6 @@
 # CassandraKeySpace Editor
 
-[CassandraKeySpace Editor by AppsCode](https://byte.builders) - CassandraKeySpace Editor
+[CassandraKeySpace Editor by AppsCode](https://appscode.com) - CassandraKeySpace Editor
 
 ## TL;DR;
 

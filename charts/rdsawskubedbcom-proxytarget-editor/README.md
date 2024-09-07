@@ -1,6 +1,6 @@
 # ProxyTarget Editor
 
-[ProxyTarget Editor by AppsCode](https://byte.builders) - ProxyTarget Editor
+[ProxyTarget Editor by AppsCode](https://appscode.com) - ProxyTarget Editor
 
 ## TL;DR;
 

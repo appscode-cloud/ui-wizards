@@ -1,6 +1,6 @@
 # SecurityGroup Editor
 
-[SecurityGroup Editor by AppsCode](https://byte.builders) - SecurityGroup Editor
+[SecurityGroup Editor by AppsCode](https://appscode.com) - SecurityGroup Editor
 
 ## TL;DR;
 

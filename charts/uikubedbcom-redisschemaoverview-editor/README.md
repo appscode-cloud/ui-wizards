@@ -1,6 +1,6 @@
 # RedisSchemaOverview Editor
 
-[RedisSchemaOverview Editor by AppsCode](https://byte.builders) - RedisSchemaOverview Editor
+[RedisSchemaOverview Editor by AppsCode](https://appscode.com) - RedisSchemaOverview Editor
 
 ## TL;DR;
 

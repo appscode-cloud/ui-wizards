@@ -1,6 +1,6 @@
 # MongoDBArchiver Editor
 
-[MongoDBArchiver Editor by AppsCode](https://byte.builders) - MongoDBArchiver Editor
+[MongoDBArchiver Editor by AppsCode](https://appscode.com) - MongoDBArchiver Editor
 
 ## TL;DR;
 

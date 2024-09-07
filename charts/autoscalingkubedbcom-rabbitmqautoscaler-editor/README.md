@@ -1,6 +1,6 @@
 # RabbitMQAutoscaler Editor
 
-[RabbitMQAutoscaler Editor by AppsCode](https://byte.builders) - RabbitMQAutoscaler Editor
+[RabbitMQAutoscaler Editor by AppsCode](https://appscode.com) - RabbitMQAutoscaler Editor
 
 ## TL;DR;
 

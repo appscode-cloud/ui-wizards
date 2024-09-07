@@ -2082,13 +2082,16 @@ properties:
                     type: array
                   inboxServer:
                     properties:
-                      endpoint:
+                      jmapEndpoint:
                         type: string
                       token:
                         type: string
+                      webadminEndpoint:
+                        type: string
                     required:
-                    - endpoint
+                    - jmapEndpoint
                     - token
+                    - webadminEndpoint
                     type: object
                   logLevel:
                     format: int32
@@ -3409,6 +3412,8 @@ properties:
                     type: object
                   dns:
                     properties:
+                      domain:
+                        type: string
                       emailDomain:
                         type: string
                       targetIPs:
@@ -3416,6 +3421,7 @@ properties:
                           type: string
                         type: array
                     required:
+                    - domain
                     - emailDomain
                     - targetIPs
                     type: object
@@ -3550,6 +3556,22 @@ properties:
                         type: integer
                       replicaJmapInstanceCount:
                         type: integer
+                      secret:
+                        properties:
+                          adminJWTPublicKey:
+                            type: string
+                          dkimPrivateKey:
+                            type: string
+                          jwtPrivateKey:
+                            type: string
+                          jwtPublicKey:
+                            type: string
+                        required:
+                        - adminJWTPublicKey
+                        - dkimPrivateKey
+                        - jwtPrivateKey
+                        - jwtPublicKey
+                        type: object
                       tls:
                         properties:
                           secretName:

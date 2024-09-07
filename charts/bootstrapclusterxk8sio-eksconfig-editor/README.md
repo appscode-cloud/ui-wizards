@@ -1,6 +1,6 @@
 # EKSConfig Editor
 
-[EKSConfig Editor by AppsCode](https://byte.builders) - EKSConfig Editor
+[EKSConfig Editor by AppsCode](https://appscode.com) - EKSConfig Editor
 
 ## TL;DR;
 

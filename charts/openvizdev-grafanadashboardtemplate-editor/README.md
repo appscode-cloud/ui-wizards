@@ -1,6 +1,6 @@
 # GrafanaDashboardTemplate Editor
 
-[GrafanaDashboardTemplate Editor by AppsCode](https://byte.builders) - GrafanaDashboardTemplate Editor
+[GrafanaDashboardTemplate Editor by AppsCode](https://appscode.com) - GrafanaDashboardTemplate Editor
 
 ## TL;DR;
 

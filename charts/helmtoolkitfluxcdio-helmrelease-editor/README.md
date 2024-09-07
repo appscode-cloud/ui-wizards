@@ -1,6 +1,6 @@
 # HelmRelease Editor
 
-[HelmRelease Editor by AppsCode](https://byte.builders) - HelmRelease Editor
+[HelmRelease Editor by AppsCode](https://appscode.com) - HelmRelease Editor
 
 ## TL;DR;
 

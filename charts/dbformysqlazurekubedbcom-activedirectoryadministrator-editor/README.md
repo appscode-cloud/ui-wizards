@@ -1,6 +1,6 @@
 # ActiveDirectoryAdministrator Editor
 
-[ActiveDirectoryAdministrator Editor by AppsCode](https://byte.builders) - ActiveDirectoryAdministrator Editor
+[ActiveDirectoryAdministrator Editor by AppsCode](https://appscode.com) - ActiveDirectoryAdministrator Editor
 
 ## TL;DR;
 

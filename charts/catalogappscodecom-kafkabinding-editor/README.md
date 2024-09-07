@@ -1,6 +1,6 @@
 # KafkaBinding Editor
 
-[KafkaBinding Editor by AppsCode](https://byte.builders) - KafkaBinding Editor
+[KafkaBinding Editor by AppsCode](https://appscode.com) - KafkaBinding Editor
 
 ## TL;DR;
 

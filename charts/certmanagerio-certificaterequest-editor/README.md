@@ -1,6 +1,6 @@
 # CertificateRequest Editor
 
-[CertificateRequest Editor by AppsCode](https://byte.builders) - CertificateRequest Editor
+[CertificateRequest Editor by AppsCode](https://appscode.com) - CertificateRequest Editor
 
 ## TL;DR;
 

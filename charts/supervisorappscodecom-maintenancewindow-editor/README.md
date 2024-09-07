@@ -1,6 +1,6 @@
 # MaintenanceWindow Editor
 
-[MaintenanceWindow Editor by AppsCode](https://byte.builders) - MaintenanceWindow Editor
+[MaintenanceWindow Editor by AppsCode](https://appscode.com) - MaintenanceWindow Editor
 
 ## TL;DR;
 

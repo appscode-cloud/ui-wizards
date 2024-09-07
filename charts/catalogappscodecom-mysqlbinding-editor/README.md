@@ -1,6 +1,6 @@
 # MySQLBinding Editor
 
-[MySQLBinding Editor by AppsCode](https://byte.builders) - MySQLBinding Editor
+[MySQLBinding Editor by AppsCode](https://appscode.com) - MySQLBinding Editor
 
 ## TL;DR;
 

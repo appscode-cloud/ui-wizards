@@ -1,6 +1,6 @@
 # AWSClusterTemplate Editor
 
-[AWSClusterTemplate Editor by AppsCode](https://byte.builders) - AWSClusterTemplate Editor
+[AWSClusterTemplate Editor by AppsCode](https://appscode.com) - AWSClusterTemplate Editor
 
 ## TL;DR;
 

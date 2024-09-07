@@ -1,6 +1,6 @@
 # ConfigMap Editor
 
-[ConfigMap Editor by AppsCode](https://byte.builders) - ConfigMap Editor
+[ConfigMap Editor by AppsCode](https://appscode.com) - ConfigMap Editor
 
 ## TL;DR;
 

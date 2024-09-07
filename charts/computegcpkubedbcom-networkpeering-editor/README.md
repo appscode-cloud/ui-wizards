@@ -1,6 +1,6 @@
 # NetworkPeering Editor
 
-[NetworkPeering Editor by AppsCode](https://byte.builders) - NetworkPeering Editor
+[NetworkPeering Editor by AppsCode](https://appscode.com) - NetworkPeering Editor
 
 ## TL;DR;
 

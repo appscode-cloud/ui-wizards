@@ -1,6 +1,6 @@
 # GCPMachine Editor
 
-[GCPMachine Editor by AppsCode](https://byte.builders) - GCPMachine Editor
+[GCPMachine Editor by AppsCode](https://appscode.com) - GCPMachine Editor
 
 ## TL;DR;
 

@@ -1,6 +1,6 @@
 # PerconaXtraDBBinding Editor
 
-[PerconaXtraDBBinding Editor by AppsCode](https://byte.builders) - PerconaXtraDBBinding Editor
+[PerconaXtraDBBinding Editor by AppsCode](https://appscode.com) - PerconaXtraDBBinding Editor
 
 ## TL;DR;
 

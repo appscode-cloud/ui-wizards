@@ -1,6 +1,6 @@
 # VPCEndpoint Editor
 
-[VPCEndpoint Editor by AppsCode](https://byte.builders) - VPCEndpoint Editor
+[VPCEndpoint Editor by AppsCode](https://appscode.com) - VPCEndpoint Editor
 
 ## TL;DR;
 

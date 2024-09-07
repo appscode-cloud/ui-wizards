@@ -1,6 +1,6 @@
 # AzureMachine Editor
 
-[AzureMachine Editor by AppsCode](https://byte.builders) - AzureMachine Editor
+[AzureMachine Editor by AppsCode](https://appscode.com) - AzureMachine Editor
 
 ## TL;DR;
 

@@ -1,6 +1,6 @@
 # ProviderRegistration Editor
 
-[ProviderRegistration Editor by AppsCode](https://byte.builders) - ProviderRegistration Editor
+[ProviderRegistration Editor by AppsCode](https://appscode.com) - ProviderRegistration Editor
 
 ## TL;DR;
 

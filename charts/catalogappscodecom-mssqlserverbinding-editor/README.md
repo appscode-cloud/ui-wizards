@@ -1,6 +1,6 @@
 # MSSQLServerBinding Editor
 
-[MSSQLServerBinding Editor by AppsCode](https://byte.builders) - MSSQLServerBinding Editor
+[MSSQLServerBinding Editor by AppsCode](https://appscode.com) - MSSQLServerBinding Editor
 
 ## TL;DR;
 

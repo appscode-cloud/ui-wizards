@@ -1,6 +1,6 @@
 # ResourceOutline Editor
 
-[ResourceOutline Editor by AppsCode](https://byte.builders) - ResourceOutline Editor
+[ResourceOutline Editor by AppsCode](https://appscode.com) - ResourceOutline Editor
 
 ## TL;DR;
 

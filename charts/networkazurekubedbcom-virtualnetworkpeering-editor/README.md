@@ -1,6 +1,6 @@
 # VirtualNetworkPeering Editor
 
-[VirtualNetworkPeering Editor by AppsCode](https://byte.builders) - VirtualNetworkPeering Editor
+[VirtualNetworkPeering Editor by AppsCode](https://appscode.com) - VirtualNetworkPeering Editor
 
 ## TL;DR;
 

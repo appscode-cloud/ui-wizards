@@ -1,6 +1,6 @@
 # PrivateDNSZone Editor
 
-[PrivateDNSZone Editor by AppsCode](https://byte.builders) - PrivateDNSZone Editor
+[PrivateDNSZone Editor by AppsCode](https://appscode.com) - PrivateDNSZone Editor
 
 ## TL;DR;
 

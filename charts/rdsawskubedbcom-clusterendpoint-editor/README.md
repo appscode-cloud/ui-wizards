@@ -1,6 +1,6 @@
 # ClusterEndpoint Editor
 
-[ClusterEndpoint Editor by AppsCode](https://byte.builders) - ClusterEndpoint Editor
+[ClusterEndpoint Editor by AppsCode](https://appscode.com) - ClusterEndpoint Editor
 
 ## TL;DR;
 

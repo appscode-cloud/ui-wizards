@@ -1,6 +1,6 @@
 # SQLDatabase Editor
 
-[SQLDatabase Editor by AppsCode](https://byte.builders) - SQLDatabase Editor
+[SQLDatabase Editor by AppsCode](https://appscode.com) - SQLDatabase Editor
 
 ## TL;DR;
 

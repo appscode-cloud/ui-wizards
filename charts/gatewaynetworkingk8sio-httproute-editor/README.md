@@ -1,6 +1,6 @@
 # HTTPRoute Editor
 
-[HTTPRoute Editor by AppsCode](https://byte.builders) - HTTPRoute Editor
+[HTTPRoute Editor by AppsCode](https://appscode.com) - HTTPRoute Editor
 
 ## TL;DR;
 

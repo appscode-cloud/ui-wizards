@@ -1,6 +1,6 @@
 # KafkaAutoscaler Editor
 
-[KafkaAutoscaler Editor by AppsCode](https://byte.builders) - KafkaAutoscaler Editor
+[KafkaAutoscaler Editor by AppsCode](https://appscode.com) - KafkaAutoscaler Editor
 
 ## TL;DR;
 

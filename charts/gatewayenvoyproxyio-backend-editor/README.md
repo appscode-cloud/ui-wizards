@@ -1,6 +1,6 @@
 # Backend Editor
 
-[Backend Editor by AppsCode](https://byte.builders) - Backend Editor
+[Backend Editor by AppsCode](https://appscode.com) - Backend Editor
 
 ## TL;DR;
 

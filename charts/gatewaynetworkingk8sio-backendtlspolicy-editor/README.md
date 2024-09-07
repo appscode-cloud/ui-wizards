@@ -1,6 +1,6 @@
 # BackendTLSPolicy Editor
 
-[BackendTLSPolicy Editor by AppsCode](https://byte.builders) - BackendTLSPolicy Editor
+[BackendTLSPolicy Editor by AppsCode](https://appscode.com) - BackendTLSPolicy Editor
 
 ## TL;DR;
 

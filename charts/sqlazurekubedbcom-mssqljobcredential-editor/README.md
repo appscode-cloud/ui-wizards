@@ -1,6 +1,6 @@
 # MSSQLJobCredential Editor
 
-[MSSQLJobCredential Editor by AppsCode](https://byte.builders) - MSSQLJobCredential Editor
+[MSSQLJobCredential Editor by AppsCode](https://appscode.com) - MSSQLJobCredential Editor
 
 ## TL;DR;
 

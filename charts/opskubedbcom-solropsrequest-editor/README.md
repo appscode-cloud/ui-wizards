@@ -1,6 +1,6 @@
 # SolrOpsRequest Editor
 
-[SolrOpsRequest Editor by AppsCode](https://byte.builders) - SolrOpsRequest Editor
+[SolrOpsRequest Editor by AppsCode](https://appscode.com) - SolrOpsRequest Editor
 
 ## TL;DR;
 

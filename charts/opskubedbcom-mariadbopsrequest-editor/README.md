@@ -1,6 +1,6 @@
 # MariaDBOpsRequest Editor
 
-[MariaDBOpsRequest Editor by AppsCode](https://byte.builders) - MariaDBOpsRequest Editor
+[MariaDBOpsRequest Editor by AppsCode](https://appscode.com) - MariaDBOpsRequest Editor
 
 ## TL;DR;
 

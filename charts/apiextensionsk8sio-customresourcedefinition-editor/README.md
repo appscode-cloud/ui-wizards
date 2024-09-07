@@ -1,6 +1,6 @@
 # CustomResourceDefinition Editor
 
-[CustomResourceDefinition Editor by AppsCode](https://byte.builders) - CustomResourceDefinition Editor
+[CustomResourceDefinition Editor by AppsCode](https://appscode.com) - CustomResourceDefinition Editor
 
 ## TL;DR;
 

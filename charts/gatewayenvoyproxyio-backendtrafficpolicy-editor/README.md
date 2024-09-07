@@ -1,6 +1,6 @@
 # BackendTrafficPolicy Editor
 
-[BackendTrafficPolicy Editor by AppsCode](https://byte.builders) - BackendTrafficPolicy Editor
+[BackendTrafficPolicy Editor by AppsCode](https://appscode.com) - BackendTrafficPolicy Editor
 
 ## TL;DR;
 

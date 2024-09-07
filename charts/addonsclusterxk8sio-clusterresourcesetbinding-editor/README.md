@@ -1,6 +1,6 @@
 # ClusterResourceSetBinding Editor
 
-[ClusterResourceSetBinding Editor by AppsCode](https://byte.builders) - ClusterResourceSetBinding Editor
+[ClusterResourceSetBinding Editor by AppsCode](https://appscode.com) - ClusterResourceSetBinding Editor
 
 ## TL;DR;
 

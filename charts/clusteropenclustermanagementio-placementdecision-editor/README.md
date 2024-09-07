@@ -1,6 +1,6 @@
 # PlacementDecision Editor
 
-[PlacementDecision Editor by AppsCode](https://byte.builders) - PlacementDecision Editor
+[PlacementDecision Editor by AppsCode](https://appscode.com) - PlacementDecision Editor
 
 ## TL;DR;
 

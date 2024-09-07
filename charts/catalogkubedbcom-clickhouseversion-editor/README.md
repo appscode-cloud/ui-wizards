@@ -1,6 +1,6 @@
 # ClickHouseVersion Editor
 
-[ClickHouseVersion Editor by AppsCode](https://byte.builders) - ClickHouseVersion Editor
+[ClickHouseVersion Editor by AppsCode](https://appscode.com) - ClickHouseVersion Editor
 
 ## TL;DR;
 

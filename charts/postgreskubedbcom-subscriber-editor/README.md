@@ -1,6 +1,6 @@
 # Subscriber Editor
 
-[Subscriber Editor by AppsCode](https://byte.builders) - Subscriber Editor
+[Subscriber Editor by AppsCode](https://appscode.com) - Subscriber Editor
 
 ## TL;DR;
 

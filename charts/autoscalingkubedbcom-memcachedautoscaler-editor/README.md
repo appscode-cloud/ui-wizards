@@ -1,6 +1,6 @@
 # MemcachedAutoscaler Editor
 
-[MemcachedAutoscaler Editor by AppsCode](https://byte.builders) - MemcachedAutoscaler Editor
+[MemcachedAutoscaler Editor by AppsCode](https://appscode.com) - MemcachedAutoscaler Editor
 
 ## TL;DR;
 

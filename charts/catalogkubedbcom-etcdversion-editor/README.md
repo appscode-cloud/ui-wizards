@@ -1,6 +1,6 @@
 # EtcdVersion Editor
 
-[EtcdVersion Editor by AppsCode](https://byte.builders) - EtcdVersion Editor
+[EtcdVersion Editor by AppsCode](https://appscode.com) - EtcdVersion Editor
 
 ## TL;DR;
 

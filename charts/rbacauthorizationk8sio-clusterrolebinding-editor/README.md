@@ -1,6 +1,6 @@
 # ClusterRoleBinding Editor
 
-[ClusterRoleBinding Editor by AppsCode](https://byte.builders) - ClusterRoleBinding Editor
+[ClusterRoleBinding Editor by AppsCode](https://appscode.com) - ClusterRoleBinding Editor
 
 ## TL;DR;
 

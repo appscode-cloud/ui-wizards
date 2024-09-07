@@ -1,6 +1,6 @@
 # Plan Editor
 
-[Plan Editor by AppsCode](https://byte.builders) - Plan Editor
+[Plan Editor by AppsCode](https://appscode.com) - Plan Editor
 
 ## TL;DR;
 

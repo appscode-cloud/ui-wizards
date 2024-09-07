@@ -1,6 +1,6 @@
 # SSLCert Editor
 
-[SSLCert Editor by AppsCode](https://byte.builders) - SSLCert Editor
+[SSLCert Editor by AppsCode](https://appscode.com) - SSLCert Editor
 
 ## TL;DR;
 

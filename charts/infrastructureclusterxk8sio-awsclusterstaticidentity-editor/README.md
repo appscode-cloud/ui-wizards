@@ -1,6 +1,6 @@
 # AWSClusterStaticIdentity Editor
 
-[AWSClusterStaticIdentity Editor by AppsCode](https://byte.builders) - AWSClusterStaticIdentity Editor
+[AWSClusterStaticIdentity Editor by AppsCode](https://appscode.com) - AWSClusterStaticIdentity Editor
 
 ## TL;DR;
 

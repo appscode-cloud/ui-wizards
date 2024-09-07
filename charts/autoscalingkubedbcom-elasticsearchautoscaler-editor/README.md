@@ -1,6 +1,6 @@
 # ElasticsearchAutoscaler Editor
 
-[ElasticsearchAutoscaler Editor by AppsCode](https://byte.builders) - ElasticsearchAutoscaler Editor
+[ElasticsearchAutoscaler Editor by AppsCode](https://appscode.com) - ElasticsearchAutoscaler Editor
 
 ## TL;DR;
 

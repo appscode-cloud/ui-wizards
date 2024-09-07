@@ -1,6 +1,6 @@
 # Kafka Editor
 
-[Kafka Editor by AppsCode](https://byte.builders) - Kafka Editor
+[Kafka Editor by AppsCode](https://appscode.com) - Kafka Editor
 
 ## TL;DR;
 

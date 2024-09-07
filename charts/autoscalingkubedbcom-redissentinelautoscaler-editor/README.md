@@ -1,6 +1,6 @@
 # RedisSentinelAutoscaler Editor
 
-[RedisSentinelAutoscaler Editor by AppsCode](https://byte.builders) - RedisSentinelAutoscaler Editor
+[RedisSentinelAutoscaler Editor by AppsCode](https://appscode.com) - RedisSentinelAutoscaler Editor
 
 ## TL;DR;
 

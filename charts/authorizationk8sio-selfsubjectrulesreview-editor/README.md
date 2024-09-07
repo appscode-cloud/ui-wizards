@@ -1,6 +1,6 @@
 # SelfSubjectRulesReview Editor
 
-[SelfSubjectRulesReview Editor by AppsCode](https://byte.builders) - SelfSubjectRulesReview Editor
+[SelfSubjectRulesReview Editor by AppsCode](https://appscode.com) - SelfSubjectRulesReview Editor
 
 ## TL;DR;
 

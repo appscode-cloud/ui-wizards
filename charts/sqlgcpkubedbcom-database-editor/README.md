@@ -1,6 +1,6 @@
 # Database Editor
 
-[Database Editor by AppsCode](https://byte.builders) - Database Editor
+[Database Editor by AppsCode](https://appscode.com) - Database Editor
 
 ## TL;DR;
 

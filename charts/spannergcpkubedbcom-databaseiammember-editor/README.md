@@ -1,6 +1,6 @@
 # DatabaseIAMMember Editor
 
-[DatabaseIAMMember Editor by AppsCode](https://byte.builders) - DatabaseIAMMember Editor
+[DatabaseIAMMember Editor by AppsCode](https://appscode.com) - DatabaseIAMMember Editor
 
 ## TL;DR;
 

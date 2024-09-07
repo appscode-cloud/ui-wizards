@@ -1,6 +1,6 @@
 # KafkaOpsRequest Editor
 
-[KafkaOpsRequest Editor by AppsCode](https://byte.builders) - KafkaOpsRequest Editor
+[KafkaOpsRequest Editor by AppsCode](https://appscode.com) - KafkaOpsRequest Editor
 
 ## TL;DR;
 

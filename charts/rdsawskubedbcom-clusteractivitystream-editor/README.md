@@ -1,6 +1,6 @@
 # ClusterActivityStream Editor
 
-[ClusterActivityStream Editor by AppsCode](https://byte.builders) - ClusterActivityStream Editor
+[ClusterActivityStream Editor by AppsCode](https://appscode.com) - ClusterActivityStream Editor
 
 ## TL;DR;
 

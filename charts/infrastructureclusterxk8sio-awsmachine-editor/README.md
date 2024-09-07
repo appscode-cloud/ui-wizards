@@ -1,6 +1,6 @@
 # AWSMachine Editor
 
-[AWSMachine Editor by AppsCode](https://byte.builders) - AWSMachine Editor
+[AWSMachine Editor by AppsCode](https://appscode.com) - AWSMachine Editor
 
 ## TL;DR;
 

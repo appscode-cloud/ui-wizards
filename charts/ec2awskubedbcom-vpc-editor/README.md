@@ -1,6 +1,6 @@
 # VPC Editor
 
-[VPC Editor by AppsCode](https://byte.builders) - VPC Editor
+[VPC Editor by AppsCode](https://appscode.com) - VPC Editor
 
 ## TL;DR;
 

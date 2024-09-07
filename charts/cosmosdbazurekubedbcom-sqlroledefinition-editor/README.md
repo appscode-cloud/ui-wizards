@@ -1,6 +1,6 @@
 # SQLRoleDefinition Editor
 
-[SQLRoleDefinition Editor by AppsCode](https://byte.builders) - SQLRoleDefinition Editor
+[SQLRoleDefinition Editor by AppsCode](https://appscode.com) - SQLRoleDefinition Editor
 
 ## TL;DR;
 

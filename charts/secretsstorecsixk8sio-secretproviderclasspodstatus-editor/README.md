@@ -1,6 +1,6 @@
 # SecretProviderClassPodStatus Editor
 
-[SecretProviderClassPodStatus Editor by AppsCode](https://byte.builders) - SecretProviderClassPodStatus Editor
+[SecretProviderClassPodStatus Editor by AppsCode](https://appscode.com) - SecretProviderClassPodStatus Editor
 
 ## TL;DR;
 

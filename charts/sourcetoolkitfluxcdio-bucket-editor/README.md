@@ -1,6 +1,6 @@
 # Bucket Editor
 
-[Bucket Editor by AppsCode](https://byte.builders) - Bucket Editor
+[Bucket Editor by AppsCode](https://appscode.com) - Bucket Editor
 
 ## TL;DR;
 

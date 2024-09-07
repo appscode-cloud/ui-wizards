@@ -1,6 +1,6 @@
 # Receiver Editor
 
-[Receiver Editor by AppsCode](https://byte.builders) - Receiver Editor
+[Receiver Editor by AppsCode](https://appscode.com) - Receiver Editor
 
 ## TL;DR;
 

@@ -1,6 +1,6 @@
 # MSSQLServerSecurityAlertPolicy Editor
 
-[MSSQLServerSecurityAlertPolicy Editor by AppsCode](https://byte.builders) - MSSQLServerSecurityAlertPolicy Editor
+[MSSQLServerSecurityAlertPolicy Editor by AppsCode](https://appscode.com) - MSSQLServerSecurityAlertPolicy Editor
 
 ## TL;DR;
 

@@ -1,6 +1,6 @@
 # MongoDBVersion Editor
 
-[MongoDBVersion Editor by AppsCode](https://byte.builders) - MongoDBVersion Editor
+[MongoDBVersion Editor by AppsCode](https://appscode.com) - MongoDBVersion Editor
 
 ## TL;DR;
 

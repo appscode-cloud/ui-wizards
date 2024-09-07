@@ -1,6 +1,6 @@
 # MySQL Editor
 
-[MySQL Editor by AppsCode](https://byte.builders) - MySQL Editor
+[MySQL Editor by AppsCode](https://appscode.com) - MySQL Editor
 
 ## TL;DR;
 

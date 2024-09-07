@@ -1,6 +1,6 @@
 # GremlinGraph Editor
 
-[GremlinGraph Editor by AppsCode](https://byte.builders) - GremlinGraph Editor
+[GremlinGraph Editor by AppsCode](https://appscode.com) - GremlinGraph Editor
 
 ## TL;DR;
 

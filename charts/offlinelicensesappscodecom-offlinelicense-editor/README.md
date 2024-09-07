@@ -1,6 +1,6 @@
 # OfflineLicense Editor
 
-[OfflineLicense Editor by AppsCode](https://byte.builders) - OfflineLicense Editor
+[OfflineLicense Editor by AppsCode](https://appscode.com) - OfflineLicense Editor
 
 ## TL;DR;
 

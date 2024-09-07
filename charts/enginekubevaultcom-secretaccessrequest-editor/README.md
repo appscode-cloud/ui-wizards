@@ -1,6 +1,6 @@
 # SecretAccessRequest Editor
 
-[SecretAccessRequest Editor by AppsCode](https://byte.builders) - SecretAccessRequest Editor
+[SecretAccessRequest Editor by AppsCode](https://appscode.com) - SecretAccessRequest Editor
 
 ## TL;DR;
 

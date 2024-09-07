@@ -1,6 +1,6 @@
 # VirtualNetworkRule Editor
 
-[VirtualNetworkRule Editor by AppsCode](https://byte.builders) - VirtualNetworkRule Editor
+[VirtualNetworkRule Editor by AppsCode](https://appscode.com) - VirtualNetworkRule Editor
 
 ## TL;DR;
 

@@ -1,6 +1,6 @@
 # PgBouncerServerOverview Editor
 
-[PgBouncerServerOverview Editor by AppsCode](https://byte.builders) - PgBouncerServerOverview Editor
+[PgBouncerServerOverview Editor by AppsCode](https://appscode.com) - PgBouncerServerOverview Editor
 
 ## TL;DR;
 

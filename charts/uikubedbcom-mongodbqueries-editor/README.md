@@ -1,6 +1,6 @@
 # MongoDBQueries Editor
 
-[MongoDBQueries Editor by AppsCode](https://byte.builders) - MongoDBQueries Editor
+[MongoDBQueries Editor by AppsCode](https://appscode.com) - MongoDBQueries Editor
 
 ## TL;DR;
 

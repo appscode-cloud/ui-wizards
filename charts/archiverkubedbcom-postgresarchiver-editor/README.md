@@ -1,6 +1,6 @@
 # PostgresArchiver Editor
 
-[PostgresArchiver Editor by AppsCode](https://byte.builders) - PostgresArchiver Editor
+[PostgresArchiver Editor by AppsCode](https://appscode.com) - PostgresArchiver Editor
 
 ## TL;DR;
 

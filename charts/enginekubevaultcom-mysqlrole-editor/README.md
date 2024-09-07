@@ -1,6 +1,6 @@
 # MySQLRole Editor
 
-[MySQLRole Editor by AppsCode](https://byte.builders) - MySQLRole Editor
+[MySQLRole Editor by AppsCode](https://appscode.com) - MySQLRole Editor
 
 ## TL;DR;
 

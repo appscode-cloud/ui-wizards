@@ -1,6 +1,6 @@
 # PgBouncerBinding Editor
 
-[PgBouncerBinding Editor by AppsCode](https://byte.builders) - PgBouncerBinding Editor
+[PgBouncerBinding Editor by AppsCode](https://appscode.com) - PgBouncerBinding Editor
 
 ## TL;DR;
 

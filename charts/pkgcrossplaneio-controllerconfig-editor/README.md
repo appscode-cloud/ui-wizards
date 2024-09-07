@@ -1,6 +1,6 @@
 # ControllerConfig Editor
 
-[ControllerConfig Editor by AppsCode](https://byte.builders) - ControllerConfig Editor
+[ControllerConfig Editor by AppsCode](https://appscode.com) - ControllerConfig Editor
 
 ## TL;DR;
 

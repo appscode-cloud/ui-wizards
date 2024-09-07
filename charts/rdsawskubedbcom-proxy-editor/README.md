@@ -1,6 +1,6 @@
 # Proxy Editor
 
-[Proxy Editor by AppsCode](https://byte.builders) - Proxy Editor
+[Proxy Editor by AppsCode](https://appscode.com) - Proxy Editor
 
 ## TL;DR;
 

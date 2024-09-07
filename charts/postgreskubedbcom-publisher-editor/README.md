@@ -1,6 +1,6 @@
 # Publisher Editor
 
-[Publisher Editor by AppsCode](https://byte.builders) - Publisher Editor
+[Publisher Editor by AppsCode](https://appscode.com) - Publisher Editor
 
 ## TL;DR;
 

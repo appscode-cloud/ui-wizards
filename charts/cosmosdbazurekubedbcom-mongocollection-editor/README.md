@@ -1,6 +1,6 @@
 # MongoCollection Editor
 
-[MongoCollection Editor by AppsCode](https://byte.builders) - MongoCollection Editor
+[MongoCollection Editor by AppsCode](https://appscode.com) - MongoCollection Editor
 
 ## TL;DR;
 

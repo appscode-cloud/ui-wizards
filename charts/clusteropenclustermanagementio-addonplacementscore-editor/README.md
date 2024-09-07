@@ -1,6 +1,6 @@
 # AddOnPlacementScore Editor
 
-[AddOnPlacementScore Editor by AppsCode](https://byte.builders) - AddOnPlacementScore Editor
+[AddOnPlacementScore Editor by AppsCode](https://appscode.com) - AddOnPlacementScore Editor
 
 ## TL;DR;
 

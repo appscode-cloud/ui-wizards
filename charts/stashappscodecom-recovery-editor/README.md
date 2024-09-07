@@ -1,6 +1,6 @@
 # Recovery Editor
 
-[Recovery Editor by AppsCode](https://byte.builders) - Recovery Editor
+[Recovery Editor by AppsCode](https://appscode.com) - Recovery Editor
 
 ## TL;DR;
 

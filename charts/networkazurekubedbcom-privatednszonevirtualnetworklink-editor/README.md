@@ -1,6 +1,6 @@
 # PrivateDNSZoneVirtualNetworkLink Editor
 
-[PrivateDNSZoneVirtualNetworkLink Editor by AppsCode](https://byte.builders) - PrivateDNSZoneVirtualNetworkLink Editor
+[PrivateDNSZoneVirtualNetworkLink Editor by AppsCode](https://appscode.com) - PrivateDNSZoneVirtualNetworkLink Editor
 
 ## TL;DR;
 

@@ -1,6 +1,6 @@
 # VaultServerVersion Editor
 
-[VaultServerVersion Editor by AppsCode](https://byte.builders) - VaultServerVersion Editor
+[VaultServerVersion Editor by AppsCode](https://appscode.com) - VaultServerVersion Editor
 
 ## TL;DR;
 

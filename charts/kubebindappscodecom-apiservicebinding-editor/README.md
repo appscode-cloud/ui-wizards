@@ -1,6 +1,6 @@
 # APIServiceBinding Editor
 
-[APIServiceBinding Editor by AppsCode](https://byte.builders) - APIServiceBinding Editor
+[APIServiceBinding Editor by AppsCode](https://appscode.com) - APIServiceBinding Editor
 
 ## TL;DR;
 

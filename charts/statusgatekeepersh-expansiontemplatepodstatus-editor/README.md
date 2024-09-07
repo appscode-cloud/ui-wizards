@@ -1,6 +1,6 @@
 # ExpansionTemplatePodStatus Editor
 
-[ExpansionTemplatePodStatus Editor by AppsCode](https://byte.builders) - ExpansionTemplatePodStatus Editor
+[ExpansionTemplatePodStatus Editor by AppsCode](https://appscode.com) - ExpansionTemplatePodStatus Editor
 
 ## TL;DR;
 

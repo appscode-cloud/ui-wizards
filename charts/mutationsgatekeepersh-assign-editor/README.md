@@ -1,6 +1,6 @@
 # Assign Editor
 
-[Assign Editor by AppsCode](https://byte.builders) - Assign Editor
+[Assign Editor by AppsCode](https://appscode.com) - Assign Editor
 
 ## TL;DR;
 

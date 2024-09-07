@@ -1,6 +1,6 @@
 # Stream Editor
 
-[Stream Editor by AppsCode](https://byte.builders) - Stream Editor
+[Stream Editor by AppsCode](https://appscode.com) - Stream Editor
 
 ## TL;DR;
 

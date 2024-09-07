@@ -1,6 +1,6 @@
 # ManagedProxyConfiguration Editor
 
-[ManagedProxyConfiguration Editor by AppsCode](https://byte.builders) - ManagedProxyConfiguration Editor
+[ManagedProxyConfiguration Editor by AppsCode](https://appscode.com) - ManagedProxyConfiguration Editor
 
 ## TL;DR;
 

@@ -1,6 +1,6 @@
 # AWSClusterControllerIdentity Editor
 
-[AWSClusterControllerIdentity Editor by AppsCode](https://byte.builders) - AWSClusterControllerIdentity Editor
+[AWSClusterControllerIdentity Editor by AppsCode](https://appscode.com) - AWSClusterControllerIdentity Editor
 
 ## TL;DR;
 

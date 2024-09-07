@@ -1,6 +1,6 @@
 # MariaDBBinding Editor
 
-[MariaDBBinding Editor by AppsCode](https://byte.builders) - MariaDBBinding Editor
+[MariaDBBinding Editor by AppsCode](https://appscode.com) - MariaDBBinding Editor
 
 ## TL;DR;
 

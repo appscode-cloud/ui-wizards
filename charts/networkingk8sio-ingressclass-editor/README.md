@@ -1,6 +1,6 @@
 # IngressClass Editor
 
-[IngressClass Editor by AppsCode](https://byte.builders) - IngressClass Editor
+[IngressClass Editor by AppsCode](https://appscode.com) - IngressClass Editor
 
 ## TL;DR;
 

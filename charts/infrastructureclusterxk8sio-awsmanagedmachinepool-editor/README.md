@@ -1,6 +1,6 @@
 # AWSManagedMachinePool Editor
 
-[AWSManagedMachinePool Editor by AppsCode](https://byte.builders) - AWSManagedMachinePool Editor
+[AWSManagedMachinePool Editor by AppsCode](https://appscode.com) - AWSManagedMachinePool Editor
 
 ## TL;DR;
 

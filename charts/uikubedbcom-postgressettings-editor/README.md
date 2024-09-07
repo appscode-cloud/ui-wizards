@@ -1,6 +1,6 @@
 # PostgresSettings Editor
 
-[PostgresSettings Editor by AppsCode](https://byte.builders) - PostgresSettings Editor
+[PostgresSettings Editor by AppsCode](https://appscode.com) - PostgresSettings Editor
 
 ## TL;DR;
 

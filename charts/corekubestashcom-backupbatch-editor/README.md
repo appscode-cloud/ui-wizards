@@ -1,6 +1,6 @@
 # BackupBatch Editor
 
-[BackupBatch Editor by AppsCode](https://byte.builders) - BackupBatch Editor
+[BackupBatch Editor by AppsCode](https://appscode.com) - BackupBatch Editor
 
 ## TL;DR;
 

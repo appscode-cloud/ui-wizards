@@ -1,6 +1,6 @@
 # PgpoolBinding Editor
 
-[PgpoolBinding Editor by AppsCode](https://byte.builders) - PgpoolBinding Editor
+[PgpoolBinding Editor by AppsCode](https://appscode.com) - PgpoolBinding Editor
 
 ## TL;DR;
 

@@ -1,6 +1,6 @@
 # ImageReview Editor
 
-[ImageReview Editor by AppsCode](https://byte.builders) - ImageReview Editor
+[ImageReview Editor by AppsCode](https://appscode.com) - ImageReview Editor
 
 ## TL;DR;
 

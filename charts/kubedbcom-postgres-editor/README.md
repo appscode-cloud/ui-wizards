@@ -1,6 +1,6 @@
 # Postgres Editor
 
-[Postgres Editor by AppsCode](https://byte.builders) - Postgres Editor
+[Postgres Editor by AppsCode](https://appscode.com) - Postgres Editor
 
 ## TL;DR;
 

@@ -1,6 +1,6 @@
 # DomainPolicy Editor
 
-[DomainPolicy Editor by AppsCode](https://byte.builders) - DomainPolicy Editor
+[DomainPolicy Editor by AppsCode](https://appscode.com) - DomainPolicy Editor
 
 ## TL;DR;
 

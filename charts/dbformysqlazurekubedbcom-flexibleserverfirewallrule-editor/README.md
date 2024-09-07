@@ -1,6 +1,6 @@
 # FlexibleServerFirewallRule Editor
 
-[FlexibleServerFirewallRule Editor by AppsCode](https://byte.builders) - FlexibleServerFirewallRule Editor
+[FlexibleServerFirewallRule Editor by AppsCode](https://appscode.com) - FlexibleServerFirewallRule Editor
 
 ## TL;DR;
 

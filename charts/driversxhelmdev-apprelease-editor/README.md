@@ -1,6 +1,6 @@
 # AppRelease Editor
 
-[AppRelease Editor by AppsCode](https://byte.builders) - AppRelease Editor
+[AppRelease Editor by AppsCode](https://appscode.com) - AppRelease Editor
 
 ## TL;DR;
 

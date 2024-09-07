@@ -1,6 +1,6 @@
 # ResourceSummary Editor
 
-[ResourceSummary Editor by AppsCode](https://byte.builders) - ResourceSummary Editor
+[ResourceSummary Editor by AppsCode](https://appscode.com) - ResourceSummary Editor
 
 ## TL;DR;
 

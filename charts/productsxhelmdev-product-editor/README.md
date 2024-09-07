@@ -1,6 +1,6 @@
 # Product Editor
 
-[Product Editor by AppsCode](https://byte.builders) - Product Editor
+[Product Editor by AppsCode](https://appscode.com) - Product Editor
 
 ## TL;DR;
 

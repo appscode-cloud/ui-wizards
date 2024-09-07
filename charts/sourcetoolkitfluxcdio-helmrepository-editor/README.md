@@ -1,6 +1,6 @@
 # HelmRepository Editor
 
-[HelmRepository Editor by AppsCode](https://byte.builders) - HelmRepository Editor
+[HelmRepository Editor by AppsCode](https://appscode.com) - HelmRepository Editor
 
 ## TL;DR;
 

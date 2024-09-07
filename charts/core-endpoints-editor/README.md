@@ -1,6 +1,6 @@
 # Endpoints Editor
 
-[Endpoints Editor by AppsCode](https://byte.builders) - Endpoints Editor
+[Endpoints Editor by AppsCode](https://appscode.com) - Endpoints Editor
 
 ## TL;DR;
 

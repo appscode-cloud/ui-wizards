@@ -1,6 +1,6 @@
 # MSSQLServer Editor
 
-[MSSQLServer Editor by AppsCode](https://byte.builders) - MSSQLServer Editor
+[MSSQLServer Editor by AppsCode](https://appscode.com) - MSSQLServer Editor
 
 ## TL;DR;
 

@@ -1,6 +1,6 @@
 # DummyCRD Editor
 
-[DummyCRD Editor by AppsCode](https://byte.builders) - DummyCRD Editor
+[DummyCRD Editor by AppsCode](https://appscode.com) - DummyCRD Editor
 
 ## TL;DR;
 

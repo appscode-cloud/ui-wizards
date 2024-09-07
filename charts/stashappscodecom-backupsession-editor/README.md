@@ -1,6 +1,6 @@
 # BackupSession Editor
 
-[BackupSession Editor by AppsCode](https://byte.builders) - BackupSession Editor
+[BackupSession Editor by AppsCode](https://appscode.com) - BackupSession Editor
 
 ## TL;DR;
 

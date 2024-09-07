@@ -1,6 +1,6 @@
 # MutatingWebhookConfiguration Editor
 
-[MutatingWebhookConfiguration Editor by AppsCode](https://byte.builders) - MutatingWebhookConfiguration Editor
+[MutatingWebhookConfiguration Editor by AppsCode](https://appscode.com) - MutatingWebhookConfiguration Editor
 
 ## TL;DR;
 

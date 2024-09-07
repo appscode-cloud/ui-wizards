@@ -1,6 +1,6 @@
 # Snapshot Editor
 
-[Snapshot Editor by AppsCode](https://byte.builders) - Snapshot Editor
+[Snapshot Editor by AppsCode](https://appscode.com) - Snapshot Editor
 
 ## TL;DR;
 

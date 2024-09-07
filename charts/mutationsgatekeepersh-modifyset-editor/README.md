@@ -1,6 +1,6 @@
 # ModifySet Editor
 
-[ModifySet Editor by AppsCode](https://byte.builders) - ModifySet Editor
+[ModifySet Editor by AppsCode](https://appscode.com) - ModifySet Editor
 
 ## TL;DR;
 

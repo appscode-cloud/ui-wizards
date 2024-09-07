@@ -1,6 +1,6 @@
 # MSSQLManagedInstance Editor
 
-[MSSQLManagedInstance Editor by AppsCode](https://byte.builders) - MSSQLManagedInstance Editor
+[MSSQLManagedInstance Editor by AppsCode](https://appscode.com) - MSSQLManagedInstance Editor
 
 ## TL;DR;
 

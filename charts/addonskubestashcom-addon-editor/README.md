@@ -1,6 +1,6 @@
 # Addon Editor
 
-[Addon Editor by AppsCode](https://byte.builders) - Addon Editor
+[Addon Editor by AppsCode](https://appscode.com) - Addon Editor
 
 ## TL;DR;
 

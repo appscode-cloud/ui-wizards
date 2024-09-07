@@ -1,6 +1,6 @@
 # AzureUserAssignedIdentity Editor
 
-[AzureUserAssignedIdentity Editor by AppsCode](https://byte.builders) - AzureUserAssignedIdentity Editor
+[AzureUserAssignedIdentity Editor by AppsCode](https://appscode.com) - AzureUserAssignedIdentity Editor
 
 ## TL;DR;
 

@@ -1,6 +1,6 @@
 # PlacementPolicy Editor
 
-[PlacementPolicy Editor by AppsCode](https://byte.builders) - PlacementPolicy Editor
+[PlacementPolicy Editor by AppsCode](https://appscode.com) - PlacementPolicy Editor
 
 ## TL;DR;
 

@@ -1,6 +1,6 @@
 # SecurityPolicy Editor
 
-[SecurityPolicy Editor by AppsCode](https://byte.builders) - SecurityPolicy Editor
+[SecurityPolicy Editor by AppsCode](https://appscode.com) - SecurityPolicy Editor
 
 ## TL;DR;
 

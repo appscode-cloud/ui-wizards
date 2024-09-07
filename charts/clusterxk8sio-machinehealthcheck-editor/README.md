@@ -1,6 +1,6 @@
 # MachineHealthCheck Editor
 
-[MachineHealthCheck Editor by AppsCode](https://byte.builders) - MachineHealthCheck Editor
+[MachineHealthCheck Editor by AppsCode](https://appscode.com) - MachineHealthCheck Editor
 
 ## TL;DR;
 

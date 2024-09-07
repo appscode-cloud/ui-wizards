@@ -1,6 +1,6 @@
 # ElasticsearchRole Editor
 
-[ElasticsearchRole Editor by AppsCode](https://byte.builders) - ElasticsearchRole Editor
+[ElasticsearchRole Editor by AppsCode](https://appscode.com) - ElasticsearchRole Editor
 
 ## TL;DR;
 

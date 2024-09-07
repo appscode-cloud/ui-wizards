@@ -1,6 +1,6 @@
 # MachineDeployment Editor
 
-[MachineDeployment Editor by AppsCode](https://byte.builders) - MachineDeployment Editor
+[MachineDeployment Editor by AppsCode](https://appscode.com) - MachineDeployment Editor
 
 ## TL;DR;
 

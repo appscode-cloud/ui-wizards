@@ -1,6 +1,6 @@
 # Etcd Editor
 
-[Etcd Editor by AppsCode](https://byte.builders) - Etcd Editor
+[Etcd Editor by AppsCode](https://appscode.com) - Etcd Editor
 
 ## TL;DR;
 

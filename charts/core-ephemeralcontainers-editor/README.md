@@ -1,6 +1,6 @@
 # EphemeralContainers Editor
 
-[EphemeralContainers Editor by AppsCode](https://byte.builders) - EphemeralContainers Editor
+[EphemeralContainers Editor by AppsCode](https://appscode.com) - EphemeralContainers Editor
 
 ## TL;DR;
 

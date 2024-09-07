@@ -1,6 +1,6 @@
 # ClientTrafficPolicy Editor
 
-[ClientTrafficPolicy Editor by AppsCode](https://byte.builders) - ClientTrafficPolicy Editor
+[ClientTrafficPolicy Editor by AppsCode](https://appscode.com) - ClientTrafficPolicy Editor
 
 ## TL;DR;
 

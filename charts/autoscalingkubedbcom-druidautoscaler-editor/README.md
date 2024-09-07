@@ -1,6 +1,6 @@
 # DruidAutoscaler Editor
 
-[DruidAutoscaler Editor by AppsCode](https://byte.builders) - DruidAutoscaler Editor
+[DruidAutoscaler Editor by AppsCode](https://appscode.com) - DruidAutoscaler Editor
 
 ## TL;DR;
 

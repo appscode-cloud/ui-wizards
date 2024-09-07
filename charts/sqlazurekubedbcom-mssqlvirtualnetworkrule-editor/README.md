@@ -1,6 +1,6 @@
 # MSSQLVirtualNetworkRule Editor
 
-[MSSQLVirtualNetworkRule Editor by AppsCode](https://byte.builders) - MSSQLVirtualNetworkRule Editor
+[MSSQLVirtualNetworkRule Editor by AppsCode](https://appscode.com) - MSSQLVirtualNetworkRule Editor
 
 ## TL;DR;
 

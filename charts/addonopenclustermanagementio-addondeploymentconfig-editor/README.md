@@ -1,6 +1,6 @@
 # AddOnDeploymentConfig Editor
 
-[AddOnDeploymentConfig Editor by AppsCode](https://byte.builders) - AddOnDeploymentConfig Editor
+[AddOnDeploymentConfig Editor by AppsCode](https://appscode.com) - AddOnDeploymentConfig Editor
 
 ## TL;DR;
 

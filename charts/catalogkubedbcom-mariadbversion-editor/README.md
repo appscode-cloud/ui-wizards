@@ -1,6 +1,6 @@
 # MariaDBVersion Editor
 
-[MariaDBVersion Editor by AppsCode](https://byte.builders) - MariaDBVersion Editor
+[MariaDBVersion Editor by AppsCode](https://appscode.com) - MariaDBVersion Editor
 
 ## TL;DR;
 

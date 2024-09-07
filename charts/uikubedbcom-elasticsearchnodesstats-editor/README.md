@@ -1,6 +1,6 @@
 # ElasticsearchNodesStats Editor
 
-[ElasticsearchNodesStats Editor by AppsCode](https://byte.builders) - ElasticsearchNodesStats Editor
+[ElasticsearchNodesStats Editor by AppsCode](https://appscode.com) - ElasticsearchNodesStats Editor
 
 ## TL;DR;
 

@@ -1,6 +1,6 @@
 # ClusterParameterGroup Editor
 
-[ClusterParameterGroup Editor by AppsCode](https://byte.builders) - ClusterParameterGroup Editor
+[ClusterParameterGroup Editor by AppsCode](https://appscode.com) - ClusterParameterGroup Editor
 
 ## TL;DR;
 

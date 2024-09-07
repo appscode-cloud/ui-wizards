@@ -1,6 +1,6 @@
 # HelmChart Editor
 
-[HelmChart Editor by AppsCode](https://byte.builders) - HelmChart Editor
+[HelmChart Editor by AppsCode](https://appscode.com) - HelmChart Editor
 
 ## TL;DR;
 

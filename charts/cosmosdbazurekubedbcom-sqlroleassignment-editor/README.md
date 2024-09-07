@@ -1,6 +1,6 @@
 # SQLRoleAssignment Editor
 
-[SQLRoleAssignment Editor by AppsCode](https://byte.builders) - SQLRoleAssignment Editor
+[SQLRoleAssignment Editor by AppsCode](https://appscode.com) - SQLRoleAssignment Editor
 
 ## TL;DR;
 

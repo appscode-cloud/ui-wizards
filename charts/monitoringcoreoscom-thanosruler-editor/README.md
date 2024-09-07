@@ -1,6 +1,6 @@
 # ThanosRuler Editor
 
-[ThanosRuler Editor by AppsCode](https://byte.builders) - ThanosRuler Editor
+[ThanosRuler Editor by AppsCode](https://appscode.com) - ThanosRuler Editor
 
 ## TL;DR;
 

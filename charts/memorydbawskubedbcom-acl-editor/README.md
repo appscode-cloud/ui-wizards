@@ -1,6 +1,6 @@
 # ACL Editor
 
-[ACL Editor by AppsCode](https://byte.builders) - ACL Editor
+[ACL Editor by AppsCode](https://appscode.com) - ACL Editor
 
 ## TL;DR;
 

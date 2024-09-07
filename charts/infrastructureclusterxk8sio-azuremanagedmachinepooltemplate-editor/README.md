@@ -1,6 +1,6 @@
 # AzureManagedMachinePoolTemplate Editor
 
-[AzureManagedMachinePoolTemplate Editor by AppsCode](https://byte.builders) - AzureManagedMachinePoolTemplate Editor
+[AzureManagedMachinePoolTemplate Editor by AppsCode](https://appscode.com) - AzureManagedMachinePoolTemplate Editor
 
 ## TL;DR;
 

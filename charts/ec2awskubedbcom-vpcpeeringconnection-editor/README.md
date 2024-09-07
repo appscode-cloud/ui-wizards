@@ -1,6 +1,6 @@
 # VPCPeeringConnection Editor
 
-[VPCPeeringConnection Editor by AppsCode](https://byte.builders) - VPCPeeringConnection Editor
+[VPCPeeringConnection Editor by AppsCode](https://appscode.com) - VPCPeeringConnection Editor
 
 ## TL;DR;
 

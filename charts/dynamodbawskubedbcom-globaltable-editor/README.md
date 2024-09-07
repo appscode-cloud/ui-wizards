@@ -1,6 +1,6 @@
 # GlobalTable Editor
 
-[GlobalTable Editor by AppsCode](https://byte.builders) - GlobalTable Editor
+[GlobalTable Editor by AppsCode](https://appscode.com) - GlobalTable Editor
 
 ## TL;DR;
 

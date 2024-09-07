@@ -1,6 +1,6 @@
 # EC2NodeClass Editor
 
-[EC2NodeClass Editor by AppsCode](https://byte.builders) - EC2NodeClass Editor
+[EC2NodeClass Editor by AppsCode](https://appscode.com) - EC2NodeClass Editor
 
 ## TL;DR;
 

@@ -1,6 +1,6 @@
 # ReplicaSet Editor
 
-[ReplicaSet Editor by AppsCode](https://byte.builders) - ReplicaSet Editor
+[ReplicaSet Editor by AppsCode](https://appscode.com) - ReplicaSet Editor
 
 ## TL;DR;
 

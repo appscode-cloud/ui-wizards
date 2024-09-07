@@ -1,6 +1,6 @@
 # PgBouncerOpsRequest Editor
 
-[PgBouncerOpsRequest Editor by AppsCode](https://byte.builders) - PgBouncerOpsRequest Editor
+[PgBouncerOpsRequest Editor by AppsCode](https://appscode.com) - PgBouncerOpsRequest Editor
 
 ## TL;DR;
 

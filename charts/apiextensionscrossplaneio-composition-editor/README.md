@@ -1,6 +1,6 @@
 # Composition Editor
 
-[Composition Editor by AppsCode](https://byte.builders) - Composition Editor
+[Composition Editor by AppsCode](https://appscode.com) - Composition Editor
 
 ## TL;DR;
 

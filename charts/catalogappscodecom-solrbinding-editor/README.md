@@ -1,6 +1,6 @@
 # SolrBinding Editor
 
-[SolrBinding Editor by AppsCode](https://byte.builders) - SolrBinding Editor
+[SolrBinding Editor by AppsCode](https://appscode.com) - SolrBinding Editor
 
 ## TL;DR;
 

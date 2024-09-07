@@ -1,6 +1,6 @@
 # ProxySQLOpsRequest Editor
 
-[ProxySQLOpsRequest Editor by AppsCode](https://byte.builders) - ProxySQLOpsRequest Editor
+[ProxySQLOpsRequest Editor by AppsCode](https://appscode.com) - ProxySQLOpsRequest Editor
 
 ## TL;DR;
 

@@ -1,6 +1,6 @@
 # CronJob Editor
 
-[CronJob Editor by AppsCode](https://byte.builders) - CronJob Editor
+[CronJob Editor by AppsCode](https://appscode.com) - CronJob Editor
 
 ## TL;DR;
 

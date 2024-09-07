@@ -1,6 +1,6 @@
 # BackupConfiguration Editor
 
-[BackupConfiguration Editor by AppsCode](https://byte.builders) - BackupConfiguration Editor
+[BackupConfiguration Editor by AppsCode](https://appscode.com) - BackupConfiguration Editor
 
 ## TL;DR;
 

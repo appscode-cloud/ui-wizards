@@ -1,6 +1,6 @@
 # MemcachedOpsRequest Editor
 
-[MemcachedOpsRequest Editor by AppsCode](https://byte.builders) - MemcachedOpsRequest Editor
+[MemcachedOpsRequest Editor by AppsCode](https://appscode.com) - MemcachedOpsRequest Editor
 
 ## TL;DR;
 

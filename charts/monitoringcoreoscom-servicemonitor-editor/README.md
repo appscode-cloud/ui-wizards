@@ -1,6 +1,6 @@
 # ServiceMonitor Editor
 
-[ServiceMonitor Editor by AppsCode](https://byte.builders) - ServiceMonitor Editor
+[ServiceMonitor Editor by AppsCode](https://appscode.com) - ServiceMonitor Editor
 
 ## TL;DR;
 

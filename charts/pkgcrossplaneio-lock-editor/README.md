@@ -1,6 +1,6 @@
 # Lock Editor
 
-[Lock Editor by AppsCode](https://byte.builders) - Lock Editor
+[Lock Editor by AppsCode](https://appscode.com) - Lock Editor
 
 ## TL;DR;
 

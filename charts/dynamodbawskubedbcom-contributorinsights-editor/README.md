@@ -1,6 +1,6 @@
 # ContributorInsights Editor
 
-[ContributorInsights Editor by AppsCode](https://byte.builders) - ContributorInsights Editor
+[ContributorInsights Editor by AppsCode](https://appscode.com) - ContributorInsights Editor
 
 ## TL;DR;
 

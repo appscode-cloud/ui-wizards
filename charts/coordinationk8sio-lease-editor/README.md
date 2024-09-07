@@ -1,6 +1,6 @@
 # Lease Editor
 
-[Lease Editor by AppsCode](https://byte.builders) - Lease Editor
+[Lease Editor by AppsCode](https://appscode.com) - Lease Editor
 
 ## TL;DR;
 

@@ -1,6 +1,6 @@
 # KafkaRoute Editor
 
-[KafkaRoute Editor by AppsCode](https://byte.builders) - KafkaRoute Editor
+[KafkaRoute Editor by AppsCode](https://appscode.com) - KafkaRoute Editor
 
 ## TL;DR;
 

@@ -1,6 +1,6 @@
 # RabbitMQVersion Editor
 
-[RabbitMQVersion Editor by AppsCode](https://byte.builders) - RabbitMQVersion Editor
+[RabbitMQVersion Editor by AppsCode](https://appscode.com) - RabbitMQVersion Editor
 
 ## TL;DR;
 

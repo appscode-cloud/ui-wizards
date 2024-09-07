@@ -1,6 +1,6 @@
 # PodStatusResult Editor
 
-[PodStatusResult Editor by AppsCode](https://byte.builders) - PodStatusResult Editor
+[PodStatusResult Editor by AppsCode](https://appscode.com) - PodStatusResult Editor
 
 ## TL;DR;
 

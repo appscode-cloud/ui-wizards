@@ -1,6 +1,6 @@
 # Gateway Editor
 
-[Gateway Editor by AppsCode](https://byte.builders) - Gateway Editor
+[Gateway Editor by AppsCode](https://appscode.com) - Gateway Editor
 
 ## TL;DR;
 

@@ -1,6 +1,6 @@
 # RedisVersion Editor
 
-[RedisVersion Editor by AppsCode](https://byte.builders) - RedisVersion Editor
+[RedisVersion Editor by AppsCode](https://appscode.com) - RedisVersion Editor
 
 ## TL;DR;
 

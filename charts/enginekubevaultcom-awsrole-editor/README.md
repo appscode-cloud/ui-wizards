@@ -1,6 +1,6 @@
 # AWSRole Editor
 
-[AWSRole Editor by AppsCode](https://byte.builders) - AWSRole Editor
+[AWSRole Editor by AppsCode](https://appscode.com) - AWSRole Editor
 
 ## TL;DR;
 

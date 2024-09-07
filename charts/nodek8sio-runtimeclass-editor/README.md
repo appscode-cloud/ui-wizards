@@ -1,6 +1,6 @@
 # RuntimeClass Editor
 
-[RuntimeClass Editor by AppsCode](https://byte.builders) - RuntimeClass Editor
+[RuntimeClass Editor by AppsCode](https://appscode.com) - RuntimeClass Editor
 
 ## TL;DR;
 

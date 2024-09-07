@@ -1,6 +1,6 @@
 # BackendLBPolicy Editor
 
-[BackendLBPolicy Editor by AppsCode](https://byte.builders) - BackendLBPolicy Editor
+[BackendLBPolicy Editor by AppsCode](https://appscode.com) - BackendLBPolicy Editor
 
 ## TL;DR;
 

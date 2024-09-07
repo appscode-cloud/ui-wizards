@@ -1,6 +1,6 @@
 # ClickHouse Editor
 
-[ClickHouse Editor by AppsCode](https://byte.builders) - ClickHouse Editor
+[ClickHouse Editor by AppsCode](https://appscode.com) - ClickHouse Editor
 
 ## TL;DR;
 

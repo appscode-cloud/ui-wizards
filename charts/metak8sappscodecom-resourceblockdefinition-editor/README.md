@@ -1,6 +1,6 @@
 # ResourceBlockDefinition Editor
 
-[ResourceBlockDefinition Editor by AppsCode](https://byte.builders) - ResourceBlockDefinition Editor
+[ResourceBlockDefinition Editor by AppsCode](https://appscode.com) - ResourceBlockDefinition Editor
 
 ## TL;DR;
 

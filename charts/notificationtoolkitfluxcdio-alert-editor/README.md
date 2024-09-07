@@ -1,6 +1,6 @@
 # Alert Editor
 
-[Alert Editor by AppsCode](https://byte.builders) - Alert Editor
+[Alert Editor by AppsCode](https://appscode.com) - Alert Editor
 
 ## TL;DR;
 

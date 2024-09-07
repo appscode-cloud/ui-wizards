@@ -1,6 +1,6 @@
 # AzureClusterTemplate Editor
 
-[AzureClusterTemplate Editor by AppsCode](https://byte.builders) - AzureClusterTemplate Editor
+[AzureClusterTemplate Editor by AppsCode](https://appscode.com) - AzureClusterTemplate Editor
 
 ## TL;DR;
 

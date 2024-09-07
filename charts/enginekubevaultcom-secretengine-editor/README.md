@@ -1,6 +1,6 @@
 # SecretEngine Editor
 
-[SecretEngine Editor by AppsCode](https://byte.builders) - SecretEngine Editor
+[SecretEngine Editor by AppsCode](https://appscode.com) - SecretEngine Editor
 
 ## TL;DR;
 

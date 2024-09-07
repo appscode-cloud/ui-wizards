@@ -1,6 +1,6 @@
 # ChartPreset Editor
 
-[ChartPreset Editor by AppsCode](https://byte.builders) - ChartPreset Editor
+[ChartPreset Editor by AppsCode](https://appscode.com) - ChartPreset Editor
 
 ## TL;DR;
 

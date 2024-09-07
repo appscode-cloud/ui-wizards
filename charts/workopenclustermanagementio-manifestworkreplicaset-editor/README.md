@@ -1,6 +1,6 @@
 # ManifestWorkReplicaSet Editor
 
-[ManifestWorkReplicaSet Editor by AppsCode](https://byte.builders) - ManifestWorkReplicaSet Editor
+[ManifestWorkReplicaSet Editor by AppsCode](https://appscode.com) - ManifestWorkReplicaSet Editor
 
 ## TL;DR;
 

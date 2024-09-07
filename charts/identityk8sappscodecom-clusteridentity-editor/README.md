@@ -1,6 +1,6 @@
 # ClusterIdentity Editor
 
-[ClusterIdentity Editor by AppsCode](https://byte.builders) - ClusterIdentity Editor
+[ClusterIdentity Editor by AppsCode](https://appscode.com) - ClusterIdentity Editor
 
 ## TL;DR;
 

@@ -1,6 +1,6 @@
 # GCPMachineTemplate Editor
 
-[GCPMachineTemplate Editor by AppsCode](https://byte.builders) - GCPMachineTemplate Editor
+[GCPMachineTemplate Editor by AppsCode](https://appscode.com) - GCPMachineTemplate Editor
 
 ## TL;DR;
 

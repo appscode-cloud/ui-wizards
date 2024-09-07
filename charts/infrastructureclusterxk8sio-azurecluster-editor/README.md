@@ -1,6 +1,6 @@
 # AzureCluster Editor
 
-[AzureCluster Editor by AppsCode](https://byte.builders) - AzureCluster Editor
+[AzureCluster Editor by AppsCode](https://appscode.com) - AzureCluster Editor
 
 ## TL;DR;
 

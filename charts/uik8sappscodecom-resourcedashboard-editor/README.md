@@ -1,6 +1,6 @@
 # ResourceDashboard Editor
 
-[ResourceDashboard Editor by AppsCode](https://byte.builders) - ResourceDashboard Editor
+[ResourceDashboard Editor by AppsCode](https://appscode.com) - ResourceDashboard Editor
 
 ## TL;DR;
 

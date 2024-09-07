@@ -1,6 +1,6 @@
 # MySQLVersion Editor
 
-[MySQLVersion Editor by AppsCode](https://byte.builders) - MySQLVersion Editor
+[MySQLVersion Editor by AppsCode](https://appscode.com) - MySQLVersion Editor
 
 ## TL;DR;
 

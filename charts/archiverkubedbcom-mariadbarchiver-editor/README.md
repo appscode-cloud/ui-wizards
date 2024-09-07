@@ -1,6 +1,6 @@
 # MariaDBArchiver Editor
 
-[MariaDBArchiver Editor by AppsCode](https://byte.builders) - MariaDBArchiver Editor
+[MariaDBArchiver Editor by AppsCode](https://appscode.com) - MariaDBArchiver Editor
 
 ## TL;DR;
 

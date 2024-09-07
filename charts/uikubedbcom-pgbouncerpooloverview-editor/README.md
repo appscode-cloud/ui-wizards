@@ -1,6 +1,6 @@
 # PgBouncerPoolOverview Editor
 
-[PgBouncerPoolOverview Editor by AppsCode](https://byte.builders) - PgBouncerPoolOverview Editor
+[PgBouncerPoolOverview Editor by AppsCode](https://appscode.com) - PgBouncerPoolOverview Editor
 
 ## TL;DR;
 

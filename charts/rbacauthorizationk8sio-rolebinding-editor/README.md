@@ -1,6 +1,6 @@
 # RoleBinding Editor
 
-[RoleBinding Editor by AppsCode](https://byte.builders) - RoleBinding Editor
+[RoleBinding Editor by AppsCode](https://appscode.com) - RoleBinding Editor
 
 ## TL;DR;
 

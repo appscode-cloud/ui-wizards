@@ -1,6 +1,6 @@
 # DBSnapshotCopy Editor
 
-[DBSnapshotCopy Editor by AppsCode](https://byte.builders) - DBSnapshotCopy Editor
+[DBSnapshotCopy Editor by AppsCode](https://appscode.com) - DBSnapshotCopy Editor
 
 ## TL;DR;
 

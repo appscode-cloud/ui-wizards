@@ -1,6 +1,6 @@
 # AzureMachineTemplate Editor
 
-[AzureMachineTemplate Editor by AppsCode](https://byte.builders) - AzureMachineTemplate Editor
+[AzureMachineTemplate Editor by AppsCode](https://appscode.com) - AzureMachineTemplate Editor
 
 ## TL;DR;
 

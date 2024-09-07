@@ -1,6 +1,6 @@
 # MongoDBAutoscaler Editor
 
-[MongoDBAutoscaler Editor by AppsCode](https://byte.builders) - MongoDBAutoscaler Editor
+[MongoDBAutoscaler Editor by AppsCode](https://appscode.com) - MongoDBAutoscaler Editor
 
 ## TL;DR;
 

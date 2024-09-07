@@ -1,6 +1,6 @@
 # PgBouncerAutoscaler Editor
 
-[PgBouncerAutoscaler Editor by AppsCode](https://byte.builders) - PgBouncerAutoscaler Editor
+[PgBouncerAutoscaler Editor by AppsCode](https://appscode.com) - PgBouncerAutoscaler Editor
 
 ## TL;DR;
 

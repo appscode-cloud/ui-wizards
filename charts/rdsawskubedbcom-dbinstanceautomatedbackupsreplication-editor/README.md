@@ -1,6 +1,6 @@
 # DBInstanceAutomatedBackupsReplication Editor
 
-[DBInstanceAutomatedBackupsReplication Editor by AppsCode](https://byte.builders) - DBInstanceAutomatedBackupsReplication Editor
+[DBInstanceAutomatedBackupsReplication Editor by AppsCode](https://appscode.com) - DBInstanceAutomatedBackupsReplication Editor
 
 ## TL;DR;
 

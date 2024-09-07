@@ -1,6 +1,6 @@
 # MySQLSchemaOverview Editor
 
-[MySQLSchemaOverview Editor by AppsCode](https://byte.builders) - MySQLSchemaOverview Editor
+[MySQLSchemaOverview Editor by AppsCode](https://appscode.com) - MySQLSchemaOverview Editor
 
 ## TL;DR;
 

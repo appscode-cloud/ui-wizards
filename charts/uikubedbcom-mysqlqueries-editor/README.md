@@ -1,6 +1,6 @@
 # MySQLQueries Editor
 
-[MySQLQueries Editor by AppsCode](https://byte.builders) - MySQLQueries Editor
+[MySQLQueries Editor by AppsCode](https://appscode.com) - MySQLQueries Editor
 
 ## TL;DR;
 

@@ -1,6 +1,6 @@
 # APIService Editor
 
-[APIService Editor by AppsCode](https://byte.builders) - APIService Editor
+[APIService Editor by AppsCode](https://appscode.com) - APIService Editor
 
 ## TL;DR;
 

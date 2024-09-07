@@ -1,6 +1,6 @@
 # CassandraTable Editor
 
-[CassandraTable Editor by AppsCode](https://byte.builders) - CassandraTable Editor
+[CassandraTable Editor by AppsCode](https://appscode.com) - CassandraTable Editor
 
 ## TL;DR;
 

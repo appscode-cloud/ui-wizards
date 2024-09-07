@@ -1,6 +1,6 @@
 # ApprovalPolicy Editor
 
-[ApprovalPolicy Editor by AppsCode](https://byte.builders) - ApprovalPolicy Editor
+[ApprovalPolicy Editor by AppsCode](https://appscode.com) - ApprovalPolicy Editor
 
 ## TL;DR;
 

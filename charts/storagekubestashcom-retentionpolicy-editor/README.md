@@ -1,6 +1,6 @@
 # RetentionPolicy Editor
 
-[RetentionPolicy Editor by AppsCode](https://byte.builders) - RetentionPolicy Editor
+[RetentionPolicy Editor by AppsCode](https://appscode.com) - RetentionPolicy Editor
 
 ## TL;DR;
 

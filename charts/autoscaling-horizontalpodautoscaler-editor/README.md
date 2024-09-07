@@ -1,6 +1,6 @@
 # HorizontalPodAutoscaler Editor
 
-[HorizontalPodAutoscaler Editor by AppsCode](https://byte.builders) - HorizontalPodAutoscaler Editor
+[HorizontalPodAutoscaler Editor by AppsCode](https://appscode.com) - HorizontalPodAutoscaler Editor
 
 ## TL;DR;
 

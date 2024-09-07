@@ -1,6 +1,6 @@
 # ElasticsearchSchemaOverview Editor
 
-[ElasticsearchSchemaOverview Editor by AppsCode](https://byte.builders) - ElasticsearchSchemaOverview Editor
+[ElasticsearchSchemaOverview Editor by AppsCode](https://appscode.com) - ElasticsearchSchemaOverview Editor
 
 ## TL;DR;
 

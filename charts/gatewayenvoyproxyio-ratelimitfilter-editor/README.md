@@ -1,6 +1,6 @@
 # RateLimitFilter Editor
 
-[RateLimitFilter Editor by AppsCode](https://byte.builders) - RateLimitFilter Editor
+[RateLimitFilter Editor by AppsCode](https://appscode.com) - RateLimitFilter Editor
 
 ## TL;DR;
 

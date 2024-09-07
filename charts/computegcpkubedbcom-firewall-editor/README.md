@@ -1,6 +1,6 @@
 # Firewall Editor
 
-[Firewall Editor by AppsCode](https://byte.builders) - Firewall Editor
+[Firewall Editor by AppsCode](https://appscode.com) - Firewall Editor
 
 ## TL;DR;
 

@@ -1,6 +1,6 @@
 # ProxySQLVersion Editor
 
-[ProxySQLVersion Editor by AppsCode](https://byte.builders) - ProxySQLVersion Editor
+[ProxySQLVersion Editor by AppsCode](https://appscode.com) - ProxySQLVersion Editor
 
 ## TL;DR;
 

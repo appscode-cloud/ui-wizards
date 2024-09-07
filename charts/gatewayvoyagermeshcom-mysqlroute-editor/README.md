@@ -1,6 +1,6 @@
 # MySQLRoute Editor
 
-[MySQLRoute Editor by AppsCode](https://byte.builders) - MySQLRoute Editor
+[MySQLRoute Editor by AppsCode](https://appscode.com) - MySQLRoute Editor
 
 ## TL;DR;
 

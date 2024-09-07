@@ -1,6 +1,6 @@
 # PrometheusRule Editor
 
-[PrometheusRule Editor by AppsCode](https://byte.builders) - PrometheusRule Editor
+[PrometheusRule Editor by AppsCode](https://appscode.com) - PrometheusRule Editor
 
 ## TL;DR;
 

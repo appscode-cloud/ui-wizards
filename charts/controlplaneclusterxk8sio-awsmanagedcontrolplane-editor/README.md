@@ -1,6 +1,6 @@
 # AWSManagedControlPlane Editor
 
-[AWSManagedControlPlane Editor by AppsCode](https://byte.builders) - AWSManagedControlPlane Editor
+[AWSManagedControlPlane Editor by AppsCode](https://appscode.com) - AWSManagedControlPlane Editor
 
 ## TL;DR;
 

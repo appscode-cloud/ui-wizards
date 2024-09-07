@@ -1,6 +1,6 @@
 # Namespace Editor
 
-[Namespace Editor by AppsCode](https://byte.builders) - Namespace Editor
+[Namespace Editor by AppsCode](https://appscode.com) - Namespace Editor
 
 ## TL;DR;
 

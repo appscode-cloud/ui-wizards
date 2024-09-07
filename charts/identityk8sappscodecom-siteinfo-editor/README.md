@@ -1,6 +1,6 @@
 # SiteInfo Editor
 
-[SiteInfo Editor by AppsCode](https://byte.builders) - SiteInfo Editor
+[SiteInfo Editor by AppsCode](https://appscode.com) - SiteInfo Editor
 
 ## TL;DR;
 

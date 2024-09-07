@@ -1,6 +1,6 @@
 # Machine Editor
 
-[Machine Editor by AppsCode](https://byte.builders) - Machine Editor
+[Machine Editor by AppsCode](https://appscode.com) - Machine Editor
 
 ## TL;DR;
 

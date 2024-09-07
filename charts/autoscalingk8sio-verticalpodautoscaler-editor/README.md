@@ -1,6 +1,6 @@
 # VerticalPodAutoscaler Editor
 
-[VerticalPodAutoscaler Editor by AppsCode](https://byte.builders) - VerticalPodAutoscaler Editor
+[VerticalPodAutoscaler Editor by AppsCode](https://appscode.com) - VerticalPodAutoscaler Editor
 
 ## TL;DR;
 

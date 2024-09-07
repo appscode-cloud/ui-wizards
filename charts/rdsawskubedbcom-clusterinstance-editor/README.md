@@ -1,6 +1,6 @@
 # ClusterInstance Editor
 
-[ClusterInstance Editor by AppsCode](https://byte.builders) - ClusterInstance Editor
+[ClusterInstance Editor by AppsCode](https://appscode.com) - ClusterInstance Editor
 
 ## TL;DR;
 

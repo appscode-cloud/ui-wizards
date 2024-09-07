@@ -1,6 +1,6 @@
 # ProxyEndpoint Editor
 
-[ProxyEndpoint Editor by AppsCode](https://byte.builders) - ProxyEndpoint Editor
+[ProxyEndpoint Editor by AppsCode](https://appscode.com) - ProxyEndpoint Editor
 
 ## TL;DR;
 

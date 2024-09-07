@@ -1,6 +1,6 @@
 # SinglestoreBinding Editor
 
-[SinglestoreBinding Editor by AppsCode](https://byte.builders) - SinglestoreBinding Editor
+[SinglestoreBinding Editor by AppsCode](https://appscode.com) - SinglestoreBinding Editor
 
 ## TL;DR;
 

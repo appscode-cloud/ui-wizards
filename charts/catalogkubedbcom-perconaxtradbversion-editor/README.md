@@ -1,6 +1,6 @@
 # PerconaXtraDBVersion Editor
 
-[PerconaXtraDBVersion Editor by AppsCode](https://byte.builders) - PerconaXtraDBVersion Editor
+[PerconaXtraDBVersion Editor by AppsCode](https://appscode.com) - PerconaXtraDBVersion Editor
 
 ## TL;DR;
 

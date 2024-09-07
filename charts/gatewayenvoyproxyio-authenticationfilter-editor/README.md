@@ -1,6 +1,6 @@
 # AuthenticationFilter Editor
 
-[AuthenticationFilter Editor by AppsCode](https://byte.builders) - AuthenticationFilter Editor
+[AuthenticationFilter Editor by AppsCode](https://appscode.com) - AuthenticationFilter Editor
 
 ## TL;DR;
 

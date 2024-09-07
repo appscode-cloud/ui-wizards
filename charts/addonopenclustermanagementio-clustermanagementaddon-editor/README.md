@@ -1,6 +1,6 @@
 # ClusterManagementAddOn Editor
 
-[ClusterManagementAddOn Editor by AppsCode](https://byte.builders) - ClusterManagementAddOn Editor
+[ClusterManagementAddOn Editor by AppsCode](https://appscode.com) - ClusterManagementAddOn Editor
 
 ## TL;DR;
 

@@ -1,6 +1,6 @@
 # ManagedClusterSetRoleBinding Editor
 
-[ManagedClusterSetRoleBinding Editor by AppsCode](https://byte.builders) - ManagedClusterSetRoleBinding Editor
+[ManagedClusterSetRoleBinding Editor by AppsCode](https://appscode.com) - ManagedClusterSetRoleBinding Editor
 
 ## TL;DR;
 

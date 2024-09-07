@@ -1,6 +1,6 @@
 # MSSQLServerArchiver Editor
 
-[MSSQLServerArchiver Editor by AppsCode](https://byte.builders) - MSSQLServerArchiver Editor
+[MSSQLServerArchiver Editor by AppsCode](https://appscode.com) - MSSQLServerArchiver Editor
 
 ## TL;DR;
 

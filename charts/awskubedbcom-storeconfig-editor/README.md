@@ -1,6 +1,6 @@
 # StoreConfig Editor
 
-[StoreConfig Editor by AppsCode](https://byte.builders) - StoreConfig Editor
+[StoreConfig Editor by AppsCode](https://appscode.com) - StoreConfig Editor
 
 ## TL;DR;
 

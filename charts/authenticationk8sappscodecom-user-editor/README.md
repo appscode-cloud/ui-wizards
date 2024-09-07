@@ -1,6 +1,6 @@
 # User Editor
 
-[User Editor by AppsCode](https://byte.builders) - User Editor
+[User Editor by AppsCode](https://appscode.com) - User Editor
 
 ## TL;DR;
 

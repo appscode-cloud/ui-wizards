@@ -1,6 +1,6 @@
 # Topic Editor
 
-[Topic Editor by AppsCode](https://byte.builders) - Topic Editor
+[Topic Editor by AppsCode](https://appscode.com) - Topic Editor
 
 ## TL;DR;
 

@@ -1,6 +1,6 @@
 # Function Editor
 
-[Function Editor by AppsCode](https://byte.builders) - Function Editor
+[Function Editor by AppsCode](https://appscode.com) - Function Editor
 
 ## TL;DR;
 

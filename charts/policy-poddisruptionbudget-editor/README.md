@@ -1,6 +1,6 @@
 # PodDisruptionBudget Editor
 
-[PodDisruptionBudget Editor by AppsCode](https://byte.builders) - PodDisruptionBudget Editor
+[PodDisruptionBudget Editor by AppsCode](https://appscode.com) - PodDisruptionBudget Editor
 
 ## TL;DR;
 

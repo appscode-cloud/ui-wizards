@@ -1,6 +1,6 @@
 # AlertmanagerConfig Editor
 
-[AlertmanagerConfig Editor by AppsCode](https://byte.builders) - AlertmanagerConfig Editor
+[AlertmanagerConfig Editor by AppsCode](https://appscode.com) - AlertmanagerConfig Editor
 
 ## TL;DR;
 

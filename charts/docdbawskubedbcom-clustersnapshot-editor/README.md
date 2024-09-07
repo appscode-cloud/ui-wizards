@@ -1,6 +1,6 @@
 # ClusterSnapshot Editor
 
-[ClusterSnapshot Editor by AppsCode](https://byte.builders) - ClusterSnapshot Editor
+[ClusterSnapshot Editor by AppsCode](https://appscode.com) - ClusterSnapshot Editor
 
 ## TL;DR;
 

@@ -1,6 +1,6 @@
 # RedisQueries Editor
 
-[RedisQueries Editor by AppsCode](https://byte.builders) - RedisQueries Editor
+[RedisQueries Editor by AppsCode](https://appscode.com) - RedisQueries Editor
 
 ## TL;DR;
 

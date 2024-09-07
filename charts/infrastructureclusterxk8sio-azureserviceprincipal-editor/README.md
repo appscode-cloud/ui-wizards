@@ -1,6 +1,6 @@
 # AzureServicePrincipal Editor
 
-[AzureServicePrincipal Editor by AppsCode](https://byte.builders) - AzureServicePrincipal Editor
+[AzureServicePrincipal Editor by AppsCode](https://appscode.com) - AzureServicePrincipal Editor
 
 ## TL;DR;
 

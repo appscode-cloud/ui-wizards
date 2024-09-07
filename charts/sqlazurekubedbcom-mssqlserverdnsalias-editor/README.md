@@ -1,6 +1,6 @@
 # MSSQLServerDNSAlias Editor
 
-[MSSQLServerDNSAlias Editor by AppsCode](https://byte.builders) - MSSQLServerDNSAlias Editor
+[MSSQLServerDNSAlias Editor by AppsCode](https://appscode.com) - MSSQLServerDNSAlias Editor
 
 ## TL;DR;
 

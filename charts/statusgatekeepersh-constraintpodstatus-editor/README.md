@@ -1,6 +1,6 @@
 # ConstraintPodStatus Editor
 
-[ConstraintPodStatus Editor by AppsCode](https://byte.builders) - ConstraintPodStatus Editor
+[ConstraintPodStatus Editor by AppsCode](https://appscode.com) - ConstraintPodStatus Editor
 
 ## TL;DR;
 

@@ -1,6 +1,6 @@
 # ProxySQLSettings Editor
 
-[ProxySQLSettings Editor by AppsCode](https://byte.builders) - ProxySQLSettings Editor
+[ProxySQLSettings Editor by AppsCode](https://appscode.com) - ProxySQLSettings Editor
 
 ## TL;DR;
 

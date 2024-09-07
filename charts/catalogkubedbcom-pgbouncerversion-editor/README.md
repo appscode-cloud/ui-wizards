@@ -1,6 +1,6 @@
 # PgBouncerVersion Editor
 
-[PgBouncerVersion Editor by AppsCode](https://byte.builders) - PgBouncerVersion Editor
+[PgBouncerVersion Editor by AppsCode](https://appscode.com) - PgBouncerVersion Editor
 
 ## TL;DR;
 

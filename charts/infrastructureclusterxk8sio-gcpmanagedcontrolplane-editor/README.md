@@ -1,6 +1,6 @@
 # GCPManagedControlPlane Editor
 
-[GCPManagedControlPlane Editor by AppsCode](https://byte.builders) - GCPManagedControlPlane Editor
+[GCPManagedControlPlane Editor by AppsCode](https://appscode.com) - GCPManagedControlPlane Editor
 
 ## TL;DR;
 

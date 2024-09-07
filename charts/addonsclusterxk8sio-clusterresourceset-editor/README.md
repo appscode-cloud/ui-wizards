@@ -1,6 +1,6 @@
 # ClusterResourceSet Editor
 
-[ClusterResourceSet Editor by AppsCode](https://byte.builders) - ClusterResourceSet Editor
+[ClusterResourceSet Editor by AppsCode](https://appscode.com) - ClusterResourceSet Editor
 
 ## TL;DR;
 

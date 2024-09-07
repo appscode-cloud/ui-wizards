@@ -1,6 +1,6 @@
 # TableItem Editor
 
-[TableItem Editor by AppsCode](https://byte.builders) - TableItem Editor
+[TableItem Editor by AppsCode](https://appscode.com) - TableItem Editor
 
 ## TL;DR;
 

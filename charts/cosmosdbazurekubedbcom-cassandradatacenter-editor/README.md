@@ -1,6 +1,6 @@
 # CassandraDatacenter Editor
 
-[CassandraDatacenter Editor by AppsCode](https://byte.builders) - CassandraDatacenter Editor
+[CassandraDatacenter Editor by AppsCode](https://appscode.com) - CassandraDatacenter Editor
 
 ## TL;DR;
 

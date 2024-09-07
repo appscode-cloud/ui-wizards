@@ -1,6 +1,6 @@
 # Connector Editor
 
-[Connector Editor by AppsCode](https://byte.builders) - Connector Editor
+[Connector Editor by AppsCode](https://appscode.com) - Connector Editor
 
 ## TL;DR;
 

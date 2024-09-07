@@ -1,6 +1,6 @@
 # Prometheus Editor
 
-[Prometheus Editor by AppsCode](https://byte.builders) - Prometheus Editor
+[Prometheus Editor by AppsCode](https://appscode.com) - Prometheus Editor
 
 ## TL;DR;
 

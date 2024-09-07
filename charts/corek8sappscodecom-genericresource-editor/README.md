@@ -1,6 +1,6 @@
 # GenericResource Editor
 
-[GenericResource Editor by AppsCode](https://byte.builders) - GenericResource Editor
+[GenericResource Editor by AppsCode](https://appscode.com) - GenericResource Editor
 
 ## TL;DR;
 

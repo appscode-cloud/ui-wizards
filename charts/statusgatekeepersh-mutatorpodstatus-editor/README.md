@@ -1,6 +1,6 @@
 # MutatorPodStatus Editor
 
-[MutatorPodStatus Editor by AppsCode](https://byte.builders) - MutatorPodStatus Editor
+[MutatorPodStatus Editor by AppsCode](https://appscode.com) - MutatorPodStatus Editor
 
 ## TL;DR;
 

@@ -1,6 +1,6 @@
 # MySQLAutoscaler Editor
 
-[MySQLAutoscaler Editor by AppsCode](https://byte.builders) - MySQLAutoscaler Editor
+[MySQLAutoscaler Editor by AppsCode](https://appscode.com) - MySQLAutoscaler Editor
 
 ## TL;DR;
 

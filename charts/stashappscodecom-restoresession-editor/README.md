@@ -1,6 +1,6 @@
 # RestoreSession Editor
 
-[RestoreSession Editor by AppsCode](https://byte.builders) - RestoreSession Editor
+[RestoreSession Editor by AppsCode](https://appscode.com) - RestoreSession Editor
 
 ## TL;DR;
 

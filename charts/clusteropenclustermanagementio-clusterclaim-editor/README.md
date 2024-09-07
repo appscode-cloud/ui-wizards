@@ -1,6 +1,6 @@
 # ClusterClaim Editor
 
-[ClusterClaim Editor by AppsCode](https://byte.builders) - ClusterClaim Editor
+[ClusterClaim Editor by AppsCode](https://appscode.com) - ClusterClaim Editor
 
 ## TL;DR;
 

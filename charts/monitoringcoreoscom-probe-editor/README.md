@@ -1,6 +1,6 @@
 # Probe Editor
 
-[Probe Editor by AppsCode](https://byte.builders) - Probe Editor
+[Probe Editor by AppsCode](https://appscode.com) - Probe Editor
 
 ## TL;DR;
 

@@ -1,6 +1,6 @@
 # Project Editor
 
-[Project Editor by AppsCode](https://byte.builders) - Project Editor
+[Project Editor by AppsCode](https://appscode.com) - Project Editor
 
 ## TL;DR;
 

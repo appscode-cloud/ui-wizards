@@ -1,6 +1,6 @@
 # Container Editor
 
-[Container Editor by AppsCode](https://byte.builders) - Container Editor
+[Container Editor by AppsCode](https://appscode.com) - Container Editor
 
 ## TL;DR;
 

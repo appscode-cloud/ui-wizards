@@ -1,6 +1,6 @@
 # ProviderRevision Editor
 
-[ProviderRevision Editor by AppsCode](https://byte.builders) - ProviderRevision Editor
+[ProviderRevision Editor by AppsCode](https://appscode.com) - ProviderRevision Editor
 
 ## TL;DR;
 

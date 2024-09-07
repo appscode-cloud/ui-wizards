@@ -1,6 +1,6 @@
 # MSSQLServerOpsRequest Editor
 
-[MSSQLServerOpsRequest Editor by AppsCode](https://byte.builders) - MSSQLServerOpsRequest Editor
+[MSSQLServerOpsRequest Editor by AppsCode](https://appscode.com) - MSSQLServerOpsRequest Editor
 
 ## TL;DR;
 

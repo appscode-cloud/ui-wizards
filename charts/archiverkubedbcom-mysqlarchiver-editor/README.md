@@ -1,6 +1,6 @@
 # MySQLArchiver Editor
 
-[MySQLArchiver Editor by AppsCode](https://byte.builders) - MySQLArchiver Editor
+[MySQLArchiver Editor by AppsCode](https://appscode.com) - MySQLArchiver Editor
 
 ## TL;DR;
 

@@ -1,6 +1,6 @@
 # StorageClass Editor
 
-[StorageClass Editor by AppsCode](https://byte.builders) - StorageClass Editor
+[StorageClass Editor by AppsCode](https://appscode.com) - StorageClass Editor
 
 ## TL;DR;
 

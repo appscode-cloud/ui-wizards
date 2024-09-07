@@ -1,6 +1,6 @@
 # FerretDB Editor
 
-[FerretDB Editor by AppsCode](https://byte.builders) - FerretDB Editor
+[FerretDB Editor by AppsCode](https://appscode.com) - FerretDB Editor
 
 ## TL;DR;
 

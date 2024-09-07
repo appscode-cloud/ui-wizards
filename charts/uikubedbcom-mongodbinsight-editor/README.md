@@ -1,6 +1,6 @@
 # MongoDBInsight Editor
 
-[MongoDBInsight Editor by AppsCode](https://byte.builders) - MongoDBInsight Editor
+[MongoDBInsight Editor by AppsCode](https://appscode.com) - MongoDBInsight Editor
 
 ## TL;DR;
 

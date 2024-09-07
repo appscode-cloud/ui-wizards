@@ -1,6 +1,6 @@
 # AzureClusterIdentity Editor
 
-[AzureClusterIdentity Editor by AppsCode](https://byte.builders) - AzureClusterIdentity Editor
+[AzureClusterIdentity Editor by AppsCode](https://appscode.com) - AzureClusterIdentity Editor
 
 ## TL;DR;
 

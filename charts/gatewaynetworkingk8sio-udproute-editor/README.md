@@ -1,6 +1,6 @@
 # UDPRoute Editor
 
-[UDPRoute Editor by AppsCode](https://byte.builders) - UDPRoute Editor
+[UDPRoute Editor by AppsCode](https://appscode.com) - UDPRoute Editor
 
 ## TL;DR;
 

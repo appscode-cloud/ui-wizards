@@ -1,6 +1,6 @@
 # DaemonSet Editor
 
-[DaemonSet Editor by AppsCode](https://byte.builders) - DaemonSet Editor
+[DaemonSet Editor by AppsCode](https://appscode.com) - DaemonSet Editor
 
 ## TL;DR;
 

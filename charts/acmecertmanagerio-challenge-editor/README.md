@@ -1,6 +1,6 @@
 # Challenge Editor
 
-[Challenge Editor by AppsCode](https://byte.builders) - Challenge Editor
+[Challenge Editor by AppsCode](https://appscode.com) - Challenge Editor
 
 ## TL;DR;
 

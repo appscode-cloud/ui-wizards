@@ -1,6 +1,6 @@
 # Instance Editor
 
-[Instance Editor by AppsCode](https://byte.builders) - Instance Editor
+[Instance Editor by AppsCode](https://appscode.com) - Instance Editor
 
 ## TL;DR;
 

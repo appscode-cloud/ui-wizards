@@ -1,6 +1,6 @@
 # ImageRepository Editor
 
-[ImageRepository Editor by AppsCode](https://byte.builders) - ImageRepository Editor
+[ImageRepository Editor by AppsCode](https://appscode.com) - ImageRepository Editor
 
 ## TL;DR;
 

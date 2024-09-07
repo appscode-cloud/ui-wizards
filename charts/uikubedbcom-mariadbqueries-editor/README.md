@@ -1,6 +1,6 @@
 # MariaDBQueries Editor
 
-[MariaDBQueries Editor by AppsCode](https://byte.builders) - MariaDBQueries Editor
+[MariaDBQueries Editor by AppsCode](https://appscode.com) - MariaDBQueries Editor
 
 ## TL;DR;
 

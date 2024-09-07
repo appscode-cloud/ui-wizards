@@ -1,6 +1,6 @@
 # SQLStoredProcedure Editor
 
-[SQLStoredProcedure Editor by AppsCode](https://byte.builders) - SQLStoredProcedure Editor
+[SQLStoredProcedure Editor by AppsCode](https://appscode.com) - SQLStoredProcedure Editor
 
 ## TL;DR;
 

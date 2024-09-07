@@ -1,6 +1,6 @@
 # Elasticsearch Editor
 
-[Elasticsearch Editor by AppsCode](https://byte.builders) - Elasticsearch Editor
+[Elasticsearch Editor by AppsCode](https://appscode.com) - Elasticsearch Editor
 
 ## TL;DR;
 

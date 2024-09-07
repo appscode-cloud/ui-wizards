@@ -1,6 +1,6 @@
 # ClusterClass Editor
 
-[ClusterClass Editor by AppsCode](https://byte.builders) - ClusterClass Editor
+[ClusterClass Editor by AppsCode](https://appscode.com) - ClusterClass Editor
 
 ## TL;DR;
 

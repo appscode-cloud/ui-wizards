@@ -1,6 +1,6 @@
 # MongoDBSchemaOverview Editor
 
-[MongoDBSchemaOverview Editor by AppsCode](https://byte.builders) - MongoDBSchemaOverview Editor
+[MongoDBSchemaOverview Editor by AppsCode](https://appscode.com) - MongoDBSchemaOverview Editor
 
 ## TL;DR;
 

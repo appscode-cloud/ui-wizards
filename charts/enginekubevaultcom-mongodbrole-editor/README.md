@@ -1,6 +1,6 @@
 # MongoDBRole Editor
 
-[MongoDBRole Editor by AppsCode](https://byte.builders) - MongoDBRole Editor
+[MongoDBRole Editor by AppsCode](https://appscode.com) - MongoDBRole Editor
 
 ## TL;DR;
 

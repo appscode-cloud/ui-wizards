@@ -1,6 +1,6 @@
 # Kustomization Editor
 
-[Kustomization Editor by AppsCode](https://byte.builders) - Kustomization Editor
+[Kustomization Editor by AppsCode](https://appscode.com) - Kustomization Editor
 
 ## TL;DR;
 

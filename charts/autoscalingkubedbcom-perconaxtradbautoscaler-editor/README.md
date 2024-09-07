@@ -1,6 +1,6 @@
 # PerconaXtraDBAutoscaler Editor
 
-[PerconaXtraDBAutoscaler Editor by AppsCode](https://byte.builders) - PerconaXtraDBAutoscaler Editor
+[PerconaXtraDBAutoscaler Editor by AppsCode](https://appscode.com) - PerconaXtraDBAutoscaler Editor
 
 ## TL;DR;
 

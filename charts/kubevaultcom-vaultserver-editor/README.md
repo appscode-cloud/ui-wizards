@@ -1,6 +1,6 @@
 # VaultServer Editor
 
-[VaultServer Editor by AppsCode](https://byte.builders) - VaultServer Editor
+[VaultServer Editor by AppsCode](https://appscode.com) - VaultServer Editor
 
 ## TL;DR;
 

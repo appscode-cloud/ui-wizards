@@ -1,6 +1,6 @@
 # CompositeResourceDefinition Editor
 
-[CompositeResourceDefinition Editor by AppsCode](https://byte.builders) - CompositeResourceDefinition Editor
+[CompositeResourceDefinition Editor by AppsCode](https://appscode.com) - CompositeResourceDefinition Editor
 
 ## TL;DR;
 

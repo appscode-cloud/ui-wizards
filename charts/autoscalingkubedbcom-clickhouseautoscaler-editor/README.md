@@ -1,6 +1,6 @@
 # ClickHouseAutoscaler Editor
 
-[ClickHouseAutoscaler Editor by AppsCode](https://byte.builders) - ClickHouseAutoscaler Editor
+[ClickHouseAutoscaler Editor by AppsCode](https://appscode.com) - ClickHouseAutoscaler Editor
 
 ## TL;DR;
 

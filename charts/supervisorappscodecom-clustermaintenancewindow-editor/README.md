@@ -1,6 +1,6 @@
 # ClusterMaintenanceWindow Editor
 
-[ClusterMaintenanceWindow Editor by AppsCode](https://byte.builders) - ClusterMaintenanceWindow Editor
+[ClusterMaintenanceWindow Editor by AppsCode](https://appscode.com) - ClusterMaintenanceWindow Editor
 
 ## TL;DR;
 

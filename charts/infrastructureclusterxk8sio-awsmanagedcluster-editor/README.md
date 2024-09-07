@@ -1,6 +1,6 @@
 # AWSManagedCluster Editor
 
-[AWSManagedCluster Editor by AppsCode](https://byte.builders) - AWSManagedCluster Editor
+[AWSManagedCluster Editor by AppsCode](https://appscode.com) - AWSManagedCluster Editor
 
 ## TL;DR;
 
