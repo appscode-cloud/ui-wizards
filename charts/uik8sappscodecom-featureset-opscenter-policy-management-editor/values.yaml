@@ -9,179 +9,193 @@ metadata:
     name: RELEASE-NAME
     namespace: default
 resources:
-  helmToolkitFluxcdIoHelmRelease_cert_manager: # +doc-gen:break
+  helmToolkitFluxcdIoHelmRelease_gatekeeper: # +doc-gen:break
     apiVersion: helm.toolkit.fluxcd.io/v2
     kind: HelmRelease
     metadata:
       labels:
-        app.kubernetes.io/component: cert-manager
-      name: cert-manager
+        app.kubernetes.io/component: gatekeeper
+      name: gatekeeper
       namespace: kubeops
     spec:
       chart:
         spec:
-          chart: cert-manager
+          chart: gatekeeper
           sourceRef:
             kind: HelmRepository
             name: appscode-charts-oci
             namespace: kubeops
-          version: v1.15.2
+          version: 3.13.3
       install:
         crds: CreateReplace
         createNamespace: true
         remediation:
           retries: -1
       interval: 5m
-      releaseName: cert-manager
-      storageNamespace: cert-manager
-      targetNamespace: cert-manager
+      releaseName: gatekeeper
+      storageNamespace: gatekeeper-system
+      targetNamespace: gatekeeper-system
       timeout: 30m
       upgrade:
         crds: CreateReplace
         remediation:
           retries: -1
       values:
-        installCRDs: true
-  helmToolkitFluxcdIoHelmRelease_cert_manager_csi_driver_cacerts: # +doc-gen:break
+        constraintViolationsLimit: 100
+  helmToolkitFluxcdIoHelmRelease_gatekeeper_constraints: # +doc-gen:break
     apiVersion: helm.toolkit.fluxcd.io/v2
     kind: HelmRelease
     metadata:
       labels:
-        app.kubernetes.io/component: cert-manager-csi-driver-cacerts
-      name: cert-manager-csi-driver-cacerts
+        app.kubernetes.io/component: gatekeeper-constraints
+      name: gatekeeper-constraints
       namespace: kubeops
     spec:
       chart:
         spec:
-          chart: cert-manager-csi-driver-cacerts
+          chart: gatekeeper-library
           sourceRef:
             kind: HelmRepository
             name: appscode-charts-oci
             namespace: kubeops
-          version: v2024.7.28
+          version: v2023.10.1
       install:
         crds: CreateReplace
         createNamespace: true
         remediation:
           retries: -1
       interval: 5m
-      releaseName: cert-manager-csi-driver-cacerts
-      storageNamespace: cert-manager
-      targetNamespace: cert-manager
-      timeout: 30m
-      upgrade:
-        crds: CreateReplace
-        remediation:
-          retries: -1
-  helmToolkitFluxcdIoHelmRelease_falco: # +doc-gen:break
-    apiVersion: helm.toolkit.fluxcd.io/v2
-    kind: HelmRelease
-    metadata:
-      labels:
-        app.kubernetes.io/component: falco
-      name: falco
-      namespace: kubeops
-    spec:
-      chart:
-        spec:
-          chart: falco
-          sourceRef:
-            kind: HelmRepository
-            name: appscode-charts-oci
-            namespace: kubeops
-          version: 4.0.0
-      install:
-        crds: CreateReplace
-        createNamespace: true
-        remediation:
-          retries: -1
-      interval: 5m
-      releaseName: falco
-      storageNamespace: falco
-      targetNamespace: falco
+      releaseName: gatekeeper-constraints
+      storageNamespace: gatekeeper-system
+      targetNamespace: gatekeeper-system
       timeout: 30m
       upgrade:
         crds: CreateReplace
         remediation:
           retries: -1
       values:
-        driver:
-          kind: modern-bpf
-        falco:
-          grpc:
-            enabled: true
-          grpc_output:
-            enabled: true
-          http_output:
-            enabled: true
-            insecure: true
-            url: http://falco-ui-server:8080/falcoevents
-          json_include_output_property: true
-          json_output: true
-          modern_bpf:
-            cpus_for_each_syscall_buffer: 1
-        falcosidekick:
-          enabled: false
-          webui:
-            enabled: false
-        tty: true
-  helmToolkitFluxcdIoHelmRelease_falco_ui_server: # +doc-gen:break
+        enable: constraints
+  helmToolkitFluxcdIoHelmRelease_gatekeeper_grafana_dashboards: # +doc-gen:break
     apiVersion: helm.toolkit.fluxcd.io/v2
     kind: HelmRelease
     metadata:
       labels:
-        app.kubernetes.io/component: falco-ui-server
-      name: falco-ui-server
+        app.kubernetes.io/component: gatekeeper-grafana-dashboards
+      name: gatekeeper-grafana-dashboards
       namespace: kubeops
     spec:
       chart:
         spec:
-          chart: falco-ui-server
+          chart: gatekeeper-grafana-dashboards
           sourceRef:
             kind: HelmRepository
             name: appscode-charts-oci
             namespace: kubeops
-          version: v2024.5.17
+          version: v2023.10.1
       install:
         crds: CreateReplace
         createNamespace: true
         remediation:
           retries: -1
       interval: 5m
-      releaseName: falco-ui-server
-      storageNamespace: falco
-      targetNamespace: falco
+      releaseName: gatekeeper-grafana-dashboards
+      storageNamespace: gatekeeper-system
+      targetNamespace: gatekeeper-system
       timeout: 30m
       upgrade:
         crds: CreateReplace
         remediation:
           retries: -1
-  helmToolkitFluxcdIoHelmRelease_scanner: # +doc-gen:break
+  helmToolkitFluxcdIoHelmRelease_gatekeeper_templates: # +doc-gen:break
     apiVersion: helm.toolkit.fluxcd.io/v2
     kind: HelmRelease
     metadata:
       labels:
-        app.kubernetes.io/component: scanner
-      name: scanner
+        app.kubernetes.io/component: gatekeeper-templates
+      name: gatekeeper-templates
       namespace: kubeops
     spec:
       chart:
         spec:
-          chart: scanner
+          chart: gatekeeper-library
           sourceRef:
             kind: HelmRepository
             name: appscode-charts-oci
             namespace: kubeops
-          version: v2024.1.18
+          version: v2023.10.1
       install:
         crds: CreateReplace
         createNamespace: true
         remediation:
           retries: -1
       interval: 5m
-      releaseName: scanner
-      storageNamespace: kubeops
-      targetNamespace: kubeops
+      releaseName: gatekeeper-templates
+      storageNamespace: gatekeeper-system
+      targetNamespace: gatekeeper-system
+      timeout: 30m
+      upgrade:
+        crds: CreateReplace
+        remediation:
+          retries: -1
+      values:
+        enable: templates
+  helmToolkitFluxcdIoHelmRelease_kyverno: # +doc-gen:break
+    apiVersion: helm.toolkit.fluxcd.io/v2
+    kind: HelmRelease
+    metadata:
+      labels:
+        app.kubernetes.io/component: kyverno
+      name: kyverno
+      namespace: kubeops
+    spec:
+      chart:
+        spec:
+          chart: kyverno
+          sourceRef:
+            kind: HelmRepository
+            name: appscode-charts-oci
+            namespace: kubeops
+          version: 3.2.6
+      install:
+        crds: CreateReplace
+        createNamespace: true
+        remediation:
+          retries: -1
+      interval: 5m
+      releaseName: kyverno
+      storageNamespace: kyverno
+      targetNamespace: kyverno
+      timeout: 30m
+      upgrade:
+        crds: CreateReplace
+        remediation:
+          retries: -1
+  helmToolkitFluxcdIoHelmRelease_kyverno_policies: # +doc-gen:break
+    apiVersion: helm.toolkit.fluxcd.io/v2
+    kind: HelmRelease
+    metadata:
+      labels:
+        app.kubernetes.io/component: kyverno-policies
+      name: kyverno-policies
+      namespace: kubeops
+    spec:
+      chart:
+        spec:
+          chart: kyverno-policies
+          sourceRef:
+            kind: HelmRepository
+            name: appscode-charts-oci
+            namespace: kubeops
+          version: 3.2.5
+      install:
+        crds: CreateReplace
+        createNamespace: true
+        remediation:
+          retries: -1
+      interval: 5m
+      releaseName: kyverno-policies
+      storageNamespace: falco
+      targetNamespace: falco
       timeout: 30m
       upgrade:
         crds: CreateReplace
