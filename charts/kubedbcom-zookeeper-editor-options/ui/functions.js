@@ -762,6 +762,19 @@ function fetchOptions({ model, getValue }, type) {
   return []
 }
 
+function isDeploymentModeDisable({ commit, getValue, model, watchDependency }) {
+  watchDependency('discriminator#/bundleApiLoaded')
+  const deploymentType = getValue(model, '/spec/admin/deployment/default')
+  if (!nodetopologiesDedicated.length && deploymentType === 'Dedicated') {
+    commit('wizard/model$update', {
+      path: '/spec/admin/deployment/default',
+      value: 'Shared',
+      force: true,
+    })
+  }
+  return !nodetopologiesDedicated.length
+}
+
 function getAdminOptions({ getValue, model, watchDependency }, type) {
   watchDependency('discriminator#/bundleApiLoaded')
 
@@ -989,6 +1002,7 @@ function showAdditionalSettings({ watchDependency }) {
 }
 
 return {
+  isDeploymentModeDisable,
   initBundle,
   returnFalse,
   isVariantAvailable,
