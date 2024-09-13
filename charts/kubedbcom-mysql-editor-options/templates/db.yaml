@@ -30,6 +30,40 @@ spec:
     innoDBCluster:
       router:
         replicas: {{ .Values.spec.innoDBCluster.router.replicas }}
+        podTemplate:
+          spec:
+            containers:
+              - name: mysql-router
+                resources:
+                  {{- toYaml $res | nindent 20 }}
+            {{- if .Values.spec.admin.clusterTier.placement.default }}
+            podPlacementPolicy:
+              name: {{ .Values.spec.admin.clusterTier.placement.default }}
+            {{- end }}
+            {{- if eq .Values.spec.admin.deployment.default "Dedicated" }}
+            nodeSelector:
+              app: mysqls.kubedb.com
+              instance: {{ include "kubedbcom-mysql-editor-options.fullname" . }}
+              namespace: {{ .Release.Namespace }}
+              nodepool: {{ .Values.spec.admin.clusterTier.nodeTopology.default }}
+            tolerations:
+              - key: app
+                operator: "Equal"
+                value: "mysqls.kubedb.com"
+                effect: "NoSchedule"
+              - key: instance
+                operator: "Equal"
+                value: {{ include "kubedbcom-mysql-editor-options.fullname" . }}
+                effect: "NoSchedule"
+              - key: namespace
+                operator: "Equal"
+                value: {{ .Release.Namespace }}
+                effect: "NoSchedule"
+              - key: nodepool
+                operator: "Equal"
+                value: {{ .Values.spec.admin.clusterTier.nodeTopology.default }}
+                effect: "NoSchedule"
+            {{- end }}
 {{- end }}
   storageType: Durable
   storage:
