@@ -389,29 +389,6 @@ steps:
           default: false
           type: boolean
       elements:
-      - elements:
-        - if: isToggleOn|tls
-          label:
-            text: Enable TLS?
-          schema:
-            $ref: schema#/properties/spec/properties/admin/properties/tls/properties/default
-          type: switch
-        - fetch: getAdminOptions|clusterIssuers
-          if: showIssuer
-          label:
-            text: labels.clusterIssuers
-          schema:
-            $ref: schema#/properties/spec/properties/admin/properties/clusterIssuers/properties/default
-          type: select
-        type: single-step-form
-      - elements:
-        - if: isToggleOn|expose
-          label:
-            text: Expose via Gateway?
-          schema:
-            $ref: schema#/properties/spec/properties/admin/properties/expose/properties/default
-          type: switch
-        type: single-step-form
       - discriminator:
           monitoring:
             default: false
@@ -442,6 +419,29 @@ steps:
             $ref: schema#/properties/form/properties/alert/properties/enabled
           sortable: true
           type: select
+        type: single-step-form
+      - elements:
+        - if: isToggleOn|tls
+          label:
+            text: Enable TLS?
+          schema:
+            $ref: schema#/properties/spec/properties/admin/properties/tls/properties/default
+          type: switch
+        - fetch: getAdminOptions|clusterIssuers
+          if: showIssuer
+          label:
+            text: labels.clusterIssuers
+          schema:
+            $ref: schema#/properties/spec/properties/admin/properties/clusterIssuers/properties/default
+          type: select
+        type: single-step-form
+      - elements:
+        - if: isToggleOn|expose
+          label:
+            text: Expose via Gateway?
+          schema:
+            $ref: schema#/properties/spec/properties/admin/properties/expose/properties/default
+          type: switch
         type: single-step-form
       - elements:
         - if: isToggleOn|archiver

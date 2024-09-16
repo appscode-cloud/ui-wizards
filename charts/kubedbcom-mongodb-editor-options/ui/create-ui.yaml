@@ -471,13 +471,13 @@ steps:
         backup:
           default: false
           type: boolean
-        monitoring:
-          default: false
-          type: boolean
       elements:
-      - elements:
+      - discriminator:
+          monitoring:
+            default: false
+            type: boolean
+        elements:
         - computed: setMonitoring
-          if: isToggleOn|monitoring
           label:
             text: labels.enable_monitoring
           onChange: updateAlertValue
@@ -501,6 +501,7 @@ steps:
             $ref: schema#/properties/form/properties/alert/properties/enabled
           sortable: true
           type: select
+        if: isToggleOn|monitoring
         type: single-step-form
       - elements:
         - if: isToggleOn|tls
