@@ -75,6 +75,15 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/admin/properties/storageClasses/properties/default
       type: select
+    - fetch: getAppBindings|postgres
+      label:
+        text: labels.postgresRef.label
+      onChange: onRefChange|postgresRef
+      refresh: true
+      required: true
+      schema:
+        $ref: discriminator#/postgresRef
+      type: select
     - accordion: true
       description:
         text: Configure Credentials, Deployment Mode etc.
@@ -141,15 +150,6 @@ steps:
           value: DoNotTerminate
         schema:
           $ref: schema#/properties/spec/properties/deletionPolicy
-        type: select
-      - fetch: getAppBindings|postgres
-        label:
-          text: labels.postgresRef.label
-        onChange: onRefChange|postgresRef
-        refresh: true
-        required: true
-        schema:
-          $ref: discriminator#/postgresRef
         type: select
       - label:
           text: Provide Authentication Credentials?

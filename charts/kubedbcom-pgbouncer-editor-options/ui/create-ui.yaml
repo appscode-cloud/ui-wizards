@@ -64,6 +64,20 @@ steps:
         text: labels.machine_profile
       show_label: true
       type: single-step-form
+    - label:
+        text: labels.databaseref.name
+      schema:
+        $ref: schema#/properties/spec/properties/database/properties/databaseName
+      type: input
+    - fetch: getAppBindings|postgres
+      label:
+        text: labels.databaseref.select
+      onChange: onRefChange
+      refresh: true
+      required: true
+      schema:
+        $ref: discriminator#/pgRef
+      type: select
     - accordion: true
       description:
         text: Configure Credentials, Deployment Mode etc.
@@ -131,25 +145,6 @@ steps:
           $ref: schema#/properties/spec/properties/deletionPolicy
         type: select
       - label:
-          text: labels.sync_users_question
-        schema:
-          $ref: schema#/properties/spec/properties/database/properties/syncUsers
-        type: switch
-      - label:
-          text: labels.databaseref.name
-        schema:
-          $ref: schema#/properties/spec/properties/database/properties/databaseName
-        type: input
-      - fetch: getAppBindings|postgres
-        label:
-          text: labels.databaseref.select
-        onChange: onRefChange
-        refresh: true
-        required: true
-        schema:
-          $ref: discriminator#/pgRef
-        type: select
-      - label:
           text: Provide Authentication Credentials?
         onChange: onAuthChange
         schema:
@@ -179,6 +174,11 @@ steps:
         schema:
           $ref: schema#/properties/spec/properties/configuration
         type: editor
+      - label:
+          text: labels.sync_users_question
+        schema:
+          $ref: schema#/properties/spec/properties/database/properties/syncUsers
+        type: switch
       - hasDescription: true
         if: isToggleOn|deployment
         label:

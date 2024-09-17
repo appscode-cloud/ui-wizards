@@ -204,6 +204,19 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/persistence/properties/size
       type: input
+    - elements:
+      - fetch: getAppBindings
+        label:
+          text: labels.zookeeperRef.name
+        schema:
+          $ref: schema#/properties/spec/properties/zookeeperRef/properties/name
+        type: select
+      label:
+        text: labels.zookeeperRef.label
+      schema:
+        $ref: schema#/properties/spec/properties/zookeeperRef
+      show_label: true
+      type: single-step-form
     - accordion: true
       description:
         text: Configure Credentials, Deployment Mode etc.
@@ -271,19 +284,6 @@ steps:
         schema:
           $ref: schema#/properties/spec/properties/deletionPolicy
         type: select
-      - elements:
-        - fetch: getAppBindings
-          label:
-            text: labels.zookeeperRef.name
-          schema:
-            $ref: schema#/properties/spec/properties/zookeeperRef/properties/name
-          type: select
-        label:
-          text: labels.zookeeperRef.label
-        schema:
-          $ref: schema#/properties/spec/properties/zookeeperRef
-        show_label: true
-        type: single-step-form
       - label:
           text: Provide Authentication Credentials?
         onChange: onAuthChange

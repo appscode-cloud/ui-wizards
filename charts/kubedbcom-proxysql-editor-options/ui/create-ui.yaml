@@ -72,6 +72,16 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/admin/properties/storageClasses/properties/default
       type: select
+    - label:
+        text: labels.backend_section
+      type: label-element
+    - fetch: getAppBindings
+      label:
+        text: labels.backend
+      refresh: true
+      schema:
+        $ref: schema#/properties/spec/properties/backend
+      type: select
     - accordion: true
       description:
         text: Configure Credentials, Deployment Mode etc.
@@ -134,16 +144,6 @@ steps:
           value: DoNotTerminate
         schema:
           $ref: schema#/properties/spec/properties/deletionPolicy
-        type: select
-      - label:
-          text: labels.backend_section
-        type: label-element
-      - fetch: getAppBindings
-        label:
-          text: labels.backend
-        refresh: true
-        schema:
-          $ref: schema#/properties/spec/properties/backend
         type: select
       - label:
           text: Provide Authentication Credentials?
