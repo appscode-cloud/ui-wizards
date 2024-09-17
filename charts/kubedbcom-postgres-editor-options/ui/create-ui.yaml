@@ -50,9 +50,8 @@ steps:
         disabled: isMachineNotCustom
         label:
           text: labels.cpu
-        onChange: setRequests|cpu
         schema:
-          $ref: schema#/properties/spec/properties/podResources/properties/resources/properties/limits/properties/cpu
+          $ref: schema#/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
         type: input
       - computed: setLimits|memory
         disabled: isMachineNotCustom
@@ -60,7 +59,7 @@ steps:
           text: labels.memory
         onChange: setRequests|memory
         schema:
-          $ref: schema#/properties/spec/properties/podResources/properties/resources/properties/limits/properties/memory
+          $ref: schema#/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
         type: input
       label:
         text: labels.machine_profile
@@ -177,8 +176,7 @@ steps:
         schema:
           $ref: schema#/properties/spec/properties/configuration
         type: editor
-      - disabled: isDeploymentModeDisable
-        hasDescription: true
+      - hasDescription: true
         if: isToggleOn|deployment
         label:
           text: labels.deployment.name
@@ -282,9 +280,6 @@ steps:
           schema:
             $ref: schema#/properties/spec/properties/admin/properties/tls/properties/default
           type: switch
-        show_label: true
-        type: single-step-form
-      - elements:
         - fetch: getAdminOptions|clusterIssuers
           if: showIssuer
           label:

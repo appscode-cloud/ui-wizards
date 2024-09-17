@@ -383,12 +383,12 @@ function onMachineChange({ commit, model, getValue }, type) {
       ? `/spec/${type}/podResources/resources`
       : '/spec/podResources/resources'
     commit('wizard/model$update', {
-      path: `${commitPathPrefix}/limits/cpu`,
+      path: `${commitPathPrefix}/requests/cpu`,
       value: machines[selectedMachine]?.resources.limits.cpu,
       force: true,
     })
     commit('wizard/model$update', {
-      path: `${commitPathPrefix}/limits/memory`,
+      path: `${commitPathPrefix}/requests/memory`,
       value: machines[selectedMachine]?.resources.limits.memory,
       force: true,
     })
@@ -399,17 +399,10 @@ function setLimits({ model, getValue, commit }, resource, type) {
   const path = type ? `/spec/${type}/podResources/machine` : '/spec/podResources/machine'
   const selectedMachine = getValue(model, path)
   const reqCommitPath = type
-    ? `/spec/${type}/podResources/resources/requests/${resource}`
-    : `/spec/podResources/resources/requests/${resource}`
+    ? `/spec/${type}/podResources/resources/limits/${resource}`
+    : `/spec/podResources/resources/limits/${resource}`
   if (selectedMachine && selectedMachine !== 'custom') {
-    if (resource === 'cpu') {
-      commit('wizard/model$update', {
-        path: reqCommitPath,
-        value: machines[selectedMachine]?.resources?.limits?.cpu,
-        force: true,
-      })
-      return machines[selectedMachine]?.resources?.limits?.cpu
-    } else if (resource === 'memory') {
+    if (resource === 'memory') {
       commit('wizard/model$update', {
         path: reqCommitPath,
         value: machines[selectedMachine]?.resources?.limits?.memory,
@@ -419,14 +412,16 @@ function setLimits({ model, getValue, commit }, resource, type) {
     }
   } else {
     const modelPath = type
-      ? `/spec/${type}/podResources/resources/limits/${resource}`
-      : `/spec/podResources/resources/limits/${resource}`
+      ? `/spec/${type}/podResources/resources/requests/${resource}`
+      : `/spec/podResources/resources/requests/${resource}`
     const val = getValue(model, modelPath)
-    commit('wizard/model$update', {
-      path: reqCommitPath,
-      value: val,
-      force: true,
-    })
+    if (resource === 'memory') {
+      commit('wizard/model$update', {
+        path: reqCommitPath,
+        value: val,
+        force: true,
+      })
+    }
     if (resource === 'cpu') return val || '250m'
     else return val || '500Mi'
   }
@@ -434,12 +429,12 @@ function setLimits({ model, getValue, commit }, resource, type) {
 
 function setRequests({ getValue, model, commit }, resource, type) {
   const modelPath = type
-    ? `/spec/${type}/podResources/resources/limits/${resource}`
-    : `/spec/podResources/resources/limits/${resource}`
-  const val = getValue(model, modelPath)
-  commitPath = type
     ? `/spec/${type}/podResources/resources/requests/${resource}`
     : `/spec/podResources/resources/requests/${resource}`
+  const val = getValue(model, modelPath)
+  commitPath = type
+    ? `/spec/${type}/podResources/resources/limits/${resource}`
+    : `/spec/podResources/resources/limits/${resource}`
   commit('wizard/model$update', {
     path: commitPath,
     value: val,
@@ -737,19 +732,6 @@ function fetchOptions({ model, getValue }, type) {
   return []
 }
 
-function isDeploymentModeDisable({ commit, getValue, model, watchDependency }) {
-  watchDependency('discriminator#/bundleApiLoaded')
-  const deploymentType = getValue(model, '/spec/admin/deployment/default')
-  if (!nodetopologiesDedicated.length && deploymentType === 'Dedicated') {
-    commit('wizard/model$update', {
-      path: '/spec/admin/deployment/default',
-      value: 'Shared',
-      force: true,
-    })
-  }
-  return !nodetopologiesDedicated.length
-}
-
 function getAdminOptions({ getValue, model, watchDependency }, type) {
   watchDependency('discriminator#/bundleApiLoaded')
 
@@ -799,6 +781,20 @@ function isToggleOn({ getValue, model, discriminator, watchDependency }, type) {
   ) {
     if (deploymentType === 'Dedicated' && bundleApiLoaded) return true
     else return false
+  } else if (type === 'deployment') {
+    const deploymentType = getValue(model, '/spec/admin/deployment/default')
+    if (!nodetopologiesDedicated.length && deploymentType === 'Dedicated') {
+      commit('wizard/model$update', {
+        path: '/spec/admin/deployment/default',
+        value: 'Shared',
+        force: true,
+      })
+    }
+    return (
+      getValue(model, `/spec/admin/${type}/toggle`) &&
+      nodetopologiesDedicated.length &&
+      bundleApiLoaded
+    )
   } else return getValue(model, `/spec/admin/${type}/toggle`) && bundleApiLoaded
 }
 
@@ -936,7 +932,6 @@ function showAdditionalSettings({ watchDependency }) {
 }
 
 return {
-  isDeploymentModeDisable,
   showAdditionalSettings,
   returnFalse,
   initBundle,

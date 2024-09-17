@@ -69,9 +69,8 @@ steps:
             disabled: isMachineNotCustom|topology/controller
             label:
               text: labels.cpu
-            onChange: setRequests|cpu|topology/controller
             schema:
-              $ref: schema#/properties/spec/properties/topology/properties/controller/properties/podResources/properties/resources/properties/limits/properties/cpu
+              $ref: schema#/properties/spec/properties/topology/properties/controller/properties/podResources/properties/resources/properties/requests/properties/cpu
             type: input
           - computed: setLimits|memory|topology/controller
             disabled: isMachineNotCustom|topology/controller
@@ -79,7 +78,7 @@ steps:
               text: labels.memory
             onChange: setRequests|memory|topology/controller
             schema:
-              $ref: schema#/properties/spec/properties/topology/properties/controller/properties/podResources/properties/resources/properties/limits/properties/memory
+              $ref: schema#/properties/spec/properties/topology/properties/controller/properties/podResources/properties/resources/properties/requests/properties/memory
             type: input
           label:
             text: labels.machine_profile
@@ -119,9 +118,8 @@ steps:
             disabled: isMachineNotCustom|topology/broker
             label:
               text: labels.cpu
-            onChange: setRequests|cpu
             schema:
-              $ref: schema#/properties/spec/properties/topology/properties/broker/properties/podResources/properties/resources/properties/limits/properties/cpu
+              $ref: schema#/properties/spec/properties/topology/properties/broker/properties/podResources/properties/resources/properties/requests/properties/cpu
             type: input
           - computed: setLimits|memory|topology/broker
             disabled: isMachineNotCustom|topology/broker
@@ -129,7 +127,7 @@ steps:
               text: labels.memory
             onChange: setRequests|memory
             schema:
-              $ref: schema#/properties/spec/properties/topology/properties/broker/properties/podResources/properties/resources/properties/limits/properties/memory
+              $ref: schema#/properties/spec/properties/topology/properties/broker/properties/podResources/properties/resources/properties/requests/properties/memory
             type: input
           label:
             text: labels.machine_profile
@@ -155,17 +153,15 @@ steps:
         disabled: isMachineNotCustom
         label:
           text: labels.cpu
-        onChange: setRequests|cpu
         schema:
-          $ref: schema#/properties/spec/properties/podResources/properties/resources/properties/limits/properties/cpu
+          $ref: schema#/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
         type: input
       - computed: setLimits|cpu
         disabled: isMachineNotCustom
         label:
           text: labels.cpu
-        onChange: setRequests|cpu
         schema:
-          $ref: schema#/properties/spec/properties/podResources/properties/resources/properties/limits/properties/cpu
+          $ref: schema#/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
         type: input
       if: notEqualToDatabaseMode|Topology
       label:
@@ -275,8 +271,7 @@ steps:
         schema:
           $ref: schema#/properties/spec/properties/configuration
         type: editor
-      - disabled: isDeploymentModeDisable
-        hasDescription: true
+      - hasDescription: true
         if: isToggleOn|deployment
         label:
           text: labels.deployment.name
@@ -332,13 +327,13 @@ steps:
         backup:
           default: false
           type: boolean
-        monitoring:
-          default: false
-          type: boolean
       elements:
-      - elements:
+      - discriminator:
+          monitoring:
+            default: false
+            type: boolean
+        elements:
         - computed: setMonitoring
-          if: isToggleOn|monitoring
           label:
             text: labels.enable_monitoring
           onChange: updateAlertValue
@@ -362,6 +357,7 @@ steps:
             $ref: schema#/properties/form/properties/alert/properties/enabled
           sortable: true
           type: select
+        if: isToggleOn|monitoring
         type: single-step-form
       - elements:
         - if: isToggleOn|tls
