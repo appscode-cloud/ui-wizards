@@ -168,6 +168,23 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/admin/properties/storageClasses/properties/default
       type: select
+    - label:
+        text: labels.deepStorage
+      options:
+      - s3
+      - google
+      - azure
+      - hdfs
+      schema:
+        $ref: schema#/properties/spec/properties/deepStorage/properties/type
+      type: select
+    - fetch: getSecrets
+      label:
+        text: labels.configSecret
+      refresh: true
+      schema:
+        $ref: schema#/properties/spec/properties/deepStorage/properties/configSecret
+      type: select
     - accordion: true
       description:
         text: Configure Credentials, Deployment Mode etc.
@@ -240,23 +257,6 @@ steps:
           value: DoNotTerminate
         schema:
           $ref: schema#/properties/spec/properties/deletionPolicy
-        type: select
-      - label:
-          text: labels.deepStorage
-        options:
-        - s3
-        - google
-        - azure
-        - hdfs
-        schema:
-          $ref: schema#/properties/spec/properties/deepStorage/properties/type
-        type: select
-      - fetch: getSecrets
-        label:
-          text: labels.configSecret
-        refresh: true
-        schema:
-          $ref: schema#/properties/spec/properties/deepStorage/properties/configSecret
         type: select
       - label:
           text: labels.metadataStorage.external
@@ -436,6 +436,7 @@ steps:
             $ref: schema#/properties/spec/properties/admin/properties/tls/properties/default
           type: switch
         - fetch: getAdminOptions|clusterIssuers
+          required: true
           if: showIssuer
           label:
             text: labels.clusterIssuers
