@@ -505,9 +505,11 @@ function isVariantAvailable({ storeGet }) {
 function showAlerts({ watchDependency, model, getValue, discriminator }) {
   watchDependency('discriminator#/monitoring')
   const isMonitorEnabled = getValue(discriminator, '/monitoring')
-  return (
-    isMonitorEnabled && isToggleOn({ getValue, model, discriminator, watchDependency }, 'alert')
+  const isAlertToggleEnabled = isToggleOn(
+    { getValue, model, discriminator, watchDependency },
+    'alert',
   )
+  return isMonitorEnabled && isAlertToggleEnabled
 }
 
 function onBackupSwitch({ discriminator, getValue, commit }) {
