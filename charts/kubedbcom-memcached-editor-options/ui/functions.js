@@ -512,6 +512,23 @@ function showAlerts({ watchDependency, model, getValue, discriminator }) {
   return isMonitorEnabled && isAlertToggleEnabled
 }
 
+function updateAlertValue({ commit, model, discriminator, getValue }) {
+  const isMonitorEnabled = getValue(discriminator, '/monitoring')
+  const alert = isMonitorEnabled ? 'warning' : 'none'
+  // update alert value depend on monitoring profile
+  commit('wizard/model$update', {
+    path: '/form/alert/enabled',
+    value: alert,
+    force: true,
+  })
+  const agent = isMonitorEnabled ? 'prometheus.io/operator' : ''
+  commit('wizard/model$update', {
+    path: '/spec/admin/monitoring/agent',
+    value: agent,
+    force: true,
+  })
+}
+
 function onBackupSwitch({ discriminator, getValue, commit }) {
   const isBackupOn = getValue(discriminator, '/backup')
   commit('wizard/model$update', {
@@ -776,6 +793,7 @@ function showAdditionalSettings({ watchDependency }) {
 }
 
 return {
+  updateAlertValue,
   showAdditionalSettings,
   initBundle,
   returnFalse,
