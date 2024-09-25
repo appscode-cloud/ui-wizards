@@ -577,7 +577,7 @@ let clusterIssuers = []
 let nodetopologiesShared = []
 let nodetopologiesDedicated = []
 let features = []
-async function initBundle({ model, getValue, axios, storeGet, setDiscriminatorValue }) {
+async function initBundle({ commit, model, getValue, axios, storeGet, setDiscriminatorValue }) {
   const owner = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
 
@@ -595,6 +595,45 @@ async function initBundle({ model, getValue, axios, storeGet, setDiscriminatorVa
     nodetopologiesShared = resp.data.shared || []
   } catch (e) {
     console.log(e)
+  }
+
+  if (!features.includes('tls')) {
+    commit('wizard/model$update', {
+      path: '/spec/admin/tls/default',
+      value: false,
+      force: true,
+    })
+  }
+  if (!features.includes('expose')) {
+    commit('wizard/model$update', {
+      path: '/spec/admin/expose/default',
+      value: false,
+      force: true,
+    })
+  }
+  if (!features.includes('monitoring')) {
+    commit('wizard/model$update', {
+      path: '/spec/admin/monitoring/agent',
+      value: '',
+      force: true,
+    })
+    commit('wizard/model$update', {
+      path: '/form/alert/enabled',
+      value: 'none',
+      force: true,
+    })
+  }
+  if (!features.includes('backup')) {
+    commit('wizard/model$update', {
+      path: '/spec/admin/archiver/default',
+      value: false,
+      force: true,
+    })
+    commit('wizard/model$update', {
+      path: '/spec/backup/tool',
+      value: '',
+      force: true,
+    })
   }
 
   setDiscriminatorValue('/bundleApiLoaded', true)
