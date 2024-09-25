@@ -592,7 +592,7 @@ let nodetopologiesShared = []
 let nodetopologiesDedicated = []
 let features = []
 
-async function initBundle({ model, getValue, axios, storeGet, setDiscriminatorValue }) {
+async function initBundle({ commit, model, getValue, axios, storeGet, setDiscriminatorValue }) {
   const owner = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
 

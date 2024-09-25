@@ -733,6 +733,7 @@ async function initBundle({ commit, model, getValue, axios, storeGet, setDiscrim
   } catch (e) {
     console.log(e)
   }
+
   if (!features.includes('tls')) {
     commit('wizard/model$update', {
       path: '/spec/admin/tls/default',
@@ -771,6 +772,7 @@ async function initBundle({ commit, model, getValue, axios, storeGet, setDiscrim
       force: true,
     })
   }
+
   setDiscriminatorValue('/bundleApiLoaded', true)
 }
 
