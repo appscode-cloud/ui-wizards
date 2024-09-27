@@ -1,0 +1,48 @@
+apiVersion: core.kubestash.com/v1alpha1
+kind: BackupConfiguration
+metadata:
+  name: {{ include "kubestashcom-backupconfiguration-editor-options.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kubestashcom-backupconfiguration-editor-options.labels" . | nindent 4 }}
+spec:
+  target:
+    {{- toYaml .Values.spec.target | nindent 4 }}
+  backends:
+    - name: default-backend
+      storageRef:
+        name: {{ .Values.spec.backend.storageRef.name }}
+        namespace: {{ .Values.spec.backend.storageRef.namespace }}
+      retentionPolicy:
+        name: {{ .Values.spec.backend.retentionPolicy.name }}
+        namespace: {{ .Values.spec.backend.retentionPolicy.namespace }}
+
+  sessions:
+  {{- range .Values.spec.sessions }}
+    - name: {{ .sessionName }}
+      sessionHistoryLimit: 2
+      scheduler:
+        schedule: {{ .schedule | quote }}
+        jobTemplate:
+          backoffLimit: 1
+      repositories:
+        - name: {{ .repoName }}
+          backend: default-backend
+          directory: {{ $.Values.spec.target.namespace }}/{{ $.Values.spec.target.name }}
+          encryptionSecret:
+            name: {{ .encryptionSecret.name }}
+            namespace: {{ .encryptionSecret.namespace }}
+      addon:
+        name: {{ .addon.name }}
+        tasks:
+        {{- range .addon.tasks }}
+          - name: {{ .name }}
+            params: {{ .params }}
+        {{- end }}
+        {{- if .addon.jobTemplate.securityContext }}
+        jobTemplate:
+          spec:
+            securityContext:
+              runAsUser: {{ .addon.jobTemplate.securityContext }}
+        {{- end }}
+  {{- end }}
