@@ -344,7 +344,18 @@ async function getNamespaces({ axios, storeGet }) {
         },
       },
     )
-    const namespaces = resp?.data?.status?.namespaces || []
+    const projects = resp?.data?.status?.projects
+    if (projects) {
+      const projectsNamespace = []
+      Object.entries(projects).forEach(([key, values]) => {
+        values.forEach((value) => {
+          projectsNamespace.push(`${value} (${key})`)
+        })
+      })
+      namespaces = resultArray
+    } else {
+      namespaces = resp?.data?.status?.namespaces || []
+    }
     return namespaces
   } catch (e) {
     console.log(e)
