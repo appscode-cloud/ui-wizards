@@ -18,6 +18,7 @@ package v1alpha1
 
 import (
 	core "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // +kubebuilder:validation:Enum=db.t.micro;db.t.small;db.t.medium;db.t.large;db.t.xlarge;db.t.2xlarge;db.m.small;db.m.large;db.m.xlarge;db.m.2xlarge;db.m.4xlarge;db.m.8xlarge;db.m.12xlarge;db.m.16xlarge;db.m.24xlarge;db.r.large;db.r.xlarge;db.r.2xlarge;db.r.4xlarge;db.r.8xlarge;db.r.12xlarge;db.r.16xlarge;db.r.24xlarge
@@ -37,6 +38,17 @@ type PodResources struct {
 
 type StorageClass struct {
 	Name string `json:"name"`
+}
+
+type InitDatabase struct {
+	Archiver Archiver `json:"archiver"`
+}
+
+type Archiver struct {
+	RecoveryTimestamp  metav1.Time     `json:"recoveryTimestamp"`
+	EncryptionSecret   ObjectReference `json:"encryptionSecret"`
+	FullDBRepository   ObjectReference `json:"fullDBRepository"`
+	ManifestRepository ObjectReference `json:"manifestRepository"`
 }
 
 // +kubebuilder:validation:Enum=Standalone;Replicaset

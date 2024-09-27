@@ -1801,6 +1801,58 @@ properties:
         - podResources
         - replicas
         type: object
+      init:
+        properties:
+          archiver:
+            properties:
+              encryptionSecret:
+                description: ObjectReference contains enough information to let you
+                  inspect or modify the referred object.
+                properties:
+                  name:
+                    type: string
+                  namespace:
+                    type: string
+                required:
+                - name
+                - namespace
+                type: object
+              fullDBRepository:
+                description: ObjectReference contains enough information to let you
+                  inspect or modify the referred object.
+                properties:
+                  name:
+                    type: string
+                  namespace:
+                    type: string
+                required:
+                - name
+                - namespace
+                type: object
+              manifestRepository:
+                description: ObjectReference contains enough information to let you
+                  inspect or modify the referred object.
+                properties:
+                  name:
+                    type: string
+                  namespace:
+                    type: string
+                required:
+                - name
+                - namespace
+                type: object
+              recoveryTimestamp:
+                format: date-time
+                type: string
+            required:
+            - encryptionSecret
+            - fullDBRepository
+            - manifestRepository
+            - recoveryTimestamp
+            type: object
+        required:
+        - archiver
+        type: object
       labels:
         additionalProperties:
           type: string
@@ -2222,6 +2274,7 @@ properties:
     - configuration
     - deletionPolicy
     - hidden
+    - init
     - mode
     - monitoring
     - persistence
