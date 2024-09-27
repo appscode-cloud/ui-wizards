@@ -877,6 +877,13 @@ properties:
                 type: object
               values:
                 properties:
+                  ace-user-roles:
+                    properties:
+                      enabled:
+                        type: boolean
+                    required:
+                    - enabled
+                    type: object
                   affinity:
                     properties:
                       nodeAffinity:
@@ -1632,6 +1639,7 @@ properties:
                       type: object
                     type: array
                 required:
+                - ace-user-roles
                 - apiserver
                 - helmRepositories
                 - image
@@ -2825,6 +2833,10 @@ properties:
                     properties:
                       baseURL:
                         type: string
+                      caBundle:
+                        type: string
+                      insecureSkipTLSVerify:
+                        type: boolean
                       token:
                         type: string
                       tokenSecretName:
@@ -3397,6 +3409,8 @@ properties:
                     properties:
                       capi:
                         properties:
+                          clusterName:
+                            type: string
                           namespace:
                             type: string
                           provider:
@@ -3406,7 +3420,9 @@ properties:
                             - capz
                             type: string
                         required:
+                        - clusterName
                         - namespace
+                        - provider
                         type: object
                       clusterManagers:
                         items:
@@ -3486,6 +3502,8 @@ properties:
                           ghcr:
                             type: string
                           kubernetes:
+                            type: string
+                          microsoft:
                             type: string
                           quay:
                             type: string

@@ -7,8 +7,8 @@
 ```bash
 $ helm repo add appscode-charts-oci https://bundles.byte.builders/ui/
 $ helm repo update
-$ helm search repo appscode-charts-oci/statusgatekeepersh-expansiontemplatepodstatus-editor --version=v0.5.0
-$ helm upgrade -i statusgatekeepersh-expansiontemplatepodstatus-editor appscode-charts-oci/statusgatekeepersh-expansiontemplatepodstatus-editor -n default --create-namespace --version=v0.5.0
+$ helm search repo appscode-charts-oci/statusgatekeepersh-expansiontemplatepodstatus-editor --version=v0.6.0
+$ helm upgrade -i statusgatekeepersh-expansiontemplatepodstatus-editor appscode-charts-oci/statusgatekeepersh-expansiontemplatepodstatus-editor -n default --create-namespace --version=v0.6.0
 ```
 
 ## Introduction
@@ -24,7 +24,7 @@ This chart deploys a ExpansionTemplatePodStatus Editor on a [Kubernetes](http://
 To install/upgrade the chart with the release name `statusgatekeepersh-expansiontemplatepodstatus-editor`:
 
 ```bash
-$ helm upgrade -i statusgatekeepersh-expansiontemplatepodstatus-editor appscode-charts-oci/statusgatekeepersh-expansiontemplatepodstatus-editor -n default --create-namespace --version=v0.5.0
+$ helm upgrade -i statusgatekeepersh-expansiontemplatepodstatus-editor appscode-charts-oci/statusgatekeepersh-expansiontemplatepodstatus-editor -n default --create-namespace --version=v0.6.0
 ```
 
 The command deploys a ExpansionTemplatePodStatus Editor on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
@@ -56,12 +56,12 @@ The following table lists the configurable parameters of the `statusgatekeepersh
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm upgrade -i`. For example:
 
 ```bash
-$ helm upgrade -i statusgatekeepersh-expansiontemplatepodstatus-editor appscode-charts-oci/statusgatekeepersh-expansiontemplatepodstatus-editor -n default --create-namespace --version=v0.5.0 --set apiVersion=status.gatekeeper.sh/v1beta1
+$ helm upgrade -i statusgatekeepersh-expansiontemplatepodstatus-editor appscode-charts-oci/statusgatekeepersh-expansiontemplatepodstatus-editor -n default --create-namespace --version=v0.6.0 --set apiVersion=status.gatekeeper.sh/v1beta1
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
 installing the chart. For example:
 
 ```bash
-$ helm upgrade -i statusgatekeepersh-expansiontemplatepodstatus-editor appscode-charts-oci/statusgatekeepersh-expansiontemplatepodstatus-editor -n default --create-namespace --version=v0.5.0 --values values.yaml
+$ helm upgrade -i statusgatekeepersh-expansiontemplatepodstatus-editor appscode-charts-oci/statusgatekeepersh-expansiontemplatepodstatus-editor -n default --create-namespace --version=v0.6.0 --values values.yaml
 ```

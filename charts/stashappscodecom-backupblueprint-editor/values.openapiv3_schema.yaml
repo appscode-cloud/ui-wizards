@@ -174,6 +174,7 @@ properties:
                     items:
                       type: string
                     type: array
+                    x-kubernetes-list-type: atomic
                   path:
                     description: 'path is Optional: Used as the mounted root, rather
                       than the full Ceph tree, default is /'
@@ -194,8 +195,14 @@ properties:
                       https://examples.k8s.io/volumes/cephfs/README.md#how-to-use-it'
                     properties:
                       name:
-                        description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                          TODO: Add other useful fields. apiVersion, kind, uid?'
+                        default: ""
+                        description: 'Name of the referent. This field is effectively
+                          required, but due to backwards compatibility is allowed
+                          to be empty. Instances of this type with an empty value
+                          here are almost certainly wrong. TODO: Add other useful
+                          fields. apiVersion, kind, uid? More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                          TODO: Drop `kubebuilder:default` when controller-gen doesn''t
+                          need it https://github.com/kubernetes-sigs/kubebuilder/issues/3896.'
                         type: string
                     type: object
                     x-kubernetes-map-type: atomic
@@ -226,8 +233,14 @@ properties:
                       containing parameters used to connect to OpenStack.'
                     properties:
                       name:
-                        description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                          TODO: Add other useful fields. apiVersion, kind, uid?'
+                        default: ""
+                        description: 'Name of the referent. This field is effectively
+                          required, but due to backwards compatibility is allowed
+                          to be empty. Instances of this type with an empty value
+                          here are almost certainly wrong. TODO: Add other useful
+                          fields. apiVersion, kind, uid? More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                          TODO: Drop `kubebuilder:default` when controller-gen doesn''t
+                          need it https://github.com/kubernetes-sigs/kubebuilder/issues/3896.'
                         type: string
                     type: object
                     x-kubernetes-map-type: atomic
@@ -290,9 +303,16 @@ properties:
                       - path
                       type: object
                     type: array
+                    x-kubernetes-list-type: atomic
                   name:
-                    description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                      TODO: Add other useful fields. apiVersion, kind, uid?'
+                    default: ""
+                    description: 'Name of the referent. This field is effectively
+                      required, but due to backwards compatibility is allowed to be
+                      empty. Instances of this type with an empty value here are almost
+                      certainly wrong. TODO: Add other useful fields. apiVersion,
+                      kind, uid? More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                      TODO: Drop `kubebuilder:default` when controller-gen doesn''t
+                      need it https://github.com/kubernetes-sigs/kubebuilder/issues/3896.'
                     type: string
                   optional:
                     description: optional specify whether the ConfigMap or its keys
@@ -323,8 +343,14 @@ properties:
                       all secret references are passed.
                     properties:
                       name:
-                        description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                          TODO: Add other useful fields. apiVersion, kind, uid?'
+                        default: ""
+                        description: 'Name of the referent. This field is effectively
+                          required, but due to backwards compatibility is allowed
+                          to be empty. Instances of this type with an empty value
+                          here are almost certainly wrong. TODO: Add other useful
+                          fields. apiVersion, kind, uid? More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                          TODO: Drop `kubebuilder:default` when controller-gen doesn''t
+                          need it https://github.com/kubernetes-sigs/kubebuilder/issues/3896.'
                         type: string
                     type: object
                     x-kubernetes-map-type: atomic
@@ -366,7 +392,7 @@ properties:
                       properties:
                         fieldRef:
                           description: 'Required: Selects a field of the pod: only
-                            annotations, labels, name and namespace are supported.'
+                            annotations, labels, name, namespace and uid are supported.'
                           properties:
                             apiVersion:
                               description: Version of the schema the FieldPath is
@@ -425,6 +451,7 @@ properties:
                       - path
                       type: object
                     type: array
+                    x-kubernetes-list-type: atomic
                 type: object
               emptyDir:
                 description: 'emptyDir represents a temporary directory that shares
@@ -521,6 +548,7 @@ properties:
                             items:
                               type: string
                             type: array
+                            x-kubernetes-list-type: atomic
                           dataSource:
                             description: 'dataSource field can be used to specify
                               either: * An existing VolumeSnapshot object (snapshot.storage.k8s.io/VolumeSnapshot)
@@ -671,11 +699,13 @@ properties:
                                       items:
                                         type: string
                                       type: array
+                                      x-kubernetes-list-type: atomic
                                   required:
                                   - key
                                   - operator
                                   type: object
                                 type: array
+                                x-kubernetes-list-type: atomic
                               matchLabels:
                                 additionalProperties:
                                   type: string
@@ -707,7 +737,7 @@ properties:
                               referred to by volumeAttributesClass does not exist,
                               this PersistentVolumeClaim will be set to a Pending
                               state, as reflected by the modifyVolumeStatus field,
-                              until such as a resource exists. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#volumeattributesclass
+                              until such as a resource exists. More info: https://kubernetes.io/docs/concepts/storage/volume-attributes-classes/
                               (Alpha) Using this field requires the VolumeAttributesClass
                               feature gate to be enabled.'
                             type: string
@@ -750,6 +780,7 @@ properties:
                     items:
                       type: string
                     type: array
+                    x-kubernetes-list-type: atomic
                   wwids:
                     description: 'wwids Optional: FC volume world wide identifiers
                       (wwids) Either wwids or combination of targetWWNs and lun must
@@ -757,6 +788,7 @@ properties:
                     items:
                       type: string
                     type: array
+                    x-kubernetes-list-type: atomic
                 type: object
               flexVolume:
                 description: flexVolume represents a generic volume resource that
@@ -790,8 +822,14 @@ properties:
                       all secrets are passed to the plugin scripts.'
                     properties:
                       name:
-                        description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                          TODO: Add other useful fields. apiVersion, kind, uid?'
+                        default: ""
+                        description: 'Name of the referent. This field is effectively
+                          required, but due to backwards compatibility is allowed
+                          to be empty. Instances of this type with an empty value
+                          here are almost certainly wrong. TODO: Add other useful
+                          fields. apiVersion, kind, uid? More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                          TODO: Drop `kubebuilder:default` when controller-gen doesn''t
+                          need it https://github.com/kubernetes-sigs/kubebuilder/issues/3896.'
                         type: string
                     type: object
                     x-kubernetes-map-type: atomic
@@ -954,6 +992,7 @@ properties:
                     items:
                       type: string
                     type: array
+                    x-kubernetes-list-type: atomic
                   readOnly:
                     description: readOnly here will force the ReadOnly setting in
                       VolumeMounts. Defaults to false.
@@ -963,8 +1002,14 @@ properties:
                       initiator authentication
                     properties:
                       name:
-                        description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                          TODO: Add other useful fields. apiVersion, kind, uid?'
+                        default: ""
+                        description: 'Name of the referent. This field is effectively
+                          required, but due to backwards compatibility is allowed
+                          to be empty. Instances of this type with an empty value
+                          here are almost certainly wrong. TODO: Add other useful
+                          fields. apiVersion, kind, uid? More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                          TODO: Drop `kubebuilder:default` when controller-gen doesn''t
+                          need it https://github.com/kubernetes-sigs/kubebuilder/issues/3896.'
                         type: string
                     type: object
                     x-kubernetes-map-type: atomic
@@ -1119,11 +1164,13 @@ properties:
                                         items:
                                           type: string
                                         type: array
+                                        x-kubernetes-list-type: atomic
                                     required:
                                     - key
                                     - operator
                                     type: object
                                   type: array
+                                  x-kubernetes-list-type: atomic
                                 matchLabels:
                                   additionalProperties:
                                     type: string
@@ -1207,9 +1254,16 @@ properties:
                                 - path
                                 type: object
                               type: array
+                              x-kubernetes-list-type: atomic
                             name:
-                              description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                                TODO: Add other useful fields. apiVersion, kind, uid?'
+                              default: ""
+                              description: 'Name of the referent. This field is effectively
+                                required, but due to backwards compatibility is allowed
+                                to be empty. Instances of this type with an empty
+                                value here are almost certainly wrong. TODO: Add other
+                                useful fields. apiVersion, kind, uid? More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                TODO: Drop `kubebuilder:default` when controller-gen
+                                doesn''t need it https://github.com/kubernetes-sigs/kubebuilder/issues/3896.'
                               type: string
                             optional:
                               description: optional specify whether the ConfigMap
@@ -1229,8 +1283,8 @@ properties:
                                 properties:
                                   fieldRef:
                                     description: 'Required: Selects a field of the
-                                      pod: only annotations, labels, name and namespace
-                                      are supported.'
+                                      pod: only annotations, labels, name, namespace
+                                      and uid are supported.'
                                     properties:
                                       apiVersion:
                                         description: Version of the schema the FieldPath
@@ -1293,6 +1347,7 @@ properties:
                                 - path
                                 type: object
                               type: array
+                              x-kubernetes-list-type: atomic
                           type: object
                         secret:
                           description: secret information about the secret data to
@@ -1340,9 +1395,16 @@ properties:
                                 - path
                                 type: object
                               type: array
+                              x-kubernetes-list-type: atomic
                             name:
-                              description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                                TODO: Add other useful fields. apiVersion, kind, uid?'
+                              default: ""
+                              description: 'Name of the referent. This field is effectively
+                                required, but due to backwards compatibility is allowed
+                                to be empty. Instances of this type with an empty
+                                value here are almost certainly wrong. TODO: Add other
+                                useful fields. apiVersion, kind, uid? More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                TODO: Drop `kubebuilder:default` when controller-gen
+                                doesn''t need it https://github.com/kubernetes-sigs/kubebuilder/issues/3896.'
                               type: string
                             optional:
                               description: optional field specify whether the Secret
@@ -1381,6 +1443,7 @@ properties:
                           type: object
                       type: object
                     type: array
+                    x-kubernetes-list-type: atomic
                 type: object
               quobyte:
                 description: quobyte represents a Quobyte mount on the host that shares
@@ -1442,6 +1505,7 @@ properties:
                     items:
                       type: string
                     type: array
+                    x-kubernetes-list-type: atomic
                   pool:
                     description: 'pool is the rados pool name. Default is rbd. More
                       info: https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it'
@@ -1456,8 +1520,14 @@ properties:
                       info: https://examples.k8s.io/volumes/rbd/README.md#how-to-use-it'
                     properties:
                       name:
-                        description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                          TODO: Add other useful fields. apiVersion, kind, uid?'
+                        default: ""
+                        description: 'Name of the referent. This field is effectively
+                          required, but due to backwards compatibility is allowed
+                          to be empty. Instances of this type with an empty value
+                          here are almost certainly wrong. TODO: Add other useful
+                          fields. apiVersion, kind, uid? More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                          TODO: Drop `kubebuilder:default` when controller-gen doesn''t
+                          need it https://github.com/kubernetes-sigs/kubebuilder/issues/3896.'
                         type: string
                     type: object
                     x-kubernetes-map-type: atomic
@@ -1495,8 +1565,14 @@ properties:
                       operation will fail.
                     properties:
                       name:
-                        description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                          TODO: Add other useful fields. apiVersion, kind, uid?'
+                        default: ""
+                        description: 'Name of the referent. This field is effectively
+                          required, but due to backwards compatibility is allowed
+                          to be empty. Instances of this type with an empty value
+                          here are almost certainly wrong. TODO: Add other useful
+                          fields. apiVersion, kind, uid? More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                          TODO: Drop `kubebuilder:default` when controller-gen doesn''t
+                          need it https://github.com/kubernetes-sigs/kubebuilder/issues/3896.'
                         type: string
                     type: object
                     x-kubernetes-map-type: atomic
@@ -1576,6 +1652,7 @@ properties:
                       - path
                       type: object
                     type: array
+                    x-kubernetes-list-type: atomic
                   optional:
                     description: optional field specify whether the Secret or its
                       keys must be defined
@@ -1604,8 +1681,14 @@ properties:
                       will be attempted.
                     properties:
                       name:
-                        description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                          TODO: Add other useful fields. apiVersion, kind, uid?'
+                        default: ""
+                        description: 'Name of the referent. This field is effectively
+                          required, but due to backwards compatibility is allowed
+                          to be empty. Instances of this type with an empty value
+                          here are almost certainly wrong. TODO: Add other useful
+                          fields. apiVersion, kind, uid? More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                          TODO: Drop `kubebuilder:default` when controller-gen doesn''t
+                          need it https://github.com/kubernetes-sigs/kubebuilder/issues/3896.'
                         type: string
                     type: object
                     x-kubernetes-map-type: atomic
@@ -1725,6 +1808,7 @@ properties:
                     items:
                       type: string
                     type: array
+                    x-kubernetes-list-type: atomic
                 type: object
               executionPolicy:
                 default: Always
@@ -1764,6 +1848,7 @@ properties:
                       - value
                       type: object
                     type: array
+                    x-kubernetes-list-type: atomic
                   path:
                     description: Path to access on the HTTP server.
                     type: string
@@ -1884,6 +1969,7 @@ properties:
                     items:
                       type: string
                     type: array
+                    x-kubernetes-list-type: atomic
                 type: object
               httpGet:
                 description: HTTPGet specifies the http Get request to perform.
@@ -1912,6 +1998,7 @@ properties:
                       - value
                       type: object
                     type: array
+                    x-kubernetes-list-type: atomic
                   path:
                     description: Path to access on the HTTP server.
                     type: string
@@ -2128,6 +2215,7 @@ properties:
                 items:
                   type: string
                 type: array
+                x-kubernetes-list-type: atomic
               dataSource:
                 description: 'dataSource field can be used to specify either: * An
                   existing VolumeSnapshot object (snapshot.storage.k8s.io/VolumeSnapshot)
@@ -2267,11 +2355,13 @@ properties:
                           items:
                             type: string
                           type: array
+                          x-kubernetes-list-type: atomic
                       required:
                       - key
                       - operator
                       type: object
                     type: array
+                    x-kubernetes-list-type: atomic
                   matchLabels:
                     additionalProperties:
                       type: string
@@ -2300,7 +2390,7 @@ properties:
                   controller if it exists. If the resource referred to by volumeAttributesClass
                   does not exist, this PersistentVolumeClaim will be set to a Pending
                   state, as reflected by the modifyVolumeStatus field, until such
-                  as a resource exists. More info: https://kubernetes.io/docs/concepts/storage/persistent-volumes#volumeattributesclass
+                  as a resource exists. More info: https://kubernetes.io/docs/concepts/storage/volume-attributes-classes/
                   (Alpha) Using this field requires the VolumeAttributesClass feature
                   gate to be enabled.'
                 type: string
@@ -2324,6 +2414,7 @@ properties:
                 items:
                   type: string
                 type: array
+                x-kubernetes-list-type: atomic
               allocatedResourceStatuses:
                 additionalProperties:
                   description: When a controller receives persistentvolume claim update
@@ -2405,7 +2496,7 @@ properties:
               conditions:
                 description: conditions is the current Condition of persistent volume
                   claim. If underlying persistent volume is being resized then the
-                  Condition will be set to 'ResizeStarted'.
+                  Condition will be set to 'Resizing'.
                 items:
                   description: PersistentVolumeClaimCondition contains details about
                     state of pvc
@@ -2426,8 +2517,8 @@ properties:
                     reason:
                       description: reason is a unique, this should be a short, machine
                         understandable string that gives the reason for condition's
-                        last transition. If it reports "ResizeStarted" that means
-                        the underlying persistent volume is being resized.
+                        last transition. If it reports "Resizing" that means the underlying
+                        persistent volume is being resized.
                       type: string
                     status:
                       type: string
@@ -2440,6 +2531,9 @@ properties:
                   - type
                   type: object
                 type: array
+                x-kubernetes-list-map-keys:
+                - type
+                x-kubernetes-list-type: map
               currentVolumeAttributesClassName:
                 description: currentVolumeAttributesClassName is the current name
                   of the VolumeAttributesClass the PVC is using. When unset, there
@@ -2574,8 +2668,14 @@ properties:
                               description: The key to select.
                               type: string
                             name:
-                              description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                                TODO: Add other useful fields. apiVersion, kind, uid?'
+                              default: ""
+                              description: 'Name of the referent. This field is effectively
+                                required, but due to backwards compatibility is allowed
+                                to be empty. Instances of this type with an empty
+                                value here are almost certainly wrong. TODO: Add other
+                                useful fields. apiVersion, kind, uid? More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                TODO: Drop `kubebuilder:default` when controller-gen
+                                doesn''t need it https://github.com/kubernetes-sigs/kubebuilder/issues/3896.'
                               type: string
                             optional:
                               description: Specify whether the ConfigMap or its key
@@ -2636,8 +2736,14 @@ properties:
                                 be a valid secret key.
                               type: string
                             name:
-                              description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                                TODO: Add other useful fields. apiVersion, kind, uid?'
+                              default: ""
+                              description: 'Name of the referent. This field is effectively
+                                required, but due to backwards compatibility is allowed
+                                to be empty. Instances of this type with an empty
+                                value here are almost certainly wrong. TODO: Add other
+                                useful fields. apiVersion, kind, uid? More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                                TODO: Drop `kubebuilder:default` when controller-gen
+                                doesn''t need it https://github.com/kubernetes-sigs/kubebuilder/issues/3896.'
                               type: string
                             optional:
                               description: Specify whether the Secret or its key must
@@ -2666,8 +2772,14 @@ properties:
                       description: The ConfigMap to select from
                       properties:
                         name:
-                          description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                            TODO: Add other useful fields. apiVersion, kind, uid?'
+                          default: ""
+                          description: 'Name of the referent. This field is effectively
+                            required, but due to backwards compatibility is allowed
+                            to be empty. Instances of this type with an empty value
+                            here are almost certainly wrong. TODO: Add other useful
+                            fields. apiVersion, kind, uid? More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                            TODO: Drop `kubebuilder:default` when controller-gen doesn''t
+                            need it https://github.com/kubernetes-sigs/kubebuilder/issues/3896.'
                           type: string
                         optional:
                           description: Specify whether the ConfigMap must be defined
@@ -2682,8 +2794,14 @@ properties:
                       description: The Secret to select from
                       properties:
                         name:
-                          description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                            TODO: Add other useful fields. apiVersion, kind, uid?'
+                          default: ""
+                          description: 'Name of the referent. This field is effectively
+                            required, but due to backwards compatibility is allowed
+                            to be empty. Instances of this type with an empty value
+                            here are almost certainly wrong. TODO: Add other useful
+                            fields. apiVersion, kind, uid? More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                            TODO: Drop `kubebuilder:default` when controller-gen doesn''t
+                            need it https://github.com/kubernetes-sigs/kubebuilder/issues/3896.'
                           type: string
                         optional:
                           description: Specify whether the Secret must be defined
@@ -2730,6 +2848,7 @@ properties:
                             items:
                               type: string
                             type: array
+                            x-kubernetes-list-type: atomic
                         type: object
                       httpGet:
                         description: HTTPGet specifies the http request to perform.
@@ -2759,6 +2878,7 @@ properties:
                               - value
                               type: object
                             type: array
+                            x-kubernetes-list-type: atomic
                           path:
                             description: Path to access on the HTTP server.
                             type: string
@@ -2838,6 +2958,7 @@ properties:
                             items:
                               type: string
                             type: array
+                            x-kubernetes-list-type: atomic
                         type: object
                       httpGet:
                         description: HTTPGet specifies the http request to perform.
@@ -2867,6 +2988,7 @@ properties:
                               - value
                               type: object
                             type: array
+                            x-kubernetes-list-type: atomic
                           path:
                             description: Path to access on the HTTP server.
                             type: string
@@ -2937,6 +3059,7 @@ properties:
                         items:
                           type: string
                         type: array
+                        x-kubernetes-list-type: atomic
                     type: object
                   failureThreshold:
                     description: Minimum consecutive failures for the probe to be
@@ -2988,6 +3111,7 @@ properties:
                           - value
                           type: object
                         type: array
+                        x-kubernetes-list-type: atomic
                       path:
                         description: Path to access on the HTTP server.
                         type: string
@@ -3090,6 +3214,7 @@ properties:
                         items:
                           type: string
                         type: array
+                        x-kubernetes-list-type: atomic
                     type: object
                   failureThreshold:
                     description: Minimum consecutive failures for the probe to be
@@ -3141,6 +3266,7 @@ properties:
                           - value
                           type: object
                         type: array
+                        x-kubernetes-list-type: atomic
                       path:
                         description: Path to access on the HTTP server.
                         type: string
@@ -3277,6 +3403,26 @@ properties:
                       the container is: 1) run as Privileged 2) has CAP_SYS_ADMIN
                       Note that this field cannot be set when spec.os.name is windows.'
                     type: boolean
+                  appArmorProfile:
+                    description: appArmorProfile is the AppArmor options to use by
+                      this container. If set, this profile overrides the pod's appArmorProfile.
+                      Note that this field cannot be set when spec.os.name is windows.
+                    properties:
+                      localhostProfile:
+                        description: localhostProfile indicates a profile loaded on
+                          the node that should be used. The profile must be preconfigured
+                          on the node to work. Must match the loaded name of the profile.
+                          Must be set if and only if type is "Localhost".
+                        type: string
+                      type:
+                        description: 'type indicates which kind of AppArmor profile
+                          will be applied. Valid options are: Localhost - a profile
+                          pre-loaded on the node. RuntimeDefault - the container runtime''s
+                          default profile. Unconfined - no AppArmor enforcement.'
+                        type: string
+                    required:
+                    - type
+                    type: object
                   capabilities:
                     description: The capabilities to add/drop when running containers.
                       Defaults to the default set of capabilities granted by the container
@@ -3289,12 +3435,14 @@ properties:
                           description: Capability represent POSIX capabilities type
                           type: string
                         type: array
+                        x-kubernetes-list-type: atomic
                       drop:
                         description: Removed capabilities
                         items:
                           description: Capability represent POSIX capabilities type
                           type: string
                         type: array
+                        x-kubernetes-list-type: atomic
                     type: object
                   privileged:
                     description: Run container in privileged mode. Processes in privileged
@@ -3486,11 +3634,13 @@ properties:
                                         items:
                                           type: string
                                         type: array
+                                        x-kubernetes-list-type: atomic
                                     required:
                                     - key
                                     - operator
                                     type: object
                                   type: array
+                                  x-kubernetes-list-type: atomic
                                 matchFields:
                                   description: A list of node selector requirements
                                     by node's fields.
@@ -3522,11 +3672,13 @@ properties:
                                         items:
                                           type: string
                                         type: array
+                                        x-kubernetes-list-type: atomic
                                     required:
                                     - key
                                     - operator
                                     type: object
                                   type: array
+                                  x-kubernetes-list-type: atomic
                               type: object
                               x-kubernetes-map-type: atomic
                             weight:
@@ -3539,6 +3691,7 @@ properties:
                           - weight
                           type: object
                         type: array
+                        x-kubernetes-list-type: atomic
                       requiredDuringSchedulingIgnoredDuringExecution:
                         description: If the affinity requirements specified by this
                           field are not met at scheduling time, the pod will not be
@@ -3587,11 +3740,13 @@ properties:
                                         items:
                                           type: string
                                         type: array
+                                        x-kubernetes-list-type: atomic
                                     required:
                                     - key
                                     - operator
                                     type: object
                                   type: array
+                                  x-kubernetes-list-type: atomic
                                 matchFields:
                                   description: A list of node selector requirements
                                     by node's fields.
@@ -3623,14 +3778,17 @@ properties:
                                         items:
                                           type: string
                                         type: array
+                                        x-kubernetes-list-type: atomic
                                     required:
                                     - key
                                     - operator
                                     type: object
                                   type: array
+                                  x-kubernetes-list-type: atomic
                               type: object
                               x-kubernetes-map-type: atomic
                             type: array
+                            x-kubernetes-list-type: atomic
                         required:
                         - nodeSelectorTerms
                         type: object
@@ -3696,11 +3854,13 @@ properties:
                                             items:
                                               type: string
                                             type: array
+                                            x-kubernetes-list-type: atomic
                                         required:
                                         - key
                                         - operator
                                         type: object
                                       type: array
+                                      x-kubernetes-list-type: atomic
                                     matchLabels:
                                       additionalProperties:
                                         type: string
@@ -3718,14 +3878,14 @@ properties:
                                     keys to select which pods will be taken into consideration.
                                     The keys are used to lookup values from the incoming
                                     pod labels, those key-value labels are merged
-                                    with `LabelSelector` as `key in (value)` to select
+                                    with `labelSelector` as `key in (value)` to select
                                     the group of existing pods which pods will be
                                     taken into consideration for the incoming pod's
                                     pod (anti) affinity. Keys that don't exist in
                                     the incoming pod labels will be ignored. The default
                                     value is empty. The same key is forbidden to exist
-                                    in both MatchLabelKeys and LabelSelector. Also,
-                                    MatchLabelKeys cannot be set when LabelSelector
+                                    in both matchLabelKeys and labelSelector. Also,
+                                    matchLabelKeys cannot be set when labelSelector
                                     isn't set. This is an alpha field and requires
                                     enabling MatchLabelKeysInPodAffinity feature gate.
                                   items:
@@ -3737,14 +3897,14 @@ properties:
                                     keys to select which pods will be taken into consideration.
                                     The keys are used to lookup values from the incoming
                                     pod labels, those key-value labels are merged
-                                    with `LabelSelector` as `key notin (value)` to
+                                    with `labelSelector` as `key notin (value)` to
                                     select the group of existing pods which pods will
                                     be taken into consideration for the incoming pod's
                                     pod (anti) affinity. Keys that don't exist in
                                     the incoming pod labels will be ignored. The default
                                     value is empty. The same key is forbidden to exist
-                                    in both MismatchLabelKeys and LabelSelector. Also,
-                                    MismatchLabelKeys cannot be set when LabelSelector
+                                    in both mismatchLabelKeys and labelSelector. Also,
+                                    mismatchLabelKeys cannot be set when labelSelector
                                     isn't set. This is an alpha field and requires
                                     enabling MatchLabelKeysInPodAffinity feature gate.
                                   items:
@@ -3791,11 +3951,13 @@ properties:
                                             items:
                                               type: string
                                             type: array
+                                            x-kubernetes-list-type: atomic
                                         required:
                                         - key
                                         - operator
                                         type: object
                                       type: array
+                                      x-kubernetes-list-type: atomic
                                     matchLabels:
                                       additionalProperties:
                                         type: string
@@ -3818,6 +3980,7 @@ properties:
                                   items:
                                     type: string
                                   type: array
+                                  x-kubernetes-list-type: atomic
                                 topologyKey:
                                   description: This pod should be co-located (affinity)
                                     or not co-located (anti-affinity) with the pods
@@ -3840,6 +4003,7 @@ properties:
                           - weight
                           type: object
                         type: array
+                        x-kubernetes-list-type: atomic
                       requiredDuringSchedulingIgnoredDuringExecution:
                         description: If the affinity requirements specified by this
                           field are not met at scheduling time, the pod will not be
@@ -3891,11 +4055,13 @@ properties:
                                         items:
                                           type: string
                                         type: array
+                                        x-kubernetes-list-type: atomic
                                     required:
                                     - key
                                     - operator
                                     type: object
                                   type: array
+                                  x-kubernetes-list-type: atomic
                                 matchLabels:
                                   additionalProperties:
                                     type: string
@@ -3913,13 +4079,13 @@ properties:
                                 to select which pods will be taken into consideration.
                                 The keys are used to lookup values from the incoming
                                 pod labels, those key-value labels are merged with
-                                `LabelSelector` as `key in (value)` to select the
+                                `labelSelector` as `key in (value)` to select the
                                 group of existing pods which pods will be taken into
                                 consideration for the incoming pod's pod (anti) affinity.
                                 Keys that don't exist in the incoming pod labels will
                                 be ignored. The default value is empty. The same key
-                                is forbidden to exist in both MatchLabelKeys and LabelSelector.
-                                Also, MatchLabelKeys cannot be set when LabelSelector
+                                is forbidden to exist in both matchLabelKeys and labelSelector.
+                                Also, matchLabelKeys cannot be set when labelSelector
                                 isn't set. This is an alpha field and requires enabling
                                 MatchLabelKeysInPodAffinity feature gate.
                               items:
@@ -3931,14 +4097,14 @@ properties:
                                 keys to select which pods will be taken into consideration.
                                 The keys are used to lookup values from the incoming
                                 pod labels, those key-value labels are merged with
-                                `LabelSelector` as `key notin (value)` to select the
+                                `labelSelector` as `key notin (value)` to select the
                                 group of existing pods which pods will be taken into
                                 consideration for the incoming pod's pod (anti) affinity.
                                 Keys that don't exist in the incoming pod labels will
                                 be ignored. The default value is empty. The same key
-                                is forbidden to exist in both MismatchLabelKeys and
-                                LabelSelector. Also, MismatchLabelKeys cannot be set
-                                when LabelSelector isn't set. This is an alpha field
+                                is forbidden to exist in both mismatchLabelKeys and
+                                labelSelector. Also, mismatchLabelKeys cannot be set
+                                when labelSelector isn't set. This is an alpha field
                                 and requires enabling MatchLabelKeysInPodAffinity
                                 feature gate.
                               items:
@@ -3980,11 +4146,13 @@ properties:
                                         items:
                                           type: string
                                         type: array
+                                        x-kubernetes-list-type: atomic
                                     required:
                                     - key
                                     - operator
                                     type: object
                                   type: array
+                                  x-kubernetes-list-type: atomic
                                 matchLabels:
                                   additionalProperties:
                                     type: string
@@ -4007,6 +4175,7 @@ properties:
                               items:
                                 type: string
                               type: array
+                              x-kubernetes-list-type: atomic
                             topologyKey:
                               description: This pod should be co-located (affinity)
                                 or not co-located (anti-affinity) with the pods matching
@@ -4020,6 +4189,7 @@ properties:
                           - topologyKey
                           type: object
                         type: array
+                        x-kubernetes-list-type: atomic
                     type: object
                   podAntiAffinity:
                     description: Describes pod anti-affinity scheduling rules (e.g.
@@ -4082,11 +4252,13 @@ properties:
                                             items:
                                               type: string
                                             type: array
+                                            x-kubernetes-list-type: atomic
                                         required:
                                         - key
                                         - operator
                                         type: object
                                       type: array
+                                      x-kubernetes-list-type: atomic
                                     matchLabels:
                                       additionalProperties:
                                         type: string
@@ -4104,14 +4276,14 @@ properties:
                                     keys to select which pods will be taken into consideration.
                                     The keys are used to lookup values from the incoming
                                     pod labels, those key-value labels are merged
-                                    with `LabelSelector` as `key in (value)` to select
+                                    with `labelSelector` as `key in (value)` to select
                                     the group of existing pods which pods will be
                                     taken into consideration for the incoming pod's
                                     pod (anti) affinity. Keys that don't exist in
                                     the incoming pod labels will be ignored. The default
                                     value is empty. The same key is forbidden to exist
-                                    in both MatchLabelKeys and LabelSelector. Also,
-                                    MatchLabelKeys cannot be set when LabelSelector
+                                    in both matchLabelKeys and labelSelector. Also,
+                                    matchLabelKeys cannot be set when labelSelector
                                     isn't set. This is an alpha field and requires
                                     enabling MatchLabelKeysInPodAffinity feature gate.
                                   items:
@@ -4123,14 +4295,14 @@ properties:
                                     keys to select which pods will be taken into consideration.
                                     The keys are used to lookup values from the incoming
                                     pod labels, those key-value labels are merged
-                                    with `LabelSelector` as `key notin (value)` to
+                                    with `labelSelector` as `key notin (value)` to
                                     select the group of existing pods which pods will
                                     be taken into consideration for the incoming pod's
                                     pod (anti) affinity. Keys that don't exist in
                                     the incoming pod labels will be ignored. The default
                                     value is empty. The same key is forbidden to exist
-                                    in both MismatchLabelKeys and LabelSelector. Also,
-                                    MismatchLabelKeys cannot be set when LabelSelector
+                                    in both mismatchLabelKeys and labelSelector. Also,
+                                    mismatchLabelKeys cannot be set when labelSelector
                                     isn't set. This is an alpha field and requires
                                     enabling MatchLabelKeysInPodAffinity feature gate.
                                   items:
@@ -4177,11 +4349,13 @@ properties:
                                             items:
                                               type: string
                                             type: array
+                                            x-kubernetes-list-type: atomic
                                         required:
                                         - key
                                         - operator
                                         type: object
                                       type: array
+                                      x-kubernetes-list-type: atomic
                                     matchLabels:
                                       additionalProperties:
                                         type: string
@@ -4204,6 +4378,7 @@ properties:
                                   items:
                                     type: string
                                   type: array
+                                  x-kubernetes-list-type: atomic
                                 topologyKey:
                                   description: This pod should be co-located (affinity)
                                     or not co-located (anti-affinity) with the pods
@@ -4226,6 +4401,7 @@ properties:
                           - weight
                           type: object
                         type: array
+                        x-kubernetes-list-type: atomic
                       requiredDuringSchedulingIgnoredDuringExecution:
                         description: If the anti-affinity requirements specified by
                           this field are not met at scheduling time, the pod will
@@ -4277,11 +4453,13 @@ properties:
                                         items:
                                           type: string
                                         type: array
+                                        x-kubernetes-list-type: atomic
                                     required:
                                     - key
                                     - operator
                                     type: object
                                   type: array
+                                  x-kubernetes-list-type: atomic
                                 matchLabels:
                                   additionalProperties:
                                     type: string
@@ -4299,13 +4477,13 @@ properties:
                                 to select which pods will be taken into consideration.
                                 The keys are used to lookup values from the incoming
                                 pod labels, those key-value labels are merged with
-                                `LabelSelector` as `key in (value)` to select the
+                                `labelSelector` as `key in (value)` to select the
                                 group of existing pods which pods will be taken into
                                 consideration for the incoming pod's pod (anti) affinity.
                                 Keys that don't exist in the incoming pod labels will
                                 be ignored. The default value is empty. The same key
-                                is forbidden to exist in both MatchLabelKeys and LabelSelector.
-                                Also, MatchLabelKeys cannot be set when LabelSelector
+                                is forbidden to exist in both matchLabelKeys and labelSelector.
+                                Also, matchLabelKeys cannot be set when labelSelector
                                 isn't set. This is an alpha field and requires enabling
                                 MatchLabelKeysInPodAffinity feature gate.
                               items:
@@ -4317,14 +4495,14 @@ properties:
                                 keys to select which pods will be taken into consideration.
                                 The keys are used to lookup values from the incoming
                                 pod labels, those key-value labels are merged with
-                                `LabelSelector` as `key notin (value)` to select the
+                                `labelSelector` as `key notin (value)` to select the
                                 group of existing pods which pods will be taken into
                                 consideration for the incoming pod's pod (anti) affinity.
                                 Keys that don't exist in the incoming pod labels will
                                 be ignored. The default value is empty. The same key
-                                is forbidden to exist in both MismatchLabelKeys and
-                                LabelSelector. Also, MismatchLabelKeys cannot be set
-                                when LabelSelector isn't set. This is an alpha field
+                                is forbidden to exist in both mismatchLabelKeys and
+                                labelSelector. Also, mismatchLabelKeys cannot be set
+                                when labelSelector isn't set. This is an alpha field
                                 and requires enabling MatchLabelKeysInPodAffinity
                                 feature gate.
                               items:
@@ -4366,11 +4544,13 @@ properties:
                                         items:
                                           type: string
                                         type: array
+                                        x-kubernetes-list-type: atomic
                                     required:
                                     - key
                                     - operator
                                     type: object
                                   type: array
+                                  x-kubernetes-list-type: atomic
                                 matchLabels:
                                   additionalProperties:
                                     type: string
@@ -4393,6 +4573,7 @@ properties:
                               items:
                                 type: string
                               type: array
+                              x-kubernetes-list-type: atomic
                             topologyKey:
                               description: This pod should be co-located (affinity)
                                 or not co-located (anti-affinity) with the pods matching
@@ -4406,6 +4587,7 @@ properties:
                           - topologyKey
                           type: object
                         type: array
+                        x-kubernetes-list-type: atomic
                     type: object
                 type: object
               automountServiceAccountToken:
@@ -4429,8 +4611,14 @@ properties:
                     let you locate the referenced object inside the same namespace.
                   properties:
                     name:
-                      description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                        TODO: Add other useful fields. apiVersion, kind, uid?'
+                      default: ""
+                      description: 'Name of the referent. This field is effectively
+                        required, but due to backwards compatibility is allowed to
+                        be empty. Instances of this type with an empty value here
+                        are almost certainly wrong. TODO: Add other useful fields.
+                        apiVersion, kind, uid? More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
+                        TODO: Drop `kubebuilder:default` when controller-gen doesn''t
+                        need it https://github.com/kubernetes-sigs/kubebuilder/issues/3896.'
                       type: string
                   type: object
                   x-kubernetes-map-type: atomic
@@ -4510,6 +4698,26 @@ properties:
                   https://kubernetes.io/docs/concepts/policy/security-context/ More
                   info: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/'
                 properties:
+                  appArmorProfile:
+                    description: appArmorProfile is the AppArmor options to use by
+                      the containers in this pod. Note that this field cannot be set
+                      when spec.os.name is windows.
+                    properties:
+                      localhostProfile:
+                        description: localhostProfile indicates a profile loaded on
+                          the node that should be used. The profile must be preconfigured
+                          on the node to work. Must match the loaded name of the profile.
+                          Must be set if and only if type is "Localhost".
+                        type: string
+                      type:
+                        description: 'type indicates which kind of AppArmor profile
+                          will be applied. Valid options are: Localhost - a profile
+                          pre-loaded on the node. RuntimeDefault - the container runtime''s
+                          default profile. Unconfined - no AppArmor enforcement.'
+                        type: string
+                    required:
+                    - type
+                    type: object
                   fsGroup:
                     description: "A special supplemental group that applies to all
                       containers in a pod. Some volume types allow the Kubelet to
@@ -4620,6 +4828,7 @@ properties:
                       format: int64
                       type: integer
                     type: array
+                    x-kubernetes-list-type: atomic
                   sysctls:
                     description: Sysctls hold a list of namespaced sysctls used for
                       the pod. Pods with unsupported sysctls (by the container runtime)
@@ -4639,6 +4848,7 @@ properties:
                       - value
                       type: object
                     type: array
+                    x-kubernetes-list-type: atomic
                   windowsOptions:
                     description: The Windows specific settings applied to all containers.
                       If unspecified, the options within a container's SecurityContext
@@ -4763,11 +4973,13 @@ properties:
                                 items:
                                   type: string
                                 type: array
+                                x-kubernetes-list-type: atomic
                             required:
                             - key
                             - operator
                             type: object
                           type: array
+                          x-kubernetes-list-type: atomic
                         matchLabels:
                           additionalProperties:
                             type: string
@@ -4836,9 +5048,7 @@ properties:
                         minimum\" is treated as 0. In this situation, new pod with
                         the same labelSelector cannot be scheduled, because computed
                         skew will be 3(3 - 0) if new Pod is scheduled to any of the
-                        three zones, it will violate MaxSkew. \n This is a beta field
-                        and requires the MinDomainsInPodTopologySpread feature gate
-                        to be enabled (enabled by default)."
+                        three zones, it will violate MaxSkew."
                       format: int32
                       type: integer
                     nodeAffinityPolicy:
@@ -5010,11 +5220,13 @@ properties:
                           items:
                             type: string
                           type: array
+                          x-kubernetes-list-type: atomic
                       required:
                       - key
                       - operator
                       type: object
                     type: array
+                    x-kubernetes-list-type: atomic
                   matchLabels:
                     additionalProperties:
                       type: string
