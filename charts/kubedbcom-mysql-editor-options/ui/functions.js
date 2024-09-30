@@ -341,12 +341,11 @@ async function getNamespaces({ axios, storeGet }) {
     const projects = resp?.data?.status?.projects
     if (projects) {
       isRancherManaged = true
-      const projectsNamespace = []
-      Object.entries(projects).forEach(([key, values]) => {
-        values.forEach((value) => {
-          projectsNamespace.push(`${value} (${key})`)
-        })
-      })
+      let projectsNamespace = []
+      projectsNamespace = Object.entries(projects).map(([project, namespaces]) => ({
+        project: project,
+        namespaces: namespaces,
+      }))
       namespaces = projectsNamespace
     } else {
       namespaces = resp?.data?.status?.namespaces || []
@@ -358,8 +357,10 @@ async function getNamespaces({ axios, storeGet }) {
   }
 }
 
-function isClusterRancherManaged() {
-  return isRancherManaged
+function isClusterRancherManaged({ watchDependency }, type) {
+  watchDependency('discriminator#/bundleApiLoaded')
+  if (type === 'rancher') return isRancherManaged
+  else return !isRancherManaged
 }
 
 function showRecovery({ watchDependency, getValue, discriminator }) {
@@ -937,6 +938,7 @@ function showAdditionalSettings({ watchDependency }) {
 }
 
 return {
+  isClusterRancherManaged,
   getRecoveryNames,
   fetchNamespaces,
   showRecovery,
