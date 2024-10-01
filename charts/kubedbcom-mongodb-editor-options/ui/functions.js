@@ -749,7 +749,7 @@ async function initBundle({ commit, model, getValue, axios, storeGet, setDiscrim
       force: true,
     })
   }
-  if (!features.includes('expose')) {
+  if (!features.includes('binding')) {
     commit('wizard/model$update', {
       path: '/spec/admin/expose/default',
       value: false,

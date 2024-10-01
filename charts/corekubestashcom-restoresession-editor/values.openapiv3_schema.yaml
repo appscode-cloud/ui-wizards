@@ -9357,19 +9357,50 @@ properties:
                 type: object
               manifestOptions:
                 properties:
-                  mariaDB:
+                  druid:
                     properties:
                       authSecret:
+                        default: true
                         type: boolean
                       authSecretName:
                         type: string
                       configSecret:
+                        default: true
                         type: boolean
                       configSecretName:
                         type: string
                       db:
+                        default: true
                         type: boolean
                       dbName:
+                        type: string
+                      deepStorageSecret:
+                        default: true
+                        type: boolean
+                      restoreNamespace:
+                        type: string
+                    type: object
+                  mariaDB:
+                    properties:
+                      authSecret:
+                        default: true
+                        type: boolean
+                      authSecretName:
+                        type: string
+                      configSecret:
+                        default: true
+                        type: boolean
+                      configSecretName:
+                        type: string
+                      db:
+                        default: true
+                        type: boolean
+                      dbName:
+                        type: string
+                      initScript:
+                        default: true
+                        type: boolean
+                      restoreNamespace:
                         type: string
                       tlsIssuerRef:
                         properties:
@@ -9388,16 +9419,24 @@ properties:
                   mongoDB:
                     properties:
                       authSecret:
+                        default: true
                         type: boolean
                       authSecretName:
                         type: string
                       configSecret:
+                        default: true
                         type: boolean
                       configSecretName:
                         type: string
                       db:
+                        default: true
                         type: boolean
                       dbName:
+                        type: string
+                      initScript:
+                        default: true
+                        type: boolean
+                      restoreNamespace:
                         type: string
                       tlsIssuerRef:
                         properties:
@@ -9416,10 +9455,12 @@ properties:
                   msSQLServer:
                     properties:
                       authSecret:
+                        default: true
                         type: boolean
                       authSecretName:
                         type: string
                       db:
+                        default: true
                         type: boolean
                       dbName:
                         type: string
@@ -9436,6 +9477,8 @@ properties:
                         - name
                         type: object
                         x-kubernetes-map-type: atomic
+                      restoreNamespace:
+                        type: string
                       tlsIssuerRef:
                         properties:
                           apiGroup:
@@ -9453,16 +9496,24 @@ properties:
                   mySQL:
                     properties:
                       authSecret:
+                        default: true
                         type: boolean
                       authSecretName:
                         type: string
                       configSecret:
+                        default: true
                         type: boolean
                       configSecretName:
                         type: string
                       db:
+                        default: true
                         type: boolean
                       dbName:
+                        type: string
+                      initScript:
+                        default: true
+                        type: boolean
+                      restoreNamespace:
                         type: string
                       tlsIssuerRef:
                         properties:
@@ -9481,16 +9532,24 @@ properties:
                   postgres:
                     properties:
                       authSecret:
+                        default: true
                         type: boolean
                       authSecretName:
                         type: string
                       configSecret:
+                        default: true
                         type: boolean
                       configSecretName:
                         type: string
                       db:
+                        default: true
                         type: boolean
                       dbName:
+                        type: string
+                      initScript:
+                        default: true
+                        type: boolean
+                      restoreNamespace:
                         type: string
                       tlsIssuerRef:
                         properties:
@@ -9506,9 +9565,122 @@ properties:
                         type: object
                         x-kubernetes-map-type: atomic
                     type: object
-                  restoreNamespace:
-                    type: string
+                  redis:
+                    properties:
+                      authSecret:
+                        default: true
+                        type: boolean
+                      authSecretName:
+                        type: string
+                      configSecret:
+                        default: true
+                        type: boolean
+                      configSecretName:
+                        type: string
+                      db:
+                        default: true
+                        type: boolean
+                      dbName:
+                        type: string
+                      initScript:
+                        default: true
+                        type: boolean
+                      restoreNamespace:
+                        type: string
+                      tlsIssuerRef:
+                        properties:
+                          apiGroup:
+                            type: string
+                          kind:
+                            type: string
+                          name:
+                            type: string
+                        required:
+                        - kind
+                        - name
+                        type: object
+                        x-kubernetes-map-type: atomic
+                    type: object
+                  singlestore:
+                    properties:
+                      authSecret:
+                        default: true
+                        type: boolean
+                      authSecretName:
+                        type: string
+                      configSecret:
+                        default: true
+                        type: boolean
+                      configSecretName:
+                        type: string
+                      db:
+                        default: true
+                        type: boolean
+                      dbName:
+                        type: string
+                      initScript:
+                        default: true
+                        type: boolean
+                      restoreNamespace:
+                        type: string
+                      tlsIssuerRef:
+                        properties:
+                          apiGroup:
+                            type: string
+                          kind:
+                            type: string
+                          name:
+                            type: string
+                        required:
+                        - kind
+                        - name
+                        type: object
+                        x-kubernetes-map-type: atomic
+                    type: object
+                  workload:
+                    properties:
+                      restoreNamespace:
+                        type: string
+                    type: object
+                  zooKeeper:
+                    properties:
+                      authSecret:
+                        default: true
+                        type: boolean
+                      authSecretName:
+                        type: string
+                      configSecret:
+                        default: true
+                        type: boolean
+                      configSecretName:
+                        type: string
+                      db:
+                        default: true
+                        type: boolean
+                      dbName:
+                        type: string
+                      initScript:
+                        default: true
+                        type: boolean
+                      restoreNamespace:
+                        type: string
+                      tlsIssuerRef:
+                        properties:
+                          apiGroup:
+                            type: string
+                          kind:
+                            type: string
+                          name:
+                            type: string
+                        required:
+                        - kind
+                        - name
+                        type: object
+                        x-kubernetes-map-type: atomic
+                    type: object
                 type: object
+              restoreTimeout:
+                type: string
               target:
                 properties:
                   apiGroup:
@@ -9522,8 +9694,6 @@ properties:
                 required:
                 - name
                 type: object
-              timeout:
-                type: string
             type: object
         type: object
     type: object

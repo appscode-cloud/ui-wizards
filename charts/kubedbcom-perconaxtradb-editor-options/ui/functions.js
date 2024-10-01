@@ -612,6 +612,46 @@ async function initBundle({ commit, model, getValue, axios, storeGet, setDiscrim
   } catch (e) {
     console.log(e)
   }
+
+  if (!features.includes('tls')) {
+    commit('wizard/model$update', {
+      path: '/spec/admin/tls/default',
+      value: false,
+      force: true,
+    })
+  }
+  if (!features.includes('binding')) {
+    commit('wizard/model$update', {
+      path: '/spec/admin/expose/default',
+      value: false,
+      force: true,
+    })
+  }
+  if (!features.includes('monitoring')) {
+    commit('wizard/model$update', {
+      path: '/spec/admin/monitoring/agent',
+      value: '',
+      force: true,
+    })
+    commit('wizard/model$update', {
+      path: '/form/alert/enabled',
+      value: 'none',
+      force: true,
+    })
+  }
+  if (!features.includes('backup')) {
+    commit('wizard/model$update', {
+      path: '/spec/admin/archiver/default',
+      value: false,
+      force: true,
+    })
+    commit('wizard/model$update', {
+      path: '/spec/backup/tool',
+      value: '',
+      force: true,
+    })
+  }
+
   setDiscriminatorValue('/bundleApiLoaded', true)
 }
 
