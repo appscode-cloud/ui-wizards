@@ -303,7 +303,7 @@ const machineList = [
   'db.r.16xlarge',
   'db.r.24xlarge',
 ]
-
+let isRancherManaged = false
 async function getNamespaces({ axios, storeGet }) {
   const params = storeGet('/route/params')
   const { user, cluster, group, version, resource } = params
@@ -325,12 +325,38 @@ async function getNamespaces({ axios, storeGet }) {
         },
       },
     )
-    const namespaces = resp?.data?.status?.namespaces || []
+    const projects = resp?.data?.status?.projects
+    if (projects) {
+      isRancherManaged = true
+      let projectsNamespace = []
+      projectsNamespace = Object.keys(projects).map((project) => ({
+        project: project,
+        namespaces: projects[project].map((namespace) => ({
+          text: namespace,
+          value: namespace,
+        })),
+      }))
+      namespaces = projectsNamespace
+    } else {
+      namespaces = resp?.data?.status?.namespaces || []
+    }
     return namespaces
   } catch (e) {
     console.log(e)
     return []
   }
+}
+
+function isClusterRancherManaged({ watchDependency }, type) {
+  watchDependency('discriminator#/bundleApiLoaded')
+  if (type === 'rancher') return isRancherManaged
+  else return !isRancherManaged
+}
+
+function showRecovery({ watchDependency, getValue, discriminator }) {
+  watchDependency('discriminator#/recovery')
+  const isRecoveryOn = getValue(discriminator, '/recovery') || ''
+  return isRecoveryOn
 }
 
 function updateAlertValue({ commit, model, discriminator, getValue }) {
@@ -759,6 +785,7 @@ let clusterIssuers = []
 let nodetopologiesShared = []
 let nodetopologiesDedicated = []
 let features = []
+let namespaces = []
 async function initBundle({ commit, model, getValue, axios, storeGet, setDiscriminatorValue }) {
   const owner = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
@@ -818,8 +845,36 @@ async function initBundle({ commit, model, getValue, axios, storeGet, setDiscrim
       force: true,
     })
   }
-
+  namespaces = getNamespaces({ axios, storeGet })
   setDiscriminatorValue('/bundleApiLoaded', true)
+}
+
+function fetchNamespaces({ watchDependency }) {
+  watchDependency('discriminator#/bundleApiLoaded')
+  return namespaces
+}
+
+async function getRecoveryNames({ getValue, model, watchDependency, storeGet, axios }, type) {
+  watchDependency(`model#/spec/init/archiver/${type}/namespace`)
+  const params = storeGet('/route/params')
+  const { user, cluster } = params
+  const namespace = getValue(model, `/spec/init/archiver/${type}/namespace`)
+  let url = `/clusters/${user}/${cluster}/proxy/storage.kubestash.com/v1alpha1/namespaces/${namespace}/repositories`
+  if (type === 'encryptionSecret')
+    url = `/clusters/${user}/${cluster}/proxy/core/v1/namespaces/${namespace}/secrets`
+  const options = []
+  if (namespace) {
+    try {
+      const resp = await axios.get(url)
+      const items = resp.data?.items
+      items.forEach((ele) => {
+        options.push(ele.metadata?.name)
+      })
+    } catch (e) {
+      console.log(e)
+    }
+  }
+  return options
 }
 
 function fetchOptions({ model, getValue }, type) {
@@ -1082,6 +1137,10 @@ function showAdditionalSettings({ watchDependency }) {
 }
 
 return {
+  isClusterRancherManaged,
+  getRecoveryNames,
+  fetchNamespaces,
+  showRecovery,
   initBundle,
   returnFalse,
   EqualToDatabaseMode,

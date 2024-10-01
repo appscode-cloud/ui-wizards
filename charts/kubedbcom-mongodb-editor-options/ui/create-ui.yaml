@@ -233,6 +233,9 @@ steps:
         createAuthSecret:
           default: false
           type: boolean
+        recovery:
+          default: false
+          type: boolean     
       elements:
       - elements:
         - isArray: true
@@ -407,6 +410,109 @@ steps:
           text: Hidden
         schema:
           $ref: schema#/properties/spec/properties/hidden/properties/podResources
+        show_label: true
+        type: single-step-form
+      - label:
+          text: Point in-time Recovery?
+        schema:
+          $ref: discriminator#/recovery
+        type: switch
+      - elements:
+        - customClass: mt-10
+          label:
+            text: Recovery Timestamp
+          schema:
+            $ref: schema#/properties/spec/properties/init/properties/archiver/properties/recoveryTimestamp
+          type: input
+        - type: single-step-form
+          schema:
+            $ref: schema#/properties/spec/properties/init/properties/archiver/properties/encryptionSecret
+          show_label: true
+          label:
+            text: Encryption Secret
+          elements:
+            - label:
+                text: Namespace
+              fetch: fetchNamespaces
+              if: isClusterRancherManaged|rancher
+              hasGroup: true
+              schema:
+                $ref: schema#/properties/spec/properties/init/properties/archiver/properties/encryptionSecret/properties/namespace
+              type: select
+            - label:
+                text: Namespace
+              fetch: fetchNamespaces
+              if: isClusterRancherManaged|notRancher
+              schema:
+                $ref: schema#/properties/spec/properties/init/properties/archiver/properties/encryptionSecret/properties/namespace
+              type: select            
+            - label:
+                text: Name
+              fetch: getRecoveryNames|encryptionSecret
+              schema:
+                $ref: schema#/properties/spec/properties/init/properties/archiver/properties/encryptionSecret/properties/name
+              type: select
+        - type: single-step-form
+          schema:
+            $ref: schema#/properties/spec/properties/init/properties/archiver/properties/fullDBRepository
+          show_label: true
+          label:
+            text: Full DB Repository
+          elements:
+            - label:
+                text: Namespace
+              fetch: fetchNamespaces
+              if: isClusterRancherManaged|rancher
+              hasGroup: true
+              schema:
+                $ref: schema#/properties/spec/properties/init/properties/archiver/properties/fullDBRepository/properties/namespace
+              type: select
+            - label:
+                text: Namespace
+              fetch: fetchNamespaces
+              if: isClusterRancherManaged|notRancher
+              schema:
+                $ref: schema#/properties/spec/properties/init/properties/archiver/properties/fullDBRepository/properties/namespace
+              type: select
+            - label:
+                text: Name
+              fetch: getRecoveryNames|fullDBRepository
+              schema:
+                $ref: schema#/properties/spec/properties/init/properties/archiver/properties/fullDBRepository/properties/name
+              type: select
+        - type: single-step-form
+          schema:
+            $ref: schema#/properties/spec/properties/init/properties/archiver/properties/manifestRepository
+          show_label: true
+          label:
+            text: Manifest Repository
+          elements:
+            - label:
+                text: Namespace
+              fetch: fetchNamespaces
+              if: isClusterRancherManaged|rancher
+              hasGroup: true
+              schema:
+                $ref: schema#/properties/spec/properties/init/properties/archiver/properties/manifestRepository/properties/namespace
+              type: select
+            - label:
+                text: Namespace
+              fetch: fetchNamespaces
+              if: isClusterRancherManaged|notRancher
+              schema:
+                $ref: schema#/properties/spec/properties/init/properties/archiver/properties/manifestRepository/properties/namespace
+              type: select
+            - label:
+                text: Name
+              fetch: getRecoveryNames|manifestRepository
+              schema:
+                $ref: schema#/properties/spec/properties/init/properties/archiver/properties/manifestRepository/properties/name
+              type: select
+        if: showRecovery
+        label:
+          text: Point in-time Recovery
+        schema:
+          $ref: schema#/properties/spec/properties/init/properties/archiver
         show_label: true
         type: single-step-form
       - hasDescription: true
