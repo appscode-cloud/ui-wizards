@@ -53,6 +53,7 @@ type KubedbcomPostgresEditorOptionsSpecSpec struct {
 	PodResources   PodResources       `json:"podResources"`
 	AuthSecret     AuthSecret         `json:"authSecret"`
 	Configuration  string             `json:"configuration"`
+	Init           InitDatabase       `json:"init"`
 	Admin          AdminOptions       `json:"admin"`
 	Backup         BackupToolSpec     `json:"backup"`
 	Monitoring     MonitoringOperator `json:"monitoring"`

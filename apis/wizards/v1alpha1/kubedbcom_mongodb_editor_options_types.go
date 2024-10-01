@@ -56,6 +56,7 @@ type KubedbcomMongodbEditorOptionsSpecSpec struct {
 	AuthSecret     AuthSecret           `json:"authSecret"`
 	DeletionPolicy DeletionPolicy       `json:"deletionPolicy"`
 	Configuration  string               `json:"configuration"`
+	Init           InitDatabase         `json:"init"`
 	Admin          AdminOptions         `json:"admin"`
 	Backup         BackupToolSpec       `json:"backup"`
 	Monitoring     MonitoringOperator   `json:"monitoring"`

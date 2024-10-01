@@ -7,8 +7,8 @@
 ```bash
 $ helm repo add appscode-charts-oci https://bundles.byte.builders/ui/
 $ helm repo update
-$ helm search repo appscode-charts-oci/uik8sappscodecom-featureset-opscenter-security-editor --version=v0.5.0
-$ helm upgrade -i uik8sappscodecom-featureset-opscenter-security-editor appscode-charts-oci/uik8sappscodecom-featureset-opscenter-security-editor -n default --create-namespace --version=v0.5.0
+$ helm search repo appscode-charts-oci/uik8sappscodecom-featureset-opscenter-security-editor --version=v0.6.0
+$ helm upgrade -i uik8sappscodecom-featureset-opscenter-security-editor appscode-charts-oci/uik8sappscodecom-featureset-opscenter-security-editor -n default --create-namespace --version=v0.6.0
 ```
 
 ## Introduction
@@ -24,7 +24,7 @@ This chart deploys a FeatureSet Editor on a [Kubernetes](http://kubernetes.io) c
 To install/upgrade the chart with the release name `uik8sappscodecom-featureset-opscenter-security-editor`:
 
 ```bash
-$ helm upgrade -i uik8sappscodecom-featureset-opscenter-security-editor appscode-charts-oci/uik8sappscodecom-featureset-opscenter-security-editor -n default --create-namespace --version=v0.5.0
+$ helm upgrade -i uik8sappscodecom-featureset-opscenter-security-editor appscode-charts-oci/uik8sappscodecom-featureset-opscenter-security-editor -n default --create-namespace --version=v0.6.0
 ```
 
 The command deploys a FeatureSet Editor on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
@@ -58,18 +58,18 @@ The following table lists the configurable parameters of the `uik8sappscodecom-f
 | resources.helmToolkitFluxcdIoHelmRelease_cert_manager_csi_driver_cacerts |             | <code>{"apiVersion":"helm.toolkit.fluxcd.io/v2","kind":"HelmRelease","metadata":{"labels":{"app.kubernetes.io/component":"cert-manager-csi-driver-cacerts"},"name":"cert-manager-csi-driver-cacerts","namespace":"kubeops"},"spec":{"chart":{"spec":{"chart":"cert-manager-csi-driver-cacerts","sourceRef":{"kind":"HelmRepository","name":"appscode-charts-oci","namespace":"kubeops"},"version":"v2024.7.28"}},"install":{"crds":"CreateReplace","createNamespace":true,"remediation":{"retries":-1}},"interval":"5m","releaseName":"cert-manager-csi-driver-cacerts","storageNamespace":"cert-manager","targetNamespace":"cert-manager","timeout":"30m","upgrade":{"crds":"CreateReplace","remediation":{"retries":-1}}}}</code>                                                                                                                                                                                                                                                              |
 | resources.helmToolkitFluxcdIoHelmRelease_falco                           |             | <code>{"apiVersion":"helm.toolkit.fluxcd.io/v2","kind":"HelmRelease","metadata":{"labels":{"app.kubernetes.io/component":"falco"},"name":"falco","namespace":"kubeops"},"spec":{"chart":{"spec":{"chart":"falco","sourceRef":{"kind":"HelmRepository","name":"appscode-charts-oci","namespace":"kubeops"},"version":"4.0.0"}},"install":{"crds":"CreateReplace","createNamespace":true,"remediation":{"retries":-1}},"interval":"5m","releaseName":"falco","storageNamespace":"falco","targetNamespace":"falco","timeout":"30m","upgrade":{"crds":"CreateReplace","remediation":{"retries":-1}},"values":{"driver":{"kind":"modern-bpf"},"falco":{"grpc":{"enabled":true},"grpc_output":{"enabled":true},"http_output":{"enabled":true,"insecure":true,"url":"http://falco-ui-server:8080/falcoevents"},"json_include_output_property":true,"json_output":true,"modern_bpf":{"cpus_for_each_syscall_buffer":1}},"falcosidekick":{"enabled":false,"webui":{"enabled":false}},"tty":true}}}</code> |
 | resources.helmToolkitFluxcdIoHelmRelease_falco_ui_server                 |             | <code>{"apiVersion":"helm.toolkit.fluxcd.io/v2","kind":"HelmRelease","metadata":{"labels":{"app.kubernetes.io/component":"falco-ui-server"},"name":"falco-ui-server","namespace":"kubeops"},"spec":{"chart":{"spec":{"chart":"falco-ui-server","sourceRef":{"kind":"HelmRepository","name":"appscode-charts-oci","namespace":"kubeops"},"version":"v2024.5.17"}},"install":{"crds":"CreateReplace","createNamespace":true,"remediation":{"retries":-1}},"interval":"5m","releaseName":"falco-ui-server","storageNamespace":"falco","targetNamespace":"falco","timeout":"30m","upgrade":{"crds":"CreateReplace","remediation":{"retries":-1}}}}</code>                                                                                                                                                                                                                                                                                                                                            |
-| resources.helmToolkitFluxcdIoHelmRelease_scanner                         |             | <code>{"apiVersion":"helm.toolkit.fluxcd.io/v2","kind":"HelmRelease","metadata":{"labels":{"app.kubernetes.io/component":"scanner"},"name":"scanner","namespace":"kubeops"},"spec":{"chart":{"spec":{"chart":"scanner","sourceRef":{"kind":"HelmRepository","name":"appscode-charts-oci","namespace":"kubeops"},"version":"v2024.1.18"}},"install":{"crds":"CreateReplace","createNamespace":true,"remediation":{"retries":-1}},"interval":"5m","releaseName":"scanner","storageNamespace":"kubeops","targetNamespace":"kubeops","timeout":"30m","upgrade":{"crds":"CreateReplace","remediation":{"retries":-1}}}}</code>                                                                                                                                                                                                                                                                                                                                                                        |
+| resources.helmToolkitFluxcdIoHelmRelease_scanner                         |             | <code>{"apiVersion":"helm.toolkit.fluxcd.io/v2","kind":"HelmRelease","metadata":{"labels":{"app.kubernetes.io/component":"scanner"},"name":"scanner","namespace":"kubeops"},"spec":{"chart":{"spec":{"chart":"scanner","sourceRef":{"kind":"HelmRepository","name":"appscode-charts-oci","namespace":"kubeops"},"version":"v2024.8.21"}},"install":{"crds":"CreateReplace","createNamespace":true,"remediation":{"retries":-1}},"interval":"5m","releaseName":"scanner","storageNamespace":"kubeops","targetNamespace":"kubeops","timeout":"30m","upgrade":{"crds":"CreateReplace","remediation":{"retries":-1}}}}</code>                                                                                                                                                                                                                                                                                                                                                                        |
 
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm upgrade -i`. For example:
 
 ```bash
-$ helm upgrade -i uik8sappscodecom-featureset-opscenter-security-editor appscode-charts-oci/uik8sappscodecom-featureset-opscenter-security-editor -n default --create-namespace --version=v0.5.0 --set metadata.resource.group=ui.k8s.appscode.com
+$ helm upgrade -i uik8sappscodecom-featureset-opscenter-security-editor appscode-charts-oci/uik8sappscodecom-featureset-opscenter-security-editor -n default --create-namespace --version=v0.6.0 --set metadata.resource.group=ui.k8s.appscode.com
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
 installing the chart. For example:
 
 ```bash
-$ helm upgrade -i uik8sappscodecom-featureset-opscenter-security-editor appscode-charts-oci/uik8sappscodecom-featureset-opscenter-security-editor -n default --create-namespace --version=v0.5.0 --values values.yaml
+$ helm upgrade -i uik8sappscodecom-featureset-opscenter-security-editor appscode-charts-oci/uik8sappscodecom-featureset-opscenter-security-editor -n default --create-namespace --version=v0.6.0 --values values.yaml
 ```

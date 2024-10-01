@@ -7,8 +7,8 @@
 ```bash
 $ helm repo add bytebuilders-ui https://bundles.byte.builders/ui/
 $ helm repo update
-$ helm search repo bytebuilders-ui/kubedbcom-pgpool-editor-options --version=v0.5.0
-$ helm upgrade -i kubedbcom-pgpool-editor-options bytebuilders-ui/kubedbcom-pgpool-editor-options -n kube-system --create-namespace --version=v0.5.0
+$ helm search repo bytebuilders-ui/kubedbcom-pgpool-editor-options --version=v0.6.0
+$ helm upgrade -i kubedbcom-pgpool-editor-options bytebuilders-ui/kubedbcom-pgpool-editor-options -n kube-system --create-namespace --version=v0.6.0
 ```
 
 ## Introduction
@@ -24,7 +24,7 @@ This chart deploys a Pgpool Editor UI Options on a [Kubernetes](http://kubernete
 To install/upgrade the chart with the release name `kubedbcom-pgpool-editor-options`:
 
 ```bash
-$ helm upgrade -i kubedbcom-pgpool-editor-options bytebuilders-ui/kubedbcom-pgpool-editor-options -n kube-system --create-namespace --version=v0.5.0
+$ helm upgrade -i kubedbcom-pgpool-editor-options bytebuilders-ui/kubedbcom-pgpool-editor-options -n kube-system --create-namespace --version=v0.6.0
 ```
 
 The command deploys a Pgpool Editor UI Options on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
@@ -63,8 +63,8 @@ The following table lists the configurable parameters of the `kubedbcom-pgpool-e
 | spec.syncUsers                                                             |                                                                                                                                                                           | <code>true</code>                                         |
 | spec.deletionPolicy                                                        |                                                                                                                                                                           | <code>WipeOut</code>                                      |
 | spec.podResources.machine                                                  |                                                                                                                                                                           | <code>""</code>                                           |
-| spec.podResources.resources.limits.cpu                                     |                                                                                                                                                                           | <code>500m</code>                                         |
-| spec.podResources.resources.limits.memory                                  |                                                                                                                                                                           | <code>1Gi</code>                                          |
+| spec.podResources.resources.requests.cpu                                   |                                                                                                                                                                           | <code>500m</code>                                         |
+| spec.podResources.resources.requests.memory                                |                                                                                                                                                                           | <code>1Gi</code>                                          |
 | spec.authSecret.name                                                       |                                                                                                                                                                           | <code>""</code>                                           |
 | spec.authSecret.password                                                   |                                                                                                                                                                           | <code>""</code>                                           |
 | spec.configuration                                                         |                                                                                                                                                                           | <code>""</code>                                           |
@@ -163,12 +163,12 @@ The following table lists the configurable parameters of the `kubedbcom-pgpool-e
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm upgrade -i`. For example:
 
 ```bash
-$ helm upgrade -i kubedbcom-pgpool-editor-options bytebuilders-ui/kubedbcom-pgpool-editor-options -n kube-system --create-namespace --version=v0.5.0 --set metadata.resource.group=kubedb.com
+$ helm upgrade -i kubedbcom-pgpool-editor-options bytebuilders-ui/kubedbcom-pgpool-editor-options -n kube-system --create-namespace --version=v0.6.0 --set metadata.resource.group=kubedb.com
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
 installing the chart. For example:
 
 ```bash
-$ helm upgrade -i kubedbcom-pgpool-editor-options bytebuilders-ui/kubedbcom-pgpool-editor-options -n kube-system --create-namespace --version=v0.5.0 --values values.yaml
+$ helm upgrade -i kubedbcom-pgpool-editor-options bytebuilders-ui/kubedbcom-pgpool-editor-options -n kube-system --create-namespace --version=v0.6.0 --values values.yaml
 ```
