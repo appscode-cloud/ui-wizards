@@ -263,40 +263,6 @@ steps:
           type: select
         if: isToggleOn|monitoring
         type: single-step-form
-      - elements:
-        - if: isToggleOn|tls
-          label:
-            text: Enable TLS?
-          schema:
-            $ref: schema#/properties/spec/properties/admin/properties/tls/properties/default
-          type: switch
-        type: single-step-form
-      - elements:
-        - fetch: getAdminOptions|clusterIssuers
-          if: showIssuer
-          label:
-            text: labels.clusterIssuers
-          required: true
-          schema:
-            $ref: schema#/properties/spec/properties/admin/properties/clusterIssuers/properties/default
-          type: select
-        type: single-step-form
-      - elements:
-        - if: isToggleOn|expose
-          label:
-            text: Expose via Gateway?
-          schema:
-            $ref: schema#/properties/spec/properties/admin/properties/expose/properties/default
-          type: switch
-        type: single-step-form
-      - elements:
-        - if: isToggleOn|archiver
-          label:
-            text: Enable Archiver?
-          schema:
-            $ref: schema#/properties/spec/properties/admin/properties/archiver/properties/default
-          type: switch
-        type: single-step-form
       if: showAdditionalSettings
       label:
         text: Additional Options
