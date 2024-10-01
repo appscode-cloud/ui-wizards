@@ -336,9 +336,12 @@ async function getNamespaces({ axios, storeGet }) {
     if (projects) {
       isRancherManaged = true
       let projectsNamespace = []
-      projectsNamespace = Object.entries(projects).map(([project, namespaces]) => ({
+      projectsNamespace = Object.keys(projects).map((project) => ({
         project: project,
-        namespaces: namespaces,
+        namespaces: projects[project].map((namespace) => ({
+          text: namespace,
+          value: namespace,
+        })),
       }))
       namespaces = projectsNamespace
     } else {
