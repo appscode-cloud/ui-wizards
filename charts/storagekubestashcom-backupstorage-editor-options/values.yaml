@@ -22,11 +22,8 @@ spec:
   # Labels to add to all the template objects
   labels: {}
 
-  storageSecret:
-    create: true
-
   backend:
-    provider: "" # s3,gcs,azure
+    provider: "local" # s3,gcs,azure,local
     s3:
       spec:
         endpoint: ""
@@ -54,3 +51,13 @@ spec:
       auth:
         GOOGLE_PROJECT_ID: ""
         GOOGLE_SERVICE_ACCOUNT_JSON_KEY: ""
+    local:
+      mountPath: "ll"
+      persistentVolumeClaim:
+        claimName: "cc"
+        readOnly: false
+
+  deletionPolicy: "Delete"
+
+  runtimeSettings:
+    securityContext:

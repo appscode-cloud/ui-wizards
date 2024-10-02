@@ -44,10 +44,11 @@ type CorekubestashcomRestoresessionEditorOptionsSpecSpec struct {
 	// +optional
 	Annotations map[string]string `json:"annotations"`
 	// +optional
-	Labels     map[string]string          `json:"labels"`
-	DataSource RestoreDataSource          `json:"dataSource"`
-	Addon      KubeStashAddon             `json:"addon"`
-	Target     kmapi.TypedObjectReference `json:"target"`
+	Labels     map[string]string `json:"labels"`
+	DataSource RestoreDataSource `json:"dataSource"`
+	Addon      KubeStashAddon    `json:"addon"`
+	// +optional
+	Target kmapi.TypedObjectReference `json:"target"`
 }
 
 type RestoreDataSource struct {

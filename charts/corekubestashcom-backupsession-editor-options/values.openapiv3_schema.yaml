@@ -1,0 +1,81 @@
+properties:
+  metadata:
+    properties:
+      release:
+        properties:
+          name:
+            type: string
+          namespace:
+            type: string
+        required:
+        - name
+        - namespace
+        type: object
+      resource:
+        description: ResourceID identifies a resource
+        properties:
+          group:
+            type: string
+          kind:
+            description: Kind is the serialized kind of the resource.  It is normally
+              CamelCase and singular.
+            type: string
+          name:
+            description: 'Name is the plural name of the resource to serve.  It must
+              match the name of the CustomResourceDefinition-registration too: plural.group
+              and it must be all lowercase.'
+            type: string
+          scope:
+            description: ResourceScope is an enum defining the different scopes available
+              to a custom resource
+            type: string
+          version:
+            type: string
+        required:
+        - group
+        type: object
+    required:
+    - release
+    - resource
+    type: object
+  spec:
+    properties:
+      annotations:
+        additionalProperties:
+          type: string
+        type: object
+      backupTimeout:
+        type: string
+      invoker:
+        description: TypedLocalObjectReference contains enough information to let
+          you locate the typed referenced object inside the same namespace.
+        properties:
+          apiGroup:
+            description: APIGroup is the group for the resource being referenced.
+              If APIGroup is not specified, the specified Kind must be in the core
+              API group. For any other third-party types, APIGroup is required.
+            type: string
+          kind:
+            description: Kind is the type of resource being referenced
+            type: string
+          name:
+            description: Name is the name of resource being referenced
+            type: string
+        required:
+        - kind
+        - name
+        type: object
+        x-kubernetes-map-type: atomic
+      labels:
+        additionalProperties:
+          type: string
+        type: object
+      session:
+        type: string
+    required:
+    - invoker
+    - session
+    type: object
+required:
+- spec
+type: object

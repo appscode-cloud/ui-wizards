@@ -1,0 +1,197 @@
+steps:
+- form:
+    elements:
+    - discriminator:
+        database:
+          default: {}
+          type: object
+      elements:
+      - if: isConsole
+        label:
+          text: labels.name
+        schema:
+          $ref: schema#/properties/metadata/properties/release/properties/name
+        type: input
+      - fetch: getNamespaces
+        if: isConsole
+        label:
+          text: labels.selectNamespace
+        schema:
+          $ref: schema#/properties/metadata/properties/release/properties/namespace
+        type: select
+      - fetch: getDbs
+        if: isConsole
+        label:
+          text: labels.selectDb
+        onChange: initTarget
+        refresh: true
+        required: true
+        schema:
+          $ref: discriminator#/properties/database
+        type: select
+      - elements:
+        - computed: initMetadata
+          if: returnFalse
+          type: input
+        - isArray: true
+          keys:
+            label:
+              text: labels.labels.key
+          label:
+            text: labels.labels.label
+          schema:
+            $ref: schema#/properties/spec/properties/labels
+          type: key-value-input-form
+          values:
+            label:
+              text: labels.labels.value
+            schema:
+              $ref: schema#/properties/spec/properties/labels/additionalProperties
+            type: input
+        - isArray: true
+          keys:
+            label:
+              text: labels.annotations.key
+          label:
+            text: labels.annotations.label
+          schema:
+            $ref: schema#/properties/spec/properties/annotations
+          type: key-value-input-form
+          values:
+            label:
+              text: labels.annotations.value
+            schema:
+              $ref: schema#/properties/spec/properties/annotations/additionalProperties
+            type: input
+        - elements:
+          - elements:
+            - computed: setNamespace
+              disableUnselect: true
+              fetch: getNamespaces
+              label:
+                text: labels.namespace
+              refresh: true
+              schema:
+                $ref: schema#/properties/spec/properties/dataSource/properties/repository/properties/namespace
+              type: select
+            - disableUnselect: true
+              fetch: fetchNames|repository
+              label:
+                text: labels.name
+              refresh: true
+              schema:
+                $ref: schema#/properties/spec/properties/dataSource/properties/repository/properties/name
+              type: select
+            label:
+              text: labels.dataSource.repository
+            schema:
+              $ref: schema#/properties/spec/properties/dataSource/properties/repository
+            show_label: true
+            type: single-step-form
+          - disableUnselect: true
+            fetch: getSnapshots
+            label:
+              text: labels.dataSource.snapshot
+            refresh: true
+            schema:
+              $ref: schema#/properties/spec/properties/dataSource/properties/snapshot
+            type: select
+          - elements:
+            - disableUnselect: true
+              fetch: getNamespaces
+              label:
+                text: labels.namespace
+              refresh: true
+              schema:
+                $ref: schema#/properties/spec/properties/dataSource/properties/encryptionSecret/properties/namespace
+              type: select
+            - disableUnselect: true
+              fetch: fetchNames|encryptionSecret
+              label:
+                text: labels.name
+              refresh: true
+              schema:
+                $ref: schema#/properties/spec/properties/dataSource/properties/encryptionSecret/properties/name
+              type: select
+            label:
+              text: labels.dataSource.encryptionSecret
+            schema:
+              $ref: schema#/properties/spec/properties/dataSource/properties/encryptionSecret
+            show_label: true
+            type: single-step-form
+          schema:
+            $ref: schema#/properties/spec/properties/dataSource
+          type: single-step-form
+        - discriminator:
+            task:
+              default: ""
+              type: string
+          elements:
+          - fetch: getAddons
+            label:
+              text: labels.name
+            refresh: true
+            schema:
+              $ref: schema#/properties/spec/properties/addon/properties/name
+            type: select
+          - addFormLabel: labels.addon.tasks
+            element:
+              discriminator:
+                taksName:
+                  default: ""
+                  type: string
+              elements:
+              - fetch: getTasks
+                label:
+                  text: labels.name
+                schema:
+                  $ref: schema#/properties/spec/properties/addon/properties/tasks/items/properties/name
+                type: select
+              - label:
+                  text: labels.addon.params
+                schema:
+                  $ref: schema#/properties/spec/properties/addon/properties/tasks/items/properties/params
+                type: editor
+              type: single-step-form
+            label:
+              text: labels.addon.tasks
+            schema:
+              $ref: schema#/properties/spec/properties/addon/properties/tasks
+            tableContents:
+            - inTableColumn: true
+              label:
+                text: labels.addon.tasks
+              path: name
+              type: value
+              typeOfValue: string
+            - inTableColumn: true
+              label:
+                text: labels.addon.params
+              path: params
+              type: value
+              typeOfValue: string
+            type: single-step-form-array
+          - elements:
+            - label:
+                text: labels.addon.securityContext
+              schema:
+                $ref: schema#/properties/spec/properties/addon/properties/jobTemplate/properties/securityContext
+              type: input
+            schema:
+              $ref: schema#/properties/spec/properties/addon/properties/jobTemplate
+            type: single-step-form
+          label:
+            text: labels.addon.label
+          schema:
+            $ref: schema#/properties/spec/properties/addon
+          show_label: true
+          type: single-step-form
+        if: databaseSelected
+        schema:
+          $ref: schema#/properties/spec
+        type: single-step-form
+      type: single-step-form
+    type: single-step-form
+  id: options
+  title: steps.0.label
+type: multi-step-form

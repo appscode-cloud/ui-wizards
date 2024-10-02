@@ -16,7 +16,10 @@ limitations under the License.
 
 package v1alpha1
 
-import store "kmodules.xyz/objectstore-api/api/v1"
+import (
+	core "k8s.io/api/core/v1"
+	store "kmodules.xyz/objectstore-api/api/v1"
+)
 
 type S3 struct {
 	Spec store.S3Spec `json:"spec"`
@@ -50,6 +53,14 @@ type GCS struct {
 type GCSAuth struct {
 	GoogleProjectID             string `json:"GOOGLE_PROJECT_ID"`
 	GoogleServiceAccountJSONKey string `json:"GOOGLE_SERVICE_ACCOUNT_JSON_KEY"`
+}
+
+type Local struct {
+	PersistentVolumeClaim *core.PersistentVolumeClaimVolumeSource `json:"persistentVolumeClaim,omitempty"`
+	// MountPath specifies the directory where this volume will be mounted
+	MountPath string `json:"mountPath,omitempty"`
+	// +optional
+	SubPath string `json:"subPath,omitempty"`
 }
 
 type Swift struct {

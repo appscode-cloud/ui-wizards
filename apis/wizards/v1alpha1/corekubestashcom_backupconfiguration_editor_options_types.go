@@ -44,10 +44,11 @@ type CorekubestashcomBackupconfigurationEditorOptionsSpecSpec struct {
 	// +optional
 	Annotations map[string]string `json:"annotations"`
 	// +optional
-	Labels   map[string]string          `json:"labels"`
-	Backend  Backend                    `json:"backend"`
-	Sessions []Session                  `json:"session"`
-	Target   kmapi.TypedObjectReference `json:"target"`
+	Labels   map[string]string `json:"labels"`
+	Backend  Backend           `json:"backend"`
+	Sessions []Session         `json:"session"`
+	// +optional
+	Target kmapi.TypedObjectReference `json:"target"`
 }
 
 type Backend struct {

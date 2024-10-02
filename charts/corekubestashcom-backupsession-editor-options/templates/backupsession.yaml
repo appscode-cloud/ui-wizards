@@ -1,0 +1,17 @@
+apiVersion: core.kubestash.com/v1alpha1
+kind: BackupSession
+metadata:
+  name: {{ include "corekubestashcom-backupsession-editor-options.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "corekubestashcom-backupsession-editor-options.labels" . | nindent 4 }}
+  {{- if .Values.spec.annotations }}
+  annotations:
+    {{- include "corekubestashcom-backupsession-editor-options.annotations" . | nindent 4 }}
+  {{- end }}
+spec:
+  invoker:
+    {{- toYaml .Values.spec.invoker | nindent 4 }}
+  session: {{ .Values.spec.session }}
+  backupTimeout: {{ .Values.spec.backupTimeout }}
+

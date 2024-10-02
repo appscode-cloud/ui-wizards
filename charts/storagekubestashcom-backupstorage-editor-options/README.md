@@ -45,30 +45,34 @@ The command removes all the Kubernetes components associated with the chart and 
 
 The following table lists the configurable parameters of the `storagekubestashcom-backupstorage-editor-options` chart and their default values.
 
-|                       Parameter                       |                    Description                     |              Default               |
-|-------------------------------------------------------|----------------------------------------------------|------------------------------------|
-| metadata.resource.group                               |                                                    | <code>storage.kubestash.com</code> |
-| metadata.resource.kind                                |                                                    | <code>BackupStorage</code>         |
-| metadata.resource.name                                |                                                    | <code>backupstorages</code>        |
-| metadata.resource.scope                               |                                                    | <code>Namespaced</code>            |
-| metadata.resource.version                             |                                                    | <code>v1alpha1</code>              |
-| metadata.release.name                                 | Release name                                       | <code>""</code>                    |
-| metadata.release.namespace                            | Release namespace                                  | <code>""</code>                    |
-| spec.annotations                                      | Annotations to add to the database custom resource | <code>{}</code>                    |
-| spec.labels                                           | Labels to add to all the template objects          | <code>{}</code>                    |
-| spec.storageSecret.create                             |                                                    | <code>true</code>                  |
-| spec.backend.provider                                 |                                                    | <code>"" # s3,gcs,azure</code>     |
-| spec.backend.s3.spec.endpoint                         |                                                    | <code>""</code>                    |
-| spec.backend.s3.spec.bucket                           |                                                    | <code>""</code>                    |
-| spec.backend.s3.auth.AWS_ACCESS_KEY_ID                |                                                    | <code>""</code>                    |
-| spec.backend.s3.auth.AWS_SECRET_ACCESS_KEY            |                                                    | <code>""</code>                    |
-| spec.backend.s3.auth.CA_CERT_DATA                     |                                                    | <code>""</code>                    |
-| spec.backend.azure.spec.container                     |                                                    | <code>""</code>                    |
-| spec.backend.azure.auth.AZURE_ACCOUNT_NAME            |                                                    | <code>""</code>                    |
-| spec.backend.azure.auth.AZURE_ACCOUNT_KEY             |                                                    | <code>""</code>                    |
-| spec.backend.gcs.spec.bucket                          |                                                    | <code>""</code>                    |
-| spec.backend.gcs.auth.GOOGLE_PROJECT_ID               |                                                    | <code>""</code>                    |
-| spec.backend.gcs.auth.GOOGLE_SERVICE_ACCOUNT_JSON_KEY |                                                    | <code>""</code>                    |
+|                       Parameter                       |                    Description                     |                  Default                  |
+|-------------------------------------------------------|----------------------------------------------------|-------------------------------------------|
+| metadata.resource.group                               |                                                    | <code>storage.kubestash.com</code>        |
+| metadata.resource.kind                                |                                                    | <code>BackupStorage</code>                |
+| metadata.resource.name                                |                                                    | <code>backupstorages</code>               |
+| metadata.resource.scope                               |                                                    | <code>Namespaced</code>                   |
+| metadata.resource.version                             |                                                    | <code>v1alpha1</code>                     |
+| metadata.release.name                                 | Release name                                       | <code>""</code>                           |
+| metadata.release.namespace                            | Release namespace                                  | <code>""</code>                           |
+| spec.annotations                                      | Annotations to add to the database custom resource | <code>{}</code>                           |
+| spec.labels                                           | Labels to add to all the template objects          | <code>{}</code>                           |
+| spec.backend.provider                                 |                                                    | <code>"local" # s3,gcs,azure,local</code> |
+| spec.backend.s3.spec.endpoint                         |                                                    | <code>""</code>                           |
+| spec.backend.s3.spec.bucket                           |                                                    | <code>""</code>                           |
+| spec.backend.s3.auth.AWS_ACCESS_KEY_ID                |                                                    | <code>""</code>                           |
+| spec.backend.s3.auth.AWS_SECRET_ACCESS_KEY            |                                                    | <code>""</code>                           |
+| spec.backend.s3.auth.CA_CERT_DATA                     |                                                    | <code>""</code>                           |
+| spec.backend.azure.spec.container                     |                                                    | <code>""</code>                           |
+| spec.backend.azure.auth.AZURE_ACCOUNT_NAME            |                                                    | <code>""</code>                           |
+| spec.backend.azure.auth.AZURE_ACCOUNT_KEY             |                                                    | <code>""</code>                           |
+| spec.backend.gcs.spec.bucket                          |                                                    | <code>""</code>                           |
+| spec.backend.gcs.auth.GOOGLE_PROJECT_ID               |                                                    | <code>""</code>                           |
+| spec.backend.gcs.auth.GOOGLE_SERVICE_ACCOUNT_JSON_KEY |                                                    | <code>""</code>                           |
+| spec.backend.local.mountPath                          |                                                    | <code>"ll"</code>                         |
+| spec.backend.local.persistentVolumeClaim.claimName    |                                                    | <code>"cc"</code>                         |
+| spec.backend.local.persistentVolumeClaim.readOnly     |                                                    | <code>false</code>                        |
+| spec.deletionPolicy                                   |                                                    | <code>"Delete"</code>                     |
+| spec.runtimeSettings.securityContext                  |                                                    | <code></code>                             |
 
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm upgrade -i`. For example:
