@@ -56,7 +56,6 @@ The following table lists the configurable parameters of the `storagekubestashco
 | metadata.release.namespace                            | Release namespace                                  | <code>""</code>                    |
 | spec.annotations                                      | Annotations to add to the database custom resource | <code>{}</code>                    |
 | spec.labels                                           | Labels to add to all the template objects          | <code>{}</code>                    |
-| spec.storageSecret.create                             |                                                    | <code>true</code>                  |
 | spec.backend.provider                                 |                                                    | <code>"" # s3,gcs,azure</code>     |
 | spec.backend.s3.spec.endpoint                         |                                                    | <code>""</code>                    |
 | spec.backend.s3.spec.bucket                           |                                                    | <code>""</code>                    |
@@ -69,6 +68,8 @@ The following table lists the configurable parameters of the `storagekubestashco
 | spec.backend.gcs.spec.bucket                          |                                                    | <code>""</code>                    |
 | spec.backend.gcs.auth.GOOGLE_PROJECT_ID               |                                                    | <code>""</code>                    |
 | spec.backend.gcs.auth.GOOGLE_SERVICE_ACCOUNT_JSON_KEY |                                                    | <code>""</code>                    |
+| spec.deletionPolicy                                   |                                                    | <code>"Delete"</code>              |
+| spec.runtimeSettings.securityContext                  |                                                    | <code></code>                      |
 
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm upgrade -i`. For example:

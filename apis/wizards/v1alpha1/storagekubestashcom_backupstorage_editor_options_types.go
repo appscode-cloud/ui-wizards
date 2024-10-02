@@ -18,6 +18,7 @@ package v1alpha1
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	kubestashapi "kubestash.dev/apimachinery/apis/storage/v1alpha1"
 	api "x-helm.dev/apimachinery/apis/releases/v1alpha1"
 )
 
@@ -43,9 +44,10 @@ type StoragekubestashcomBackupstorageEditorOptionsSpecSpec struct {
 	// +optional
 	Annotations map[string]string `json:"annotations"`
 	// +optional
-	Labels        map[string]string `json:"labels"`
-	StorageSecret OptionalResource  `json:"storageSecret"`
-	Backend       KubeStashBackend  `json:"backend"`
+	Labels          map[string]string           `json:"labels"`
+	Backend         KubeStashBackend            `json:"backend"`
+	DeletionPolicy  kubestashapi.DeletionPolicy `json:"deletionPolicy"`
+	RuntimeSettings RuntimeSettings             `json:"runtimeSettings"`
 }
 
 type KubeStashBackend struct {
@@ -56,6 +58,11 @@ type KubeStashBackend struct {
 	Azure Azure `json:"azure"`
 	// +optional
 	GCS GCS `json:"gcs"`
+}
+
+type RuntimeSettings struct {
+	// +optional
+	SecurityContext int64 `json:"securityContext"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

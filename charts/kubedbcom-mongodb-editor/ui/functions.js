@@ -1161,7 +1161,7 @@ async function fetchNamespaces(
   const url = `clusters/${username}/${clusterName}/proxy/identity.k8s.appscode.com/v1alpha1/selfsubjectnamespaceaccessreviews`
 
   try {
-    if (namespace) {
+    // if (namespace) {
       const resp = await axios.post(url, {
         _recurringCall: false,
         apiVersion: 'identity.k8s.appscode.com/v1alpha1',
@@ -1179,7 +1179,7 @@ async function fetchNamespaces(
       })
       let data = resp.data.status.namespaces
       return data
-    }
+    // }
   } catch (e) {
     console.log(e)
   }

@@ -138,18 +138,26 @@ properties:
         required:
         - provider
         type: object
+      deletionPolicy:
+        description: DeletionPolicy specifies what to do if a resource is deleted
+        enum:
+        - Delete
+        - WipeOut
+        type: string
       labels:
         additionalProperties:
           type: string
         type: object
-      storageSecret:
+      runtimeSettings:
         properties:
-          create:
-            type: boolean
+          securityContext:
+            format: int64
+            type: integer
         type: object
     required:
     - backend
-    - storageSecret
+    - deletionPolicy
+    - runtimeSettings
     type: object
 required:
 - spec
