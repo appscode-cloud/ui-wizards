@@ -1,547 +1,227 @@
 steps:
 - form:
     discriminator:
-      bundleApiLoaded:
-        default: false
+      nameSpaceApi:
         type: boolean
+        default: false
     elements:
-    - computed: initBundle
+    - type: input
+      computed: getNamespacesApi
       if: returnFalse
-      type: label-element
-    - disableUnselect: true
-      fetch: getAdminOptions|databases/MongoDB/versions
-      if: isToggleOn|databases/MongoDB/versions
+    - type: single-step-form
       label:
-        text: labels.database.version
-      schema:
-        $ref: schema#/properties/spec/properties/admin/properties/databases/properties/MongoDB/properties/versions/properties/default
-      type: select
-    - hasDescription: true
-      label:
-        text: labels.database.mode
-      onChange: clearArbiterHidden
-      options:
-      - description: options.database.mode.Standalone.description
-        text: options.database.mode.Standalone.label
-        value: Standalone
-      - description: options.database.mode.Replicaset.description
-        text: options.database.mode.Replicaset.label
-        value: Replicaset
-      - description: options.database.mode.Sharded.description
-        text: options.database.mode.Sharded.label
-        value: Sharded
-      schema:
-        $ref: schema#/properties/spec/properties/mode
-      type: radio
-    - elements:
-      - label:
-          text: labels.replicaset.name
-        schema:
-          $ref: schema#/properties/spec/properties/replicaSet/properties/name
-        type: input
-      - label:
-          text: labels.replicaset.number
-        schema:
-          $ref: schema#/properties/spec/properties/replicaSet/properties/replicas
-        type: input
-      if: isEqualToModelPathValue|Replicaset|/spec/mode
-      schema:
-        $ref: schema#/properties/spec/properties/replicaSet
-      type: single-step-form
-    - elements:
-      - elements:
-        - customClass: mt-10
-          label:
-            text: labels.shards
-          schema:
-            $ref: schema#/properties/spec/properties/shardTopology/properties/shard/properties/shards
-          type: input
-        - label:
-            text: labels.replicaset.number
-          schema:
-            $ref: schema#/properties/spec/properties/shardTopology/properties/shard/properties/replicas
-          type: input
-        - label:
-            text: labels.storage.size
-          schema:
-            $ref: schema#/properties/spec/properties/shardTopology/properties/shard/properties/persistence/properties/size
-          type: input
-        - elements:
-          - computed: setMachineToCustom
-            fetch: getMachineListForOptions
-            label:
-              text: labels.machine
-            onChange: onMachineChange|shardTopology/shard
-            schema:
-              $ref: schema#/properties/spec/properties/shardTopology/properties/shard/properties/podResources/properties/machine
-            type: select
-          - computed: setLimits|cpu|shardTopology/shard
-            disabled: isMachineNotCustom|shardTopology/shard
-            label:
-              text: labels.cpu
-            schema:
-              $ref: schema#/properties/spec/properties/shardTopology/properties/shard/properties/podResources/properties/resources/properties/requests/properties/cpu
-            type: input
-          - computed: setLimits|memory|shardTopology/shard
-            disabled: isMachineNotCustom|shardTopology/shard
-            label:
-              text: labels.memory
-            onChange: setRequests|memory|shardTopology/shard
-            schema:
-              $ref: schema#/properties/spec/properties/shardTopology/properties/shard/properties/podResources/properties/resources/properties/requests/properties/memory
-            type: input
-          schema:
-            $ref: schema#/properties/spec/properties/shardTopology/properties/shard/properties/podResources
-          type: single-step-form
-        label:
-          text: labels.shardNodes
-        show_label: true
-        type: single-step-form
-      - elements:
-        - customClass: mt-10
-          label:
-            text: labels.replicaset.number
-          schema:
-            $ref: schema#/properties/spec/properties/shardTopology/properties/configServer/properties/replicas
-          type: input
-        - label:
-            text: labels.storage.size
-          schema:
-            $ref: schema#/properties/spec/properties/shardTopology/properties/configServer/properties/persistence/properties/size
-          type: input
-        - elements:
-          - computed: setMachineToCustom
-            fetch: getMachineListForOptions
-            label:
-              text: labels.machine
-            onChange: onMachineChange|shardTopology/configServer
-            schema:
-              $ref: schema#/properties/spec/properties/shardTopology/properties/configServer/properties/podResources/properties/machine
-            type: select
-          - computed: setLimits|cpu|shardTopology/configServer
-            disabled: isMachineNotCustom|shardTopology/configServer
-            label:
-              text: labels.cpu
-            schema:
-              $ref: schema#/properties/spec/properties/shardTopology/properties/configServer/properties/podResources/properties/resources/properties/requests/properties/cpu
-            type: input
-          - computed: setLimits|memory|shardTopology/configServer
-            disabled: isMachineNotCustom|shardTopology/configServer
-            label:
-              text: labels.memory
-            onChange: setRequests|memory|shardTopology/configServer
-            schema:
-              $ref: schema#/properties/spec/properties/shardTopology/properties/configServer/properties/podResources/properties/resources/properties/requests/properties/memory
-            type: input
-          schema:
-            $ref: schema#/properties/spec/properties/shardTopology/properties/configServer/properties/podResources
-          type: single-step-form
-        label:
-          text: labels.configServer
-        show_label: true
-        type: single-step-form
-      - elements:
-        - customClass: mt-10
-          label:
-            text: labels.replicaset.number
-          schema:
-            $ref: schema#/properties/spec/properties/shardTopology/properties/mongos/properties/replicas
-          type: input
-        - elements:
-          - computed: setMachineToCustom
-            fetch: getMachineListForOptions
-            label:
-              text: labels.machine
-            onChange: onMachineChange|shardTopology/mongos
-            schema:
-              $ref: schema#/properties/spec/properties/shardTopology/properties/mongos/properties/podResources/properties/machine
-            type: select
-          - computed: setLimits|cpu|shardTopology/mongos
-            disabled: isMachineNotCustom|shardTopology/mongos
-            label:
-              text: labels.cpu
-            schema:
-              $ref: schema#/properties/spec/properties/shardTopology/properties/mongos/properties/podResources/properties/resources/properties/requests/properties/cpu
-            type: input
-          - computed: setLimits|memory|shardTopology/mongos
-            disabled: isMachineNotCustom|shardTopology/mongos
-            label:
-              text: labels.memory
-            onChange: setRequests|memory|shardTopology/mongos
-            schema:
-              $ref: schema#/properties/spec/properties/shardTopology/properties/mongos/properties/podResources/properties/resources/properties/requests/properties/memory
-            type: input
-          schema:
-            $ref: schema#/properties/spec/properties/shardTopology/properties/mongos/properties/podResources
-          type: single-step-form
-        label:
-          text: labels.mongos
-        show_label: true
-        type: single-step-form
-      if: isEqualToModelPathValue|Sharded|/spec/mode
-      type: single-step-form
-    - elements:
-      - computed: setMachineToCustom
-        customClass: mt-10
-        fetch: getMachineListForOptions
-        label:
-          text: labels.machine
-        onChange: onMachineChange
-        schema:
-          $ref: schema#/properties/spec/properties/podResources/properties/machine
-        type: select
-      - computed: setLimits|cpu
-        disabled: isMachineNotCustom
-        label:
-          text: labels.cpu
-        schema:
-          $ref: schema#/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
-        type: input
-      - computed: setLimits|memory
-        disabled: isMachineNotCustom
-        label:
-          text: labels.memory
-        onChange: setRequests|memory
-        schema:
-          $ref: schema#/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
-        type: input
-      if: notEqualToDatabaseMode|Sharded
-      label:
-        text: labels.machine_profile
+        text: Storage Ref
       show_label: true
-      type: single-step-form
-    - fetch: getAdminOptions|storageClasses
-      if: isToggleOn|storageClasses
-      label:
-        text: labels.storage.select
-      schema:
-        $ref: schema#/properties/spec/properties/admin/properties/storageClasses/properties/default
-      type: select
-    - if: showStorageSizeField
-      label:
-        text: labels.storage.size
-      schema:
-        $ref: schema#/properties/spec/properties/persistence/properties/size
-      type: input
-    - accordion: true
-      description:
-        text: Configure Credentials, Deployment Mode etc.
-      discriminator:
-        configDatabase:
-          default: false
-          type: boolean
-        createAuthSecret:
-          default: false
-          type: boolean
       elements:
-      - elements:
-        - isArray: true
-          keys:
-            label:
-              text: labels.labels.key
+      - type: select
+        schema:
+          $ref: schema#/properties/spec/properties/backend/properties/storageRef/properties/namespace
+        fetch: getNamespaces
+        label:
+          text: Namespace
+      - type: select
+        schema:
+          $ref: schema#/properties/spec/properties/backend/properties/storageRef/properties/name
+        fetch: getNames|storageRef
+        label:
+          text: name
+    - type: single-step-form
+      label:
+        text: Retention Policy
+      show_label: true
+      elements:
+      - type: select
+        schema:
+          $ref: schema#/properties/spec/properties/backend/properties/retentionPolicy/properties/namespace
+        fetch: getNamespaces
+        label:
+          text: Namespace
+      - type: select
+        schema:
+          $ref: schema#/properties/spec/properties/backend/properties/retentionPolicy/properties/name
+        fetch: getNames|retentionPolicy
+        label:
+          text: name
+    - type: single-step-form
+      elements:
+      - isArray: true
+        keys:
           label:
-            text: labels.labels.label
-          schema:
-            $ref: schema#/properties/spec/properties/labels
-          type: key-value-input-form
-          values:
-            label:
-              text: labels.labels.value
-            schema:
-              $ref: schema#/properties/spec/properties/labels/additionalProperties
-            type: input
-        - isArray: true
-          keys:
-            label:
-              text: labels.annotations.key
+            text: labels.labels.key
+        label:
+          text: labels.labels.label
+        schema:
+          $ref: schema#/properties/spec/properties/labels
+        type: key-value-input-form
+        values:
           label:
-            text: labels.annotations.label
+            text: labels.labels.value
           schema:
-            $ref: schema#/properties/spec/properties/annotations
-          type: key-value-input-form
-          values:
-            label:
-              text: labels.annotations.value
-            schema:
-              $ref: schema#/properties/spec/properties/annotations/additionalProperties
-            type: input
-        hideForm: true
-        label:
-          text: Labels & Annotations
-        show_label: true
-        type: single-step-form
-      - customClass: mt-20
-        label:
-          text: labels.deletionPolicy
-        onChange: setStorageClass
-        options:
-        - description: options.deletionPolicy.delete.description
-          text: options.deletionPolicy.delete.label
-          value: Delete
-        - description: options.deletionPolicy.halt.description
-          text: options.deletionPolicy.halt.label
-          value: Halt
-        - description: options.deletionPolicy.wipeOut.description
-          text: options.deletionPolicy.wipeOut.label
-          value: WipeOut
-        - description: options.deletionPolicy.doNotTerminate.description
-          text: options.deletionPolicy.doNotTerminate.label
-          value: DoNotTerminate
-        schema:
-          $ref: schema#/properties/spec/properties/deletionPolicy
-        type: select
-      - label:
-          text: Provide Authentication Credentials?
-        onChange: onAuthChange
-        schema:
-          $ref: discriminator#/createAuthSecret
-        type: switch
-      - if: showAuthPasswordField
-        label:
-          text: labels.name
-        schema:
-          $ref: schema#/properties/spec/properties/authSecret/properties/name
-        type: input
-      - if: showAuthPasswordField
-        label:
-          text: labels.password
-        schema:
-          $ref: schema#/properties/spec/properties/authSecret/properties/password
-        type: input
-      - label:
-          text: Configure Database?
-        onChange: clearConfiguration
-        schema:
-          $ref: discriminator#/configDatabase
-        type: switch
-      - if: isConfigDatabaseOn
-        label:
-          text: Configuration
-        schema:
-          $ref: schema#/properties/spec/properties/configuration
-        type: editor
-      - if: notEqualToDatabaseMode|Standalone
-        label:
-          text: Enable Arbiter?
-        schema:
-          $ref: schema#/properties/spec/properties/arbiter/properties/enabled
-        type: switch
-      - elements:
-        - elements:
-          - computed: setMachineToCustom
-            customClass: mt-10
-            fetch: getMachineListForOptions
-            label:
-              text: labels.machine
-            onChange: onMachineChange|arbiter
-            schema:
-              $ref: schema#/properties/spec/properties/arbiter/properties/podResources/properties/machine
-            type: select
-          - computed: setLimits|cpu|arbiter
-            disabled: isMachineNotCustom|arbiter
-            label:
-              text: labels.cpu
-            schema:
-              $ref: schema#/properties/spec/properties/arbiter/properties/podResources/properties/resources/properties/requests/properties/cpu
-            type: input
-          - computed: setLimits|memory|arbiter
-            disabled: isMachineNotCustom|arbiter
-            label:
-              text: labels.memory
-            onChange: setRequests|memory|arbiter
-            schema:
-              $ref: schema#/properties/spec/properties/arbiter/properties/podResources/properties/resources/properties/requests/properties/memory
-            type: input
-          schema:
-            $ref: schema#/properties/spec/properties/arbiter/properties/podResources
-          type: single-step-form
-        if: showArbiter
-        label:
-          text: Arbiter
-        schema:
-          $ref: schema#/properties/spec/properties/arbiter
-        show_label: true
-        type: single-step-form
-      - if: notEqualToDatabaseMode|Standalone
-        label:
-          text: Enable hidden?
-        schema:
-          $ref: schema#/properties/spec/properties/hidden/properties/enabled
-        type: switch
-      - elements:
-        - customClass: mt-10
-          label:
-            text: Replicas
-          schema:
-            $ref: schema#/properties/spec/properties/hidden/properties/replicas
+            $ref: schema#/properties/spec/properties/labels/additionalProperties
           type: input
-        - label:
-            text: Persistence Size
-          schema:
-            $ref: schema#/properties/spec/properties/hidden/properties/persistence/properties/size
-          type: input
-        - computed: setMachineToCustom
-          fetch: getMachineListForOptions
+      - isArray: true
+        keys:
           label:
-            text: labels.machine
-          onChange: onMachineChange|hidden
-          schema:
-            $ref: schema#/properties/spec/properties/hidden/properties/podResources/properties/machine
-          type: select
-        - computed: setLimits|cpu|hidden
-          disabled: isMachineNotCustom|hidden
+            text: labels.annotations.key
+        label:
+          text: labels.annotations.label
+        schema:
+          $ref: schema#/properties/spec/properties/annotations
+        type: key-value-input-form
+        values:
           label:
-            text: labels.cpu
+            text: labels.annotations.value
           schema:
-            $ref: schema#/properties/spec/properties/hidden/properties/podResources/properties/resources/properties/requests/properties/cpu
+            $ref: schema#/properties/spec/properties/annotations/additionalProperties
           type: input
-        - computed: setLimits|memory|hidden
-          disabled: isMachineNotCustom|hidden
-          label:
-            text: labels.memory
-          schema:
-            $ref: schema#/properties/spec/properties/hidden/properties/podResources/properties/resources/properties/requests/properties/memory
-          type: input
-        if: showHidden
-        label:
-          text: Hidden
-        schema:
-          $ref: schema#/properties/spec/properties/hidden/properties/podResources
-        show_label: true
-        type: single-step-form
-      - hasDescription: true
-        if: isToggleOn|deployment
-        label:
-          text: labels.deployment.name
-        options:
-        - description: labels.deployment.shared
-          text: Shared
-          value: Shared
-        - description: labels.deployment.dedicated
-          text: Dedicated
-          value: Dedicated
-        schema:
-          $ref: schema#/properties/spec/properties/admin/properties/deployment/properties/default
-        type: radio
-      - if: isToggleOn|clusterTier
-        isHorizontal: true
-        label:
-          text: labels.clusterTier
-        options:
-        - text: General Purpose
-          value: GeneralPurpose
-        - text: Memory Optimized
-          value: MemoryOptimized
-        - text: CPU Optimized
-          value: CPUOptimized
-        schema:
-          $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/default
-        type: radio
-      - disableUnselect: true
-        fetch: getAdminOptions|clusterTier/placement
-        if: isToggleOn|clusterTier/placement
-        label:
-          text: labels.placement
-        schema:
-          $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/placement/properties/default
-        type: select
-      - disableUnselect: true
-        fetch: getNodeTopology
-        if: isToggleOn|clusterTier/nodeTopology
-        label:
-          text: labels.nodeTopology
-        schema:
-          $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/nodeTopology/properties/default
-        type: select
       hideForm: true
       label:
-        text: Advanced Configuration
+        text: Labels & Annotations
       show_label: true
-      type: single-step-form
-    - accordion: true
-      description:
-        text: Enable Backup, Monitoring, TLS etc.
-      discriminator:
-        backup:
-          default: false
-          type: boolean
+    - type: single-step-form 
       elements:
-      - discriminator:
-          monitoring:
-            default: false
-            type: boolean
-        elements:
-        - computed: setMonitoring
-          label:
-            text: labels.enable_monitoring
-          onChange: updateAlertValue
-          schema:
-            $ref: discriminator#/monitoring
-          type: switch
-        - customClass: mt-10
-          if: showAlerts
-          label:
-            text: labels.alert.options
-          options:
-          - text: None
-            value: none
-          - text: Critical
-            value: critical
-          - text: Warning
-            value: warning
-          - text: Info
-            value: info
-          schema:
-            $ref: schema#/properties/form/properties/alert/properties/enabled
-          sortable: true
-          type: select
-        if: isToggleOn|monitoring
-        type: single-step-form
-      - elements:
-        - if: isToggleOn|tls
-          label:
-            text: Enable TLS?
-          schema:
-            $ref: schema#/properties/spec/properties/admin/properties/tls/properties/default
-          type: switch
-        - fetch: getAdminOptions|clusterIssuers
-          if: showIssuer
-          label:
-            text: labels.clusterIssuers
-          required: true
-          schema:
-            $ref: schema#/properties/spec/properties/admin/properties/clusterIssuers/properties/default
-          type: select
-        type: single-step-form
-      - elements:
-        - if: isToggleOn|expose
-          label:
-            text: Expose via Gateway?
-          schema:
-            $ref: schema#/properties/spec/properties/admin/properties/expose/properties/default
-          type: switch
-        type: single-step-form
-      - elements:
-        - if: isToggleOn|archiver
-          label:
-            text: Enable Archiver?
-          schema:
-            $ref: schema#/properties/spec/properties/admin/properties/archiver/properties/default
-          type: switch
-        type: single-step-form
-      - computed: setBackup
-        if: isToggleOn|backup
+      - addFormLabel: Session
+        element:
+          elements:
+          - type: input
+            label:
+              text: Session Name
+            schema:
+              $ref: schema#/properties/spec/properties/session/items/properties/sessionName
+          - type: input
+            label:
+              text: Schedule
+            schema:
+              $ref: schema#/properties/spec/properties/session/items/properties/schedule
+          - type: single-step-form
+            show_label: true
+            label:
+              text: Addon
+            schema:
+              $ref: schema#/properties/spec/properties/session/items/properties/addon
+            elements:
+            - label:
+                text: Security Context
+              schema:
+                $ref: schema#/properties/spec/properties/session/items/properties/addon/properties/jobTemplate/properties/securityContext
+              type: input
+            - label:
+                text: Name
+              schema:
+                $ref: schema#/properties/spec/properties/session/items/properties/addon/properties/name
+              fetch: getAddon
+              type: select
+            - addFormLabel: Task
+              element:
+                elements:
+                - label:
+                    text: Name
+                  schema:
+                    $ref: schema#/properties/spec/properties/session/items/properties/addon/properties/tasks/items/properties/name
+                  fetch: getTaskNames
+                  type: select
+                - label:
+                    text: Params
+                  schema:
+                    $ref: schema#/properties/spec/properties/session/items/properties/addon/properties/tasks/items/properties/params
+                  type: input
+                type: single-step-form
+              tableContents:
+              - inTableColumn: true
+                label:
+                  text: Name
+                path: name
+                type: value
+                typeOfValue: string
+              - inTableColumn: true
+                label:
+                  text: Params
+                path: params
+                type: value
+                typeOfValue: string
+              label:
+                text: Tasks
+              schema:
+                $ref: schema#/properties/spec/properties/session/items/properties/addon/properties/tasks
+              type: single-step-form-array
+          - type: single-step-form
+            label:
+              text: encryptionSecret
+            show_label: true
+            schema:
+              $ref: schema#/properties/spec/properties/session/items/properties/encryptionSecret
+            elements:
+            - label:
+                text: Namespace
+              fetch: getNamespaces
+              schema:
+                $ref: schema#/properties/spec/properties/session/items/properties/encryptionSecret/properties/namespace
+              type: select
+            - label:
+                text: Name
+              fetch: getEncryptionSecretNames
+              schema:
+                $ref: schema#/properties/spec/properties/session/items/properties/encryptionSecret/properties/name
+              type: select
+          - type: input
+            label:
+              text: Repo Name
+            schema:
+              $ref: schema#/properties/spec/properties/session/items/properties/repoName
+          type: single-step-form
         label:
-          text: Enable Backup?
-        onChange: onBackupSwitch
+          text: Session
         schema:
-          $ref: discriminator#/backup
-        type: switch
-      if: showAdditionalSettings
+          $ref: schema#/properties/spec/properties/session
+        tableContents:
+        - inTableColumn: true
+          label:
+            text: Repo Name
+          path: repoName
+          type: value
+          typeOfValue: string
+        - inTableColumn: true
+          label:
+            text: Schedule
+          path: schedule
+          type: value
+          typeOfValue: string
+        - inTableColumn: true
+          label:
+            text: Session Name
+          path: sessionName
+          type: value
+          typeOfValue: string
+        type: single-step-form-array
+    - type: single-step-form
       label:
-        text: Additional Options
+        text: Target
       show_label: true
-      type: single-step-form
+      elements:
+      - type: select
+        computed: setApiGroup
+        fetch: getApiGroup
+        schema:
+          $ref: schema#/properties/spec/properties/target/properties/apiGroup
+        label:
+          text: Api Group
+      - type: select
+        schema:
+          $ref: schema#/properties/spec/properties/target/properties/kind
+        fetch: getKinds
+        label:
+          text: Kind
+      - type: select
+        schema:
+          $ref: schema#/properties/spec/properties/target/properties/namespace
+        fetch: getNamespaces
+        label:
+          text: Namespace
+      - type: select
+        schema:
+          $ref: schema#/properties/spec/properties/target/properties/name
+        label:
+          text: Name 
     type: single-step-form
   id: options
   title: steps.0.label
