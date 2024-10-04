@@ -3,10 +3,7 @@
 
 // get specific feature details
 function getFeatureSetDetails(storeGet) {
-  const getRoute = storeGet('/route')
-  const featureSets = getRoute.fullPath.includes('/hubs/')
-    ? storeGet('/ocm/featureSet/result')
-    : storeGet('/cluster/featureSets/result') || []
+  const featureSets = storeGet('/cluster/featureSets/result') || []
   const featureSetName = storeGet('/route/params/featureset') || ''
   const featureSet = featureSets?.find((item) => item?.metadata?.name === featureSetName)
   return featureSet
