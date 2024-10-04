@@ -5,11 +5,18 @@
 function getFeatureSetDetails(storeGet) {
   const getRoute = storeGet('/route')
   const featureSets = getRoute.fullPath.includes('/hubs/')
-    ? storeGet('/ocm/featureSet/')
+    ? storeGet('/ocm/featureSet/result')
     : storeGet('/cluster/featureSets/result') || []
+  const featureSetName = storeGet('/route/params/featureset') || ''
+  const featureSet = featureSets?.find((item) => item?.metadata?.name === featureSetName)
+  return featureSet
+}
+
+function getFeatureSetDetailsOcm(storeGet) {
+  const featureSets = storeGet('/ocm/featureSet/result')
 
   const featureSetName = storeGet('/route/params/featureset') || ''
-  const featureSet = featureSets.find((item) => item?.metadata?.name === featureSetName)
+  const featureSet = featureSets?.find((item) => item?.name === featureSetName)
   return featureSet
 }
 
@@ -180,12 +187,22 @@ function getEnabledFeatures({ storeGet }) {
 function disableFeatures({ getValue, storeGet, itemCtx, discriminator, watchDependency }) {
   watchDependency('discriminator#/isResourceLoaded')
 
+  const getRoute = storeGet('/route')
+
   const isResourceLoaded = getValue(discriminator, '/isResourceLoaded')
   if (!isResourceLoaded) return true
 
   const featureName = itemCtx.value
-  const featureSet = getFeatureSetDetails(storeGet)
-  const requiredFeatures = featureSet?.spec?.requiredFeatures || []
+
+  let featureSet = {}
+  let requiredFeatures = []
+  if (getRoute.fullPath.includes('/hubs/')) {
+    featureSet = getFeatureSetDetailsOcm(storeGet)
+    requiredFeatures = featureSet?.requiredFeatures || []
+  } else {
+    featureSet = getFeatureSetDetails(storeGet)
+    requiredFeatures = featureSet?.spec?.requiredFeatures || []
+  }
 
   if (requiredFeatures.includes(featureName)) return true
   else return false
