@@ -153,7 +153,6 @@ function getEnabledFeatures({ storeGet }) {
   const getRoute = storeGet('/route')
 
   // extreme special case for OCM featureSet
-  window.console.log(featureSet, getRoute.fullPath.includes('/hubs/'))
   if (featureSet === 'opscenter-core' && getRoute?.fullPath?.includes('/hubs/')) {
     return ['flux2', 'kube-ui-server', 'license-proxyserver', 'opscenter-features']
   }
@@ -164,7 +163,6 @@ function getEnabledFeatures({ storeGet }) {
     }) || []
 
   if (activeFeature) {
-    window.console.log('howdy')
     return getEnabledFeaturesFromActiveFeature(allFeatureSetFeature, storeGet)
   }
 
