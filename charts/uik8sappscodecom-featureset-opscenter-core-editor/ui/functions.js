@@ -3,7 +3,11 @@
 
 // get specific feature details
 function getFeatureSetDetails(storeGet) {
-  const featureSets = storeGet('/cluster/featureSets/result') || []
+  const getRoute = storeGet('/route')
+  const featureSets = getRoute.fullPath.includes('/hubs/')
+    ? storeGet('/ocm/featureSet/')
+    : storeGet('/cluster/featureSets/result') || []
+
   const featureSetName = storeGet('/route/params/featureset') || ''
   const featureSet = featureSets.find((item) => item?.metadata?.name === featureSetName)
   return featureSet
@@ -66,6 +70,29 @@ function getEnabledFeatureInConfigureBtnClick(allFeatureSetFeature, isBlockLevel
 function getEnabledFeatureInEnableBtnClick(allFeatureSetFeature, isBlockLevel, storeGet) {
   // filter only (enabled + required + feature block feature)
   const featureBlock = storeGet('/route/query/activeBlock') || ''
+
+  // for OCM
+  const getRoute = storeGet('/route')
+  const FeatureList = storeGet('/ocm/featureSet/')
+  const FeatureSet = storeGet('/route/params/featureset')
+
+  if (getRoute.fullPath.includes('/hubs/')) {
+    const selectedFeatureSet =
+      FeatureList.result?.filter((item) => {
+        return item.name === FeatureSet
+      }) || []
+    const checkedFeatures =
+      selectedFeatureSet[0].features.filter((item) => {
+        return item.installed || item.recommended || item.featureBlock === featureBlock
+      }) || []
+    const checkedFeatureName =
+      checkedFeatures.map((item) => {
+        return item.name
+      }) || []
+    checkedFeatureName.push(featureBlock)
+    return checkedFeatureName
+  }
+
   const isRecommendedFeatureAvailable = allFeatureSetFeature.some((item) => {
     return item?.spec?.featureBlock === featureBlock && item?.spec?.recommended
   })
@@ -264,15 +291,18 @@ async function setReleaseNameAndNamespaceAndInitializeValues({
     // get resources default values when featureset is installed
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
+    const clusterset = storeGet('route/params/clusterset')
 
     const {
       name: chartName,
       sourceRef,
       version: chartVersion,
     } = getFeatureSetPropertyValue(storeGet, getValue, '/spec/chart')
-    const { data } = await axios.get(
-      `/clusters/${owner}/${cluster}/helm/packageview/values?name=${chartName}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${chartVersion}&format=json`,
-    )
+    const url =
+      `/clusters/${owner}/${cluster}/helm/packageview/values?name=${chartName}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${chartVersion}&format=json` +
+      (clusterset ? `&clusterset=${clusterset}` : '')
+    const { data } = await axios.get(url)
+
     const { resources: resourcesDefaultValues } = data || {}
 
     Object.keys(resourcesDefaultValues || {}).forEach((key) => {
