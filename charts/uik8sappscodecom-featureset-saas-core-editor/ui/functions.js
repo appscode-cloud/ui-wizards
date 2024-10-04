@@ -3,13 +3,8 @@
 
 // get specific feature details
 function getFeatureSetDetails(storeGet) {
-  window.console.log('asasasdas')
-  const getRoute = storeGet('/route')
-  const featureSets = getRoute.fullPath.includes('/hubs/')
-    ? storeGet('/ocm/featureSet/')
-    : storeGet('/cluster/featureSets/result') || []
+  const featureSets = storeGet('/cluster/featureSets/result') || []
   const featureSetName = storeGet('/route/params/featureset') || ''
-  window.console.log(featureSet)
   const featureSet = featureSets?.find((item) => item?.metadata?.name === featureSetName)
   return featureSet
 }
