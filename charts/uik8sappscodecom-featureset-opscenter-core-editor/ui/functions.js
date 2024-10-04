@@ -153,6 +153,13 @@ function getEnabledFeatures({ storeGet }) {
   const featureBlock = storeGet('/route/query/activeBlock') || ''
   const configureMode = storeGet('/route/query/mode') || ''
   const activeFeature = storeGet('/route/query/activeFeature') || ''
+  const getRoute = storeGet('/route')
+
+  // extreme special case for OCM featureSet
+  window.console.log(featureSet, getRoute.fullPath.includes('/hubs/'))
+  if (featureSet === 'opscenter-core' && getRoute?.fullPath?.includes('/hubs/')) {
+    return ['flux2', 'kube-ui-server', 'license-proxyserver', 'opscenter-features']
+  }
 
   const allFeatureSetFeature =
     allFeatures.filter((item) => {
@@ -160,6 +167,7 @@ function getEnabledFeatures({ storeGet }) {
     }) || []
 
   if (activeFeature) {
+    window.console.log('howdy')
     return getEnabledFeaturesFromActiveFeature(allFeatureSetFeature, storeGet)
   }
 
@@ -215,6 +223,14 @@ function getResourceValuePathFromFeature(feature) {
   return resourceValuePath
 }
 
+function checkSpecialOcmCase(storeGet, featureName) {
+  const getRoute = storeGet('/route')
+  const specialNames = ['flux2', 'license-proxyserver']
+  if (getRoute?.fullPath?.includes('/hubs/') && specialNames.includes(featureName)) return false
+
+  return true
+}
+
 function onEnabledFeaturesChange({ discriminator, getValue, commit, storeGet }) {
   const enabledFeatures = getValue(discriminator, '/enabledFeatures') || []
 
@@ -224,7 +240,7 @@ function onEnabledFeaturesChange({ discriminator, getValue, commit, storeGet }) 
     const featureName = item?.metadata?.name || ''
     const resourceValuePath = getResourceValuePathFromFeature(item)
 
-    if (enabledFeatures.includes(featureName)) {
+    if (enabledFeatures.includes(featureName) && checkSpecialOcmCase(storeGet, featureName)) {
       const featureSet = storeGet('/route/params/featureset') || ''
       const chart = getFeaturePropertyValue(storeGet, featureName, getValue, '/spec/chart/name')
       const targetNamespace = getFeaturePropertyValue(
@@ -404,4 +420,5 @@ return {
   returnFalse,
   setReleaseNameAndNamespaceAndInitializeValues,
   fetchFeatureSetOptions,
+  checkSpecialOcmCase,
 }
