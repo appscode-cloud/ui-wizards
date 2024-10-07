@@ -1653,7 +1653,6 @@ function onInputChange(
 ) {
   const value = getValue(discriminator, `/${discriminatorName}`)
   const backends = getValue(model, modelPath)
-  watchDependency(`discriminator#/${discriminatorName}`)
   if (field !== 'encryptionSecret') backends[0][field][subfield] = value
   else backends[0]['repositories'][0][field][subfield] = value
   commit('wizard/model$update', {
@@ -1699,14 +1698,7 @@ function setInitSchedule(
   })
 }
 
-function getDefault(
-  { getValue, discriminator, watchDependency, commit, model },
-  modelPath,
-  field,
-  subfield,
-  discriminatorName,
-) {
-  watchDependency(`discriminator#/${discriminatorName}`)
+function getDefault({ getValue, model }, modelPath, field, subfield) {
   const backends = getValue(model, modelPath)
   if (field !== 'encryptionSecret') return backends[0][field][subfield]
   else {
