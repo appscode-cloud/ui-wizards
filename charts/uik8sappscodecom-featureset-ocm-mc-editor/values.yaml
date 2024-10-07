@@ -9,37 +9,6 @@ metadata:
     name: RELEASE-NAME
     namespace: default
 resources:
-  helmToolkitFluxcdIoHelmRelease_ace_mc_addons: # +doc-gen:break
-    apiVersion: helm.toolkit.fluxcd.io/v2
-    kind: HelmRelease
-    metadata:
-      labels:
-        app.kubernetes.io/component: ace-mc-addons
-      name: ace-mc-addons
-      namespace: kubeops
-    spec:
-      chart:
-        spec:
-          chart: ace-ocm-addons
-          sourceRef:
-            kind: HelmRepository
-            name: appscode-charts-oci
-            namespace: kubeops
-          version: v2024.8.21
-      install:
-        crds: CreateReplace
-        createNamespace: true
-        remediation:
-          retries: -1
-      interval: 5m
-      releaseName: ace-mc-addons
-      storageNamespace: open-cluster-management-addon
-      targetNamespace: open-cluster-management-addon
-      timeout: 30m
-      upgrade:
-        crds: CreateReplace
-        remediation:
-          retries: -1
   helmToolkitFluxcdIoHelmRelease_ingress_nginx_mc: # +doc-gen:break
     apiVersion: helm.toolkit.fluxcd.io/v2
     kind: HelmRelease
@@ -250,6 +219,37 @@ resources:
           retries: -1
       interval: 5m
       releaseName: mc-license-manager
+      storageNamespace: open-cluster-management-addon
+      targetNamespace: open-cluster-management-addon
+      timeout: 30m
+      upgrade:
+        crds: CreateReplace
+        remediation:
+          retries: -1
+  helmToolkitFluxcdIoHelmRelease_mc_profile_manager: # +doc-gen:break
+    apiVersion: helm.toolkit.fluxcd.io/v2
+    kind: HelmRelease
+    metadata:
+      labels:
+        app.kubernetes.io/component: mc-profile-manager
+      name: mc-profile-manager
+      namespace: kubeops
+    spec:
+      chart:
+        spec:
+          chart: cluster-profile-manager
+          sourceRef:
+            kind: HelmRepository
+            name: appscode-charts-oci
+            namespace: kubeops
+          version: v2024.9.30
+      install:
+        crds: CreateReplace
+        createNamespace: true
+        remediation:
+          retries: -1
+      interval: 5m
+      releaseName: mc-profile-manager
       storageNamespace: open-cluster-management-addon
       targetNamespace: open-cluster-management-addon
       timeout: 30m

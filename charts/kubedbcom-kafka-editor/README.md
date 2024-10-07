@@ -7,8 +7,8 @@
 ```bash
 $ helm repo add appscode-charts-oci https://bundles.byte.builders/ui/
 $ helm repo update
-$ helm search repo appscode-charts-oci/kubedbcom-kafka-editor --version=v0.6.0
-$ helm upgrade -i kubedbcom-kafka-editor appscode-charts-oci/kubedbcom-kafka-editor -n default --create-namespace --version=v0.6.0
+$ helm search repo appscode-charts-oci/kubedbcom-kafka-editor --version=v0.7.0
+$ helm upgrade -i kubedbcom-kafka-editor appscode-charts-oci/kubedbcom-kafka-editor -n default --create-namespace --version=v0.7.0
 ```
 
 ## Introduction
@@ -24,7 +24,7 @@ This chart deploys a Kafka Editor on a [Kubernetes](http://kubernetes.io) cluste
 To install/upgrade the chart with the release name `kubedbcom-kafka-editor`:
 
 ```bash
-$ helm upgrade -i kubedbcom-kafka-editor appscode-charts-oci/kubedbcom-kafka-editor -n default --create-namespace --version=v0.6.0
+$ helm upgrade -i kubedbcom-kafka-editor appscode-charts-oci/kubedbcom-kafka-editor -n default --create-namespace --version=v0.7.0
 ```
 
 The command deploys a Kafka Editor on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
@@ -129,6 +129,7 @@ The following table lists the configurable parameters of the `kubedbcom-kafka-ed
 | metadata.release.name                                                      |             | <code>RELEASE-NAME</code>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | metadata.release.namespace                                                 |             | <code>default</code>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 | resources.autoscalingKubedbComKafkaAutoscaler                              |             | <code>{"apiVersion":"autoscaling.kubedb.com/v1alpha1","kind":"KafkaAutoscaler","metadata":{"name":"kafka","namespace":"demo"},"spec":{"compute":{"node":{"maxAllowed":{"cpu":1,"memory":"2Gi"},"minAllowed":{"cpu":"400m","memory":"400Mi"},"podLifeTimeThreshold":"10m","resourceDiffPercentage":20,"trigger":"On"},"nodeTopology":{"name":"standard-basv2-family"}},"databaseRef":{"name":"repl"},"opsRequestOptions":{"apply":"IfReady","timeout":"10m"}}}</code>                                                                                                                                                                                                                                                                                                                                           |
+| resources.catalogAppscodeComKafkaBinding                                   |             | <code>{"apiVersion":"catalog.appscode.com/v1alpha1","kind":"KafkaBinding","metadata":{"name":"kafka","namespace":"demo"},"spec":{"sourceRef":{"name":"kafka","namespace":"demo"}}}</code>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | resources.kubedbComKafka                                                   |             | <code>{"apiVersion":"kubedb.com/v1","kind":"Kafka","metadata":{"name":"kafka","namespace":"demo"},"spec":{"authSecret":{"name":"kafka-admin-cred"},"deletionPolicy":"WipeOut","enableSSL":true,"monitor":{"agent":"prometheus.io/operator","prometheus":{"exporter":{"port":9091},"serviceMonitor":{"interval":"10s","labels":{"release":"prometheus"}}}},"storageType":"Ephemeral","tls":{"issuerRef":{"apiGroup":"cert-manager.io","kind":"Issuer","name":"kafka-ca"}},"topology":{"broker":{"replicas":3,"storage":{"accessModes":["ReadWriteOnce"],"resources":{"requests":{"storage":"1Gi"}},"storageClassName":"standard"}},"controller":{"replicas":2,"storage":{"accessModes":["ReadWriteOnce"],"resources":{"requests":{"storage":"1Gi"}},"storageClassName":"standard"}}},"version":"3.3.2"}}</code> |
 | resources.monitoringCoreosComServiceMonitor                                |             | <code>{"apiVersion":"monitoring.coreos.com/v1","kind":"ServiceMonitor","metadata":{"name":"kafka","namespace":"demo"},"spec":{"endpoints":[{"honorLabels":true,"interval":"10s","path":"/metrics","port":"metrics"}],"namespaceSelector":{"matchNames":["demo"]},"selector":{"matchLabels":{"app.kubernetes.io/instance":"kafka","app.kubernetes.io/name":"kafkas.kubedb.com"}}}}</code>                                                                                                                                                                                                                                                                                                                                                                                                                       |
 | resources.secret_admin_cred                                                |             | <code>{"apiVersion":"v1","kind":"Secret","metadata":{"name":"kafka-admin-cred","namespace":"demo"},"stringData":{"password":"WeakPassword","username":"admin"},"type":"kubernetes.io/basic-auth"}</code>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
@@ -137,12 +138,12 @@ The following table lists the configurable parameters of the `kubedbcom-kafka-ed
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm upgrade -i`. For example:
 
 ```bash
-$ helm upgrade -i kubedbcom-kafka-editor appscode-charts-oci/kubedbcom-kafka-editor -n default --create-namespace --version=v0.6.0 --set form.alert.enabled=warning
+$ helm upgrade -i kubedbcom-kafka-editor appscode-charts-oci/kubedbcom-kafka-editor -n default --create-namespace --version=v0.7.0 --set form.alert.enabled=warning
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
 installing the chart. For example:
 
 ```bash
-$ helm upgrade -i kubedbcom-kafka-editor appscode-charts-oci/kubedbcom-kafka-editor -n default --create-namespace --version=v0.6.0 --values values.yaml
+$ helm upgrade -i kubedbcom-kafka-editor appscode-charts-oci/kubedbcom-kafka-editor -n default --create-namespace --version=v0.7.0 --values values.yaml
 ```

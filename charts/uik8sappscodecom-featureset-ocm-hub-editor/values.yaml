@@ -9,37 +9,6 @@ metadata:
     name: RELEASE-NAME
     namespace: default
 resources:
-  helmToolkitFluxcdIoHelmRelease_ace_ocm_addons: # +doc-gen:break
-    apiVersion: helm.toolkit.fluxcd.io/v2
-    kind: HelmRelease
-    metadata:
-      labels:
-        app.kubernetes.io/component: ace-ocm-addons
-      name: ace-ocm-addons
-      namespace: kubeops
-    spec:
-      chart:
-        spec:
-          chart: ace-ocm-addons
-          sourceRef:
-            kind: HelmRepository
-            name: appscode-charts-oci
-            namespace: kubeops
-          version: v2024.8.21
-      install:
-        crds: CreateReplace
-        createNamespace: true
-        remediation:
-          retries: -1
-      interval: 5m
-      releaseName: ace-ocm-addons
-      storageNamespace: open-cluster-management-addon
-      targetNamespace: open-cluster-management-addon
-      timeout: 30m
-      upgrade:
-        crds: CreateReplace
-        remediation:
-          retries: -1
   helmToolkitFluxcdIoHelmRelease_cluster_auth_manager: # +doc-gen:break
     apiVersion: helm.toolkit.fluxcd.io/v2
     kind: HelmRelease
@@ -128,6 +97,37 @@ resources:
       releaseName: cluster-manager-hub
       storageNamespace: open-cluster-management
       targetNamespace: open-cluster-management
+      timeout: 30m
+      upgrade:
+        crds: CreateReplace
+        remediation:
+          retries: -1
+  helmToolkitFluxcdIoHelmRelease_cluster_profile_manager: # +doc-gen:break
+    apiVersion: helm.toolkit.fluxcd.io/v2
+    kind: HelmRelease
+    metadata:
+      labels:
+        app.kubernetes.io/component: cluster-profile-manager
+      name: cluster-profile-manager
+      namespace: kubeops
+    spec:
+      chart:
+        spec:
+          chart: cluster-profile-manager
+          sourceRef:
+            kind: HelmRepository
+            name: appscode-charts-oci
+            namespace: kubeops
+          version: v2024.9.30
+      install:
+        crds: CreateReplace
+        createNamespace: true
+        remediation:
+          retries: -1
+      interval: 5m
+      releaseName: cluster-profile-manager
+      storageNamespace: open-cluster-management-addon
+      targetNamespace: open-cluster-management-addon
       timeout: 30m
       upgrade:
         crds: CreateReplace
