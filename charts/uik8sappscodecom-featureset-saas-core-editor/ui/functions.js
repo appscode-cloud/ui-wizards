@@ -5,7 +5,7 @@
 function getFeatureSetDetails(storeGet) {
   const featureSets = storeGet('/cluster/featureSets/result') || []
   const featureSetName = storeGet('/route/params/featureset') || ''
-  const featureSet = featureSets.find((item) => item?.metadata?.name === featureSetName)
+  const featureSet = featureSets?.find((item) => item?.metadata?.name === featureSetName)
   return featureSet
 }
 
@@ -288,15 +288,18 @@ async function setReleaseNameAndNamespaceAndInitializeValues({
     // get resources default values when featureset is installed
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
+    const clusterset = storeGet('route/params/clusterset')
 
     const {
       name: chartName,
       sourceRef,
       version: chartVersion,
     } = getFeatureSetPropertyValue(storeGet, getValue, '/spec/chart')
-    const { data } = await axios.get(
-      `/clusters/${owner}/${cluster}/helm/packageview/values?name=${chartName}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${chartVersion}&format=json`,
-    )
+    const url =
+      `/clusters/${owner}/${cluster}/helm/packageview/values?name=${chartName}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${chartVersion}&format=json` +
+      (clusterset ? `&clusterset=${clusterset}` : '')
+    const { data } = await axios.get(url)
+
     const { resources: resourcesDefaultValues } = data || {}
 
     Object.keys(resourcesDefaultValues || {}).forEach((key) => {
