@@ -267,34 +267,9 @@ function returnFalse() {
 let appKind = []
 let coreKind = []
 let kubedbKind = []
-let availableKinds = {}
-let kindToResourceMap = {}
-let namespaces = []
-let version = ''
 
-function init({ watchDependency, model, getValue, storeGet, axios }) {
+function init({ watchDependency, model, getValue, storeGet, axios, setDiscriminatorValue }) {
   getKindsApi({ watchDependency, model, getValue, storeGet, axios })
-  namespaces = fetchNamespacesApi({ axios, storeGet })
-}
-
-function fetchNamespaces({ watchDependency }) {
-  watchDependency('discriminator#/nameSpaceApi')
-  return namespaces
-}
-
-function setVersion({ getValue, model, watchDependency }) {
-  watchDependency('model#/spec/target/apiGroup')
-  watchDependency('model#/spec/target/kind')
-  const apiGroup = getValue(model, `/spec/target/apiGroup`)
-  const kind = getValue(model, `/spec/target/kind`)
-  if (apiGroup === 'core') apiGroup = ''
-  Object.keys(availableKinds[apiGroup]).forEach((vs) => {
-    availableKinds[apiGroup][vs].forEach((ele) => {
-      if (ele.Kind === kind) {
-        version = vs
-      }
-    })
-  })
 }
 
 async function getKindsApi({ storeGet, axios }) {
@@ -303,31 +278,9 @@ async function getKindsApi({ storeGet, axios }) {
   let url = `/clusters/${user}/${cluster}/available-types?groups=core,apps,kubedb.com`
   try {
     const resp = await axios.get(url)
-
-    kindToResourceMap['kubedb.com'] = {}
-    kindToResourceMap['apps'] = {}
-    kindToResourceMap['core'] = {}
-
-    availableKinds = resp.data
-
-    appKind = Object.values(availableKinds['apps'])
-      .flat()
-      .map((ele) => {
-        kindToResourceMap['apps'][ele.Kind] = ele.Resource
-        return ele.Kind
-      })
-    kubedbKind = Object.values(availableKinds['kubedb.com'])
-      .flat()
-      .map((ele) => {
-        kindToResourceMap['kubedb.com'][ele.Kind] = ele.Resource
-        return ele.Kind
-      })
-    coreKind = Object.values(availableKinds[''])
-      .flat()
-      .map((ele) => {
-        kindToResourceMap['core'][ele.Kind] = ele.Resource
-        return ele.Kind
-      })
+    appKind = Object.values(resp.data['apps']).flat()
+    kubedbKind = Object.values(resp.data['kubedb.com']).flat()
+    coreKind = Object.values(resp.data['']).flat()
   } catch (e) {
     console.log(e)
   }
@@ -347,40 +300,26 @@ function getApiGroup() {
   return ['core', 'apps', 'kubedb.com']
 }
 
-async function getTargetName({ watchDependency, getValue, model, axios, storeGet }) {
-  watchDependency('model#/spec/target/apiGroup')
-  watchDependency('model#/spec/target/namespace')
-  watchDependency('model#/spec/target/kind')
+async function getTargetName({ watchDependency, storeGet, getValue, model, axios }) {
+  watchDependency(`model#/spec/target/apiGroup`)
+  watchDependency(`model#/spec/target/kind`)
+  watchDependency(`model#/spec/target/namespace`)
   const apiGroup = getValue(model, `/spec/target/apiGroup`)
+  const kind = getValue(model, `/spec/target/kind`)
   const namespace = getValue(model, `/spec/target/namespace`)
-  const resource = getResourceName({ getValue, model })
   const params = storeGet('/route/params')
   const { user, cluster } = params
 
-  const url = `/clusters/${user}/${cluster}/proxy/${apiGroup}/${version}/namespaces/${namespace}/${resource}`
-  if (apiGroup && version && resource && namespace) {
-    try {
-      const resp = await axios.get(url)
-      const items = resp.data?.items
-      const options = items.map((ele) => {
-        return ele.metadata.name
-      })
-      return options
-    } catch (e) {
-      console.log(e)
-    }
+  const url = `/clusters/${user}/${cluster}/proxy/meta.k8s.appscode.com/v1alpha1/usermenus/kubedb-accordion/available`
+  try {
+    const resp = await axios.get(url)
+    console.log(resp)
+  } catch (e) {
+    console.log(e)
   }
 }
 
-function getResourceName({ getValue, model }) {
-  const apiGroup = getValue(model, `/spec/target/apiGroup`)
-  const kind = getValue(model, `/spec/target/kind`)
-  return kindToResourceMap[apiGroup][kind]
-}
-
 return {
-  fetchNamespaces,
-  setVersion,
   init,
   getTargetName,
   getKinds,

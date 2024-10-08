@@ -9,16 +9,9 @@ steps:
           default: false
           type: boolean
       elements:
-      - fetch: fetchNamespaces
-        if: isConsole
-        label:
-          text: Select Namespace
-        schema:
-          $ref: schema#/properties/metadata/properties/release/properties/namespace
-        type: select
-      - computed: init
-        if: returnFalse
+      - if: returnFalse
         type: input
+        computed: init
       - if: isConsole
         label:
           text: labels.name
@@ -205,38 +198,36 @@ steps:
           schema:
             $ref: schema#/properties/spec/properties/addon
           type: single-step-form
-        - elements:
-          - fetch: getApiGroup
-            label:
-              text: Api Group
-            schema:
-              $ref: schema#/properties/spec/properties/target/properties/apiGroup
-            type: select
-          - fetch: getKinds
-            label:
-              text: Kind
-            onChange: setVersion
-            schema:
-              $ref: schema#/properties/spec/properties/target/properties/kind
-            type: select
-          - fetch: fetchNamespaces
-            label:
-              text: Namespace
-            schema:
-              $ref: schema#/properties/spec/properties/target/properties/namespace
-            type: select
-          - fetch: getTargetName
-            label:
-              text: Name
-            schema:
-              $ref: schema#/properties/spec/properties/target/properties/name
-            type: select
-          hideForm: true
-          if: isConsole
+        - type: single-step-form
           label:
             text: Target
           show_label: true
-          type: single-step-form
+          elements:
+          - type: select
+            fetch: getApiGroup
+            schema:
+              $ref: schema#/properties/spec/properties/target/properties/apiGroup
+            label:
+              text: Api Group
+          - type: select
+            schema:
+              $ref: schema#/properties/spec/properties/target/properties/kind
+            fetch: getKinds
+            label:
+              text: Kind
+          - type: select
+            schema:
+              $ref: schema#/properties/spec/properties/target/properties/namespace
+            fetch: getNamespaces
+            label:
+              text: Namespace
+          - type: select
+            fetch: getTargetName
+            schema:
+              $ref: schema#/properties/spec/properties/target/properties/name
+            label:
+              text: Name 
+        if: databaseSelected
         schema:
           $ref: schema#/properties/spec
         type: single-step-form
