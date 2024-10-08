@@ -263,7 +263,66 @@ function returnFalse() {
   return false
 }
 
+let appKind = []
+let coreKind = []
+let kubedbKind = []
+
+function init({ watchDependency, model, getValue, storeGet, axios, setDiscriminatorValue }) {
+  getKindsApi({ watchDependency, model, getValue, storeGet, axios })
+}
+
+async function getKindsApi({ storeGet, axios }) {
+  const params = storeGet('/route/params')
+  const { user, cluster } = params
+  let url = `/clusters/${user}/${cluster}/available-types?groups=core,apps,kubedb.com`
+  try {
+    const resp = await axios.get(url)
+    appKind = Object.values(resp.data['apps']).flat()
+    kubedbKind = Object.values(resp.data['kubedb.com']).flat()
+    coreKind = Object.values(resp.data['']).flat()
+  } catch (e) {
+    console.log(e)
+  }
+  return []
+}
+
+function getKinds({ watchDependency, getValue, model }) {
+  watchDependency(`model#/spec/target/apiGroup`)
+  const apiGroup = getValue(model, `/spec/target/apiGroup`)
+
+  if (apiGroup === 'core') return coreKind
+  else if (apiGroup === 'apps') return appKind
+  else return kubedbKind
+}
+
+function getApiGroup() {
+  return ['core', 'apps', 'kubedb.com']
+}
+
+async function getTargetName({ watchDependency, storeGet, getValue, model, axios }) {
+  watchDependency(`model#/spec/target/apiGroup`)
+  watchDependency(`model#/spec/target/kind`)
+  watchDependency(`model#/spec/target/namespace`)
+  const apiGroup = getValue(model, `/spec/target/apiGroup`)
+  const kind = getValue(model, `/spec/target/kind`)
+  const namespace = getValue(model, `/spec/target/namespace`)
+  const params = storeGet('/route/params')
+  const { user, cluster } = params
+
+  const url = `/clusters/${user}/${cluster}/proxy/meta.k8s.appscode.com/v1alpha1/usermenus/kubedb-accordion/available`
+  try {
+    const resp = await axios.get(url)
+    console.log(resp)
+  } catch (e) {
+    console.log(e)
+  }
+}
+
 return {
+  init,
+  getTargetName,
+  getKinds,
+  getApiGroup,
   isConsole,
   initMetadata,
   isRancherManaged,
