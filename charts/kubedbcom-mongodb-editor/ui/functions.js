@@ -2413,7 +2413,7 @@ function onSetCustomConfigChange({ discriminator, getValue, commit }) {
   }
 }
 
-function getCreateNameSpaceUrl({ model, getValue, storeGet }) {
+function getCreateNameSpaceUrl({ storeGet }) {
   const user = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
 
