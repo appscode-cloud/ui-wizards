@@ -99,7 +99,7 @@ spec:
         labels:
           {{- toYaml .Values.spec.monitoring.serviceMonitor.labels | nindent 10 }}
 {{- end }}
-{{- if .Values.spec.init.archiver.recoveryTimestamp }}
+{{- if (and .Values.spec.init .Values.spec.init.archiver .Values.spec.init.archiver.recoveryTimestamp) }}
   init:
     archiver:
       {{- toYaml .Values.spec.init.archiver | nindent 6 }}
