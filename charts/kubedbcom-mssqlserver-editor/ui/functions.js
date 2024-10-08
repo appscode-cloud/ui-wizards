@@ -1656,7 +1656,7 @@ function onRepositoryNameChange({ getValue, model, commit }) {
 }
 
 function onInputChange(
-  { getValue, discriminator, watchDependency, commit, model },
+  { getValue, discriminator, commit, model },
   modelPath,
   field,
   subfield,

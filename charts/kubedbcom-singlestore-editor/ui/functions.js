@@ -1158,6 +1158,16 @@ async function getBlueprints({ getValue, model, setDiscriminatorValue, axios, st
   }
 }
 
+function isRancherManaged({ storeGet }) {
+  const managers = storeGet('/cluster/clusterDefinition/result/clusterManagers')
+  const found = managers.find((item) => item === 'Rancher')
+  return !!found
+}
+
+function isNotRancherManaged({ storeGet }) {
+  return !isRancherManaged({ storeGet })
+}
+
 async function fetchNamespaces({ axios, storeGet }) {
   const username = storeGet('/route/params/user')
   const clusterName = storeGet('/route/params/cluster')
@@ -1644,7 +1654,7 @@ function onRepositoryNameChange({ getValue, model, commit }) {
 }
 
 function onInputChange(
-  { getValue, discriminator, watchDependency, commit, model },
+  { getValue, discriminator, commit, model },
   modelPath,
   field,
   subfield,
@@ -1659,6 +1669,7 @@ function onInputChange(
     value: backends,
   })
 }
+
 function setFileValueFromStash({ getValue, commit, model }, modelPath, field, subfield, value) {
   const backends = getValue(model, modelPath)
   if (field !== 'encryptionSecret') backends[0][field][subfield] = value
@@ -2441,6 +2452,8 @@ return {
   setInitSchedule,
   fetchNames,
   fetchNamespaces,
+  isRancherManaged,
+  isNotRancherManaged,
   onInputChangeSchedule,
   getDefaultSchedule,
   getBlueprints,
