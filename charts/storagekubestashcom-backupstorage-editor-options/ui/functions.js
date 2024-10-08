@@ -246,7 +246,44 @@ function isVariantAvailable({ storeGet }) {
   return variant ? true : false
 }
 
+async function getNamespaces({ axios, storeGet }) {
+  const params = storeGet('/route/params')
+  const { user, cluster, group, version, resource } = params
+  try {
+    const resp = await axios.post(
+      `/clusters/${user}/${cluster}/proxy/identity.k8s.appscode.com/v1alpha1/selfsubjectnamespaceaccessreviews`,
+      {
+        apiVersion: 'identity.k8s.appscode.com/v1alpha1',
+        kind: 'SelfSubjectNamespaceAccessReview',
+        spec: {
+          resourceAttributes: [
+            {
+              verb: 'create',
+              group: group,
+              version: version,
+              resource: resource,
+            },
+          ],
+        },
+      },
+    )
+    namespaces = resp?.data?.status?.namespaces || []
+    return namespaces
+  } catch (e) {
+    console.log(e)
+    return []
+  }
+}
+
+function isProvider({ watchDependency, model, getValue }, type) {
+  watchDependency('model#/spec/backend/provider')
+  const Provider = getValue(model, '/spec/backend/provider')
+  return type === Provider
+}
+
 return {
+  isProvider,
+  getNamespaces,
   isVariantAvailable,
   getResources,
   initNamespace,

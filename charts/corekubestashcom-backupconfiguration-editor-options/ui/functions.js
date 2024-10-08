@@ -1,4 +1,14 @@
 let namespaces = []
+let appKind = []
+let coreKind = []
+let kubedbKind = []
+
+function init({ watchDependency, model, getValue, storeGet, axios, setDiscriminatorValue }) {
+  getNamespacesApi({ axios, storeGet, setDiscriminatorValue })
+  getKindsApi({ watchDependency, model, getValue, storeGet, axios })
+  setDiscriminatorValue('/nameSpaceApi', true)
+}
+
 async function getNamespacesApi({ axios, storeGet, setDiscriminatorValue }) {
   const params = storeGet('/route/params')
   const { user, cluster, group, version, resource } = params
@@ -21,7 +31,6 @@ async function getNamespacesApi({ axios, storeGet, setDiscriminatorValue }) {
       },
     )
     namespaces = resp?.data?.status?.namespaces || []
-    setDiscriminatorValue('/nameSpaceApi', true)
     return namespaces
   } catch (e) {
     console.log(e)
@@ -109,31 +118,55 @@ async function getEncryptionSecretNames({ model, watchDependency, storeGet, getV
   return []
 }
 
-async function getKinds({ watchDependency, model, getValue, storeGet, axios }) {
-  watchDependency(`model#/spec/target/apiGroup`)
-
-  const apiGroup = getValue(model, `/spec/target/apiGroup`)
+async function getKindsApi({ storeGet, axios }) {
   const params = storeGet('/route/params')
   const { user, cluster } = params
-  let url = `/clusters/${user}/${cluster}/available-types?groups=${apiGroup}`
-  if (apiGroup) {
-    try {
-      const resp = await axios.get(url)
-      const kind = Object.values(resp.data[apiGroup]).flat()
-      return kind
-    } catch (e) {
-      console.log(e)
-    }
+  let url = `/clusters/${user}/${cluster}/available-types?groups=core,apps,kubedb.com`
+  try {
+    const resp = await axios.get(url)
+    appKind = Object.values(resp.data['apps']).flat()
+    kubedbKind = Object.values(resp.data['kubedb.com']).flat()
+    coreKind = Object.values(resp.data['']).flat()
+  } catch (e) {
+    console.log(e)
   }
   return []
 }
 
+function getKinds({ watchDependency, getValue, model }) {
+  watchDependency(`model#/spec/target/apiGroup`)
+  const apiGroup = getValue(model, `/spec/target/apiGroup`)
+
+  if (apiGroup === 'core') return coreKind
+  else if (apiGroup === 'apps') return appKind
+  else return kubedbKind
+}
+
 function getApiGroup() {
-  return ['kubedb.com', 'apps']
+  return ['core', 'apps', 'kubedb.com']
 }
 
 function setApiGroup() {
   return 'kubedb.com'
+}
+
+async function getTargetName({ watchDependency, storeGet, getValue, model, axios }) {
+  watchDependency(`model#/spec/target/apiGroup`)
+  watchDependency(`model#/spec/target/kind`)
+  watchDependency(`model#/spec/target/namespace`)
+  const apiGroup = getValue(model, `/spec/target/apiGroup`)
+  const kind = getValue(model, `/spec/target/kind`)
+  const namespace = getValue(model, `/spec/target/namespace`)
+  const params = storeGet('/route/params')
+  const { user, cluster } = params
+
+  const url = `/clusters/${user}/${cluster}/proxy/meta.k8s.appscode.com/v1alpha1/usermenus/kubedb-accordion/available`
+  try {
+    const resp = await axios.get(url)
+    console.log(resp)
+  } catch (e) {
+    console.log(e)
+  }
 }
 
 async function fetchJsons({ axios, itemCtx }) {
@@ -171,13 +204,14 @@ function returnFalse() {
 }
 
 return {
+  getTargetName,
   setApiGroup,
   getApiGroup,
   getEncryptionSecretNames,
   getKinds,
   getTaskNames,
   getAddon,
-  getNamespacesApi,
+  init,
   getNames,
   returnFalse,
   fetchJsons,
