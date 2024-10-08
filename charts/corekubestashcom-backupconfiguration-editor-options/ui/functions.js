@@ -2,14 +2,41 @@ let namespaces = []
 let appKind = []
 let coreKind = []
 let kubedbKind = []
+let availableKinds = {}
+let kindToResourceMap = {}
+let version = ''
 
 function init({ watchDependency, model, getValue, storeGet, axios, setDiscriminatorValue }) {
   getNamespacesApi({ axios, storeGet, setDiscriminatorValue })
   getKindsApi({ watchDependency, model, getValue, storeGet, axios })
+  initKindToResource({ watchDependency, storeGet, getValue, model, axios })
   setDiscriminatorValue('/nameSpaceApi', true)
 }
 
-async function getNamespacesApi({ axios, storeGet, setDiscriminatorValue }) {
+async function initKindToResource({ storeGet, axios }) {
+  const params = storeGet('/route/params')
+  const { user, cluster } = params
+
+  const url = `/clusters/${user}/${cluster}/proxy/meta.k8s.appscode.com/v1alpha1/usermenus/kubedb-accordion/available`
+  try {
+    const resp = await axios.get(url)
+    const sections = resp.data?.spec?.sections
+    sections.forEach((section) => {
+      const items = section?.items
+      items.forEach((item) => {
+        const grp = item?.resource?.group
+        const kind = item?.resource?.kind
+        const resourceName = item?.resource?.name
+        kindToResourceMap[grp] = {}
+        kindToResourceMap[grp][kind] = resourceName
+      })
+    })
+  } catch (e) {
+    console.log(e)
+  }
+}
+
+async function getNamespacesApi({ axios, storeGet }) {
   const params = storeGet('/route/params')
   const { user, cluster, group, version, resource } = params
   try {
@@ -124,6 +151,7 @@ async function getKindsApi({ storeGet, axios }) {
   let url = `/clusters/${user}/${cluster}/available-types?groups=core,apps,kubedb.com`
   try {
     const resp = await axios.get(url)
+    availableKinds = resp.data
     appKind = Object.values(resp.data['apps']).flat()
     kubedbKind = Object.values(resp.data['kubedb.com']).flat()
     coreKind = Object.values(resp.data['']).flat()
@@ -142,31 +170,48 @@ function getKinds({ watchDependency, getValue, model }) {
   else return kubedbKind
 }
 
+function setVersion({ getValue, model }) {
+  const apiGroup = getValue(model, `/spec/target/apiGroup`)
+  const kind = getValue(model, `/spec/target/kind`)
+  if (apiGroup === 'core') apiGroup = ''
+  Object.keys(availableKinds[apiGroup]).forEach((vs) => {
+    availableKinds[apiGroup][vs].forEach((ele) => {
+      if (ele === kind) {
+        version = vs
+      }
+    })
+  })
+}
+
 function getApiGroup() {
   return ['core', 'apps', 'kubedb.com']
 }
 
-function setApiGroup() {
-  return 'kubedb.com'
-}
-
-async function getTargetName({ watchDependency, storeGet, getValue, model, axios }) {
-  watchDependency(`model#/spec/target/apiGroup`)
-  watchDependency(`model#/spec/target/kind`)
-  watchDependency(`model#/spec/target/namespace`)
+async function getTargetName({ watchDependency, getValue, model, axios, storeGet }) {
+  watchDependency('model#/spec/target/apiGroup')
+  watchDependency('model#/spec/target/namespace')
+  watchDependency('model#/spec/target/kind')
   const apiGroup = getValue(model, `/spec/target/apiGroup`)
-  const kind = getValue(model, `/spec/target/kind`)
   const namespace = getValue(model, `/spec/target/namespace`)
+  const resource = getResourceName({ getValue, model })
   const params = storeGet('/route/params')
   const { user, cluster } = params
 
-  const url = `/clusters/${user}/${cluster}/proxy/meta.k8s.appscode.com/v1alpha1/usermenus/kubedb-accordion/available`
-  try {
-    const resp = await axios.get(url)
-    console.log(resp)
-  } catch (e) {
-    console.log(e)
+  const url = `/clusters/${user}/${cluster}/proxy/${apiGroup}/${version}/namespaces/${namespace}/${resource}`
+  if (apiGroup && version && resource && namespace) {
+    try {
+      const resp = await axios.get(url)
+      return resp.data?.items
+    } catch (e) {
+      console.log(e)
+    }
   }
+}
+
+function getResourceName({ getValue, model }) {
+  const apiGroup = getValue(model, `/spec/target/apiGroup`)
+  const kind = getValue(model, `/spec/target/kind`)
+  return kindToResourceMap[apiGroup][kind]
 }
 
 async function fetchJsons({ axios, itemCtx }) {
@@ -204,8 +249,8 @@ function returnFalse() {
 }
 
 return {
+  setVersion,
   getTargetName,
-  setApiGroup,
   getApiGroup,
   getEncryptionSecretNames,
   getKinds,
