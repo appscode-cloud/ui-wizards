@@ -1157,7 +1157,7 @@ function isNotRancherManaged({ storeGet }) {
   return !isRancherManaged({ storeGet })
 }
 
-async function fetchNamespaces({ getValue, axios, storeGet, discriminator }, discriminatorName) {
+async function fetchNamespaces({ axios, storeGet }) {
   const username = storeGet('/route/params/user')
   const clusterName = storeGet('/route/params/cluster')
   const group = storeGet('/route/params/group')

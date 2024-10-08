@@ -880,7 +880,6 @@ steps:
         type: string
     elements:
     - computed: initScheduleBackupForEdit
-      if: scheduleBackup
       label:
         text: labels.backup.title
       onChange: onScheduleBackupChange
@@ -931,15 +930,26 @@ steps:
             storageRefNamespace:
               type: string
           elements:
-          - computed: getDefault|/resources/coreKubestashComBackupConfiguration/spec/backends|storageRef|namespace|storageRefNamespace
-            fetch: fetchNamespaces|storageRefNamespace
+          - computed: getDefault|/resources/coreKubestashComBackupConfiguration/spec/backends|storageRef|namespace
+            fetch: fetchNamespaces
+            hasGroup: true
+            if: isRancherManaged
             label:
               text: Namespace
             onChange: onInputChange|resources/coreKubestashComBackupConfiguration/spec/backends|storageRef|namespace|storageRefNamespace
             schema:
               $ref: discriminator#/storageRefNamespace
             type: select
-          - computed: getDefault|/resources/coreKubestashComBackupConfiguration/spec/backends|storageRef|name|storageRefName
+          - computed: getDefault|/resources/coreKubestashComBackupConfiguration/spec/backends|storageRef|namespace
+            fetch: fetchNamespaces
+            if: isNotRancherManaged
+            label:
+              text: Namespace
+            onChange: onInputChange|resources/coreKubestashComBackupConfiguration/spec/backends|storageRef|namespace|storageRefNamespace
+            schema:
+              $ref: discriminator#/storageRefNamespace
+            type: select
+          - computed: getDefault|/resources/coreKubestashComBackupConfiguration/spec/backends|storageRef|name
             fetch: fetchNames|v1alpha1|backupstorages|storageRefNamespace
             label:
               text: Name
@@ -957,15 +967,26 @@ steps:
             retentionPolicyNamespace:
               type: string
           elements:
-          - computed: getDefault|/resources/coreKubestashComBackupConfiguration/spec/backends|retentionPolicy|namespace|retentionPolicyNamespace
-            fetch: fetchNamespaces|retentionPolicyNamespace
+          - computed: getDefault|/resources/coreKubestashComBackupConfiguration/spec/backends|retentionPolicy|namespace
+            fetch: fetchNamespaces
+            hasGroup: true
+            if: isRancherManaged
             label:
               text: Namespace
             onChange: onInputChange|resources/coreKubestashComBackupConfiguration/spec/backends|retentionPolicy|namespace|retentionPolicyNamespace
             schema:
               $ref: discriminator#/retentionPolicyNamespace
             type: select
-          - computed: getDefault|/resources/coreKubestashComBackupConfiguration/spec/backends|retentionPolicy|name|retentionPolicyName
+          - computed: getDefault|/resources/coreKubestashComBackupConfiguration/spec/backends|retentionPolicy|namespace
+            fetch: fetchNamespaces
+            if: isNotRancherManaged
+            label:
+              text: Namespace
+            onChange: onInputChange|resources/coreKubestashComBackupConfiguration/spec/backends|retentionPolicy|namespace|retentionPolicyNamespace
+            schema:
+              $ref: discriminator#/retentionPolicyNamespace
+            type: select
+          - computed: getDefault|/resources/coreKubestashComBackupConfiguration/spec/backends|retentionPolicy|name
             fetch: fetchNames|v1alpha1|retentionpolicies|retentionPolicyNamespace
             label:
               text: Name
@@ -983,8 +1004,19 @@ steps:
             encryptionSecretNamespace:
               type: string
           elements:
-          - computed: getDefault|/resources/coreKubestashComBackupConfiguration/spec/sessions|encryptionSecret|namespace|encryptionSecretNamespace
-            fetch: fetchNamespaces|encryptionSecretNamespace
+          - computed: getDefault|/resources/coreKubestashComBackupConfiguration/spec/sessions|encryptionSecret|namespace
+            fetch: fetchNamespaces
+            hasGroup: true
+            if: isRancherManaged
+            label:
+              text: Namespace
+            onChange: onInputChange|/resources/coreKubestashComBackupConfiguration/spec/sessions|encryptionSecret|namespace|encryptionSecretNamespace
+            schema:
+              $ref: discriminator#/encryptionSecretNamespace
+            type: select
+          - computed: getDefault|/resources/coreKubestashComBackupConfiguration/spec/sessions|encryptionSecret|namespace
+            fetch: fetchNamespaces
+            if: isNotRancherManaged
             label:
               text: Namespace
             onChange: onInputChange|/resources/coreKubestashComBackupConfiguration/spec/sessions|encryptionSecret|namespace|encryptionSecretNamespace
@@ -995,7 +1027,7 @@ steps:
             fetch: fetchNames|v1|secrets|encryptionSecretNamespace
             label:
               text: Name
-            onChange: onInputChange|/resources/coreKubestashComBackupConfiguration/spec/sessions|encryptionSecret|name|encryptionSecretName
+            onChange: onInputChange|/resources/coreKubestashComBackupConfiguration/spec/sessions|encryptionSecret|name
             schema:
               $ref: discriminator#/encryptionSecretName
             type: select
