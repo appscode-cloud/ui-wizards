@@ -242,6 +242,41 @@ steps:
                     $ref: schema#/properties/spec/properties/backend/properties/s3/properties/spec/properties/region
                   label:
                     text: Region
+          - type: single-step-form
+            if: isProvider|local
+            schema:
+              $ref: schema#/properties/spec/properties/backend/properties/local
+            label:
+              text: Local
+            show_label: true
+            elements:
+              - type: input
+                schema:
+                  $ref: schema#/properties/spec/properties/backend/properties/local/properties/mountPath
+                label:
+                  text: Mount Path
+              - type: input
+                schema:
+                  $ref: schema#/properties/spec/properties/backend/properties/local/properties/subPath
+                label:
+                  text: Sub Path
+              - type: single-step-form
+                label:
+                  text: Persistent Volume Claim
+                show_label: true
+                schema:
+                  $ref: schema#/properties/spec/properties/backend/properties/local/properties/persistentVolumeClaim
+                elements:
+                - type: input
+                  schema:
+                    $ref: schema#/properties/spec/properties/backend/properties/local/properties/persistentVolumeClaim/properties/claimName
+                  label:
+                    text: claim Name
+                - type: switch
+                  schema:
+                    $ref: schema#/properties/spec/properties/backend/properties/local/properties/persistentVolumeClaim/properties/readOnly
+                  label:
+                    text: ReadOnly?
       schema:
         $ref: schema#/properties/spec
       type: single-step-form
