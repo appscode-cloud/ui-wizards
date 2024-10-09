@@ -13,8 +13,7 @@ spec:
   usagePolicy:
     allowedNamespaces:
       from: All
-  default: true
-  deletionPolicy: WipeOut
+  deletionPolicy: {{ .Values.spec.deletionPolicy }}
   storage:
     provider: {{ .Values.spec.backend.provider }}
   {{- if eq .Values.spec.backend.provider "s3" }}
@@ -68,4 +67,14 @@ spec:
       secretName: {{ printf "%s-storage-cred" (include "storagekubestashcom-backupstorage-editor-options.fullname" $) }}
       {{- end }}
     {{- end }}
+  {{- end }}
+
+  {{- if eq .Values.spec.backend.provider "local" }}
+  {{- with .Values.spec.backend.local }}
+  local:
+    mountPath: {{ .mountPath }}
+    persistentVolumeClaim:
+      claimName: {{ .persistentVolumeClaim.claimName }}
+      readOnly: {{ .persistentVolumeClaim.readOnly }}
+  {{- end }}
   {{- end }}

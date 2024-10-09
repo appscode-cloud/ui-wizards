@@ -1,0 +1,22 @@
+apiVersion: storage.kubestash.com/v1alpha1
+kind: Repository
+metadata:
+  name: {{ include "storagekubestashcom-repository-editor-options.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "storagekubestashcom-repository-editor-options.labels" . | nindent 4 }}
+{{- if .Values.spec.annotations }}
+  annotations:
+    {{- include "storagekubestashcom-repository-editor-options.annotations" . | nindent 4 }}
+{{- end }}
+spec:
+  storageRef:
+    name: {{ .Values.spec.storageRef.name }}
+    namespace: {{ .Values.spec.storageRef.namespace }}
+  encryptionSecret:
+    name: {{ .Values.spec.encryptionSecret.name }}
+    namespace: {{ .Values.spec.encryptionSecret.namespace }}
+  path: {{ .Values.spec.path }}
+  target:
+    {{- toYaml .Values.spec.appRef | nindent 4 }}
+  deletionPolicy: {{ .Values.spec.deletionPolicy }}

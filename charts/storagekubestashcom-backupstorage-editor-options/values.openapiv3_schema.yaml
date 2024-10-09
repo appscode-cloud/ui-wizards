@@ -100,7 +100,40 @@ properties:
             required:
             - spec
             type: object
+          local:
+            properties:
+              mountPath:
+                description: MountPath specifies the directory where this volume will
+                  be mounted
+                type: string
+              persistentVolumeClaim:
+                description: PersistentVolumeClaimVolumeSource references the user's
+                  PVC in the same namespace. This volume finds the bound PV and mounts
+                  that volume for the pod. A PersistentVolumeClaimVolumeSource is,
+                  essentially, a wrapper around another type of volume that is owned
+                  by someone else (the system).
+                properties:
+                  claimName:
+                    description: 'claimName is the name of a PersistentVolumeClaim
+                      in the same namespace as the pod using this volume. More info:
+                      https://kubernetes.io/docs/concepts/storage/persistent-volumes#persistentvolumeclaims'
+                    type: string
+                  readOnly:
+                    description: readOnly Will force the ReadOnly setting in VolumeMounts.
+                      Default false.
+                    type: boolean
+                required:
+                - claimName
+                type: object
+              subPath:
+                type: string
+            type: object
           provider:
+            enum:
+            - s3
+            - azure
+            - gcs
+            - local
             type: string
           s3:
             properties:
@@ -138,18 +171,26 @@ properties:
         required:
         - provider
         type: object
+      deletionPolicy:
+        description: DeletionPolicy specifies what to do if a resource is deleted
+        enum:
+        - Delete
+        - WipeOut
+        type: string
       labels:
         additionalProperties:
           type: string
         type: object
-      storageSecret:
+      runtimeSettings:
         properties:
-          create:
-            type: boolean
+          securityContext:
+            format: int64
+            type: integer
         type: object
     required:
     - backend
-    - storageSecret
+    - deletionPolicy
+    - runtimeSettings
     type: object
 required:
 - spec
