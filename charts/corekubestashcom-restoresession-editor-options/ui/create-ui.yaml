@@ -9,9 +9,9 @@ steps:
           default: false
           type: boolean
       elements:
-      - if: returnFalse
+      - computed: init
+        if: returnFalse
         type: input
-        computed: init
       - if: isConsole
         label:
           text: labels.name
@@ -198,36 +198,36 @@ steps:
           schema:
             $ref: schema#/properties/spec/properties/addon
           type: single-step-form
-        - type: single-step-form
+        - elements:
+          - fetch: getApiGroup
+            label:
+              text: Api Group
+            schema:
+              $ref: schema#/properties/spec/properties/target/properties/apiGroup
+            type: select
+          - fetch: getKinds
+            label:
+              text: Kind
+            onChange: setVersion
+            schema:
+              $ref: schema#/properties/spec/properties/target/properties/kind
+            type: select
+          - fetch: getNamespaces
+            label:
+              text: Namespace
+            schema:
+              $ref: schema#/properties/spec/properties/target/properties/namespace
+            type: select
+          - fetch: getTargetName
+            label:
+              text: Name
+            schema:
+              $ref: schema#/properties/spec/properties/target/properties/name
+            type: select
           label:
             text: Target
           show_label: true
-          elements:
-          - type: select
-            fetch: getApiGroup
-            schema:
-              $ref: schema#/properties/spec/properties/target/properties/apiGroup
-            label:
-              text: Api Group
-          - type: select
-            schema:
-              $ref: schema#/properties/spec/properties/target/properties/kind
-            fetch: getKinds
-            onChange: setVersion
-            label:
-              text: Kind
-          - type: select
-            schema:
-              $ref: schema#/properties/spec/properties/target/properties/namespace
-            fetch: getNamespaces
-            label:
-              text: Namespace
-          - type: select
-            fetch: getTargetName
-            schema:
-              $ref: schema#/properties/spec/properties/target/properties/name
-            label:
-              text: Name 
+          type: single-step-form
         if: databaseSelected
         schema:
           $ref: schema#/properties/spec

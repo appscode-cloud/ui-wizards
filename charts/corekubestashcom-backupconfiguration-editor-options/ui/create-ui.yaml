@@ -2,48 +2,47 @@ steps:
 - form:
     discriminator:
       nameSpaceApi:
-        type: boolean
         default: false
+        type: boolean
     elements:
-    - type: input
-      computed: init
+    - computed: init
       if: returnFalse
-    - type: single-step-form
+      type: input
+    - elements:
+      - fetch: getNamespaces
+        label:
+          text: Namespace
+        schema:
+          $ref: schema#/properties/spec/properties/backend/properties/storageRef/properties/namespace
+        type: select
+      - fetch: getNames|storageRef
+        label:
+          text: name
+        schema:
+          $ref: schema#/properties/spec/properties/backend/properties/storageRef/properties/name
+        type: select
       label:
         text: Storage Ref
       show_label: true
-      elements:
-      - type: select
-        schema:
-          $ref: schema#/properties/spec/properties/backend/properties/storageRef/properties/namespace
-        fetch: getNamespaces
+      type: single-step-form
+    - elements:
+      - fetch: getNamespaces
         label:
           text: Namespace
-      - type: select
         schema:
-          $ref: schema#/properties/spec/properties/backend/properties/storageRef/properties/name
-        fetch: getNames|storageRef
+          $ref: schema#/properties/spec/properties/backend/properties/retentionPolicy/properties/namespace
+        type: select
+      - fetch: getNames|retentionPolicy
         label:
           text: name
-    - type: single-step-form
+        schema:
+          $ref: schema#/properties/spec/properties/backend/properties/retentionPolicy/properties/name
+        type: select
       label:
         text: Retention Policy
       show_label: true
-      elements:
-      - type: select
-        schema:
-          $ref: schema#/properties/spec/properties/backend/properties/retentionPolicy/properties/namespace
-        fetch: getNamespaces
-        label:
-          text: Namespace
-      - type: select
-        schema:
-          $ref: schema#/properties/spec/properties/backend/properties/retentionPolicy/properties/name
-        fetch: getNames|retentionPolicy
-        label:
-          text: name
-    - type: single-step-form
-      elements:
+      type: single-step-form
+    - elements:
       - isArray: true
         keys:
           label:
@@ -78,47 +77,41 @@ steps:
       label:
         text: Labels & Annotations
       show_label: true
-    - type: single-step-form 
-      elements:
+      type: single-step-form
+    - elements:
       - addFormLabel: Session
         element:
           elements:
-          - type: input
-            label:
+          - label:
               text: Session Name
             schema:
               $ref: schema#/properties/spec/properties/session/items/properties/sessionName
-          - type: input
-            label:
+            type: input
+          - label:
               text: Schedule
             schema:
               $ref: schema#/properties/spec/properties/session/items/properties/schedule
-          - type: single-step-form
-            show_label: true
-            label:
-              text: Addon
-            schema:
-              $ref: schema#/properties/spec/properties/session/items/properties/addon
-            elements:
+            type: input
+          - elements:
             - label:
                 text: Security Context
               schema:
                 $ref: schema#/properties/spec/properties/session/items/properties/addon/properties/jobTemplate/properties/securityContext
               type: input
-            - label:
+            - fetch: getAddon
+              label:
                 text: Name
               schema:
                 $ref: schema#/properties/spec/properties/session/items/properties/addon/properties/name
-              fetch: getAddon
               type: select
             - addFormLabel: Task
               element:
                 elements:
-                - label:
+                - fetch: getTaskNames
+                  label:
                     text: Name
                   schema:
                     $ref: schema#/properties/spec/properties/session/items/properties/addon/properties/tasks/items/properties/name
-                  fetch: getTaskNames
                   type: select
                 - label:
                     text: Params
@@ -126,6 +119,10 @@ steps:
                     $ref: schema#/properties/spec/properties/session/items/properties/addon/properties/tasks/items/properties/params
                   type: editor
                 type: single-step-form
+              label:
+                text: Tasks
+              schema:
+                $ref: schema#/properties/spec/properties/session/items/properties/addon/properties/tasks
               tableContents:
               - inTableColumn: true
                 label:
@@ -139,35 +136,37 @@ steps:
                 path: params
                 type: value
                 typeOfValue: string
-              label:
-                text: Tasks
-              schema:
-                $ref: schema#/properties/spec/properties/session/items/properties/addon/properties/tasks
               type: single-step-form-array
-          - type: single-step-form
             label:
-              text: encryptionSecret
-            show_label: true
+              text: Addon
             schema:
-              $ref: schema#/properties/spec/properties/session/items/properties/encryptionSecret
-            elements:
-            - label:
+              $ref: schema#/properties/spec/properties/session/items/properties/addon
+            show_label: true
+            type: single-step-form
+          - elements:
+            - fetch: getNamespaces
+              label:
                 text: Namespace
-              fetch: getNamespaces
               schema:
                 $ref: schema#/properties/spec/properties/session/items/properties/encryptionSecret/properties/namespace
               type: select
-            - label:
+            - fetch: getEncryptionSecretNames
+              label:
                 text: Name
-              fetch: getEncryptionSecretNames
               schema:
                 $ref: schema#/properties/spec/properties/session/items/properties/encryptionSecret/properties/name
               type: select
-          - type: input
             label:
+              text: encryptionSecret
+            schema:
+              $ref: schema#/properties/spec/properties/session/items/properties/encryptionSecret
+            show_label: true
+            type: single-step-form
+          - label:
               text: Repo Name
             schema:
               $ref: schema#/properties/spec/properties/session/items/properties/repoName
+            type: input
           type: single-step-form
         label:
           text: Session
@@ -193,36 +192,37 @@ steps:
           type: value
           typeOfValue: string
         type: single-step-form-array
-    - type: single-step-form
+      type: single-step-form
+    - elements:
+      - fetch: getApiGroup
+        label:
+          text: Api Group
+        schema:
+          $ref: schema#/properties/spec/properties/target/properties/apiGroup
+        type: select
+      - fetch: getKinds
+        label:
+          text: Kind
+        onChange: setVersion
+        schema:
+          $ref: schema#/properties/spec/properties/target/properties/kind
+        type: select
+      - fetch: getNamespaces
+        label:
+          text: Namespace
+        schema:
+          $ref: schema#/properties/spec/properties/target/properties/namespace
+        type: select
+      - fetch: getTargetName
+        label:
+          text: Name
+        schema:
+          $ref: schema#/properties/spec/properties/target/properties/name
+        type: select
       label:
         text: Target
       show_label: true
-      elements:
-      - type: select
-        fetch: getApiGroup
-        schema:
-          $ref: schema#/properties/spec/properties/target/properties/apiGroup
-        label:
-          text: Api Group
-      - type: select
-        schema:
-          $ref: schema#/properties/spec/properties/target/properties/kind
-        fetch: getKinds
-        onChange: setVersion
-        label:
-          text: Kind
-      - type: select
-        schema:
-          $ref: schema#/properties/spec/properties/target/properties/namespace
-        fetch: getNamespaces
-        label:
-          text: Namespace
-      - type: select
-        fetch: getTargetName
-        schema:
-          $ref: schema#/properties/spec/properties/target/properties/name
-        label:
-          text: Name 
+      type: single-step-form
     type: single-step-form
   id: options
   title: steps.0.label
