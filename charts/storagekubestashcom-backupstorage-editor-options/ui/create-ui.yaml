@@ -77,15 +77,17 @@ steps:
               $ref: schema#/properties/spec/properties/backend/properties/provider
             options:
             - text: Azure
-              value: Azure
+              value: azure
             - text: AWS
-              value: AWS
+              value: s3
             - text: GKE
-              value: GKE
+              value: gcs
+            - text: Local
+              value: local
             label:
               text: Provider
           - type: single-step-form
-            if: isProvider|Azure
+            if: isProvider|azure
             schema:
               $ref: schema#/properties/spec/properties/backend/properties/azure
             label:
@@ -132,7 +134,7 @@ steps:
                   label:
                     text: Prefix
           - type: single-step-form
-            if: isProvider|GKE
+            if: isProvider|gcs
             schema:
               $ref: schema#/properties/spec/properties/backend/properties/gcs
             label:
@@ -179,7 +181,7 @@ steps:
                   label:
                     text: Prefix
           - type: single-step-form
-            if: isProvider|AWS
+            if: isProvider|s3
             schema:
               $ref: schema#/properties/spec/properties/backend/properties/s3
             label:
