@@ -67,7 +67,19 @@ steps:
           - elements:
             - computed: setNamespace
               disableUnselect: true
-              fetch: getNamespaces
+              fetch: fetchNamespaces
+              hasGroup: true
+              if: isRancherManaged
+              label:
+                text: labels.namespace
+              refresh: true
+              schema:
+                $ref: schema#/properties/spec/properties/dataSource/properties/repository/properties/namespace
+              type: select
+            - computed: setNamespace
+              disableUnselect: true
+              fetch: fetchNamespaces
+              if: isNotRancherManaged
               label:
                 text: labels.namespace
               refresh: true
@@ -98,7 +110,18 @@ steps:
             type: select
           - elements:
             - disableUnselect: true
-              fetch: getNamespaces
+              if: isRancherManaged
+              fetch: fetchNamespaces
+              hasGroup: true
+              label:
+                text: labels.namespace
+              refresh: true
+              schema:
+                $ref: schema#/properties/spec/properties/dataSource/properties/encryptionSecret/properties/namespace
+              type: select
+            - disableUnselect: true
+              if: isNotRancherManaged
+              fetch: fetchNamespaces
               label:
                 text: labels.namespace
               refresh: true
@@ -127,6 +150,9 @@ steps:
               default: ""
               type: string
           elements:
+          - label:
+              text: labels.addon.label
+            type: label-element
           - fetch: getAddons
             label:
               text: labels.name
@@ -180,11 +206,8 @@ steps:
             schema:
               $ref: schema#/properties/spec/properties/addon/properties/jobTemplate
             type: single-step-form
-          label:
-            text: labels.addon.label
           schema:
             $ref: schema#/properties/spec/properties/addon
-          show_label: true
           type: single-step-form
         if: databaseSelected
         schema:
