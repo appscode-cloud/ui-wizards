@@ -1147,38 +1147,54 @@ async function getBlueprints({ getValue, model, setDiscriminatorValue, axios, st
   }
 }
 
-async function fetchNamespaces(
-  { getValue, model, axios, storeGet, discriminator },
-  discriminatorName,
-) {
+function isRancherManaged({ storeGet }) {
+  const managers = storeGet('/cluster/clusterDefinition/result/clusterManagers')
+  const found = managers.find((item) => item === 'Rancher')
+  return !!found
+}
+
+function isNotRancherManaged({ storeGet }) {
+  return !isRancherManaged({ storeGet })
+}
+
+async function fetchNamespaces({ axios, storeGet }) {
   const username = storeGet('/route/params/user')
   const clusterName = storeGet('/route/params/cluster')
   const group = storeGet('/route/params/group')
   const version = storeGet('/route/params/version')
   const resource = storeGet('/route/params/resource')
-  const namespace = getValue(discriminator, `${discriminatorName}`)
 
   const url = `clusters/${username}/${clusterName}/proxy/identity.k8s.appscode.com/v1alpha1/selfsubjectnamespaceaccessreviews`
 
   try {
-    if (namespace) {
-      const resp = await axios.post(url, {
-        _recurringCall: false,
-        apiVersion: 'identity.k8s.appscode.com/v1alpha1',
-        kind: 'SelfSubjectNamespaceAccessReview',
-        spec: {
-          resourceAttributes: [
-            {
-              verb: 'create',
-              group: group,
-              version: version,
-              resource: resource,
-            },
-          ],
-        },
-      })
-      let data = resp.data.status.namespaces
-      return data
+    const resp = await axios.post(url, {
+      _recurringCall: false,
+      apiVersion: 'identity.k8s.appscode.com/v1alpha1',
+      kind: 'SelfSubjectNamespaceAccessReview',
+      spec: {
+        resourceAttributes: [
+          {
+            verb: 'create',
+            group: group,
+            version: version,
+            resource: resource,
+          },
+        ],
+      },
+    })
+    if (resp.data?.status?.projects) {
+      const projects = resp.data?.status?.projects
+      let projectsNamespace = []
+      projectsNamespace = Object.keys(projects).map((project) => ({
+        project: project,
+        namespaces: projects[project].map((namespace) => ({
+          text: namespace,
+          value: namespace,
+        })),
+      }))
+      return projectsNamespace
+    } else {
+      return resp.data?.status?.namespaces || []
     }
   } catch (e) {
     console.log(e)
@@ -1637,7 +1653,6 @@ function onInputChange(
 ) {
   const value = getValue(discriminator, `/${discriminatorName}`)
   const backends = getValue(model, modelPath)
-  watchDependency(`discriminator#/${discriminatorName}`)
   if (field !== 'encryptionSecret') backends[0][field][subfield] = value
   else backends[0]['repositories'][0][field][subfield] = value
   commit('wizard/model$update', {
@@ -1683,14 +1698,7 @@ function setInitSchedule(
   })
 }
 
-function getDefault(
-  { getValue, discriminator, watchDependency, commit, model },
-  modelPath,
-  field,
-  subfield,
-  discriminatorName,
-) {
-  watchDependency(`discriminator#/${discriminatorName}`)
+function getDefault({ getValue, model }, modelPath, field, subfield) {
   const backends = getValue(model, modelPath)
   if (field !== 'encryptionSecret') return backends[0][field][subfield]
   else {
@@ -2405,7 +2413,7 @@ function onSetCustomConfigChange({ discriminator, getValue, commit }) {
   }
 }
 
-function getCreateNameSpaceUrl({ model, getValue, storeGet }) {
+function getCreateNameSpaceUrl({ storeGet }) {
   const user = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
 
@@ -2432,6 +2440,8 @@ function showScheduleBackup({ storeGet }) {
 return {
   setInitSchedule,
   fetchNames,
+  isRancherManaged,
+  isNotRancherManaged,
   fetchNamespaces,
   onInputChangeSchedule,
   getDefaultSchedule,
