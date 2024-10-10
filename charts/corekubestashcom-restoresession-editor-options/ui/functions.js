@@ -355,7 +355,12 @@ async function getTargetName({ watchDependency, getValue, model, axios, storeGet
   if (apiGroup && version && resource && namespace) {
     try {
       const resp = await axios.get(url)
-      return resp.data?.items
+      const items = resp.data?.items
+      let options = []
+      items.forEach((ele) => {
+        options.push(ele.metadata?.name)
+      })
+      return options
     } catch (e) {
       console.log(e)
     }
