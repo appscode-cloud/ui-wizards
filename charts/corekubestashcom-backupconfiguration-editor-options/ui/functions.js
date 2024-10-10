@@ -86,9 +86,11 @@ async function getNames({ storeGet, getValue, model, axios, watchDependency }, t
     try {
       const resp = await axios.get(url)
       const items = resp.data?.items
+      let options = []
       items.forEach((ele) => {
         options.push(ele.metadata?.name)
       })
+      return options
     } catch (e) {
       console.log(e)
     }
