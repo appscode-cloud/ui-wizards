@@ -1,0 +1,157 @@
+properties:
+  metadata:
+    properties:
+      release:
+        properties:
+          name:
+            type: string
+          namespace:
+            type: string
+        required:
+        - name
+        - namespace
+        type: object
+      resource:
+        description: ResourceID identifies a resource
+        properties:
+          group:
+            type: string
+          kind:
+            description: Kind is the serialized kind of the resource.  It is normally
+              CamelCase and singular.
+            type: string
+          name:
+            description: 'Name is the plural name of the resource to serve.  It must
+              match the name of the CustomResourceDefinition-registration too: plural.group
+              and it must be all lowercase.'
+            type: string
+          scope:
+            description: ResourceScope is an enum defining the different scopes available
+              to a custom resource
+            type: string
+          version:
+            type: string
+        required:
+        - group
+        type: object
+    required:
+    - release
+    - resource
+    type: object
+  spec:
+    properties:
+      annotations:
+        additionalProperties:
+          type: string
+        type: object
+      backend:
+        properties:
+          retentionPolicy:
+            description: ObjectReference contains enough information to let you inspect
+              or modify the referred object.
+            properties:
+              name:
+                type: string
+              namespace:
+                type: string
+            required:
+            - name
+            - namespace
+            type: object
+          storageRef:
+            description: ObjectReference contains enough information to let you inspect
+              or modify the referred object.
+            properties:
+              name:
+                type: string
+              namespace:
+                type: string
+            required:
+            - name
+            - namespace
+            type: object
+        required:
+        - retentionPolicy
+        - storageRef
+        type: object
+      labels:
+        additionalProperties:
+          type: string
+        type: object
+      session:
+        items:
+          properties:
+            addon:
+              properties:
+                jobTemplate:
+                  properties:
+                    securityContext:
+                      format: int64
+                      type: integer
+                  type: object
+                name:
+                  type: string
+                tasks:
+                  items:
+                    properties:
+                      name:
+                        type: string
+                      params:
+                        type: string
+                    required:
+                    - name
+                    type: object
+                  type: array
+              required:
+              - name
+              - tasks
+              type: object
+            encryptionSecret:
+              description: ObjectReference contains enough information to let you
+                inspect or modify the referred object.
+              properties:
+                name:
+                  type: string
+                namespace:
+                  type: string
+              required:
+              - name
+              - namespace
+              type: object
+            repoName:
+              type: string
+            schedule:
+              type: string
+            sessionName:
+              type: string
+          required:
+          - addon
+          - encryptionSecret
+          - repoName
+          - schedule
+          - sessionName
+          type: object
+        type: array
+      target:
+        description: TypedObjectReference represents an typed namespaced object.
+        properties:
+          apiGroup:
+            type: string
+          kind:
+            type: string
+          name:
+            description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names'
+            type: string
+          namespace:
+            description: 'Namespace of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/'
+            type: string
+        required:
+        - name
+        type: object
+    required:
+    - backend
+    - session
+    type: object
+required:
+- spec
+type: object
