@@ -9,21 +9,21 @@ metadata:
     name: RELEASE-NAME
     namespace: default
 resources:
-  secret_secret: # +doc-gen:break
+  secret_storage_cred: # +doc-gen:break
     apiVersion: v1
     data:
       AWS_ACCESS_KEY_ID: <AWS Access Key ID>
       AWS_SECRET_ACCESS_KEY: <AWS Secret Access Key>
     kind: Secret
     metadata:
-      name: s3-secret
+      name: s3-storage-cred
       namespace: ""
     type: Opaque
-  storageKubestashComBackupStorage_storage: # +doc-gen:break
+  storageKubestashComBackupStorage: # +doc-gen:break
     apiVersion: storage.kubestash.com/v1alpha1
     kind: BackupStorage
     metadata:
-      name: s3-storage
+      name: s3
       namespace: demo
     spec:
       default: true
@@ -35,7 +35,7 @@ resources:
           endpoint: s3.amazonaws.com
           prefix: /kubestash-backup
           region: us-west-1
-          secret: s3-secret
+          secretName: s3-storage-cred
       usagePolicy:
         allowedNamespaces:
           from: All

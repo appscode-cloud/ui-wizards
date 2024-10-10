@@ -1,5 +1,4 @@
 let addonList = []
-
 function isConsole({ storeGet }) {
   isKube = storeGet('/route/query/operation')
   return !isKube
@@ -263,7 +262,121 @@ function returnFalse() {
   return false
 }
 
+let appKind = []
+let coreKind = []
+let kubedbKind = []
+let availableKinds = {}
+let kindToResourceMap = {}
+let version = ''
+
+function init({ watchDependency, model, getValue, storeGet, axios, setDiscriminatorValue }) {
+  getKindsApi({ watchDependency, model, getValue, storeGet, axios })
+  initKindToResource({ watchDependency, storeGet, getValue, model, axios })
+}
+
+async function initKindToResource({ storeGet, axios }) {
+  const params = storeGet('/route/params')
+  const { user, cluster } = params
+
+  const url = `/clusters/${user}/${cluster}/proxy/meta.k8s.appscode.com/v1alpha1/usermenus/kubedb-accordion/available`
+  try {
+    const resp = await axios.get(url)
+    const sections = resp.data?.spec?.sections
+    sections.forEach((section) => {
+      const items = section?.items
+      items.forEach((item) => {
+        const grp = item?.resource?.group
+        const kind = item?.resource?.kind
+        const resourceName = item?.resource?.name
+        kindToResourceMap[grp] = {}
+        kindToResourceMap[grp][kind] = resourceName
+      })
+    })
+  } catch (e) {
+    console.log(e)
+  }
+}
+
+function setVersion({ getValue, model }) {
+  const apiGroup = getValue(model, `/spec/target/apiGroup`)
+  const kind = getValue(model, `/spec/target/kind`)
+  if (apiGroup === 'core') apiGroup = ''
+  Object.keys(availableKinds[apiGroup]).forEach((vs) => {
+    availableKinds[apiGroup][vs].forEach((ele) => {
+      if (ele === kind) {
+        version = vs
+      }
+    })
+  })
+}
+
+async function getKindsApi({ storeGet, axios }) {
+  const params = storeGet('/route/params')
+  const { user, cluster } = params
+  let url = `/clusters/${user}/${cluster}/available-types?groups=core,apps,kubedb.com`
+  try {
+    const resp = await axios.get(url)
+    availableKinds = resp.data
+    appKind = Object.values(resp.data['apps']).flat()
+    kubedbKind = Object.values(resp.data['kubedb.com']).flat()
+    coreKind = Object.values(resp.data['']).flat()
+  } catch (e) {
+    console.log(e)
+  }
+  return []
+}
+
+function getKinds({ watchDependency, getValue, model }) {
+  watchDependency(`model#/spec/target/apiGroup`)
+  const apiGroup = getValue(model, `/spec/target/apiGroup`)
+
+  if (apiGroup === 'core') return coreKind
+  else if (apiGroup === 'apps') return appKind
+  else return kubedbKind
+}
+
+function getApiGroup() {
+  return ['core', 'apps', 'kubedb.com']
+}
+
+async function getTargetName({ watchDependency, getValue, model, axios, storeGet }) {
+  watchDependency('model#/spec/target/apiGroup')
+  watchDependency('model#/spec/target/namespace')
+  watchDependency('model#/spec/target/kind')
+  const apiGroup = getValue(model, `/spec/target/apiGroup`)
+  const namespace = getValue(model, `/spec/target/namespace`)
+  const resource = getResourceName({ getValue, model })
+  const params = storeGet('/route/params')
+  const { user, cluster } = params
+
+  const url = `/clusters/${user}/${cluster}/proxy/${apiGroup}/${version}/namespaces/${namespace}/${resource}`
+  if (apiGroup && version && resource && namespace) {
+    try {
+      const resp = await axios.get(url)
+      const items = resp.data?.items
+      let options = []
+      items.forEach((ele) => {
+        options.push(ele.metadata?.name)
+      })
+      return options
+    } catch (e) {
+      console.log(e)
+    }
+  }
+}
+
+function getResourceName({ getValue, model }) {
+  const apiGroup = getValue(model, `/spec/target/apiGroup`)
+  const kind = getValue(model, `/spec/target/kind`)
+  return kindToResourceMap[apiGroup][kind]
+}
+
 return {
+  setVersion,
+  init,
+  getTargetName,
+  getKinds,
+  getApiGroup,
   isConsole,
   initMetadata,
   isRancherManaged,
