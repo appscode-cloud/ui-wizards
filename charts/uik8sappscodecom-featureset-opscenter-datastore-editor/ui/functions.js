@@ -428,12 +428,24 @@ async function getDatabaseTypes({
   let enabledTypes = ['Elasticsearch', 'Kafka', 'MariaDB', 'MongoDB', 'MySQL', 'Postgres', 'Redis']
   const owner = storeGet('/route/params/user') || ''
   const cluster = storeGet('/route/params/cluster') || ''
+  const getRoute = storeGet('/route')
+
   if (isFetching === 'success') {
     enabledTypes = getValue(discriminator, '/enabledTypes') || []
   } else if (isFetching !== 'pending') {
     try {
       isFetching = 'pending'
-      const resp = await axios.get(`/clusters/${owner}/${cluster}/db-status`)
+
+      const clusterset = getRoute.fullPath.includes('/clustersets/')
+          ? getRoute.fullPath.split('/clustersets/')[1].split('/')[0]
+          : null;
+
+      const url = clusterset
+          ? `/clusters/${owner}/${cluster}/db-status?clusterset=${clusterset}`
+          : `/clusters/${owner}/${cluster}/db-status`;
+
+      const resp = await axios.get(url);
+
       data = resp?.data
       isFetching = 'success'
       if (Object.keys(data).length) {
