@@ -211,6 +211,7 @@ async function getSnapshots({ watchDependency, model, storeGet, getValue, axios 
         item.text = name
         return true
       })
+      console.log(snapshots)
       const filteredSnapshots = snapshots.filter((item) => {
         const owners = item?.metadata?.ownerReferences
         if (owners.length) return owners[0].name === repository && owners[0].kind === 'Repository'
@@ -269,11 +270,18 @@ let coreKind = []
 let kubedbKind = []
 let availableKinds = {}
 let kindToResourceMap = {}
+let namespaces = []
 let version = ''
 
-function init({ watchDependency, model, getValue, storeGet, axios, setDiscriminatorValue }) {
+function init({ watchDependency, model, getValue, storeGet, axios }) {
   getKindsApi({ watchDependency, model, getValue, storeGet, axios })
   initKindToResource({ watchDependency, storeGet, getValue, model, axios })
+  namespaces = fetchNamespacesApi({ axios, storeGet })
+}
+
+function fetchNamespaces({ watchDependency }) {
+  watchDependency('discriminator#/nameSpaceApi')
+  return namespaces
 }
 
 async function initKindToResource({ storeGet, axios }) {
@@ -374,6 +382,7 @@ function getResourceName({ getValue, model }) {
 }
 
 return {
+  fetchNamespaces,
   setVersion,
   init,
   getTargetName,
