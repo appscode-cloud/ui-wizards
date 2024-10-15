@@ -5,6 +5,9 @@ steps:
         database:
           default: {}
           type: object
+        nameSpaceApi:
+          default: false
+          type: boolean
       elements:
       - computed: init
         if: returnFalse
@@ -18,19 +21,9 @@ steps:
       - fetch: fetchNamespaces
         if: isConsole
         label:
-          text: labels.selectNamespace
+          text: Select Namespace
         schema:
           $ref: schema#/properties/metadata/properties/release/properties/namespace
-        type: select
-      - fetch: getDbs
-        if: isConsole
-        label:
-          text: labels.selectDb
-        onChange: initTarget
-        refresh: true
-        required: true
-        schema:
-          $ref: discriminator#/properties/database
         type: select
       - elements:
         - computed: initMetadata
@@ -242,7 +235,6 @@ steps:
             text: Target
           show_label: true
           type: single-step-form
-        if: databaseSelected
         schema:
           $ref: schema#/properties/spec
         type: single-step-form
