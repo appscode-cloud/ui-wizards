@@ -9,31 +9,7 @@ let version = ''
 function init({ watchDependency, model, getValue, storeGet, axios, setDiscriminatorValue }) {
   getNamespacesApi({ axios, storeGet, setDiscriminatorValue })
   getKindsApi({ watchDependency, model, getValue, storeGet, axios })
-  initKindToResource({ watchDependency, storeGet, getValue, model, axios })
   setDiscriminatorValue('/nameSpaceApi', true)
-}
-
-async function initKindToResource({ storeGet, axios }) {
-  const params = storeGet('/route/params')
-  const { user, cluster } = params
-
-  const url = `/clusters/${user}/${cluster}/proxy/meta.k8s.appscode.com/v1alpha1/usermenus/kubedb-accordion/available`
-  try {
-    const resp = await axios.get(url)
-    const sections = resp.data?.spec?.sections
-    sections.forEach((section) => {
-      const items = section?.items
-      items.forEach((item) => {
-        const grp = item?.resource?.group
-        const kind = item?.resource?.kind
-        const resourceName = item?.resource?.name
-        kindToResourceMap[grp] = {}
-        kindToResourceMap[grp][kind] = resourceName
-      })
-    })
-  } catch (e) {
-    console.log(e)
-  }
 }
 
 async function getNamespacesApi({ axios, storeGet }) {
@@ -153,10 +129,30 @@ async function getKindsApi({ storeGet, axios }) {
   let url = `/clusters/${user}/${cluster}/available-types?groups=core,apps,kubedb.com`
   try {
     const resp = await axios.get(url)
+
+    kindToResourceMap['kubedb.com'] = {}
+    kindToResourceMap['apps'] = {}
+    kindToResourceMap['core'] = {}
+
     availableKinds = resp.data
-    appKind = Object.values(resp.data['apps']).flat()
-    kubedbKind = Object.values(resp.data['kubedb.com']).flat()
-    coreKind = Object.values(resp.data['']).flat()
+    appKind = Object.values(availableKinds['apps'])
+      .flat()
+      .map((ele) => {
+        kindToResourceMap['apps'][ele.Kind] = ele.Resource
+        return ele.Kind
+      })
+    kubedbKind = Object.values(availableKinds['kubedb.com'])
+      .flat()
+      .map((ele) => {
+        kindToResourceMap['kubedb.com'][ele.Kind] = ele.Resource
+        return ele.Kind
+      })
+    coreKind = Object.values(availableKinds[''])
+      .flat()
+      .map((ele) => {
+        kindToResourceMap['core'][ele.Kind] = ele.Resource
+        return ele.Kind
+      })
   } catch (e) {
     console.log(e)
   }
@@ -178,7 +174,7 @@ function setVersion({ getValue, model }) {
   if (apiGroup === 'core') apiGroup = ''
   Object.keys(availableKinds[apiGroup]).forEach((vs) => {
     availableKinds[apiGroup][vs].forEach((ele) => {
-      if (ele === kind) {
+      if (ele.Kind === kind) {
         version = vs
       }
     })
@@ -203,11 +199,16 @@ async function getTargetName({ watchDependency, getValue, model, axios, storeGet
   if (apiGroup && version && resource && namespace) {
     try {
       const resp = await axios.get(url)
-      return resp.data?.items
+      const items = resp.data?.items
+      const options = items.map((ele) => {
+        return ele.metadata.name
+      })
+      return options
     } catch (e) {
       console.log(e)
     }
   }
+  return []
 }
 
 function getResourceName({ getValue, model }) {
