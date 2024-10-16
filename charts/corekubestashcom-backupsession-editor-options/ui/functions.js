@@ -1,14 +1,22 @@
 let invokerData = []
 
 function initName({ model, getValue, commit }) {
-  const invoker = getValue(model, '/spec/invoker/name')
-  const session = getValue(model, '/spec/session')
+  const invoker = getValue(model, '/spec/invoker/name') || ''
+  const session = getValue(model, '/spec/session') || ''
   let name = ''
   if (invoker && session) name = `${invoker}-${session}-${Date.now()}`
   else name = ''
   commit('wizard/model$update', {
     path: '/metadata/release/name',
     value: name,
+    force: true,
+  })
+
+  const found = invokerData.find((item) => item.metadata.name === invoker)
+  const uid = found ? found.metadata?.uid : ''
+  commit('wizard/model$update', {
+    path: '/spec/ownerUID',
+    value: uid,
     force: true,
   })
 }
@@ -45,8 +53,8 @@ async function fetchNamespaces({ axios, storeGet }) {
 async function fetchInvokerName({ getValue, model, watchDependency, axios, storeGet }) {
   watchDependency('model#/spec/invoker/kind')
   watchDependency('model#/metadata/release/namespace')
-  const namespace = getValue(model, '/metadata/release/namespace')
-  const kind = getValue(model, '/spec/invoker/kind')
+  const namespace = getValue(model, '/metadata/release/namespace') || ''
+  const kind = getValue(model, '/spec/invoker/kind') || ''
   const user = storeGet('/route/params/user') || ''
   const cluster = storeGet('/route/params/cluster') || ''
   const core = 'core.kubestash.com'
@@ -71,7 +79,7 @@ async function fetchInvokerName({ getValue, model, watchDependency, axios, store
 
 function fetchSessions({ getValue, model, watchDependency }) {
   watchDependency('model#/spec/invoker/name')
-  const invokerName = getValue(model, '/spec/invoker/name')
+  const invokerName = getValue(model, '/spec/invoker/name') || ''
   const found = invokerData.find((item) => item.metadata.name === invokerName)
   if (found) return found.spec?.sessions.map((item) => item.name)
   return []
