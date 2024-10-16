@@ -1,26 +1,29 @@
 steps:
 - form:
+    discriminator:
+      nameSpaceApi:
+        default: false
+        type: boolean
     elements:
-    - disabled: isVariantAvailable
-      label:
-        text: labels.repository.name
-      schema:
-        $ref: schema#/properties/metadata/properties/release/properties/name
+    - computed: init
+      if: returnFalse
       type: input
-    - add_new_button:
-        label: labels.add_new_namespace
-        target: _blank
-        url:
-          function: getCreateNameSpaceUrl
-      computed: initNamespace
-      disabled: isNamespaceDisabled
-      fetch: getResources|core|v1|namespaces
-      label:
-        text: labels.namespace
-      refresh: true
+    - elements:
+      - disabled: isVariantAvailable
+        label:
+          text: labels.repository.name
+        schema:
+          $ref: schema#/properties/metadata/properties/release/properties/name
+        type: input
+      - fetch: getNamespacesApi
+        label:
+          text: labels.namespace
+        schema:
+          $ref: schema#/properties/metadata/properties/release/properties/namespace
+        type: select
       schema:
-        $ref: schema#/properties/metadata/properties/release/properties/namespace
-      type: select
+        $ref: schema#/properties/metadata/properties/release
+      type: single-step-form
     - discriminator:
         existingAuthSecrets:
           default: []
@@ -32,8 +35,7 @@ steps:
           default: true
           type: boolean
       elements:
-      - individualItemDisabilityCheck: labelsDisabilityChecker
-        isArray: true
+      - isArray: true
         keys:
           label:
             text: labels.key
@@ -63,186 +65,114 @@ steps:
           schema:
             $ref: schema#/properties/spec/properties/annotations/additionalProperties
           type: input
-      - customClass: mb-10
-        label:
-          text: labels.repository.backend
-        type: label-element
-      - elements:
-        - computed: initBackendProvider
-          label:
-            text: labels.backend.provider
-          onChange: onBackendProviderChange
-          options:
-          - text: Azure Blob Storage
-            value: azure
-          - text: Backblaze B2
-            value: b2
-          - text: Google Cloud Service
-            value: gcs
-          - text: AWS S3
-            value: s3
-          - text: OpenStack Swift
-            value: swift
-          schema:
-            $ref: schema#/properties/spec/properties/backend/properties/provider
-          type: select
-        - elements:
-          - elements:
-            - label:
-                text: labels.backend.container
-              required: true
-              schema:
-                $ref: schema#/properties/spec/properties/backend/properties/azure/properties/spec/properties/container
-              type: input
-            - label:
-                text: labels.backend.prefix
-              schema:
-                $ref: schema#/properties/spec/properties/backend/properties/azure/properties/spec/properties/prefix
-              type: input
-            - label:
-                text: labels.backend.maxConnections
-              schema:
-                $ref: schema#/properties/spec/properties/backend/properties/azure/properties/spec/properties/maxConnections
-              type: input
-            schema:
-              $ref: schema#/properties/spec/properties/backend/properties/azure/properties/spec
-            type: single-step-form
-          if: showBackendForm|azure
-          schema:
-            $ref: schema#/properties/spec/properties/backend/properties/azure
-          type: single-step-form
-        - elements:
-          - elements:
-            - label:
-                text: labels.backend.bucket
-              required: true
-              schema:
-                $ref: schema#/properties/spec/properties/backend/properties/gcs/properties/spec/properties/bucket
-              type: input
-            - label:
-                text: labels.backend.prefix
-              schema:
-                $ref: schema#/properties/spec/properties/backend/properties/gcs/properties/spec/properties/prefix
-              type: input
-            - label:
-                text: labels.backend.maxConnections
-              schema:
-                $ref: schema#/properties/spec/properties/backend/properties/gcs/properties/spec/properties/maxConnections
-              type: input
-            schema:
-              $ref: schema#/properties/spec/properties/backend/properties/gcs/properties/spec
-            type: single-step-form
-          if: showBackendForm|gcs
-          schema:
-            $ref: schema#/properties/spec/properties/backend/properties/gcs
-          type: single-step-form
-        - elements:
-          - elements:
-            - label:
-                text: labels.backend.endPoint
-              required: true
-              schema:
-                $ref: schema#/properties/spec/properties/backend/properties/s3/properties/spec/properties/endpoint
-              type: input
-            - label:
-                text: labels.backend.bucket
-              required: true
-              schema:
-                $ref: schema#/properties/spec/properties/backend/properties/s3/properties/spec/properties/bucket
-              type: input
-            - label:
-                text: labels.backend.prefix
-              schema:
-                $ref: schema#/properties/spec/properties/backend/properties/s3/properties/spec/properties/prefix
-              type: input
-            - label:
-                text: labels.backend.region
-              schema:
-                $ref: schema#/properties/spec/properties/backend/properties/s3/properties/spec/properties/region
-              type: input
-            schema:
-              $ref: schema#/properties/spec/properties/backend/properties/s3/properties/spec
-            type: single-step-form
-          if: showBackendForm|s3
-          schema:
-            $ref: schema#/properties/spec/properties/backend/properties/s3
-          type: single-step-form
+      - label:
+          text: Deletion Policy
+        options:
+          - Delete
+          - WipeOut
         schema:
-          $ref: schema#/properties/spec/properties/backend
+          $ref: schema#/properties/spec/properties/deletionPolicy
+        type: select
+      - elements:
+        - disableUnselect: true
+          fetch: fetchNamespaces
+          hasGroup: true
+          if: isRancherManaged
+          label:
+            text: labels.namespace
+          refresh: true
+          schema:
+            $ref: schema#/properties/spec/properties/storageRef/properties/namespace
+          type: select
+        - disableUnselect: true
+          fetch: fetchNamespaces
+          if: isNotRancherManaged
+          label:
+            text: labels.namespace
+          refresh: true
+          schema:
+            $ref: schema#/properties/spec/properties/storageRef/properties/namespace
+          type: select
+        - disableUnselect: true
+          fetch: fetchNames|storageRef
+          label:
+            text: labels.name
+          refresh: true
+          schema:
+            $ref: schema#/properties/spec/properties/storageRef/properties/name
+          type: select
+        label:
+          text: labels.storageRef
+        schema:
+          $ref: schema#/properties/spec/properties/storageRef
         show_label: true
         type: single-step-form
-      - label:
-          text: labels.repository.secret
-        type: label-element
-      - computed: initExistingAuthSecrets
-        onChange: onChoiseChange
-        options:
-        - text: Use Existing
-          value: true
-        - text: Create New
-          value: false
-        schema:
-          $ref: discriminator#/useExistingAuthSecret
-        type: radio
       - elements:
-        - elements:
-          - label:
-              text: labels.backend.azure.account_name
-            required: true
-            schema:
-              $ref: schema#/properties/spec/properties/backend/properties/azure/properties/auth/properties/AZURE_ACCOUNT_NAME
-            type: input
-          - label:
-              text: labels.backend.azure.account_key
-            required: true
-            schema:
-              $ref: schema#/properties/spec/properties/backend/properties/azure/properties/auth/properties/AZURE_ACCOUNT_KEY
-            type: input
-          if: showSecretForm|azure
+        - disableUnselect: true
+          fetch: fetchNamespaces
+          hasGroup: true
+          if: isRancherManaged
+          label:
+            text: labels.namespace
+          refresh: true
           schema:
-            $ref: schema#/properties/spec/properties/backend/properties/azure/properties/auth
-          type: single-step-form
-        - elements:
-          - label:
-              text: labels.backend.gcs.project_id
-            required: true
-            schema:
-              $ref: schema#/properties/spec/properties/backend/properties/gcs/properties/auth/properties/GOOGLE_PROJECT_ID
-            type: input
-          - label:
-              text: labels.backend.gcs.service_account
-            language: json
-            required: true
-            schema:
-              $ref: schema#/properties/spec/properties/backend/properties/gcs/properties/auth/properties/GOOGLE_SERVICE_ACCOUNT_JSON_KEY
-            type: editor
-          if: showSecretForm|gcs
+            $ref: schema#/properties/spec/properties/encryptionSecret/properties/namespace
+          type: select
+        - disableUnselect: true
+          fetch: fetchNamespaces
+          if: isNotRancherManaged
+          label:
+            text: labels.namespace
+          refresh: true
           schema:
-            $ref: schema#/properties/spec/properties/backend/properties/gcs/properties/auth
-          type: single-step-form
-        - elements:
-          - label:
-              text: labels.backend.s3.access_key_id
-            required: true
-            schema:
-              $ref: schema#/properties/spec/properties/backend/properties/s3/properties/auth/properties/AWS_ACCESS_KEY_ID
-            type: input
-          - label:
-              text: labels.backend.s3.secret_access_key
-            required: true
-            schema:
-              $ref: schema#/properties/spec/properties/backend/properties/s3/properties/auth/properties/AWS_SECRET_ACCESS_KEY
-            type: input
-          - label:
-              text: labels.backend.s3.ca_cert_data
-            schema:
-              $ref: schema#/properties/spec/properties/backend/properties/s3/properties/auth/properties/CA_CERT_DATA
-            type: editor
-          if: showSecretForm|s3
+            $ref: schema#/properties/spec/properties/encryptionSecret/properties/namespace
+          type: select
+        - disableUnselect: true
+          fetch: fetchNames|encryptionSecret
+          label:
+            text: labels.name
+          refresh: true
           schema:
-            $ref: schema#/properties/spec/properties/backend/properties/s3/properties/auth
-          type: single-step-form
-        if: showCreateSecretForm
+            $ref: schema#/properties/spec/properties/encryptionSecret/properties/name
+          type: select
+        label:
+          text: labels.encryptionSecret
+        schema:
+          $ref: schema#/properties/spec/properties/encryptionSecret
+        show_label: true
+        type: single-step-form
+      - elements:
+        - fetch: getApiGroup
+          label:
+            text: Api Group
+          schema:
+            $ref: schema#/properties/spec/properties/appRef/properties/apiGroup
+          type: select
+        - fetch: getKinds
+          label:
+            text: Kind
+          onChange: setVersion
+          sortable: true
+          schema:
+            $ref: schema#/properties/spec/properties/appRef/properties/kind
+          type: select
+        - fetch: fetchNamespaces
+          label:
+            text: Namespace
+          schema:
+            $ref: schema#/properties/spec/properties/appRef/properties/namespace
+          type: select
+        - fetch: getTargetName
+          label:
+            text: Name
+          schema:
+            $ref: schema#/properties/spec/properties/appRef/properties/name
+          type: select
+        label:
+          text: Target
+        schema:
+          $ref: schema#/properties/spec/properties/appRef
+        show_label: true
         type: single-step-form
       schema:
         $ref: schema#/properties/spec
