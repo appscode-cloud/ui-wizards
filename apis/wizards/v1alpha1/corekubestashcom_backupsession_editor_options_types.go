@@ -44,9 +44,10 @@ type CorekubestashcomBackupsessionEditorOptionsSpecSpec struct {
 	// +optional
 	Annotations map[string]string `json:"annotations"`
 	// +optional
-	Labels  map[string]string               `json:"labels"`
-	Invoker *core.TypedLocalObjectReference `json:"invoker"`
-	Session string                          `json:"session"`
+	Labels   map[string]string               `json:"labels"`
+	OwnerUID string                          `json:"ownerUID"`
+	Invoker  *core.TypedLocalObjectReference `json:"invoker"`
+	Session  string                          `json:"session"`
 	// +optional
 	BackupTimeout *metav1.Duration `json:"backupTimeout,omitempty"`
 }

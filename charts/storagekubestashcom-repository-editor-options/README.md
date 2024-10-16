@@ -49,7 +49,7 @@ The following table lists the configurable parameters of the `storagekubestashco
 |---------------------------------|----------------------------------------------------|------------------------------------|
 | metadata.resource.group         |                                                    | <code>storage.kubestash.com</code> |
 | metadata.resource.kind          |                                                    | <code>Repository</code>            |
-| metadata.resource.name          |                                                    | <code>repositorys</code>           |
+| metadata.resource.name          |                                                    | <code>repositories</code>          |
 | metadata.resource.scope         |                                                    | <code>Namespaced</code>            |
 | metadata.resource.version       |                                                    | <code>v1alpha1</code>              |
 | metadata.release.name           | Release name                                       | <code>""</code>                    |
@@ -60,9 +60,9 @@ The following table lists the configurable parameters of the `storagekubestashco
 | spec.storageRef.namespace       |                                                    | <code>""</code>                    |
 | spec.encryptionSecret.name      |                                                    | <code>""</code>                    |
 | spec.encryptionSecret.namespace |                                                    | <code>""</code>                    |
-| spec.appRef.apiGroup            |                                                    | <code>na</code>                    |
+| spec.appRef.apiGroup            |                                                    | <code>"kubedb.com"</code>          |
 | spec.appRef.kind                |                                                    | <code>""</code>                    |
-| spec.appRef.name                |                                                    | <code>na</code>                    |
+| spec.appRef.name                |                                                    | <code>""</code>                    |
 | spec.appRef.namespace           |                                                    | <code>""</code>                    |
 | spec.path                       |                                                    | <code>""</code>                    |
 | spec.deletionPolicy             |                                                    | <code>Delete</code>                |

@@ -1,231 +1,167 @@
-async function getResources(
-  { axios, storeGet, model, getValue, watchDependency },
-  group,
-  version,
-  resource,
-  namespaced,
-) {
-  const owner = storeGet('/route/params/user')
-  const cluster = storeGet('/route/params/cluster')
-  let namespace = ''
-  if (namespaced) {
-    namespace = getValue(model, '/metadata/release/namespace')
-    watchDependency('model#/metadata/release/namespace')
-  }
+let namespaces = []
+let appKind = []
+let coreKind = []
+let kubedbKind = []
+let availableKinds = {}
+let kindToResourceMap = {}
+let version = ''
 
-  if (!namespaced || namespace) {
-    // call api if resource is either not namespaced
-    // or namespaced and user has selected a namespace
-    try {
-      const resp = await axios.get(
-        `/clusters/${owner}/${cluster}/proxy/${group}/${version}${
-          namespace ? '/namespaces/' + namespace : ''
-        }/${resource}`,
-        {
-          params: { filter: { items: { metadata: { name: null } } } },
-        },
-      )
-
-      const resources = (resp && resp.data && resp.data.items) || []
-
-      resources.map((item) => {
-        const name = (item.metadata && item.metadata.name) || ''
-        item.text = name
-        item.value = name
-        return true
-      })
-      return resources
-    } catch (e) {
-      console.log(e)
-      return []
-    }
-  } else return []
+function init({ watchDependency, model, getValue, storeGet, axios, setDiscriminatorValue }) {
+  namespaces = getNamespacesApi({ axios, storeGet })
+  getKindsApi({ watchDependency, model, getValue, storeGet, axios })
+  setDiscriminatorValue('/nameSpaceApi', true)
 }
 
-function initNamespace({ route }) {
-  const { namespace } = route.query || {}
-  return namespace || null
-}
-function isNamespaceDisabled({ route }) {
-  return !!initNamespace({ route }) || !isVariantAvailable
+function getKinds({ watchDependency, getValue, model }) {
+  watchDependency(`model#/spec/appRef/apiGroup`)
+  const apiGroup = getValue(model, `/spec/appRef/apiGroup`)
+  console.log(apiGroup)
+
+  if (apiGroup === 'core') return coreKind
+  else if (apiGroup === 'apps') return appKind
+  else return kubedbKind
 }
 
-function labelsDisabilityChecker({ itemCtx }) {
-  const { key } = itemCtx
-  if (key.startsWith('app.kubernetes.io') || key.includes('helm')) return true
-  else return false
+function setVersion({ getValue, model }) {
+  let apiGroup = getValue(model, `/spec/appRef/apiGroup`)
+  const kind = getValue(model, `/spec/appRef/kind`)
+  if (apiGroup === 'core') apiGroup = ''
+  console.log(availableKinds)
+
+  Object.keys(availableKinds[apiGroup]).forEach((vs) => {
+    availableKinds[apiGroup][vs].forEach((ele) => {
+      if (ele.Kind === kind) {
+        version = vs
+      }
+    })
+  })
 }
 
-async function fetchJsons({ axios, itemCtx, setDiscriminatorValue }, discriminatorPath) {
-  let ui = {}
-  let language = {}
-  let functions = {}
-  const { name, sourceRef, version, packageviewUrlPrefix } = itemCtx.chart
+async function getKindsApi({ storeGet, axios }) {
+  const params = storeGet('/route/params')
+  const { user, cluster } = params
+  let url = `/clusters/${user}/${cluster}/available-types?groups=core,apps,kubedb.com`
   try {
-    ui = await axios.get(
-      `${packageviewUrlPrefix}/create-ui.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`,
-    )
-    language = await axios.get(
-      `${packageviewUrlPrefix}/language.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`,
-    )
-    const functionString = await axios.get(
-      `${packageviewUrlPrefix}/functions.js?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}`,
-    )
-    // declare evaluate the functionString to get the functions Object
-    const evalFunc = new Function(functionString.data || '')
-    functions = evalFunc()
+    const resp = await axios.get(url)
+
+    kindToResourceMap['kubedb.com'] = {}
+    kindToResourceMap['apps'] = {}
+    kindToResourceMap['core'] = {}
+
+    availableKinds = resp.data
+    appKind = Object.values(availableKinds['apps'])
+      .flat()
+      .map((ele) => {
+        kindToResourceMap['apps'][ele.Kind] = ele.Resource
+        return ele.Kind
+      })
+    kubedbKind = Object.values(availableKinds['kubedb.com'])
+      .flat()
+      .map((ele) => {
+        kindToResourceMap['kubedb.com'][ele.Kind] = ele.Resource
+        return ele.Kind
+      })
+    coreKind = Object.values(availableKinds[''])
+      .flat()
+      .map((ele) => {
+        kindToResourceMap['core'][ele.Kind] = ele.Resource
+        return ele.Kind
+      })
   } catch (e) {
     console.log(e)
   }
+  return []
+}
 
-  if (discriminatorPath) {
-    setDiscriminatorValue(discriminatorPath, {
-      ui: ui.data || {},
-      language: language.data || {},
-      functions,
-    })
+function isRancherManaged({ storeGet }) {
+  const managers = storeGet('/cluster/clusterDefinition/result/clusterManagers')
+  const found = managers.find((item) => item === 'Rancher')
+  return !!found
+}
+
+function isNotRancherManaged({ storeGet }) {
+  return !isRancherManaged({ storeGet })
+}
+function fetchNamespaces({ watchDependency }) {
+  watchDependency('discriminator#/nameSpaceApi')
+  console.log(namespaces)
+
+  return namespaces
+}
+async function getNamespacesApi({ axios, storeGet }) {
+  const params = storeGet('/route/params')
+  const { user, cluster, group, version, resource } = params
+  try {
+    const resp = await axios.post(
+      `/clusters/${user}/${cluster}/proxy/identity.k8s.appscode.com/v1alpha1/selfsubjectnamespaceaccessreviews`,
+      {
+        apiVersion: 'identity.k8s.appscode.com/v1alpha1',
+        kind: 'SelfSubjectNamespaceAccessReview',
+        spec: {
+          resourceAttributes: [
+            {
+              verb: 'create',
+              group: group,
+              version: version,
+              resource: resource,
+            },
+          ],
+        },
+      },
+    )
+    namespaces = resp?.data?.status?.namespaces || []
+    return namespaces
+  } catch (e) {
+    console.log(e)
+    return []
   }
-
-  return {
-    ui: ui.data || {},
-    language: language.data || {},
-    functions,
-  }
 }
 
-function showExistingSecretSelection({ discriminator, getValue, watchDependency }) {
-  const useExistingAuthSecret = getValue(discriminator, '/useExistingAuthSecret')
-  const isExistingAuthSecretsFetching = getValue(discriminator, '/isExistingAuthSecretsFetching')
-  watchDependency('discriminator#/useExistingAuthSecret')
-  watchDependency('discriminator#/isExistingAuthSecretsFetching')
+async function fetchNames({ getValue, model, storeGet, watchDependency, axios }, type) {
+  watchDependency(`model#/spec/${type}/namespace`) || ''
+  const user = storeGet('/route/params/user') || ''
+  const cluster = storeGet('/route/params/cluster') || ''
+  const namespace = getValue(model, `/spec/${type}/namespace`) || ''
+  let suffix = type
+  if (type === 'encryptionSecret') suffix = 'secrets'
+  else if (type === 'repository') suffix = 'repositories'
+  else if (type === 'storageRef') suffix = 'backupstorages'
+  const core = suffix === 'secrets' ? 'core' : 'storage.kubestash.com'
+  const version = suffix === 'secrets' ? 'v1' : 'v1alpha1'
+  const url = `/clusters/${user}/${cluster}/proxy/${core}/${version}/namespaces/${namespace}/${suffix}`
 
-  return !isExistingAuthSecretsFetching && useExistingAuthSecret
-}
+  try {
+    if (namespace) {
+      const resp = await axios.get(url)
+      let names = resp?.data?.items
+      names.map((item) => {
+        item.value = item?.metadata?.name || ''
+        item.text = item?.metadata?.name || ''
+        return true
+      })
 
-function onChoiseChange({ discriminator, getValue, commit }) {
-  const useExistingAuthSecret = getValue(discriminator, '/useExistingAuthSecret')
-  // remove spec.storageSecret
-  commit('wizard/model$delete', '/spec/storageSecret')
-  if (useExistingAuthSecret) {
-    // remove the auth from each backend
-    Object.keys(backendMap).forEach((backend) => {
-      commit('wizard/model$delete', `/spec/backend/${backend}/auth`)
-    })
-  }
-}
+      if (type === 'repository') {
+        const resource = storeGet('/resource/layout/result/resource') || {}
+        let group = resource?.group || ''
+        let kind = resource?.kind || ''
 
-async function initExistingAuthSecrets(ctx) {
-  ctx.setDiscriminatorValue('/isExistingAuthSecretsFetching', true)
-  const secrets = await getResources(ctx, 'core', 'v1', 'secrets', true)
-  // set secrets;
-  ctx.setDiscriminatorValue('/existingAuthSecrets', secrets)
-  ctx.setDiscriminatorValue('/isExistingAuthSecretsFetching', false)
+        if (isConsole({ storeGet })) {
+          group = getValue(model, '/spec/appRef/apiGroup') || ''
+          kind = getValue(model, '/spec/appRef/kind') || ''
+        }
 
-  return true
-}
-
-async function getExistingAuthSecrets({ discriminator, getValue, watchDependency }) {
-  const existingAuthSecrets = getValue(discriminator, '/existingAuthSecrets')
-  watchDependency('discriminator#/existingAuthSecrets')
-  return existingAuthSecrets
-}
-
-function showCreateSecretForm({ discriminator, getValue, watchDependency }) {
-  const useExistingAuthSecret = getValue(discriminator, '/useExistingAuthSecret')
-  watchDependency('discriminator#/useExistingAuthSecret')
-  return !useExistingAuthSecret
-}
-
-// backend configuration
-const backendMap = {
-  azure: {
-    spec: { container: '', maxConnections: 0, prefix: '' },
-    auth: { AZURE_ACCOUNT_KEY: '', AZURE_ACCOUNT_NAME: '' },
-  },
-  b2: {
-    spec: { bucket: '', prefix: '', maxConnections: 0 },
-    auth: { B2_ACCOUNT_ID: '', B2_ACCOUNT_KEY: '' },
-  },
-  gcs: {
-    spec: { bucket: '', prefix: '', maxConnections: 0 },
-    auth: { GOOGLE_PROJECT_ID: '', GOOGLE_SERVICE_ACCOUNT_JSON_KEY: '' },
-  },
-  s3: {
-    spec: { endpoint: '', bucket: '', prefix: '', region: '' },
-    auth: {
-      AWS_ACCESS_KEY_ID: '',
-      AWS_SECRET_ACCESS_KEY: '',
-      CA_CERT_DATA: '',
-    },
-  },
-  swift: {
-    spec: { container: '', prefix: '' },
-    auth: {
-      OS_AUTH_TOKEN: '',
-      OS_AUTH_URL: '',
-      OS_PASSWORD: '',
-      OS_PROJECT_DOMAIN_NAME: '',
-      OS_PROJECT_NAME: '',
-      OS_REGION_NAME: '',
-      OS_STORAGE_URL: '',
-      OS_TENANT_ID: '',
-      OS_TENANT_NAME: '',
-      OS_USERNAME: '',
-      OS_USER_DOMAIN_NAME: '',
-      ST_AUTH: '',
-      ST_KEY: '',
-      ST_USER: '',
-    },
-  },
-}
-
-function initBackendProvider({ model, getValue }) {
-  const backend = getValue(model, '/spec/backend')
-  const selectedBackend = Object.keys(backendMap).find((key) => {
-    const value = backend && backend[key]
-
-    return value ? true : false
-  })
-  return selectedBackend || 'gcs'
-}
-
-function valueExists(value, getValue, path) {
-  const val = getValue(value, path)
-  if (val) return true
-  else return false
-}
-
-function onBackendProviderChange({ commit, getValue, model }) {
-  const selectedBackendProvider = getValue(model, '/spec/backend/provider')
-
-  // delete every other backend type from model  exect the selected one
-  Object.keys(backendMap).forEach((key) => {
-    if (key !== selectedBackendProvider) {
-      commit('wizard/model$delete', `/spec/backend/${key}`)
+        const filteredRepo = names.filter((item) => {
+          const appRef = item?.spec?.appRef || {}
+          return appRef?.apiGroup === group && appRef?.kind === kind
+        })
+        return filteredRepo
+      }
+      return names
     }
-  })
-
-  // set the selectedBackend type object in
-
-  if (!valueExists(model, getValue, `/${selectedBackendProvider}`)) {
-    commit('wizard/model$update', {
-      path: `/spec/backend/${selectedBackendProvider}`,
-      value: {},
-      force: true,
-    })
+  } catch (e) {
+    console.log(e)
   }
-}
-
-function showBackendForm({ getValue, model, watchDependency }, value) {
-  const backendProvider = getValue(model, '/spec/backend/provider')
-  watchDependency('model#/spec/backend/provider')
-  return backendProvider === value
-}
-
-function showSecretForm({ model, getValue, watchDependency }, value) {
-  const backendProvider = getValue(model, '/spec/backend/provider')
-  watchDependency('model#/spec/backend/provider')
-  return backendProvider === value
+  return []
 }
 
 function getCreateNameSpaceUrl({ model, getValue, storeGet }) {
@@ -241,26 +177,59 @@ function getCreateNameSpaceUrl({ model, getValue, storeGet }) {
   }
 }
 
-function isVariantAvailable({ storeGet }) {
-  const variant = storeGet('/route/query/variant')
-  return variant ? true : false
+function getApiGroup() {
+  return ['core', 'apps', 'kubedb.com']
+}
+
+async function getTargetName({ watchDependency, getValue, model, axios, storeGet }) {
+  watchDependency('model#/spec/appRef/apiGroup')
+  watchDependency('model#/spec/appRef/namespace')
+  watchDependency('model#/spec/appRef/kind')
+  const apiGroup = getValue(model, `/spec/appRef/apiGroup`)
+  const namespace = getValue(model, `/spec/appRef/namespace`)
+  const resource = getResourceName({ getValue, model })
+  const params = storeGet('/route/params')
+  const { user, cluster } = params
+
+  const url = `/clusters/${user}/${cluster}/proxy/${apiGroup}/${version}/namespaces/${namespace}/${resource}`
+  if (apiGroup && version && resource && namespace) {
+    try {
+      const resp = await axios.get(url)
+      const items = resp.data?.items
+      const options = items.map((ele) => {
+        return ele.metadata.name
+      })
+      return options
+    } catch (e) {
+      console.log(e)
+    }
+  }
+  return []
+}
+
+function getResourceName({ getValue, model }) {
+  const apiGroup = getValue(model, `/spec/appRef/apiGroup`)
+  const kind = getValue(model, `/spec/appRef/kind`)
+  return kindToResourceMap[apiGroup][kind]
+}
+
+function returnFalse() {
+  return false
 }
 
 return {
-  isVariantAvailable,
-  getResources,
-  initNamespace,
-  isNamespaceDisabled,
-  labelsDisabilityChecker,
-  fetchJsons,
-  showExistingSecretSelection,
-  initExistingAuthSecrets,
-  onChoiseChange,
-  getExistingAuthSecrets,
-  showCreateSecretForm,
-  initBackendProvider,
-  onBackendProviderChange,
-  showBackendForm,
-  showSecretForm,
+  getKindsApi,
+  getNamespacesApi,
+  init,
   getCreateNameSpaceUrl,
+  isRancherManaged,
+  isNotRancherManaged,
+  fetchNamespaces,
+  fetchNames,
+  getApiGroup,
+  getTargetName,
+  getKinds,
+  getResourceName,
+  returnFalse,
+  setVersion,
 }
