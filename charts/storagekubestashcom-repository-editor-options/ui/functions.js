@@ -125,6 +125,7 @@ async function fetchNames({ getValue, model, storeGet, watchDependency, axios },
   let suffix = type
   if (type === 'encryptionSecret') suffix = 'secrets'
   else if (type === 'repository') suffix = 'repositories'
+  else if (type === 'storageRef') suffix = 'backupstorages'
   const core = suffix === 'secrets' ? 'core' : 'storage.kubestash.com'
   const version = suffix === 'secrets' ? 'v1' : 'v1alpha1'
   const url = `/clusters/${user}/${cluster}/proxy/${core}/${version}/namespaces/${namespace}/${suffix}`
