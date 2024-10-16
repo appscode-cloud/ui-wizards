@@ -9,6 +9,13 @@ metadata:
   annotations:
     {{- include "corekubestashcom-backupsession-editor-options.annotations" . | nindent 4 }}
   {{- end }}
+  ownerReferences:
+  - apiVersion: core.kubestash.com/v1alpha1
+    blockOwnerDeletion: true
+    controller: true
+    kind: {{ .Values.spec.invoker.kind }}
+    name: {{ .Values.spec.invoker.name }}
+    uid: {{ .Values.spec.ownerUID }}
 spec:
   invoker:
     {{- toYaml .Values.spec.invoker | nindent 4 }}

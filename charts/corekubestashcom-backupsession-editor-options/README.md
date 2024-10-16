@@ -56,6 +56,7 @@ The following table lists the configurable parameters of the `corekubestashcom-b
 | metadata.release.namespace | Release namespace                                  | <code>""</code>                  |
 | spec.annotations           | Annotations to add to the database custom resource | <code>{}</code>                  |
 | spec.labels                | Labels to add to all the template objects          | <code>{}</code>                  |
+| spec.ownerUID              |                                                    | <code>""</code>                  |
 | spec.invoker.apiGroup      |                                                    | <code>core.kubestash.com</code>  |
 | spec.invoker.kind          |                                                    | <code>BackupConfiguration</code> |
 | spec.invoker.name          |                                                    | <code>""</code>                  |
