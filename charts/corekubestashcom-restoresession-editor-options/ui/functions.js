@@ -172,12 +172,15 @@ async function fetchNames({ getValue, model, storeGet, watchDependency, axios },
           group = getValue(model, '/spec/target/apiGroup') || ''
           kind = getValue(model, '/spec/target/kind') || ''
         }
-
-        const filteredRepo = names.filter((item) => {
-          const appRef = item?.spec?.appRef || {}
-          return appRef?.apiGroup === group && appRef?.kind === kind
-        })
-        return filteredRepo
+        if (kind && group) {
+          const filteredRepo = names.filter((item) => {
+            const appRef = item?.spec?.appRef || {}
+            return appRef?.apiGroup === group && appRef?.kind === kind
+          })
+          return filteredRepo
+        } else {
+          return names
+        }
       }
       return names
     }
