@@ -1,4 +1,18 @@
 let invokerData = []
+
+function initName({ model, getValue, commit }) {
+  const invoker = getValue(model, '/spec/invoker/name')
+  const session = getValue(model, '/spec/session')
+  let name = ''
+  if (invoker && session) name = `${invoker}-${session}-${Date.now()}`
+  else name = ''
+  commit('wizard/model$update', {
+    path: '/metadata/release/name',
+    value: name,
+    force: true,
+  })
+}
+
 async function fetchNamespaces({ axios, storeGet }) {
   const params = storeGet('/route/params')
   const { user, cluster, group, version, resource } = params
@@ -64,6 +78,7 @@ function fetchSessions({ getValue, model, watchDependency }) {
 }
 
 return {
+  initName,
   fetchNamespaces,
   fetchInvokerName,
   fetchSessions,
