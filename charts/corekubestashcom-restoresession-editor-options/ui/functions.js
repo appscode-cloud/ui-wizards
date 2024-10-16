@@ -208,7 +208,6 @@ async function getSnapshots({ watchDependency, model, storeGet, getValue, axios 
         item.text = name
         return true
       })
-      console.log(snapshots)
       const filteredSnapshots = snapshots.filter((item) => {
         const owners = item?.metadata?.ownerReferences
         if (owners.length) return owners[0].name === repository && owners[0].kind === 'Repository'
@@ -272,7 +271,6 @@ let version = ''
 
 function init({ watchDependency, model, getValue, storeGet, axios }) {
   getKindsApi({ watchDependency, model, getValue, storeGet, axios })
-  initKindToResource({ watchDependency, storeGet, getValue, model, axios })
   namespaces = fetchNamespacesApi({ axios, storeGet })
 }
 
@@ -281,36 +279,15 @@ function fetchNamespaces({ watchDependency }) {
   return namespaces
 }
 
-async function initKindToResource({ storeGet, axios }) {
-  const params = storeGet('/route/params')
-  const { user, cluster } = params
-
-  const url = `/clusters/${user}/${cluster}/proxy/meta.k8s.appscode.com/v1alpha1/usermenus/kubedb-accordion/available`
-  try {
-    const resp = await axios.get(url)
-    const sections = resp.data?.spec?.sections
-    sections.forEach((section) => {
-      const items = section?.items
-      items.forEach((item) => {
-        const grp = item?.resource?.group
-        const kind = item?.resource?.kind
-        const resourceName = item?.resource?.name
-        kindToResourceMap[grp] = {}
-        kindToResourceMap[grp][kind] = resourceName
-      })
-    })
-  } catch (e) {
-    console.log(e)
-  }
-}
-
-function setVersion({ getValue, model }) {
+function setVersion({ getValue, model, watchDependency }) {
+  watchDependency('model#/spec/target/apiGroup')
+  watchDependency('model#/spec/target/kind')
   const apiGroup = getValue(model, `/spec/target/apiGroup`)
   const kind = getValue(model, `/spec/target/kind`)
   if (apiGroup === 'core') apiGroup = ''
   Object.keys(availableKinds[apiGroup]).forEach((vs) => {
     availableKinds[apiGroup][vs].forEach((ele) => {
-      if (ele === kind) {
+      if (ele.Kind === kind) {
         version = vs
       }
     })
@@ -323,10 +300,31 @@ async function getKindsApi({ storeGet, axios }) {
   let url = `/clusters/${user}/${cluster}/available-types?groups=core,apps,kubedb.com`
   try {
     const resp = await axios.get(url)
+
+    kindToResourceMap['kubedb.com'] = {}
+    kindToResourceMap['apps'] = {}
+    kindToResourceMap['core'] = {}
+
     availableKinds = resp.data
-    appKind = Object.values(resp.data['apps']).flat()
-    kubedbKind = Object.values(resp.data['kubedb.com']).flat()
-    coreKind = Object.values(resp.data['']).flat()
+
+    appKind = Object.values(availableKinds['apps'])
+      .flat()
+      .map((ele) => {
+        kindToResourceMap['apps'][ele.Kind] = ele.Resource
+        return ele.Kind
+      })
+    kubedbKind = Object.values(availableKinds['kubedb.com'])
+      .flat()
+      .map((ele) => {
+        kindToResourceMap['kubedb.com'][ele.Kind] = ele.Resource
+        return ele.Kind
+      })
+    coreKind = Object.values(availableKinds[''])
+      .flat()
+      .map((ele) => {
+        kindToResourceMap['core'][ele.Kind] = ele.Resource
+        return ele.Kind
+      })
   } catch (e) {
     console.log(e)
   }
@@ -361,9 +359,8 @@ async function getTargetName({ watchDependency, getValue, model, axios, storeGet
     try {
       const resp = await axios.get(url)
       const items = resp.data?.items
-      let options = []
-      items.forEach((ele) => {
-        options.push(ele.metadata?.name)
+      const options = items.map((ele) => {
+        return ele.metadata.name
       })
       return options
     } catch (e) {
