@@ -9,6 +9,13 @@ steps:
           default: false
           type: boolean
       elements:
+      - fetch: fetchNamespaces
+        if: isConsole
+        label:
+          text: Select Namespace
+        schema:
+          $ref: schema#/properties/metadata/properties/release/properties/namespace
+        type: select
       - computed: init
         if: returnFalse
         type: input
@@ -18,13 +25,6 @@ steps:
         schema:
           $ref: schema#/properties/metadata/properties/release/properties/name
         type: input
-      - fetch: fetchNamespaces
-        if: isConsole
-        label:
-          text: Select Namespace
-        schema:
-          $ref: schema#/properties/metadata/properties/release/properties/namespace
-        type: select
       - elements:
         - computed: initMetadata
           if: returnFalse
@@ -233,6 +233,7 @@ steps:
             type: select
           label:
             text: Target
+          if: isConsole
           hideForm: true
           show_label: true
           type: single-step-form
