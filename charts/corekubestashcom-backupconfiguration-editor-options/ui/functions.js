@@ -7,7 +7,7 @@ let kindToResourceMap = {}
 let version = ''
 
 function init({ watchDependency, model, getValue, storeGet, axios, setDiscriminatorValue }) {
-  getNamespacesApi({ axios, storeGet, setDiscriminatorValue })
+  namespaces = getNamespacesApi({ axios, storeGet, setDiscriminatorValue })
   getKindsApi({ watchDependency, model, getValue, storeGet, axios })
   setDiscriminatorValue('/nameSpaceApi', true)
 }
