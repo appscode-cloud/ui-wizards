@@ -177,13 +177,10 @@ function getCreateNameSpaceUrl({ model, getValue, storeGet }) {
   }
 }
 
-function isVariantAvailable({ storeGet }) {
-  const variant = storeGet('/route/query/variant')
-  return variant ? true : false
-}
 function getApiGroup() {
   return ['core', 'apps', 'kubedb.com']
 }
+
 async function getTargetName({ watchDependency, getValue, model, axios, storeGet }) {
   watchDependency('model#/spec/appRef/apiGroup')
   watchDependency('model#/spec/appRef/namespace')
@@ -209,18 +206,20 @@ async function getTargetName({ watchDependency, getValue, model, axios, storeGet
   }
   return []
 }
+
 function getResourceName({ getValue, model }) {
   const apiGroup = getValue(model, `/spec/appRef/apiGroup`)
   const kind = getValue(model, `/spec/appRef/kind`)
   return kindToResourceMap[apiGroup][kind]
 }
+
 function returnFalse() {
   return false
 }
+
 return {
   getKindsApi,
   getNamespacesApi,
-  isVariantAvailable,
   init,
   getCreateNameSpaceUrl,
   isRancherManaged,
