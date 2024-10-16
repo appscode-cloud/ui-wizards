@@ -1,5 +1,4 @@
 let addonList = []
-
 function isConsole({ storeGet }) {
   isKube = storeGet('/route/query/operation')
   return !isKube
@@ -47,7 +46,7 @@ function isNotRancherManaged({ storeGet }) {
   return !isRancherManaged({ storeGet })
 }
 
-async function fetchNamespaces({ axios, storeGet }) {
+async function fetchNamespacesApi({ axios, storeGet }) {
   const params = storeGet('/route/params')
   const { user, cluster, group, version, resource } = params
   try {
@@ -173,12 +172,15 @@ async function fetchNames({ getValue, model, storeGet, watchDependency, axios },
           group = getValue(model, '/spec/target/apiGroup') || ''
           kind = getValue(model, '/spec/target/kind') || ''
         }
-
-        const filteredRepo = names.filter((item) => {
-          const appRef = item?.spec?.appRef || {}
-          return appRef?.apiGroup === group && appRef?.kind === kind
-        })
-        return filteredRepo
+        if (kind && group) {
+          const filteredRepo = names.filter((item) => {
+            const appRef = item?.spec?.appRef || {}
+            return appRef?.apiGroup === group && appRef?.kind === kind
+          })
+          return filteredRepo
+        } else {
+          return names
+        }
       }
       return names
     }
@@ -209,7 +211,6 @@ async function getSnapshots({ watchDependency, model, storeGet, getValue, axios 
         item.text = name
         return true
       })
-
       const filteredSnapshots = snapshots.filter((item) => {
         const owners = item?.metadata?.ownerReferences
         if (owners.length) return owners[0].name === repository && owners[0].kind === 'Repository'
@@ -263,12 +264,132 @@ function returnFalse() {
   return false
 }
 
+let appKind = []
+let coreKind = []
+let kubedbKind = []
+let availableKinds = {}
+let kindToResourceMap = {}
+let namespaces = []
+let version = ''
+
+function init({ watchDependency, model, getValue, storeGet, axios }) {
+  getKindsApi({ watchDependency, model, getValue, storeGet, axios })
+  namespaces = fetchNamespacesApi({ axios, storeGet })
+}
+
+function fetchNamespaces({ watchDependency }) {
+  watchDependency('discriminator#/nameSpaceApi')
+  return namespaces
+}
+
+function setVersion({ getValue, model, watchDependency }) {
+  watchDependency('model#/spec/target/apiGroup')
+  watchDependency('model#/spec/target/kind')
+  const apiGroup = getValue(model, `/spec/target/apiGroup`)
+  const kind = getValue(model, `/spec/target/kind`)
+  if (apiGroup === 'core') apiGroup = ''
+  Object.keys(availableKinds[apiGroup]).forEach((vs) => {
+    availableKinds[apiGroup][vs].forEach((ele) => {
+      if (ele.Kind === kind) {
+        version = vs
+      }
+    })
+  })
+}
+
+async function getKindsApi({ storeGet, axios }) {
+  const params = storeGet('/route/params')
+  const { user, cluster } = params
+  let url = `/clusters/${user}/${cluster}/available-types?groups=core,apps,kubedb.com`
+  try {
+    const resp = await axios.get(url)
+
+    kindToResourceMap['kubedb.com'] = {}
+    kindToResourceMap['apps'] = {}
+    kindToResourceMap['core'] = {}
+
+    availableKinds = resp.data
+
+    appKind = Object.values(availableKinds['apps'])
+      .flat()
+      .map((ele) => {
+        kindToResourceMap['apps'][ele.Kind] = ele.Resource
+        return ele.Kind
+      })
+    kubedbKind = Object.values(availableKinds['kubedb.com'])
+      .flat()
+      .map((ele) => {
+        kindToResourceMap['kubedb.com'][ele.Kind] = ele.Resource
+        return ele.Kind
+      })
+    coreKind = Object.values(availableKinds[''])
+      .flat()
+      .map((ele) => {
+        kindToResourceMap['core'][ele.Kind] = ele.Resource
+        return ele.Kind
+      })
+  } catch (e) {
+    console.log(e)
+  }
+  return []
+}
+
+function getKinds({ watchDependency, getValue, model }) {
+  watchDependency(`model#/spec/target/apiGroup`)
+  const apiGroup = getValue(model, `/spec/target/apiGroup`)
+
+  if (apiGroup === 'core') return coreKind
+  else if (apiGroup === 'apps') return appKind
+  else return kubedbKind
+}
+
+function getApiGroup() {
+  return ['core', 'apps', 'kubedb.com']
+}
+
+async function getTargetName({ watchDependency, getValue, model, axios, storeGet }) {
+  watchDependency('model#/spec/target/apiGroup')
+  watchDependency('model#/spec/target/namespace')
+  watchDependency('model#/spec/target/kind')
+  const apiGroup = getValue(model, `/spec/target/apiGroup`)
+  const namespace = getValue(model, `/spec/target/namespace`)
+  const resource = getResourceName({ getValue, model })
+  const params = storeGet('/route/params')
+  const { user, cluster } = params
+
+  const url = `/clusters/${user}/${cluster}/proxy/${apiGroup}/${version}/namespaces/${namespace}/${resource}`
+  if (apiGroup && version && resource && namespace) {
+    try {
+      const resp = await axios.get(url)
+      const items = resp.data?.items
+      const options = items.map((ele) => {
+        return ele.metadata.name
+      })
+      return options
+    } catch (e) {
+      console.log(e)
+    }
+  }
+}
+
+function getResourceName({ getValue, model }) {
+  const apiGroup = getValue(model, `/spec/target/apiGroup`)
+  const kind = getValue(model, `/spec/target/kind`)
+  return kindToResourceMap[apiGroup][kind]
+}
+
 return {
+  fetchNamespaces,
+  setVersion,
+  init,
+  getTargetName,
+  getKinds,
+  getApiGroup,
   isConsole,
   initMetadata,
   isRancherManaged,
   isNotRancherManaged,
-  fetchNamespaces,
+  fetchNamespacesApi,
   setNamespace,
   getDbs,
   initTarget,

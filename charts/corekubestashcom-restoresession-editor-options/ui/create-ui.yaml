@@ -5,30 +5,26 @@ steps:
         database:
           default: {}
           type: object
+        nameSpaceApi:
+          default: false
+          type: boolean
       elements:
+      - fetch: fetchNamespaces
+        if: isConsole
+        label:
+          text: Select Namespace
+        schema:
+          $ref: schema#/properties/metadata/properties/release/properties/namespace
+        type: select
+      - computed: init
+        if: returnFalse
+        type: input
       - if: isConsole
         label:
           text: labels.name
         schema:
           $ref: schema#/properties/metadata/properties/release/properties/name
         type: input
-      - fetch: getNamespaces
-        if: isConsole
-        label:
-          text: labels.selectNamespace
-        schema:
-          $ref: schema#/properties/metadata/properties/release/properties/namespace
-        type: select
-      - fetch: getDbs
-        if: isConsole
-        label:
-          text: labels.selectDb
-        onChange: initTarget
-        refresh: true
-        required: true
-        schema:
-          $ref: discriminator#/properties/database
-        type: select
       - elements:
         - computed: initMetadata
           if: returnFalse
@@ -209,7 +205,38 @@ steps:
           schema:
             $ref: schema#/properties/spec/properties/addon
           type: single-step-form
-        if: databaseSelected
+        - elements:
+          - fetch: getApiGroup
+            label:
+              text: Api Group
+            schema:
+              $ref: schema#/properties/spec/properties/target/properties/apiGroup
+            type: select
+          - fetch: getKinds
+            label:
+              text: Kind
+            onChange: setVersion
+            schema:
+              $ref: schema#/properties/spec/properties/target/properties/kind
+            type: select
+          - fetch: fetchNamespaces
+            label:
+              text: Namespace
+            schema:
+              $ref: schema#/properties/spec/properties/target/properties/namespace
+            type: select
+          - fetch: getTargetName
+            label:
+              text: Name
+            schema:
+              $ref: schema#/properties/spec/properties/target/properties/name
+            type: select
+          hideForm: true
+          if: isConsole
+          label:
+            text: Target
+          show_label: true
+          type: single-step-form
         schema:
           $ref: schema#/properties/spec
         type: single-step-form

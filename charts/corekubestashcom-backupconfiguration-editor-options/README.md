@@ -60,7 +60,7 @@ The following table lists the configurable parameters of the `kubestashcom-backu
 | spec.backend.storageRef.namespace      |                                                    | <code>""</code>                   |
 | spec.backend.retentionPolicy.name      |                                                    | <code>""</code>                   |
 | spec.backend.retentionPolicy.namespace |                                                    | <code>""</code>                   |
-| spec.target.apiGroup                   |                                                    | <code>""</code>                   |
+| spec.target.apiGroup                   |                                                    | <code>"kubedb.com"</code>         |
 | spec.target.kind                       |                                                    | <code>""</code>                   |
 | spec.target.name                       |                                                    | <code>""</code>                   |
 | spec.target.namespace                  |                                                    | <code>""</code>                   |

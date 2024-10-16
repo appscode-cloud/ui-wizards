@@ -64,7 +64,7 @@ The following table lists the configurable parameters of the `corekubestashcom-r
 | spec.addon.name                            |                                                    | <code>""</code>                 |
 | spec.addon.tasks                           |                                                    | <code>[]</code>                 |
 | spec.addon.jobTemplate.securityContext     |                                                    | <code></code>                   |
-| spec.target.apiGroup                       |                                                    | <code>""</code>                 |
+| spec.target.apiGroup                       |                                                    | <code>"kubedb.com"</code>       |
 | spec.target.kind                           |                                                    | <code>""</code>                 |
 | spec.target.namespace                      |                                                    | <code>""</code>                 |
 | spec.target.name                           |                                                    | <code>""</code>                 |

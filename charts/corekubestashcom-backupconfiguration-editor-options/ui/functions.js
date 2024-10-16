@@ -1,329 +1,18 @@
-const machines = {
-  'db.t.micro': {
-    resources: {
-      requests: {
-        cpu: '250m',
-        memory: '512Mi',
-      },
-      limits: {
-        cpu: '500m',
-        memory: '1Gi',
-      },
-    },
-  },
-  'db.t.small': {
-    resources: {
-      requests: {
-        cpu: '1',
-        memory: '1Gi',
-      },
-      limits: {
-        cpu: '2',
-        memory: '2Gi',
-      },
-    },
-  },
-  'db.t.medium': {
-    resources: {
-      requests: {
-        cpu: '1',
-        memory: '2Gi',
-      },
-      limits: {
-        cpu: '2',
-        memory: '4Gi',
-      },
-    },
-  },
-  'db.t.large': {
-    resources: {
-      requests: {
-        cpu: '1',
-        memory: '4Gi',
-      },
-      limits: {
-        cpu: '2',
-        memory: '8Gi',
-      },
-    },
-  },
-  'db.t.xlarge': {
-    resources: {
-      requests: {
-        cpu: '2',
-        memory: '8Gi',
-      },
-      limits: {
-        cpu: '4',
-        memory: '16Gi',
-      },
-    },
-  },
-  'db.t.2xlarge': {
-    resources: {
-      requests: {
-        cpu: '4',
-        memory: '16Gi',
-      },
-      limits: {
-        cpu: '8',
-        memory: '32Gi',
-      },
-    },
-  },
-  'db.m.small': {
-    resources: {
-      requests: {
-        cpu: '500m',
-        memory: '912680550',
-      },
-      limits: {
-        cpu: '1',
-        memory: '1825361100',
-      },
-    },
-  },
-  'db.m.large': {
-    resources: {
-      requests: {
-        cpu: '1',
-        memory: '4Gi',
-      },
-      limits: {
-        cpu: '2',
-        memory: '8Gi',
-      },
-    },
-  },
-  'db.m.xlarge': {
-    resources: {
-      requests: {
-        cpu: '2',
-        memory: '8Gi',
-      },
-      limits: {
-        cpu: '4',
-        memory: '16Gi',
-      },
-    },
-  },
-  'db.m.2xlarge': {
-    resources: {
-      requests: {
-        cpu: '4',
-        memory: '16Gi',
-      },
-      limits: {
-        cpu: '8',
-        memory: '32Gi',
-      },
-    },
-  },
-  'db.m.4xlarge': {
-    resources: {
-      requests: {
-        cpu: '8',
-        memory: '32Gi',
-      },
-      limits: {
-        cpu: '16',
-        memory: '64Gi',
-      },
-    },
-  },
-  'db.m.8xlarge': {
-    resources: {
-      requests: {
-        cpu: '16',
-        memory: '64Gi',
-      },
-      limits: {
-        cpu: '32',
-        memory: '128Gi',
-      },
-    },
-  },
-  'db.m.12xlarge': {
-    resources: {
-      requests: {
-        cpu: '24',
-        memory: '96Gi',
-      },
-      limits: {
-        cpu: '48',
-        memory: '192Gi',
-      },
-    },
-  },
-  'db.m.16xlarge': {
-    resources: {
-      requests: {
-        cpu: '32',
-        memory: '128Gi',
-      },
-      limits: {
-        cpu: '64',
-        memory: '256Gi',
-      },
-    },
-  },
-  'db.m.24xlarge': {
-    resources: {
-      requests: {
-        cpu: '48',
-        memory: '192Gi',
-      },
-      limits: {
-        cpu: '96',
-        memory: '384Gi',
-      },
-    },
-  },
-  'db.r.large': {
-    resources: {
-      requests: {
-        cpu: '1',
-        memory: '8Gi',
-      },
-      limits: {
-        cpu: '2',
-        memory: '16Gi',
-      },
-    },
-  },
-  'db.r.xlarge': {
-    resources: {
-      requests: {
-        cpu: '2',
-        memory: '16Gi',
-      },
-      limits: {
-        cpu: '4',
-        memory: '32Gi',
-      },
-    },
-  },
-  'db.r.2xlarge': {
-    resources: {
-      requests: {
-        cpu: '4',
-        memory: '32Gi',
-      },
-      limits: {
-        cpu: '8',
-        memory: '64Gi',
-      },
-    },
-  },
-  'db.r.4xlarge': {
-    resources: {
-      requests: {
-        cpu: '8',
-        memory: '96Gi',
-      },
-      limits: {
-        cpu: '16',
-        memory: '192Gi',
-      },
-    },
-  },
-  'db.r.8xlarge': {
-    resources: {
-      requests: {
-        cpu: '16',
-        memory: '128Gi',
-      },
-      limits: {
-        cpu: '32',
-        memory: '256Gi',
-      },
-    },
-  },
-  'db.r.12xlarge': {
-    resources: {
-      requests: {
-        cpu: '24',
-        memory: '192Gi',
-      },
-      limits: {
-        cpu: '48',
-        memory: '384Gi',
-      },
-    },
-  },
-  'db.r.16xlarge': {
-    resources: {
-      requests: {
-        cpu: '32',
-        memory: '256Gi',
-      },
-      limits: {
-        cpu: '64',
-        memory: '512Gi',
-      },
-    },
-  },
-  'db.r.24xlarge': {
-    resources: {
-      requests: {
-        cpu: '24',
-        memory: '384Gi',
-      },
-      limits: {
-        cpu: '96',
-        memory: '768Gi',
-      },
-    },
-  },
+let namespaces = []
+let appKind = []
+let coreKind = []
+let kubedbKind = []
+let availableKinds = {}
+let kindToResourceMap = {}
+let version = ''
+
+function init({ watchDependency, model, getValue, storeGet, axios, setDiscriminatorValue }) {
+  namespaces = getNamespacesApi({ axios, storeGet, setDiscriminatorValue })
+  getKindsApi({ watchDependency, model, getValue, storeGet, axios })
+  setDiscriminatorValue('/nameSpaceApi', true)
 }
 
-const machineList = [
-  'custom',
-  'db.t.micro',
-  'db.t.small',
-  'db.t.medium',
-  'db.t.large',
-  'db.t.xlarge',
-  'db.t.2xlarge',
-  'db.m.small',
-  'db.m.large',
-  'db.m.xlarge',
-  'db.m.2xlarge',
-  'db.m.4xlarge',
-  'db.m.8xlarge',
-  'db.m.12xlarge',
-  'db.m.16xlarge',
-  'db.m.24xlarge',
-  'db.r.large',
-  'db.r.xlarge',
-  'db.r.2xlarge',
-  'db.r.4xlarge',
-  'db.r.8xlarge',
-  'db.r.12xlarge',
-  'db.r.16xlarge',
-  'db.r.24xlarge',
-]
-
-function showAuthPasswordField({ discriminator, getValue, watchDependency }) {
-  const modelPathValue = getValue(discriminator, '/createAuthSecret')
-  watchDependency('discriminator#/createAuthSecret')
-  return !!modelPathValue
-}
-
-function isEqualToModelPathValue({ model, getValue, watchDependency }, value, modelPath) {
-  const modelPathValue = getValue(model, modelPath)
-  watchDependency('model#' + modelPath)
-  return modelPathValue === value
-}
-
-function showStorageSizeField({ model, getValue, watchDependency }) {
-  const modelPathValue = getValue(model, '/spec/mode')
-  watchDependency('model#/spec/mode')
-  const validType = ['Standalone', 'Replicaset']
-  return validType.includes(modelPathValue)
-}
-
-async function getNamespaces({ axios, storeGet }) {
+async function getNamespacesApi({ axios, storeGet }) {
   const params = storeGet('/route/params')
   const { user, cluster, group, version, resource } = params
   try {
@@ -344,7 +33,7 @@ async function getNamespaces({ axios, storeGet }) {
         },
       },
     )
-    const namespaces = resp?.data?.status?.namespaces || []
+    namespaces = resp?.data?.status?.namespaces || []
     return namespaces
   } catch (e) {
     console.log(e)
@@ -352,98 +41,180 @@ async function getNamespaces({ axios, storeGet }) {
   }
 }
 
-function onCreateAuthSecretChange({ discriminator, getValue, commit }) {
-  const createAuthSecret = getValue(discriminator, '/createAuthSecret')
-  if (createAuthSecret) {
-    commit('wizard/model$delete', '/spec/authSecret/name')
-  } else if (createAuthSecret === false) {
-    commit('wizard/model$delete', '/spec/authSecret/password')
+function getNamespaces({ watchDependency }) {
+  watchDependency('discriminator#/nameSpaceApi')
+  return namespaces
+}
+
+async function getNames({ storeGet, getValue, model, axios, watchDependency }, type) {
+  watchDependency(`model#/spec/backend/${type}/namespace`)
+
+  const namespace = getValue(model, `/spec/backend/${type}/namespace`)
+  const params = storeGet('/route/params')
+  const { user, cluster } = params
+
+  let url = `/clusters/${user}/${cluster}/proxy/storage.kubestash.com/v1alpha1/namespaces/${namespace}/retentionpolicies`
+  if (type === 'storageRef') {
+    url = `/clusters/${user}/${cluster}/proxy/storage.kubestash.com/v1alpha1/namespaces/${namespace}/backupstorages`
   }
-}
 
-function isMachineNotCustom({ model, getValue, watchDependency }, path) {
-  const fullpath = path ? `/spec/${path}/podResources/machine` : '/spec/podResources/machine'
-  const modelPathValue = getValue(model, fullpath)
-  watchDependency(`model#${fullpath}`)
-  return modelPathValue !== 'custom' && !!modelPathValue
-}
-
-function getMachineListForOptions() {
-  const array = machineList.map((item) => {
-    return { text: item, value: item }
-  })
-  return array
-}
-
-function onMachineChange({ commit, model, getValue }, type) {
-  const path = type ? `/spec/${type}/podResources/machine` : '/spec/podResources/machine'
-  let selectedMachine = getValue(model, path)
-  if (selectedMachine && selectedMachine !== 'custom') {
-    const commitPathPrefix = type
-      ? `/spec/${type}/podResources/resources`
-      : '/spec/podResources/resources'
-    commit('wizard/model$update', {
-      path: `${commitPathPrefix}/requests/cpu`,
-      value: machines[selectedMachine]?.resources.limits.cpu,
-      force: true,
-    })
-    commit('wizard/model$update', {
-      path: `${commitPathPrefix}/requests/memory`,
-      value: machines[selectedMachine]?.resources.limits.memory,
-      force: true,
-    })
-  }
-}
-
-function setLimits({ model, getValue, commit }, resource, type) {
-  const path = type ? `/spec/${type}/podResources/machine` : '/spec/podResources/machine'
-  const selectedMachine = getValue(model, path)
-  const reqCommitPath = type
-    ? `/spec/${type}/podResources/resources/limits/${resource}`
-    : `/spec/podResources/resources/limits/${resource}`
-  if (selectedMachine && selectedMachine !== 'custom') {
-    if (resource === 'memory') {
-      commit('wizard/model$update', {
-        path: reqCommitPath,
-        value: machines[selectedMachine]?.resources?.limits?.memory,
-        force: true,
+  if (namespace) {
+    try {
+      const resp = await axios.get(url)
+      const items = resp.data?.items
+      let options = []
+      items.forEach((ele) => {
+        options.push(ele.metadata?.name)
       })
-      return machines[selectedMachine]?.resources?.limits?.memory
+      return options
+    } catch (e) {
+      console.log(e)
     }
-  } else {
-    const modelPath = type
-      ? `/spec/${type}/podResources/resources/requests/${resource}`
-      : `/spec/podResources/resources/requests/${resource}`
-    const val = getValue(model, modelPath)
-    if (resource === 'memory') {
-      commit('wizard/model$update', {
-        path: reqCommitPath,
-        value: val,
-        force: true,
-      })
-    }
-    if (resource === 'cpu') return val || '250m'
-    else return val || '500Mi'
   }
+  return []
 }
 
-function setRequests({ getValue, model, commit }, resource, type) {
-  const modelPath = type
-    ? `/spec/${type}/podResources/resources/requests/${resource}`
-    : `/spec/podResources/resources/requests/${resource}`
-  const val = getValue(model, modelPath)
-  commitPath = type
-    ? `/spec/${type}/podResources/resources/limits/${resource}`
-    : `/spec/podResources/resources/limits/${resource}`
-  commit('wizard/model$update', {
-    path: commitPath,
-    value: val,
-    force: true,
+async function getAddon({ storeGet, axios }) {
+  const params = storeGet('/route/params')
+  const { user, cluster } = params
+  let url = `/clusters/${user}/${cluster}/proxy/addons.kubestash.com/v1alpha1/addons`
+  try {
+    const resp = await axios.get(url)
+    let addons = []
+    resp.data?.items.forEach((item) => {
+      addons.push(item.metadata.name)
+    })
+    return addons
+  } catch (e) {
+    console.log(e)
+  }
+  return []
+}
+
+async function getTaskNames({ model, watchDependency, storeGet, getValue, axios }) {
+  watchDependency('model#/spec/sessions/items/addon/name')
+  const addon = getValue(model, '/spec/sessions/items/addon/name')
+  const params = storeGet('/route/params')
+  const { user, cluster } = params
+  let url = `/clusters/${user}/${cluster}/proxy/addons.kubestash.com/v1alpha1/addons/${addon}`
+  if (addon) {
+    try {
+      const resp = await axios.get(url)
+    } catch (e) {
+      console.log(e)
+    }
+  }
+  return []
+}
+
+async function getEncryptionSecretNames({ model, watchDependency, storeGet, getValue, axios }) {
+  watchDependency('model#/spec/sessions/items/encryptionSecret/namespace')
+  const namespace = getValue(model, '/spec/sessions/items//encryptionSecret/namespace')
+  const params = storeGet('/route/params')
+  const { user, cluster } = params
+  let url = `/clusters/${user}/${cluster}/proxy/core/v1/namespaces/${namespace}/secrets`
+  if (namespace) {
+    try {
+      const resp = await axios.get(url)
+    } catch (e) {
+      console.log(e)
+    }
+  }
+  return []
+}
+
+async function getKindsApi({ storeGet, axios }) {
+  const params = storeGet('/route/params')
+  const { user, cluster } = params
+  let url = `/clusters/${user}/${cluster}/available-types?groups=core,apps,kubedb.com`
+  try {
+    const resp = await axios.get(url)
+
+    kindToResourceMap['kubedb.com'] = {}
+    kindToResourceMap['apps'] = {}
+    kindToResourceMap['core'] = {}
+
+    availableKinds = resp.data
+    appKind = Object.values(availableKinds['apps'])
+      .flat()
+      .map((ele) => {
+        kindToResourceMap['apps'][ele.Kind] = ele.Resource
+        return ele.Kind
+      })
+    kubedbKind = Object.values(availableKinds['kubedb.com'])
+      .flat()
+      .map((ele) => {
+        kindToResourceMap['kubedb.com'][ele.Kind] = ele.Resource
+        return ele.Kind
+      })
+    coreKind = Object.values(availableKinds[''])
+      .flat()
+      .map((ele) => {
+        kindToResourceMap['core'][ele.Kind] = ele.Resource
+        return ele.Kind
+      })
+  } catch (e) {
+    console.log(e)
+  }
+  return []
+}
+
+function getKinds({ watchDependency, getValue, model }) {
+  watchDependency(`model#/spec/target/apiGroup`)
+  const apiGroup = getValue(model, `/spec/target/apiGroup`)
+
+  if (apiGroup === 'core') return coreKind
+  else if (apiGroup === 'apps') return appKind
+  else return kubedbKind
+}
+
+function setVersion({ getValue, model }) {
+  const apiGroup = getValue(model, `/spec/target/apiGroup`)
+  const kind = getValue(model, `/spec/target/kind`)
+  if (apiGroup === 'core') apiGroup = ''
+  Object.keys(availableKinds[apiGroup]).forEach((vs) => {
+    availableKinds[apiGroup][vs].forEach((ele) => {
+      if (ele.Kind === kind) {
+        version = vs
+      }
+    })
   })
 }
 
-function setMachineToCustom() {
-  return 'custom'
+function getApiGroup() {
+  return ['core', 'apps', 'kubedb.com']
+}
+
+async function getTargetName({ watchDependency, getValue, model, axios, storeGet }) {
+  watchDependency('model#/spec/target/apiGroup')
+  watchDependency('model#/spec/target/namespace')
+  watchDependency('model#/spec/target/kind')
+  const apiGroup = getValue(model, `/spec/target/apiGroup`)
+  const namespace = getValue(model, `/spec/target/namespace`)
+  const resource = getResourceName({ getValue, model })
+  const params = storeGet('/route/params')
+  const { user, cluster } = params
+
+  const url = `/clusters/${user}/${cluster}/proxy/${apiGroup}/${version}/namespaces/${namespace}/${resource}`
+  if (apiGroup && version && resource && namespace) {
+    try {
+      const resp = await axios.get(url)
+      const items = resp.data?.items
+      const options = items.map((ele) => {
+        return ele.metadata.name
+      })
+      return options
+    } catch (e) {
+      console.log(e)
+    }
+  }
+  return []
+}
+
+function getResourceName({ getValue, model }) {
+  const apiGroup = getValue(model, `/spec/target/apiGroup`)
+  const kind = getValue(model, `/spec/target/kind`)
+  return kindToResourceMap[apiGroup][kind]
 }
 
 async function fetchJsons({ axios, itemCtx }) {
@@ -476,544 +247,21 @@ async function fetchJsons({ axios, itemCtx }) {
   }
 }
 
-function updateAlertValue({ commit, model, discriminator, getValue }) {
-  const isMonitorEnabled = getValue(discriminator, '/monitoring')
-  const alert = isMonitorEnabled ? 'warning' : 'none'
-  // update alert value depend on monitoring profile
-  commit('wizard/model$update', {
-    path: '/form/alert/enabled',
-    value: alert,
-    force: true,
-  })
-  const agent = isMonitorEnabled ? 'prometheus.io/operator' : ''
-  commit('wizard/model$update', {
-    path: '/spec/admin/monitoring/agent',
-    value: agent,
-    force: true,
-  })
-}
-
-function getCreateNameSpaceUrl({ model, getValue, storeGet }) {
-  const user = storeGet('/route/params/user')
-  const cluster = storeGet('/route/params/cluster')
-
-  const domain = storeGet('/domain') || ''
-  if (domain.includes('bb.test')) {
-    return `http://console.bb.test:5990/${user}/kubernetes/${cluster}/core/v1/namespaces/create`
-  } else {
-    const editedDomain = domain.replace('kubedb', 'console')
-    return `${editedDomain}/${user}/kubernetes/${cluster}/core/v1/namespaces/create`
-  }
-}
-
-const ifCapiProviderIsNotEmpty = ({ model, getValue, watchDependency }) => {
-  watchDependency('model#/form/capi/provider')
-  const val = getValue(model, '/form/capi/provider')
-  if (val) return true
-}
-
-const showMultiselectZone = ({ model, getValue, watchDependency }) => {
-  watchDependency('model#/form/capi/dedicated')
-  const val = getValue(model, '/form/capi/provider')
-
-  if (val === 'capz' && ifDedicated({ model, getValue })) return true
-}
-
-const showSelectZone = ({ model, getValue, watchDependency }) => {
-  watchDependency('model#/form/capi/dedicated')
-  const val = getValue(model, '/form/capi/provider')
-  if (val !== 'capz' && ifDedicated({ model, getValue })) return true
-}
-
-const ifDedicated = ({ model, getValue }) => {
-  const val = getValue(model, 'form/capi/dedicated')
-  if (val) return true
-}
-
-const dedicatedOnChange = ({ model, getValue, commit }) => {
-  const val = getValue(model, 'form/capi/dedicated')
-  if (!val) {
-    commit('wizard/model$delete', 'form/capi/zones')
-    commit('wizard/model$delete', 'form/capi/sku')
-  }
-}
-
-const ifZones = ({ model, getValue, watchDependency }) => {
-  watchDependency('model#/form/capi/zones')
-  watchDependency('model#/form/capi/dedicated')
-  const zones = getValue(model, 'form/capi/zones') || []
-  const isDedicated = getValue(model, 'form/capi/dedicated')
-  if (zones.length && isDedicated) return true
-}
-
-const zonesOnChange = ({ model, getValue, commit }) => {
-  const zones = getValue(model, 'form/capi/zones') || []
-  if (!zones.length) commit('wizard/model$delete', 'form/capi/sku')
-}
-
-async function getZones({ storeGet, axios, model, getValue }) {
-  const owner = storeGet('/route/params/user')
-  const cluster = storeGet('/route/params/cluster')
-  const isDedicated = getValue(model, 'form/capi/dedicated')
-  if (isDedicated) {
-    try {
-      const resp = await axios.get(`clustersv2/${owner}/${cluster}/zones`)
-      const val = resp.data.map((item) => {
-        return { value: item, text: item }
-      })
-      return val
-    } catch (e) {
-      console.log(e)
-      return []
-    }
-  }
-}
-
-async function getSKU({ storeGet, axios, model, getValue, watchDependency }) {
-  watchDependency('model#/form/capi/zones')
-  const owner = storeGet('/route/params/user')
-  const cluster = storeGet('/route/params/cluster')
-  const zones = getValue(model, 'form/capi/zones') || []
-  if (zones.length) {
-    try {
-      let url = `clustersv2/${owner}/${cluster}/vms?`
-      if (typeof zones === 'string') {
-        url += `zones=${encodeURIComponent(zones)}`
-      } else {
-        zones.forEach((item) => {
-          url += `zones=${encodeURIComponent(item)}&`
-        })
-        url = url.slice(0, -1)
-      }
-      const resp = await axios.get(url)
-      const val = resp.data.map((item) => {
-        return {
-          value: item.name,
-          text: `${item.name} [CPU: ${item.cpu}] [Memory: ${item.memory}mb]`,
-        }
-      })
-      return val
-    } catch (e) {
-      console.log(e)
-      return []
-    }
-  }
-}
-
-function isVariantAvailable({ storeGet }) {
-  const variant = storeGet('/route/query/variant')
-  return variant ? true : false
-}
-
-function setStorageClass({ model, commit, getValue, discriminator, watchDependency }) {
-  const deletionPolicy = getValue(model, '/spec/deletionPolicy') || ''
-  let storageClass = getValue(model, '/spec/admin/storageClasses/default') || ''
-  const storageClassList = getValue(model, '/spec/admin/storageClasses/available') || []
-  const suffix = '-retain'
-
-  const simpleClassList = storageClassList.filter((item) => {
-    return !item.endsWith(suffix)
-  })
-  const retainClassList = storageClassList.filter((item) => {
-    return item.endsWith(suffix)
-  })
-
-  if (deletionPolicy === 'WipeOut' || deletionPolicy === 'Delete') {
-    storageClass = simpleClassList.length ? simpleClassList[0] : retainClassList[0]
-  } else {
-    storageClass = retainClassList.length ? retainClassList[0] : simpleClassList[0]
-  }
-
-  const isChangeable = isToggleOn(
-    { getValue, model, discriminator, watchDependency },
-    'storageClasses',
-  )
-  if (isChangeable && storageClass) {
-    commit('wizard/model$update', {
-      path: '/spec/admin/storageClasses/default',
-      value: storageClass,
-      force: true,
-    })
-  }
-}
-
-function notEqualToDatabaseMode({ model, getValue, watchDependency }, mode) {
-  const modelPathValue = getValue(model, '/spec/mode')
-  watchDependency('model#/spec/mode')
-  return modelPathValue && modelPathValue !== mode
-}
-
-function showArbiter({ watchDependency, model, getValue }) {
-  watchDependency('model#/spec/arbiter/enabled')
-  const isArbiterOn = getValue(model, '/spec/arbiter/enabled') || ''
-  const notStandalone = notEqualToDatabaseMode({ model, getValue, watchDependency }, 'Standalone')
-  return isArbiterOn && notStandalone
-}
-
-function showHidden({ watchDependency, model, getValue }) {
-  watchDependency('model#/spec/hidden/enabled')
-  const isHiddenOn = getValue(model, '/spec/hidden/enabled') || ''
-  const notStandalone = notEqualToDatabaseMode({ model, getValue, watchDependency }, 'Standalone')
-  return isHiddenOn && notStandalone
-}
-
-function clearArbiterHidden({ commit }) {
-  commit('wizard/model$update', {
-    path: `/spec/arbiter/enabled`,
-    value: false,
-    force: true,
-  })
-
-  commit('wizard/model$update', {
-    path: `/spec/hidden/enabled`,
-    value: false,
-    force: true,
-  })
-}
-
-function isConfigDatabaseOn({ watchDependency, discriminator, getValue }) {
-  watchDependency('discriminator#/configDatabase')
-  return getValue(discriminator, '/configDatabase')
-}
-
-function clearConfiguration({ discriminator, getValue, commit }) {
-  const configOn = getValue(discriminator, '/configDatabase')
-
-  if (!configOn) {
-    commit('wizard/model$delete', '/spec/configuration')
-  }
-}
-
 function returnFalse() {
   return false
 }
 
-let placement = []
-let versions = []
-let storageClass = []
-let clusterIssuers = []
-let nodetopologiesShared = []
-let nodetopologiesDedicated = []
-let features = []
-async function initBundle({ commit, model, getValue, axios, storeGet, setDiscriminatorValue }) {
-  const owner = storeGet('/route/params/user')
-  const cluster = storeGet('/route/params/cluster')
-  let db = getValue(model, '/metadata/resource/kind')
-  db = db.toLowerCase()
-  let url = `clusters/${owner}/${cluster}/db-bundle?type=features,common,versions&db-singular=${db}`
-  try {
-    const resp = await axios.get(url)
-    features = resp.data.features || []
-    placement = resp.data.placementpolicies || []
-    versions = resp.data.versions || []
-    storageClass = resp.data.storageclasses || []
-    clusterIssuers = resp.data.clusterissuers || []
-    nodetopologiesDedicated = resp.data.dedicated || []
-    nodetopologiesShared = resp.data.shared || []
-  } catch (e) {
-    console.log(e)
-  }
-
-  if (!features.includes('tls')) {
-    commit('wizard/model$update', {
-      path: '/spec/admin/tls/default',
-      value: false,
-      force: true,
-    })
-  }
-  if (!features.includes('expose')) {
-    commit('wizard/model$update', {
-      path: '/spec/admin/expose/default',
-      value: false,
-      force: true,
-    })
-  }
-  if (!features.includes('monitoring')) {
-    commit('wizard/model$update', {
-      path: '/spec/admin/monitoring/agent',
-      value: '',
-      force: true,
-    })
-    commit('wizard/model$update', {
-      path: '/form/alert/enabled',
-      value: 'none',
-      force: true,
-    })
-  }
-  if (!features.includes('backup')) {
-    commit('wizard/model$update', {
-      path: '/spec/admin/archiver/default',
-      value: false,
-      force: true,
-    })
-    commit('wizard/model$update', {
-      path: '/spec/backup/tool',
-      value: '',
-      force: true,
-    })
-  }
-
-  setDiscriminatorValue('/bundleApiLoaded', true)
-}
-
-function fetchOptions({ model, getValue }, type) {
-  let kind = getValue(model, '/metadata/resource/kind')
-
-  if (type === 'clusterTier/placement') {
-    return placement
-  } else if (type === `databases/${kind}/versions`) {
-    return versions
-  } else if (type === 'storageClasses') {
-    return storageClass
-  } else if (type === 'clusterIssuers') {
-    return clusterIssuers
-  }
-
-  return []
-}
-
-function getAdminOptions({ getValue, model, watchDependency }, type) {
-  watchDependency('discriminator#/bundleApiLoaded')
-
-  const options = getValue(model, `/spec/admin/${type}/available`) || []
-
-  if (options.length === 0) {
-    return fetchOptions({ model, getValue }, type)
-  }
-
-  return options
-}
-
-function checkIfFeatureOn({ getValue, model }, type) {
-  let val = getValue(model, `/spec/admin/${type}/toggle`)
-  const backupVal = getValue(model, '/spec/backup/tool')
-
-  if (type === 'backup') {
-    return features.includes('backup') && backupVal === 'KubeStash'
-  } else if (type === 'tls') {
-    return features.includes('tls') && val
-  } else if (type === 'expose') {
-    return features.includes('binding') && val
-  } else if (type === 'monitoring') {
-    return features.includes('monitoring') && val
-  } else if (type === 'archiver') {
-    return features.includes('backup') && backupVal === 'KubeStash' && val
-  }
-}
-
-function isToggleOn({ getValue, model, discriminator, watchDependency }, type) {
-  watchDependency('discriminator#/bundleApiLoaded')
-  watchDependency('model#/spec/admin/deployment/default')
-  const bundleApiLoaded = getValue(discriminator, '/bundleApiLoaded')
-  let deploymentType = getValue(model, `/spec/admin/deployment/default`)
-  if (
-    type === 'tls' ||
-    type === 'backup' ||
-    type === 'expose' ||
-    type === 'monitoring' ||
-    type === 'archiver'
-  ) {
-    return checkIfFeatureOn({ getValue, model }, type)
-  } else if (
-    type === 'clusterTier' ||
-    type === 'clusterTier/placement' ||
-    type === 'clusterTier/nodeTopology'
-  ) {
-    if (deploymentType === 'Dedicated' && bundleApiLoaded) return true
-    else return false
-  } else if (type === 'deployment') {
-    const deploymentType = getValue(model, '/spec/admin/deployment/default')
-    if (!nodetopologiesDedicated.length && deploymentType === 'Dedicated') {
-      commit('wizard/model$update', {
-        path: '/spec/admin/deployment/default',
-        value: 'Shared',
-        force: true,
-      })
-    }
-    return (
-      getValue(model, `/spec/admin/${type}/toggle`) &&
-      nodetopologiesDedicated.length &&
-      bundleApiLoaded
-    )
-  } else return getValue(model, `/spec/admin/${type}/toggle`) && bundleApiLoaded
-}
-
-function showAlerts({ watchDependency, model, getValue, discriminator }) {
-  watchDependency('discriminator#/monitoring')
-  const isMonitorEnabled = getValue(discriminator, '/monitoring')
-  return (
-    isMonitorEnabled && isToggleOn({ getValue, model, discriminator, watchDependency }, 'alert')
-  )
-}
-
-function onBackupSwitch({ discriminator, getValue, commit }) {
-  const isBackupOn = getValue(discriminator, '/backup')
-  commit('wizard/model$update', {
-    path: '/spec/backup/tool',
-    value: isBackupOn ? 'KubeStash' : '',
-    force: true,
-  })
-}
-
-async function getNodeTopology({ model, getValue, axios, storeGet, watchDependency }) {
-  watchDependency('model#/spec/admin/deployment/default')
-  watchDependency('model#/spec/admin/clusterTier/default')
-  const deploymentType = getValue(model, '/spec/admin/deployment/default') || ''
-  const clusterTier = getValue(model, '/spec/admin/clusterTier/default') || ''
-  let nodeTopologyList = getValue(model, `/spec/admin/clusterTier/nodeTopology/available`) || []
-
-  const provider = storeGet('/cluster/clusterDefinition/result/provider') || ''
-
-  if (deploymentType === 'Shared') nodeTopologyList = nodetopologiesShared
-  else if (deploymentType === 'Dedicated') nodeTopologyList = nodetopologiesDedicated
-
-  const filteredList = filterNodeTopology(nodeTopologyList, clusterTier, provider)
-  return filteredList
-}
-
-function filterNodeTopology(list, tier, provider) {
-  // first filter the list from value that exists from the filtered list got from API
-  const filteredlist = list
-
-  // filter the list based on clusterTier
-  if (provider === 'EKS') {
-    return filteredlist.filter((item) => {
-      if (tier === 'CPUOptimized') return item.startsWith('c')
-      else if (tier === 'MemoryOptimized') return item.startsWith('r')
-      else return !item.startsWith('c') && !item.startsWith('r')
-    })
-  } else if (provider === 'AKS') {
-    return filteredlist.filter((item) => {
-      if (tier === 'CPUOptimized') return item.startsWith('f') || item.startsWith('fx')
-      else if (tier === 'MemoryOptimized')
-        return (
-          item.startsWith('e') ||
-          item.startsWith('eb') ||
-          item.startsWith('ec') ||
-          item.startsWith('m') ||
-          item.startsWith('d')
-        )
-      else
-        return (
-          !(item.startsWith('f') || item.startsWith('fx')) &&
-          !(
-            item.startsWith('e') ||
-            item.startsWith('eb') ||
-            item.startsWith('ec') ||
-            item.startsWith('m') ||
-            item.startsWith('d')
-          )
-        )
-    })
-  } else if (provider === 'GKE') {
-    return filteredlist.filter((item) => {
-      if (tier === 'CPUOptimized')
-        return item.startsWith('h3') || item.startsWith('c2') || item.startsWith('c2d')
-      else if (tier === 'MemoryOptimized')
-        return (
-          item.startsWith('x4') ||
-          item.startsWith('m1') ||
-          item.startsWith('m2') ||
-          item.startsWith('m3')
-        )
-      else
-        return (
-          !(item.startsWith('h3') || item.startsWith('c2') || item.startsWith('c2d')) &&
-          !(
-            item.startsWith('x4') ||
-            item.startsWith('m1') ||
-            item.startsWith('m2') ||
-            item.startsWith('m3')
-          )
-        )
-    })
-  } else return filteredlist
-}
-
-function showIssuer({ model, getValue, watchDependency, discriminator }) {
-  watchDependency('model#/spec/admin/tls/default')
-  const isTlsEnabled = getValue(model, '/spec/admin/tls/default')
-  const isIssuerToggleEnabled = isToggleOn(
-    { getValue, model, discriminator, watchDependency },
-    'clusterIssuers',
-  )
-  return isTlsEnabled && isIssuerToggleEnabled
-}
-
-function setMonitoring({ getValue, model }) {
-  const agent = getValue(model, '/spec/admin/monitoring/agent') || ''
-  return !!agent
-}
-
-function setBackup({ model, getValue }) {
-  const backup = getValue(model, '/spec/backup/tool')
-  return backup === 'KubeStash' && features.includes('backup')
-}
-
-function onAuthChange({ getValue, discriminator, commit }) {
-  const isAuthOn = getValue(discriminator, '/createAuthSecret')
-  if (!isAuthOn) {
-    commit('wizard/model$update', {
-      path: '/spec/authSecret/name',
-      value: '',
-      force: true,
-    })
-    commit('wizard/model$update', {
-      path: '/spec/authSecret/password',
-      value: '',
-      force: true,
-    })
-  }
-}
-
-function showAdditionalSettings({ watchDependency }) {
-  watchDependency('discriminator#/bundleApiLoaded')
-  return features.length
-}
-
 return {
-  showAdditionalSettings,
+  setVersion,
+  getTargetName,
+  getApiGroup,
+  getEncryptionSecretNames,
+  getKinds,
+  getTaskNames,
+  getAddon,
+  init,
+  getNames,
   returnFalse,
-  initBundle,
-  isVariantAvailable,
   fetchJsons,
-  showAuthPasswordField,
-  isEqualToModelPathValue,
-  showStorageSizeField,
   getNamespaces,
-  onCreateAuthSecretChange,
-  isMachineNotCustom,
-  getMachineListForOptions,
-  onMachineChange,
-  setLimits,
-  setRequests,
-  setMachineToCustom,
-  updateAlertValue,
-  getCreateNameSpaceUrl,
-  ifCapiProviderIsNotEmpty,
-  ifDedicated,
-  dedicatedOnChange,
-  ifZones,
-  zonesOnChange,
-  getZones,
-  getSKU,
-  showMultiselectZone,
-  showSelectZone,
-  setStorageClass,
-  showArbiter,
-  showHidden,
-  notEqualToDatabaseMode,
-  clearArbiterHidden,
-  isConfigDatabaseOn,
-  clearConfiguration,
-  isToggleOn,
-  getAdminOptions,
-  onBackupSwitch,
-  showAlerts,
-  showIssuer,
-  setMonitoring,
-  getNodeTopology,
-  filterNodeTopology,
-  onAuthChange,
-  setBackup,
 }
