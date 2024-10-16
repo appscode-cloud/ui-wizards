@@ -92,8 +92,8 @@ async function getAddon({ storeGet, axios }) {
 }
 
 async function getTaskNames({ model, watchDependency, storeGet, getValue, axios }) {
-  watchDependency('model#/spec/session/items/addon/name')
-  const addon = getValue(model, '/spec/session/items/addon/name')
+  watchDependency('model#/spec/sessions/items/addon/name')
+  const addon = getValue(model, '/spec/sessions/items/addon/name')
   const params = storeGet('/route/params')
   const { user, cluster } = params
   let url = `/clusters/${user}/${cluster}/proxy/addons.kubestash.com/v1alpha1/addons/${addon}`
@@ -108,8 +108,8 @@ async function getTaskNames({ model, watchDependency, storeGet, getValue, axios 
 }
 
 async function getEncryptionSecretNames({ model, watchDependency, storeGet, getValue, axios }) {
-  watchDependency('model#/spec/session/items/encryptionSecret/namespace')
-  const namespace = getValue(model, '/spec/session/items//encryptionSecret/namespace')
+  watchDependency('model#/spec/sessions/items/encryptionSecret/namespace')
+  const namespace = getValue(model, '/spec/sessions/items//encryptionSecret/namespace')
   const params = storeGet('/route/params')
   const { user, cluster } = params
   let url = `/clusters/${user}/${cluster}/proxy/core/v1/namespaces/${namespace}/secrets`
