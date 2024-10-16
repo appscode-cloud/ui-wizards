@@ -37,13 +37,11 @@ async function fetchInvokerName({ getValue, model, watchDependency, axios, store
   const cluster = storeGet('/route/params/cluster') || ''
   const core = 'core.kubestash.com'
   const version = 'v1alpha1'
-
+  const suffix = kind === 'BackupConfiguration' ? 'backupconfigurations' : 'backupblueprints'
   try {
     if (namespace && kind) {
-      const url = `/clusters/${user}/${cluster}/proxy/${core}/${version}/namespaces/${namespace}/${kind}`
-      console.log(url)
+      const url = `/clusters/${user}/${cluster}/proxy/${core}/${version}/namespaces/${namespace}/${suffix}`
       const resp = await axios.get(url)
-      console.log(resp.data)
       invokerData = resp.data.items
       const names = resp.data.items.map((item) => {
         const name = item.metadata?.name
