@@ -64,6 +64,8 @@ func addKnownTypes(scheme *runtime.Scheme) error {
 		&KafkaAlertsList{},
 		&MariadbAlerts{},
 		&MariadbAlertsList{},
+		&MemcachedAlerts{},
+		&MemcachedAlertsList{},
 		&MongodbAlerts{},
 		&MongodbAlertsList{},
 		&MysqlAlerts{},
