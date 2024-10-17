@@ -96,95 +96,95 @@ steps:
         text: Horizontal Scaling Form
       type: single-step-form
     - elements:
-      - type: single-step-form
+      - elements:
+        - computed: setResource|/spec/podTemplate/spec/containers
+          label:
+            text: labels.resources
+          schema:
+            $ref: schema#/properties/spec/properties/verticalScaling/properties/exporter/properties/resources
+          type: resource-input-form
         label:
           text: Exporter
         schema:
           $ref: schema#/properties/spec/properties/verticalScaling/properties/exporter
         show_label: true
-        elements:
+        type: single-step-form
+      - elements:
+        - label:
+            text: Node Selection Policy
+          schema:
+            $ref: schema#/properties/spec/properties/verticalScaling/properties/pgbouncer/properties/nodeSelectionPolicy
+          type: input
+        - computed: setResource|/spec/podTemplate/spec/containers
+          label:
+            text: labels.resources
+          schema:
+            $ref: schema#/properties/spec/properties/verticalScaling/properties/pgbouncer/properties/resources
+          type: resource-input-form
+        - elements:
           - label:
-              text: labels.resources
-            computed: setResource|/spec/podTemplate/spec/containers
+              text: key
             schema:
-              $ref: schema#/properties/spec/properties/verticalScaling/properties/exporter/properties/resources
-            type: resource-input-form
-      - type: single-step-form
+              $ref: schema#/properties/spec/properties/verticalScaling/properties/pgbouncer/properties/topology/properties/key
+            type: input
+          - label:
+              text: value
+            schema:
+              $ref: schema#/properties/spec/properties/verticalScaling/properties/pgbouncer/properties/topology/properties/value
+            type: input
+          label:
+            text: Topology
+          schema:
+            $ref: schema#/properties/spec/properties/verticalScaling/properties/pgbouncer/properties/topology
+          show_label: true
+          type: single-step-form
         label:
           text: pgbouncer
         schema:
           $ref: schema#/properties/spec/properties/verticalScaling/properties/pgbouncer
         show_label: true
-        elements:
-          - type: input
-            label:
-              text: Node Selection Policy
-            schema:
-              $ref: schema#/properties/spec/properties/verticalScaling/properties/pgbouncer/properties/nodeSelectionPolicy
-          - label:
-              text: labels.resources
-            computed: setResource|/spec/podTemplate/spec/containers
-            schema:
-              $ref: schema#/properties/spec/properties/verticalScaling/properties/pgbouncer/properties/resources
-            type: resource-input-form
-          - type: single-step-form
-            label:
-              text: Topology
-            show_label: true
-            schema:
-                  $ref: schema#/properties/spec/properties/verticalScaling/properties/pgbouncer/properties/topology
-            elements:
-              - type: input
-                label:
-                  text: key
-                schema:
-                  $ref: schema#/properties/spec/properties/verticalScaling/properties/pgbouncer/properties/topology/properties/key
-              - type: input
-                label:
-                  text: value
-                schema:
-                  $ref: schema#/properties/spec/properties/verticalScaling/properties/pgbouncer/properties/topology/properties/value
+        type: single-step-form
       if: ifRequestTypeEqualsTo|VerticalScaling
       type: single-step-form
     - elements:
-      - type: single-step-form
-        show_label: true
-        if: ifDbTypeEqualsTo|Topology|VolumeExpansion
-        label:
-          text: Broker
-        elements:
-        - label:
+      - elements:
+        - computed: setValueFromDbDetails|/spec/topology/broker/storage/resources/requests/storage
+          label:
             text: labels.storage.size
-          computed: setValueFromDbDetails|/spec/topology/broker/storage/resources/requests/storage
           schema:
             $ref: schema#/properties/spec/properties/volumeExpansion/properties/broker
           type: input
-      - type: single-step-form
-        show_label: true
         if: ifDbTypeEqualsTo|Topology|VolumeExpansion
         label:
-          text: Controller
-        elements:
-        - label:
+          text: Broker
+        show_label: true
+        type: single-step-form
+      - elements:
+        - computed: setValueFromDbDetails|/spec/topology/controller/storage/resources/requests/storage
+          label:
             text: labels.storage.size
-          computed: setValueFromDbDetails|/spec/topology/controller/storage/resources/requests/storage
           schema:
             $ref: schema#/properties/spec/properties/volumeExpansion/properties/controller
           type: input
-      - type: single-step-form
-        if: ifDbTypeEqualsTo|Combined|VolumeExpansion
+        if: ifDbTypeEqualsTo|Topology|VolumeExpansion
         label:
-          text: Node
+          text: Controller
         show_label: true
-        schema:
-          $ref: schema#/properties/spec/properties/volumeExpansion
-        elements:
-        - label:
+        type: single-step-form
+      - elements:
+        - computed: setValueFromDbDetails|/spec/storage/resources/requests/storage
+          label:
             text: labels.storage.size
-          computed: setValueFromDbDetails|/spec/storage/resources/requests/storage
           schema:
             $ref: schema#/properties/spec/properties/volumeExpansion/properties/node
           type: input
+        if: ifDbTypeEqualsTo|Combined|VolumeExpansion
+        label:
+          text: Node
+        schema:
+          $ref: schema#/properties/spec/properties/volumeExpansion
+        show_label: true
+        type: single-step-form
       - label:
           text: Mode
         options:
