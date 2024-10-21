@@ -79,9 +79,6 @@ function isRancherManaged({ storeGet }) {
   return !!found
 }
 
-function isNotRancherManaged({ storeGet }) {
-  return !isRancherManaged({ storeGet })
-}
 function fetchNamespaces({ watchDependency }) {
   watchDependency('discriminator#/nameSpaceApi')
   console.log(namespaces)
@@ -223,7 +220,6 @@ return {
   init,
   getCreateNameSpaceUrl,
   isRancherManaged,
-  isNotRancherManaged,
   fetchNamespaces,
   fetchNames,
   getApiGroup,

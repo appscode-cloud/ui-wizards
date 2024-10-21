@@ -1153,10 +1153,6 @@ function isRancherManaged({ storeGet }) {
   return !!found
 }
 
-function isNotRancherManaged({ storeGet }) {
-  return !isRancherManaged({ storeGet })
-}
-
 async function fetchNamespaces({ axios, storeGet }) {
   const username = storeGet('/route/params/user')
   const clusterName = storeGet('/route/params/cluster')
@@ -2441,7 +2437,6 @@ return {
   setInitSchedule,
   fetchNames,
   isRancherManaged,
-  isNotRancherManaged,
   fetchNamespaces,
   onInputChangeSchedule,
   getDefaultSchedule,
