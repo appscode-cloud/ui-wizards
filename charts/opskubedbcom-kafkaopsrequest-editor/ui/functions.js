@@ -637,6 +637,7 @@ function setValueFromDbDetails(
   watchDependency('discriminator#/dbDetails')
 
   const retValue = getValue(discriminator, `/dbDetails${path}`)
+
   if (commitPath && retValue) {
     const tlsOperation = getValue(discriminator, '/tlsOperation')
 
