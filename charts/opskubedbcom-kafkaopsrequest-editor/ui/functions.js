@@ -86,7 +86,7 @@ async function getDbDetails({
 }) {
   const owner = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
-
+  const version = storeGet('/route/params/version')
   const namespace = getValue(model, '/metadata/namespace')
   watchDependency('model#/metadata/namespace')
   const name = getValue(model, '/spec/databaseRef/name')
@@ -94,7 +94,7 @@ async function getDbDetails({
 
   if (namespace && name) {
     const resp = await axios.get(
-      `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/kafkas/${name}`,
+      `/clusters/${owner}/${cluster}/proxy/kubedb.com/${version}/namespaces/${namespace}/kafkas/${name}`,
     )
 
     setDiscriminatorValue('/dbDetails', resp.data || {})
@@ -191,11 +191,10 @@ function getDbTls({ discriminator, getValue, watchDependency }) {
 function getDbType({ discriminator, getValue, watchDependency }) {
   watchDependency('discriminator#/dbDetails')
   const dbDetails = getValue(discriminator, '/dbDetails')
-  console.log(dbDetails)
   const { spec } = dbDetails || {}
-  const { mode } = spec || {}
-
-  return mode || 'Standalone'
+  const { topology } = spec || {}
+  if (topology) return 'Topology'
+  else return 'Combined'
 }
 
 function initNamespace({ route }) {
@@ -311,7 +310,6 @@ function ifDbTypeEqualsTo({ discriminator, getValue, watchDependency, commit }, 
     getValue,
     watchDependency,
   })
-
   return value === verd
 }
 
@@ -657,6 +655,14 @@ function setValueFromDbDetails(
   return retValue || undefined
 }
 
+function setResource({ discriminator, getValue, watchDependency, storeGet }, path) {
+  watchDependency('discriminator#/dbDetails')
+  const containers = getValue(discriminator, `/dbDetails${path}`)
+  const kind = storeGet('/resource/layout/result/resource/kind')
+  const resource = containers.filter((ele) => ele.name === kind.toLowerCase())
+  return resource[0].resources
+}
+
 function getAliasOptions() {
   return ['server', 'client', 'metrics-exporter']
 }
@@ -705,6 +711,7 @@ function isVerticalScaleTopologyRequired({ watchDependency, getValue, discrimina
 }
 
 return {
+  setResource,
   fetchJsons,
   returnFalse,
   getNamespaces,

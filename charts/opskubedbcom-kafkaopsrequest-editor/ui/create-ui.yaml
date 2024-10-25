@@ -85,7 +85,7 @@ steps:
         $ref: schema#/properties/spec/properties/updateVersion/properties/targetVersion
       type: select
     - elements:
-      - computed: setValueFromDbDetails|/spec/cluster/node
+      - computed: setValueFromDbDetails|/spec/replicas
         if: ifDbTypeEqualsTo|Combined|horizontalScaling
         label:
           text: Node
@@ -101,11 +101,13 @@ steps:
         show_label: true
         elements:
           - type: input
+            computed: setValueFromDbDetails|/spec/topology/broker/replicas
             label:
               text: Broker
             schema:
               $ref: schema#/properties/spec/properties/horizontalScaling/properties/topology/properties/broker
           - type: input
+            computed: setValueFromDbDetails|/spec/topology/controller/replicas
             label:
               text: Controller
             schema:
@@ -130,6 +132,7 @@ steps:
               $ref: schema#/properties/spec/properties/verticalScaling/properties/broker/properties/nodeSelectionPolicy
           - label:
               text: labels.resources
+            computed: setResource|/spec/topology/broker/podTemplate/spec/containers
             schema:
               $ref: schema#/properties/spec/properties/verticalScaling/properties/broker/properties/resources
             type: resource-input-form
@@ -165,6 +168,7 @@ steps:
               $ref: schema#/properties/spec/properties/verticalScaling/properties/controller/properties/nodeSelectionPolicy
           - label:
               text: labels.resources
+            computed: setResource|/spec/topology/controller/podTemplate/spec/containers            
             schema:
               $ref: schema#/properties/spec/properties/verticalScaling/properties/controller/properties/resources
             type: resource-input-form
@@ -188,7 +192,7 @@ steps:
       - type: single-step-form
         if: ifDbTypeEqualsTo|Combined|VerticalScaling
         label:
-          text: node
+          text: Node
         schema:
           $ref: schema#/properties/spec/properties/verticalScaling/properties/node
         show_label: true
@@ -200,6 +204,7 @@ steps:
               $ref: schema#/properties/spec/properties/verticalScaling/properties/node/properties/nodeSelectionPolicy
           - label:
               text: labels.resources
+            computed: setResource|/spec/podTemplate/spec/containers
             schema:
               $ref: schema#/properties/spec/properties/verticalScaling/properties/node/properties/resources
             type: resource-input-form
@@ -225,6 +230,7 @@ steps:
     - elements:
       - type: single-step-form
         show_label: true
+        if: ifDbTypeEqualsTo|Topology|VolumeExpansion
         label:
           text: Broker
         elements:
@@ -232,15 +238,20 @@ steps:
             text: labels.storage.size
           schema:
             $ref: schema#/properties/spec/properties/volumeExpansion/properties/broker
-          if: ifDbTypeEqualsTo|Topology|VolumeExpansion
           type: input
+      - type: single-step-form
+        show_label: true
+        if: ifDbTypeEqualsTo|Topology|VolumeExpansion
+        label:
+          text: Controller
+        elements:
         - label:
             text: labels.storage.size
           schema:
             $ref: schema#/properties/spec/properties/volumeExpansion/properties/controller
-          if: ifDbTypeEqualsTo|Topology|VolumeExpansion
           type: input
       - type: single-step-form
+        if: ifDbTypeEqualsTo|Combined|VolumeExpansion
         label:
           text: Node
         show_label: true
@@ -251,7 +262,6 @@ steps:
             text: labels.storage.size
           schema:
             $ref: schema#/properties/spec/properties/volumeExpansion/properties/node
-          if: ifDbTypeEqualsTo|Combined|VolumeExpansion
           type: input
       - label:
           text: Mode
