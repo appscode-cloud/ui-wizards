@@ -59,7 +59,7 @@ async function getDbs({ axios, storeGet, model, getValue, watchDependency }) {
   watchDependency('model#/metadata/namespace')
 
   const resp = await axios.get(
-    `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/kafkas`,
+    `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/pgbouncers`,
     {
       params: { filter: { items: { metadata: { name: null } } } },
     },
@@ -89,12 +89,12 @@ async function getDbDetails({
   const version = storeGet('/route/params/version')
   const namespace = getValue(model, '/metadata/namespace')
   watchDependency('model#/metadata/namespace')
-  const name = getValue(model, '/spec/databaseRef/name')
-  watchDependency('model#/spec/databaseRef/name')
+  const name = getValue(model, '/spec/serverRef/name')
+  watchDependency('model#/spec/serverRef/name')
 
   if (namespace && name) {
     const resp = await axios.get(
-      `/clusters/${owner}/${cluster}/proxy/kubedb.com/${version}/namespaces/${namespace}/kafkas/${name}`,
+      `/clusters/${owner}/${cluster}/proxy/kubedb.com/${version}/namespaces/${namespace}/pgbouncers/${name}`,
     )
 
     setDiscriminatorValue('/dbDetails', resp.data || {})
@@ -118,7 +118,7 @@ async function getDbVersions({ axios, storeGet, watchDependency }) {
   }
 
   const resp = await axios.get(
-    `/clusters/${owner}/${cluster}/proxy/catalog.kubedb.com/v1alpha1/kafkaversions`,
+    `/clusters/${owner}/${cluster}/proxy/catalog.kubedb.com/v1alpha1/pgbouncerversions`,
     {
       params: queryParams,
     },
@@ -202,7 +202,7 @@ function initNamespace({ route }) {
   return namespace || null
 }
 
-function initDatabaseRef({ route, watchDependency }) {
+function initServerRef({ route, watchDependency }) {
   watchDependency('model#/metadata/namespace')
   const { name } = route.query || {}
   return name
@@ -213,7 +213,7 @@ function asDatabaseOperation(route) {
 }
 
 function generateOpsRequestNameForClusterUI(getValue, model, route) {
-  const dbName = getValue(model, '/spec/databaseRef/name')
+  const dbName = getValue(model, '/spec/serverRef/name')
 
   const selectedType = getValue(model, '/spec/type')
   const lowerType = selectedType ? String(selectedType).toLowerCase() : ''
@@ -227,7 +227,7 @@ function generateOpsRequestNameForClusterUI(getValue, model, route) {
 
 function showAndInitName({ route, commit, getValue, model, watchDependency }) {
   watchDependency('model#/spec/type')
-  watchDependency('model#/spec/databaseRef/name')
+  watchDependency('model#/spec/serverRef/name')
   const ver = asDatabaseOperation(route)
 
   const selectedType = getValue(model, '/spec/type')
@@ -262,11 +262,11 @@ function showAndInitNamespace({ route, commit }) {
 
   return !ver
 }
-function showAndInitDatabaseRef({ route, commit }) {
+function showAndInitServerRef({ route, commit }) {
   const ver = asDatabaseOperation(route)
   if (ver) {
     commit('wizard/model$update', {
-      path: '/spec/databaseRef/name',
+      path: '/spec/serverRef/name',
       value: `${route.query.name}`,
       force: true,
     })
@@ -622,9 +622,9 @@ function getRequestTypeFromRoute({ route, model, discriminator, getValue, watchD
 
 function isDbDetailsLoading({ discriminator, model, getValue, watchDependency }) {
   watchDependency('discriminator#/dbDetails')
-  watchDependency('model#/spec/databaseRef/name')
+  watchDependency('model#/spec/serverRef/name')
   const dbDetails = getValue(discriminator, '/dbDetails')
-  const dbName = getValue(model, '/spec/databaseRef/name')
+  const dbName = getValue(model, '/spec/serverRef/name')
 
   return !dbDetails || !dbName
 }
@@ -673,7 +673,7 @@ function isNamespaceDisabled({ route }) {
   return !!namespace
 }
 
-function isDatabaseRefDisabled({ route }) {
+function isServerRefDisabled({ route }) {
   const { name } = route.query || {}
   return !!name
 }
@@ -696,7 +696,7 @@ function isVerticalScaleTopologyRequired({ watchDependency, getValue, discrimina
 
   const key = getValue(discriminator, '/topologyKey')
   const value = getValue(discriminator, '/topologyValue')
-  const path = `/spec/verticalScaling/kafka/topology`
+  const path = `/spec/verticalScaling/pgbouncer/topology`
 
   if (key || value) {
     commit('wizard/model$update', {
@@ -724,11 +724,11 @@ return {
   getDbTls,
   getDbType,
   initNamespace,
-  initDatabaseRef,
+  initServerRef,
 
   showAndInitName,
   showAndInitNamespace,
-  showAndInitDatabaseRef,
+  showAndInitServerRef,
   showConfigureOpsrequestLabel,
   showAndInitOpsRequestType,
 
@@ -756,7 +756,7 @@ return {
   setValueFromDbDetails,
   getAliasOptions,
   isNamespaceDisabled,
-  isDatabaseRefDisabled,
+  isServerRefDisabled,
   onNamespaceChange,
   onDbChange,
   setApplyToIfReady,
