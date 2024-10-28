@@ -59,7 +59,7 @@ async function getDbs({ axios, storeGet, model, getValue, watchDependency }) {
   watchDependency('model#/metadata/namespace')
 
   const resp = await axios.get(
-    `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/redises`,
+    `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/perconaxtradbs`,
     {
       params: { filter: { items: { metadata: { name: null } } } },
     },
@@ -94,7 +94,7 @@ async function getDbDetails({
 
   if (namespace && name) {
     const resp = await axios.get(
-      `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/redises/${name}`,
+      `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/perconaxtradbs/${name}`,
     )
 
     setDiscriminatorValue('/dbDetails', resp.data || {})
@@ -118,7 +118,7 @@ async function getDbVersions({ axios, storeGet, watchDependency }) {
   }
 
   const resp = await axios.get(
-    `/clusters/${owner}/${cluster}/proxy/catalog.kubedb.com/v1alpha1/redisversions`,
+    `/clusters/${owner}/${cluster}/proxy/catalog.kubedb.com/v1alpha1/perconaxtradbversions`,
     {
       params: queryParams,
     },
@@ -631,6 +631,14 @@ function isDbDetailsLoading({ discriminator, model, getValue, watchDependency })
   return !dbDetails || !dbName
 }
 
+function setResource({ discriminator, getValue, watchDependency, storeGet }, path) {
+  watchDependency('discriminator#/dbDetails')
+  const containers = getValue(discriminator, `/dbDetails${path}`) || []
+  const kind = storeGet('/resource/layout/result/resource/kind')
+  const resource = containers.filter((ele) => ele.name === kind.toLowerCase())
+  return resource[0].resources
+}
+
 function setValueFromDbDetails(
   { discriminator, getValue, watchDependency, commit },
   path,
@@ -690,7 +698,7 @@ function isVerticalScaleTopologyRequired({ watchDependency, getValue, discrimina
 
   const key = getValue(discriminator, '/topologyKey')
   const value = getValue(discriminator, '/topologyValue')
-  const path = `/spec/verticalScaling/redis/topology`
+  const path = `/spec/verticalScaling/perconaxtradb/topology`
 
   if (key || value) {
     commit('wizard/model$update', {
@@ -706,6 +714,7 @@ function isVerticalScaleTopologyRequired({ watchDependency, getValue, discrimina
 }
 
 return {
+  setResource,
   fetchJsons,
   returnFalse,
   getNamespaces,

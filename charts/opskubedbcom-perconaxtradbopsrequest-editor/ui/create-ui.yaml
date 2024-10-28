@@ -85,15 +85,13 @@ steps:
         $ref: schema#/properties/spec/properties/updateVersion/properties/targetVersion
       type: select
     - elements:
-      - computed: setValueFromDbDetails|/spec/cluster/number
-        if: ifDbTypeEqualsTo|Cluster|horizontalScaling
+      - computed: setValueFromDbDetails|/spec/replicas
         label:
-          text: labels.number
+          text: Member
         schema:
-          $ref: schema#/properties/spec/properties/horizontalScaling/properties/number
+          $ref: schema#/properties/spec/properties/horizontalScaling/properties/member
         type: input
-      - computed: setValueFromDbDetails|/spec/cluster/replicas
-        if: ifDbTypeEqualsTo|Cluster|horizontalScaling
+      - computed: setValueFromDbDetails|/spec/replicas
         label:
           text: labels.memberWeight
         schema:
@@ -105,11 +103,11 @@ steps:
       type: single-step-form
     - elements:
       - elements:
-        - computed: setValueFromDbDetails|/spec/podTemplate/spec/resources|/spec/verticalScaling/redis/resources
+        - computed: setValueFromDbDetails|/spec/podTemplate/spec/resources|/spec/verticalScaling/perconaxtradb/resources
           label:
             text: labels.resources
           schema:
-            $ref: schema#/properties/spec/properties/verticalScaling/properties/redis/properties/resources
+            $ref: schema#/properties/spec/properties/verticalScaling/properties/perconaxtradb/properties/resources
           type: resource-input-form
         - label:
             text: labels.node_selection_policy
@@ -119,7 +117,7 @@ steps:
           - text: Taint
             value: Taint
           schema:
-            $ref: schema#/properties/spec/properties/verticalScaling/properties/redis/properties/nodeSelectionPolicy
+            $ref: schema#/properties/spec/properties/verticalScaling/properties/perconaxtradb/properties/nodeSelectionPolicy
           type: select
         - discriminator:
             topologyKey:
@@ -146,16 +144,22 @@ steps:
           show_label: true
           type: single-step-form
         label:
-          text: labels.redis
+          text: Perconaxtradb
         schema:
-          $ref: schema#/properties/spec/properties/verticalScaling/properties/redis
+          $ref: schema#/properties/spec/properties/verticalScaling/properties/perconaxtradb
         show_label: true
         type: single-step-form
-      - computed: setValueFromDbDetails|/spec/monitor/prometheus/exporter/resources|/spec/verticalScaling/exporter/resources
+      - computed: setValueFromDbDetails|/spec/podTemplate/spec/resources
         label:
           text: labels.exporter
         schema:
           $ref: schema#/properties/spec/properties/verticalScaling/properties/exporter/properties/resources
+        type: resource-input-form
+      - computed: setValueFromDbDetails|/spec/coordinator/resources
+        label:
+          text: Coordinator
+        schema:
+          $ref: schema#/properties/spec/properties/verticalScaling/properties/coordinator/properties/resources
         type: resource-input-form
       if: ifRequestTypeEqualsTo|VerticalScaling
       type: single-step-form
@@ -164,7 +168,7 @@ steps:
         label:
           text: labels.storage.size
         schema:
-          $ref: schema#/properties/spec/properties/volumeExpansion/properties/redis
+          $ref: schema#/properties/spec/properties/volumeExpansion/properties/perconaxtradb
         type: input
       - label:
           text: Mode
