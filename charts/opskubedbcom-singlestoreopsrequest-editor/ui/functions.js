@@ -59,7 +59,7 @@ async function getDbs({ axios, storeGet, model, getValue, watchDependency }) {
   watchDependency('model#/metadata/namespace')
 
   const resp = await axios.get(
-    `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/mssqlservers`,
+    `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/singlestores`,
     {
       params: { filter: { items: { metadata: { name: null } } } },
     },
@@ -94,7 +94,7 @@ async function getDbDetails({
 
   if (namespace && name) {
     const resp = await axios.get(
-      `/clusters/${owner}/${cluster}/proxy/kubedb.com/${version}/namespaces/${namespace}/mssqlservers/${name}`,
+      `/clusters/${owner}/${cluster}/proxy/kubedb.com/${version}/namespaces/${namespace}/singlestores/${name}`,
     )
 
     setDiscriminatorValue('/dbDetails', resp.data || {})
@@ -118,7 +118,7 @@ async function getDbVersions({ axios, storeGet, watchDependency }) {
   }
 
   const resp = await axios.get(
-    `/clusters/${owner}/${cluster}/proxy/catalog.kubedb.com/v1alpha1/mssqlserverversions`,
+    `/clusters/${owner}/${cluster}/proxy/catalog.kubedb.com/v1alpha1/singlestoreversions`,
     {
       params: queryParams,
     },
@@ -659,7 +659,8 @@ function setValueFromDbDetails(
 function setResource({ discriminator, getValue, watchDependency, storeGet }, path) {
   watchDependency('discriminator#/dbDetails')
   const containers = getValue(discriminator, `/dbDetails${path}`) || []
-  const resource = containers.filter((ele) => ele.name === 'mssql')
+  const kind = storeGet('/resource/layout/result/resource/kind')
+  const resource = containers.filter((ele) => ele.name === kind.toLowerCase())
   return resource[0].resources
 }
 
@@ -695,7 +696,7 @@ function isVerticalScaleTopologyRequired({ watchDependency, getValue, discrimina
 
   const key = getValue(discriminator, '/topologyKey')
   const value = getValue(discriminator, '/topologyValue')
-  const path = `/spec/verticalScaling/mssqlserver/topology`
+  const path = `/spec/verticalScaling/singlestore/topology`
 
   if (key || value) {
     commit('wizard/model$update', {
