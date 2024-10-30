@@ -274,13 +274,6 @@ function showAndInitOpsRequestType({ route, commit }) {
   return !ver
 }
 
-function hasReplica({ watchDependency, getValue, discriminator }) {
-  watchDependency('discriminator#/dbDetails')
-  const dbDetails = getValue(discriminator, '/dbDetails')
-  console.log(dbDetails)
-  return !!dbDetails.spec.replicas
-}
-
 // for config secret
 async function getConfigSecrets({ storeGet, axios, model, getValue, watchDependency }) {
   const owner = storeGet('/route/params/user')
@@ -500,7 +493,6 @@ function setValueFromDbDetails(
   watchDependency('discriminator#/dbDetails')
 
   const retValue = getValue(discriminator, `/dbDetails${path}`)
-  console.log(retValue)
 
   if (commitPath && retValue) {
     const tlsOperation = getValue(discriminator, '/tlsOperation')
@@ -590,7 +582,6 @@ return {
   showConfigureOpsrequestLabel,
   showAndInitOpsRequestType,
 
-  hasReplica,
   getConfigSecrets,
   createSecretUrl,
   isEqualToValueFromType,
