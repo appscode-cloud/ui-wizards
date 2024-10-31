@@ -92,180 +92,180 @@ steps:
         schema:
           $ref: schema#/properties/spec/properties/horizontalScaling/properties/node
         type: input
-      - type: single-step-form
+      - elements:
+        - computed: setValueFromDbDetails|/spec/topology/broker/replicas
+          label:
+            text: Broker
+          schema:
+            $ref: schema#/properties/spec/properties/horizontalScaling/properties/topology/properties/broker
+          type: input
+        - computed: setValueFromDbDetails|/spec/topology/controller/replicas
+          label:
+            text: Controller
+          schema:
+            $ref: schema#/properties/spec/properties/horizontalScaling/properties/topology/properties/controller
+          type: input
         if: ifDbTypeEqualsTo|Topology|horizontalScaling
         label:
           text: Topology
         schema:
           $ref: schema#/properties/spec/properties/horizontalScaling/properties/topology
         show_label: true
-        elements:
-          - type: input
-            computed: setValueFromDbDetails|/spec/topology/broker/replicas
-            label:
-              text: Broker
-            schema:
-              $ref: schema#/properties/spec/properties/horizontalScaling/properties/topology/properties/broker
-          - type: input
-            computed: setValueFromDbDetails|/spec/topology/controller/replicas
-            label:
-              text: Controller
-            schema:
-              $ref: schema#/properties/spec/properties/horizontalScaling/properties/topology/properties/controller
+        type: single-step-form
       if: ifRequestTypeEqualsTo|HorizontalScaling
       label:
         text: Horizontal Scaling Form
       type: single-step-form
     - elements:
-      - type: single-step-form
+      - elements:
+        - label:
+            text: Node Selection Policy
+          schema:
+            $ref: schema#/properties/spec/properties/verticalScaling/properties/broker/properties/nodeSelectionPolicy
+          type: input
+        - computed: setResource|/spec/topology/broker/podTemplate/spec/containers
+          label:
+            text: labels.resources
+          schema:
+            $ref: schema#/properties/spec/properties/verticalScaling/properties/broker/properties/resources
+          type: resource-input-form
+        - elements:
+          - label:
+              text: key
+            schema:
+              $ref: schema#/properties/spec/properties/verticalScaling/properties/broker/properties/topology/properties/key
+            type: input
+          - label:
+              text: value
+            schema:
+              $ref: schema#/properties/spec/properties/verticalScaling/properties/broker/properties/topology/properties/value
+            type: input
+          label:
+            text: Topology
+          schema:
+            $ref: schema#/properties/spec/properties/verticalScaling/properties/broker/properties/topology
+          show_label: true
+          type: single-step-form
         if: ifDbTypeEqualsTo|Topology|VerticalScaling
         label:
           text: Broker
         schema:
           $ref: schema#/properties/spec/properties/verticalScaling/properties/broker
         show_label: true
-        elements:
-          - type: input
-            label:
-              text: Node Selection Policy
-            schema:
-              $ref: schema#/properties/spec/properties/verticalScaling/properties/broker/properties/nodeSelectionPolicy
+        type: single-step-form
+      - elements:
+        - label:
+            text: Node Selection Policy
+          schema:
+            $ref: schema#/properties/spec/properties/verticalScaling/properties/controller/properties/nodeSelectionPolicy
+          type: input
+        - computed: setResource|/spec/topology/controller/podTemplate/spec/containers
+          label:
+            text: labels.resources
+          schema:
+            $ref: schema#/properties/spec/properties/verticalScaling/properties/controller/properties/resources
+          type: resource-input-form
+        - elements:
           - label:
-              text: labels.resources
-            computed: setResource|/spec/topology/broker/podTemplate/spec/containers
+              text: key
             schema:
-              $ref: schema#/properties/spec/properties/verticalScaling/properties/broker/properties/resources
-            type: resource-input-form
-          - type: single-step-form
-            label:
-              text: Topology
-            show_label: true
+              $ref: schema#/properties/spec/properties/verticalScaling/properties/controller/properties/topology/properties/key
+            type: input
+          - label:
+              text: value
             schema:
-                  $ref: schema#/properties/spec/properties/verticalScaling/properties/broker/properties/topology
-            elements:
-              - type: input
-                label:
-                  text: key
-                schema:
-                  $ref: schema#/properties/spec/properties/verticalScaling/properties/broker/properties/topology/properties/key
-              - type: input
-                label:
-                  text: value
-                schema:
-                  $ref: schema#/properties/spec/properties/verticalScaling/properties/broker/properties/topology/properties/value
-      - type: single-step-form
+              $ref: schema#/properties/spec/properties/verticalScaling/properties/controller/properties/topology/properties/value
+            type: input
+          label:
+            text: Topology
+          schema:
+            $ref: schema#/properties/spec/properties/verticalScaling/properties/controller/properties/topology
+          show_label: true
+          type: single-step-form
         if: ifDbTypeEqualsTo|Topology|VerticalScaling
         label:
           text: Controller
         schema:
           $ref: schema#/properties/spec/properties/verticalScaling/properties/controller
         show_label: true
-        elements:
-          - type: input
-            label:
-              text: Node Selection Policy
-            schema:
-              $ref: schema#/properties/spec/properties/verticalScaling/properties/controller/properties/nodeSelectionPolicy
+        type: single-step-form
+      - elements:
+        - label:
+            text: Node Selection Policy
+          schema:
+            $ref: schema#/properties/spec/properties/verticalScaling/properties/node/properties/nodeSelectionPolicy
+          type: input
+        - computed: setResource|/spec/podTemplate/spec/containers
+          label:
+            text: labels.resources
+          schema:
+            $ref: schema#/properties/spec/properties/verticalScaling/properties/node/properties/resources
+          type: resource-input-form
+        - elements:
           - label:
-              text: labels.resources
-            computed: setResource|/spec/topology/controller/podTemplate/spec/containers            
+              text: key
             schema:
-              $ref: schema#/properties/spec/properties/verticalScaling/properties/controller/properties/resources
-            type: resource-input-form
-          - type: single-step-form
-            label:
-              text: Topology
-            show_label: true
+              $ref: schema#/properties/spec/properties/verticalScaling/properties/node/properties/topology/properties/key
+            type: input
+          - label:
+              text: value
             schema:
-                  $ref: schema#/properties/spec/properties/verticalScaling/properties/controller/properties/topology
-            elements:
-              - type: input
-                label:
-                  text: key
-                schema:
-                  $ref: schema#/properties/spec/properties/verticalScaling/properties/controller/properties/topology/properties/key
-              - type: input
-                label:
-                  text: value
-                schema:
-                  $ref: schema#/properties/spec/properties/verticalScaling/properties/controller/properties/topology/properties/value
-      - type: single-step-form
+              $ref: schema#/properties/spec/properties/verticalScaling/properties/node/properties/topology/properties/value
+            type: input
+          label:
+            text: Topology
+          schema:
+            $ref: schema#/properties/spec/properties/verticalScaling/properties/node/properties/topology
+          show_label: true
+          type: single-step-form
         if: ifDbTypeEqualsTo|Combined|VerticalScaling
         label:
           text: Node
         schema:
           $ref: schema#/properties/spec/properties/verticalScaling/properties/node
         show_label: true
-        elements:
-          - type: input
-            label:
-              text: Node Selection Policy
-            schema:
-              $ref: schema#/properties/spec/properties/verticalScaling/properties/node/properties/nodeSelectionPolicy
-          - label:
-              text: labels.resources
-            computed: setResource|/spec/podTemplate/spec/containers
-            schema:
-              $ref: schema#/properties/spec/properties/verticalScaling/properties/node/properties/resources
-            type: resource-input-form
-          - type: single-step-form
-            label:
-              text: Topology
-            show_label: true
-            schema:
-                  $ref: schema#/properties/spec/properties/verticalScaling/properties/node/properties/topology
-            elements:
-              - type: input
-                label:
-                  text: key
-                schema:
-                  $ref: schema#/properties/spec/properties/verticalScaling/properties/node/properties/topology/properties/key
-              - type: input
-                label:
-                  text: value
-                schema:
-                  $ref: schema#/properties/spec/properties/verticalScaling/properties/node/properties/topology/properties/value
+        type: single-step-form
       if: ifRequestTypeEqualsTo|VerticalScaling
       type: single-step-form
     - elements:
-      - type: single-step-form
-        show_label: true
-        if: ifDbTypeEqualsTo|Topology|VolumeExpansion
-        label:
-          text: Broker
-        elements:
-        - label:
+      - elements:
+        - computed: setValueFromDbDetails|/spec/topology/broker/storage/resources/requests/storage
+          label:
             text: labels.storage.size
-          computed: setValueFromDbDetails|/spec/topology/broker/storage/resources/requests/storage
           schema:
             $ref: schema#/properties/spec/properties/volumeExpansion/properties/broker
           type: input
-      - type: single-step-form
-        show_label: true
         if: ifDbTypeEqualsTo|Topology|VolumeExpansion
         label:
-          text: Controller
-        elements:
-        - label:
+          text: Broker
+        show_label: true
+        type: single-step-form
+      - elements:
+        - computed: setValueFromDbDetails|/spec/topology/controller/storage/resources/requests/storage
+          label:
             text: labels.storage.size
-          computed: setValueFromDbDetails|/spec/topology/controller/storage/resources/requests/storage
           schema:
             $ref: schema#/properties/spec/properties/volumeExpansion/properties/controller
           type: input
-      - type: single-step-form
-        if: ifDbTypeEqualsTo|Combined|VolumeExpansion
+        if: ifDbTypeEqualsTo|Topology|VolumeExpansion
         label:
-          text: Node
+          text: Controller
         show_label: true
-        schema:
-          $ref: schema#/properties/spec/properties/volumeExpansion
-        elements:
-        - label:
+        type: single-step-form
+      - elements:
+        - computed: setValueFromDbDetails|/spec/storage/resources/requests/storage
+          label:
             text: labels.storage.size
-          computed: setValueFromDbDetails|/spec/storage/resources/requests/storage
           schema:
             $ref: schema#/properties/spec/properties/volumeExpansion/properties/node
           type: input
+        if: ifDbTypeEqualsTo|Combined|VolumeExpansion
+        label:
+          text: Node
+        schema:
+          $ref: schema#/properties/spec/properties/volumeExpansion
+        show_label: true
+        type: single-step-form
       - label:
           text: Mode
         options:
