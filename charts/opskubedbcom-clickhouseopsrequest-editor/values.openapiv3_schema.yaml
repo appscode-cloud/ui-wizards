@@ -43,6 +43,16 @@ properties:
         - IfReady
         - Always
         type: string
+      authentication:
+        properties:
+          secretRef:
+            properties:
+              name:
+                default: ""
+                type: string
+            type: object
+            x-kubernetes-map-type: atomic
+        type: object
       databaseRef:
         properties:
           name:
@@ -57,6 +67,7 @@ properties:
       type:
         enum:
         - Restart
+        - RotateAuth
         type: string
     required:
     - databaseRef
