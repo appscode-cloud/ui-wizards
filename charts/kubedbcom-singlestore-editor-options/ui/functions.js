@@ -497,7 +497,7 @@ function updateAgentValue({ commit }, val) {
 function setReplicaNumber({ model, getValue }) {
   const modelPathValue = getValue(model, '/spec/mode')
   if (modelPathValue === 'Topology') {
-    return 3
+    return 2
   } else return 1
 }
 function setRouterNumber({ model, getValue }) {
