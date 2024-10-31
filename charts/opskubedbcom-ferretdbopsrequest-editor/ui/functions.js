@@ -118,7 +118,7 @@ async function getDbVersions({ axios, storeGet, watchDependency }) {
   }
 
   const resp = await axios.get(
-    `/clusters/${owner}/${cluster}/proxy/catalog.kubedb.com/v1alpha1/ferretdbsversions`,
+    `/clusters/${owner}/${cluster}/proxy/catalog.kubedb.com/v1alpha1/ferretdbversions`,
     {
       params: queryParams,
     },
