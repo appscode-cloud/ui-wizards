@@ -492,7 +492,7 @@ function onReconfigurationTypeChange({ commit, discriminator, getValue, setDiscr
     commit('wizard/model$delete', `/spec/configuration`)
 
     commit('wizard/model$update', {
-      path: `/spec/configuration/removeCustomConfig`,
+      path: `/spec/configuration/pgbouncer/removeCustomConfig`,
       value: true,
       force: true,
     })
