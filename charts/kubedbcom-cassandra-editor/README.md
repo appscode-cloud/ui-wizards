@@ -7,8 +7,8 @@
 ```bash
 $ helm repo add appscode-charts-oci https://bundles.byte.builders/ui/
 $ helm repo update
-$ helm search repo appscode-charts-oci/kubedbcom-cassandra-editor --version=v0.8.0
-$ helm upgrade -i kubedbcom-cassandra-editor appscode-charts-oci/kubedbcom-cassandra-editor -n default --create-namespace --version=v0.8.0
+$ helm search repo appscode-charts-oci/kubedbcom-cassandra-editor --version=v0.9.0
+$ helm upgrade -i kubedbcom-cassandra-editor appscode-charts-oci/kubedbcom-cassandra-editor -n default --create-namespace --version=v0.9.0
 ```
 
 ## Introduction
@@ -24,7 +24,7 @@ This chart deploys a Cassandra Editor on a [Kubernetes](http://kubernetes.io) cl
 To install/upgrade the chart with the release name `kubedbcom-cassandra-editor`:
 
 ```bash
-$ helm upgrade -i kubedbcom-cassandra-editor appscode-charts-oci/kubedbcom-cassandra-editor -n default --create-namespace --version=v0.8.0
+$ helm upgrade -i kubedbcom-cassandra-editor appscode-charts-oci/kubedbcom-cassandra-editor -n default --create-namespace --version=v0.9.0
 ```
 
 The command deploys a Cassandra Editor on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
@@ -56,12 +56,12 @@ The following table lists the configurable parameters of the `kubedbcom-cassandr
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm upgrade -i`. For example:
 
 ```bash
-$ helm upgrade -i kubedbcom-cassandra-editor appscode-charts-oci/kubedbcom-cassandra-editor -n default --create-namespace --version=v0.8.0 --set apiVersion=kubedb.com/v1alpha2
+$ helm upgrade -i kubedbcom-cassandra-editor appscode-charts-oci/kubedbcom-cassandra-editor -n default --create-namespace --version=v0.9.0 --set apiVersion=kubedb.com/v1alpha2
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
 installing the chart. For example:
 
 ```bash
-$ helm upgrade -i kubedbcom-cassandra-editor appscode-charts-oci/kubedbcom-cassandra-editor -n default --create-namespace --version=v0.8.0 --values values.yaml
+$ helm upgrade -i kubedbcom-cassandra-editor appscode-charts-oci/kubedbcom-cassandra-editor -n default --create-namespace --version=v0.9.0 --values values.yaml
 ```

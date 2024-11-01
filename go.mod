@@ -9,7 +9,7 @@ require (
 	k8s.io/api v0.30.2
 	k8s.io/apimachinery v0.30.2
 	k8s.io/kube-openapi v0.0.0-20240703190633-0aa61b46e8c2
-	kmodules.xyz/client-go v0.30.28
+	kmodules.xyz/client-go v0.30.31
 	kmodules.xyz/monitoring-agent-api v0.30.2
 	kmodules.xyz/objectstore-api v0.29.1
 	kmodules.xyz/offshoot-api v0.30.1
