@@ -2516,7 +2516,10 @@ async function getNamespaces({ axios, storeGet }) {
 
 async function getMongoDbs({ axios, storeGet, model, getValue, watchDependency }) {
   watchDependency('model#/metadata/namespace')
-  const namespace = getValue(model, '/metadata/namespace')
+  const namespace = getValue(
+    model,
+    'resources/autoscalingKubedbComMongoDBAutoscaler/metadata/namespace',
+  )
   const owner = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
 
@@ -2551,6 +2554,8 @@ async function getDbDetails({ axios, storeGet, getValue, model }) {
         `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/mongodbs/${name}`,
       )
       dbDetails = resp.data || {}
+      console.log(dbDetails)
+      return dbDetails
     } catch (e) {
       console.log(e)
     }
@@ -2561,9 +2566,12 @@ async function mongoTypeEqualsTo(
   { axios, storeGet, watchDependency, model, getValue, commit },
   mongoType,
 ) {
-  watchDependency('model#/spec/databaseRef/name')
-
-  const dbName = getValue(model, '/spec/databaseRef/name')
+  watchDependency('discriminator#/dbDetails')
+  const dbName = getValue(
+    model,
+    'resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/databaseRef/name',
+  )
+  console.log({ dbDetails })
   if (dbName !== dbDetails?.metadata?.name)
     await getDbDetails({ axios, storeGet, getValue, model, watchDependency })
 
@@ -2681,7 +2689,19 @@ function setApplyToIfReady() {
   return 'IfReady'
 }
 
+function setNamespace({ storeGet }) {
+  const namespace = storeGet('/route/query/namespace')
+  return namespace
+}
+
+function setDbName({ storeGet }) {
+  const name = storeGet('/route/query/name')
+  return name
+}
+
 return {
+  setDbName,
+  setNamespace,
   isConsole,
   getNamespaces,
   getMongoDbs,
