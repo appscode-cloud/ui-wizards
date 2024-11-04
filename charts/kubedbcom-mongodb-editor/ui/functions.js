@@ -2489,7 +2489,6 @@ function isKubedb({ storeGet }) {
 function showOpsRequestOptions({ model, getValue, watchDependency, storeGet, discriminator }) {
   if (isKubedb({ storeGet }) === true) return true
   watchDependency('model#/spec/databaseRef/name')
-  watchDependency('discriminator#/autoscalingType')
   return (
     !!getValue(model, '/spec/databaseRef/name') && !!getValue(discriminator, '/autoscalingType')
   )
@@ -2541,7 +2540,7 @@ async function getMongoDbs({ axios, storeGet, model, getValue, watchDependency }
   })
 }
 
-async function getDbDetails({ axios, storeGet, getValue, model }) {
+async function getDbDetails({ axios, storeGet, getValue, model, setDiscriminatorValue }) {
   const owner = storeGet('/route/params/user') || ''
   const cluster = storeGet('/route/params/cluster') || ''
   const namespace =
@@ -2554,7 +2553,7 @@ async function getDbDetails({ axios, storeGet, getValue, model }) {
         `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/mongodbs/${name}`,
       )
       dbDetails = resp.data || {}
-      console.log(dbDetails)
+      setDiscriminatorValue('/dbDetails', true)
       return dbDetails
     } catch (e) {
       console.log(e)
@@ -2563,18 +2562,10 @@ async function getDbDetails({ axios, storeGet, getValue, model }) {
 }
 
 async function mongoTypeEqualsTo(
-  { axios, storeGet, watchDependency, model, getValue, commit },
+  { axios, storeGet, watchDependency, model, getValue, commit, discriminator },
   mongoType,
 ) {
   watchDependency('discriminator#/dbDetails')
-  const dbName = getValue(
-    model,
-    'resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/databaseRef/name',
-  )
-  console.log({ dbDetails })
-  if (dbName !== dbDetails?.metadata?.name)
-    await getDbDetails({ axios, storeGet, getValue, model, watchDependency })
-
   const { spec } = dbDetails || {}
   const { shardTopology, replicaSet } = spec || {}
   let verd = ''
@@ -2628,22 +2619,6 @@ function onNamespaceChange({ model, getValue, commit }) {
   if (!namespace) {
     commit('wizard/model$delete', '/spec/databaseRef/name')
   }
-}
-
-function ifScalingTypeEqualsTo(
-  { storeGet, watchDependency, getValue, discriminator, model },
-  type,
-) {
-  watchDependency('discriminator#/autoscalingType')
-  watchDependency('model#/spec/databaseRef/name')
-
-  const operation = storeGet('/route/query/operation') || ''
-  if (operation.length) {
-    const splitOp = operation.split('-')
-    if (splitOp.length > 2) autoscaleType = splitOp[2]
-  } else autoscaleType = getValue(discriminator, '/autoscalingType') || ''
-  const isDatabaseSelected = !!getValue(model, '/spec/databaseRef/name')
-  return autoscaleType === type && isDatabaseSelected
 }
 
 async function fetchNodeTopology({ axios, storeGet }) {
@@ -2711,7 +2686,6 @@ return {
   clearSpecModel,
   initMetadata,
   onNamespaceChange,
-  ifScalingTypeEqualsTo,
   fetchNodeTopology,
   isNodeTopologySelected,
   setControlledResources,
