@@ -7,6 +7,10 @@ en:
       name: Archiver
       default: Default Archiver
       toggle: Can user modify Archiver?
+    backup:
+      name: Backup
+      default: Enable Backup
+      toggle: Can user modify Backup?
     clusterTier:
       name: Cluster Tier
       nodeTopology:
@@ -28,76 +32,106 @@ en:
     databases:
       ClickHouse:
         configure: Configure ClickHouse
-        toggle: Can user modify ClickHouse configuration?
+        toggle: Can user modify ClickHouse Version?
+        toggleMode: Can user modify ClickHouse Mode?
       Druid:
         configure: Configure Druid
-        toggle: Can user modify Druid configuration?
+        toggle: Can user modify Druid Version?
+        toggleMode: Can user modify Druid Mode?
       default: Default Version
+      defaultMode: Default Mode
       Elasticsearch:
         configure: Configure Elasticsearch
-        toggle: Can user modify Elasticsearch configuration?
+        toggle: Can user modify Elasticsearch Version?
+        toggleMode: Can user modify Elasticsearch Mode?
       FerretDB:
         configure: Configure FerretDB
-        toggle: Can user modify FerretDB configuration?
+        toggle: Can user modify FerretDB Version?
+        toggleMode: Can user modify FerretDB Mode?
       Kafka:
         configure: Configure Kafka
-        toggle: Can user modify Kafka configuration?
+        toggle: Can user modify Kafka Version?
+        toggleMode: Can user modify Kafka Mode?
       MSSQLServer:
         configure: Configure MSSQLServer
-        toggle: Can user modify MSSQLServer configuration?
+        toggle: Can user modify MSSQLServer Version?
+        toggleMode: Can user modify MSSQLServer Mode?
       MariaDB:
         configure: Configure MariaDB
-        toggle: Can user modify MariaDB configuration?
+        toggle: Can user modify MariaDB Version?
+        toggleMode: Can user modify MariaDB Mode?
       Memcached:
         configure: Configure Memcached
-        toggle: Can user modify Memcached configuration?
+        toggle: Can user modify Memcached Version?
+        toggleMode: Can user modify Memcached Mode?
+      modes: Available Modes
       MongoDB:
         configure: Configure MongoDB
-        toggle: Can user modify MongoDB configuration?
+        toggle: Can user modify MongoDB Version?
+        toggleMode: Can user modify MongoDB Mode?
       MySQL:
         configure: Configure MySQL
-        toggle: Can user modify MySQL configuration?
+        toggle: Can user modify MySQL Version?
+        toggleMode: Can user modify MySQL Mode?
       name: Configure Databases
       PerconaXtraDB:
         configure: Configure PerconaXtraDB
-        toggle: Can user modify PerconaXtraDB configuration?
+        toggle: Can user modify PerconaXtraDB Version?
+        toggleMode: Can user modify PerconaXtraDB Mode?
       PgBouncer:
         configure: Configure PgBouncer
-        toggle: Can user modify PgBouncer configuration?
+        toggle: Can user modify PgBouncer Version?
+        toggleMode: Can user modify PgBouncer Mode?
       Pgpool:
         configure: Configure Pgpool
-        toggle: Can user modify Pgpool configuration?
+        toggle: Can user modify Pgpool Version?
+        toggleMode: Can user modify Pgpool Mode?
       Postgres:
         configure: Configure Postgres
-        toggle: Can user modify Postgres configuration?
+        toggle: Can user modify Postgres Version?
+        toggleMode: Can user modify Postgres Mode?
       ProxySQL:
         configure: Configure ProxySQL
-        toggle: Can user modify ProxySQL configuration?
+        toggle: Can user modify ProxySQL Version?
+        toggleMode: Can user modify ProxySQL Mode?
       RabbitMQ:
         configure: Configure RabbitMQ
-        toggle: Can user modify RabbitMQ configuration?
+        toggle: Can user modify RabbitMQ Version?
+        toggleMode: Can user modify RabbitMQ Mode?
       Redis:
         configure: Configure Redis
-        toggle: Can user modify Redis configuration?
+        toggle: Can user modify Redis Version?
+        toggleMode: Can user modify Redis Mode?
       Singlestore:
         configure: Configure Singlestore
-        toggle: Can user modify Singlestore configuration?
+        toggle: Can user modify Singlestore Version?
+        toggleMode: Can user modify Singlestore Mode?
       Solr:
         configure: Configure Solr
         toggle: Can user modify Solr configuration?
+        toggleMode: Can user modify Solr Mode?
       ZooKeeper:
         configure: Configure ZooKeeper
-        toggle: Can user modify ZooKeeper configuration?
+        toggle: Can user modify ZooKeeper Version?
+        toggleMode: Can user modify ZooKeeper Mode?
       versions: Available Versions 
+    deletionPolicy:
+      name: Deletion Policy
+      default: Default Deletion Policy
+      toggle: Can user modify Deletion Policy?
     deployment:
       dedicated: For production applications with sophisticated workload requirements.
       name: Deployment Type
       shared: For exploring databases when high-performance is not required.
       toggle: Can users modify Deployment type?
+    pointInTimeRecovery:
+      name: Point In Time-Recovery
+      default: Enable Point In-Time Recovery
+      toggle: Can users modify Point In-Time Recovery?
     storageClass:
       name: Storage Class
       available: Available Storage Classes
-      default: default Storage Class
+      default: Default Storage Class
       toggle: Can users modify Storage Class?
     showPreview:
       name: Preview
@@ -121,3 +155,17 @@ en:
         value: Value
         key: Key
     usePrefix: Storage Prefix
+  options:
+    deletionPolicy:
+      delete:
+        description: Keep only database Secrets and backed up data.
+        label: Delete ( Keep only database Secrets and backed up data )
+      doNotTerminate:
+        description: Prevent deletion of the Druid CRD.
+        label: DoNotTerminate ( Prevent deletion of the Druid CRD )
+      halt:
+        description: 'Keep PVCs, database Secrets and backed up data.'
+        label: Halt ( Keep PVCs, database Secrets and backed up data )
+      wipeOut:
+        description: Delete everything including backed up data.
+        label: WipeOut ( Delete everything including backed up data )

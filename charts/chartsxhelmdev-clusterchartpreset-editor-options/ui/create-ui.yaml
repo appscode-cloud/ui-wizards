@@ -213,6 +213,30 @@ steps:
               schema:
                 $ref: schema#/properties/spec/properties/admin/properties/databases/properties/ClickHouse/properties/versions
               type: single-step-form
+            - elements:
+              - computed: returnTrue
+                label:
+                  text: labels.databases.ClickHouse.toggleMode
+                schema:
+                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/ClickHouse/properties/mode/properties/toggle
+                type: switch
+              - fetch: fetchModes|ClickHouse
+                label:
+                  text: labels.databases.modes
+                onChange: clearDefaultVersion|ClickHouse
+                schema:
+                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/ClickHouse/properties/mode/properties/available
+                type: multiselect
+              - computed: setDefaultMode|ClickHouse
+                fetch: availableModes|ClickHouse
+                label:
+                  text: labels.databases.defaultMode
+                schema:
+                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/ClickHouse/properties/mode/properties/default
+                type: select
+              schema:
+                $ref: schema#/properties/spec/properties/admin/properties/databases/properties/ClickHouse/properties/mode
+              type: single-step-form
             if: isConfigureDb|clickhouse
             schema:
               $ref: schema#/properties/spec/properties/admin/properties/databases/properties/ClickHouse
@@ -244,6 +268,30 @@ steps:
                 type: select
               schema:
                 $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Druid/properties/versions
+              type: single-step-form
+            - elements:
+              - computed: returnTrue
+                label:
+                  text: labels.databases.Druid.toggleMode
+                schema:
+                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Druid/properties/mode/properties/toggle
+                type: switch
+              - fetch: fetchModes|Druid
+                label:
+                  text: labels.databases.modes
+                onChange: clearDefaultVersion|Druid
+                schema:
+                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Druid/properties/mode/properties/available
+                type: multiselect
+              - computed: setDefaultMode|Druid
+                fetch: availableModes|Druid
+                label:
+                  text: labels.databases.defaultMode
+                schema:
+                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Druid/properties/mode/properties/default
+                type: select
+              schema:
+                $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Druid/properties/mode
               type: single-step-form
             if: isConfigureDb|druid
             schema:
@@ -277,6 +325,30 @@ steps:
               schema:
                 $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Elasticsearch/properties/versions
               type: single-step-form
+            - elements:
+              - computed: returnTrue
+                label:
+                  text: labels.databases.Elasticsearch.toggleMode
+                schema:
+                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Elasticsearch/properties/mode/properties/toggle
+                type: switch
+              - fetch: fetchModes|Elasticsearch
+                label:
+                  text: labels.databases.modes
+                onChange: clearDefaultVersion|Elasticsearch
+                schema:
+                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Elasticsearch/properties/mode/properties/available
+                type: multiselect
+              - computed: setDefaultMode|Elasticsearch
+                fetch: availableModes|Elasticsearch
+                label:
+                  text: labels.databases.defaultMode
+                schema:
+                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Elasticsearch/properties/mode/properties/default
+                type: select
+              schema:
+                $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Elasticsearch/properties/mode
+              type: single-step-form
             if: isConfigureDb|elasticsearch
             schema:
               $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Elasticsearch
@@ -308,6 +380,30 @@ steps:
                 type: select
               schema:
                 $ref: schema#/properties/spec/properties/admin/properties/databases/properties/FerretDB/properties/versions
+              type: single-step-form
+            - elements:
+              - computed: returnTrue
+                label:
+                  text: labels.databases.FerretDB.toggleMode
+                schema:
+                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/FerretDB/properties/mode/properties/toggle
+                type: switch
+              - fetch: fetchModes|FerretDB
+                label:
+                  text: labels.databases.modes
+                onChange: clearDefaultVersion|FerretDB
+                schema:
+                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/FerretDB/properties/mode/properties/available
+                type: multiselect
+              - computed: setDefaultMode|FerretDB
+                fetch: availableModes|FerretDB
+                label:
+                  text: labels.databases.defaultMode
+                schema:
+                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/FerretDB/properties/mode/properties/default
+                type: select
+              schema:
+                $ref: schema#/properties/spec/properties/admin/properties/databases/properties/FerretDB/properties/mode
               type: single-step-form
             if: isConfigureDb|ferretdb
             schema:
@@ -341,6 +437,30 @@ steps:
               schema:
                 $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Kafka/properties/versions
               type: single-step-form
+            - elements:
+              - computed: returnTrue
+                label:
+                  text: labels.databases.Kafka.toggleMode
+                schema:
+                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Kafka/properties/mode/properties/toggle
+                type: switch
+              - fetch: fetchModes|Kafka
+                label:
+                  text: labels.databases.modes
+                onChange: clearDefaultVersion|Kafka
+                schema:
+                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Kafka/properties/mode/properties/available
+                type: multiselect
+              - computed: setDefaultMode|Kafka
+                fetch: availableModes|Kafka
+                label:
+                  text: labels.databases.defaultMode
+                schema:
+                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Kafka/properties/mode/properties/default
+                type: select
+              schema:
+                $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Kafka/properties/mode
+              type: single-step-form
             if: isConfigureDb|kafka
             schema:
               $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Kafka
@@ -372,6 +492,30 @@ steps:
                 type: select
               schema:
                 $ref: schema#/properties/spec/properties/admin/properties/databases/properties/MSSQLServer/properties/versions
+              type: single-step-form
+            - elements:
+              - computed: returnTrue
+                label:
+                  text: labels.databases.MSSQLServer.toggleMode
+                schema:
+                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/MSSQLServer/properties/mode/properties/toggle
+                type: switch
+              - fetch: fetchModes|MSSQLServer
+                label:
+                  text: labels.databases.modes
+                onChange: clearDefaultVersion|MSSQLServer
+                schema:
+                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/MSSQLServer/properties/mode/properties/available
+                type: multiselect
+              - computed: setDefaultMode|MSSQLServer
+                fetch: availableModes|MSSQLServer
+                label:
+                  text: labels.databases.defaultMode
+                schema:
+                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/MSSQLServer/properties/mode/properties/default
+                type: select
+              schema:
+                $ref: schema#/properties/spec/properties/admin/properties/databases/properties/MSSQLServer/properties/mode
               type: single-step-form
             if: isConfigureDb|mssqlserver
             schema:
@@ -405,6 +549,30 @@ steps:
               schema:
                 $ref: schema#/properties/spec/properties/admin/properties/databases/properties/MariaDB/properties/versions
               type: single-step-form
+            - elements:
+              - computed: returnTrue
+                label:
+                  text: labels.databases.MariaDB.toggleMode
+                schema:
+                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/MariaDB/properties/mode/properties/toggle
+                type: switch
+              - fetch: fetchModes|MariaDB
+                label:
+                  text: labels.databases.modes
+                onChange: clearDefaultVersion|MariaDB
+                schema:
+                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/MariaDB/properties/mode/properties/available
+                type: multiselect
+              - computed: setDefaultMode|MariaDB
+                fetch: availableModes|MariaDB
+                label:
+                  text: labels.databases.defaultMode
+                schema:
+                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/MariaDB/properties/mode/properties/default
+                type: select
+              schema:
+                $ref: schema#/properties/spec/properties/admin/properties/databases/properties/MariaDB/properties/mode
+              type: single-step-form
             if: isConfigureDb|mariadb
             schema:
               $ref: schema#/properties/spec/properties/admin/properties/databases/properties/MariaDB
@@ -436,6 +604,30 @@ steps:
                 type: select
               schema:
                 $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Memcached/properties/versions
+              type: single-step-form
+            - elements:
+              - computed: returnTrue
+                label:
+                  text: labels.databases.Memcached.toggleMode
+                schema:
+                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Memcached/properties/mode/properties/toggle
+                type: switch
+              - fetch: fetchModes|Memcached
+                label:
+                  text: labels.databases.modes
+                onChange: clearDefaultVersion|Memcached
+                schema:
+                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Memcached/properties/mode/properties/available
+                type: multiselect
+              - computed: setDefaultMode|Memcached
+                fetch: availableModes|Memcached
+                label:
+                  text: labels.databases.defaultMode
+                schema:
+                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Memcached/properties/mode/properties/default
+                type: select
+              schema:
+                $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Memcached/properties/mode
               type: single-step-form
             if: isConfigureDb|memcached
             schema:
@@ -469,6 +661,30 @@ steps:
               schema:
                 $ref: schema#/properties/spec/properties/admin/properties/databases/properties/MongoDB/properties/versions
               type: single-step-form
+            - elements:
+              - computed: returnTrue
+                label:
+                  text: labels.databases.MongoDB.toggleMode
+                schema:
+                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/MongoDB/properties/mode/properties/toggle
+                type: switch
+              - fetch: fetchModes|MongoDB
+                label:
+                  text: labels.databases.modes
+                onChange: clearDefaultVersion|MongoDB
+                schema:
+                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/MongoDB/properties/mode/properties/available
+                type: multiselect
+              - computed: setDefaultMode|MongoDB
+                fetch: availableModes|MongoDB
+                label:
+                  text: labels.databases.defaultMode
+                schema:
+                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/MongoDB/properties/mode/properties/default
+                type: select
+              schema:
+                $ref: schema#/properties/spec/properties/admin/properties/databases/properties/MongoDB/properties/mode
+              type: single-step-form
             if: isConfigureDb|mongodb
             schema:
               $ref: schema#/properties/spec/properties/admin/properties/databases/properties/MongoDB
@@ -500,6 +716,30 @@ steps:
                 type: select
               schema:
                 $ref: schema#/properties/spec/properties/admin/properties/databases/properties/MySQL/properties/versions
+              type: single-step-form
+            - elements:
+              - computed: returnTrue
+                label:
+                  text: labels.databases.MySQL.toggleMode
+                schema:
+                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/MySQL/properties/mode/properties/toggle
+                type: switch
+              - fetch: fetchModes|MySQL
+                label:
+                  text: labels.databases.modes
+                onChange: clearDefaultVersion|MySQL
+                schema:
+                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/MySQL/properties/mode/properties/available
+                type: multiselect
+              - computed: setDefaultMode|MySQL
+                fetch: availableModes|MySQL
+                label:
+                  text: labels.databases.defaultMode
+                schema:
+                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/MySQL/properties/mode/properties/default
+                type: select
+              schema:
+                $ref: schema#/properties/spec/properties/admin/properties/databases/properties/MySQL/properties/mode
               type: single-step-form
             if: isConfigureDb|mysql
             schema:
@@ -533,6 +773,30 @@ steps:
               schema:
                 $ref: schema#/properties/spec/properties/admin/properties/databases/properties/PerconaXtraDB/properties/versions
               type: single-step-form
+            - elements:
+              - computed: returnTrue
+                label:
+                  text: labels.databases.PerconaXtraDB.toggleMode
+                schema:
+                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/PerconaXtraDB/properties/mode/properties/toggle
+                type: switch
+              - fetch: fetchModes|PerconaXtraDB
+                label:
+                  text: labels.databases.modes
+                onChange: clearDefaultVersion|PerconaXtraDB
+                schema:
+                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/PerconaXtraDB/properties/mode/properties/available
+                type: multiselect
+              - computed: setDefaultMode|PerconaXtraDB
+                fetch: availableModes|PerconaXtraDB
+                label:
+                  text: labels.databases.defaultMode
+                schema:
+                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/PerconaXtraDB/properties/mode/properties/default
+                type: select
+              schema:
+                $ref: schema#/properties/spec/properties/admin/properties/databases/properties/PerconaXtraDB/properties/mode
+              type: single-step-form
             if: isConfigureDb|perconaxtradb
             schema:
               $ref: schema#/properties/spec/properties/admin/properties/databases/properties/PerconaXtraDB
@@ -564,6 +828,30 @@ steps:
                 type: select
               schema:
                 $ref: schema#/properties/spec/properties/admin/properties/databases/properties/PgBouncer/properties/versions
+              type: single-step-form
+            - elements:
+              - computed: returnTrue
+                label:
+                  text: labels.databases.PgBouncer.toggleMode
+                schema:
+                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/PgBouncer/properties/mode/properties/toggle
+                type: switch
+              - fetch: fetchModes|PgBouncer
+                label:
+                  text: labels.databases.modes
+                onChange: clearDefaultVersion|PgBouncer
+                schema:
+                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/PgBouncer/properties/mode/properties/available
+                type: multiselect
+              - computed: setDefaultMode|PgBouncer
+                fetch: availableModes|PgBouncer
+                label:
+                  text: labels.databases.defaultMode
+                schema:
+                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/PgBouncer/properties/mode/properties/default
+                type: select
+              schema:
+                $ref: schema#/properties/spec/properties/admin/properties/databases/properties/PgBouncer/properties/mode
               type: single-step-form
             if: isConfigureDb|pgbouncer
             schema:
@@ -597,6 +885,30 @@ steps:
               schema:
                 $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Pgpool/properties/versions
               type: single-step-form
+            - elements:
+              - computed: returnTrue
+                label:
+                  text: labels.databases.Pgpool.toggleMode
+                schema:
+                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Pgpool/properties/mode/properties/toggle
+                type: switch
+              - fetch: fetchModes|Pgpool
+                label:
+                  text: labels.databases.modes
+                onChange: clearDefaultVersion|Pgpool
+                schema:
+                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Pgpool/properties/mode/properties/available
+                type: multiselect
+              - computed: setDefaultMode|Pgpool
+                fetch: availableModes|Pgpool
+                label:
+                  text: labels.databases.defaultMode
+                schema:
+                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Pgpool/properties/mode/properties/default
+                type: select
+              schema:
+                $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Pgpool/properties/mode
+              type: single-step-form
             if: isConfigureDb|pgpool
             schema:
               $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Pgpool
@@ -628,6 +940,30 @@ steps:
                 type: select
               schema:
                 $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Postgres/properties/versions
+              type: single-step-form
+            - elements:
+              - computed: returnTrue
+                label:
+                  text: labels.databases.Postgres.toggleMode
+                schema:
+                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Postgres/properties/mode/properties/toggle
+                type: switch
+              - fetch: fetchModes|Postgres
+                label:
+                  text: labels.databases.modes
+                onChange: clearDefaultVersion|Postgres
+                schema:
+                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Postgres/properties/mode/properties/available
+                type: multiselect
+              - computed: setDefaultMode|Postgres
+                fetch: availableModes|Postgres
+                label:
+                  text: labels.databases.defaultMode
+                schema:
+                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Postgres/properties/mode/properties/default
+                type: select
+              schema:
+                $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Postgres/properties/mode
               type: single-step-form
             if: isConfigureDb|postgres
             schema:
@@ -661,6 +997,30 @@ steps:
               schema:
                 $ref: schema#/properties/spec/properties/admin/properties/databases/properties/ProxySQL/properties/versions
               type: single-step-form
+            - elements:
+              - computed: returnTrue
+                label:
+                  text: labels.databases.ProxySQL.toggleMode
+                schema:
+                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/ProxySQL/properties/mode/properties/toggle
+                type: switch
+              - fetch: fetchModes|ProxySQL
+                label:
+                  text: labels.databases.modes
+                onChange: clearDefaultVersion|ProxySQL
+                schema:
+                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/ProxySQL/properties/mode/properties/available
+                type: multiselect
+              - computed: setDefaultMode|ProxySQL
+                fetch: availableModes|ProxySQL
+                label:
+                  text: labels.databases.defaultMode
+                schema:
+                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/ProxySQL/properties/mode/properties/default
+                type: select
+              schema:
+                $ref: schema#/properties/spec/properties/admin/properties/databases/properties/ProxySQL/properties/mode
+              type: single-step-form
             if: isConfigureDb|proxysql
             schema:
               $ref: schema#/properties/spec/properties/admin/properties/databases/properties/ProxySQL
@@ -692,6 +1052,30 @@ steps:
                 type: select
               schema:
                 $ref: schema#/properties/spec/properties/admin/properties/databases/properties/RabbitMQ/properties/versions
+              type: single-step-form
+            - elements:
+              - computed: returnTrue
+                label:
+                  text: labels.databases.RabbitMQ.toggleMode
+                schema:
+                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/RabbitMQ/properties/mode/properties/toggle
+                type: switch
+              - fetch: fetchModes|RabbitMQ
+                label:
+                  text: labels.databases.modes
+                onChange: clearDefaultVersion|RabbitMQ
+                schema:
+                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/RabbitMQ/properties/mode/properties/available
+                type: multiselect
+              - computed: setDefaultMode|RabbitMQ
+                fetch: availableModes|RabbitMQ
+                label:
+                  text: labels.databases.defaultMode
+                schema:
+                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/RabbitMQ/properties/mode/properties/default
+                type: select
+              schema:
+                $ref: schema#/properties/spec/properties/admin/properties/databases/properties/RabbitMQ/properties/mode
               type: single-step-form
             if: isConfigureDb|rabbitmq
             schema:
@@ -725,6 +1109,30 @@ steps:
               schema:
                 $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Redis/properties/versions
               type: single-step-form
+            - elements:
+              - computed: returnTrue
+                label:
+                  text: labels.databases.Redis.toggleMode
+                schema:
+                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Redis/properties/mode/properties/toggle
+                type: switch
+              - fetch: fetchModes|Redis
+                label:
+                  text: labels.databases.modes
+                onChange: clearDefaultVersion|Redis
+                schema:
+                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Redis/properties/mode/properties/available
+                type: multiselect
+              - computed: setDefaultMode|Redis
+                fetch: availableModes|Redis
+                label:
+                  text: labels.databases.defaultMode
+                schema:
+                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Redis/properties/mode/properties/default
+                type: select
+              schema:
+                $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Redis/properties/mode
+              type: single-step-form
             if: isConfigureDb|redis
             schema:
               $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Redis
@@ -756,6 +1164,30 @@ steps:
                 type: select
               schema:
                 $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Singlestore/properties/versions
+              type: single-step-form
+            - elements:
+              - computed: returnTrue
+                label:
+                  text: labels.databases.Singlestore.toggleMode
+                schema:
+                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Singlestore/properties/mode/properties/toggle
+                type: switch
+              - fetch: fetchModes|Singlestore
+                label:
+                  text: labels.databases.modes
+                onChange: clearDefaultVersion|Singlestore
+                schema:
+                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Singlestore/properties/mode/properties/available
+                type: multiselect
+              - computed: setDefaultMode|Singlestore
+                fetch: availableModes|Singlestore
+                label:
+                  text: labels.databases.defaultMode
+                schema:
+                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Singlestore/properties/mode/properties/default
+                type: select
+              schema:
+                $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Singlestore/properties/mode
               type: single-step-form
             if: isConfigureDb|singlestore
             schema:
@@ -789,6 +1221,30 @@ steps:
               schema:
                 $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Solr/properties/versions
               type: single-step-form
+            - elements:
+              - computed: returnTrue
+                label:
+                  text: labels.databases.Solr.toggleMode
+                schema:
+                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Solr/properties/mode/properties/toggle
+                type: switch
+              - fetch: fetchModes|Solr
+                label:
+                  text: labels.databases.modes
+                onChange: clearDefaultVersion|Solr
+                schema:
+                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Solr/properties/mode/properties/available
+                type: multiselect
+              - computed: setDefaultMode|Solr
+                fetch: availableModes|Solr
+                label:
+                  text: labels.databases.defaultMode
+                schema:
+                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Solr/properties/mode/properties/default
+                type: select
+              schema:
+                $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Solr/properties/mode
+              type: single-step-form
             if: isConfigureDb|solr
             schema:
               $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Solr
@@ -821,6 +1277,30 @@ steps:
               schema:
                 $ref: schema#/properties/spec/properties/admin/properties/databases/properties/ZooKeeper/properties/versions
               type: single-step-form
+            - elements:
+              - computed: returnTrue
+                label:
+                  text: labels.databases.ZooKeeper.toggleMode
+                schema:
+                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/ZooKeeper/properties/mode/properties/toggle
+                type: switch
+              - fetch: fetchModes|ZooKeeper
+                label:
+                  text: labels.databases.modes
+                onChange: clearDefaultVersion|ZooKeeper
+                schema:
+                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/ZooKeeper/properties/mode/properties/available
+                type: multiselect
+              - computed: setDefaultMode|ZooKeeper
+                fetch: availableModes|ZooKeeper
+                label:
+                  text: labels.databases.defaultMode
+                schema:
+                  $ref: schema#/properties/spec/properties/admin/properties/databases/properties/ZooKeeper/properties/mode/properties/default
+                type: select
+              schema:
+                $ref: schema#/properties/spec/properties/admin/properties/databases/properties/ZooKeeper/properties/mode
+              type: single-step-form
             if: isConfigureDb|zookeeper
             schema:
               $ref: schema#/properties/spec/properties/admin/properties/databases/properties/ZooKeeper
@@ -851,6 +1331,51 @@ steps:
           hideForm: false
           label:
             text: labels.storageClass.name
+          show_label: true
+          type: single-step-form
+        - elements:
+          - label:
+              text: labels.backup.toggle
+            schema:
+              $ref: schema#/properties/spec/properties/admin/properties/backup/properties/toggle
+            type: switch
+          - label:
+              text: labels.backup.default
+            schema:
+              $ref: schema#/properties/spec/properties/admin/properties/backup/properties/default
+            type: switch
+          hideForm: true
+          label:
+            text: labels.backup.name
+          show_label: true
+          type: single-step-form
+        - elements:
+          - label:
+              text: labels.deletionPolicy.toggle
+            schema:
+              $ref: schema#/properties/spec/properties/admin/properties/deletionPolicy/properties/toggle
+            type: switch
+          - label:
+              text: labels.deletionPolicy.default
+            options:
+            - description: options.deletionPolicy.delete.description
+              text: options.deletionPolicy.delete.label
+              value: Delete
+            - description: options.deletionPolicy.halt.description
+              text: options.deletionPolicy.halt.label
+              value: Halt
+            - description: options.deletionPolicy.wipeOut.description
+              text: options.deletionPolicy.wipeOut.label
+              value: WipeOut
+            - description: options.deletionPolicy.doNotTerminate.description
+              text: options.deletionPolicy.doNotTerminate.label
+              value: DoNotTerminate
+            schema:
+              $ref: schema#/properties/spec/properties/admin/properties/deletionPolicy/properties/default
+            type: select
+          hideForm: true
+          label:
+            text: labels.deletionPolicy.name
           show_label: true
           type: single-step-form
         - elements:
@@ -890,6 +1415,22 @@ steps:
           hideForm: false
           label:
             text: labels.clusterIssuers.name
+          show_label: true
+          type: single-step-form
+        - elements:
+          - label:
+              text: labels.pointInTimeRecovery.toggle
+            schema:
+              $ref: schema#/properties/spec/properties/admin/properties/pointInTimeRecovery/properties/toggle
+            type: switch
+          - label:
+              text: labels.pointInTimeRecovery.default
+            schema:
+              $ref: schema#/properties/spec/properties/admin/properties/pointInTimeRecovery/properties/default
+            type: switch
+          hideForm: true
+          label:
+            text: labels.pointInTimeRecovery.name
           show_label: true
           type: single-step-form
         - elements:

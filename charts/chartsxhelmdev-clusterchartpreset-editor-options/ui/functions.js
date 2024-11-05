@@ -1,3 +1,86 @@
+const modes = {
+  ClickHouse: {
+    availableModes: ['Standalone', 'Topology'],
+    default: 'Topology',
+  },
+  Druid: {
+    availableModes: ['Topology'],
+    default: 'Topology',
+  },
+  Elasticsearch: {
+    availableModes: ['Combined', 'Topology'],
+    default: 'Topology',
+  },
+  FerretDB: {
+    availableModes: ['Standalone', 'Replicaset'],
+    default: 'Replicaset',
+  },
+  Kafka: {
+    availableModes: ['Combined', 'Topology'],
+    default: 'Topology',
+  },
+  MSSQLServer: {
+    availableModes: ['Standalone', 'Topology'],
+    default: 'Topology',
+  },
+  MariaDB: {
+    availableModes: ['Standalone', 'Replicaset'],
+    default: 'Replicaset',
+  },
+  Memcached: {
+    availableModes: ['Standalone', 'Replicaset'],
+    default: 'Replicaset',
+  },
+  MongoDB: {
+    availableModes: ['Standalone', 'Replicaset', 'Sharded'],
+    default: 'Replicaset',
+  },
+  MySQL: {
+    availableModes: ['Standalone', 'GroupReplication', 'InnoDBCluster'],
+    default: 'GroupReplication',
+  },
+  PerconaXtraDB: {
+    availableModes: ['Standalone', 'Replicaset'],
+    default: 'Replicaset',
+  },
+  PgBouncer: {
+    availableModes: ['Standalone', 'Replicaset'],
+    default: 'Replicaset',
+  },
+  Pgpool: {
+    availableModes: ['Standalone', 'Replicaset'],
+    default: 'Replicaset',
+  },
+  Postgres: {
+    availableModes: ['Standalone', 'Replicaset'],
+    default: 'Replicaset',
+  },
+  ProxySQL: {
+    availableModes: ['Standalone', 'Replicaset'],
+    default: 'Replicaset',
+  },
+  RabbitMQ: {
+    availableModes: ['Standalone', 'Replicaset'],
+    default: 'Replicaset',
+  },
+  Redis: {
+    availableModes: ['Standalone', 'Cluster', 'Sentinel'],
+    default: 'Cluster',
+  },
+  Singlestore: {
+    availableModes: ['Standalone', 'Topology'],
+    default: 'Topology',
+  },
+  Solr: {
+    availableModes: ['Standalone', 'Replicaset', 'Topology'],
+    default: 'Topology',
+  },
+  ZooKeeper: {
+    availableModes: ['Standalone', 'Replicaset'],
+    default: 'Replicaset',
+  },
+}
+
 function setTool({ commit }) {
   commit('wizard/model$update', {
     path: '/spec/backup/tool',
@@ -9,6 +92,10 @@ function setTool({ commit }) {
 
 function returnFalse() {
   return false
+}
+
+function returnTrue() {
+  return true
 }
 
 async function fetchJsons({ axios, itemCtx }) {
@@ -49,7 +136,6 @@ function presetNameEqualsTo({ storeGet }, value) {
 function getOptions({ getValue, model, watchDependency }, type) {
   watchDependency(`model#/spec/admin/${type}/available`)
   const options = getValue(model, `/spec/admin/${type}/available`)
-  console.log(type, options)
   return options
 }
 
@@ -87,6 +173,11 @@ function clearDefaultVersion({ commit }, db) {
 function availableVersions({ getValue, model, watchDependency }, db) {
   watchDependency(`model#/spec/admin/databases/${db}/versions/available`)
   return getValue(model, `/spec/admin/databases/${db}/versions/available`)
+}
+
+function availableModes({ getValue, model, watchDependency }, db) {
+  watchDependency(`model#/spec/admin/databases/${db}/mode/available`)
+  return getValue(model, `/spec/admin/databases/${db}/mode/available`)
 }
 
 function isKubedbPresetEnable(storeGet) {
@@ -230,6 +321,21 @@ function isKubedbUiPreset({ getValue, watchDependency, discriminator, storeGet }
   } else return false
 }
 
+function fetchModes({ commit }, db) {
+  const arr = modes[db]?.availableModes || []
+  commit('wizard/model$update', {
+    path: `/spec/admin/databases/${db}/mode/available`,
+    value: arr,
+    force: true,
+  })
+  return arr
+}
+
+function setDefaultMode({}, db) {
+  const def = modes[db]?.default || ''
+  return def
+}
+
 return {
   getOptions,
   getNodeTopology,
@@ -246,6 +352,10 @@ return {
   FetchDbBundle,
   setTool,
   returnFalse,
+  returnTrue,
   fetchJsons,
   presetNameEqualsTo,
+  fetchModes,
+  availableModes,
+  setDefaultMode,
 }
