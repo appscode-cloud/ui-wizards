@@ -2435,52 +2435,8 @@ function showScheduleBackup({ storeGet }) {
 
 //////////////////// Auto scaler /////////////////
 
-function showAutoScaling({ storeGet }) {
-  const operationQuery = storeGet('/route/query/operation') || ''
-  const isAutoScale =
-    operationQuery === 'create-opsrequest-compute' || operationQuery === 'create-opsrequest-storage'
-      ? true
-      : false
-  return !isAutoScale
-}
-
 let autoscaleType = ''
 let dbDetails = {}
-
-function isConsole({ storeGet, commit }) {
-  const isKube = isKubedb({ storeGet })
-
-  if (isKube) {
-    const dbName = storeGet('/route/query/name') || ''
-    commit('wizard/model$update', {
-      path: '/spec/databaseRef/name',
-      value: dbName,
-      force: true,
-    })
-    const operation = storeGet('/route/query/operation') || ''
-    if (operation.length) {
-      const splitOp = operation.split('-')
-      if (splitOp.length > 2) autoscaleType = splitOp[2]
-    }
-    const date = Math.floor(Date.now() / 1000)
-    const modifiedName = `${dbName}-${date}-autoscaling-${autoscaleType}`
-    commit('wizard/model$update', {
-      path: '/metadata/name',
-      value: modifiedName,
-      force: true,
-    })
-    const namespace = storeGet('/route/query/namespace') || ''
-    if (namespace) {
-      commit('wizard/model$update', {
-        path: '/metadata/namespace',
-        value: namespace,
-        force: true,
-      })
-    }
-  }
-
-  return !isKube
-}
 
 function isKubedb({ storeGet }) {
   return !!storeGet('/route/query/operation')
@@ -2492,52 +2448,6 @@ function showOpsRequestOptions({ model, getValue, watchDependency, storeGet, dis
   return (
     !!getValue(model, '/spec/databaseRef/name') && !!getValue(discriminator, '/autoscalingType')
   )
-}
-
-async function getNamespaces({ axios, storeGet }) {
-  const owner = storeGet('/route/params/user')
-  const cluster = storeGet('/route/params/cluster')
-
-  const resp = await axios.get(`/clusters/${owner}/${cluster}/proxy/core/v1/namespaces`, {
-    params: { filter: { items: { metadata: { name: null } } } },
-  })
-
-  const resources = (resp && resp.data && resp.data.items) || []
-
-  return resources.map((item) => {
-    const name = (item.metadata && item.metadata.name) || ''
-    return {
-      text: name,
-      value: name,
-    }
-  })
-}
-
-async function getMongoDbs({ axios, storeGet, model, getValue, watchDependency }) {
-  watchDependency('model#/metadata/namespace')
-  const namespace = getValue(
-    model,
-    'resources/autoscalingKubedbComMongoDBAutoscaler/metadata/namespace',
-  )
-  const owner = storeGet('/route/params/user')
-  const cluster = storeGet('/route/params/cluster')
-
-  const resp = await axios.get(
-    `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/mongodbs`,
-    {
-      params: { filter: { items: { metadata: { name: null } } } },
-    },
-  )
-
-  const resources = (resp && resp.data && resp.data.items) || []
-
-  return resources.map((item) => {
-    const name = (item.metadata && item.metadata.name) || ''
-    return {
-      text: name,
-      value: name,
-    }
-  })
 }
 
 async function getDbDetails({ axios, storeGet, getValue, model, setDiscriminatorValue }) {
@@ -2593,44 +2503,48 @@ async function mongoTypeEqualsTo({ watchDependency, getValue, commit, discrimina
 
 function clearSpecModel({ commit }, dbtype) {
   if (dbtype === 'standalone') {
-    commit('wizard/model$delete', `/spec/${autoscaleType}/replicaSet`)
-    commit('wizard/model$delete', `/spec/${autoscaleType}/shard`)
-    commit('wizard/model$delete', `/spec/${autoscaleType}/mongos`)
-    commit('wizard/model$delete', `/spec/${autoscaleType}/configServer`)
+    commit(
+      'wizard/model$delete',
+      `/resources/autoscalingKubedbComMongoDBAutoscaler/spec/${autoscaleType}/replicaSet`,
+    )
+    commit(
+      'wizard/model$delete',
+      `/resources/autoscalingKubedbComMongoDBAutoscaler/spec/${autoscaleType}/shard`,
+    )
+    commit(
+      'wizard/model$delete',
+      `/resources/autoscalingKubedbComMongoDBAutoscaler/spec/${autoscaleType}/mongos`,
+    )
+    commit(
+      'wizard/model$delete',
+      `/resources/autoscalingKubedbComMongoDBAutoscaler/spec/${autoscaleType}/configServer`,
+    )
   } else if (dbtype === 'replicaSet') {
-    commit('wizard/model$delete', `/spec/${autoscaleType}/standalone`)
-    commit('wizard/model$delete', `/spec/${autoscaleType}/shard`)
-    commit('wizard/model$delete', `/spec/${autoscaleType}/mongos`)
-    commit('wizard/model$delete', `/spec/${autoscaleType}/configServer`)
+    commit(
+      'wizard/model$delete',
+      `/resources/autoscalingKubedbComMongoDBAutoscaler/spec/${autoscaleType}/standalone`,
+    )
+    commit(
+      'wizard/model$delete',
+      `/resources/autoscalingKubedbComMongoDBAutoscaler/spec/${autoscaleType}/shard`,
+    )
+    commit(
+      'wizard/model$delete',
+      `/resources/autoscalingKubedbComMongoDBAutoscaler/spec/${autoscaleType}/mongos`,
+    )
+    commit(
+      'wizard/model$delete',
+      `/resources/autoscalingKubedbComMongoDBAutoscaler/spec/${autoscaleType}/configServer`,
+    )
   } else if (dbtype === 'sharded') {
-    commit('wizard/model$delete', `/spec/${autoscaleType}/standalone`)
-    commit('wizard/model$delete', `/spec/${autoscaleType}/replicaSet`)
-  }
-}
-
-function initMetadata({ getValue, discriminator, model, commit, storeGet }) {
-  const dbName = getValue(model, '/spec/databaseRef/name') || ''
-  const type = getValue(discriminator, '/autoscalingType') || ''
-  const date = Math.floor(Date.now() / 1000)
-  const resource = storeGet('/route/params/resource')
-  const scalingName = dbName ? dbName : resource
-  const modifiedName = `${scalingName}-${date}-autoscaling-${type ? type : ''}`
-  if (modifiedName)
-    commit('wizard/model$update', {
-      path: '/metadata/name',
-      value: modifiedName,
-      force: true,
-    })
-
-  // delete the other type object from model
-  if (type === 'compute') commit('wizard/model$delete', '/spec/storage')
-  if (type === 'storage') commit('wizard/model$delete', '/spec/compute')
-}
-
-function onNamespaceChange({ model, getValue, commit }) {
-  const namespace = getValue(model, '/metadata/namespace')
-  if (!namespace) {
-    commit('wizard/model$delete', '/spec/databaseRef/name')
+    commit(
+      'wizard/model$delete',
+      `/resources/autoscalingKubedbComMongoDBAutoscaler/spec/${autoscaleType}/standalone`,
+    )
+    commit(
+      'wizard/model$delete',
+      `/resources/autoscalingKubedbComMongoDBAutoscaler/spec/${autoscaleType}/replicaSet`,
+    )
   }
 }
 
@@ -2684,22 +2598,16 @@ function setApplyToIfReady() {
 }
 
 return {
-  isConsole,
-  getNamespaces,
-  getMongoDbs,
   isKubedb,
   getDbDetails,
   mongoTypeEqualsTo,
   clearSpecModel,
-  initMetadata,
-  onNamespaceChange,
   fetchNodeTopology,
   isNodeTopologySelected,
   setControlledResources,
   setTrigger,
   setApplyToIfReady,
   showOpsRequestOptions,
-  showAutoScaling,
   setInitSchedule,
   fetchNames,
   isRancherManaged,
