@@ -53,8 +53,10 @@ type AdminOptions struct {
 	ShowPreview bool      `json:"showPreview"`
 	LeftPanel   LeftPanel `json:"leftPanel"`
 
+	// +optional
 	NodeSelector map[string]string `json:"nodeSelector"`
-	Tolerations  []core.Toleration `json:"tolerations"`
+	// +optional
+	Tolerations []core.Toleration `json:"tolerations"`
 
 	Databases      DatabasesProfile             `json:"databases"`
 	StorageClasses RequiredClusterScopedProfile `json:"storageClasses"`

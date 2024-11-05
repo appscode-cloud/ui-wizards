@@ -7774,6 +7774,28 @@ properties:
                     - default
                     - toggle
                     type: object
+                  leftPanel:
+                    properties:
+                      showBackup:
+                        type: boolean
+                      showBackupLegacy:
+                        type: boolean
+                      showInsights:
+                        type: boolean
+                      showOperations:
+                        type: boolean
+                      showSecurity:
+                        type: boolean
+                      showVaultInfo:
+                        type: boolean
+                    required:
+                    - showBackup
+                    - showBackupLegacy
+                    - showInsights
+                    - showOperations
+                    - showSecurity
+                    - showVaultInfo
+                    type: object
                   monitoring:
                     properties:
                       agent:
@@ -7823,6 +7845,10 @@ properties:
                     - exporter
                     - toggle
                     type: object
+                  nodeSelector:
+                    additionalProperties:
+                      type: string
+                    type: object
                   pointInTimeRecovery:
                     properties:
                       default:
@@ -7860,6 +7886,22 @@ properties:
                     - default
                     - toggle
                     type: object
+                  tolerations:
+                    items:
+                      properties:
+                        effect:
+                          type: string
+                        key:
+                          type: string
+                        operator:
+                          type: string
+                        tolerationSeconds:
+                          format: int64
+                          type: integer
+                        value:
+                          type: string
+                      type: object
+                    type: array
                 required:
                 - alert
                 - archiver
@@ -7870,11 +7912,14 @@ properties:
                 - deletionPolicy
                 - deployment
                 - expose
+                - leftPanel
                 - monitoring
+                - nodeSelector
                 - pointInTimeRecovery
                 - showPreview
                 - storageClasses
                 - tls
+                - tolerations
                 type: object
               valuesFrom:
                 items:
