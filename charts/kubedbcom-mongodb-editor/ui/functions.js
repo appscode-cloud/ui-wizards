@@ -2576,7 +2576,8 @@ async function mongoTypeEqualsTo({ watchDependency, getValue, commit, discrimina
   watchDependency('discriminator#/dbDetails')
 
   const dbDetailsSuccess = getValue(discriminator, '/dbDetails')
-  console.log(dbDetailsSuccess)
+
+  if (!dbDetailsSuccess) return false
 
   const { spec } = dbDetails || {}
   const { shardTopology, replicaSet } = spec || {}
