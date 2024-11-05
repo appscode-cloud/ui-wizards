@@ -2559,13 +2559,25 @@ async function getDbDetails({ axios, storeGet, getValue, model, setDiscriminator
       console.log(e)
     }
   }
+  commit('wizard/model$update', {
+    path: `/resources/autoscalingKubedbComMongoDBAutoscaler/metadata/namespace`,
+    value: namespace,
+    force: true,
+  })
+
+  commit('wizard/model$update', {
+    path: `/resources/autoscalingKubedbComMongoDBAutoscaler/spec/databaseRef/name`,
+    value: name,
+    force: true,
+  })
 }
 
-async function mongoTypeEqualsTo(
-  { axios, storeGet, watchDependency, model, getValue, commit, discriminator },
-  mongoType,
-) {
+async function mongoTypeEqualsTo({ watchDependency, getValue, commit, discriminator }, mongoType) {
   watchDependency('discriminator#/dbDetails')
+
+  const dbDetailsSuccess = getValue(discriminator, '/dbDetails')
+  console.log(dbDetailsSuccess)
+
   const { spec } = dbDetails || {}
   const { shardTopology, replicaSet } = spec || {}
   let verd = ''
@@ -2640,14 +2652,20 @@ async function fetchNodeTopology({ axios, storeGet }) {
 }
 
 function isNodeTopologySelected({ watchDependency, model, getValue }) {
-  watchDependency('model#/spec/compute/nodeTopology/name')
-  const nodeTopologyName = getValue(model, '/spec/compute/nodeTopology/name') || ''
+  watchDependency(
+    'model#/resources/autoscalingKubedbComMongoDBAutoscaler/spec/compute/nodeTopology/name',
+  )
+  const nodeTopologyName =
+    getValue(
+      model,
+      '/resources/autoscalingKubedbComMongoDBAutoscaler/spec/compute/nodeTopology/name',
+    ) || ''
   return !!nodeTopologyName.length
 }
 
 function setControlledResources({ commit }, type) {
   const list = ['cpu', 'memory']
-  const path = `/spec/compute/${type}/controlledResources`
+  const path = `/resources/autoscalingKubedbComMongoDBAutoscaler/spec/${type}/controlledResources`
   commit('wizard/model$update', {
     path: path,
     value: list,
@@ -2664,19 +2682,7 @@ function setApplyToIfReady() {
   return 'IfReady'
 }
 
-function setNamespace({ storeGet }) {
-  const namespace = storeGet('/route/query/namespace')
-  return namespace
-}
-
-function setDbName({ storeGet }) {
-  const name = storeGet('/route/query/name')
-  return name
-}
-
 return {
-  setDbName,
-  setNamespace,
   isConsole,
   getNamespaces,
   getMongoDbs,

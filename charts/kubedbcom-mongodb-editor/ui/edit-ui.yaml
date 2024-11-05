@@ -1361,28 +1361,12 @@ steps:
         type: boolean
         default: false
     elements:
-    - if: returnFalse
-      type: input
-      computed: getDbDetails
-    - elements:
-      - label:
-          text: Namespace
-        computed: setNamespace
-        schema:
-          $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/metadata/namespace        
-        type: input
-      - computed: setDbName
-        label:
-          text: Database Name
-        required: true
-        schema:
-          $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/databaseRef/properties/name
-        type: input
+    - computed: getDbDetails
       if: returnFalse
-      type: single-step-form
+      type: input
     - elements:
-      - elements:
-        - elements:
+      - if: mongoTypeEqualsTo|standalone
+        elements:
           - computed: setTrigger
             label:
               text: Trigger
@@ -1436,7 +1420,7 @@ steps:
               $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/standalone/properties/maxAllowed
             show_label: true
             type: single-step-form
-          - fetch: setControlledResources|standalone
+          - fetch: setControlledResources|compute/standalone
             label:
               text: Controlled Resources
             schema:
@@ -1444,13 +1428,16 @@ steps:
             type: multiselect
           - type: select
             options:
-              - RequestsAndLimits
-              - RequestsOnly
+              - text: Requests And Limits
+                value: RequestsAndLimits
+              - text: Requests Only
+                value: RequestsOnly
             label:
               text: Container Controlled Values
             schema:
               $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/standalone/properties/containerControlledValues
           - type: single-step-form
+            show_label: true
             label:
               text: In Memory Storage
             schema:
@@ -1466,18 +1453,14 @@ steps:
                   text: Usage Threshold Percentage
                 schema:
                   $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/standalone/properties/inMemoryStorage/properties/usageThresholdPercentage
-          schema:
-            $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/standalone
-          type: single-step-form
-        if: mongoTypeEqualsTo|standalone
         label:
           text: Standalone
         schema:
           $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/standalone
         show_label: true
         type: single-step-form
-      - elements:
-        - elements:
+      - if: mongoTypeEqualsTo|replicaSet
+        elements:
           - computed: setTrigger
             label:
               text: Trigger
@@ -1531,23 +1514,47 @@ steps:
               $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/replicaSet/properties/maxAllowed
             show_label: true
             type: single-step-form
-          - fetch: setControlledResources|replicaSet
+          - fetch: setControlledResources|compute/replicaSet
             label:
               text: Controlled Resources
             schema:
               $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/replicaSet/properties/controlledResources
             type: multiselect
-          schema:
-            $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/replicaSet
-          type: single-step-form
-        if: mongoTypeEqualsTo|replicaSet
+          - type: select
+            options:
+              - text: Requests And Limits
+                value: RequestsAndLimits
+              - text: Requests Only
+                value: RequestsOnly
+            label:
+              text: Container Controlled Values
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/replicaSet/properties/containerControlledValues
+          - type: single-step-form
+            show_label: true
+            label:
+              text: In Memory Storage
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/replicaSet/properties/inMemoryStorage
+            elements:
+              - type: input
+                label:
+                  text: Scaling Factor Percentage
+                schema:
+                  $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/replicaSet/properties/inMemoryStorage/properties/scalingFactorPercentage
+              - type: input
+                label:
+                  text: Usage Threshold Percentage
+                schema:
+                  $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/replicaSet/properties/inMemoryStorage/properties/usageThresholdPercentage
         label:
           text: ReplicaSet
         schema:
           $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/replicaSet
         show_label: true
         type: single-step-form
-      - elements:
+      - if: mongoTypeEqualsTo|sharded
+        elements:
         - elements:
           - computed: setTrigger
             label:
@@ -1602,12 +1609,39 @@ steps:
               $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/shard/properties/maxAllowed
             show_label: true
             type: single-step-form
-          - fetch: setControlledResources|shard
+          - fetch: setControlledResources|compute/shard
             label:
               text: Controlled Resources
             schema:
               $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/shard/properties/controlledResources
             type: multiselect
+          - type: select
+            options:
+              - text: Requests And Limits
+                value: RequestsAndLimits
+              - text: Requests Only
+                value: RequestsOnly
+            label:
+              text: Container Controlled Values
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/shard/properties/containerControlledValues
+          - type: single-step-form
+            show_label: true
+            label:
+              text: In Memory Storage
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/shard/properties/inMemoryStorage
+            elements:
+              - type: input
+                label:
+                  text: Scaling Factor Percentage
+                schema:
+                  $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/shard/properties/inMemoryStorage/properties/scalingFactorPercentage
+              - type: input
+                label:
+                  text: Usage Threshold Percentage
+                schema:
+                  $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/shard/properties/inMemoryStorage/properties/usageThresholdPercentage
           label:
             text: Shard
           schema:
@@ -1668,16 +1702,229 @@ steps:
               $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/configServer/properties/maxAllowed
             show_label: true
             type: single-step-form
-          - fetch: setControlledResources|configServer
+          - fetch: setControlledResources|compute/configServer
             label:
               text: Controlled Resources
             schema:
               $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/configServer/properties/controlledResources
             type: multiselect
+          - type: select
+            options:
+              - text: Requests And Limits
+                value: RequestsAndLimits
+              - text: Requests Only
+                value: RequestsOnly
+            label:
+              text: Container Controlled Values
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/configServer/properties/containerControlledValues
+          - type: single-step-form
+            show_label: true
+            label:
+              text: In Memory Storage
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/configServer/properties/inMemoryStorage
+            elements:
+              - type: input
+                label:
+                  text: Scaling Factor Percentage
+                schema:
+                  $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/configServer/properties/inMemoryStorage/properties/scalingFactorPercentage
+              - type: input
+                label:
+                  text: Usage Threshold Percentage
+                schema:
+                  $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/configServer/properties/inMemoryStorage/properties/usageThresholdPercentage
           label:
-            text: ConfigServer
+            text: Config Server
           schema:
             $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/configServer
+          show_label: true
+          type: single-step-form
+        - elements:
+          - computed: setTrigger
+            label:
+              text: Trigger
+            options:
+            - "On"
+            - "Off"
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/arbiter/properties/trigger
+            type: select
+          - label:
+              text: Pod LifeTime Threshold
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/arbiter/properties/podLifeTimeThreshold
+            type: input
+          - label:
+              text: Resource Diff Percentage
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/arbiter/properties/resourceDiffPercentage
+            type: input
+          - elements:
+            - label:
+                text: cpu
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/arbiter/properties/minAllowed/properties/cpu
+              type: input
+            - label:
+                text: memory
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/arbiter/properties/minAllowed/properties/memory
+              type: input
+            label:
+              text: Min Allowed
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/arbiter/properties/minAllowed
+            show_label: true
+            type: single-step-form
+          - elements:
+            - label:
+                text: cpu
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/arbiter/properties/maxAllowed/properties/cpu
+              type: input
+            - label:
+                text: memory
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/arbiter/properties/maxAllowed/properties/memory
+              type: input
+            label:
+              text: Max Allowed
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/arbiter/properties/maxAllowed
+            show_label: true
+            type: single-step-form
+          - fetch: setControlledResources|compute/arbiter
+            label:
+              text: Controlled Resources
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/arbiter/properties/controlledResources
+            type: multiselect
+          - type: select
+            options:
+              - text: Requests And Limits
+                value: RequestsAndLimits
+              - text: Requests Only
+                value: RequestsOnly
+            label:
+              text: Container Controlled Values
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/arbiter/properties/containerControlledValues
+          - type: single-step-form
+            show_label: true
+            label:
+              text: In Memory Storage
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/arbiter/properties/inMemoryStorage
+            elements:
+              - type: input
+                label:
+                  text: Scaling Factor Percentage
+                schema:
+                  $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/arbiter/properties/inMemoryStorage/properties/scalingFactorPercentage
+              - type: input
+                label:
+                  text: Usage Threshold Percentage
+                schema:
+                  $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/arbiter/properties/inMemoryStorage/properties/usageThresholdPercentage
+          label:
+            text: arbiter
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/arbiter
+          show_label: true
+          type: single-step-form
+        - elements:
+          - computed: setTrigger
+            label:
+              text: Trigger
+            options:
+            - "On"
+            - "Off"
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/hidden/properties/trigger
+            type: select
+          - label:
+              text: Pod LifeTime Threshold
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/hidden/properties/podLifeTimeThreshold
+            type: input
+          - label:
+              text: Resource Diff Percentage
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/hidden/properties/resourceDiffPercentage
+            type: input
+          - elements:
+            - label:
+                text: cpu
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/hidden/properties/minAllowed/properties/cpu
+              type: input
+            - label:
+                text: memory
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/hidden/properties/minAllowed/properties/memory
+              type: input
+            label:
+              text: Min Allowed
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/hidden/properties/minAllowed
+            show_label: true
+            type: single-step-form
+          - elements:
+            - label:
+                text: cpu
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/hidden/properties/maxAllowed/properties/cpu
+              type: input
+            - label:
+                text: memory
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/hidden/properties/maxAllowed/properties/memory
+              type: input
+            label:
+              text: Max Allowed
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/hidden/properties/maxAllowed
+            show_label: true
+            type: single-step-form
+          - fetch: setControlledResources|compute/hidden
+            label:
+              text: Controlled Resources
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/hidden/properties/controlledResources
+            type: multiselect
+          - type: select
+            options:
+              - text: Requests And Limits
+                value: RequestsAndLimits
+              - text: Requests Only
+                value: RequestsOnly
+            label:
+              text: Container Controlled Values
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/hidden/properties/containerControlledValues
+          - type: single-step-form
+            show_label: true
+            label:
+              text: In Memory Storage
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/hidden/properties/inMemoryStorage
+            elements:
+              - type: input
+                label:
+                  text: Scaling Factor Percentage
+                schema:
+                  $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/hidden/properties/inMemoryStorage/properties/scalingFactorPercentage
+              - type: input
+                label:
+                  text: Usage Threshold Percentage
+                schema:
+                  $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/hidden/properties/inMemoryStorage/properties/usageThresholdPercentage
+          label:
+            text: hidden
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/hidden
           show_label: true
           type: single-step-form
         - elements:
@@ -1734,21 +1981,51 @@ steps:
               $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/mongos/properties/maxAllowed
             show_label: true
             type: single-step-form
-          - fetch: setControlledResources|mongos
+          - fetch: setControlledResources|compute/mongos
             label:
               text: Controlled Resources
             schema:
               $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/mongos/properties/controlledResources
             type: multiselect
+          - type: select
+            options:
+              - text: Requests And Limits
+                value: RequestsAndLimits
+              - text: Requests Only
+                value: RequestsOnly
+            label:
+              text: Container Controlled Values
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/mongos/properties/containerControlledValues
+          - type: single-step-form
+            show_label: true
+            label:
+              text: In Memory Storage
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/mongos/properties/inMemoryStorage
+            elements:
+              - type: input
+                label:
+                  text: Scaling Factor Percentage
+                schema:
+                  $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/mongos/properties/inMemoryStorage/properties/scalingFactorPercentage
+              - type: input
+                label:
+                  text: Usage Threshold Percentage
+                schema:
+                  $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/mongos/properties/inMemoryStorage/properties/usageThresholdPercentage
           label:
             text: mongos
           schema:
             $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/mongos
           show_label: true
           type: single-step-form
-        if: mongoTypeEqualsTo|sharded
         type: single-step-form
-      - elements:
+      - type: single-step-form
+        show_label: true
+        label:
+          text: NodeTopology
+        elements:
         - fetch: fetchNodeTopology
           label:
             text: Select NodeTopology
@@ -1767,12 +2044,8 @@ steps:
           schema:
             $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/scaleDownDiffPercentage
           type: input
-        label:
-          text: NodeTopology
         schema:
           $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/nodeTopology
-        show_label: true
-        type: single-step-form
       type: single-step-form
     - elements:  
       - type: single-step-form
@@ -1831,7 +2104,7 @@ steps:
       show_label: true
       type: single-step-form
     type: single-step-form
-  id: autoscaler
+  id: compute-autoscaler
   title: steps.10.label
 - form:
     discriminator:
@@ -1839,27 +2112,12 @@ steps:
         type: object
         default: {}
     elements:
-    - if: returnFalse
-      type: input
-      computed: getDbDetails
-    - elements:
-      - label:
-          text: Namespace
-        computed: setNamespace
-        schema:
-          $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/metadata/namespace        
-        type: input
-      - computed: setDbName
-        label:
-          text: Database Name
-        required: true
-        schema:
-          $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/databaseRef/properties/name
-        type: input
+    - computed: getDbDetails
       if: returnFalse
-      type: single-step-form
+      type: input
     - elements:
-      - elements:
+      - if: mongoTypeEqualsTo|standalone
+        elements:
         - computed: setTrigger
           label:
             text: Trigger
@@ -1897,7 +2155,7 @@ steps:
               type: input
             type: single-step-form
           label:
-            text: ScalingRules
+            text: Scaling Rules
           schema:
             $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/standalone/properties/scalingRules
           tableContents:
@@ -1915,18 +2173,23 @@ steps:
             typeOfValue: string
           type: single-step-form-array
         - label:
-            text: labels.upperBound
+            text: Scaling Threshold
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/standalone/properties/scalingThreshold
+          type: input
+        - label:
+            text: UpperBound
           schema:
             $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/standalone/properties/upperBound
           type: input
-        if: mongoTypeEqualsTo|standalone
         label:
           text: Standalone
         schema:
           $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/standalone
         show_label: true
         type: single-step-form
-      - elements:
+      - if: mongoTypeEqualsTo|replicaSet
+        elements:
         - computed: setTrigger
           label:
             text: labels.trigger
@@ -1982,18 +2245,23 @@ steps:
             typeOfValue: string
           type: single-step-form-array
         - label:
+            text: Scaling Threshold
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/replicaSet/properties/scalingThreshold
+          type: input
+        - label:
             text: labels.upperBound
           schema:
             $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/replicaSet/properties/upperBound
           type: input
-        if: mongoTypeEqualsTo|replicaSet
         label:
           text: ReplicaSet
         schema:
           $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/replicaSet
         show_label: true
         type: single-step-form
-      - elements:
+      - if: mongoTypeEqualsTo|sharded
+        elements:
         - elements:
           - computed: setTrigger
             label:
@@ -2126,7 +2394,6 @@ steps:
             $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/configServer
           show_label: true
           type: single-step-form
-        if: mongoTypeEqualsTo|sharded
         type: single-step-form
       type: single-step-form
     - elements:  
@@ -2186,6 +2453,6 @@ steps:
       show_label: true
       type: single-step-form
     type: single-step-form
-  id: autoscaler2
+  id: storage-autoscaler
   title: steps.11.label
 type: multi-step-form
