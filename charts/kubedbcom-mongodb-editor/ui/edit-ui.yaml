@@ -2109,8 +2109,8 @@ steps:
 - form:
     discriminator:
       dbDetails:
-        type: object
-        default: {}
+        type: boolean
+        default: false
     elements:
     - computed: getDbDetails
       if: returnFalse
@@ -2185,14 +2185,14 @@ steps:
         label:
           text: Standalone
         schema:
-          $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/standalone
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/standalone
         show_label: true
         type: single-step-form
       - if: mongoTypeEqualsTo|replicaSet
         elements:
         - computed: setTrigger
           label:
-            text: labels.trigger
+            text: Trigger
           options:
           - "On"
           - "Off"
@@ -2212,7 +2212,7 @@ steps:
           schema:
             $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/replicaSet/properties/usageThreshold
           type: input
-        - addFormLabel: labels.scalingRules
+        - addFormLabel: Scaling Rules
           element:
             elements:
             - label:
@@ -2250,14 +2250,14 @@ steps:
             $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/replicaSet/properties/scalingThreshold
           type: input
         - label:
-            text: labels.upperBound
+            text: UpperBound
           schema:
             $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/replicaSet/properties/upperBound
           type: input
         label:
           text: ReplicaSet
         schema:
-          $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/replicaSet
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/replicaSet
         show_label: true
         type: single-step-form
       - if: mongoTypeEqualsTo|sharded
@@ -2321,6 +2321,11 @@ steps:
               text: UpperBound
             schema:
               $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/shard/properties/upperBound
+            type: input
+          - label:
+              text: Scaling Threshold
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/shard/properties/scalingThreshold
             type: input
           label:
             text: Shard
@@ -2388,10 +2393,86 @@ steps:
             schema:
               $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/configServer/properties/upperBound
             type: input
+          - label:
+              text: Scaling Threshold
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/configServer/properties/scalingThreshold
+            type: input
           label:
             text: ConfigServer
           schema:
             $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/configServer
+          show_label: true
+          type: single-step-form
+        - elements:
+          - computed: setTrigger
+            label:
+              text: Trigger
+            options:
+            - "On"
+            - "Off"
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/hidden/properties/trigger
+            type: select
+          - label:
+              text: Expansion Mode
+            options:
+            - Online
+            - Offline
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/hidden/properties/expansionMode
+            type: select
+          - label:
+              text: Usage Threshold
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/hidden/properties/usageThreshold
+            type: input
+          - addFormLabel: Scaling Rules
+            element:
+              elements:
+              - label:
+                  text: Applies Upto
+                schema:
+                  $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/hidden/properties/scalingRules/items/properties/appliesUpto
+                type: input
+              - label:
+                  text: Threshold
+                schema:
+                  $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/hidden/properties/scalingRules/items/properties/threshold
+                type: input
+              type: single-step-form
+            label:
+              text: Scaling Rules
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/hidden/properties/scalingRules
+            tableContents:
+            - inTableColumn: true
+              label:
+                text: Applies Upto
+              path: appliesUpto
+              type: value
+              typeOfValue: string
+            - inTableColumn: true
+              label:
+                text: Threshold
+              path: threshold
+              type: value
+              typeOfValue: string
+            type: single-step-form-array
+          - label:
+              text: UpperBound
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/hidden/properties/upperBound
+            type: input
+          - label:
+              text: Scaling Threshold
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/hidden/properties/scalingThreshold
+            type: input
+          label:
+            text: Hidden
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/hidden
           show_label: true
           type: single-step-form
         type: single-step-form
