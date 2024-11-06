@@ -1463,29 +1463,36 @@ steps:
             element:
               elements:
               - label:
-                  text: labels.tolerations.effect
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/tolerations/items/properties/effect
-                type: input
-              - label:
                   text: labels.tolerations.key
                 schema:
                   $ref: schema#/properties/spec/properties/admin/properties/tolerations/items/properties/key
                 type: input
               - label:
                   text: labels.tolerations.operator
+                options:
+                - NoSchedule
+                - PreferNoSchedule
+                - NoExecute
                 schema:
                   $ref: schema#/properties/spec/properties/admin/properties/tolerations/items/properties/operator
-                type: input
-              - label:
-                  text: labels.tolerations.tolerationSeconds
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/tolerations/items/properties/tolerationSeconds
-                type: input
+                type: select
               - label:
                   text: labels.tolerations.value
                 schema:
                   $ref: schema#/properties/spec/properties/admin/properties/tolerations/items/properties/value
+                type: input
+              - label:
+                  text: labels.tolerations.effect
+                options:
+                - Exists
+                - Equal
+                schema:
+                  $ref: schema#/properties/spec/properties/admin/properties/tolerations/items/properties/effect
+                type: select
+              - label:
+                  text: labels.tolerations.tolerationSeconds
+                schema:
+                  $ref: schema#/properties/spec/properties/admin/properties/tolerations/items/properties/tolerationSeconds
                 type: input
               type: single-step-form
             label:
