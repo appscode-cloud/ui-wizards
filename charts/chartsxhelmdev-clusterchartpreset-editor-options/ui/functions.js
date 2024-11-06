@@ -94,10 +94,6 @@ function returnFalse() {
   return false
 }
 
-function returnTrue() {
-  return true
-}
-
 async function fetchJsons({ axios, itemCtx }) {
   let ui = {}
   let language = {}
@@ -360,7 +356,6 @@ return {
   FetchDbBundle,
   setTool,
   returnFalse,
-  returnTrue,
   fetchJsons,
   presetNameEqualsTo,
   fetchModes,
