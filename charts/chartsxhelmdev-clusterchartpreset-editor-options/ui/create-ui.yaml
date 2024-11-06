@@ -1335,51 +1335,6 @@ steps:
           type: single-step-form
         - elements:
           - label:
-              text: labels.backup.toggle
-            schema:
-              $ref: schema#/properties/spec/properties/admin/properties/backup/properties/toggle
-            type: switch
-          - label:
-              text: labels.backup.default
-            schema:
-              $ref: schema#/properties/spec/properties/admin/properties/backup/properties/default
-            type: switch
-          hideForm: true
-          label:
-            text: labels.backup.name
-          show_label: true
-          type: single-step-form
-        - elements:
-          - label:
-              text: labels.deletionPolicy.toggle
-            schema:
-              $ref: schema#/properties/spec/properties/admin/properties/deletionPolicy/properties/toggle
-            type: switch
-          - label:
-              text: labels.deletionPolicy.default
-            options:
-            - description: options.deletionPolicy.delete.description
-              text: options.deletionPolicy.delete.label
-              value: Delete
-            - description: options.deletionPolicy.halt.description
-              text: options.deletionPolicy.halt.label
-              value: Halt
-            - description: options.deletionPolicy.wipeOut.description
-              text: options.deletionPolicy.wipeOut.label
-              value: WipeOut
-            - description: options.deletionPolicy.doNotTerminate.description
-              text: options.deletionPolicy.doNotTerminate.label
-              value: DoNotTerminate
-            schema:
-              $ref: schema#/properties/spec/properties/admin/properties/deletionPolicy/properties/default
-            type: select
-          hideForm: true
-          label:
-            text: labels.deletionPolicy.name
-          show_label: true
-          type: single-step-form
-        - elements:
-          - label:
               text: labels.storageClass.toggle
             schema:
               $ref: schema#/properties/spec/properties/admin/properties/tls/properties/toggle
@@ -1415,22 +1370,6 @@ steps:
           hideForm: false
           label:
             text: labels.clusterIssuers.name
-          show_label: true
-          type: single-step-form
-        - elements:
-          - label:
-              text: labels.pointInTimeRecovery.toggle
-            schema:
-              $ref: schema#/properties/spec/properties/admin/properties/pointInTimeRecovery/properties/toggle
-            type: switch
-          - label:
-              text: labels.pointInTimeRecovery.default
-            schema:
-              $ref: schema#/properties/spec/properties/admin/properties/pointInTimeRecovery/properties/default
-            type: switch
-          hideForm: true
-          label:
-            text: labels.pointInTimeRecovery.name
           show_label: true
           type: single-step-form
         - elements:
@@ -1492,18 +1431,31 @@ steps:
           type: single-step-form
         - elements:
           - label:
-              text: labels.archiver.toggle
+              text: labels.deletionPolicy.toggle
             schema:
-              $ref: schema#/properties/spec/properties/admin/properties/archiver/properties/toggle
+              $ref: schema#/properties/spec/properties/admin/properties/deletionPolicy/properties/toggle
             type: switch
           - label:
-              text: labels.archiver.default
+              text: labels.deletionPolicy.default
+            options:
+            - description: options.deletionPolicy.delete.description
+              text: options.deletionPolicy.delete.label
+              value: Delete
+            - description: options.deletionPolicy.halt.description
+              text: options.deletionPolicy.halt.label
+              value: Halt
+            - description: options.deletionPolicy.wipeOut.description
+              text: options.deletionPolicy.wipeOut.label
+              value: WipeOut
+            - description: options.deletionPolicy.doNotTerminate.description
+              text: options.deletionPolicy.doNotTerminate.label
+              value: DoNotTerminate
             schema:
-              $ref: schema#/properties/spec/properties/admin/properties/archiver/properties/default
-            type: switch
+              $ref: schema#/properties/spec/properties/admin/properties/deletionPolicy/properties/default
+            type: select
           hideForm: true
           label:
-            text: labels.archiver.name
+            text: labels.deletionPolicy.name
           show_label: true
           type: single-step-form
         - elements:
@@ -1598,6 +1550,65 @@ steps:
           type: single-step-form
         - elements:
           - label:
+              text: labels.backup.toggle
+            schema:
+              $ref: schema#/properties/spec/properties/admin/properties/backup/properties/toggle
+            type: switch
+          - label:
+              text: labels.backup.default
+            schema:
+              $ref: schema#/properties/spec/properties/admin/properties/backup/properties/default
+            type: switch
+          hideForm: true
+          label:
+            text: labels.backup.name
+          show_label: true
+          type: single-step-form
+        - elements:
+          - label:
+              text: labels.pointInTimeRecovery.toggle
+            schema:
+              $ref: schema#/properties/spec/properties/admin/properties/pointInTimeRecovery/properties/toggle
+            type: switch
+          - label:
+              text: labels.pointInTimeRecovery.default
+            schema:
+              $ref: schema#/properties/spec/properties/admin/properties/pointInTimeRecovery/properties/default
+            type: switch
+          hideForm: true
+          label:
+            text: labels.pointInTimeRecovery.name
+          show_label: true
+          type: single-step-form
+        - elements:
+          - label:
+              text: labels.archiver.toggle
+            schema:
+              $ref: schema#/properties/spec/properties/admin/properties/archiver/properties/toggle
+            type: switch
+          - label:
+              text: labels.archiver.default
+            schema:
+              $ref: schema#/properties/spec/properties/admin/properties/archiver/properties/default
+            type: switch
+          hideForm: true
+          label:
+            text: labels.archiver.name
+          show_label: true
+          type: single-step-form
+        - elements:
+          - label:
+              text: labels.showPreview.toggle
+            schema:
+              $ref: schema#/properties/spec/properties/admin/properties/showPreview
+            type: switch
+          hideForm: true
+          label:
+            text: labels.showPreview.name
+          show_label: true
+          type: single-step-form
+        - elements:
+          - label:
               text: labels.leftPanel.showBackup
             schema:
               $ref: schema#/properties/spec/properties/admin/properties/leftPanel/properties/showBackup
@@ -1632,17 +1643,6 @@ steps:
             text: labels.leftPanel.name
           schema:
             $ref: schema#/properties/spec/properties/admin/properties/leftPanel
-          show_label: true
-          type: single-step-form
-        - elements:
-          - label:
-              text: labels.showPreview.toggle
-            schema:
-              $ref: schema#/properties/spec/properties/admin/properties/showPreview
-            type: switch
-          hideForm: true
-          label:
-            text: labels.showPreview.name
           show_label: true
           type: single-step-form
         if: isKubedbUiPreset
