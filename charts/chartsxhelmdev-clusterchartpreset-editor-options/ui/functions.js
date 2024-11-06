@@ -94,6 +94,11 @@ function returnFalse() {
   return false
 }
 
+function checkModeToggle({ getValue, model }, db) {
+  const toggle = getValue(model, `/spec/admin/databases/${db}/mode/toggle`)
+  if (toggle === undefined) return true
+}
+
 async function fetchJsons({ axios, itemCtx }) {
   let ui = {}
   let language = {}
@@ -335,9 +340,10 @@ function fetchModes({ commit }, db) {
   return arr
 }
 
-function setDefaultMode({}, db) {
+function setDefaultMode({ getValue, model }, db) {
+  const modelDef = getValue(model, `/spec/admin/databases/${db}/mode/default`)
   const def = modes[db]?.default || ''
-  return def
+  if (modelDef === undefined) return def
 }
 
 return {
@@ -356,6 +362,7 @@ return {
   FetchDbBundle,
   setTool,
   returnFalse,
+  checkModeToggle,
   fetchJsons,
   presetNameEqualsTo,
   fetchModes,
