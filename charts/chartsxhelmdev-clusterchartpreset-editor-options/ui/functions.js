@@ -346,6 +346,17 @@ function setDefaultMode({ getValue, model }, db) {
   if (modelDef === undefined) return def
 }
 
+function setStorageClass({ getValue, model, watchDependency, commit }) {
+  watchDependency('model#/spec/admin/storageClasses/available')
+  const classes = getValue(model, '/spec/admin/storageClasses/available')
+  if (classes.length === 1)
+    commit('wizard/model$update', {
+      path: '/spec/admin/storageClasses/default',
+      value: classes[0],
+      force: true,
+    })
+}
+
 return {
   getOptions,
   getNodeTopology,
@@ -369,4 +380,5 @@ return {
   availableModes,
   setDefaultMode,
   clearDefaultMode,
+  setStorageClass,
 }
