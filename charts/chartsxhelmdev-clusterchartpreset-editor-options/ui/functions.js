@@ -170,6 +170,14 @@ function clearDefaultVersion({ commit }, db) {
   })
 }
 
+function clearDefaultMode({ commit }, db) {
+  commit('wizard/model$update', {
+    path: `/spec/admin/databases/${db}/mode/default`,
+    value: '',
+    force: true,
+  })
+}
+
 function availableVersions({ getValue, model, watchDependency }, db) {
   watchDependency(`model#/spec/admin/databases/${db}/versions/available`)
   return getValue(model, `/spec/admin/databases/${db}/versions/available`)
@@ -358,4 +366,5 @@ return {
   fetchModes,
   availableModes,
   setDefaultMode,
+  clearDefaultMode,
 }
