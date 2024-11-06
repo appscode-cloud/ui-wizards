@@ -2450,7 +2450,7 @@ function showOpsRequestOptions({ model, getValue, watchDependency, storeGet, dis
   )
 }
 
-async function getDbDetails({ axios, storeGet, getValue, model, setDiscriminatorValue }) {
+async function getDbDetails({ axios, storeGet, getValue, model, setDiscriminatorValue, commit }) {
   const owner = storeGet('/route/params/user') || ''
   const cluster = storeGet('/route/params/cluster') || ''
   const namespace =
@@ -2464,17 +2464,16 @@ async function getDbDetails({ axios, storeGet, getValue, model, setDiscriminator
       )
       dbDetails = resp.data || {}
       setDiscriminatorValue('/dbDetails', true)
-      return dbDetails
     } catch (e) {
       console.log(e)
     }
   }
+
   commit('wizard/model$update', {
     path: `/resources/autoscalingKubedbComMongoDBAutoscaler/metadata/namespace`,
     value: namespace,
     force: true,
   })
-
   commit('wizard/model$update', {
     path: `/resources/autoscalingKubedbComMongoDBAutoscaler/spec/databaseRef/name`,
     value: name,
@@ -2482,9 +2481,13 @@ async function getDbDetails({ axios, storeGet, getValue, model, setDiscriminator
   })
 }
 
-async function mongoTypeEqualsTo({ watchDependency, getValue, commit, discriminator }, mongoType) {
+async function mongoTypeEqualsTo(
+  { watchDependency, getValue, commit, discriminator },
+  mongoType,
+  type,
+) {
   watchDependency('discriminator#/dbDetails')
-
+  autoscaleType = type
   const dbDetailsSuccess = getValue(discriminator, '/dbDetails')
 
   if (!dbDetailsSuccess) return false
