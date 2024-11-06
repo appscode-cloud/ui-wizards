@@ -50,7 +50,13 @@ type AdminOptions struct {
 	Deployment  DeploymentProfile  `json:"deployment"`
 	ClusterTier ClusterTierProfile `json:"clusterTier"`
 
-	ShowPreview bool `json:"showPreview"`
+	ShowPreview bool      `json:"showPreview"`
+	LeftPanel   LeftPanel `json:"leftPanel"`
+
+	// +optional
+	NodeSelector map[string]string `json:"nodeSelector"`
+	// +optional
+	Tolerations []core.Toleration `json:"tolerations"`
 
 	Databases      DatabasesProfile             `json:"databases"`
 	StorageClasses RequiredClusterScopedProfile `json:"storageClasses"`
@@ -62,7 +68,10 @@ type AdminOptions struct {
 	Monitoring Monitoring `json:"monitoring"`
 	Alert      Alert      `json:"alert"`
 
-	Archiver ToggleProfileOnBoolean `json:"archiver"`
+	DeletionPolicy      ToggleProfileOnString  `json:"deletionPolicy"`
+	Backup              ToggleProfileOnBoolean `json:"backup"`
+	Archiver            ToggleProfileOnBoolean `json:"archiver"`
+	PointInTimeRecovery ToggleProfileOnBoolean `json:"pointInTimeRecovery"`
 }
 
 // *** Machine-related starts *** //
@@ -106,6 +115,16 @@ type DatabasesProfile struct {
 
 type DatabaseProfile struct {
 	Versions RequiredClusterScopedProfile `json:"versions"`
+	Mode     RequiredClusterScopedProfile `json:"mode"`
+}
+
+type LeftPanel struct {
+	ShowInsights     bool `json:"showInsights"`
+	ShowVaultInfo    bool `json:"showVaultInfo"`
+	ShowOperations   bool `json:"showOperations"`
+	ShowBackup       bool `json:"showBackup"`
+	ShowBackupLegacy bool `json:"showBackupLegacy"`
+	ShowSecurity     bool `json:"showSecurity"`
 }
 
 type ClusterScopedProfile struct {
@@ -126,6 +145,11 @@ type NamespaceScopedProfile struct {
 	Available []ObjectReference `json:"available"`
 	Default   ObjectReference   `json:"default"`
 	Toggle    bool              `json:"toggle"`
+}
+
+type ToggleProfileOnString struct {
+	Default string `json:"default"`
+	Toggle  bool   `json:"toggle"`
 }
 
 type ToggleProfileOnBoolean struct {
