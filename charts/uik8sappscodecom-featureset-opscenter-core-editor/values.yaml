@@ -9,6 +9,37 @@ metadata:
     name: RELEASE-NAME
     namespace: default
 resources:
+  helmToolkitFluxcdIoHelmRelease_aceshifter: # +doc-gen:break
+    apiVersion: helm.toolkit.fluxcd.io/v2
+    kind: HelmRelease
+    metadata:
+      labels:
+        app.kubernetes.io/component: aceshifter
+      name: aceshifter
+      namespace: kubeops
+    spec:
+      chart:
+        spec:
+          chart: aceshifter
+          sourceRef:
+            kind: HelmRepository
+            name: appscode-charts-oci
+            namespace: kubeops
+          version: v2024.10.24
+      install:
+        crds: CreateReplace
+        createNamespace: true
+        remediation:
+          retries: -1
+      interval: 5m
+      releaseName: aceshifter
+      storageNamespace: kubeops
+      targetNamespace: kubeops
+      timeout: 30m
+      upgrade:
+        crds: CreateReplace
+        remediation:
+          retries: -1
   helmToolkitFluxcdIoHelmRelease_flux2: # +doc-gen:break
     apiVersion: helm.toolkit.fluxcd.io/v2
     kind: HelmRelease
@@ -73,7 +104,7 @@ resources:
             kind: HelmRepository
             name: appscode-charts-oci
             namespace: kubeops
-          version: v2024.8.21
+          version: v2024.10.24
       install:
         crds: CreateReplace
         createNamespace: true
@@ -104,7 +135,7 @@ resources:
             kind: HelmRepository
             name: appscode-charts-oci
             namespace: kubeops
-          version: v2024.9.13
+          version: v2024.10.7
       install:
         crds: CreateReplace
         createNamespace: true
@@ -135,7 +166,7 @@ resources:
             kind: HelmRepository
             name: appscode-charts-oci
             namespace: kubeops
-          version: v2024.8.21
+          version: v2024.10.24
       install:
         crds: CreateReplace
         createNamespace: true
