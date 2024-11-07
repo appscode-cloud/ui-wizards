@@ -53,17 +53,17 @@ steps:
           type: single-step-form
         - elements:
           - label:
-              text: nodeportRange
+              text: Nodeport Range
             schema:
               $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/envoy/properties/service/properties/nodeportRange
-            type: textarea
+            type: input
           - label:
-              text: portRange
+              text: Port Range
             schema:
               $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/envoy/properties/service/properties/portRange
-            type: textarea
+            type: input
           label:
-            text: Envoy
+            text: Envoy Service Ports
           show_label: true
           type: single-step-form
         - elements:
@@ -71,16 +71,6 @@ steps:
               text: Controller Name
             schema:
               $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/gateway/properties/config/properties/envoyGateway/properties/gateway/properties/controllerName
-            type: input
-          - label:
-              text: Logging Level
-            schema:
-              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/gateway/properties/config/properties/envoyGateway/properties/logging/properties/level/properties/default
-            type: input
-          - label:
-              text: Provider type
-            schema:
-              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/gateway/properties/config/properties/envoyGateway/properties/provider/properties/type
             type: input
           - label:
               text: enable Gateway Converter?
@@ -115,111 +105,112 @@ steps:
         - elements:
           - elements:
             - label:
-                text: Environment
+                text: Provider
+              options: 
+                - none
+                - external
+                - cloudflare
+                - route53
+                - cloudDNS
+                - azureDNS
               schema:
-                $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/infra/properties/dns/properties/auth/properties/azureDNS/properties/environment
-              type: input
-            - label:
-                text: Hosted Zone Name
-              schema:
-                $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/infra/properties/dns/properties/auth/properties/azureDNS/properties/hostedZoneName
-              type: input
-            - label:
-                text: Resource Group Name
-              schema:
-                $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/infra/properties/dns/properties/auth/properties/azureDNS/properties/resourceGroupName
-              type: input
-            - label:
-                text: Service Principal App ID
-              schema:
-                $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/infra/properties/dns/properties/auth/properties/azureDNS/properties/servicePrincipalAppID
-              type: input
-            - label:
-                text: Service Principal App Password
-              inputType: password 
-              schema:
-                $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/infra/properties/dns/properties/auth/properties/azureDNS/properties/servicePrincipalAppPassword
-              type: input
-            - label:
-                text: Subscription ID
-              schema:
-                $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/infra/properties/dns/properties/auth/properties/azureDNS/properties/subscriptionID
-              type: input
-            - label:
-                text: Tenant ID
-              schema:
-                $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/infra/properties/dns/properties/auth/properties/azureDNS/properties/tenantID
-              type: input
-            hideForm: true
+                $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/infra/properties/dns/properties/provider
+              type: select
+            - elements:
+              - label:
+                  text: Environment
+                schema:
+                  $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/infra/properties/dns/properties/auth/properties/azureDNS/properties/environment
+                type: input
+              - label:
+                  text: Hosted Zone Name
+                schema:
+                  $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/infra/properties/dns/properties/auth/properties/azureDNS/properties/hostedZoneName
+                type: input
+              - label:
+                  text: Resource Group Name
+                schema:
+                  $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/infra/properties/dns/properties/auth/properties/azureDNS/properties/resourceGroupName
+                type: input
+              - label:
+                  text: Service Principal App ID
+                schema:
+                  $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/infra/properties/dns/properties/auth/properties/azureDNS/properties/servicePrincipalAppID
+                type: input
+              - label:
+                  text: Service Principal App Password
+                inputType: password 
+                schema:
+                  $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/infra/properties/dns/properties/auth/properties/azureDNS/properties/servicePrincipalAppPassword
+                type: input
+              - label:
+                  text: Subscription ID
+                schema:
+                  $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/infra/properties/dns/properties/auth/properties/azureDNS/properties/subscriptionID
+                type: input
+              - label:
+                  text: Tenant ID
+                schema:
+                  $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/infra/properties/dns/properties/auth/properties/azureDNS/properties/tenantID
+                type: input
+              label:
+                text: azureDNS
+              if: checkDnsProvider|azureDNS
+              type: single-step-form
+            - elements:
+              - label:
+                  text: GOOGLE PROJECT ID
+                schema:
+                  $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/infra/properties/dns/properties/auth/properties/cloudDNS/properties/GOOGLE_PROJECT_ID
+                type: input
+              - label:
+                  text: GOOGLE SERVICE ACCOUNT JSON KEY
+                schema:
+                  $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/infra/properties/dns/properties/auth/properties/cloudDNS/properties/GOOGLE_SERVICE_ACCOUNT_JSON_KEY
+                type: input
+              label:
+                text: cloudDNS
+              if: checkDnsProvider|cloudDNS
+              type: single-step-form
+            - elements:
+              - label:
+                  text: Base URL
+                schema:
+                  $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/infra/properties/dns/properties/auth/properties/cloudflare/properties/baseURL
+                type: input
+              - label:
+                  text: Token
+                schema:
+                  $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/infra/properties/dns/properties/auth/properties/cloudflare/properties/token
+                type: input
+              label:
+                text: cloudflare
+              if: checkDnsProvider|cloudflare
+              type: single-step-form
+            - elements:
+              - label:
+                  text: AWS Access Key ID
+                schema:
+                  $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/infra/properties/dns/properties/auth/properties/route53/properties/AWS_ACCESS_KEY_ID
+                type: input
+              - label:
+                  text: AWS Region
+                schema:
+                  $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/infra/properties/dns/properties/auth/properties/route53/properties/AWS_REGION
+                type: input
+              - label:
+                  text: AWS Secret Access Key
+                schema:
+                  $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/infra/properties/dns/properties/auth/properties/route53/properties/AWS_SECRET_ACCESS_KEY
+                type: input
+              label:
+                text: route53
+              if: checkDnsProvider|route53
+              type: single-step-form
             label:
-              text: Azure DNS
+              text: DNS
             show_label: true
             type: single-step-form
-          - elements:
-            - label:
-                text: GOOGLE PROJECT ID
-              schema:
-                $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/infra/properties/dns/properties/auth/properties/cloudDNS/properties/GOOGLE_PROJECT_ID
-              type: input
-            - label:
-                text: GOOGLE SERVICE ACCOUNT JSON KEY
-              schema:
-                $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/infra/properties/dns/properties/auth/properties/cloudDNS/properties/GOOGLE_SERVICE_ACCOUNT_JSON_KEY
-              type: input
-            hideForm: true
-            label:
-              text: Cloud DNS
-            show_label: true
-            type: single-step-form
-          - elements:
-            - label:
-                text: Base URL
-              schema:
-                $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/infra/properties/dns/properties/auth/properties/cloudflare/properties/baseURL
-              type: input
-            - label:
-                text: Token
-              schema:
-                $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/infra/properties/dns/properties/auth/properties/cloudflare/properties/token
-              type: input
-            hideForm: true
-            label:
-              text: Cloud Flare
-            show_label: true
-            type: single-step-form
-          - elements:
-            - label:
-                text: AWS Access Key ID
-              schema:
-                $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/infra/properties/dns/properties/auth/properties/route53/properties/AWS_ACCESS_KEY_ID
-              type: input
-            - label:
-                text: AWS Region
-              schema:
-                $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/infra/properties/dns/properties/auth/properties/route53/properties/AWS_REGION
-              type: input
-            - label:
-                text: AWS Secret Access Key
-              schema:
-                $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/infra/properties/dns/properties/auth/properties/route53/properties/AWS_SECRET_ACCESS_KEY
-              type: input
-            hideForm: true
-            label:
-              text: Route53
-            show_label: true
-            type: single-step-form
-          - label:
-              text: Provider
-            options: 
-              - none
-              - external
-              - cloudflare
-              - route53
-              - cloudDNS
-              - azureDNS
-            schema:
-              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/infra/properties/dns/properties/provider
-            type: select
           - label:
               text: Host
             schema:
@@ -233,73 +224,74 @@ steps:
             schema:
               $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/infra/properties/hostType
             type: select
-          - label:
-              text: Email
-            inputType: Email
-            schema:
-              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/infra/properties/tls/properties/acme/properties/email
-            type: input
-          - label:
-              text: Solver
-            options:
-              - Gateway
-              - Ingress
-            schema:
-              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/infra/properties/tls/properties/acme/properties/solver
-            type: select
-          - label:
-              text: caCert
-            schema:
-              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/infra/properties/tls/properties/ca/properties/cert
-            type: input
-          - label:
-              text: caKey
-            schema:
-              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/infra/properties/tls/properties/ca/properties/key
-            type: input
-          - label:
-              text: certificateCert
-            schema:
-              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/infra/properties/tls/properties/certificate/properties/cert
-            type: input
-          - label:
-              text: certificateKey
-            schema:
-              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/infra/properties/tls/properties/certificate/properties/key
-            type: input
-          - label:
-              text: Issuer
-            options:
-              - ca
-              - letsencrypt
-              - letsencrypt-staging
-              - external
-            schema:
-              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/infra/properties/tls/properties/issuer
-            type: select
-          - label:
-              text: Keystore
-            inputType: byte
-            schema:
-              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/infra/properties/tls/properties/jks/properties/keystore
-            type: input
-          - label:
-              text: Password
-            inputType: password
-            schema:
-              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/infra/properties/tls/properties/jks/properties/password
-            type: input
-          - label:
-              text: Truststore
-            inputType: byte
-            schema:
-              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/infra/properties/tls/properties/jks/properties/truststore
-            type: input
+          - elements:
+            - label:
+                text: Issuer
+              options:
+                - ca
+                - letsencrypt
+                - letsencrypt-staging
+                - external
+              schema:
+                $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/infra/properties/tls/properties/issuer
+              type: select
+            - elements:
+              - label:
+                  text: Email
+                inputType: Email
+                schema:
+                  $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/infra/properties/tls/properties/acme/properties/email
+                type: input
+              - label:
+                  text: Solver
+                options:
+                  - Gateway
+                  - Ingress
+                schema:
+                  $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/infra/properties/tls/properties/acme/properties/solver
+                type: select
+              label:
+                text: acme
+              if: checkIssuer|letsencrypt
+              type: single-step-form
+            - elements:
+              - label:
+                  text: caCert
+                schema:
+                  $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/infra/properties/tls/properties/ca/properties/cert
+                type: input
+              - label:
+                  text: caKey
+                schema:
+                  $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/infra/properties/tls/properties/ca/properties/key
+                type: input
+              label:
+                text: ca
+              if: checkIssuer|ca
+              type: single-step-form
+            - elements:
+              - label:
+                  text: certificateCert
+                schema:
+                  $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/infra/properties/tls/properties/certificate/properties/cert
+                type: input
+              - label:
+                  text: certificateKey
+                schema:
+                  $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/infra/properties/tls/properties/certificate/properties/key
+                type: input
+              label:
+                text: certificate
+              if: checkIssuer|external
+              type: single-step-form
+            label:
+              text: TLS
+            show_label: true
+            type: single-step-form
           label:
             text: Infra
           show_label: true
           type: single-step-form
-        if: isServiceGatewaySelected
         type: single-step-form
       type: single-step-form
     type: single-step-form

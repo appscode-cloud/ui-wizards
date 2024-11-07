@@ -378,6 +378,28 @@ function isServiceGatewaySelected({ watchDependency, discriminator, getValue }) 
   else return false
 }
 
+function checkDnsProvider({ watchDependency, model, getValue }, provider) {
+  watchDependency(
+    'model#/resources/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/spec/values/infra/dns/provider',
+  )
+  const selectedProvider = getValue(
+    model,
+    '/resources/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/spec/values/infra/dns/provider',
+  )
+  return selectedProvider === provider
+}
+
+function checkIssuer({ watchDependency, model, getValue }, issuer) {
+  watchDependency(
+    'model#/resources/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/spec/values/infra/tls/issuer',
+  )
+  const selectedIssuer = getValue(
+    model,
+    '/resources/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/spec/values/infra/tls/issuer',
+  )
+  return selectedIssuer === issuer
+}
+
 return {
   hideThisElement,
   checkIsResourceLoaded,
@@ -392,4 +414,6 @@ return {
   setReleaseNameAndNamespaceAndInitializeValues,
   fetchFeatureSetOptions,
   isServiceGatewaySelected,
+  checkDnsProvider,
+  checkIssuer,
 }
