@@ -400,6 +400,15 @@ function checkIssuer({ watchDependency, model, getValue }, issuer) {
   return selectedIssuer === issuer
 }
 
+function fetchEnum({ elementSchema }) {
+  console.log(elementSchema)
+  return elementSchema.enum
+}
+
+function returnProvider() {
+  return 'none'
+}
+
 return {
   hideThisElement,
   checkIsResourceLoaded,
@@ -416,4 +425,6 @@ return {
   isServiceGatewaySelected,
   checkDnsProvider,
   checkIssuer,
+  returnProvider,
+  fetchEnum,
 }

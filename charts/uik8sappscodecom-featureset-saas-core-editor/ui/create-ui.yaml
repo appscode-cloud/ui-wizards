@@ -106,13 +106,8 @@ steps:
           - elements:
             - label:
                 text: Provider
-              options: 
-                - none
-                - external
-                - cloudflare
-                - route53
-                - cloudDNS
-                - azureDNS
+              computed: returnProvider
+              fetch: fetchEnum
               schema:
                 $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/infra/properties/dns/properties/provider
               type: select
@@ -121,37 +116,44 @@ steps:
                   text: Environment
                 schema:
                   $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/infra/properties/dns/properties/auth/properties/azureDNS/properties/environment
+                required: true  
                 type: input
               - label:
                   text: Hosted Zone Name
                 schema:
                   $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/infra/properties/dns/properties/auth/properties/azureDNS/properties/hostedZoneName
+                required: true
                 type: input
               - label:
                   text: Resource Group Name
                 schema:
                   $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/infra/properties/dns/properties/auth/properties/azureDNS/properties/resourceGroupName
+                required: true
                 type: input
               - label:
                   text: Service Principal App ID
                 schema:
                   $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/infra/properties/dns/properties/auth/properties/azureDNS/properties/servicePrincipalAppID
+                required: true
                 type: input
               - label:
                   text: Service Principal App Password
                 inputType: password 
                 schema:
                   $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/infra/properties/dns/properties/auth/properties/azureDNS/properties/servicePrincipalAppPassword
+                required: true
                 type: input
               - label:
                   text: Subscription ID
                 schema:
                   $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/infra/properties/dns/properties/auth/properties/azureDNS/properties/subscriptionID
+                required: true
                 type: input
               - label:
                   text: Tenant ID
                 schema:
                   $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/infra/properties/dns/properties/auth/properties/azureDNS/properties/tenantID
+                required: true
                 type: input
               label:
                 text: azureDNS
@@ -162,11 +164,13 @@ steps:
                   text: GOOGLE PROJECT ID
                 schema:
                   $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/infra/properties/dns/properties/auth/properties/cloudDNS/properties/GOOGLE_PROJECT_ID
+                required: true
                 type: input
               - label:
                   text: GOOGLE SERVICE ACCOUNT JSON KEY
                 schema:
                   $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/infra/properties/dns/properties/auth/properties/cloudDNS/properties/GOOGLE_SERVICE_ACCOUNT_JSON_KEY
+                required: true
                 type: input
               label:
                 text: cloudDNS
@@ -177,11 +181,13 @@ steps:
                   text: Base URL
                 schema:
                   $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/infra/properties/dns/properties/auth/properties/cloudflare/properties/baseURL
+                required: true
                 type: input
               - label:
                   text: Token
                 schema:
                   $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/infra/properties/dns/properties/auth/properties/cloudflare/properties/token
+                required: true
                 type: input
               label:
                 text: cloudflare
@@ -192,16 +198,19 @@ steps:
                   text: AWS Access Key ID
                 schema:
                   $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/infra/properties/dns/properties/auth/properties/route53/properties/AWS_ACCESS_KEY_ID
+                required: true
                 type: input
               - label:
                   text: AWS Region
                 schema:
                   $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/infra/properties/dns/properties/auth/properties/route53/properties/AWS_REGION
+                required: true
                 type: input
               - label:
                   text: AWS Secret Access Key
                 schema:
                   $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/infra/properties/dns/properties/auth/properties/route53/properties/AWS_SECRET_ACCESS_KEY
+                required: true
                 type: input
               label:
                 text: route53
@@ -218,20 +227,14 @@ steps:
             type: input
           - label:
               text: Host Type
-            options:
-              - domain
-              - ip
+            fetch: fetchEnum
             schema:
               $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/infra/properties/hostType
             type: select
           - elements:
             - label:
                 text: Issuer
-              options:
-                - ca
-                - letsencrypt
-                - letsencrypt-staging
-                - external
+              fetch: fetchEnum
               schema:
                 $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/infra/properties/tls/properties/issuer
               type: select
@@ -241,14 +244,14 @@ steps:
                 inputType: Email
                 schema:
                   $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/infra/properties/tls/properties/acme/properties/email
+                required: true
                 type: input
               - label:
                   text: Solver
-                options:
-                  - Gateway
-                  - Ingress
+                fetch: fetchEnum
                 schema:
                   $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/infra/properties/tls/properties/acme/properties/solver
+                required: true
                 type: select
               label:
                 text: acme
@@ -259,11 +262,13 @@ steps:
                   text: caCert
                 schema:
                   $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/infra/properties/tls/properties/ca/properties/cert
+                required: true
                 type: input
               - label:
                   text: caKey
                 schema:
                   $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/infra/properties/tls/properties/ca/properties/key
+                required: true
                 type: input
               label:
                 text: ca
@@ -274,11 +279,13 @@ steps:
                   text: certificateCert
                 schema:
                   $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/infra/properties/tls/properties/certificate/properties/cert
+                required: true
                 type: input
               - label:
                   text: certificateKey
                 schema:
                   $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/infra/properties/tls/properties/certificate/properties/key
+                required: true
                 type: input
               label:
                 text: certificate
