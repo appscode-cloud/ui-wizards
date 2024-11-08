@@ -371,6 +371,44 @@ function checkIsResourceLoaded({ commit, storeGet, watchDependency, getValue, di
   }
 }
 
+function isServiceGatewaySelected({ watchDependency, discriminator, getValue }) {
+  watchDependency('discriminator#/enabledFeatures')
+  const enabledFeatures = getValue(discriminator, '/enabledFeatures')
+  if (enabledFeatures.find((service) => service === 'service-gateway-presets')) return true
+  else return false
+}
+
+function checkDnsProvider({ watchDependency, model, getValue }, provider) {
+  watchDependency(
+    'model#/resources/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/spec/values/infra/dns/provider',
+  )
+  const selectedProvider = getValue(
+    model,
+    '/resources/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/spec/values/infra/dns/provider',
+  )
+  return selectedProvider === provider
+}
+
+function checkIssuer({ watchDependency, model, getValue }, issuer) {
+  watchDependency(
+    'model#/resources/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/spec/values/infra/tls/issuer',
+  )
+  const selectedIssuer = getValue(
+    model,
+    '/resources/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/spec/values/infra/tls/issuer',
+  )
+  return selectedIssuer === issuer
+}
+
+function fetchEnum({ elementSchema }) {
+  console.log(elementSchema)
+  return elementSchema.enum
+}
+
+function returnProvider() {
+  return 'none'
+}
+
 return {
   hideThisElement,
   checkIsResourceLoaded,
@@ -384,4 +422,9 @@ return {
   returnFalse,
   setReleaseNameAndNamespaceAndInitializeValues,
   fetchFeatureSetOptions,
+  isServiceGatewaySelected,
+  checkDnsProvider,
+  checkIssuer,
+  returnProvider,
+  fetchEnum,
 }
