@@ -7,8 +7,8 @@
 ```bash
 $ helm repo add appscode-charts-oci https://bundles.byte.builders/ui/
 $ helm repo update
-$ helm search repo appscode-charts-oci/policy-poddisruptionbudget-editor --version=v0.9.0
-$ helm upgrade -i policy-poddisruptionbudget-editor appscode-charts-oci/policy-poddisruptionbudget-editor -n default --create-namespace --version=v0.9.0
+$ helm search repo appscode-charts-oci/policy-poddisruptionbudget-editor --version=v0.10.0
+$ helm upgrade -i policy-poddisruptionbudget-editor appscode-charts-oci/policy-poddisruptionbudget-editor -n default --create-namespace --version=v0.10.0
 ```
 
 ## Introduction
@@ -24,7 +24,7 @@ This chart deploys a PodDisruptionBudget Editor on a [Kubernetes](http://kuberne
 To install/upgrade the chart with the release name `policy-poddisruptionbudget-editor`:
 
 ```bash
-$ helm upgrade -i policy-poddisruptionbudget-editor appscode-charts-oci/policy-poddisruptionbudget-editor -n default --create-namespace --version=v0.9.0
+$ helm upgrade -i policy-poddisruptionbudget-editor appscode-charts-oci/policy-poddisruptionbudget-editor -n default --create-namespace --version=v0.10.0
 ```
 
 The command deploys a PodDisruptionBudget Editor on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
@@ -56,12 +56,12 @@ The following table lists the configurable parameters of the `policy-poddisrupti
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm upgrade -i`. For example:
 
 ```bash
-$ helm upgrade -i policy-poddisruptionbudget-editor appscode-charts-oci/policy-poddisruptionbudget-editor -n default --create-namespace --version=v0.9.0 --set apiVersion=policy/v1
+$ helm upgrade -i policy-poddisruptionbudget-editor appscode-charts-oci/policy-poddisruptionbudget-editor -n default --create-namespace --version=v0.10.0 --set apiVersion=policy/v1
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
 installing the chart. For example:
 
 ```bash
-$ helm upgrade -i policy-poddisruptionbudget-editor appscode-charts-oci/policy-poddisruptionbudget-editor -n default --create-namespace --version=v0.9.0 --values values.yaml
+$ helm upgrade -i policy-poddisruptionbudget-editor appscode-charts-oci/policy-poddisruptionbudget-editor -n default --create-namespace --version=v0.10.0 --values values.yaml
 ```
