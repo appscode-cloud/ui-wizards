@@ -133,7 +133,7 @@ steps:
               $ref: model#/metadata/resource/name
             version:
               $ref: model#/metadata/resource/version
-          path: ${domain}/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/mongodbopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=HorizontalScaling
+          path: ${domain}/console/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/mongodbopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=HorizontalScaling
       - computed: setDatabaseMode
         disabled: true
         hasDescription: true
@@ -299,7 +299,7 @@ steps:
             $ref: model#/metadata/resource/name
           version:
             $ref: model#/metadata/resource/version
-        path: ${domain}/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/mongodbopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=ReconfigureTLS
+        path: ${domain}/console/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/mongodbopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=ReconfigureTLS
     - computed: isValueExistInModel|/resources/kubedbComMongoDB/spec/tls
       disabled: true
       label:
@@ -1087,6 +1087,11 @@ steps:
           type: reusable-element
         if: showCustomizeExporterSection
         type: single-step-form
+      - computed: setMetadata
+        if: returnFalse
+        schema:
+          $ref: schema#/properties/metadata/properties/name
+        type: input
       if: showMonitoringSection
       type: single-step-form
     type: single-step-form
@@ -1225,7 +1230,7 @@ steps:
             $ref: model#/metadata/resource/name
           version:
             $ref: model#/metadata/resource/version
-        path: ${domain}/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/mongodbopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=Reconfigure
+        path: ${domain}/console/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/mongodbopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=Reconfigure
     - disabled: true
       elements:
       - discriminator:
