@@ -4,6 +4,52 @@
   {{- $res = get (get $machines .Values.spec.podResources.machine) "resources" }}
 {{- end }}
 
+{{- define "common.placement" -}}
+
+{{- if .Values.spec.admin.clusterTier.placement.default }}
+podPlacementPolicy:
+  name: {{ .Values.spec.admin.clusterTier.placement.default }}
+{{- end }}
+
+{{- if or .Values.spec.admin.nodeSelector (eq .Values.spec.admin.deployment.default "Dedicated") }}
+nodeSelector:
+{{- if .Values.spec.admin.nodeSelector }}
+{{- toYaml .Values.spec.admin.nodeSelector | nindent 2 }}
+{{- end }}
+{{- if eq .Values.spec.admin.deployment.default "Dedicated" }}
+  app: pgpools.kubedb.com
+  instance: {{ include "kubedbcom-pgpool-editor-options.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  nodepool: {{ .Values.spec.admin.clusterTier.nodeTopology.default }}
+{{- end }}
+{{- end }}
+
+{{- if or .Values.spec.admin.tolerations (eq .Values.spec.admin.deployment.default "Dedicated") }}
+tolerations:
+{{- if .Values.spec.admin.tolerations }}
+{{- toYaml .Values.spec.admin.tolerations | nindent 2 }}
+{{- end }}
+{{- if eq .Values.spec.admin.deployment.default "Dedicated" }}
+  - key: app
+    operator: "Equal"
+    value: "pgpools.kubedb.com"
+    effect: "NoSchedule"
+  - key: instance
+    operator: "Equal"
+    value: {{ include "kubedbcom-pgpool-editor-options.fullname" . }}
+    effect: "NoSchedule"
+  - key: namespace
+    operator: "Equal"
+    value: {{ .Release.Namespace }}
+    effect: "NoSchedule"
+  - key: nodepool
+    operator: "Equal"
+    value: {{ .Values.spec.admin.clusterTier.nodeTopology.default }}
+    effect: "NoSchedule"
+{{- end }}
+{{- end }}
+{{- end }}
+
 apiVersion: kubedb.com/v1alpha2
 kind: Pgpool
 metadata:
@@ -28,34 +74,7 @@ spec:
         - name: pgpool
           resources:
             {{- toYaml $res | nindent 12 }}
-      {{- if .Values.spec.admin.clusterTier.placement.default }}
-      podPlacementPolicy:
-        name: {{ .Values.spec.admin.clusterTier.placement.default }}
-      {{- end }}
-      {{- if eq .Values.spec.admin.deployment.default "Dedicated" }}
-      nodeSelector:
-        app: pgpools.kubedb.com
-        instance: {{ include "kubedbcom-pgpool-editor-options.fullname" . }}
-        namespace: {{ .Release.Namespace }}
-        nodepool: {{ .Values.spec.admin.clusterTier.nodeTopology.default }}
-      tolerations:
-        - key: app
-          operator: "Equal"
-          value: "pgpools.kubedb.com"
-          effect: "NoSchedule"
-        - key: instance
-          operator: "Equal"
-          value: {{ include "kubedbcom-pgpool-editor-options.fullname" . }}
-          effect: "NoSchedule"
-        - key: namespace
-          operator: "Equal"
-          value: {{ .Release.Namespace }}
-          effect: "NoSchedule"
-        - key: nodepool
-          operator: "Equal"
-          value: {{ .Values.spec.admin.clusterTier.nodeTopology.default }}
-          effect: "NoSchedule"
-      {{- end }}
+      {{- include "common.placement" . | nindent 6 }}
   deletionPolicy: {{ .Values.spec.deletionPolicy }}
 {{- if .Values.spec.authSecret.name }}
   authSecret:
