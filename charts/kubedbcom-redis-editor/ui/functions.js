@@ -30,6 +30,23 @@ async function fetchJsons({ axios, itemCtx }) {
   }
 }
 
+function setMetadata({ storeGet, mode, commit }) {
+  const dbname = storeGet('/route/params/name') || ''
+  const namespace = storeGet('/route/query/namespace') || ''
+  if (mode === 'standalone-step') {
+    commit('wizard/model$update', {
+      path: '/metadata/release/name',
+      value: dbname,
+      force: true,
+    })
+    commit('wizard/model$update', {
+      path: '/metadata/release/namespace',
+      value: namespace,
+      force: true,
+    })
+  }
+}
+
 function disableLableChecker({ itemCtx }) {
   const { key } = itemCtx
   if (key.startsWith('app.kubernetes.io') || key.includes('helm')) return true
@@ -1857,13 +1874,12 @@ function getOpsRequestUrl({ storeGet, model, getValue, mode }, reqType) {
   const namespace = getValue(model, '/metadata/release/namespace')
   const resource = getValue(model, '/metadata/resource/name')
   const version = getValue(model, '/metadata/resource/version')
-  const routeRootPath = storeGet('/route/path')
-  const pathPrefix = `${domain}${routeRootPath}`
+  const pathPrefix = `${domain}${window.location.pathname}`
 
   if (mode === 'standalone-step')
     return `${pathPrefix}?namespace=${namespace}&applyAction=create-opsrequest-${reqType.toLowerCase()}`
   else
-    return `${domain}/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/redisopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=VerticalScaling`
+    return `${domain}/console/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/redisopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=VerticalScaling`
 }
 
 function getCreateNameSpaceUrl({ model, getValue, storeGet }) {
@@ -2095,6 +2111,7 @@ function getDefaultSchedule(
 }
 
 return {
+  setMetadata,
   setInitSchedule,
   fetchNames,
   fetchNamespaces,
