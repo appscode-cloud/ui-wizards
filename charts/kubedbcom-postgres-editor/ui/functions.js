@@ -1782,12 +1782,12 @@ function getOpsRequestUrl({ storeGet, model, getValue, mode }, reqType) {
   const resource = getValue(model, '/metadata/resource/name')
   const version = getValue(model, '/metadata/resource/version')
   const routeRootPath = storeGet('/route/path')
-  const pathPrefix = `${domain}${routeRootPath}`
+  const pathPrefix = `${domain}${window.location.pathname}`
 
   if (mode === 'standalone-step')
     return `${pathPrefix}?namespace=${namespace}&applyAction=create-opsrequest-${reqType.toLowerCase()}`
   else
-    return `${domain}/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/postgresopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=VerticalScaling`
+    return `${domain}/console/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/postgresopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=VerticalScaling`
 }
 
 function getCreateNameSpaceUrl({ model, getValue, storeGet }) {
@@ -2009,7 +2009,25 @@ function getDefaultSchedule({ getValue, watchDependency, model }, modelPath) {
   return session[0].scheduler.schedule
 }
 
+function setMetadata({ storeGet, mode, commit }) {
+  const dbname = storeGet('/route/params/name') || ''
+  const namespace = storeGet('/route/query/namespace') || ''
+  if (mode === 'standalone-step') {
+    commit('wizard/model$update', {
+      path: '/metadata/release/name',
+      value: dbname,
+      force: true,
+    })
+    commit('wizard/model$update', {
+      path: '/metadata/release/namespace',
+      value: namespace,
+      force: true,
+    })
+  }
+}
+
 return {
+  setMetadata,
   setInitSchedule,
   fetchNames,
   fetchNamespaces,
