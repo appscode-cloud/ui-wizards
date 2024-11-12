@@ -68,23 +68,13 @@ steps:
           type: single-step-form
         - elements:
           - label:
-              text: Controller Name
-            schema:
-              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/gateway/properties/config/properties/envoyGateway/properties/gateway/properties/controllerName
-            type: input
+              text: Envoy Gateway
+            type: label-element
           - label:
               text: enable Gateway Converter?
             schema:
               $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/gateway/properties/gateway-converter/properties/enabled
             type: switch
-          - label:
-              text: Kubernetes Cluster Domain
-            schema:
-              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/gateway/properties/kubernetesClusterDomain
-            type: input
-          label:
-            text: Envoy Gateway
-          show_label: true
           type: single-step-form
         - elements:
           - label:
@@ -263,13 +253,13 @@ steps:
                 schema:
                   $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/infra/properties/tls/properties/ca/properties/cert
                 required: true
-                type: input
+                type: textarea
               - label:
                   text: caKey
                 schema:
                   $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/infra/properties/tls/properties/ca/properties/key
                 required: true
-                type: input
+                type: textarea
               label:
                 text: ca
               if: checkIssuer|ca
@@ -280,13 +270,13 @@ steps:
                 schema:
                   $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/infra/properties/tls/properties/certificate/properties/cert
                 required: true
-                type: input
+                type: textarea
               - label:
                   text: certificateKey
                 schema:
                   $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/infra/properties/tls/properties/certificate/properties/key
                 required: true
-                type: input
+                type: textarea
               label:
                 text: certificate
               if: checkIssuer|external
@@ -299,6 +289,17 @@ steps:
             text: Infra
           show_label: true
           type: single-step-form
+        - elements:
+          - label:
+              text: Skip GatewayPreset
+            type: label-element
+          - label:
+              text: Skip creating GatewayPreset ?
+            schema:
+              $ref: schema#/properties/resources/properties/helmToolkitFluxcdIoHelmRelease_service_gateway_presets/properties/spec/properties/values/properties/skipGatewayPreset
+            type: switch
+          type: single-step-form
+        if: isServiceGatewaySelected
         type: single-step-form
       type: single-step-form
     type: single-step-form
