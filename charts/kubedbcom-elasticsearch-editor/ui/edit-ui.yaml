@@ -146,7 +146,7 @@ steps:
             $ref: model#/metadata/resource/name
           version:
             $ref: model#/metadata/resource/version
-        path: ${domain}/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/elasticsearchopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations
+        path: ${domain}/console/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/elasticsearchopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations
     - computed: setDatabaseMode
       disabled: true
       hasDescription: true
@@ -638,7 +638,7 @@ steps:
             $ref: model#/metadata/resource/name
           version:
             $ref: model#/metadata/resource/version
-        path: ${domain}/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/elasticsearchopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=ReconfigureTLS
+        path: ${domain}/console/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/elasticsearchopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=ReconfigureTLS
     - computed: isValueExistInModel|/resources/kubedbComMariaDB/spec/tls
       disabled: true
       label:
@@ -1323,6 +1323,9 @@ steps:
           type: reusable-element
         if: showCustomizeExporterSection
         type: single-step-form
+      - computed: setMetadata
+        if: returnFalse
+        type: input
       if: showMonitoringSection
       type: single-step-form
     type: single-step-form

@@ -688,8 +688,7 @@ function getOpsRequestUrl({ storeGet, model, getValue, mode }, reqType) {
   const namespace = getValue(model, '/metadata/release/namespace')
   const resource = getValue(model, '/metadata/resource/name')
   const version = getValue(model, '/metadata/resource/version')
-  const routeRootPath = storeGet('/route/path')
-  const pathPrefix = `${domain}${routeRootPath}`
+  const pathPrefix = `${domain}${window.location.pathname}`
 
   if (mode === 'standalone-step')
     return `${pathPrefix}?namespace=${namespace}&applyAction=create-opsrequest-${reqType.toLowerCase()}`
@@ -737,7 +736,25 @@ function isVariantAvailable({ storeGet }) {
   return variant ? true : false
 }
 
+function setMetadata({ storeGet, mode, commit }) {
+  const dbname = storeGet('/route/params/name') || ''
+  const namespace = storeGet('/route/query/namespace') || ''
+  if (mode === 'standalone-step') {
+    commit('wizard/model$update', {
+      path: '/metadata/release/name',
+      value: dbname,
+      force: true,
+    })
+    commit('wizard/model$update', {
+      path: '/metadata/release/namespace',
+      value: namespace,
+      force: true,
+    })
+  }
+}
+
 return {
+  setMetadata,
   isVariantAvailable,
   fetchJsons,
   disableLableChecker,
