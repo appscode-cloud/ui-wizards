@@ -373,8 +373,8 @@ function checkIsResourceLoaded({ commit, storeGet, watchDependency, getValue, di
 
 function isServiceGatewaySelected({ watchDependency, discriminator, getValue }) {
   watchDependency('discriminator#/enabledFeatures')
-  const enabledFeatures = getValue(discriminator, '/enabledFeatures')
-  if (enabledFeatures.find((service) => service === 'service-gateway-presets')) return true
+  const enabledFeatures = getValue(discriminator, '/enabledFeatures') || []
+  if (enabledFeatures?.find((service) => service === 'service-gateway-presets')) return true
   else return false
 }
 
@@ -401,7 +401,6 @@ function checkIssuer({ watchDependency, model, getValue }, issuer) {
 }
 
 function fetchEnum({ elementSchema }) {
-  console.log(elementSchema)
   return elementSchema.enum
 }
 
