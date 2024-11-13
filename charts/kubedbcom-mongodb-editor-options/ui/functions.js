@@ -277,6 +277,21 @@ const machines = {
   },
 }
 
+const modeDetails = {
+  Standalone: {
+    description: 'Single node MongoDB without high availability and sharding.',
+    text: 'Standalone',
+  },
+  Sharded: {
+    description: 'MongoDB sharded cluster for high performance and high availability.',
+    text: 'Sharded Cluster',
+  },
+  Replicaset: {
+    description: 'MongoDB ReplicaSet for high availability.',
+    text: 'Replicated Cluster',
+  },
+}
+
 const machineList = [
   'custom',
   'db.t.micro',
@@ -671,9 +686,9 @@ function showArbiter({ watchDependency, model, getValue }) {
   return isArbiterOn && notStandalone
 }
 
-function showRecovery({ watchDependency, getValue, discriminator }) {
-  watchDependency('discriminator#/recovery')
-  const isRecoveryOn = getValue(discriminator, '/recovery') || ''
+function showRecovery({ watchDependency, getValue, model }) {
+  watchDependency('model#/spec/admin/pointInTimeRecovery/default')
+  const isRecoveryOn = getValue(model, '/spec/admin/pointInTimeRecovery/default') || ''
   return isRecoveryOn
 }
 
@@ -813,7 +828,15 @@ function getAdminOptions({ getValue, model, watchDependency }, type) {
   if (options.length === 0) {
     return fetchOptions({ model, getValue }, type)
   }
-
+  if (type.endsWith('/mode')) {
+    return (
+      options?.map((item) => ({
+        description: modeDetails[item]?.description || '',
+        text: modeDetails[item]?.text || '',
+        value: item,
+      })) || []
+    )
+  }
   return options
 }
 
@@ -845,7 +868,7 @@ function checkIfFeatureOn({ getValue, model }, type) {
   const backupVal = getValue(model, '/spec/backup/tool')
 
   if (type === 'backup') {
-    return features.includes('backup') && backupVal === 'KubeStash'
+    return features.includes('backup') && backupVal === 'KubeStash' && val
   } else if (type === 'tls') {
     return features.includes('tls') && val
   } else if (type === 'expose') {
@@ -1003,7 +1026,8 @@ function setMonitoring({ getValue, model }) {
 
 function setBackup({ model, getValue }) {
   const backup = getValue(model, '/spec/backup/tool')
-  return backup === 'KubeStash' && features.includes('backup')
+  const val = getValue(model, '/spec/admin/backup/default')
+  return backup === 'KubeStash' && features.includes('backup') && val
 }
 
 function onAuthChange({ getValue, discriminator, commit }) {
@@ -1025,6 +1049,16 @@ function onAuthChange({ getValue, discriminator, commit }) {
 function showAdditionalSettings({ watchDependency }) {
   watchDependency('discriminator#/bundleApiLoaded')
   return features.length
+}
+
+function getDefaultMode({ getValue, model }) {
+  const val = getValue(model, '/spec/admin/databases/MongoDB/mode/default') || ''
+  return val
+}
+
+function getDefaultDeletetion({ getValue, model }) {
+  const val = getValue(model, '/spec/admin/deletionPolicy/default') || ''
+  return val
 }
 
 return {
@@ -1076,4 +1110,6 @@ return {
   filterNodeTopology,
   onAuthChange,
   setBackup,
+  getDefaultMode,
+  getDefaultDeletetion,
 }
