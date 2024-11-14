@@ -194,6 +194,17 @@ spec:
       apiGroup: "cert-manager.io"
       kind: ClusterIssuer
       name: {{ .Values.spec.admin.clusterIssuers.default }}
+    {{- if .Values.spec.admin.expose.default }}
+    certificates:
+      - alias: server
+        {{- if .Values.spec.hostname }}
+        dnsNames:
+          - {{ .Values.spec.hostname }}
+        {{- else if .Values.spec.ip }}
+        ipAddresses:
+          - {{ .Values.spec.ip }}
+        {{- end }}
+    {{- end }}
   clusterAuthMode: x509
   sslMode: requireSSL
 {{- end }}
