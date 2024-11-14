@@ -303,6 +303,18 @@ const machineList = [
   'db.r.16xlarge',
   'db.r.24xlarge',
 ]
+
+const modeDetails = {
+  Standalone: {
+    description: 'Single node Postgres without high availability.',
+    text: 'Standalone',
+  },
+  Replicaset: {
+    description: 'Postgres HA Cluster for high availability.',
+    text: 'HA Cluster',
+  },
+}
+
 let isRancherManaged = false
 async function getNamespaces({ axios, storeGet }) {
   const params = storeGet('/route/params')
@@ -899,7 +911,15 @@ function getAdminOptions({ getValue, model, watchDependency }, type) {
   if (options.length === 0) {
     return fetchOptions({ model, getValue }, type)
   }
-
+  if (type.endsWith('/mode')) {
+    return (
+      options?.map((item) => ({
+        description: modeDetails[item]?.description || '',
+        text: modeDetails[item]?.text || '',
+        value: item,
+      })) || []
+    )
+  }
   return options
 }
 
@@ -908,7 +928,7 @@ function checkIfFeatureOn({ getValue, model }, type) {
   const backupVal = getValue(model, '/spec/backup/tool')
 
   if (type === 'backup') {
-    return features.includes('backup') && backupVal === 'KubeStash'
+    return features.includes('backup') && backupVal === 'KubeStash' && val
   } else if (type === 'tls') {
     return features.includes('tls') && val
   } else if (type === 'expose') {
@@ -1115,7 +1135,7 @@ function setMonitoring({ getValue, model }) {
 
 function setBackup({ model, getValue }) {
   const backup = getValue(model, '/spec/backup/tool')
-  return backup === 'KubeStash' && features.includes('backup')
+  return backup === 'KubeStash' && features.includes('backup') && val
 }
 
 function isMachineNotCustom({ model, getValue, watchDependency }, path) {
@@ -1134,6 +1154,11 @@ function EqualToDatabaseMode({ model, getValue, watchDependency }, mode) {
 function showAdditionalSettings({ watchDependency }) {
   watchDependency('discriminator#/bundleApiLoaded')
   return features.length
+}
+
+function getDefault({ getValue, model }, type) {
+  const val = getValue(model, `/spec/admin/${type}/default`) || ''
+  return val
 }
 
 return {
@@ -1194,4 +1219,5 @@ return {
   setStorageClass,
   setBackup,
   showAdditionalSettings,
+  getDefault,
 }

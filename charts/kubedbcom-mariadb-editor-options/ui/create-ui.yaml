@@ -22,13 +22,6 @@ steps:
       if: isToggleOn|databases/MariaDB/mode
       label:
         text: labels.database.mode
-      options:
-      - description: options.database.mode.Standalone.description
-        text: options.database.mode.Standalone.label
-        value: Standalone
-      - description: options.database.mode.Replicaset.description
-        text: options.database.mode.Replicaset.label
-        value: Replicaset
       schema:
         $ref: schema#/properties/spec/properties/mode
       type: radio
@@ -180,7 +173,9 @@ steps:
         schema:
           $ref: schema#/properties/spec/properties/configuration
         type: editor
-      - label:
+      - computed: getDefault|pointInTimeRecovery
+        if: isToggleOn|pointInTimeRecovery
+        label:
           text: Point in-time Recovery?
         schema:
           $ref: discriminator#/recovery
