@@ -16,7 +16,10 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Elasticsearch/properties/versions/properties/default
       type: select
-    - hasDescription: true
+    - computed: getDefault|databases/Elasticsearch/mode
+      fetch: getAdminOptions|databases/Elasticsearch/mode
+      hasDescription: true
+      if: isToggleOn|databases/Elasticsearch/mode
       label:
         text: labels.database.mode
       options:
@@ -277,7 +280,9 @@ steps:
           text: Labels & Annotations
         show_label: true
         type: single-step-form
-      - customClass: mt-20
+      - computed: getDefault|deletionPolicy
+        customClass: mt-20
+        if: isToggleOn|deletionPolicy
         label:
           text: labels.deletionPolicy
         onChange: setStorageClass
