@@ -621,7 +621,15 @@ function getAdminOptions({ getValue, model, watchDependency }, type) {
   if (options.length === 0) {
     return fetchOptions({ model, getValue }, type)
   }
-
+  if (type.endsWith('/mode')) {
+    return (
+      options?.map((item) => ({
+        description: modeDetails[item]?.description || '',
+        text: modeDetails[item]?.text || '',
+        value: item,
+      })) || []
+    )
+  }
   return options
 }
 
