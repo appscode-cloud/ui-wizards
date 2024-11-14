@@ -16,7 +16,7 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/admin/properties/databases/properties/MongoDB/properties/versions/properties/default
       type: select
-    - computed: getDefaultMode
+    - computed: getDefault|databases/MongoDB/mode
       fetch: getAdminOptions|databases/MongoDB/mode
       hasDescription: true
       if: isToggleOn|databases/MongoDB/mode
@@ -226,6 +226,9 @@ steps:
         createAuthSecret:
           default: false
           type: boolean
+        recovery:
+          default: false
+          type: boolean
       elements:
       - elements:
         - isArray: true
@@ -263,7 +266,7 @@ steps:
           text: Labels & Annotations
         show_label: true
         type: single-step-form
-      - computed: getDefaultDeletetion
+      - computed: getDefault|deletionPolicy
         customClass: mt-20
         if: isToggleOn|deletionPolicy
         label:
@@ -404,11 +407,12 @@ steps:
           $ref: schema#/properties/spec/properties/hidden/properties/podResources
         show_label: true
         type: single-step-form
-      - if: isToggleOn|pointInTimeRecovery
+      - computed: getDefault|pointInTimeRecovery
+        if: isToggleOn|pointInTimeRecovery
         label:
           text: Point in-time Recovery?
         schema:
-          $ref: schema#/properties/spec/properties/admin/properties/pointInTimeRecovery/properties/default
+          $ref: discriminator#/recovery
         type: switch
       - elements:
         - customClass: mt-10

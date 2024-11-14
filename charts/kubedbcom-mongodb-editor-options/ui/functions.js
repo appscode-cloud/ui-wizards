@@ -686,9 +686,9 @@ function showArbiter({ watchDependency, model, getValue }) {
   return isArbiterOn && notStandalone
 }
 
-function showRecovery({ watchDependency, getValue, model }) {
-  watchDependency('model#/spec/admin/pointInTimeRecovery/default')
-  const isRecoveryOn = getValue(model, '/spec/admin/pointInTimeRecovery/default') || ''
+function showRecovery({ watchDependency, getValue, discriminator }) {
+  watchDependency('discriminator#/recovery')
+  const isRecoveryOn = getValue(discriminator, '/recovery') || ''
   return isRecoveryOn
 }
 
@@ -1051,13 +1051,8 @@ function showAdditionalSettings({ watchDependency }) {
   return features.length
 }
 
-function getDefaultMode({ getValue, model }) {
-  const val = getValue(model, '/spec/admin/databases/MongoDB/mode/default') || ''
-  return val
-}
-
-function getDefaultDeletetion({ getValue, model }) {
-  const val = getValue(model, '/spec/admin/deletionPolicy/default') || ''
+function getDefault({ getValue, model }, type) {
+  const val = getValue(model, `/spec/admin/${type}/default`) || ''
   return val
 }
 
@@ -1110,6 +1105,5 @@ return {
   filterNodeTopology,
   onAuthChange,
   setBackup,
-  getDefaultMode,
-  getDefaultDeletetion,
+  getDefault,
 }
