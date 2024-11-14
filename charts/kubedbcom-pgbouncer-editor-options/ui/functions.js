@@ -304,6 +304,17 @@ const machineList = [
   'db.r.24xlarge',
 ]
 
+const modeDetails = {
+  Standalone: {
+    description: 'Single node PgBouncer without high availability.',
+    text: 'Standalone',
+  },
+  Replicaset: {
+    description: 'PgBouncer ReplicaSet for high availability.',
+    text: 'Replicaset',
+  },
+}
+
 async function getAppBindings({ axios, storeGet }, type) {
   const owner = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
@@ -614,7 +625,15 @@ function getAdminOptions({ getValue, model, watchDependency }, type) {
   if (options.length === 0) {
     return fetchOptions({ model, getValue }, type)
   }
-
+  if (type.endsWith('/mode')) {
+    return (
+      options?.map((item) => ({
+        description: modeDetails[item]?.description || '',
+        text: modeDetails[item]?.text || '',
+        value: item,
+      })) || []
+    )
+  }
   return options
 }
 
@@ -623,7 +642,7 @@ function checkIfFeatureOn({ getValue, model }, type) {
   const backupVal = getValue(model, '/spec/backup/tool')
 
   if (type === 'backup') {
-    return features.includes('backup') && backupVal === 'KubeStash'
+    return features.includes('backup') && backupVal === 'KubeStash' && val
   } else if (type === 'tls') {
     return features.includes('tls') && val
   } else if (type === 'expose') {
@@ -787,7 +806,8 @@ function setMonitoring({ getValue, model }) {
 
 function setBackup({ model, getValue }) {
   const backup = getValue(model, '/spec/backup/tool')
-  return backup === 'KubeStash' && features.includes('backup')
+  const val = getValue(model, `/spec/admin/${type}/default`) || ''
+  return backup === 'KubeStash' && features.includes('backup') && val
 }
 
 function onAuthChange({ getValue, discriminator, commit }) {
@@ -824,6 +844,11 @@ function showAdditionalSettings({ watchDependency }) {
   return features.length
 }
 
+function getDefault({ getValue, model }, type) {
+  const val = getValue(model, `/spec/admin/${type}/default`) || ''
+  return val
+}
+
 return {
   showAdditionalSettings,
   initBundle,
@@ -854,4 +879,5 @@ return {
   isConfigDatabaseOn,
   clearConfiguration,
   setBackup,
+  getDefault,
 }
