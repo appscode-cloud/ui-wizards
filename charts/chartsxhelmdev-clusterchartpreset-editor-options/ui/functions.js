@@ -40,7 +40,7 @@ const modes = {
     default: 'GroupReplication',
   },
   PerconaXtraDB: {
-    availableModes: ['Standalone', 'Replicaset'],
+    availableModes: ['Replicaset'],
     default: 'Replicaset',
   },
   PgBouncer: {
