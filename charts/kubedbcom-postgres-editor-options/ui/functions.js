@@ -1154,6 +1154,7 @@ function setMonitoring({ getValue, model }) {
 
 function setBackup({ model, getValue }) {
   const backup = getValue(model, '/spec/backup/tool')
+  const val = getValue(model, '/spec/admin/backup/default')
   return backup === 'KubeStash' && features.includes('backup') && val
 }
 

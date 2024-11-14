@@ -304,6 +304,17 @@ const machineList = [
   'db.r.24xlarge',
 ]
 
+const modeDetails = {
+  Standalone: {
+    description: 'Single node Singlestore without high availability.',
+    text: 'Standalone',
+  },
+  Topology: {
+    description: 'Topology cluster mode for high availability.',
+    text: 'Topology Cluster',
+  },
+}
+
 function showAuthPasswordField({ discriminator, getValue, watchDependency }) {
   const modelPathValue = getValue(discriminator, '/createAuthSecret')
   watchDependency('discriminator#/createAuthSecret')
@@ -793,7 +804,15 @@ function getAdminOptions({ getValue, model, watchDependency }, type) {
   if (options.length === 0) {
     return fetchOptions({ model, getValue }, type)
   }
-
+  if (type.endsWith('/mode')) {
+    return (
+      options?.map((item) => ({
+        description: modeDetails[item]?.description || '',
+        text: modeDetails[item]?.text || '',
+        value: item,
+      })) || []
+    )
+  }
   return options
 }
 
@@ -802,7 +821,7 @@ function checkIfFeatureOn({ getValue, model }, type) {
   const backupVal = getValue(model, '/spec/backup/tool')
 
   if (type === 'backup') {
-    return features.includes('backup') && backupVal === 'KubeStash'
+    return features.includes('backup') && backupVal === 'KubeStash' && val
   } else if (type === 'tls') {
     return features.includes('tls') && val
   } else if (type === 'expose') {
@@ -1001,7 +1020,8 @@ function setMonitoring({ getValue, model }) {
 
 function setBackup({ model, getValue }) {
   const backup = getValue(model, '/spec/backup/tool')
-  return backup === 'KubeStash' && features.includes('backup')
+  const val = getValue(model, '/spec/admin/backup/default')
+  return backup === 'KubeStash' && features.includes('backup') && val
 }
 
 function isMachineNotCustom({ model, getValue, watchDependency }, path) {
@@ -1141,6 +1161,11 @@ function showAdditionalSettings({ watchDependency }) {
   return features.length
 }
 
+function getDefault({ getValue, model }, type) {
+  const val = getValue(model, `/spec/admin/${type}/default`) || ''
+  return val
+}
+
 return {
   initBundle,
   returnFalse,
@@ -1195,4 +1220,5 @@ return {
   setRouterNumber,
   setBackup,
   showAdditionalSettings,
+  getDefault,
 }
