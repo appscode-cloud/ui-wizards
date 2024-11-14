@@ -559,7 +559,8 @@ function setMonitoring({ getValue, model }) {
 
 function setBackup({ model, getValue }) {
   const backup = getValue(model, '/spec/backup/tool')
-  return backup === 'KubeStash' && features.includes('backup')
+  const val = getValue(model, '/spec/admin/backup/default')
+  return backup === 'KubeStash' && features.includes('backup') && val
 }
 
 function onAuthChange({ getValue, discriminator, commit }) {
@@ -777,7 +778,7 @@ function checkIfFeatureOn({ getValue, model }, type) {
   const backupVal = getValue(model, '/spec/backup/tool')
 
   if (type === 'backup') {
-    return features.includes('backup') && backupVal === 'KubeStash'
+    return features.includes('backup') && backupVal === 'KubeStash' && val
   } else if (type === 'tls') {
     return features.includes('tls') && val
   } else if (type === 'expose') {
@@ -910,6 +911,11 @@ function showAdditionalSettings({ watchDependency }) {
   return features.length
 }
 
+function getDefault({ getValue, model }, type) {
+  const val = getValue(model, `/spec/admin/${type}/default`) || ''
+  return val
+}
+
 return {
   showAdditionalSettings,
   returnFalse,
@@ -944,4 +950,5 @@ return {
   isToggleOn,
   getAdminOptions,
   setBackup,
+  getDefault,
 }
