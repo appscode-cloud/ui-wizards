@@ -306,7 +306,7 @@ const machineList = [
 
 const modeDetails = {
   Standalone: {
-    description: 'Single node ClickHouse without high availability and sharding.',
+    description: 'Single node ClickHouse without high availability',
     text: 'Standalone',
   },
   Topology: {

@@ -305,7 +305,7 @@ const machineList = [
 ]
 const modeDetails = {
   Standalone: {
-    description: 'Single node FerretDB without high availability and sharding.',
+    description: 'Single node FerretDB without high availability',
     text: 'Standalone',
   },
   Replicaset: {

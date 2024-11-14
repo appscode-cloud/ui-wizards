@@ -304,6 +304,17 @@ const machineList = [
   'db.r.24xlarge',
 ]
 
+const modeDetails = {
+  Standalone: {
+    description: 'Single node MSSQLServer without high availability',
+    text: 'Standalone',
+  },
+  Topology: {
+    description: 'Configure your MSSQLServer Availability group',
+    text: 'Availability Group',
+  },
+}
+
 function showAuthPasswordField({ discriminator, getValue, watchDependency }) {
   const modelPathValue = getValue(discriminator, '/createAuthSecret')
   watchDependency('discriminator#/createAuthSecret')
@@ -674,7 +685,8 @@ function showAlerts({ watchDependency, model, getValue, discriminator }) {
 
 function setBackup({ model, getValue }) {
   const backup = getValue(model, '/spec/backup/tool')
-  return backup === 'KubeStash' && features.includes('backup')
+  const val = getValue(model, '/spec/admin/backup/default')
+  return backup === 'KubeStash' && features.includes('backup') && val
 }
 
 function onBackupSwitch({ discriminator, getValue, commit }) {
@@ -809,7 +821,15 @@ function getAdminOptions({ getValue, model, watchDependency }, type) {
   if (options.length === 0) {
     return fetchOptions({ model, getValue }, type)
   }
-
+  if (type.endsWith('/mode')) {
+    return (
+      options?.map((item) => ({
+        description: modeDetails[item]?.description || '',
+        text: modeDetails[item]?.text || '',
+        value: item,
+      })) || []
+    )
+  }
   return options
 }
 
@@ -818,7 +838,7 @@ function checkIfFeatureOn({ getValue, model }, type) {
   const backupVal = getValue(model, '/spec/backup/tool')
 
   if (type === 'backup') {
-    return features.includes('backup') && backupVal === 'KubeStash'
+    return features.includes('backup') && backupVal === 'KubeStash' && val
   } else if (type === 'tls') {
     return features.includes('tls') && val
   } else if (type === 'expose') {
@@ -951,6 +971,11 @@ function showAdditionalSettings({ watchDependency }) {
   return features.length
 }
 
+function getDefault({ getValue, model }, type) {
+  const val = getValue(model, `/spec/admin/${type}/default`) || ''
+  return val
+}
+
 return {
   isClusterRancherManaged,
   getRecoveryNames,
@@ -994,4 +1019,5 @@ return {
   onBackupSwitch,
   updateAlertValue,
   setBackup,
+  getDefault,
 }
