@@ -16,17 +16,13 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Postgres/properties/versions/properties/default
       type: select
-    - hasDescription: true
+    - computed: getDefault|databases/Postgres/mode
+      fetch: getAdminOptions|databases/Postgres/mode
+      hasDescription: true
+      if: isToggleOn|databases/Postgres/mode
       label:
         text: labels.database.mode
       onChange: clearArbiterHidden
-      options:
-      - description: options.database.mode.Standalone.description
-        text: options.database.mode.Standalone.label
-        value: Standalone
-      - description: options.database.mode.ReplicaSet.description
-        text: options.database.mode.ReplicaSet.label
-        value: Replicaset
       schema:
         $ref: schema#/properties/spec/properties/mode
       type: radio
@@ -129,7 +125,9 @@ steps:
           text: Labels & Annotations
         show_label: true
         type: single-step-form
-      - customClass: mt-20
+      - computed: getDefault|deletionPolicy
+        customClass: mt-20
+        if: isToggleOn|deletionPolicy
         label:
           text: labels.deletionPolicy
         onChange: setStorageClass
@@ -179,7 +177,9 @@ steps:
         schema:
           $ref: schema#/properties/spec/properties/configuration
         type: editor
-      - label:
+      - computed: getDefault|pointInTimeRecovery
+        if: isToggleOn|pointInTimeRecovery
+        label:
           text: Point in-time Recovery?
         schema:
           $ref: discriminator#/recovery

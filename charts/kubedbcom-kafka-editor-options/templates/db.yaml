@@ -19,17 +19,31 @@
 {{- end }}
 
 {{- define "common.placement" -}}
+
 {{- if .Values.spec.admin.clusterTier.placement.default }}
 podPlacementPolicy:
   name: {{ .Values.spec.admin.clusterTier.placement.default }}
 {{- end }}
-{{- if eq .Values.spec.admin.deployment.default "Dedicated" }}
+
+{{- if or .Values.spec.admin.nodeSelector (eq .Values.spec.admin.deployment.default "Dedicated") }}
 nodeSelector:
+{{- if .Values.spec.admin.nodeSelector }}
+{{- toYaml .Values.spec.admin.nodeSelector | nindent 2 }}
+{{- end }}
+{{- if eq .Values.spec.admin.deployment.default "Dedicated" }}
   app: kafkas.kubedb.com
   instance: {{ include "kubedbcom-kafka-editor-options.fullname" . }}
   namespace: {{ .Release.Namespace }}
   nodepool: {{ .Values.spec.admin.clusterTier.nodeTopology.default }}
+{{- end }}
+{{- end }}
+
+{{- if or .Values.spec.admin.tolerations (eq .Values.spec.admin.deployment.default "Dedicated") }}
 tolerations:
+{{- if .Values.spec.admin.tolerations }}
+{{- toYaml .Values.spec.admin.tolerations | nindent 2 }}
+{{- end }}
+{{- if eq .Values.spec.admin.deployment.default "Dedicated" }}
   - key: app
     operator: "Equal"
     value: "kafkas.kubedb.com"
@@ -46,6 +60,7 @@ tolerations:
     operator: "Equal"
     value: {{ .Values.spec.admin.clusterTier.nodeTopology.default }}
     effect: "NoSchedule"
+{{- end }}
 {{- end }}
 {{- end }}
 

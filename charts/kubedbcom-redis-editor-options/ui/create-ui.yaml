@@ -16,7 +16,10 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/admin/properties/databases/properties/Redis/properties/versions/properties/default
       type: select
-    - hasDescription: true
+    - computed: getDefault|databases/Redis/mode
+      fetch: getAdminOptions|databases/Redis/mode
+      hasDescription: true
+      if: isToggleOn|databases/Redis/mode
       label:
         text: labels.database.mode
       options:
@@ -174,7 +177,9 @@ steps:
           text: Labels & Annotations
         show_label: true
         type: single-step-form
-      - customClass: mt-20
+      - computed: getDefault|deletionPolicy
+        customClass: mt-20
+        if: isToggleOn|deletionPolicy
         label:
           text: labels.deletionPolicy
         onChange: setStorageClass

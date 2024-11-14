@@ -16,19 +16,12 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/admin/properties/databases/properties/MySQL/properties/versions/properties/default
       type: select
-    - hasDescription: true
+    - computed: getDefault|databases/MySQL/mode
+      fetch: getAdminOptions|databases/MySQL/mode
+      hasDescription: true
+      if: isToggleOn|databases/MySQL/mode
       label:
         text: labels.database.mode
-      options:
-      - description: options.database.mode.Standalone.description
-        text: options.database.mode.Standalone.label
-        value: Standalone
-      - description: options.database.mode.GroupReplication.description
-        text: options.database.mode.GroupReplication.label
-        value: GroupReplication
-      - description: options.database.mode.InnoDBCluster.description
-        text: options.database.mode.InnoDBCluster.label
-        value: InnoDBCluster
       schema:
         $ref: schema#/properties/spec/properties/mode
       type: radio
@@ -143,7 +136,9 @@ steps:
           text: Labels & Annotations
         show_label: true
         type: single-step-form
-      - customClass: mt-20
+      - computed: getDefault|deletionPolicy
+        customClass: mt-20
+        if: isToggleOn|deletionPolicy
         label:
           text: labels.deletionPolicy
         onChange: setStorageClass
@@ -193,7 +188,9 @@ steps:
         schema:
           $ref: schema#/properties/spec/properties/configuration
         type: editor
-      - label:
+      - computed: getDefault|pointInTimeRecovery
+        if: isToggleOn|pointInTimeRecovery
+        label:
           text: Point in-time Recovery?
         schema:
           $ref: discriminator#/recovery
