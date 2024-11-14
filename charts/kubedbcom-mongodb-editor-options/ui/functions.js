@@ -723,12 +723,16 @@ let nodetopologiesShared = []
 let nodetopologiesDedicated = []
 let features = []
 let namespaces = []
+let hostName = ''
+let ip = ''
 async function initBundle({ commit, model, getValue, axios, storeGet, setDiscriminatorValue }) {
   const owner = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
+  const namespace = getValue(model, '/metadata/release/namespace')
   let db = getValue(model, '/metadata/resource/kind')
   db = db.toLowerCase()
   let url = `clusters/${owner}/${cluster}/db-bundle?type=features,common,versions&db-singular=${db}`
+  const gatewayinfosurl = `/clusters/${owner}/${cluster}/proxy/meta.k8s.appscode.com/v1alpha1/gatewayinfos/${namespace}`
   try {
     const resp = await axios.get(url)
     features = resp.data.features || []
@@ -738,6 +742,10 @@ async function initBundle({ commit, model, getValue, axios, storeGet, setDiscrim
     clusterIssuers = resp.data.clusterissuers || []
     nodetopologiesDedicated = resp.data.dedicated || []
     nodetopologiesShared = resp.data.shared || []
+
+    const gatewayinfosResp = await axios.get(gatewayinfosurl)
+    hostName = gatewayinfosResp.data?.spec?.hostName
+    ip = gatewayinfosResp.data?.spec?.ip
   } catch (e) {
     console.log(e)
   }
@@ -1027,7 +1035,40 @@ function showAdditionalSettings({ watchDependency }) {
   return features.length
 }
 
+async function checkHostnameOrIP({ commit, model, getValue }) {
+  const tls = getValue(model, '/spec/admin/tls/default')
+  const expose = getValue(model, '/spec/admin/expose/default')
+  if (tls && expose) {
+    console.log({ hostName, ip })
+    if (hostName) {
+      commit('wizard/model$update', {
+        path: '/spec/hostname',
+        value: hostName,
+        force: true,
+      })
+    } else {
+      commit('wizard/model$update', {
+        path: '/spec/ip',
+        value: ip,
+        force: true,
+      })
+    }
+  } else {
+    commit('wizard/model$update', {
+      path: '/spec/hostname',
+      value: '',
+      force: true,
+    })
+    commit('wizard/model$update', {
+      path: '/spec/ip',
+      value: '',
+      force: true,
+    })
+  }
+}
+
 return {
+  checkHostnameOrIP,
   isClusterRancherManaged,
   getRecoveryNames,
   fetchNamespaces,
