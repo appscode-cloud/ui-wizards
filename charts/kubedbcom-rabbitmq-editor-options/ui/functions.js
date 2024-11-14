@@ -306,12 +306,12 @@ const machineList = [
 
 const modeDetails = {
   Standalone: {
-    description: 'Single node Pgpool without high availability',
+    description: 'Single node RabbitMQ without high availability',
     text: 'Standalone',
   },
   Replicaset: {
-    description: 'Memcached Pgpool for high availability.',
-    text: 'Replicaset',
+    description: 'RabbitMQ Cluster for high availability.',
+    text: 'Cluster',
   },
 }
 

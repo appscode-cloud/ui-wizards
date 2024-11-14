@@ -309,7 +309,7 @@ const modeDetails = {
     text: 'Standalone',
   },
   Replicaset: {
-    description: 'Memcached Pgpool for high availability.',
+    description: 'Pgpool Replicaset for high availability.',
     text: 'Replicaset',
   },
 }
