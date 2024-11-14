@@ -305,7 +305,7 @@ const machineList = [
 
 const modeDetails = {
   Standalone: {
-    description: 'Single node Pgpool without high availability',
+    description: 'Single node Pgpool without high availability.',
     text: 'Standalone',
   },
   Replicaset: {

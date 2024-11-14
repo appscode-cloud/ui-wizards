@@ -306,7 +306,7 @@ const machineList = [
 
 const modeDetails = {
   Standalone: {
-    description: 'Single node RabbitMQ without high availability',
+    description: 'Single node RabbitMQ without high availability.',
     text: 'Standalone',
   },
   Replicaset: {
