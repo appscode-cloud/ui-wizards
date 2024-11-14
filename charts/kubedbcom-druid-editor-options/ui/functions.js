@@ -559,7 +559,8 @@ function setMonitoring({ getValue, model }) {
 
 function setBackup({ model, getValue }) {
   const backup = getValue(model, '/spec/backup/tool')
-  return backup === 'KubeStash' && features.includes('backup')
+  const val = getValue(model, '/spec/admin/backup/default')
+  return backup === 'KubeStash' && features.includes('backup') && val
 }
 
 function onAuthChange({ getValue, discriminator, commit }) {
@@ -702,6 +703,25 @@ async function initBundle({ commit, model, getValue, axios, storeGet, setDiscrim
     console.log(e)
   }
 
+  commit('wizard/model$update', {
+    path: '/spec/deletionPolicy',
+    value: getDefault({ getValue, model }, 'deletionPolicy'),
+    force: true,
+  })
+
+  if (!getValue(model, `/spec/admin/databases/Druid/mode/toggle`)) {
+    let defMode = getDefault({ getValue, model }, 'databases/Druid/mode') || ''
+    if (defMode === '') {
+      const arr = getValue(model, '/spec/databases/Druid/mode/available') || []
+      if (arr.length) defMode = arr[0]
+    }
+    commit('wizard/model$update', {
+      path: '/spec/mode',
+      value: defMode,
+      force: true,
+    })
+  }
+
   if (!features.includes('tls')) {
     commit('wizard/model$update', {
       path: '/spec/admin/tls/default',
@@ -777,7 +797,7 @@ function checkIfFeatureOn({ getValue, model }, type) {
   const backupVal = getValue(model, '/spec/backup/tool')
 
   if (type === 'backup') {
-    return features.includes('backup') && backupVal === 'KubeStash'
+    return features.includes('backup') && backupVal === 'KubeStash' && val
   } else if (type === 'tls') {
     return features.includes('tls') && val
   } else if (type === 'expose') {
@@ -910,6 +930,11 @@ function showAdditionalSettings({ watchDependency }) {
   return features.length
 }
 
+function getDefault({ getValue, model }, type) {
+  const val = getValue(model, `/spec/admin/${type}/default`) || ''
+  return val
+}
+
 return {
   showAdditionalSettings,
   returnFalse,
@@ -944,4 +969,5 @@ return {
   isToggleOn,
   getAdminOptions,
   setBackup,
+  getDefault,
 }

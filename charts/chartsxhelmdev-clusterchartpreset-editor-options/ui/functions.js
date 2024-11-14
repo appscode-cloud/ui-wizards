@@ -330,13 +330,15 @@ function isKubedbUiPreset({ getValue, watchDependency, discriminator, storeGet }
   } else return false
 }
 
-function fetchModes({ commit }, db) {
+function fetchModes({ model, getValue, commit }, db) {
   const arr = modes[db]?.availableModes || []
-  commit('wizard/model$update', {
-    path: `/spec/admin/databases/${db}/mode/available`,
-    value: arr,
-    force: true,
-  })
+  const val = getValue(model, `/spec/admin/databases/${db}/mode/available`)
+  if (!val)
+    commit('wizard/model$update', {
+      path: `/spec/admin/databases/${db}/mode/available`,
+      value: arr,
+      force: true,
+    })
   return arr
 }
 
