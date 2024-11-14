@@ -277,21 +277,6 @@ const machines = {
   },
 }
 
-const modeDetails = {
-  Standalone: {
-    description: 'Single node MongoDB without high availability and sharding.',
-    text: 'Standalone',
-  },
-  Sharded: {
-    description: 'MongoDB sharded cluster for high performance and high availability.',
-    text: 'Sharded Cluster',
-  },
-  Replicaset: {
-    description: 'MongoDB ReplicaSet for high availability.',
-    text: 'Replicated Cluster',
-  },
-}
-
 const machineList = [
   'custom',
   'db.t.micro',
@@ -318,6 +303,21 @@ const machineList = [
   'db.r.16xlarge',
   'db.r.24xlarge',
 ]
+
+const modeDetails = {
+  Standalone: {
+    description: 'Single node MongoDB without high availability and sharding.',
+    text: 'Standalone',
+  },
+  Sharded: {
+    description: 'MongoDB sharded cluster for high performance and high availability.',
+    text: 'Sharded Cluster',
+  },
+  Replicaset: {
+    description: 'MongoDB ReplicaSet for high availability.',
+    text: 'Replicated Cluster',
+  },
+}
 
 function showAuthPasswordField({ discriminator, getValue, watchDependency }) {
   const modelPathValue = getValue(discriminator, '/createAuthSecret')
@@ -755,6 +755,25 @@ async function initBundle({ commit, model, getValue, axios, storeGet, setDiscrim
     nodetopologiesShared = resp.data.shared || []
   } catch (e) {
     console.log(e)
+  }
+
+  commit('wizard/model$update', {
+    path: '/spec/deletionPolicy',
+    value: getDefault({ getValue, model }, 'deletionPolicy'),
+    force: true,
+  })
+
+  if (!getValue(model, `/spec/admin/databases/MongoDB/mode/toggle`)) {
+    let defMode = getDefault({ getValue, model }, 'databases/MongoDB/mode') || ''
+    if (defMode === '') {
+      const arr = getValue(model, '/spec/databases/MongoDB/mode/available') || []
+      if (arr.length) defMode = arr[0]
+    }
+    commit('wizard/model$update', {
+      path: '/spec/mode',
+      value: defMode,
+      force: true,
+    })
   }
 
   if (!features.includes('tls')) {

@@ -636,6 +636,25 @@ async function initBundle({ commit, model, getValue, axios, storeGet, setDiscrim
     console.log(e)
   }
 
+  commit('wizard/model$update', {
+    path: '/spec/deletionPolicy',
+    value: getDefault({ getValue, model }, 'deletionPolicy'),
+    force: true,
+  })
+
+  if (!getValue(model, `/spec/admin/databases/Memcached/mode/toggle`)) {
+    let defMode = getDefault({ getValue, model }, 'databases/Memcached/mode') || ''
+    if (defMode === '') {
+      const arr = getValue(model, '/spec/databases/Memcached/mode/available') || []
+      if (arr.length) defMode = arr[0]
+    }
+    commit('wizard/model$update', {
+      path: '/spec/mode',
+      value: defMode,
+      force: true,
+    })
+  }
+
   if (!features.includes('tls')) {
     commit('wizard/model$update', {
       path: '/spec/admin/tls/default',
