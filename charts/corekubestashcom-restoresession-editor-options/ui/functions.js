@@ -42,10 +42,6 @@ function isRancherManaged({ storeGet }) {
   return !!found
 }
 
-function isNotRancherManaged({ storeGet }) {
-  return !isRancherManaged({ storeGet })
-}
-
 async function fetchNamespacesApi({ axios, storeGet }) {
   const params = storeGet('/route/params')
   const { user, cluster, group, version, resource } = params
@@ -388,7 +384,6 @@ return {
   isConsole,
   initMetadata,
   isRancherManaged,
-  isNotRancherManaged,
   fetchNamespacesApi,
   setNamespace,
   getDbs,
