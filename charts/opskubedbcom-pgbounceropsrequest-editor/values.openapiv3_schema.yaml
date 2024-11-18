@@ -74,6 +74,13 @@ properties:
         required:
         - pgbouncer
         type: object
+      databaseRef:
+        properties:
+          name:
+            default: ""
+            type: string
+        type: object
+        x-kubernetes-map-type: atomic
       horizontalScaling:
         properties:
           replicas:
@@ -82,13 +89,6 @@ properties:
         type: object
       restart:
         type: object
-      serverRef:
-        properties:
-          name:
-            default: ""
-            type: string
-        type: object
-        x-kubernetes-map-type: atomic
       timeout:
         type: string
       tls:
@@ -293,7 +293,7 @@ properties:
             type: object
         type: object
     required:
-    - serverRef
+    - databaseRef
     - type
     type: object
 type: object

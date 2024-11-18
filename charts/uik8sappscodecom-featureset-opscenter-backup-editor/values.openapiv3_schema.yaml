@@ -452,6 +452,13 @@ properties:
                         type: array
                       license:
                         type: string
+                      networkPolicy:
+                        properties:
+                          enabled:
+                            type: boolean
+                        required:
+                        - enabled
+                        type: object
                       registry:
                         type: string
                       registryFQDN:
@@ -463,6 +470,83 @@ properties:
                     - registry
                     - registryFQDN
                     - skipCleaner
+                    type: object
+                  kubestash-catalog:
+                    properties:
+                      enabled:
+                        type: boolean
+                      kubedump:
+                        properties:
+                          backup:
+                            properties:
+                              includeDependants:
+                                type: boolean
+                              labelSelector:
+                                type: string
+                              sanitize:
+                                type: boolean
+                            required:
+                            - includeDependants
+                            - labelSelector
+                            - sanitize
+                            type: object
+                          enabled:
+                            type: boolean
+                        required:
+                        - backup
+                        - enabled
+                        type: object
+                      manifest:
+                        properties:
+                          enabled:
+                            type: boolean
+                        required:
+                        - enabled
+                        type: object
+                      proxies:
+                        properties:
+                          ghcr:
+                            type: string
+                        type: object
+                      pvc:
+                        properties:
+                          enabled:
+                            type: boolean
+                        required:
+                        - enabled
+                        type: object
+                      volumesnapshot:
+                        properties:
+                          enabled:
+                            type: boolean
+                        required:
+                        - enabled
+                        type: object
+                      waitTimeout:
+                        format: int64
+                        type: integer
+                      workload:
+                        properties:
+                          enabled:
+                            type: boolean
+                        required:
+                        - enabled
+                        type: object
+                    required:
+                    - enabled
+                    - kubedump
+                    - manifest
+                    - pvc
+                    - volumesnapshot
+                    - waitTimeout
+                    - workload
+                    type: object
+                  kubestash-metrics:
+                    properties:
+                      enabled:
+                        type: boolean
+                    required:
+                    - enabled
                     type: object
                   kubestash-operator:
                     properties:
@@ -1504,6 +1588,8 @@ properties:
                         type: object
                       criticalAddon:
                         type: boolean
+                      enabled:
+                        type: boolean
                       fullnameOverride:
                         type: string
                       imagePullPolicy:
@@ -1894,6 +1980,7 @@ properties:
                         type: array
                     required:
                     - cleaner
+                    - enabled
                     - imagePullPolicy
                     - monitoring
                     - operator
@@ -7387,7 +7474,28 @@ properties:
                             required:
                             - spec
                             type: object
+                          local:
+                            properties:
+                              mountPath:
+                                type: string
+                              persistentVolumeClaim:
+                                properties:
+                                  claimName:
+                                    type: string
+                                  readOnly:
+                                    type: boolean
+                                required:
+                                - claimName
+                                type: object
+                              subPath:
+                                type: string
+                            type: object
                           provider:
+                            enum:
+                            - s3
+                            - azure
+                            - gcs
+                            - local
                             type: string
                           s3:
                             properties:
@@ -7454,17 +7562,9 @@ properties:
                     - KubeStash
                     - Stash
                     type: string
-                  usePrefix:
-                    enum:
-                    - uid
-                    - name
-                    - skip
-                    type: string
                 required:
-                - clusterMetadata
                 - kubestash
                 - tool
-                - usePrefix
                 type: object
               valuesFrom:
                 items:
