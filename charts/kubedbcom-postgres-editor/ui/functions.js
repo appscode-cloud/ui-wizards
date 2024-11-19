@@ -2057,6 +2057,72 @@ function showOpsRequestOptions({ model, getValue, watchDependency, storeGet, dis
   )
 }
 
+async function getDbDetails({ axios, storeGet, getValue, model, setDiscriminatorValue, commit }) {
+  const owner = storeGet('/route/params/user') || ''
+  const cluster = storeGet('/route/params/cluster') || ''
+
+  const namespace =
+    storeGet('/route/query/namespace') || getValue(model, '/metadata/namespace') || ''
+  const name = storeGet('/route/query/name') || getValue(model, '/spec/databaseRef/name') || ''
+
+  if (namespace && name) {
+    try {
+      const resp = await axios.get(
+        `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/mongodbs/${name}`,
+      )
+      dbDetails = resp.data || {}
+
+      setDiscriminatorValue('/dbDetails', true)
+    } catch (e) {
+      console.log(e)
+    }
+  }
+
+  commit('wizard/model$update', {
+    path: `/metadata/release/name`,
+    value: name,
+    force: true,
+  })
+  commit('wizard/model$update', {
+    path: `/metadata/release/namespace`,
+    value: namespace,
+    force: true,
+  })
+  commit('wizard/model$update', {
+    path: `/resources/autoscalingKubedbComPostgresAutoscaler/spec/databaseRef/name`,
+    value: name,
+    force: true,
+  })
+  commit('wizard/model$update', {
+    path: `/resources/autoscalingKubedbComPostgresAutoscaler/metadata/labels`,
+    value: dbDetails.metadata.labels,
+    force: true,
+  })
+}
+
+async function dbTypeEqualsTo(
+  { watchDependency, getValue, commit, discriminator },
+  mongoType,
+  type,
+) {
+  watchDependency('discriminator#/dbDetails')
+  autoscaleType = type
+  const dbDetailsSuccess = getValue(discriminator, '/dbDetails')
+
+  if (!dbDetailsSuccess) return false
+
+  const { spec } = dbDetails || {}
+  const { shardTopology, replicaSet } = spec || {}
+  let verd = ''
+  if (shardTopology) verd = 'sharded'
+  else {
+    if (replicaSet) verd = 'replicaSet'
+    else verd = 'standalone'
+  }
+  clearSpecModel({ commit }, verd)
+  return mongoType === verd
+}
+
 async function getNamespaces({ axios, storeGet }) {
   const owner = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
