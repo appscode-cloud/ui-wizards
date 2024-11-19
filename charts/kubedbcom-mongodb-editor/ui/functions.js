@@ -2437,7 +2437,6 @@ function showScheduleBackup({ storeGet }) {
 
 let autoscaleType = ''
 let dbDetails = {}
-let autoscalerDetails = {}
 function isKubedb({ storeGet }) {
   return !!storeGet('/route/query/operation')
 }
@@ -2453,59 +2452,24 @@ function showOpsRequestOptions({ model, getValue, watchDependency, storeGet, dis
 async function getDbDetails({ axios, storeGet, getValue, model, setDiscriminatorValue, commit }) {
   const owner = storeGet('/route/params/user') || ''
   const cluster = storeGet('/route/params/cluster') || ''
-  const version = storeGet('/route/params/version')
 
   const namespace =
     storeGet('/route/query/namespace') || getValue(model, '/metadata/namespace') || ''
   const name = storeGet('/route/query/name') || getValue(model, '/spec/databaseRef/name') || ''
 
-  const url = `/clusters/${owner}/${cluster}/helm/editor/model`
   if (namespace && name) {
     try {
-      const resp = await axios.put(url, {
-        metadata: {
-          release: {
-            name: name,
-            namespace: namespace,
-          },
-          resource: {
-            group: 'kubedb.com',
-            version: 'v1',
-            name: 'mongodbs',
-            resourceTitle: 'MongoDB',
-            scope: 'Namespaced',
-          },
-        },
-      })
-
-      dbDetails = resp.data?.resources?.kubedbComMongoDB || {}
-      autoscalerDetails = resp.data?.resources?.autoscalingKubedbComMongoDBAutoscaler?.spec || {}
+      const resp = await axios.get(
+        `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/mongodbs/${name}`,
+      )
+      dbDetails = resp.data || {}
 
       setDiscriminatorValue('/dbDetails', true)
     } catch (e) {
       console.log(e)
     }
   }
-  let type = ''
-  const { spec } = dbDetails || {}
-  const { shardTopology, replicaSet } = spec || {}
-  if (shardTopology) type = 'sharded'
-  else {
-    if (replicaSet) type = 'replicaSet'
-    else type = 'standalone'
-  }
 
-  const path = `/resources/autoscalingKubedbComMongoDBAutoscaler/spec/compute/${type}`
-  commit('wizard/model$update', {
-    path: path,
-    value: autoscalerDetails.compute[type],
-    force: true,
-  })
-  commit('wizard/model$update', {
-    path: '/resources/autoscalingKubedbComMongoDBAutoscaler/spec/opsRequestOptions',
-    value: autoscalerDetails.opsRequestOptions,
-    force: true,
-  })
   commit('wizard/model$update', {
     path: `/metadata/release/name`,
     value: name,
