@@ -12,7 +12,13 @@ spec:
     timeout: 10m
     apply: IfReady
   compute:
-    redis:
+{{- if eq .Values.spec.mode "Cluster" }}
+    cluster:
+{{- else if eq .Values.spec.mode "Standalone" }}
+    standalone:
+{{- else }}
+    sentinel:
+{{- end }}
       trigger: "Off"
       podLifeTimeThreshold: 10m
       resourceDiffPercentage: 20
