@@ -4,9 +4,9 @@ steps:
       bundleApiLoaded:
         default: false
         type: boolean
-      pid:
-        type: string
       customPid:
+        type: string
+      pid:
         type: string
     elements:
     - computed: initBundle
@@ -108,19 +108,19 @@ steps:
         text: PID
       onChange: onPidChange
       options:
-        - Developer
-        - Express
-        - Standard
-        - Enterprise
-        - EnterpriseCore
-        - Custom
+      - Developer
+      - Express
+      - Standard
+      - Enterprise
+      - EnterpriseCore
+      - Custom
       required: true
       schema:
         $ref: discriminator#/properties/pid
       type: select
-    - label:
+    - if: isPidCustom
+      label:
         text: Custom PID
-      if: isPidCustom
       onChange: onCustomPidChange
       required: true
       schema:
