@@ -985,4 +985,365 @@ steps:
     type: single-step-form
   id: custom-config
   title: steps.8.label
+- form:
+    elements:
+    - elements:
+      - label:
+          text: Name
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/metadata/properties/name
+        type: input
+      - fetch: getNamespaces
+        label:
+          text: Select Namespace
+        onChange: onNamespaceChange
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/metadata/properties/namespace
+        type: select
+      - fetch: getMysqlDbs
+        label:
+          text: Select Db
+        onChange: initMetadata
+        refresh: true
+        required: true
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/databaseRef/properties/name
+        type: select
+      if: isConsole
+      type: single-step-form
+    - hasDescription: true
+      if: isConsole
+      label:
+        text: Select Type
+      onChange: initMetadata
+      options:
+      - description: Scale your CPU Memory based on resource usage
+        text: Compute
+        value: compute
+      - description: Expand your database size based on volume usage
+        text: Storage
+        value: storage
+      required: true
+      schema:
+        $ref: discriminator#/properties/autoscalingType
+      type: radio
+    - elements:
+      - elements:
+        - elements:
+          - label:
+              text: Trigger
+            options:
+            - "On"
+            - "Off"
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/compute/properties/mysql/properties/trigger
+            type: select
+          - label:
+              text: Pod LifeTime Threshold
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/compute/properties/mysql/properties/podLifeTimeThreshold
+            type: input
+          - label:
+              text: Resource Diff Percentage
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/compute/properties/mysql/properties/resourceDiffPercentage
+            type: input
+          - elements:
+            - label:
+                text: cpu
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/compute/properties/mysql/properties/minAllowed/properties/cpu
+              type: input
+            - label:
+                text: memory
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/compute/properties/mysql/properties/minAllowed/properties/memory
+              type: input
+            label:
+              text: Min Allowed
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/compute/properties/mysql/properties/minAllowed
+            show_label: true
+            type: single-step-form
+          - elements:
+            - label:
+                text: cpu
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/compute/properties/mysql/properties/maxAllowed/properties/cpu
+              type: input
+            - label:
+                text: memory
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/compute/properties/mysql/properties/maxAllowed/properties/memory
+              type: input
+            label:
+              text: Max Allowed
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/compute/properties/mysql/properties/maxAllowed
+            show_label: true
+            type: single-step-form
+          - fetch: setControlledResources|mysql
+            label:
+              text: controlled Resources
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/compute/properties/mysql/properties/controlledResources
+            type: multiselect
+          - type: single-step-form
+            label:
+              text: In Memory Storage
+            show_label: true
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/compute/properties/mysql/properties/inMemoryStorage
+            elements:
+              - type: input
+                label:
+                  text: Scaling Factor Percentage
+                schema:
+                  $ref: schema#/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/compute/properties/mysql/properties/inMemoryStorage/properties/scalingFactorPercentage
+              - type: input
+                label:
+                  text: Usage Threshold Percentage
+                schema:
+                  $ref: schema#/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/compute/properties/mysql/properties/inMemoryStorage/properties/usageThresholdPercentage                  
+          - type: select
+            label:
+              text: containerControlledValues
+            options:
+              - RequestsAndLimits
+              - RequestsOnly
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/compute/properties/mysql/properties/containerControlledValues
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/compute/properties/mysql
+          type: single-step-form
+        label:
+          text: Mysql
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/compute/properties/mysql
+        show_label: true
+        type: single-step-form
+      - elements:
+        - fetch: fetchNodeTopology
+          label:
+            text: Select NodeTopology
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/name
+          type: select
+        - if: isNodeTopologySelected
+          label:
+            text: scaleUp Diff Percentage
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/scaleUpDiffPercentage
+          type: input
+        - if: isNodeTopologySelected
+          label:
+            text: scaleDown Diff Percentage
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/scaleDownDiffPercentage
+          type: input
+        label:
+          text: NodeTopology
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/compute/properties/nodeTopology
+        show_label: true
+        type: single-step-form
+      type: single-step-form
+    - elements:
+      - label:
+          text: Timeout
+        options:
+        - text: 5 minutes
+          value: 5m0s
+        - text: 10 minutes
+          value: 10m0s
+        - text: 30 minutes
+          value: 30m0s
+        - text: 1 hour
+          value: 1h0m
+        - text: 2 hours
+          value: 2h0m
+        - text: 5 hours
+          value: 5h0m
+        - text: 10 hours
+          value: 10h0m
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/opsRequestOptions/properties/timeout
+        type: select
+      - computed: setApplyToIfReady
+        label:
+          text: Apply
+        options:
+        - text: IfReady (OpsRequest will be applied if database is ready)
+          value: IfReady
+        - text: Always (OpsRequest will always be applied)
+          value: Always
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/opsRequestOptions/properties/apply
+        type: radio
+      if: showOpsRequestOptions
+      label:
+        text: Ops Request Options
+      schema:
+        $ref: schema#/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/opsRequestOptions
+      show_label: true
+      type: single-step-form
+    type: single-step-form
+  id: compute-autoscaler
+  title: steps.9.label
+- form:
+    elements:
+    - elements:
+      - label:
+          text: Name
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/metadata/properties/name
+        type: input
+      - fetch: getNamespaces
+        label:
+          text: Select Namespace
+        onChange: onNamespaceChange
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/metadata/properties/namespace
+        type: select
+      - fetch: getMysqlDbs
+        label:
+          text: Select Db
+        onChange: initMetadata
+        refresh: true
+        required: true
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/databaseRef/properties/name
+        type: select
+      if: isConsole
+      type: single-step-form
+    - hasDescription: true
+      if: isConsole
+      label:
+        text: Select Type
+      onChange: initMetadata
+      options:
+      - description: Scale your CPU Memory based on resource usage
+        text: Compute
+        value: compute
+      - description: Expand your database size based on volume usage
+        text: Storage
+        value: storage
+      required: true
+      schema:
+        $ref: discriminator#/properties/autoscalingType
+      type: radio
+    - elements:
+      - elements:
+        - label:
+            text: Trigger
+          options:
+          - "On"
+          - "Off"
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/storage/properties/mysql/properties/trigger
+          type: select
+        - label:
+            text: Expansion Mode
+          options:
+          - Online
+          - Offline
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/storage/properties/mysql/properties/expansionMode
+          type: select
+        - label:
+            text: Usage Threshold
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/storage/properties/mysql/properties/usageThreshold
+          type: input
+        - addFormLabel: scalingRules
+          element:
+            elements:
+            - label:
+                text: AppliesUpto
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/storage/properties/mysql/properties/scalingRules/items/properties/appliesUpto
+              type: input
+            - label:
+                text: Threshold
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/storage/properties/mysql/properties/scalingRules/items/properties/threshold
+              type: input
+            type: single-step-form
+          label:
+            text: ScalingRules
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/storage/properties/mysql/properties/scalingRules
+          tableContents:
+          - inTableColumn: true
+            label:
+              text: Applies Upto
+            path: appliesUpto
+            type: value
+            typeOfValue: string
+          - inTableColumn: true
+            label:
+              text: Threshold
+            path: threshold
+            type: value
+            typeOfValue: string
+          type: single-step-form-array
+        - label:
+            text: UpperBound
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/storage/properties/mysql/properties/upperBound
+          type: input
+        - label:
+            text: Scaling Threshold
+          type: input
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/storage/properties/mysql/properties/scalingThreshold
+        label:
+          text: Mysql
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/storage/properties/mysql
+        show_label: true
+        type: single-step-form
+      type: single-step-form
+    - elements:
+      - label:
+          text: Timeout
+        options:
+        - text: 5 minutes
+          value: 5m0s
+        - text: 10 minutes
+          value: 10m0s
+        - text: 30 minutes
+          value: 30m0s
+        - text: 1 hour
+          value: 1h0m
+        - text: 2 hours
+          value: 2h0m
+        - text: 5 hours
+          value: 5h0m
+        - text: 10 hours
+          value: 10h0m
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/opsRequestOptions/properties/timeout
+        type: select
+      - computed: setApplyToIfReady
+        label:
+          text: Apply
+        options:
+        - text: IfReady (OpsRequest will be applied if database is ready)
+          value: IfReady
+        - text: Always (OpsRequest will always be applied)
+          value: Always
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/opsRequestOptions/properties/apply
+        type: radio
+      if: showOpsRequestOptions
+      label:
+        text: Ops Request Options
+      schema:
+        $ref: schema#/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/opsRequestOptions
+      show_label: true
+      type: single-step-form
+    type: single-step-form
+  id: storage-autoscaler
+  title: steps.10.label
 type: multi-step-form
