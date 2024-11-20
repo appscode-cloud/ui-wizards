@@ -1110,6 +1110,14 @@ async function checkHostnameOrIP({ commit, model, getValue }) {
   }
 }
 
+function getDefault({ getValue, model }, modelPath, field, subfield) {
+  const backends = getValue(model, modelPath)
+  if (field !== 'encryptionSecret') return backends[0][field][subfield]
+  else {
+    return backends[0]['repositories'][0][field][subfield]
+  }
+}
+
 return {
   checkHostnameOrIP,
   isClusterRancherManaged,
