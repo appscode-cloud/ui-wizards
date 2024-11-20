@@ -1,34 +1,38 @@
 steps:
 - form:
+    discriminator:
+      dbDetails:
+        type: boolean
+        default: false
     elements:
     - elements:
       - label:
-          text: labels.name
+          text: Name
         schema:
-          $ref: schema#/properties/metadata/properties/name
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComPostgresAutoscaler/properties/metadata/properties/name
         type: input
       - fetch: getNamespaces
         label:
-          text: labels.selectNamespace
+          text: SelectNamespace
         onChange: onNamespaceChange
         schema:
-          $ref: schema#/properties/metadata/properties/namespace
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComPostgresAutoscaler/properties/metadata/properties/namespace
         type: select
       - fetch: getMariaDbs
         label:
-          text: labels.selectDb
+          text: SelectDb
         onChange: initMetadata
         refresh: true
         required: true
         schema:
-          $ref: schema#/properties/spec/properties/databaseRef/properties/name
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComPostgresAutoscaler/properties/spec/properties/databaseRef/properties/name
         type: select
       if: isConsole
       type: single-step-form
     - hasDescription: true
       if: isConsole
       label:
-        text: labels.selectType
+        text: SelectType
       onChange: initMetadata
       options:
       - description: Scale your CPU Memory based on resource usage
@@ -46,95 +50,95 @@ steps:
         - elements:
           - computed: setTrigger
             label:
-              text: labels.trigger
+              text: Trigger
             options:
             - "On"
             - "Off"
             schema:
-              $ref: schema#/properties/spec/properties/compute/properties/mariadb/properties/trigger
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComPostgresAutoscaler/properties/spec/properties/compute/properties/mariadb/properties/trigger
             type: select
           - label:
-              text: labels.podLifeTimeThreshold
+              text: Pod LifeTime Threshold
             schema:
-              $ref: schema#/properties/spec/properties/compute/properties/mariadb/properties/podLifeTimeThreshold
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComPostgresAutoscaler/properties/spec/properties/compute/properties/mariadb/properties/podLifeTimeThreshold
             type: input
           - label:
-              text: labels.resourceDiffPercentage
+              text: Resource Diff Percentage
             schema:
-              $ref: schema#/properties/spec/properties/compute/properties/mariadb/properties/resourceDiffPercentage
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComPostgresAutoscaler/properties/spec/properties/compute/properties/mariadb/properties/resourceDiffPercentage
             type: input
           - elements:
             - label:
-                text: labels.cpu
+                text: cpu
               schema:
-                $ref: schema#/properties/spec/properties/compute/properties/mariadb/properties/minAllowed/properties/cpu
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComPostgresAutoscaler/properties/spec/properties/compute/properties/mariadb/properties/minAllowed/properties/cpu
               type: input
             - label:
-                text: labels.memory
+                text: memory
               schema:
-                $ref: schema#/properties/spec/properties/compute/properties/mariadb/properties/minAllowed/properties/memory
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComPostgresAutoscaler/properties/spec/properties/compute/properties/mariadb/properties/minAllowed/properties/memory
               type: input
             label:
-              text: labels.minAllowed
+              text: Min Allowed
             schema:
-              $ref: schema#/properties/spec/properties/compute/properties/mariadb/properties/minAllowed
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComPostgresAutoscaler/properties/spec/properties/compute/properties/mariadb/properties/minAllowed
             show_label: true
             type: single-step-form
           - elements:
             - label:
-                text: labels.cpu
+                text: cpu
               schema:
-                $ref: schema#/properties/spec/properties/compute/properties/mariadb/properties/maxAllowed/properties/cpu
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComPostgresAutoscaler/properties/spec/properties/compute/properties/mariadb/properties/maxAllowed/properties/cpu
               type: input
             - label:
-                text: labels.memory
+                text: memory
               schema:
-                $ref: schema#/properties/spec/properties/compute/properties/mariadb/properties/maxAllowed/properties/memory
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComPostgresAutoscaler/properties/spec/properties/compute/properties/mariadb/properties/maxAllowed/properties/memory
               type: input
             label:
-              text: labels.maxAllowed
+              text: Max Allowed
             schema:
-              $ref: schema#/properties/spec/properties/compute/properties/mariadb/properties/maxAllowed
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComPostgresAutoscaler/properties/spec/properties/compute/properties/mariadb/properties/maxAllowed
             show_label: true
             type: single-step-form
           - fetch: setControlledResources|mariadb
             label:
-              text: labels.controlledResources
+              text: Controlled Resources
             schema:
-              $ref: schema#/properties/spec/properties/compute/properties/mariadb/properties/controlledResources
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComPostgresAutoscaler/properties/spec/properties/compute/properties/mariadb/properties/controlledResources
             type: multiselect
           schema:
-            $ref: schema#/properties/spec/properties/compute/properties/mariadb
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComPostgresAutoscaler/properties/spec/properties/compute/properties/mariadb
           type: single-step-form
         label:
-          text: labels.mariadb
+          text: Mariadb
         schema:
-          $ref: schema#/properties/spec/properties/compute/properties/mariadb
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComPostgresAutoscaler/properties/spec/properties/compute/properties/mariadb
         show_label: true
         type: single-step-form
       - elements:
         - fetch: fetchNodeTopology
           label:
-            text: labels.selectNodeTopology
+            text: Select NodeTopology
           schema:
-            $ref: schema#/properties/spec/properties/compute/properties/nodeTopology/properties/name
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComPostgresAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/name
           type: select
         - if: isNodeTopologySelected
           label:
-            text: labels.scaleUpDiffPercentage
+            text: ScaleUp Diff Percentage
           schema:
-            $ref: schema#/properties/spec/properties/compute/properties/nodeTopology/properties/scaleUpDiffPercentage
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComPostgresAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/scaleUpDiffPercentage
           type: input
         - if: isNodeTopologySelected
           label:
-            text: labels.scaleDownDiffPercentage
+            text: ScaleDown Diff Percentage
           schema:
-            $ref: schema#/properties/spec/properties/compute/properties/nodeTopology/properties/scaleDownDiffPercentage
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComPostgresAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/scaleDownDiffPercentage
           type: input
         label:
-          text: labels.nodeTopology
+          text: NodeTopology
         schema:
-          $ref: schema#/properties/spec/properties/compute/properties/nodeTopology
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComPostgresAutoscaler/properties/spec/properties/compute/properties/nodeTopology
         show_label: true
         type: single-step-form
       if: ifScalingTypeEqualsTo|compute
@@ -143,74 +147,74 @@ steps:
       - elements:
         - computed: setTrigger
           label:
-            text: labels.trigger
+            text: Trigger
           options:
           - "On"
           - "Off"
           schema:
-            $ref: schema#/properties/spec/properties/storage/properties/mariadb/properties/trigger
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComPostgresAutoscaler/properties/spec/properties/storage/properties/mariadb/properties/trigger
           type: select
         - label:
-            text: labels.expansionMode
+            text: Expansion Mode
           options:
           - Online
           - Offline
           schema:
-            $ref: schema#/properties/spec/properties/storage/properties/mariadb/properties/expansionMode
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComPostgresAutoscaler/properties/spec/properties/storage/properties/mariadb/properties/expansionMode
           type: select
         - label:
-            text: labels.usageThreshold
+            text: Usage Threshold
           schema:
-            $ref: schema#/properties/spec/properties/storage/properties/mariadb/properties/usageThreshold
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComPostgresAutoscaler/properties/spec/properties/storage/properties/mariadb/properties/usageThreshold
           type: input
-        - addFormLabel: labels.scalingRules
+        - addFormLabel: Scaling Rules
           element:
             elements:
             - label:
-                text: labels.appliesUpto
+                text: Applies Upto
               schema:
-                $ref: schema#/properties/spec/properties/storage/properties/mariadb/properties/scalingRules/items/properties/appliesUpto
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComPostgresAutoscaler/properties/spec/properties/storage/properties/mariadb/properties/scalingRules/items/properties/appliesUpto
               type: input
             - label:
-                text: labels.threshold
+                text: Threshold
               schema:
-                $ref: schema#/properties/spec/properties/storage/properties/mariadb/properties/scalingRules/items/properties/threshold
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComPostgresAutoscaler/properties/spec/properties/storage/properties/mariadb/properties/scalingRules/items/properties/threshold
               type: input
             type: single-step-form
           label:
-            text: labels.scalingRules
+            text: ScalingRules
           schema:
-            $ref: schema#/properties/spec/properties/storage/properties/mariadb/properties/scalingRules
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComPostgresAutoscaler/properties/spec/properties/storage/properties/mariadb/properties/scalingRules
           tableContents:
           - inTableColumn: true
             label:
-              text: labels.appliesUpto
+              text: Applies Upto
             path: appliesUpto
             type: value
             typeOfValue: string
           - inTableColumn: true
             label:
-              text: labels.threshold
+              text: Threshold
             path: threshold
             type: value
             typeOfValue: string
           type: single-step-form-array
         - label:
-            text: labels.upperBound
+            text: UpperBound
           schema:
-            $ref: schema#/properties/spec/properties/storage/properties/mariadb/properties/upperBound
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComPostgresAutoscaler/properties/spec/properties/storage/properties/mariadb/properties/upperBound
           type: input
         label:
-          text: labels.mariadb
+          text: Mariadb
         schema:
-          $ref: schema#/properties/spec/properties/compute/properties/mariadb
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComPostgresAutoscaler/properties/spec/properties/compute/properties/mariadb
         show_label: true
         type: single-step-form
       if: ifScalingTypeEqualsTo|storage
       type: single-step-form
     - elements:
       - label:
-          text: labels.timeout
+          text: Timeout
         options:
         - text: 5 minutes
           value: 5m
@@ -227,27 +231,27 @@ steps:
         - text: 10 hours
           value: 10h
         schema:
-          $ref: schema#/properties/spec/properties/opsRequestOptions/properties/timeout
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComPostgresAutoscaler/properties/spec/properties/opsRequestOptions/properties/timeout
         type: select
       - computed: setApplyToIfReady
         label:
-          text: labels.apply
+          text: Apply
         options:
         - text: IfReady (OpsRequest will be applied if database is ready)
           value: IfReady
         - text: Always (OpsRequest will always be applied)
           value: Always
         schema:
-          $ref: schema#/properties/spec/properties/opsRequestOptions/properties/apply
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComPostgresAutoscaler/properties/spec/properties/opsRequestOptions/properties/apply
         type: radio
       if: showOpsRequestOptions
       label:
-        text: labels.opsRequestOptions
+        text: Ops Request Options
       schema:
-        $ref: schema#/properties/spec/properties/opsRequestOptions
+        $ref: schema#/properties/resources/properties/autoscalingKubedbComPostgresAutoscaler/properties/spec/properties/opsRequestOptions
       show_label: true
       type: single-step-form
     type: single-step-form
-  id: basic
+  id: compute-autoscaler
   title: steps.0.label
 type: multi-step-form
