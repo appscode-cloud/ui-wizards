@@ -88,16 +88,6 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/persistence/properties/size
       type: input
-    - elements:
-      - fetch: getAdminOptions|clusterIssuers
-        if: isEqualToModelPathValue|Topology|/spec/mode
-        label:
-          text: labels.clusterIssuers
-        required: true
-        schema:
-          $ref: schema#/properties/spec/properties/admin/properties/clusterIssuers/properties/default
-        type: select
-      type: single-step-form
     - label:
         text: Accept EULA?
       schema:
@@ -379,6 +369,22 @@ steps:
           schema:
             $ref: discriminator#/monitoring
           type: switch
+        type: single-step-form
+      - elements:
+        - if: isToggleOn|tls
+          label:
+            text: Enable TLS?
+          schema:
+            $ref: schema#/properties/spec/properties/admin/properties/tls/properties/default
+          type: switch
+        - fetch: getAdminOptions|clusterIssuers
+          if: showIssuer
+          label:
+            text: labels.clusterIssuers
+          required: true
+          schema:
+            $ref: schema#/properties/spec/properties/admin/properties/clusterIssuers/properties/default
+          type: select
         type: single-step-form
       - elements:
         - if: isToggleOn|archiver
