@@ -91,15 +91,18 @@ async function getAddon({ storeGet, axios }) {
   return []
 }
 
-async function getTaskNames({ model, watchDependency, storeGet, getValue, axios }) {
-  watchDependency('model#/spec/sessions/items/addon/name')
-  const addon = getValue(model, '/spec/sessions/items/addon/name')
+async function getTaskNames({ watchDependency, storeGet, axios }) {
+  watchDependency('temporaryModel#/session/addon/name')
+  const addon = storeGet('/wizard/temporaryModel/session/addon/name')
   const params = storeGet('/route/params')
   const { user, cluster } = params
   let url = `/clusters/${user}/${cluster}/proxy/addons.kubestash.com/v1alpha1/addons/${addon}`
   if (addon) {
     try {
       const resp = await axios.get(url)
+
+      const backupTasks = resp?.data?.spec?.backupTasks?.map((task) => task.name) || []
+      return backupTasks
     } catch (e) {
       console.log(e)
     }
@@ -107,15 +110,26 @@ async function getTaskNames({ model, watchDependency, storeGet, getValue, axios 
   return []
 }
 
-async function getEncryptionSecretNames({ model, watchDependency, storeGet, getValue, axios }) {
-  watchDependency('model#/spec/sessions/items/encryptionSecret/namespace')
-  const namespace = getValue(model, '/spec/sessions/items//encryptionSecret/namespace')
+function clearTasks({ commit }) {
+  commit('wizard/temporaryModel$update', {
+    path: '/session/addon/tasks',
+    value: [],
+    force: true,
+  })
+}
+
+async function getEncryptionSecretNames({ watchDependency, storeGet, axios }) {
+  watchDependency('temporaryModel#/session/encryptionSecret/namespace')
+  const namespace = storeGet('/wizard/temporaryModel/session/encryptionSecret/namespace')
   const params = storeGet('/route/params')
   const { user, cluster } = params
   let url = `/clusters/${user}/${cluster}/proxy/core/v1/namespaces/${namespace}/secrets`
   if (namespace) {
     try {
       const resp = await axios.get(url)
+      const name = resp?.data?.items?.map((item) => item.metadata?.name) || []
+      console.log({ name })
+      return name
     } catch (e) {
       console.log(e)
     }
@@ -264,4 +278,5 @@ return {
   returnFalse,
   fetchJsons,
   getNamespaces,
+  clearTasks,
 }
