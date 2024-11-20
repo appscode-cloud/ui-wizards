@@ -7,7 +7,7 @@ function isConsole({ storeGet, commit }) {
   if (isKube) {
     const dbName = storeGet('/route/query/name') || ''
     commit('wizard/model$update', {
-      path: '/spec/databaseRef/name',
+      path: '/resources/autoscalingKubedbComClickHouseAutoscaler/spec/databaseRef/name',
       value: dbName,
       force: true,
     })
@@ -42,10 +42,13 @@ function isKubedb({ storeGet }) {
 
 function showOpsRequestOptions({ model, getValue, watchDependency, storeGet, discriminator }) {
   if (isKubedb({ storeGet }) === true) return true
-  watchDependency('model#/spec/databaseRef/name')
+  watchDependency('model#/resources/autoscalingKubedbComClickHouseAutoscaler/spec/databaseRef/name')
   watchDependency('discriminator#/autoscalingType')
   return (
-    !!getValue(model, '/spec/databaseRef/name') && !!getValue(discriminator, '/autoscalingType')
+    !!getValue(
+      model,
+      '/resources/autoscalingKubedbComClickHouseAutoscaler/spec/databaseRef/name',
+    ) && !!getValue(discriminator, '/autoscalingType')
   )
 }
 
@@ -93,7 +96,9 @@ async function getMariaDbs({ axios, storeGet, model, getValue, watchDependency }
 }
 
 function initMetadata({ getValue, discriminator, model, commit, storeGet }) {
-  const dbName = getValue(model, '/spec/databaseRef/name') || ''
+  const dbName =
+    getValue(model, '/resources/autoscalingKubedbComClickHouseAutoscaler/spec/databaseRef/name') ||
+    ''
   const type = getValue(discriminator, '/autoscalingType') || ''
   const date = Math.floor(Date.now() / 1000)
   const resource = storeGet('/route/params/resource')
@@ -107,14 +112,25 @@ function initMetadata({ getValue, discriminator, model, commit, storeGet }) {
     })
 
   // delete the other type object from vuex wizard model
-  if (type === 'compute') commit('wizard/model$delete', '/spec/storage')
-  if (type === 'storage') commit('wizard/model$delete', '/spec/compute')
+  if (type === 'compute')
+    commit(
+      'wizard/model$delete',
+      '/resources/autoscalingKubedbComClickHouseAutoscaler/spec/storage',
+    )
+  if (type === 'storage')
+    commit(
+      'wizard/model$delete',
+      '/resources/autoscalingKubedbComClickHouseAutoscaler/spec/compute',
+    )
 }
 
 function onNamespaceChange({ model, getValue, commit }) {
   const namespace = getValue(model, '/metadata/namespace')
   if (!namespace) {
-    commit('wizard/model$delete', '/spec/databaseRef/name')
+    commit(
+      'wizard/model$delete',
+      '/resources/autoscalingKubedbComClickHouseAutoscaler/spec/databaseRef/name',
+    )
   }
 }
 
@@ -123,14 +139,17 @@ function ifScalingTypeEqualsTo(
   type,
 ) {
   watchDependency('discriminator#/autoscalingType')
-  watchDependency('model#/spec/databaseRef/name')
+  watchDependency('model#/resources/autoscalingKubedbComClickHouseAutoscaler/spec/databaseRef/name')
 
   const operation = storeGet('/route/query/operation') || ''
   if (operation.length) {
     const splitOp = operation.split('-')
     if (splitOp.length > 2) autoscaleType = splitOp[2]
   } else autoscaleType = getValue(discriminator, '/autoscalingType') || ''
-  const isDatabaseSelected = !!getValue(model, '/spec/databaseRef/name')
+  const isDatabaseSelected = !!getValue(
+    model,
+    '/resources/autoscalingKubedbComClickHouseAutoscaler/spec/databaseRef/name',
+  )
   return autoscaleType === type && isDatabaseSelected
 }
 
@@ -153,14 +172,20 @@ async function fetchNodeTopology({ axios, storeGet }) {
 }
 
 function isNodeTopologySelected({ watchDependency, model, getValue }) {
-  watchDependency('model#/spec/compute/nodeTopology/name')
-  const nodeTopologyName = getValue(model, '/spec/compute/nodeTopology/name') || ''
+  watchDependency(
+    'model#/resources/autoscalingKubedbComClickHouseAutoscaler/spec/compute/nodeTopology/name',
+  )
+  const nodeTopologyName =
+    getValue(
+      model,
+      '/resources/autoscalingKubedbComClickHouseAutoscaler/spec/compute/nodeTopology/name',
+    ) || ''
   return !!nodeTopologyName.length
 }
 
 function setControlledResources({ commit }, type) {
   const list = ['cpu', 'memory']
-  const path = `/spec/compute/${type}/controlledResources`
+  const path = `/resources/autoscalingKubedbComClickHouseAutoscaler/spec/compute/${type}/controlledResources`
   commit('wizard/model$update', {
     path: path,
     value: list,
