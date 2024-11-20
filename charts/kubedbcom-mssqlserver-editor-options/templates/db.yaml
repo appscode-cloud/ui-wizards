@@ -77,12 +77,6 @@ spec:
     mode: AvailabilityGroup
     availabilityGroup:
       {{- toYaml .Values.spec.topology.availabilityGroup | nindent 6 }}
-  internalAuth:
-    endpointCert:
-      issuerRef:
-        apiGroup: "cert-manager.io"
-        kind: ClusterIssuer
-        name: {{ .Values.spec.admin.clusterIssuers.default }}
 {{- else }}
   replicas: 1
 {{- end }}
@@ -90,6 +84,13 @@ spec:
     spec:
       containers:
         - name: mssql
+          env:
+          {{- if .Values.spec.acceptEULA }}
+          - name: ACCEPT_EULA
+            value: {{ .Values.spec.acceptEULA | toString | quote }}
+          {{ end }}
+          - name: MSSQL_PID
+            value: {{ .Values.spec.pid }}
           resources:
             {{- toYaml $res | nindent 12 }}
       {{- include "common.placement" . | nindent 6 }}
