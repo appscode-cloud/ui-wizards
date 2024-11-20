@@ -995,6 +995,34 @@ function getDefault({ getValue, model }, type) {
   return val
 }
 
+function getDefaulPid({ getValue, model }) {
+  return (pid = getValue(model, '/spec/pid') || '')
+}
+
+function onPidChange({ getValue, discriminator, commit }) {
+  const pid = getValue(discriminator, '/pid')
+  commit('wizard/model$update', {
+    path: '/spec/pid',
+    value: pid !== 'Custom' ? pid : '',
+    force: true,
+  })
+}
+
+function isPidCustom({ watchDependency, getValue, discriminator }) {
+  watchDependency('discriminator#/pid')
+  const pid = getValue(discriminator, '/pid')
+  return pid === 'Custom'
+}
+
+function onCustomPidChange({ getValue, discriminator, commit }) {
+  const customPid = getValue(discriminator, '/customPid')
+  commit('wizard/model$update', {
+    path: '/spec/pid',
+    value: customPid,
+    force: true,
+  })
+}
+
 return {
   isClusterRancherManaged,
   getRecoveryNames,
@@ -1039,4 +1067,8 @@ return {
   updateAlertValue,
   setBackup,
   getDefault,
+  getDefaulPid,
+  onPidChange,
+  isPidCustom,
+  onCustomPidChange,
 }
