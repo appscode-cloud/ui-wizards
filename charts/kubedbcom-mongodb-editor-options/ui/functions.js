@@ -1075,6 +1075,7 @@ function onAuthChange({ getValue, discriminator, commit }) {
 
 function showAdditionalSettings({ watchDependency }) {
   watchDependency('discriminator#/bundleApiLoaded')
+  console.log(features)
   return features.length
 }
 
@@ -1110,12 +1111,9 @@ async function checkHostnameOrIP({ commit, model, getValue }) {
   }
 }
 
-function getDefault({ getValue, model }, modelPath, field, subfield) {
-  const backends = getValue(model, modelPath)
-  if (field !== 'encryptionSecret') return backends[0][field][subfield]
-  else {
-    return backends[0]['repositories'][0][field][subfield]
-  }
+function getDefault({ getValue, model }, type) {
+  const val = getValue(model, `/spec/admin/${type}/default`) || ''
+  return val
 }
 
 return {
