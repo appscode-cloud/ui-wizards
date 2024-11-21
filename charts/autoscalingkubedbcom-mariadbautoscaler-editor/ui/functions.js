@@ -7,7 +7,7 @@ function isConsole({ storeGet, commit }) {
   if (isKube) {
     const dbName = storeGet('/route/query/name') || ''
     commit('wizard/model$update', {
-      path: '/resources/autoscalingKubedbComClickHouseAutoscaler/spec/databaseRef/name',
+      path: '/resources/autoscalingKubedbComMariaDBAutoscaler/spec/databaseRef/name',
       value: dbName,
       force: true,
     })
@@ -42,13 +42,11 @@ function isKubedb({ storeGet }) {
 
 function showOpsRequestOptions({ model, getValue, watchDependency, storeGet, discriminator }) {
   if (isKubedb({ storeGet }) === true) return true
-  watchDependency('model#/resources/autoscalingKubedbComClickHouseAutoscaler/spec/databaseRef/name')
+  watchDependency('model#/resources/autoscalingKubedbComMariaDBAutoscaler/spec/databaseRef/name')
   watchDependency('discriminator#/autoscalingType')
   return (
-    !!getValue(
-      model,
-      '/resources/autoscalingKubedbComClickHouseAutoscaler/spec/databaseRef/name',
-    ) && !!getValue(discriminator, '/autoscalingType')
+    !!getValue(model, '/resources/autoscalingKubedbComMariaDBAutoscaler/spec/databaseRef/name') &&
+    !!getValue(discriminator, '/autoscalingType')
   )
 }
 
@@ -97,8 +95,7 @@ async function getMariaDbs({ axios, storeGet, model, getValue, watchDependency }
 
 function initMetadata({ getValue, discriminator, model, commit, storeGet }) {
   const dbName =
-    getValue(model, '/resources/autoscalingKubedbComClickHouseAutoscaler/spec/databaseRef/name') ||
-    ''
+    getValue(model, '/resources/autoscalingKubedbComMariaDBAutoscaler/spec/databaseRef/name') || ''
   const type = getValue(discriminator, '/autoscalingType') || ''
   const date = Math.floor(Date.now() / 1000)
   const resource = storeGet('/route/params/resource')
@@ -113,15 +110,9 @@ function initMetadata({ getValue, discriminator, model, commit, storeGet }) {
 
   // delete the other type object from vuex wizard model
   if (type === 'compute')
-    commit(
-      'wizard/model$delete',
-      '/resources/autoscalingKubedbComClickHouseAutoscaler/spec/storage',
-    )
+    commit('wizard/model$delete', '/resources/autoscalingKubedbComMariaDBAutoscaler/spec/storage')
   if (type === 'storage')
-    commit(
-      'wizard/model$delete',
-      '/resources/autoscalingKubedbComClickHouseAutoscaler/spec/compute',
-    )
+    commit('wizard/model$delete', '/resources/autoscalingKubedbComMariaDBAutoscaler/spec/compute')
 }
 
 function onNamespaceChange({ model, getValue, commit }) {
@@ -129,7 +120,7 @@ function onNamespaceChange({ model, getValue, commit }) {
   if (!namespace) {
     commit(
       'wizard/model$delete',
-      '/resources/autoscalingKubedbComClickHouseAutoscaler/spec/databaseRef/name',
+      '/resources/autoscalingKubedbComMariaDBAutoscaler/spec/databaseRef/name',
     )
   }
 }
@@ -139,7 +130,7 @@ function ifScalingTypeEqualsTo(
   type,
 ) {
   watchDependency('discriminator#/autoscalingType')
-  watchDependency('model#/resources/autoscalingKubedbComClickHouseAutoscaler/spec/databaseRef/name')
+  watchDependency('model#/resources/autoscalingKubedbComMariaDBAutoscaler/spec/databaseRef/name')
 
   const operation = storeGet('/route/query/operation') || ''
   if (operation.length) {
@@ -148,7 +139,7 @@ function ifScalingTypeEqualsTo(
   } else autoscaleType = getValue(discriminator, '/autoscalingType') || ''
   const isDatabaseSelected = !!getValue(
     model,
-    '/resources/autoscalingKubedbComClickHouseAutoscaler/spec/databaseRef/name',
+    '/resources/autoscalingKubedbComMariaDBAutoscaler/spec/databaseRef/name',
   )
   return autoscaleType === type && isDatabaseSelected
 }
@@ -173,19 +164,19 @@ async function fetchNodeTopology({ axios, storeGet }) {
 
 function isNodeTopologySelected({ watchDependency, model, getValue }) {
   watchDependency(
-    'model#/resources/autoscalingKubedbComClickHouseAutoscaler/spec/compute/nodeTopology/name',
+    'model#/resources/autoscalingKubedbComMariaDBAutoscaler/spec/compute/nodeTopology/name',
   )
   const nodeTopologyName =
     getValue(
       model,
-      '/resources/autoscalingKubedbComClickHouseAutoscaler/spec/compute/nodeTopology/name',
+      '/resources/autoscalingKubedbComMariaDBAutoscaler/spec/compute/nodeTopology/name',
     ) || ''
   return !!nodeTopologyName.length
 }
 
 function setControlledResources({ commit }, type) {
   const list = ['cpu', 'memory']
-  const path = `/resources/autoscalingKubedbComClickHouseAutoscaler/spec/compute/${type}/controlledResources`
+  const path = `/resources/autoscalingKubedbComMariaDBAutoscaler/spec/compute/${type}/controlledResources`
   commit('wizard/model$update', {
     path: path,
     value: list,
@@ -202,7 +193,55 @@ function setApplyToIfReady() {
   return 'IfReady'
 }
 
+async function getDbDetails({ setDiscriminatorValue, commit, axios, storeGet, getValue, model }) {
+  const owner = storeGet('/route/params/user') || ''
+  const cluster = storeGet('/route/params/cluster') || ''
+  const namespace =
+    storeGet('/route/query/namespace') || getValue(model, '/metadata/namespace') || ''
+  const name =
+    storeGet('/route/query/name') ||
+    getValue(
+      model,
+      '/resources/autoscalingKubedbComElasticsearchAutoscaler/spec/databaseRef/name',
+    ) ||
+    ''
+
+  if (namespace && name) {
+    try {
+      const resp = await axios.get(
+        `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/mariadbs/${name}`,
+      )
+      dbDetails = resp.data || {}
+      setDiscriminatorValue('/dbDetails', true)
+    } catch (e) {
+      console.log(e)
+    }
+  }
+
+  commit('wizard/model$update', {
+    path: `/metadata/release/name`,
+    value: name,
+    force: true,
+  })
+  commit('wizard/model$update', {
+    path: `/metadata/release/namespace`,
+    value: namespace,
+    force: true,
+  })
+  commit('wizard/model$update', {
+    path: `/resources/autoscalingKubedbComMariaDBAutoscaler/spec/databaseRef/name`,
+    value: name,
+    force: true,
+  })
+  commit('wizard/model$update', {
+    path: `/resources/autoscalingKubedbComMariaDBAutoscaler/metadata/labels`,
+    value: dbDetails.metadata.labels,
+    force: true,
+  })
+}
+
 return {
+  getDbDetails,
   isConsole,
   getNamespaces,
   getMariaDbs,
