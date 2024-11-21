@@ -48,6 +48,8 @@ type KubedbcomMssqlserverEditorOptionsSpecSpec struct {
 	Labels         map[string]string   `json:"labels"`
 	Mode           MssqlserverMode     `json:"mode"`
 	Replicas       int                 `json:"replicas"`
+	AcceptEULA     bool                `json:"acceptEULA"`
+	PID            MSSQLServerPID      `json:"pid"`
 	Topology       MSSQLServerTopology `json:"topology"`
 	Persistence    Persistence         `json:"persistence"`
 	PodResources   PodResources        `json:"podResources"`
@@ -66,6 +68,9 @@ type MssqlserverMode string
 type MSSQLServerTopology struct {
 	AvailabilityGroup *MSSQLServerAGSpec `json:"availabilityGroup"`
 }
+
+// +kubebuilder:validation:Enum=Developer;Express;Standard;Enterprise;EnterpriseCore;Custom
+type MSSQLServerPID string
 
 type MSSQLServerAGSpec struct {
 	Databases []string `json:"databases"`

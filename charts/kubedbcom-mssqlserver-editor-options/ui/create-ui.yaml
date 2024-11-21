@@ -4,6 +4,10 @@ steps:
       bundleApiLoaded:
         default: false
         type: boolean
+      customPid:
+        type: string
+      pid:
+        type: string
     elements:
     - computed: initBundle
       if: returnFalse
@@ -94,6 +98,34 @@ steps:
           $ref: schema#/properties/spec/properties/admin/properties/clusterIssuers/properties/default
         type: select
       type: single-step-form
+    - label:
+        text: Accept EULA?
+      schema:
+        $ref: schema#/properties/spec/properties/acceptEULA
+      type: switch
+    - computed: getDefaulPid
+      label:
+        text: PID
+      onChange: onPidChange
+      options:
+      - Developer
+      - Express
+      - Standard
+      - Enterprise
+      - EnterpriseCore
+      - Custom
+      required: true
+      schema:
+        $ref: discriminator#/properties/pid
+      type: select
+    - if: isPidCustom
+      label:
+        text: Custom PID
+      onChange: onCustomPidChange
+      required: true
+      schema:
+        $ref: discriminator#/properties/customPid
+      type: input
     - accordion: true
       description:
         text: Configure Credentials, Deployment Mode etc.
@@ -348,6 +380,12 @@ steps:
             $ref: discriminator#/monitoring
           type: switch
         type: single-step-form
+      - if: isToggleOn|tls
+        label:
+          text: Enable TLS?
+        schema:
+          $ref: schema#/properties/spec/properties/admin/properties/tls/properties/default
+        type: switch
       - elements:
         - if: isToggleOn|archiver
           label:
