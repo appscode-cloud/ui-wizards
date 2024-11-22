@@ -551,6 +551,8 @@ function onCustomizeExporterChange({ discriminator, getValue, commit }) {
 // ********************************* Initialization & Backup *************************************
 let blueprintDetails = {}
 let filteredBlueprint = {}
+let isBackupOn = false
+let dbResource = {}
 const stashAppscodeComRestoreSession_init = {
   spec: {
     repository: {
@@ -1104,10 +1106,16 @@ function showBackupForm({ getValue, discriminator, watchDependency }) {
 // invoker form
 function onBackupInvokerChange({ getValue, discriminator, commit, model, storeGet }) {
   const kind = storeGet('/resource/layout/result/resource/kind')
-  const namespace = storeGet('/route/query/namespace')
   const backupInvoker = getValue(discriminator, '/backupInvoker')
   const annotations = getValue(model, '/resources/kubedbComMariaDB/metadata/annotations')
+  const { name, namespace, labels } = getValue(model, '/resources/kubedbComMariaDB/metadata')
+
   if (backupInvoker === 'backupConfiguration') {
+    commit('wizard/model$update', {
+      path: '/resources/coreKubestashComBackupConfiguration/metadata',
+      value: { name, namespace, labels },
+      force: true,
+    })
     if (!filteredBlueprint) {
       commit('wizard/model$delete', '/resources/coreKubestashComBackupBlueprint')
       delete annotations['blueprint.kubestash.com/name']
@@ -1119,6 +1127,12 @@ function onBackupInvokerChange({ getValue, discriminator, commit, model, storeGe
       })
     }
   } else if (backupInvoker === 'backupBlueprint') {
+    if (!isBackupOn) commit('wizard/model$delete', '/resources/coreKubestashComBackupConfiguration')
+    commit('wizard/model$update', {
+      path: '/resources/coreKubestashComBackupBlueprint/metadata',
+      value: { name, namespace, labels },
+      force: true,
+    })
     if (filteredBlueprint) {
       commit('wizard/model$update', {
         path: '/resources/coreKubestashComBackupBlueprint',
@@ -1133,22 +1147,10 @@ function onBackupInvokerChange({ getValue, discriminator, commit, model, storeGe
         value: annotations,
         force: true,
       })
-      const backupBackends = getValue(
-        model,
-        '/resources/coreKubestashComBackupConfiguration/spec/backends',
-      )
+
       commit('wizard/model$update', {
-        path: '/resources/coreKubestashComBackupBlueprint/spec/backupConfigurationTemplate/backends',
-        value: backupBackends,
-        force: true,
-      })
-      const backupSession = getValue(
-        model,
-        '/resources/coreKubestashComBackupConfiguration/spec/sessions',
-      )
-      commit('wizard/model$update', {
-        path: '/resources/coreKubestashComBackupBlueprint/spec/backupConfigurationTemplate/sessions',
-        value: backupSession,
+        path: '/resources/coreKubestashComBackupBlueprint',
+        value: blueprintDetails,
         force: true,
       })
     }
@@ -1909,21 +1911,41 @@ function isBackupToggled({ discriminator, getValue, watchDependency }) {
   return (isBackupToggled = getValue(discriminator, '/backupEnabled'))
 }
 
-async function setBackupSwitch({ getValue, model, storeGet, axios }) {
-  const backup = getValue(model, '/resources/coreKubestashComBackupConfiguration')
+async function setBackupSwitch({ commit, storeGet, axios }) {
   const backupConfigurationsFromStore = storeGet('/backup/backupConfigurations')
   const { name, cluster, user } = storeGet('/route/params')
   const namespace = storeGet('/route/query/namespace')
+  isBackupOn = !!backupConfigurationsFromStore?.find(
+    (item) => item.spec?.target?.name === name && item.spec?.target?.namespace === namespace,
+  )
+  // call model to get actual model metadata
+  if (!isBackupOn) {
+    const resource = storeGet('/resource/layout/result/resource')
+    const resp = await axios.put(`/clusters/${user}/${cluster}/helm/editor/model`, {
+      metadata: {
+        release: {
+          name,
+          namespace,
+        },
+        resource,
+      },
+    })
+    dbResource = resp.data?.resources?.kubedbComMariaDB
 
-  // pre-initialize blueprint data
-  filteredBlueprint = backupConfigurationsFromStore?.find((item) => {
-    return (
+    commit('wizard/model$update', {
+      path: '/resources/kubedbComMariaDB',
+      value: dbResource,
+      force: true,
+    })
+  }
+  // pre-initialize blueprint data if available
+  filteredBlueprint = backupConfigurationsFromStore?.find(
+    (item) =>
       item.spec?.target?.name === name &&
       item.spec?.target?.namespace === namespace &&
       item.metadata?.labels?.['kubestash.com/invoker-name'] &&
-      item.metadata?.labels?.['kubestash.com/invoker-namespace']
-    )
-  })
+      item.metadata?.labels?.['kubestash.com/invoker-namespace'],
+  )
   if (filteredBlueprint) {
     try {
       const blueNamespace = filteredBlueprint.metadata?.labels['kubestash.com/invoker-namespace']
@@ -1956,7 +1978,7 @@ async function setBackupSwitch({ getValue, model, storeGet, axios }) {
     }
   }
 
-  return !!backup
+  return !!isBackupOn
 }
 
 function isAllowedNamespacesEqualTo({ getValue, model, watchDependency }, type) {
