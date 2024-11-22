@@ -39,6 +39,16 @@ spec:
         name: mongodb-addon
         tasks:
           - name: logical-backup
+        containerSecurityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            runAsGroup: 999
+            runAsNonRoot: true
+            runAsUser: 999
+            seccompProfile:
+              type: RuntimeDefault
         {{- if semverCompare "~6.0.0" (splitList "-" .Values.spec.admin.databases.MongoDB.versions.default | last) }}
         jobTemplate:
           spec:
