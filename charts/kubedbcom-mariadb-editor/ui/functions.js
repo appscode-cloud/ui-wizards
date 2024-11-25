@@ -1931,6 +1931,8 @@ async function setBackupSwitch({ commit, storeGet, axios, getValue, model }) {
 
   // call model to get the model when backup is disabled
   if (!isBackupOn) {
+    commit('wizard/model$delete', '/resources/coreKubestashComBackupConfiguration')
+    commit('wizard/model$delete', '/resources/coreKubestashComBackupBlueprint')
     const resource = storeGet('/resource/layout/result/resource')
     const resp = await axios.put(`/clusters/${user}/${cluster}/helm/editor/model`, {
       metadata: {
