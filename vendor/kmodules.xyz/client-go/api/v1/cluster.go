@@ -35,11 +35,20 @@ const (
 	HostingProviderGeneric      HostingProvider = "Generic"
 	HostingProviderGKE          HostingProvider = "GKE"
 	HostingProviderLinode       HostingProvider = "Linode"
+	HostingProviderAkamai       HostingProvider = "Akamai"
 	HostingProviderPacket       HostingProvider = "Packet"
 	HostingProviderRancher      HostingProvider = "Rancher"
 	HostingProviderScaleway     HostingProvider = "Scaleway"
 	HostingProviderVultr        HostingProvider = "Vultr"
 )
+
+func (h HostingProvider) ConvertToPreferredProvider() HostingProvider {
+	switch h {
+	case HostingProviderLinode:
+		return HostingProviderAkamai
+	}
+	return h
+}
 
 const (
 	AceInfoConfigMapName = "ace-info"
@@ -47,6 +56,7 @@ const (
 	ClusterNameKey         string = "cluster.appscode.com/name"
 	ClusterDisplayNameKey  string = "cluster.appscode.com/display-name"
 	ClusterProviderNameKey string = "cluster.appscode.com/provider"
+	ClusterProfileLabel    string = "cluster.appscode.com/profile"
 
 	AceOrgIDKey     string = "ace.appscode.com/org-id"
 	ClientOrgKey    string = "ace.appscode.com/client-org"
