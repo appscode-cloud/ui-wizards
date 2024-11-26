@@ -554,6 +554,8 @@ let blueprintDetails = {}
 let filteredBlueprint = {}
 let isBackupOn = false
 let dbResource = {}
+let namespaceList = []
+
 const stashAppscodeComRestoreSession_init = {
   spec: {
     repository: {
@@ -1713,6 +1715,10 @@ function isRancherManaged({ storeGet }) {
   return !!found
 }
 
+function getNamespaceArray() {
+  return namespaceList
+}
+
 async function fetchNamespaces({ axios, storeGet }) {
   const username = storeGet('/route/params/user')
   const clusterName = storeGet('/route/params/cluster')
@@ -1964,6 +1970,10 @@ async function setBackupSwitch({ commit, storeGet, axios, getValue, model }) {
       force: true,
     })
   }
+
+  // call namespace for optimization
+  namespaceList = fetchNamespaces({ axios, storeGet })
+
   // pre-initialize blueprint data if available
   filteredBlueprint = backupConfigurationsFromStore?.find(
     (item) =>
@@ -2397,4 +2407,5 @@ return {
   onBackupChange,
   setBackupSwitch,
   isAllowedNamespacesEqualTo,
+  getNamespaceArray,
 }
