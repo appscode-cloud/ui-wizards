@@ -1128,6 +1128,17 @@ function onBackupInvokerChange({ getValue, discriminator, commit, model, storeGe
         value: { name, namespace, apiGroup, kind },
         force: true,
       })
+      const sessions = getValue(
+        model,
+        '/resources/coreKubestashComBackupConfiguration/spec/sessions',
+      )
+      sessions[0]['repositories'][0]['name'] = name
+      sessions[0]['repositories'][0]['directory'] = `${namespace}/${name}`
+      commit('wizard/model$update', {
+        path: '/resources/coreKubestashComBackupConfiguration/spec/sessions',
+        value: sessions,
+        force: true,
+      })
     }
     if (!filteredBlueprint) {
       commit('wizard/model$delete', '/resources/coreKubestashComBackupBlueprint')
@@ -1142,11 +1153,6 @@ function onBackupInvokerChange({ getValue, discriminator, commit, model, storeGe
   } else if (backupInvoker === 'backupBlueprint') {
     if (!isBackupOn) {
       commit('wizard/model$delete', '/resources/coreKubestashComBackupConfiguration')
-      commit('wizard/model$update', {
-        path: '/resources/coreKubestashComBackupBlueprint/metadata',
-        value: { name, namespace, labels },
-        force: true,
-      })
     }
     if (filteredBlueprint) {
       commit('wizard/model$update', {
@@ -1163,9 +1169,18 @@ function onBackupInvokerChange({ getValue, discriminator, commit, model, storeGe
         force: true,
       })
 
+      const sessions = blueprintDetails.spec.backupConfigurationTemplate.sessions
+      sessions[0]['repositories'][0]['name'] = `${kind.toLowerCase()}-blueprint`
+      sessions[0]['repositories'][0]['directory'] = `${namespace}/${kind.toLowerCase()}-blueprint`
+      blueprintDetails.spec.backupConfigurationTemplate.sessions = sessions
       commit('wizard/model$update', {
         path: '/resources/coreKubestashComBackupBlueprint',
         value: blueprintDetails,
+        force: true,
+      })
+      commit('wizard/model$update', {
+        path: '/resources/coreKubestashComBackupBlueprint/metadata',
+        value: { name: `${kind.toLowerCase()}-blueprint`, namespace, labels },
         force: true,
       })
     }
