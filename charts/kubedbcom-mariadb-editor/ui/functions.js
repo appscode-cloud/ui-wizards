@@ -1107,6 +1107,7 @@ function showBackupForm({ getValue, discriminator, watchDependency }) {
 // invoker form
 function onBackupInvokerChange({ getValue, discriminator, commit, model, storeGet }) {
   const kind = storeGet('/resource/layout/result/resource/kind')
+  const apiGroup = storeGet('/route/params/group')
   const backupInvoker = getValue(discriminator, '/backupInvoker')
   const annotations = getValue(model, '/resources/kubedbComMariaDB/metadata/annotations')
 
@@ -1118,6 +1119,11 @@ function onBackupInvokerChange({ getValue, discriminator, commit, model, storeGe
       commit('wizard/model$update', {
         path: '/resources/coreKubestashComBackupConfiguration/metadata',
         value: { name, namespace, labels },
+        force: true,
+      })
+      commit('wizard/model$update', {
+        path: '/resources/coreKubestashComBackupConfiguration/spec/target',
+        value: { name, namespace, apiGroup, kind },
         force: true,
       })
     }
@@ -1770,6 +1776,7 @@ async function fetchNames(
     if (namespace) {
       const resp = await axios.get(url)
       let data = resp.data.items
+      if (type === 'secrets') data = data.filter((ele) => !!ele.data['RESTIC_PASSWORD'])
       data = data.map((ele) => ele.metadata.name)
       return data
     }
@@ -1933,6 +1940,12 @@ async function setBackupSwitch({ commit, storeGet, axios, getValue, model }) {
   if (!isBackupOn) {
     commit('wizard/model$delete', '/resources/coreKubestashComBackupConfiguration')
     commit('wizard/model$delete', '/resources/coreKubestashComBackupBlueprint')
+    commit('wizard/model$update', {
+      path: '/metadata/release',
+      value: { name, namespace },
+      force: true,
+    })
+
     const resource = storeGet('/resource/layout/result/resource')
     const resp = await axios.put(`/clusters/${user}/${cluster}/helm/editor/model`, {
       metadata: {
