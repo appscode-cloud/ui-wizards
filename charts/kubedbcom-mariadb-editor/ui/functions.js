@@ -1984,6 +1984,21 @@ async function setBackupSwitch({ commit, storeGet, axios, getValue, model }) {
       value: dbResource,
       force: true,
     })
+
+    // set initial data from stash-presets when backup is disabled
+    const stashPreset = storeGet('/backup/stashPresets')
+    const { retentionPolicy, encryptionSecret, schedule, storageRef } = stashPreset
+    const tempBackends = initialModel.spec?.backends
+    tempBackends[0]['storageRef'] = storageRef
+    tempBackends[0]['retentionPolicy'] = retentionPolicy
+    initialModel.spec['backends'] = tempBackends
+
+    const tempSessions = initialModel.spec?.sessions
+    const tempRepositories = initialModel.spec?.sessions[0]?.repositories
+    tempRepositories[0]['encryptionSecret'] = encryptionSecret
+    tempSessions[0]['repositories'] = tempRepositories
+    tempSessions[0]['scheduler']['schedule'] = schedule
+    initialModel.spec['sessions'] = tempSessions
   }
 
   // call namespace for optimization
