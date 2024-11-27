@@ -1117,29 +1117,11 @@ function onBackupInvokerChange({ getValue, discriminator, commit, model, storeGe
   const { name, namespace, labels } = getValue(model, '/resources/kubedbComMariaDB/metadata')
 
   if (backupInvoker === 'backupConfiguration') {
-    if (!isBackupOn) {
-      commit('wizard/model$update', {
-        path: '/resources/coreKubestashComBackupConfiguration/metadata',
-        value: { name, namespace, labels },
-        force: true,
-      })
-      commit('wizard/model$update', {
-        path: '/resources/coreKubestashComBackupConfiguration/spec/target',
-        value: { name, namespace, apiGroup, kind },
-        force: true,
-      })
-      const sessions = getValue(
-        model,
-        '/resources/coreKubestashComBackupConfiguration/spec/sessions',
-      )
-      sessions[0]['repositories'][0]['name'] = name
-      sessions[0]['repositories'][0]['directory'] = `${namespace}/${name}`
-      commit('wizard/model$update', {
-        path: '/resources/coreKubestashComBackupConfiguration/spec/sessions',
-        value: sessions,
-        force: true,
-      })
-    }
+    commit('wizard/model$update', {
+      path: '/resources/coreKubestashComBackupConfiguration',
+      value: initialModel,
+      force: true,
+    })
     if (!filteredBlueprint) {
       commit('wizard/model$delete', '/resources/coreKubestashComBackupBlueprint')
       delete annotations['blueprint.kubestash.com/name']
@@ -1151,36 +1133,20 @@ function onBackupInvokerChange({ getValue, discriminator, commit, model, storeGe
       })
     }
   } else if (backupInvoker === 'backupBlueprint') {
+    commit('wizard/model$update', {
+      path: '/resources/coreKubestashComBackupBlueprint',
+      value: blueprintDetails,
+      force: true,
+    })
     if (!isBackupOn) {
       commit('wizard/model$delete', '/resources/coreKubestashComBackupConfiguration')
     }
-    if (filteredBlueprint) {
-      commit('wizard/model$update', {
-        path: '/resources/coreKubestashComBackupBlueprint',
-        value: blueprintDetails,
-        force: true,
-      })
-    } else {
+    if (!filteredBlueprint) {
       annotations['blueprint.kubestash.com/name'] = `${kind.toLowerCase()}-blueprint`
       annotations['blueprint.kubestash.com/namespace'] = namespace
       commit('wizard/model$update', {
         path: '/resources/kubedbComMariaDB/metadata/annotations',
         value: annotations,
-        force: true,
-      })
-
-      const sessions = blueprintDetails.spec.backupConfigurationTemplate.sessions
-      sessions[0]['repositories'][0]['name'] = `${kind.toLowerCase()}-blueprint`
-      sessions[0]['repositories'][0]['directory'] = `${namespace}/${kind.toLowerCase()}-blueprint`
-      blueprintDetails.spec.backupConfigurationTemplate.sessions = sessions
-      commit('wizard/model$update', {
-        path: '/resources/coreKubestashComBackupBlueprint',
-        value: blueprintDetails,
-        force: true,
-      })
-      commit('wizard/model$update', {
-        path: '/resources/coreKubestashComBackupBlueprint/metadata',
-        value: { name: `${kind.toLowerCase()}-blueprint`, namespace, labels },
         force: true,
       })
     }
@@ -1931,12 +1897,6 @@ function onBackupChange({ discriminator, getValue, commit, storeGet }) {
   if (!isBackupToggled) {
     commit('wizard/model$delete', '/resources/coreKubestashComBackupConfiguration')
     commit('wizard/model$delete', '/resources/coreKubestashComBackupBlueprint')
-  } else {
-    commit('wizard/model$update', {
-      path: '/resources/coreKubestashComBackupConfiguration',
-      value: initialModel,
-      force: true,
-    })
   }
 }
 
@@ -1953,6 +1913,7 @@ async function setBackupSwitch({ commit, storeGet, axios, getValue, model }) {
   const backupConfigurationsFromStore = storeGet('/backup/backupConfigurations')
   const { name, cluster, user } = storeGet('/route/params')
   const namespace = storeGet('/route/query/namespace')
+  const kind = storeGet('/resource/layout/result/resource/kind')
   isBackupOn = !!backupConfigurationsFromStore?.find(
     (item) => item.spec?.target?.name === name && item.spec?.target?.namespace === namespace,
   )
@@ -1988,6 +1949,7 @@ async function setBackupSwitch({ commit, storeGet, axios, getValue, model }) {
     // set initial data from stash-presets when backup is disabled
     const stashPreset = storeGet('/backup/stashPresets')
     const { retentionPolicy, encryptionSecret, schedule, storageRef } = stashPreset
+
     const tempBackends = initialModel.spec?.backends
     tempBackends[0]['storageRef'] = storageRef
     tempBackends[0]['retentionPolicy'] = retentionPolicy
@@ -1996,9 +1958,17 @@ async function setBackupSwitch({ commit, storeGet, axios, getValue, model }) {
     const tempSessions = initialModel.spec?.sessions
     const tempRepositories = initialModel.spec?.sessions[0]?.repositories
     tempRepositories[0]['encryptionSecret'] = encryptionSecret
+    tempRepositories[0].name = name
+    tempRepositories[0]['directory'] = `${namespace}/${name}`
+
     tempSessions[0]['repositories'] = tempRepositories
     tempSessions[0]['scheduler']['schedule'] = schedule
     initialModel.spec['sessions'] = tempSessions
+
+    const apiGroup = storeGet('/route/params/group')
+    initialModel.spec['target'] = { name, namespace, apiGroup, kind }
+    const labels = dbResource.metadata.labels
+    initialModel['metadata'] = { name, namespace, labels }
   }
 
   // call namespace for optimization
@@ -2039,6 +2009,32 @@ async function setBackupSwitch({ commit, storeGet, axios, getValue, model }) {
       const url = `/clusters/${user}/${cluster}/helm/packageview/values?name=${chartName}&sourceApiGroup=${sourceApiGroup}&sourceKind=${sourceKind}&sourceNamespace=${sourceNamespace}&sourceName=${sourceName}&version=${chartVersion}&format=json`
       const resp = await axios.get(url)
       blueprintDetails = resp.data?.resources?.coreKubestashComBackupBlueprint || {}
+
+      // prefill blueprintDetails with stash-presets value
+      const stashPreset = storeGet('/backup/stashPresets')
+      const { retentionPolicy, encryptionSecret, schedule, storageRef } = stashPreset
+      const tempBackends = blueprintDetails.spec.backupConfigurationTemplate?.backends
+      tempBackends[0]['storageRef'] = storageRef
+      tempBackends[0]['retentionPolicy'] = retentionPolicy
+      blueprintDetails.spec.backupConfigurationTemplate['backends'] = tempBackends
+
+      const tempSessions = blueprintDetails.spec.backupConfigurationTemplate?.sessions
+      const tempRepositories =
+        blueprintDetails.spec.backupConfigurationTemplate?.sessions[0]?.repositories
+      tempRepositories[0]['encryptionSecret'] = encryptionSecret
+      tempRepositories[0].name = `${kind.toLowerCase()}-blueprint`
+      tempRepositories[0]['directory'] = `${namespace}/${kind.toLowerCase()}-blueprint`
+
+      tempSessions[0]['repositories'] = tempRepositories
+      tempSessions[0]['scheduler']['schedule'] = schedule
+      blueprintDetails.spec.backupConfigurationTemplate['sessions'] = tempSessions
+
+      const labels = dbResource.metadata.labels
+      blueprintDetails['metadata'] = {
+        name: `${kind.toLowerCase()}-blueprint`,
+        namespace,
+        labels,
+      }
     } catch (e) {
       console.log(e)
     }
