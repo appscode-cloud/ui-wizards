@@ -1,0 +1,2192 @@
+steps:
+- form:
+    discriminator:
+      createAuthSecret:
+        type: boolean
+    elements:
+    - disabled: true
+      label:
+        text: labels.database.name
+      onChange: onNameChange
+      schema:
+        $ref: schema#/properties/metadata/properties/release/properties/name
+      type: input
+    - disabled: true
+      fetch: getResources|core|v1|namespaces
+      label:
+        text: labels.namespace
+      onChange: onNamespaceChange
+      schema:
+        $ref: schema#/properties/metadata/properties/release/properties/namespace
+      type: select
+    - disableUnselect: true
+      disabled: true
+      fetch: getSolrVersions|catalog.kubedb.com|v1alpha1|solrversions
+      label:
+        text: labels.database.version
+      onChange: onVersionChange
+      schema:
+        $ref: schema#/properties/resources/properties/kubedbComSolr/properties/spec/properties/version
+      type: select
+    - individualItemDisabilityCheck: disableLableChecker
+      isArray: true
+      keys:
+        label:
+          text: labels.labels.key
+      label:
+        text: labels.labels.label
+      onChange: onLabelChange
+      schema:
+        $ref: schema#/properties/resources/properties/kubedbComSolr/properties/metadata/properties/labels
+      type: key-value-input-form
+      values:
+        label:
+          text: labels.labels.value
+        schema:
+          $ref: schema#/properties/resources/properties/kubedbComSolr/properties/metadata/properties/labels/additionalProperties
+        type: input
+    - isArray: true
+      keys:
+        label:
+          text: labels.annotations.key
+      label:
+        text: labels.annotations.label
+      schema:
+        $ref: schema#/properties/resources/properties/kubedbComSolr/properties/metadata/properties/annotations
+      type: key-value-input-form
+      values:
+        label:
+          text: labels.annotations.value
+        schema:
+          $ref: schema#/properties/resources/properties/kubedbComSolr/properties/metadata/properties/annotations/additionalProperties
+        type: input
+    - hasDescription: true
+      label:
+        text: labels.deletionPolicy
+      options:
+      - description: options.deletionPolicy.delete.description
+        text: options.deletionPolicy.delete.label
+        value: Delete
+      - description: options.deletionPolicy.halt.description
+        text: options.deletionPolicy.halt.label
+        value: Halt
+      - description: options.deletionPolicy.wipeOut.description
+        text: options.deletionPolicy.wipeOut.label
+        value: WipeOut
+      - description: options.deletionPolicy.doNotTerminate.description
+        text: options.deletionPolicy.doNotTerminate.label
+        value: DoNotTerminate
+      schema:
+        $ref: schema#/properties/resources/properties/kubedbComSolr/properties/spec/properties/deletionPolicy
+      type: radio
+    - disabled: true
+      label:
+        text: labels.disable_security_question
+      onChange: onDisableSecurityChange
+      schema:
+        $ref: schema#/properties/resources/properties/kubedbComSolr/properties/spec/properties/disableSecurity
+      type: switch
+    - elements:
+      - label:
+          text: labels.database.admin_secret
+        type: label-element
+      - disabled: true
+        label:
+          text: labels.secret
+        schema:
+          $ref: schema#/properties/resources/properties/kubedbComSolr/properties/spec/properties/authSecret/properties/name
+        type: input
+      if: isSecurityEnabled
+      type: single-step-form
+    type: single-step-form
+  id: basic
+  title: steps.0.label
+- form:
+    elements:
+    - alias: reusable_alert
+      chart:
+        name: uibytebuildersdev-component-alert
+        version: v0.11.0
+      moduleResolver: fetchJsons
+      schema:
+        $ref: schema#/properties/form/properties/alert
+      type: reusable-element
+    type: single-step-form
+  id: alert
+  title: labels.alert
+- form:
+    discriminator:
+      activeDatabaseMode:
+        type: string
+    elements:
+    - label:
+        text: labels.to_update_disabled_section
+      type: label-element
+    - customClass: mb-20
+      label:
+        text: labels.create_opsrequest
+      type: anchor
+      url:
+        params:
+          cluster:
+            $ref: store#/route/params/cluster
+          dbname:
+            $ref: model#/metadata/release/name
+          domain:
+            $ref: store#/domain
+          group:
+            $ref: model#/metadata/resource/group
+          kind:
+            $ref: model#/metadata/resource/kind
+          namespace:
+            $ref: model#/metadata/release/namespace
+          owner:
+            $ref: store#/route/params/user
+          resource:
+            $ref: model#/metadata/resource/name
+          version:
+            $ref: model#/metadata/resource/version
+        path: ${domain}/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/solropsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations
+    - computed: setDatabaseMode
+      disabled: true
+      hasDescription: true
+      label:
+        text: labels.database.mode
+      onChange: deleteDatabaseModePath
+      options:
+      - description: options.database.mode.Combined.description
+        text: options.database.mode.Combined.label
+        value: Combined
+      - description: options.database.mode.Dedicated.description
+        text: options.database.mode.Dedicated.label
+        value: Dedicated
+      schema:
+        $ref: discriminator#/activeDatabaseMode
+      type: radio
+    - elements:
+      - disabled: true
+        label:
+          text: labels.replicaset.number
+        schema:
+          $ref: schema#/properties/resources/properties/kubedbComSolr/properties/spec/properties/replicas
+        type: input
+      - fetch: getMaxUnavailableOptions|/resources/kubedbComSolr/spec
+        label:
+          text: labels.max_unavailable
+        schema:
+          $ref: schema#/properties/resources/properties/kubedbComSolr/properties/spec/properties/maxUnavailable
+        type: select
+      - disabled: true
+        label:
+          text: labels.storage.size
+        schema:
+          $ref: schema#/properties/resources/properties/kubedbComSolr/properties/spec/properties/storage/properties/resources/properties/requests/properties/storage
+        type: input
+      - disabled: true
+        label:
+          text: labels.storage.class
+        schema:
+          $ref: schema#/properties/resources/properties/kubedbComSolr/properties/spec/properties/storage/properties/storageClassName
+        type: input
+      if: isEqualToDatabaseMode|Combined
+      type: single-step-form
+    - element:
+        elements:
+        - disabled: true
+          label:
+            text: labels.replicaset.number
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComSolr/properties/spec/properties/topology/properties/$dyn/properties/replicas
+          type: input
+        - fetch: getMaxUnavailableOptions
+          label:
+            text: labels.max_unavailable
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComSolr/properties/spec/properties/topology/properties/$dyn/properties/maxUnavailable
+          type: select
+        - disabled: true
+          elements:
+          - elements:
+            - elements:
+              - label:
+                  text: labels.storage.size
+                schema:
+                  $ref: schema#/properties/resources/properties/kubedbComSolr/properties/spec/properties/topology/properties/$dyn/properties/storage/properties/resources/properties/requests/properties/storage
+                type: input
+              schema:
+                $ref: schema#/properties/resources/properties/kubedbComSolr/properties/spec/properties/topology/properties/$dyn/properties/storage/properties/resources/properties/requests
+              type: single-step-form
+            schema:
+              $ref: schema#/properties/resources/properties/kubedbComSolr/properties/spec/properties/topology/properties/$dyn/properties/storage/properties/resources
+            type: single-step-form
+          - label:
+              text: labels.storage.class
+            schema:
+              $ref: schema#/properties/resources/properties/kubedbComSolr/properties/spec/properties/topology/properties/$dyn/properties/storage/properties/storageClassName
+            type: input
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComSolr/properties/spec/properties/topology/properties/$dyn/properties/storage
+          type: single-step-form
+        - disabled: true
+          label:
+            text: labels.suffix
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComSolr/properties/spec/properties/topology/properties/$dyn/properties/suffix
+          type: input
+        - disabled: true
+          label:
+            text: labels.resources
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComSolr/properties/spec/properties/topology/properties/$dyn/properties/resources
+          type: resource-input-form
+        hideForm: true
+        schema:
+          $ref: schema#/properties/resources/properties/kubedbComSolr/properties/spec/properties/topology/properties/$dyn
+        show_label: true
+        type: single-step-form
+      individualItemVisibilityCheck: hasTopologyNode
+      schema:
+        $ref: schema#/properties/resources/properties/kubedbComSolr/properties/spec/properties/topology
+      type: array-input-form
+    type: single-step-form
+  id: topology
+  title: steps.1.label
+- form:
+    discriminator:
+      internalUsers:
+        type: array
+    elements:
+    - addFormLabel: labels.user
+      computed: setInternalUsers
+      disabled: true
+      element:
+        discriminator:
+          users:
+            emitAs: internalUsers
+            type: array
+        elements:
+        - disabled: disableUsername
+          label:
+            text: labels.username
+          required: true
+          schema:
+            $ref: discriminator#/properties/users/items/properties/username
+          type: input
+        - isArray: true
+          keys:
+            label:
+              text: labels.annotations.key
+          label:
+            text: labels.attributes
+          schema:
+            $ref: discriminator#/properties/users/items/properties/attributes
+          type: key-value-input-form
+          values:
+            label:
+              text: labels.annotations.value
+            schema:
+              $ref: discriminator#/properties/users/items/properties/attributes/additionalProperties
+            type: input
+        - element:
+            label:
+              text: labels.role
+            schema:
+              $ref: discriminator#/properties/users/items/properties/backendRoles/items
+            type: input
+          label:
+            text: labels.backendRoles
+          schema:
+            $ref: discriminator#/properties/users/items/properties/backendRoles
+          type: list-input-form
+        - label:
+            text: labels.description
+          schema:
+            $ref: discriminator#/properties/users/items/properties/description
+          type: textarea
+        - label:
+            text: labels.hidden
+          schema:
+            $ref: discriminator#/properties/users/items/properties/hidden
+          type: switch
+        - element:
+            label:
+              text: labels.role
+            schema:
+              $ref: discriminator#/properties/users/items/properties/opendistroSecurityRoles/items
+            type: input
+          if: isAuthPluginEqualTo|OpenDistro
+          label:
+            text: labels.opendistro_security_roles
+          schema:
+            $ref: discriminator#/properties/users/items/properties/opendistroSecurityRoles
+          type: list-input-form
+        - label:
+            text: labels.reserved
+          schema:
+            $ref: discriminator#/properties/users/items/properties/reserved
+          type: switch
+        - element:
+            label:
+              text: labels.role
+            schema:
+              $ref: discriminator#/properties/users/items/properties/searchGuardRoles/items
+            type: input
+          if: isAuthPluginEqualTo|SearchGuard
+          label:
+            text: labels.search_guard_roles
+          schema:
+            $ref: discriminator#/properties/users/items/properties/searchGuardRoles
+          type: list-input-form
+        - allowUserDefinedOption: true
+          fetch: getSecrets
+          label:
+            text: labels.secret_name
+          schema:
+            $ref: discriminator#/properties/users/items/properties/secretName
+          type: select
+        type: single-step-form
+      individualItemDisabilityCheck: disableUserEdit
+      label:
+        text: labels.internal_users
+      newItemValidator: validateNewUser
+      onChange: onInternalUsersChange
+      schema:
+        $ref: discriminator#/properties/internalUsers
+      tableContents:
+      - inTableColumn: true
+        label:
+          text: labels.username
+        path: username
+        type: value
+        typeOfValue: string
+      - label:
+          text: labels.attributes
+        path: attributes
+        type: value
+        typeOfValue: key-value
+      - inTableColumn: true
+        label:
+          isSubsection: true
+          text: labels.backendRoles
+        path: backendRoles
+        type: value
+        typeOfValue: array
+      - label:
+          text: labels.description
+        path: description
+        type: value
+        typeOfValue: string
+      - label:
+          text: labels.hidden
+        path: hidden
+        type: value
+        typeOfValue: string
+      - label:
+          isSubsection: true
+          text: labels.opendistro_security_roles
+        path: opendistroSecurityRoles
+        type: value
+        typeOfValue: array
+      - inTableColumn: true
+        label:
+          text: labels.reserved
+        path: reserved
+        type: value
+        typeOfValue: string
+      - label:
+          isSubsection: true
+          text: labels.search_guard_roles
+        path: searchGuardRoles
+        type: value
+        typeOfValue: array
+      - inTableColumn: true
+        label:
+          text: labels.secret_name
+        path: secretName
+        type: value
+        typeOfValue: string
+      type: single-step-form-array
+    type: single-step-form
+  id: internal-users
+  if: showInternalUsersAndRolesMapping
+  title: steps.2.label
+- form:
+    discriminator:
+      rolesMapping:
+        type: array
+    elements:
+    - addFormLabel: labels.role
+      computed: setRolesMapping
+      disabled: true
+      element:
+        discriminator:
+          roles:
+            emitAs: rolesMapping
+            type: array
+        elements:
+        - label:
+            text: labels.role_name
+          required: true
+          schema:
+            $ref: discriminator#/properties/roles/items/properties/roleName
+          type: input
+        - element:
+            label:
+              text: labels.role
+            schema:
+              $ref: discriminator#/properties/roles/items/properties/andBackendRoles/items
+            type: input
+          label:
+            text: labels.andBackendRoles
+          schema:
+            $ref: discriminator#/properties/roles/items/properties/andBackendRoles
+          type: list-input-form
+        - element:
+            label:
+              text: labels.role
+            schema:
+              $ref: discriminator#/properties/roles/items/properties/backendRoles/items
+            type: input
+          label:
+            text: labels.backendRoles
+          schema:
+            $ref: discriminator#/properties/roles/items/properties/backendRoles
+          type: list-input-form
+        - label:
+            text: labels.hidden
+          schema:
+            $ref: discriminator#/properties/roles/items/properties/hidden
+          type: switch
+        - element:
+            label:
+              text: labels.host
+            schema:
+              $ref: discriminator#/properties/roles/items/properties/hosts/items
+            type: input
+          label:
+            text: labels.hosts
+          schema:
+            $ref: discriminator#/properties/roles/items/properties/hosts
+          type: list-input-form
+        - label:
+            text: labels.reserved
+          schema:
+            $ref: discriminator#/properties/roles/items/properties/reserved
+          type: switch
+        - allowUserDefinedOption: true
+          fetch: getInternalUsers
+          label:
+            text: labels.users
+          schema:
+            $ref: discriminator#/properties/roles/items/properties/users
+          type: multiselect
+        type: single-step-form
+      label:
+        text: labels.roles_mapping
+      onChange: onRolesMappingChange
+      schema:
+        $ref: discriminator#/properties/rolesMapping
+      tableContents:
+      - inTableColumn: true
+        label:
+          text: labels.role_name
+        path: roleName
+        type: value
+        typeOfValue: string
+      - inTableColumn: true
+        label:
+          isSubsection: true
+          text: labels.backendRoles
+        path: backendRoles
+        type: value
+        typeOfValue: array
+      - inTableColumn: true
+        label:
+          text: labels.hidden
+        path: hidden
+        type: value
+        typeOfValue: string
+      - label:
+          isSubsection: true
+          text: labels.andBackendRoles
+        path: andBackendRoles
+        type: value
+        typeOfValue: array
+      - label:
+          isSubsection: true
+          text: labels.hosts
+        path: hosts
+        type: value
+        typeOfValue: array
+      - inTableColumn: true
+        label:
+          isSubsection: true
+          text: labels.users
+        path: users
+        type: value
+        typeOfValue: array
+      - label:
+          text: labels.reserved
+        path: reserved
+        type: value
+        typeOfValue: string
+      type: single-step-form-array
+    type: single-step-form
+  id: roles-mapping
+  if: showInternalUsersAndRolesMapping
+  title: steps.11.label
+- form:
+    elements:
+    - discriminator:
+        customizeKernelSettings:
+          type: string
+      elements:
+      - computed: returnStringYes
+        label:
+          text: labels.customizeKernelSettings
+        onChange: onCustomizeKernelSettingChange
+        options:
+        - text: options.yesOrNo.yes.text
+          value: "yes"
+        - text: options.kernelSettings.no
+          value: "no"
+        - text: options.kernelSettings.disable
+          value: disable
+        schema:
+          $ref: discriminator#/properties/customizeKernelSettings
+        type: radio
+      - if: isDiscriminatorEqualTo|/customizeKernelSettings|yes
+        label:
+          text: labels.privileged_question
+        schema:
+          $ref: schema#/properties/resources/properties/kubedbComSolr/properties/spec/properties/kernelSettings/properties/privileged
+        type: switch
+      - addFormLabel: labels.sysctl
+        element:
+          elements:
+          - label:
+              text: labels.name
+            schema:
+              $ref: schema#/properties/resources/properties/kubedbComSolr/properties/spec/properties/kernelSettings/properties/sysctls/items/properties/name
+            type: input
+          - label:
+              text: labels.value
+            schema:
+              $ref: schema#/properties/resources/properties/kubedbComSolr/properties/spec/properties/kernelSettings/properties/sysctls/items/properties/value
+            type: input
+          type: single-step-form
+        if: isDiscriminatorEqualTo|/customizeKernelSettings|yes
+        label:
+          text: labels.sysctls
+        schema:
+          $ref: schema#/properties/resources/properties/kubedbComSolr/properties/spec/properties/kernelSettings/properties/sysctls
+        tableContents:
+        - inTableColumn: true
+          label:
+            text: labels.name
+          path: name
+          type: value
+          typeOfValue: string
+        - inTableColumn: true
+          label:
+            text: labels.value
+          path: value
+          type: value
+          typeOfValue: string
+        type: single-step-form-array
+      keepEmpty: true
+      schema:
+        $ref: schema#/properties/resources/properties/kubedbComSolr/properties/spec/properties/kernelSettings
+      type: single-step-form
+    type: single-step-form
+  id: kernel-settings
+  title: steps.10.label
+- form:
+    discriminator:
+      configureTLS:
+        default: true
+        type: boolean
+    elements:
+    - if: showTlsRecommendation
+      label:
+        text: labels.tls_recommended_text
+      type: label-element
+    - label:
+        text: labels.to_update_tls
+      type: label-element
+    - customClass: mb-20
+      label:
+        text: labels.create_opsrequest
+      type: anchor
+      url:
+        params:
+          cluster:
+            $ref: store#/route/params/cluster
+          dbname:
+            $ref: model#/metadata/release/name
+          domain:
+            $ref: store#/domain
+          group:
+            $ref: model#/metadata/resource/group
+          kind:
+            $ref: model#/metadata/resource/kind
+          namespace:
+            $ref: model#/metadata/release/namespace
+          owner:
+            $ref: store#/route/params/user
+          resource:
+            $ref: model#/metadata/resource/name
+          version:
+            $ref: model#/metadata/resource/version
+        path: ${domain}/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/solropsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=ReconfigureTLS
+    - computed: isValueExistInModel|/resources/kubedbComMariaDB/spec/tls
+      disabled: true
+      label:
+        text: labels.enable_tls
+      onChange: onTlsConfigureChange
+      schema:
+        $ref: discriminator#/configureTLS
+      type: switch
+    - disabled: true
+      elements:
+      - label:
+          text: labels.enable_ssl_question
+        schema:
+          $ref: schema#/properties/resources/properties/kubedbComSolr/properties/spec/properties/enableSSL
+        type: switch
+      - elements:
+        - computed: setApiGroupEdit
+          disabled: true
+          label:
+            text: labels.api_group
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComSolr/properties/spec/properties/tls/properties/issuerRef/properties/apiGroup
+          type: input
+        - label:
+            text: labels.kind
+          options:
+          - text: Issuer
+            value: Issuer
+          - text: ClusterIssuer
+            value: ClusterIssuer
+          required: returnFalse
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComSolr/properties/spec/properties/tls/properties/issuerRef/properties/kind
+          type: select
+        - allowUserDefinedOption: true
+          fetch: getIssuerRefsName
+          label:
+            text: labels.name
+          required: returnFalse
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComSolr/properties/spec/properties/tls/properties/issuerRef/properties/name
+          type: select
+        label:
+          text: labels.issuer_ref
+        schema:
+          $ref: schema#/properties/resources/properties/kubedbComSolr/properties/spec/properties/tls/properties/issuerRef
+        type: single-step-form
+      - alias: reusable_certificates
+        chart:
+          name: uibytebuildersdev-component-certificates
+          version: v0.11.0
+        moduleResolver: fetchJsons
+        schema:
+          $ref: schema#/properties/resources/properties/kubedbComSolr/properties/spec/properties/tls/properties/certificates
+        type: reusable-element
+      if: showTlsConfigureSection
+      type: single-step-form
+    type: single-step-form
+  id: tls
+  if: isSecurityEnabled
+  title: steps.3.label
+- form:
+    elements:
+    - disabled: disableInitializationSection
+      discriminator:
+        prePopulateDatabase:
+          type: string
+      elements:
+      - computed: initPrePopulateDatabase
+        label:
+          text: labels.prePopulateDatabase
+        onChange: onPrePopulateDatabaseChange
+        options:
+        - text: options.yesOrNo.yes.text
+          value: "yes"
+        - text: options.yesOrNo.no.text
+          value: "no"
+        schema:
+          $ref: discriminator#/properties/prePopulateDatabase
+        type: radio
+      - discriminator:
+          dataSource:
+            type: string
+        elements:
+        - computed: initDataSource
+          label:
+            text: labels.dataSource
+          onChange: onDataSourceChange
+          options:
+          - text: options.dataSource.script.text
+            value: script
+          - text: options.dataSource.stashBackup.text
+            value: stashBackup
+          schema:
+            $ref: discriminator#/properties/dataSource
+          type: select
+        - discriminator:
+            sourceVolumeType:
+              type: string
+          elements:
+          - label:
+              text: labels.script.path
+            schema:
+              $ref: schema#/properties/resources/properties/kubedbComSolr/properties/spec/properties/init/properties/script/properties/scriptPath
+            type: input
+          - label:
+              text: labels.script.volume
+            type: label-element
+          - computed: initVolumeType
+            label:
+              text: labels.script.volumeType
+            onChange: onVolumeTypeChange
+            options:
+            - text: options.scriptSourceVolumeType.configMap.text
+              value: configMap
+            - text: options.scriptSourceVolumeType.secret.text
+              value: secret
+            schema:
+              $ref: discriminator#/properties/sourceVolumeType
+            type: select
+          - allowUserDefinedOption: true
+            fetch: resourceNames|core|v1|configmaps
+            if: showConfigMapOrSecretName|configMap
+            label:
+              text: labels.script.volumeName
+            schema:
+              $ref: schema#/properties/resources/properties/kubedbComSolr/properties/spec/properties/init/properties/script/properties/configMap/properties/name
+            type: select
+          - allowUserDefinedOption: true
+            fetch: resourceNames|core|v1|secrets
+            if: showConfigMapOrSecretName|secret
+            label:
+              text: labels.script.volumeName
+            schema:
+              $ref: schema#/properties/resources/properties/kubedbComSolr/properties/spec/properties/init/properties/script/properties/secret/properties/secretName
+            type: select
+          if: showScriptOrStashForm|script
+          type: single-step-form
+        - elements:
+          - label:
+              text: labels.restoreSession.snapshot
+            schema:
+              $ref: schema#/properties/resources/properties/stashAppscodeComRestoreSession_init/properties/spec/properties/rules/properties/0/properties/snapshots/properties/0
+            type: input
+          - discriminator:
+              repositoryChoise:
+                type: string
+            elements:
+            - label:
+                text: labels.repositories.title
+              type: label-element
+            - computed: setInitialRestoreSessionRepo
+              onChange: onInitRepositoryChoiseChange
+              options:
+              - text: options.createOrSelect.select.text
+                value: select
+              - text: options.createOrSelect.create.text
+                value: create
+              schema:
+                $ref: discriminator#/properties/repositoryChoise
+              type: radio
+            - allowUserDefinedOption: true
+              fetch: resourceNames|stash.appscode.com|v1alpha1|repositories
+              if: showRepositorySelectOrCreate|select
+              label:
+                text: labels.repositories.name
+              schema:
+                $ref: schema#/properties/resources/properties/stashAppscodeComRestoreSession_init/properties/spec/properties/repository/properties/name
+              type: select
+            - alias: repository_create_init
+              chart:
+                name: uibytebuildersdev-component-repository-create
+                version: v0.11.0
+              dataContext:
+                namespace:
+                  $ref: schema#/properties/metadata/properties/release/properties/namespace
+              if: showRepositorySelectOrCreate|create
+              moduleResolver: fetchJsons
+              schema:
+                $ref: schema#/properties/resources/properties/stashAppscodeComRepository_init_repo/properties/spec/properties/backend
+              type: reusable-element
+            type: single-step-form
+          - if: returnFalse
+            label:
+              text: labels.backupConfiguration.targetReference.name
+            schema:
+              $ref: schema#/properties/resources/properties/stashAppscodeComRestoreSession_init/properties/spec/properties/target/properties/ref/properties/name
+            type: input
+          - discriminator:
+              customizeRestoreJobRuntimeSettings:
+                type: string
+            elements:
+            - computed: initCustomizeRestoreJobRuntimeSettings
+              label:
+                isSubsection: true
+                text: labels.runtimeSettings.choise
+              onChange: onCustomizeRestoreJobRuntimeSettingsChange
+              options:
+              - text: options.yesOrNo.yes.text
+                value: "yes"
+              - text: options.yesOrNo.no.text
+                value: "no"
+              schema:
+                $ref: discriminator#/properties/customizeRestoreJobRuntimeSettings
+              type: radio
+            - alias: runtime_settings_init
+              chart:
+                name: uibytebuildersdev-component-runtime-settings
+                version: v0.11.0
+              dataContext:
+                namespace:
+                  $ref: schema#/properties/metadata/properties/release/properties/namespace
+              if: showRuntimeForm|yes
+              moduleResolver: fetchJsons
+              schema:
+                $ref: schema#/properties/resources/properties/stashAppscodeComRestoreSession_init/properties/spec/properties/runtimeSettings
+              type: reusable-element
+            type: single-step-form
+          if: showScriptOrStashForm|stashBackup
+          type: single-step-form
+        - if: returnFalse
+          label:
+            text: labels.waitForInitialRestore
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComSolr/properties/spec/properties/init/properties/waitForInitialRestore
+          type: switch
+        if: showInitializationForm
+        type: single-step-form
+      type: single-step-form
+    type: single-step-form
+  id: initialization
+  title: steps.4.label
+- form:
+    discriminator:
+      repoInitialSelectionStatus:
+        type: string
+      scheduleBackup:
+        default: "yes"
+        type: string
+    elements:
+    - computed: initScheduleBackupForEdit
+      label:
+        text: labels.backup.title
+      onChange: onScheduleBackupChange
+      options:
+      - text: options.yesOrNo.yes.text
+        value: "yes"
+      - text: options.yesOrNo.no.text
+        value: "no"
+      schema:
+        $ref: discriminator#/properties/scheduleBackup
+      type: radio
+    - discriminator:
+        backupEnabled:
+          default: false
+          type: boolean
+        backupInvoker:
+          type: string
+      elements:
+      - computed: initBackupInvoker
+        disabled: true
+        label:
+          text: labels.backup.invoker
+        onChange: onBackupInvokerChange
+        options:
+        - text: Backup Configuration
+          value: backupConfiguration
+        - text: Backup Blueprint
+          value: backupBlueprint
+        schema:
+          $ref: discriminator#/properties/backupInvoker
+        type: radio
+      - elements:
+        - discriminator:
+            backupSchedule:
+              type: string
+          elements:
+          - computed: getDefaultSchedule|resources/coreKubestashComBackupConfiguration/spec/sessions|backupSchedule
+            label:
+              text: labels.backupConfiguration.schedule
+            onChange: onInputChangeSchedule|resources/coreKubestashComBackupConfiguration/spec/sessions|backupSchedule
+            schema:
+              $ref: discriminator#/backupSchedule
+            type: input
+          type: single-step-form
+        - discriminator:
+            storageRefName:
+              type: string
+            storageRefNamespace:
+              type: string
+          elements:
+          - computed: getDefault|/resources/coreKubestashComBackupConfiguration/spec/backends|storageRef|namespace
+            fetch: fetchNamespaces
+            hasGroup: isRancherManaged
+            label:
+              text: Namespace
+            onChange: onInputChange|resources/coreKubestashComBackupConfiguration/spec/backends|storageRef|namespace|storageRefNamespace
+            schema:
+              $ref: discriminator#/storageRefNamespace
+            type: select
+          - computed: getDefault|/resources/coreKubestashComBackupConfiguration/spec/backends|storageRef|name
+            fetch: fetchNames|v1alpha1|backupstorages|storageRefNamespace
+            label:
+              text: Name
+            onChange: onInputChange|resources/coreKubestashComBackupConfiguration/spec/backends|storageRef|name|storageRefName
+            schema:
+              $ref: discriminator#/storageRefName
+            type: select
+          label:
+            text: StorageRef
+          show_label: true
+          type: single-step-form
+        - discriminator:
+            retentionPolicyName:
+              type: string
+            retentionPolicyNamespace:
+              type: string
+          elements:
+          - computed: getDefault|/resources/coreKubestashComBackupConfiguration/spec/backends|retentionPolicy|namespace
+            fetch: fetchNamespaces
+            hasGroup: isRancherManaged
+            label:
+              text: Namespace
+            onChange: onInputChange|resources/coreKubestashComBackupConfiguration/spec/backends|retentionPolicy|namespace|retentionPolicyNamespace
+            schema:
+              $ref: discriminator#/retentionPolicyNamespace
+            type: select
+          - computed: getDefault|/resources/coreKubestashComBackupConfiguration/spec/backends|retentionPolicy|name
+            fetch: fetchNames|v1alpha1|retentionpolicies|retentionPolicyNamespace
+            label:
+              text: Name
+            onChange: onInputChange|resources/coreKubestashComBackupConfiguration/spec/backends|retentionPolicy|name|retentionPolicyName
+            schema:
+              $ref: discriminator#/retentionPolicyName
+            type: select
+          label:
+            text: Retention Policy
+          show_label: true
+          type: single-step-form
+        - discriminator:
+            encryptionSecretName:
+              type: string
+            encryptionSecretNamespace:
+              type: string
+          elements:
+          - computed: getDefault|/resources/coreKubestashComBackupConfiguration/spec/sessions|encryptionSecret|namespace
+            fetch: fetchNamespaces
+            hasGroup: isRancherManaged
+            label:
+              text: Namespace
+            onChange: onInputChange|/resources/coreKubestashComBackupConfiguration/spec/sessions|encryptionSecret|namespace|encryptionSecretNamespace
+            schema:
+              $ref: discriminator#/encryptionSecretNamespace
+            type: select
+          - computed: getDefault|/resources/coreKubestashComBackupConfiguration/spec/sessions|encryptionSecret|name|encryptionSecretName
+            fetch: fetchNames|v1|secrets|encryptionSecretNamespace
+            label:
+              text: Name
+            onChange: onInputChange|/resources/coreKubestashComBackupConfiguration/spec/sessions|encryptionSecret|name
+            schema:
+              $ref: discriminator#/encryptionSecretName
+            type: select
+          label:
+            text: Encryption Secret
+          show_label: true
+          type: single-step-form
+        if: showInvokerForm|backupConfiguration
+        type: single-step-form
+      - discriminator:
+          backupBlueprintName:
+            type: string
+          schedule:
+            type: string
+          taskParameters:
+            additionalProperties:
+              type: string
+            type: object
+        elements:
+        - label:
+            text: labels.backupBlueprint.title
+          type: label-element
+        - allowUserDefinedOption: true
+          computed: initFromAnnotationValue|stash.appscode.com/backup-blueprint
+          fetch: unNamespacedResourceNames|stash.appscode.com|v1beta1|backupblueprints
+          label:
+            text: labels.backupBlueprint.name
+          onChange: onBackupBlueprintNameChange
+          schema:
+            $ref: discriminator#/properties/backupBlueprintName
+          type: select
+        - computed: initFromAnnotationValue|stash.appscode.com/schedule
+          label:
+            text: labels.backupBlueprint.schedule
+          onChange: onBackupBlueprintScheduleChange
+          schema:
+            $ref: discriminator#/properties/schedule
+          type: input
+        - computed: initFromAnnotationKeyValue|params.stash.appscode.com/
+          isArray: true
+          keys:
+            label:
+              text: Key
+          label:
+            text: labels.backupBlueprint.taskParameters
+          onChange: onTaskParametersChange
+          schema:
+            $ref: discriminator#/properties/taskParameters
+          type: key-value-input-form
+          values:
+            label:
+              text: Value
+            schema:
+              $ref: discriminator#/properties/taskParameters/additionalProperties
+            type: input
+        if: showInvokerForm|backupBlueprint
+        label:
+          text: Backup Blueprint form
+        type: single-step-form
+      if: showBackupForm
+      label:
+        text: Backup Form
+      type: single-step-form
+    type: single-step-form
+  id: backupconfiguration
+  title: steps.5.label
+- form:
+    discriminator:
+      enableMonitoring:
+        default: true
+        type: boolean
+    elements:
+    - label:
+        text: labels.to_update_exporter_resources
+      type: label-element
+    - customClass: mb-20
+      label:
+        text: labels.create_opsrequest
+      type: anchor
+      url:
+        function: getOpsRequestUrl|VerticalScaling
+    - computed: returnTrue
+      label:
+        text: labels.enable_monitoring
+      onChange: onEnableMonitoringChange
+      schema:
+        $ref: discriminator#/enableMonitoring
+      type: switch
+    - discriminator:
+        customizeExporter:
+          default: true
+          type: boolean
+      elements:
+      - hasDescription: true
+        label:
+          text: labels.agent
+        onChange: onAgentChange
+        options:
+        - description: options.agent.prometheus_operator.description
+          text: options.agent.prometheus_operator.label
+          value: prometheus.io/operator
+        - description: options.agent.prometheus.description
+          text: options.agent.prometheus.label
+          value: prometheus.io
+        - description: options.agent.prometheus_builtin.description
+          text: options.agent.prometheus_builtin.label
+          value: prometheus.io/builtin
+        schema:
+          $ref: schema#/properties/resources/properties/kubedbComSolr/properties/spec/properties/monitor/properties/agent
+        type: radio
+      - elements:
+        - label:
+            text: labels.scrapping_interval
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComSolr/properties/spec/properties/monitor/properties/prometheus/properties/serviceMonitor/properties/interval
+          type: input
+        if: isEqualToModelPathValue|prometheus.io/operator|/resources/kubedbComSolr/spec/monitor/agent
+        label:
+          text: labels.service_monitor_configuration
+        show_label: true
+        type: single-step-form
+      - elements:
+        - elements:
+          - addFormLabel: labels.endpoint
+            element:
+              elements:
+              - label:
+                  text: labels.honor_labels
+                schema:
+                  $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/endpoints/items/properties/honorLabels
+                type: switch
+              - label:
+                  text: labels.interval
+                schema:
+                  $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/endpoints/items/properties/interval
+                type: input
+              - label:
+                  text: labels.path
+                schema:
+                  $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/endpoints/items/properties/path
+                type: input
+              - label:
+                  text: labels.port
+                schema:
+                  $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/endpoints/items/properties/port
+                type: input
+              type: single-step-form
+            label:
+              text: labels.endpoints
+            schema:
+              $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/endpoints
+            tableContents:
+            - inTableColumn: true
+              label:
+                text: labels.honor_labels
+              path: honorLabels
+              type: value
+              typeOfValue: string
+            - inTableColumn: true
+              label:
+                text: labels.interval
+              path: interval
+              type: value
+              typeOfValue: string
+            - inTableColumn: true
+              label:
+                text: labels.path
+              path: path
+              type: value
+              typeOfValue: string
+            - inTableColumn: true
+              label:
+                text: labels.port
+              path: port
+              type: value
+              typeOfValue: string
+            type: single-step-form-array
+          - elements:
+            - fetch: getResources|core|v1|namespaces
+              label:
+                text: labels.matchNames
+              schema:
+                $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/namespaceSelector/properties/matchNames
+              type: multiselect
+            if: returnFalse
+            schema:
+              $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/namespaceSelector
+            type: single-step-form
+          - elements:
+            - isArray: true
+              keys:
+                label:
+                  text: labels.labels.key
+              label:
+                text: labels.labels.label
+              schema:
+                $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/selector/properties/matchLabels
+              type: key-value-input-form
+              values:
+                label:
+                  text: labels.labels.value
+                schema:
+                  $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/selector/properties/matchLabels/additionalProperties
+                type: input
+            if: returnFalse
+            schema:
+              $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/selector
+            type: single-step-form
+          schema:
+            $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec
+          type: single-step-form
+        if: isEqualToModelPathValue|prometheus.io|/resources/kubedbComSolr/spec/monitor/agent
+        label:
+          text: labels.service_monitor
+        schema:
+          $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor
+        show_label: true
+        type: single-step-form
+      - if: isEqualToModelPathValue|prometheus.io|/resources/kubedbComSolr/spec/monitor/agent
+        individualItemDisabilityCheck: disableLableChecker
+        isArray: true
+        keys:
+          label:
+            text: labels.labels.key
+        label:
+          text: labels.labels.label
+        schema:
+          $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/metadata/properties/labels
+        type: key-value-input-form
+        values:
+          label:
+            text: labels.labels.value
+          schema:
+            $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/metadata/properties/labels/additionalProperties
+          type: input
+      - label:
+          text: labels.exporter_configuration
+        type: label-element
+      - label:
+          text: labels.customize_exporter
+        onChange: onCustomizeExporterChange
+        schema:
+          $ref: discriminator#/customizeExporter
+        type: switch
+      - elements:
+        - disabled: true
+          label:
+            text: labels.resources
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComSolr/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/resources
+          type: resource-input-form
+        - label:
+            text: labels.security_context
+          type: label-element
+        - label:
+            text: labels.run_as_user
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComSolr/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/securityContext/properties/runAsUser
+          type: input
+        - customClass: mb-0
+          label:
+            text: labels.run_as_group
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComSolr/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/securityContext/properties/runAsGroup
+          type: input
+        - label:
+            text: labels.port
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComSolr/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/port
+          type: input
+        - element:
+            label:
+              isSubsection: true
+              text: labels.args
+            schema:
+              $ref: schema#/properties/resources/properties/kubedbComSolr/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/args/items
+            type: input
+          label:
+            text: labels.args
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComSolr/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/args
+          type: list-input-form
+        - alias: reusable_env
+          chart:
+            name: uibytebuildersdev-component-env
+            version: v0.11.0
+          dataContext:
+            namespace:
+              $ref: schema#/properties/metadata/properties/release/properties/namespace
+          moduleResolver: fetchJsons
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComSolr/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env
+          type: reusable-element
+        if: showCustomizeExporterSection
+        type: single-step-form
+      if: showMonitoringSection
+      type: single-step-form
+    type: single-step-form
+  id: monitoring
+  title: steps.6.label
+- form:
+    elements:
+    - alias: pod_template_standalone
+      chart:
+        name: uibytebuildersdev-component-pod-template
+        version: v0.11.0
+      dataContext:
+        namespace:
+          $ref: schema#/properties/metadata/properties/release/properties/namespace
+        topology:
+          $ref: schema#/properties/resources/properties/kubedbComSolr/properties/spec/properties/topology
+      functionCallbacks:
+        isEditWizard:
+          $ref: functions#/returnTrue
+      moduleResolver: fetchJsons
+      schema:
+        $ref: schema#/properties/resources/properties/kubedbComSolr/properties/spec/properties/podTemplate
+      type: reusable-element
+    type: single-step-form
+  id: pod-template
+  title: steps.7.label
+- form:
+    elements:
+    - alias: reusable_service_templates
+      chart:
+        name: uibytebuildersdev-component-service-templates
+        version: v0.11.0
+      moduleResolver: fetchJsons
+      schema:
+        $ref: schema#/properties/resources/properties/kubedbComSolr/properties/spec/properties/serviceTemplates
+      type: reusable-element
+    type: single-step-form
+  id: networking
+  title: steps.8.label
+- form:
+    elements:
+    - discriminator:
+        setCustomConfig:
+          type: string
+      elements:
+      - computed: initSetCustomConfig
+        label:
+          text: labels.setCustomConfig
+        onChange: onSetCustomConfigChange
+        options:
+        - text: options.yesOrNo.yes.text
+          value: "yes"
+        - text: options.yesOrNo.no.text
+          value: "no"
+        schema:
+          $ref: discriminator#/properties/setCustomConfig
+        type: radio
+      - discriminator:
+          configFiles:
+            type: string
+          configurationSource:
+            default: use-existing-config
+            type: string
+        elements:
+        - computed: setConfigurationSource
+          label:
+            text: labels.custom_config_type
+          onChange: onConfigurationSourceChange
+          options:
+          - text: options.configuration_source.use_existing_config.label
+            value: use-existing-config
+          - text: options.configuration_source.create_new_config.label
+            value: create-new-config
+          schema:
+            $ref: discriminator#/configurationSource
+          type: radio
+        - allowUserDefinedOption: true
+          fetch: getSecrets
+          if: isEqualToDiscriminatorPath|use-existing-config|/configurationSource
+          label:
+            text: labels.name
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComSolr/properties/spec/properties/configSecret/properties/name
+          type: select
+        - addFormLabel: labels.config_file
+          computed: setConfigFiles
+          element:
+            discriminator:
+              files:
+                emitAs: configFiles
+                type: array
+            elements:
+            - label:
+                text: labels.filename
+              required: true
+              schema:
+                $ref: discriminator#/properties/files/items/properties/key
+              type: input
+            - label:
+                text: labels.labels.value
+              required: true
+              schema:
+                $ref: discriminator#/properties/files/items/properties/value
+              type: editor
+            type: single-step-form
+          if: isEqualToDiscriminatorPath|create-new-config|/configurationSource
+          label:
+            text: labels.config_files
+          onChange: onConfigFilesChange
+          schema:
+            $ref: discriminator#/properties/configFiles
+          tableContents:
+          - inTableColumn: true
+            label:
+              text: labels.filename
+            path: key
+            type: value
+            typeOfValue: string
+          - label:
+              text: labels.labels.value
+            path: value
+            type: value
+            typeOfValue: code
+          type: single-step-form-array
+        if: isDiscriminatorEqualTo|/setCustomConfig|yes
+        type: single-step-form
+      type: single-step-form
+    type: single-step-form
+  id: custom-config
+  title: steps.9.label
+- form:
+    elements:
+    - discriminator:
+        setSecretCustomConfig:
+          type: string
+      elements:
+      - computed: initSetSecureCustomConfig
+        label:
+          text: labels.setSecretCustomConfig
+        onChange: onSetSecretCustomConfigChange
+        options:
+        - text: options.yesOrNo.yes.text
+          value: "yes"
+        - text: options.yesOrNo.no.text
+          value: "no"
+        schema:
+          $ref: discriminator#/properties/setSecretCustomConfig
+        type: radio
+      - discriminator:
+          configFiles:
+            type: string
+          configurationSource:
+            default: use-existing-config
+            type: string
+        elements:
+        - computed: setSecretConfigurationSource
+          label:
+            text: labels.secret_custom_config_type
+          onChange: onSecretConfigurationSourceChange
+          options:
+          - text: options.configuration_source.use_existing_config.label
+            value: use-existing-config
+          - text: options.configuration_source.create_new_config.label
+            value: create-new-config
+          schema:
+            $ref: discriminator#/configurationSource
+          type: radio
+        - allowUserDefinedOption: true
+          fetch: getSecrets
+          if: isEqualToDiscriminatorPath|use-existing-config|/configurationSource
+          label:
+            text: labels.name
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComSolr/properties/spec/properties/secureConfigSecret/properties/name
+          type: select
+        - addFormLabel: labels.config_file
+          computed: setSecretConfigFiles
+          element:
+            discriminator:
+              files:
+                emitAs: configFiles
+                type: array
+            elements:
+            - label:
+                text: labels.settings_key
+              required: true
+              schema:
+                $ref: discriminator#/properties/files/items/properties/key
+              type: input
+            - label:
+                text: labels.settings_value
+              required: true
+              schema:
+                $ref: discriminator#/properties/files/items/properties/value
+              type: editor
+            type: single-step-form
+          if: isEqualToDiscriminatorPath|create-new-config|/configurationSource
+          label:
+            text: labels.config_files
+          onChange: onSecretConfigFilesChange
+          schema:
+            $ref: discriminator#/properties/configFiles
+          tableContents:
+          - inTableColumn: true
+            label:
+              text: labels.settings_key
+            path: key
+            type: value
+            typeOfValue: string
+          - label:
+              text: labels.settings_value
+            path: value
+            type: value
+            typeOfValue: code
+          type: single-step-form-array
+        if: isDiscriminatorEqualTo|/setSecretCustomConfig|yes
+        type: single-step-form
+      type: single-step-form
+    type: single-step-form
+  id: secure-custom-config
+  if: showSecureCustomConfig
+  title: steps.12.label
+- form:
+    discriminator:
+      dbDetails:
+        type: boolean
+        default: false
+    elements:
+    - type: input
+      computed: getDbDetails
+      if: returnFalse
+    - elements:
+      - label:
+          text: Name
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/metadata/properties/name
+        type: input
+      - fetch: getNamespaces
+        label:
+          text: SelectNamespace
+        onChange: onNamespaceChange
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/metadata/properties/namespace
+        type: select
+      - fetch: getDbs
+        label:
+          text: SelectDb
+        onChange: initMetadata
+        refresh: true
+        required: true
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/databaseRef/properties/name
+        type: select
+      if: isConsole
+      type: single-step-form
+    - hasDescription: true
+      if: isConsole
+      label:
+        text: SelectType
+      onChange: initMetadata
+      options:
+      - description: Scale your CPU Memory based on resource usage
+        text: Compute
+        value: compute
+      - description: Expand your database size based on volume usage
+        text: Storage
+        value: storage
+      required: true
+      schema:
+        $ref: discriminator#/properties/autoscalingType
+      type: radio
+    - elements:
+      - elements:
+        - elements:
+          - label:
+              text: Trigger
+            options:
+            - "On"
+            - "Off"
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/coordinator/properties/trigger
+            type: select
+          - label:
+              text: PodLifeTimeThreshold
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/coordinator/properties/podLifeTimeThreshold
+            type: input
+          - label:
+              text: Resource Diff Percentage
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/coordinator/properties/resourceDiffPercentage
+            type: input
+          - elements:
+            - label:
+                text: cpu
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/coordinator/properties/minAllowed/properties/cpu
+              type: input
+            - label:
+                text: memory
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/coordinator/properties/minAllowed/properties/memory
+              type: input
+            label:
+              text: Min Allowed
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/coordinator/properties/minAllowed
+            show_label: true
+            type: single-step-form
+          - elements:
+            - label:
+                text: cpu
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/coordinator/properties/maxAllowed/properties/cpu
+              type: input
+            - label:
+                text: memory
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/coordinator/properties/maxAllowed/properties/memory
+              type: input
+            label:
+              text: Max Allowed
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/coordinator/properties/maxAllowed
+            show_label: true
+            type: single-step-form
+          - fetch: setControlledResources|coordinator
+            label:
+              text: Controlled Resources
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/coordinator/properties/controlledResources
+            type: multiselect
+          label:
+            text: Brokers
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/coordinator
+          show_label: true
+          type: single-step-form
+        - elements:
+          - label:
+              text: Trigger
+            options:
+            - "On"
+            - "Off"
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/data/properties/trigger
+            type: select
+          - label:
+              text: PodLifeTimeThreshold
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/data/properties/podLifeTimeThreshold
+            type: input
+          - label:
+              text: Resource Diff Percentage
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/data/properties/resourceDiffPercentage
+            type: input
+          - elements:
+            - label:
+                text: cpu
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/data/properties/minAllowed/properties/cpu
+              type: input
+            - label:
+                text: memory
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/data/properties/minAllowed/properties/memory
+              type: input
+            label:
+              text: Min Allowed
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/data/properties/minAllowed
+            show_label: true
+            type: single-step-form
+          - elements:
+            - label:
+                text: cpu
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/data/properties/maxAllowed/properties/cpu
+              type: input
+            - label:
+                text: memory
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/data/properties/maxAllowed/properties/memory
+              type: input
+            label:
+              text: Max Allowed
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/data/properties/maxAllowed
+            show_label: true
+            type: single-step-form
+          - fetch: setControlledResources|data
+            label:
+              text: Controlled Resources
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/data/properties/controlledResources
+            type: multiselect
+          label:
+            text: Brokers
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/data
+          show_label: true
+          type: single-step-form
+        - elements:
+          - label:
+              text: Trigger
+            options:
+            - "On"
+            - "Off"
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/node/properties/trigger
+            type: select
+          - label:
+              text: PodLifeTimeThreshold
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/node/properties/podLifeTimeThreshold
+            type: input
+          - label:
+              text: Resource Diff Percentage
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/node/properties/resourceDiffPercentage
+            type: input
+          - elements:
+            - label:
+                text: cpu
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/node/properties/minAllowed/properties/cpu
+              type: input
+            - label:
+                text: memory
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/node/properties/minAllowed/properties/memory
+              type: input
+            label:
+              text: Min Allowed
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/node/properties/minAllowed
+            show_label: true
+            type: single-step-form
+          - elements:
+            - label:
+                text: cpu
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/node/properties/maxAllowed/properties/cpu
+              type: input
+            - label:
+                text: memory
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/node/properties/maxAllowed/properties/memory
+              type: input
+            label:
+              text: Max Allowed
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/node/properties/maxAllowed
+            show_label: true
+            type: single-step-form
+          - fetch: setControlledResources|node
+            label:
+              text: Controlled Resources
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/node/properties/controlledResources
+            type: multiselect
+          label:
+            text: Brokers
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/node
+          show_label: true
+          type: single-step-form
+        - elements:
+          - label:
+              text: Trigger
+            options:
+            - "On"
+            - "Off"
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/overseer/properties/trigger
+            type: select
+          - label:
+              text: PodLifeTimeThreshold
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/overseer/properties/podLifeTimeThreshold
+            type: input
+          - label:
+              text: Resource Diff Percentage
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/overseer/properties/resourceDiffPercentage
+            type: input
+          - elements:
+            - label:
+                text: cpu
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/overseer/properties/minAllowed/properties/cpu
+              type: input
+            - label:
+                text: memory
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/overseer/properties/minAllowed/properties/memory
+              type: input
+            label:
+              text: Min Allowed
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/overseer/properties/minAllowed
+            show_label: true
+            type: single-step-form
+          - elements:
+            - label:
+                text: cpu
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/overseer/properties/maxAllowed/properties/cpu
+              type: input
+            - label:
+                text: memory
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/overseer/properties/maxAllowed/properties/memory
+              type: input
+            label:
+              text: Max Allowed
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/overseer/properties/maxAllowed
+            show_label: true
+            type: single-step-form
+          - fetch: setControlledResources|overseer
+            label:
+              text: Controlled Resources
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/overseer/properties/controlledResources
+            type: multiselect
+          label:
+            text: Brokers
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/overseer
+          show_label: true
+          type: single-step-form
+        if: dbTypeEqualsTo|topology 
+        type: single-step-form
+      - elements:
+        - elements:
+          - label:
+              text: Trigger
+            options:
+            - "On"
+            - "Off"
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/overlords/properties/trigger
+            type: select
+          - label:
+              text: PodLifeTimeThreshold
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/overlords/properties/podLifeTimeThreshold
+            type: input
+          - label:
+              text: Resource Diff Percentage
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/overlords/properties/resourceDiffPercentage
+            type: input
+          - elements:
+            - label:
+                text: cpu
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/overlords/properties/minAllowed/properties/cpu
+              type: input
+            - label:
+                text: memory
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/overlords/properties/minAllowed/properties/memory
+              type: input
+            label:
+              text: Min Allowed
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/overlords/properties/minAllowed
+            show_label: true
+            type: single-step-form
+          - elements:
+            - label:
+                text: cpu
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/overlords/properties/maxAllowed/properties/cpu
+              type: input
+            - label:
+                text: memory
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/overlords/properties/maxAllowed/properties/memory
+              type: input
+            label:
+              text: Max Allowed
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/overlords/properties/maxAllowed
+            show_label: true
+            type: single-step-form
+          - fetch: setControlledResources|overlords
+            label:
+              text: Controlled Resources
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/overlords/properties/controlledResources
+            type: multiselect
+          label:
+            text: overlords
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/overlords
+          show_label: true
+          type: single-step-form
+        if: dbTypeEqualsTo|standalone
+        type: single-step-form
+      - elements:
+        - fetch: fetchNodeTopology
+          label:
+            text: Select NodeTopology
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/name
+          type: select
+        - if: isNodeTopologySelected
+          label:
+            text: ScaleUp Diff Percentage
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/scaleUpDiffPercentage
+          type: input
+        - if: isNodeTopologySelected
+          label:
+            text: ScaleDown Diff Percentage
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/scaleDownDiffPercentage
+          type: input
+        label:
+          text: nodeTopology
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/compute/properties/nodeTopology
+        show_label: true
+        type: single-step-form
+      type: single-step-form
+    - elements:
+      - label:
+          text: Timeout
+        options:
+        - text: 5 minutes
+          value: 5m0s
+        - text: 10 minutes
+          value: 10m0s
+        - text: 30 minutes
+          value: 30m0s
+        - text: 1 hour
+          value: 1h0m
+        - text: 2 hours
+          value: 2h0m
+        - text: 5 hours
+          value: 5h0m
+        - text: 10 hours
+          value: 10h0m
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/opsRequestOptions/properties/timeout
+        type: select
+      - computed: setApplyToIfReady
+        label:
+          text: Apply
+        options:
+        - text: IfReady (OpsRequest will be applied if database is ready)
+          value: IfReady
+        - text: Always (OpsRequest will always be applied)
+          value: Always
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/opsRequestOptions/properties/apply
+        type: radio
+      if: showOpsRequestOptions
+      label:
+        text: ops Request Options
+      schema:
+        $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/opsRequestOptions
+      show_label: true
+      type: single-step-form
+    type: single-step-form
+  id: compute-autoscaler
+  title: steps.13.label
+- form:
+    discriminator:
+      dbDetails:
+        type: boolean
+        default: false
+    elements:
+    - type: input
+      computed: getDbDetails
+      if: returnFalse    
+    - elements:
+      - label:
+          text: Name
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/metadata/properties/name
+        type: input
+      - fetch: getNamespaces
+        label:
+          text: SelectNamespace
+        onChange: onNamespaceChange
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/metadata/properties/namespace
+        type: select
+      - fetch: getDbs
+        label:
+          text: SelectDb
+        onChange: initMetadata
+        refresh: true
+        required: true
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/databaseRef/properties/name
+        type: select
+      if: isConsole
+      type: single-step-form
+    - hasDescription: true
+      if: isConsole
+      label:
+        text: SelectType
+      onChange: initMetadata
+      options:
+      - description: Scale your CPU Memory based on resource usage
+        text: Compute
+        value: compute
+      - description: Expand your database size based on volume usage
+        text: Storage
+        value: storage
+      required: true
+      schema:
+        $ref: discriminator#/properties/autoscalingType
+      type: radio
+    - elements:
+      - elements:
+        - elements:
+          - label:
+              text: Trigger
+            options:
+            - "On"
+            - "Off"
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/historicals/properties/trigger
+            type: select
+          - label:
+              text: PodLifeTimeThreshold
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/historicals/properties/podLifeTimeThreshold
+            type: input
+          - label:
+              text: Resource Diff Percentage
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/historicals/properties/resourceDiffPercentage
+            type: input
+          - elements:
+            - label:
+                text: cpu
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/historicals/properties/minAllowed/properties/cpu
+              type: input
+            - label:
+                text: memory
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/historicals/properties/minAllowed/properties/memory
+              type: input
+            label:
+              text: Min Allowed
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/historicals/properties/minAllowed
+            show_label: true
+            type: single-step-form
+          - elements:
+            - label:
+                text: cpu
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/historicals/properties/maxAllowed/properties/cpu
+              type: input
+            - label:
+                text: memory
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/historicals/properties/maxAllowed/properties/memory
+              type: input
+            label:
+              text: Max Allowed
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/historicals/properties/maxAllowed
+            show_label: true
+            type: single-step-form
+          - fetch: setControlledResources|historicals
+            label:
+              text: Controlled Resources
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/historicals/properties/controlledResources
+            type: multiselect
+          label:
+            text: Historicals
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/historicals
+          show_label: true
+          type: single-step-form        
+        - elements:
+          - label:
+              text: Trigger
+            options:
+            - "On"
+            - "Off"
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/middleManagers/properties/trigger
+            type: select
+          - label:
+              text: PodLifeTimeThreshold
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/middleManagers/properties/podLifeTimeThreshold
+            type: input
+          - label:
+              text: Resource Diff Percentage
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/middleManagers/properties/resourceDiffPercentage
+            type: input
+          - elements:
+            - label:
+                text: cpu
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/middleManagers/properties/minAllowed/properties/cpu
+              type: input
+            - label:
+                text: memory
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/middleManagers/properties/minAllowed/properties/memory
+              type: input
+            label:
+              text: Min Allowed
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/middleManagers/properties/minAllowed
+            show_label: true
+            type: single-step-form
+          - elements:
+            - label:
+                text: cpu
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/middleManagers/properties/maxAllowed/properties/cpu
+              type: input
+            - label:
+                text: memory
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/middleManagers/properties/maxAllowed/properties/memory
+              type: input
+            label:
+              text: Max Allowed
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/middleManagers/properties/maxAllowed
+            show_label: true
+            type: single-step-form
+          - fetch: setControlledResources|middleManagers
+            label:
+              text: Controlled Resources
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/middleManagers/properties/controlledResources
+            type: multiselect
+          label:
+            text: MiddleManagers
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/storage/properties/middleManagers
+          show_label: true
+          type: single-step-form
+        type: single-step-form
+      type: single-step-form
+    - elements:
+      - label:
+          text: Timeout
+        options:
+        - text: 5 minutes
+          value: 5m0s
+        - text: 10 minutes
+          value: 10m0s
+        - text: 30 minutes
+          value: 30m0s
+        - text: 1 hour
+          value: 1h0m
+        - text: 2 hours
+          value: 2h0m
+        - text: 5 hours
+          value: 5h0m
+        - text: 10 hours
+          value: 10h0m
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/opsRequestOptions/properties/timeout
+        type: select
+      - computed: setApplyToIfReady
+        label:
+          text: Apply
+        options:
+        - text: IfReady (OpsRequest will be applied if database is ready)
+          value: IfReady
+        - text: Always (OpsRequest will always be applied)
+          value: Always
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/opsRequestOptions/properties/apply
+        type: radio
+      if: showOpsRequestOptions
+      label:
+        text: ops Request Options
+      schema:
+        $ref: schema#/properties/resources/properties/autoscalingKubedbComSolrAutoscaler/properties/spec/properties/opsRequestOptions
+      show_label: true
+      type: single-step-form
+    type: single-step-form
+  id: storage-autoscaler
+  title: steps.0.label
+type: multi-step-form
