@@ -2133,7 +2133,7 @@ steps:
             $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/standalone/properties/expansionMode
           type: select
         - label:
-            text: Usage Threshold
+            text: Usage Threshold (%)
           schema:
             $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/standalone/properties/usageThreshold
           type: input
@@ -2141,12 +2141,12 @@ steps:
           element:
             elements:
             - label:
-                text: Applies Upto
+                text: AppliesUpto (In Storage units)
               schema:
                 $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/standalone/properties/scalingRules/items/properties/appliesUpto
               type: input
             - label:
-                text: Threshold
+                text: Threshold (In %, Or In Storage Units)
               schema:
                 $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/standalone/properties/scalingRules/items/properties/threshold
               type: input
@@ -2155,16 +2155,17 @@ steps:
             text: Scaling Rules
           schema:
             $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/standalone/properties/scalingRules
+          onChange: handleUnit|autoscalingKubedbComMongoDBAutoscaler/spec/storage/standalone/scalingRules|scalingRules
           tableContents:
           - inTableColumn: true
             label:
-              text: Applies Upto
+              text: AppliesUpto (In Storage units)
             path: appliesUpto
             type: value
             typeOfValue: string
           - inTableColumn: true
             label:
-              text: Threshold
+              text: Threshold (In %, Or In Storage Units)
             path: threshold
             type: value
             typeOfValue: string
@@ -2178,6 +2179,7 @@ steps:
             text: UpperBound
           schema:
             $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/standalone/properties/upperBound
+          onChange: handleUnit|autoscalingKubedbComMongoDBAutoscaler/spec/storage/standalone/upperBound
           type: input
         label:
           text: Standalone
@@ -2204,7 +2206,7 @@ steps:
             $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/replicaSet/properties/expansionMode
           type: select
         - label:
-            text: usage Threshold
+            text: usage Threshold (%)
           schema:
             $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/replicaSet/properties/usageThreshold
           type: input
@@ -2217,7 +2219,7 @@ steps:
                 $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/replicaSet/properties/scalingRules/items/properties/appliesUpto
               type: input
             - label:
-                text: Threshold
+                text: Threshold (In %, Or In Storage Units)
               schema:
                 $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/replicaSet/properties/scalingRules/items/properties/threshold
               type: input
@@ -2226,16 +2228,17 @@ steps:
             text: Scaling Rules
           schema:
             $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/replicaSet/properties/scalingRules
+          onChange: handleUnit|autoscalingKubedbComMongoDBAutoscaler/spec/storage/replicaSet/scalingRules|scalingRules
           tableContents:
           - inTableColumn: true
             label:
-              text: Applies Upto
+              text: AppliesUpto (In Storage units)
             path: appliesUpto
             type: value
             typeOfValue: string
           - inTableColumn: true
             label:
-              text: Threshold
+              text: Threshold (In %, Or In Storage Units)
             path: threshold
             type: value
             typeOfValue: string
@@ -2247,6 +2250,7 @@ steps:
           type: input
         - label:
             text: UpperBound
+          onChange: handleUnit|autoscalingKubedbComMongoDBAutoscaler/spec/storage/replicaSet/upperBound
           schema:
             $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/replicaSet/properties/upperBound
           type: input
@@ -2276,7 +2280,7 @@ steps:
               $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/shard/properties/expansionMode
             type: select
           - label:
-              text: Usage Threshold
+              text: Usage Threshold (%)
             schema:
               $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/shard/properties/usageThreshold
             type: input
@@ -2284,12 +2288,12 @@ steps:
             element:
               elements:
               - label:
-                  text: Applies Upto
+                  text: AppliesUpto (In Storage units)
                 schema:
                   $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/shard/properties/scalingRules/items/properties/appliesUpto
                 type: input
               - label:
-                  text: Threshold
+                  text: Threshold (In %, Or In Storage Units)
                 schema:
                   $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/shard/properties/scalingRules/items/properties/threshold
                 type: input
@@ -2298,22 +2302,24 @@ steps:
               text: Scaling Rules
             schema:
               $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/shard/properties/scalingRules
+            onChange: handleUnit|autoscalingKubedbComMongoDBAutoscaler/spec/storage/shard/scalingRules|scalingRules
             tableContents:
             - inTableColumn: true
               label:
-                text: Applies Upto
+                text: AppliesUpto (In Storage units)
               path: appliesUpto
               type: value
               typeOfValue: string
             - inTableColumn: true
               label:
-                text: Threshold
+                text: Threshold (In %, Or In Storage Units)
               path: threshold
               type: value
               typeOfValue: string
             type: single-step-form-array
           - label:
               text: UpperBound
+            onChange: handleUnit|autoscalingKubedbComMongoDBAutoscaler/spec/storage/shard/upperBound
             schema:
               $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/shard/properties/upperBound
             type: input
@@ -2346,7 +2352,7 @@ steps:
               $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/configServer/properties/expansionMode
             type: select
           - label:
-              text: Usage Threshold
+              text: Usage Threshold (%)
             schema:
               $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/configServer/properties/usageThreshold
             type: input
@@ -2354,12 +2360,12 @@ steps:
             element:
               elements:
               - label:
-                  text: Applies Upto
+                  text: AppliesUpto (In Storage units)
                 schema:
                   $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/configServer/properties/scalingRules/items/properties/appliesUpto
                 type: input
               - label:
-                  text: Threshold
+                  text: Threshold (In %, Or In Storage Units)
                 schema:
                   $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/configServer/properties/scalingRules/items/properties/threshold
                 type: input
@@ -2368,22 +2374,24 @@ steps:
               text: Scaling Rules
             schema:
               $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/configServer/properties/scalingRules
+            onChange: handleUnit|autoscalingKubedbComMongoDBAutoscaler/spec/storage/configServer/scalingRules|scalingRules
             tableContents:
             - inTableColumn: true
               label:
-                text: Applies Upto
+                text: AppliesUpto (In Storage units)
               path: appliesUpto
               type: value
               typeOfValue: string
             - inTableColumn: true
               label:
-                text: Threshold
+                text: Threshold (In %, Or In Storage Units)
               path: threshold
               type: value
               typeOfValue: string
             type: single-step-form-array
           - label:
               text: UpperBound
+            onChange: handleUnit|autoscalingKubedbComMongoDBAutoscaler/spec/storage/configServer/upperBound
             schema:
               $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/configServer/properties/upperBound
             type: input
@@ -2416,7 +2424,7 @@ steps:
               $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/hidden/properties/expansionMode
             type: select
           - label:
-              text: Usage Threshold
+              text: Usage Threshold (%)
             schema:
               $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/hidden/properties/usageThreshold
             type: input
@@ -2424,12 +2432,12 @@ steps:
             element:
               elements:
               - label:
-                  text: Applies Upto
+                  text: AppliesUpto (In Storage units)
                 schema:
                   $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/hidden/properties/scalingRules/items/properties/appliesUpto
                 type: input
               - label:
-                  text: Threshold
+                  text: Threshold (In %, Or In Storage Units)
                 schema:
                   $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/hidden/properties/scalingRules/items/properties/threshold
                 type: input
@@ -2438,22 +2446,24 @@ steps:
               text: Scaling Rules
             schema:
               $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/hidden/properties/scalingRules
+            onChange: handleUnit|autoscalingKubedbComMongoDBAutoscaler/spec/storage/hidden/scalingRules|scalingRules
             tableContents:
             - inTableColumn: true
               label:
-                text: Applies Upto
+                text: AppliesUpto (In Storage units)
               path: appliesUpto
               type: value
               typeOfValue: string
             - inTableColumn: true
               label:
-                text: Threshold
+                text: Threshold (In %, Or In Storage Units)
               path: threshold
               type: value
               typeOfValue: string
             type: single-step-form-array
           - label:
               text: UpperBound
+            onChange: handleUnit|autoscalingKubedbComMongoDBAutoscaler/spec/storage/hidden/upperBound
             schema:
               $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/hidden/properties/upperBound
             type: input
