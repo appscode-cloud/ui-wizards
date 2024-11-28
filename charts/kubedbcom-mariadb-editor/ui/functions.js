@@ -1967,9 +1967,9 @@ async function setBackupSwitch({ commit, storeGet, axios, getValue, model }) {
 
     const apiGroup = storeGet('/route/params/group')
     initialModel.spec['target'] = { name, namespace, apiGroup, kind }
-    const labels = dbResource.metadata.labels
+    const labels = dbResource.metadata?.labels
     initialModel['metadata'] = { name, namespace, labels }
-  }
+  } else dbResource = getValue(model, '/resources/kubedbComMariaDB')
 
   // call namespace for optimization
   namespaceList = fetchNamespaces({ axios, storeGet })
@@ -1985,7 +1985,7 @@ async function setBackupSwitch({ commit, storeGet, axios, getValue, model }) {
   if (filteredBlueprint) {
     try {
       const blueNamespace = filteredBlueprint.metadata?.labels['kubestash.com/invoker-namespace']
-      const blueName = filteredBlueprint.metadata.labels['kubestash.com/invoker-name']
+      const blueName = filteredBlueprint.metadata?.labels['kubestash.com/invoker-name']
       const resp = await axios.get(
         `/clusters/${user}/${cluster}/proxy/core.kubestash.com/v1alpha1/namespaces/${blueNamespace}/backupblueprints/${blueName}`,
       )
@@ -2013,14 +2013,14 @@ async function setBackupSwitch({ commit, storeGet, axios, getValue, model }) {
       // prefill blueprintDetails with stash-presets value
       const stashPreset = storeGet('/backup/stashPresets')
       const { retentionPolicy, encryptionSecret, schedule, storageRef } = stashPreset
-      const tempBackends = blueprintDetails.spec.backupConfigurationTemplate?.backends
+      const tempBackends = blueprintDetails.spec?.backupConfigurationTemplate?.backends
       tempBackends[0]['storageRef'] = storageRef
       tempBackends[0]['retentionPolicy'] = retentionPolicy
       blueprintDetails.spec.backupConfigurationTemplate['backends'] = tempBackends
 
-      const tempSessions = blueprintDetails.spec.backupConfigurationTemplate?.sessions
+      const tempSessions = blueprintDetails.spec?.backupConfigurationTemplate?.sessions
       const tempRepositories =
-        blueprintDetails.spec.backupConfigurationTemplate?.sessions[0]?.repositories
+        blueprintDetails.spec?.backupConfigurationTemplate?.sessions[0]?.repositories
       tempRepositories[0]['encryptionSecret'] = encryptionSecret
       tempRepositories[0].name = `${kind.toLowerCase()}-blueprint`
       tempRepositories[0]['directory'] = `${namespace}/${kind.toLowerCase()}-blueprint`
@@ -2029,7 +2029,7 @@ async function setBackupSwitch({ commit, storeGet, axios, getValue, model }) {
       tempSessions[0]['scheduler']['schedule'] = schedule
       blueprintDetails.spec.backupConfigurationTemplate['sessions'] = tempSessions
 
-      const labels = dbResource.metadata.labels
+      const labels = dbResource.metadata?.labels
       blueprintDetails['metadata'] = {
         name: `${kind.toLowerCase()}-blueprint`,
         namespace,
