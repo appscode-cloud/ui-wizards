@@ -885,7 +885,7 @@ steps:
             $ref: schema#/properties/resources/properties/autoscalingKubedbComRabbitMQAutoscaler/properties/spec/properties/storage/properties/standalone/properties/expansionMode
           type: select
         - label:
-            text: Usage Threshold
+            text: UsageThreshold (%)
           schema:
             $ref: schema#/properties/resources/properties/autoscalingKubedbComRabbitMQAutoscaler/properties/spec/properties/storage/properties/standalone/properties/usageThreshold
           type: input
@@ -893,12 +893,12 @@ steps:
           element:
             elements:
             - label:
-                text: appliesUpto
+                text: AppliesUpto (In Storage units)
               schema:
                 $ref: schema#/properties/resources/properties/autoscalingKubedbComRabbitMQAutoscaler/properties/spec/properties/storage/properties/standalone/properties/scalingRules/items/properties/appliesUpto
               type: input
             - label:
-                text: threshold
+                text: Threshold (In %, Or In Storage Units)
               schema:
                 $ref: schema#/properties/resources/properties/autoscalingKubedbComRabbitMQAutoscaler/properties/spec/properties/storage/properties/standalone/properties/scalingRules/items/properties/threshold
               type: input
@@ -907,22 +907,24 @@ steps:
             text: ScalingRules
           schema:
             $ref: schema#/properties/resources/properties/autoscalingKubedbComRabbitMQAutoscaler/properties/spec/properties/storage/properties/standalone/properties/scalingRules
+          onChange: handleUnit|autoscalingKubedbComRabbitMQAutoscaler/spec/storage/standalone/scalingRules|scalingRules
           tableContents:
           - inTableColumn: true
             label:
-              text: appliesUpto
+              text: AppliesUpto (In Storage units)
             path: appliesUpto
             type: value
             typeOfValue: string
           - inTableColumn: true
             label:
-              text: threshold
+              text: Threshold (In %, Or In Storage Units)
             path: threshold
             type: value
             typeOfValue: string
           type: single-step-form-array
         - label:
             text: UpperBound
+          onChange: handleUnit|autoscalingKubedbComRabbitMQAutoscaler/spec/storage/standalone/upperBound
           schema:
             $ref: schema#/properties/resources/properties/autoscalingKubedbComRabbitMQAutoscaler/properties/spec/properties/storage/properties/standalone/properties/upperBound
           type: input
@@ -951,7 +953,7 @@ steps:
             $ref: schema#/properties/resources/properties/autoscalingKubedbComRabbitMQAutoscaler/properties/spec/properties/storage/properties/cluster/properties/expansionMode
           type: select
         - label:
-            text: Usage Threshold
+            text: UsageThreshold (%)
           schema:
             $ref: schema#/properties/resources/properties/autoscalingKubedbComRabbitMQAutoscaler/properties/spec/properties/storage/properties/cluster/properties/usageThreshold
           type: input
@@ -959,12 +961,12 @@ steps:
           element:
             elements:
             - label:
-                text: appliesUpto
+                text: AppliesUpto (In Storage units)
               schema:
                 $ref: schema#/properties/resources/properties/autoscalingKubedbComRabbitMQAutoscaler/properties/spec/properties/storage/properties/cluster/properties/scalingRules/items/properties/appliesUpto
               type: input
             - label:
-                text: Threshold
+                text: Threshold (In %, Or In Storage Units)
               schema:
                 $ref: schema#/properties/resources/properties/autoscalingKubedbComRabbitMQAutoscaler/properties/spec/properties/storage/properties/cluster/properties/scalingRules/items/properties/threshold
               type: input
@@ -973,16 +975,17 @@ steps:
             text: ScalingRules
           schema:
             $ref: schema#/properties/resources/properties/autoscalingKubedbComRabbitMQAutoscaler/properties/spec/properties/storage/properties/cluster/properties/scalingRules
+          onChange: handleUnit|autoscalingKubedbComRabbitMQAutoscaler/spec/storage/cluster/scalingRules|scalingRules
           tableContents:
           - inTableColumn: true
             label:
-              text: AppliesUpto
+              text: AppliesUpto (In Storage units)
             path: appliesUpto
             type: value
             typeOfValue: string
           - inTableColumn: true
             label:
-              text: Threshold
+              text: Threshold (In %, Or In Storage Units)
             path: threshold
             type: value
             typeOfValue: string
@@ -991,6 +994,7 @@ steps:
             text: UpperBound
           schema:
             $ref: schema#/properties/resources/properties/autoscalingKubedbComRabbitMQAutoscaler/properties/spec/properties/storage/properties/cluster/properties/upperBound
+          onChange: handleUnit|autoscalingKubedbComRabbitMQAutoscaler/spec/storage/cluster/upperBound
           type: input
         if: dbTypeEqualsTo|cluster
         label:
@@ -1018,7 +1022,7 @@ steps:
               $ref: schema#/properties/resources/properties/autoscalingKubedbComRabbitMQAutoscaler/properties/spec/properties/storage/properties/sentinel/properties/expansionMode
             type: select
           - label:
-              text: Usage Threshold
+              text: UsageThreshold (%)
             schema:
               $ref: schema#/properties/resources/properties/autoscalingKubedbComRabbitMQAutoscaler/properties/spec/properties/storage/properties/sentinel/properties/usageThreshold
             type: input
@@ -1026,12 +1030,12 @@ steps:
             element:
               elements:
               - label:
-                  text: AppliesUpto
+                  text: AppliesUpto (In Storage units)
                 schema:
                   $ref: schema#/properties/resources/properties/autoscalingKubedbComRabbitMQAutoscaler/properties/spec/properties/storage/properties/sentinel/properties/scalingRules/items/properties/appliesUpto
                 type: input
               - label:
-                  text: Threshold
+                  text: Threshold (In %, Or In Storage Units)
                 schema:
                   $ref: schema#/properties/resources/properties/autoscalingKubedbComRabbitMQAutoscaler/properties/spec/properties/storage/properties/sentinel/properties/scalingRules/items/properties/threshold
                 type: input
@@ -1040,16 +1044,17 @@ steps:
               text: ScalingRules
             schema:
               $ref: schema#/properties/resources/properties/autoscalingKubedbComRabbitMQAutoscaler/properties/spec/properties/storage/properties/sentinel/properties/scalingRules
+            onChange: handleUnit|autoscalingKubedbComRabbitMQAutoscaler/spec/storage/sentinel/scalingRules|scalingRules
             tableContents:
             - inTableColumn: true
               label:
-                text: AppliesUpto
+                text: AppliesUpto (In Storage units)
               path: appliesUpto
               type: value
               typeOfValue: string
             - inTableColumn: true
               label:
-                text: Threshold
+                text: Threshold (In %, Or In Storage Units)
               path: threshold
               type: value
               typeOfValue: string
@@ -1058,6 +1063,7 @@ steps:
               text: UpperBound
             schema:
               $ref: schema#/properties/resources/properties/autoscalingKubedbComRabbitMQAutoscaler/properties/spec/properties/storage/properties/sentinel/properties/upperBound
+            onChange: handleUnit|autoscalingKubedbComRabbitMQAutoscaler/spec/storage/sentinel/upperBound
             type: input
           label:
             text: Sentinel
@@ -1083,7 +1089,7 @@ steps:
               $ref: schema#/properties/resources/properties/autoscalingKubedbComRabbitMQAutoscaler/properties/spec/properties/storage/properties/sentinel/properties/expansionMode
             type: select
           - label:
-              text: Usage Threshold
+              text: UsageThreshold (%)
             schema:
               $ref: schema#/properties/resources/properties/autoscalingKubedbComRabbitMQAutoscaler/properties/spec/properties/storage/properties/sentinel/properties/usageThreshold
             type: input
@@ -1091,12 +1097,12 @@ steps:
             element:
               elements:
               - label:
-                  text: AppliesUpto
+                  text: AppliesUpto (In Storage units)
                 schema:
                   $ref: schema#/properties/resources/properties/autoscalingKubedbComRabbitMQAutoscaler/properties/spec/properties/storage/properties/sentinel/properties/scalingRules/items/properties/appliesUpto
                 type: input
               - label:
-                  text: Threshold
+                  text: Threshold (In %, Or In Storage Units)
                 schema:
                   $ref: schema#/properties/resources/properties/autoscalingKubedbComRabbitMQAutoscaler/properties/spec/properties/storage/properties/sentinel/properties/scalingRules/items/properties/threshold
                 type: input
@@ -1105,16 +1111,17 @@ steps:
               text: ScalingRules
             schema:
               $ref: schema#/properties/resources/properties/autoscalingKubedbComRabbitMQAutoscaler/properties/spec/properties/storage/properties/sentinel/properties/scalingRules
+            onChange: handleUnit|autoscalingKubedbComRabbitMQAutoscaler/spec/storage/sentinel/scalingRules|scalingRules
             tableContents:
             - inTableColumn: true
               label:
-                text: AppliesUpto
+                text: AppliesUpto (In Storage units)
               path: appliesUpto
               type: value
               typeOfValue: string
             - inTableColumn: true
               label:
-                text: Threshold
+                text: Threshold (In %, Or In Storage Units)
               path: threshold
               type: value
               typeOfValue: string
@@ -1122,7 +1129,8 @@ steps:
           - label:
               text: UpperBound
             schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComRabbitMQAutoscaler/properties/spec/properties/storage/properties/sentinel/properties/upperBound
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComRabbitMQAutoscaler/properties/spec/properties/storage/properties/configServer/properties/upperBound
+            onChange: handleUnit|autoscalingKubedbComRabbitMQAutoscaler/spec/storage/configServer/upperBound
             type: input
           label:
             text: ConfigServer

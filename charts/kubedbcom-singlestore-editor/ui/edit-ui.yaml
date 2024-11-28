@@ -398,7 +398,7 @@ steps:
             $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/aggregator/properties/expansionMode
           type: select
         - label:
-            text: Usage Threshold
+            text: UsageThreshold (%)
           schema:
             $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/aggregator/properties/usageThreshold
           type: input
@@ -406,12 +406,12 @@ steps:
           element:
             elements:
             - label:
-                text: appliesUpto
+                text: AppliesUpto (In Storage units)
               schema:
                 $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/aggregator/properties/scalingRules/items/properties/appliesUpto
               type: input
             - label:
-                text: threshold
+                text: Threshold (In %, Or In Storage Units)
               schema:
                 $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/aggregator/properties/scalingRules/items/properties/threshold
               type: input
@@ -420,16 +420,17 @@ steps:
             text: ScalingRules
           schema:
             $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/aggregator/properties/scalingRules
+          onChange: handleUnit|autoscalingKubedbComSinglestoreAutoscaler/spec/storage/aggregator/scalingRules|scalingRules
           tableContents:
           - inTableColumn: true
             label:
-              text: appliesUpto
+              text: AppliesUpto (In Storage units)
             path: appliesUpto
             type: value
             typeOfValue: string
           - inTableColumn: true
             label:
-              text: threshold
+              text: Threshold (In %, Or In Storage Units)
             path: threshold
             type: value
             typeOfValue: string
@@ -438,6 +439,7 @@ steps:
             text: UpperBound
           schema:
             $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/aggregator/properties/upperBound
+          onChange: handleUnit|autoscalingKubedbComSinglestoreAutoscaler/spec/storage/aggregator/upperBound
           type: input
         if: dbTypeEqualsTo|topology
         label:
@@ -466,7 +468,7 @@ steps:
             $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/leaf/properties/expansionMode
           type: select
         - label:
-            text: Usage Threshold
+            text: UsageThreshold (%)
           schema:
             $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/leaf/properties/usageThreshold
           type: input
@@ -474,36 +476,38 @@ steps:
           element:
             elements:
             - label:
-                text: appliesUpto
+                text: AppliesUpto (In Storage units)
               schema:
                 $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/leaf/properties/scalingRules/items/properties/appliesUpto
               type: input
             - label:
-                text: threshold
+                text: Threshold (In %, Or In Storage Units)
               schema:
                 $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/leaf/properties/scalingRules/items/properties/threshold
               type: input
             type: single-step-form
           label:
             text: ScalingRules
+          onChange: handleUnit|autoscalingKubedbComSinglestoreAutoscaler/spec/storage/leaf/scalingRules
           schema:
             $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/leaf/properties/scalingRules
           tableContents:
           - inTableColumn: true
             label:
-              text: appliesUpto
+              text: AppliesUpto (In Storage units)
             path: appliesUpto
             type: value
             typeOfValue: string
           - inTableColumn: true
             label:
-              text: threshold
+              text: Threshold (In %, Or In Storage Units)
             path: threshold
             type: value
             typeOfValue: string
           type: single-step-form-array
         - label:
             text: UpperBound
+          onChange: handleUnit|autoscalingKubedbComSinglestoreAutoscaler/spec/storage/leaf/upperBound
           schema:
             $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/leaf/properties/upperBound
           type: input
@@ -534,7 +538,7 @@ steps:
             $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/node/properties/expansionMode
           type: select
         - label:
-            text: Usage Threshold
+            text: UsageThreshold (%)
           schema:
             $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/node/properties/usageThreshold
           type: input
@@ -542,12 +546,12 @@ steps:
           element:
             elements:
             - label:
-                text: appliesUpto
+                text: AppliesUpto (In Storage units)
               schema:
                 $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/node/properties/scalingRules/items/properties/appliesUpto
               type: input
             - label:
-                text: threshold
+                text: Threshold (In %, Or In Storage Units)
               schema:
                 $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/node/properties/scalingRules/items/properties/threshold
               type: input
@@ -556,22 +560,24 @@ steps:
             text: ScalingRules
           schema:
             $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/node/properties/scalingRules
+          onChange: handleUnit|autoscalingKubedbComSinglestoreAutoscaler/spec/storage/node/scalingRules|scalingRules
           tableContents:
           - inTableColumn: true
             label:
-              text: appliesUpto
+              text: AppliesUpto (In Storage units)
             path: appliesUpto
             type: value
             typeOfValue: string
           - inTableColumn: true
             label:
-              text: threshold
+              text: Threshold (In %, Or In Storage Units)
             path: threshold
             type: value
             typeOfValue: string
           type: single-step-form-array
         - label:
             text: UpperBound
+          onChange: handleUnit|autoscalingKubedbComSinglestoreAutoscaler/spec/storage/node/upperBound
           schema:
             $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/node/properties/upperBound
           type: input
