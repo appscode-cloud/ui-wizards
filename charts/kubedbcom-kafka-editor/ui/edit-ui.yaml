@@ -124,7 +124,7 @@ steps:
             $ref: model#/metadata/resource/name
           version:
             $ref: model#/metadata/resource/version
-        path: ${domain}/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/kafkaopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations
+        path: ${domain}/console/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/kafkaopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations
     - computed: setDatabaseMode
       disabled: true
       hasDescription: true
@@ -249,7 +249,7 @@ steps:
             $ref: model#/metadata/resource/name
           version:
             $ref: model#/metadata/resource/version
-        path: ${domain}/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/kafkaopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=ReconfigureTLS
+        path: ${domain}/console/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/kafkaopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=ReconfigureTLS
     - disabled: true
       label:
         text: labels.enable_tls
@@ -469,6 +469,9 @@ steps:
           schema:
             $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/metadata/properties/labels/additionalProperties
           type: input
+      - computed: setMetadata
+        if: returnFalse
+        type: input      
       if: showMonitoringSection
       type: single-step-form
     type: single-step-form

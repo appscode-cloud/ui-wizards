@@ -493,8 +493,8 @@ function setStorageClass({ model, getValue, commit }, path) {
       const found = defaultRetainList.length
         ? defaultRetainList[0].value
         : storageClassList.length
-          ? storageClassList[0].value
-          : ''
+        ? storageClassList[0].value
+        : ''
       storageClass = found
     }
   } else {
@@ -507,8 +507,8 @@ function setStorageClass({ model, getValue, commit }, path) {
       const found = defaultSimpleList.length
         ? defaultSimpleList[0].value
         : storageClassList.length
-          ? storageClassList[0].value
-          : ''
+        ? storageClassList[0].value
+        : ''
       storageClass = found
     }
   }
@@ -937,13 +937,12 @@ function getOpsRequestUrl({ storeGet, model, getValue, mode }, reqType) {
   const namespace = getValue(model, '/metadata/release/namespace')
   const resource = getValue(model, '/metadata/resource/name')
   const version = getValue(model, '/metadata/resource/version')
-  const routeRootPath = storeGet('/route/path')
-  const pathPrefix = `${domain}${routeRootPath}`
+  const pathPrefix = `${domain}${window.location.pathname}`
 
   if (mode === 'standalone-step')
     return `${pathPrefix}?namespace=${namespace}&applyAction=create-opsrequest-${reqType.toLowerCase()}`
   else
-    return `${domain}/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/kafkaopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=${reqType}`
+    return `${domain}/console/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/kafkaopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=${reqType}`
 }
 
 function getCreateNameSpaceUrl({ model, getValue, storeGet }) {
@@ -964,7 +963,25 @@ function isVariantAvailable({ storeGet }) {
   return variant ? true : false
 }
 
+function setMetadata({ storeGet, mode, commit }) {
+  const dbname = storeGet('/route/params/name') || ''
+  const namespace = storeGet('/route/query/namespace') || ''
+  if (mode === 'standalone-step') {
+    commit('wizard/model$update', {
+      path: '/metadata/release/name',
+      value: dbname,
+      force: true,
+    })
+    commit('wizard/model$update', {
+      path: '/metadata/release/namespace',
+      value: namespace,
+      force: true,
+    })
+  }
+}
+
 return {
+  setMetadata,
   isVariantAvailable,
   fetchJsons,
   disableLableChecker,
