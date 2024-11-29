@@ -461,167 +461,134 @@ steps:
         backupEnabled:
           default: false
           type: boolean
-        backupInvoker:
-          type: string
       elements:
-      - computed: initBackupInvoker
-        disabled: true
+      - computed: setBackupSwitch
         label:
-          text: labels.backup.invoker
-        onChange: onBackupInvokerChange
-        options:
-        - text: Backup Configuration
-          value: backupConfiguration
-        - text: Backup Blueprint
-          value: backupBlueprint
+          text: Enable Backup
+        onChange: onBackupChange
         schema:
-          $ref: discriminator#/properties/backupInvoker
-        type: radio
-      - elements:
-        - discriminator:
-            backupSchedule:
-              type: string
-          elements:
-          - computed: getDefaultSchedule|resources/coreKubestashComBackupConfiguration/spec/sessions|backupSchedule
-            label:
-              text: labels.backupConfiguration.schedule
-            onChange: onInputChangeSchedule|resources/coreKubestashComBackupConfiguration/spec/sessions|backupSchedule
-            schema:
-              $ref: discriminator#/backupSchedule
-            type: input
-          type: single-step-form
-        - discriminator:
-            storageRefName:
-              type: string
-            storageRefNamespace:
-              type: string
-          elements:
-          - computed: getDefault|/resources/coreKubestashComBackupConfiguration/spec/backends|storageRef|namespace
-            fetch: fetchNamespaces
-            hasGroup: isRancherManaged
-            label:
-              text: Namespace
-            onChange: onInputChange|resources/coreKubestashComBackupConfiguration/spec/backends|storageRef|namespace|storageRefNamespace
-            schema:
-              $ref: discriminator#/storageRefNamespace
-            type: select
-          - computed: getDefault|/resources/coreKubestashComBackupConfiguration/spec/backends|storageRef|name
-            fetch: fetchNames|v1alpha1|backupstorages|storageRefNamespace
-            label:
-              text: Name
-            onChange: onInputChange|resources/coreKubestashComBackupConfiguration/spec/backends|storageRef|name|storageRefName
-            schema:
-              $ref: discriminator#/storageRefName
-            type: select
-          label:
-            text: StorageRef
-          show_label: true
-          type: single-step-form
-        - discriminator:
-            retentionPolicyName:
-              type: string
-            retentionPolicyNamespace:
-              type: string
-          elements:
-          - computed: getDefault|/resources/coreKubestashComBackupConfiguration/spec/backends|retentionPolicy|namespace
-            fetch: fetchNamespaces
-            hasGroup: isRancherManaged
-            label:
-              text: Namespace
-            onChange: onInputChange|resources/coreKubestashComBackupConfiguration/spec/backends|retentionPolicy|namespace|retentionPolicyNamespace
-            schema:
-              $ref: discriminator#/retentionPolicyNamespace
-            type: select
-          - computed: getDefault|/resources/coreKubestashComBackupConfiguration/spec/backends|retentionPolicy|name
-            fetch: fetchNames|v1alpha1|retentionpolicies|retentionPolicyNamespace
-            label:
-              text: Name
-            onChange: onInputChange|resources/coreKubestashComBackupConfiguration/spec/backends|retentionPolicy|name|retentionPolicyName
-            schema:
-              $ref: discriminator#/retentionPolicyName
-            type: select
-          label:
-            text: Retention Policy
-          show_label: true
-          type: single-step-form
-        - discriminator:
-            encryptionSecretName:
-              type: string
-            encryptionSecretNamespace:
-              type: string
-          elements:
-          - computed: getDefault|/resources/coreKubestashComBackupConfiguration/spec/sessions|encryptionSecret|namespace
-            fetch: fetchNamespaces
-            hasGroup: isRancherManaged
-            label:
-              text: Namespace
-            onChange: onInputChange|/resources/coreKubestashComBackupConfiguration/spec/sessions|encryptionSecret|namespace|encryptionSecretNamespace
-            schema:
-              $ref: discriminator#/encryptionSecretNamespace
-            type: select
-          - computed: getDefault|/resources/coreKubestashComBackupConfiguration/spec/sessions|encryptionSecret|name
-            fetch: fetchNames|v1|secrets|encryptionSecretNamespace
-            label:
-              text: Name
-            onChange: onInputChange|/resources/coreKubestashComBackupConfiguration/spec/sessions|encryptionSecret|name|encryptionSecretName
-            schema:
-              $ref: discriminator#/encryptionSecretName
-            type: select
-          label:
-            text: Encryption Secret
-          show_label: true
-          type: single-step-form
-        if: showInvokerForm|backupConfiguration
-        type: single-step-form
+          $ref: discriminator#/backupEnabled
+        type: switch
       - discriminator:
-          backupBlueprintName:
+          backupInvoker:
             type: string
-          schedule:
-            type: string
-          taskParameters:
-            additionalProperties:
-              type: string
-            type: object
         elements:
-        - label:
-            text: labels.backupBlueprint.title
-          type: label-element
-        - allowUserDefinedOption: true
-          computed: initFromAnnotationValue|stash.appscode.com/backup-blueprint
-          fetch: unNamespacedResourceNames|stash.appscode.com|v1beta1|backupblueprints
+        - computed: initBackupInvoker
           label:
-            text: labels.backupBlueprint.name
-          onChange: onBackupBlueprintNameChange
+            text: labels.backup.invoker
+          onChange: onBackupInvokerChange
+          options:
+          - text: Backup Configuration
+            value: backupConfiguration
+          - text: Backup Blueprint
+            value: backupBlueprint
           schema:
-            $ref: discriminator#/properties/backupBlueprintName
-          type: select
-        - computed: initFromAnnotationValue|stash.appscode.com/schedule
-          label:
-            text: labels.backupBlueprint.schedule
-          onChange: onBackupBlueprintScheduleChange
-          schema:
-            $ref: discriminator#/properties/schedule
-          type: input
-        - computed: initFromAnnotationKeyValue|params.stash.appscode.com/
-          isArray: true
-          keys:
+            $ref: discriminator#/properties/backupInvoker
+          type: radio
+        - elements:
+          - discriminator:
+              backupSchedule:
+                type: string
+            elements:
+            - computed: getDefaultSchedule|resources/coreKubestashComBackupConfiguration/spec/sessions
+              label:
+                text: labels.backupConfiguration.schedule
+              onChange: onInputChangeSchedule|resources/coreKubestashComBackupConfiguration/spec/sessions|backupSchedule
+              required: true
+              schema:
+                $ref: discriminator#/backupSchedule
+              type: input
+            type: single-step-form
+          - discriminator:
+              storageRefName:
+                type: string
+              storageRefNamespace:
+                type: string
+            elements:
+            - computed: getDefault|/resources/coreKubestashComBackupConfiguration/spec/backends|storageRef|namespace
+              fetch: getNamespaceArray
+              hasGroup: isRancherManaged
+              label:
+                text: Namespace
+              onChange: onInputChange|resources/coreKubestashComBackupConfiguration/spec/backends|storageRef|namespace|storageRefNamespace
+              required: true
+              schema:
+                $ref: discriminator#/storageRefNamespace
+              type: select
+            - computed: getDefault|/resources/coreKubestashComBackupConfiguration/spec/backends|storageRef|name
+              fetch: fetchNames|v1alpha1|backupstorages|storageRefNamespace
+              label:
+                text: Name
+              onChange: onInputChange|resources/coreKubestashComBackupConfiguration/spec/backends|storageRef|name|storageRefName
+              required: true
+              schema:
+                $ref: discriminator#/storageRefName
+              type: select
             label:
-              text: Key
-          label:
-            text: labels.backupBlueprint.taskParameters
-          onChange: onTaskParametersChange
-          schema:
-            $ref: discriminator#/properties/taskParameters
-          type: key-value-input-form
-          values:
+              text: StorageRef
+            show_label: true
+            type: single-step-form
+          - discriminator:
+              retentionPolicyName:
+                type: string
+              retentionPolicyNamespace:
+                type: string
+            elements:
+            - computed: getDefault|/resources/coreKubestashComBackupConfiguration/spec/backends|retentionPolicy|namespace
+              fetch: getNamespaceArray
+              hasGroup: isRancherManaged
+              label:
+                text: Namespace
+              onChange: onInputChange|resources/coreKubestashComBackupConfiguration/spec/backends|retentionPolicy|namespace|retentionPolicyNamespace
+              required: true
+              schema:
+                $ref: discriminator#/retentionPolicyNamespace
+              type: select
+            - computed: getDefault|/resources/coreKubestashComBackupConfiguration/spec/backends|retentionPolicy|name
+              fetch: fetchNames|v1alpha1|retentionpolicies|retentionPolicyNamespace
+              label:
+                text: Name
+              onChange: onInputChange|resources/coreKubestashComBackupConfiguration/spec/backends|retentionPolicy|name|retentionPolicyName
+              required: true
+              schema:
+                $ref: discriminator#/retentionPolicyName
+              type: select
             label:
-              text: Value
-            schema:
-              $ref: discriminator#/properties/taskParameters/additionalProperties
-            type: input
-        if: showInvokerForm|backupBlueprint
-        label:
-          text: Backup Blueprint form
+              text: Retention Policy
+            show_label: true
+            type: single-step-form
+          - discriminator:
+              encryptionSecretName:
+                type: string
+              encryptionSecretNamespace:
+                type: string
+            elements:
+            - computed: getDefault|/resources/coreKubestashComBackupConfiguration/spec/sessions|encryptionSecret|namespace
+              fetch: getNamespaceArray
+              hasGroup: isRancherManaged
+              label:
+                text: Namespace
+              onChange: onInputChange|/resources/coreKubestashComBackupConfiguration/spec/sessions|encryptionSecret|namespace|encryptionSecretNamespace
+              required: true
+              schema:
+                $ref: discriminator#/encryptionSecretNamespace
+              type: select
+            - computed: getDefault|/resources/coreKubestashComBackupConfiguration/spec/sessions|encryptionSecret|name
+              fetch: fetchNames|v1|secrets|encryptionSecretNamespace
+              label:
+                text: Name
+              onChange: onInputChange|/resources/coreKubestashComBackupConfiguration/spec/sessions|encryptionSecret|name|encryptionSecretName
+              required: true
+              schema:
+                $ref: discriminator#/encryptionSecretName
+              type: select
+            label:
+              text: Encryption Secret
+            show_label: true
+            type: single-step-form
+          if: showInvokerForm|backupConfiguration
+          type: single-step-form
+        if: isBackupToggled
         type: single-step-form
       if: showBackupForm
       label:
@@ -962,4 +929,351 @@ steps:
     type: single-step-form
   id: custom-config
   title: steps.8.label
+- form:
+    discriminator:
+      dbDetails:
+        type: boolean
+        default: false
+    elements:
+    - type: input
+      computed: getDbDetails
+      if: returnFalse    
+    - elements:
+      - label:
+          text: Name
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/metadata/properties/name
+        type: input
+      - fetch: getNamespaces
+        label:
+          text: SelectNamespace
+        onChange: onNamespaceChange
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/metadata/properties/namespace
+        type: select
+      - fetch: getMariaDbs
+        label:
+          text: SelectDb
+        onChange: initMetadata
+        refresh: true
+        required: true
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/databaseRef/properties/name
+        type: select
+      if: isConsole
+      type: single-step-form
+    - hasDescription: true
+      if: isConsole
+      label:
+        text: SelectType
+      onChange: initMetadata
+      options:
+      - description: Scale your CPU Memory based on resource usage
+        text: Compute
+        value: compute
+      - description: Expand your database size based on volume usage
+        text: Storage
+        value: storage
+      required: true
+      schema:
+        $ref: discriminator#/properties/autoscalingType
+      type: radio
+    - elements:
+      - elements:
+        - elements:
+          - label:
+              text: Trigger
+            options:
+            - "On"
+            - "Off"
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/compute/properties/mariadb/properties/trigger
+            type: select
+          - label:
+              text: Pod LifeTime Threshold
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/compute/properties/mariadb/properties/podLifeTimeThreshold
+            type: input
+          - label:
+              text: Resource Diff Percentage
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/compute/properties/mariadb/properties/resourceDiffPercentage
+            type: input
+          - elements:
+            - label:
+                text: cpu
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/compute/properties/mariadb/properties/minAllowed/properties/cpu
+              type: input
+            - label:
+                text: memory
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/compute/properties/mariadb/properties/minAllowed/properties/memory
+              type: input
+            label:
+              text: Min Allowed
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/compute/properties/mariadb/properties/minAllowed
+            show_label: true
+            type: single-step-form
+          - elements:
+            - label:
+                text: cpu
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/compute/properties/mariadb/properties/maxAllowed/properties/cpu
+              type: input
+            - label:
+                text: memory
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/compute/properties/mariadb/properties/maxAllowed/properties/memory
+              type: input
+            label:
+              text: Max Allowed
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/compute/properties/mariadb/properties/maxAllowed
+            show_label: true
+            type: single-step-form
+          - fetch: setControlledResources|mariadb
+            label:
+              text: Controlled Resources
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/compute/properties/mariadb/properties/controlledResources
+            type: multiselect
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/compute/properties/mariadb
+          type: single-step-form
+        label:
+          text: Mariadb
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/compute/properties/mariadb
+        show_label: true
+        type: single-step-form
+      - elements:
+        - fetch: fetchNodeTopology
+          label:
+            text: Select NodeTopology
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/name
+          type: select
+        - if: isNodeTopologySelected
+          label:
+            text: ScaleUp Diff Percentage
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/scaleUpDiffPercentage
+          type: input
+        - if: isNodeTopologySelected
+          label:
+            text: ScaleDown Diff Percentage
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/scaleDownDiffPercentage
+          type: input
+        label:
+          text: NodeTopology
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/compute/properties/nodeTopology
+        show_label: true
+        type: single-step-form
+      if: ifScalingTypeEqualsTo|compute
+      type: single-step-form
+    - elements:
+      - label:
+          text: Timeout
+        options:
+        - text: 5 minutes
+          value: 5m0s
+        - text: 10 minutes
+          value: 10m0s
+        - text: 30 minutes
+          value: 30m0s
+        - text: 1 hour
+          value: 1h0m
+        - text: 2 hours
+          value: 2h0m
+        - text: 5 hours
+          value: 5h0m
+        - text: 10 hours
+          value: 10h0m
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/opsRequestOptions/properties/timeout
+        type: select
+      - computed: setApplyToIfReady
+        label:
+          text: Apply
+        options:
+        - text: IfReady (OpsRequest will be applied if database is ready)
+          value: IfReady
+        - text: Always (OpsRequest will always be applied)
+          value: Always
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/opsRequestOptions/properties/apply
+        type: radio
+      if: showOpsRequestOptions
+      label:
+        text: Ops Request Options
+      schema:
+        $ref: schema#/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/opsRequestOptions
+      show_label: true
+      type: single-step-form
+    type: single-step-form
+  id: compute-autoscaler
+  title: steps.9.label
+- form:
+    discriminator:
+      dbDetails:
+        type: boolean
+        default: false
+    elements:
+    - type: input
+      computed: getDbDetails
+      if: returnFalse
+    - elements:
+      - label:
+          text: Name
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/metadata/properties/name
+        type: input
+      - fetch: getNamespaces
+        label:
+          text: SelectNamespace
+        onChange: onNamespaceChange
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/metadata/properties/namespace
+        type: select
+      - fetch: getMariaDbs
+        label:
+          text: SelectDb
+        onChange: initMetadata
+        refresh: true
+        required: true
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/databaseRef/properties/name
+        type: select
+      if: isConsole
+      type: single-step-form
+    - hasDescription: true
+      if: isConsole
+      label:
+        text: SelectType
+      onChange: initMetadata
+      options:
+      - description: Scale your CPU Memory based on resource usage
+        text: Compute
+        value: compute
+      - description: Expand your database size based on volume usage
+        text: Storage
+        value: storage
+      required: true
+      schema:
+        $ref: discriminator#/properties/autoscalingType
+      type: radio
+    - elements:
+      - elements:
+        - label:
+            text: Trigger
+          options:
+          - "On"
+          - "Off"
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/storage/properties/mariadb/properties/trigger
+          type: select
+        - label:
+            text: Expansion Mode
+          options:
+          - Online
+          - Offline
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/storage/properties/mariadb/properties/expansionMode
+          type: select
+        - label:
+            text: Usage Threshold
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/storage/properties/mariadb/properties/usageThreshold
+          type: input
+        - addFormLabel: Scaling Rules
+          element:
+            elements:
+            - label:
+                text: Applies Upto
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/storage/properties/mariadb/properties/scalingRules/items/properties/appliesUpto
+              type: input
+            - label:
+                text: Threshold
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/storage/properties/mariadb/properties/scalingRules/items/properties/threshold
+              type: input
+            type: single-step-form
+          label:
+            text: ScalingRules
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/storage/properties/mariadb/properties/scalingRules
+          tableContents:
+          - inTableColumn: true
+            label:
+              text: Applies Upto
+            path: appliesUpto
+            type: value
+            typeOfValue: string
+          - inTableColumn: true
+            label:
+              text: Threshold
+            path: threshold
+            type: value
+            typeOfValue: string
+          type: single-step-form-array
+        - label:
+            text: UpperBound
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/storage/properties/mariadb/properties/upperBound
+          type: input
+        label:
+          text: Mariadb
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/compute/properties/mariadb
+        show_label: true
+        type: single-step-form
+      if: ifScalingTypeEqualsTo|storage
+      type: single-step-form
+    - elements:
+      - label:
+          text: Timeout
+        options:
+        - text: 5 minutes
+          value: 5m0s
+        - text: 10 minutes
+          value: 10m0s
+        - text: 30 minutes
+          value: 30m0s
+        - text: 1 hour
+          value: 1h0m
+        - text: 2 hours
+          value: 2h0m
+        - text: 5 hours
+          value: 5h0m
+        - text: 10 hours
+          value: 10h0m
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/opsRequestOptions/properties/timeout
+        type: select
+      - computed: setApplyToIfReady
+        label:
+          text: Apply
+        options:
+        - text: IfReady (OpsRequest will be applied if database is ready)
+          value: IfReady
+        - text: Always (OpsRequest will always be applied)
+          value: Always
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/opsRequestOptions/properties/apply
+        type: radio
+      if: showOpsRequestOptions
+      label:
+        text: Ops Request Options
+      schema:
+        $ref: schema#/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/opsRequestOptions
+      show_label: true
+      type: single-step-form
+    type: single-step-form
+  id: storage-autoscaler
+  title: steps.10.label  
 type: multi-step-form
