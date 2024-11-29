@@ -345,6 +345,14 @@ steps:
           type: select
         if: isToggleOn|monitoring
         type: single-step-form
+      - computed: setBackup
+        if: isToggleOn|backup
+        label:
+          text: Enable Backup?
+        onChange: onBackupSwitch
+        schema:
+          $ref: discriminator#/backup
+        type: switch
       - elements:
         - computed: toggleTls
           label:
@@ -362,14 +370,6 @@ steps:
           type: select
         if: isEqualToModelPathValue|Topology|/spec/mode
         type: single-step-form
-      - computed: setBackup
-        if: isToggleOn|backup
-        label:
-          text: Enable Backup?
-        onChange: onBackupSwitch
-        schema:
-          $ref: discriminator#/backup
-        type: switch
       - if: isToggleOn|expose
         label:
           text: Expose via Gateway?

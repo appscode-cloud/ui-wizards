@@ -343,6 +343,22 @@ steps:
           type: select
         if: isToggleOn|monitoring
         type: single-step-form
+      - computed: setBackup
+        if: isToggleOn|backup
+        label:
+          text: Enable Backup?
+        onChange: onBackupSwitch
+        schema:
+          $ref: discriminator#/properties/backup
+        type: switch
+      - elements:
+        - label:
+            text: Enable Archiver?
+          schema:
+            $ref: schema#/properties/spec/properties/admin/properties/archiver/properties/default
+          type: switch
+        if: isToggleOn|archiver
+        type: single-step-form
       - elements:
         - label:
             text: Enable TLS?
@@ -367,22 +383,6 @@ steps:
           type: switch
         if: isToggleOn|expose
         type: single-step-form
-      - elements:
-        - label:
-            text: Enable Archiver?
-          schema:
-            $ref: schema#/properties/spec/properties/admin/properties/archiver/properties/default
-          type: switch
-        if: isToggleOn|archiver
-        type: single-step-form
-      - computed: setBackup
-        if: isToggleOn|backup
-        label:
-          text: Enable Backup?
-        onChange: onBackupSwitch
-        schema:
-          $ref: discriminator#/properties/backup
-        type: switch
       if: showAdditionalSettings
       label:
         text: Additional Options

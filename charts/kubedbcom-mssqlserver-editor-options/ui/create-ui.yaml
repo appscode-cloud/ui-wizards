@@ -378,11 +378,13 @@ steps:
             $ref: discriminator#/monitoring
           type: switch
         type: single-step-form
-      - if: isToggleOn|tls
+      - computed: setBackup
+        if: isToggleOn|backup
         label:
-          text: Enable TLS?
+          text: Enable Backup?
+        onChange: onBackupSwitch
         schema:
-          $ref: schema#/properties/spec/properties/admin/properties/tls/properties/default
+          $ref: discriminator#/backup
         type: switch
       - elements:
         - if: isToggleOn|archiver
@@ -392,13 +394,11 @@ steps:
             $ref: schema#/properties/spec/properties/admin/properties/archiver/properties/default
           type: switch
         type: single-step-form
-      - computed: setBackup
-        if: isToggleOn|backup
+      - if: isToggleOn|tls
         label:
-          text: Enable Backup?
-        onChange: onBackupSwitch
+          text: Enable TLS?
         schema:
-          $ref: discriminator#/backup
+          $ref: schema#/properties/spec/properties/admin/properties/tls/properties/default
         type: switch
       if: showAdditionalSettings
       label:

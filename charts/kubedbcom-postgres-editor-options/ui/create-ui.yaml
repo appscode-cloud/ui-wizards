@@ -347,12 +347,20 @@ steps:
           type: select
         if: isToggleOn|monitoring
         type: single-step-form
+      - computed: setBackup
+        if: isToggleOn|backup
+        label:
+          text: Enable Backup?
+        onChange: onBackupSwitch
+        schema:
+          $ref: discriminator#/backup
+        type: switch
       - elements:
-        - if: isToggleOn|expose
+        - if: isToggleOn|archiver
           label:
-            text: Expose via Gateway?
+            text: Enable Archiver?
           schema:
-            $ref: schema#/properties/spec/properties/admin/properties/expose/properties/default
+            $ref: schema#/properties/spec/properties/admin/properties/archiver/properties/default
           type: switch
         type: single-step-form
       - elements:
@@ -372,21 +380,13 @@ steps:
           type: select
         type: single-step-form
       - elements:
-        - if: isToggleOn|archiver
+        - if: isToggleOn|expose
           label:
-            text: Enable Archiver?
+            text: Expose via Gateway?
           schema:
-            $ref: schema#/properties/spec/properties/admin/properties/archiver/properties/default
+            $ref: schema#/properties/spec/properties/admin/properties/expose/properties/default
           type: switch
         type: single-step-form
-      - computed: setBackup
-        if: isToggleOn|backup
-        label:
-          text: Enable Backup?
-        onChange: onBackupSwitch
-        schema:
-          $ref: discriminator#/backup
-        type: switch
       if: showAdditionalSettings
       label:
         text: Additional Options

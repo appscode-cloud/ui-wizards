@@ -413,6 +413,14 @@ steps:
           sortable: true
           type: select
         type: single-step-form
+      - computed: setBackup
+        if: isToggleOn|backup
+        label:
+          text: Enable Backup?
+        onChange: onBackupSwitch
+        schema:
+          $ref: discriminator#/backup
+        type: switch
       - elements:
         - if: isToggleOn|tls
           label:
@@ -437,14 +445,6 @@ steps:
             $ref: schema#/properties/spec/properties/admin/properties/expose/properties/default
           type: switch
         type: single-step-form
-      - computed: setBackup
-        if: isToggleOn|backup
-        label:
-          text: Enable Backup?
-        onChange: onBackupSwitch
-        schema:
-          $ref: discriminator#/backup
-        type: switch
       - elements:
         - label:
             text: labels.disableDefaults
