@@ -21,12 +21,12 @@ steps:
       type: select
     - disableUnselect: true
       disabled: true
-      fetch: getElasticSearchVersions|catalog.kubedb.com|v1alpha1|elasticsearchversions
+      fetch: getDruidVersions|catalog.kubedb.com|v1alpha1|druidversions
       label:
         text: labels.database.version
       onChange: onVersionChange
       schema:
-        $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/version
+        $ref: schema#/properties/resources/properties/kubedbComDruid/properties/spec/properties/version
       type: select
     - individualItemDisabilityCheck: disableLableChecker
       isArray: true
@@ -37,13 +37,13 @@ steps:
         text: labels.labels.label
       onChange: onLabelChange
       schema:
-        $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/metadata/properties/labels
+        $ref: schema#/properties/resources/properties/kubedbComDruid/properties/metadata/properties/labels
       type: key-value-input-form
       values:
         label:
           text: labels.labels.value
         schema:
-          $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/metadata/properties/labels/additionalProperties
+          $ref: schema#/properties/resources/properties/kubedbComDruid/properties/metadata/properties/labels/additionalProperties
         type: input
     - isArray: true
       keys:
@@ -52,13 +52,13 @@ steps:
       label:
         text: labels.annotations.label
       schema:
-        $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/metadata/properties/annotations
+        $ref: schema#/properties/resources/properties/kubedbComDruid/properties/metadata/properties/annotations
       type: key-value-input-form
       values:
         label:
           text: labels.annotations.value
         schema:
-          $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/metadata/properties/annotations/additionalProperties
+          $ref: schema#/properties/resources/properties/kubedbComDruid/properties/metadata/properties/annotations/additionalProperties
         type: input
     - hasDescription: true
       label:
@@ -77,14 +77,14 @@ steps:
         text: options.deletionPolicy.doNotTerminate.label
         value: DoNotTerminate
       schema:
-        $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/deletionPolicy
+        $ref: schema#/properties/resources/properties/kubedbComDruid/properties/spec/properties/deletionPolicy
       type: radio
     - disabled: true
       label:
         text: labels.disable_security_question
       onChange: onDisableSecurityChange
       schema:
-        $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/disableSecurity
+        $ref: schema#/properties/resources/properties/kubedbComDruid/properties/spec/properties/disableSecurity
       type: switch
     - elements:
       - label:
@@ -94,7 +94,7 @@ steps:
         label:
           text: labels.secret
         schema:
-          $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/authSecret/properties/name
+          $ref: schema#/properties/resources/properties/kubedbComDruid/properties/spec/properties/authSecret/properties/name
         type: input
       if: isSecurityEnabled
       type: single-step-form
@@ -146,7 +146,7 @@ steps:
             $ref: model#/metadata/resource/name
           version:
             $ref: model#/metadata/resource/version
-        path: ${domain}/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/elasticsearchopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations
+        path: ${domain}/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/druidopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations
     - computed: setDatabaseMode
       disabled: true
       hasDescription: true
@@ -168,25 +168,25 @@ steps:
         label:
           text: labels.replicaset.number
         schema:
-          $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/replicas
+          $ref: schema#/properties/resources/properties/kubedbComDruid/properties/spec/properties/replicas
         type: input
-      - fetch: getMaxUnavailableOptions|/resources/kubedbComElasticsearch/spec
+      - fetch: getMaxUnavailableOptions|/resources/kubedbComDruid/spec
         label:
           text: labels.max_unavailable
         schema:
-          $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/maxUnavailable
+          $ref: schema#/properties/resources/properties/kubedbComDruid/properties/spec/properties/maxUnavailable
         type: select
       - disabled: true
         label:
           text: labels.storage.size
         schema:
-          $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/storage/properties/resources/properties/requests/properties/storage
+          $ref: schema#/properties/resources/properties/kubedbComDruid/properties/spec/properties/storage/properties/resources/properties/requests/properties/storage
         type: input
       - disabled: true
         label:
           text: labels.storage.class
         schema:
-          $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/storage/properties/storageClassName
+          $ref: schema#/properties/resources/properties/kubedbComDruid/properties/spec/properties/storage/properties/storageClassName
         type: input
       if: isEqualToDatabaseMode|Combined
       type: single-step-form
@@ -196,13 +196,13 @@ steps:
           label:
             text: labels.replicaset.number
           schema:
-            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/$dyn/properties/replicas
+            $ref: schema#/properties/resources/properties/kubedbComDruid/properties/spec/properties/topology/properties/$dyn/properties/replicas
           type: input
         - fetch: getMaxUnavailableOptions
           label:
             text: labels.max_unavailable
           schema:
-            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/$dyn/properties/maxUnavailable
+            $ref: schema#/properties/resources/properties/kubedbComDruid/properties/spec/properties/topology/properties/$dyn/properties/maxUnavailable
           type: select
         - disabled: true
           elements:
@@ -211,42 +211,42 @@ steps:
               - label:
                   text: labels.storage.size
                 schema:
-                  $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/$dyn/properties/storage/properties/resources/properties/requests/properties/storage
+                  $ref: schema#/properties/resources/properties/kubedbComDruid/properties/spec/properties/topology/properties/$dyn/properties/storage/properties/resources/properties/requests/properties/storage
                 type: input
               schema:
-                $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/$dyn/properties/storage/properties/resources/properties/requests
+                $ref: schema#/properties/resources/properties/kubedbComDruid/properties/spec/properties/topology/properties/$dyn/properties/storage/properties/resources/properties/requests
               type: single-step-form
             schema:
-              $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/$dyn/properties/storage/properties/resources
+              $ref: schema#/properties/resources/properties/kubedbComDruid/properties/spec/properties/topology/properties/$dyn/properties/storage/properties/resources
             type: single-step-form
           - label:
               text: labels.storage.class
             schema:
-              $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/$dyn/properties/storage/properties/storageClassName
+              $ref: schema#/properties/resources/properties/kubedbComDruid/properties/spec/properties/topology/properties/$dyn/properties/storage/properties/storageClassName
             type: input
           schema:
-            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/$dyn/properties/storage
+            $ref: schema#/properties/resources/properties/kubedbComDruid/properties/spec/properties/topology/properties/$dyn/properties/storage
           type: single-step-form
         - disabled: true
           label:
             text: labels.suffix
           schema:
-            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/$dyn/properties/suffix
+            $ref: schema#/properties/resources/properties/kubedbComDruid/properties/spec/properties/topology/properties/$dyn/properties/suffix
           type: input
         - disabled: true
           label:
             text: labels.resources
           schema:
-            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/$dyn/properties/resources
+            $ref: schema#/properties/resources/properties/kubedbComDruid/properties/spec/properties/topology/properties/$dyn/properties/resources
           type: resource-input-form
         hideForm: true
         schema:
-          $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology/properties/$dyn
+          $ref: schema#/properties/resources/properties/kubedbComDruid/properties/spec/properties/topology/properties/$dyn
         show_label: true
         type: single-step-form
       individualItemVisibilityCheck: hasTopologyNode
       schema:
-        $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology
+        $ref: schema#/properties/resources/properties/kubedbComDruid/properties/spec/properties/topology
       type: array-input-form
     type: single-step-form
   id: topology
@@ -559,7 +559,7 @@ steps:
         label:
           text: labels.privileged_question
         schema:
-          $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/kernelSettings/properties/privileged
+          $ref: schema#/properties/resources/properties/kubedbComDruid/properties/spec/properties/kernelSettings/properties/privileged
         type: switch
       - addFormLabel: labels.sysctl
         element:
@@ -567,19 +567,19 @@ steps:
           - label:
               text: labels.name
             schema:
-              $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/kernelSettings/properties/sysctls/items/properties/name
+              $ref: schema#/properties/resources/properties/kubedbComDruid/properties/spec/properties/kernelSettings/properties/sysctls/items/properties/name
             type: input
           - label:
               text: labels.value
             schema:
-              $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/kernelSettings/properties/sysctls/items/properties/value
+              $ref: schema#/properties/resources/properties/kubedbComDruid/properties/spec/properties/kernelSettings/properties/sysctls/items/properties/value
             type: input
           type: single-step-form
         if: isDiscriminatorEqualTo|/customizeKernelSettings|yes
         label:
           text: labels.sysctls
         schema:
-          $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/kernelSettings/properties/sysctls
+          $ref: schema#/properties/resources/properties/kubedbComDruid/properties/spec/properties/kernelSettings/properties/sysctls
         tableContents:
         - inTableColumn: true
           label:
@@ -596,7 +596,7 @@ steps:
         type: single-step-form-array
       keepEmpty: true
       schema:
-        $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/kernelSettings
+        $ref: schema#/properties/resources/properties/kubedbComDruid/properties/spec/properties/kernelSettings
       type: single-step-form
     type: single-step-form
   id: kernel-settings
@@ -638,7 +638,7 @@ steps:
             $ref: model#/metadata/resource/name
           version:
             $ref: model#/metadata/resource/version
-        path: ${domain}/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/elasticsearchopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=ReconfigureTLS
+        path: ${domain}/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/druidopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=ReconfigureTLS
     - computed: isValueExistInModel|/resources/kubedbComMariaDB/spec/tls
       disabled: true
       label:
@@ -652,7 +652,7 @@ steps:
       - label:
           text: labels.enable_ssl_question
         schema:
-          $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/enableSSL
+          $ref: schema#/properties/resources/properties/kubedbComDruid/properties/spec/properties/enableSSL
         type: switch
       - elements:
         - computed: setApiGroupEdit
@@ -660,7 +660,7 @@ steps:
           label:
             text: labels.api_group
           schema:
-            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/tls/properties/issuerRef/properties/apiGroup
+            $ref: schema#/properties/resources/properties/kubedbComDruid/properties/spec/properties/tls/properties/issuerRef/properties/apiGroup
           type: input
         - label:
             text: labels.kind
@@ -671,7 +671,7 @@ steps:
             value: ClusterIssuer
           required: returnFalse
           schema:
-            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/tls/properties/issuerRef/properties/kind
+            $ref: schema#/properties/resources/properties/kubedbComDruid/properties/spec/properties/tls/properties/issuerRef/properties/kind
           type: select
         - allowUserDefinedOption: true
           fetch: getIssuerRefsName
@@ -679,12 +679,12 @@ steps:
             text: labels.name
           required: returnFalse
           schema:
-            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/tls/properties/issuerRef/properties/name
+            $ref: schema#/properties/resources/properties/kubedbComDruid/properties/spec/properties/tls/properties/issuerRef/properties/name
           type: select
         label:
           text: labels.issuer_ref
         schema:
-          $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/tls/properties/issuerRef
+          $ref: schema#/properties/resources/properties/kubedbComDruid/properties/spec/properties/tls/properties/issuerRef
         type: single-step-form
       - alias: reusable_certificates
         chart:
@@ -692,7 +692,7 @@ steps:
           version: v0.11.0
         moduleResolver: fetchJsons
         schema:
-          $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/tls/properties/certificates
+          $ref: schema#/properties/resources/properties/kubedbComDruid/properties/spec/properties/tls/properties/certificates
         type: reusable-element
       if: showTlsConfigureSection
       type: single-step-form
@@ -742,7 +742,7 @@ steps:
           - label:
               text: labels.script.path
             schema:
-              $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/init/properties/script/properties/scriptPath
+              $ref: schema#/properties/resources/properties/kubedbComDruid/properties/spec/properties/init/properties/script/properties/scriptPath
             type: input
           - label:
               text: labels.script.volume
@@ -765,7 +765,7 @@ steps:
             label:
               text: labels.script.volumeName
             schema:
-              $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/init/properties/script/properties/configMap/properties/name
+              $ref: schema#/properties/resources/properties/kubedbComDruid/properties/spec/properties/init/properties/script/properties/configMap/properties/name
             type: select
           - allowUserDefinedOption: true
             fetch: resourceNames|core|v1|secrets
@@ -773,7 +773,7 @@ steps:
             label:
               text: labels.script.volumeName
             schema:
-              $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/init/properties/script/properties/secret/properties/secretName
+              $ref: schema#/properties/resources/properties/kubedbComDruid/properties/spec/properties/init/properties/script/properties/secret/properties/secretName
             type: select
           if: showScriptOrStashForm|script
           type: single-step-form
@@ -863,7 +863,7 @@ steps:
           label:
             text: labels.waitForInitialRestore
           schema:
-            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/init/properties/waitForInitialRestore
+            $ref: schema#/properties/resources/properties/kubedbComDruid/properties/spec/properties/init/properties/waitForInitialRestore
           type: switch
         if: showInitializationForm
         type: single-step-form
@@ -1106,15 +1106,15 @@ steps:
           text: options.agent.prometheus_builtin.label
           value: prometheus.io/builtin
         schema:
-          $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/monitor/properties/agent
+          $ref: schema#/properties/resources/properties/kubedbComDruid/properties/spec/properties/monitor/properties/agent
         type: radio
       - elements:
         - label:
             text: labels.scrapping_interval
           schema:
-            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/monitor/properties/prometheus/properties/serviceMonitor/properties/interval
+            $ref: schema#/properties/resources/properties/kubedbComDruid/properties/spec/properties/monitor/properties/prometheus/properties/serviceMonitor/properties/interval
           type: input
-        if: isEqualToModelPathValue|prometheus.io/operator|/resources/kubedbComElasticsearch/spec/monitor/agent
+        if: isEqualToModelPathValue|prometheus.io/operator|/resources/kubedbComDruid/spec/monitor/agent
         label:
           text: labels.service_monitor_configuration
         show_label: true
@@ -1209,14 +1209,14 @@ steps:
           schema:
             $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec
           type: single-step-form
-        if: isEqualToModelPathValue|prometheus.io|/resources/kubedbComElasticsearch/spec/monitor/agent
+        if: isEqualToModelPathValue|prometheus.io|/resources/kubedbComDruid/spec/monitor/agent
         label:
           text: labels.service_monitor
         schema:
           $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor
         show_label: true
         type: single-step-form
-      - if: isEqualToModelPathValue|prometheus.io|/resources/kubedbComElasticsearch/spec/monitor/agent
+      - if: isEqualToModelPathValue|prometheus.io|/resources/kubedbComDruid/spec/monitor/agent
         individualItemDisabilityCheck: disableLableChecker
         isArray: true
         keys:
@@ -1247,7 +1247,7 @@ steps:
           label:
             text: labels.resources
           schema:
-            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/resources
+            $ref: schema#/properties/resources/properties/kubedbComDruid/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/resources
           type: resource-input-form
         - label:
             text: labels.security_context
@@ -1255,30 +1255,30 @@ steps:
         - label:
             text: labels.run_as_user
           schema:
-            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/securityContext/properties/runAsUser
+            $ref: schema#/properties/resources/properties/kubedbComDruid/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/securityContext/properties/runAsUser
           type: input
         - customClass: mb-0
           label:
             text: labels.run_as_group
           schema:
-            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/securityContext/properties/runAsGroup
+            $ref: schema#/properties/resources/properties/kubedbComDruid/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/securityContext/properties/runAsGroup
           type: input
         - label:
             text: labels.port
           schema:
-            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/port
+            $ref: schema#/properties/resources/properties/kubedbComDruid/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/port
           type: input
         - element:
             label:
               isSubsection: true
               text: labels.args
             schema:
-              $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/args/items
+              $ref: schema#/properties/resources/properties/kubedbComDruid/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/args/items
             type: input
           label:
             text: labels.args
           schema:
-            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/args
+            $ref: schema#/properties/resources/properties/kubedbComDruid/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/args
           type: list-input-form
         - alias: reusable_env
           chart:
@@ -1289,7 +1289,7 @@ steps:
               $ref: schema#/properties/metadata/properties/release/properties/namespace
           moduleResolver: fetchJsons
           schema:
-            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env
+            $ref: schema#/properties/resources/properties/kubedbComDruid/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env
           type: reusable-element
         if: showCustomizeExporterSection
         type: single-step-form
@@ -1308,13 +1308,13 @@ steps:
         namespace:
           $ref: schema#/properties/metadata/properties/release/properties/namespace
         topology:
-          $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/topology
+          $ref: schema#/properties/resources/properties/kubedbComDruid/properties/spec/properties/topology
       functionCallbacks:
         isEditWizard:
           $ref: functions#/returnTrue
       moduleResolver: fetchJsons
       schema:
-        $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/podTemplate
+        $ref: schema#/properties/resources/properties/kubedbComDruid/properties/spec/properties/podTemplate
       type: reusable-element
     type: single-step-form
   id: pod-template
@@ -1327,7 +1327,7 @@ steps:
         version: v0.11.0
       moduleResolver: fetchJsons
       schema:
-        $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/serviceTemplates
+        $ref: schema#/properties/resources/properties/kubedbComDruid/properties/spec/properties/serviceTemplates
       type: reusable-element
     type: single-step-form
   id: networking
@@ -1375,7 +1375,7 @@ steps:
           label:
             text: labels.name
           schema:
-            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/configSecret/properties/name
+            $ref: schema#/properties/resources/properties/kubedbComDruid/properties/spec/properties/configSecret/properties/name
           type: select
         - addFormLabel: labels.config_file
           computed: setConfigFiles
@@ -1466,7 +1466,7 @@ steps:
           label:
             text: labels.name
           schema:
-            $ref: schema#/properties/resources/properties/kubedbComElasticsearch/properties/spec/properties/secureConfigSecret/properties/name
+            $ref: schema#/properties/resources/properties/kubedbComDruid/properties/spec/properties/secureConfigSecret/properties/name
           type: select
         - addFormLabel: labels.config_file
           computed: setSecretConfigFiles
@@ -1528,14 +1528,14 @@ steps:
       - label:
           text: Name
         schema:
-          $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/metadata/properties/name
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/metadata/properties/name
         type: input
       - fetch: getNamespaces
         label:
           text: SelectNamespace
         onChange: onNamespaceChange
         schema:
-          $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/metadata/properties/namespace
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/metadata/properties/namespace
         type: select
       - fetch: getDbs
         label:
@@ -1544,7 +1544,7 @@ steps:
         refresh: true
         required: true
         schema:
-          $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/databaseRef/properties/name
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/databaseRef/properties/name
         type: select
       if: isConsole
       type: single-step-form
@@ -1573,67 +1573,260 @@ steps:
             - "On"
             - "Off"
             schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/node/properties/trigger
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/brokers/properties/trigger
             type: select
           - label:
               text: PodLifeTimeThreshold
             schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/node/properties/podLifeTimeThreshold
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/brokers/properties/podLifeTimeThreshold
             type: input
           - label:
               text: Resource Diff Percentage
             schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/node/properties/resourceDiffPercentage
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/brokers/properties/resourceDiffPercentage
             type: input
           - elements:
             - label:
                 text: cpu
               schema:
-                $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/node/properties/minAllowed/properties/cpu
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/brokers/properties/minAllowed/properties/cpu
               type: input
             - label:
                 text: memory
               schema:
-                $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/node/properties/minAllowed/properties/memory
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/brokers/properties/minAllowed/properties/memory
               type: input
             label:
               text: Min Allowed
             schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/node/properties/minAllowed
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/brokers/properties/minAllowed
             show_label: true
             type: single-step-form
           - elements:
             - label:
                 text: cpu
               schema:
-                $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/node/properties/maxAllowed/properties/cpu
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/brokers/properties/maxAllowed/properties/cpu
               type: input
             - label:
                 text: memory
               schema:
-                $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/node/properties/maxAllowed/properties/memory
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/brokers/properties/maxAllowed/properties/memory
               type: input
             label:
               text: Max Allowed
             schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/node/properties/maxAllowed
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/brokers/properties/maxAllowed
             show_label: true
             type: single-step-form
-          - fetch: setControlledResources|node
+          - fetch: setControlledResources|brokers
             label:
-              text: controlledResources
+              text: Controlled Resources
             schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/node/properties/controlledResources
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/brokers/properties/controlledResources
             type: multiselect
+          label:
+            text: Brokers
           schema:
-            $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/node
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/brokers
+          show_label: true
           type: single-step-form
-        if: dbTypeEqualsTo|node
-        label:
-          text: Node
-        schema:
-          $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/node
-        show_label: true
+        - elements:
+          - label:
+              text: Trigger
+            options:
+            - "On"
+            - "Off"
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/coordinators/properties/trigger
+            type: select
+          - label:
+              text: PodLifeTimeThreshold
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/coordinators/properties/podLifeTimeThreshold
+            type: input
+          - label:
+              text: Resource Diff Percentage
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/coordinators/properties/resourceDiffPercentage
+            type: input
+          - elements:
+            - label:
+                text: cpu
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/coordinators/properties/minAllowed/properties/cpu
+              type: input
+            - label:
+                text: memory
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/coordinators/properties/minAllowed/properties/memory
+              type: input
+            label:
+              text: Min Allowed
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/coordinators/properties/minAllowed
+            show_label: true
+            type: single-step-form
+          - elements:
+            - label:
+                text: cpu
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/coordinators/properties/maxAllowed/properties/cpu
+              type: input
+            - label:
+                text: memory
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/coordinators/properties/maxAllowed/properties/memory
+              type: input
+            label:
+              text: Max Allowed
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/coordinators/properties/maxAllowed
+            show_label: true
+            type: single-step-form
+          - fetch: setControlledResources|coordinators
+            label:
+              text: Controlled Resources
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/coordinators/properties/controlledResources
+            type: multiselect
+          label:
+            text: coordinators
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/coordinators
+          show_label: true
+          type: single-step-form
+        - elements:
+          - label:
+              text: Trigger
+            options:
+            - "On"
+            - "Off"
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/historicals/properties/trigger
+            type: select
+          - label:
+              text: PodLifeTimeThreshold
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/historicals/properties/podLifeTimeThreshold
+            type: input
+          - label:
+              text: Resource Diff Percentage
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/historicals/properties/resourceDiffPercentage
+            type: input
+          - elements:
+            - label:
+                text: cpu
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/historicals/properties/minAllowed/properties/cpu
+              type: input
+            - label:
+                text: memory
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/historicals/properties/minAllowed/properties/memory
+              type: input
+            label:
+              text: Min Allowed
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/historicals/properties/minAllowed
+            show_label: true
+            type: single-step-form
+          - elements:
+            - label:
+                text: cpu
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/historicals/properties/maxAllowed/properties/cpu
+              type: input
+            - label:
+                text: memory
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/historicals/properties/maxAllowed/properties/memory
+              type: input
+            label:
+              text: Max Allowed
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/historicals/properties/maxAllowed
+            show_label: true
+            type: single-step-form
+          - fetch: setControlledResources|historicals
+            label:
+              text: Controlled Resources
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/historicals/properties/controlledResources
+            type: multiselect
+          label:
+            text: Historicals
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/historicals
+          show_label: true
+          type: single-step-form        
+        - elements:
+          - label:
+              text: Trigger
+            options:
+            - "On"
+            - "Off"
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/middleManagers/properties/trigger
+            type: select
+          - label:
+              text: PodLifeTimeThreshold
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/middleManagers/properties/podLifeTimeThreshold
+            type: input
+          - label:
+              text: Resource Diff Percentage
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/middleManagers/properties/resourceDiffPercentage
+            type: input
+          - elements:
+            - label:
+                text: cpu
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/middleManagers/properties/minAllowed/properties/cpu
+              type: input
+            - label:
+                text: memory
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/middleManagers/properties/minAllowed/properties/memory
+              type: input
+            label:
+              text: Min Allowed
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/middleManagers/properties/minAllowed
+            show_label: true
+            type: single-step-form
+          - elements:
+            - label:
+                text: cpu
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/middleManagers/properties/maxAllowed/properties/cpu
+              type: input
+            - label:
+                text: memory
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/middleManagers/properties/maxAllowed/properties/memory
+              type: input
+            label:
+              text: Max Allowed
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/middleManagers/properties/maxAllowed
+            show_label: true
+            type: single-step-form
+          - fetch: setControlledResources|middleManagers
+            label:
+              text: Controlled Resources
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/middleManagers/properties/controlledResources
+            type: multiselect
+          label:
+            text: MiddleManagers
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/middleManagers
+          show_label: true
+          type: single-step-form
+        if: dbTypeEqualsTo|topology 
         type: single-step-form
       - elements:
         - elements:
@@ -1643,62 +1836,62 @@ steps:
             - "On"
             - "Off"
             schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/data/properties/trigger
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/overlords/properties/trigger
             type: select
           - label:
               text: PodLifeTimeThreshold
             schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/data/properties/podLifeTimeThreshold
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/overlords/properties/podLifeTimeThreshold
             type: input
           - label:
               text: Resource Diff Percentage
             schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/data/properties/resourceDiffPercentage
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/overlords/properties/resourceDiffPercentage
             type: input
           - elements:
             - label:
                 text: cpu
               schema:
-                $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/data/properties/minAllowed/properties/cpu
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/overlords/properties/minAllowed/properties/cpu
               type: input
             - label:
                 text: memory
               schema:
-                $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/data/properties/minAllowed/properties/memory
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/overlords/properties/minAllowed/properties/memory
               type: input
             label:
               text: Min Allowed
             schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/data/properties/minAllowed
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/overlords/properties/minAllowed
             show_label: true
             type: single-step-form
           - elements:
             - label:
                 text: cpu
               schema:
-                $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/data/properties/maxAllowed/properties/cpu
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/overlords/properties/maxAllowed/properties/cpu
               type: input
             - label:
                 text: memory
               schema:
-                $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/data/properties/maxAllowed/properties/memory
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/overlords/properties/maxAllowed/properties/memory
               type: input
             label:
               text: Max Allowed
             schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/data/properties/maxAllowed
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/overlords/properties/maxAllowed
             show_label: true
             type: single-step-form
-          - fetch: setControlledResources|data
+          - fetch: setControlledResources|overlords
             label:
               text: Controlled Resources
             schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/data/properties/controlledResources
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/overlords/properties/controlledResources
             type: multiselect
           label:
-            text: Data
+            text: overlords
           schema:
-            $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/data
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/overlords
           show_label: true
           type: single-step-form
         - elements:
@@ -1708,154 +1901,89 @@ steps:
             - "On"
             - "Off"
             schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/ingest/properties/trigger
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/routers/properties/trigger
             type: select
           - label:
-              text: Pod LifeTime Threshold
+              text: PodLifeTimeThreshold
             schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/ingest/properties/podLifeTimeThreshold
-            type: input
-          - label:
-              text: ResourceDiffPercentage
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/ingest/properties/resourceDiffPercentage
-            type: input
-          - elements:
-            - label:
-                text: cpu
-              schema:
-                $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/ingest/properties/minAllowed/properties/cpu
-              type: input
-            - label:
-                text: memory
-              schema:
-                $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/ingest/properties/minAllowed/properties/memory
-              type: input
-            label:
-              text: Min Allowed
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/ingest/properties/minAllowed
-            show_label: true
-            type: single-step-form
-          - elements:
-            - label:
-                text: cpu
-              schema:
-                $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/ingest/properties/maxAllowed/properties/cpu
-              type: input
-            - label:
-                text: memory
-              schema:
-                $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/ingest/properties/maxAllowed/properties/memory
-              type: input
-            label:
-              text: Max Allowed
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/ingest/properties/maxAllowed
-            show_label: true
-            type: single-step-form
-          - fetch: setControlledResources|ingest
-            label:
-              text: Controlled Resources
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/ingest/properties/controlledResources
-            type: multiselect
-          label:
-            text: Ingest
-          schema:
-            $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/ingest
-          show_label: true
-          type: single-step-form
-        - elements:
-          - label:
-              text: Trigger
-            options:
-            - "On"
-            - "Off"
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/master/properties/trigger
-            type: select
-          - label:
-              text: Pod LifeTime Threshold
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/master/properties/podLifeTimeThreshold
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/routers/properties/podLifeTimeThreshold
             type: input
           - label:
               text: Resource Diff Percentage
             schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/master/properties/resourceDiffPercentage
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/routers/properties/resourceDiffPercentage
             type: input
           - elements:
             - label:
                 text: cpu
               schema:
-                $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/master/properties/minAllowed/properties/cpu
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/routers/properties/minAllowed/properties/cpu
               type: input
             - label:
                 text: memory
               schema:
-                $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/master/properties/minAllowed/properties/memory
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/routers/properties/minAllowed/properties/memory
               type: input
             label:
               text: Min Allowed
             schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/master/properties/minAllowed
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/routers/properties/minAllowed
             show_label: true
             type: single-step-form
           - elements:
             - label:
                 text: cpu
               schema:
-                $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/master/properties/maxAllowed/properties/cpu
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/routers/properties/maxAllowed/properties/cpu
               type: input
             - label:
                 text: memory
               schema:
-                $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/master/properties/maxAllowed/properties/memory
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/routers/properties/maxAllowed/properties/memory
               type: input
             label:
               text: Max Allowed
             schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/master/properties/maxAllowed
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/routers/properties/maxAllowed
             show_label: true
             type: single-step-form
-          - fetch: setControlledResources|master
+          - fetch: setControlledResources|routers
             label:
               text: Controlled Resources
             schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/master/properties/controlledResources
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/routers/properties/controlledResources
             type: multiselect
           label:
-            text: Master
+            text: routers
           schema:
-            $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/master
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/routers
           show_label: true
           type: single-step-form
-        if: dbTypeEqualsTo|topology
+        if: dbTypeEqualsTo|standalone
         type: single-step-form
       - elements:
         - fetch: fetchNodeTopology
           label:
             text: Select NodeTopology
           schema:
-            $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/name
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/name
           type: select
         - if: isNodeTopologySelected
           label:
             text: ScaleUp Diff Percentage
           schema:
-            $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/scaleUpDiffPercentage
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/scaleUpDiffPercentage
           type: input
         - if: isNodeTopologySelected
           label:
             text: ScaleDown Diff Percentage
           schema:
-            $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/scaleDownDiffPercentage
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/scaleDownDiffPercentage
           type: input
         label:
           text: nodeTopology
         schema:
-          $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/nodeTopology
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/compute/properties/nodeTopology
         show_label: true
         type: single-step-form
       type: single-step-form
@@ -1878,7 +2006,7 @@ steps:
         - text: 10 hours
           value: 10h0m
         schema:
-          $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/opsRequestOptions/properties/timeout
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/opsRequestOptions/properties/timeout
         type: select
       - computed: setApplyToIfReady
         label:
@@ -1889,13 +2017,13 @@ steps:
         - text: Always (OpsRequest will always be applied)
           value: Always
         schema:
-          $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/opsRequestOptions/properties/apply
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/opsRequestOptions/properties/apply
         type: radio
       if: showOpsRequestOptions
       label:
         text: ops Request Options
       schema:
-        $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/opsRequestOptions
+        $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/opsRequestOptions
       show_label: true
       type: single-step-form
     type: single-step-form
@@ -1914,14 +2042,14 @@ steps:
       - label:
           text: Name
         schema:
-          $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/metadata/properties/name
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/metadata/properties/name
         type: input
       - fetch: getNamespaces
         label:
           text: SelectNamespace
         onChange: onNamespaceChange
         schema:
-          $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/metadata/properties/namespace
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/metadata/properties/namespace
         type: select
       - fetch: getDbs
         label:
@@ -1930,7 +2058,7 @@ steps:
         refresh: true
         required: true
         schema:
-          $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/databaseRef/properties/name
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/databaseRef/properties/name
         type: select
       if: isConsole
       type: single-step-form
@@ -1952,141 +2080,71 @@ steps:
       type: radio
     - elements:
       - elements:
-        - label:
-            text: Trigger
-          options:
-          - "On"
-          - "Off"
-          schema:
-            $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/node/properties/trigger
-          type: select
-        - label:
-            text: Expansion Mode
-          options:
-          - Online
-          - Offline
-          schema:
-            $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/node/properties/expansionMode
-          type: select
-        - label:
-            text: UsageThreshold (%)
-          schema:
-            $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/node/properties/usageThreshold
-          type: input
-        - addFormLabel: ScalingRules
-          element:
-            elements:
+        - elements:
+          - label:
+              text: Trigger
+            options:
+            - "On"
+            - "Off"
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/storage/properties/historicals/properties/trigger
+            type: select
+          - label:
+              text: PodLifeTimeThreshold
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/storage/properties/historicals/properties/podLifeTimeThreshold
+            type: input
+          - label:
+              text: Resource Diff Percentage
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/storage/properties/historicals/properties/resourceDiffPercentage
+            type: input
+          - elements:
             - label:
-                text: AppliesUpto (In Storage units)
+                text: cpu
               schema:
-                $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/node/properties/scalingRules/items/properties/appliesUpto
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/storage/properties/historicals/properties/minAllowed/properties/cpu
               type: input
             - label:
-                text: Threshold (In %, Or In Storage Units)
+                text: memory
               schema:
-                $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/node/properties/scalingRules/items/properties/threshold
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/storage/properties/historicals/properties/minAllowed/properties/memory
               type: input
+            label:
+              text: Min Allowed
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/storage/properties/historicals/properties/minAllowed
+            show_label: true
             type: single-step-form
+          - elements:
+            - label:
+                text: cpu
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/storage/properties/historicals/properties/maxAllowed/properties/cpu
+              type: input
+            - label:
+                text: memory
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/storage/properties/historicals/properties/maxAllowed/properties/memory
+              type: input
+            label:
+              text: Max Allowed
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/storage/properties/historicals/properties/maxAllowed
+            show_label: true
+            type: single-step-form
+          - fetch: setControlledResources|historicals
+            label:
+              text: Controlled Resources
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/storage/properties/historicals/properties/controlledResources
+            type: multiselect
           label:
-            text: ScalingRules
+            text: Historicals
           schema:
-            $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/node/properties/scalingRules
-          onChange: handleUnit|autoscalingKubedbComElasticsearchAutoscaler/spec/storage/node/scalingRules|scalingRules
-          tableContents:
-          - inTableColumn: true
-            label:
-              text: AppliesUpto (In Storage units)
-            path: appliesUpto
-            type: value
-            typeOfValue: string
-          - inTableColumn: true
-            label:
-              text: Threshold (In %, Or In Storage Units)
-            path: threshold
-            type: value
-            typeOfValue: string
-          type: single-step-form-array
-        - label:
-            text: UpperBound
-          onChange: handleUnit|autoscalingKubedbComElasticsearchAutoscaler/spec/storage/node/upperBound
-          schema:
-            $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/node/properties/upperBound
-          type: input
-        if: dbTypeEqualsTo|node
-        label:
-          text: Node
-        schema:
-          $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/compute/properties/node
-        show_label: true
-        type: single-step-form
-      - elements:
-        - elements:
-          - label:
-              text: trigger
-            options:
-            - "On"
-            - "Off"
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/data/properties/trigger
-            type: select
-          - label:
-              text: Expansion Mode
-            options:
-            - Online
-            - Offline
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/data/properties/expansionMode
-            type: select
-          - label:
-              text: UsageThreshold (%)
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/data/properties/usageThreshold
-            type: input
-          - addFormLabel: ScalingRules
-            element:
-              elements:
-              - label:
-                  text: AppliesUpto (In Storage units)
-                schema:
-                  $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/data/properties/scalingRules/items/properties/appliesUpto
-                type: input
-              - label:
-                  text: Threshold (In %, Or In Storage Units)
-                schema:
-                  $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/data/properties/scalingRules/items/properties/threshold
-                type: input
-              type: single-step-form
-            label:
-              text: ScalingRules
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/data/properties/scalingRules
-            onChange: handleUnit|autoscalingKubedbComElasticsearchAutoscaler/spec/storage/data/scalingRules|scalingRules
-            tableContents:
-            - inTableColumn: true
-              label:
-                text: AppliesUpto (In Storage units)
-              path: appliesUpto
-              type: value
-              typeOfValue: string
-            - inTableColumn: true
-              label:
-                text: Threshold (In %, Or In Storage Units)
-              path: threshold
-              type: value
-              typeOfValue: string
-            type: single-step-form-array
-          - label:
-              text: UpperBound
-            onChange: handleUnit|autoscalingKubedbComElasticsearchAutoscaler/spec/storage/data/upperBound
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/data/properties/upperBound
-            type: input
-          label:
-            text: Data
-          schema:
-            $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/data
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/storage/properties/historicals
           show_label: true
-          type: single-step-form
+          type: single-step-form        
         - elements:
           - label:
               text: Trigger
@@ -2094,134 +2152,64 @@ steps:
             - "On"
             - "Off"
             schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/ingest/properties/trigger
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/storage/properties/middleManagers/properties/trigger
             type: select
           - label:
-              text: Expansion Mode
-            options:
-            - Online
-            - Offline
+              text: PodLifeTimeThreshold
             schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/ingest/properties/expansionMode
-            type: select
-          - label:
-              text: UsageThreshold (%)
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/ingest/properties/usageThreshold
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/storage/properties/middleManagers/properties/podLifeTimeThreshold
             type: input
-          - addFormLabel: ScalingRules
-            element:
-              elements:
-              - label:
-                  text: AppliesUpto (In Storage units)
-                schema:
-                  $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/ingest/properties/scalingRules/items/properties/appliesUpto
-                type: input
-              - label:
-                  text: Threshold (In %, Or In Storage Units)
-                schema:
-                  $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/ingest/properties/scalingRules/items/properties/threshold
-                type: input
-              type: single-step-form
+          - label:
+              text: Resource Diff Percentage
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/storage/properties/middleManagers/properties/resourceDiffPercentage
+            type: input
+          - elements:
+            - label:
+                text: cpu
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/storage/properties/middleManagers/properties/minAllowed/properties/cpu
+              type: input
+            - label:
+                text: memory
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/storage/properties/middleManagers/properties/minAllowed/properties/memory
+              type: input
             label:
-              text: ScalingRules
+              text: Min Allowed
             schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/ingest/properties/scalingRules
-            onChange: handleUnit|autoscalingKubedbComElasticsearchAutoscaler/spec/storage/ingest/scalingRules|scalingRules
-            tableContents:
-            - inTableColumn: true
-              label:
-                text: AppliesUpto (In Storage units)
-              path: appliesUpto
-              type: value
-              typeOfValue: string
-            - inTableColumn: true
-              label:
-                text: Threshold (In %, Or In Storage Units)
-              path: threshold
-              type: value
-              typeOfValue: string
-            type: single-step-form-array
-          - label:
-              text: UpperBound
-            onChange: handleUnit|autoscalingKubedbComElasticsearchAutoscaler/spec/storage/ingest/upperBound
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/storage/properties/middleManagers/properties/minAllowed
+            show_label: true
+            type: single-step-form
+          - elements:
+            - label:
+                text: cpu
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/storage/properties/middleManagers/properties/maxAllowed/properties/cpu
+              type: input
+            - label:
+                text: memory
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/storage/properties/middleManagers/properties/maxAllowed/properties/memory
+              type: input
+            label:
+              text: Max Allowed
             schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/ingest/properties/upperBound
-            type: input
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/storage/properties/middleManagers/properties/maxAllowed
+            show_label: true
+            type: single-step-form
+          - fetch: setControlledResources|middleManagers
+            label:
+              text: Controlled Resources
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/storage/properties/middleManagers/properties/controlledResources
+            type: multiselect
           label:
-            text: Ingest
+            text: MiddleManagers
           schema:
-            $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/ingest
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/storage/properties/middleManagers
           show_label: true
           type: single-step-form
-        - elements:
-          - label:
-              text: Trigger
-            options:
-            - "On"
-            - "Off"
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/master/properties/trigger
-            type: select
-          - label:
-              text: Expansion Mode
-            options:
-            - Online
-            - Offline
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/master/properties/expansionMode
-            type: select
-          - label:
-              text: UsageThreshold (%)
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/master/properties/usageThreshold
-            type: input
-          - addFormLabel: ScalingRules
-            element:
-              elements:
-              - label:
-                  text: AppliesUpto (In Storage units)
-                schema:
-                  $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/master/properties/scalingRules/items/properties/appliesUpto
-                type: input
-              - label:
-                  text: Threshold (In %, Or In Storage Units)
-                schema:
-                  $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/master/properties/scalingRules/items/properties/threshold
-                type: input
-              type: single-step-form
-            label:
-              text: ScalingRules
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/master/properties/scalingRules
-            onChange: handleUnit|autoscalingKubedbComElasticsearchAutoscaler/spec/storage/master/scalingRules|scalingRules
-            tableContents:
-            - inTableColumn: true
-              label:
-                text: AppliesUpto (In Storage units)
-              path: appliesUpto
-              type: value
-              typeOfValue: string
-            - inTableColumn: true
-              label:
-                text: Threshold (In %, Or In Storage Units)
-              path: threshold
-              type: value
-              typeOfValue: string
-            type: single-step-form-array
-          - label:
-              text: UpperBound
-            onChange: handleUnit|autoscalingKubedbComElasticsearchAutoscaler/spec/storage/master/upperBound
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/master/properties/upperBound
-            type: input
-          label:
-            text: Master
-          schema:
-            $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/storage/properties/master
-          show_label: true
-          type: single-step-form
-        if: dbTypeEqualsTo|topology
         type: single-step-form
       type: single-step-form
     - elements:
@@ -2243,7 +2231,7 @@ steps:
         - text: 10 hours
           value: 10h0m
         schema:
-          $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/opsRequestOptions/properties/timeout
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/opsRequestOptions/properties/timeout
         type: select
       - computed: setApplyToIfReady
         label:
@@ -2254,13 +2242,13 @@ steps:
         - text: Always (OpsRequest will always be applied)
           value: Always
         schema:
-          $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/opsRequestOptions/properties/apply
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/opsRequestOptions/properties/apply
         type: radio
       if: showOpsRequestOptions
       label:
         text: ops Request Options
       schema:
-        $ref: schema#/properties/resources/properties/autoscalingKubedbComElasticsearchAutoscaler/properties/spec/properties/opsRequestOptions
+        $ref: schema#/properties/resources/properties/autoscalingKubedbComDruidAutoscaler/properties/spec/properties/opsRequestOptions
       show_label: true
       type: single-step-form
     type: single-step-form

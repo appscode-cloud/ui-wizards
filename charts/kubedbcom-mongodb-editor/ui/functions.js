@@ -2433,7 +2433,247 @@ function showScheduleBackup({ storeGet }) {
   return !isBackupOperation
 }
 
+//////////////////// Auto scaler /////////////////
+
+let autoscaleType = ''
+let dbDetails = {}
+function isKubedb({ storeGet }) {
+  return !!storeGet('/route/query/operation')
+}
+
+function showOpsRequestOptions({ model, getValue, watchDependency, storeGet, discriminator }) {
+  if (isKubedb({ storeGet }) === true) return true
+  watchDependency('model#/spec/databaseRef/name')
+  return (
+    !!getValue(model, '/spec/databaseRef/name') && !!getValue(discriminator, '/autoscalingType')
+  )
+}
+
+async function getDbDetails({ axios, storeGet, getValue, model, setDiscriminatorValue, commit }) {
+  const owner = storeGet('/route/params/user') || ''
+  const cluster = storeGet('/route/params/cluster') || ''
+
+  const namespace =
+    storeGet('/route/query/namespace') || getValue(model, '/metadata/namespace') || ''
+  const name = storeGet('/route/query/name') || getValue(model, '/spec/databaseRef/name') || ''
+
+  if (namespace && name) {
+    try {
+      const resp = await axios.get(
+        `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/mongodbs/${name}`,
+      )
+      dbDetails = resp.data || {}
+
+      setDiscriminatorValue('/dbDetails', true)
+    } catch (e) {
+      console.log(e)
+    }
+  }
+
+  commit('wizard/model$update', {
+    path: `/metadata/release/name`,
+    value: name,
+    force: true,
+  })
+  commit('wizard/model$update', {
+    path: `/metadata/release/namespace`,
+    value: namespace,
+    force: true,
+  })
+  commit('wizard/model$update', {
+    path: `/resources/autoscalingKubedbComMongoDBAutoscaler/spec/databaseRef/name`,
+    value: name,
+    force: true,
+  })
+  commit('wizard/model$update', {
+    path: `/resources/autoscalingKubedbComMongoDBAutoscaler/metadata/labels`,
+    value: dbDetails.metadata.labels,
+    force: true,
+  })
+}
+
+async function mongoTypeEqualsTo(
+  { watchDependency, getValue, commit, discriminator },
+  mongoType,
+  type,
+) {
+  watchDependency('discriminator#/dbDetails')
+  autoscaleType = type
+  const dbDetailsSuccess = getValue(discriminator, '/dbDetails')
+
+  if (!dbDetailsSuccess) return false
+
+  const { spec } = dbDetails || {}
+  const { shardTopology, replicaSet } = spec || {}
+  let verd = ''
+  if (shardTopology) verd = 'sharded'
+  else {
+    if (replicaSet) verd = 'replicaSet'
+    else verd = 'standalone'
+  }
+  clearSpecModel({ commit }, verd)
+  return mongoType === verd
+}
+
+function clearSpecModel({ commit }, dbtype) {
+  if (dbtype === 'standalone') {
+    commit(
+      'wizard/model$delete',
+      `/resources/autoscalingKubedbComMongoDBAutoscaler/spec/${autoscaleType}/replicaSet`,
+    )
+    commit(
+      'wizard/model$delete',
+      `/resources/autoscalingKubedbComMongoDBAutoscaler/spec/${autoscaleType}/shard`,
+    )
+    commit(
+      'wizard/model$delete',
+      `/resources/autoscalingKubedbComMongoDBAutoscaler/spec/${autoscaleType}/mongos`,
+    )
+    commit(
+      'wizard/model$delete',
+      `/resources/autoscalingKubedbComMongoDBAutoscaler/spec/${autoscaleType}/configServer`,
+    )
+  } else if (dbtype === 'replicaSet') {
+    commit(
+      'wizard/model$delete',
+      `/resources/autoscalingKubedbComMongoDBAutoscaler/spec/${autoscaleType}/standalone`,
+    )
+    commit(
+      'wizard/model$delete',
+      `/resources/autoscalingKubedbComMongoDBAutoscaler/spec/${autoscaleType}/shard`,
+    )
+    commit(
+      'wizard/model$delete',
+      `/resources/autoscalingKubedbComMongoDBAutoscaler/spec/${autoscaleType}/mongos`,
+    )
+    commit(
+      'wizard/model$delete',
+      `/resources/autoscalingKubedbComMongoDBAutoscaler/spec/${autoscaleType}/configServer`,
+    )
+  } else if (dbtype === 'sharded') {
+    commit(
+      'wizard/model$delete',
+      `/resources/autoscalingKubedbComMongoDBAutoscaler/spec/${autoscaleType}/standalone`,
+    )
+    commit(
+      'wizard/model$delete',
+      `/resources/autoscalingKubedbComMongoDBAutoscaler/spec/${autoscaleType}/replicaSet`,
+    )
+  }
+}
+
+async function fetchNodeTopology({ axios, storeGet }) {
+  const owner = storeGet('/route/params/user') || ''
+  const cluster = storeGet('/route/params/cluster') || ''
+  const url = `/clusters/${owner}/${cluster}/proxy/node.k8s.appscode.com/v1alpha1/nodetopologies`
+  try {
+    const resp = await axios.get(url)
+    const list = (resp && resp.data?.items) || []
+    const mappedList = list.map((item) => {
+      const name = (item.metadata && item.metadata.name) || ''
+      return name
+    })
+    return mappedList
+  } catch (e) {
+    console.log(e)
+  }
+  return []
+}
+
+function isNodeTopologySelected({ watchDependency, model, getValue }) {
+  watchDependency(
+    'model#/resources/autoscalingKubedbComMongoDBAutoscaler/spec/compute/nodeTopology/name',
+  )
+  const nodeTopologyName =
+    getValue(
+      model,
+      '/resources/autoscalingKubedbComMongoDBAutoscaler/spec/compute/nodeTopology/name',
+    ) || ''
+  return !!nodeTopologyName.length
+}
+
+function setControlledResources({ commit }, type) {
+  const list = ['cpu', 'memory']
+  const path = `/resources/autoscalingKubedbComMongoDBAutoscaler/spec/${type}/controlledResources`
+  commit('wizard/model$update', {
+    path: path,
+    value: list,
+    force: true,
+  })
+  return list
+}
+
+function setTrigger() {
+  return 'On'
+}
+
+function setApplyToIfReady() {
+  return 'IfReady'
+}
+
+function setMetadata({ storeGet, mode, commit }) {
+  const dbname = storeGet('/route/params/name') || ''
+  const namespace = storeGet('/route/query/namespace') || ''
+  if (mode === 'standalone-step') {
+    commit('wizard/model$update', {
+      path: '/metadata/release/name',
+      value: dbname,
+      force: true,
+    })
+    commit('wizard/model$update', {
+      path: '/metadata/release/namespace',
+      value: namespace,
+      force: true,
+    })
+  }
+}
+
+function handleUnit({ commit, model, getValue }, path, type = 'bound') {
+  let value = getValue(model, `/resources/${path}`)
+  if (type === 'scalingRules') {
+    const updatedValue = []
+    value.forEach((ele) => {
+      let appliesUpto = ele['appliesUpto']
+      let threshold = ele['threshold']
+      if (appliesUpto && !isNaN(appliesUpto)) {
+        appliesUpto += 'Gi'
+      }
+      if (!isNaN(threshold)) {
+        threshold += 'pc'
+      }
+      updatedValue.push({ threshold, appliesUpto })
+    })
+    if (JSON.stringify(updatedValue) !== JSON.stringify(value)) {
+      commit('wizard/model$update', {
+        path: `/resources/${path}`,
+        value: updatedValue,
+        force: true,
+      })
+    }
+  } else {
+    if (!isNaN(value)) {
+      value += 'Gi'
+      commit('wizard/model$update', {
+        path: `/resources/${path}`,
+        value: value,
+        force: true,
+      })
+    }
+  }
+}
 return {
+  handleUnit,
+  setMetadata,
+  isKubedb,
+  getDbDetails,
+  mongoTypeEqualsTo,
+  clearSpecModel,
+  fetchNodeTopology,
+  isNodeTopologySelected,
+  setControlledResources,
+  setTrigger,
+  setApplyToIfReady,
+  showOpsRequestOptions,
   setInitSchedule,
   fetchNames,
   isRancherManaged,

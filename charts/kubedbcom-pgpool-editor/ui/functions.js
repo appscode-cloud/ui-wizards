@@ -83,21 +83,6 @@ function setValueFromModel({ getValue, model }, path) {
   return getValue(model, path)
 }
 
-function isNotShardModeSelected({ model, getValue, watchDependency }) {
-  watchDependency('model#/resources/kubedbComSinglestore/spec')
-  const hasShardTopology = getValue(model, '/resources/kubedbComSinglestore/spec/shardTopology')
-  return !hasShardTopology
-}
-
-function isShardModeSelected({ model, getValue, watchDependency, commit }) {
-  const resp = !isNotShardModeSelected({ model, getValue, watchDependency })
-  if (resp) {
-    commit('wizard/model$delete', '/resources/kubedbComSinglestore/spec/configSecret')
-    commit('wizard/model$delete', '/resources/secret_config')
-  }
-  return resp
-}
-
 async function getNamespacedResourceList(axios, storeGet, { namespace, group, version, resource }) {
   const owner = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
@@ -206,9 +191,18 @@ function returnTrue() {
 function returnStringYes() {
   return 'yes'
 }
+function setAddressType({ model, getValue }) {
+  const value = getValue(model, '/resources/kubedbComPgpool/spec/useAddressType')
+
+  if (!value) {
+    return 'DNS'
+  }
+
+  return value
+}
 
 // ************************* Basic Info **********************************************
-async function getMongoDbVersions({ axios, storeGet }, group, version, resource) {
+async function getPgpoolVersions({ axios, storeGet }, group, version, resource) {
   const owner = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
 
@@ -248,281 +242,27 @@ async function getMongoDbVersions({ axios, storeGet }, group, version, resource)
   }
 }
 
-// ************************* Auth Secret Field ******************************************
-function showAuthPasswordField({ model, getValue, watchDependency }) {
-  watchDependency('model#/resources')
-  const modelPathValue = getValue(model, '/resources')
-  return !!(
-    modelPathValue &&
-    modelPathValue.secret &&
-    modelPathValue.secret.metadata &&
-    modelPathValue.secret.metadata.name &&
-    !showAuthSecretField({ model, getValue, watchDependency })
-  )
-}
-
-function showAuthSecretField({ model, getValue, watchDependency }) {
-  watchDependency('model#/resources/kubedbComSinglestore/spec')
-  const modelPathValue = getValue(model, '/resources/kubedbComSinglestore/spec')
-  return !!(modelPathValue && modelPathValue.authSecret && modelPathValue.authSecret.name)
-}
-
-function showNewSecretCreateField({ model, getValue, watchDependency, commit }) {
-  const resp =
-    !showAuthSecretField({ model, getValue, watchDependency }) &&
-    !showAuthPasswordField({ model, getValue, watchDependency })
-  const secret = getValue(model, '/resources/secret_auth')
-  if (resp && !secret) {
-    commit('wizard/model$update', {
-      path: '/resources/secret_auth',
-      value: {
-        data: {
-          password: '',
-        },
-      },
-      force: true,
-    })
-  }
-  return resp
-}
-
 // ********************* Database Mode ***********************
-function isNotStandaloneMode({ discriminator, getValue, watchDependency }) {
-  watchDependency('discriminator#/activeDatabaseMode')
-  const mode = getValue(discriminator, '/activeDatabaseMode')
-  return mode !== 'Standalone'
-}
+function setDatabaseMode({ model, getValue }) {
+  const replicas = getValue(model, '/resources/kubedbComPgpool/spec/replicas')
 
-function showCommonStorageClassAndSizeField({ discriminator, getValue, watchDependency }) {
-  watchDependency('discriminator#/activeDatabaseMode')
-  const mode = getValue(discriminator, '/activeDatabaseMode')
-  const validType = ['Standalone', 'Replicaset']
-  return validType.includes(mode)
-}
-function setDatabaseMode({ model, getValue, watchDependency }) {
-  const modelPathValue = getValue(model, '/resources/kubedbComSinglestore/spec')
-
-  watchDependency('model#/resources/kubedbComSinglestore/spec')
-  if (modelPathValue.shardTopology) {
-    return 'Sharded'
-  } else if (modelPathValue.replicaSet) {
-    return 'Replicaset'
-  } else {
-    return 'Standalone'
-  }
-}
-
-let storageClassList = []
-async function getStorageClassNames(
-  { axios, storeGet, commit, model, getValue, watchDependency, discriminator },
-  mode,
-) {
-  const owner = storeGet('/route/params/user')
-  const cluster = storeGet('/route/params/cluster')
-
-  const databaseModeShard = getValue(discriminator, '/activeDatabaseMode') === 'Sharded'
-
-  const resp = await axios.get(
-    `/clusters/${owner}/${cluster}/proxy/storage.k8s.io/v1/storageclasses`,
-    {
-      params: {
-        filter: { items: { metadata: { name: null, annotations: null } } },
-      },
-    },
-  )
-
-  const resources = (resp && resp.data && resp.data.items) || []
-
-  resources.map((item) => {
-    const name = (item.metadata && item.metadata.name) || ''
-    item.text = name
-    item.value = name
-    return true
-  })
-  storageClassList = resources
-  const path =
-    mode === 'shard'
-      ? '/resources/kubedbComSinglestore/spec/shardTopology/shard/storage/storageClassName'
-      : '/resources/kubedbComSinglestore/spec/storage/storageClassName'
-  const initialStorageClass = getValue(model, path)
-  if (!initialStorageClass) setStorageClass({ getValue, commit, model, discriminator })
-  return resources
-}
-
-function setStorageClass({ getValue, commit, model, discriminator }) {
-  const deletionPolicy = getValue(model, 'resources/kubedbComSinglestore/spec/deletionPolicy') || ''
-  const suffix = '-retain'
-  let storageClass = ''
-
-  const simpleClassList = storageClassList.filter((item) => {
-    return !item.metadata?.name?.endsWith(suffix)
-  })
-
-  const retainClassList = storageClassList.filter((item) => {
-    return item.metadata?.name?.endsWith(suffix)
-  })
-
-  const defaultSimpleList = simpleClassList.filter((item) => {
-    return (
-      item.metadata &&
-      item.metadata.annotations &&
-      item.metadata.annotations['storageclass.kubernetes.io/is-default-class']
-    )
-  })
-
-  const defaultRetainList = retainClassList.filter((item) => {
-    return (
-      item.metadata &&
-      item.metadata.annotations &&
-      item.metadata.annotations['storageclass.kubernetes.io/is-default-class']
-    )
-  })
-
-  if (deletionPolicy === 'WipeOut' || deletionPolicy === 'Delete') {
-    if (simpleClassList.length > 1) {
-      const found = defaultSimpleList.length ? defaultSimpleList[0] : simpleClassList[0]
-      storageClass = found.value
-    } else if (simpleClassList.length === 1) {
-      storageClass = simpleClassList[0]?.value
-    } else {
-      const found = defaultRetainList.length
-        ? defaultRetainList[0].value
-        : storageClassList.length
-        ? storageClassList[0].value
-        : ''
-      storageClass = found
-    }
-  } else {
-    if (retainClassList.length > 1) {
-      const found = defaultRetainList.length ? defaultRetainList[0] : retainClassList[0]
-      storageClass = found.value
-    } else if (retainClassList.length === 1) {
-      storageClass = retainClassList[0]?.value
-    } else {
-      const found = defaultSimpleList.length
-        ? defaultSimpleList[0].value
-        : storageClassList.length
-        ? storageClassList[0].value
-        : ''
-      storageClass = found
-    }
-  }
-
-  const mode = getValue(discriminator, '/activeDatabaseMode')
-
-  if (mode === 'Sharded') {
-    commit('wizard/model$update', {
-      path: '/resources/kubedbComSinglestore/spec/shardTopology/shard/storage/storageClassName',
-      value: storageClass,
-      force: true,
-    })
-    commit('wizard/model$update', {
-      path: '/resources/kubedbComSinglestore/spec/shardTopology/configServer/storage/storageClassName',
-      value: storageClass,
-      force: true,
-    })
-    commit('wizard/model$delete', '/resources/kubedbComSinglestore/spec/storage')
-  } else {
-    commit('wizard/model$update', {
-      path: '/resources/kubedbComSinglestore/spec/storage/storageClassName',
-      value: storageClass,
-      force: true,
-    })
-  }
-}
-
-function updateConfigServerStorageClass({ getValue, model, commit }) {
-  const storageClass =
-    getValue(
-      model,
-      '/resources/kubedbComSinglestore/spec/shardTopology/shard/storage/storageClassName',
-    ) || ''
-  commit('wizard/model$update', {
-    path: '/resources/kubedbComSinglestore/spec/shardTopology/configServer/storage/storageClassName',
-    value: storageClass,
-    force: true,
-  })
-}
-
-function deleteDatabaseModePath({ discriminator, getValue, commit, model }) {
-  const mode = getValue(discriminator, '/activeDatabaseMode')
-  const modelSpec = getValue(model, '/resources/kubedbComSinglestore/spec')
-  if (mode === 'Sharded') {
-    commit('wizard/model$delete', '/resources/kubedbComSinglestore/spec/replicaSet')
-    commit('wizard/model$delete', '/resources/kubedbComSinglestore/spec/replicas')
-    commit('wizard/model$delete', '/resources/kubedbComSinglestore/spec/storage')
-    commit('wizard/model$delete', '/resources/kubedbComSinglestore/spec/podTemplate')
-    commit('wizard/model$delete', '/resources/kubedbComSinglestore/spec/configSecret')
-
-    commit('wizard/model$delete', '/resources/secret_config')
-
-    if (!modelSpec.shardTopology) {
-      commit('wizard/model$update', {
-        path: '/resources/kubedbComSinglestore/spec/shardTopology',
-        value: {
-          configServer: {
-            replicas: 3,
-            storage: {
-              resources: {
-                requests: {
-                  storage: '',
-                },
-              },
-            },
-          },
-          mongos: {
-            replicas: 2,
-          },
-          shard: {
-            replicas: 3,
-            shards: 3,
-            storage: {
-              resources: {
-                requests: {
-                  storage: '',
-                },
-              },
-            },
-          },
-        },
-        force: true,
-      })
-    }
-  } else if (mode === 'Replicaset') {
-    commit('wizard/model$delete', '/resources/kubedbComSinglestore/spec/shardTopology')
-
-    commit('wizard/model$delete', '/resources/secret_shard_config')
-    commit('wizard/model$delete', '/resources/secret_configserver_config')
-    commit('wizard/model$delete', '/resources/secret_mongos_config')
-
-    if (!modelSpec.replicaSet) {
-      commit('wizard/model$update', {
-        path: '/resources/kubedbComSinglestore/spec/replicaSet',
-        value: { name: '' },
-        force: true,
-      })
-      commit('wizard/model$update', {
-        path: '/resources/kubedbComSinglestore/spec/replicas',
-        value: 3,
-        force: true,
-      })
-    }
-  } else if (mode === 'Standalone') {
-    commit('wizard/model$delete', '/resources/kubedbComSinglestore/spec/shardTopology')
-
-    commit('wizard/model$delete', '/resources/kubedbComSinglestore/spec/replicaSet')
-    commit('wizard/model$delete', '/resources/kubedbComSinglestore/spec/replicas')
-
-    commit('wizard/model$delete', '/resources/secret_shard_config')
-    commit('wizard/model$delete', '/resources/secret_configserver_config')
-    commit('wizard/model$delete', '/resources/secret_mongos_config')
-  }
+  return replicas === 1 ? 'Standalone' : 'Cluster'
 }
 
 function isEqualToDatabaseMode({ getValue, watchDependency, discriminator }, value) {
   watchDependency('discriminator#/activeDatabaseMode')
   const mode = getValue(discriminator, '/activeDatabaseMode')
   return mode === value
+}
+
+const onDatabaseModeChange = ({ discriminator, getValue, commit }) => {
+  const databaseMode = getValue(discriminator, '/activeDatabaseMode')
+
+  commit('wizard/model$update', {
+    path: '/resources/kubedbComPgpool/spec/replicas',
+    value: databaseMode === 'Standalone' ? 1 : 3,
+    force: true,
+  })
 }
 
 // ************************** TLS ******************************88
@@ -534,11 +274,11 @@ function setApiGroup() {
 async function getIssuerRefsName({ axios, storeGet, getValue, model, watchDependency }) {
   const owner = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
-  watchDependency('model#/resources/kubedbComSinglestore/spec/tls/issuerRef/apiGroup')
-  watchDependency('model#/resources/kubedbComSinglestore/spec/tls/issuerRef/kind')
+  watchDependency('model#/resources/kubedbComPgpool/spec/tls/issuerRef/apiGroup')
+  watchDependency('model#/resources/kubedbComPgpool/spec/tls/issuerRef/kind')
   watchDependency('model#/metadata/release/namespace')
-  const apiGroup = getValue(model, '/resources/kubedbComSinglestore/spec/tls/issuerRef/apiGroup')
-  const kind = getValue(model, '/resources/kubedbComSinglestore/spec/tls/issuerRef/kind')
+  const apiGroup = getValue(model, '/resources/kubedbComPgpool/spec/tls/issuerRef/apiGroup')
+  const kind = getValue(model, '/resources/kubedbComPgpool/spec/tls/issuerRef/kind')
   const namespace = getValue(model, '/metadata/release/namespace')
 
   let url
@@ -592,14 +332,9 @@ async function hasNoIssuerRefName({ axios, storeGet, getValue, model, watchDepen
   return !resp
 }
 
-function setClusterAuthMode({ model, getValue }) {
-  const val = getValue(model, '/resources/kubedbComSinglestore/spec/clusterAuthMode')
-  return val || 'x509'
-}
-
 function setSSLMode({ model, getValue }) {
-  const val = getValue(model, '/resources/kubedbComSinglestore/spec/sslMode')
-  return val || 'requireSSL'
+  const val = getValue(model, '/resources/kubedbComPgpool/spec/sslMode')
+  return val || 'require'
 }
 
 function showTlsConfigureSection({ watchDependency, discriminator, getValue }) {
@@ -612,14 +347,13 @@ function onTlsConfigureChange({ discriminator, getValue, commit }) {
   const configureStatus = getValue(discriminator, '/configureTLS')
   if (configureStatus) {
     commit('wizard/model$update', {
-      path: '/resources/kubedbComSinglestore/spec/tls',
+      path: '/resources/kubedbComPgpool/spec/tls',
       value: { issuerRef: {}, certificates: [] },
       force: true,
     })
   } else {
-    commit('wizard/model$delete', '/resources/kubedbComSinglestore/spec/tls')
-    commit('wizard/model$delete', '/resources/kubedbComSinglestore/spec/clusterAuthMode')
-    commit('wizard/model$delete', '/resources/kubedbComSinglestore/spec/sslMode')
+    commit('wizard/model$delete', '/resources/kubedbComPgpool/spec/tls')
+    commit('wizard/model$delete', '/resources/kubedbComPgpool/spec/sslMode')
   }
 }
 
@@ -639,12 +373,12 @@ function onEnableMonitoringChange({ discriminator, getValue, commit }) {
   const configureStatus = getValue(discriminator, '/enableMonitoring')
   if (configureStatus) {
     commit('wizard/model$update', {
-      path: '/resources/kubedbComSinglestore/spec/monitor',
+      path: '/resources/kubedbComPgpool/spec/monitor',
       value: {},
       force: true,
     })
   } else {
-    commit('wizard/model$delete', '/resources/kubedbComSinglestore/spec/monitor')
+    commit('wizard/model$delete', '/resources/kubedbComPgpool/spec/monitor')
   }
 
   // update alert value depend on monitoring profile
@@ -665,15 +399,12 @@ function onCustomizeExporterChange({ discriminator, getValue, commit }) {
   const configureStatus = getValue(discriminator, '/customizeExporter')
   if (configureStatus) {
     commit('wizard/model$update', {
-      path: '/resources/kubedbComSinglestore/spec/monitor/prometheus/exporter',
+      path: '/resources/kubedbComPgpool/spec/monitor/prometheus/exporter',
       value: {},
       force: true,
     })
   } else {
-    commit(
-      'wizard/model$delete',
-      '/resources/kubedbComSinglestore/spec/monitor/prometheus/exporter',
-    )
+    commit('wizard/model$delete', '/resources/kubedbComPgpool/spec/monitor/prometheus/exporter')
   }
 }
 
@@ -798,12 +529,6 @@ const stashAppscodeComBackupConfiguration = {
   },
 }
 
-function disableInitializationSection({ model, getValue, watchDependency }) {
-  const initialized = getValue(model, '/resources/kubedbComSinglestore/spec/init/initialized')
-  watchDependency('model#/resources/kubedbComSinglestore/spec/init/initialized')
-  return !!initialized
-}
-
 function valueExists(value, getValue, path) {
   const val = getValue(value, path)
   if (val) return true
@@ -813,13 +538,13 @@ function valueExists(value, getValue, path) {
 function initPrePopulateDatabase({ getValue, model }) {
   const waitForInitialRestore = getValue(
     model,
-    '/resources/kubedbComSinglestore/spec/init/waitForInitialRestore',
+    '/resources/kubedbComPgpool/spec/init/waitForInitialRestore',
   )
   const stashAppscodeComRestoreSession_init = getValue(
     model,
     '/resources/stashAppscodeComRestoreSession_init',
   )
-  const script = getValue(model, '/resources/kubedbComSinglestore/spec/init/script')
+  const script = getValue(model, '/resources/kubedbComPgpool/spec/init/script')
 
   return waitForInitialRestore || !!stashAppscodeComRestoreSession_init || !!script ? 'yes' : 'no'
 }
@@ -829,11 +554,11 @@ function onPrePopulateDatabaseChange({ commit, getValue, discriminator, model })
   if (prePopulateDatabase === 'no') {
     // delete related properties
     commit('wizard/model$update', {
-      path: '/resources/kubedbComSinglestore/spec/init/waitForInitialRestore',
+      path: '/resources/kubedbComPgpool/spec/init/waitForInitialRestore',
       value: false,
     })
     commit('wizard/model$delete', '/resources/stashAppscodeComRestoreSession_init')
-    commit('wizard/model$delete', '/resources/kubedbComSinglestore/spec/init/script')
+    commit('wizard/model$delete', '/resources/kubedbComPgpool/spec/init/script')
     commit('wizard/model$delete', '/resources/stashAppscodeComRepository_init_repo')
   } else {
     const dbName = getValue(model, '/metadata/release/name')
@@ -855,7 +580,7 @@ function onPrePopulateDatabaseChange({ commit, getValue, discriminator, model })
 }
 
 function initDataSource({ getValue, model }) {
-  const script = getValue(model, '/resources/kubedbComSinglestore/spec/init/script')
+  const script = getValue(model, '/resources/kubedbComPgpool/spec/init/script')
   const stashAppscodeComRestoreSession_init = getValue(
     model,
     '/resources/stashAppscodeComRestoreSession_init',
@@ -870,7 +595,7 @@ function onDataSourceChange({ commit, getValue, discriminator, model }) {
   const dataSource = getValue(discriminator, '/dataSource')
 
   commit('wizard/model$update', {
-    path: '/resources/kubedbComSinglestore/spec/init/waitForInitialRestore',
+    path: '/resources/kubedbComPgpool/spec/init/waitForInitialRestore',
     value: dataSource === 'stashBackup',
     force: true,
   })
@@ -879,13 +604,13 @@ function onDataSourceChange({ commit, getValue, discriminator, model }) {
     commit('wizard/model$delete', '/resources/stashAppscodeComRestoreSession_init')
 
     // create a new script if there is no script property
-    if (!valueExists(model, getValue, '/resources/kubedbComSinglestore/spec/init/script'))
+    if (!valueExists(model, getValue, '/resources/kubedbComPgpool/spec/init/script'))
       commit('wizard/model$update', {
-        path: '/resources/kubedbComSinglestore/spec/init/script',
+        path: '/resources/kubedbComPgpool/spec/init/script',
         value: initScript,
       })
   } else if (dataSource === 'stashBackup') {
-    commit('wizard/model$delete', '/resources/kubedbComSinglestore/spec/init/script')
+    commit('wizard/model$delete', '/resources/kubedbComPgpool/spec/init/script')
 
     // create a new stashAppscodeComRestoreSession_init if there is no stashAppscodeComRestoreSession_init property
     if (!valueExists(model, getValue, '/resources/stashAppscodeComRestoreSession_init')) {
@@ -907,14 +632,8 @@ function onDataSourceChange({ commit, getValue, discriminator, model }) {
 
 // // for script
 function initVolumeType({ getValue, model }) {
-  const configMap = getValue(
-    model,
-    '/resources/kubedbComSinglestore/spec/init/script/configMap/name',
-  )
-  const secret = getValue(
-    model,
-    '/resources/kubedbComSinglestore/spec/init/script/secret/secretName',
-  )
+  const configMap = getValue(model, '/resources/kubedbComPgpool/spec/init/script/configMap/name')
+  const secret = getValue(model, '/resources/kubedbComPgpool/spec/init/script/secret/secretName')
 
   if (configMap) return 'configMap'
   else if (secret) return 'secret'
@@ -925,13 +644,11 @@ function onVolumeTypeChange({ commit, getValue, discriminator, model }) {
   const sourceVolumeType = getValue(discriminator, '/sourceVolumeType')
   if (sourceVolumeType === 'configMap') {
     // add configMap object and delete secret object
-    commit('wizard/model$delete', '/resources/kubedbComSinglestore/spec/init/script/secret')
+    commit('wizard/model$delete', '/resources/kubedbComPgpool/spec/init/script/secret')
 
-    if (
-      !valueExists(model, getValue, '/resources/kubedbComSinglestore/spec/init/script/configMap')
-    ) {
+    if (!valueExists(model, getValue, '/resources/kubedbComPgpool/spec/init/script/configMap')) {
       commit('wizard/model$update', {
-        path: '/resources/kubedbComSinglestore/spec/init/script/configMap',
+        path: '/resources/kubedbComPgpool/spec/init/script/configMap',
         value: {
           name: '',
         },
@@ -939,11 +656,11 @@ function onVolumeTypeChange({ commit, getValue, discriminator, model }) {
     }
   } else if (sourceVolumeType === 'secret') {
     // delete configMap object and add secret object
-    commit('wizard/model$delete', '/resources/kubedbComSinglestore/spec/init/script/configMap')
+    commit('wizard/model$delete', '/resources/kubedbComPgpool/spec/init/script/configMap')
 
-    if (!valueExists(model, getValue, '/resources/kubedbComSinglestore/spec/init/script/secret')) {
+    if (!valueExists(model, getValue, '/resources/kubedbComPgpool/spec/init/script/secret')) {
       commit('wizard/model$update', {
-        path: '/resources/kubedbComSinglestore/spec/init/script/secret',
+        path: '/resources/kubedbComPgpool/spec/init/script/secret',
         value: {
           secretName: '',
         },
@@ -1116,161 +833,21 @@ async function getImagePullSecrets({ getValue, model, watchDependency, axios, st
   })
 }
 
-function showBackupOptions({ discriminator, getValue, watchDependency }, backup) {
-  const backupEnabled = getValue(discriminator, '/backupEnabled')
-  if (backupEnabled) {
-    if (backup === 'alert') return true
-    else return false
-  } else {
-    if (backup === 'alert') return false
-    else return true
-  }
-}
-
-function isBlueprintOption({ discriminator, getValue, watchDependency }, value) {
-  watchDependency('discriminator#/blueprintOptions')
-  const blueprintOptions = getValue(discriminator, '/blueprintOptions')
-  return blueprintOptions === value
-}
-
-function ifUsagePolicy({ discriminator, getValue, watchDependency, model }, value) {
-  watchDependency(
-    'model#/resources/coreKubestashComBackupBlueprint/spec/usagePolicy/allowedNamespaces/from/default',
-  )
-  const usagePolicy = getValue(
-    model,
-    '/resources/coreKubestashComBackupBlueprint/spec/usagePolicy/allowedNamespaces/from/default',
-  )
-  return usagePolicy === value
-}
-
-async function getBlueprints({ getValue, model, setDiscriminatorValue, axios, storeGet }, backup) {
-  const username = storeGet('/route/params/user')
-  const clusterName = storeGet('/route/params/cluster')
-  const url = `clusters/${username}/${clusterName}/proxy/core.kubestash.com/v1alpha1/backupblueprints`
-
-  try {
-    const resp = await axios.get(url)
-    let data = resp.data.items
-    return data
-  } catch (e) {
-    console.log(e)
-  }
-}
-
-function isRancherManaged({ storeGet }) {
-  const managers = storeGet('/cluster/clusterDefinition/result/clusterManagers')
-  const found = managers.find((item) => item === 'Rancher')
-  return !!found
-}
-
-async function fetchNamespaces({ axios, storeGet }) {
-  const username = storeGet('/route/params/user')
-  const clusterName = storeGet('/route/params/cluster')
-  const group = storeGet('/route/params/group')
-  const version = storeGet('/route/params/version')
-  const resource = storeGet('/route/params/resource')
-
-  const url = `clusters/${username}/${clusterName}/proxy/identity.k8s.appscode.com/v1alpha1/selfsubjectnamespaceaccessreviews`
-
-  try {
-    const resp = await axios.post(url, {
-      _recurringCall: false,
-      apiVersion: 'identity.k8s.appscode.com/v1alpha1',
-      kind: 'SelfSubjectNamespaceAccessReview',
-      spec: {
-        resourceAttributes: [
-          {
-            verb: 'create',
-            group: group,
-            version: version,
-            resource: resource,
-          },
-        ],
-      },
-    })
-    if (resp.data?.status?.projects) {
-      const projects = resp.data?.status?.projects
-      let projectsNamespace = []
-      projectsNamespace = Object.keys(projects).map((project) => ({
-        project: project,
-        namespaces: projects[project].map((namespace) => ({
-          text: namespace,
-          value: namespace,
-        })),
-      }))
-      return projectsNamespace
-    } else {
-      return resp.data?.status?.namespaces || []
-    }
-  } catch (e) {
-    console.log(e)
-  }
-  return []
-}
-
-async function fetchNames(
-  { getValue, axios, storeGet, watchDependency, discriminator },
-  version,
-  type,
-  discriminatorName,
-) {
-  watchDependency(`discriminator#/${discriminatorName}`)
-  const username = storeGet('/route/params/user')
-  const clusterName = storeGet('/route/params/cluster')
-  const namespace = getValue(discriminator, `${discriminatorName}`)
-  const url =
-    type !== 'secrets'
-      ? `clusters/${username}/${clusterName}/proxy/storage.kubestash.com/${version}/namespaces/${namespace}/${type}`
-      : `clusters/${username}/${clusterName}/proxy/core/${version}/namespaces/${namespace}/${type}`
-  try {
-    if (namespace) {
-      const resp = await axios.get(url)
-      let data = resp.data.items
-      data = data.map((ele) => ele.metadata.name)
-      return data
-    }
-  } catch (e) {
-    console.log(e)
-  }
-  return []
-}
-
 // /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // FOR Backup Configuration
 
-// schedule backup
+// schedule bakcup
 
 function getBackupConfigsAndAnnotations(getValue, model) {
   const stashAppscodeComBackupConfiguration = getValue(
     model,
     '/resources/stashAppscodeComBackupConfiguration',
   )
+  const kubedbComPgpoolAnnotations =
+    getValue(model, '/resources/kubedbComPgpool/metadata/annotations') || {}
 
-  const coreKubestashComBackupConfiguration = getValue(
-    model,
-    '/resources/coreKubestashComBackupConfiguration',
-  )
-  const kubeStashTarget = coreKubestashComBackupConfiguration?.spec?.target
-
-  const mongoDB = getValue(model, '/resources/kubedbComSinglestore')
-  const mongoDbKind = mongoDB?.apiVersion?.split('/')?.at(0)
-
-  let isKubeStash = false
-  if (
-    mongoDB?.kind === kubeStashTarget.kind &&
-    mongoDB?.metadata?.name === kubeStashTarget?.name &&
-    mongoDB?.metadata?.namespace === kubeStashTarget?.namespace &&
-    mongoDbKind === kubeStashTarget?.apiGroup
-  ) {
-    isKubeStash = true
-  }
-
-  const kubedbComSinglestoreAnnotations =
-    getValue(model, '/resources/kubedbComSinglestore/metadata/annotations') || {}
-
-  const isBluePrint = Object.keys(kubedbComSinglestoreAnnotations).some(
+  const isBluePrint = Object.keys(kubedbComPgpoolAnnotations).some(
     (k) =>
       k === 'stash.appscode.com/backup-blueprint' ||
       k === 'stash.appscode.com/schedule' ||
@@ -1280,12 +857,11 @@ function getBackupConfigsAndAnnotations(getValue, model) {
   return {
     stashAppscodeComBackupConfiguration,
     isBluePrint,
-    isKubeStash,
   }
 }
 
-function deleteKubeDbComMongDbAnnotation(getValue, model, commit) {
-  const annotations = getValue(model, '/resources/kubedbComSinglestore/metadata/annotations') || {}
+function deleteKubeDbComPgpoolDbAnnotation(getValue, model, commit) {
+  const annotations = getValue(model, '/resources/kubedbComPgpool/metadata/annotations') || {}
   const filteredKeyList =
     Object.keys(annotations).filter(
       (k) =>
@@ -1298,13 +874,13 @@ function deleteKubeDbComMongDbAnnotation(getValue, model, commit) {
     filteredAnnotations[k] = annotations[k]
   })
   commit('wizard/model$update', {
-    path: '/resources/kubedbComSinglestore/metadata/annotations',
+    path: '/resources/kubedbComPgpool/metadata/annotations',
     value: filteredAnnotations,
   })
 }
 
-function addKubeDbComMongDbAnnotation(getValue, model, commit, key, value, force) {
-  const annotations = getValue(model, '/resources/kubedbComSinglestore/metadata/annotations') || {}
+function addKubeDbComPgpoolDbAnnotation(getValue, model, commit, key, value, force) {
+  const annotations = getValue(model, '/resources/kubedbComPgpool/metadata/annotations') || {}
 
   if (annotations[key] === undefined) {
     annotations[key] = value
@@ -1313,7 +889,7 @@ function addKubeDbComMongDbAnnotation(getValue, model, commit, key, value, force
   }
 
   commit('wizard/model$update', {
-    path: '/resources/kubedbComSinglestore/metadata/annotations',
+    path: '/resources/kubedbComPgpool/metadata/annotations',
     value: annotations,
     force: true,
   })
@@ -1348,8 +924,8 @@ function onScheduleBackupChange({ commit, getValue, discriminator, model }) {
     // delete stashAppscodeComBackupConfiguration
     commit('wizard/model$delete', '/resources/stashAppscodeComBackupConfiguration')
     commit('wizard/model$delete', '/resources/stashAppscodeComRepository_repo')
-    // delete annotation from kubedbComSinglestore annotation
-    deleteKubeDbComMongDbAnnotation(getValue, model, commit)
+    // delete annotation from kubedbComPgpool annotation
+    deleteKubeDbComPgpoolDbAnnotation(getValue, model, commit)
   } else {
     const { isBluePrint } = getBackupConfigsAndAnnotations(getValue, model)
 
@@ -1384,167 +960,15 @@ function showBackupForm({ getValue, discriminator, watchDependency }) {
 }
 
 // invoker form
-async function initBackupInvoker({ getValue, model, storeGet, commit, axios }) {
-  const { isBluePrint, isKubeStash } = getBackupConfigsAndAnnotations(getValue, model)
-
-  const apiGroup = getValue(model, '/metadata/resource/group')
-  let kind = getValue(model, '/metadata/resource/kind')
-  const username = storeGet('/route/params/user')
-  const clusterName = storeGet('/route/params/cluster')
-  const name = storeGet('/route/params/name')
-  const namespace = storeGet('/route/query/namespace')
-  const group = storeGet('/route/params/group')
-  const version = storeGet('/route/params/version')
-  const resource = storeGet('/route/params/resource')
-  let labels = {}
-
-  const sessions = getValue(model, '/resources/coreKubestashComBackupConfiguration/spec/sessions')
-  sessions[0].repositories[0].name = name
-  sessions[0].repositories[0].directory = `/${name}`
-
-  commit('wizard/model$update', {
-    path: '/resources/coreKubestashComBackupConfiguration/spec/sessions',
-    value: sessions,
-    force: true,
-  })
-
-  const url = `clusters/${username}/${clusterName}/proxy/${group}/${version}/namespaces/${namespace}/${resource}/${name}`
-
-  try {
-    const resp = await axios.get(url)
-    labels = resp.data.metadata.labels
-    kind = resp.data.kind
-  } catch (e) {
-    console.log(e)
-  }
-
-  commit('wizard/model$update', {
-    path: '/metadata/release',
-    value: {
-      labels: labels,
-      name: name,
-      namespace: namespace,
-    },
-    force: true,
-  })
-
-  commit('wizard/model$update', {
-    path: '/resources/coreKubestashComBackupConfiguration/metadata',
-    value: {
-      labels: labels,
-      name: name,
-      namespace: namespace,
-    },
-    force: true,
-  })
-
-  commit('wizard/model$update', {
-    path: '/resources/coreKubestashComBackupConfiguration/spec/target',
-    value: {
-      apiGroup: apiGroup,
-      kind: kind,
-      name: name,
-      namespace: namespace,
-    },
-    force: true,
-  })
-
-  let isStashPresetEnable = false
-  try {
-    const url = `/clusters/${username}/${clusterName}/proxy/ui.k8s.appscode.com/v1alpha1/features`
-    const resp = await axios.get(url)
-    const stashFeature = resp.data.items.filter((item) => {
-      return item.metadata.name === 'stash-presets'
-    })
-    if (stashFeature[0].status?.enabled) {
-      isStashPresetEnable = true
-    }
-  } catch (e) {
-    console.log(e)
-  }
-  let schedule = ''
-  let storageRefName = ''
-  let storageRefNamespace = ''
-  let retentionPolicyName = ''
-  let retentionPolicyNamespace = ''
-  let encryptionSecretName = ''
-  let encryptionSecretNamespace = ''
-
-  if (isStashPresetEnable) {
-    try {
-      const url = `clusters/${username}/${clusterName}/proxy/charts.x-helm.dev/v1alpha1/clusterchartpresets/stash-presets`
-      const resp = await axios.get(url)
-      schedule = resp.data.spec.values.spec.backup.kubestash.schedule
-      storageRefName = resp.data.spec.values.spec.backup.kubestash.storageRef.name
-      storageRefNamespace = resp.data.spec.values.spec.backup.kubestash.storageRef.namespace
-      retentionPolicyName = resp.data.spec.values.spec.backup.kubestash.retentionPolicy.name
-      retentionPolicyNamespace =
-        resp.data.spec.values.spec.backup.kubestash.retentionPolicy.namespace
-      encryptionSecretName = resp.data.spec.values.spec.backup.kubestash.encryptionSecret.name
-      encryptionSecretNamespace =
-        resp.data.spec.values.spec.backup.kubestash.encryptionSecret.namespace
-    } catch (e) {
-      console.log(e)
-    }
-  }
-  setInitSchedule(
-    { getValue, commit, model },
-    'resources/coreKubestashComBackupConfiguration/spec/sessions/',
-    schedule,
-  )
-  setFileValueFromStash(
-    { getValue, commit, model },
-    'resources/coreKubestashComBackupConfiguration/spec/backends',
-    'storageRef',
-    'namespace',
-    storageRefNamespace,
-  )
-  setFileValueFromStash(
-    { getValue, commit, model },
-    'resources/coreKubestashComBackupConfiguration/spec/backends',
-    'storageRef',
-    'name',
-    storageRefName,
-  )
-  setFileValueFromStash(
-    { getValue, commit, model },
-    'resources/coreKubestashComBackupConfiguration/spec/backends',
-    'retentionPolicy',
-    'namespace',
-    retentionPolicyNamespace,
-  )
-  setFileValueFromStash(
-    { getValue, commit, model },
-    'resources/coreKubestashComBackupConfiguration/spec/backends',
-    'retentionPolicy',
-    'name',
-    retentionPolicyName,
-  )
-  setFileValueFromStash(
-    { getValue, commit, model },
-    'resources/coreKubestashComBackupConfiguration/spec/sessions',
-    'encryptionSecret',
-    'namespace',
-    encryptionSecretNamespace,
-  )
-  setFileValueFromStash(
-    { getValue, commit, model },
-    'resources/coreKubestashComBackupConfiguration/spec/sessions',
-    'encryptionSecret',
-    'name',
-    encryptionSecretName,
+function initBackupInvoker({ getValue, model }) {
+  const { stashAppscodeComBackupConfiguration, isBluePrint } = getBackupConfigsAndAnnotations(
+    getValue,
+    model,
   )
 
-  if (isKubeStash) return 'backupConfiguration'
+  if (stashAppscodeComBackupConfiguration) return 'backupConfiguration'
   else if (isBluePrint) return 'backupBlueprint'
-  else return 'backupConfiguration'
-}
-
-function initBlueprint() {
-  return 'create'
-}
-function initUsagePolicy() {
-  return 'Same'
+  else return undefined
 }
 
 function onBackupInvokerChange({ getValue, discriminator, commit, model }) {
@@ -1552,7 +976,7 @@ function onBackupInvokerChange({ getValue, discriminator, commit, model }) {
 
   if (backupInvoker === 'backupConfiguration') {
     // delete annotation and create backup config object
-    deleteKubeDbComMongDbAnnotation(getValue, model, commit)
+    deleteKubeDbComPgpoolDbAnnotation(getValue, model, commit)
     const dbName = getValue(model, '/metadata/release/name')
 
     if (!valueExists(model, getValue, '/resources/stashAppscodeComBackupConfiguration')) {
@@ -1569,7 +993,13 @@ function onBackupInvokerChange({ getValue, discriminator, commit, model }) {
   } else if (backupInvoker === 'backupBlueprint') {
     // delete backup configuration object and create the annotation
     commit('wizard/model$delete', '/resources/stashAppscodeComBackupConfiguration')
-    addKubeDbComMongDbAnnotation(getValue, model, commit, 'stash.appscode.com/backup-blueprint', '')
+    addKubeDbComPgpoolDbAnnotation(
+      getValue,
+      model,
+      commit,
+      'stash.appscode.com/backup-blueprint',
+      '',
+    )
   }
 }
 
@@ -1649,82 +1079,9 @@ function onRepositoryNameChange({ getValue, model, commit }) {
   })
 }
 
-function onInputChange(
-  { getValue, discriminator, commit, model },
-  modelPath,
-  field,
-  subfield,
-  discriminatorName,
-) {
-  const value = getValue(discriminator, `/${discriminatorName}`)
-  const backends = getValue(model, modelPath)
-  if (field !== 'encryptionSecret') backends[0][field][subfield] = value
-  else backends[0]['repositories'][0][field][subfield] = value
-  commit('wizard/model$update', {
-    path: modelPath,
-    value: backends,
-  })
-}
-
-function setFileValueFromStash({ getValue, commit, model }, modelPath, field, subfield, value) {
-  const backends = getValue(model, modelPath)
-  if (field !== 'encryptionSecret') backends[0][field][subfield] = value
-  else backends[0]['repositories'][0][field][subfield] = value
-  commit('wizard/model$update', {
-    path: modelPath,
-    value: backends,
-  })
-}
-
-function onInputChangeSchedule(
-  { getValue, discriminator, watchDependency, commit, model },
-  modelPath,
-  discriminatorName,
-) {
-  watchDependency(`discriminator#/${discriminatorName}`)
-  const value = getValue(discriminator, `/${discriminatorName}`)
-  const session = getValue(model, modelPath)
-  session[0].scheduler.schedule = value
-  commit('wizard/model$update', {
-    path: modelPath,
-    value: session,
-  })
-}
-
-function setInitSchedule(
-  { getValue, discriminator, watchDependency, commit, model },
-  modelPath,
-  value,
-) {
-  const session = getValue(model, modelPath)
-  session[0].scheduler.schedule = value
-  commit('wizard/model$update', {
-    path: modelPath,
-    value: session,
-  })
-}
-
-function getDefault({ getValue, model }, modelPath, field, subfield) {
-  const backends = getValue(model, modelPath)
-  if (field !== 'encryptionSecret') return backends[0][field][subfield]
-  else {
-    return backends[0]['repositories'][0][field][subfield]
-  }
-}
-
-function getDefaultSchedule(
-  { getValue, discriminator, watchDependency, commit, model },
-  modelPath,
-  discriminatorName,
-) {
-  watchDependency(`model#/${modelPath}`)
-  const session = getValue(model, modelPath)
-  return session[0].scheduler.schedule
-}
-
 // backup blueprint form
 function getMongoAnnotations(getValue, model) {
-  const annotations = getValue(model, '/resources/kubedbComSinglestore/metadata/annotations')
+  const annotations = getValue(model, '/resources/kubedbComPgpool/metadata/annotations')
   return { ...annotations } || {}
 }
 
@@ -1735,7 +1092,7 @@ function initFromAnnotationValue({ getValue, model }, key) {
 
 function onBackupBlueprintNameChange({ getValue, discriminator, commit, model }) {
   const backupBlueprintName = getValue(discriminator, '/backupBlueprintName')
-  addKubeDbComMongDbAnnotation(
+  addKubeDbComPgpoolDbAnnotation(
     getValue,
     model,
     commit,
@@ -1747,7 +1104,7 @@ function onBackupBlueprintNameChange({ getValue, discriminator, commit, model })
 
 function onBackupBlueprintScheduleChange({ getValue, discriminator, commit, model }) {
   const backupBlueprintSchedule = getValue(discriminator, '/schedule')
-  addKubeDbComMongDbAnnotation(
+  addKubeDbComPgpoolDbAnnotation(
     getValue,
     model,
     commit,
@@ -1775,8 +1132,7 @@ function onTaskParametersChange({ getValue, discriminator, model, commit }) {
   const taskParamterKeys = Object.keys(taskParameters).map(
     (tp) => `params.stash.appscode.com/${tp}`,
   )
-  const oldAnnotations =
-    getValue(model, '/resources/kubedbComSinglestore/metadata/annotations') || {}
+  const oldAnnotations = getValue(model, '/resources/kubedbComPgpool/metadata/annotations') || {}
   const newAnnotations = {}
 
   const filteredAnnotationKeys = Object.keys(oldAnnotations).filter(
@@ -1792,7 +1148,7 @@ function onTaskParametersChange({ getValue, discriminator, model, commit }) {
   })
 
   commit('wizard/model$update', {
-    path: '/resources/kubedbComSinglestore/metadata/annotations',
+    path: '/resources/kubedbComPgpool/metadata/annotations',
     value: newAnnotations,
   })
 }
@@ -1804,7 +1160,7 @@ function isValueExistInModel({ model, getValue }, path) {
 
 function onNamespaceChange({ commit, model, getValue }) {
   const namespace = getValue(model, '/metadata/release/namespace')
-  const agent = getValue(model, '/resources/kubedbComSinglestore/spec/monitor/agent')
+  const agent = getValue(model, '/resources/kubedbComPgpool/spec/monitor/agent')
   if (agent === 'prometheus.io') {
     commit('wizard/model$update', {
       path: '/resources/monitoringCoreosComServiceMonitor/spec/namespaceSelector/matchNames',
@@ -1815,9 +1171,9 @@ function onNamespaceChange({ commit, model, getValue }) {
 }
 
 function onLabelChange({ commit, model, getValue }) {
-  const labels = getValue(model, '/resources/kubedbComSinglestore/spec/metadata/labels')
+  const labels = getValue(model, '/resources/kubedbComPgpool/spec/metadata/labels')
 
-  const agent = getValue(model, '/resources/kubedbComSinglestore/spec/monitor/agent')
+  const agent = getValue(model, '/resources/kubedbComPgpool/spec/monitor/agent')
 
   if (agent === 'prometheus.io') {
     commit('wizard/model$update', {
@@ -1831,9 +1187,9 @@ function onLabelChange({ commit, model, getValue }) {
 function onNameChange({ commit, model, getValue }) {
   const dbName = getValue(model, '/metadata/release/name')
 
-  const agent = getValue(model, '/resources/kubedbComSinglestore/spec/monitor/agent')
+  const agent = getValue(model, '/resources/kubedbComPgpool/spec/monitor/agent')
 
-  const labels = getValue(model, '/resources/kubedbComSinglestore/spec/metadata/labels')
+  const labels = getValue(model, '/resources/kubedbComPgpool/spec/metadata/labels')
 
   if (agent === 'prometheus.io') {
     commit('wizard/model$update', {
@@ -1883,7 +1239,7 @@ function onNameChange({ commit, model, getValue }) {
   const hasSecretConfig = getValue(model, '/resources/secret_config')
   if (hasSecretConfig) {
     commit('wizard/model$update', {
-      path: '/resources/kubedbComSinglestore/spec/configSecret/name',
+      path: '/resources/kubedbComPgpool/spec/configSecret/name',
       value: `${dbName}-config`,
       force: true,
     })
@@ -1893,7 +1249,7 @@ function onNameChange({ commit, model, getValue }) {
   const hasSecretShardConfig = getValue(model, '/resources/secret_shard_config')
   if (hasSecretShardConfig) {
     commit('wizard/model$update', {
-      path: '/resources/kubedbComSinglestore/spec/shardTopology/shard/configSecret/name',
+      path: '/resources/kubedbComPgpool/spec/shardTopology/shard/configSecret/name',
       value: `${dbName}-shard-config`,
       force: true,
     })
@@ -1903,7 +1259,7 @@ function onNameChange({ commit, model, getValue }) {
   const hasSecretConfigServerConfig = getValue(model, '/resources/secret_configserver_config')
   if (hasSecretConfigServerConfig) {
     commit('wizard/model$update', {
-      path: '/resources/kubedbComSinglestore/spec/shardTopology/configServer/configSecret/name',
+      path: '/resources/kubedbComPgpool/spec/shardTopology/configServer/configSecret/name',
       value: `${dbName}-configserver-config`,
       force: true,
     })
@@ -1913,7 +1269,7 @@ function onNameChange({ commit, model, getValue }) {
   const hasSecretMongosConfig = getValue(model, '/resources/secret_mongos_config')
   if (hasSecretMongosConfig) {
     commit('wizard/model$update', {
-      path: '/resources/kubedbComSinglestore/spec/shardTopology/mongos/configSecret/name',
+      path: '/resources/kubedbComPgpool/spec/shardTopology/mongos/configSecret/name',
       value: `${dbName}-mongos-config`,
       force: true,
     })
@@ -1925,7 +1281,7 @@ function returnFalse() {
 }
 
 function onAgentChange({ commit, model, getValue }) {
-  const agent = getValue(model, '/resources/kubedbComSinglestore/spec/monitor/agent')
+  const agent = getValue(model, '/resources/kubedbComPgpool/spec/monitor/agent')
   if (agent === 'prometheus.io') {
     commit('wizard/model$update', {
       path: '/resources/monitoringCoreosComServiceMonitor/spec/endpoints',
@@ -1943,14 +1299,13 @@ function onAgentChange({ commit, model, getValue }) {
 /*************************************  Database Secret Section ********************************************/
 
 function getCreateAuthSecret({ model, getValue }) {
-  const authSecret = getValue(model, '/resources/kubedbComSinglestore/spec/authSecret')
+  const authSecret = getValue(model, '/resources/kubedbComPgpool/spec/authSecret')
 
   return !authSecret
 }
 
 function showExistingSecretSection({ getValue, watchDependency, discriminator }) {
   watchDependency('discriminator#/createAuthSecret')
-
   const hasAuthSecretName = getValue(discriminator, '/createAuthSecret')
   return !hasAuthSecretName
 }
@@ -1987,6 +1342,12 @@ function onAuthSecretPasswordChange({ getValue, discriminator, commit }) {
   }
 }
 
+function disableInitializationSection({ model, getValue, watchDependency }) {
+  const initialized = getValue(model, '/resources/kubedbComPgpool/spec/init/initialized')
+  watchDependency('model#/resources/kubedbComPgpool/spec/init/initialized')
+  return !!initialized
+}
+
 // eslint-disable-next-line no-empty-pattern
 function encodePassword({}, value) {
   return btoa(value)
@@ -2000,7 +1361,7 @@ function decodePassword({}, value) {
 function onCreateAuthSecretChange({ discriminator, getValue, commit }) {
   const createAuthSecret = getValue(discriminator, '/createAuthSecret')
   if (createAuthSecret) {
-    commit('wizard/model$delete', '/resources/kubedbComSinglestore/spec/authSecret')
+    commit('wizard/model$delete', '/resources/kubedbComPgpool/spec/authSecret')
   } else if (createAuthSecret === false) {
     commit('wizard/model$delete', '/resources/secret_auth')
   }
@@ -2012,43 +1373,46 @@ async function getSecrets({ storeGet, axios, model, getValue, watchDependency })
   const namespace = getValue(model, '/metadata/release/namespace')
   watchDependency('model#/metadata/release/namespace')
 
-  try {
-    const resp = await axios.get(
-      `/clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}/secrets`,
-      {
-        params: {
-          filter: { items: { metadata: { name: null }, type: null } },
+  if (owner && cluster && namespace) {
+    try {
+      const resp = await axios.get(
+        `/clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}/secrets`,
+        {
+          params: {
+            filter: {
+              items: {
+                data: { username: null, password: null },
+                metadata: { name: null },
+                type: null,
+              },
+            },
+          },
         },
-      },
-    )
+      )
 
-    const secrets = (resp && resp.data && resp.data.items) || []
+      const secrets = (resp && resp.data && resp.data.items) || []
 
-    const filteredSecrets = secrets.filter((item) => {
-      const validType = ['kubernetes.io/service-account-token', 'Opaque']
-      return validType.includes(item.type)
-    })
+      const filteredSecrets = secrets.filter((item) => {
+        const validType = [
+          'kubernetes.io/service-account-token',
+          'Opaque',
+          'kubernetes.io/basic-auth',
+        ]
+        return validType.includes(item.type)
+      })
 
-    filteredSecrets.map((item) => {
-      const name = (item.metadata && item.metadata.name) || ''
-      item.text = name
-      item.value = name
-      return true
-    })
-    return filteredSecrets
-  } catch (e) {
-    console.log(e)
-    return []
+      filteredSecrets.map((item) => {
+        const name = (item.metadata && item.metadata.name) || ''
+        item.text = name
+        item.value = name
+        return true
+      })
+      return filteredSecrets
+    } catch (e) {
+      console.log(e)
+    }
   }
-}
-
-//////////////////////////////////////// Service Monitor //////////////////////////////////////////////////////
-
-//////////////////// service monitor ///////////////////
-
-function isEqualToServiceMonitorType({ rootModel, watchDependency }, value) {
-  watchDependency('rootModel#/spec/type')
-  return rootModel && rootModel.spec && rootModel.spec.type === value
+  return []
 }
 
 //////////////////// custom config /////////////////
@@ -2066,8 +1430,9 @@ function onConfigurationSourceChange({ getValue, discriminator, commit, model })
       })
     }
     const configSecretName = `${getValue(model, '/metadata/release/name')}-config`
+
     commit('wizard/model$update', {
-      path: '/resources/kubedbComSinglestore/spec/configSecret/name',
+      path: '/resources/kubedbComPgpool/spec/configSecret/name',
       value: configSecretName,
       force: true,
     })
@@ -2077,13 +1442,29 @@ function onConfigurationSourceChange({ getValue, discriminator, commit, model })
 function onConfigurationChange({ getValue, commit, discriminator, model }) {
   const value = getValue(discriminator, '/configuration')
   commit('wizard/model$update', {
-    path: '/resources/secret_config/stringData/mongod.conf',
+    path: '/resources/secret_config/stringData/user.conf',
     value: value,
     force: true,
   })
   const configSecretName = `${getValue(model, '/metadata/release/name')}-config`
   commit('wizard/model$update', {
-    path: '/resources/kubedbComSinglestore/spec/configSecret/name',
+    path: '/resources/kubedbComPgpool/spec/configSecret/name',
+    value: configSecretName,
+    force: true,
+  })
+}
+
+function onConfigurationChangeEdit({ getValue, commit, discriminator, model }) {
+  const value = getValue(discriminator, '/configuration')
+
+  commit('wizard/model$update', {
+    path: '/resources/secret_config/data/pgpool.ini',
+    value: btoa(value),
+    force: true,
+  })
+  const configSecretName = `${getValue(model, '/metadata/release/name')}-config`
+  commit('wizard/model$update', {
+    path: '/resources/kubedbComPgpool/spec/configSecret/name',
     value: configSecretName,
     force: true,
   })
@@ -2103,296 +1484,17 @@ function setSecretConfigNamespace({ getValue, model, watchDependency }) {
   return namespace
 }
 
-//////////////////// custom config for sharded topology /////////////////
-
-function setConfigurationSourceShard({ model, getValue, discriminator }) {
-  const src = getValue(discriminator, '/configurationSourceShard')
-  if (src) return src
-  const value = getValue(model, '/resources/secret_shard_config')
-  return value ? 'create-new-config' : 'use-existing-config'
-}
-
-function setConfigurationSourceConfigServer({ model, getValue, discriminator }) {
-  const src = getValue(discriminator, '/configurationSourceConfigServer')
-  if (src) return src
-  const value = getValue(model, '/resources/secret_configserver_config')
-  return value ? 'create-new-config' : 'use-existing-config'
-}
-
-function setConfigurationSourceMongos({ model, getValue, discriminator }) {
-  const src = getValue(discriminator, '/configurationSourceMongos')
-  if (src) return src
-  const value = getValue(model, '/resources/secret_mongos_config')
-  return value ? 'create-new-config' : 'use-existing-config'
-}
-
-function isSchemaOf(schema) {
-  if (schema === 'discriminator#/configurationSourceShard') {
-    return 'shard'
-  } else if (schema === 'discriminator#/configurationSourceConfigServer') {
-    return 'configserver'
-  } else {
-    return 'mongos'
-  }
-}
-
-function disableConfigSourceOption({
-  itemCtx,
-  discriminator,
-  getValue,
-  watchDependency,
-  elementUi,
-}) {
-  watchDependency('discriminator#/configurationSourceShard')
-  watchDependency('discriminator#/configurationSourceConfigServer')
-  watchDependency('discriminator#/configurationSourceMongos')
-  const configSrcShard = getValue(discriminator, '/configurationSourceShard')
-  const configSrcConfigServer = getValue(discriminator, '/configurationSourceConfigServer')
-  const configSrcMongos = getValue(discriminator, '/configurationSourceMongos')
-  if (
-    itemCtx.value !== 'use-existing-config' &&
-    itemCtx.value !== 'create-new-config' &&
-    (configSrcShard === `same-as-${isSchemaOf(elementUi.schema.$ref)}-config-secret` ||
-      configSrcConfigServer === `same-as-${isSchemaOf(elementUi.schema.$ref)}-config-secret` ||
-      configSrcMongos === `same-as-${isSchemaOf(elementUi.schema.$ref)}-config-secret`)
-  ) {
-    return true
-  }
-  if (
-    itemCtx.value === 'same-as-shard-config-secret' &&
-    configSrcShard !== 'use-existing-config' &&
-    configSrcShard !== 'create-new-config'
-  ) {
-    return true
-  }
-  if (
-    itemCtx.value === 'same-as-configserver-config-secret' &&
-    configSrcConfigServer !== 'use-existing-config' &&
-    configSrcConfigServer !== 'create-new-config'
-  ) {
-    return true
-  }
-  if (
-    itemCtx.value === 'same-as-mongos-config-secret' &&
-    configSrcMongos !== 'use-existing-config' &&
-    configSrcMongos !== 'create-new-config'
-  ) {
-    return true
-  }
-  return false
-}
-
-function onConfigurationSourceMongosChange({ getValue, discriminator, commit, model }) {
-  const configurationSource = getValue(discriminator, '/configurationSourceMongos')
-  const configSecretName = `${getValue(model, '/metadata/release/name')}-mongos-config`
-  if (configurationSource === 'use-existing-config') {
-    commit('wizard/model$delete', '/resources/secret_mongos_config')
-    onConfigSecretModelChange(
-      { commit, model, getValue, discriminator },
-      'mongos',
-      configurationSource,
-      '/configurationMongos',
-    )
-  } else if (configurationSource === 'create-new-config') {
-    const value = getValue(model, '/resources/secret_mongos_config')
-    if (!value) {
-      commit('wizard/model$update', {
-        path: '/resources/secret_mongos_config',
-        value: {},
-        force: true,
-      })
-    }
-    commit('wizard/model$update', {
-      path: '/resources/kubedbComSinglestore/spec/shardTopology/mongos/configSecret/name',
-      value: configSecretName,
-      force: true,
-    })
-    onConfigSecretModelChange(
-      { commit, model, getValue, discriminator },
-      'mongos',
-      configurationSource,
-      '/configurationMongos',
-    )
-  } else if (configurationSource === 'same-as-shard-config-secret') {
-    transferConfigSecret({ commit, model, getValue }, 'shard', 'mongos')
-  } else if (configurationSource === 'same-as-configserver-config-secret') {
-    transferConfigSecret({ commit, model, getValue }, 'configserver', 'mongos')
-  }
-}
-
-function onConfigurationSourceShardChange({ getValue, discriminator, commit, model }) {
-  const configurationSource = getValue(discriminator, '/configurationSourceShard')
-  const configSecretName = `${getValue(model, '/metadata/release/name')}-shard-config`
-  if (configurationSource === 'use-existing-config') {
-    commit('wizard/model$delete', '/resources/secret_shard_config')
-    onConfigSecretModelChange(
-      { commit, model, getValue, discriminator },
-      'shard',
-      configurationSource,
-      '/configurationShard',
-    )
-  } else if (configurationSource === 'create-new-config') {
-    const value = getValue(model, '/resources/secret_shard_config')
-    if (!value) {
-      commit('wizard/model$update', {
-        path: '/resources/secret_shard_config',
-        value: {},
-        force: true,
-      })
-    }
-    commit('wizard/model$update', {
-      path: '/resources/kubedbComSinglestore/spec/shardTopology/shard/configSecret/name',
-      value: configSecretName,
-      force: true,
-    })
-    onConfigSecretModelChange(
-      { commit, model, getValue, discriminator },
-      'shard',
-      configurationSource,
-      '/configurationShard',
-    )
-  } else if (configurationSource === 'same-as-configserver-config-secret') {
-    transferConfigSecret({ commit, model, getValue }, 'configserver', 'shard')
-  } else if (configurationSource === 'same-as-mongos-config-secret') {
-    transferConfigSecret({ commit, model, getValue }, 'mongos', 'shard')
-  }
-}
-
-function onConfigurationSourceConfigServerChange({ getValue, discriminator, commit, model }) {
-  const configurationSource = getValue(discriminator, '/configurationSourceConfigServer')
-  const configSecretName = `${getValue(model, '/metadata/release/name')}-configserver-config`
-  if (configurationSource === 'use-existing-config') {
-    commit('wizard/model$delete', '/resources/secret_configserver_config')
-    onConfigSecretModelChange(
-      { commit, model, getValue, discriminator },
-      'configserver',
-      configurationSource,
-      '/configurationConfigServer',
-    )
-  } else if (configurationSource === 'create-new-config') {
-    const value = getValue(model, '/resources/secret_configserver_config')
-    if (!value) {
-      commit('wizard/model$update', {
-        path: '/resources/secret_configserver_config',
-        value: {},
-        force: true,
-      })
-    }
-    commit('wizard/model$update', {
-      path: '/resources/kubedbComSinglestore/spec/shardTopology/configServer/configSecret/name',
-      value: configSecretName,
-      force: true,
-    })
-    onConfigSecretModelChange(
-      { commit, model, getValue, discriminator },
-      'configserver',
-      configurationSource,
-      '/configurationConfigServer',
-    )
-  } else if (configurationSource === 'same-as-shard-config-secret') {
-    const configurationSourceReference = getValue(discriminator, '/configurationSourceShard')
-    transferConfigSecret(
-      { commit, model, getValue },
-      'shard',
-      'configserver',
-      configurationSourceReference,
-    )
-  } else if (configurationSource === 'same-as-mongos-config-secret') {
-    const configurationSourceReference = getValue(discriminator, '/configurationSourceMongos')
-    transferConfigSecret(
-      { commit, model, getValue },
-      'mongos',
-      'configserver',
-      configurationSourceReference,
-    )
-  }
-}
-
-function transferConfigSecret({ commit, model, getValue }, src, des) {
-  const isShardedMode = getValue(model, '/resources/kubedbComSinglestore/spec/shardTopology')
-  if (isShardedMode) {
-    commit('wizard/model$update', {
-      path: `/resources/kubedbComSinglestore/spec/shardTopology/${
-        des === 'configserver' ? 'configServer' : des
-      }/configSecret/name`,
-      value: getValue(
-        model,
-        `/resources/kubedbComSinglestore/spec/shardTopology/${
-          src === 'configserver' ? 'configServer' : src
-        }/configSecret/name`,
-      ),
-      force: true,
-    })
-
-    commit('wizard/model$delete', `/resources/secret_${des}_config`)
-  }
-}
-
-function onConfigSecretModelChange(
-  { commit, model, getValue, discriminator },
-  configType,
-  configSrc,
-  discriminatorPath,
-) {
-  if (configSrc === 'create-new-config') {
-    const value = getValue(discriminator, discriminatorPath)
-    commit('wizard/model$update', {
-      path: `/resources/secret_${configType}_config/stringData/mongod.conf`,
-      value: value,
-      force: true,
-    })
-  }
-  const configSrcShard = getValue(discriminator, '/configurationSourceShard')
-  const configSrcConfigServer = getValue(discriminator, '/configurationSourceConfigServer')
-  const configSrcMongos = getValue(discriminator, '/configurationSourceMongos')
-
-  if (configSrcShard === `same-as-${configType}-config-secret`) {
-    transferConfigSecret({ commit, model, getValue }, configType, 'shard')
-  }
-  if (configSrcConfigServer === `same-as-${configType}-config-secret`) {
-    transferConfigSecret({ commit, model, getValue }, configType, 'configserver')
-  }
-  if (configSrcMongos === `same-as-${configType}-config-secret`) {
-    transferConfigSecret({ commit, model, getValue }, configType, 'mongos')
-  }
-}
-
 function setConfiguration({ model, getValue }) {
-  return getValue(model, '/resources/secret_config/stringData/mongod.conf')
+  return getValue(model, '/resources/secret_config/stringData/user.conf')
 }
 
-function setConfigurationShard({ model, getValue }) {
-  const value = getValue(model, '/resources/secret_shard_config/stringData/mongod.conf')
-  return value
-}
-
-function setConfigurationConfigServer({ model, getValue }) {
-  const value = getValue(model, '/resources/secret_configserver_config/stringData/mongod.conf')
-  return value
-}
-
-function setConfigurationMongos({ model, getValue }) {
-  const value = getValue(model, '/resources/secret_mongos_config/stringData/mongod.conf')
-  return value
+function setConfigurationForEdit({ model, getValue }) {
+  const value = getValue(model, '/resources/secret_config/data/pgpool.ini')
+  return atob(value)
 }
 
 function setConfigurationFiles({ model, getValue }) {
-  const value = getValue(model, '/resources/secret_config/data/mongod.conf')
-  return atob(value)
-}
-
-function setConfigurationFilesShard({ model, getValue }) {
-  const value = getValue(model, '/resources/secret_shard_config/data/mongod.conf')
-  return atob(value)
-}
-
-function setConfigurationFilesConfigServer({ model, getValue }) {
-  const value = getValue(model, '/resources/secret_configserver_config/data/mongod.conf')
-  return atob(value)
-}
-
-function setConfigurationFilesMongos({ model, getValue }) {
-  const value = getValue(model, '/resources/secret_mongos_config/data/mongod.conf')
+  const value = getValue(model, '/resources/secret_config/data/user.conf')
   return atob(value)
 }
 
@@ -2400,37 +1502,62 @@ function onSetCustomConfigChange({ discriminator, getValue, commit }) {
   const value = getValue(discriminator, '/setCustomConfig')
 
   if (value === 'no') {
-    commit('wizard/model$delete', '/resources/kubedbComSinglestore/spec/configSecret')
-    commit(
-      'wizard/model$delete',
-      '/resources/kubedbComSinglestore/spec/shardTopology/shard/configSecret',
-    )
-    commit(
-      'wizard/model$delete',
-      '/resources/kubedbComSinglestore/spec/shardTopology/configServer/configSecret',
-    )
-    commit(
-      'wizard/model$delete',
-      '/resources/kubedbComSinglestore/spec/shardTopology/mongos/configSecret',
-    )
+    commit('wizard/model$delete', '/resources/kubedbComPgpool/spec/configSecret')
     commit('wizard/model$delete', '/resources/secret_config')
-    commit('wizard/model$delete', '/resources/secret_shard_config')
-    commit('wizard/model$delete', '/resources/secret_configserver_config')
-    commit('wizard/model$delete', '/resources/secret_mongos_config')
   }
 }
 
-function getCreateNameSpaceUrl({ model, getValue, storeGet }) {
-  const user = storeGet('/route/params/user')
+function getOpsRequestUrl({ storeGet, model, getValue, mode }, reqType) {
+  const cluster = storeGet('/route/params/cluster')
+  const domain = storeGet('/domain')
+  const owner = storeGet('/route/params/user')
+  const dbname = getValue(model, '/metadata/release/name')
+  const group = getValue(model, '/metadata/resource/group')
+  const kind = getValue(model, '/metadata/resource/kind')
+  const namespace = getValue(model, '/metadata/release/namespace')
+  const resource = getValue(model, '/metadata/resource/name')
+  const version = getValue(model, '/metadata/resource/version')
+  const routeRootPath = storeGet('/route/path')
+  const pathPrefix = `${domain}${routeRootPath}${
+    routeRootPath.split('/').pop() !== 'operations' ? '/operations' : ''
+  }`
+
+  if (mode === 'standalone-step')
+    return `${pathPrefix}?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=${reqType}&showOpsRequestModal=true`
+  else
+    return `${domain}/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/pgpoolopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=VerticalScaling`
+}
+
+const getAppbinding = async ({ axios, storeGet, getValue, watchDependency, rootModel }) => {
+  const owner = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
 
-  const domain = storeGet('/domain') || ''
-  if (domain.includes('bb.test')) {
-    return `http://console.bb.test:5990/${user}/kubernetes/${cluster}/core/v1/namespaces/create`
-  } else {
-    const editedDomain = domain.replace('kubedb', 'console')
-    return `${editedDomain}/${user}/kubernetes/${cluster}/core/v1/namespaces/create`
-  }
+  const group = 'appcatalog.appscode.com'
+  const version = 'v1alpha1'
+  const resource = 'appbindings'
+
+  watchDependency('rootModel#/databaseRef/namespace')
+
+  const namespace = getValue(rootModel, '/databaseRef/namespace')
+
+  const resp = await axios.get(
+    `/clusters/${owner}/${cluster}/proxy/${group}/${version}/namespaces/${namespace}/${resource}`,
+    {
+      params: {
+        filter: { items: { metadata: { name: null }, type: null } },
+      },
+    },
+  )
+
+  const resources = (resp && resp.data && resp.data.items) || []
+
+  resources.map((item) => {
+    const name = (item.metadata && item.metadata.name) || ''
+    item.text = name
+    item.value = name
+    return true
+  })
+  return resources
 }
 
 function isVariantAvailable({ storeGet }) {
@@ -2438,10 +1565,56 @@ function isVariantAvailable({ storeGet }) {
   return variant ? true : false
 }
 
-function showScheduleBackup({ storeGet }) {
-  const operationQuery = storeGet('/route/query/operation') || ''
-  const isBackupOperation = operationQuery === 'edit-self-backupconfiguration' ? true : false
-  return !isBackupOperation
+function onRefChange({ discriminator, getValue, commit }) {
+  const ref = getValue(discriminator, '/pgRef') || {}
+  commit('wizard/model$update', {
+    path: '/resources/kubedbComPgpool/spec/database/databaseRef/name',
+    value: ref.name || '',
+    force: true,
+  })
+  commit('wizard/model$update', {
+    path: '/resources/kubedbComPgpool/spec/database/databaseRef/namespace',
+    value: ref.namespace || '',
+    force: true,
+  })
+}
+
+async function getAppBindings({ axios, storeGet }, type) {
+  const owner = storeGet('/route/params/user')
+  const cluster = storeGet('/route/params/cluster')
+  const queryParams = {
+    filter: {
+      items: {
+        metadata: { name: null, namespace: null },
+        spec: { type: null },
+      },
+    },
+  }
+  try {
+    const resp = await axios.get(
+      `/clusters/${owner}/${cluster}/proxy/appcatalog.appscode.com/v1alpha1/appbindings`,
+      queryParams,
+    )
+    const resources = (resp && resp.data && resp.data.items) || []
+
+    const fileredResources = resources
+      .filter((item) => item.spec?.type === `kubedb.com/${type}`)
+      .map((item) => {
+        const name = item.metadata?.name || ''
+        const namespace = item.metadata?.namespace || ''
+        return {
+          text: `${namespace}/${name}`,
+          value: {
+            name: name,
+            namespace: namespace,
+          },
+        }
+      })
+    return fileredResources
+  } catch (e) {
+    console.log(e)
+    return []
+  }
 }
 
 ///////////////////////// Autoscaler ///////////////////
@@ -2454,7 +1627,7 @@ function isConsole({ storeGet, commit }) {
   if (isKube) {
     const dbName = storeGet('/route/query/name') || ''
     commit('wizard/model$update', {
-      path: '/resources/autoscalingKubedbComSinglestoreAutoscaler/spec/databaseRef/name',
+      path: '/resources/autoscalingKubedbComPgpoolAutoscaler/spec/databaseRef/name',
       value: dbName,
       force: true,
     })
@@ -2466,14 +1639,14 @@ function isConsole({ storeGet, commit }) {
     const date = Math.floor(Date.now() / 1000)
     const modifiedName = `${dbName}-${date}-autoscaling-${autoscaleType}`
     commit('wizard/model$update', {
-      path: '/resources/autoscalingKubedbComSinglestoreAutoscaler/metadata/name',
+      path: '/resources/autoscalingKubedbComPgpoolAutoscaler/metadata/name',
       value: modifiedName,
       force: true,
     })
     const namespace = storeGet('/route/query/namespace') || ''
     if (namespace) {
       commit('wizard/model$update', {
-        path: '/resources/autoscalingKubedbComSinglestoreAutoscaler/metadata/namespace',
+        path: '/resources/autoscalingKubedbComPgpoolAutoscaler/metadata/namespace',
         value: namespace,
         force: true,
       })
@@ -2489,15 +1662,11 @@ function isKubedb({ storeGet }) {
 
 function showOpsRequestOptions({ model, getValue, watchDependency, storeGet, discriminator }) {
   if (isKubedb({ storeGet }) === true) return true
-  watchDependency(
-    'model#/resources/autoscalingKubedbComSinglestoreAutoscaler/spec/databaseRef/name',
-  )
+  watchDependency('model#/resources/autoscalingKubedbComPgpoolAutoscaler/spec/databaseRef/name')
   watchDependency('discriminator#/autoscalingType')
   return (
-    !!getValue(
-      model,
-      '/resources/autoscalingKubedbComSinglestoreAutoscaler/spec/databaseRef/name',
-    ) && !!getValue(discriminator, '/autoscalingType')
+    !!getValue(model, '/resources/autoscalingKubedbComPgpoolAutoscaler/spec/databaseRef/name') &&
+    !!getValue(discriminator, '/autoscalingType')
   )
 }
 
@@ -2521,16 +1690,16 @@ async function getNamespaces({ axios, storeGet }) {
 }
 
 async function getDbs({ axios, storeGet, model, getValue, watchDependency }) {
-  watchDependency('model#/resources/autoscalingKubedbComSinglestoreAutoscaler/metadata/namespace')
+  watchDependency('model#/resources/autoscalingKubedbComPgpoolAutoscaler/metadata/namespace')
   const namespace = getValue(
     model,
-    '/resources/autoscalingKubedbComSinglestoreAutoscaler/metadata/namespace',
+    '/resources/autoscalingKubedbComPgpoolAutoscaler/metadata/namespace',
   )
   const owner = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
 
   const resp = await axios.get(
-    `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/singlestores`,
+    `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/redises`,
     {
       params: { filter: { items: { metadata: { name: null } } } },
     },
@@ -2552,17 +1721,17 @@ async function getDbDetails({ commit, setDiscriminatorValue, axios, storeGet, ge
   const cluster = storeGet('/route/params/cluster') || ''
   const namespace =
     storeGet('/route/query/namespace') ||
-    getValue(model, '/resources/autoscalingKubedbComSinglestoreAutoscaler/metadata/namespace') ||
+    getValue(model, '/resources/autoscalingKubedbComPgpoolAutoscaler/metadata/namespace') ||
     ''
   const name =
     storeGet('/route/query/name') ||
-    getValue(model, '/resources/autoscalingKubedbComSinglestoreAutoscaler/spec/databaseRef/name') ||
+    getValue(model, '/resources/autoscalingKubedbComPgpoolAutoscaler/spec/databaseRef/name') ||
     ''
 
   if (namespace && name) {
     try {
       const resp = await axios.get(
-        `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/singlestores/${name}`,
+        `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/pgpools/${name}`,
       )
       dbDetails = resp.data || {}
       setDiscriminatorValue('/dbDetails', true)
@@ -2582,18 +1751,18 @@ async function getDbDetails({ commit, setDiscriminatorValue, axios, storeGet, ge
     force: true,
   })
   commit('wizard/model$update', {
-    path: `/resources/autoscalingKubedbComSinglestoreAutoscaler/spec/databaseRef/name`,
+    path: `/resources/autoscalingKubedbComPgpoolAutoscaler/spec/databaseRef/name`,
     value: name,
     force: true,
   })
   commit('wizard/model$update', {
-    path: `/resources/autoscalingKubedbComSinglestoreAutoscaler/metadata/labels`,
+    path: `/resources/autoscalingKubedbComPgpoolAutoscaler/metadata/labels`,
     value: dbDetails.metadata.labels,
     force: true,
   })
 }
 
-async function dbTypeEqualsTo({ axios, storeGet, watchDependency, model, getValue, commit }, type) {
+async function dbTypeEqualsTo({ watchDependency, commit }, type) {
   watchDependency('discriminator#/dbDetails')
 
   const { spec } = dbDetails || {}
@@ -2601,7 +1770,7 @@ async function dbTypeEqualsTo({ axios, storeGet, watchDependency, model, getValu
   let verd = ''
   if (topology) verd = 'topology'
   else {
-    verd = 'standalone'
+    verd = 'combined'
   }
   clearSpecModel({ commit }, verd)
   return type === verd && spec
@@ -2611,37 +1780,36 @@ function clearSpecModel({ commit }, dbtype) {
   if (dbtype === 'standalone') {
     commit(
       'wizard/model$delete',
-      `/resources/autoscalingKubedbComSinglestoreAutoscaler/spec/${autoscaleType}/cluster`,
+      `/resources/autoscalingKubedbComPgpoolAutoscaler/spec/${autoscaleType}/cluster`,
     )
     commit(
       'wizard/model$delete',
-      `/resources/autoscalingKubedbComSinglestoreAutoscaler/spec/${autoscaleType}/sentinel`,
+      `/resources/autoscalingKubedbComPgpoolAutoscaler/spec/${autoscaleType}/sentinel`,
     )
   } else if (dbtype === 'cluster') {
     commit(
       'wizard/model$delete',
-      `/resources/autoscalingKubedbComSinglestoreAutoscaler/spec/${autoscaleType}/standalone`,
+      `/resources/autoscalingKubedbComPgpoolAutoscaler/spec/${autoscaleType}/standalone`,
     )
     commit(
       'wizard/model$delete',
-      `/resources/autoscalingKubedbComSinglestoreAutoscaler/spec/${autoscaleType}/sentinel`,
+      `/resources/autoscalingKubedbComPgpoolAutoscaler/spec/${autoscaleType}/sentinel`,
     )
   } else if (dbtype === 'sentinel') {
     commit(
       'wizard/model$delete',
-      `/resources/autoscalingKubedbComSinglestoreAutoscaler/spec/${autoscaleType}/standalone`,
+      `/resources/autoscalingKubedbComPgpoolAutoscaler/spec/${autoscaleType}/standalone`,
     )
     commit(
       'wizard/model$delete',
-      `/resources/autoscalingKubedbComSinglestoreAutoscaler/spec/${autoscaleType}/cluster`,
+      `/resources/autoscalingKubedbComPgpoolAutoscaler/spec/${autoscaleType}/cluster`,
     )
   }
 }
 
 function initMetadata({ getValue, discriminator, model, commit, storeGet }) {
   const dbName =
-    getValue(model, '/resources/autoscalingKubedbComSinglestoreAutoscaler/spec/databaseRef/name') ||
-    ''
+    getValue(model, '/resources/autoscalingKubedbComPgpoolAutoscaler/spec/databaseRef/name') || ''
   const type = getValue(discriminator, '/autoscalingType') || ''
   const date = Math.floor(Date.now() / 1000)
   const resource = storeGet('/route/params/resource')
@@ -2649,33 +1817,27 @@ function initMetadata({ getValue, discriminator, model, commit, storeGet }) {
   const modifiedName = `${scalingName}-${date}-autoscaling-${type ? type : ''}`
   if (modifiedName)
     commit('wizard/model$update', {
-      path: '/resources/autoscalingKubedbComSinglestoreAutoscaler/metadata/name',
+      path: '/resources/autoscalingKubedbComPgpoolAutoscaler/metadata/name',
       value: modifiedName,
       force: true,
     })
 
   // delete the other type object from model
   if (type === 'compute')
-    commit(
-      'wizard/model$delete',
-      '/resources/autoscalingKubedbComSinglestoreAutoscaler/spec/storage',
-    )
+    commit('wizard/model$delete', '/resources/autoscalingKubedbComPgpoolAutoscaler/spec/storage')
   if (type === 'storage')
-    commit(
-      'wizard/model$delete',
-      '/resources/autoscalingKubedbComSinglestoreAutoscaler/spec/compute',
-    )
+    commit('wizard/model$delete', '/resources/autoscalingKubedbComPgpoolAutoscaler/spec/compute')
 }
 
 function onNamespaceChange({ model, getValue, commit }) {
   const namespace = getValue(
     model,
-    '/resources/autoscalingKubedbComSinglestoreAutoscaler/metadata/namespace',
+    '/resources/autoscalingKubedbComPgpoolAutoscaler/metadata/namespace',
   )
   if (!namespace) {
     commit(
       'wizard/model$delete',
-      '/resources/autoscalingKubedbComSinglestoreAutoscaler/spec/databaseRef/name',
+      '/resources/autoscalingKubedbComPgpoolAutoscaler/spec/databaseRef/name',
     )
   }
 }
@@ -2685,9 +1847,7 @@ function ifScalingTypeEqualsTo(
   type,
 ) {
   watchDependency('discriminator#/autoscalingType')
-  watchDependency(
-    'model#/resources/autoscalingKubedbComSinglestoreAutoscaler/spec/databaseRef/name',
-  )
+  watchDependency('model#/resources/autoscalingKubedbComPgpoolAutoscaler/spec/databaseRef/name')
 
   const operation = storeGet('/route/query/operation') || ''
   if (operation.length) {
@@ -2696,7 +1856,7 @@ function ifScalingTypeEqualsTo(
   } else autoscaleType = getValue(discriminator, '/autoscalingType') || ''
   const isDatabaseSelected = !!getValue(
     model,
-    '/resources/autoscalingKubedbComSinglestoreAutoscaler/spec/databaseRef/name',
+    '/resources/autoscalingKubedbComPgpoolAutoscaler/spec/databaseRef/name',
   )
   return autoscaleType === type && isDatabaseSelected
 }
@@ -2721,19 +1881,19 @@ async function fetchNodeTopology({ axios, storeGet }) {
 
 function isNodeTopologySelected({ watchDependency, model, getValue }) {
   watchDependency(
-    'model#/resources/autoscalingKubedbComSinglestoreAutoscaler/spec/compute/nodeTopology/name',
+    'model#/resources/autoscalingKubedbComPgpoolAutoscaler/spec/compute/nodeTopology/name',
   )
   const nodeTopologyName =
     getValue(
       model,
-      '/resources/autoscalingKubedbComSinglestoreAutoscaler/spec/compute/nodeTopology/name',
+      '/resources/autoscalingKubedbComPgpoolAutoscaler/spec/compute/nodeTopology/name',
     ) || ''
   return !!nodeTopologyName.length
 }
 
 function setControlledResources({ commit }, type) {
   const list = ['cpu', 'memory']
-  const path = `/resources/autoscalingKubedbComSinglestoreAutoscaler/spec/compute/${type}/controlledResources`
+  const path = `/resources/autoscalingKubedbComPgpoolAutoscaler/spec/compute/${type}/controlledResources`
   commit('wizard/model$update', {
     path: path,
     value: list,
@@ -2802,52 +1962,29 @@ return {
   setTrigger,
   setApplyToIfReady,
   showOpsRequestOptions,
-  setInitSchedule,
-  fetchNames,
-  fetchNamespaces,
-  isRancherManaged,
-  onInputChangeSchedule,
-  getDefaultSchedule,
-  getBlueprints,
-  ifUsagePolicy,
-  initUsagePolicy,
-  isBlueprintOption,
-  initBlueprint,
-  getDefault,
-  onInputChange,
-  showBackupOptions,
-  showScheduleBackup,
   isVariantAvailable,
   fetchJsons,
+  getAppbinding,
+  onDatabaseModeChange,
+  setDatabaseMode,
   disableLableChecker,
   isEqualToModelPathValue,
   getResources,
   isEqualToDiscriminatorPath,
   setValueFromModel,
-  isNotShardModeSelected,
-  isShardModeSelected,
   getNamespacedResourceList,
   getResourceList,
   resourceNames,
   unNamespacedResourceNames,
   returnTrue,
   returnStringYes,
-  getMongoDbVersions,
-  showAuthPasswordField,
-  showAuthSecretField,
-  showNewSecretCreateField,
-  isNotStandaloneMode,
-  showCommonStorageClassAndSizeField,
-  setDatabaseMode,
-  getStorageClassNames,
-  setStorageClass,
-  deleteDatabaseModePath,
+  setAddressType,
+  getPgpoolVersions,
   isEqualToDatabaseMode,
   setApiGroup,
   getIssuerRefsName,
   hasIssuerRefName,
   hasNoIssuerRefName,
-  setClusterAuthMode,
   setSSLMode,
   showTlsConfigureSection,
   onTlsConfigureChange,
@@ -2856,8 +1993,9 @@ return {
   onEnableMonitoringChange,
   showCustomizeExporterSection,
   onCustomizeExporterChange,
-  disableInitializationSection,
   valueExists,
+  onConfigurationChangeEdit,
+  setConfigurationForEdit,
   initPrePopulateDatabase,
   onPrePopulateDatabaseChange,
   initDataSource,
@@ -2877,8 +2015,8 @@ return {
   showRuntimeForm,
   getImagePullSecrets,
   getBackupConfigsAndAnnotations,
-  deleteKubeDbComMongDbAnnotation,
-  addKubeDbComMongDbAnnotation,
+  deleteKubeDbComPgpoolDbAnnotation,
+  addKubeDbComPgpoolDbAnnotation,
   initScheduleBackup,
   initScheduleBackupForEdit,
   onScheduleBackupChange,
@@ -2890,6 +2028,7 @@ return {
   setInitialRestoreSessionRepo,
   initRepositoryChoise,
   initRepositoryChoiseForEdit,
+  setConfigurationForEdit,
   onRepositoryChoiseChange,
   onRepositoryNameChange,
   getMongoAnnotations,
@@ -2909,34 +2048,19 @@ return {
   showPasswordSection,
   setAuthSecretPassword,
   onAuthSecretPasswordChange,
+  disableInitializationSection,
   encodePassword,
   decodePassword,
   onCreateAuthSecretChange,
   getSecrets,
-  isEqualToServiceMonitorType,
   onConfigurationSourceChange,
   onConfigurationChange,
   setConfigurationSource,
   setSecretConfigNamespace,
-  setConfigurationSourceShard,
-  setConfigurationSourceConfigServer,
-  setConfigurationSourceMongos,
-  isSchemaOf,
-  disableConfigSourceOption,
-  onConfigurationSourceMongosChange,
-  onConfigurationSourceShardChange,
-  onConfigurationSourceConfigServerChange,
-  transferConfigSecret,
-  onConfigSecretModelChange,
   setConfiguration,
-  setConfigurationShard,
-  setConfigurationConfigServer,
-  setConfigurationMongos,
   setConfigurationFiles,
-  setConfigurationFilesShard,
-  setConfigurationFilesConfigServer,
-  setConfigurationFilesMongos,
   onSetCustomConfigChange,
-  getCreateNameSpaceUrl,
-  updateConfigServerStorageClass,
+  getOpsRequestUrl,
+  onRefChange,
+  getAppBindings,
 }
