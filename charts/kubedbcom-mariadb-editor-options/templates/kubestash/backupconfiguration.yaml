@@ -39,5 +39,15 @@ spec:
         name: mariadb-addon
         tasks:
           - name: logical-backup
+        containerSecurityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            runAsGroup: 999
+            runAsNonRoot: true
+            runAsUser: 999
+            seccompProfile:
+              type: RuntimeDefault
 
 {{- end }}

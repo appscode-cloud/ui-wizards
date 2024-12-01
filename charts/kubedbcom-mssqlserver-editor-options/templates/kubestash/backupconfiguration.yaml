@@ -39,4 +39,14 @@ spec:
         name: mssqlserver-addon
         tasks:
           - name: logical-backup
+        containerSecurityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            runAsGroup: 10001
+            runAsNonRoot: true
+            runAsUser: 10001
+            seccompProfile:
+              type: RuntimeDefault
 {{- end }}

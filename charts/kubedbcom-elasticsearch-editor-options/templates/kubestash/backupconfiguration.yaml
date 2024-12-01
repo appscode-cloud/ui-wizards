@@ -39,5 +39,15 @@ spec:
         name: elasticsearch-addon
         tasks:
           - name: logical-backup
+        containerSecurityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            runAsGroup: 1000
+            runAsNonRoot: true
+            runAsUser: 1000
+            seccompProfile:
+              type: RuntimeDefault
 
 {{- end }}
