@@ -511,12 +511,12 @@ steps:
 - form:
     discriminator:
       dbDetails:
-        type: boolean
         default: false
+        type: boolean
     elements:
-    - type: input
-      computed: getDbDetails
+    - computed: getDbDetails
       if: returnFalse
+      type: input
     - elements:
       - label:
           text: Name
@@ -618,10 +618,10 @@ steps:
             schema:
               $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/broker/properties/controlledResources
             type: multiselect
-          schema:
-            $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/broker
           label:
             text: Broker
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/broker
           show_label: true
           type: single-step-form
         - elements:
@@ -683,10 +683,10 @@ steps:
             schema:
               $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/controller/properties/controlledResources
             type: multiselect
-          schema:
-            $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/controller
           label:
             text: Controller
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/controller
           show_label: true
           type: single-step-form
         if: dbTypeEqualsTo|topology
@@ -755,10 +755,10 @@ steps:
             schema:
               $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/node/properties/controlledResources
             type: multiselect
-          schema:
-            $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/node
           label:
             text: Node
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/compute/properties/node
           show_label: true
           type: single-step-form
         if: dbTypeEqualsTo|combined
@@ -838,16 +838,16 @@ steps:
 - form:
     discriminator:
       dbDetails:
-        type: boolean
         default: false
+        type: boolean
     elements:
-    - type: input
-      computed: getDbDetails
+    - computed: getDbDetails
       if: returnFalse
+      type: input
     - elements:
-      - type: input
-        computed: getDbDetails
+      - computed: getDbDetails
         if: returnFalse
+        type: input
       - label:
           text: Name
         schema:
@@ -906,7 +906,7 @@ steps:
             $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/storage/properties/broker/properties/expansionMode
           type: select
         - label:
-            text: UsageThreshold (%) 
+            text: UsageThreshold (%)
           schema:
             $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/storage/properties/broker/properties/usageThreshold
           type: input
@@ -914,31 +914,31 @@ steps:
           element:
             elements:
             - label:
-                text: AppliesUpto (In Storage units)  
+                text: AppliesUpto (In Storage units)
               schema:
                 $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/storage/properties/broker/properties/scalingRules/items/properties/appliesUpto
               type: input
             - label:
-                text: Threshold (In %, Or In Storage Units) 
+                text: Threshold (In %, Or In Storage Units)
               schema:
                 $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/storage/properties/broker/properties/scalingRules/items/properties/threshold
               type: input
             type: single-step-form
           label:
             text: ScalingRules
+          onChange: handleUnit|autoscalingKubedbComKafkaAutoscaler/spec/storage/broker/scalingRules|scalingRules
           schema:
             $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/storage/properties/broker/properties/scalingRules
-          onChange: handleUnit|autoscalingKubedbComKafkaAutoscaler/spec/storage/broker/scalingRules|scalingRules
           tableContents:
           - inTableColumn: true
             label:
-              text: AppliesUpto (In Storage units)  
+              text: AppliesUpto (In Storage units)
             path: appliesUpto
             type: value
             typeOfValue: string
           - inTableColumn: true
             label:
-              text: Threshold (In %, Or In Storage Units) 
+              text: Threshold (In %, Or In Storage Units)
             path: threshold
             type: value
             typeOfValue: string
@@ -974,7 +974,7 @@ steps:
             $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/storage/properties/controller/properties/expansionMode
           type: select
         - label:
-            text: UsageThreshold (%) 
+            text: UsageThreshold (%)
           schema:
             $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/storage/properties/controller/properties/usageThreshold
           type: input
@@ -982,31 +982,31 @@ steps:
           element:
             elements:
             - label:
-                text: AppliesUpto (In Storage units)  
+                text: AppliesUpto (In Storage units)
               schema:
                 $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/storage/properties/controller/properties/scalingRules/items/properties/appliesUpto
               type: input
             - label:
-                text: Threshold (In %, Or In Storage Units) 
+                text: Threshold (In %, Or In Storage Units)
               schema:
                 $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/storage/properties/controller/properties/scalingRules/items/properties/threshold
               type: input
             type: single-step-form
           label:
             text: ScalingRules
+          onChange: handleUnit|autoscalingKubedbComKafkaAutoscaler/spec/storage/controller/scalingRules|scalingRules
           schema:
             $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/storage/properties/controller/properties/scalingRules
-          onChange: handleUnit|autoscalingKubedbComKafkaAutoscaler/spec/storage/controller/scalingRules|scalingRules
           tableContents:
           - inTableColumn: true
             label:
-              text: AppliesUpto (In Storage units)  
+              text: AppliesUpto (In Storage units)
             path: appliesUpto
             type: value
             typeOfValue: string
           - inTableColumn: true
             label:
-              text: Threshold (In %, Or In Storage Units) 
+              text: Threshold (In %, Or In Storage Units)
             path: threshold
             type: value
             typeOfValue: string
@@ -1042,7 +1042,7 @@ steps:
             $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/storage/properties/node/properties/expansionMode
           type: select
         - label:
-            text: UsageThreshold (%) 
+            text: UsageThreshold (%)
           schema:
             $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/storage/properties/node/properties/usageThreshold
           type: input
@@ -1050,31 +1050,31 @@ steps:
           element:
             elements:
             - label:
-                text: AppliesUpto (In Storage units)  
+                text: AppliesUpto (In Storage units)
               schema:
                 $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/storage/properties/node/properties/scalingRules/items/properties/appliesUpto
               type: input
             - label:
-                text: Threshold (In %, Or In Storage Units) 
+                text: Threshold (In %, Or In Storage Units)
               schema:
                 $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/storage/properties/node/properties/scalingRules/items/properties/threshold
               type: input
             type: single-step-form
           label:
             text: ScalingRules
+          onChange: handleUnit|autoscalingKubedbComKafkaAutoscaler/spec/storage/node/scalingRules|scalingRules
           schema:
             $ref: schema#/properties/resources/properties/autoscalingKubedbComKafkaAutoscaler/properties/spec/properties/storage/properties/node/properties/scalingRules
-          onChange: handleUnit|autoscalingKubedbComKafkaAutoscaler/spec/storage/node/scalingRules|scalingRules
           tableContents:
           - inTableColumn: true
             label:
-              text: AppliesUpto (In Storage units)  
+              text: AppliesUpto (In Storage units)
             path: appliesUpto
             type: value
             typeOfValue: string
           - inTableColumn: true
             label:
-              text: Threshold (In %, Or In Storage Units) 
+              text: Threshold (In %, Or In Storage Units)
             path: threshold
             type: value
             typeOfValue: string
@@ -1136,4 +1136,3 @@ steps:
   id: storage-autoscaler
   title: steps.7.label
 type: multi-step-form
- 

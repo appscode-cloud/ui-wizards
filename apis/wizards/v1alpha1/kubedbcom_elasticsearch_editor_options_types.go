@@ -64,6 +64,8 @@ type KubedbcomElasticsearchEditorOptionsSpecSpec struct {
 	// KernelSettings contains the additional kernel settings.
 	// +optional
 	KernelSettings KernelSettings `json:"kernelSettings"`
+	// +optional
+	Openshift Openshift `json:"openshift"`
 }
 
 type KernelSettings struct {

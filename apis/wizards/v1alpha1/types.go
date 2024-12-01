@@ -62,6 +62,16 @@ type AuthSecret struct {
 	Password string `json:"password"`
 }
 
+type Openshift struct {
+	// +optional
+	SecurityContext SecurityContext `json:"securityContext"`
+}
+
+type SecurityContext struct {
+	// +optional
+	RunAsUser *int64 `json:"runAsUser"`
+}
+
 // ObjectReference contains enough information to let you inspect or modify the referred object.
 type ObjectReference struct {
 	Namespace string `json:"namespace"`

@@ -1,4 +1,4 @@
-{{- if eq .Values.spec.backup.tool "KubeStash" -}}
+{{- if and (eq .Values.spec.backup.tool "KubeStash") (.Values.spec.admin.backup.enable.default) (eq .Values.spec.admin.backup.by "BackupConfiguration") -}}
 
 apiVersion: core.kubestash.com/v1alpha1
 kind: BackupConfiguration

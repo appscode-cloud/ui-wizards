@@ -14,12 +14,12 @@ steps:
 - form:
     discriminator:
       dbDetails:
-        type: boolean
         default: false
+        type: boolean
     elements:
-    - type: input
-      computed: getDbDetails
+    - computed: getDbDetails
       if: returnFalse
+      type: input
     - elements:
       - label:
           text: Name
@@ -120,12 +120,12 @@ steps:
           schema:
             $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/aggregator/properties/controlledResources
           type: multiselect
-        schema:
-          $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/aggregator
+        if: dbTypeEqualsTo|topology
         label:
           text: Aggregator
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/aggregator
         show_label: true
-        if: dbTypeEqualsTo|topology
         type: single-step-form
       - elements:
         - label:
@@ -186,12 +186,12 @@ steps:
           schema:
             $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/leaf/properties/controlledResources
           type: multiselect
-        schema:
-          $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/leaf
+        if: dbTypeEqualsTo|topology
         label:
           text: Leaf
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/leaf
         show_label: true
-        if: dbTypeEqualsTo|topology
         type: single-step-form
       - elements:
         - label:
@@ -252,12 +252,12 @@ steps:
           schema:
             $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/node/properties/controlledResources
           type: multiselect
-        schema:
-          $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/node
+        if: dbTypeEqualsTo|standalone
         label:
           text: node
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/node
         show_label: true
-        if: dbTypeEqualsTo|standalone
         type: single-step-form
       - elements:
         - fetch: fetchNodeTopology
@@ -330,16 +330,16 @@ steps:
 - form:
     discriminator:
       dbDetails:
-        type: boolean
         default: false
+        type: boolean
     elements:
-    - type: input
-      computed: getDbDetails
+    - computed: getDbDetails
       if: returnFalse
+      type: input
     - elements:
-      - type: input
-        computed: getDbDetails
+      - computed: getDbDetails
         if: returnFalse
+        type: input
       - label:
           text: Name
         schema:
@@ -418,9 +418,9 @@ steps:
             type: single-step-form
           label:
             text: ScalingRules
+          onChange: handleUnit|autoscalingKubedbComSinglestoreAutoscaler/spec/storage/aggregator/scalingRules|scalingRules
           schema:
             $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/aggregator/properties/scalingRules
-          onChange: handleUnit|autoscalingKubedbComSinglestoreAutoscaler/spec/storage/aggregator/scalingRules|scalingRules
           tableContents:
           - inTableColumn: true
             label:
@@ -488,9 +488,9 @@ steps:
             type: single-step-form
           label:
             text: ScalingRules
+          onChange: handleUnit|autoscalingKubedbComSinglestoreAutoscaler/spec/storage/leaf/scalingRules
           schema:
             $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/leaf/properties/scalingRules
-          onChange: handleUnit|autoscalingKubedbComSinglestoreAutoscaler/spec/storage/leaf/scalingRules
           tableContents:
           - inTableColumn: true
             label:
@@ -558,9 +558,9 @@ steps:
             type: single-step-form
           label:
             text: ScalingRules
+          onChange: handleUnit|autoscalingKubedbComSinglestoreAutoscaler/spec/storage/node/scalingRules|scalingRules
           schema:
             $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/storage/properties/node/properties/scalingRules
-          onChange: handleUnit|autoscalingKubedbComSinglestoreAutoscaler/spec/storage/node/scalingRules|scalingRules
           tableContents:
           - inTableColumn: true
             label:

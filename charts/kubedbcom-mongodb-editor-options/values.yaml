@@ -111,6 +111,10 @@ spec:
   hostName: ""
   ip: ""
 
+  openshift:
+    securityContext:
+      runAsUser:
+
   admin:
     deployment:
       default: Shared
@@ -181,11 +185,16 @@ spec:
       default: WipeOut
       toggle: true
     backup:
-      default: true
-      toggle: true
+      enable:
+        default: true
+        toggle: true
+      by: BackupConfiguration
+      via: Dump
     archiver:
-      toggle: true
-      default: false
+      enable:
+        toggle: true
+        default: false
+      via: Dump
     pointInTimeRecovery:
       default: false
       toggle: true

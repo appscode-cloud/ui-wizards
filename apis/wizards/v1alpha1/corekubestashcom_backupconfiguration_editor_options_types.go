@@ -49,6 +49,8 @@ type CorekubestashcomBackupconfigurationEditorOptionsSpecSpec struct {
 	Sessions []Session         `json:"sessions"`
 	// +optional
 	Target kmapi.TypedObjectReference `json:"target"`
+	// +optional
+	Openshift Openshift `json:"openshift"`
 }
 
 type Backend struct {
