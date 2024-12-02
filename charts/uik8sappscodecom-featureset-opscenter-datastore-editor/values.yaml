@@ -25,7 +25,7 @@ resources:
             kind: HelmRepository
             name: appscode-charts-oci
             namespace: kubeops
-          version: v2024.11.8-rc.0
+          version: v2024.11.18
       install:
         crds: CreateReplace
         createNamespace: true
@@ -67,7 +67,7 @@ resources:
             kind: HelmRepository
             name: appscode-charts-oci
             namespace: kubeops
-          version: v2024.9.30
+          version: v2024.11.18
       install:
         crds: CreateReplace
         createNamespace: true
@@ -98,7 +98,7 @@ resources:
             kind: HelmRepository
             name: appscode-charts-oci
             namespace: kubeops
-          version: v2024.11.18
+          version: v2024.12.9
       install:
         crds: CreateReplace
         createNamespace: true
@@ -117,11 +117,16 @@ resources:
         alerts:
           toggle: true
         archiver:
-          default: false
-          toggle: true
+          enable:
+            default: false
+            toggle: true
+          via: Dump
         backup:
-          default: true
-          toggle: true
+          by: BackupConfiguration
+          enable:
+            default: true
+            toggle: true
+          via: Dump
         clusterIssuers:
           available: []
           default: ""
