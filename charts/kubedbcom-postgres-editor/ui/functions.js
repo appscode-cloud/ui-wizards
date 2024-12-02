@@ -1981,9 +1981,8 @@ function getDefault({ getValue, model }, modelPath, field, subfield) {
 }
 
 function getDefaultSchedule({ getValue, watchDependency, model }, modelPath) {
-  watchDependency(`model#/${modelPath}`)
   const session = getValue(model, modelPath)
-  return session[0].scheduler.schedule
+  return session[0]?.scheduler.schedule
 }
 
 //////////////////// Auto scaler /////////////////
