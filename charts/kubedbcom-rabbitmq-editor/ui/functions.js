@@ -1902,7 +1902,9 @@ function setControlledResources({ commit }, type) {
   return list
 }
 
-function setTrigger() {
+function setTrigger({ model, getValue }, path) {
+  let value = getValue(model, `/resources/${path}`)
+  if (value) return value
   return 'On'
 }
 
