@@ -1385,7 +1385,6 @@ function initBackupInvoker() {
 
 function onBackupInvokerChange({ getValue, discriminator, commit, model, storeGet }) {
   const kind = storeGet('/resource/layout/result/resource/kind')
-  const apiGroup = storeGet('/route/params/group')
   const backupInvoker = getValue(discriminator, '/backupInvoker')
   const annotations = getValue(model, '/resources/kubedbComMongoDB/metadata/annotations')
 
@@ -1508,7 +1507,7 @@ function onInputChange(
   discriminatorName,
 ) {
   const value = getValue(discriminator, `/${discriminatorName}`)
-  const backends = getValue(model, modelPath)
+  const backends = getValue(model, modelPath) || []
   if (field !== 'encryptionSecret') backends[0][field][subfield] = value
   else backends[0]['repositories'][0][field][subfield] = value
   commit('wizard/model$update', {
@@ -1527,17 +1526,17 @@ function setFileValueFromStash({ getValue, commit, model }, modelPath, field, su
 }
 
 function onInputChangeSchedule(
-  { getValue, discriminator, watchDependency, commit, model },
+  { getValue, discriminator, commit, model },
   modelPath,
   discriminatorName,
 ) {
-  watchDependency(`discriminator#/${discriminatorName}`)
   const value = getValue(discriminator, `/${discriminatorName}`)
   const session = getValue(model, modelPath)
   session[0].scheduler.schedule = value
   commit('wizard/model$update', {
     path: modelPath,
     value: session,
+    force: true,
   })
 }
 

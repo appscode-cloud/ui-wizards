@@ -1105,9 +1105,12 @@ function showBackupForm({ getValue, discriminator, watchDependency }) {
 }
 
 // invoker form
+function initBackupInvoker() {
+  return 'backupConfiguration'
+}
+
 function onBackupInvokerChange({ getValue, discriminator, commit, model, storeGet }) {
   const kind = storeGet('/resource/layout/result/resource/kind')
-  const apiGroup = storeGet('/route/params/group')
   const backupInvoker = getValue(discriminator, '/backupInvoker')
   const annotations = getValue(model, '/resources/kubedbComMariaDB/metadata/annotations')
 
@@ -1634,10 +1637,6 @@ function showScheduleBackup({ storeGet }) {
   const operationQuery = storeGet('/route/query/operation') || ''
   const isBackupOperation = operationQuery === 'edit-self-backupconfiguration' ? true : false
   return !isBackupOperation
-}
-
-function initBackupInvoker() {
-  return 'backupConfiguration'
 }
 
 function showBackupOptions({ discriminator, getValue, watchDependency }, backup) {
