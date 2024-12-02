@@ -619,6 +619,7 @@ let features = []
 async function initBundle({ commit, model, getValue, axios, storeGet, setDiscriminatorValue }) {
   const owner = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
+  const namespace = getValue(model, '/metadata/release/namespace')
 
   let db = getValue(model, '/metadata/resource/kind')
   db = db.toLowerCase()
