@@ -748,6 +748,7 @@ async function initBundle({ commit, model, getValue, axios, storeGet, setDiscrim
   db = db.toLowerCase()
   let url = `clusters/${owner}/${cluster}/db-bundle?type=features,common,versions&db-singular=${db}`
   const gatewayinfosurl = `/clusters/${owner}/${cluster}/proxy/meta.k8s.appscode.com/v1alpha1/gatewayinfos/${namespace}`
+  const annotationUrl = `clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}`
   try {
     const resp = await axios.get(url)
     features = resp.data.features || []
@@ -757,6 +758,18 @@ async function initBundle({ commit, model, getValue, axios, storeGet, setDiscrim
     clusterIssuers = resp.data.clusterissuers || []
     nodetopologiesDedicated = resp.data.dedicated || []
     nodetopologiesShared = resp.data.shared || []
+
+    const response = await axios.get(annotationUrl)
+    const annotations = response.data?.metadata?.annotations || {}
+    const uidRange = annotations['openshift.io/sa.scc.uid-range']
+    if (uidRange) {
+      const val = uidRange.split('/')[0]
+      commit('wizard/model$update', {
+        path: '/spec/openshift/securityContext/runAsUser',
+        value: val,
+        force: true,
+      })
+    }
 
     const gatewayinfosResp = await axios.get(gatewayinfosurl)
     hostName = gatewayinfosResp.data?.spec?.hostName
@@ -812,7 +825,7 @@ async function initBundle({ commit, model, getValue, axios, storeGet, setDiscrim
   }
   if (!features.includes('backup')) {
     commit('wizard/model$update', {
-      path: '/spec/admin/archiver/default',
+      path: '/spec/admin/archiver/enable/default',
       value: false,
       force: true,
     })
@@ -892,6 +905,9 @@ async function getRecoveryNames({ getValue, model, watchDependency, storeGet, ax
 
 function checkIfFeatureOn({ getValue, model }, type) {
   let val = getValue(model, `/spec/admin/${type}/toggle`)
+  if (type === 'backup' || type === 'archiver') {
+    val = getValue(model, `/spec/admin/${type}/enable/toggle`)
+  }
   const backupVal = getValue(model, '/spec/backup/tool')
 
   if (type === 'backup') {
@@ -1053,7 +1069,7 @@ function setMonitoring({ getValue, model }) {
 
 function setBackup({ model, getValue }) {
   const backup = getValue(model, '/spec/backup/tool')
-  const val = getValue(model, '/spec/admin/backup/default')
+  const val = getValue(model, '/spec/admin/backup/enable/default')
   return backup === 'KubeStash' && features.includes('backup') && val
 }
 
@@ -1075,7 +1091,6 @@ function onAuthChange({ getValue, discriminator, commit }) {
 
 function showAdditionalSettings({ watchDependency }) {
   watchDependency('discriminator#/bundleApiLoaded')
-  console.log(features)
   return features.length
 }
 
@@ -1083,7 +1098,6 @@ async function checkHostnameOrIP({ commit, model, getValue }) {
   const tls = getValue(model, '/spec/admin/tls/default')
   const expose = getValue(model, '/spec/admin/expose/default')
   if (tls && expose) {
-    console.log({ hostName, ip })
     if (hostName) {
       commit('wizard/model$update', {
         path: '/spec/hostname',

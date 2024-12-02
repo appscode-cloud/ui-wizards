@@ -566,7 +566,7 @@ function setMonitoring({ getValue, model }) {
 
 function setBackup({ model, getValue }) {
   const backup = getValue(model, '/spec/backup/tool')
-  const val = getValue(model, '/spec/admin/backup/default')
+  const val = getValue(model, '/spec/admin/backup/enable/default')
   return backup === 'KubeStash' && features.includes('backup') && val
 }
 
@@ -619,6 +619,7 @@ let features = []
 async function initBundle({ commit, model, getValue, axios, storeGet, setDiscriminatorValue }) {
   const owner = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
+  const namespace = getValue(model, '/metadata/release/namespace')
 
   let db = getValue(model, '/metadata/resource/kind')
   db = db.toLowerCase()
@@ -683,7 +684,7 @@ async function initBundle({ commit, model, getValue, axios, storeGet, setDiscrim
   }
   if (!features.includes('backup')) {
     commit('wizard/model$update', {
-      path: '/spec/admin/archiver/default',
+      path: '/spec/admin/archiver/enable/default',
       value: false,
       force: true,
     })
@@ -735,6 +736,9 @@ function getAdminOptions({ getValue, model, watchDependency }, type) {
 
 function checkIfFeatureOn({ getValue, model }, type) {
   let val = getValue(model, `/spec/admin/${type}/toggle`)
+  if (type === 'backup' || type === 'archiver') {
+    val = getValue(model, `/spec/admin/${type}/enable/toggle`)
+  }
   const backupVal = getValue(model, '/spec/backup/tool')
 
   if (type === 'backup') {

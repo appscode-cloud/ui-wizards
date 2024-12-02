@@ -759,10 +759,12 @@ let features = []
 async function initBundle({ commit, model, getValue, axios, storeGet, setDiscriminatorValue }) {
   const owner = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
+  const namespace = getValue(model, '/metadata/release/namespace')
 
   let db = getValue(model, '/metadata/resource/kind')
   db = db.toLowerCase()
   let url = `clusters/${owner}/${cluster}/db-bundle?type=features,common,versions&db-singular=${db}`
+  const annotationUrl = `clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}`
 
   try {
     const resp = await axios.get(url)
@@ -773,6 +775,18 @@ async function initBundle({ commit, model, getValue, axios, storeGet, setDiscrim
     clusterIssuers = resp.data.clusterissuers || []
     nodetopologiesDedicated = resp.data.dedicated || []
     nodetopologiesShared = resp.data.shared || []
+
+    const response = await axios.get(annotationUrl)
+    const annotations = response.data?.metadata?.annotations || {}
+    const uidRange = annotations['openshift.io/sa.scc.uid-range']
+    if (uidRange) {
+      const val = uidRange.split('/')[0]
+      commit('wizard/model$update', {
+        path: '/spec/openshift/securityContext/runAsUser',
+        value: val,
+        force: true,
+      })
+    }
   } catch (e) {
     console.log(e)
   }
@@ -824,7 +838,7 @@ async function initBundle({ commit, model, getValue, axios, storeGet, setDiscrim
   }
   if (!features.includes('backup')) {
     commit('wizard/model$update', {
-      path: '/spec/admin/archiver/default',
+      path: '/spec/admin/archiver/enable/default',
       value: false,
       force: true,
     })
@@ -876,6 +890,9 @@ function getAdminOptions({ getValue, model, watchDependency }, type) {
 
 function checkIfFeatureOn({ getValue, model }, type) {
   let val = getValue(model, `/spec/admin/${type}/toggle`)
+  if (type === 'backup' || type === 'archiver') {
+    val = getValue(model, `/spec/admin/${type}/enable/toggle`)
+  }
   const backupVal = getValue(model, '/spec/backup/tool')
 
   if (type === 'backup') {
@@ -1086,7 +1103,7 @@ function setMonitoring({ getValue, model }) {
 
 function setBackup({ model, getValue }) {
   const backup = getValue(model, '/spec/backup/tool')
-  const val = getValue(model, '/spec/admin/backup/default')
+  const val = getValue(model, '/spec/admin/backup/enable/default')
   return backup === 'KubeStash' && features.includes('backup') && val
 }
 
