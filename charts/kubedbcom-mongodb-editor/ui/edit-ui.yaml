@@ -577,152 +577,42 @@ steps:
         backupEnabled:
           default: false
           type: boolean
-        backupInvoker:
-          type: string
       elements:
-      - computed: initBackupInvoker
-        disabled: true
+      - computed: setBackupSwitch
         label:
-          text: labels.backup.invoker
-        onChange: onBackupInvokerChange
-        options:
-        - text: Backup Configuration
-          value: backupConfiguration
-        - text: Backup Blueprint
-          value: backupBlueprint
+          text: Enable Backup
+        onChange: onBackupChange
         schema:
-          $ref: discriminator#/properties/backupInvoker
-        type: radio
-      - elements:
-        - discriminator:
-            backupSchedule:
-              type: string
-          elements:
-          - computed: getDefaultSchedule|resources/coreKubestashComBackupConfiguration/spec/sessions|backupSchedule
-            label:
-              text: labels.backupConfiguration.schedule
-            onChange: onInputChangeSchedule|resources/coreKubestashComBackupConfiguration/spec/sessions|backupSchedule
-            schema:
-              $ref: discriminator#/backupSchedule
-            type: input
-          type: single-step-form
-        - discriminator:
-            storageRefName:
-              type: string
-            storageRefNamespace:
-              type: string
-          elements:
-          - computed: getDefault|/resources/coreKubestashComBackupConfiguration/spec/backends|storageRef|namespace|storageRefNamespace
-            fetch: fetchNamespaces
-            hasGroup: isRancherManaged
-            label:
-              text: Namespace
-            onChange: onInputChange|resources/coreKubestashComBackupConfiguration/spec/backends|storageRef|namespace|storageRefNamespace
-            schema:
-              $ref: discriminator#/storageRefNamespace
-            type: select
-          - computed: getDefault|/resources/coreKubestashComBackupConfiguration/spec/backends|storageRef|name|storageRefName
-            fetch: fetchNames|v1alpha1|backupstorages|storageRefNamespace
-            label:
-              text: Name
-            onChange: onInputChange|resources/coreKubestashComBackupConfiguration/spec/backends|storageRef|name|storageRefName
-            schema:
-              $ref: discriminator#/storageRefName
-            type: select
-          label:
-            text: StorageRef
-          show_label: true
-          type: single-step-form
-        - discriminator:
-            retentionPolicyName:
-              type: string
-            retentionPolicyNamespace:
-              type: string
-          elements:
-          - computed: getDefault|/resources/coreKubestashComBackupConfiguration/spec/backends|retentionPolicy|namespace
-            fetch: fetchNamespaces
-            hasGroup: isRancherManaged
-            label:
-              text: Namespace
-            onChange: onInputChange|resources/coreKubestashComBackupConfiguration/spec/backends|retentionPolicy|namespace|retentionPolicyNamespace
-            schema:
-              $ref: discriminator#/retentionPolicyNamespace
-            type: select
-          - computed: getDefault|/resources/coreKubestashComBackupConfiguration/spec/backends|retentionPolicy|name
-            fetch: fetchNames|v1alpha1|retentionpolicies|retentionPolicyNamespace
-            label:
-              text: Name
-            onChange: onInputChange|resources/coreKubestashComBackupConfiguration/spec/backends|retentionPolicy|name|retentionPolicyName
-            schema:
-              $ref: discriminator#/retentionPolicyName
-            type: select
-          label:
-            text: Retention Policy
-          show_label: true
-          type: single-step-form
-        - discriminator:
-            encryptionSecretName:
-              type: string
-            encryptionSecretNamespace:
-              type: string
-          elements:
-          - computed: getDefault|/resources/coreKubestashComBackupConfiguration/spec/sessions|encryptionSecret|namespace
-            fetch: fetchNamespaces
-            hasGroup: isRancherManaged
-            label:
-              text: Namespace
-            onChange: onInputChange|/resources/coreKubestashComBackupConfiguration/spec/sessions|encryptionSecret|namespace|encryptionSecretNamespace
-            schema:
-              $ref: discriminator#/encryptionSecretNamespace
-            type: select
-          - computed: getDefault|/resources/coreKubestashComBackupConfiguration/spec/sessions|encryptionSecret|name
-            fetch: fetchNames|v1|secrets|encryptionSecretNamespace
-            label:
-              text: Name
-            onChange: onInputChange|/resources/coreKubestashComBackupConfiguration/spec/sessions|encryptionSecret|name|encryptionSecretName
-            schema:
-              $ref: discriminator#/encryptionSecretName
-            type: select
-          label:
-            text: Encryption Secret
-          show_label: true
-          type: single-step-form
-        if: showInvokerForm|backupConfiguration
-        type: single-step-form
+          $ref: discriminator#/backupEnabled
+        type: switch
       - discriminator:
-          backupBlueprintName:
+          backupInvoker:
             type: string
-          blueprintOptions:
-            type: string
-          schedule:
-            type: string
-          taskParameters:
-            additionalProperties:
-              type: string
-            type: object
         elements:
-        - computed: initBlueprint
+        - computed: initBackupInvoker
           label:
-            text: Backup Options
+            text: labels.backup.invoker
+          onChange: onBackupInvokerChange
           options:
-          - text: Create
-            value: create
-          - text: Choose
-            value: choose
+          - text: Backup Configuration
+            value: backupConfiguration
+          - text: Backup Blueprint
+            value: backupBlueprint
           schema:
-            $ref: discriminator#/blueprintOptions
+            $ref: discriminator#/properties/backupInvoker
           type: radio
         - elements:
           - discriminator:
-              blueprintSchedule:
+              backupSchedule:
                 type: string
             elements:
-            - computed: getDefaultSchedule|resources/coreKubestashComBackupBlueprint/spec/backupConfigurationTemplate/sessions|blueprintSchedule
+            - computed: getDefaultSchedule|resources/coreKubestashComBackupConfiguration/spec/sessions
               label:
                 text: labels.backupConfiguration.schedule
-              onChange: onInputChangeSchedule|resources/coreKubestashComBackupBlueprint/spec/backupConfigurationTemplate/sessions|blueprintSchedule
+              onChange: onInputChangeSchedule|resources/coreKubestashComBackupConfiguration/spec/sessions|backupSchedule
+              required: true
               schema:
-                $ref: discriminator#/blueprintSchedule
+                $ref: discriminator#/backupSchedule
               type: input
             type: single-step-form
           - discriminator:
@@ -731,20 +621,22 @@ steps:
               storageRefNamespace:
                 type: string
             elements:
-            - computed: getDefault|/resources/coreKubestashComBackupBlueprint/spec/backupConfigurationTemplate/backends|storageRef|namespace
-              fetch: fetchNamespaces|storageRefNamespace
+            - computed: getDefault|/resources/coreKubestashComBackupConfiguration/spec/backends|storageRef|namespace
+              fetch: getNamespaceArray
               hasGroup: isRancherManaged
               label:
                 text: Namespace
-              onChange: onInputChange|resources/coreKubestashComBackupBlueprint/spec/backupConfigurationTemplate/backends|storageRef|namespace|storageRefNamespace
+              onChange: onInputChange|resources/coreKubestashComBackupConfiguration/spec/backends|storageRef|namespace|storageRefNamespace
+              required: true
               schema:
                 $ref: discriminator#/storageRefNamespace
               type: select
-            - computed: getDefault|/resources/coreKubestashComBackupBlueprint/spec/backupConfigurationTemplate/backends|storageRef|name
+            - computed: getDefault|/resources/coreKubestashComBackupConfiguration/spec/backends|storageRef|name
               fetch: fetchNames|v1alpha1|backupstorages|storageRefNamespace
               label:
                 text: Name
-              onChange: onInputChange|resources/coreKubestashComBackupBlueprint/spec/backupConfigurationTemplate/backends|storageRef|name|storageRefName
+              onChange: onInputChange|resources/coreKubestashComBackupConfiguration/spec/backends|storageRef|name|storageRefName
+              required: true
               schema:
                 $ref: discriminator#/storageRefName
               type: select
@@ -758,20 +650,22 @@ steps:
               retentionPolicyNamespace:
                 type: string
             elements:
-            - computed: getDefault|/resources/coreKubestashComBackupBlueprint/spec/backupConfigurationTemplate/backends|retentionPolicy|namespace
-              fetch: fetchNamespaces|retentionPolicyNamespace
+            - computed: getDefault|/resources/coreKubestashComBackupConfiguration/spec/backends|retentionPolicy|namespace
+              fetch: getNamespaceArray
               hasGroup: isRancherManaged
               label:
                 text: Namespace
-              onChange: onInputChange|resources/coreKubestashComBackupBlueprint/spec/backupConfigurationTemplate/backends|retentionPolicy|namespace|retentionPolicyNamespace
+              onChange: onInputChange|resources/coreKubestashComBackupConfiguration/spec/backends|retentionPolicy|namespace|retentionPolicyNamespace
+              required: true
               schema:
                 $ref: discriminator#/retentionPolicyNamespace
               type: select
-            - computed: getDefault|/resources/coreKubestashComBackupBlueprint/spec/backupConfigurationTemplate/backends|retentionPolicy|name
+            - computed: getDefault|/resources/coreKubestashComBackupConfiguration/spec/backends|retentionPolicy|name
               fetch: fetchNames|v1alpha1|retentionpolicies|retentionPolicyNamespace
               label:
                 text: Name
-              onChange: onInputChange|resources/coreKubestashComBackupBlueprint/spec/backupConfigurationTemplate/backends|retentionPolicy|name|retentionPolicyName
+              onChange: onInputChange|resources/coreKubestashComBackupConfiguration/spec/backends|retentionPolicy|name|retentionPolicyName
+              required: true
               schema:
                 $ref: discriminator#/retentionPolicyName
               type: select
@@ -785,20 +679,22 @@ steps:
               encryptionSecretNamespace:
                 type: string
             elements:
-            - computed: getDefault|/resources/coreKubestashComBackupBlueprint/spec/backupConfigurationTemplate/sessions|encryptionSecret|namespace
-              fetch: fetchNamespaces|encryptionSecretNamespace
+            - computed: getDefault|/resources/coreKubestashComBackupConfiguration/spec/sessions|encryptionSecret|namespace
+              fetch: getNamespaceArray
               hasGroup: isRancherManaged
               label:
                 text: Namespace
-              onChange: onInputChange|/resources/coreKubestashComBackupBlueprint/spec/backupConfigurationTemplate/sessions|encryptionSecret|namespace|encryptionSecretNamespace
+              onChange: onInputChange|/resources/coreKubestashComBackupConfiguration/spec/sessions|encryptionSecret|namespace|encryptionSecretNamespace
+              required: true
               schema:
                 $ref: discriminator#/encryptionSecretNamespace
               type: select
-            - computed: getDefault|/resources/coreKubestashComBackupBlueprint/spec/backupConfigurationTemplate/sessions|encryptionSecret|name
+            - computed: getDefault|/resources/coreKubestashComBackupConfiguration/spec/sessions|encryptionSecret|name
               fetch: fetchNames|v1|secrets|encryptionSecretNamespace
               label:
                 text: Name
-              onChange: onInputChange|/resources/coreKubestashComBackupBlueprint/spec/backupConfigurationTemplate/sessions|encryptionSecret|name|encryptionSecretName
+              onChange: onInputChange|/resources/coreKubestashComBackupConfiguration/spec/sessions|encryptionSecret|name|encryptionSecretName
+              required: true
               schema:
                 $ref: discriminator#/encryptionSecretName
               type: select
@@ -806,60 +702,9 @@ steps:
               text: Encryption Secret
             show_label: true
             type: single-step-form
-          - elements:
-            - computed: initUsagePolicy
-              label:
-                text: From
-              options:
-              - text: All
-                value: All
-              - text: Same
-                value: Same
-              - text: Selector
-                value: Selector
-              schema:
-                $ref: schema#/properties/resources/properties/coreKubestashComBackupBlueprint/properties/spec/properties/usagePolicy/properties/allowedNamespaces/properties/from
-              type: select
-            - if: ifUsagePolicy|Selector
-              isArray: true
-              keys:
-                label:
-                  text: key
-              label:
-                text: Allowed Namespaces
-              schema:
-                $ref: schema#/properties/resources/properties/coreKubestashComBackupBlueprint/properties/spec/properties/usagePolicy/properties/allowedNamespaces/properties/selector/properties/matchLabels
-              type: key-value-input-form
-              values:
-                label:
-                  text: value
-                schema:
-                  $ref: schema#/properties/resources/properties/coreKubestashComBackupBlueprint/properties/spec/properties/usagePolicy/properties/allowedNamespaces/properties/selector/properties/matchLabels/additionalProperties
-                type: input
-            label:
-              text: Usage Policy
-            show_label: true
-            type: single-step-form
-          if: isBlueprintOption|create
+          if: showInvokerForm|backupConfiguration
           type: single-step-form
-        - elements:
-          - label:
-              text: labels.backupBlueprint.title
-            type: label-element
-          - allowUserDefinedOption: true
-            computed: initFromAnnotationValue|stash.appscode.com/backup-blueprint
-            fetch: getBlueprints
-            label:
-              text: labels.backupBlueprint.name
-            onChange: onBackupBlueprintNameChange
-            schema:
-              $ref: discriminator#/properties/backupBlueprintName
-            type: select
-          if: isBlueprintOption|choose
-          type: single-step-form
-        if: showInvokerForm|backupBlueprint
-        label:
-          text: Backup Blueprint form
+        if: isBackupToggled
         type: single-step-form
       if: showBackupForm
       label:

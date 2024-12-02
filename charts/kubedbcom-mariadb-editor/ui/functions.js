@@ -1112,7 +1112,6 @@ function onBackupInvokerChange({ getValue, discriminator, commit, model, storeGe
   const annotations = getValue(model, '/resources/kubedbComMariaDB/metadata/annotations')
 
   // get name namespace labels to set in db resource when backup is not enabled initially
-  const { name, namespace, labels } = getValue(model, '/resources/kubedbComMariaDB/metadata')
 
   if (backupInvoker === 'backupConfiguration') {
     commit('wizard/model$update', {
@@ -1753,15 +1752,6 @@ function onInputChange(
     force: true,
   })
 }
-function setFileValueFromStash({ getValue, commit, model }, modelPath, field, subfield, value) {
-  const backends = getValue(model, modelPath)
-  if (field !== 'encryptionSecret') backends[0][field][subfield] = value
-  else backends[0]['repositories'][0][field][subfield] = value
-  commit('wizard/model$update', {
-    path: modelPath,
-    value: backends,
-  })
-}
 
 function onInputChangeSchedule(
   { getValue, discriminator, commit, model },
@@ -1769,19 +1759,6 @@ function onInputChangeSchedule(
   discriminatorName,
 ) {
   const value = getValue(discriminator, `/${discriminatorName}`)
-  const session = getValue(model, modelPath)
-  session[0].scheduler.schedule = value
-  commit('wizard/model$update', {
-    path: modelPath,
-    value: session,
-  })
-}
-
-function setInitSchedule(
-  { getValue, discriminator, watchDependency, commit, model },
-  modelPath,
-  value,
-) {
   const session = getValue(model, modelPath)
   session[0].scheduler.schedule = value
   commit('wizard/model$update', {
@@ -1897,22 +1874,24 @@ async function setBackupSwitch({ commit, storeGet, axios, getValue, model }) {
 
     // set initial data from stash-presets when backup is disabled
     const stashPreset = storeGet('/backup/stashPresets')
-    const { retentionPolicy, encryptionSecret, schedule, storageRef } = stashPreset
+    if (stashPreset) {
+      const { retentionPolicy, encryptionSecret, schedule, storageRef } = stashPreset
 
-    const tempBackends = initialModel.spec?.backends
-    tempBackends[0]['storageRef'] = storageRef
-    tempBackends[0]['retentionPolicy'] = retentionPolicy
-    initialModel.spec['backends'] = tempBackends
+      const tempBackends = initialModel.spec?.backends
+      tempBackends[0]['storageRef'] = storageRef
+      tempBackends[0]['retentionPolicy'] = retentionPolicy
+      initialModel.spec['backends'] = tempBackends
 
-    const tempSessions = initialModel.spec?.sessions
-    const tempRepositories = initialModel.spec?.sessions[0]?.repositories
-    tempRepositories[0]['encryptionSecret'] = encryptionSecret
-    tempRepositories[0].name = name
-    tempRepositories[0]['directory'] = `${namespace}/${name}`
+      const tempSessions = initialModel.spec?.sessions
+      const tempRepositories = initialModel.spec?.sessions[0]?.repositories
+      tempRepositories[0]['encryptionSecret'] = encryptionSecret
+      tempRepositories[0].name = name
+      tempRepositories[0]['directory'] = `${namespace}/${name}`
 
-    tempSessions[0]['repositories'] = tempRepositories
-    tempSessions[0]['scheduler']['schedule'] = schedule
-    initialModel.spec['sessions'] = tempSessions
+      tempSessions[0]['repositories'] = tempRepositories
+      tempSessions[0]['scheduler']['schedule'] = schedule
+      initialModel.spec['sessions'] = tempSessions
+    }
 
     const apiGroup = storeGet('/route/params/group')
     initialModel.spec['target'] = { name, namespace, apiGroup, kind }
@@ -2186,7 +2165,6 @@ return {
   setTrigger,
   setApplyToIfReady,
   showOpsRequestOptions,
-  setInitSchedule,
   fetchNames,
   isRancherManaged,
   fetchNamespaces,
