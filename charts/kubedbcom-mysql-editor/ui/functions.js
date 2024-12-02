@@ -2181,7 +2181,7 @@ function handleUnit({ commit, model, getValue }, path, type = 'bound') {
   let value = getValue(model, `/resources/${path}`)
   if (type === 'scalingRules') {
     const updatedValue = []
-    value.forEach((ele) => {
+    value?.forEach((ele) => {
       let appliesUpto = ele['appliesUpto']
       let threshold = ele['threshold']
       if (appliesUpto && !isNaN(appliesUpto)) {
