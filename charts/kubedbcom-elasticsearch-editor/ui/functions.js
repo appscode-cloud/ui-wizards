@@ -3058,7 +3058,9 @@ function setControlledResources({ commit }, type) {
   return list
 }
 
-function setTrigger() {
+function setTrigger({ model, getValue }, path) {
+  let value = getValue(model, `/resources/${path}`)
+  if (value) return value
   return 'On'
 }
 
@@ -3070,7 +3072,7 @@ function handleUnit({ commit, model, getValue }, path, type = 'bound') {
   let value = getValue(model, `/resources/${path}`)
   if (type === 'scalingRules') {
     const updatedValue = []
-    value.forEach((ele) => {
+    value?.forEach((ele) => {
       let appliesUpto = ele['appliesUpto']
       let threshold = ele['threshold']
       if (appliesUpto && !isNaN(appliesUpto)) {
