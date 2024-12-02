@@ -1125,31 +1125,31 @@ steps:
             schema:
               $ref: schema#/properties/resources/properties/autoscalingKubedbComPostgresAutoscaler/properties/spec/properties/compute/properties/postgres/properties/controlledResources
             type: multiselect
-          - type: select
-            label:
+          - label:
               text: Container Controlled Values
             options:
-              - RequestsAndLimits
-              - RequestsOnly
+            - RequestsAndLimits
+            - RequestsOnly
             schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComPostgresAutoscaler/properties/spec/properties/compute/properties/postgres/properties/containerControlledValues 
-          - type: single-step-form
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComPostgresAutoscaler/properties/spec/properties/compute/properties/postgres/properties/containerControlledValues
+            type: select
+          - elements:
+            - label:
+                text: ScalingFactor Percentage
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComPostgresAutoscaler/properties/spec/properties/compute/properties/postgres/properties/inMemoryStorage/properties/scalingFactorPercentage
+              type: input
+            - label:
+                text: Usage Threshold Percentage
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComPostgresAutoscaler/properties/spec/properties/compute/properties/postgres/properties/inMemoryStorage/properties/usageThresholdPercentage
+              type: input
             label:
               text: In Memory Storage
-            show_label: true
             schema:
               $ref: schema#/properties/resources/properties/autoscalingKubedbComPostgresAutoscaler/properties/spec/properties/compute/properties/postgres/properties/inMemoryStorage
-            elements:
-              - type: input
-                label:
-                  text: ScalingFactor Percentage
-                schema:
-                  $ref: schema#/properties/resources/properties/autoscalingKubedbComPostgresAutoscaler/properties/spec/properties/compute/properties/postgres/properties/inMemoryStorage/properties/scalingFactorPercentage 
-              - type: input
-                label:
-                  text: Usage Threshold Percentage
-                schema:
-                  $ref: schema#/properties/resources/properties/autoscalingKubedbComPostgresAutoscaler/properties/spec/properties/compute/properties/postgres/properties/inMemoryStorage/properties/usageThresholdPercentage
+            show_label: true
+            type: single-step-form
           schema:
             $ref: schema#/properties/resources/properties/autoscalingKubedbComPostgresAutoscaler/properties/spec/properties/compute/properties/postgres
           type: single-step-form
@@ -1313,9 +1313,9 @@ steps:
             type: single-step-form
           label:
             text: ScalingRules
+          onChange: handleUnit|autoscalingKubedbComPostgresAutoscaler/spec/storage/postgres/scalingRules|scalingRules
           schema:
             $ref: schema#/properties/resources/properties/autoscalingKubedbComPostgresAutoscaler/properties/spec/properties/storage/properties/postgres/properties/scalingRules
-          onChange: handleUnit|autoscalingKubedbComPostgresAutoscaler/spec/storage/postgres/scalingRules|scalingRules
           tableContents:
           - inTableColumn: true
             label:

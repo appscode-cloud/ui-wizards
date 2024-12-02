@@ -49,6 +49,8 @@ type CorekubestashcomRestoresessionEditorOptionsSpecSpec struct {
 	Addon      KubeStashAddon    `json:"addon"`
 	// +optional
 	Target kmapi.TypedObjectReference `json:"target"`
+	// +optional
+	Openshift Openshift `json:"openshift"`
 }
 
 type RestoreDataSource struct {

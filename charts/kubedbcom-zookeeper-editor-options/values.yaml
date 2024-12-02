@@ -42,6 +42,10 @@ spec:
     name: ""
     password: ""
 
+  openshift:
+    securityContext:
+      runAsUser: 
+
   admin:
     deployment:
       default: Shared
@@ -112,11 +116,16 @@ spec:
       default: WipeOut
       toggle: true
     backup:
-      default: true
-      toggle: true
+      enable:
+        default: true
+        toggle: true
+      by: BackupConfiguration
+      via: Dump
     archiver:
-      toggle: false
-      default: false
+      enable:
+        default: false
+        toggle: false
+      via: Dump
     pointInTimeRecovery:
       default: false
       toggle: false

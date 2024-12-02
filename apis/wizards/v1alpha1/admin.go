@@ -69,8 +69,8 @@ type AdminOptions struct {
 	Alert      Alert      `json:"alert"`
 
 	DeletionPolicy      ToggleProfileOnString  `json:"deletionPolicy"`
-	Backup              ToggleProfileOnBoolean `json:"backup"`
-	Archiver            ToggleProfileOnBoolean `json:"archiver"`
+	Backup              BackupProfile          `json:"backup"`
+	Archiver            ArchiverProfile        `json:"archiver"`
 	PointInTimeRecovery ToggleProfileOnBoolean `json:"pointInTimeRecovery"`
 }
 
@@ -117,6 +117,30 @@ type DatabaseProfile struct {
 	Versions RequiredClusterScopedProfile `json:"versions"`
 	Mode     RequiredClusterScopedProfile `json:"mode"`
 }
+
+// *** Backup-related starts *** //
+
+type BackupProfile struct {
+	Enable ToggleProfileOnBoolean `json:"enable"`
+	// +kubebuilder:default=BackupConfiguration
+	By BackupBy `json:"by"`
+	// +kubebuilder:default=Dump
+	Via BackupVia `json:"via"`
+}
+
+// +kubebuilder:validation:Enum=BackupConfiguration;BackupBlueprint
+type BackupBy string
+
+// +kubebuilder:validation:Enum=Dump;VolumeSnapshot
+type BackupVia string
+
+type ArchiverProfile struct {
+	Enable ToggleProfileOnBoolean `json:"enable"`
+	// +kubebuilder:default=Dump
+	Via BackupVia `json:"via"`
+}
+
+// *** Backup-related ends *** //
 
 type LeftPanel struct {
 	ShowInsights     bool `json:"showInsights"`

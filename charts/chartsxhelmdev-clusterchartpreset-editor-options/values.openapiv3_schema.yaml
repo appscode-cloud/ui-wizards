@@ -51,23 +51,54 @@ properties:
             type: object
           archiver:
             properties:
-              default:
-                type: boolean
-              toggle:
-                type: boolean
+              enable:
+                properties:
+                  default:
+                    type: boolean
+                  toggle:
+                    type: boolean
+                required:
+                - default
+                - toggle
+                type: object
+              via:
+                default: Dump
+                enum:
+                - Dump
+                - VolumeSnapshot
+                type: string
             required:
-            - default
-            - toggle
+            - enable
+            - via
             type: object
           backup:
             properties:
-              default:
-                type: boolean
-              toggle:
-                type: boolean
+              by:
+                default: BackupConfiguration
+                enum:
+                - BackupConfiguration
+                - BackupBlueprint
+                type: string
+              enable:
+                properties:
+                  default:
+                    type: boolean
+                  toggle:
+                    type: boolean
+                required:
+                - default
+                - toggle
+                type: object
+              via:
+                default: Dump
+                enum:
+                - Dump
+                - VolumeSnapshot
+                type: string
             required:
-            - default
-            - toggle
+            - by
+            - enable
+            - via
             type: object
           clusterIssuers:
             properties:

@@ -94,6 +94,10 @@ metadata:
 {{- end }}
   annotations:
     app.kubernetes.io/cluster-tier: {{ .Values.spec.admin.clusterTier.default }}
+  {{- if and (eq .Values.spec.backup.tool "KubeStash") (.Values.spec.admin.backup.enable.default) (eq .Values.spec.admin.backup.by "BackupBlueprint") }}
+    blueprint.kubestash.com/name: {{ .Values.metadata.resource.kind | lower }}-blueprint
+    blueprint.kubestash.com/namespace: kubedb
+  {{- end }}
 {{- if .Values.spec.annotations }}
     {{- include "kubedbcom-mongodb-editor-options.annotations" . | nindent 4 }}
 {{- end }}

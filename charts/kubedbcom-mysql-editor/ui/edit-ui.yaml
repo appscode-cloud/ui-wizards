@@ -1088,31 +1088,31 @@ steps:
             schema:
               $ref: schema#/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/compute/properties/mysql/properties/controlledResources
             type: multiselect
-          - type: single-step-form
+          - elements:
+            - label:
+                text: Scaling Factor Percentage
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/compute/properties/mysql/properties/inMemoryStorage/properties/scalingFactorPercentage
+              type: input
+            - label:
+                text: Usage Threshold Percentage
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/compute/properties/mysql/properties/inMemoryStorage/properties/usageThresholdPercentage
+              type: input
             label:
               text: In Memory Storage
-            show_label: true
             schema:
               $ref: schema#/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/compute/properties/mysql/properties/inMemoryStorage
-            elements:
-              - type: input
-                label:
-                  text: Scaling Factor Percentage
-                schema:
-                  $ref: schema#/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/compute/properties/mysql/properties/inMemoryStorage/properties/scalingFactorPercentage
-              - type: input
-                label:
-                  text: Usage Threshold Percentage
-                schema:
-                  $ref: schema#/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/compute/properties/mysql/properties/inMemoryStorage/properties/usageThresholdPercentage                  
-          - type: select
-            label:
+            show_label: true
+            type: single-step-form
+          - label:
               text: containerControlledValues
             options:
-              - RequestsAndLimits
-              - RequestsOnly
+            - RequestsAndLimits
+            - RequestsOnly
             schema:
               $ref: schema#/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/compute/properties/mysql/properties/containerControlledValues
+            type: select
           schema:
             $ref: schema#/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/compute/properties/mysql
           type: single-step-form
@@ -1271,13 +1271,13 @@ steps:
             type: single-step-form
           label:
             text: ScalingRules
+          onChange: handleUnit|autoscalingKubedbComMySQLAutoscaler/spec/storage/mysql/scalingRules|scalingRules
           schema:
             $ref: schema#/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/storage/properties/mysql/properties/scalingRules
-          onChange: handleUnit|autoscalingKubedbComMySQLAutoscaler/spec/storage/mysql/scalingRules|scalingRules
           tableContents:
           - inTableColumn: true
             label:
-              text: AppliesUpto (In Storage units) 
+              text: AppliesUpto (In Storage units)
             path: appliesUpto
             type: value
             typeOfValue: string
@@ -1296,9 +1296,9 @@ steps:
           type: input
         - label:
             text: Scaling Threshold
-          type: input
           schema:
             $ref: schema#/properties/resources/properties/autoscalingKubedbComMySQLAutoscaler/properties/spec/properties/storage/properties/mysql/properties/scalingThreshold
+          type: input
         label:
           text: Mysql
         schema:

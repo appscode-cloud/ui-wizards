@@ -55,6 +55,8 @@ type KubedbcomPerconaxtradbEditorOptionsSpecSpec struct {
 	Admin          AdminOptions       `json:"admin"`
 	Backup         BackupToolSpec     `json:"backup"`
 	Monitoring     MonitoringOperator `json:"monitoring"`
+	// +optional
+	Openshift Openshift `json:"openshift"`
 }
 
 type PerconaxtradbAlertsSpecForm struct {
