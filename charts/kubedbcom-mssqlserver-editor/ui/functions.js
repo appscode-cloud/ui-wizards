@@ -1707,7 +1707,7 @@ function getDefault({ getValue, model }, modelPath, field, subfield) {
 
 function getDefaultSchedule({ getValue, model }, modelPath) {
   const session = getValue(model, modelPath)
-  return session[0].scheduler.schedule
+  return session[0]?.scheduler.schedule
 }
 
 // backup blueprint form
