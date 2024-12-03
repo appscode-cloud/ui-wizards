@@ -1883,12 +1883,15 @@ async function fetchNames(
   }
   return []
 }
+
 function initBlueprint() {
   return 'create'
 }
+
 function initUsagePolicy() {
   return 'Same'
 }
+
 function onInputChange(
   { getValue, discriminator, watchDependency, commit, model },
   modelPath,
@@ -1897,7 +1900,7 @@ function onInputChange(
   discriminatorName,
 ) {
   const value = getValue(discriminator, `/${discriminatorName}`)
-  const backends = getValue(model, modelPath)
+  const backends = getValue(model, modelPath) || []
   if (field !== 'encryptionSecret') backends[0][field][subfield] = value
   else backends[0]['repositories'][0][field][subfield] = value
   commit('wizard/model$update', {
@@ -1916,11 +1919,10 @@ function setFileValueFromStash({ getValue, commit, model }, modelPath, field, su
 }
 
 function onInputChangeSchedule(
-  { getValue, discriminator, watchDependency, commit, model },
+  { getValue, discriminator, commit, model },
   modelPath,
   discriminatorName,
 ) {
-  watchDependency(`discriminator#/${discriminatorName}`)
   const value = getValue(discriminator, `/${discriminatorName}`)
   const session = getValue(model, modelPath)
   session[0].scheduler.schedule = value
