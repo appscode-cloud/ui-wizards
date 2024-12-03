@@ -2988,14 +2988,14 @@ async function fetchNodeTopology({ axios, storeGet }) {
   return []
 }
 
-function isNodeTopologySelected({ watchDependency, model, getValue }) {
+function isNodeTopologySelected({ watchDependency, model, getValue }, type) {
   watchDependency(
-    'model#/resources/autoscalingKubedbComSolrAutoscaler/spec/compute/nodeTopology/name',
+    `model#/resources/autoscalingKubedbComSolrAutoscaler/spec/${type}/nodeTopology/name`,
   )
   const nodeTopologyName =
     getValue(
       model,
-      '/resources/autoscalingKubedbComSolrAutoscaler/spec/compute/nodeTopology/name',
+      `/resources/autoscalingKubedbComSolrAutoscaler/spec/${type}/nodeTopology/name`,
     ) || ''
   return !!nodeTopologyName.length
 }
