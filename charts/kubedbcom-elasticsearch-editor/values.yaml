@@ -204,7 +204,7 @@ resources:
                 spec:
                   securityContext:
                     runAsGroup: 0
-                    runAsUser: 0
+                    runAsUser: 1000
               name: elasticsearch-addon
               tasks:
                 - name: logical-backup
@@ -245,7 +245,7 @@ resources:
               spec:
                 securityContext:
                   runAsGroup: 0
-                  runAsUser: 0
+                  runAsUser: 1000
             name: elasticsearch-addon
             tasks:
               - name: logical-backup
@@ -279,7 +279,7 @@ resources:
           spec:
             securityContext:
               runAsGroup: 0
-              runAsUser: 0
+              runAsUser: 1000
         name: elasticsearch-addon
         tasks:
           - name: logical-backup-restore
@@ -309,11 +309,7 @@ resources:
       init:
         waitForInitialRestore: true
       internalUsers:
-        openshift:
-    securityContext:
-      runAsUser: 
-
-  admin:
+        admin:
           backendRoles:
             - admin
           reserved: true
