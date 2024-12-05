@@ -13,6 +13,18 @@ metadata:
 spec:
   version: {{ .Values.spec.admin.databases.Redis.versions.default | quote }}
   replicas: 3
+  podTemplate:
+    spec:
+      securityContext:
+        fsGroup: {{ .Values.spec.openshift.securityContext.runAsUser | default 999 }}
+      containers:
+        - name: redissentinel
+          securityContext:
+            {{- include "container.securityContext" . | nindent 12 }}
+      initContainers:
+        - name: sentinel-init
+          securityContext:
+            {{- include "container.securityContext" . | nindent 12 }}
   storage:
     accessModes:
     - ReadWriteOnce
