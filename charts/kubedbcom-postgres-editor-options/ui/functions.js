@@ -1269,18 +1269,10 @@ async function setPointInTimeRecovery({
     } catch (e) {
       console.log(e)
     }
-    setDiscriminatorValue('/pointInTimeApi', true)
   }
 }
 
-function showRecoveryTimestamp({ watchDependency, discriminator, getValue }) {
-  watchDependency('discriminator#/pointInTimeApi')
-  const val = getValue(discriminator, '/pointInTimeApi')
-  return val
-}
-
 return {
-  showRecoveryTimestamp,
   setPointInTimeRecovery,
   isClusterRancherManaged,
   getRecoveryNames,
