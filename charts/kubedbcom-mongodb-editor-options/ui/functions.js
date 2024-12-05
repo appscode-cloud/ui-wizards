@@ -1185,7 +1185,7 @@ async function setPointInTimeRecovery({
 
       commit('wizard/model$update', {
         path: `/spec/init/archiver/recoveryTimestamp`,
-        value: resp.start,
+        value: resp.end.slice(0, -1),
         force: true,
       })
       commit('wizard/model$update', {
@@ -1201,18 +1201,10 @@ async function setPointInTimeRecovery({
     } catch (e) {
       console.log(e)
     }
-    setDiscriminatorValue('/pointInTimeApi', true)
   }
 }
 
-function showRecoveryTimestamp({ watchDependency, discriminator, getValue }) {
-  watchDependency('discriminator#/pointInTimeApi')
-  const val = getValue(discriminator, '/pointInTimeApi')
-  return val
-}
-
 return {
-  showRecoveryTimestamp,
   setPointInTimeRecovery,
   checkHostnameOrIP,
   isClusterRancherManaged,
