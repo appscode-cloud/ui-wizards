@@ -1378,66 +1378,6 @@ function showBackupForm({ getValue, discriminator, watchDependency }) {
   else return false
 }
 
-// invoker form
-function initBackupInvoker() {
-  return 'backupConfiguration'
-}
-
-function onBackupInvokerChange({ getValue, discriminator, commit, model, storeGet }) {
-  const kind = storeGet('/resource/layout/result/resource/kind')
-  const backupInvoker = getValue(discriminator, '/backupInvoker')
-  const annotations = getValue(model, '/resources/kubedbComMongoDB/metadata/annotations')
-
-  // get name namespace labels to set in db resource when backup is not enabled initially
-
-  if (backupInvoker === 'backupConfiguration') {
-    commit('wizard/model$update', {
-      path: '/resources/coreKubestashComBackupConfiguration',
-      value: initialModel,
-      force: true,
-    })
-
-    if (
-      !dbResource.metadata?.annotations?.['blueprint.kubestash.com/name'] &&
-      !dbResource.metadata?.annotations?.['blueprint.kubestash.com/namespace']
-    ) {
-      delete annotations['blueprint.kubestash.com/name']
-      delete annotations['blueprint.kubestash.com/namespace']
-      commit('wizard/model$update', {
-        path: '/resources/kubedbComMongoDB/metadata/annotations',
-        value: annotations,
-        force: true,
-      })
-    }
-  } else if (backupInvoker === 'backupBlueprint') {
-    if (!isBackupOn) {
-      commit('wizard/model$delete', '/resources/coreKubestashComBackupConfiguration')
-    }
-    annotations['blueprint.kubestash.com/name'] = `${kind.toLowerCase()}-blueprint`
-    annotations['blueprint.kubestash.com/namespace'] = 'kubedb'
-    commit('wizard/model$update', {
-      path: '/resources/kubedbComMongoDB/metadata/annotations',
-      value: annotations,
-      force: true,
-    })
-  }
-}
-
-function showInvokerForm({ getValue, discriminator, watchDependency }, value) {
-  const backupInvoker = getValue(discriminator, '/backupInvoker')
-  watchDependency('discriminator#/backupInvoker')
-
-  return backupInvoker === value
-}
-
-// backup configuration form
-function initalizeTargetReferenceName({ getValue, model, watchDependency }) {
-  const databaseName = getValue(model, '/metadata/release/name')
-  watchDependency('model#/metadata/release/name')
-
-  return databaseName
-}
-
 // restore session repository
 function setInitialRestoreSessionRepo({ getValue, model }) {
   const value = getValue(model, 'resources/stashAppscodeComRepository_init_repo')
@@ -1490,41 +1430,6 @@ function onRepositoryChoiseChange({ getValue, discriminator, watchDependency, co
   }
 }
 
-function onRepositoryNameChange({ getValue, model, commit }) {
-  const repositoryName = getValue(model, 'resources/stashAppscodeComRepository_repo/metadata/name')
-  // set this name in stashAppscodeComRestoreSession_init
-  commit('wizard/model$update', {
-    path: '/resources/stashAppscodeComBackupConfiguration/spec/repository/name',
-    value: repositoryName,
-  })
-}
-
-function onInputChange(
-  { getValue, discriminator, watchDependency, commit, model },
-  modelPath,
-  field,
-  subfield,
-  discriminatorName,
-) {
-  const value = getValue(discriminator, `/${discriminatorName}`)
-  const backends = getValue(model, modelPath) || []
-  if (field !== 'encryptionSecret') backends[0][field][subfield] = value
-  else backends[0]['repositories'][0][field][subfield] = value
-  commit('wizard/model$update', {
-    path: modelPath,
-    value: backends,
-  })
-}
-function setFileValueFromStash({ getValue, commit, model }, modelPath, field, subfield, value) {
-  const backends = getValue(model, modelPath)
-  if (field !== 'encryptionSecret') backends[0][field][subfield] = value
-  else backends[0]['repositories'][0][field][subfield] = value
-  commit('wizard/model$update', {
-    path: modelPath,
-    value: backends,
-  })
-}
-
 function onInputChangeSchedule(
   { getValue, discriminator, commit, model },
   modelPath,
@@ -1540,27 +1445,6 @@ function onInputChangeSchedule(
   })
 }
 
-function setInitSchedule(
-  { getValue, discriminator, watchDependency, commit, model },
-  modelPath,
-  value,
-) {
-  const session = getValue(model, modelPath)
-  session[0].scheduler.schedule = value
-  commit('wizard/model$update', {
-    path: modelPath,
-    value: session,
-  })
-}
-
-function getDefault({ getValue, model }, modelPath, field, subfield) {
-  const backends = getValue(model, modelPath)
-  if (field !== 'encryptionSecret') return backends[0][field][subfield]
-  else {
-    return backends[0]['repositories'][0][field][subfield]
-  }
-}
-
 function getDefaultSchedule({ getValue, model }, modelPath) {
   const session = getValue(model, modelPath)
   return session[0]?.scheduler.schedule
@@ -1568,9 +1452,14 @@ function getDefaultSchedule({ getValue, model }, modelPath) {
 
 function onBackupChange({ discriminator, getValue, commit, model }) {
   const isBackupToggled = getValue(discriminator, '/backupEnabled')
-  if (!isBackupToggled) {
+  if (isBackupToggled) {
+    commit('wizard/model$update', {
+      path: '/resources/coreKubestashComBackupConfiguration',
+      value: initialModel,
+      force: true,
+    })
+  } else {
     commit('wizard/model$delete', '/resources/coreKubestashComBackupConfiguration')
-    commit('wizard/model$delete', '/resources/coreKubestashComBackupBlueprint')
 
     const annotations = getValue(model, '/resources/kubedbComMongoDB/metadata/annotations') || {}
     if (
@@ -1593,7 +1482,7 @@ function isBackupToggled({ discriminator, getValue, watchDependency }) {
   return (isBackupToggled = getValue(discriminator, '/backupEnabled'))
 }
 
-async function setBackupSwitch({ commit, storeGet, axios, getValue, model }) {
+async function initBackup({ commit, storeGet, axios, getValue, model, setDiscriminatorValue }) {
   // set initial model for further usage
   initialModel = getValue(model, '/resources/coreKubestashComBackupConfiguration')
 
@@ -1630,7 +1519,6 @@ async function setBackupSwitch({ commit, storeGet, axios, getValue, model }) {
   // call model to get the model when backup is disabled
   if (!isBackupOn) {
     commit('wizard/model$delete', '/resources/coreKubestashComBackupConfiguration')
-    commit('wizard/model$delete', '/resources/coreKubestashComBackupBlueprint')
     commit('wizard/model$update', {
       path: '/metadata/release',
       value: { name, namespace },
@@ -1683,11 +1571,64 @@ async function setBackupSwitch({ commit, storeGet, axios, getValue, model }) {
     initialModel.spec['target'] = { name, namespace, apiGroup, kind }
     const labels = dbResource.metadata?.labels
     initialModel['metadata'] = { name, namespace, labels }
-  } else dbResource = getValue(model, '/resources/kubedbComMongoDB')
+  } else {
+    dbResource = getValue(model, '/resources/kubedbComMongoDB')
+  }
+  setDiscriminatorValue('/apiLoaded', true)
 
-  // call namespace for optimization
-  namespaceList = await fetchNamespaces({ axios, storeGet })
+  return ''
+}
+
+function isBackupInitiated({ watchDependency, getValue, discriminator }) {
+  watchDependency('discriminator#/apiLoaded')
+  return getValue(discriminator, '/apiLoaded')
+}
+
+function setBackupSwitch() {
   return !!isBackupOn
+}
+
+function onBlueprintChange({ discriminator, getValue, model, commit, storeGet }) {
+  const isBlueprintToggled = getValue(discriminator, '/blueprintEnabled')
+  const annotations = getValue(model, '/resources/kubedbComMongoDB/metadata/annotations')
+  const kind = storeGet('/resource/layout/result/resource/kind')
+  if (isBlueprintToggled) {
+    annotations['blueprint.kubestash.com/name'] = `${kind.toLowerCase()}-blueprint`
+    annotations['blueprint.kubestash.com/namespace'] = 'kubedb'
+  } else {
+    delete annotations['blueprint.kubestash.com/name']
+    delete annotations['blueprint.kubestash.com/namespace']
+  }
+  commit('wizard/model$update', {
+    path: '/resources/kubedbComMongoDB/metadata/annotations',
+    value: annotations,
+    force: true,
+  })
+}
+
+function setBlueprint() {
+  const annotations = dbResource.metadata?.annotations
+  return (
+    annotations?.['blueprint.kubestash.com/name'] &&
+    annotations?.['blueprint.kubestash.com/namespace']
+  )
+}
+
+function onArchiverChange({ discriminator, getValue, model, commit }) {
+  const isArchiverToggled = getValue(discriminator, '/archiverEnabled')
+  const labels = getValue(model, '/resources/kubedbComMongoDB/metadata/labels')
+  if (isArchiverToggled) labels['kubedb.com/archiver'] = 'true'
+  else delete labels['kubedb.com/archiver']
+  commit('wizard/model$update', {
+    path: '/resources/kubedbComMongoDB/metadata/labels',
+    value: labels,
+    force: true,
+  })
+}
+
+function setArchiver() {
+  const labels = dbResource.metadata?.labels
+  return labels?.['kubedb.com/archiver']
 }
 
 function getNamespaceArray() {
@@ -2658,7 +2599,6 @@ return {
   setTrigger,
   setApplyToIfReady,
   showOpsRequestOptions,
-  setInitSchedule,
   fetchNames,
   isRancherManaged,
   fetchNamespaces,
@@ -2667,8 +2607,6 @@ return {
   getBlueprints,
   ifUsagePolicy,
   isBlueprintOption,
-  getDefault,
-  onInputChange,
   showBackupOptions,
   showScheduleBackup,
   isVariantAvailable,
@@ -2737,15 +2675,10 @@ return {
   initScheduleBackupForEdit,
   onScheduleBackupChange,
   showBackupForm,
-  initBackupInvoker,
-  onBackupInvokerChange,
-  showInvokerForm,
-  initalizeTargetReferenceName,
   setInitialRestoreSessionRepo,
   initRepositoryChoise,
   initRepositoryChoiseForEdit,
   onRepositoryChoiseChange,
-  onRepositoryNameChange,
   getMongoAnnotations,
   initFromAnnotationValue,
   onBackupBlueprintNameChange,
@@ -2794,8 +2727,14 @@ return {
   getCreateNameSpaceUrl,
   updateConfigServerStorageClass,
 
+  isBackupInitiated,
+  initBackup,
   isBackupToggled,
   onBackupChange,
   setBackupSwitch,
   getNamespaceArray,
+  setBlueprint,
+  onBlueprintChange,
+  setArchiver,
+  onArchiverChange,
 }
