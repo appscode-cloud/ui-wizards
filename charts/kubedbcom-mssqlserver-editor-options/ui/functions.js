@@ -1040,20 +1040,28 @@ function onCustomPidChange({ getValue, discriminator, commit }) {
   })
 }
 
-async function setPointInTimeRecovery({
-  commit,
-  axios,
-  storeGet,
-  discriminator,
-  getValue,
-  setDiscriminatorValue,
-}) {
+async function setPointInTimeRecovery({ commit, axios, storeGet, discriminator, getValue }) {
   const owner = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
   const refNamespace = getValue(discriminator, '/refNamespace')
   const refDBName = getValue(discriminator, '/refDBName')
 
-  if (refNamespace && refDBName) {
+  try {
+    const repositoriesUrl = `clusters/${owner}/${cluster}/proxy/storage.kubestash.com/v1alpha1/namespaces/${refNamespace}/repositories/${refDBName}-full`
+    const snapshotsUrl = `clusters/${owner}/${cluster}/proxy/storage.kubestash.com/v1alpha1/namespaces/${refNamespace}/snapshots/${refDBName}-incremental-snapshot`
+    const repositoriesResp = await axios.get(repositoriesUrl)
+    const snapshotsResp = await axios.get(snapshotsUrl)
+
+    commit('wizard/model$update', {
+      path: `/spec/init/archiver/encryptionSecret/name`,
+      value: repositoriesResp.data?.spec.encryptionSecret.name,
+      force: true,
+    })
+    commit('wizard/model$update', {
+      path: `/spec/init/archiver/encryptionSecret/namespace`,
+      value: repositoriesResp.data?.spec.encryptionSecret.namespace,
+      force: true,
+    })
     commit('wizard/model$update', {
       path: `/spec/init/archiver/fullDBRepository/name`,
       value: `${refDBName}-full`,
@@ -1075,42 +1083,40 @@ async function setPointInTimeRecovery({
       force: true,
     })
 
-    try {
-      const repositoriesUrl = `clusters/${owner}/${cluster}/proxy/storage.kubestash.com/v1alpha1/namespaces/${refNamespace}/repositories/${refDBName}-full`
-      const snapshotsUrl = `clusters/${owner}/${cluster}/proxy/storage.kubestash.com/v1alpha1/namespaces/${refNamespace}/snapshots/${refDBName}-incremental-snapshot`
-      const repositoriesResp = await axios.get(repositoriesUrl)
-      const snapshotsResp = await axios.get(snapshotsUrl)
-      commit('wizard/model$update', {
-        path: `/spec/init/archiver/encryptionSecret/name`,
-        value: repositoriesResp.data?.spec.encryptionSecret.name,
-        force: true,
-      })
-      commit('wizard/model$update', {
-        path: `/spec/init/archiver/encryptionSecret/namespace`,
-        value: repositoriesResp.data?.spec.encryptionSecret.namespace,
-        force: true,
-      })
+    const resp = snapshotsResp.data.status?.components['wal-rs0']?.walSegments[0]
 
-      const resp = snapshotsResp.data.status?.components['wal-rs0']?.walSegments[0]
-
-      commit('wizard/model$update', {
-        path: `/spec/init/archiver/recoveryTimestamp`,
-        value: resp.start,
-        force: true,
-      })
-      commit('wizard/model$update', {
-        path: `/minDate`,
-        value: resp.start.slice(0, -1),
-        force: true,
-      })
-      commit('wizard/model$update', {
-        path: `/maxDate`,
-        value: resp.end.slice(0, -1),
-        force: true,
-      })
-    } catch (e) {
-      console.log(e)
-    }
+    commit('wizard/model$update', {
+      path: `/spec/init/archiver/recoveryTimestamp`,
+      value: resp.end.slice(0, -1),
+      force: true,
+    })
+    commit('wizard/model$update', {
+      path: `/minDate`,
+      value: resp.start.slice(0, -1),
+      force: true,
+    })
+    commit('wizard/model$update', {
+      path: `/maxDate`,
+      value: resp.end.slice(0, -1),
+      force: true,
+    })
+  } catch (e) {
+    commit('wizard/model$update', {
+      path: `/spec/init/archiver/recoveryTimestamp`,
+      value: '',
+      force: true,
+    })
+    commit('wizard/model$update', {
+      path: `/minDate`,
+      value: '',
+      force: true,
+    })
+    commit('wizard/model$update', {
+      path: `/maxDate`,
+      value: '',
+      force: true,
+    })
+    console.log(e)
   }
 }
 
