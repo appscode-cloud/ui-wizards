@@ -213,6 +213,12 @@ async function getSnapshots({ watchDependency, model, storeGet, getValue, axios 
       })
       if (filteredSnapshots.length)
         filteredSnapshots[0].text = filteredSnapshots[0].text + ' (Latest)'
+
+      filteredSnapshots.forEach((item) => {
+        const time = item.status?.snapshotTime || ''
+        item.text = item.text + getTimeDiffs(time)
+      })
+
       return filteredSnapshots
     }
   } catch (e) {
@@ -221,7 +227,24 @@ async function getSnapshots({ watchDependency, model, storeGet, getValue, axios 
   return []
 }
 
-async function getAddons({ storeGet, axios, setDiscriminatorValue }) {
+function getTimeDiffs(time) {
+  const now = new Date()
+  const timeConvert = new Date(time)
+  diffInMs = now - timeConvert
+
+  const diffInSeconds = Math.floor(diffInMs / 1000)
+  const diffInMinutes = Math.floor(diffInMs / (1000 * 60)) % 60
+  const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60)) % 60
+  const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24))
+
+  let timeDiff = ''
+  if (diffInDays) timeDiff += `${diffInDays} ${diffInDays > 0 ? 'days' : 'day'} `
+  if (diffInHours) timeDiff += `${diffInHours} ${diffInHours > 0 ? 'hours' : 'hour'} `
+  if (diffInMinutes) timeDiff += `${diffInMinutes} ${diffInMinutes > 0 ? 'minutes' : 'minute'}`
+  return ` ${timeDiff} ago`
+}
+
+async function getAddons({ storeGet, axios, commit }) {
   const user = storeGet('/route/params/user') || ''
   const cluster = storeGet('/route/params/cluster') || ''
   const url = `/clusters/${user}/${cluster}/proxy/addons.kubestash.com/v1alpha1/addons`
@@ -232,6 +255,16 @@ async function getAddons({ storeGet, axios, setDiscriminatorValue }) {
     addonList = addons
 
     addons = addons.map((item) => item?.metadata?.name)
+
+    const kind = storeGet('/resource/layout/result/resource/kind')
+    if (kind) {
+      const found = addons.find((item) => item.startsWith(kind.toLowerCase()))
+      commit('wizard/model$update', {
+        path: '/spec/addon/name',
+        value: found,
+        force: true,
+      })
+    }
     return addons
   } catch (e) {
     console.log(e)
@@ -374,6 +407,18 @@ function getResourceName({ getValue, model }) {
   return kindToResourceMap[apiGroup][kind]
 }
 
+function onParamsChange({ getValue, model, discriminator, commit }) {
+  const tasks = getValue(model, '/spec/addon/tasks') || []
+  const params = getValue(discriminator, '/params')
+  tasks[0]['params'] = params
+  commit('wizard/model$update', {
+    path: '/spec/addon/tasks',
+    value: tasks,
+    force: true,
+  })
+  console.log(params, tasks)
+}
+
 return {
   fetchNamespaces,
   setVersion,
@@ -394,4 +439,5 @@ return {
   getTasks,
   databaseSelected,
   returnFalse,
+  onParamsChange,
 }
