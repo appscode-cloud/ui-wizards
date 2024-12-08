@@ -78,10 +78,14 @@ spec:
         replicas: {{ .Values.spec.innoDBCluster.router.replicas }}
         podTemplate:
           spec:
+            securityContext:
+              fsGroup: {{ .Values.spec.openshift.securityContext.runAsUser | default 999 }}
             containers:
               - name: mysql-router
                 resources:
                   {{- toYaml $res | nindent 20 }}
+                securityContext:
+                  {{- include "container.securityContext" . | nindent 20 }}
             {{- include "common.placement" . | nindent 6 }}
 {{- end }}
   storageType: Durable
@@ -94,10 +98,23 @@ spec:
         storage: {{ .Values.spec.persistence.size }}
   podTemplate:
     spec:
+      securityContext:
+        fsGroup: {{ .Values.spec.openshift.securityContext.runAsUser | default 999 }}
       containers:
         - name: mysql
           resources:
             {{- toYaml $res | nindent 12 }}
+          securityContext:
+            {{- include "container.securityContext" . | nindent 12 }}
+          {{- if eq .Values.spec.mode "GroupReplication" }}
+        - name: mysql-coordinator
+          securityContext:
+            {{- include "container.securityContext" . | nindent 12 }}
+          {{- end }}
+      initContainers:
+        - name: mysql-init
+          securityContext:
+            {{- include "container.securityContext" . | nindent 12 }}
       {{- include "common.placement" . | nindent 6 }}
   deletionPolicy: {{ .Values.spec.deletionPolicy }}
 {{- if .Values.spec.authSecret.name }}
@@ -128,6 +145,8 @@ spec:
       exporter:
         resources:
           {{- toYaml .resources | nindent 10 }}
+        securityContext:
+          {{- include "container.securityContext" $ | nindent 10 }}
     {{- end }}
       serviceMonitor:
         interval: 30s

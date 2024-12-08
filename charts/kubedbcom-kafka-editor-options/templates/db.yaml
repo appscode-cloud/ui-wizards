@@ -89,10 +89,14 @@ spec:
         storage: {{ .Values.spec.persistence.size }}
   podTemplate:
     spec:
+      securityContext:
+        fsGroup: {{ .Values.spec.openshift.securityContext.runAsUser | default 999 }}
       containers:
         - name: kafka
           resources:
             {{- toYaml $res | nindent 12 }}
+          securityContext:
+            {{- include "container.securityContext" . | nindent 12 }}
       {{- include "common.placement" . | nindent 6 }}
 {{- else if eq .Values.spec.mode "Topology" }}
   topology:
@@ -100,10 +104,14 @@ spec:
       replicas: {{ .Values.spec.topology.controller.replicas }}
       podTemplate:
         spec:
+          securityContext:
+            fsGroup: {{ .Values.spec.openshift.securityContext.runAsUser | default 999 }}
           containers:
             - name: kafka
               resources:
                 {{- toYaml $controller_res | nindent 16 }}
+              securityContext:
+                {{- include "container.securityContext" . | nindent 16 }}
           {{- include "common.placement" . | nindent 10 }}
       storage:
         storageClassName: {{ .Values.spec.admin.storageClasses.default }}
@@ -116,10 +124,14 @@ spec:
       replicas: {{ .Values.spec.topology.broker.replicas }}
       podTemplate:
         spec:
+          securityContext:
+            fsGroup: {{ .Values.spec.openshift.securityContext.runAsUser | default 999 }}
           containers:
             - name: kafka
               resources:
                 {{- toYaml $broker_res | nindent 16 }}
+              securityContext:
+                {{- include "container.securityContext" . | nindent 16 }}
           {{- include "common.placement" . | nindent 10 }}
       storage:
         storageClassName: {{ .Values.spec.admin.storageClasses.default }}
@@ -158,6 +170,8 @@ spec:
       exporter:
         resources:
           {{- toYaml .resources | nindent 10 }}
+        securityContext:
+          {{- include "container.securityContext" $ | nindent 10 }}
     {{- end }}
       serviceMonitor:
         interval: 30s

@@ -124,10 +124,21 @@ spec:
       replicas: {{ .Values.spec.shardTopology.configServer.replicas }}
       podTemplate:
         spec:
+          securityContext:
+            fsGroup: {{ .Values.spec.openshift.securityContext.runAsUser | default 999 }}
           containers:
             - name: mongodb
               resources:
                 {{- toYaml $configServer_res | nindent 16 }}
+              securityContext:
+                {{- include "container.securityContext" . | nindent 16 }}
+            - name: replication-mode-detector
+              securityContext:
+                {{- include "container.securityContext" . | nindent 16 }}
+          initContainers:
+            - name: copy-config
+              securityContext:
+                {{- include "container.securityContext" . | nindent 16 }}
           {{- include "common.placement" . | nindent 10 }}
       storage:
         resources:
@@ -138,20 +149,39 @@ spec:
       replicas: {{ .Values.spec.shardTopology.mongos.replicas }}
       podTemplate:
         spec:
+          securityContext:
+            fsGroup: {{ .Values.spec.openshift.securityContext.runAsUser | default 999 }}
           containers:
             - name: mongodb
               resources:
                 {{- toYaml $mongos_res | nindent 16 }}
+              securityContext:
+                {{- include "container.securityContext" . | nindent 16 }}
+          initContainers:
+            - name: copy-config
+              securityContext:
+                {{- include "container.securityContext" . | nindent 16 }}
           {{- include "common.placement" . | nindent 10 }}
     shard:
       shards: {{ .Values.spec.shardTopology.shard.shards }}
       replicas: {{ .Values.spec.shardTopology.shard.replicas }}
       podTemplate:
         spec:
+          securityContext:
+            fsGroup: {{ .Values.spec.openshift.securityContext.runAsUser | default 999 }}
           containers:
             - name: mongodb
               resources:
                 {{- toYaml $shard_res | nindent 16 }}
+              securityContext:
+                {{- include "container.securityContext" . | nindent 16 }}
+            - name: replication-mode-detector
+              securityContext:
+                {{- include "container.securityContext" . | nindent 16 }}
+          initContainers:
+            - name: copy-config
+              securityContext:
+                {{- include "container.securityContext" . | nindent 16 }}
           {{- include "common.placement" . | nindent 10 }}
       storage:
         resources:
@@ -161,10 +191,23 @@ spec:
 {{- else }}
   podTemplate:
     spec:
+      securityContext:
+        fsGroup: {{ .Values.spec.openshift.securityContext.runAsUser | default 999 }}
       containers:
         - name: mongodb
           resources:
             {{- toYaml $res | nindent 12 }}
+          securityContext:
+            {{- include "container.securityContext" . | nindent 12 }}
+          {{- if eq .Values.spec.mode "Replicaset" }}
+        - name: replication-mode-detector
+          securityContext:
+            {{- include "container.securityContext" . | nindent 12 }}
+          {{- end }}
+      initContainers:
+        - name: copy-config
+          securityContext:
+            {{- include "container.securityContext" . | nindent 12 }}
       {{- include "common.placement" . | nindent 6 }}
 {{- end }}
 {{- if .Values.spec.arbiter.enabled }}
@@ -175,6 +218,12 @@ spec:
           - name: mongodb
             resources:
               {{- toYaml $arbiter_res | nindent 14 }}
+            securityContext:
+              {{- include "container.securityContext" . | nindent 14 }}
+        initContainers:
+          - name: copy-config
+            securityContext:
+              {{- include "container.securityContext" . | nindent 14 }}
         {{- include "common.placement" . | nindent 8 }}
 {{- end }}
 {{- if .Values.spec.hidden.enabled }}
@@ -186,6 +235,12 @@ spec:
           - name: mongodb
             resources:
               {{- toYaml $hidden_res | nindent 14 }}
+            securityContext:
+              {{- include "container.securityContext" . | nindent 14 }}
+        initContainers:
+          - name: copy-config
+            securityContext:
+              {{- include "container.securityContext" . | nindent 14 }}
         {{- include "common.placement" . | nindent 8 }}
     storage:
       resources:
@@ -236,6 +291,8 @@ spec:
           - --compatible-mode
         resources:
           {{- toYaml .resources | nindent 10 }}
+        securityContext:
+          {{- include "container.securityContext" $ | nindent 10 }}
     {{- end }}
       serviceMonitor:
         interval: 30s
