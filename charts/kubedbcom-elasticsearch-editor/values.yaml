@@ -202,9 +202,16 @@ resources:
           - addon:
               jobTemplate:
                 spec:
-                  securityContext:
+                  containerSecurityContext:
+                    allowPrivilegeEscalation: false
+                    capabilities:
+                      drop:
+                        - ALL
                     runAsGroup: 0
+                    runAsNonRoot: true
                     runAsUser: 1000
+                    seccompProfile:
+                      type: RuntimeDefault
               name: elasticsearch-addon
               tasks:
                 - name: logical-backup
@@ -217,10 +224,24 @@ resources:
                   namespace: demo
                 name: elasticsearch-repo
             scheduler:
+              failedJobsHistoryLimit: 4
               jobTemplate:
-                backoffLimit: 1
-              schedule: '*/5 * * * *'
-            sessionHistoryLimit: 2
+                backoffLimit: 2
+                template:
+                  spec:
+                    containerSecurityContext:
+                      allowPrivilegeEscalation: false
+                      capabilities:
+                        drop:
+                          - ALL
+                      runAsGroup: 0
+                      runAsNonRoot: true
+                      runAsUser: 1000
+                      seccompProfile:
+                        type: RuntimeDefault
+              schedule: 0 */2 * * *
+              successfulJobsHistoryLimit: 2
+            sessionHistoryLimit: 3
       usagePolicy:
         allowedNamespaces:
           from: Same
@@ -243,9 +264,16 @@ resources:
         - addon:
             jobTemplate:
               spec:
-                securityContext:
+                containerSecurityContext:
+                  allowPrivilegeEscalation: false
+                  capabilities:
+                    drop:
+                      - ALL
                   runAsGroup: 0
+                  runAsNonRoot: true
                   runAsUser: 1000
+                  seccompProfile:
+                    type: RuntimeDefault
             name: elasticsearch-addon
             tasks:
               - name: logical-backup
@@ -258,10 +286,24 @@ resources:
                 namespace: demo
               name: elasticsearch-repo
           scheduler:
+            failedJobsHistoryLimit: 4
             jobTemplate:
-              backoffLimit: 1
-            schedule: '*/5 * * * *'
-          sessionHistoryLimit: 2
+              backoffLimit: 2
+              template:
+                spec:
+                  containerSecurityContext:
+                    allowPrivilegeEscalation: false
+                    capabilities:
+                      drop:
+                        - ALL
+                    runAsGroup: 0
+                    runAsNonRoot: true
+                    runAsUser: 1000
+                    seccompProfile:
+                      type: RuntimeDefault
+            schedule: 0 */2 * * *
+            successfulJobsHistoryLimit: 2
+          sessionHistoryLimit: 3
       target:
         apiGroup: kubedb.com
         kind: Elasticsearch

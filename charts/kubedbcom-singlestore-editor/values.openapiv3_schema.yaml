@@ -11254,6 +11254,15 @@ properties:
                             properties:
                               backend:
                                 type: string
+                              backupVerifier:
+                                properties:
+                                  name:
+                                    type: string
+                                  namespace:
+                                    type: string
+                                required:
+                                - name
+                                type: object
                               deletionPolicy:
                                 enum:
                                 - Delete
@@ -23344,6 +23353,15 @@ properties:
                         properties:
                           backend:
                             type: string
+                          backupVerifier:
+                            properties:
+                              name:
+                                type: string
+                              namespace:
+                                type: string
+                            required:
+                            - name
+                            type: object
                           deletionPolicy:
                             enum:
                             - Delete
@@ -35498,19 +35516,6 @@ properties:
                         type: boolean
                       dbName:
                         type: string
-                      internalAuthIssuerRef:
-                        properties:
-                          apiGroup:
-                            type: string
-                          kind:
-                            type: string
-                          name:
-                            type: string
-                        required:
-                        - kind
-                        - name
-                        type: object
-                        x-kubernetes-map-type: atomic
                       restoreNamespace:
                         type: string
                       tlsIssuerRef:
@@ -35621,6 +35626,34 @@ properties:
                         type: boolean
                       restoreNamespace:
                         type: string
+                      tlsIssuerRef:
+                        properties:
+                          apiGroup:
+                            type: string
+                          kind:
+                            type: string
+                          name:
+                            type: string
+                        required:
+                        - kind
+                        - name
+                        type: object
+                        x-kubernetes-map-type: atomic
+                    type: object
+                  redisSentinel:
+                    properties:
+                      SentinelName:
+                        type: string
+                      authSecret:
+                        default: true
+                        type: boolean
+                      authSecretName:
+                        type: string
+                      restoreNamespace:
+                        type: string
+                      sentinel:
+                        default: true
+                        type: boolean
                       tlsIssuerRef:
                         properties:
                           apiGroup:

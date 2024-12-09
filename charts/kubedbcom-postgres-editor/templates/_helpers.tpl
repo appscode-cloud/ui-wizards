@@ -113,3 +113,24 @@ Alert Enabled
 {{- end -}}
 {{- if (and $sev (le $sev $result) $enabled) -}}{{ (mustLast .) }}{{- end -}}
 {{- end }}
+
+{{- define "container.securityContext" -}}
+{{- $version := .Values.spec.admin.databases.Postgres.versions.default }}
+allowPrivilegeEscalation: false
+capabilities:
+  drop:
+  - ALL
+runAsNonRoot: true
+{{- if hasPrefix "timescaledb-" $version }}
+runAsUser: 70
+runAsGroup: 70
+{{- else if $version | regexMatch "^[0-9]+\\.[0-9]+$" }}
+runAsUser: 70
+runAsGroup: 70
+{{- else }}
+runAsUser: {{ $.Values.spec.openshift.securityContext.runAsUser | default 999 }}
+runAsGroup: 0
+{{- end }}
+seccompProfile:
+  type: RuntimeDefault
+{{- end }}
