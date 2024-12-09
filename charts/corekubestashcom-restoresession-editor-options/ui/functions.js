@@ -211,13 +211,13 @@ async function getSnapshots({ watchDependency, model, storeGet, getValue, axios 
         const owners = item?.metadata?.ownerReferences
         if (owners.length) return owners[0].name === repository && owners[0].kind === 'Repository'
       })
-      if (filteredSnapshots.length)
-        filteredSnapshots[0].text = filteredSnapshots[0].text + ' (Latest)'
 
       filteredSnapshots.forEach((item) => {
         const time = item.status?.snapshotTime || ''
-        item.text = item.text + getTimeDiffs(time)
+        item.subText = getTimeDiffs(time)
       })
+      if (filteredSnapshots.length)
+        filteredSnapshots[0].subText = '(Latest) ' + filteredSnapshots[0].subText
 
       return filteredSnapshots
     }
@@ -232,9 +232,9 @@ function getTimeDiffs(time) {
   const timeConvert = new Date(time)
   diffInMs = now - timeConvert
 
-  const diffInSeconds = Math.floor(diffInMs / 1000)
+  const diffInSeconds = Math.floor(diffInMs / 1000) % 60
   const diffInMinutes = Math.floor(diffInMs / (1000 * 60)) % 60
-  const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60)) % 60
+  const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60)) % 24
   const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24))
 
   let timeDiff = ''
