@@ -1006,6 +1006,7 @@ function getDefault({ getValue, model }, type) {
   return val
 }
 
+let recoveryTimestampMiliSec = '000Z'
 async function setPointInTimeRecovery({ commit, axios, storeGet, discriminator, getValue }) {
   const owner = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
@@ -1050,20 +1051,25 @@ async function setPointInTimeRecovery({ commit, axios, storeGet, discriminator, 
     })
 
     const resp = snapshotsResp.data.status?.components['wal-rs0']?.walSegments[0]
+    const recoveryTimestampArray = resp?.end.split('.')
+
+    if (recoveryTimestampArray.length === 2) {
+      recoveryTimestampMiliSec = recoveryTimestampArray[1]
+    }
 
     commit('wizard/model$update', {
       path: `/spec/init/archiver/recoveryTimestamp`,
-      value: resp.end.slice(0, -1),
+      value: resp?.end.slice(0, -1),
       force: true,
     })
     commit('wizard/model$update', {
       path: `/minDate`,
-      value: resp.start.slice(0, -1),
+      value: resp?.start.slice(0, -1),
       force: true,
     })
     commit('wizard/model$update', {
       path: `/maxDate`,
-      value: resp.end.slice(0, -1),
+      value: resp?.end.slice(0, -1),
       force: true,
     })
   } catch (e) {
@@ -1086,7 +1092,23 @@ async function setPointInTimeRecovery({ commit, axios, storeGet, discriminator, 
   }
 }
 
+function setMiliSeconds({ model, getValue, commit }) {
+  const recoveryTimestamp = getValue(model, '/spec/init/archiver/recoveryTimestamp')
+  const recoveryTimestampArray = recoveryTimestamp?.split('.')
+  if (recoveryTimestampArray.length === 1) return
+  if (recoveryTimestampMiliSec !== '000Z') {
+    console.log(recoveryTimestampArray[0] + '.' + recoveryTimestampMiliSec.slice(0, -1))
+    commit('wizard/model$update', {
+      path: `/spec/init/archiver/recoveryTimestamp`,
+      value: recoveryTimestampArray[0] + '.' + recoveryTimestampMiliSec.slice(0, -1),
+      force: true,
+    })
+    recoveryTimestampMiliSec = '000Z'
+  }
+}
+
 return {
+  setMiliSeconds,
   setPointInTimeRecovery,
   isClusterRancherManaged,
   getRecoveryNames,
