@@ -214,6 +214,7 @@ async function getSnapshots({ watchDependency, model, storeGet, getValue, axios 
 
       filteredSnapshots.forEach((item) => {
         const time = item.status?.snapshotTime || ''
+        // get the time difference and add it to subtext
         item.subText = getTimeDiffs(time)
       })
       if (filteredSnapshots.length)
@@ -232,7 +233,7 @@ function getTimeDiffs(time) {
   const timeConvert = new Date(time)
   diffInMs = now - timeConvert
 
-  const diffInSeconds = Math.floor(diffInMs / 1000) % 60
+  // const diffInSeconds = Math.floor(diffInMs / 1000) % 60
   const diffInMinutes = Math.floor(diffInMs / (1000 * 60)) % 60
   const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60)) % 24
   const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24))
@@ -407,7 +408,7 @@ function getResourceName({ getValue, model }) {
   return kindToResourceMap[apiGroup][kind]
 }
 
-function onParamsChange({ getValue, model, discriminator, commit }) {
+function onParameterChange({ getValue, model, discriminator, commit }) {
   const tasks = getValue(model, '/spec/addon/tasks') || []
   const params = getValue(discriminator, '/params')
   tasks[0]['params'] = params
@@ -439,5 +440,5 @@ return {
   getTasks,
   databaseSelected,
   returnFalse,
-  onParamsChange,
+  onParameterChange,
 }
