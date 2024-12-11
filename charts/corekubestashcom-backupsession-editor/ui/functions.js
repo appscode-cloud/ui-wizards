@@ -50,7 +50,7 @@ function buildObject({ getValue, discriminator, commit }) {
     }
   })
   const generatedObjects = sessions.map((ele) => {
-    const timestamp = new Date().toISOString().replace(/[-:.]/g, '')
+    const timestamp = Math.floor(Date.now() / 1000)
     return {
       apiVersion: 'core.kubestash.com/v1alpha1',
       kind: 'BackupSession',
