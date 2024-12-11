@@ -678,7 +678,9 @@ function onCustomizeExporterChange({ discriminator, getValue, commit }) {
 let initialModel = {}
 let isBackupOn = false
 let dbResource = {}
+let initialDbMetadata = {}
 let namespaceList = []
+let backupConfigurationsFromStore = {}
 
 const stashAppscodeComRestoreSession_init = {
   spec: {
@@ -1298,7 +1300,7 @@ function deleteKubeDbComMongDbAnnotation(getValue, model, commit) {
   })
 }
 
-function addKubeDbComMongDbAnnotation(getValue, model, commit, key, value, force) {
+function addKubeDbComMongoDbAnnotation(getValue, model, commit, key, value, force) {
   const annotations = getValue(model, '/resources/kubedbComMongoDB/metadata/annotations') || {}
 
   if (annotations[key] === undefined) {
@@ -1561,9 +1563,10 @@ function getDefault({ getValue, model }, modelPath, field, subfield) {
   }
 }
 
-function getDefaultSchedule({ getValue, model }, modelPath) {
+function getDefaultSchedule({ getValue, model, watchDependency }, modelPath) {
+  watchDependency('discriminator#/config')
   const session = getValue(model, modelPath)
-  return session[0]?.scheduler.schedule
+  return session?.length ? session[0]?.scheduler.schedule : ''
 }
 
 function onBackupChange({ discriminator, getValue, commit, model }) {
@@ -1593,20 +1596,21 @@ function isBackupToggled({ discriminator, getValue, watchDependency }) {
   return (isBackupToggled = getValue(discriminator, '/backupEnabled'))
 }
 
-async function setBackupSwitch({ commit, storeGet, axios, getValue, model }) {
+async function initBackupData({ commit, storeGet, axios, getValue, model, setDiscriminatorValue }) {
   // set initial model for further usage
   initialModel = getValue(model, '/resources/coreKubestashComBackupConfiguration')
 
   // check db backup is enabled or not
-  const backupConfigurationsFromStore = storeGet('/backup/backupConfigurations')
+  backupConfigurationsFromStore = storeGet('/backup/backupConfigurations')
+  const configs = objectCopy(backupConfigurationsFromStore)
   const { name, cluster, user, group } = storeGet('/route/params')
   const namespace = storeGet('/route/query/namespace')
   const kind = storeGet('/resource/layout/result/resource/kind')
 
   // check config with metadata name first
-  let config = backupConfigurationsFromStore?.find(
+  let config = configs?.find(
     (item) =>
-      item.metadata.name === name &&
+      item.metadata?.name === name &&
       item.spec?.target?.name === name &&
       item.spec?.target?.namespace === namespace &&
       item.spec?.target?.kind === kind &&
@@ -1615,7 +1619,7 @@ async function setBackupSwitch({ commit, storeGet, axios, getValue, model }) {
 
   // check config without metadata name if not found with metadata name
   if (!config)
-    config = backupConfigurationsFromStore?.find(
+    config = configs?.find(
       (item) =>
         item.spec?.target?.name === name &&
         item.spec?.target?.namespace === namespace &&
@@ -1630,7 +1634,6 @@ async function setBackupSwitch({ commit, storeGet, axios, getValue, model }) {
   // call model to get the model when backup is disabled
   if (!isBackupOn) {
     commit('wizard/model$delete', '/resources/coreKubestashComBackupConfiguration')
-    commit('wizard/model$delete', '/resources/coreKubestashComBackupBlueprint')
     commit('wizard/model$update', {
       path: '/metadata/release',
       value: { name, namespace },
@@ -1648,7 +1651,9 @@ async function setBackupSwitch({ commit, storeGet, axios, getValue, model }) {
           resource,
         },
       })
-      dbResource = resp.data?.resources?.kubedbComMongoDB
+      dbResource = { ...resp.data?.resources?.kubedbComMongoDB }
+
+      initialDbMetadata = objectCopy(dbResource.metadata)
     } catch (e) {
       console.log(e)
     }
@@ -1683,11 +1688,195 @@ async function setBackupSwitch({ commit, storeGet, axios, getValue, model }) {
     initialModel.spec['target'] = { name, namespace, apiGroup, kind }
     const labels = dbResource.metadata?.labels
     initialModel['metadata'] = { name, namespace, labels }
-  } else dbResource = getValue(model, '/resources/kubedbComMongoDB')
+  } else {
+    dbResource = getValue(model, '/resources/kubedbComMongoDB')
+    initialDbMetadata = objectCopy(dbResource.metadata)
+  }
+
+  setDiscriminatorValue('isBackupDataLoaded', true)
 
   // call namespace for optimization
-  namespaceList = await fetchNamespaces({ axios, storeGet })
-  return !!isBackupOn
+  // namespaceList = await fetchNamespaces({ axios, storeGet })
+}
+
+function isBackupDataLoadedTrue({ watchDependency, getValue, discriminator }) {
+  watchDependency('discriminator#/isBackupDataLoaded')
+  return !!getValue(discriminator, '/isBackupDataLoaded')
+}
+
+async function setBackupType() {
+  return 'BackupConfig'
+}
+
+async function getTypes() {
+  const arr = [
+    {
+      description: 'Create, Delete or Modify BackupConfig',
+      text: 'BackupConfig',
+      value: 'BackupConfig',
+    },
+    {
+      description: 'Enable/Disable BackupBlueprint',
+      text: 'BackupBlueprint',
+      value: 'BackupBlueprint',
+    },
+  ]
+
+  if (dbResource?.spec?.replicaSet || dbResource?.spec?.shardTopology) {
+    arr.push({
+      description: 'Enable/Disable Archiver',
+      text: 'Archiver',
+      value: 'Archiver',
+    })
+  }
+  return arr
+}
+
+function onBackupTypeChange({ commit, getValue, discriminator }) {
+  const type = getValue(discriminator, '/backupType')
+  const db = objectCopy(dbResource)
+  commit('wizard/model$update', {
+    path: '/resources/kubedbComMongoDB/metadata',
+    value: db.metadata,
+    force: true,
+  })
+  if (type === 'BackupConfig' || isBackupOn)
+    commit('wizard/model$update', {
+      path: '/resources/coreKubestashComBackupConfiguration',
+      value: initialModel,
+      force: true,
+    })
+  else commit('wizard/model$delete', '/resources/coreKubestashComBackupConfiguration')
+}
+
+function isBackupType({ watchDependency, getValue, discriminator }, type) {
+  watchDependency('discriminator#/backupType')
+  const selectedType = getValue(discriminator, '/backupType')
+
+  return selectedType === type
+}
+
+function setBlueprintSwitch() {
+  const annotations = initialDbMetadata?.annotations
+
+  return !!(
+    annotations['blueprint.kubestash.com/name'] && annotations['blueprint.kubestash.com/namespace']
+  )
+}
+
+function onBlueprintChange({ getValue, discriminator, commit, model, storeGet }) {
+  const blueprintSwitch = getValue(discriminator, '/blueprintEnabled')
+  if (blueprintSwitch) addLabelAnnotation(commit, storeGet, 'annotations')
+  else deleteLabelAnnotation(commit, 'annotations')
+}
+
+function setArchiverSwitch() {
+  const labels = initialDbMetadata?.labels
+  return !!labels['kubedb.com/archiver']
+}
+
+function onArchiverChange({ getValue, discriminator, commit, model, storeGet }) {
+  const archiverSwitch = getValue(discriminator, '/archiverEnabled')
+  if (archiverSwitch) addLabelAnnotation(commit, storeGet, 'labels')
+  else deleteLabelAnnotation(commit, 'labels')
+}
+
+function addLabelAnnotation(commit, storeGet, type) {
+  const obj = objectCopy(initialDbMetadata[type])
+
+  if (type === 'annotations') {
+    const kind = storeGet('/resource/layout/result/resource/kind')
+    obj['blueprint.kubestash.com/name'] = 'kubedb'
+    obj['blueprint.kubestash.com/namespace'] = `${kind.toLowerCase()}-blueprint`
+  } else {
+    obj['kubedb.com/archiver'] = 'true'
+  }
+
+  commit('wizard/model$update', {
+    path: `/resources/kubedbComMongoDB/metadata/${type}`,
+    value: obj,
+    force: true,
+  })
+}
+
+function deleteLabelAnnotation(commit, type) {
+  const obj = initialDbMetadata[type]
+
+  if (type === 'annotations') {
+    delete obj['blueprint.kubestash.com/name']
+    delete obj['blueprint.kubestash.com/namespace']
+  } else delete obj['kubedb.com/archiver']
+
+  commit('wizard/model$update', {
+    path: `/resources/kubedbComMongoDB/metadata/${type}`,
+    value: obj,
+    force: true,
+  })
+}
+
+function getContext() {
+  if (isBackupOn) return ['Create', 'Delete', 'Modify']
+  return ['Create']
+}
+
+function onContextChange({ getValue, discriminator, commit, model }) {
+  const context = getValue(discriminator, '/backupConfigContext')
+  if (context === 'Delete') {
+    commit('wizard/model$delete', '/resources/coreKubestashComBackupConfiguration')
+  } else if (context === 'Create') {
+    commit('wizard/model$update', {
+      path: '/resources/coreKubestashComBackupConfiguration',
+      value: initialModel,
+      force: true,
+    })
+  }
+}
+
+function getConfigList({ storeGet }) {
+  const configs = objectCopy(backupConfigurationsFromStore)
+  const filteredList = configs?.filter((ele) => ele.status?.phase === 'Ready')
+  const list = filteredList?.map((ele) => ele.metadata.name)
+  return list
+}
+
+function onConfigChange({ getValue, discriminator, commit, storeGet, model }) {
+  const configName = getValue(discriminator, '/config')
+  const configs = objectCopy(backupConfigurationsFromStore)
+  const configDetails = configs?.find((item) => item?.metadata?.name === configName)
+  const scheduleFromConfig = configDetails?.spec?.sessions?.length
+    ? configDetails?.spec?.sessions[0]['scheduler']['schedule']
+    : ''
+
+  const modelPath = '/resources/coreKubestashComBackupConfiguration/spec/sessions'
+  const session = getValue(model, modelPath)
+  if (session?.length) session[0]['scheduler']['schedule'] = scheduleFromConfig
+
+  commit('wizard/model$update', {
+    path: modelPath,
+    value: session,
+    force: true,
+  })
+}
+
+function showPause({ watchDependency, getValue, discriminator }) {
+  watchDependency('discriminator#/backupConfigContext')
+  watchDependency('discriminator#/config')
+  const contex = getValue(discriminator, '/backupConfigContext')
+  return !!getValue(discriminator, '/config') && contex === 'Modify'
+}
+
+function showConfigList({ watchDependency, getValue, discriminator }) {
+  watchDependency('discriminator#/backupConfigContext')
+  const contex = getValue(discriminator, '/backupConfigContext')
+  return contex === 'Modify'
+}
+
+function showSchedule({ watchDependency, getValue, discriminator }) {
+  watchDependency('discriminator#/backupConfigContext')
+  watchDependency('discriminator#/config')
+  const configName = getValue(discriminator, '/config')
+  const contex = getValue(discriminator, '/backupConfigContext')
+  return configName || contex === 'Create'
 }
 
 function getNamespaceArray() {
@@ -1707,7 +1896,7 @@ function initFromAnnotationValue({ getValue, model }, key) {
 
 function onBackupBlueprintNameChange({ getValue, discriminator, commit, model }) {
   const backupBlueprintName = getValue(discriminator, '/backupBlueprintName')
-  addKubeDbComMongDbAnnotation(
+  addKubeDbComMongoDbAnnotation(
     getValue,
     model,
     commit,
@@ -1719,7 +1908,7 @@ function onBackupBlueprintNameChange({ getValue, discriminator, commit, model })
 
 function onBackupBlueprintScheduleChange({ getValue, discriminator, commit, model }) {
   const backupBlueprintSchedule = getValue(discriminator, '/schedule')
-  addKubeDbComMongDbAnnotation(
+  addKubeDbComMongoDbAnnotation(
     getValue,
     model,
     commit,
@@ -2645,6 +2834,11 @@ function handleUnit({ commit, model, getValue }, path, type = 'bound') {
     }
   }
 }
+
+function objectCopy(obj) {
+  const temp = JSON.stringify(obj)
+  return JSON.parse(temp)
+}
 return {
   handleUnit,
   setMetadata,
@@ -2732,7 +2926,7 @@ return {
   getImagePullSecrets,
   getBackupConfigsAndAnnotations,
   deleteKubeDbComMongDbAnnotation,
-  addKubeDbComMongDbAnnotation,
+  addKubeDbComMongoDbAnnotation,
   initScheduleBackup,
   initScheduleBackupForEdit,
   onScheduleBackupChange,
@@ -2794,8 +2988,24 @@ return {
   getCreateNameSpaceUrl,
   updateConfigServerStorageClass,
 
+  initBackupData,
+  isBackupDataLoadedTrue,
   isBackupToggled,
   onBackupChange,
-  setBackupSwitch,
+  setBackupType,
+  getTypes,
   getNamespaceArray,
+  isBackupType,
+  getContext,
+  onContextChange,
+  getConfigList,
+  onConfigChange,
+  showPause,
+  showSchedule,
+  showConfigList,
+  setBlueprintSwitch,
+  onBlueprintChange,
+  setArchiverSwitch,
+  onArchiverChange,
+  onBackupTypeChange,
 }
