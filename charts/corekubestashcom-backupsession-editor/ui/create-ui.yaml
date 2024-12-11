@@ -1,0 +1,26 @@
+steps:
+- form:
+    type: single-step-form
+    discriminator:
+      backup: 
+        type: string
+      initApi:
+        type: boolean
+        default: false 
+    elements:
+      - computed: init
+        if: returnFalse
+        type: label-element
+      - if: isApiResolved
+        type: select
+        fetch: getOptions
+        label:
+          text: Select Backup
+        onChange: buildObject
+        schema:
+          $ref: discriminator#/backup
+  id: basic
+  title: steps.0.label
+type: multi-step-form
+
+
