@@ -110,6 +110,7 @@ steps:
                 $ref: schema#/properties/spec/properties/sessions/items/properties/addon/properties/jobTemplate/properties/securityContext
               type: input
             - fetch: getAddon
+              onChange: clearTasks
               label:
                 text: Name
               schema:
@@ -123,7 +124,7 @@ steps:
                     text: Name
                   schema:
                     $ref: schema#/properties/spec/properties/sessions/items/properties/addon/properties/tasks/items/properties/name
-                  type: input
+                  type: select
                 - label:
                     text: Params
                   schema:
@@ -134,6 +135,8 @@ steps:
                 text: Tasks
               schema:
                 $ref: schema#/properties/spec/properties/sessions/items/properties/addon/properties/tasks
+              resetOnChange: true
+              resetDependencyPath: '/session/addon/name'
               tableContents:
               - inTableColumn: true
                 label:
@@ -166,7 +169,7 @@ steps:
                 text: Name
               schema:
                 $ref: schema#/properties/spec/properties/sessions/items/properties/encryptionSecret/properties/name
-              type: input
+              type: select
             label:
               text: Encryption Secret
             schema:
@@ -202,6 +205,7 @@ steps:
           path: sessionName
           type: value
           typeOfValue: string
+        temporaryPath: /session
         type: single-step-form-array
       type: single-step-form
     - elements:
