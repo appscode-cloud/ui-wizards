@@ -128,7 +128,6 @@ async function getEncryptionSecretNames({ watchDependency, storeGet, axios }) {
     try {
       const resp = await axios.get(url)
       const name = resp?.data?.items?.map((item) => item.metadata?.name) || []
-      console.log({ name })
       return name
     } catch (e) {
       console.log(e)
