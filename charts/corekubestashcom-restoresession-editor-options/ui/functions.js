@@ -417,7 +417,6 @@ function onParameterChange({ getValue, model, discriminator, commit }) {
     value: tasks,
     force: true,
   })
-  console.log(params, tasks)
 }
 
 return {
