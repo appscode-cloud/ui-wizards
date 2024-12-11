@@ -1,5 +1,7 @@
 let options = []
 let backups = []
+let backupName = ''
+let backupNamespace = ''
 
 async function init({ storeGet, axios, setDiscriminatorValue, commit }) {
   const owner = storeGet('/route/params/user')
@@ -27,6 +29,21 @@ function getOptions() {
   return options
 }
 
+function getSessionOptions({ getValue, discriminator, watchDependency }) {
+  watchDependency('discriminator#/backup')
+  const backup = getValue(discriminator, '/backup')
+  let sessions = []
+  backups?.forEach((ele) => {
+    if (ele.metadata.name === backup) {
+      backupName = ele.metadata.name
+      backupNamespace = ele.metadata.namespace
+      sessions = ele.spec.sessions
+    }
+  })
+  const optionsArray = sessions?.map((ele) => ele.name)
+  return optionsArray
+}
+
 function returnFalse() {
   return false
 }
@@ -37,19 +54,15 @@ function isApiResolved({ watchDependency, getValue, discriminator }) {
   return initApi
 }
 
-function buildObject({ getValue, discriminator, commit }) {
+function isBackupSelected({ getValue, discriminator, watchDependency }) {
+  watchDependency('discriminator#/backup')
   const backup = getValue(discriminator, '/backup')
-  let sessions = []
-  let backupName = ''
-  let backupNamespace = ''
-  backups.forEach((ele) => {
-    if (ele.metadata.name === backup) {
-      backupName = ele.metadata.name
-      backupNamespace = ele.metadata.namespace
-      sessions = ele.spec.sessions
-    }
-  })
-  const generatedObjects = sessions.map((ele) => {
+  return backup
+}
+
+function buildObject({ getValue, discriminator, commit }) {
+  const sessions = getValue(discriminator, '/selectedSessions')
+  const generatedObjects = sessions?.map((ele) => {
     const timestamp = Math.floor(Date.now() / 1000)
     return {
       apiVersion: 'core.kubestash.com/v1alpha1',
@@ -58,7 +71,7 @@ function buildObject({ getValue, discriminator, commit }) {
         labels: {
           'kubestash.com/invoker-name': backupName,
         },
-        name: `${backupName}-${ele.name}-${timestamp}`,
+        name: `${backupName}-${ele}-${timestamp}`,
         namespace: backupNamespace,
       },
       spec: {
@@ -67,7 +80,7 @@ function buildObject({ getValue, discriminator, commit }) {
           kind: 'BackupConfiguration',
           name: backupName,
         },
-        session: ele.name,
+        session: ele,
       },
     }
   })
@@ -79,7 +92,19 @@ function buildObject({ getValue, discriminator, commit }) {
   })
 }
 
+function clearModel({ commit, setDiscriminatorValue }) {
+  commit('wizard/model$update', {
+    path: '/resources/coreKubestashComBackupSession/',
+    value: '',
+    force: true,
+  })
+  setDiscriminatorValue('/selectedSessions', [])
+}
+
 return {
+  clearModel,
+  getSessionOptions,
+  isBackupSelected,
   buildObject,
   isApiResolved,
   getOptions,

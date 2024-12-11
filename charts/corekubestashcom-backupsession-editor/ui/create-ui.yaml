@@ -4,6 +4,8 @@ steps:
     discriminator:
       backup: 
         type: string
+      selectedSessions:
+        type: Array
       initApi:
         type: boolean
         default: false 
@@ -14,12 +16,21 @@ steps:
       - if: isApiResolved
         type: select
         fetch: getOptions
+        onChange: clearModel
         required: true
         label:
           text: Select Backup
-        onChange: buildObject
         schema:
           $ref: discriminator#/backup
+      - if: isBackupSelected
+        type: multiselect
+        fetch: getSessionOptions
+        required: true
+        label:
+          text: Select Sessions
+        onChange: buildObject
+        schema:
+          $ref: discriminator#/selectedSessions
   id: basic
   title: steps.0.label
 type: multi-step-form
