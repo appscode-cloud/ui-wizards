@@ -11,8 +11,8 @@ podPlacementPolicy:
   name: {{ .Values.spec.admin.clusterTier.placement.default }}
 {{- end }}
 
-{{- if or .Values.spec.admin.nodeSelector (eq .Values.spec.admin.deployment.default "Dedicated") }}
 nodeSelector:
+  kubernetes.io/os: linux
 {{- if .Values.spec.admin.nodeSelector }}
 {{- toYaml .Values.spec.admin.nodeSelector | nindent 2 }}
 {{- end }}
@@ -21,7 +21,6 @@ nodeSelector:
   instance: {{ include "kubedbcom-mariadb-editor-options.fullname" . }}
   namespace: {{ .Release.Namespace }}
   nodepool: {{ .Values.spec.admin.clusterTier.nodeTopology.default }}
-{{- end }}
 {{- end }}
 
 {{- if or .Values.spec.admin.tolerations (eq .Values.spec.admin.deployment.default "Dedicated") }}
