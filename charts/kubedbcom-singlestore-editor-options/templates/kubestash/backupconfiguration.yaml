@@ -23,11 +23,19 @@ spec:
         namespace: {{ .Values.spec.backup.kubestash.retentionPolicy.namespace }}
   sessions:
     - name: full-backup
-      sessionHistoryLimit: 2
+      sessionHistoryLimit: 3
       scheduler:
         schedule: {{ .Values.spec.backup.kubestash.schedule | quote }}
         jobTemplate:
-          backoffLimit: 1
+          template:
+            spec:
+              containerSecurityContext:
+                {{- include "container.securityContext" . | nindent 16 }}
+              nodeSelector:
+                kubernetes.io/os: linux
+          backoffLimit: 2
+        successfulJobsHistoryLimit: 2
+        failedJobsHistoryLimit: 4
       repositories:
         - name: {{ include "kubedbcom-singlestore-editor-options.fullname" . }}
           backend: default-backend
@@ -39,15 +47,10 @@ spec:
         name: singlestore-addon
         tasks:
           - name: logical-backup
-        containerSecurityContext:
-            allowPrivilegeEscalation: false
-            capabilities:
-              drop:
-              - ALL
-            runAsGroup: 998
-            runAsNonRoot: true
-            runAsUser: 999
-            seccompProfile:
-              type: RuntimeDefault
-
+        jobTemplate:
+          spec:
+            containerSecurityContext:
+              {{- include "container.securityContext" . | nindent 14 }}
+            nodeSelector:
+              kubernetes.io/os: linux
 {{- end }}
