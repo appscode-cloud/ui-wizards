@@ -411,43 +411,34 @@ function getMachineListForOptions() {
   return array
 }
 
-function onMachineChange({ commit, model, getValue }, type) {
-  const path = type ? `/spec/${type}/podResources/machine` : '/spec/podResources/machine'
-  let selectedMachine = getValue(model, path) || 'custom'
-  const commitPathPrefix = type
-    ? `/spec/${type}/podResources/resources`
-    : '/spec/podResources/resources'
-
-  commit('wizard/model$update', {
-    path: `${commitPathPrefix}/requests/cpu`,
-    value: selectedMachine !== 'custom' ? machines[selectedMachine]?.resources.limits.cpu : '500m',
-    force: true,
-  })
-  commit('wizard/model$update', {
-    path: `${commitPathPrefix}/requests/memory`,
-    value:
-      selectedMachine !== 'custom' ? machines[selectedMachine]?.resources.limits.memory : '1Gi',
-    force: true,
-  })
-  commit('wizard/model$update', {
-    path: `${commitPathPrefix}/limits/cpu`,
-    value: selectedMachine !== 'custom' ? machines[selectedMachine]?.resources.limits.cpu : '500m',
-    force: true,
-  })
-  commit('wizard/model$update', {
-    path: `${commitPathPrefix}/limits/memory`,
-    value:
-      selectedMachine !== 'custom' ? machines[selectedMachine]?.resources.limits.memory : '1Gi',
-    force: true,
-  })
-}
-
 function setLimits({ model, getValue, commit }, resource, type) {
   const path = type ? `/spec/${type}/podResources/machine` : '/spec/podResources/machine'
   const selectedMachine = getValue(model, path) || 'custom'
   const reqCommitPath = type
     ? `/spec/${type}/podResources/resources/limits/${resource}`
     : `/spec/podResources/resources/limits/${resource}`
+  const comparePath = type
+    ? `/spec/${type}/podResources/resources/requests/${resource}`
+    : `/spec/podResources/resources/requests/${resource}`
+
+  if (selectedMachine === 'custom') {
+    const val2 = getValue(model, comparePath)
+    if (resource === 'memory') {
+      commit('wizard/model$update', {
+        path: reqCommitPath,
+        value: val2,
+        force: true,
+      })
+      return val2
+    } else {
+      commit('wizard/model$update', {
+        path: reqCommitPath,
+        value: val2,
+        force: true,
+      })
+      return val2
+    }
+  }
 
   if (resource === 'memory') {
     commit('wizard/model$update', {
@@ -1266,7 +1257,6 @@ return {
   onCreateAuthSecretChange,
   isMachineNotCustom,
   getMachineListForOptions,
-  onMachineChange,
   setLimits,
   setRequests,
   setMachineToCustom,

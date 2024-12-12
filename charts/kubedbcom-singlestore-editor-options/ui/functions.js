@@ -1095,37 +1095,6 @@ function updateAlertValue({ commit, model, discriminator, getValue }) {
   })
 }
 
-function onMachineChange({ commit, model, getValue }, type) {
-  const path = type ? `/spec/${type}/podResources/machine` : '/spec/podResources/machine'
-  let selectedMachine = getValue(model, path) || 'custom'
-  const commitPathPrefix = type
-    ? `/spec/${type}/podResources/resources`
-    : '/spec/podResources/resources'
-
-  commit('wizard/model$update', {
-    path: `${commitPathPrefix}/requests/cpu`,
-    value: selectedMachine !== 'custom' ? machines[selectedMachine]?.resources.limits.cpu : '500m',
-    force: true,
-  })
-  commit('wizard/model$update', {
-    path: `${commitPathPrefix}/requests/memory`,
-    value:
-      selectedMachine !== 'custom' ? machines[selectedMachine]?.resources.limits.memory : '1Gi',
-    force: true,
-  })
-  commit('wizard/model$update', {
-    path: `${commitPathPrefix}/limits/cpu`,
-    value: selectedMachine !== 'custom' ? machines[selectedMachine]?.resources.limits.cpu : '500m',
-    force: true,
-  })
-  commit('wizard/model$update', {
-    path: `${commitPathPrefix}/limits/memory`,
-    value:
-      selectedMachine !== 'custom' ? machines[selectedMachine]?.resources.limits.memory : '1Gi',
-    force: true,
-  })
-}
-
 function setLimits({ model, getValue, commit }, resource, type) {
   const path = type ? `/spec/${type}/podResources/machine` : '/spec/podResources/machine'
   const selectedMachine = getValue(model, path) || 'custom'
@@ -1202,7 +1171,6 @@ return {
   isConfigAvailable,
   initBundle,
   returnFalse,
-  onMachineChange,
   setLimits,
   setRequests,
   toggleTls,

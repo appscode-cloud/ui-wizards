@@ -350,32 +350,6 @@ function getMachineListForOptions() {
   return array
 }
 
-function onMachineChange({ commit, model, getValue }) {
-  let selectedMachine = getValue(model, '/spec/podResources/machine') || 'custom'
-  commit('wizard/model$update', {
-    path: '/spec/podResources/resources/requests/cpu',
-    value: selectedMachine !== 'custom' ? machines[selectedMachine]?.resources.limits.cpu : '500m',
-    force: true,
-  })
-  commit('wizard/model$update', {
-    path: '/spec/podResources/resources/requests/memory',
-    value:
-      selectedMachine !== 'custom' ? machines[selectedMachine]?.resources.limits.memory : '1Gi',
-    force: true,
-  })
-  commit('wizard/model$update', {
-    path: '/spec/podResources/resources/limits/cpu',
-    value: selectedMachine !== 'custom' ? machines[selectedMachine]?.resources.limits.cpu : '500m',
-    force: true,
-  })
-  commit('wizard/model$update', {
-    path: '/spec/podResources/resources/limits/memory',
-    value:
-      selectedMachine !== 'custom' ? machines[selectedMachine]?.resources.limits.memory : '1Gi',
-    force: true,
-  })
-}
-
 function setLimits({ model, getValue, commit }, resource) {
   const path = '/spec/podResources/machine'
   const selectedMachine = getValue(model, path) || 'custom'
@@ -1171,7 +1145,6 @@ return {
   showStorageSizeField,
   onModeChange,
   getMachineListForOptions,
-  onMachineChange,
   setLimits,
   setRequests,
   setMachineToCustom,
