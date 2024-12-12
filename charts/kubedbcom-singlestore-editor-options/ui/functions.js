@@ -456,8 +456,10 @@ function getMachineListForOptions() {
   return array
 }
 
-function setMachineToCustom() {
-  return 'custom'
+function setMachineToCustom({ getValue, model }, type) {
+  const path = type ? `spec/${type}/podResources/machine` : '/spec/podResources/machine'
+  const machine = getValue(model, path)
+  return machine || 'custom'
 }
 
 async function fetchJsons({ axios, itemCtx }) {
@@ -1095,53 +1097,60 @@ function updateAlertValue({ commit, model, discriminator, getValue }) {
 
 function onMachineChange({ commit, model, getValue }, type) {
   const path = type ? `/spec/${type}/podResources/machine` : '/spec/podResources/machine'
-  let selectedMachine = getValue(model, path)
-  if (selectedMachine && selectedMachine !== 'custom') {
-    const commitPathPrefix = type
-      ? `/spec/${type}/podResources/resources`
-      : '/spec/podResources/resources'
-    commit('wizard/model$update', {
-      path: `${commitPathPrefix}/requests/cpu`,
-      value: machines[selectedMachine]?.resources.limits.cpu,
-      force: true,
-    })
-    commit('wizard/model$update', {
-      path: `${commitPathPrefix}/requests/memory`,
-      value: machines[selectedMachine]?.resources.limits.memory,
-      force: true,
-    })
-  }
+  let selectedMachine = getValue(model, path) || 'custom'
+  const commitPathPrefix = type
+    ? `/spec/${type}/podResources/resources`
+    : '/spec/podResources/resources'
+
+  commit('wizard/model$update', {
+    path: `${commitPathPrefix}/requests/cpu`,
+    value: selectedMachine !== 'custom' ? machines[selectedMachine]?.resources.limits.cpu : '500m',
+    force: true,
+  })
+  commit('wizard/model$update', {
+    path: `${commitPathPrefix}/requests/memory`,
+    value:
+      selectedMachine !== 'custom' ? machines[selectedMachine]?.resources.limits.memory : '1Gi',
+    force: true,
+  })
+  commit('wizard/model$update', {
+    path: `${commitPathPrefix}/limits/cpu`,
+    value: selectedMachine !== 'custom' ? machines[selectedMachine]?.resources.limits.cpu : '500m',
+    force: true,
+  })
+  commit('wizard/model$update', {
+    path: `${commitPathPrefix}/limits/memory`,
+    value:
+      selectedMachine !== 'custom' ? machines[selectedMachine]?.resources.limits.memory : '1Gi',
+    force: true,
+  })
 }
 
 function setLimits({ model, getValue, commit }, resource, type) {
   const path = type ? `/spec/${type}/podResources/machine` : '/spec/podResources/machine'
-  const selectedMachine = getValue(model, path)
+  const selectedMachine = getValue(model, path) || 'custom'
   const reqCommitPath = type
     ? `/spec/${type}/podResources/resources/limits/${resource}`
     : `/spec/podResources/resources/limits/${resource}`
-  if (selectedMachine && selectedMachine !== 'custom') {
-    if (resource === 'memory') {
-      commit('wizard/model$update', {
-        path: reqCommitPath,
-        value: machines[selectedMachine]?.resources?.limits?.memory,
-        force: true,
-      })
-      return machines[selectedMachine]?.resources?.limits?.memory
-    }
+
+  if (resource === 'memory') {
+    commit('wizard/model$update', {
+      path: reqCommitPath,
+      value:
+        selectedMachine === 'custom' ? '1Gi' : machines[selectedMachine]?.resources?.limits?.memory,
+      force: true,
+    })
+    return selectedMachine === 'custom'
+      ? '1Gi'
+      : machines[selectedMachine]?.resources?.limits?.memory
   } else {
-    const modelPath = type
-      ? `/spec/${type}/podResources/resources/requests/${resource}`
-      : `/spec/podResources/resources/requests/${resource}`
-    const val = getValue(model, modelPath)
-    if (resource === 'memory') {
-      commit('wizard/model$update', {
-        path: reqCommitPath,
-        value: val,
-        force: true,
-      })
-    }
-    if (resource === 'cpu') return val || '250m'
-    else return val || '500Mi'
+    commit('wizard/model$update', {
+      path: reqCommitPath,
+      value:
+        selectedMachine === 'custom' ? '500m' : machines[selectedMachine]?.resources?.limits?.cpu,
+      force: true,
+    })
+    return selectedMachine === 'custom' ? '500m' : machines[selectedMachine]?.resources?.limits?.cpu
   }
 }
 
