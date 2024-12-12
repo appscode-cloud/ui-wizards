@@ -31,6 +31,8 @@ spec:
             spec:
               containerSecurityContext:
                 {{- include "container.securityContext" . | nindent 16 }}
+              nodeSelector:
+                kubernetes.io/os: linux
           backoffLimit: 2
         successfulJobsHistoryLimit: 2
         failedJobsHistoryLimit: 4
@@ -49,4 +51,6 @@ spec:
           spec:
             containerSecurityContext:
               {{- include "container.securityContext" . | nindent 14 }}
+            nodeSelector:
+              kubernetes.io/os: linux
 {{- end }}
