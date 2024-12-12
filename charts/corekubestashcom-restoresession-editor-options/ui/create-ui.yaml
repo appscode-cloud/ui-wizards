@@ -29,29 +29,19 @@ steps:
         - computed: initMetadata
           if: returnFalse
           type: input
-        - elements:
-          - elements:
-            - computed: setNamespace
-              disableUnselect: true
-              fetch: fetchNamespaces
-              hasGroup: isRancherManaged
-              label:
-                text: Repository Namespace
-              refresh: true
-              schema:
-                $ref: schema#/properties/spec/properties/dataSource/properties/repository/properties/namespace
-              type: select
-            - disableUnselect: true
-              fetch: fetchNames|repository
-              label:
-                text: Repository
-              refresh: true
-              schema:
-                $ref: schema#/properties/spec/properties/dataSource/properties/repository/properties/name
-              type: select
+        - discriminator:
+              repository:
+                type: object
+          elements:
+          - disableUnselect: true
+            fetch: getRepositories
+            label:
+              text: Repository
+            onChange: onRepoChange
+            refresh: true
             schema:
-              $ref: schema#/properties/spec/properties/dataSource/properties/repository
-            type: single-step-form
+              $ref: discriminator#/properties/repository
+            type: select
           - disableUnselect: true
             fetch: getSnapshots
             label:
