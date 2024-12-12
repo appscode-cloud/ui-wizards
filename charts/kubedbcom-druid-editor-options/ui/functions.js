@@ -384,6 +384,29 @@ function setLimits({ model, getValue, commit }, resource, type) {
     ? `/spec/${type}/podResources/resources/limits/${resource}`
     : `/spec/podResources/resources/limits/${resource}`
 
+  const comparePath = type
+    ? `/spec/${type}/podResources/resources/requests/${resource}`
+    : `/spec/podResources/resources/requests/${resource}`
+
+  if (selectedMachine === 'custom') {
+    const val2 = getValue(model, comparePath)
+    if (resource === 'memory') {
+      commit('wizard/model$update', {
+        path: reqCommitPath,
+        value: val2,
+        force: true,
+      })
+      return val2
+    } else {
+      commit('wizard/model$update', {
+        path: reqCommitPath,
+        value: val2,
+        force: true,
+      })
+      return val2
+    }
+  }
+
   if (resource === 'memory') {
     commit('wizard/model$update', {
       path: reqCommitPath,
