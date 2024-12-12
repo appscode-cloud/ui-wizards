@@ -456,21 +456,17 @@ function setLimits({ model, getValue, commit }, resource) {
   if (resource === 'memory') {
     commit('wizard/model$update', {
       path: reqCommitPath,
-      value:
-        selectedMachine === 'custom' ? '1Gi' : machines[selectedMachine]?.resources?.limits?.memory,
+      value: machines[selectedMachine]?.resources?.limits?.memory,
       force: true,
     })
-    return selectedMachine === 'custom'
-      ? '1Gi'
-      : machines[selectedMachine]?.resources?.limits?.memory
+    return machines[selectedMachine]?.resources?.limits?.memory
   } else {
     commit('wizard/model$update', {
       path: reqCommitPath,
-      value:
-        selectedMachine === 'custom' ? '500m' : machines[selectedMachine]?.resources?.limits?.cpu,
+      value: machines[selectedMachine]?.resources?.limits?.cpu,
       force: true,
     })
-    return selectedMachine === 'custom' ? '500m' : machines[selectedMachine]?.resources?.limits?.cpu
+    return machines[selectedMachine]?.resources?.limits?.cpu
   }
 }
 
