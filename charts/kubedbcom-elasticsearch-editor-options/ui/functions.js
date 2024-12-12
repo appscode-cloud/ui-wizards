@@ -965,7 +965,13 @@ function getDefault({ getValue, model }, type) {
   return val
 }
 
+function isConfigAvailable({ getValue, model }) {
+  const val = getValue(model, '/spec/configuration')
+  return val !== ''
+}
+
 return {
+  isConfigAvailable,
   showAdditionalSettings,
   returnFalse,
   initBundle,

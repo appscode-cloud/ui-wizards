@@ -1107,7 +1107,14 @@ function setMiliSeconds({ model, getValue, commit }) {
     recoveryTimestampMiliSec = '000Z'
   }
 }
+
+function isConfigAvailable({ getValue, model }) {
+  const val = getValue(model, '/spec/configuration')
+  return val !== ''
+}
+
 return {
+  isConfigAvailable,
   setMiliSeconds,
   setPointInTimeRecovery,
   isClusterRancherManaged,

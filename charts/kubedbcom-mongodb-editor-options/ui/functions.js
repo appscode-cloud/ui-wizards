@@ -718,6 +718,11 @@ function isConfigDatabaseOn({ watchDependency, discriminator, getValue }) {
   return getValue(discriminator, '/configDatabase')
 }
 
+function isConfigAvailable({ getValue, model }) {
+  const val = getValue(model, '/spec/configuration')
+  return val !== ''
+}
+
 function clearConfiguration({ discriminator, getValue, commit }) {
   const configOn = getValue(discriminator, '/configDatabase')
 
@@ -1232,6 +1237,7 @@ function setMiliSeconds({ model, getValue, commit }) {
 }
 
 return {
+  isConfigAvailable,
   setMiliSeconds,
   setPointInTimeRecovery,
   checkHostnameOrIP,

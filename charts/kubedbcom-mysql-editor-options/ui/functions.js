@@ -1107,7 +1107,13 @@ function setMiliSeconds({ model, getValue, commit }) {
   }
 }
 
+function isConfigAvailable({ getValue, model }) {
+  const val = getValue(model, '/spec/configuration')
+  return val !== ''
+}
+
 return {
+  isConfigAvailable,
   setMiliSeconds,
   setPointInTimeRecovery,
   isClusterRancherManaged,

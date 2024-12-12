@@ -46,6 +46,7 @@ steps:
         disabled: isMachineNotCustom
         label:
           text: labels.cpu
+        onChange: setRequests|cpu
         schema:
           $ref: schema#/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
         type: input
@@ -165,7 +166,8 @@ steps:
         schema:
           $ref: schema#/properties/spec/properties/authSecret/properties/password
         type: input
-      - label:
+      - computed: isConfigAvailable
+        label:
           text: Configure Database?
         onChange: clearConfiguration
         schema:
