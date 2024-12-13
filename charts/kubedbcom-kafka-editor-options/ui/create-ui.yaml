@@ -57,7 +57,6 @@ steps:
             fetch: getMachineListForOptions
             label:
               text: Machine
-            onChange: onMachineChange|controller
             schema:
               $ref: schema#/properties/spec/properties/topology/properties/controller/properties/podResources/properties/machine
             type: select
@@ -65,6 +64,7 @@ steps:
             disabled: isMachineNotCustom|topology/controller
             label:
               text: labels.cpu
+            onChange: setRequests|cpu|topology/controller
             schema:
               $ref: schema#/properties/spec/properties/topology/properties/controller/properties/podResources/properties/resources/properties/requests/properties/cpu
             type: input
@@ -106,7 +106,6 @@ steps:
             fetch: getMachineListForOptions
             label:
               text: Machine
-            onChange: onMachineChange|broker
             schema:
               $ref: schema#/properties/spec/properties/topology/properties/broker/properties/podResources/properties/machine
             type: select
@@ -114,6 +113,7 @@ steps:
             disabled: isMachineNotCustom|topology/broker
             label:
               text: labels.cpu
+            onChange: setRequests|cpu|topology/broker
             schema:
               $ref: schema#/properties/spec/properties/topology/properties/broker/properties/podResources/properties/resources/properties/requests/properties/cpu
             type: input
@@ -121,7 +121,7 @@ steps:
             disabled: isMachineNotCustom|topology/broker
             label:
               text: labels.memory
-            onChange: setRequests|memory
+            onChange: setRequests|memory|topology/broker
             schema:
               $ref: schema#/properties/spec/properties/topology/properties/broker/properties/podResources/properties/resources/properties/requests/properties/memory
             type: input
@@ -141,7 +141,6 @@ steps:
         fetch: getMachineListForOptions
         label:
           text: Machine
-        onChange: onMachineChange
         schema:
           $ref: schema#/properties/spec/properties/podResources/properties/machine
         type: select
@@ -149,6 +148,7 @@ steps:
         disabled: isMachineNotCustom
         label:
           text: labels.cpu
+        onChange: setRequests|cpu
         schema:
           $ref: schema#/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
         type: input
@@ -156,6 +156,7 @@ steps:
         disabled: isMachineNotCustom
         label:
           text: labels.memory
+        onChange: setRequests|memory
         schema:
           $ref: schema#/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
         type: input
@@ -257,7 +258,8 @@ steps:
         schema:
           $ref: schema#/properties/spec/properties/authSecret/properties/password
         type: input
-      - label:
+      - computed: isConfigAvailable
+        label:
           text: Configure Database?
         onChange: clearConfiguration
         schema:

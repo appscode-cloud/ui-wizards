@@ -60,11 +60,10 @@ steps:
             $ref: schema#/properties/spec/properties/shardTopology/properties/shard/properties/persistence/properties/size
           type: input
         - elements:
-          - computed: setMachineToCustom
+          - computed: setMachineToCustom|shardTopology/shard
             fetch: getMachineListForOptions
             label:
               text: labels.machine
-            onChange: onMachineChange|shardTopology/shard
             schema:
               $ref: schema#/properties/spec/properties/shardTopology/properties/shard/properties/podResources/properties/machine
             type: select
@@ -72,6 +71,7 @@ steps:
             disabled: isMachineNotCustom|shardTopology/shard
             label:
               text: labels.cpu
+            onChange: setRequests|cpu|shardTopology/shard
             schema:
               $ref: schema#/properties/spec/properties/shardTopology/properties/shard/properties/podResources/properties/resources/properties/requests/properties/cpu
             type: input
@@ -103,11 +103,10 @@ steps:
             $ref: schema#/properties/spec/properties/shardTopology/properties/configServer/properties/persistence/properties/size
           type: input
         - elements:
-          - computed: setMachineToCustom
+          - computed: setMachineToCustom|shardTopology/configServer
             fetch: getMachineListForOptions
             label:
               text: labels.machine
-            onChange: onMachineChange|shardTopology/configServer
             schema:
               $ref: schema#/properties/spec/properties/shardTopology/properties/configServer/properties/podResources/properties/machine
             type: select
@@ -115,6 +114,7 @@ steps:
             disabled: isMachineNotCustom|shardTopology/configServer
             label:
               text: labels.cpu
+            onChange: setRequests|cpu|shardTopology/configServer
             schema:
               $ref: schema#/properties/spec/properties/shardTopology/properties/configServer/properties/podResources/properties/resources/properties/requests/properties/cpu
             type: input
@@ -141,11 +141,10 @@ steps:
             $ref: schema#/properties/spec/properties/shardTopology/properties/mongos/properties/replicas
           type: input
         - elements:
-          - computed: setMachineToCustom
+          - computed: setMachineToCustom|shardTopology/mongos
             fetch: getMachineListForOptions
             label:
               text: labels.machine
-            onChange: onMachineChange|shardTopology/mongos
             schema:
               $ref: schema#/properties/spec/properties/shardTopology/properties/mongos/properties/podResources/properties/machine
             type: select
@@ -153,6 +152,7 @@ steps:
             disabled: isMachineNotCustom|shardTopology/mongos
             label:
               text: labels.cpu
+            onChange: setRequests|cpu|shardTopology/mongos
             schema:
               $ref: schema#/properties/spec/properties/shardTopology/properties/mongos/properties/podResources/properties/resources/properties/requests/properties/cpu
             type: input
@@ -179,7 +179,6 @@ steps:
         fetch: getMachineListForOptions
         label:
           text: labels.machine
-        onChange: onMachineChange
         schema:
           $ref: schema#/properties/spec/properties/podResources/properties/machine
         type: select
@@ -187,6 +186,7 @@ steps:
         disabled: isMachineNotCustom
         label:
           text: labels.cpu
+        onChange: setRequests|cpu
         schema:
           $ref: schema#/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
         type: input
@@ -306,7 +306,8 @@ steps:
         schema:
           $ref: schema#/properties/spec/properties/authSecret/properties/password
         type: input
-      - label:
+      - computed: isConfigAvailable
+        label:
           text: Configure Database?
         onChange: clearConfiguration
         schema:
@@ -326,12 +327,11 @@ steps:
         type: switch
       - elements:
         - elements:
-          - computed: setMachineToCustom
+          - computed: setMachineToCustom|arbiter
             customClass: mt-10
             fetch: getMachineListForOptions
             label:
               text: labels.machine
-            onChange: onMachineChange|arbiter
             schema:
               $ref: schema#/properties/spec/properties/arbiter/properties/podResources/properties/machine
             type: select
@@ -339,6 +339,7 @@ steps:
             disabled: isMachineNotCustom|arbiter
             label:
               text: labels.cpu
+            onChange: setRequests|cpu|arbiter
             schema:
               $ref: schema#/properties/spec/properties/arbiter/properties/podResources/properties/resources/properties/requests/properties/cpu
             type: input
@@ -378,11 +379,10 @@ steps:
           schema:
             $ref: schema#/properties/spec/properties/hidden/properties/persistence/properties/size
           type: input
-        - computed: setMachineToCustom
+        - computed: setMachineToCustom|hidden
           fetch: getMachineListForOptions
           label:
             text: labels.machine
-          onChange: onMachineChange|hidden
           schema:
             $ref: schema#/properties/spec/properties/hidden/properties/podResources/properties/machine
           type: select
@@ -390,6 +390,7 @@ steps:
           disabled: isMachineNotCustom|hidden
           label:
             text: labels.cpu
+          onChange: setRequests|cpu|hidden
           schema:
             $ref: schema#/properties/spec/properties/hidden/properties/podResources/properties/resources/properties/requests/properties/cpu
           type: input

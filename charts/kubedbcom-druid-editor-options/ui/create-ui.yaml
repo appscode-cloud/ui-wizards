@@ -32,7 +32,6 @@ steps:
           fetch: getMachineListForOptions
           label:
             text: Machine
-          onChange: onMachineChange|topology/middleManagers
           schema:
             $ref: schema#/properties/spec/properties/topology/properties/middleManagers/properties/podResources/properties/machine
           type: select
@@ -40,6 +39,7 @@ steps:
           disabled: isMachineNotCustom|topology/middleManagers
           label:
             text: labels.cpu
+          onChange: setRequests|cpu|topology/middleManagers
           schema:
             $ref: schema#/properties/spec/properties/topology/properties/middleManagers/properties/podResources/properties/resources/properties/requests/properties/cpu
           type: input
@@ -70,7 +70,6 @@ steps:
           fetch: getMachineListForOptions
           label:
             text: Machine
-          onChange: onMachineChange|topology/historicals
           schema:
             $ref: schema#/properties/spec/properties/topology/properties/historicals/properties/podResources/properties/machine
           type: select
@@ -78,6 +77,7 @@ steps:
           disabled: isMachineNotCustom|topology/historicals
           label:
             text: labels.cpu
+          onChange: setRequests|cpu|topology/historicals
           schema:
             $ref: schema#/properties/spec/properties/topology/properties/historicals/properties/podResources/properties/resources/properties/requests/properties/cpu
           type: input
@@ -103,7 +103,6 @@ steps:
           fetch: getMachineListForOptions
           label:
             text: Machine
-          onChange: onMachineChange|topology/brokers
           schema:
             $ref: schema#/properties/spec/properties/topology/properties/brokers/properties/podResources/properties/machine
           type: select
@@ -111,6 +110,7 @@ steps:
           disabled: isMachineNotCustom|topology/brokers
           label:
             text: labels.cpu
+          onChange: setRequests|cpu|topology/middleManagers
           schema:
             $ref: schema#/properties/spec/properties/topology/properties/brokers/properties/podResources/properties/resources/properties/requests/properties/cpu
           type: input
@@ -136,7 +136,6 @@ steps:
           fetch: getMachineListForOptions
           label:
             text: Machine
-          onChange: onMachineChange|topology/coordinators
           schema:
             $ref: schema#/properties/spec/properties/topology/properties/coordinators/properties/podResources/properties/machine
           type: select
@@ -144,6 +143,7 @@ steps:
           disabled: isMachineNotCustom|topology/coordinators
           label:
             text: labels.cpu
+          onChange: setRequests|cpu|topology/middleManagers
           schema:
             $ref: schema#/properties/spec/properties/topology/properties/coordinators/properties/podResources/properties/resources/properties/requests/properties/cpu
           type: input
@@ -330,7 +330,8 @@ steps:
         schema:
           $ref: schema#/properties/spec/properties/authSecret/properties/password
         type: input
-      - label:
+      - computed: isConfigAvailable
+        label:
           text: Configure Database?
         onChange: clearConfiguration
         schema:

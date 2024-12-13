@@ -43,7 +43,6 @@ steps:
         fetch: getMachineListForOptions
         label:
           text: labels.machine
-        onChange: onMachineChange|topology/aggregator
         schema:
           $ref: schema#/properties/spec/properties/topology/properties/aggregator/properties/podResources/properties/machine
         type: select
@@ -51,6 +50,7 @@ steps:
         disabled: isMachineNotCustom|topology/aggregator
         label:
           text: labels.cpu
+        onChange: setRequests|cpu|topology/aggregator
         schema:
           $ref: schema#/properties/spec/properties/topology/properties/aggregator/properties/podResources/properties/resources/properties/requests/properties/cpu
         type: input
@@ -84,7 +84,6 @@ steps:
         fetch: getMachineListForOptions
         label:
           text: labels.machine
-        onChange: onMachineChange|topology/leaf
         schema:
           $ref: schema#/properties/spec/properties/topology/properties/leaf/properties/podResources/properties/machine
         type: select
@@ -92,6 +91,7 @@ steps:
         disabled: isMachineNotCustom|topology/leaf
         label:
           text: labels.cpu
+        onChange: setRequests|cpu|topology/leaf
         schema:
           $ref: schema#/properties/spec/properties/topology/properties/leaf/properties/podResources/properties/resources/properties/requests/properties/cpu
         type: input
@@ -114,7 +114,6 @@ steps:
         fetch: getMachineListForOptions
         label:
           text: labels.machine
-        onChange: onMachineChange
         schema:
           $ref: schema#/properties/spec/properties/podResources/properties/machine
         type: select
@@ -122,6 +121,7 @@ steps:
         disabled: isMachineNotCustom
         label:
           text: labels.cpu
+        onChange: setRequests|cpu
         schema:
           $ref: schema#/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
         type: input
@@ -245,7 +245,8 @@ steps:
         schema:
           $ref: schema#/properties/spec/properties/authSecret/properties/password
         type: input
-      - label:
+      - computed: isConfigAvailable
+        label:
           text: Configure Database?
         onChange: clearConfiguration
         schema:

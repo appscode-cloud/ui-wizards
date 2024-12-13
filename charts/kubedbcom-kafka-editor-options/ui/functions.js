@@ -341,55 +341,48 @@ function getMachineListForOptions() {
   return array
 }
 
-function onMachineChange({ commit, model, getValue }, type) {
-  const path = type ? `/spec/${type}/podResources/machine` : '/spec/podResources/machine'
-  let selectedMachine = getValue(model, path)
-  if (selectedMachine && selectedMachine !== 'custom') {
-    const commitPathPrefix = type
-      ? `/spec/${type}/podResources/resources`
-      : '/spec/podResources/resources'
-    commit('wizard/model$update', {
-      path: `${commitPathPrefix}/requests/cpu`,
-      value: machines[selectedMachine]?.resources.limits.cpu,
-      force: true,
-    })
-    commit('wizard/model$update', {
-      path: `${commitPathPrefix}/requests/memory`,
-      value: machines[selectedMachine]?.resources.limits.memory,
-      force: true,
-    })
-  }
-}
-
 function setLimits({ model, getValue, commit }, resource, type) {
   const path = type ? `/spec/${type}/podResources/machine` : '/spec/podResources/machine'
-  const selectedMachine = getValue(model, path)
+  const selectedMachine = getValue(model, path) || 'custom'
   const reqCommitPath = type
     ? `/spec/${type}/podResources/resources/limits/${resource}`
     : `/spec/podResources/resources/limits/${resource}`
-  if (selectedMachine && selectedMachine !== 'custom') {
+  const comparePath = type
+    ? `/spec/${type}/podResources/resources/requests/${resource}`
+    : `/spec/podResources/resources/requests/${resource}`
+
+  if (selectedMachine === 'custom') {
+    const val2 = getValue(model, comparePath)
     if (resource === 'memory') {
       commit('wizard/model$update', {
         path: reqCommitPath,
-        value: machines[selectedMachine]?.resources?.limits?.memory,
+        value: val2,
         force: true,
       })
-      return machines[selectedMachine]?.resources?.limits?.memory
+      return val2
+    } else {
+      commit('wizard/model$update', {
+        path: reqCommitPath,
+        value: val2,
+        force: true,
+      })
+      return val2
     }
+  }
+  if (resource === 'memory') {
+    commit('wizard/model$update', {
+      path: reqCommitPath,
+      value: machines[selectedMachine]?.resources?.limits?.memory,
+      force: true,
+    })
+    return machines[selectedMachine]?.resources?.limits?.memory
   } else {
-    const modelPath = type
-      ? `/spec/${type}/podResources/resources/requests/${resource}`
-      : `/spec/podResources/resources/requests/${resource}`
-    const val = getValue(model, modelPath)
-    if (resource === 'memory') {
-      commit('wizard/model$update', {
-        path: reqCommitPath,
-        value: val,
-        force: true,
-      })
-    }
-    if (resource === 'cpu') return val || '250m'
-    else return val || '500Mi'
+    commit('wizard/model$update', {
+      path: reqCommitPath,
+      value: machines[selectedMachine]?.resources?.limits?.cpu,
+      force: true,
+    })
+    return machines[selectedMachine]?.resources?.limits?.cpu
   }
 }
 
@@ -408,8 +401,10 @@ function setRequests({ getValue, model, commit }, resource, type) {
   })
 }
 
-function setMachineToCustom() {
-  return 'custom'
+function setMachineToCustom({ getValue, model }, type) {
+  const path = type ? `spec/${type}/podResources/machine` : '/spec/podResources/machine'
+  const machine = getValue(model, path)
+  return machine || 'custom'
 }
 
 function getCreateNameSpaceUrl({ model, getValue, storeGet }) {
@@ -872,7 +867,13 @@ function getDefault({ getValue, model }, type) {
   return val
 }
 
+function isConfigAvailable({ getValue, model }) {
+  const val = getValue(model, '/spec/configuration')
+  return val !== ''
+}
+
 return {
+  isConfigAvailable,
   showAdditionalSettings,
   initBundle,
   returnFalse,
@@ -881,7 +882,6 @@ return {
   isEqualToModelPathValue,
   showStorageSizeField,
   getMachineListForOptions,
-  onMachineChange,
   setLimits,
   setRequests,
   setMachineToCustom,
