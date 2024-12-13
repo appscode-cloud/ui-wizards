@@ -243,9 +243,18 @@ resources:
           - addon:
               jobTemplate:
                 spec:
-                  securityContext:
+                  containerSecurityContext:
+                    allowPrivilegeEscalation: false
+                    capabilities:
+                      drop:
+                        - ALL
                     runAsGroup: 0
+                    runAsNonRoot: true
                     runAsUser: 999
+                    seccompProfile:
+                      type: RuntimeDefault
+                  nodeSelector:
+                    kubernetes.io/os: linux
               name: mysql-addon
               tasks:
                 - name: logical-backup
@@ -258,10 +267,26 @@ resources:
                   namespace: demo
                 name: mysql-repo
             scheduler:
+              failedJobsHistoryLimit: 4
               jobTemplate:
-                backoffLimit: 1
-              schedule: '*/5 * * * *'
-            sessionHistoryLimit: 2
+                backoffLimit: 2
+                template:
+                  spec:
+                    containerSecurityContext:
+                      allowPrivilegeEscalation: false
+                      capabilities:
+                        drop:
+                          - ALL
+                      runAsGroup: 0
+                      runAsNonRoot: true
+                      runAsUser: 999
+                      seccompProfile:
+                        type: RuntimeDefault
+                    nodeSelector:
+                      kubernetes.io/os: linux
+              schedule: 0 */2 * * *
+              successfulJobsHistoryLimit: 2
+            sessionHistoryLimit: 3
       usagePolicy:
         allowedNamespaces:
           from: Same
@@ -284,9 +309,18 @@ resources:
         - addon:
             jobTemplate:
               spec:
-                securityContext:
+                containerSecurityContext:
+                  allowPrivilegeEscalation: false
+                  capabilities:
+                    drop:
+                      - ALL
                   runAsGroup: 0
+                  runAsNonRoot: true
                   runAsUser: 999
+                  seccompProfile:
+                    type: RuntimeDefault
+                nodeSelector:
+                  kubernetes.io/os: linux
             name: mysql-addon
             tasks:
               - name: logical-backup
@@ -299,10 +333,26 @@ resources:
                 namespace: demo
               name: mysql-repo
           scheduler:
+            failedJobsHistoryLimit: 4
             jobTemplate:
-              backoffLimit: 1
-            schedule: '*/5 * * * *'
-          sessionHistoryLimit: 2
+              backoffLimit: 2
+              template:
+                spec:
+                  containerSecurityContext:
+                    allowPrivilegeEscalation: false
+                    capabilities:
+                      drop:
+                        - ALL
+                    runAsGroup: 0
+                    runAsNonRoot: true
+                    runAsUser: 999
+                    seccompProfile:
+                      type: RuntimeDefault
+                  nodeSelector:
+                    kubernetes.io/os: linux
+            schedule: 0 */2 * * *
+            successfulJobsHistoryLimit: 2
+          sessionHistoryLimit: 3
       target:
         apiGroup: kubedb.com
         kind: MySQL
@@ -316,8 +366,21 @@ resources:
       namespace: demo
     spec:
       addon:
+        containerRuntimeSettings:
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            runAsGroup: 0
+            runAsNonRoot: true
+            runAsUser: 999
+            seccompProfile:
+              type: RuntimeDefault
         jobTemplate:
           spec:
+            nodeSelector:
+              kubernetes.io/os: linux
             securityContext:
               runAsGroup: 0
               runAsUser: 999
