@@ -560,6 +560,19 @@ steps:
         default: "yes"
         type: string
     elements:
+    - computed: initScheduleBackupForEdit
+      if: showScheduleBackup
+      label:
+        text: labels.backup.title
+      onChange: onScheduleBackupChange
+      options:
+      - text: options.yesOrNo.yes.text
+        value: "yes"
+      - text: options.yesOrNo.no.text
+        value: "no"
+      schema:
+        $ref: discriminator#/properties/scheduleBackup
+      type: radio
     - discriminator:
         backupType:
           type: string
@@ -575,18 +588,8 @@ steps:
         if: isBackupDataLoadedTrue
         hasDescription: true
         label:
-          text: Select
+          text: Select Backup Type
         onChange: onBackupTypeChange
-        # options:
-        # - description: Create, Delete or Modify BackupConfig
-        #   text: BackupConfig
-        #   value: BackupConfig
-        # - description: Enable/Disable BackupBlueprint
-        #   text: BackupBlueprint
-        #   value: BackupBlueprint
-        # - description: Enable/Disable Archiver
-        #   text: Archiver
-        #   value: Archiver
         schema:
           $ref: discriminator#/backupType
         type: radio
