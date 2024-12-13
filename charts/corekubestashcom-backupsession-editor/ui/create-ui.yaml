@@ -1,38 +1,36 @@
 steps:
 - form:
-    type: single-step-form
     discriminator:
-      backup: 
+      backup:
         type: string
+      initApi:
+        default: false
+        type: boolean
       selectedSessions:
         type: Array
-      initApi:
-        type: boolean
-        default: false 
     elements:
-      - computed: init
-        if: returnFalse
-        type: label-element
-      - if: isApiResolved
-        type: select
-        fetch: getOptions
-        onChange: clearModel
-        required: true
-        label:
-          text: Select Backup
-        schema:
-          $ref: discriminator#/backup
-      - if: isBackupSelected
-        type: multiselect
-        fetch: getSessionOptions
-        required: true
-        label:
-          text: Select Sessions
-        onChange: buildObject
-        schema:
-          $ref: discriminator#/selectedSessions
+    - computed: init
+      if: returnFalse
+      type: label-element
+    - fetch: getOptions
+      if: isApiResolved
+      label:
+        text: Select Backup
+      onChange: clearModel
+      required: true
+      schema:
+        $ref: discriminator#/backup
+      type: select
+    - fetch: getSessionOptions
+      if: isBackupSelected
+      label:
+        text: Select Sessions
+      onChange: buildObject
+      required: true
+      schema:
+        $ref: discriminator#/selectedSessions
+      type: multiselect
+    type: single-step-form
   id: basic
   title: steps.0.label
 type: multi-step-form
-
-
