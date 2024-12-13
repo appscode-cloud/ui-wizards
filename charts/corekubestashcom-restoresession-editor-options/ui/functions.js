@@ -4,7 +4,7 @@ function isConsole({ storeGet }) {
   return !isKube
 }
 
-function initMetadata({ storeGet, commit }) {
+async function initMetadata({ storeGet, commit, axios }) {
   const resource = storeGet('/resource') || {}
   const { group, kind } = resource?.layout?.result?.resource
   const name = storeGet('/route/query/name') || ''
@@ -33,6 +33,32 @@ function initMetadata({ storeGet, commit }) {
       value: target,
       force: true,
     })
+
+    // set addon name
+    commit('wizard/model$update', {
+      path: '/spec/addon/name',
+      value: `${kind.toLowerCase()}-addon`,
+    })
+  }
+
+  // get encryptionSecret from stash-preset
+  await getPreset({ axios, storeGet, commit })
+}
+
+async function getPreset({ axios, storeGet, commit }) {
+  const user = storeGet('/route/params/user') || ''
+  const cluster = storeGet('/route/params/cluster') || ''
+  const url = `/clusters/${user}/${cluster}/proxy/charts.x-helm.dev/v1alpha1/clusterchartpresets/stash-presets`
+  try {
+    const resp = await axios.get(url)
+    const encryptionSecret = resp?.data?.spec?.values?.spec?.backup?.kubestash?.encryptionSecret
+    commit('wizard/model$update', {
+      path: '/spec/dataSource/encryptionSecret',
+      value: encryptionSecret,
+      force: true,
+    })
+  } catch (e) {
+    console.log(e)
   }
 }
 
@@ -137,47 +163,35 @@ function initTarget({ getValue, discriminator, commit }) {
   })
 }
 
-async function fetchNames({ getValue, model, storeGet, watchDependency, axios }, type) {
-  watchDependency(`model#/spec/dataSource/${type}/namespace`) || ''
+async function getRepositories({ getValue, model, storeGet, axios }) {
   const user = storeGet('/route/params/user') || ''
   const cluster = storeGet('/route/params/cluster') || ''
-  const namespace = getValue(model, `/spec/dataSource/${type}/namespace`) || ''
-  let suffix = type
-  if (type === 'encryptionSecret') suffix = 'secrets'
-  else if (type === 'repository') suffix = 'repositories'
-  const core = suffix === 'secrets' ? 'core' : 'storage.kubestash.com'
-  const version = suffix === 'secrets' ? 'v1' : 'v1alpha1'
-  const url = `/clusters/${user}/${cluster}/proxy/${core}/${version}/namespaces/${namespace}/${suffix}`
+  const url = `/clusters/${user}/${cluster}/proxy/storage.kubestash.com/v1alpha1/repositories`
 
   try {
-    if (namespace) {
-      const resp = await axios.get(url)
-      let names = resp?.data?.items
-      names.map((item) => {
-        item.value = item?.metadata?.name || ''
-        item.text = item?.metadata?.name || ''
-        return true
+    const resp = await axios.get(url)
+    let names = resp?.data?.items
+    names.map((item) => {
+      item.value = { name: item?.metadata?.name, namespace: item?.metadata?.namespace } || {}
+      item.text = `${item?.metadata?.namespace}/${item?.metadata?.name}` || ''
+      return true
+    })
+
+    const resource = storeGet('/resource/layout/result/resource') || {}
+    let group = resource?.group || ''
+    let kind = resource?.kind || ''
+
+    if (isConsole({ storeGet })) {
+      group = getValue(model, '/spec/target/apiGroup') || ''
+      kind = getValue(model, '/spec/target/kind') || ''
+    }
+    if (kind && group) {
+      const filteredRepo = names.filter((item) => {
+        const appRef = item?.spec?.appRef || {}
+        return appRef?.apiGroup === group && appRef?.kind === kind
       })
-
-      if (type === 'repository') {
-        const resource = storeGet('/resource/layout/result/resource') || {}
-        let group = resource?.group || ''
-        let kind = resource?.kind || ''
-
-        if (isConsole({ storeGet })) {
-          group = getValue(model, '/spec/target/apiGroup') || ''
-          kind = getValue(model, '/spec/target/kind') || ''
-        }
-        if (kind && group) {
-          const filteredRepo = names.filter((item) => {
-            const appRef = item?.spec?.appRef || {}
-            return appRef?.apiGroup === group && appRef?.kind === kind
-          })
-          return filteredRepo
-        } else {
-          return names
-        }
-      }
+      return filteredRepo
+    } else {
       return names
     }
   } catch (e) {
@@ -186,15 +200,25 @@ async function fetchNames({ getValue, model, storeGet, watchDependency, axios },
   return []
 }
 
-async function getSnapshots({ watchDependency, model, storeGet, getValue, axios }) {
-  watchDependency('model#/spec/dataSource/repository/namespace')
-  watchDependency('model#/spec/dataSource/repository/name')
+function onRepoChange({ getValue, discriminator, commit }) {
+  const repo = getValue(discriminator, '/repository')
+  commit('wizard/model$update', {
+    path: '/spec/dataSource/repository',
+    value: repo,
+    force: true,
+  })
+}
+
+async function getSnapshots({ watchDependency, discriminator, storeGet, getValue, axios }) {
+  watchDependency('discriminator#/repository')
   const user = storeGet('/route/params/user') || ''
   const cluster = storeGet('/route/params/cluster') || ''
   const core = 'storage.kubestash.com'
   const version = 'v1alpha1'
-  const namespace = getValue(model, '/spec/dataSource/repository/namespace') || ''
-  const repository = getValue(model, '/spec/dataSource/repository/name') || ''
+  const repo = getValue(discriminator, '/repository') || {}
+  const namespace = repo.namespace || ''
+  const repository = repo.name || ''
+
   const url = `/clusters/${user}/${cluster}/proxy/${core}/${version}/namespaces/${namespace}/snapshots`
 
   try {
@@ -211,8 +235,15 @@ async function getSnapshots({ watchDependency, model, storeGet, getValue, axios 
         const owners = item?.metadata?.ownerReferences
         if (owners.length) return owners[0].name === repository && owners[0].kind === 'Repository'
       })
+
+      filteredSnapshots.forEach((item) => {
+        const time = item.status?.snapshotTime || ''
+        // get the time difference and add it to subtext
+        item.subText = getTimeDiffs(time)
+      })
       if (filteredSnapshots.length)
-        filteredSnapshots[0].text = filteredSnapshots[0].text + ' (Latest)'
+        filteredSnapshots[0].subText = '(Latest) ' + filteredSnapshots[0].subText
+
       return filteredSnapshots
     }
   } catch (e) {
@@ -221,20 +252,48 @@ async function getSnapshots({ watchDependency, model, storeGet, getValue, axios 
   return []
 }
 
-async function getAddons({ storeGet, axios, setDiscriminatorValue }) {
+function getTimeDiffs(time) {
+  const now = new Date()
+  const timeConvert = new Date(time)
+  diffInMs = now - timeConvert
+
+  // const diffInSeconds = Math.floor(diffInMs / 1000) % 60
+  const diffInMinutes = Math.floor(diffInMs / (1000 * 60)) % 60
+  const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60)) % 24
+  const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24))
+
+  let timeDiff = ''
+  if (diffInDays) timeDiff += `${diffInDays} ${diffInDays > 0 ? 'days' : 'day'} `
+  if (diffInHours) timeDiff += `${diffInHours} ${diffInHours > 0 ? 'hours' : 'hour'} `
+  if (diffInMinutes) timeDiff += `${diffInMinutes} ${diffInMinutes > 0 ? 'minutes' : 'minute'}`
+  return ` ${timeDiff} ago`
+}
+
+async function getAddons({ storeGet, axios, commit }) {
   const user = storeGet('/route/params/user') || ''
   const cluster = storeGet('/route/params/cluster') || ''
   const url = `/clusters/${user}/${cluster}/proxy/addons.kubestash.com/v1alpha1/addons`
+  if (isConsole({ storeGet })) {
+    try {
+      const resp = await axios.get(url)
+      let addons = resp?.data?.items
+      addonList = addons
 
-  try {
-    const resp = await axios.get(url)
-    let addons = resp?.data?.items
-    addonList = addons
+      addons = addons.map((item) => item?.metadata?.name)
 
-    addons = addons.map((item) => item?.metadata?.name)
-    return addons
-  } catch (e) {
-    console.log(e)
+      const kind = storeGet('/resource/layout/result/resource/kind')
+      if (kind) {
+        const found = addons.find((item) => item.startsWith(kind.toLowerCase()))
+        commit('wizard/model$update', {
+          path: '/spec/addon/name',
+          value: found,
+          force: true,
+        })
+      }
+      return addons
+    } catch (e) {
+      console.log(e)
+    }
   }
   return []
 }
@@ -374,6 +433,17 @@ function getResourceName({ getValue, model }) {
   return kindToResourceMap[apiGroup][kind]
 }
 
+function onParameterChange({ getValue, model, discriminator, commit }) {
+  const tasks = getValue(model, '/spec/addon/tasks') || []
+  const params = getValue(discriminator, '/params')
+  tasks[0]['params'] = params
+  commit('wizard/model$update', {
+    path: '/spec/addon/tasks',
+    value: tasks,
+    force: true,
+  })
+}
+
 return {
   fetchNamespaces,
   setVersion,
@@ -383,15 +453,18 @@ return {
   getApiGroup,
   isConsole,
   initMetadata,
+  getPreset,
   isRancherManaged,
   fetchNamespacesApi,
   setNamespace,
   getDbs,
   initTarget,
-  fetchNames,
+  getRepositories,
+  onRepoChange,
   getSnapshots,
   getAddons,
   getTasks,
   databaseSelected,
   returnFalse,
+  onParameterChange,
 }
