@@ -124,20 +124,13 @@ type BackupProfile struct {
 	Enable ToggleProfileOnBoolean `json:"enable"`
 	// +kubebuilder:default=BackupConfiguration
 	By BackupBy `json:"by"`
-	// +kubebuilder:default=Dump
-	Via BackupVia `json:"via"`
 }
 
 // +kubebuilder:validation:Enum=BackupConfiguration;BackupBlueprint
 type BackupBy string
 
-// +kubebuilder:validation:Enum=Dump;VolumeSnapshot
-type BackupVia string
-
 type ArchiverProfile struct {
 	Enable ToggleProfileOnBoolean `json:"enable"`
-	// +kubebuilder:default=Dump
-	Via BackupVia `json:"via"`
 }
 
 // *** Backup-related ends *** //
