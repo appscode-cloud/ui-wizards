@@ -178,3 +178,71 @@ resources:
           requests:
             storage: 100Mi
       version: 3.8.3
+  coreKubestashComBackupConfiguration: # +doc-gen:break
+    apiVersion: core.kubestash.com/v1alpha1
+    kind: BackupConfiguration
+    metadata:
+      name: elasticsearch
+      namespace: demo
+    spec:
+      backends:
+        - name: elasticsearch-backend
+          retentionPolicy:
+            name: elasticsearch-retention-policy
+            namespace: demo
+          storageRef:
+            name: elasticsearch-storage
+            namespace: demo
+      sessions:
+        - addon:
+            jobTemplate:
+              spec:
+                containerSecurityContext:
+                  allowPrivilegeEscalation: false
+                  capabilities:
+                    drop:
+                      - ALL
+                  runAsGroup: 0
+                  runAsNonRoot: true
+                  runAsUser: 1000
+                  seccompProfile:
+                    type: RuntimeDefault
+                nodeSelector:
+                  kubernetes.io/os: linux
+            name: elasticsearch-addon
+            tasks:
+              - name: logical-backup
+          name: elasticsearch-frequent-backup
+          repositories:
+            - backend: elasticsearch-backend
+              directory: /es-repo
+              encryptionSecret:
+                name: elasticsearch-encryption-secret
+                namespace: demo
+              name: elasticsearch-repo
+          scheduler:
+            failedJobsHistoryLimit: 4
+            jobTemplate:
+              backoffLimit: 2
+              template:
+                spec:
+                  containerSecurityContext:
+                    allowPrivilegeEscalation: false
+                    capabilities:
+                      drop:
+                        - ALL
+                    runAsGroup: 0
+                    runAsNonRoot: true
+                    runAsUser: 1000
+                    seccompProfile:
+                      type: RuntimeDefault
+                  nodeSelector:
+                    kubernetes.io/os: linux
+            schedule: 0 */2 * * *
+            successfulJobsHistoryLimit: 2
+          sessionHistoryLimit: 3
+      target:
+        apiGroup: kubedb.com
+        kind: Elasticsearch
+        name: elasticsearch
+        namespace: demo
