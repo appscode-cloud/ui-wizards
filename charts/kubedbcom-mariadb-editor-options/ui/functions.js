@@ -808,8 +808,11 @@ function checkIfFeatureOn({ getValue, model }, type) {
 function isToggleOn({ getValue, model, discriminator, watchDependency }, type) {
   watchDependency('discriminator#/bundleApiLoaded')
   watchDependency('model#/spec/admin/deployment/default')
+  watchDependency('model#/spec/mode')
   const bundleApiLoaded = getValue(discriminator, '/bundleApiLoaded')
   let deploymentType = getValue(model, `/spec/admin/deployment/default`)
+  const mode = getValue(model, '/spec/mode')
+  if (type === 'archiver' && mode === 'Standalone') return false
   if (
     type === 'tls' ||
     type === 'backup' ||
