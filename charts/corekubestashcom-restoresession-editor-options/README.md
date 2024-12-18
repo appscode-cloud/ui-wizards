@@ -62,7 +62,6 @@ The following table lists the configurable parameters of the `corekubestashcom-r
 | spec.dataSource.encryptionSecret.name      |                                                    | <code>""</code>                 |
 | spec.dataSource.encryptionSecret.namespace |                                                    | <code>"stash"</code>            |
 | spec.addon.name                            |                                                    | <code>""</code>                 |
-| spec.addon.tasks                           |                                                    | <code>[]</code>                 |
 | spec.addon.jobTemplate.securityContext     |                                                    | <code></code>                   |
 | spec.target.apiGroup                       |                                                    | <code>"kubedb.com"</code>       |
 | spec.target.kind                           |                                                    | <code>""</code>                 |
