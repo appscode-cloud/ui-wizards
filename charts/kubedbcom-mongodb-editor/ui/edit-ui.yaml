@@ -585,8 +585,8 @@ steps:
         type: input
       - computed: setBackupType
         fetch: getTypes
-        if: isBackupDataLoadedTrue
         hasDescription: true
+        if: isBackupDataLoadedTrue
         label:
           text: Select Backup Type
         onChange: onBackupTypeChange
@@ -612,10 +612,10 @@ steps:
           schema:
             $ref: discriminator#/backupConfigContext
           type: select
-        - label:
-            text: Select BackupConfig
-          fetch: getConfigList
+        - fetch: getConfigList
           if: showConfigList
+          label:
+            text: Select BackupConfig
           onChange: onConfigChange
           required: true
           schema:
@@ -636,8 +636,8 @@ steps:
           schema:
             $ref: schema#/properties/resources/properties/coreKubestashComBackupConfiguration/properties/spec/properties/paused
           type: switch
-        type: single-step-form
         if: isBackupType|BackupConfig
+        type: single-step-form
       - discriminator:
           blueprintEnabled:
             default: false

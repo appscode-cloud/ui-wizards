@@ -75,6 +75,7 @@ type MSSQLServerTopology struct {
 type MSSQLServerPID string
 
 type MSSQLServerAGSpec struct {
+	// +optional
 	Databases []string `json:"databases"`
 }
 
