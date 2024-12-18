@@ -1483,8 +1483,8 @@ function onInputChangeSchedule(
   discriminatorName,
 ) {
   const value = getValue(discriminator, `/${discriminatorName}`)
-  const session = getValue(model, modelPath)
-  session[0].scheduler.schedule = value
+  const session = getValue(model, modelPath) || []
+  if (session.length) session[0].scheduler.schedule = value
   commit('wizard/model$update', {
     path: modelPath,
     value: session,
@@ -1558,6 +1558,7 @@ async function initBackupData({ commit, storeGet, axios, getValue, model, setDis
   const kind = storeGet('/resource/layout/result/resource/kind')
 
   // get db resource
+  let resources = {}
   try {
     const resource = storeGet('/resource/layout/result/resource')
     const resp = await axios.put(`/clusters/${user}/${cluster}/helm/editor/model`, {
@@ -1570,6 +1571,7 @@ async function initBackupData({ commit, storeGet, axios, getValue, model, setDis
       },
     })
     dbResource = { ...resp.data?.resources?.kubedbComMongoDB }
+    resources = { ...resp.data?.resources }
     if (resp.data?.resources?.coreKubestashComBackupConfiguration) {
       isBackupOnModel = true
       initialModel = objectCopy(resp.data?.resources?.coreKubestashComBackupConfiguration) || {}
@@ -1607,16 +1609,12 @@ async function initBackupData({ commit, storeGet, axios, getValue, model, setDis
     force: true,
   })
   commit('wizard/model$update', {
-    path: '/resources/kubedbComMongoDB',
-    value: dbResource,
+    path: '/resources',
+    value: resources,
     force: true,
   })
 
-  // call model to get the model when backup is disabled
-  if (!isBackupOnModel) {
-    commit('wizard/model$delete', '/resources/coreKubestashComBackupConfiguration')
-  }
-  // set initial data from stash-presets when backup is disabled
+  // set initial data from stash-presets
   const stashPreset = storeGet('/backup/stashPresets')
   if (stashPreset) {
     const { retentionPolicy, encryptionSecret, schedule, storageRef } = stashPreset
@@ -1635,7 +1633,6 @@ async function initBackupData({ commit, storeGet, axios, getValue, model, setDis
     tempSessions[0]['repositories'] = tempRepositories
     tempSessions[0]['scheduler']['schedule'] = schedule
     valuesFromWizard.spec['sessions'] = tempSessions
-    console.log(valuesFromWizard)
   }
 
   const apiGroup = storeGet('/route/params/group')
@@ -1647,28 +1644,7 @@ async function initBackupData({ commit, storeGet, axios, getValue, model, setDis
     labels,
   }
 
-  // else {
-  //   dbResource = getValue(model, '/resources/kubedbComMongoDB')
-  //   initialDbMetadata = objectCopy(dbResource.metadata)
-
-  // const actions = storeGet('/resource/layout/result/ui/actions') || []
-  // const editor = actions.length ? actions[0].editor : {}
-  // const chartName = editor.name
-  // const sourceRef = editor.sourceRef
-  // const {
-  //   apiGroup: sourceApiGroup,
-  //   kind: sourceKind,
-  //   namespace: sourceNamespace,
-  //   name: sourceName,
-  // } = sourceRef || {}
-
-  // const requestUrl = `/clusters/${user}/${cluster}/helm/packageview/values?name=${chartName}&sourceApiGroup=${sourceApiGroup}&sourceKind=${sourceKind}&sourceNamespace=${sourceNamespace}&sourceName=${sourceName}&version=${chartVersion}&format=json`
-  // }
-
   setDiscriminatorValue('isBackupDataLoaded', true)
-
-  // call namespace for optimization
-  // namespaceList = await fetchNamespaces({ axios, storeGet })
 }
 
 function isBackupDataLoadedTrue({ watchDependency, getValue, discriminator }) {
@@ -1711,17 +1687,21 @@ function onBackupTypeChange({ commit, getValue, discriminator }) {
     value: type,
     force: true,
   })
-  const db = objectCopy(dbResource)
-
+  if (!isBackupOnModel) {
+    commit('wizard/model$delete', '/resources/coreKubestashComBackupConfiguration')
+  } else {
+    commit('wizard/model$update', {
+      path: '/resources/coreKubestashComBackupConfiguration',
+      value: initialModel,
+      force: true,
+    })
+  }
+  commit('wizard/model$delete', '/context')
   commit('wizard/model$update', {
     path: '/resources/kubedbComMongoDB/metadata',
-    value: db.metadata,
+    value: { ...initialDbMetadata },
     force: true,
   })
-  if (type === 'BackupConfig') {
-  } else {
-    commit('wizard/model$delete', '/resources/coreKubestashComBackupConfiguration')
-  }
 }
 
 function isBackupType({ watchDependency, getValue, discriminator }, type) {
@@ -1801,9 +1781,7 @@ function onContextChange({ getValue, discriminator, commit, model }) {
     value: context,
     force: true,
   })
-  if (context === 'Delete') {
-    commit('wizard/model$delete', '/resources/coreKubestashComBackupConfiguration')
-  } else if (context === 'Create') {
+  if (context === 'Create') {
     commit('wizard/model$update', {
       path: '/resources/coreKubestashComBackupConfiguration',
       value: valuesFromWizard,
@@ -1832,26 +1810,10 @@ function onConfigChange({ getValue, discriminator, commit, storeGet, model }) {
   const configName = getValue(discriminator, '/config')
   const configs = objectCopy(backupConfigurationsFromStore)
   const configDetails = configs?.find((item) => item?.metadata?.name === configName)
-  const scheduleFromConfig = configDetails?.spec?.sessions?.length
-    ? configDetails?.spec?.sessions[0]['scheduler']['schedule']
-    : ''
-
-  if (!isBackupOnModel) {
-    commit('wizard/model$update', {
-      path: '/resources/coreKubestashComBackupConfiguration',
-      value: objectCopy(valuesFromWizard),
-      force: true,
-    })
-  }
-  const modelPath = '/resources/coreKubestashComBackupConfiguration/spec/sessions'
-  const session = isBackupOnModel ? initialModel.spec?.sessions : valuesFromWizard.spec?.sessions
-  console.log(session)
-
-  if (session?.length) session[0]['scheduler']['schedule'] = scheduleFromConfig
 
   commit('wizard/model$update', {
-    path: modelPath,
-    value: session,
+    path: '/resources/coreKubestashComBackupConfiguration',
+    value: configDetails,
     force: true,
   })
 }
@@ -1875,7 +1837,9 @@ function showSchedule({ watchDependency, getValue, discriminator }) {
   watchDependency('discriminator#/config')
   const configName = getValue(discriminator, '/config')
   const contex = getValue(discriminator, '/backupConfigContext')
-  return !!configName || (contex && contex !== 'Delete')
+  if (contex === 'Create') return true
+  else if (contex === 'Delete') return false
+  else return !!configName
 }
 
 function getNamespaceArray() {
