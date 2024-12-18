@@ -1302,7 +1302,7 @@ function deleteKubeDbComMongDbAnnotation(getValue, model, commit) {
   })
 }
 
-function addKubeDbComMongoDbAnnotation(getValue, model, commit, key, value, force) {
+function addKubeDbComMongDbAnnotation(getValue, model, commit, key, value, force) {
   const annotations = getValue(model, '/resources/kubedbComMongoDB/metadata/annotations') || {}
 
   if (annotations[key] === undefined) {
@@ -1484,12 +1484,14 @@ function onInputChangeSchedule(
 ) {
   const value = getValue(discriminator, `/${discriminatorName}`)
   const session = getValue(model, modelPath) || []
-  if (session.length) session[0].scheduler.schedule = value
-  commit('wizard/model$update', {
-    path: modelPath,
-    value: session,
-    force: true,
-  })
+  if (session.length) {
+    session[0].scheduler.schedule = value
+    commit('wizard/model$update', {
+      path: modelPath,
+      value: session,
+      force: true,
+    })
+  }
 }
 
 function setInitSchedule(
@@ -1517,33 +1519,6 @@ function getDefaultSchedule({ getValue, model, watchDependency }, modelPath) {
   watchDependency('discriminator#/config')
   const session = getValue(model, modelPath)
   return session?.length ? session[0]?.scheduler.schedule : ''
-}
-
-function onBackupChange({ discriminator, getValue, commit, model }) {
-  const isBackupToggled = getValue(discriminator, '/backupEnabled')
-  if (!isBackupToggled) {
-    commit('wizard/model$delete', '/resources/coreKubestashComBackupConfiguration')
-    commit('wizard/model$delete', '/resources/coreKubestashComBackupBlueprint')
-
-    const annotations = getValue(model, '/resources/kubedbComMongoDB/metadata/annotations') || {}
-    if (
-      annotations['blueprint.kubestash.com/name'] &&
-      annotations['blueprint.kubestash.com/namespace']
-    ) {
-      delete annotations['blueprint.kubestash.com/name']
-      delete annotations['blueprint.kubestash.com/namespace']
-      commit('wizard/model$update', {
-        path: '/resources/kubedbComMongoDB/metadata/annotations',
-        value: annotations,
-        force: true,
-      })
-    }
-  }
-}
-
-function isBackupToggled({ discriminator, getValue, watchDependency }) {
-  watchDependency('discriminator#/backupEnabled')
-  return (isBackupToggled = getValue(discriminator, '/backupEnabled'))
 }
 
 async function initBackupData({ commit, storeGet, axios, getValue, model, setDiscriminatorValue }) {
@@ -1859,7 +1834,7 @@ function initFromAnnotationValue({ getValue, model }, key) {
 
 function onBackupBlueprintNameChange({ getValue, discriminator, commit, model }) {
   const backupBlueprintName = getValue(discriminator, '/backupBlueprintName')
-  addKubeDbComMongoDbAnnotation(
+  addKubeDbComMongDbAnnotation(
     getValue,
     model,
     commit,
@@ -1871,7 +1846,7 @@ function onBackupBlueprintNameChange({ getValue, discriminator, commit, model })
 
 function onBackupBlueprintScheduleChange({ getValue, discriminator, commit, model }) {
   const backupBlueprintSchedule = getValue(discriminator, '/schedule')
-  addKubeDbComMongoDbAnnotation(
+  addKubeDbComMongDbAnnotation(
     getValue,
     model,
     commit,
@@ -2889,7 +2864,7 @@ return {
   getImagePullSecrets,
   getBackupConfigsAndAnnotations,
   deleteKubeDbComMongDbAnnotation,
-  addKubeDbComMongoDbAnnotation,
+  addKubeDbComMongDbAnnotation,
   initScheduleBackup,
   initScheduleBackupForEdit,
   onScheduleBackupChange,
@@ -2950,8 +2925,6 @@ return {
 
   initBackupData,
   isBackupDataLoadedTrue,
-  isBackupToggled,
-  onBackupChange,
   setBackupType,
   getTypes,
   getNamespaceArray,
