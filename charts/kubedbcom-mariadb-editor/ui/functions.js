@@ -1737,7 +1737,7 @@ function getDefaultSchedule({ getValue, model, watchDependency }, modelPath) {
 async function initBackupData({ commit, storeGet, axios, getValue, model, setDiscriminatorValue }) {
   // set initial model for further usage
   valuesFromWizard = getValue(model, '/resources/coreKubestashComBackupConfiguration')
-  initialModel = objectCopy(valuesFromWizard)
+
   // check db backup is enabled or not
   backupConfigurationsFromStore = storeGet('/backup/backupConfigurations')
   const configs = objectCopy(backupConfigurationsFromStore)

@@ -1100,7 +1100,7 @@ function showBackupForm({ getValue, discriminator, watchDependency }) {
 async function initBackupData({ commit, storeGet, axios, getValue, model, setDiscriminatorValue }) {
   // set initial model for further usage
   valuesFromWizard = getValue(model, '/resources/coreKubestashComBackupConfiguration')
-  initialModel = objectCopy(valuesFromWizard)
+
   // check db backup is enabled or not
   backupConfigurationsFromStore = storeGet('/backup/backupConfigurations')
   const configs = objectCopy(backupConfigurationsFromStore)
@@ -2075,9 +2075,10 @@ function getDefault({ getValue, model }, modelPath, field, subfield) {
   }
 }
 
-function getDefaultSchedule({ getValue, model }, modelPath) {
+function getDefaultSchedule({ getValue, model, watchDependency }, modelPath) {
+  watchDependency('discriminator#/config')
   const session = getValue(model, modelPath)
-  return session[0].scheduler.schedule
+  return session?.length ? session[0]?.scheduler.schedule : ''
 }
 
 //////////////////// Auto Scaler /////////////////
