@@ -1521,6 +1521,8 @@ function getDefaultSchedule({ getValue, model, watchDependency }, modelPath) {
   return session?.length ? session[0]?.scheduler.schedule : ''
 }
 
+// restructure backup modal
+
 async function initBackupData({ commit, storeGet, axios, getValue, model, setDiscriminatorValue }) {
   // set initial model for further usage
   valuesFromWizard = getValue(model, '/resources/coreKubestashComBackupConfiguration')

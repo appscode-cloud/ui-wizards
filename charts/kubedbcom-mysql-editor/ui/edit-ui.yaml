@@ -483,137 +483,97 @@ steps:
         $ref: discriminator#/properties/scheduleBackup
       type: radio
     - discriminator:
-        backupEnabled:
+        backupType:
+          type: string
+        isBackupDataLoaded:
           default: false
           type: boolean
       elements:
-      - computed: setBackupSwitch
+      - computed: initBackupData
+        if: returnFalse
+        type: input
+      - computed: setBackupType
+        fetch: getTypes
+        if: isBackupDataLoadedTrue
+        hasDescription: true
         label:
-          text: Enable Backup
-        onChange: onBackupChange
+          text: Select Backup Type
+        onChange: onBackupTypeChange
         schema:
-          $ref: discriminator#/backupEnabled
-        type: switch
+          $ref: discriminator#/backupType
+        type: radio
       - discriminator:
-          backupInvoker:
+          backupConfigContext:
+            type: string
+          config:
+            type: string
+          paused:
+            default: false
+            type: boolean
+          schedule:
             type: string
         elements:
-        - computed: initBackupInvoker
+        - fetch: getContext
           label:
-            text: labels.backup.invoker
-          onChange: onBackupInvokerChange
-          options:
-          - text: Backup Configuration
-            value: backupConfiguration
-          - text: Backup Blueprint
-            value: backupBlueprint
+            text: Select Context
+          onChange: onContextChange
+          required: true
           schema:
-            $ref: discriminator#/properties/backupInvoker
-          type: radio
-        - elements:
-          - discriminator:
-              backupSchedule:
-                type: string
-            elements:
-            - computed: getDefaultSchedule|resources/coreKubestashComBackupConfiguration/spec/sessions
-              label:
-                text: labels.backupConfiguration.schedule
-              onChange: onInputChangeSchedule|resources/coreKubestashComBackupConfiguration/spec/sessions|backupSchedule
-              required: true
-              schema:
-                $ref: discriminator#/backupSchedule
-              type: input
-            type: single-step-form
-          - discriminator:
-              storageRefName:
-                type: string
-              storageRefNamespace:
-                type: string
-            elements:
-            - computed: getDefault|/resources/coreKubestashComBackupConfiguration/spec/backends|storageRef|namespace
-              fetch: getNamespaceArray
-              hasGroup: isRancherManaged
-              label:
-                text: Namespace
-              onChange: onInputChange|resources/coreKubestashComBackupConfiguration/spec/backends|storageRef|namespace|storageRefNamespace
-              required: true
-              schema:
-                $ref: discriminator#/storageRefNamespace
-              type: select
-            - computed: getDefault|/resources/coreKubestashComBackupConfiguration/spec/backends|storageRef|name
-              fetch: fetchNames|v1alpha1|backupstorages|storageRefNamespace
-              label:
-                text: Name
-              onChange: onInputChange|resources/coreKubestashComBackupConfiguration/spec/backends|storageRef|name|storageRefName
-              required: true
-              schema:
-                $ref: discriminator#/storageRefName
-              type: select
-            label:
-              text: StorageRef
-            show_label: true
-            type: single-step-form
-          - discriminator:
-              retentionPolicyName:
-                type: string
-              retentionPolicyNamespace:
-                type: string
-            elements:
-            - computed: getDefault|/resources/coreKubestashComBackupConfiguration/spec/backends|retentionPolicy|namespace
-              fetch: getNamespaceArray
-              hasGroup: isRancherManaged
-              label:
-                text: Namespace
-              onChange: onInputChange|resources/coreKubestashComBackupConfiguration/spec/backends|retentionPolicy|namespace|retentionPolicyNamespace
-              required: true
-              schema:
-                $ref: discriminator#/retentionPolicyNamespace
-              type: select
-            - computed: getDefault|/resources/coreKubestashComBackupConfiguration/spec/backends|retentionPolicy|name
-              fetch: fetchNames|v1alpha1|retentionpolicies|retentionPolicyNamespace
-              label:
-                text: Name
-              onChange: onInputChange|resources/coreKubestashComBackupConfiguration/spec/backends|retentionPolicy|name|retentionPolicyName
-              required: true
-              schema:
-                $ref: discriminator#/retentionPolicyName
-              type: select
-            label:
-              text: Retention Policy
-            show_label: true
-            type: single-step-form
-          - discriminator:
-              encryptionSecretName:
-                type: string
-              encryptionSecretNamespace:
-                type: string
-            elements:
-            - computed: getDefault|/resources/coreKubestashComBackupConfiguration/spec/sessions|encryptionSecret|namespace
-              fetch: getNamespaceArray
-              hasGroup: isRancherManaged
-              label:
-                text: Namespace
-              onChange: onInputChange|/resources/coreKubestashComBackupConfiguration/spec/sessions|encryptionSecret|namespace|encryptionSecretNamespace
-              required: true
-              schema:
-                $ref: discriminator#/encryptionSecretNamespace
-              type: select
-            - computed: getDefault|/resources/coreKubestashComBackupConfiguration/spec/sessions|encryptionSecret|name
-              fetch: fetchNames|v1|secrets|encryptionSecretNamespace
-              label:
-                text: Name
-              onChange: onInputChange|/resources/coreKubestashComBackupConfiguration/spec/sessions|encryptionSecret|name|encryptionSecretName
-              required: true
-              schema:
-                $ref: discriminator#/encryptionSecretName
-              type: select
-            label:
-              text: Encryption Secret
-            show_label: true
-            type: single-step-form
-          if: showInvokerForm|backupConfiguration
-          type: single-step-form
-        if: isBackupToggled
+            $ref: discriminator#/backupConfigContext
+          type: select
+        - label:
+            text: Select BackupConfig
+          fetch: getConfigList
+          if: showConfigList
+          onChange: onConfigChange
+          required: true
+          schema:
+            $ref: discriminator#/config
+          type: select
+        - computed: getDefaultSchedule|/resources/coreKubestashComBackupConfiguration/spec/sessions
+          if: showSchedule
+          label:
+            text: Schedule
+          onChange: onInputChangeSchedule|/resources/coreKubestashComBackupConfiguration/spec/sessions|schedule
+          required: true
+          schema:
+            $ref: discriminator#/schedule
+          type: input
+        - if: showPause
+          label:
+            text: Paused
+          schema:
+            $ref: schema#/properties/resources/properties/coreKubestashComBackupConfiguration/properties/spec/properties/paused
+          type: switch
+        type: single-step-form
+        if: isBackupType|BackupConfig
+      - discriminator:
+          blueprintEnabled:
+            default: false
+            type: boolean
+        elements:
+        - computed: setBlueprintSwitch
+          label:
+            text: Enable Backup Blueprint
+          onChange: onBlueprintChange
+          schema:
+            $ref: discriminator#/blueprintEnabled
+          type: switch
+        if: isBackupType|BackupBlueprint
+        type: single-step-form
+      - discriminator:
+          archiverEnabled:
+            default: false
+            type: boolean
+        elements:
+        - computed: setArchiverSwitch
+          label:
+            text: Enable Archiver
+          onChange: onArchiverChange
+          schema:
+            $ref: discriminator#/archiverEnabled
+          type: switch
+        if: isBackupType|Archiver
         type: single-step-form
       if: showBackupForm
       label:

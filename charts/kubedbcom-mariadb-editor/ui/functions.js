@@ -1858,7 +1858,7 @@ async function getTypes() {
     },
   ]
 
-  if (dbResource?.spec?.replicas) {
+  if (dbResource?.spec?.replicas !== 1) {
     arr.push({
       description: 'Enable/Disable Archiver',
       text: 'Archiver',
