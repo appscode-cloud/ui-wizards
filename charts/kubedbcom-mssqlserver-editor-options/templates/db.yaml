@@ -56,14 +56,17 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "kubedbcom-mssqlserver-editor-options.labels" . | nindent 4 }}
-{{- if .Values.spec.admin.archiver.enable.default }}
-    kubedb.com/archiver: "true"
-{{- end }}
 {{- if .Values.spec.annotations }}
   annotations:
     {{- include "kubedbcom-mssqlserver-editor-options.annotations" . | nindent 4 }}
 {{- end }}
 spec:
+{{- if .Values.spec.admin.archiver.enable.default }}
+  archiver:
+    ref:
+      name: {{ .Values.spec.archiverName }}
+      namespace: kubedb
+{{- end }}
   version: {{ .Values.spec.admin.databases.MSSQLServer.versions.default | quote }}
   storageType: Durable
   storage:
