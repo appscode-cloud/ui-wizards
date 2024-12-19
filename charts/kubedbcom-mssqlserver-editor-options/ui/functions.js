@@ -844,7 +844,10 @@ function fetchOptions({ model, getValue }, type) {
   return []
 }
 
-function getAdminOptions({ getValue, model, watchDependency }, type) {
+let archiverMap = []
+let archiverCalled = false
+
+function getAdminOptions({ getValue, model, watchDependency, axios, storeGet }, type) {
   watchDependency('discriminator#/bundleApiLoaded')
 
   const options = getValue(model, `/spec/admin/${type}/available`) || []
@@ -861,7 +864,81 @@ function getAdminOptions({ getValue, model, watchDependency }, type) {
       })) || []
     )
   }
+  if (type === 'storageClasses' && !archiverCalled) {
+    getArchiverName({ axios, storeGet }, options)
+  }
   return options
+}
+
+function showArchiver({ watchDependency, getValue, model, commit }) {
+  watchDependency('model#/spec/mode')
+  const dbmode = getValue(model, '/spec/mode')
+
+  if (dbmode === 'Standalone') {
+    commit('wizard/model$update', {
+      path: '/spec/admin/archiver/enable/default',
+      value: false,
+      force: true,
+    })
+    return false
+  }
+  return checkIfFeatureOn({ getValue, model }, 'archiver')
+}
+
+async function getArchiverName({ axios, storeGet }, options) {
+  try {
+    archiverCalled = true
+    const params = storeGet('/route/params')
+    const { user, cluster, group, resource } = params
+    const url = `/clusters/${user}/${cluster}/proxy/storage.k8s.io/v1/storageclasses`
+    const resp = await axios.get(url)
+
+    resp.data?.items?.forEach((item) => {
+      const annotations = item.metadata?.annotations
+      const classname = item.metadata?.name
+      const annotationKeyToFind = `${resource}.${group}/archiver`
+      archiverMap.push({ storageClass: classname, annotation: annotations[annotationKeyToFind] })
+      return resp.data
+    })
+  } catch (e) {
+    console.log(e)
+  }
+}
+
+function onArchiverChange({ model, getValue, commit }) {
+  const isArchiverOn = getValue(model, '/spec/admin/archiver/enable/default')
+
+  const stClass = getValue(model, '/spec/admin/storageClasses/default')
+  const found = archiverMap.find((item) => item.storageClass === stClass)
+
+  if (isArchiverOn && found?.annotation)
+    commit('wizard/model$update', {
+      path: '/spec/archiverName',
+      value: found.annotation,
+      force: true,
+    })
+}
+
+function showArchiverAlert({ watchDependency, model, getValue, commit }) {
+  watchDependency('model#/spec/admin/storageClasses/default')
+
+  watchDependency('model#/spec/mode')
+  const mode = getValue(model, '/spec/mode')
+  if (mode === 'Standalone') return false
+
+  const stClass = getValue(model, '/spec/admin/storageClasses/default')
+  const found = archiverMap.find((item) => item.storageClass === stClass)
+  const show = !found?.annotation
+
+  // toggle archiver to false when storageClass annotation not found
+  if (show)
+    commit('wizard/model$update', {
+      path: '/spec/admin/archiver/enable/default',
+      value: false,
+      force: true,
+    })
+
+  return show
 }
 
 function checkIfFeatureOn({ getValue, model }, type) {
@@ -880,25 +957,16 @@ function checkIfFeatureOn({ getValue, model }, type) {
   } else if (type === 'monitoring') {
     return features.includes('monitoring') && val
   } else if (type === 'archiver') {
-    return features.includes('backup') && backupVal === 'KubeStash' && val
+    return features.includes('backup') && val
   }
 }
 
-function isToggleOn({ getValue, model, discriminator, watchDependency }, type) {
+function isToggleOn({ getValue, model, discriminator, watchDependency, commit }, type) {
   watchDependency('discriminator#/bundleApiLoaded')
   watchDependency('model#/spec/admin/deployment/default')
-  watchDependency('model#/spec/mode')
   const bundleApiLoaded = getValue(discriminator, '/bundleApiLoaded')
   let deploymentType = getValue(model, `/spec/admin/deployment/default`)
-  const mode = getValue(model, '/spec/mode')
-  if (type === 'archiver' && mode === 'Standalone') return false
-  if (
-    type === 'tls' ||
-    type === 'backup' ||
-    type === 'expose' ||
-    type === 'monitoring' ||
-    type === 'archiver'
-  ) {
+  if (type === 'tls' || type === 'backup' || type === 'expose' || type === 'monitoring') {
     return checkIfFeatureOn({ getValue, model }, type)
   } else if (
     type === 'clusterTier' ||
@@ -1197,4 +1265,7 @@ return {
   onPidChange,
   isPidCustom,
   onCustomPidChange,
+  onArchiverChange,
+  showArchiverAlert,
+  showArchiver,
 }
