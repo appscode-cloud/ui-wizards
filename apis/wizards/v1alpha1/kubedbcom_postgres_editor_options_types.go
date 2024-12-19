@@ -45,18 +45,20 @@ type KubedbcomPostgresEditorOptionsSpecSpec struct {
 	// +optional
 	Annotations map[string]string `json:"annotations"`
 	// +optional
-	Labels         map[string]string  `json:"labels"`
-	Mode           GeneralMode        `json:"mode"`
-	Replicas       int                `json:"replicas"`
-	DeletionPolicy DeletionPolicy     `json:"deletionPolicy"`
-	Persistence    Persistence        `json:"persistence"`
-	PodResources   PodResources       `json:"podResources"`
-	AuthSecret     AuthSecret         `json:"authSecret"`
-	Configuration  string             `json:"configuration"`
-	Init           InitDatabase       `json:"init"`
-	Admin          AdminOptions       `json:"admin"`
-	Backup         BackupToolSpec     `json:"backup"`
-	Monitoring     MonitoringOperator `json:"monitoring"`
+	Labels         map[string]string `json:"labels"`
+	Mode           GeneralMode       `json:"mode"`
+	Replicas       int               `json:"replicas"`
+	DeletionPolicy DeletionPolicy    `json:"deletionPolicy"`
+	Persistence    Persistence       `json:"persistence"`
+	PodResources   PodResources      `json:"podResources"`
+	AuthSecret     AuthSecret        `json:"authSecret"`
+	Configuration  string            `json:"configuration"`
+	// +optional
+	ArchiverName string             `json:"archiverName"`
+	Init         InitDatabase       `json:"init"`
+	Admin        AdminOptions       `json:"admin"`
+	Backup       BackupToolSpec     `json:"backup"`
+	Monitoring   MonitoringOperator `json:"monitoring"`
 	// +optional
 	Openshift Openshift `json:"openshift"`
 }

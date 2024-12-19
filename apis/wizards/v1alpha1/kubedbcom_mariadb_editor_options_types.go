@@ -48,16 +48,18 @@ type KubedbcomMariadbEditorOptionsSpecSpec struct {
 	Labels map[string]string `json:"labels"`
 	Mode   GeneralMode       `json:"mode"`
 	// +optional
-	Replicas       int                `json:"replicas,omitempty"`
-	Persistence    Persistence        `json:"persistence"`
-	PodResources   PodResources       `json:"podResources"`
-	AuthSecret     AuthSecret         `json:"authSecret"`
-	DeletionPolicy DeletionPolicy     `json:"deletionPolicy"`
-	Configuration  string             `json:"configuration"`
-	Init           InitDatabase       `json:"init"`
-	Admin          AdminOptions       `json:"admin"`
-	Backup         BackupToolSpec     `json:"backup"`
-	Monitoring     MonitoringOperator `json:"monitoring"`
+	Replicas       int            `json:"replicas,omitempty"`
+	Persistence    Persistence    `json:"persistence"`
+	PodResources   PodResources   `json:"podResources"`
+	AuthSecret     AuthSecret     `json:"authSecret"`
+	DeletionPolicy DeletionPolicy `json:"deletionPolicy"`
+	Configuration  string         `json:"configuration"`
+	// +optional
+	ArchiverName string             `json:"archiverName"`
+	Init         InitDatabase       `json:"init"`
+	Admin        AdminOptions       `json:"admin"`
+	Backup       BackupToolSpec     `json:"backup"`
+	Monitoring   MonitoringOperator `json:"monitoring"`
 	// +optional
 	Openshift Openshift `json:"openshift"`
 }
