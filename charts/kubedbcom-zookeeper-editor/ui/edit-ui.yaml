@@ -1,0 +1,119 @@
+steps:
+- form:
+    elements:
+    - disabled: true
+      label:
+        text: labels.database.name
+      onChange: onNameChange
+      schema:
+        $ref: schema#/properties/metadata/properties/release/properties/name
+      type: input
+    type: single-step-form
+  id: basic
+  title: steps.0.label
+- form:
+    discriminator:
+      scheduleBackup:
+        default: "yes"
+        type: string
+    elements:
+    - discriminator:
+        backupType:
+          type: string
+        isBackupDataLoaded:
+          default: false
+          type: boolean
+      elements:
+      - computed: initBackupData
+        if: returnFalse
+        type: input
+      - computed: setBackupType
+        fetch: getTypes
+        hasDescription: true
+        if: isBackupDataLoadedTrue
+        label:
+          text: Select Backup Type
+        onChange: onBackupTypeChange
+        schema:
+          $ref: discriminator#/backupType
+        type: radio
+      - discriminator:
+          backupConfigContext:
+            type: string
+          config:
+            type: string
+          paused:
+            default: false
+            type: boolean
+          schedule:
+            type: string
+        elements:
+        - fetch: getContext
+          label:
+            text: Select Context
+          onChange: onContextChange
+          required: true
+          schema:
+            $ref: discriminator#/backupConfigContext
+          type: select
+        - fetch: getConfigList
+          if: showConfigList
+          label:
+            text: Select BackupConfig
+          onChange: onConfigChange
+          required: true
+          schema:
+            $ref: discriminator#/config
+          type: select
+        - computed: getDefaultSchedule|/resources/coreKubestashComBackupConfiguration/spec/sessions
+          if: showSchedule
+          label:
+            text: Schedule
+          onChange: onInputChangeSchedule|/resources/coreKubestashComBackupConfiguration/spec/sessions|schedule
+          required: true
+          schema:
+            $ref: discriminator#/schedule
+          type: input
+        - if: showPause
+          label:
+            text: Paused
+          schema:
+            $ref: schema#/properties/resources/properties/coreKubestashComBackupConfiguration/properties/spec/properties/paused
+          type: switch
+        if: isBackupType|BackupConfig
+        type: single-step-form
+      - discriminator:
+          blueprintEnabled:
+            default: false
+            type: boolean
+        elements:
+        - computed: setBlueprintSwitch
+          label:
+            text: Enable Backup Blueprint
+          onChange: onBlueprintChange
+          schema:
+            $ref: discriminator#/blueprintEnabled
+          type: switch
+        if: isBackupType|BackupBlueprint
+        type: single-step-form
+      - discriminator:
+          archiverEnabled:
+            default: false
+            type: boolean
+        elements:
+        - computed: setArchiverSwitch
+          label:
+            text: Enable Archiver
+          onChange: onArchiverChange
+          schema:
+            $ref: discriminator#/archiverEnabled
+          type: switch
+        if: isBackupType|Archiver
+        type: single-step-form
+      label:
+        text: Backup Form
+      type: single-step-form
+    type: single-step-form
+  id: backupconfiguration
+  title: steps.4.label
+type: multi-step-form
