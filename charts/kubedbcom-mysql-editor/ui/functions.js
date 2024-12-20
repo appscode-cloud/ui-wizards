@@ -1088,6 +1088,9 @@ let initialDbMetadata = {}
 let namespaceList = []
 let backupConfigurationsFromStore = {}
 let valuesFromWizard = {}
+let initialArchiver = {}
+let isArchiverAvailable = false
+let archiverObjectToCommit = {}
 
 function showBackupForm({ getValue, discriminator, watchDependency }) {
   const scheduleBackup = getValue(discriminator, '/scheduleBackup')
@@ -1099,37 +1102,61 @@ function showBackupForm({ getValue, discriminator, watchDependency }) {
 
 async function initBackupData({ commit, storeGet, axios, getValue, model, setDiscriminatorValue }) {
   // set initial model for further usage
-  valuesFromWizard = getValue(model, '/resources/coreKubestashComBackupConfiguration')
+  initialModel = getValue(model, '/resources/coreKubestashComBackupConfiguration')
+  isBackupOnModel = !!initialModel
 
   // check db backup is enabled or not
   backupConfigurationsFromStore = storeGet('/backup/backupConfigurations')
   const configs = objectCopy(backupConfigurationsFromStore)
-  const { name, cluster, user, group } = storeGet('/route/params')
+  const { name, cluster, user, group, resource } = storeGet('/route/params')
   const namespace = storeGet('/route/query/namespace')
   const kind = storeGet('/resource/layout/result/resource/kind')
+  dbResource = getValue(model, '/resources/kubedbComMySQL')
+  initialDbMetadata = objectCopy(dbResource.metadata)
+  initialArchiver = dbResource.spec?.archiver ? objectCopy(dbResource.spec?.archiver) : undefined
 
-  // get db resource
-  let resources = {}
+  // get values.yaml to populate data when backup-config is being created
   try {
-    const resource = storeGet('/resource/layout/result/resource')
-    const resp = await axios.put(`/clusters/${user}/${cluster}/helm/editor/model`, {
-      metadata: {
-        release: {
-          name,
-          namespace,
-        },
-        resource,
-      },
-    })
-    dbResource = { ...resp.data?.resources?.kubedbComMySQL }
-    resources = { ...resp.data?.resources }
-    if (resp.data?.resources?.coreKubestashComBackupConfiguration) {
-      isBackupOnModel = true
-      initialModel = objectCopy(resp.data?.resources?.coreKubestashComBackupConfiguration) || {}
-    }
-    initialDbMetadata = objectCopy(dbResource.metadata)
+    const actionArray = storeGet('/resource/actions/result')
+    const editorDetails = actionArray[0]?.items[0]?.editor
+    const chartName = editorDetails?.name
+    const sourceApiGroup = editorDetails?.sourceRef?.apiGroup
+    const sourceKind = editorDetails?.sourceRef?.kind
+    const sourceNamespace = editorDetails?.sourceRef?.namespace
+    const sourceName = editorDetails?.sourceRef?.name
+    const chartVersion = editorDetails?.version
+
+    const url = `/clusters/${user}/${cluster}/helm/packageview/values?name=${chartName}&sourceApiGroup=${sourceApiGroup}&sourceKind=${sourceKind}&sourceNamespace=${sourceNamespace}&sourceName=${sourceName}&version=${chartVersion}&format=json`
+
+    const resp = await axios.get(url)
+
+    valuesFromWizard = objectCopy(resp.data?.resources?.coreKubestashComBackupConfiguration) || {}
   } catch (e) {
     console.log(e)
+  }
+
+  // check storageclass archiver annotation
+  if (initialArchiver) {
+    isArchiverAvailable = true
+  } else {
+    const storageClassName = dbResource?.spec?.storage?.storageClassName
+    const url = `/clusters/${user}/${cluster}/proxy/storage.k8s.io/v1/storageclasses/${storageClassName}`
+    try {
+      const resp = await axios.get(url)
+      const archAnnotation = resp.data?.metadata?.annotations
+      const annotationKeyToFind = `${resource}.${group}/archiver`
+      if (archAnnotation[annotationKeyToFind]) {
+        isArchiverAvailable = true
+        archiverObjectToCommit = {
+          ref: {
+            name: archAnnotation[annotationKeyToFind],
+            namespace: 'kubedb',
+          },
+        }
+      }
+    } catch (e) {
+      console.log(e)
+    }
   }
 
   // check config with metadata name first
@@ -1154,16 +1181,6 @@ async function initBackupData({ commit, storeGet, axios, getValue, model, setDis
 
   // set backup switch here
   isBackupOn = !!config
-  commit('wizard/model$update', {
-    path: '/metadata/release',
-    value: { name, namespace },
-    force: true,
-  })
-  commit('wizard/model$update', {
-    path: '/resources',
-    value: resources,
-    force: true,
-  })
 
   // set initial data from stash-presets
   const stashPreset = storeGet('/backup/stashPresets')
@@ -1221,7 +1238,7 @@ async function getTypes() {
     },
   ]
 
-  if (dbResource?.spec?.topology) {
+  if (dbResource?.spec?.topology && isArchiverAvailable) {
     arr.push({
       description: 'Enable/Disable Archiver',
       text: 'Archiver',
@@ -1248,11 +1265,12 @@ function onBackupTypeChange({ commit, getValue, discriminator }) {
     })
   }
   commit('wizard/model$delete', '/context')
-  commit('wizard/model$update', {
-    path: '/resources/kubedbComMySQL/metadata',
-    value: { ...initialDbMetadata },
-    force: true,
-  })
+  if (type !== 'BackupConfig')
+    commit('wizard/model$update', {
+      path: '/resources/kubedbComMySQL',
+      value: { ...dbResource },
+      force: true,
+    })
 }
 
 function isBackupType({ watchDependency, getValue, discriminator }, type) {
@@ -1277,14 +1295,21 @@ function onBlueprintChange({ getValue, discriminator, commit, model, storeGet })
 }
 
 function setArchiverSwitch() {
-  const labels = initialDbMetadata?.labels
-  return !!labels['kubedb.com/archiver']
+  const archiver = dbResource?.spec?.archiver
+  return !!archiver
 }
 
 function onArchiverChange({ getValue, discriminator, commit, model, storeGet }) {
   const archiverSwitch = getValue(discriminator, '/archiverEnabled')
-  if (archiverSwitch) addLabelAnnotation(commit, storeGet, 'labels')
-  else deleteLabelAnnotation(commit, 'labels')
+  const path = 'resources/kubedbComMySQL/spec/archiver'
+  if (archiverSwitch) {
+    commit('wizard/model$update', {
+      path: path,
+      value: initialArchiver ? initialArchiver : archiverObjectToCommit,
+    })
+  } else {
+    commit('wizard/model$delete', path)
+  }
 }
 
 function addLabelAnnotation(commit, storeGet, type) {
