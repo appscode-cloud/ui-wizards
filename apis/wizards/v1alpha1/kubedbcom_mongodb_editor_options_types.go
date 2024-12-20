@@ -59,11 +59,13 @@ type KubedbcomMongodbEditorOptionsSpecSpec struct {
 	// +optional
 	HostName string `json:"hostName"`
 	// +optional
-	IP         string             `json:"ip"`
-	Init       InitDatabase       `json:"init"`
-	Admin      AdminOptions       `json:"admin"`
-	Backup     BackupToolSpec     `json:"backup"`
-	Monitoring MonitoringOperator `json:"monitoring"`
+	IP string `json:"ip"`
+	// +optional
+	ArchiverName string             `json:"archiverName"`
+	Init         InitDatabase       `json:"init"`
+	Admin        AdminOptions       `json:"admin"`
+	Backup       BackupToolSpec     `json:"backup"`
+	Monitoring   MonitoringOperator `json:"monitoring"`
 	// +optional
 	Openshift Openshift `json:"openshift"`
 }
