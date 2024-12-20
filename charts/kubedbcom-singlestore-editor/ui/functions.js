@@ -1392,38 +1392,40 @@ let initialDbMetadata = {}
 let namespaceList = []
 let backupConfigurationsFromStore = {}
 let valuesFromWizard = {}
+let initialArchiver = {}
+let isArchiverAvailable = false
+let archiverObjectToCommit = {}
 
-async function initBackupData({ commit, storeGet, axios, getValue, model, setDiscriminatorValue }) {
+async function initBackupData({ storeGet, axios, getValue, model, setDiscriminatorValue }) {
   // set initial model for further usage
-  valuesFromWizard = getValue(model, '/resources/coreKubestashComBackupConfiguration')
+  initialModel = getValue(model, '/resources/coreKubestashComBackupConfiguration')
+  isBackupOnModel = !!initialModel
 
   // check db backup is enabled or not
   backupConfigurationsFromStore = storeGet('/backup/backupConfigurations')
   const configs = objectCopy(backupConfigurationsFromStore)
-  const { name, cluster, user, group } = storeGet('/route/params')
+  const { name, cluster, user, group, resource } = storeGet('/route/params')
   const namespace = storeGet('/route/query/namespace')
   const kind = storeGet('/resource/layout/result/resource/kind')
+  dbResource = getValue(model, '/resources/kubedbComSinglestore')
+  initialDbMetadata = objectCopy(dbResource.metadata)
 
-  // get db resource
-  let resources = {}
+  // get values.yaml to populate data when backup-config is being created
   try {
-    const resource = storeGet('/resource/layout/result/resource')
-    const resp = await axios.put(`/clusters/${user}/${cluster}/helm/editor/model`, {
-      metadata: {
-        release: {
-          name,
-          namespace,
-        },
-        resource,
-      },
-    })
-    dbResource = { ...resp.data?.resources?.kubedbComSinglestore }
-    resources = { ...resp.data?.resources }
-    if (resp.data?.resources?.coreKubestashComBackupConfiguration) {
-      isBackupOnModel = true
-      initialModel = objectCopy(resp.data?.resources?.coreKubestashComBackupConfiguration) || {}
-    }
-    initialDbMetadata = objectCopy(dbResource.metadata)
+    const actionArray = storeGet('/resource/actions/result')
+    const editorDetails = actionArray[0]?.items[0]?.editor
+    const chartName = editorDetails?.name
+    const sourceApiGroup = editorDetails?.sourceRef?.apiGroup
+    const sourceKind = editorDetails?.sourceRef?.kind
+    const sourceNamespace = editorDetails?.sourceRef?.namespace
+    const sourceName = editorDetails?.sourceRef?.name
+    const chartVersion = editorDetails?.version
+
+    const url = `/clusters/${user}/${cluster}/helm/packageview/values?name=${chartName}&sourceApiGroup=${sourceApiGroup}&sourceKind=${sourceKind}&sourceNamespace=${sourceNamespace}&sourceName=${sourceName}&version=${chartVersion}&format=json`
+
+    const resp = await axios.get(url)
+
+    valuesFromWizard = objectCopy(resp.data?.resources?.coreKubestashComBackupConfiguration) || {}
   } catch (e) {
     console.log(e)
   }
@@ -1450,16 +1452,6 @@ async function initBackupData({ commit, storeGet, axios, getValue, model, setDis
 
   // set backup switch here
   isBackupOn = !!config
-  commit('wizard/model$update', {
-    path: '/metadata/release',
-    value: { name, namespace },
-    force: true,
-  })
-  commit('wizard/model$update', {
-    path: '/resources',
-    value: resources,
-    force: true,
-  })
 
   // set initial data from stash-presets
   const stashPreset = storeGet('/backup/stashPresets')
@@ -1531,14 +1523,14 @@ function onBackupTypeChange({ commit, getValue, discriminator }) {
   } else {
     commit('wizard/model$update', {
       path: '/resources/coreKubestashComBackupConfiguration',
-      value: initialModel,
+      value: objectCopy(initialModel),
       force: true,
     })
   }
   commit('wizard/model$delete', '/context')
   commit('wizard/model$update', {
-    path: '/resources/kubedbComSinglestore/metadata',
-    value: { ...initialDbMetadata },
+    path: '/resources/kubedbComSinglestore',
+    value: objectCopy(dbResource),
     force: true,
   })
 }
@@ -1565,14 +1557,21 @@ function onBlueprintChange({ getValue, discriminator, commit, model, storeGet })
 }
 
 function setArchiverSwitch() {
-  const labels = initialDbMetadata?.labels
-  return !!labels['kubedb.com/archiver']
+  const archiver = dbResource?.spec?.archiver
+  return !!archiver
 }
 
-function onArchiverChange({ getValue, discriminator, commit, model, storeGet }) {
+function onArchiverChange({ getValue, discriminator, commit }) {
   const archiverSwitch = getValue(discriminator, '/archiverEnabled')
-  if (archiverSwitch) addLabelAnnotation(commit, storeGet, 'labels')
-  else deleteLabelAnnotation(commit, 'labels')
+  const path = 'resources/kubedbComSinglestore/spec/archiver'
+  if (archiverSwitch) {
+    commit('wizard/model$update', {
+      path: path,
+      value: initialArchiver ? initialArchiver : archiverObjectToCommit,
+    })
+  } else {
+    commit('wizard/model$delete', path)
+  }
 }
 
 function addLabelAnnotation(commit, storeGet, type) {
