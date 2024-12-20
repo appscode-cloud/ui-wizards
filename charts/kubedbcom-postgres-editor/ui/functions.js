@@ -1308,18 +1308,17 @@ function onBackupTypeChange({ commit, getValue, discriminator }) {
   } else {
     commit('wizard/model$update', {
       path: '/resources/coreKubestashComBackupConfiguration',
-      value: initialModel,
+      value: objectCopy(initialModel),
       force: true,
     })
   }
   commit('wizard/model$delete', '/context')
 
-  if (type !== 'BackupConfig')
-    commit('wizard/model$update', {
-      path: '/resources/kubedbComPostgres',
-      value: { ...dbResource },
-      force: true,
-    })
+  commit('wizard/model$update', {
+    path: '/resources/kubedbComPostgres',
+    value: objectCopy(dbResource),
+    force: true,
+  })
 }
 
 function isBackupType({ watchDependency, getValue, discriminator }, type) {

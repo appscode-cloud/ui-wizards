@@ -1896,17 +1896,16 @@ function onBackupTypeChange({ commit, getValue, discriminator }) {
   } else {
     commit('wizard/model$update', {
       path: '/resources/coreKubestashComBackupConfiguration',
-      value: initialModel,
+      value: objectCopy(initialModel),
       force: true,
     })
   }
   commit('wizard/model$delete', '/context')
-  if (type !== 'BackupConfig')
-    commit('wizard/model$update', {
-      path: '/resources/kubedbComMariaDB',
-      value: { ...dbResource },
-      force: true,
-    })
+  commit('wizard/model$update', {
+    path: '/resources/kubedbComMariaDB',
+    value: objectCopy(dbResource),
+    force: true,
+  })
 }
 
 function isBackupType({ watchDependency, getValue, discriminator }, type) {
@@ -2260,10 +2259,7 @@ async function getDbDetails({ setDiscriminatorValue, commit, axios, storeGet, ge
     storeGet('/route/query/namespace') || getValue(model, '/metadata/namespace') || ''
   const name =
     storeGet('/route/query/name') ||
-    getValue(
-      model,
-      '/resources/autoscalingKubedbComElasticsearchAutoscaler/spec/databaseRef/name',
-    ) ||
+    getValue(model, '/resources/autoscalingKubedbComMariaDBAutoscaler/spec/databaseRef/name') ||
     ''
 
   if (namespace && name) {
