@@ -313,12 +313,21 @@ steps:
           $ref: discriminator#/properties/backup
         type: switch
       - elements:
-        - label:
+        - disabled: showArchiverAlert
+          label:
             text: Enable Archiver?
+          onChange: onArchiverChange
           schema:
             $ref: schema#/properties/spec/properties/admin/properties/archiver/properties/enable/properties/default
           type: switch
-        if: isToggleOn|archiver
+        - label:
+            text: The selected StorageClass does not support Archiver
+          alertInfo:
+            type: info
+            show: true
+          if: showArchiverAlert
+          type: label-element
+        if: showArchiver
         type: single-step-form
       - elements:
         - label:
