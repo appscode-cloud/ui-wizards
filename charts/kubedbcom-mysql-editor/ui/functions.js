@@ -2352,20 +2352,36 @@ function isBindingAlreadyOn({ model, getValue }) {
   const value = getValue(model, '/resources')
   const keys = Object.keys(value)
   isExposeBinding = !!keys.find((str) => str === 'catalogAppscodeComMySQLBinding')
-  console.log(isExposeBinding, keys)
   return isExposeBinding
 }
 
-function addOrRemoveBinding({ commit, model, getValue, discriminator }) {
+async function addOrRemoveBinding({ commit, model, getValue, discriminator }) {
   const value = getValue(discriminator, `/binding`)
-  const resources = getValue(model, '/resources')
+  const dbName = getValue(model, '/metadata/release/name')
+  const dbNamespace = getValue(model, '/metadata/release/namespace')
+  const bindingValues = {
+    apiVersion: 'catalog.appscode.com/v1alpha1',
+    kind: 'MySQLBinding',
+    metadata: {
+      name: dbName,
+      namespace: dbNamespace,
+    },
+    spec: {
+      sourceRef: {
+        name: dbName,
+        namespace: dbNamespace,
+      },
+    },
+  }
 
   if (value) {
-    commit('wizard/model$update', {
-      path: '/resources/kubedbComMySQL/spec/storage/storageClassName',
-      value: storageClass,
+    await commit('wizard/model$update', {
+      path: '/resources/catalogAppscodeComMySQLBinding',
+      value: bindingValues,
       force: true,
     })
+  } else {
+    await commit('wizard/model$delete', '/resources/catalogAppscodeComMySQLBinding')
   }
 }
 
