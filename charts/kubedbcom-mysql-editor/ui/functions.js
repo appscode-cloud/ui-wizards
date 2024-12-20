@@ -2348,6 +2348,27 @@ function objectCopy(obj) {
   return JSON.parse(temp)
 }
 
+function isBindingAlreadyOn({ model, getValue }) {
+  const value = getValue(model, '/resources')
+  const keys = Object.keys(value)
+  isExposeBinding = !!keys.find((str) => str === 'catalogAppscodeComMySQLBinding')
+  console.log(isExposeBinding, keys)
+  return isExposeBinding
+}
+
+function addOrRemoveBinding({ commit, model, getValue, discriminator }) {
+  const value = getValue(discriminator, `/binding`)
+  const resources = getValue(model, '/resources')
+
+  if (value) {
+    commit('wizard/model$update', {
+      path: '/resources/kubedbComMySQL/spec/storage/storageClassName',
+      value: storageClass,
+      force: true,
+    })
+  }
+}
+
 return {
   handleUnit,
   isConsole,
@@ -2494,4 +2515,6 @@ return {
   onArchiverChange,
   onBackupTypeChange,
   getNamespaceArray,
+  isBindingAlreadyOn,
+  addOrRemoveBinding,
 }
