@@ -1293,6 +1293,43 @@ function handleUnit({ commit, model, getValue }, path, type = 'bound') {
   }
 }
 
+function isBindingAlreadyOn({ model, getValue }) {
+  const value = getValue(model, '/resources')
+  const keys = Object.keys(value)
+  isExposeBinding = !!keys.find((str) => str === 'catalogAppscodeComKafkaBinding')
+  return isExposeBinding
+}
+
+async function addOrRemoveBinding({ commit, model, getValue, discriminator }) {
+  const value = getValue(discriminator, `/binding`)
+  const dbName = getValue(model, '/metadata/release/name')
+  const dbNamespace = getValue(model, '/metadata/release/namespace')
+  const bindingValues = {
+    apiVersion: 'catalog.appscode.com/v1alpha1',
+    kind: 'KafkaBinding',
+    metadata: {
+      name: dbName,
+      namespace: dbNamespace,
+    },
+    spec: {
+      sourceRef: {
+        name: dbName,
+        namespace: dbNamespace,
+      },
+    },
+  }
+
+  if (value) {
+    await commit('wizard/model$update', {
+      path: '/resources/catalogAppscodeComKafkaBinding',
+      value: bindingValues,
+      force: true,
+    })
+  } else {
+    await commit('wizard/model$delete', '/resources/catalogAppscodeComKafkaBinding')
+  }
+}
+
 return {
   handleUnit,
   isConsole,
@@ -1376,4 +1413,6 @@ return {
   getOpsRequestUrl,
   getCreateNameSpaceUrl,
   setStorageClass,
+  isBindingAlreadyOn,
+  addOrRemoveBinding,
 }
