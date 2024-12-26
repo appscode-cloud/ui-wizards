@@ -50,7 +50,7 @@ The following table lists the configurable parameters of the `metak8sappscodecom
 | apiVersion         |             | <code>meta.k8s.appscode.com/v1alpha1</code> |
 | kind               |             | <code>MenuOutline</code>                    |
 | metadata.name      |             | <code>menuoutline</code>                    |
-| metadata.namespace |             | <code>default</code>                        |
+| metadata.namespace |             | <code>""</code>                             |
 
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm upgrade -i`. For example:
