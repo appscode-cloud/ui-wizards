@@ -2901,10 +2901,12 @@ async function addOrRemoveBinding({ commit, model, getValue, discriminator }) {
   const value = getValue(discriminator, `/binding`)
   const dbName = getValue(model, '/metadata/release/name')
   const dbNamespace = getValue(model, '/metadata/release/namespace')
+  const labels = getValue(model, '/resources/kubedbComSinglestore/metadata/labels')
   const bindingValues = {
     apiVersion: 'catalog.appscode.com/v1alpha1',
     kind: 'SinglestoreBinding',
     metadata: {
+      labels,
       name: dbName,
       namespace: dbNamespace,
     },

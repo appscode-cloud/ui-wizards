@@ -2359,10 +2359,12 @@ async function addOrRemoveBinding({ commit, model, getValue, discriminator }) {
   const value = getValue(discriminator, `/binding`)
   const dbName = getValue(model, '/metadata/release/name')
   const dbNamespace = getValue(model, '/metadata/release/namespace')
+  const labels = getValue(model, '/resources/kubedbComMySQL/metadata/labels')
   const bindingValues = {
     apiVersion: 'catalog.appscode.com/v1alpha1',
     kind: 'MySQLBinding',
     metadata: {
+      labels,
       name: dbName,
       namespace: dbNamespace,
     },
