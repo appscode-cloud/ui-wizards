@@ -775,6 +775,10 @@ let archiverCalled = false
 function getAdminOptions({ getValue, model, watchDependency, axios, storeGet }, type) {
   watchDependency('discriminator#/bundleApiLoaded')
 
+  if (type === 'storageClasses' && !archiverCalled) {
+    getArchiverName({ axios, storeGet })
+  }
+
   const options = getValue(model, `/spec/admin/${type}/available`) || []
 
   if (options.length === 0) {
@@ -788,9 +792,6 @@ function getAdminOptions({ getValue, model, watchDependency, axios, storeGet }, 
         value: item,
       })) || []
     )
-  }
-  if (type === 'storageClasses' && !archiverCalled) {
-    getArchiverName({ axios, storeGet }, options)
   }
   return options
 }
@@ -810,7 +811,7 @@ function showArchiver({ watchDependency, getValue, model, commit }) {
   return checkIfFeatureOn({ getValue, model }, 'archiver')
 }
 
-async function getArchiverName({ axios, storeGet }, options) {
+async function getArchiverName({ axios, storeGet }) {
   try {
     archiverCalled = true
     const params = storeGet('/route/params')
