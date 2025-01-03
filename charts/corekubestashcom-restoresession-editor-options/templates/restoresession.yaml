@@ -30,6 +30,20 @@ spec:
     {{- if and .Values.spec.addon.jobTemplate .Values.spec.addon.jobTemplate.securityContext }}
     jobTemplate:
       spec:
+        nodeSelector:
+          kubernetes.io/os: linux
         securityContext:
           runAsUser: {{ .Values.spec.addon.jobTemplate.securityContext }}
+          runAsGroup: 0
+    containerRuntimeSettings:
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+            - ALL
+        runAsGroup: 0
+        runAsNonRoot: true
+        runAsUser: {{ .Values.spec.addon.jobTemplate.securityContext }}
+        seccompProfile:
+          type: RuntimeDefault
     {{- end }}
