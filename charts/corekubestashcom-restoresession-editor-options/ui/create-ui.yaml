@@ -39,6 +39,7 @@ steps:
               text: Repository
             onChange: onRepoChange
             refresh: true
+            required: true
             schema:
               $ref: discriminator#/properties/repository
             type: select
@@ -72,6 +73,9 @@ steps:
             schema:
               $ref: discriminator#/properties/params
             type: textarea
+          - computed: setSecurityContext
+            if: returnFalse
+            type: input
           schema:
             $ref: schema#/properties/spec/properties/addon
           type: single-step-form
@@ -105,6 +109,8 @@ steps:
           if: isConsole
           label:
             text: Target
+          schema:
+            $ref: schema#/properties/spec/properties/target
           show_label: true
           type: single-step-form
         schema:
