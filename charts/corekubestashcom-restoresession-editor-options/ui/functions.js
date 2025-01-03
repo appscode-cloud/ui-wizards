@@ -166,7 +166,16 @@ function initTarget({ getValue, discriminator, commit }) {
 async function getRepositories({ getValue, model, storeGet, axios }) {
   const user = storeGet('/route/params/user') || ''
   const cluster = storeGet('/route/params/cluster') || ''
-  const url = `/clusters/${user}/${cluster}/proxy/storage.kubestash.com/v1alpha1/repositories`
+  const namespace = storeGet('/route/query/namespace') || ''
+  const activeOrg = storeGet('/activeOrganization') || ''
+  const orgList = storeGet('/organizations') || []
+  const activeOrgObj = orgList.find((item) => item.username === activeOrg)
+  const orgType = activeOrgObj?.orgType
+
+  let url = `/clusters/${user}/${cluster}/proxy/storage.kubestash.com/v1alpha1/repositories`
+  if (orgType === 3) {
+    url = `/clusters/${user}/${cluster}/proxy/storage.kubestash.com/v1alpha1/namespaces/${namespace}/repositories`
+  }
 
   try {
     const resp = await axios.get(url)
@@ -313,6 +322,53 @@ function databaseSelected({ storeGet, watchDependency, getValue, discriminator }
   watchDependency('discriminator#/database')
   const target = getValue(discriminator, '/database') || {}
   return !!target.name
+}
+
+const securityContextMap = {
+  MongoDB: 999,
+  Postgres: 70,
+  Elasticsearch: 1000,
+  MSSQLServer: 10001,
+  MySQL: 999,
+  MariaDB: 999,
+  Redis: 999,
+  Singlestore: 999,
+  ZooKeeper: 999,
+}
+
+async function setSecurityContext({ storeGet, commit, axios }) {
+  const namespace = storeGet('/route/query/namespace') || ''
+  const user = storeGet('/route/params/user') || ''
+  const cluster = storeGet('/route/params/cluster') || ''
+  if (namespace) {
+    const url = `clusters/${user}/${cluster}/proxy/core/v1/namespaces/${namespace}`
+    try {
+      const resp = await axios.get(url)
+      console.log(resp.data)
+      const annotations = resp.data?.metadata?.annotations || {}
+      const uidRange = annotations['openshift.io/sa.scc.uid-range']
+      if (uidRange) {
+        const val = uidRange.split('/')[0]
+        commit('wizard/model$update', {
+          path: '/spec/addon/jobTemplate/securityContext',
+          value: val,
+          force: true,
+        })
+      } else {
+        const kind = storeGet('/resource/layout/result/resource/kind') || ''
+        const context = securityContextMap[kind]
+        console.log(kind, context)
+
+        commit('wizard/model$update', {
+          path: '/spec/addon/jobTemplate/securityContext',
+          value: context,
+          force: true,
+        })
+      }
+    } catch (e) {
+      console.log(e)
+    }
+  }
 }
 
 function returnFalse() {
@@ -467,4 +523,5 @@ return {
   databaseSelected,
   returnFalse,
   onParameterChange,
+  setSecurityContext,
 }
