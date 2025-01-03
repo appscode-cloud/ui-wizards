@@ -36,4 +36,11 @@ spec:
     storageClassName: {{ .Values.spec.admin.storageClasses.default }}
   storageType: Durable
   deletionPolicy: {{ .Values.spec.deletionPolicy }}
+{{- if .Values.spec.admin.tls.default }}
+  tls:
+    issuerRef:
+      apiGroup: "cert-manager.io"
+      kind: ClusterIssuer
+      name: {{ .Values.spec.admin.clusterIssuers.default }}
+{{- end }}
 {{ end }}
