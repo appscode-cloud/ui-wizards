@@ -338,12 +338,15 @@ resources:
     spec:
       authSecret:
         name: redis-auth
+      cluster:
+        replicas: 3
+        shards: 2
       configSecret:
         name: redis-config
       deletionPolicy: WipeOut
       init:
         waitForInitialRestore: true
-      mode: Sentinel
+      mode: Cluster
       monitor:
         agent: prometheus.io
         prometheus:
@@ -356,9 +359,6 @@ resources:
                 cpu: 100m
                 memory: 128Mi
       replicas: 3
-      sentinelRef:
-        name: sentinel
-        namespace: demo
       storage:
         accessModes:
           - ReadWriteOnce
