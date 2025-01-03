@@ -2301,6 +2301,45 @@ function objectCopy(obj) {
   return JSON.parse(temp)
 }
 
+function isBindingAlreadyOn({ model, getValue }) {
+  const value = getValue(model, '/resources')
+  const keys = Object.keys(value)
+  isExposeBinding = !!keys.find((str) => str === 'catalogAppscodeComMariaDBBinding')
+  return isExposeBinding
+}
+
+async function addOrRemoveBinding({ commit, model, getValue, discriminator }) {
+  const value = getValue(discriminator, `/binding`)
+  const dbName = getValue(model, '/metadata/release/name')
+  const dbNamespace = getValue(model, '/metadata/release/namespace')
+  const labels = getValue(model, '/resources/kubedbComMariaDB/metadata/labels')
+  const bindingValues = {
+    apiVersion: 'catalog.appscode.com/v1alpha1',
+    kind: 'MariaDBBinding',
+    metadata: {
+      labels,
+      name: dbName,
+      namespace: dbNamespace,
+    },
+    spec: {
+      sourceRef: {
+        name: dbName,
+        namespace: dbNamespace,
+      },
+    },
+  }
+
+  if (value) {
+    await commit('wizard/model$update', {
+      path: '/resources/catalogAppscodeComMariaDBBinding',
+      value: bindingValues,
+      force: true,
+    })
+  } else {
+    await commit('wizard/model$delete', '/resources/catalogAppscodeComMariaDBBinding')
+  }
+}
+
 return {
   getDbDetails,
   isConsole,
@@ -2442,4 +2481,6 @@ return {
   setArchiverSwitch,
   onArchiverChange,
   onBackupTypeChange,
+  isBindingAlreadyOn,
+  addOrRemoveBinding,
 }
