@@ -459,50 +459,6 @@ async function unNamespacedResourceNames({ axios, storeGet }, group, version, re
   })
 }
 
-// reconfiguration type
-function ifReconfigurationTypeEqualsTo({ discriminator, getValue, watchDependency }, value) {
-  const reconfigurationType = getValue(discriminator, '/reconfigurationType')
-  watchDependency('discriminator#/reconfigurationType')
-
-  return reconfigurationType === value
-}
-
-function onApplyconfigChange({ discriminator, getValue, commit }) {
-  const applyconfig = getValue(discriminator, '/applyConfig')
-
-  const configObj = {}
-  if (applyconfig) {
-    applyconfig.forEach((item) => {
-      const { key, value } = item
-      configObj[key] = value
-    })
-  }
-
-  commit('wizard/model$update', {
-    path: '/spec/configuration/applyConfig',
-    value: configObj,
-    force: true,
-  })
-}
-
-function onReconfigurationTypeChange({ commit, discriminator, getValue, setDiscriminatorValue }) {
-  const reconfigurationType = getValue(discriminator, '/reconfigurationType')
-  setDiscriminatorValue('/applyConfig', [])
-  if (reconfigurationType === 'remove') {
-    commit('wizard/model$delete', `/spec/configuration`)
-
-    commit('wizard/model$update', {
-      path: `/spec/configuration/removeCustomConfig`,
-      value: true,
-      force: true,
-    })
-  } else {
-    commit('wizard/model$delete', `/spec/configuration/configSecret`)
-    commit('wizard/model$delete', `/spec/configuration/applyConfig`)
-    commit('wizard/model$delete', `/spec/configuration/removeCustomConfig`)
-  }
-}
-
 // for tls
 function hasTlsField({ discriminator, getValue, watchDependency }) {
   const tls = getDbTls({
@@ -741,9 +697,6 @@ return {
   getResourceList,
   resourceNames,
   unNamespacedResourceNames,
-  ifReconfigurationTypeEqualsTo,
-  onReconfigurationTypeChange,
-  onApplyconfigChange,
   hasTlsField,
   initIssuerRefApiGroup,
   getIssuerRefsName,
