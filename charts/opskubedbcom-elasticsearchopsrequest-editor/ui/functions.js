@@ -178,6 +178,24 @@ function ifRequestTypeEqualsTo({ model, getValue, watchDependency }, type) {
   return selectedType === type
 }
 
+function onApplyconfigChange({ discriminator, getValue, commit }) {
+  const applyconfig = getValue(discriminator, '/applyConfig')
+
+  const configObj = {}
+  if (applyconfig) {
+    applyconfig.forEach((item) => {
+      const { key, value } = item
+      configObj[key] = value
+    })
+  }
+
+  commit('wizard/model$update', {
+    path: '/spec/configuration/applyConfig',
+    value: configObj,
+    force: true,
+  })
+}
+
 function onRequestTypeChange({ model, getValue, commit }) {
   const selectedType = getValue(model, '/spec/type')
   const reqTypeMapping = {
@@ -832,6 +850,7 @@ return {
   resourceNames,
   unNamespacedResourceNames,
   ifReconfigurationTypeEqualsTo,
+  onApplyconfigChange,
   onReconfigurationTypeChange,
   disableReconfigurationType,
   hasTlsField,
