@@ -778,6 +778,7 @@ function fetchOptions({ model, getValue, commit }, type) {
 
   return returnArray
 }
+
 let archiverMap = []
 let archiverCalled = false
 
