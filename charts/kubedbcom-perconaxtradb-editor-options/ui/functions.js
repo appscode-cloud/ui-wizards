@@ -686,7 +686,7 @@ async function initBundle({ commit, model, getValue, axios, storeGet, setDiscrim
   setDiscriminatorValue('/bundleApiLoaded', true)
 }
 
-function fetchOptions({ model, getValue }, type) {
+function fetchOptions({ model, getValue, commit }, type) {
   let kind = getValue(model, '/metadata/resource/kind')
 
   let returnArray = []
@@ -711,13 +711,13 @@ function fetchOptions({ model, getValue }, type) {
 
   return returnArray
 }
-function getAdminOptions({ getValue, model, watchDependency }, type) {
+function getAdminOptions({ getValue, model, watchDependency, commit }, type) {
   watchDependency('discriminator#/bundleApiLoaded')
 
   const options = getValue(model, `/spec/admin/${type}/available`) || []
 
   if (options.length === 0) {
-    return fetchOptions({ model, getValue }, type)
+    return fetchOptions({ model, getValue, commit }, type)
   }
 
   return options
