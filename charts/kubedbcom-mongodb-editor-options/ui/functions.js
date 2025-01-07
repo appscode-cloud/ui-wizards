@@ -845,7 +845,7 @@ function fetchNamespaces({ watchDependency }) {
   return namespaces
 }
 
-function fetchOptions({ model, getValue }, type) {
+function fetchOptions({ model, getValue, commit }, type) {
   let kind = getValue(model, '/metadata/resource/kind')
 
   let returnArray = []
@@ -873,7 +873,7 @@ function fetchOptions({ model, getValue }, type) {
 let archiverMap = []
 let archiverCalled = false
 
-function getAdminOptions({ getValue, model, watchDependency, axios, storeGet }, type) {
+function getAdminOptions({ getValue, model, watchDependency, axios, storeGet, commit }, type) {
   watchDependency('discriminator#/bundleApiLoaded')
 
   if (type === 'storageClasses' && !archiverCalled) {
@@ -883,7 +883,7 @@ function getAdminOptions({ getValue, model, watchDependency, axios, storeGet }, 
   const options = getValue(model, `/spec/admin/${type}/available`) || []
 
   if (options.length === 0) {
-    return fetchOptions({ model, getValue }, type)
+    return fetchOptions({ model, getValue, commit }, type)
   }
   if (type.endsWith('/mode')) {
     return (
