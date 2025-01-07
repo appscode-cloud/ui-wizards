@@ -831,19 +831,28 @@ async function getRecoveryNames({ getValue, model, watchDependency, storeGet, ax
 function fetchOptions({ model, getValue }, type) {
   let kind = getValue(model, '/metadata/resource/kind')
 
+  let returnArray = []
   if (type === 'clusterTier/placement') {
-    return placement
+    returnArray = placement
   } else if (type === `databases/${kind}/versions`) {
-    return versions
+    returnArray = versions
   } else if (type === 'storageClasses') {
-    return storageClass
+    returnArray = storageClass
   } else if (type === 'clusterIssuers') {
-    return clusterIssuers
+    returnArray = clusterIssuers
   }
 
-  return []
-}
+  if (returnArray.length === 1) {
+    const path = `/spec/admin/${type}/default`
+    commit('wizard/model$update', {
+      path: path,
+      value: returnArray[0],
+      force: true,
+    })
+  }
 
+  return returnArray
+}
 let archiverMap = []
 let archiverCalled = false
 
