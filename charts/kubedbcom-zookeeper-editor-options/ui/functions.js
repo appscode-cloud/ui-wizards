@@ -849,6 +849,7 @@ function fetchOptions({ model, getValue, commit }, type) {
 
   return returnArray
 }
+
 function getAdminOptions({ getValue, model, watchDependency, commit }, type) {
   watchDependency('discriminator#/bundleApiLoaded')
 
