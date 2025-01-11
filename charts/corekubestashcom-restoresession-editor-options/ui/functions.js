@@ -240,10 +240,11 @@ async function getSnapshots({ watchDependency, discriminator, storeGet, getValue
         item.text = name
         return true
       })
-      const filteredSnapshots = snapshots.filter((item) => {
-        const owners = item?.metadata?.ownerReferences
-        if (owners.length) return owners[0].name === repository && owners[0].kind === 'Repository'
-      })
+      const filteredSnapshots =
+        snapshots.filter((item) => {
+          const owners = item?.metadata?.ownerReferences || []
+          if (owners.length) return owners[0].name === repository && owners[0].kind === 'Repository'
+        }) || []
 
       filteredSnapshots.forEach((item) => {
         const time = item.status?.snapshotTime || ''
