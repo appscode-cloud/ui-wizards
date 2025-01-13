@@ -1,13 +1,13 @@
 let addonList = []
 function isConsole({ storeGet }) {
-  isKube = storeGet('/route/query/operation')
-  return !isKube
+  const group = storeGet('/route/params/group') || ''
+  return group !== 'kubedb.com'
 }
 
 async function initMetadata({ storeGet, commit, axios }) {
   const resource = storeGet('/resource') || {}
   const { group, kind } = resource?.layout?.result?.resource
-  const name = storeGet('/route/query/name') || ''
+  const name = storeGet('/route/params/name') || ''
   const namespace = storeGet('route/query/namespace') || ''
   if (!isConsole({ storeGet })) {
     // set metadata name namespace
@@ -347,7 +347,6 @@ async function setSecurityContext({ storeGet, commit, axios }) {
     const url = `clusters/${user}/${cluster}/proxy/core/v1/namespaces/${namespace}`
     try {
       const resp = await axios.get(url)
-      console.log(resp.data)
       const annotations = resp.data?.metadata?.annotations || {}
       const uidRange = annotations['openshift.io/sa.scc.uid-range']
       if (uidRange) {
@@ -360,7 +359,6 @@ async function setSecurityContext({ storeGet, commit, axios }) {
       } else {
         const kind = storeGet('/resource/layout/result/resource/kind') || ''
         const context = securityContextMap[kind]
-        console.log(kind, context)
 
         commit('wizard/model$update', {
           path: '/spec/addon/jobTemplate/securityContext',
