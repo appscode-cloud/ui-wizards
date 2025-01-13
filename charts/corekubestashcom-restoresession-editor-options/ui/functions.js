@@ -240,10 +240,11 @@ async function getSnapshots({ watchDependency, discriminator, storeGet, getValue
         item.text = name
         return true
       })
-      const filteredSnapshots = snapshots.filter((item) => {
-        const owners = item?.metadata?.ownerReferences
-        if (owners.length) return owners[0].name === repository && owners[0].kind === 'Repository'
-      })
+      const filteredSnapshots =
+        snapshots.filter((item) => {
+          const owners = item?.metadata?.ownerReferences || []
+          if (owners.length) return owners[0].name === repository && owners[0].kind === 'Repository'
+        }) || []
 
       filteredSnapshots.forEach((item) => {
         const time = item.status?.snapshotTime || ''
@@ -262,6 +263,8 @@ async function getSnapshots({ watchDependency, discriminator, storeGet, getValue
 }
 
 function getTimeDiffs(time) {
+  if (time === '') return ''
+
   const now = new Date()
   const timeConvert = new Date(time)
   diffInMs = now - timeConvert
@@ -272,9 +275,9 @@ function getTimeDiffs(time) {
   const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24))
 
   let timeDiff = ''
-  if (diffInDays) timeDiff += `${diffInDays} ${diffInDays > 0 ? 'days' : 'day'} `
-  if (diffInHours) timeDiff += `${diffInHours} ${diffInHours > 0 ? 'hours' : 'hour'} `
-  if (diffInMinutes) timeDiff += `${diffInMinutes} ${diffInMinutes > 0 ? 'minutes' : 'minute'}`
+  if (diffInDays) timeDiff += `${diffInDays} ${diffInDays > 1 ? 'days' : 'day'} `
+  if (diffInHours) timeDiff += `${diffInHours} ${diffInHours > 1 ? 'hours' : 'hour'} `
+  if (diffInMinutes) timeDiff += `${diffInMinutes} ${diffInMinutes > 1 ? 'minutes' : 'minute'}`
   return ` ${timeDiff} ago`
 }
 
