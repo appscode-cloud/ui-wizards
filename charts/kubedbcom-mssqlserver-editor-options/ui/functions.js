@@ -828,26 +828,36 @@ async function getRecoveryNames({ getValue, model, watchDependency, storeGet, ax
   return options
 }
 
-function fetchOptions({ model, getValue }, type) {
+function fetchOptions({ model, getValue, commit }, type) {
   let kind = getValue(model, '/metadata/resource/kind')
 
+  let returnArray = []
   if (type === 'clusterTier/placement') {
-    return placement
+    returnArray = placement
   } else if (type === `databases/${kind}/versions`) {
-    return versions
+    returnArray = versions
   } else if (type === 'storageClasses') {
-    return storageClass
+    returnArray = storageClass
   } else if (type === 'clusterIssuers') {
-    return clusterIssuers
+    returnArray = clusterIssuers
   }
 
-  return []
+  if (returnArray.length === 1) {
+    const path = `/spec/admin/${type}/default`
+    commit('wizard/model$update', {
+      path: path,
+      value: returnArray[0],
+      force: true,
+    })
+  }
+
+  return returnArray
 }
 
 let archiverMap = []
 let archiverCalled = false
 
-function getAdminOptions({ getValue, model, watchDependency, axios, storeGet }, type) {
+function getAdminOptions({ getValue, model, watchDependency, axios, storeGet, commit }, type) {
   watchDependency('discriminator#/bundleApiLoaded')
 
   if (type === 'storageClasses' && !archiverCalled) {
@@ -857,7 +867,7 @@ function getAdminOptions({ getValue, model, watchDependency, axios, storeGet }, 
   const options = getValue(model, `/spec/admin/${type}/available`) || []
 
   if (options.length === 0) {
-    return fetchOptions({ model, getValue }, type)
+    return fetchOptions({ model, getValue, commit }, type)
   }
   if (type.endsWith('/mode')) {
     return (
