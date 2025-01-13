@@ -1,6 +1,7 @@
 let addonList = []
-function isConsole() {
-  return window.location.href.includes('/console/')
+function isConsole({ storeGet }) {
+  const group = storeGet('/route/params/group') || ''
+  return group !== 'kubedb.com'
 }
 
 async function initMetadata({ storeGet, commit, axios }) {
@@ -8,7 +9,7 @@ async function initMetadata({ storeGet, commit, axios }) {
   const { group, kind } = resource?.layout?.result?.resource
   const name = storeGet('/route/params/name') || ''
   const namespace = storeGet('route/query/namespace') || ''
-  if (!isConsole()) {
+  if (!isConsole({ storeGet })) {
     // set metadata name namespace
     commit('wizard/model$update', {
       path: '/metadata/release/name',
@@ -189,7 +190,7 @@ async function getRepositories({ getValue, model, storeGet, axios }) {
     let group = resource?.group || ''
     let kind = resource?.kind || ''
 
-    if (isConsole()) {
+    if (isConsole({ storeGet })) {
       group = getValue(model, '/spec/target/apiGroup') || ''
       kind = getValue(model, '/spec/target/kind') || ''
     }
@@ -284,7 +285,7 @@ async function getAddons({ storeGet, axios, commit }) {
   const user = storeGet('/route/params/user') || ''
   const cluster = storeGet('/route/params/cluster') || ''
   const url = `/clusters/${user}/${cluster}/proxy/addons.kubestash.com/v1alpha1/addons`
-  if (isConsole()) {
+  if (isConsole({ storeGet })) {
     try {
       const resp = await axios.get(url)
       let addons = resp?.data?.items
