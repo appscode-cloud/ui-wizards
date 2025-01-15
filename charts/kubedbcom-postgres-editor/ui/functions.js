@@ -2644,7 +2644,7 @@ return {
   isBackupDataLoadedTrue,
   setBackupType,
   getTypes,
-  getNamespaceArray,
+  onBackupTypeChange,
   isBackupType,
   getContext,
   onContextChange,

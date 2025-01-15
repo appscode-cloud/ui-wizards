@@ -1191,10 +1191,6 @@ function showBackupForm({ getValue, discriminator, watchDependency }) {
   else return false
 }
 
-function getNamespaceArray() {
-  return namespaceList
-}
-
 let initialModel = {}
 let isBackupOn = false
 let isBackupOnModel = false

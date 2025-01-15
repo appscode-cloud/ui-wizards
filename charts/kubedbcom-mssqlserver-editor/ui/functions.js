@@ -3135,6 +3135,7 @@ return {
   onSetCustomConfigChange,
   getCreateNameSpaceUrl,
   updateConfigServerStorageClass,
+
   initBackupData,
   isBackupDataLoadedTrue,
   setBackupType,
