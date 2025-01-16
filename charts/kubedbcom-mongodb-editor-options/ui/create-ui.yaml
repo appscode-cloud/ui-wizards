@@ -226,6 +226,11 @@ steps:
         createAuthSecret:
           default: false
           type: boolean
+        referSecret:
+          type: boolean
+          default: false
+        secret:
+          type: string
         recovery:
           default: false
           type: boolean
@@ -294,6 +299,20 @@ steps:
         schema:
           $ref: discriminator#/createAuthSecret
         type: switch
+      - if: showReferSecret
+        label:
+          text: Refer existing Secret ?
+        onChange: onAuthChange
+        schema:
+          $ref: discriminator#/referSecret
+        type: switch
+      - if: showSecretDropdown
+        type: select
+        schema:
+          $ref: schema#/properties/spec/properties/authSecret/properties/name
+        label:
+          text: Secret
+        fetch: getSecrets
       - if: showAuthPasswordField
         label:
           text: labels.name
