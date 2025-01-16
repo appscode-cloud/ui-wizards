@@ -315,24 +315,10 @@ const modeDetails = {
   },
 }
 
-function showAuthPasswordField({ discriminator, getValue, watchDependency }) {
-  const modelPathValue = getValue(discriminator, '/createAuthSecret')
-  watchDependency('discriminator#/createAuthSecret')
-  return !!modelPathValue
-}
-
 function isEqualToModelPathValue({ model, getValue, watchDependency }, value, modelPath) {
   const modelPathValue = getValue(model, modelPath)
   watchDependency('model#' + modelPath)
   return modelPathValue === value
-}
-
-function showAuthSecretField({ discriminator, getValue, watchDependency }) {
-  return !showAuthPasswordField({
-    discriminator,
-    getValue,
-    watchDependency,
-  })
 }
 
 function showStorageSizeField({ model, getValue, watchDependency }) {
@@ -431,37 +417,6 @@ function onCreateAuthSecretChange({ discriminator, getValue, commit }) {
   } else if (createAuthSecret === false) {
     commit('wizard/model$delete', '/spec/authSecret/password')
   }
-}
-
-async function getSecrets({ storeGet, axios, model, getValue, watchDependency }) {
-  const owner = storeGet('/route/params/user')
-  const cluster = storeGet('/route/params/cluster')
-  const namespace = getValue(model, '/metadata/release/namespace')
-  watchDependency('model#/metadata/release/namespace')
-
-  const resp = await axios.get(
-    `/clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}/secrets`,
-    {
-      params: {
-        filter: { items: { metadata: { name: null }, type: null } },
-      },
-    },
-  )
-
-  const secrets = (resp && resp.data && resp.data.items) || []
-
-  const filteredSecrets = secrets.filter((item) => {
-    const validType = ['kubernetes.io/service-account-token', 'Opaque']
-    return validType.includes(item.type)
-  })
-
-  filteredSecrets.map((item) => {
-    const name = (item.metadata && item.metadata.name) || ''
-    item.text = name
-    item.value = name
-    return true
-  })
-  return filteredSecrets
 }
 
 function getMachineListForOptions() {
@@ -1086,7 +1041,7 @@ function showIssuer({ model, getValue, watchDependency, discriminator }) {
 }
 
 function onAuthChange({ getValue, discriminator, commit }) {
-  const isAuthOn = getValue(discriminator, '/createAuthSecret')
+  const isAuthOn = getValue(discriminator, '/referSecret')
   if (!isAuthOn) {
     commit('wizard/model$update', {
       path: '/spec/authSecret/name',
@@ -1174,7 +1129,48 @@ function isConfigAvailable({ getValue, model }) {
   return val !== ''
 }
 
+async function getSecrets({ getValue, model, storeGet, axios }) {
+  const params = storeGet('/route/params')
+  const { user, cluster } = params
+  const namespace = getValue(model, `/metadata/release/namespace`)
+  let url = `/clusters/${user}/${cluster}/proxy/core/v1/namespaces/${namespace}/secrets`
+
+  const options = []
+  try {
+    const resp = await axios.get(url)
+    console.log(resp)
+    const items = resp.data?.items
+    items.forEach((ele) => {
+      options.push(ele.metadata?.name)
+    })
+  } catch (e) {
+    console.log(e)
+  }
+  return options
+}
+
+function showAuthPasswordField({ discriminator, getValue, watchDependency }) {
+  const modelPathValue = getValue(discriminator, '/referSecret')
+  watchDependency('discriminator#/referSecret')
+  return !modelPathValue && showReferSecret({ discriminator, getValue, watchDependency })
+}
+
+function showSecretDropdown({ discriminator, getValue, watchDependency }) {
+  const modelPathValue = getValue(discriminator, '/referSecret')
+  watchDependency('discriminator#/referSecret')
+  return !!modelPathValue && showReferSecret({ discriminator, getValue, watchDependency })
+}
+
+function showReferSecret({ discriminator, getValue, watchDependency }) {
+  const modelPathValue = getValue(discriminator, '/createAuthSecret')
+  watchDependency('discriminator#/createAuthSecret')
+  return !!modelPathValue
+}
+
 return {
+  showSecretDropdown,
+  showReferSecret,
+  getSecrets,
   isConfigAvailable,
   showAdditionalSettings,
   returnFalse,
@@ -1202,7 +1198,6 @@ return {
   fetchJsons,
   showAuthPasswordField,
   isEqualToModelPathValue,
-  showAuthSecretField,
   showStorageSizeField,
   getResources,
   getMongoDbVersions,
