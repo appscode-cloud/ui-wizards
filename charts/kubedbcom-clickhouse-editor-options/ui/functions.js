@@ -1129,7 +1129,7 @@ function isConfigAvailable({ getValue, model }) {
   return val !== ''
 }
 
-async function getSecrets({ getValue, model, storeGet, axios }) {
+async function getReferSecrets({ getValue, model, storeGet, axios }) {
   const params = storeGet('/route/params')
   const { user, cluster } = params
   const namespace = getValue(model, `/metadata/release/namespace`)
@@ -1170,7 +1170,7 @@ function showReferSecret({ discriminator, getValue, watchDependency }) {
 return {
   showSecretDropdown,
   showReferSecret,
-  getSecrets,
+  getReferSecrets,
   isConfigAvailable,
   showAdditionalSettings,
   returnFalse,
@@ -1202,7 +1202,6 @@ return {
   getResources,
   getMongoDbVersions,
   onCreateAuthSecretChange,
-  getSecrets,
   getMachineListForOptions,
   setLimits,
   setRequests,
