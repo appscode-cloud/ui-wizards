@@ -388,12 +388,6 @@ function updateAlertValue({ commit, model, discriminator, getValue }) {
   })
 }
 
-function showAuthPasswordField({ discriminator, getValue, watchDependency }) {
-  const modelPathValue = getValue(discriminator, '/createAuthSecret')
-  watchDependency('discriminator#/createAuthSecret')
-  return !!modelPathValue
-}
-
 function isEqualToModelPathValue({ model, getValue, watchDependency }, value, modelPath) {
   const modelPathValue = getValue(model, modelPath)
   watchDependency('model#' + modelPath)
@@ -1232,7 +1226,7 @@ function showIssuer({ model, getValue, watchDependency, discriminator }) {
 }
 
 function onAuthChange({ getValue, discriminator, commit }) {
-  const isAuthOn = getValue(discriminator, '/createAuthSecret')
+  const isAuthOn = getValue(discriminator, '/referSecret')
   if (!isAuthOn) {
     commit('wizard/model$update', {
       path: '/spec/authSecret/name',
@@ -1387,7 +1381,48 @@ function isConfigAvailable({ getValue, model }) {
   return val !== ''
 }
 
+async function getReferSecrets({ getValue, model, storeGet, axios }) {
+  const params = storeGet('/route/params')
+  const { user, cluster } = params
+  const namespace = getValue(model, `/metadata/release/namespace`)
+  let url = `/clusters/${user}/${cluster}/proxy/core/v1/namespaces/${namespace}/secrets`
+
+  const options = []
+  try {
+    const resp = await axios.get(url)
+    console.log(resp)
+    const items = resp.data?.items
+    items.forEach((ele) => {
+      options.push(ele.metadata?.name)
+    })
+  } catch (e) {
+    console.log(e)
+  }
+  return options
+}
+
+function showAuthPasswordField({ discriminator, getValue, watchDependency }) {
+  const modelPathValue = getValue(discriminator, '/referSecret')
+  watchDependency('discriminator#/referSecret')
+  return !modelPathValue && showReferSecret({ discriminator, getValue, watchDependency })
+}
+
+function showSecretDropdown({ discriminator, getValue, watchDependency }) {
+  const modelPathValue = getValue(discriminator, '/referSecret')
+  watchDependency('discriminator#/referSecret')
+  return !!modelPathValue && showReferSecret({ discriminator, getValue, watchDependency })
+}
+
+function showReferSecret({ discriminator, getValue, watchDependency }) {
+  const modelPathValue = getValue(discriminator, '/createAuthSecret')
+  watchDependency('discriminator#/createAuthSecret')
+  return !!modelPathValue
+}
+
 return {
+  showSecretDropdown,
+  showReferSecret,
+  getReferSecrets,
   isConfigAvailable,
   setMiliSeconds,
   setPointInTimeRecovery,
