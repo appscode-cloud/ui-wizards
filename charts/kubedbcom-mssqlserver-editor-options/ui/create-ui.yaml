@@ -134,10 +134,10 @@ steps:
         createAuthSecret:
           default: false
           type: boolean
-        referSecret:
-          type: boolean
-          default: false
         recovery:
+          default: false
+          type: boolean
+        referSecret:
           default: false
           type: boolean
       elements:
@@ -212,13 +212,13 @@ steps:
         schema:
           $ref: discriminator#/referSecret
         type: switch
-      - if: showSecretDropdown
-        type: select
-        schema:
-          $ref: schema#/properties/spec/properties/authSecret/properties/name
+      - fetch: getReferSecrets
+        if: showSecretDropdown
         label:
           text: Secret
-        fetch: getReferSecrets
+        schema:
+          $ref: schema#/properties/spec/properties/authSecret/properties/name
+        type: select
       - if: showAuthPasswordField
         label:
           text: labels.password

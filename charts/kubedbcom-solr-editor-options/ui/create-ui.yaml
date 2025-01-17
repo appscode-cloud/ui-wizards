@@ -221,8 +221,8 @@ steps:
           default: false
           type: boolean
         referSecret:
-          type: boolean
           default: false
+          type: boolean
       elements:
       - elements:
         - isArray: true
@@ -295,13 +295,13 @@ steps:
         schema:
           $ref: discriminator#/referSecret
         type: switch
-      - if: showSecretDropdown
-        type: select
-        schema:
-          $ref: schema#/properties/spec/properties/authSecret/properties/name
+      - fetch: getReferSecrets
+        if: showSecretDropdown
         label:
           text: Secret
-        fetch: getReferSecrets
+        schema:
+          $ref: schema#/properties/spec/properties/authSecret/properties/name
+        type: select
       - if: showAuthPasswordField
         label:
           text: labels.password
