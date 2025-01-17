@@ -99,6 +99,9 @@ steps:
         recovery:
           default: false
           type: boolean
+        referSecret:
+          default: false
+          type: boolean
       elements:
       - elements:
         - isArray: true
@@ -164,12 +167,20 @@ steps:
         schema:
           $ref: discriminator#/createAuthSecret
         type: switch
-      - if: showAuthPasswordField
+      - if: showReferSecret
         label:
-          text: labels.name
+          text: Refer existing Secret ?
+        onChange: onAuthChange
+        schema:
+          $ref: discriminator#/referSecret
+        type: switch
+      - fetch: getReferSecrets
+        if: showSecretDropdown
+        label:
+          text: Secret
         schema:
           $ref: schema#/properties/spec/properties/authSecret/properties/name
-        type: input
+        type: select
       - if: showAuthPasswordField
         label:
           text: labels.password

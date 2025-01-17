@@ -198,6 +198,9 @@ steps:
         metadataStorage:
           default: {}
           type: object
+        referSecret:
+          default: false
+          type: boolean
         zookeeperRef:
           default: {}
           type: object
@@ -318,12 +321,20 @@ steps:
         schema:
           $ref: discriminator#/createAuthSecret
         type: switch
-      - if: showAuthPasswordField
+      - if: showReferSecret
         label:
-          text: labels.name
+          text: Refer existing Secret ?
+        onChange: onAuthChange
+        schema:
+          $ref: discriminator#/referSecret
+        type: switch
+      - fetch: getReferSecrets
+        if: showSecretDropdown
+        label:
+          text: Secret
         schema:
           $ref: schema#/properties/spec/properties/authSecret/properties/name
-        type: input
+        type: select
       - if: showAuthPasswordField
         label:
           text: labels.password
