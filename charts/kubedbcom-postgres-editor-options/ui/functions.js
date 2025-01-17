@@ -1225,20 +1225,17 @@ function showIssuer({ model, getValue, watchDependency, discriminator }) {
   return isTlsEnabled && isIssuerToggleEnabled
 }
 
-function onAuthChange({ getValue, discriminator, commit }) {
-  const isAuthOn = getValue(discriminator, '/referSecret')
-  if (!isAuthOn) {
-    commit('wizard/model$update', {
-      path: '/spec/authSecret/name',
-      value: '',
-      force: true,
-    })
-    commit('wizard/model$update', {
-      path: '/spec/authSecret/password',
-      value: '',
-      force: true,
-    })
-  }
+function onAuthChange({ commit }) {
+  commit('wizard/model$update', {
+    path: '/spec/authSecret/name',
+    value: '',
+    force: true,
+  })
+  commit('wizard/model$update', {
+    path: '/spec/authSecret/password',
+    value: '',
+    force: true,
+  })
 }
 
 function setMonitoring({ getValue, model }) {
@@ -1381,7 +1378,12 @@ function isConfigAvailable({ getValue, model }) {
   return val !== ''
 }
 
-async function getReferSecrets({ getValue, model, storeGet, axios }) {
+async function getReferSecrets({ getValue, model, storeGet, axios, discriminator }) {
+  const referSecret = getValue(discriminator, '/referSecret')
+  if (!referSecret) {
+    return []
+  }
+
   const params = storeGet('/route/params')
   const { user, cluster } = params
   const namespace = getValue(model, `/metadata/release/namespace`)
@@ -1390,7 +1392,6 @@ async function getReferSecrets({ getValue, model, storeGet, axios }) {
   const options = []
   try {
     const resp = await axios.get(url)
-    console.log(resp)
     const items = resp.data?.items
     items.forEach((ele) => {
       options.push(ele.metadata?.name)
