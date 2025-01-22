@@ -72,14 +72,16 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/type
       type: radio
-    - computed: setValueFromDbDetails|/spec/version
-      fetch: getElasticsearchVersions
+    - elements:
+      - computed: setValueFromDbDetails|/spec/version
+        fetch: getElasticsearchVersions
+        label:
+          text: labels.targetVersion
+        schema:
+          $ref: schema#/properties/spec/properties/updateVersion/properties/targetVersion
+        type: select
       if: ifRequestTypeEqualsTo|UpdateVersion
-      label:
-        text: labels.targetVersion
-      schema:
-        $ref: schema#/properties/spec/properties/updateVersion/properties/targetVersion
-      type: select
+      type: single-step-form
     - elements:
       - computed: setValueFromDbDetails|/spec/replicas
         if: ifDbTypeEqualsTo|combined|horizontalScaling
