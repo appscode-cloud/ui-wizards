@@ -76,14 +76,16 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/type
       type: radio
-    - computed: setValueFromDbDetails|/spec/version
-      fetch: getDbVersions
+    - elements:
+      - computed: setValueFromDbDetails|/spec/version
+        fetch: getDbVersions
+        label:
+          text: labels.targetVersion
+        schema:
+          $ref: schema#/properties/spec/properties/updateVersion/properties/targetVersion
+        type: select
       if: ifRequestTypeEqualsTo|UpdateVersion
-      label:
-        text: labels.targetVersion
-      schema:
-        $ref: schema#/properties/spec/properties/updateVersion/properties/targetVersion
-      type: select
+      type: single-step-form
     - elements:
       - computed: setValueFromDbDetails|/spec/topology/aggregator/replicas
         label:

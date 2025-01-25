@@ -33,6 +33,7 @@ function returnFalse() {
 }
 
 async function getNamespaces({ axios, storeGet }) {
+  if (storeGet('/route/query/operation')) return []
   const owner = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
 
@@ -52,6 +53,7 @@ async function getNamespaces({ axios, storeGet }) {
 }
 
 async function getPostgreses({ axios, storeGet, model, getValue, watchDependency }) {
+  if (storeGet('/route/query/operation')) return []
   const owner = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
 
