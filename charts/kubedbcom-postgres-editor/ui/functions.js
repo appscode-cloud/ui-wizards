@@ -2261,7 +2261,7 @@ async function getDbDetails({ axios, storeGet, getValue, model, setDiscriminator
   if (namespace && name) {
     try {
       const resp = await axios.get(
-        `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/mongodbs/${name}`,
+        `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/postgreses/${name}`,
       )
       dbDetails = resp.data || {}
 
@@ -2506,6 +2506,45 @@ function objectCopy(obj) {
   return JSON.parse(temp)
 }
 
+function isBindingAlreadyOn({ model, getValue }) {
+  const value = getValue(model, '/resources')
+  const keys = Object.keys(value)
+  isExposeBinding = !!keys.find((str) => str === 'catalogAppscodeComPostgresBinding')
+  return isExposeBinding
+}
+
+async function addOrRemoveBinding({ commit, model, getValue, discriminator }) {
+  const value = getValue(discriminator, `/binding`)
+  const dbName = getValue(model, '/metadata/release/name')
+  const dbNamespace = getValue(model, '/metadata/release/namespace')
+  const labels = getValue(model, '/resources/kubedbComPostgres/metadata/labels')
+  const bindingValues = {
+    apiVersion: 'catalog.appscode.com/v1alpha1',
+    kind: 'PostgresBinding',
+    metadata: {
+      labels,
+      name: dbName,
+      namespace: dbNamespace,
+    },
+    spec: {
+      sourceRef: {
+        name: dbName,
+        namespace: dbNamespace,
+      },
+    },
+  }
+
+  if (value) {
+    await commit('wizard/model$update', {
+      path: '/resources/catalogAppscodeComPostgresBinding',
+      value: bindingValues,
+      force: true,
+    })
+  } else {
+    await commit('wizard/model$delete', '/resources/catalogAppscodeComPostgresBinding')
+  }
+}
+
 return {
   handleUnit,
   isConsole,
@@ -2639,6 +2678,8 @@ return {
   getOpsRequestUrl,
   getCreateNameSpaceUrl,
   setStorageClass,
+  isBindingAlreadyOn,
+  addOrRemoveBinding,
 
   initBackupData,
   isBackupDataLoadedTrue,
