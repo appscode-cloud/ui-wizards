@@ -217,6 +217,7 @@ async function getTargetName({ watchDependency, getValue, model, axios, storeGet
 function getResourceName({ getValue, model }) {
   const apiGroup = getValue(model, `/spec/appRef/apiGroup`)
   const kind = getValue(model, `/spec/appRef/kind`)
+  if (!kind || !apiGroup) return ''
   return kindToResourceMap[apiGroup][kind]
 }
 
