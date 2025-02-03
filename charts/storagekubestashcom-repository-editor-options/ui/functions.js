@@ -81,8 +81,6 @@ function isRancherManaged({ storeGet }) {
 
 function fetchNamespaces({ watchDependency }) {
   watchDependency('discriminator#/nameSpaceApi')
-  console.log(namespaces)
-
   return namespaces
 }
 async function getNamespacesApi({ axios, storeGet }) {

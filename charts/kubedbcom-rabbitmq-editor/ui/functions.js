@@ -1716,6 +1716,12 @@ async function getDbs({ axios, storeGet, model, getValue, watchDependency }) {
   })
 }
 
+function isRancherManaged({ storeGet }) {
+  const managers = storeGet('/cluster/clusterDefinition/result/clusterManagers')
+  const found = managers.find((item) => item === 'Rancher')
+  return !!found
+}
+
 async function getDbDetails({ commit, setDiscriminatorValue, axios, storeGet, getValue, model }) {
   const owner = storeGet('/route/params/user') || ''
   const cluster = storeGet('/route/params/cluster') || ''
@@ -1986,6 +1992,7 @@ async function addOrRemoveBinding({ commit, model, getValue, discriminator }) {
 }
 
 return {
+  isRancherManaged,
   handleUnit,
   isConsole,
   getNamespaces,

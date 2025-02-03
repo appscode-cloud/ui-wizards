@@ -52,6 +52,12 @@ async function getNamespaces({ axios, storeGet }) {
   })
 }
 
+function isRancherManaged({ storeGet }) {
+  const managers = storeGet('/cluster/clusterDefinition/result/clusterManagers')
+  const found = managers.find((item) => item === 'Rancher')
+  return !!found
+}
+
 async function getDbs({ axios, storeGet, model, getValue, watchDependency }) {
   if (storeGet('/route/query/operation')) return []
   const owner = storeGet('/route/params/user')
@@ -714,6 +720,7 @@ function isVerticalScaleTopologyRequired({ watchDependency, getValue, discrimina
 }
 
 return {
+  isRancherManaged,
   setResource,
   fetchJsons,
   returnFalse,

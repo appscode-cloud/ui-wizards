@@ -1036,6 +1036,12 @@ async function getNamespaces({ axios, storeGet }) {
   })
 }
 
+function isRancherManaged({ storeGet }) {
+  const managers = storeGet('/cluster/clusterDefinition/result/clusterManagers')
+  const found = managers.find((item) => item === 'Rancher')
+  return !!found
+}
+
 async function getDbs({ axios, storeGet, model, getValue, watchDependency }) {
   watchDependency('model#/resources/autoscalingKubedbComKafkaAutoscaler/metadata/namespace')
   const namespace = getValue(
@@ -1333,6 +1339,7 @@ async function addOrRemoveBinding({ commit, model, getValue, discriminator }) {
 }
 
 return {
+  isRancherManaged,
   handleUnit,
   isConsole,
   getNamespaces,
