@@ -983,7 +983,6 @@ function onArchiverChange({ model, getValue, commit }) {
 function showArchiverAlert({ watchDependency, model, getValue, commit }) {
   watchDependency('model#/spec/admin/storageClasses/default')
 
-  watchDependency('model#/spec/mode')
   const mode = getValue(model, '/spec/mode')
   if (mode === 'Standalone') return false
 
@@ -998,6 +997,7 @@ function showArchiverAlert({ watchDependency, model, getValue, commit }) {
       value: false,
       force: true,
     })
+  else onArchiverChange({ model, getValue, commit })
 
   return show
 }
