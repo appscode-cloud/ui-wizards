@@ -502,6 +502,7 @@ function onParameterChange({ getValue, model, discriminator, commit }) {
 }
 
 return {
+  isRancherManaged,
   fetchNamespaces,
   setVersion,
   init,
@@ -511,7 +512,6 @@ return {
   isConsole,
   initMetadata,
   getPreset,
-  isRancherManaged,
   fetchNamespacesApi,
   setNamespace,
   getDbs,
