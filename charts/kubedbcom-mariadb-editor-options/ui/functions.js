@@ -310,7 +310,7 @@ const modeDetails = {
     text: 'Standalone',
   },
   Replicaset: {
-    description: 'MongoDB Galera cluster for high availability.',
+    description: 'Mariadb Galera cluster for high availability.',
     text: 'Galera Cluster',
   },
 }
@@ -841,12 +841,17 @@ function onArchiverChange({ model, getValue, commit }) {
       value: found.annotation,
       force: true,
     })
+  else
+    commit('wizard/model$update', {
+      path: '/spec/archiverName',
+      value: '',
+      force: true,
+    })
 }
 
 function showArchiverAlert({ watchDependency, model, getValue, commit }) {
   watchDependency('model#/spec/admin/storageClasses/default')
 
-  watchDependency('model#/spec/mode')
   const mode = getValue(model, '/spec/mode')
   if (mode === 'Standalone') return false
 
@@ -861,6 +866,7 @@ function showArchiverAlert({ watchDependency, model, getValue, commit }) {
       value: false,
       force: true,
     })
+  else onArchiverChange({ model, getValue, commit })
 
   return show
 }
