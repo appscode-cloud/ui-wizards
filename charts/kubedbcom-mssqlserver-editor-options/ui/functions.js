@@ -551,7 +551,12 @@ function setStorageClass({ model, getValue, commit, discriminator, watchDependen
   }
 }
 
-let isRancherManaged = false
+function isRancherManaged({ storeGet }) {
+  const managers = storeGet('/cluster/clusterDefinition/result/clusterManagers')
+  const found = managers.find((item) => item === 'Rancher')
+  return !!found
+}
+
 async function getNamespaces({ axios, storeGet }) {
   const params = storeGet('/route/params')
   const { user, cluster, group, version, resource } = params
@@ -575,7 +580,6 @@ async function getNamespaces({ axios, storeGet }) {
     )
     const projects = resp?.data?.status?.projects
     if (projects) {
-      isRancherManaged = true
       let projectsNamespace = []
       projectsNamespace = Object.keys(projects).map((project) => ({
         project: project,
@@ -593,12 +597,6 @@ async function getNamespaces({ axios, storeGet }) {
     console.log(e)
     return []
   }
-}
-
-function isClusterRancherManaged({ watchDependency }, type) {
-  watchDependency('discriminator#/bundleApiLoaded')
-  if (type === 'rancher') return isRancherManaged
-  else return !isRancherManaged
 }
 
 function showRecovery({ watchDependency, getValue, discriminator }) {
@@ -1260,13 +1258,13 @@ function showReferSecret({ discriminator, getValue, watchDependency }) {
 }
 
 return {
+  isRancherManaged,
   showSecretDropdown,
   showReferSecret,
   getReferSecrets,
   isConfigAvailable,
   setMiliSeconds,
   setPointInTimeRecovery,
-  isClusterRancherManaged,
   getRecoveryNames,
   fetchNamespaces,
   showRecovery,

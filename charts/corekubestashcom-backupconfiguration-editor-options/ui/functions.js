@@ -33,12 +33,30 @@ async function getNamespacesApi({ axios, storeGet }) {
         },
       },
     )
-    namespaces = resp?.data?.status?.namespaces || []
-    return namespaces
+    if (resp.data?.status?.projects) {
+      const projects = resp.data?.status?.projects
+      let projectsNamespace = []
+      projectsNamespace = Object.keys(projects).map((project) => ({
+        project: project,
+        namespaces: projects[project].map((namespace) => ({
+          text: namespace,
+          value: namespace,
+        })),
+      }))
+      return projectsNamespace
+    } else {
+      return resp.data?.status?.namespaces || []
+    }
   } catch (e) {
     console.log(e)
-    return []
   }
+  return []
+}
+
+function isRancherManaged({ storeGet }) {
+  const managers = storeGet('/cluster/clusterDefinition/result/clusterManagers')
+  const found = managers.find((item) => item === 'Rancher')
+  return !!found
 }
 
 function getNamespaces({ watchDependency }) {
@@ -227,6 +245,7 @@ async function getTargetName({ watchDependency, getValue, model, axios, storeGet
 function getResourceName({ getValue, model }) {
   const apiGroup = getValue(model, `/spec/target/apiGroup`)
   const kind = getValue(model, `/spec/target/kind`)
+  if (!kind || !apiGroup) return ''
   return kindToResourceMap[apiGroup][kind]
 }
 
@@ -265,6 +284,7 @@ function returnFalse() {
 }
 
 return {
+  isRancherManaged,
   setVersion,
   getTargetName,
   getApiGroup,

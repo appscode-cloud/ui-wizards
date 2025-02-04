@@ -32,6 +32,12 @@ function returnFalse() {
   return false
 }
 
+function isRancherManaged({ storeGet }) {
+  const managers = storeGet('/cluster/clusterDefinition/result/clusterManagers')
+  const found = managers.find((item) => item === 'Rancher')
+  return !!found
+}
+
 async function getNamespaces({ axios, storeGet }) {
   if (storeGet('/route/query/operation')) return []
   const owner = storeGet('/route/params/user')
@@ -755,7 +761,7 @@ return {
   getDbType,
   initNamespace,
   initDatabaseRef,
-
+  isRancherManaged,
   showAndInitName,
   showAndInitNamespace,
   showAndInitDatabaseRef,

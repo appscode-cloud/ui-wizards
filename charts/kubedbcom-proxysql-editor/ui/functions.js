@@ -780,6 +780,12 @@ function isKubedb({ storeGet }) {
   return !!storeGet('/route/query/operation')
 }
 
+function isRancherManaged({ storeGet }) {
+  const managers = storeGet('/cluster/clusterDefinition/result/clusterManagers')
+  const found = managers.find((item) => item === 'Rancher')
+  return !!found
+}
+
 function showOpsRequestOptions({ model, getValue, watchDependency, storeGet, discriminator }) {
   if (isKubedb({ storeGet }) === true) return true
   watchDependency('model#/resources/autoscalingKubedbComProxySQLAutoscaler/spec/databaseRef/name')
@@ -1067,6 +1073,7 @@ function handleUnit({ commit, model, getValue }, path, type = 'bound') {
 }
 
 return {
+  isRancherManaged,
   handleUnit,
   isConsole,
   getNamespaces,

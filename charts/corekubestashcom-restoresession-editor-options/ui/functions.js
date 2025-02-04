@@ -487,6 +487,7 @@ async function getTargetName({ watchDependency, getValue, model, axios, storeGet
 function getResourceName({ getValue, model }) {
   const apiGroup = getValue(model, `/spec/target/apiGroup`)
   const kind = getValue(model, `/spec/target/kind`)
+  if (!kind || !apiGroup) return ''
   return kindToResourceMap[apiGroup][kind]
 }
 
@@ -502,6 +503,7 @@ function onParameterChange({ getValue, model, discriminator, commit }) {
 }
 
 return {
+  isRancherManaged,
   fetchNamespaces,
   setVersion,
   init,
@@ -511,7 +513,6 @@ return {
   isConsole,
   initMetadata,
   getPreset,
-  isRancherManaged,
   fetchNamespacesApi,
   setNamespace,
   getDbs,

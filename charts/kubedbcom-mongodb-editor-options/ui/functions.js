@@ -373,7 +373,6 @@ function showStorageSizeField({ model, getValue, watchDependency }) {
   return validType.includes(modelPathValue)
 }
 
-let isRancherManaged = false
 async function getNamespaces({ axios, storeGet }) {
   const params = storeGet('/route/params')
   const { user, cluster, group, version, resource } = params
@@ -397,7 +396,6 @@ async function getNamespaces({ axios, storeGet }) {
     )
     const projects = resp?.data?.status?.projects
     if (projects) {
-      isRancherManaged = true
       let projectsNamespace = []
       projectsNamespace = Object.keys(projects).map((project) => ({
         project: project,
@@ -417,10 +415,10 @@ async function getNamespaces({ axios, storeGet }) {
   }
 }
 
-function isClusterRancherManaged({ watchDependency }, type) {
-  watchDependency('discriminator#/bundleApiLoaded')
-  if (type === 'rancher') return isRancherManaged
-  else return !isRancherManaged
+function isRancherManaged({ storeGet }) {
+  const managers = storeGet('/cluster/clusterDefinition/result/clusterManagers')
+  const found = managers.find((item) => item === 'Rancher')
+  return !!found
 }
 
 function onCreateAuthSecretChange({ discriminator, getValue, commit }) {
@@ -1354,7 +1352,7 @@ return {
   setMiliSeconds,
   setPointInTimeRecovery,
   checkHostnameOrIP,
-  isClusterRancherManaged,
+  isRancherManaged,
   getRecoveryNames,
   fetchNamespaces,
   showRecovery,

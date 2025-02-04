@@ -42,12 +42,30 @@ async function fetchNamespaces({ axios, storeGet }) {
         },
       },
     )
-    const namespaces = resp?.data?.status?.namespaces || []
-    return namespaces
+    if (resp.data?.status?.projects) {
+      const projects = resp.data?.status?.projects
+      let projectsNamespace = []
+      projectsNamespace = Object.keys(projects).map((project) => ({
+        project: project,
+        namespaces: projects[project].map((namespace) => ({
+          text: namespace,
+          value: namespace,
+        })),
+      }))
+      return projectsNamespace
+    } else {
+      return resp.data?.status?.namespaces || []
+    }
   } catch (e) {
     console.log(e)
-    return []
   }
+  return []
+}
+
+function isRancherManaged({ storeGet }) {
+  const managers = storeGet('/cluster/clusterDefinition/result/clusterManagers')
+  const found = managers.find((item) => item === 'Rancher')
+  return !!found
 }
 
 async function fetchInvokerName({ getValue, model, watchDependency, axios, storeGet }) {
@@ -86,6 +104,7 @@ function fetchSessions({ getValue, model, watchDependency }) {
 }
 
 return {
+  isRancherManaged,
   initName,
   fetchNamespaces,
   fetchInvokerName,

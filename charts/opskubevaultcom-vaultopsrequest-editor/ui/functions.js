@@ -32,6 +32,12 @@ function returnFalse() {
   return false
 }
 
+function isRancherManaged({ storeGet }) {
+  const managers = storeGet('/cluster/clusterDefinition/result/clusterManagers')
+  const found = managers.find((item) => item === 'Rancher')
+  return !!found
+}
+
 async function getNamespaces({ axios, storeGet }) {
   const owner = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
@@ -421,6 +427,7 @@ function onVaultChange({ commit }) {
 }
 
 return {
+  isRancherManaged,
   fetchJsons,
   returnFalse,
   getNamespaces,
