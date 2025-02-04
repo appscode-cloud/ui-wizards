@@ -917,6 +917,12 @@ function onArchiverChange({ model, getValue, commit }) {
       value: found.annotation,
       force: true,
     })
+  else
+    commit('wizard/model$update', {
+      path: '/spec/archiverName',
+      value: '',
+      force: true,
+    })
 }
 
 function showArchiverAlert({ watchDependency, model, getValue, commit }) {

@@ -968,7 +968,6 @@ async function getArchiverName({ axios, storeGet }) {
 
 function onArchiverChange({ model, getValue, commit }) {
   const isArchiverOn = getValue(model, '/spec/admin/archiver/enable/default')
-
   const stClass = getValue(model, '/spec/admin/storageClasses/default')
   const found = archiverMap.find((item) => item.storageClass === stClass)
 
@@ -976,6 +975,12 @@ function onArchiverChange({ model, getValue, commit }) {
     commit('wizard/model$update', {
       path: '/spec/archiverName',
       value: found.annotation,
+      force: true,
+    })
+  else
+    commit('wizard/model$update', {
+      path: '/spec/archiverName',
+      value: '',
       force: true,
     })
 }
