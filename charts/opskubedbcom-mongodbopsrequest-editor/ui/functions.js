@@ -111,10 +111,17 @@ async function getMongoDetails({
   } else return {}
 }
 
-async function getMongoDbVersions({ axios, storeGet }) {
+async function getMongoDbVersions({ axios, storeGet, getValue, discriminator }) {
   const owner = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
 
+  const url = `/clusters/${owner}/${cluster}/proxy/charts.x-helm.dev/v1alpha1/clusterchartpresets/kubedb-ui-presets`
+  const kind = storeGet('/resource/layout/result/resource/kind')
+
+  const presetResp = await axios.get(url)
+  const presetVersions =
+    presetResp.data?.spec?.values?.spec?.admin?.databases?.[kind]?.versions?.available || []
+  // if (presetVersions) return presetVersions
   const queryParams = {
     filter: {
       items: {
@@ -132,10 +139,37 @@ async function getMongoDbVersions({ axios, storeGet }) {
   )
 
   const resources = (resp && resp.data && resp.data.items) || []
+  
+  function versionCompare(v1, v2) {
+    const arr1 = v1.split('.').map(Number)
+    const arr2 = v2.split('.').map(Number)
+    
+    for (let i = 0; i < Math.max(arr1.length, arr2.length); i++) {
+      const num1 = arr1[i] || 0
+      const num2 = arr2[i] || 0
+      
+      if (num1 > num2) return 1 // v1 is higher
+      if (num1 < num2) return -1 // v2 is higher
+    }
+    return 0 // versions are equal
+  }
+  
+  const sortedVersions = resources.sort((a, b) => versionCompare(a.spec.version, b.spec.version))
+  
+  let ver = getValue(discriminator, '/dbDetails/spec/version') || '0'
+  const found = sortedVersions.find((item) => item.metadata.name === ver)
+  if(found) ver = found.spec.version
+  
+  // keep only non deprecated versions && kubedb-ui-presets versions && higher than current version
 
-  // keep only non deprecated versions
-  const filteredMongoDbVersions = resources.filter((item) => item.spec && !item.spec.deprecated)
-
+  const filteredMongoDbVersions = sortedVersions.filter(
+    (item) =>
+      item.spec &&
+      !item.spec.deprecated &&
+      presetVersions.includes(item.metadata.name) &&
+      versionCompare(item.spec.version, ver) >= 0,
+  )
+  
   return filteredMongoDbVersions.map((item) => {
     const name = (item.metadata && item.metadata.name) || ''
     const specVersion = (item.spec && item.spec.version) || ''
@@ -594,7 +628,7 @@ async function getIssuerRefsName({ axios, storeGet, getValue, model, watchDepend
     url = `/clusters/${owner}/${cluster}/proxy/${apiGroup}/v1/clusterissuers`
   }
 
-  if (!url) return []
+  if (!url || !apiGroup) return []
 
   try {
     const resp = await axios.get(url)
