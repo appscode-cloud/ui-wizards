@@ -377,7 +377,28 @@ function setStorageClass({ getValue, model, watchDependency, commit }) {
     })
 }
 
+function preSelectClusterIssuer({ getValue, model, watchDependency, commit, discriminator }) {
+  const val = getValue(model, '/spec/admin/tls/default')
+  const clusterIssuers = getClusterIssuers({ watchDependency, getValue, discriminator })
+  if (val) {
+    if (clusterIssuers.length) {
+      commit('wizard/model$update', {
+        path: '/spec/admin/clusterIssuers/available',
+        value: [clusterIssuers[0]],
+        force: true,
+      })
+    }
+  } else {
+    commit('wizard/model$update', {
+      path: '/spec/admin/clusterIssuers/available',
+      value: '',
+      force: true,
+    })
+  }
+}
+
 return {
+  preSelectClusterIssuer,
   isRancherManaged,
   getOptions,
   getNodeTopology,
