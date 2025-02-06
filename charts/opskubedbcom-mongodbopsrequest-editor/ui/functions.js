@@ -126,7 +126,7 @@ async function getMongoDbVersions({ axios, storeGet, getValue, discriminator }) 
       filter: {
         items: {
           metadata: { name: null },
-          spec: { version: null, deprecated: null },
+          spec: { version: null, deprecated: null, updateConstraints: null },
         },
       },
     }
@@ -158,16 +158,26 @@ async function getMongoDbVersions({ axios, storeGet, getValue, discriminator }) 
 
     let ver = getValue(discriminator, '/dbDetails/spec/version') || '0'
     const found = sortedVersions.find((item) => item.metadata.name === ver)
-    if (found) ver = found.spec.version
 
-    // keep only non deprecated versions && kubedb-ui-presets versions && higher than current version
+    if (found) ver = found.spec?.version
+    const allowed = found?.spec?.updateConstraints?.allowlist || []
+    const limit = allowed.length ? allowed[0] : '0,0'
+
+    function extractVersions(limit) {
+      return limit.match(/\d+(\.\d+)+/g) || []
+    }
+
+    const versionConstraints = extractVersions(limit)
+
+    // keep only non deprecated & kubedb-ui-presets & within constraints of current version
 
     const filteredMongoDbVersions = sortedVersions.filter(
       (item) =>
-        item.spec &&
-        !item.spec.deprecated &&
-        presetVersions.includes(item.metadata.name) &&
-        versionCompare(item.spec.version, ver) >= 0,
+        !item.spec?.deprecated &&
+        presetVersions.includes(item.metadata?.name) &&
+        versionConstraints.length > 1 &&
+        versionCompare(item.spec?.version, versionConstraints[0]) >= 0 &&
+        versionCompare(versionConstraints[1], item.spec?.version) >= 0,
     )
 
     return filteredMongoDbVersions.map((item) => {
@@ -179,7 +189,7 @@ async function getMongoDbVersions({ axios, storeGet, getValue, discriminator }) 
       }
     })
   } catch (e) {
-    console.log(e``)
+    console.log(e)
     return []
   }
 }
