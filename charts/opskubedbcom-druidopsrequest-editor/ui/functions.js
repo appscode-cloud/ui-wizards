@@ -111,43 +111,77 @@ async function getDbDetails({
   } else return {}
 }
 
-async function getDbVersions({ axios, storeGet, watchDependency }) {
-  watchDependency('discriminator#/dbDetails')
+async function getDbVersions({ axios, storeGet, getValue, discriminator }) {
   const owner = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
 
-  const queryParams = {
-    filter: {
-      items: {
-        metadata: { name: null },
-        spec: { version: null, deprecated: null, distribution: null },
+  const url = `/clusters/${owner}/${cluster}/proxy/charts.x-helm.dev/v1alpha1/clusterchartpresets/kubedb-ui-presets`
+  const kind = storeGet('/resource/layout/result/resource/kind')
+  try {
+    const presetResp = await axios.get(url)
+    const presetVersions =
+      presetResp.data?.spec?.values?.spec?.admin?.databases?.[kind]?.versions?.available || []
+
+    const queryParams = {
+      filter: {
+        items: {
+          metadata: { name: null },
+          spec: { version: null, deprecated: null },
+        },
       },
-    },
-  }
-
-  const resp = await axios.get(
-    `/clusters/${owner}/${cluster}/proxy/catalog.kubedb.com/v1alpha1/druidversions`,
-    {
-      params: queryParams,
-    },
-  )
-
-  const resources = (resp && resp.data && resp.data.items) || []
-
-  // keep only non deprecated versions
-  const filteredElasticsearchVersions = resources.filter(
-    (item) => item.spec && !item.spec.deprecated,
-  )
-
-  return filteredElasticsearchVersions.map((item) => {
-    const name = (item.metadata && item.metadata.name) || ''
-    const specVersion = (item.spec && item.spec.version) || ''
-    const dist = (item.spec && item.spec.distribution) || ''
-    return {
-      text: `${name} (${specVersion})`,
-      value: name,
     }
-  })
+
+    const resp = await axios.get(
+      `/clusters/${owner}/${cluster}/proxy/catalog.kubedb.com/v1alpha1/${kind.toLowerCase()}versions`,
+      {
+        params: queryParams,
+      },
+    )
+
+    const resources = (resp && resp.data && resp.data.items) || []
+
+    function versionCompare(v1, v2) {
+      const arr1 = v1.split('.').map(Number)
+      const arr2 = v2.split('.').map(Number)
+
+      for (let i = 0; i < Math.max(arr1.length, arr2.length); i++) {
+        const num1 = arr1[i] || 0
+        const num2 = arr2[i] || 0
+
+        if (num1 > num2) return 1 // v1 is higher
+        if (num1 < num2) return -1 // v2 is higher
+      }
+      return 0 // versions are equal
+    }
+
+    const sortedVersions = resources.sort((a, b) => versionCompare(a.spec.version, b.spec.version))
+
+    let ver = getValue(discriminator, '/dbDetails/spec/version') || '0'
+    const found = sortedVersions.find((item) => item.metadata.name === ver)
+    if (found) ver = found.spec.version
+
+    // keep only non deprecated versions && kubedb-ui-presets versions && higher than current version
+
+    const filteredDruidVersions = sortedVersions.filter(
+      (item) =>
+        item.spec &&
+        !item.spec.deprecated &&
+        presetVersions.includes(item.metadata.name) &&
+        versionCompare(item.spec.version, ver) >= 0,
+    )
+
+    return filteredDruidVersions.map((item) => {
+      const name = (item.metadata && item.metadata.name) || ''
+      const specVersion = (item.spec && item.spec.version) || ''
+      return {
+        text: `${name} (${specVersion})`,
+        value: name,
+      }
+    })
+  } catch (e) {
+    console.log(e``)
+    return []
+  }
 }
 
 function ifRequestTypeEqualsTo({ model, getValue, watchDependency }, type) {
@@ -536,23 +570,14 @@ function initIssuerRefApiGroup({ getValue, model, watchDependency, discriminator
 async function getIssuerRefsName({ axios, storeGet, getValue, model, watchDependency }) {
   const owner = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
-  watchDependency('model#/spec/tls/issuerRef/apiGroup')
   watchDependency('model#/spec/tls/issuerRef/kind')
   watchDependency('model#/metadata/namespace')
-  const apiGroup = getValue(model, '/spec/tls/issuerRef/apiGroup')
   const kind = getValue(model, '/spec/tls/issuerRef/kind')
   const namespace = getValue(model, '/metadata/namespace')
 
-  let url
   if (kind === 'Issuer') {
-    url = `/clusters/${owner}/${cluster}/proxy/${apiGroup}/v1/namespaces/${namespace}/issuers`
-  } else if (kind === 'ClusterIssuer') {
-    url = `/clusters/${owner}/${cluster}/proxy/${apiGroup}/v1/clusterissuers`
-  }
-
-  if (!url) return []
-
-  if (url && apiGroup && namespace) {
+    const url = `/clusters/${owner}/${cluster}/proxy/cert-manager.io/v1/namespaces/${namespace}/issuers`
+    if (!url) return []
     try {
       const resp = await axios.get(url)
 
@@ -569,8 +594,18 @@ async function getIssuerRefsName({ axios, storeGet, getValue, model, watchDepend
       console.log(e)
       return []
     }
-  } else {
-    return []
+  } else if (kind === 'ClusterIssuer') {
+    const url = `/clusters/${owner}/${cluster}/proxy/charts.x-helm.dev/v1alpha1/clusterchartpresets/kubedb-ui-presets`
+    try {
+      const presetResp = await axios.get(url)
+      const clusterIssuers =
+        presetResp.data?.spec?.values?.spec?.admin?.clusterIssuers?.available || []
+
+      return clusterIssuers
+    } catch (e) {
+      console.log(e)
+      return []
+    }
   }
 }
 

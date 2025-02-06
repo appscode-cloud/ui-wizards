@@ -132,7 +132,7 @@ async function getPostgresVersions({ axios, storeGet, getValue, discriminator })
     }
 
     const resp = await axios.get(
-      `/clusters/${owner}/${cluster}/proxy/catalog.kubedb.com/v1alpha1/postgresversions`,
+      `/clusters/${owner}/${cluster}/proxy/catalog.kubedb.com/v1alpha1/${kind.toLowerCase()}versions`,
       {
         params: queryParams,
       },
