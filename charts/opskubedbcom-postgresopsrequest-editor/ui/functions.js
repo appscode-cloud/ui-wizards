@@ -111,9 +111,15 @@ async function getPostgresDetails({
   } else return {}
 }
 
-async function getPostgresVersions({ axios, storeGet }) {
+async function getPostgresVersions({ axios, storeGet, getValue, discriminator }) {
   const owner = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
+
+  const url = `/clusters/${owner}/${cluster}/proxy/charts.x-helm.dev/v1alpha1/clusterchartpresets/kubedb-ui-presets`
+  const kind = storeGet('/resource/layout/result/resource/kind')
+  const presetResp = await axios.get(url)
+  const presetVersions =
+    presetResp.data?.spec?.values?.spec?.admin?.databases?.[kind]?.versions?.available || []
 
   const queryParams = {
     filter: {
@@ -132,9 +138,35 @@ async function getPostgresVersions({ axios, storeGet }) {
   )
 
   const resources = (resp && resp.data && resp.data.items) || []
+  function versionCompare(v1, v2) {
+    const arr1 = v1.split('.').map(Number)
+    const arr2 = v2.split('.').map(Number)
 
-  // keep only non deprecated versions
-  const filteredPostgresVersions = resources.filter((item) => item.spec && !item.spec.deprecated)
+    for (let i = 0; i < Math.max(arr1.length, arr2.length); i++) {
+      const num1 = arr1[i] || 0
+      const num2 = arr2[i] || 0
+
+      if (num1 > num2) return 1 // v1 is higher
+      if (num1 < num2) return -1 // v2 is higher
+    }
+    return 0 // versions are equal
+  }
+
+  const sortedVersions = resources.sort((a, b) => versionCompare(a.spec.version, b.spec.version))
+
+  let ver = getValue(discriminator, '/dbDetails/spec/version') || '0'
+  const found = sortedVersions.find((item) => item.metadata.name === ver)
+  if (found) ver = found.spec.version
+
+  // keep only non deprecated versions && kubedb-ui-presets versions && higher than current version
+
+  const filteredPostgresVersions = sortedVersions.filter(
+    (item) =>
+      item.spec &&
+      !item.spec.deprecated &&
+      presetVersions.includes(item.metadata.name) &&
+      versionCompare(item.spec.version, ver) >= 0,
+  )
 
   return filteredPostgresVersions.map((item) => {
     const name = (item.metadata && item.metadata.name) || ''
@@ -559,37 +591,42 @@ function initIssuerRefApiGroup({ getValue, model, watchDependency }) {
 async function getIssuerRefsName({ axios, storeGet, getValue, model, watchDependency }) {
   const owner = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
-  watchDependency('model#/spec/tls/issuerRef/apiGroup')
   watchDependency('model#/spec/tls/issuerRef/kind')
   watchDependency('model#/metadata/namespace')
-  const apiGroup = getValue(model, '/spec/tls/issuerRef/apiGroup')
   const kind = getValue(model, '/spec/tls/issuerRef/kind')
   const namespace = getValue(model, '/metadata/namespace')
 
-  let url
   if (kind === 'Issuer') {
-    url = `/clusters/${owner}/${cluster}/proxy/${apiGroup}/v1/namespaces/${namespace}/issuers`
+    const url = `/clusters/${owner}/${cluster}/proxy/cert-manager.io/v1/namespaces/${namespace}/issuers`
+    if (!url) return []
+    try {
+      const resp = await axios.get(url)
+
+      const resources = (resp && resp.data && resp.data.items) || []
+
+      resources.map((item) => {
+        const name = (item.metadata && item.metadata.name) || ''
+        item.text = name
+        item.value = name
+        return true
+      })
+      return resources
+    } catch (e) {
+      console.log(e)
+      return []
+    }
   } else if (kind === 'ClusterIssuer') {
-    url = `/clusters/${owner}/${cluster}/proxy/${apiGroup}/v1/clusterissuers`
-  }
+    const url = `/clusters/${owner}/${cluster}/proxy/charts.x-helm.dev/v1alpha1/clusterchartpresets/kubedb-ui-presets`
+    try {
+      const presetResp = await axios.get(url)
+      const clusterIssuers =
+        presetResp.data?.spec?.values?.spec?.admin?.clusterIssuers?.available || []
 
-  if (!url) return []
-
-  try {
-    const resp = await axios.get(url)
-
-    const resources = (resp && resp.data && resp.data.items) || []
-
-    resources.map((item) => {
-      const name = (item.metadata && item.metadata.name) || ''
-      item.text = name
-      item.value = name
-      return true
-    })
-    return resources
-  } catch (e) {
-    console.log(e)
-    return []
+      return clusterIssuers
+    } catch (e) {
+      console.log(e)
+      return []
+    }
   }
 }
 
