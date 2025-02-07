@@ -121,7 +121,8 @@ async function getDbVersions({ axios, storeGet, watchDependency, getValue, discr
   try {
     const presetResp = await axios.get(url)
     const presetVersions =
-      presetResp.data?.spec?.values?.spec?.admin?.databases?.[kind]?.versions?.available || []
+      presetResp.data?.spec?.values?.spec?.admin?.databases?.PerconaXtraDB?.versions?.available ||
+      []
 
     const queryParams = {
       filter: {

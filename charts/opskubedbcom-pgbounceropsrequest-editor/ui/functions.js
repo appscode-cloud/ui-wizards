@@ -120,7 +120,7 @@ async function getDbVersions({ axios, storeGet, getValue, discriminator }) {
   try {
     const presetResp = await axios.get(url)
     const presetVersions =
-      presetResp.data?.spec?.values?.spec?.admin?.databases?.[kind]?.versions?.available || []
+      presetResp.data?.spec?.values?.spec?.admin?.databases?.PgBouncer?.versions?.available || []
 
     const queryParams = {
       filter: {

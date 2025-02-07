@@ -90,7 +90,7 @@ async function getDbVersions({ axios, storeGet, getValue, discriminator }) {
   try {
     const presetResp = await axios.get(url)
     const presetVersions =
-      presetResp.data?.spec?.values?.spec?.admin?.databases?.[kind]?.versions?.available || []
+      presetResp.data?.spec?.values?.spec?.admin?.databases?.ZooKeeper?.versions?.available || []
 
     const queryParams = {
       filter: {
@@ -102,7 +102,7 @@ async function getDbVersions({ axios, storeGet, getValue, discriminator }) {
     }
 
     const resp = await axios.get(
-      `/clusters/${owner}/${cluster}/proxy/catalog.kubedb.com/v1alpha1/${kind.toLowerCase()}versions`,
+      `/clusters/${owner}/${cluster}/proxy/catalog.kubedb.com/v1alpha1/zookeeperversions`,
       {
         params: queryParams,
       },
