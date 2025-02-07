@@ -157,7 +157,13 @@ async function getDbVersions({ axios, storeGet, getValue, discriminator }) {
           presetVersions.includes(item.metadata?.name) &&
           versionCompare(item.spec?.version, ver) >= 0
         )
-      else
+      else if (!limit.match(/^(>=|<=|>|<)/)) {
+        return (
+          !item.spec?.deprecated &&
+          presetVersions.includes(item.metadata?.name) &&
+          item.spec?.version === limit
+        )
+      } else
         return (
           !item.spec?.deprecated &&
           presetVersions.includes(item.metadata?.name) &&

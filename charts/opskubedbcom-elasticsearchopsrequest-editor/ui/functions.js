@@ -151,7 +151,7 @@ async function getDbVersions({ axios, storeGet, getValue, discriminator }) {
 
     const sortedVersions = resources.sort((a, b) => versionCompare(a.spec.version, b.spec.version))
 
-    let ver = getValue(discriminator, '/dbDetails/spec/version') || '0'
+    let ver = getValue(discriminator, '/elasticsearchDetails/spec/version') || '0'
     const found = sortedVersions.find((item) => item.metadata.name === ver)
 
     if (found) ver = found.spec?.version
@@ -166,7 +166,13 @@ async function getDbVersions({ axios, storeGet, getValue, discriminator }) {
           presetVersions.includes(item.metadata?.name) &&
           versionCompare(item.spec?.version, ver) >= 0
         )
-      else
+      else if (!limit.match(/^(>=|<=|>|<)/)) {
+        return (
+          !item.spec?.deprecated &&
+          presetVersions.includes(item.metadata?.name) &&
+          item.spec?.version === limit
+        )
+      } else
         return (
           !item.spec?.deprecated &&
           presetVersions.includes(item.metadata?.name) &&
