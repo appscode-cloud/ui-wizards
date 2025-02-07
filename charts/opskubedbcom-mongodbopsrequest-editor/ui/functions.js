@@ -111,7 +111,7 @@ async function getMongoDetails({
   } else return {}
 }
 
-async function getMongoDbVersions({ axios, storeGet, getValue, discriminator }) {
+async function getDbVersions({ axios, storeGet, getValue, discriminator }) {
   const owner = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
 
@@ -140,20 +140,6 @@ async function getMongoDbVersions({ axios, storeGet, getValue, discriminator }) 
 
     const resources = (resp && resp.data && resp.data.items) || []
 
-    function versionCompare(v1, v2) {
-      const arr1 = v1.split('.').map(Number)
-      const arr2 = v2.split('.').map(Number)
-
-      for (let i = 0; i < Math.max(arr1.length, arr2.length); i++) {
-        const num1 = arr1[i] || 0
-        const num2 = arr2[i] || 0
-
-        if (num1 > num2) return 1 // v1 is higher
-        if (num1 < num2) return -1 // v2 is higher
-      }
-      return 0 // versions are equal
-    }
-
     const sortedVersions = resources.sort((a, b) => versionCompare(a.spec.version, b.spec.version))
 
     let ver = getValue(discriminator, '/dbDetails/spec/version') || '0'
@@ -161,24 +147,23 @@ async function getMongoDbVersions({ axios, storeGet, getValue, discriminator }) 
 
     if (found) ver = found.spec?.version
     const allowed = found?.spec?.updateConstraints?.allowlist || []
-    const limit = allowed.length ? allowed[0] : '0,0'
-
-    function extractVersions(limit) {
-      return limit.match(/\d+(\.\d+)+/g) || []
-    }
-
-    const versionConstraints = extractVersions(limit)
+    const limit = allowed.length ? allowed[0] : '0.0'
 
     // keep only non deprecated & kubedb-ui-presets & within constraints of current version
-
-    const filteredMongoDbVersions = sortedVersions.filter(
-      (item) =>
-        !item.spec?.deprecated &&
-        presetVersions.includes(item.metadata?.name) &&
-        versionConstraints.length > 1 &&
-        versionCompare(item.spec?.version, versionConstraints[0]) >= 0 &&
-        versionCompare(versionConstraints[1], item.spec?.version) >= 0,
-    )
+    const filteredMongoDbVersions = sortedVersions.filter((item) => {
+      if (limit === '0.0')
+        return (
+          !item.spec?.deprecated &&
+          presetVersions.includes(item.metadata?.name) &&
+          versionCompare(item.spec?.version, ver) >= 0
+        )
+      else
+        return (
+          !item.spec?.deprecated &&
+          presetVersions.includes(item.metadata?.name) &&
+          isVersionWithinConstraints(item.spec?.version, limit)
+        )
+    })
 
     return filteredMongoDbVersions.map((item) => {
       const name = (item.metadata && item.metadata.name) || ''
@@ -192,6 +177,42 @@ async function getMongoDbVersions({ axios, storeGet, getValue, discriminator }) 
     console.log(e)
     return []
   }
+}
+
+function versionCompare(v1, v2) {
+  const arr1 = v1.split('.').map(Number)
+  const arr2 = v2.split('.').map(Number)
+
+  for (let i = 0; i < Math.max(arr1.length, arr2.length); i++) {
+    const num1 = arr1[i] || 0
+    const num2 = arr2[i] || 0
+
+    if (num1 > num2) return 1 // v1 is higher
+    if (num1 < num2) return -1 // v2 is higher
+  }
+  return 0 // versions are equal
+}
+
+function isVersionWithinConstraints(version, constraints) {
+  let constraintsArr = []
+  if (constraints.includes(',')) constraintsArr = constraints?.split(',')?.map((c) => c.trim())
+  else constraintsArr = [constraints]
+
+  for (let constraint of constraintsArr) {
+    let match = constraint.match(/^(>=|<=|>|<)/)
+    let operator = match ? match[0] : ''
+    let constraintVersion = constraint.replace(/^(>=|<=|>|<)/, '').trim()
+
+    let comparison = versionCompare(version, constraintVersion)
+    if (
+      (operator === '>=' && comparison < 0) ||
+      (operator === '<=' && comparison > 0) ||
+      (operator === '>' && comparison <= 0) ||
+      (operator === '<' && comparison >= 0)
+    )
+      return false
+  }
+  return true
 }
 
 function ifRequestTypeEqualsTo({ model, getValue, watchDependency }, type) {
@@ -807,7 +828,7 @@ return {
   getNamespaces,
   getMongoDbs,
   getMongoDetails,
-  getMongoDbVersions,
+  getDbVersions,
   ifRequestTypeEqualsTo,
   onRequestTypeChange,
   getDbTls,
