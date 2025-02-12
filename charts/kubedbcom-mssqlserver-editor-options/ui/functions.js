@@ -1130,17 +1130,27 @@ function convertToISO(input) {
   return date.toISOString()
 }
 
-function getComponentLogStats(status) {
-  if (!status || !status.components) return null
+function getComponentLogStats(snapshot) {
+  if (!snapshot || !snapshot.status || !snapshot.status.components) {
+    return null
+  }
 
-  const componentKeys = Object.keys(status.components)
+  const components = snapshot.status.components
+  const appKind = snapshot.spec?.appRef?.kind
 
-  let firstComponent = status.components[componentKeys[0]]
+  if (appKind === 'MongoDB') {
+    for (const [key, value] of Object.entries(components)) {
+      if (key.endsWith('0') && value.logStats) {
+        return value.logStats
+      }
+    }
+  }
 
-  if (componentKeys.includes('wal-rs0')) firstComponent = status.components['wal-rs0']
-  else if (componentKeys.includes('wal-shard0')) firstComponent = status.components['wal-shard0']
+  if (components['wal'] && components['wal'].logStats) {
+    return components['wal'].logStats
+  }
 
-  return firstComponent.logStats || null
+  return null
 }
 
 let recoveryTimestampMiliSec = '000Z'
@@ -1187,7 +1197,7 @@ async function setPointInTimeRecovery({ commit, axios, storeGet, discriminator, 
       force: true,
     })
 
-    const resp = getComponentLogStats(snapshotsResp.data?.status)
+    const resp = getComponentLogStats(snapshotsResp.data)
     const recoveryTimestampArray = convertToISO(resp?.end).split('.')
 
     if (recoveryTimestampArray.length === 2) {
