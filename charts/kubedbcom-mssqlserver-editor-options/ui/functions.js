@@ -1115,6 +1115,44 @@ function onCustomPidChange({ getValue, discriminator, commit }) {
   })
 }
 
+function convertToISO(input) {
+  const iso8601Regex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$/
+  if (iso8601Regex.test(input)) {
+    return input
+  }
+
+  const date = new Date(input)
+
+  if (isNaN(date.getTime())) {
+    throw new Error('Invalid date format')
+  }
+
+  return date.toISOString()
+}
+
+function getComponentLogStats(snapshot) {
+  if (!snapshot || !snapshot.status || !snapshot.status.components) {
+    return null
+  }
+
+  const components = snapshot.status.components
+  const appKind = snapshot.spec?.appRef?.kind
+
+  if (appKind === 'MongoDB') {
+    for (const [key, value] of Object.entries(components)) {
+      if (key.endsWith('0') && value.logStats) {
+        return value.logStats
+      }
+    }
+  }
+
+  if (components['wal'] && components['wal'].logStats) {
+    return components['wal'].logStats
+  }
+
+  return null
+}
+
 let recoveryTimestampMiliSec = '000Z'
 async function setPointInTimeRecovery({ commit, axios, storeGet, discriminator, getValue }) {
   const owner = storeGet('/route/params/user')
@@ -1159,8 +1197,8 @@ async function setPointInTimeRecovery({ commit, axios, storeGet, discriminator, 
       force: true,
     })
 
-    const resp = snapshotsResp.data.status?.components['wal-rs0']?.walSegments[0]
-    const recoveryTimestampArray = resp?.end.split('.')
+    const resp = getComponentLogStats(snapshotsResp.data)
+    const recoveryTimestampArray = convertToISO(resp?.end).split('.')
 
     if (recoveryTimestampArray.length === 2) {
       recoveryTimestampMiliSec = recoveryTimestampArray[1]
@@ -1168,17 +1206,17 @@ async function setPointInTimeRecovery({ commit, axios, storeGet, discriminator, 
 
     commit('wizard/model$update', {
       path: `/spec/init/archiver/recoveryTimestamp`,
-      value: resp?.end.slice(0, -1),
+      value: convertToISO(resp?.end).slice(0, -1),
       force: true,
     })
     commit('wizard/model$update', {
       path: `/minDate`,
-      value: resp?.start.slice(0, -1),
+      value: convertToISO(resp?.start).slice(0, -1),
       force: true,
     })
     commit('wizard/model$update', {
       path: `/maxDate`,
-      value: resp?.end.slice(0, -1),
+      value: convertToISO(resp?.end).slice(0, -1),
       force: true,
     })
   } catch (e) {
