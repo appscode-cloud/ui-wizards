@@ -111,43 +111,114 @@ async function getDbDetails({
   } else return {}
 }
 
-async function getDbVersions({ axios, storeGet, watchDependency }) {
-  watchDependency('discriminator#/dbDetails')
+async function getDbVersions({ axios, storeGet, getValue, discriminator }) {
   const owner = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
 
-  const queryParams = {
-    filter: {
-      items: {
-        metadata: { name: null },
-        spec: { version: null, deprecated: null, distribution: null },
+  const url = `/clusters/${owner}/${cluster}/proxy/charts.x-helm.dev/v1alpha1/clusterchartpresets/kubedb-ui-presets`
+  const kind = storeGet('/resource/layout/result/resource/kind')
+  try {
+    const presetResp = await axios.get(url)
+    const presetVersions =
+      presetResp.data?.spec?.values?.spec?.admin?.databases?.MariaDB?.versions?.available || []
+
+    const queryParams = {
+      filter: {
+        items: {
+          metadata: { name: null },
+          spec: { version: null, deprecated: null, updateConstraints: null },
+        },
       },
-    },
-  }
-
-  const resp = await axios.get(
-    `/clusters/${owner}/${cluster}/proxy/catalog.kubedb.com/v1alpha1/mariadbversions`,
-    {
-      params: queryParams,
-    },
-  )
-
-  const resources = (resp && resp.data && resp.data.items) || []
-
-  // keep only non deprecated versions
-  const filteredElasticsearchVersions = resources.filter(
-    (item) => item.spec && !item.spec.deprecated,
-  )
-
-  return filteredElasticsearchVersions.map((item) => {
-    const name = (item.metadata && item.metadata.name) || ''
-    const specVersion = (item.spec && item.spec.version) || ''
-    const dist = (item.spec && item.spec.distribution) || ''
-    return {
-      text: `${name} (${specVersion})`,
-      value: name,
     }
-  })
+
+    const resp = await axios.get(
+      `/clusters/${owner}/${cluster}/proxy/catalog.kubedb.com/v1alpha1/mariadbversions`,
+      {
+        params: queryParams,
+      },
+    )
+
+    const resources = (resp && resp.data && resp.data.items) || []
+
+    const sortedVersions = resources.sort((a, b) => versionCompare(a.spec.version, b.spec.version))
+
+    let ver = getValue(discriminator, '/dbDetails/spec/version') || '0'
+    const found = sortedVersions.find((item) => item.metadata.name === ver)
+
+    if (found) ver = found.spec?.version
+    const allowed = found?.spec?.updateConstraints?.allowlist || []
+    const limit = allowed.length ? allowed[0] : '0.0'
+
+    // keep only non deprecated & kubedb-ui-presets & within constraints of current version
+    const filteredMongoDbVersions = sortedVersions.filter((item) => {
+      if (limit === '0.0')
+        return (
+          !item.spec?.deprecated &&
+          presetVersions.includes(item.metadata?.name) &&
+          versionCompare(item.spec?.version, ver) >= 0
+        )
+      else if (!limit.match(/^(>=|<=|>|<)/)) {
+        return (
+          !item.spec?.deprecated &&
+          presetVersions.includes(item.metadata?.name) &&
+          item.spec?.version === limit
+        )
+      } else
+        return (
+          !item.spec?.deprecated &&
+          presetVersions.includes(item.metadata?.name) &&
+          isVersionWithinConstraints(item.spec?.version, limit)
+        )
+    })
+
+    return filteredMongoDbVersions.map((item) => {
+      const name = (item.metadata && item.metadata.name) || ''
+      const specVersion = (item.spec && item.spec.version) || ''
+      return {
+        text: `${name} (${specVersion})`,
+        value: name,
+      }
+    })
+  } catch (e) {
+    console.log(e)
+    return []
+  }
+}
+
+function versionCompare(v1, v2) {
+  const arr1 = v1.split('.').map(Number)
+  const arr2 = v2.split('.').map(Number)
+
+  for (let i = 0; i < Math.max(arr1.length, arr2.length); i++) {
+    const num1 = arr1[i] || 0
+    const num2 = arr2[i] || 0
+
+    if (num1 > num2) return 1 // v1 is higher
+    if (num1 < num2) return -1 // v2 is higher
+  }
+  return 0 // versions are equal
+}
+
+function isVersionWithinConstraints(version, constraints) {
+  let constraintsArr = []
+  if (constraints.includes(',')) constraintsArr = constraints?.split(',')?.map((c) => c.trim())
+  else constraintsArr = [constraints]
+
+  for (let constraint of constraintsArr) {
+    let match = constraint.match(/^(>=|<=|>|<)/)
+    let operator = match ? match[0] : ''
+    let constraintVersion = constraint.replace(/^(>=|<=|>|<)/, '').trim()
+
+    let comparison = versionCompare(version, constraintVersion)
+    if (
+      (operator === '>=' && comparison < 0) ||
+      (operator === '<=' && comparison > 0) ||
+      (operator === '>' && comparison <= 0) ||
+      (operator === '<' && comparison >= 0)
+    )
+      return false
+  }
+  return true
 }
 
 function ifRequestTypeEqualsTo({ model, getValue, watchDependency }, type) {
@@ -545,23 +616,14 @@ function initIssuerRefApiGroup({ getValue, model, watchDependency, discriminator
 async function getIssuerRefsName({ axios, storeGet, getValue, model, watchDependency }) {
   const owner = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
-  watchDependency('model#/spec/tls/issuerRef/apiGroup')
   watchDependency('model#/spec/tls/issuerRef/kind')
   watchDependency('model#/metadata/namespace')
-  const apiGroup = getValue(model, '/spec/tls/issuerRef/apiGroup')
   const kind = getValue(model, '/spec/tls/issuerRef/kind')
   const namespace = getValue(model, '/metadata/namespace')
 
-  let url
   if (kind === 'Issuer') {
-    url = `/clusters/${owner}/${cluster}/proxy/${apiGroup}/v1/namespaces/${namespace}/issuers`
-  } else if (kind === 'ClusterIssuer') {
-    url = `/clusters/${owner}/${cluster}/proxy/${apiGroup}/v1/clusterissuers`
-  }
-
-  if (!url) return []
-
-  if (url && apiGroup && namespace) {
+    const url = `/clusters/${owner}/${cluster}/proxy/cert-manager.io/v1/namespaces/${namespace}/issuers`
+    if (!url) return []
     try {
       const resp = await axios.get(url)
 
@@ -578,8 +640,18 @@ async function getIssuerRefsName({ axios, storeGet, getValue, model, watchDepend
       console.log(e)
       return []
     }
-  } else {
-    return []
+  } else if (kind === 'ClusterIssuer') {
+    const url = `/clusters/${owner}/${cluster}/proxy/charts.x-helm.dev/v1alpha1/clusterchartpresets/kubedb-ui-presets`
+    try {
+      const presetResp = await axios.get(url)
+      const clusterIssuers =
+        presetResp.data?.spec?.values?.spec?.admin?.clusterIssuers?.available || []
+
+      return clusterIssuers
+    } catch (e) {
+      console.log(e)
+      return []
+    }
   }
 }
 

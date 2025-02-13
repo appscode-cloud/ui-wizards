@@ -108,7 +108,6 @@ async function getElasticsearchDetails({
     )
 
     const { version } = resp?.data?.spec || {}
-    elasticVersions = await elasticVersions$api({ axios, storeGet })
     const selectedVersion = elasticVersions?.find((item) => item?.metadata?.name === version)
 
     if (resp?.data?.spec) {
@@ -121,62 +120,115 @@ async function getElasticsearchDetails({
   } else return {}
 }
 
-async function elasticVersions$api({ axios, storeGet }) {
+async function getDbVersions({ axios, storeGet, getValue, discriminator }) {
   const owner = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
 
-  const queryParams = {
-    filter: {
-      items: {
-        metadata: { name: null },
-        spec: { version: null, deprecated: null, authPlugin: null },
-      },
-    },
-  }
+  const url = `/clusters/${owner}/${cluster}/proxy/charts.x-helm.dev/v1alpha1/clusterchartpresets/kubedb-ui-presets`
+  const kind = storeGet('/resource/layout/result/resource/kind')
   try {
+    const presetResp = await axios.get(url)
+    const presetVersions =
+      presetResp.data?.spec?.values?.spec?.admin?.databases?.Elasticsearch?.versions?.available ||
+      []
+
+    const queryParams = {
+      filter: {
+        items: {
+          metadata: { name: null },
+          spec: { version: null, deprecated: null, updateConstraints: null },
+        },
+      },
+    }
+
     const resp = await axios.get(
       `/clusters/${owner}/${cluster}/proxy/catalog.kubedb.com/v1alpha1/elasticsearchversions`,
       {
         params: queryParams,
       },
     )
-    return (resp && resp.data && resp.data.items) || []
+
+    const resources = (resp && resp.data && resp.data.items) || []
+
+    const sortedVersions = resources.sort((a, b) => versionCompare(a.spec.version, b.spec.version))
+
+    let ver = getValue(discriminator, '/elasticsearchDetails/spec/version') || '0'
+    const found = sortedVersions.find((item) => item.metadata.name === ver)
+
+    if (found) ver = found.spec?.version
+    const allowed = found?.spec?.updateConstraints?.allowlist || []
+    const limit = allowed.length ? allowed[0] : '0.0'
+
+    // keep only non deprecated & kubedb-ui-presets & within constraints of current version
+    const filteredMongoDbVersions = sortedVersions.filter((item) => {
+      if (limit === '0.0')
+        return (
+          !item.spec?.deprecated &&
+          presetVersions.includes(item.metadata?.name) &&
+          versionCompare(item.spec?.version, ver) >= 0
+        )
+      else if (!limit.match(/^(>=|<=|>|<)/)) {
+        return (
+          !item.spec?.deprecated &&
+          presetVersions.includes(item.metadata?.name) &&
+          item.spec?.version === limit
+        )
+      } else
+        return (
+          !item.spec?.deprecated &&
+          presetVersions.includes(item.metadata?.name) &&
+          isVersionWithinConstraints(item.spec?.version, limit)
+        )
+    })
+
+    return filteredMongoDbVersions.map((item) => {
+      const name = (item.metadata && item.metadata.name) || ''
+      const specVersion = (item.spec && item.spec.version) || ''
+      return {
+        text: `${name} (${specVersion})`,
+        value: name,
+      }
+    })
   } catch (e) {
     console.log(e)
     return []
   }
 }
 
-async function getElasticsearchVersions({
-  axios,
-  storeGet,
-  discriminator,
-  getValue,
-  watchDependency,
-}) {
-  watchDependency('discriminator#/elasticsearchDetails')
+function versionCompare(v1, v2) {
+  const arr1 = v1.split('.').map(Number)
+  const arr2 = v2.split('.').map(Number)
 
-  const resources = elasticVersions
+  for (let i = 0; i < Math.max(arr1.length, arr2.length); i++) {
+    const num1 = arr1[i] || 0
+    const num2 = arr2[i] || 0
 
-  const elasticsearchDetails = getValue(discriminator, '/elasticsearchDetails')
-  const authPlugin = elasticsearchDetails?.spec?.authPlugin || ''
+    if (num1 > num2) return 1 // v1 is higher
+    if (num1 < num2) return -1 // v2 is higher
+  }
+  return 0 // versions are equal
+}
 
-  // keep only non deprecated versions
-  const filteredElasticsearchVersions = resources.filter(
-    (item) =>
-      item.spec && !item.spec.deprecated && (!authPlugin || item.spec.authPlugin === authPlugin),
-  )
+function isVersionWithinConstraints(version, constraints) {
+  let constraintsArr = []
+  if (constraints.includes(',')) constraintsArr = constraints?.split(',')?.map((c) => c.trim())
+  else constraintsArr = [constraints]
 
-  return filteredElasticsearchVersions.map((item) => {
-    const name = (item.metadata && item.metadata.name) || ''
-    const specVersion = (item.spec && item.spec.version) || ''
-    const authPlugin = (item.spec && item.spec.authPlugin) || ''
-    return {
-      text: `${name} (${specVersion})`,
-      value: name,
-      authPlugin,
-    }
-  })
+  for (let constraint of constraintsArr) {
+    let match = constraint.match(/^(>=|<=|>|<)/)
+    let operator = match ? match[0] : ''
+    let constraintVersion = constraint.replace(/^(>=|<=|>|<)/, '').trim()
+
+    let comparison = versionCompare(version, constraintVersion)
+    if (
+      (operator === '>=' && comparison < 0) ||
+      (operator === '<=' && comparison > 0) ||
+      (operator === '>' && comparison <= 0) ||
+      (operator === '<' && comparison >= 0)
+    )
+      return false
+  }
+  return true
 }
 
 function ifRequestTypeEqualsTo({ model, getValue, watchDependency }, type) {
@@ -597,37 +649,42 @@ function initIssuerRefApiGroup({ getValue, model, watchDependency, discriminator
 async function getIssuerRefsName({ axios, storeGet, getValue, model, watchDependency }) {
   const owner = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
-  watchDependency('model#/spec/tls/issuerRef/apiGroup')
   watchDependency('model#/spec/tls/issuerRef/kind')
   watchDependency('model#/metadata/namespace')
-  const apiGroup = getValue(model, '/spec/tls/issuerRef/apiGroup')
   const kind = getValue(model, '/spec/tls/issuerRef/kind')
   const namespace = getValue(model, '/metadata/namespace')
 
-  let url
   if (kind === 'Issuer') {
-    url = `/clusters/${owner}/${cluster}/proxy/${apiGroup}/v1/namespaces/${namespace}/issuers`
+    const url = `/clusters/${owner}/${cluster}/proxy/cert-manager.io/v1/namespaces/${namespace}/issuers`
+    if (!url) return []
+    try {
+      const resp = await axios.get(url)
+
+      const resources = (resp && resp.data && resp.data.items) || []
+
+      resources.map((item) => {
+        const name = (item.metadata && item.metadata.name) || ''
+        item.text = name
+        item.value = name
+        return true
+      })
+      return resources
+    } catch (e) {
+      console.log(e)
+      return []
+    }
   } else if (kind === 'ClusterIssuer') {
-    url = `/clusters/${owner}/${cluster}/proxy/${apiGroup}/v1/clusterissuers`
-  }
+    const url = `/clusters/${owner}/${cluster}/proxy/charts.x-helm.dev/v1alpha1/clusterchartpresets/kubedb-ui-presets`
+    try {
+      const presetResp = await axios.get(url)
+      const clusterIssuers =
+        presetResp.data?.spec?.values?.spec?.admin?.clusterIssuers?.available || []
 
-  if (!url) return []
-
-  try {
-    const resp = await axios.get(url)
-
-    const resources = (resp && resp.data && resp.data.items) || []
-
-    resources.map((item) => {
-      const name = (item.metadata && item.metadata.name) || ''
-      item.text = name
-      item.value = name
-      return true
-    })
-    return resources
-  } catch (e) {
-    console.log(e)
-    return []
+      return clusterIssuers
+    } catch (e) {
+      console.log(e)
+      return []
+    }
   }
 }
 
@@ -833,8 +890,7 @@ return {
   getNamespaces,
   getElasticsearches,
   getElasticsearchDetails,
-  elasticVersions$api,
-  getElasticsearchVersions,
+  getDbVersions,
   ifRequestTypeEqualsTo,
   onRequestTypeChange,
   getDbTls,
