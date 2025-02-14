@@ -118,10 +118,8 @@ async function getDbVersions({ axios, storeGet, getValue, discriminator }) {
   const url = `/clusters/${owner}/${cluster}/proxy/charts.x-helm.dev/v1alpha1/clusterchartpresets/kubedb-ui-presets`
   const kind = storeGet('/resource/layout/result/resource/kind')
   try {
-    const presetResp = await axios.get(url)
-    const presetVersions =
-      presetResp.data?.spec?.values?.spec?.admin?.databases?.MariaDB?.versions?.available || []
-
+    const presets = storeGet('/kubedbuiPresets') || {}
+    const presetVersions = presets.admin?.databases?.MariaDB?.versions?.available || []
     const queryParams = {
       filter: {
         items: {
@@ -150,28 +148,32 @@ async function getDbVersions({ axios, storeGet, getValue, discriminator }) {
     const limit = allowed.length ? allowed[0] : '0.0'
 
     // keep only non deprecated & kubedb-ui-presets & within constraints of current version
-    const filteredMongoDbVersions = sortedVersions.filter((item) => {
+    // if presets.status is 404, it means no presets available, no need to filter with presets
+    const filteredMariaDBVersions = sortedVersions.filter((item) => {
+      // default limit 0.0 means no restrictions, show all higher versions
       if (limit === '0.0')
         return (
           !item.spec?.deprecated &&
-          presetVersions.includes(item.metadata?.name) &&
+          (presets.status === '404' || presetVersions.includes(item.metadata?.name)) &&
           versionCompare(item.spec?.version, ver) >= 0
         )
-      else if (!limit.match(/^(>=|<=|>|<)/)) {
+      // if limit doesn't have any operator, it's a single version
+      else if (!limit.match(/^(>=|<=|>|<)/))
         return (
           !item.spec?.deprecated &&
-          presetVersions.includes(item.metadata?.name) &&
+          (presets.status === '404' || presetVersions.includes(item.metadata?.name)) &&
           item.spec?.version === limit
         )
-      } else
+      // if limit has operator, check version with constraints
+      else
         return (
           !item.spec?.deprecated &&
-          presetVersions.includes(item.metadata?.name) &&
+          (presets.status === '404' || presetVersions.includes(item.metadata?.name)) &&
           isVersionWithinConstraints(item.spec?.version, limit)
         )
     })
 
-    return filteredMongoDbVersions.map((item) => {
+    return filteredMariaDBVersions.map((item) => {
       const name = (item.metadata && item.metadata.name) || ''
       const specVersion = (item.spec && item.spec.version) || ''
       return {
