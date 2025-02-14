@@ -58,7 +58,7 @@ type AdminOptions struct {
 	// +optional
 	Tolerations []core.Toleration `json:"tolerations"`
 
-	Databases      DatabasesProfile             `json:"databases"`
+	Databases      map[string]DatabaseProfile             `json:"databases"`
 	StorageClasses RequiredClusterScopedProfile `json:"storageClasses"`
 
 	TLS            ToggleProfileOnBoolean `json:"tls"`
