@@ -49,7 +49,13 @@ func (in *AdminOptions) DeepCopyInto(out *AdminOptions) {
 			(*in)[i].DeepCopyInto(&(*out)[i])
 		}
 	}
-	in.Databases.DeepCopyInto(&out.Databases)
+	if in.Databases != nil {
+		in, out := &in.Databases, &out.Databases
+		*out = make(map[string]DatabaseProfile, len(*in))
+		for key, val := range *in {
+			(*out)[key] = *val.DeepCopy()
+		}
+	}
 	in.StorageClasses.DeepCopyInto(&out.StorageClasses)
 	out.TLS = in.TLS
 	in.ClusterIssuers.DeepCopyInto(&out.ClusterIssuers)
