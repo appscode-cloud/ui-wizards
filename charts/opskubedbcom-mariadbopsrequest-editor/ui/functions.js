@@ -623,10 +623,20 @@ async function getIssuerRefsName({ axios, storeGet, getValue, model, watchDepend
 
   if (kind === 'Issuer') {
     const url = `/clusters/${owner}/${cluster}/proxy/cert-manager.io/v1/namespaces/${namespace}/issuers`
-    if (!url) return []
+    return getIssuer(url)
+  } else if (kind === 'ClusterIssuer') {
+    const presets = storeGet('/kubedbuiPresets')
+    let clusterIssuers = presets.admin?.clusterIssuers?.available || []
+    if (presets.status === '404') {
+      const url = `/clusters/${owner}/${cluster}/proxy/cert-manager.io/v1/clusterissuers`
+      return getIssuer(url)
+    }
+    return clusterIssuers
+  }
+
+  async function getIssuer(url) {
     try {
       const resp = await axios.get(url)
-
       const resources = (resp && resp.data && resp.data.items) || []
 
       resources.map((item) => {
@@ -636,18 +646,6 @@ async function getIssuerRefsName({ axios, storeGet, getValue, model, watchDepend
         return true
       })
       return resources
-    } catch (e) {
-      console.log(e)
-      return []
-    }
-  } else if (kind === 'ClusterIssuer') {
-    const url = `/clusters/${owner}/${cluster}/proxy/charts.x-helm.dev/v1alpha1/clusterchartpresets/kubedb-ui-presets`
-    try {
-      const presetResp = await axios.get(url)
-      const clusterIssuers =
-        presetResp.data?.spec?.values?.spec?.admin?.clusterIssuers?.available || []
-
-      return clusterIssuers
     } catch (e) {
       console.log(e)
       return []
