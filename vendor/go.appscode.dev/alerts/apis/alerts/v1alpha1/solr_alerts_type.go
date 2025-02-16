@@ -60,10 +60,14 @@ type SolrAlert struct {
 	AdditionalRuleLabels map[string]string `json:"additionalRuleLabels"`
 	Groups               SolrAlertGroups   `json:"groups"`
 }
+
 type SolrAlertGroups struct {
 	Database    SolrDatabaseAlert `json:"database"`
 	Provisioner ProvisionerAlert  `json:"provisioner"`
+	OpsManager  OpsManagerAlert   `json:"opsManager"`
+	KubeStash   KubeStashAlert    `json:"kubeStash"`
 }
+
 type SolrDatabaseAlert struct {
 	Enabled mona.SeverityFlag      `json:"enabled"`
 	Rules   SolrDatabaseAlertRules `json:"rules"`

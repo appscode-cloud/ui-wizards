@@ -23,70 +23,66 @@ import (
 )
 
 const (
-	ResourceKindSinglestoreAlerts = "SinglestoreAlerts"
-	ResourceSinglestoreAlerts     = "singlestorealerts"
-	ResourceSinglestoreAlertss    = "singlestorealertss"
+	ResourceKindMSSQLServerAlerts = "MSSQLServerAlerts"
+	ResourceMSSQLServerAlerts     = "mssqlserveralerts"
+	ResourceMSSQLServerAlertss    = "mssqlserveralertss"
 )
 
-// SinglestoreAlerts defines the schama for KubeDB Ops Manager Operator Installer.
+// MSSQLServerAlerts defines the schema for KubeDB Ops Manager Operator Installer.
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
 // +kubebuilder:object:root=true
-// +kubebuilder:resource:path=singlestorealertss,singular=singlestorealerts,categories={kubedb,appscode}
-type SinglestoreAlerts struct {
+// +kubebuilder:resource:path=mssqlserveralertss,singular=mssqlserveralerts,categories={kubedb,appscode}
+type MSSQLServerAlerts struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	Spec              SinglestoreAlertsSpec `json:"spec,omitempty"`
+	Spec              MSSQLServerAlertsSpec `json:"spec,omitempty"`
 }
 
-// SinglestoreAlertsSpec is the schema for kubedb-autoscaler chart values file
-type SinglestoreAlertsSpec struct {
+// MSSQLServerAlertsSpec is the schema for kubedb-autoscaler chart values file
+type MSSQLServerAlertsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
-	Form         SinglestoreAlertsSpecForm `json:"form"`
-	Grafana      SinglestoreGrafana        `json:"grafana"`
+	Form         MSSQLServerAlertsSpecForm `json:"form"`
+	Grafana      MemcachedGrafana          `json:"grafana"`
 }
 
-type SinglestoreAlertsSpecForm struct {
-	Alert SinglestoreAlert `json:"alert"`
+type MSSQLServerAlertsSpecForm struct {
+	Alert MSSQLServerAlert `json:"alert"`
 }
 
-type SinglestoreAlert struct {
+type MSSQLServerAlert struct {
 	Enabled mona.SeverityFlag `json:"enabled"`
 	Labels  map[string]string `json:"labels"`
 	// +optional
 	Annotations map[string]string `json:"annotations"`
 	// +optional
 	AdditionalRuleLabels map[string]string      `json:"additionalRuleLabels"`
-	Groups               SinglestoreAlertGroups `json:"groups"`
+	Groups               MSSQLServerAlertGroups `json:"groups"`
 }
 
-type SinglestoreAlertGroups struct {
-	Database    SinglestoreDatabaseAlert `json:"database"`
+type MSSQLServerAlertGroups struct {
+	Database    MSSQLServerDatabaseAlert `json:"database"`
 	Provisioner ProvisionerAlert         `json:"provisioner"`
 	OpsManager  OpsManagerAlert          `json:"opsManager"`
 	KubeStash   KubeStashAlert           `json:"kubeStash"`
 }
 
-type SinglestoreDatabaseAlert struct {
+type MSSQLServerDatabaseAlert struct {
 	Enabled mona.SeverityFlag             `json:"enabled"`
-	Rules   SinglestoreDatabaseAlertRules `json:"rules"`
+	Rules   MSSQLServerDatabaseAlertRules `json:"rules"`
 }
 
-type SinglestoreDatabaseAlertRules struct {
-	SinglestoreInstanceDown       FixedAlert  `json:"singlestoreInstanceDown"`
-	SinglestoreServiceDown        FixedAlert  `json:"singlestoreServiceDown"`
-	SinglestoreTooManyConnections IntValAlert `json:"singlestoreTooManyConnections"`
-	SinglestoreHighThreadsRunning IntValAlert `json:"singlestoreHighThreadsRunning"`
-	SinglestoreRestarted          IntValAlert `json:"singlestoreRestarted"`
-	SinglestoreHighQPS            IntValAlert `json:"singlestoreHighQPS"`
-	SinglestoreHighIncomingBytes  IntValAlert `json:"singlestoreHighIncomingBytes"`
-	SinglestoreHighOutgoingBytes  IntValAlert `json:"singlestoreHighOutgoingBytes"`
+type MSSQLServerDatabaseAlertRules struct {
+	MSSQLServerInstanceDown       FixedAlert  `json:"mssqlserverInstanceDown"`
+	MSSSQLServerServiceDown       FixedAlert  `json:"mssqlserverServiceDown"`
+	MSSQLServerRestarted          IntValAlert `json:"mssqlserverRestarted"`
+	MSSQLServerTooManyConnections IntValAlert `json:"mssqlserverTooManyConnections"`
 	DiskUsageHigh                 IntValAlert `json:"diskUsageHigh"`
 	DiskAlmostFull                IntValAlert `json:"diskAlmostFull"`
 }
 
-type SinglestoreGrafana struct {
+type MSSQLServerGrafana struct {
 	Enabled bool   `json:"enabled"`
 	Version string `json:"version"`
 	JobName string `json:"jobName"`
@@ -96,10 +92,10 @@ type SinglestoreGrafana struct {
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
-// SinglestoreAlertsList is a list of SinglestoreAlertss
-type SinglestoreAlertsList struct {
+// MSSQLServerAlertsList is a list of MSSQLServerAlertss
+type MSSQLServerAlertsList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	// Items is a list of SinglestoreAlerts CRD objects
-	Items []SinglestoreAlerts `json:"items,omitempty"`
+	// Items is a list of MSSQLServerAlerts CRD objects
+	Items []MSSQLServerAlerts `json:"items,omitempty"`
 }

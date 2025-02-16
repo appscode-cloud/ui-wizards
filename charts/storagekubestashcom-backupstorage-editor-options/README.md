@@ -61,7 +61,6 @@ The following table lists the configurable parameters of the `storagekubestashco
 | spec.backend.s3.spec.bucket                           |                                                    | <code>""</code>                      |
 | spec.backend.s3.auth.AWS_ACCESS_KEY_ID                |                                                    | <code>""</code>                      |
 | spec.backend.s3.auth.AWS_SECRET_ACCESS_KEY            |                                                    | <code>""</code>                      |
-| spec.backend.s3.auth.CA_CERT_DATA                     |                                                    | <code>""</code>                      |
 | spec.backend.azure.spec.container                     |                                                    | <code>""</code>                      |
 | spec.backend.azure.auth.AZURE_ACCOUNT_NAME            |                                                    | <code>""</code>                      |
 | spec.backend.azure.auth.AZURE_ACCOUNT_KEY             |                                                    | <code>""</code>                      |
@@ -70,7 +69,6 @@ The following table lists the configurable parameters of the `storagekubestashco
 | spec.backend.gcs.auth.GOOGLE_SERVICE_ACCOUNT_JSON_KEY |                                                    | <code>""</code>                      |
 | spec.backend.local.mountPath                          |                                                    | <code>"ll"</code>                    |
 | spec.backend.local.persistentVolumeClaim.claimName    |                                                    | <code>"cc"</code>                    |
-| spec.backend.local.persistentVolumeClaim.readOnly     |                                                    | <code>false</code>                   |
 | spec.deletionPolicy                                   |                                                    | <code>"Delete"</code>                |
 | spec.runtimeSettings.securityContext                  |                                                    | <code></code>                        |
 

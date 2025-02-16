@@ -63,7 +63,6 @@ The following table lists the configurable parameters of the `stashappscodecom-r
 | spec.backend.s3.spec.bucket                           |                                                    | <code>""</code>                         |
 | spec.backend.s3.auth.AWS_ACCESS_KEY_ID                |                                                    | <code>""</code>                         |
 | spec.backend.s3.auth.AWS_SECRET_ACCESS_KEY            |                                                    | <code>""</code>                         |
-| spec.backend.s3.auth.CA_CERT_DATA                     |                                                    | <code>""</code>                         |
 | spec.backend.azure.spec.container                     |                                                    | <code>""</code>                         |
 | spec.backend.azure.auth.AZURE_ACCOUNT_NAME            |                                                    | <code>""</code>                         |
 | spec.backend.azure.auth.AZURE_ACCOUNT_KEY             |                                                    | <code>""</code>                         |

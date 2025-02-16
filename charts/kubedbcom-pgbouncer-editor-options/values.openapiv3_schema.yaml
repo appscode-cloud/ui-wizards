@@ -31,47 +31,7 @@ properties:
                     type: string
                   rules:
                     properties:
-                      diskAlmostFull:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                          val:
-                            type: integer
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        - val
-                        type: object
-                      diskUsageHigh:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                          val:
-                            type: integer
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        - val
-                        type: object
-                      postgresExporterError:
+                      pgbouncerExporterError:
                         properties:
                           duration:
                             type: string
@@ -88,7 +48,7 @@ properties:
                         - enabled
                         - severity
                         type: object
-                      postgresHighRollbackRate:
+                      pgbouncerHighRollbackRate:
                         properties:
                           duration:
                             type: string
@@ -109,7 +69,7 @@ properties:
                         - severity
                         - val
                         type: object
-                      postgresInstanceDown:
+                      pgbouncerInstanceDown:
                         properties:
                           duration:
                             type: string
@@ -126,47 +86,7 @@ properties:
                         - enabled
                         - severity
                         type: object
-                      postgresNotEnoughConnections:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                          val:
-                            type: integer
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        - val
-                        type: object
-                      postgresReplicationLag:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                          val:
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        - val
-                        type: object
-                      postgresRestarted:
+                      pgbouncerNotEnoughConnections:
                         properties:
                           duration:
                             type: string
@@ -186,7 +106,7 @@ properties:
                         - severity
                         - val
                         type: object
-                      postgresSlowQueries:
+                      pgbouncerReplicationLag:
                         properties:
                           duration:
                             type: string
@@ -198,29 +118,15 @@ properties:
                             - warning
                             - info
                             type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      postgresSplitBrain:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
+                          val:
                             type: string
                         required:
                         - duration
                         - enabled
                         - severity
+                        - val
                         type: object
-                      postgresTooManyConnections:
+                      pgbouncerRestarted:
                         properties:
                           duration:
                             type: string
@@ -240,7 +146,61 @@ properties:
                         - severity
                         - val
                         type: object
-                      postgresTooManyLocksAcquired:
+                      pgbouncerSlowQueries:
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            enum:
+                            - critical
+                            - warning
+                            - info
+                            type: string
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        type: object
+                      pgbouncerSplitBrain:
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            enum:
+                            - critical
+                            - warning
+                            - info
+                            type: string
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        type: object
+                      pgbouncerTooManyConnections:
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            enum:
+                            - critical
+                            - warning
+                            - info
+                            type: string
+                          val:
+                            type: integer
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        - val
+                        type: object
+                      pgbouncerTooManyLocksAcquired:
                         properties:
                           duration:
                             type: string
@@ -262,173 +222,16 @@ properties:
                         - val
                         type: object
                     required:
-                    - diskAlmostFull
-                    - diskUsageHigh
-                    - postgresExporterError
-                    - postgresHighRollbackRate
-                    - postgresInstanceDown
-                    - postgresNotEnoughConnections
-                    - postgresReplicationLag
-                    - postgresRestarted
-                    - postgresSlowQueries
-                    - postgresSplitBrain
-                    - postgresTooManyConnections
-                    - postgresTooManyLocksAcquired
-                    type: object
-                required:
-                - enabled
-                - rules
-                type: object
-              kubeStash:
-                properties:
-                  enabled:
-                    enum:
-                    - none
-                    - critical
-                    - warning
-                    - info
-                    type: string
-                  rules:
-                    properties:
-                      backupSessionFailed:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      backupSessionPeriodTooLong:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                          val:
-                            type: integer
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        - val
-                        type: object
-                      noBackupSessionForTooLong:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                          val:
-                            type: integer
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        - val
-                        type: object
-                      repositoryCorrupted:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      repositoryStorageRunningLow:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                          val:
-                            type: integer
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        - val
-                        type: object
-                      restoreSessionFailed:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      restoreSessionPeriodTooLong:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                          val:
-                            type: integer
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        - val
-                        type: object
-                    required:
-                    - backupSessionFailed
-                    - backupSessionPeriodTooLong
-                    - noBackupSessionForTooLong
-                    - repositoryCorrupted
-                    - repositoryStorageRunningLow
-                    - restoreSessionFailed
-                    - restoreSessionPeriodTooLong
+                    - pgbouncerExporterError
+                    - pgbouncerHighRollbackRate
+                    - pgbouncerInstanceDown
+                    - pgbouncerNotEnoughConnections
+                    - pgbouncerReplicationLag
+                    - pgbouncerRestarted
+                    - pgbouncerSlowQueries
+                    - pgbouncerSplitBrain
+                    - pgbouncerTooManyConnections
+                    - pgbouncerTooManyLocksAcquired
                     type: object
                 required:
                 - enabled
@@ -558,275 +361,10 @@ properties:
                 - enabled
                 - rules
                 type: object
-              schemaManager:
-                properties:
-                  enabled:
-                    enum:
-                    - none
-                    - critical
-                    - warning
-                    - info
-                    type: string
-                  rules:
-                    properties:
-                      schemaExpired:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      schemaFailed:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      schemaInProgressForTooLong:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      schemaPendingForTooLong:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      schemaTerminatingForTooLong:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                    required:
-                    - schemaExpired
-                    - schemaFailed
-                    - schemaInProgressForTooLong
-                    - schemaPendingForTooLong
-                    - schemaTerminatingForTooLong
-                    type: object
-                required:
-                - enabled
-                - rules
-                type: object
-              stash:
-                properties:
-                  enabled:
-                    enum:
-                    - none
-                    - critical
-                    - warning
-                    - info
-                    type: string
-                  rules:
-                    properties:
-                      backupSessionFailed:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      backupSessionPeriodTooLong:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                          val:
-                            type: integer
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        - val
-                        type: object
-                      noBackupSessionForTooLong:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                          val:
-                            type: integer
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        - val
-                        type: object
-                      repositoryCorrupted:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      repositoryStorageRunningLow:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                          val:
-                            type: integer
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        - val
-                        type: object
-                      restoreSessionFailed:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      restoreSessionPeriodTooLong:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                          val:
-                            type: integer
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        - val
-                        type: object
-                    required:
-                    - backupSessionFailed
-                    - backupSessionPeriodTooLong
-                    - noBackupSessionForTooLong
-                    - repositoryCorrupted
-                    - repositoryStorageRunningLow
-                    - restoreSessionFailed
-                    - restoreSessionPeriodTooLong
-                    type: object
-                required:
-                - enabled
-                - rules
-                type: object
             required:
             - database
-            - kubeStash
             - opsManager
             - provisioner
-            - schemaManager
-            - stash
             type: object
           labels:
             additionalProperties:
@@ -983,42 +521,727 @@ properties:
             - toggle
             type: object
           databases:
-            additionalProperties:
-              properties:
-                mode:
-                  properties:
-                    available:
-                      items:
+            properties:
+              ClickHouse:
+                properties:
+                  mode:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
                         type: string
-                      type: array
-                    default:
-                      type: string
-                    toggle:
-                      type: boolean
-                  required:
-                  - available
-                  - default
-                  - toggle
-                  type: object
-                versions:
-                  properties:
-                    available:
-                      items:
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                  versions:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
                         type: string
-                      type: array
-                    default:
-                      type: string
-                    toggle:
-                      type: boolean
-                  required:
-                  - available
-                  - default
-                  - toggle
-                  type: object
-              required:
-              - mode
-              - versions
-              type: object
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                required:
+                - mode
+                - versions
+                type: object
+              Druid:
+                properties:
+                  mode:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
+                        type: string
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                  versions:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
+                        type: string
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                required:
+                - mode
+                - versions
+                type: object
+              Elasticsearch:
+                properties:
+                  mode:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
+                        type: string
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                  versions:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
+                        type: string
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                required:
+                - mode
+                - versions
+                type: object
+              FerretDB:
+                properties:
+                  mode:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
+                        type: string
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                  versions:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
+                        type: string
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                required:
+                - mode
+                - versions
+                type: object
+              Kafka:
+                properties:
+                  mode:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
+                        type: string
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                  versions:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
+                        type: string
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                required:
+                - mode
+                - versions
+                type: object
+              MSSQLServer:
+                properties:
+                  mode:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
+                        type: string
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                  versions:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
+                        type: string
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                required:
+                - mode
+                - versions
+                type: object
+              MariaDB:
+                properties:
+                  mode:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
+                        type: string
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                  versions:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
+                        type: string
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                required:
+                - mode
+                - versions
+                type: object
+              Memcached:
+                properties:
+                  mode:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
+                        type: string
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                  versions:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
+                        type: string
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                required:
+                - mode
+                - versions
+                type: object
+              MongoDB:
+                properties:
+                  mode:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
+                        type: string
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                  versions:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
+                        type: string
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                required:
+                - mode
+                - versions
+                type: object
+              MySQL:
+                properties:
+                  mode:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
+                        type: string
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                  versions:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
+                        type: string
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                required:
+                - mode
+                - versions
+                type: object
+              PerconaXtraDB:
+                properties:
+                  mode:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
+                        type: string
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                  versions:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
+                        type: string
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                required:
+                - mode
+                - versions
+                type: object
+              PgBouncer:
+                properties:
+                  mode:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
+                        type: string
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                  versions:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
+                        type: string
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                required:
+                - mode
+                - versions
+                type: object
+              Pgpool:
+                properties:
+                  mode:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
+                        type: string
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                  versions:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
+                        type: string
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                required:
+                - mode
+                - versions
+                type: object
+              Postgres:
+                properties:
+                  mode:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
+                        type: string
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                  versions:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
+                        type: string
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                required:
+                - mode
+                - versions
+                type: object
+              ProxySQL:
+                properties:
+                  mode:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
+                        type: string
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                  versions:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
+                        type: string
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                required:
+                - mode
+                - versions
+                type: object
+              RabbitMQ:
+                properties:
+                  mode:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
+                        type: string
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                  versions:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
+                        type: string
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                required:
+                - mode
+                - versions
+                type: object
+              Redis:
+                properties:
+                  mode:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
+                        type: string
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                  versions:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
+                        type: string
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                required:
+                - mode
+                - versions
+                type: object
+              Singlestore:
+                properties:
+                  mode:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
+                        type: string
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                  versions:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
+                        type: string
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                required:
+                - mode
+                - versions
+                type: object
+              Solr:
+                properties:
+                  mode:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
+                        type: string
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                  versions:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
+                        type: string
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                required:
+                - mode
+                - versions
+                type: object
+              ZooKeeper:
+                properties:
+                  mode:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
+                        type: string
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                  versions:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
+                        type: string
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                required:
+                - mode
+                - versions
+                type: object
             type: object
           deletionPolicy:
             properties:

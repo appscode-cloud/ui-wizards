@@ -64,6 +64,7 @@ type ZookeeperAlert struct {
 type ZookeeperAlertGroups struct {
 	Database    ZookeeperDatabaseAlert `json:"database"`
 	Provisioner ProvisionerAlert       `json:"provisioner"`
+	OpsManager  OpsManagerAlert        `json:"opsManager"`
 }
 
 type ZookeeperDatabaseAlert struct {

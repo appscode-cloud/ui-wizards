@@ -72,6 +72,8 @@ type DruidAlert struct {
 type DruidAlertGroups struct {
 	Database    DruidDatabaseAlert `json:"database"`
 	Provisioner ProvisionerAlert   `json:"provisioner"`
+	OpsManager  OpsManagerAlert    `json:"opsManager"`
+	KubeStash   KubeStashAlert     `json:"kubeStash"`
 }
 
 type DruidDatabaseAlert struct {

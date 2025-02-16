@@ -65,6 +65,7 @@ type KafkaAlertGroups struct {
 	Database    KafkaDatabaseAlert `json:"database"`
 	Provisioner ProvisionerAlert   `json:"provisioner"`
 	OpsManager  OpsManagerAlert    `json:"opsManager"`
+	KubeStash   KubeStashAlert     `json:"kubeStash"`
 }
 
 type KafkaDatabaseAlert struct {

@@ -64,6 +64,7 @@ type RabbitmqAlert struct {
 type RabbitmqAlertGroups struct {
 	Database    RabbitmqDatabaseAlert `json:"database"`
 	Provisioner ProvisionerAlert      `json:"provisioner"`
+	OpsManager  OpsManagerAlert       `json:"opsManager"`
 }
 
 type RabbitmqDatabaseAlert struct {

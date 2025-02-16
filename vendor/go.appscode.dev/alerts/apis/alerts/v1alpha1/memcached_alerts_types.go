@@ -57,11 +57,13 @@ type MemcachedAlert struct {
 	AdditionalRuleLabels map[string]string    `json:"additionalRuleLabels"`
 	Groups               MemcachedAlertGroups `json:"groups"`
 }
+
 type MemcachedAlertGroups struct {
 	Database    MemcachedDatabaseAlert `json:"database"`
 	Provisioner ProvisionerAlert       `json:"provisioner"`
-	KubeStash   KubeStashAlert         `json:"kubeStash"`
+	OpsManager  OpsManagerAlert        `json:"opsManager"`
 }
+
 type MemcachedDatabaseAlert struct {
 	Enabled mona.SeverityFlag           `json:"enabled"`
 	Rules   MemcachedDatabaseAlertRules `json:"rules"`
