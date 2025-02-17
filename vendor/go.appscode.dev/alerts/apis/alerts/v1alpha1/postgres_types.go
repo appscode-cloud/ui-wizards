@@ -44,6 +44,7 @@ type PostgresAlerts struct {
 type PostgresAlertsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Form         PostgresAlertsSpecForm `json:"form"`
+	Grafana      Grafana                `json:"grafana"`
 }
 
 type PostgresAlertsSpecForm struct {

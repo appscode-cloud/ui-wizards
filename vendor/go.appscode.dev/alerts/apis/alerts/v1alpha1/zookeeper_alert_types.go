@@ -44,7 +44,7 @@ type ZookeeperAlerts struct {
 type ZookeeperAlertsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Form         ZookeeperAlertsSpecForm `json:"form"`
-	Grafana      RabbitmqGrafana         `json:"grafana"`
+	Grafana      Grafana                 `json:"grafana"`
 }
 
 type ZookeeperAlertsSpecForm struct {
@@ -84,14 +84,6 @@ type ZookeeperDatabaseAlertRules struct {
 	ZookeeperTooLongSnapshotTime IntValAlert         `json:"zookeeperTooLongSnapshotTime"`
 	ZookeeperTooHighAvgLatency   IntValAlert         `json:"zookeeperTooHighAvgLatency"`
 	ZookeeperJvmMemoryFilingUp   FloatValAlertConfig `json:"zookeeperJvmMemoryFilingUp"`
-}
-
-type ZookeeperGrafana struct {
-	Enabled bool   `json:"enabled"`
-	Version string `json:"version"`
-	JobName string `json:"jobName"`
-	URL     string `json:"url"`
-	ApiKey  string `json:"apikey"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

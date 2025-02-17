@@ -44,6 +44,7 @@ type ProxysqlAlerts struct {
 type ProxysqlAlertsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Form         ProxysqlAlertsSpecForm `json:"form"`
+	Grafana      Grafana                `json:"grafana"`
 }
 
 type ProxysqlAlertsSpecForm struct {

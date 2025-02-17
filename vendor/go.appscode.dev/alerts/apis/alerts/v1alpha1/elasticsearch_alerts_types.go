@@ -44,6 +44,7 @@ type ElasticsearchAlerts struct {
 type ElasticsearchAlertsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Form         ElasticsearchAlertsSpecForm `json:"form"`
+	Grafana      Grafana                     `json:"grafana"`
 }
 
 type ElasticsearchAlertsSpecForm struct {

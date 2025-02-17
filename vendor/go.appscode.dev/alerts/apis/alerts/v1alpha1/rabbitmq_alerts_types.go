@@ -44,7 +44,7 @@ type RabbitmqAlerts struct {
 type RabbitmqAlertsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Form         RabbitmqAlertsSpecForm `json:"form"`
-	Grafana      RabbitmqGrafana        `json:"grafana"`
+	Grafana      Grafana                `json:"grafana"`
 }
 
 type RabbitmqAlertsSpecForm struct {
@@ -73,25 +73,17 @@ type RabbitmqDatabaseAlert struct {
 }
 
 type RabbitmqDatabaseAlertRules struct {
-	RabbitmqFileDescriptorsNearLimit                       IntValAlert `json:"rabbitmqFileDescriptorsNearLimit"`
-	RabbitmqQueueIsGrowing                                 IntValAlert `json:"rabbitmqQueueIsGrowing"`
-	RabbitmqUnroutableMessages                             IntValAlert `json:"rabbitmqUnroutableMessages"`
-	RabbitmqTCPSocketsNearLimit                            IntValAlert `json:"rabbitmqTCPSocketsNearLimit"`
-	RabbitmqLowDiskWatermarkPredicted                      IntValAlert `json:"rabbitmqLowDiskWatermarkPredicted"`
-	RabbitmqInsufficientEstablishedErlangDistributionLinks IntValAlert `json:"rabbitmqInsufficientEstablishedErlangDistributionLinks"`
-	RabbitmqHighConnectionChurn                            IntValAlert `json:"rabbitmqHighConnectionChurn"`
+	RabbitmqFileDescriptorsNearLimit                       FixedAlert  `json:"rabbitmqFileDescriptorsNearLimit"`
+	RabbitmqQueueIsGrowing                                 FixedAlert  `json:"rabbitmqQueueIsGrowing"`
+	RabbitmqUnroutableMessages                             FixedAlert  `json:"rabbitmqUnroutableMessages"`
+	RabbitmqTCPSocketsNearLimit                            FixedAlert  `json:"rabbitmqTCPSocketsNearLimit"`
+	RabbitmqLowDiskWatermarkPredicted                      FixedAlert  `json:"rabbitmqLowDiskWatermarkPredicted"`
+	RabbitmqInsufficientEstablishedErlangDistributionLinks FixedAlert  `json:"rabbitmqInsufficientEstablishedErlangDistributionLinks"`
+	RabbitmqHighConnectionChurn                            FixedAlert  `json:"rabbitmqHighConnectionChurn"`
 	RabbitmqPhaseCritical                                  FixedAlert  `json:"rabbitmqPhaseCritical"`
 	RabbitmqDown                                           FixedAlert  `json:"rabbitmqDown"`
 	DiskUsageHigh                                          IntValAlert `json:"diskUsageHigh"`
 	DiskAlmostFull                                         IntValAlert `json:"diskAlmostFull"`
-}
-
-type RabbitmqGrafana struct {
-	Enabled bool   `json:"enabled"`
-	Version string `json:"version"`
-	JobName string `json:"jobName"`
-	URL     string `json:"url"`
-	ApiKey  string `json:"apikey"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

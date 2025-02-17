@@ -44,15 +44,7 @@ type DruidAlerts struct {
 type DruidAlertsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Form         DruidAlertsSpecForm `json:"form"`
-	Grafana      DruidGrafana        `json:"grafana"`
-}
-
-type DruidGrafana struct {
-	Enabled bool   `json:"enabled"`
-	Version string `json:"version"`
-	JobName string `json:"jobName"`
-	URL     string `json:"url"`
-	ApiKey  string `json:"apikey"`
+	Grafana      Grafana             `json:"grafana"`
 }
 
 type DruidAlertsSpecForm struct {
@@ -73,7 +65,6 @@ type DruidAlertGroups struct {
 	Database    DruidDatabaseAlert `json:"database"`
 	Provisioner ProvisionerAlert   `json:"provisioner"`
 	OpsManager  OpsManagerAlert    `json:"opsManager"`
-	KubeStash   KubeStashAlert     `json:"kubeStash"`
 }
 
 type DruidDatabaseAlert struct {

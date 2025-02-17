@@ -44,6 +44,7 @@ type MariadbAlerts struct {
 type MariadbAlertsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Form         MariadbAlertsSpecForm `json:"form"`
+	Grafana      Grafana               `json:"grafana"`
 }
 
 type MariadbAlertsSpecForm struct {

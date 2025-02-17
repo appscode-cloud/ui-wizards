@@ -44,6 +44,7 @@ type PgbouncerAlerts struct {
 type PgbouncerAlertsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Form         PgbouncerAlertsSpecForm `json:"form"`
+	Grafana      Grafana                 `json:"grafana"`
 }
 
 type PgbouncerAlertsSpecForm struct {
@@ -72,16 +73,10 @@ type PgbouncerDatabaseAlert struct {
 }
 
 type PgbouncerDatabaseAlertRules struct {
-	PgbouncerInstanceDown         FixedAlert          `json:"pgbouncerInstanceDown"`
-	PgbouncerRestarted            IntValAlert         `json:"pgbouncerRestarted"`
-	PgbouncerExporterError        FixedAlert          `json:"pgbouncerExporterError"`
-	PgbouncerTooManyConnections   IntValAlert         `json:"pgbouncerTooManyConnections"`
-	PgbouncerNotEnoughConnections IntValAlert         `json:"pgbouncerNotEnoughConnections"`
-	PgbouncerSlowQueries          FixedAlert          `json:"pgbouncerSlowQueries"`
-	PgbouncerReplicationLag       StringValAlert      `json:"pgbouncerReplicationLag"`
-	PgbouncerHighRollbackRate     FloatValAlertConfig `json:"pgbouncerHighRollbackRate"`
-	PgbouncerSplitBrain           FixedAlert          `json:"pgbouncerSplitBrain"`
-	PgbouncerTooManyLocksAcquired FloatValAlertConfig `json:"pgbouncerTooManyLocksAcquired"`
+	PgbouncerTooManyConnections      IntValAlert `json:"pgbouncerTooManyConnections"`
+	PgbouncerExporterLastScrapeError FixedAlert  `json:"pgbouncerExporterLastScrapeError"`
+	PgbouncerDown                    FixedAlert  `json:"pgbouncerDown"`
+	PgbouncerLogPoolerError          IntValAlert `json:"pgbouncerLogPoolerError"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

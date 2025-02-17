@@ -31,7 +31,7 @@ properties:
                     type: string
                   rules:
                     properties:
-                      pgbouncerExporterError:
+                      pgbouncerDown:
                         properties:
                           duration:
                             type: string
@@ -48,28 +48,7 @@ properties:
                         - enabled
                         - severity
                         type: object
-                      pgbouncerHighRollbackRate:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                          val:
-                            format: double
-                            type: number
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        - val
-                        type: object
-                      pgbouncerInstanceDown:
+                      pgbouncerExporterLastScrapeError:
                         properties:
                           duration:
                             type: string
@@ -86,7 +65,7 @@ properties:
                         - enabled
                         - severity
                         type: object
-                      pgbouncerNotEnoughConnections:
+                      pgbouncerLogPoolerError:
                         properties:
                           duration:
                             type: string
@@ -105,80 +84,6 @@ properties:
                         - enabled
                         - severity
                         - val
-                        type: object
-                      pgbouncerReplicationLag:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                          val:
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        - val
-                        type: object
-                      pgbouncerRestarted:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                          val:
-                            type: integer
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        - val
-                        type: object
-                      pgbouncerSlowQueries:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        type: object
-                      pgbouncerSplitBrain:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                        required:
-                        - duration
-                        - enabled
-                        - severity
                         type: object
                       pgbouncerTooManyConnections:
                         properties:
@@ -200,38 +105,11 @@ properties:
                         - severity
                         - val
                         type: object
-                      pgbouncerTooManyLocksAcquired:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                          val:
-                            format: double
-                            type: number
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        - val
-                        type: object
                     required:
-                    - pgbouncerExporterError
-                    - pgbouncerHighRollbackRate
-                    - pgbouncerInstanceDown
-                    - pgbouncerNotEnoughConnections
-                    - pgbouncerReplicationLag
-                    - pgbouncerRestarted
-                    - pgbouncerSlowQueries
-                    - pgbouncerSplitBrain
+                    - pgbouncerDown
+                    - pgbouncerExporterLastScrapeError
+                    - pgbouncerLogPoolerError
                     - pgbouncerTooManyConnections
-                    - pgbouncerTooManyLocksAcquired
                     type: object
                 required:
                 - enabled

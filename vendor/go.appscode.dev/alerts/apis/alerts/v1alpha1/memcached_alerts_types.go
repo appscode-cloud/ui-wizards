@@ -41,7 +41,7 @@ type MemcachedAlerts struct {
 type MemcachedAlertsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Form         MemcachedAlertsSpecForm `json:"form"`
-	Grafana      MemcachedGrafana        `json:"grafana"`
+	Grafana      Grafana                 `json:"grafana"`
 }
 
 type MemcachedAlertsSpecForm struct {
@@ -71,19 +71,12 @@ type MemcachedDatabaseAlert struct {
 
 type MemcachedDatabaseAlertRules struct {
 	MemcachedDown                 FixedAlert  `json:"memcachedDown"`
+	MemcachedMemoryLimit          IntValAlert `json:"memcachedMemoryLimit"`
 	MemcachedServiceRespawn       IntValAlert `json:"memcachedServiceRespawn"`
 	MemcachedConnectionThrottled  IntValAlert `json:"memcachedConnectionThrottled"`
 	MemcachedConnectionsNoneMinor FixedAlert  `json:"memcachedConnectionsNoneMinor"`
 	MemcachedItemsNoneMinor       FixedAlert  `json:"memcachedItemsNoneMinor"`
 	MemcachedEvictionsLimit       IntValAlert `json:"memcachedEvictionsLimit"`
-}
-
-type MemcachedGrafana struct {
-	Enabled bool   `json:"enabled"`
-	Version string `json:"version"`
-	JobName string `json:"jobName"`
-	URL     string `json:"url"`
-	ApiKey  string `json:"apikey"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

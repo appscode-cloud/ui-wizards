@@ -44,6 +44,7 @@ type RedisAlerts struct {
 type RedisAlertsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Form         RedisAlertsSpecForm `json:"form"`
+	Grafana      Grafana             `json:"grafana"`
 }
 
 type RedisAlertsSpecForm struct {

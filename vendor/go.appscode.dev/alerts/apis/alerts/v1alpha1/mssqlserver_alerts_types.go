@@ -44,7 +44,7 @@ type MSSQLServerAlerts struct {
 type MSSQLServerAlertsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Form         MSSQLServerAlertsSpecForm `json:"form"`
-	Grafana      MemcachedGrafana          `json:"grafana"`
+	Grafana      Grafana                   `json:"grafana"`
 }
 
 type MSSQLServerAlertsSpecForm struct {
@@ -74,20 +74,11 @@ type MSSQLServerDatabaseAlert struct {
 }
 
 type MSSQLServerDatabaseAlertRules struct {
-	MSSQLServerInstanceDown       FixedAlert  `json:"mssqlserverInstanceDown"`
-	MSSSQLServerServiceDown       FixedAlert  `json:"mssqlserverServiceDown"`
-	MSSQLServerRestarted          IntValAlert `json:"mssqlserverRestarted"`
-	MSSQLServerTooManyConnections IntValAlert `json:"mssqlserverTooManyConnections"`
-	DiskUsageHigh                 IntValAlert `json:"diskUsageHigh"`
-	DiskAlmostFull                IntValAlert `json:"diskAlmostFull"`
-}
-
-type MSSQLServerGrafana struct {
-	Enabled bool   `json:"enabled"`
-	Version string `json:"version"`
-	JobName string `json:"jobName"`
-	URL     string `json:"url"`
-	ApiKey  string `json:"apikey"`
+	MSSQLServerInstanceDown FixedAlert  `json:"mssqlserverInstanceDown"`
+	MSSSQLServerServiceDown FixedAlert  `json:"mssqlserverServiceDown"`
+	MSSQLServerRestarted    IntValAlert `json:"mssqlserverRestarted"`
+	DiskUsageHigh           IntValAlert `json:"diskUsageHigh"`
+	DiskAlmostFull          IntValAlert `json:"diskAlmostFull"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

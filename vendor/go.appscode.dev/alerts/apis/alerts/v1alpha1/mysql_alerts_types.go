@@ -44,6 +44,7 @@ type MysqlAlerts struct {
 type MysqlAlertsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Form         MysqlAlertsSpecForm `json:"form"`
+	Grafana      Grafana             `json:"grafana"`
 }
 
 type MysqlAlertsSpecForm struct {

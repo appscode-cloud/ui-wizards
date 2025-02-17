@@ -44,17 +44,8 @@ type PgpoolAlerts struct {
 type PgpoolAlertsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Form         PgpoolAlertsSpecForm `json:"form"`
-	Grafana      PgpoolGrafana        `json:"grafana"`
+	Grafana      Grafana              `json:"grafana"`
 }
-
-type PgpoolGrafana struct {
-	Enabled bool   `json:"enabled"`
-	Version string `json:"version"`
-	JobName string `json:"jobName"`
-	URL     string `json:"url"`
-	ApiKey  string `json:"apikey"`
-}
-
 type PgpoolAlertsSpecForm struct {
 	Alert PgpoolAlert `json:"alert"`
 }
