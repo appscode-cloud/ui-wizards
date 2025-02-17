@@ -67,7 +67,7 @@ type KubeStashProvider string
 
 type RuntimeSettings struct {
 	// +optional
-	SecurityContext int64 `json:"securityContext"`
+	SecurityContext *int64 `json:"securityContext"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

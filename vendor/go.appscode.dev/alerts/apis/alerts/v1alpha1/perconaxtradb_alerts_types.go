@@ -44,6 +44,7 @@ type PerconaxtradbAlerts struct {
 type PerconaxtradbAlertsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Form         PerconaxtradbAlertsSpecForm `json:"form"`
+	Grafana      Grafana                     `json:"grafana"`
 }
 
 type PerconaxtradbAlertsSpecForm struct {

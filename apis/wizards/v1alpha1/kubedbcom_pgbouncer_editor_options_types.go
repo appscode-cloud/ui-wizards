@@ -67,7 +67,7 @@ type PgbouncerDatabase struct {
 }
 
 type PgbouncerAlertsSpecForm struct {
-	Alert alerts.PostgresAlert `json:"alert"`
+	Alert alerts.PgbouncerAlert `json:"alert"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

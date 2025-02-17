@@ -44,6 +44,7 @@ type ProxysqlAlerts struct {
 type ProxysqlAlertsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Form         ProxysqlAlertsSpecForm `json:"form"`
+	Grafana      Grafana                `json:"grafana"`
 }
 
 type ProxysqlAlertsSpecForm struct {
@@ -82,8 +83,6 @@ type ProxySQLDatabaseAlertRules struct {
 	ProxySQLHighQPS            IntValAlert `json:"proxysqlHighQPS"`
 	ProxySQLHighIncomingBytes  IntValAlert `json:"proxysqlHighIncomingBytes"`
 	ProxySQLHighOutgoingBytes  IntValAlert `json:"proxysqlHighOutgoingBytes"`
-	DiskUsageHigh              IntValAlert `json:"diskUsageHigh"`
-	DiskAlmostFull             IntValAlert `json:"diskAlmostFull"`
 }
 
 type ProxySQLClusterAlert struct {

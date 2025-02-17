@@ -44,7 +44,7 @@ type SinglestoreAlerts struct {
 type SinglestoreAlertsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Form         SinglestoreAlertsSpecForm `json:"form"`
-	Grafana      SinglestoreGrafana        `json:"grafana"`
+	Grafana      Grafana                   `json:"grafana"`
 }
 
 type SinglestoreAlertsSpecForm struct {
@@ -60,11 +60,14 @@ type SinglestoreAlert struct {
 	AdditionalRuleLabels map[string]string      `json:"additionalRuleLabels"`
 	Groups               SinglestoreAlertGroups `json:"groups"`
 }
+
 type SinglestoreAlertGroups struct {
 	Database    SinglestoreDatabaseAlert `json:"database"`
 	Provisioner ProvisionerAlert         `json:"provisioner"`
+	OpsManager  OpsManagerAlert          `json:"opsManager"`
 	KubeStash   KubeStashAlert           `json:"kubeStash"`
 }
+
 type SinglestoreDatabaseAlert struct {
 	Enabled mona.SeverityFlag             `json:"enabled"`
 	Rules   SinglestoreDatabaseAlertRules `json:"rules"`
@@ -81,14 +84,6 @@ type SinglestoreDatabaseAlertRules struct {
 	SinglestoreHighOutgoingBytes  IntValAlert `json:"singlestoreHighOutgoingBytes"`
 	DiskUsageHigh                 IntValAlert `json:"diskUsageHigh"`
 	DiskAlmostFull                IntValAlert `json:"diskAlmostFull"`
-}
-
-type SinglestoreGrafana struct {
-	Enabled bool   `json:"enabled"`
-	Version string `json:"version"`
-	JobName string `json:"jobName"`
-	URL     string `json:"url"`
-	ApiKey  string `json:"apikey"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

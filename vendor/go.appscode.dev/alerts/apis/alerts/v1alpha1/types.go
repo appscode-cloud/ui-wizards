@@ -117,3 +117,11 @@ type SchemaManagerAlertRules struct {
 	SchemaFailed                FixedAlert `json:"schemaFailed"`
 	SchemaExpired               FixedAlert `json:"schemaExpired"`
 }
+
+type Grafana struct {
+	Enabled bool   `json:"enabled"`
+	Version string `json:"version"`
+	JobName string `json:"jobName"`
+	URL     string `json:"url"`
+	ApiKey  string `json:"apikey"`
+}

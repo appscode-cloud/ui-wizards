@@ -44,7 +44,7 @@ type SolrAlerts struct {
 type SolrAlertsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Form         SolrAlertsSpecForm `json:"form"`
-	Grafana      SolrGrafana        `json:"grafana"`
+	Grafana      Grafana            `json:"grafana"`
 }
 
 type SolrAlertsSpecForm struct {
@@ -60,10 +60,13 @@ type SolrAlert struct {
 	AdditionalRuleLabels map[string]string `json:"additionalRuleLabels"`
 	Groups               SolrAlertGroups   `json:"groups"`
 }
+
 type SolrAlertGroups struct {
 	Database    SolrDatabaseAlert `json:"database"`
 	Provisioner ProvisionerAlert  `json:"provisioner"`
+	OpsManager  OpsManagerAlert   `json:"opsManager"`
 }
+
 type SolrDatabaseAlert struct {
 	Enabled mona.SeverityFlag      `json:"enabled"`
 	Rules   SolrDatabaseAlertRules `json:"rules"`
@@ -71,22 +74,14 @@ type SolrDatabaseAlert struct {
 
 type SolrDatabaseAlertRules struct {
 	SolrDownShards           IntValAlert `json:"solrDownShards"`
-	SolrRecoveryFailedShards IntValAlert `json:"solrRecoveryFailedShards"`
-	SolrHighThreadsRunning   IntValAlert `json:"solrHighThreadsRunning"`
+	SolrRecoveryFailedShards FixedAlert  `json:"solrRecoveryFailedShards"`
+	SolrHighThreadsRunning   IntValAlert `json:"solrHighThreadRunning"`
 	SolrHighPoolSize         IntValAlert `json:"solrHighPoolSize"`
 	SolrHighQPS              IntValAlert `json:"solrHighQPS"`
-	SolrHighHeapSize         IntValAlert `json:"SolrHighHeapSize"`
-	SolrHighBufferSize       IntValAlert `json:"SolrHighBufferSize"`
+	SolrHighHeapSize         IntValAlert `json:"solrHighHeapSize"`
+	SolrHighBufferSize       IntValAlert `json:"solrHighBufferSize"`
 	DiskUsageHigh            IntValAlert `json:"diskUsageHigh"`
 	DiskAlmostFull           IntValAlert `json:"diskAlmostFull"`
-}
-
-type SolrGrafana struct {
-	Enabled bool   `json:"enabled"`
-	Version string `json:"version"`
-	JobName string `json:"jobName"`
-	URL     string `json:"url"`
-	ApiKey  string `json:"apikey"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

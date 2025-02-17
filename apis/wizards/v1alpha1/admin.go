@@ -58,7 +58,7 @@ type AdminOptions struct {
 	// +optional
 	Tolerations []core.Toleration `json:"tolerations"`
 
-	Databases      map[string]DatabaseProfile   `json:"databases"`
+	Databases      DatabaseProfiles             `json:"databases"`
 	StorageClasses RequiredClusterScopedProfile `json:"storageClasses"`
 
 	TLS            ToggleProfileOnBoolean `json:"tls"`
@@ -90,27 +90,27 @@ type ClusterTierProfile struct {
 
 // *** Machine-related ends *** //
 
-type DatabasesProfile struct {
-	ClickHouse    DatabaseProfile `json:"ClickHouse"`
-	Druid         DatabaseProfile `json:"Druid"`
-	Elasticsearch DatabaseProfile `json:"Elasticsearch"`
-	FerretDB      DatabaseProfile `json:"FerretDB"`
-	Kafka         DatabaseProfile `json:"Kafka"`
-	MariaDB       DatabaseProfile `json:"MariaDB"`
-	Memcached     DatabaseProfile `json:"Memcached"`
-	MongoDB       DatabaseProfile `json:"MongoDB"`
-	MSSQLServer   DatabaseProfile `json:"MSSQLServer"`
-	MySQL         DatabaseProfile `json:"MySQL"`
-	PerconaXtraDB DatabaseProfile `json:"PerconaXtraDB"`
-	PgBouncer     DatabaseProfile `json:"PgBouncer"`
-	Pgpool        DatabaseProfile `json:"Pgpool"`
-	Postgres      DatabaseProfile `json:"Postgres"`
-	ProxySQL      DatabaseProfile `json:"ProxySQL"`
-	RabbitMQ      DatabaseProfile `json:"RabbitMQ"`
-	Redis         DatabaseProfile `json:"Redis"`
-	Singlestore   DatabaseProfile `json:"Singlestore"`
-	Solr          DatabaseProfile `json:"Solr"`
-	ZooKeeper     DatabaseProfile `json:"ZooKeeper"`
+type DatabaseProfiles struct {
+	ClickHouse    *DatabaseProfile `json:"ClickHouse,omitempty"`
+	Druid         *DatabaseProfile `json:"Druid,omitempty"`
+	Elasticsearch *DatabaseProfile `json:"Elasticsearch,omitempty"`
+	FerretDB      *DatabaseProfile `json:"FerretDB,omitempty"`
+	Kafka         *DatabaseProfile `json:"Kafka,omitempty"`
+	MariaDB       *DatabaseProfile `json:"MariaDB,omitempty"`
+	Memcached     *DatabaseProfile `json:"Memcached,omitempty"`
+	MongoDB       *DatabaseProfile `json:"MongoDB,omitempty"`
+	MSSQLServer   *DatabaseProfile `json:"MSSQLServer,omitempty"`
+	MySQL         *DatabaseProfile `json:"MySQL,omitempty"`
+	PerconaXtraDB *DatabaseProfile `json:"PerconaXtraDB,omitempty"`
+	PgBouncer     *DatabaseProfile `json:"PgBouncer,omitempty"`
+	Pgpool        *DatabaseProfile `json:"Pgpool,omitempty"`
+	Postgres      *DatabaseProfile `json:"Postgres,omitempty"`
+	ProxySQL      *DatabaseProfile `json:"ProxySQL,omitempty"`
+	RabbitMQ      *DatabaseProfile `json:"RabbitMQ,omitempty"`
+	Redis         *DatabaseProfile `json:"Redis,omitempty"`
+	Singlestore   *DatabaseProfile `json:"Singlestore,omitempty"`
+	Solr          *DatabaseProfile `json:"Solr,omitempty"`
+	ZooKeeper     *DatabaseProfile `json:"ZooKeeper,omitempty"`
 }
 
 type DatabaseProfile struct {

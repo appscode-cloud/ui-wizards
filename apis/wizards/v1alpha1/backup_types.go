@@ -36,7 +36,8 @@ const (
 )
 
 type KubeStashInfo struct {
-	Schedule         string          `json:"schedule,omitempty"`
+	// +optional
+	Schedule         string          `json:"schedule"`
 	StorageRef       ObjectReference `json:"storageRef"`
 	RetentionPolicy  ObjectReference `json:"retentionPolicy"`
 	EncryptionSecret ObjectReference `json:"encryptionSecret"`

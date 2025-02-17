@@ -31,46 +31,6 @@ properties:
                     type: string
                   rules:
                     properties:
-                      diskAlmostFull:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                          val:
-                            type: integer
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        - val
-                        type: object
-                      diskUsageHigh:
-                        properties:
-                          duration:
-                            type: string
-                          enabled:
-                            type: boolean
-                          severity:
-                            enum:
-                            - critical
-                            - warning
-                            - info
-                            type: string
-                          val:
-                            type: integer
-                        required:
-                        - duration
-                        - enabled
-                        - severity
-                        - val
-                        type: object
                       pgpoolBackendErrorMessageCount:
                         properties:
                           duration:
@@ -228,8 +188,6 @@ properties:
                         - val
                         type: object
                     required:
-                    - diskAlmostFull
-                    - diskUsageHigh
                     - pgpoolBackendErrorMessageCount
                     - pgpoolBackendFatalMessageCount
                     - pgpoolBackendPanicMessageCount
@@ -238,6 +196,77 @@ properties:
                     - pgpoolLowCacheMemory
                     - pgpoolPostgresHealthCheckFailure
                     - pgpoolTooManyConnections
+                    type: object
+                required:
+                - enabled
+                - rules
+                type: object
+              opsManager:
+                properties:
+                  enabled:
+                    enum:
+                    - none
+                    - critical
+                    - warning
+                    - info
+                    type: string
+                  rules:
+                    properties:
+                      opsRequestFailed:
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            enum:
+                            - critical
+                            - warning
+                            - info
+                            type: string
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        type: object
+                      opsRequestOnProgress:
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            enum:
+                            - critical
+                            - warning
+                            - info
+                            type: string
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        type: object
+                      opsRequestStatusProgressingToLong:
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            enum:
+                            - critical
+                            - warning
+                            - info
+                            type: string
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        type: object
+                    required:
+                    - opsRequestFailed
+                    - opsRequestOnProgress
+                    - opsRequestStatusProgressingToLong
                     type: object
                 required:
                 - enabled
@@ -298,6 +327,7 @@ properties:
                 type: object
             required:
             - database
+            - opsManager
             - provisioner
             type: object
           labels:
@@ -455,42 +485,727 @@ properties:
             - toggle
             type: object
           databases:
-            additionalProperties:
-              properties:
-                mode:
-                  properties:
-                    available:
-                      items:
+            properties:
+              ClickHouse:
+                properties:
+                  mode:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
                         type: string
-                      type: array
-                    default:
-                      type: string
-                    toggle:
-                      type: boolean
-                  required:
-                  - available
-                  - default
-                  - toggle
-                  type: object
-                versions:
-                  properties:
-                    available:
-                      items:
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                  versions:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
                         type: string
-                      type: array
-                    default:
-                      type: string
-                    toggle:
-                      type: boolean
-                  required:
-                  - available
-                  - default
-                  - toggle
-                  type: object
-              required:
-              - mode
-              - versions
-              type: object
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                required:
+                - mode
+                - versions
+                type: object
+              Druid:
+                properties:
+                  mode:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
+                        type: string
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                  versions:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
+                        type: string
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                required:
+                - mode
+                - versions
+                type: object
+              Elasticsearch:
+                properties:
+                  mode:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
+                        type: string
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                  versions:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
+                        type: string
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                required:
+                - mode
+                - versions
+                type: object
+              FerretDB:
+                properties:
+                  mode:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
+                        type: string
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                  versions:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
+                        type: string
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                required:
+                - mode
+                - versions
+                type: object
+              Kafka:
+                properties:
+                  mode:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
+                        type: string
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                  versions:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
+                        type: string
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                required:
+                - mode
+                - versions
+                type: object
+              MSSQLServer:
+                properties:
+                  mode:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
+                        type: string
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                  versions:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
+                        type: string
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                required:
+                - mode
+                - versions
+                type: object
+              MariaDB:
+                properties:
+                  mode:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
+                        type: string
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                  versions:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
+                        type: string
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                required:
+                - mode
+                - versions
+                type: object
+              Memcached:
+                properties:
+                  mode:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
+                        type: string
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                  versions:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
+                        type: string
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                required:
+                - mode
+                - versions
+                type: object
+              MongoDB:
+                properties:
+                  mode:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
+                        type: string
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                  versions:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
+                        type: string
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                required:
+                - mode
+                - versions
+                type: object
+              MySQL:
+                properties:
+                  mode:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
+                        type: string
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                  versions:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
+                        type: string
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                required:
+                - mode
+                - versions
+                type: object
+              PerconaXtraDB:
+                properties:
+                  mode:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
+                        type: string
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                  versions:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
+                        type: string
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                required:
+                - mode
+                - versions
+                type: object
+              PgBouncer:
+                properties:
+                  mode:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
+                        type: string
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                  versions:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
+                        type: string
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                required:
+                - mode
+                - versions
+                type: object
+              Pgpool:
+                properties:
+                  mode:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
+                        type: string
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                  versions:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
+                        type: string
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                required:
+                - mode
+                - versions
+                type: object
+              Postgres:
+                properties:
+                  mode:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
+                        type: string
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                  versions:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
+                        type: string
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                required:
+                - mode
+                - versions
+                type: object
+              ProxySQL:
+                properties:
+                  mode:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
+                        type: string
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                  versions:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
+                        type: string
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                required:
+                - mode
+                - versions
+                type: object
+              RabbitMQ:
+                properties:
+                  mode:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
+                        type: string
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                  versions:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
+                        type: string
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                required:
+                - mode
+                - versions
+                type: object
+              Redis:
+                properties:
+                  mode:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
+                        type: string
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                  versions:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
+                        type: string
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                required:
+                - mode
+                - versions
+                type: object
+              Singlestore:
+                properties:
+                  mode:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
+                        type: string
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                  versions:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
+                        type: string
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                required:
+                - mode
+                - versions
+                type: object
+              Solr:
+                properties:
+                  mode:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
+                        type: string
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                  versions:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
+                        type: string
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                required:
+                - mode
+                - versions
+                type: object
+              ZooKeeper:
+                properties:
+                  mode:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
+                        type: string
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                  versions:
+                    properties:
+                      available:
+                        items:
+                          type: string
+                        type: array
+                      default:
+                        type: string
+                      toggle:
+                        type: boolean
+                    required:
+                    - available
+                    - default
+                    - toggle
+                    type: object
+                required:
+                - mode
+                - versions
+                type: object
             type: object
           deletionPolicy:
             properties:

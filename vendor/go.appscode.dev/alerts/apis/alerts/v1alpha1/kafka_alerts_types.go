@@ -44,7 +44,7 @@ type KafkaAlerts struct {
 type KafkaAlertsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Form         KafkaAlertsSpecForm `json:"form"`
-	Grafana      KafkaGrafana        `json:"grafana"`
+	Grafana      Grafana             `json:"grafana"`
 }
 
 type KafkaAlertsSpecForm struct {
@@ -73,30 +73,22 @@ type KafkaDatabaseAlert struct {
 }
 
 type KafkaDatabaseAlertRules struct {
-	KafkaUnderReplicatedPartitions   IntValAlert `json:"KafkaUnderReplicatedPartitions"`
-	KafkaAbnormalControllerState     IntValAlert `json:"KafkaAbnormalControllerState"`
-	KafkaOfflinePartitions           IntValAlert `json:"KafkaOfflinePartitions"`
-	KafkaUnderMinIsrPartitionCount   IntValAlert `json:"KafkaUnderMinIsrPartitionCount"`
-	KafkaOfflineLogDirectoryCount    IntValAlert `json:"KafkaOfflineLogDirectoryCount"`
-	KafkaISRExpandRate               IntValAlert `json:"KafkaISRExpandRate"`
-	KafkaISRShrinkRate               IntValAlert `json:"KafkaISRShrinkRate"`
-	KafkaBrokerCount                 IntValAlert `json:"KafkaBrokerCount"`
-	KafkaNetworkProcessorIdlePercent IntValAlert `json:"KafkaNetworkProcessorIdlePercent"`
+	KafkaUnderReplicatedPartitions   IntValAlert `json:"kafkaUnderReplicatedPartitions"`
+	KafkaAbnormalControllerState     IntValAlert `json:"kafkaAbnormalControllerState"`
+	KafkaOfflinePartitions           IntValAlert `json:"kafkaOfflinePartitions"`
+	KafkaUnderMinIsrPartitionCount   IntValAlert `json:"kafkaUnderMinIsrPartitionCount"`
+	KafkaOfflineLogDirectoryCount    IntValAlert `json:"kafkaOfflineLogDirectoryCount"`
+	KafkaISRExpandRate               IntValAlert `json:"kafkaISRExpandRate"`
+	KafkaISRShrinkRate               IntValAlert `json:"kafkaISRShrinkRate"`
+	KafkaBrokerCount                 IntValAlert `json:"kafkaBrokerCount"`
+	KafkaNetworkProcessorIdlePercent IntValAlert `json:"kafkaNetworkProcessorIdlePercent"`
 	KafkaRequestHandlerIdlePercent   IntValAlert `json:"kafkaRequestHandlerIdlePercent"`
-	KafkaReplicaFetcherManagerMaxLag IntValAlert `json:"KafkaReplicaFetcherManagerMaxLag"`
-	KafkaTopicCount                  IntValAlert `json:"KafkaTopicCount"`
+	KafkaReplicaFetcherManagerMaxLag IntValAlert `json:"kafkaReplicaFetcherManagerMaxLag"`
+	KafkaTopicCount                  IntValAlert `json:"kafkaTopicCount"`
 	KafkaPhaseCritical               FixedAlert  `json:"kafkaPhaseCritical"`
 	KafkaDown                        FixedAlert  `json:"kafkaDown"`
 	DiskUsageHigh                    IntValAlert `json:"diskUsageHigh"`
 	DiskAlmostFull                   IntValAlert `json:"diskAlmostFull"`
-}
-
-type KafkaGrafana struct {
-	Enabled bool   `json:"enabled"`
-	Version string `json:"version"`
-	JobName string `json:"jobName"`
-	URL     string `json:"url"`
-	ApiKey  string `json:"apikey"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

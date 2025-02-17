@@ -44,17 +44,8 @@ type PgpoolAlerts struct {
 type PgpoolAlertsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Form         PgpoolAlertsSpecForm `json:"form"`
-	Grafana      PgpoolGrafana        `json:"grafana"`
+	Grafana      Grafana              `json:"grafana"`
 }
-
-type PgpoolGrafana struct {
-	Enabled bool   `json:"enabled"`
-	Version string `json:"version"`
-	JobName string `json:"jobName"`
-	URL     string `json:"url"`
-	ApiKey  string `json:"apikey"`
-}
-
 type PgpoolAlertsSpecForm struct {
 	Alert PgpoolAlert `json:"alert"`
 }
@@ -72,6 +63,7 @@ type PgpoolAlert struct {
 type PgpoolAlertGroups struct {
 	Database    PgpoolDatabaseAlert `json:"database"`
 	Provisioner ProvisionerAlert    `json:"provisioner"`
+	OpsManager  OpsManagerAlert     `json:"opsManager"`
 }
 
 type PgpoolDatabaseAlert struct {
@@ -88,8 +80,6 @@ type PgpoolDatabaseAlertRules struct {
 	PgpoolBackendFatalMessageCount   IntValAlert         `json:"pgpoolBackendFatalMessageCount"`
 	PgpoolBackendErrorMessageCount   IntValAlert         `json:"pgpoolBackendErrorMessageCount"`
 	PgpoolLowCacheMemory             FloatValAlertConfig `json:"pgpoolLowCacheMemory"`
-	DiskUsageHigh                    IntValAlert         `json:"diskUsageHigh"`
-	DiskAlmostFull                   IntValAlert         `json:"diskAlmostFull"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
