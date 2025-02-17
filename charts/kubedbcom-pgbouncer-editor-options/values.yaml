@@ -50,7 +50,7 @@ spec:
 
   openshift:
     securityContext:
-      runAsUser: 
+      runAsUser: null
 
   admin:
     deployment:
@@ -87,7 +87,7 @@ spec:
           default: ""
           toggle: true
         mode:
-          available: [ "Standalone", "Replicaset" ]
+          available: ["Standalone", "Replicaset"]
           default: "Replicaset"
           toggle: true
     storageClasses:
@@ -126,10 +126,12 @@ spec:
         default: false
         toggle: false
       by: BackupConfiguration
+      via: Restic
     archiver:
       enable:
         default: false
         toggle: false
+      via: Restic
     pointInTimeRecovery:
       default: false
       toggle: false
@@ -155,7 +157,6 @@ spec:
       # Only usable when monitoring agent is `prometheus.io/webhook server`.
       labels: {}
 
-
 form:
   alert:
     ## Enable PrometheusRule alerts
@@ -163,7 +164,7 @@ form:
 
     ## Labels for default rules
     labels: # +doc-gen:break
-      release: kube-prometheus-stack
+      release: prometheus
 
     ## Annotations for default rules
     annotations: {}
@@ -178,52 +179,29 @@ form:
       database:
         enabled: warning
         rules:
-          postgresInstanceDown:
+          # Specifies the alert configuration for connection usage
+          pgbouncerTooManyConnections:
+            enabled: true
+            val: 70 # 70%
+            duration: "1m"
+            severity: warning
+          # Specifies the alert configuration for exporter scrape error.
+          pgbouncerExporterLastScrapeError:
+            enabled: true
+            duration: "0m"
+            severity: warning
+          # Specifies the alert configuration for pgbouncer instance down.
+          pgbouncerDown:
             enabled: true
             duration: "0m"
             severity: critical
-          postgresRestarted:
+          # Specifies the alert configuration for error message returned from backend postgres of pgbouncer.
+          pgbouncerLogPoolerError:
             enabled: true
-            duration: "0m"
-            val: 60
-            severity: critical
-          postgresExporterError:
-            enabled: true
-            duration: "5m"
-            severity: warning
-          postgresTooManyConnections:
-            enabled: true
-            duration: "2m"
-            val: 80
-            severity: warning
-          postgresNotEnoughConnections:
-            enabled: true
-            duration: "2m"
-            val: 5
-            severity: warning
-          postgresSlowQueries:
-            enabled: true
-            duration: "2m"
-            severity: warning
-          postgresReplicationLag:
-            enabled: true
-            duration: "0m"
-            val: 30s
-            severity: critical
-          postgresHighRollbackRate:
-            enabled: true
-            duration: "0m"
-            val: 0.02
-            severity: warning
-          postgresSplitBrain:
-            enabled: true
+            val: 10
             duration: "0m"
             severity: critical
-          postgresTooManyLocksAcquired:
-            enabled: true
-            duration: "2m"
-            val: 0.20
-            severity: critical
+
       provisioner:
         enabled: warning
         rules:
@@ -235,6 +213,7 @@ form:
             enabled: true
             duration: "15m"
             severity: warning
+
       opsManager:
         enabled: warning
         rules:
@@ -250,61 +229,3 @@ form:
             enabled: true
             duration: "0m"
             severity: critical
-      stash:
-        enabled: warning
-        rules:
-          backupSessionFailed:
-            enabled: true
-            duration: "0m"
-            severity: critical
-          restoreSessionFailed:
-            enabled: true
-            duration: "0m"
-            severity: critical
-          noBackupSessionForTooLong:
-            enabled: true
-            duration: "0m"
-            val: 18000
-            severity: warning
-          repositoryCorrupted:
-            enabled: true
-            duration: "5m"
-            severity: critical
-          repositoryStorageRunningLow:
-            enabled: true
-            duration: "5m"
-            val: 10737418240 # 10GB
-            severity: warning
-          backupSessionPeriodTooLong:
-            enabled: true
-            duration: "0m"
-            val: 1800 # 30 minute
-            severity: warning
-          restoreSessionPeriodTooLong:
-            enabled: true
-            duration: "0m"
-            val: 1800 # 30 minute
-            severity: warning
-      schemaManager:
-        enabled: warning
-        rules:
-          schemaPendingForTooLong:
-            enabled: true
-            duration: "30m"
-            severity: warning
-          schemaInProgressForTooLong:
-            enabled: true
-            duration: "30m"
-            severity: warning
-          schemaTerminatingForTooLong:
-            enabled: true
-            duration: "30m"
-            severity: warning
-          schemaFailed:
-            enabled: true
-            duration: "0m"
-            severity: warning
-          schemaExpired:
-            enabled: true
-            duration: "0m"
-            severity: warning

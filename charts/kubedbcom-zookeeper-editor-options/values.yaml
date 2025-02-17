@@ -44,7 +44,7 @@ spec:
 
   openshift:
     securityContext:
-      runAsUser: 
+      runAsUser: null
 
   admin:
     deployment:
@@ -81,7 +81,7 @@ spec:
           default: ""
           toggle: true
         mode:
-          available: [ "Standalone", "Replicaset" ]
+          available: ["Standalone", "Replicaset"]
           default: "Replicaset"
           toggle: true
     storageClasses:
@@ -120,10 +120,12 @@ spec:
         default: true
         toggle: true
       by: BackupConfiguration
+      via: Restic
     archiver:
       enable:
         default: false
         toggle: false
+      via: Restic
     pointInTimeRecovery:
       default: false
       toggle: false
@@ -134,7 +136,6 @@ spec:
       # Prometheus crd will select ServiceMonitor using these labels.
       # Only usable when monitoring agent is `prometheus.io/webhook server`.
       labels: {}
-
 
 form:
   alert:
@@ -233,6 +234,8 @@ form:
             val: 95
             duration: "1m"
             severity: critical
+
+
       provisioner:
         enabled: warning
         rules:
@@ -244,3 +247,19 @@ form:
             enabled: true
             duration: "15m"
             severity: warning
+
+      opsManager:
+        enabled: warning
+        rules:
+          opsRequestOnProgress:
+            enabled: true
+            duration: "0m"
+            severity: info
+          opsRequestStatusProgressingToLong:
+            enabled: true
+            duration: "30m"
+            severity: critical
+          opsRequestFailed:
+            enabled: true
+            duration: "0m"
+            severity: critical

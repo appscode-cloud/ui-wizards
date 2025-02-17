@@ -81,7 +81,7 @@ spec:
           default: ""
           toggle: true
         mode:
-          available: [ "Standalone", "Replicaset" ]
+          available: ["Standalone", "Replicaset"]
           default: "Replicaset"
           toggle: true
     storageClasses:
@@ -120,10 +120,12 @@ spec:
         default: false
         toggle: false
       by: BackupConfiguration
+      via: Restic
     archiver:
       enable:
         default: false
         toggle: false
+      via: Restic
     pointInTimeRecovery:
       default: false
       toggle: false
@@ -149,3 +151,92 @@ spec:
       # Only usable when monitoring agent is `prometheus.io/webhook server`.
       labels: {}
 
+form:
+  alert:
+    ## Enable PrometheusRule alerts
+    enabled: warning
+
+    ## Labels for default rules
+    labels: # +doc-gen:break
+      release: kube-prometheus-stack
+
+    ## Annotations for default rules
+    annotations: {}
+
+    ## Additional labels for PrometheusRule alerts
+    additionalRuleLabels: {}
+
+    ## Prefix for runbook URLs. Use this to override the first part of the runbookURLs that is common to all rules.
+    # runbookUrl: "https://runbooks.prometheus-operator.dev/runbooks"
+
+    groups:
+      database:
+        enabled: warning
+        rules:
+          # Specifies the alert configuration for database is in NotReady phase, that means the database is not accepting connections, read/write are hampered.
+          memcachedDown:
+            enabled: true
+            duration: "0m"
+            severity: critical
+            # Specifies the alert configuration for recently respawned(restarted).
+          memcachedServiceRespawn:
+            enabled: true
+            duration: "0m"
+            val: 180
+            severity: critical
+            # Specifies the alert configuration for too many connections.
+          memcachedConnectionThrottled:
+            enabled: true
+            duration: "2m"
+            val: 10
+            severity: warning
+            # Specifies the alert configuration for no current open connections.
+          memcachedConnectionsNoneMinor:
+            enabled: true
+            duration: "2m"
+            severity: warning
+            # Specifies the alert configuration for no items on memcached.
+          memcachedItemsNoneMinor:
+            enabled: true
+            duration: "2m"
+            severity: warning
+            # Specifies the alert configuration for high eviction.
+          memcachedEvictionsLimit:
+            enabled: true
+            duration: "0m"
+            val: 10
+            severity: critical
+            # Specifies the alert configuration for high memory usage.
+          memcachedMemoryLimit:
+            enabled: true
+            duration: "0m"
+            val: 33554432  # 32MB
+            severity: critical
+
+      provisioner:
+        enabled: warning
+        rules:
+          appPhaseNotReady:
+            enabled: true
+            duration: "1m"
+            severity: critical
+          appPhaseCritical:
+            enabled: true
+            duration: "15m"
+            severity: warning
+
+      opsManager:
+        enabled: warning
+        rules:
+          opsRequestOnProgress:
+            enabled: true
+            duration: "0m"
+            severity: info
+          opsRequestStatusProgressingToLong:
+            enabled: true
+            duration: "30m"
+            severity: critical
+          opsRequestFailed:
+            enabled: true
+            duration: "0m"
+            severity: critical

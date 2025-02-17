@@ -69,7 +69,7 @@ spec:
 
   openshift:
     securityContext:
-      runAsUser: 
+      runAsUser: null
 
   admin:
     deployment:
@@ -106,7 +106,7 @@ spec:
           default: ""
           toggle: true
         mode:
-          available: [ "Combined", "Topology" ]
+          available: ["Combined", "Topology"]
           default: "Topology"
           toggle: true
     storageClasses:
@@ -145,10 +145,12 @@ spec:
         default: false
         toggle: false
       by: BackupConfiguration
+      via: Restic
     archiver:
       enable:
         default: false
         toggle: false
+      via: Restic
     pointInTimeRecovery:
       default: false
       toggle: false
@@ -249,13 +251,13 @@ form:
             enabled: true
             duration: "1m"
             severity: critical
-            val: 0.3
+            val: 30
           # Specifies alert configurations for request handlers idle rate goes beyond provided value
           kafkaRequestHandlerIdlePercent:
             enabled: true
             duration: "1m"
             severity: critical
-            val: 0.3
+            val: 30
           # Specifies alert configurations replica lag and fetcher configurations
           kafkaReplicaFetcherManagerMaxLag:
             enabled: true
@@ -302,3 +304,19 @@ form:
             enabled: true
             duration: "15m"
             severity: warning
+
+      opsManager:
+        enabled: warning
+        rules:
+          opsRequestOnProgress:
+            enabled: true
+            duration: "0m"
+            severity: info
+          opsRequestStatusProgressingToLong:
+            enabled: true
+            duration: "30m"
+            severity: critical
+          opsRequestFailed:
+            enabled: true
+            duration: "0m"
+            severity: critical
