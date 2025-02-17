@@ -55,7 +55,7 @@ spec:
   archiverName: ""
   init:
     archiver:
-      recoveryTimestamp: ""
+      recoveryTimestamp: "2006-01-02T15:04:05Z"
       encryptionSecret:
         name: ""
         namespace: ""
@@ -68,7 +68,7 @@ spec:
 
   openshift:
     securityContext:
-      runAsUser: 
+      runAsUser: null
 
   admin:
     deployment:
@@ -105,7 +105,7 @@ spec:
           default: ""
           toggle: true
         mode:
-          available: [ "Standalone", "Topology" ]
+          available: ["Standalone", "Topology"]
           default: "Topology"
           toggle: true
     storageClasses:
@@ -144,10 +144,12 @@ spec:
         default: true
         toggle: true
       by: BackupConfiguration
+      via: Restic
     archiver:
       enable:
         default: false
         toggle: true
+      via: Restic
     pointInTimeRecovery:
       default: false
       toggle: true
@@ -195,70 +197,32 @@ form:
       database:
         enabled: warning
         rules:
-          # Sepcifies the alert configuration for virtual memory usage.
-          mssqlserverVirtualMemoryUsage:
+          mssqlserverInstanceDown:
             enabled: true
-            val: 2097152 # 2GB
-            duration: "1m"
-            severity: warning
-          # Sepcifies the alert configuration for replication lag.
-          mssqlserverReplicationLag:
-            enabled: true
-            val: 10
             duration: "0m"
             severity: critical
-          # Sepcifies the alert configuration for number of opened cursors are more than a specified amount.
-          mssqlserverNumberCursorsOpen:
+          # Specifies the alert configuration for service is down.
+          mssqlserverServiceDown:
             enabled: true
-            val: 10000
-            duration: "2m"
-            severity: warning
-          # Sepcifies the alert configuration for timed out cursors.
-          mssqlserverCursorsTimeouts:
-            enabled: true
-            val: 100
-            duration: "2m"
-            severity: warning
-          # Sepcifies the alert configuration for too many connections are opened.
-          mssqlserverTooManyConnections:
-            enabled: true
-            val: 80 # percentage
-            duration: "2m"
-            severity: warning
-          # Sepcifies the alert configuration for database is in Critical phase, that means one or more of the nodes are down but the database read/write are not hampered.
-          mongoDBPhaseCritical:
-            enabled: true
-            duration: "3m"
-            severity: warning
-          # Sepcifies the alert configuration for database is in NotReady phase, that means the database is not accepting connections, read/write are hampered.
-          mongoDBDown:
-            enabled: true
-            duration: "30s"
+            duration: "0m"
             severity: critical
-          # Sepcifies the alert configuration for high latency.
-          mssqlserverHighLatency:
+          mssqlserverRestarted:
             enabled: true
-            val: 250000
-            duration: "10m"
-            severity: warning
-          # Sepcifies the alert configuration for high ticket utilizations.
-          mssqlserverHighTicketUtilization:
+            duration: "0m"
+            val: 60
+            severity: critical
+          # Sepcifies the alert configuration for persistent volume usages.
+          diskUsageHigh:
             enabled: true
-            val: 75 # percentage
-            duration: "10m"
+            val: 80
+            duration: "1m"
             severity: warning
-          # Sepcifies the alert configuration for recurrent cursor timeout.
-          mssqlserverRecurrentCursorTimeout:
+          diskAlmostFull:
             enabled: true
-            val: 0
-            duration: "30m"
-            severity: warning
-          # Sepcifies the alert configuration for recurrent memory page faults.
-          mssqlserverRecurrentMemoryPageFaults:
-            enabled: true
-            val: 0
-            duration: "30m"
-            severity: warning
+            val: 95
+            duration: "1m"
+            severity: critical
+
       provisioner:
         enabled: warning
         rules:
@@ -270,6 +234,7 @@ form:
             enabled: true
             duration: "15m"
             severity: warning
+
       opsManager:
         enabled: warning
         rules:
@@ -285,7 +250,8 @@ form:
             enabled: true
             duration: "0m"
             severity: critical
-      stash:
+
+      kubeStash:
         enabled: warning
         rules:
           backupSessionFailed:
@@ -319,27 +285,4 @@ form:
             enabled: true
             duration: "0m"
             val: 1800 # 30 minute
-            severity: warning
-      schemaManager:
-        enabled: warning
-        rules:
-          schemaPendingForTooLong:
-            enabled: true
-            duration: "30m"
-            severity: warning
-          schemaInProgressForTooLong:
-            enabled: true
-            duration: "30m"
-            severity: warning
-          schemaTerminatingForTooLong:
-            enabled: true
-            duration: "30m"
-            severity: warning
-          schemaFailed:
-            enabled: true
-            duration: "0m"
-            severity: warning
-          schemaExpired:
-            enabled: true
-            duration: "0m"
             severity: warning

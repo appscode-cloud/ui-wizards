@@ -19,6 +19,7 @@ package v1alpha1
 import (
 	core "k8s.io/api/core/v1"
 	mona "kmodules.xyz/monitoring-agent-api/api/v1"
+	kubestashapi "kubestash.dev/apimachinery/apis"
 )
 
 // +kubebuilder:validation:Enum=Shared;Dedicated
@@ -124,6 +125,8 @@ type BackupProfile struct {
 	Enable ToggleProfileOnBoolean `json:"enable"`
 	// +kubebuilder:default=BackupConfiguration
 	By BackupBy `json:"by"`
+	// +kubebuilder:default=Restic
+	Via kubestashapi.Driver `json:"via"`
 }
 
 // +kubebuilder:validation:Enum=BackupConfiguration;BackupBlueprint
@@ -131,6 +134,8 @@ type BackupBy string
 
 type ArchiverProfile struct {
 	Enable ToggleProfileOnBoolean `json:"enable"`
+	// +kubebuilder:default=Restic
+	Via kubestashapi.Driver `json:"via"`
 }
 
 // *** Backup-related ends *** //

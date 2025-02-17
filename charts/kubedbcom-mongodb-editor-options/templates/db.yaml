@@ -88,6 +88,10 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "kubedbcom-mongodb-editor-options.labels" . | nindent 4 }}
+{{- if .Values.spec.admin.archiver.enable.default }}
+    kubedb.com/archiver: "true"
+    kubedb.com/archiving-via: {{ .Values.spec.admin.archiver.via }}
+{{- end }}
   annotations:
     app.kubernetes.io/cluster-tier: {{ .Values.spec.admin.clusterTier.default }}
   {{- if and (eq .Values.spec.backup.tool "KubeStash") (.Values.spec.admin.backup.enable.default) (eq .Values.spec.admin.backup.by "BackupBlueprint") }}

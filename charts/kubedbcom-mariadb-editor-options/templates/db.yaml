@@ -56,6 +56,10 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "kubedbcom-mariadb-editor-options.labels" . | nindent 4 }}
+{{- if .Values.spec.admin.archiver.enable.default }}
+    kubedb.com/archiver: "true"
+    kubedb.com/archiving-via: {{ .Values.spec.admin.archiver.via }}
+{{- end }}
 {{- if .Values.spec.annotations }}
   annotations:
     {{- include "kubedbcom-mariadb-editor-options.annotations" . | nindent 4 }}

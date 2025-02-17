@@ -44,7 +44,7 @@ spec:
 
   openshift:
     securityContext:
-      runAsUser: 
+      runAsUser: null
 
   admin:
     deployment:
@@ -81,7 +81,7 @@ spec:
           default: ""
           toggle: true
         mode:
-          available: [ "Replicaset" ]
+          available: ["Replicaset"]
           default: "Replicaset"
           toggle: true
     storageClasses:
@@ -120,10 +120,12 @@ spec:
         default: false
         toggle: false
       by: BackupConfiguration
+      via: Restic
     archiver:
       enable:
         default: false
         toggle: false
+      via: Restic
     pointInTimeRecovery:
       default: false
       toggle: false
@@ -223,6 +225,17 @@ form:
             duration: "2m"
             val: 80
             severity: warning
+          # Sepcifies the alert configuration for persistent volume usages.
+          diskUsageHigh:
+            enabled: true
+            val: 80
+            duration: "1m"
+            severity: warning
+          diskAlmostFull:
+            enabled: true
+            val: 95
+            duration: "1m"
+            severity: critical
       cluster:
         enabled: warning
         rules:

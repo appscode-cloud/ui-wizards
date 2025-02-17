@@ -49,7 +49,7 @@ spec:
 
   openshift:
     securityContext:
-      runAsUser: 
+      runAsUser: null
 
   admin:
     deployment:
@@ -86,7 +86,7 @@ spec:
           default: ""
           toggle: true
         mode:
-          available: [ "Standalone", "Replicaset" ]
+          available: ["Standalone", "Replicaset"]
           default: "Replicaset"
           toggle: true
     storageClasses:
@@ -125,10 +125,12 @@ spec:
         default: false
         toggle: false
       by: BackupConfiguration
+      via: Restic
     archiver:
       enable:
         default: false
         toggle: false
+      via: Restic
     pointInTimeRecovery:
       default: false
       toggle: false
@@ -222,17 +224,7 @@ form:
             val: 100 # 10mb
             duration: "1m"
             severity: warning
-          # Sepcifies the alert configuration for persistent volume usages.
-          diskUsageHigh:
-            enabled: true
-            val: 80
-            duration: "1m"
-            severity: warning
-          diskAlmostFull:
-            enabled: true
-            val: 95
-            duration: "1m"
-            severity: critical
+
       provisioner:
         enabled: warning
         rules:
@@ -244,3 +236,19 @@ form:
             enabled: true
             duration: "15m"
             severity: warning
+
+      opsManager:
+        enabled: warning
+        rules:
+          opsRequestOnProgress:
+            enabled: true
+            duration: "0m"
+            severity: info
+          opsRequestStatusProgressingToLong:
+            enabled: true
+            duration: "30m"
+            severity: critical
+          opsRequestFailed:
+            enabled: true
+            duration: "0m"
+            severity: critical

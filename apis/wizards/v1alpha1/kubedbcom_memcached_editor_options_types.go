@@ -17,6 +17,7 @@ limitations under the License.
 package v1alpha1
 
 import (
+	alerts "go.appscode.dev/alerts/apis/alerts/v1alpha1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	api "x-helm.dev/apimachinery/apis/releases/v1alpha1"
 )
@@ -37,6 +38,7 @@ type KubedbcomMemcachedEditorOptions struct {
 type KubedbcomMemcachedEditorOptionsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
 	Spec         KubedbcomMemcachedEditorOptionsSpecSpec `json:"spec"`
+	Form         MemcachedAlertsSpecForm                 `json:"form"`
 }
 
 type KubedbcomMemcachedEditorOptionsSpecSpec struct {
@@ -58,8 +60,9 @@ type KubedbcomMemcachedEditorOptionsSpecSpec struct {
 	Openshift Openshift `json:"openshift"`
 }
 
-// *** Alerts *** //
-// *** Alerts *** //
+type MemcachedAlertsSpecForm struct {
+	Alert alerts.MemcachedAlert `json:"alert"`
+}
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
