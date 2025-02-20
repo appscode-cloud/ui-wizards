@@ -380,10 +380,13 @@ function showRecovery({ watchDependency, getValue, discriminator }) {
   return isRecoveryOn
 }
 
-function getMachineListForOptions() {
-  const array = machineList.map((item) => {
-    return { text: item, value: item }
+function getMachineListForOptions({ model, getValue }) {
+  const machines = getValue(model, '/spec/admin/machineProfiles/machines')
+  let array = machines.map((machine) => {
+    const text = `${machine.name} (cpu: ${machine.limits.cpu} memory: ${machine.limits.memoty})`
+    return { text, value: machine.id }
   })
+  array = [{ text: 'custom', value: 'custom' }, ...array]
   return array
 }
 
@@ -442,6 +445,13 @@ function setRequests({ getValue, model, commit }, resource) {
 function setMachineToCustom({ getValue, model }) {
   const machine = getValue(model, '/spec/podResources/machine')
   return machine || 'custom'
+}
+
+function isMachineCustom({ model, getValue, watchDependency }, path) {
+  const fullpath = path ? `/spec/${path}/podResources/machine` : '/spec/podResources/machine'
+  const modelPathValue = getValue(model, fullpath)
+  watchDependency(`model#${fullpath}`)
+  return modelPathValue === 'custom'
 }
 
 function isMachineNotCustom({ model, getValue, watchDependency }, path) {
@@ -1290,6 +1300,7 @@ return {
   setRequests,
   setMachineToCustom,
   isMachineNotCustom,
+  isMachineCustom,
   updateAlertValue,
   getCreateNameSpaceUrl,
   ifCapiProviderIsNotEmpty,
