@@ -73,6 +73,8 @@ type AdminOptions struct {
 	Backup              BackupProfile          `json:"backup"`
 	Archiver            ArchiverProfile        `json:"archiver"`
 	PointInTimeRecovery ToggleProfileOnBoolean `json:"pointInTimeRecovery"`
+
+	MachineProfiles MachineProfiles `json:"machineProfiles"`
 }
 
 // *** Machine-related starts *** //
@@ -139,6 +141,18 @@ type ArchiverProfile struct {
 }
 
 // *** Backup-related ends *** //
+
+type MachineProfiles struct {
+	Machines  []Machine `json:"machines"`
+	Available []string  `json:"available"`
+	Default   string    `json:"default"`
+}
+
+type Machine struct {
+	Id     string            `json:"id"`
+	Name   string            `json:"name,omitempty"`
+	Limits core.ResourceList `json:"limits"`
+}
 
 type LeftPanel struct {
 	ShowInsights     bool `json:"showInsights"`
