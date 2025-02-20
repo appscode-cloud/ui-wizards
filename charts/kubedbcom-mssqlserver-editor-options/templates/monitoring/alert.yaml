@@ -18,14 +18,6 @@ metadata:
 {{- end }}
 spec:
   groups:
-  {{ with .Values.form.alert.groups.database -}}
-  {{ if (include "kubedbcom-mssqlserver-editor-options.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
-  - name: mssqlserver.database.{{ $.Release.Namespace }}.{{ $app }}.rules
-    rules:
-  {{end -}}
-  {{end -}}
-
-
   {{ with .Values.form.alert.groups.provisioner -}}
   {{ if (include "kubedbcom-mssqlserver-editor-options.alertGroupEnabled" (list $.Values.form.alert.enabled .)) -}}
   - name: mssqlserver.provisioner.{{ $.Release.Namespace }}.{{ $app }}.rules
