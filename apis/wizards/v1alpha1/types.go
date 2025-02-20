@@ -45,7 +45,7 @@ type InitDatabase struct {
 }
 
 type Archiver struct {
-	RecoveryTimestamp  metav1.Time     `json:"recoveryTimestamp"`
+	RecoveryTimestamp  *metav1.Time    `json:"recoveryTimestamp"`
 	EncryptionSecret   ObjectReference `json:"encryptionSecret"`
 	FullDBRepository   ObjectReference `json:"fullDBRepository"`
 	ManifestRepository ObjectReference `json:"manifestRepository"`
