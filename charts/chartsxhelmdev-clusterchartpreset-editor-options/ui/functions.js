@@ -397,6 +397,11 @@ function preSelectClusterIssuer({ getValue, model, watchDependency, commit, disc
   }
 }
 
+function isEnableProfiles({ watchDependency, getValue, discriminator }) {
+  watchDependency('discriminator#/enableProfiles')
+  return getValue(discriminator, '/enableProfiles') || false
+}
+
 return {
   preSelectClusterIssuer,
   isRancherManaged,
@@ -423,4 +428,5 @@ return {
   setDefaultMode,
   clearDefaultMode,
   setStorageClass,
+  isEnableProfiles,
 }
