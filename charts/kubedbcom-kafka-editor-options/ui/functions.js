@@ -331,7 +331,7 @@ function showStorageSizeField({ model, getValue, watchDependency }) {
 function getMachineListForOptions({ model, getValue }) {
   const machines = getValue(model, '/spec/admin/machineProfiles/machines')
   let array = machines.map((machine) => {
-    const text = `${machine.name} (cpu: ${machine.limits.cpu} memory: ${machine.limits.memoty})`
+    const text = `${machine.name} (cpu: ${machine.limits.cpu} memory: ${machine.limits.memory})`
     return { text, value: machine.id }
   })
   array = [{ text: 'custom', value: 'custom' }, ...array]
