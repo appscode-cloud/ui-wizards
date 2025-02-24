@@ -371,10 +371,15 @@ function showRecovery({ watchDependency, getValue, discriminator }) {
 
 function getMachineListForOptions({ model, getValue }) {
   const machines = getValue(model, '/spec/admin/machineProfiles/machines')
-  let array = machines.map((machine) => {
-    const text = `${machine.name} (cpu: ${machine.limits.cpu} memory: ${machine.limits.memoty})`
-    return { text, value: machine.id }
-  })
+  const available = getValue(model, '/spec/admin/machineProfiles/available')
+  let array = machines
+    .map((machine) => {
+      if (available.includes(machine.id)) {
+        const text = `${machine.name} (cpu: ${machine.limits.cpu} memory: ${machine.limits.memoty})`
+        return { text, value: machine.id }
+      }
+    })
+    .filter((val) => !!val)
   array = [{ text: 'custom', value: 'custom' }, ...array]
   return array
 }
