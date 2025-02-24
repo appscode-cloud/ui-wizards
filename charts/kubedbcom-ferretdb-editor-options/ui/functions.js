@@ -351,13 +351,17 @@ function getMachineListForOptions({ model, getValue }) {
   return array
 }
 
-function setLimits({ model, getValue, commit, watchDependency }, resource) {
-  watchDependency(`model#spec/podResources/machine`)
-  const path = '/spec/podResources/machine'
+function setLimits({ model, getValue, commit, watchDependency }, resource, type) {
+  const path = type ? `/spec/${type}/podResources/machine` : '/spec/podResources/machine'
+  watchDependency(`model#${path}`)
   const selectedMachine = getValue(model, path) || 'custom'
-  const reqCommitPath = `/spec/podResources/resources/limits/${resource}`
+  const reqCommitPath = type
+    ? `/spec/${type}/podResources/resources/limits/${resource}`
+    : `/spec/podResources/resources/limits/${resource}`
 
-  const comparePath = `/spec/podResources/resources/requests/${resource}`
+  const comparePath = type
+    ? `/spec/${type}/podResources/resources/requests/${resource}`
+    : `/spec/podResources/resources/requests/${resource}`
 
   if (selectedMachine === 'custom') {
     const val2 = getValue(model, comparePath)
