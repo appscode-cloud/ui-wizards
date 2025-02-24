@@ -384,11 +384,17 @@ function getMachineListForOptions({ model, getValue }) {
   return array
 }
 
-function setLimits({ model, getValue, commit }, resource) {
-  const path = '/spec/podResources/machine'
+function setLimits({ model, getValue, commit, watchDependency }, resource, type) {
+  const path = type ? `/spec/${type}/podResources/machine` : '/spec/podResources/machine'
+  watchDependency(`model#${path}`)
   const selectedMachine = getValue(model, path) || 'custom'
-  const reqCommitPath = `/spec/podResources/resources/limits/${resource}`
-  const comparePath = `/spec/podResources/resources/requests/${resource}`
+  const reqCommitPath = type
+    ? `/spec/${type}/podResources/resources/limits/${resource}`
+    : `/spec/podResources/resources/limits/${resource}`
+
+  const comparePath = type
+    ? `/spec/${type}/podResources/resources/requests/${resource}`
+    : `/spec/podResources/resources/requests/${resource}`
 
   if (selectedMachine === 'custom') {
     const val2 = getValue(model, comparePath)
@@ -408,20 +414,40 @@ function setLimits({ model, getValue, commit }, resource) {
       return val2
     }
   }
+
+  const machines = getValue(model, '/spec/admin/machineProfiles/machines')
+  let cpu, memory
+  machines.forEach((machine) => {
+    if (machine.id === selectedMachine) {
+      cpu = machine.limits.cpu
+      memory = machine.limits.memoty
+    }
+  })
+
   if (resource === 'memory') {
     commit('wizard/model$update', {
       path: reqCommitPath,
-      value: machines[selectedMachine]?.resources?.limits?.memory,
+      value: memory,
       force: true,
     })
-    return machines[selectedMachine]?.resources?.limits?.memory
+    commit('wizard/model$update', {
+      path: comparePath,
+      value: memory,
+      force: true,
+    })
+    return memory
   } else {
     commit('wizard/model$update', {
       path: reqCommitPath,
-      value: machines[selectedMachine]?.resources?.limits?.cpu,
+      value: cpu,
       force: true,
     })
-    return machines[selectedMachine]?.resources?.limits?.cpu
+    commit('wizard/model$update', {
+      path: comparePath,
+      value: cpu,
+      force: true,
+    })
+    return cpu
   }
 }
 
@@ -437,7 +463,7 @@ function setRequests({ getValue, model, commit }, resource) {
 }
 
 function setMachineToCustom({ getValue, model }) {
-  const machine = getValue(model, '/spec/podResources/machine')
+  const machine = getValue(model, '/spec/admin/machineProfiles/default')
   return machine || 'custom'
 }
 
