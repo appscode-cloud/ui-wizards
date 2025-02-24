@@ -343,8 +343,8 @@ function getMachineListForOptions({ model, getValue }) {
     .map((machine) => {
       if (available.includes(machine.id)) {
         const text = machine.name
-          ? `${machine.name} (CPU: ${machine.limits.cpu}, Memory: ${machine.limits.memoty})`
-          : `${machine.id} (CPU: ${machine.limits.cpu}, Memory: ${machine.limits.memoty})`
+          ? `${machine.name} (CPU: ${machine.limits.cpu}, Memory: ${machine.limits.memory})`
+          : `${machine.id} (CPU: ${machine.limits.cpu}, Memory: ${machine.limits.memory})`
         return { text, value: machine.id }
       }
     })
@@ -389,7 +389,7 @@ function setLimits({ model, getValue, commit, watchDependency }, resource, type)
   machines.forEach((machine) => {
     if (machine.id === selectedMachine) {
       cpu = machine.limits.cpu
-      memory = machine.limits.memoty
+      memory = machine.limits.memory
     }
   })
 
