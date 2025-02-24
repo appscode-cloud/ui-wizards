@@ -1,8 +1,17 @@
 {{- $machines := .Files.Get "data/machines.yaml" | fromYaml -}}
+{{- $machineProfileRes := dict -}}
+{{- range .Values.spec.admin.machineProfiles.machines }}
+  {{- if and $.Values.spec.admin.machineProfiles.default (eq .id $.Values.spec.admin.machineProfiles.default) }}
+    {{- $machineProfileRes = dict "requests" .limits "limits" .limits }}
+  {{- end }}
+{{- end }}
 {{- $res := .Values.spec.podResources.resources -}}
 {{- if and .Values.spec.podResources.machine (hasKey $machines .Values.spec.podResources.machine) }}
   {{- $res = get (get $machines .Values.spec.podResources.machine) "resources" }}
 {{- end }}
+{{- if $machineProfileRes }}
+  {{- $res = $machineProfileRes }}
+{{- end  }}
 
 {{- define "common.placement" -}}
 

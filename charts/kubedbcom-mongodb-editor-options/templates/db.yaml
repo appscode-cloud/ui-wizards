@@ -1,4 +1,10 @@
 {{- $machines := .Files.Get "data/machines.yaml" | fromYaml -}}
+{{- $machineProfileRes := dict -}}
+{{- range .Values.spec.admin.machineProfiles.machines }}
+  {{- if and $.Values.spec.admin.machineProfiles.default (eq .id $.Values.spec.admin.machineProfiles.default) }}
+    {{- $machineProfileRes = dict "requests" .limits "limits" .limits }}
+  {{- end }}
+{{- end }}
 {{- $res := dict -}}
 {{- $shard_res := dict -}}
 {{- $configServer_res := dict -}}
@@ -10,31 +16,49 @@
   {{- if and .Values.spec.shardTopology.shard.podResources.machine (hasKey $machines .Values.spec.shardTopology.shard.podResources.machine) }}
     {{- $shard_res = get (get $machines .Values.spec.shardTopology.shard.podResources.machine) "resources" }}
   {{- end }}
+  {{- if $machineProfileRes }}
+    {{- $shard_res = $machineProfileRes }}
+  {{- end  }}
   {{- $configServer_res = .Values.spec.shardTopology.configServer.podResources.resources -}}
   {{- if and .Values.spec.shardTopology.configServer.podResources.machine (hasKey $machines .Values.spec.shardTopology.configServer.podResources.machine) }}
     {{- $configServer_res = get (get $machines .Values.spec.shardTopology.configServer.podResources.machine) "resources" }}
   {{- end }}
+  {{- if $machineProfileRes }}
+    {{- $configServer_res = $machineProfileRes }}
+  {{- end  }}
   {{- $mongos_res = .Values.spec.shardTopology.mongos.podResources.resources -}}
   {{- if and .Values.spec.shardTopology.mongos.podResources.machine (hasKey $machines .Values.spec.shardTopology.mongos.podResources.machine) }}
     {{- $mongos_res = get (get $machines .Values.spec.shardTopology.mongos.podResources.machine) "resources" }}
   {{- end }}
+  {{- if $machineProfileRes }}
+    {{- $mongos_res = $machineProfileRes }}
+  {{- end  }}
 {{- else }}
   {{- $res = .Values.spec.podResources.resources -}}
   {{- if and .Values.spec.podResources.machine (hasKey $machines .Values.spec.podResources.machine) }}
     {{- $res = get (get $machines .Values.spec.podResources.machine) "resources" }}
   {{- end }}
+  {{- if $machineProfileRes }}
+    {{- $res = $machineProfileRes }}
+  {{- end  }}
 {{- end }}
 {{- if .Values.spec.arbiter.enabled }}
   {{- $arbiter_res = .Values.spec.arbiter.podResources.resources -}}
   {{- if and .Values.spec.arbiter.podResources.machine (hasKey $machines .Values.spec.arbiter.podResources.machine) }}
     {{- $arbiter_res = get (get $machines .Values.spec.arbiter.podResources.machine) "resources" }}
   {{- end }}
+  {{- if $machineProfileRes }}
+    {{- $arbiter_res = $machineProfileRes }}
+  {{- end  }}
 {{- end }}
 {{- if .Values.spec.hidden.enabled }}
   {{- $hidden_res = .Values.spec.hidden.podResources.resources -}}
   {{- if and .Values.spec.hidden.podResources.machine (hasKey $machines .Values.spec.hidden.podResources.machine) }}
     {{- $hidden_res = get (get $machines .Values.spec.hidden.podResources.machine) "resources" }}
   {{- end }}
+  {{- if $machineProfileRes }}
+    {{- $hidden_res = $machineProfileRes }}
+  {{- end  }}
 {{- end }}
 
 {{- define "common.placement" -}}
@@ -94,6 +118,9 @@ metadata:
 {{- end }}
   annotations:
     app.kubernetes.io/cluster-tier: {{ .Values.spec.admin.clusterTier.default }}
+  {{- if .Values.spec.admin.machineProfiles.default }}
+    kubernetes.io/instance-type: {{ .Values.spec.admin.machineProfiles.default }}
+  {{- end }}
   {{- if and (eq .Values.spec.backup.tool "KubeStash") (.Values.spec.admin.backup.enable.default) (eq .Values.spec.admin.backup.by "BackupBlueprint") }}
     blueprint.kubestash.com/name: {{ .Values.metadata.resource.kind | lower }}-blueprint
     blueprint.kubestash.com/namespace: kubedb

@@ -1,4 +1,10 @@
 {{- $machines := .Files.Get "data/machines.yaml" | fromYaml -}}
+{{- $machineProfileRes := dict -}}
+{{- range .Values.spec.admin.machineProfiles.machines }}
+  {{- if and $.Values.spec.admin.machineProfiles.default (eq .id $.Values.spec.admin.machineProfiles.default) }}
+    {{- $machineProfileRes = dict "requests" .limits "limits" .limits }}
+  {{- end }}
+{{- end }}
 {{- $res := dict -}}
 {{- $controller_res := dict -}}
 {{- $broker_res := dict -}}
@@ -7,15 +13,24 @@
   {{- if and .Values.spec.topology.controller.podResources.machine (hasKey $machines .Values.spec.topology.controller.podResources.machine) }}
     {{- $controller_res = get (get $machines .Values.spec.topology.controller.podResources.machine) "resources" }}
   {{- end }}
+  {{- if $machineProfileRes }}
+    {{- $controller_res = $machineProfileRes }}
+  {{- end  }}
   {{- $broker_res = .Values.spec.topology.broker.podResources.resources -}}
   {{- if and .Values.spec.topology.broker.podResources.machine (hasKey $machines .Values.spec.topology.broker.podResources.machine) }}
     {{- $broker_res = get (get $machines .Values.spec.topology.broker.podResources.machine) "resources" }}
   {{- end }}
+  {{- if $machineProfileRes }}
+    {{- $broker_res = $machineProfileRes }}
+  {{- end  }}
 {{- else }}
   {{- $res = .Values.spec.podResources.resources -}}
   {{- if and .Values.spec.podResources.machine (hasKey $machines .Values.spec.podResources.machine) }}
     {{- $res = get (get $machines .Values.spec.podResources.machine) "resources" }}
   {{- end }}
+  {{- if $machineProfileRes }}
+    {{- $res = $machineProfileRes }}
+  {{- end  }}
 {{- end }}
 
 {{- define "common.placement" -}}
