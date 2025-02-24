@@ -439,7 +439,9 @@ function getMachineListForOptions({ model, getValue }) {
   let array = machines
     .map((machine) => {
       if (available.includes(machine.id)) {
-        const text = `${machine.name} (cpu: ${machine.limits.cpu} memory: ${machine.limits.memoty})`
+        const text = machine.name
+          ? `${machine.name} (CPU: ${machine.limits.cpu}, Memory: ${machine.limits.memoty})`
+          : `${machine.id} (CPU: ${machine.limits.cpu}, Memory: ${machine.limits.memoty})`
         return { text, value: machine.id }
       }
     })
@@ -526,8 +528,9 @@ function setRequests({ getValue, model, commit }, resource) {
   })
 }
 
-function setMachineToCustom() {
-  return 'custom'
+function setMachineToCustom({ getValue, model }) {
+  const machine = getValue(model, '/spec/admin/machineProfiles/default')
+  return machine || 'custom'
 }
 
 async function fetchJsons({ axios, itemCtx }) {
