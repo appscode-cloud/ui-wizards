@@ -399,8 +399,6 @@ function preSelectClusterIssuer({ getValue, model, watchDependency, commit, disc
 
 function hasMachineProfiles({ getValue, model }) {
   const val = getValue(model, '/spec/admin/machineProfiles/machines')
-  console.log(val)
-
   return !!val
 }
 
