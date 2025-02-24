@@ -1,4 +1,10 @@
 {{- $machines := .Files.Get "data/machines.yaml" | fromYaml -}}
+{{- $machineProfileRes := dict -}}
+{{- range .Values.spec.admin.machineProfiles.machines }}
+  {{- if and $.Values.spec.admin.machineProfiles.default (eq .id $.Values.spec.admin.machineProfiles.default) }}
+    {{- $machineProfileRes = dict "requests" .limits "limits" .limits }}
+  {{- end }}
+{{- end }}
 {{- $res := dict -}}
 {{- $overseer_res := dict -}}
 {{- $data_res := dict -}}
@@ -8,19 +14,31 @@
   {{- if and .Values.spec.topology.overseer.podResources.machine (hasKey $machines .Values.spec.topology.overseer.podResources.machine) }}
     {{- $overseer_res = get (get $machines .Values.spec.topology.overseer.podResources.machine) "resources" }}
   {{- end }}
+  {{- if $machineProfileRes }}
+    {{- $overseer_res = $machineProfileRes }}
+  {{- end  }}
   {{- $data_res = .Values.spec.topology.data.podResources.resources -}}
   {{- if and .Values.spec.topology.data.podResources.machine (hasKey $machines .Values.spec.topology.data.podResources.machine) }}
     {{- $data_res = get (get $machines .Values.spec.topology.data.podResources.machine) "resources" }}
   {{- end }}
+  {{- if $machineProfileRes }}
+    {{- $data_res = $machineProfileRes }}
+  {{- end  }}
   {{- $coordinator_res = .Values.spec.topology.coordinator.podResources.resources -}}
   {{- if and .Values.spec.topology.coordinator.podResources.machine (hasKey $machines .Values.spec.topology.coordinator.podResources.machine) }}
     {{- $coordinator_res = get (get $machines .Values.spec.topology.coordinator.podResources.machine) "resources" }}
   {{- end }}
+  {{- if $machineProfileRes }}
+    {{- $coordinator_res = $machineProfileRes }}
+  {{- end  }}
 {{- else }}
   {{- $res = .Values.spec.podResources.resources -}}
   {{- if and .Values.spec.podResources.machine (hasKey $machines .Values.spec.podResources.machine) }}
     {{- $res = get (get $machines .Values.spec.podResources.machine) "resources" }}
   {{- end }}
+  {{- if $machineProfileRes }}
+    {{- $res = $machineProfileRes }}
+  {{- end  }}
 {{- end }}
 
 {{- define "common.placement" -}}

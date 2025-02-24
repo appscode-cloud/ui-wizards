@@ -1,4 +1,10 @@
 {{- $machines := .Files.Get "data/machines.yaml" | fromYaml -}}
+{{- $machineProfileRes := dict -}}
+{{- range .Values.spec.admin.machineProfiles.machines }}
+  {{- if and $.Values.spec.admin.machineProfiles.default (eq .id $.Values.spec.admin.machineProfiles.default) }}
+    {{- $machineProfileRes = dict "requests" .limits "limits" .limits }}
+  {{- end }}
+{{- end }}
 {{- $res := dict -}}
 {{- $data_res := dict -}}
 {{- $master_res := dict -}}
@@ -8,19 +14,31 @@
   {{- if and .Values.spec.topology.data.podResources.machine (hasKey $machines .Values.spec.topology.data.podResources.machine) }}
     {{- $data_res = get (get $machines .Values.spec.topology.data.podResources.machine) "resources" }}
   {{- end }}
+  {{- if $machineProfileRes }}
+    {{- $data_res = $machineProfileRes }}
+  {{- end  }}
   {{- $master_res = .Values.spec.topology.master.podResources.resources -}}
   {{- if and .Values.spec.topology.master.podResources.machine (hasKey $machines .Values.spec.topology.master.podResources.machine) }}
     {{- $master_res = get (get $machines .Values.spec.topology.master.podResources.machine) "resources" }}
   {{- end }}
+  {{- if $machineProfileRes }}
+    {{- $master_res = $machineProfileRes }}
+  {{- end  }}
   {{- $ingest_res = .Values.spec.topology.ingest.podResources.resources -}}
   {{- if and .Values.spec.topology.ingest.podResources.machine (hasKey $machines .Values.spec.topology.ingest.podResources.machine) }}
     {{- $ingest_res = get (get $machines .Values.spec.topology.ingest.podResources.machine) "resources" }}
   {{- end }}
+  {{- if $machineProfileRes }}
+    {{- $ingest_res = $machineProfileRes }}
+  {{- end  }}
 {{- else }}
   {{- $res = .Values.spec.podResources.resources -}}
   {{- if and .Values.spec.podResources.machine (hasKey $machines .Values.spec.podResources.machine) }}
     {{- $res = get (get $machines .Values.spec.podResources.machine) "resources" }}
   {{- end }}
+  {{- if $machineProfileRes }}
+    {{- $res = $machineProfileRes }}
+  {{- end  }}
 {{- end }}
 
 {{- define "common.placement" -}}
