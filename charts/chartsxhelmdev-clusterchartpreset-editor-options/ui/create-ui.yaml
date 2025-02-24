@@ -10,7 +10,6 @@ steps:
 
         - discriminator:
             enableProfiles:
-              default: false
               type: boolean
           elements:
           - label:
@@ -18,52 +17,68 @@ steps:
             schema:
               $ref: discriminator#/enableProfiles
             type: switch
-          - addFormLabel: Profile
-            element:
-              elements:
-              - label:
+          - elements:
+            - fetch: getMachines|machines
+              label:
+                text: Available Machines 
+              onChange: clearDefaultVersion|clickhouse
+              schema:
+                $ref: schema#/properties/spec/properties/admin/properties/machineProfiles/properties/available
+              type: multiselect
+            - fetch: getMachines|available
+              label:
+                text: Default Machine
+              schema:
+                $ref: schema#/properties/spec/properties/admin/properties/machineProfiles/properties/default
+              type: select
+            - addFormLabel: Profile
+              element:
+                elements:
+                - label:
+                    text: ID
+                  schema:
+                    $ref: schema#/properties/spec/properties/admin/properties/machineProfiles/properties/machines/items/properties/id
+                  type: input
+                - label:
+                    text: Name
+                  schema:
+                    $ref: schema#/properties/spec/properties/admin/properties/machineProfiles/properties/machines/items/properties/name
+                  type: input
+                - label:
+                    text: Limits
+                  hideRequests: true
+                  schema:
+                    $ref: schema#/properties/spec/properties/admin/properties/machineProfiles/properties/machines/items/properties/limits
+                  type: resource-input-form
+                  
+                type: single-step-form
+              label:
+                text: Machine Profiles
+              schema:
+                $ref: schema#/properties/spec/properties/admin/properties/machineProfiles/properties/machines
+              tableContents:
+              - inTableColumn: true
+                label:
                   text: ID
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/machineProfiles/properties/machines/items/properties/id
-                type: input
-              - label:
+                path: id
+                type: value
+                typeOfValue: string
+              - inTableColumn: true
+                label:
                   text: Name
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/machineProfiles/properties/machines/items/properties/name
-                type: input
-              - label:
+                path: name
+                type: value
+                typeOfValue: string
+              - inTableColumn: true
+                label:
                   text: Limits
-                hideRequests: true
-                schema:
-                  $ref: schema#/properties/spec/properties/admin/properties/machineProfiles/properties/machines/items/properties/limits
-                type: resource-input-form
-                
-              type: single-step-form
+                path: limits
+                type: value
+                typeOfValue: object-array
+              type: single-step-form-array
             if: isEnableProfiles
-            label:
-              text: Machine Profiles
-            schema:
-              $ref: schema#/properties/spec/properties/storage/properties/mariadb/properties/scalingRules
-            tableContents:
-            - inTableColumn: true
-              label:
-                text: ID
-              path: id
-              type: value
-              typeOfValue: string
-            - inTableColumn: true
-              label:
-                text: Name
-              path: name
-              type: value
-              typeOfValue: string
-            - inTableColumn: true
-              label:
-                text: Limits
-              path: limits
-              type: value
-              typeOfValue: object-array
-            type: single-step-form-array
+            type: single-step-form
+          
           show_label: true
           label:
             text: Configure MachineProfiles

@@ -397,9 +397,27 @@ function preSelectClusterIssuer({ getValue, model, watchDependency, commit, disc
   }
 }
 
+function hasMachineProfiles({ getValue, model }) {
+  const val = getValue(model, '/spec/admin/machineProfiles/machines')
+  return val
+}
+
 function isEnableProfiles({ watchDependency, getValue, discriminator }) {
   watchDependency('discriminator#/enableProfiles')
   return getValue(discriminator, '/enableProfiles') || false
+}
+
+function getMachines({ watchDependency, getValue, model }, type) {
+  watchDependency(`model#/spec/admin/machineProfiles/${type}`)
+  const machines = getValue(model, `/spec/admin/machineProfiles/${type}`)
+
+  machines?.map((machine) => {
+    machine.value = machine.id
+    machine.text = machine.id
+    return true
+  })
+
+  return machines
 }
 
 return {
@@ -428,5 +446,7 @@ return {
   setDefaultMode,
   clearDefaultMode,
   setStorageClass,
+  hasMachineProfiles,
   isEnableProfiles,
+  getMachines,
 }
