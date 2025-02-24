@@ -7,13 +7,15 @@ steps:
             default: {}
             type: object
         elements:
-
         - discriminator:
             enableProfiles:
+              default: true
               type: boolean
           elements:
-          - label:
+          - computed: hasMachineProfiles
+            label:
               text: Use custom profiles?
+            onChange: onMachineProfilesToggle
             schema:
               $ref: discriminator#/enableProfiles
             type: switch
@@ -31,7 +33,7 @@ steps:
               schema:
                 $ref: schema#/properties/spec/properties/admin/properties/machineProfiles/properties/default
               type: select
-            - addFormLabel: Profile
+            - addFormLabel: MachineProfile
               element:
                 elements:
                 - label:
@@ -44,13 +46,22 @@ steps:
                   schema:
                     $ref: schema#/properties/spec/properties/admin/properties/machineProfiles/properties/machines/items/properties/name
                   type: input
-                - label:
+                - elements:
+                  - label:
+                      text: CPU
+                    schema:
+                      $ref: schema#/properties/spec/properties/admin/properties/machineProfiles/properties/machines/items/properties/limits/properties/cpu
+                    type: input
+                  - label:
+                      text: Memory
+                    schema:
+                      $ref: schema#/properties/spec/properties/admin/properties/machineProfiles/properties/machines/items/properties/limits/properties/memory
+                    type: input
+                  label:
                     text: Limits
-                  hideRequests: true
                   schema:
                     $ref: schema#/properties/spec/properties/admin/properties/machineProfiles/properties/machines/items/properties/limits
-                  type: resource-input-form
-                  
+                  type: single-step-form
                 type: single-step-form
               label:
                 text: Machine Profiles
@@ -78,12 +89,10 @@ steps:
               type: single-step-form-array
             if: isEnableProfiles
             type: single-step-form
-          
           show_label: true
           label:
             text: Configure MachineProfiles
           type: single-step-form
-        
         type: single-step-form
       type: single-step-form
     - elements:

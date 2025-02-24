@@ -399,7 +399,9 @@ function preSelectClusterIssuer({ getValue, model, watchDependency, commit, disc
 
 function hasMachineProfiles({ getValue, model }) {
   const val = getValue(model, '/spec/admin/machineProfiles/machines')
-  return val
+  console.log(val)
+
+  return !!val
 }
 
 function isEnableProfiles({ watchDependency, getValue, discriminator }) {
@@ -407,9 +409,21 @@ function isEnableProfiles({ watchDependency, getValue, discriminator }) {
   return getValue(discriminator, '/enableProfiles') || false
 }
 
+function onMachineProfilesToggle({ getValue, model, commit, discriminator }) {
+  const toggle = getValue(discriminator, '/enableProfiles') || false
+
+  if (!toggle) {
+    commit('wizard/model$update', {
+      path: '/spec/admin/machineProfiles',
+      value: { available: [], default: '', machines: [] },
+      force: true,
+    })
+  }
+}
+
 function getMachines({ watchDependency, getValue, model }, type) {
   watchDependency(`model#/spec/admin/machineProfiles/${type}`)
-  const machines = getValue(model, `/spec/admin/machineProfiles/${type}`)
+  const machines = getValue(model, `/spec/admin/machineProfiles/${type}`) || []
 
   machines?.map((machine) => {
     machine.value = machine.id
@@ -449,4 +463,5 @@ return {
   hasMachineProfiles,
   isEnableProfiles,
   getMachines,
+  onMachineProfilesToggle,
 }
