@@ -1311,6 +1311,93 @@ steps:
             text: labels.databases.name
           show_label: true
           type: single-step-form
+        - discriminator:
+            enableProfiles:
+              default: true
+              type: boolean
+          elements:
+          - computed: hasMachineProfiles
+            label:
+              text: Use custom profiles?
+            onChange: onMachineProfilesToggle
+            schema:
+              $ref: discriminator#/enableProfiles
+            type: switch
+          - elements:
+            - fetch: getMachines|machines
+              label:
+                text: Available Machines 
+              onChange: clearDefaultVersion|clickhouse
+              schema:
+                $ref: schema#/properties/spec/properties/admin/properties/machineProfiles/properties/available
+              type: multiselect
+            - fetch: getMachines|available
+              label:
+                text: Default Machine
+              schema:
+                $ref: schema#/properties/spec/properties/admin/properties/machineProfiles/properties/default
+              type: select
+            - addFormLabel: MachineProfile
+              element:
+                elements:
+                - label:
+                    text: ID
+                  schema:
+                    $ref: schema#/properties/spec/properties/admin/properties/machineProfiles/properties/machines/items/properties/id
+                  type: input
+                - label:
+                    text: Name
+                  schema:
+                    $ref: schema#/properties/spec/properties/admin/properties/machineProfiles/properties/machines/items/properties/name
+                  type: input
+                - elements:
+                  - label:
+                      text: CPU Limits
+                    required: true
+                    schema:
+                      $ref: schema#/properties/spec/properties/admin/properties/machineProfiles/properties/machines/items/properties/limits/properties/cpu
+                    type: input
+                  - label:
+                      text: Memory Limits
+                    required: true
+                    schema:
+                      $ref: schema#/properties/spec/properties/admin/properties/machineProfiles/properties/machines/items/properties/limits/properties/memory
+                    type: input
+                  schema:
+                    $ref: schema#/properties/spec/properties/admin/properties/machineProfiles/properties/machines/items/properties/limits
+                  type: single-step-form
+                type: single-step-form
+              label:
+                text: Machine Profiles
+              schema:
+                $ref: schema#/properties/spec/properties/admin/properties/machineProfiles/properties/machines
+              tableContents:
+              - inTableColumn: true
+                label:
+                  text: ID
+                path: id
+                type: value
+                typeOfValue: string
+              - inTableColumn: true
+                label:
+                  text: Name
+                path: name
+                type: value
+                typeOfValue: string
+              - inTableColumn: true
+                label:
+                  text: Limits
+                path: limits
+                type: value
+                typeOfValue: object-array
+              type: single-step-form-array
+            if: isEnableProfiles
+            type: single-step-form
+          hideForm: true
+          label:
+            text: Configure MachineProfiles
+          show_label: true
+          type: single-step-form
         - elements:
           - label:
               text: labels.storageClass.toggle
