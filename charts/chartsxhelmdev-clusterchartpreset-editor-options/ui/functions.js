@@ -1,4 +1,4 @@
-const machines = {
+const machinesMap = {
   'db.t.micro': {
     resources: {
       requests: {
@@ -763,13 +763,18 @@ function getKnownProfile({ getValue, model }) {
   const filteredMachines = machineList.filter(
     (machine) => !machineProfiles.some((m) => m.id === machine),
   )
-  return filteredMachines
+  const mappedMachine = filteredMachines.map((item) => ({
+    text: item,
+    value: item.toLowerCase(),
+    subText: `CPU: ${machinesMap[item].resources.limits.cpu}, memory: ${machinesMap[item].resources.limits.memory}`,
+  }))
+  return mappedMachine
 }
 
 function setLimits({ getValue, discriminator, watchDependency }, type) {
   watchDependency('discriminator#/profile')
   const pro = getValue(discriminator, '/profile') || ''
-  const profileDetails = machines[pro] || {}
+  const profileDetails = machinesMap[pro] || {}
   const limits = profileDetails.resources?.limits || {}
   return limits[type] || ''
 }
@@ -782,26 +787,51 @@ function getProfileName({ watchDependency, getValue, discriminator }) {
 
 function parseMemory(memory) {
   const units = {
-    K: 1, // Base unit (KiB)
-    M: 1024, // 1 M = 1024 K
-    MB: 1024, // 1 MB = 1024 K
-    Mi: 1000, // 1 Mi = 1000 K
-    G: 1024 * 1024, // 1 G = 1024 M
-    GB: 1024 * 1024, // 1 GB = 1024 M
-    Gi: 1000 * 1000, // 1 Gi = 1000 M
-    T: 1024 * 1024 * 1024, // 1 T = 1024 G
-    TB: 1024 * 1024 * 1024, // 1 TB = 1024 G
-    Ti: 1000 * 1000 * 1000, // 1 Ti = 1000 G
-    P: 1024 * 1024 * 1024 * 1024, // 1 P = 1024 T
-    PB: 1024 * 1024 * 1024 * 1024, // 1 PB = 1024 T
-    Pi: 1000 * 1000 * 1000 * 1000, // 1 Pi = 1000 T
+    B: 1, // Base unit (Bytes)
+    KB: 1000, // 1 KB = 1000 B
+    Ki: 1000, // 1 Ki = 1000 B
+    K: 1024, // 1 K = 1024 B
+    M: 1024 * 1024, // 1 M = 1024 K
+    MB: 1024 * 1024, // 1 MB = 1024 K
+    Mi: 1000 * 1024, // 1 Mi = 1000 K
+    G: 1024 * 1024 * 1024, // 1 G = 1024 M
+    GB: 1024 * 1024 * 1024, // 1 GB = 1024 M
+    Gi: 1000 * 1000 * 1024, // 1 Gi = 1000 M
+    T: 1024 * 1024 * 1024 * 1024, // 1 T = 1024 G
+    TB: 1024 * 1024 * 1024 * 1024, // 1 TB = 1024 G
+    Ti: 1000 * 1000 * 1000 * 1024, // 1 Ti = 1000 G
+    P: 1024 * 1024 * 1024 * 1024 * 1024, // 1 P = 1024 T
+    PB: 1024 * 1024 * 1024 * 1024 * 1024, // 1 PB = 1024 T
+    Pi: 1000 * 1000 * 1000 * 1000 * 1024, // 1 Pi = 1000 T
   }
 
-  const match = memory.match(/^(\d+)(K|M|MB|Mi|G|GB|Gi|T|TB|Ti|P|PB|Pi)$/)
-  if (match) {
-    return parseInt(match[1]) * (units[match[2]] || 1)
+  // If memory is just a number, treat it as bytes
+  if (/^\d+$/.test(memory)) {
+    return parseInt(memory) // Assume raw bytes if no unit is given
   }
+
+  // Extract number and unit from memory string
+  const match = memory.match(/^(\d+)(B|KB|Ki|K|M|MB|Mi|G|GB|Gi|T|TB|Ti|P|PB|Pi)?$/)
+  if (match) {
+    const value = parseInt(match[1])
+    const unit = match[2] || 'B' // Default to 'B' if no unit
+    return value * (units[unit] || 1)
+  }
+
   return 0 // Default fallback for unexpected formats
+}
+
+function parseCPU(cpu) {
+  if (typeof cpu === 'number') return cpu // If already a number, return as is
+
+  const match = cpu.match(/^(\d+(\.\d+)?|m)$/)
+  if (!match) return 0 // Invalid format, return 0
+
+  if (cpu.endsWith('m')) {
+    return parseFloat(cpu) / 1000 // Convert '500m' to 0.5
+  }
+
+  return parseFloat(cpu) // Convert '1', '0.5' directly
 }
 
 function sortMachines(arr) {
@@ -812,7 +842,11 @@ function sortMachines(arr) {
     if (memA !== memB) {
       return memA - memB
     }
-    return a.limits.cpu - b.limits.cpu
+
+    const cpuA = parseCPU(a.limits.cpu)
+    const cpuB = parseCPU(b.limits.cpu)
+
+    return cpuA - cpuB
   })
 }
 
