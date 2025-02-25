@@ -1324,19 +1324,6 @@ steps:
               $ref: discriminator#/enableProfiles
             type: switch
           - elements:
-            - fetch: getMachines|machines
-              label:
-                text: Available Machines
-              onChange: clearDefaultVersion|clickhouse
-              schema:
-                $ref: schema#/properties/spec/properties/admin/properties/machineProfiles/properties/available
-              type: multiselect
-            - fetch: getMachines|available
-              label:
-                text: Default Machine
-              schema:
-                $ref: schema#/properties/spec/properties/admin/properties/machineProfiles/properties/default
-              type: select
             - addFormLabel: MachineProfile
               element:
                 elements:
@@ -1391,6 +1378,20 @@ steps:
                 type: value
                 typeOfValue: object-array
               type: single-step-form-array
+            - customClass: mt-10
+              fetch: getMachines|machines
+              label:
+                text: Available Machines 
+              onChange: clearDefaultVersion|clickhouse
+              schema:
+                $ref: schema#/properties/spec/properties/admin/properties/machineProfiles/properties/available
+              type: multiselect
+            - fetch: getMachines|available
+              label:
+                text: Default Machine
+              schema:
+                $ref: schema#/properties/spec/properties/admin/properties/machineProfiles/properties/default
+              type: select
             if: isEnableProfiles
             type: single-step-form
           hideForm: true
