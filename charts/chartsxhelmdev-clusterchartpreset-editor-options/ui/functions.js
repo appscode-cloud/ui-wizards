@@ -702,8 +702,14 @@ function preSelectClusterIssuer({ getValue, model, watchDependency, commit, disc
   }
 }
 
-function hasMachineProfiles({ getValue, model }) {
+function hasMachineProfiles({ getValue, model, commit }) {
   const val = getValue(model, '/spec/admin/machineProfiles/machines')
+  commit('wizard/model$update', {
+    path: '/spec/admin/machineProfiles/machines',
+    value: sortMachines(val),
+    force: true,
+  })
+
   return !!val
 }
 
@@ -712,7 +718,7 @@ function isEnableProfiles({ watchDependency, getValue, discriminator }) {
   return getValue(discriminator, '/enableProfiles') || false
 }
 
-function onMachineProfilesToggle({ getValue, model, commit, discriminator }) {
+function onMachineProfilesToggle({ getValue, commit, discriminator }) {
   const toggle = getValue(discriminator, '/enableProfiles') || false
 
   if (!toggle) {
@@ -724,9 +730,16 @@ function onMachineProfilesToggle({ getValue, model, commit, discriminator }) {
   }
 }
 
-function getMachines({ watchDependency, getValue, model }, type) {
+function getMachines({ watchDependency, getValue, model, commit }, type) {
   watchDependency(`model#/spec/admin/machineProfiles/${type}`)
   const machines = getValue(model, `/spec/admin/machineProfiles/${type}`) || []
+
+  if (type === 'machines')
+    commit('wizard/model$update', {
+      path: '/spec/admin/machineProfiles/machines',
+      value: sortMachines(machines),
+      force: true,
+    })
 
   machines?.map((machine) => {
     machine.value = machine.id
@@ -758,7 +771,6 @@ function setLimits({ getValue, discriminator, watchDependency }, type) {
   const pro = getValue(discriminator, '/profile') || ''
   const profileDetails = machines[pro] || {}
   const limits = profileDetails.resources?.limits || {}
-  console.log(pro, profileDetails, limits)
   return limits[type] || ''
 }
 
@@ -766,6 +778,42 @@ function getProfileName({ watchDependency, getValue, discriminator }) {
   watchDependency('discriminator#/profile')
   const pro = getValue(discriminator, '/profile') || ''
   return pro
+}
+
+function parseMemory(memory) {
+  const units = {
+    K: 1, // Base unit (KiB)
+    M: 1024, // 1 M = 1024 K
+    MB: 1024, // 1 MB = 1024 K
+    Mi: 1000, // 1 Mi = 1000 K
+    G: 1024 * 1024, // 1 G = 1024 M
+    GB: 1024 * 1024, // 1 GB = 1024 M
+    Gi: 1000 * 1000, // 1 Gi = 1000 M
+    T: 1024 * 1024 * 1024, // 1 T = 1024 G
+    TB: 1024 * 1024 * 1024, // 1 TB = 1024 G
+    Ti: 1000 * 1000 * 1000, // 1 Ti = 1000 G
+    P: 1024 * 1024 * 1024 * 1024, // 1 P = 1024 T
+    PB: 1024 * 1024 * 1024 * 1024, // 1 PB = 1024 T
+    Pi: 1000 * 1000 * 1000 * 1000, // 1 Pi = 1000 T
+  }
+
+  const match = memory.match(/^(\d+)(K|M|MB|Mi|G|GB|Gi|T|TB|Ti|P|PB|Pi)$/)
+  if (match) {
+    return parseInt(match[1]) * (units[match[2]] || 1)
+  }
+  return 0 // Default fallback for unexpected formats
+}
+
+function sortMachines(arr) {
+  return arr.sort((a, b) => {
+    const memA = parseMemory(a.limits.memory)
+    const memB = parseMemory(b.limits.memory)
+
+    if (memA !== memB) {
+      return memA - memB
+    }
+    return a.limits.cpu - b.limits.cpu
+  })
 }
 
 return {
