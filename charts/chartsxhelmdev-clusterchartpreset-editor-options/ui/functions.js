@@ -750,7 +750,7 @@ function getMachines({ watchDependency, getValue, model, commit }, type) {
   return machines
 }
 
-function isKnownProfileChosen({ watchDependency, discriminator, getValue }) {
+function isKnownProfileToggled({ watchDependency, discriminator, getValue }) {
   watchDependency('discriminator#/profileChoseSwitch')
   const val = getValue(discriminator, '/profileChoseSwitch')
   return val
@@ -771,9 +771,13 @@ function getKnownProfile({ getValue, model }) {
   return mappedMachine
 }
 
-function setLimits({ getValue, discriminator, watchDependency }, type) {
+function setLimits({ getValue, temporaryModel, discriminator, watchDependency }, type) {
   watchDependency('discriminator#/profile')
   const pro = getValue(discriminator, '/profile') || ''
+  if (!pro) {
+    const input = getValue(temporaryModel, `/profile/limits/${type}`)
+    return input
+  }
   const profileDetails = machinesMap[pro] || {}
   const limits = profileDetails.resources?.limits || {}
   return limits[type] || ''
@@ -782,6 +786,7 @@ function setLimits({ getValue, discriminator, watchDependency }, type) {
 function getProfileName({ watchDependency, getValue, discriminator }) {
   watchDependency('discriminator#/profile')
   const pro = getValue(discriminator, '/profile') || ''
+  if (!pro) return
   return pro
 }
 
@@ -880,7 +885,7 @@ return {
   isEnableProfiles,
   getMachines,
   onMachineProfilesToggle,
-  isKnownProfileChosen,
+  isKnownProfileToggled,
   getKnownProfile,
   setLimits,
   getProfileName,
