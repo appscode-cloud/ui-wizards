@@ -1,38 +1,40 @@
 {{- $machines := .Files.Get "data/machines.yaml" | fromYaml -}}
-{{- $machineProfileRes := dict -}}
-{{- range .Values.spec.admin.machineProfiles.machines }}
-  {{- if and $.Values.spec.admin.machineProfiles.default (eq .id $.Values.spec.admin.machineProfiles.default) }}
-    {{- $machineProfileRes = dict "requests" .limits "limits" .limits }}
-  {{- end }}
-{{- end }}
 {{- $middleManager_res := .Values.spec.topology.middleManagers.podResources.resources -}}
 {{- if and .Values.spec.topology.middleManagers.podResources.machine (hasKey $machines .Values.spec.topology.middleManagers.podResources.machine) }}
   {{- $middleManager_res = get (get $machines .Values.spec.topology.middleManagers.podResources.machine) "resources" }}
 {{- end }}
-{{- if $machineProfileRes }}
-  {{- $middleManager_res = $machineProfileRes }}
-{{- end  }}
+{{- range .Values.spec.admin.machineProfiles.machines }}
+  {{- if and $.Values.spec.topology.middleManagers.podResources.machine (eq .id $.Values.spec.topology.middleManagers.podResources.machine) }}
+    {{- $middleManager_res  = dict "requests" .limits "limits" .limits }}
+  {{- end }}
+{{- end }}
 {{- $historical_res := .Values.spec.topology.historicals.podResources.resources -}}
 {{- if and .Values.spec.topology.historicals.podResources.machine (hasKey $machines .Values.spec.topology.historicals.podResources.machine) }}
   {{- $historical_res = get (get $machines .Values.spec.topology.historicals.podResources.machine) "resources" }}
 {{- end }}
-{{- if $machineProfileRes }}
-  {{- $historical_res = $machineProfileRes }}
-{{- end  }}
+{{- range .Values.spec.admin.machineProfiles.machines }}
+  {{- if and $.Values.spec.topology.historicals.podResources.machine (eq .id $.Values.spec.topology.historicals.podResources.machine) }}
+    {{- $historical_res  = dict "requests" .limits "limits" .limits }}
+  {{- end }}
+{{- end }}
 {{- $coordinator_res := .Values.spec.topology.coordinators.podResources.resources -}}
 {{- if and .Values.spec.topology.coordinators.podResources.machine (hasKey $machines .Values.spec.topology.coordinators.podResources.machine) }}
   {{- $coordinator_res = get (get $machines .Values.spec.topology.coordinators.podResources.machine) "resources" }}
 {{- end }}
-{{- if $machineProfileRes }}
-  {{- $coordinator_res = $machineProfileRes }}
-{{- end  }}
+{{- range .Values.spec.admin.machineProfiles.machines }}
+  {{- if and $.Values.spec.topology.coordinators.podResources.machine (eq .id $.Values.spec.topology.coordinators.podResources.machine) }}
+    {{- $coordinator_res  = dict "requests" .limits "limits" .limits }}
+  {{- end }}
+{{- end }}
 {{- $broker_res := .Values.spec.topology.coordinators.podResources.resources -}}
 {{- if and .Values.spec.topology.coordinators.podResources.machine (hasKey $machines .Values.spec.topology.coordinators.podResources.machine) }}
   {{- $broker_res = get (get $machines .Values.spec.topology.coordinators.podResources.machine) "resources" }}
 {{- end }}
-{{- if $machineProfileRes }}
-  {{- $broker_res = $machineProfileRes }}
-{{- end  }}
+{{- range .Values.spec.admin.machineProfiles.machines }}
+  {{- if and $.Values.spec.topology.brokers.podResources.machine (eq .id $.Values.spec.topology.brokers.podResources.machine) }}
+    {{- $broker_res  = dict "requests" .limits "limits" .limits }}
+  {{- end }}
+{{- end }}
 
 {{- define "common.placement" -}}
 
