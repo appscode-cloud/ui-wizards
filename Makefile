@@ -228,6 +228,9 @@ gen-values-schema: $(BUILD_DIRS)
 .PHONY: gen-chart-doc
 gen-chart-doc: $(shell find $$(pwd)/charts -maxdepth 1 -mindepth 1 -type d -printf 'gen-chart-doc-%f ')
 
+.PHONY: gen-chart-doc-db
+gen-chart-doc-db: $(shell find $$(pwd)/charts -maxdepth 1 -mindepth 1 -type d -name 'kubedbcom-*' -printf 'gen-chart-doc-%f ')
+
 gen-chart-doc-%:
 	@if test -f "./charts/$*/doc.yaml"; then \
 		echo "Generate $* chart docs";                       \
@@ -527,3 +530,7 @@ curl -fsSL -o $(1) https://github.com/$(2)/releases/download/$(3)/$${bin}; \
 chmod +x $(1); \
 }
 endef
+
+.PHONY: db
+db: gen-chart-doc-db unit-tests
+	sh ./hack/db-chart-test.sh
