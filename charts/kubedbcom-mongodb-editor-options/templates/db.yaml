@@ -1,10 +1,4 @@
 {{- $machines := .Files.Get "data/machines.yaml" | fromYaml -}}
-{{- $machineProfileRes := dict -}}
-{{- range .Values.spec.admin.machineProfiles.machines }}
-  {{- if and $.Values.spec.admin.machineProfiles.default (eq .id $.Values.spec.admin.machineProfiles.default) }}
-    {{- $machineProfileRes = dict "requests" .limits "limits" .limits }}
-  {{- end }}
-{{- end }}
 {{- $res := dict -}}
 {{- $shard_res := dict -}}
 {{- $configServer_res := dict -}}
@@ -16,49 +10,61 @@
   {{- if and .Values.spec.shardTopology.shard.podResources.machine (hasKey $machines .Values.spec.shardTopology.shard.podResources.machine) }}
     {{- $shard_res = get (get $machines .Values.spec.shardTopology.shard.podResources.machine) "resources" }}
   {{- end }}
-  {{- if $machineProfileRes }}
-    {{- $shard_res = $machineProfileRes }}
-  {{- end  }}
+  {{- range .Values.spec.admin.machineProfiles.machines }}
+    {{- if and $.Values.spec.shardTopology.shard.podResources.machine (eq .id $.Values.spec.shardTopology.shard.podResources.machine) }}
+      {{- $shard_res  = dict "requests" .limits "limits" .limits }}
+    {{- end }}
+  {{- end }}
   {{- $configServer_res = .Values.spec.shardTopology.configServer.podResources.resources -}}
   {{- if and .Values.spec.shardTopology.configServer.podResources.machine (hasKey $machines .Values.spec.shardTopology.configServer.podResources.machine) }}
     {{- $configServer_res = get (get $machines .Values.spec.shardTopology.configServer.podResources.machine) "resources" }}
   {{- end }}
-  {{- if $machineProfileRes }}
-    {{- $configServer_res = $machineProfileRes }}
-  {{- end  }}
+  {{- range .Values.spec.admin.machineProfiles.machines }}
+    {{- if and $.Values.spec.shardTopology.configServer.podResources.machine (eq .id $.Values.spec.shardTopology.configServer.podResources.machine) }}
+      {{- $configServer_res  = dict "requests" .limits "limits" .limits }}
+    {{- end }}
+  {{- end }}
   {{- $mongos_res = .Values.spec.shardTopology.mongos.podResources.resources -}}
   {{- if and .Values.spec.shardTopology.mongos.podResources.machine (hasKey $machines .Values.spec.shardTopology.mongos.podResources.machine) }}
     {{- $mongos_res = get (get $machines .Values.spec.shardTopology.mongos.podResources.machine) "resources" }}
   {{- end }}
-  {{- if $machineProfileRes }}
-    {{- $mongos_res = $machineProfileRes }}
-  {{- end  }}
+  {{- range .Values.spec.admin.machineProfiles.machines }}
+    {{- if and $.Values.spec.shardTopology.mongos.podResources.machine (eq .id $.Values.spec.shardTopology.mongos.podResources.machine) }}
+      {{- $mongos_res  = dict "requests" .limits "limits" .limits }}
+    {{- end }}
+  {{- end }}
 {{- else }}
   {{- $res = .Values.spec.podResources.resources -}}
   {{- if and .Values.spec.podResources.machine (hasKey $machines .Values.spec.podResources.machine) }}
     {{- $res = get (get $machines .Values.spec.podResources.machine) "resources" }}
   {{- end }}
-  {{- if $machineProfileRes }}
-    {{- $res = $machineProfileRes }}
-  {{- end  }}
+  {{- range .Values.spec.admin.machineProfiles.machines }}
+    {{- if and $.Values.spec.podResources.machine (eq .id $.Values.spec.podResources.machine) }}
+      {{- $res  = dict "requests" .limits "limits" .limits }}
+    {{- end }}
+  {{- end }}
 {{- end }}
 {{- if .Values.spec.arbiter.enabled }}
   {{- $arbiter_res = .Values.spec.arbiter.podResources.resources -}}
   {{- if and .Values.spec.arbiter.podResources.machine (hasKey $machines .Values.spec.arbiter.podResources.machine) }}
     {{- $arbiter_res = get (get $machines .Values.spec.arbiter.podResources.machine) "resources" }}
   {{- end }}
-  {{- if $machineProfileRes }}
-    {{- $arbiter_res = $machineProfileRes }}
-  {{- end  }}
+  {{- range .Values.spec.admin.machineProfiles.machines }}
+    {{- if and $.Values.spec.arbiter.podResources.machine (eq .id $.Values.spec.arbiter.podResources.machine) }}
+      {{- $arbiter_res  = dict "requests" .limits "limits" .limits }}
+    {{- end }}
+  {{- end }}
 {{- end }}
 {{- if .Values.spec.hidden.enabled }}
   {{- $hidden_res = .Values.spec.hidden.podResources.resources -}}
   {{- if and .Values.spec.hidden.podResources.machine (hasKey $machines .Values.spec.hidden.podResources.machine) }}
     {{- $hidden_res = get (get $machines .Values.spec.hidden.podResources.machine) "resources" }}
   {{- end }}
-  {{- if $machineProfileRes }}
-    {{- $hidden_res = $machineProfileRes }}
-  {{- end  }}
+  {{- range .Values.spec.admin.machineProfiles.machines }}
+    {{- if and $.Values.spec.hidden.podResources.machine (eq .id $.Values.spec.hidden.podResources.machine) }}
+      {{- $hidden_res  = dict "requests" .limits "limits" .limits }}
+    {{- end }}
+  {{- end }}
 {{- end }}
 
 {{- define "common.placement" -}}

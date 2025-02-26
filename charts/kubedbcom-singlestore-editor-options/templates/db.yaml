@@ -1,10 +1,4 @@
 {{- $machines := .Files.Get "data/machines.yaml" | fromYaml -}}
-{{- $machineProfileRes := dict -}}
-{{- range .Values.spec.admin.machineProfiles.machines }}
-  {{- if and $.Values.spec.admin.machineProfiles.default (eq .id $.Values.spec.admin.machineProfiles.default) }}
-    {{- $machineProfileRes = dict "requests" .limits "limits" .limits }}
-  {{- end }}
-{{- end }}
 {{- $res := dict -}}
 {{- $aggregator_res := dict -}}
 {{- $leaf_res := dict -}}
@@ -13,24 +7,30 @@
   {{- if and .Values.spec.topology.aggregator.podResources.machine (hasKey $machines .Values.spec.topology.aggregator.podResources.machine) }}
     {{- $aggregator_res = get (get $machines .Values.spec.topology.aggregator.podResources.machine) "resources" }}
   {{- end }}
-  {{- if $machineProfileRes }}
-    {{- $aggregator_res = $machineProfileRes }}
-  {{- end  }}
+  {{- range .Values.spec.admin.machineProfiles.machines }}
+    {{- if and $.Values.spec.topology.aggregator.podResources.machine (eq .id $.Values.spec.topology.aggregator.podResources.machine) }}
+      {{- $aggregator_res  = dict "requests" .limits "limits" .limits }}
+    {{- end }}
+  {{- end }}
   {{- $leaf_res = .Values.spec.topology.leaf.podResources.resources -}}
   {{- if and .Values.spec.topology.leaf.podResources.machine (hasKey $machines .Values.spec.topology.leaf.podResources.machine) }}
     {{- $leaf_res = get (get $machines .Values.spec.topology.leaf.podResources.machine) "resources" }}
   {{- end }}
-  {{- if $machineProfileRes }}
-    {{- $leaf_res = $machineProfileRes }}
-  {{- end  }}
+  {{- range .Values.spec.admin.machineProfiles.machines }}
+    {{- if and $.Values.spec.topology.leaf.podResources.machine (eq .id $.Values.spec.topology.leaf.podResources.machine) }}
+      {{- $leaf_res  = dict "requests" .limits "limits" .limits }}
+    {{- end }}
+  {{- end }}
 {{- else }}
   {{- $res = .Values.spec.podResources.resources -}}
   {{- if and .Values.spec.podResources.machine (hasKey $machines .Values.spec.podResources.machine) }}
     {{- $res = get (get $machines .Values.spec.podResources.machine) "resources" }}
   {{- end }}
-  {{- if $machineProfileRes }}
-    {{- $res = $machineProfileRes }}
-  {{- end  }}
+  {{- range .Values.spec.admin.machineProfiles.machines }}
+    {{- if and $.Values.spec.podResources.machine (eq .id $.Values.spec.podResources.machine) }}
+      {{- $res  = dict "requests" .limits "limits" .limits }}
+    {{- end }}
+  {{- end }}
 {{- end }}
 
 {{- define "common.placement" -}}
