@@ -1,3 +1,308 @@
+const machinesMap = {
+  'db.t.micro': {
+    resources: {
+      requests: {
+        cpu: '250m',
+        memory: '512Mi',
+      },
+      limits: {
+        cpu: '500m',
+        memory: '1Gi',
+      },
+    },
+  },
+  'db.t.small': {
+    resources: {
+      requests: {
+        cpu: '1',
+        memory: '1Gi',
+      },
+      limits: {
+        cpu: '2',
+        memory: '2Gi',
+      },
+    },
+  },
+  'db.t.medium': {
+    resources: {
+      requests: {
+        cpu: '1',
+        memory: '2Gi',
+      },
+      limits: {
+        cpu: '2',
+        memory: '4Gi',
+      },
+    },
+  },
+  'db.t.large': {
+    resources: {
+      requests: {
+        cpu: '1',
+        memory: '4Gi',
+      },
+      limits: {
+        cpu: '2',
+        memory: '8Gi',
+      },
+    },
+  },
+  'db.t.xlarge': {
+    resources: {
+      requests: {
+        cpu: '2',
+        memory: '8Gi',
+      },
+      limits: {
+        cpu: '4',
+        memory: '16Gi',
+      },
+    },
+  },
+  'db.t.2xlarge': {
+    resources: {
+      requests: {
+        cpu: '4',
+        memory: '16Gi',
+      },
+      limits: {
+        cpu: '8',
+        memory: '32Gi',
+      },
+    },
+  },
+  'db.m.small': {
+    resources: {
+      requests: {
+        cpu: '500m',
+        memory: '912680550',
+      },
+      limits: {
+        cpu: '1',
+        memory: '1825361100',
+      },
+    },
+  },
+  'db.m.large': {
+    resources: {
+      requests: {
+        cpu: '1',
+        memory: '4Gi',
+      },
+      limits: {
+        cpu: '2',
+        memory: '8Gi',
+      },
+    },
+  },
+  'db.m.xlarge': {
+    resources: {
+      requests: {
+        cpu: '2',
+        memory: '8Gi',
+      },
+      limits: {
+        cpu: '4',
+        memory: '16Gi',
+      },
+    },
+  },
+  'db.m.2xlarge': {
+    resources: {
+      requests: {
+        cpu: '4',
+        memory: '16Gi',
+      },
+      limits: {
+        cpu: '8',
+        memory: '32Gi',
+      },
+    },
+  },
+  'db.m.4xlarge': {
+    resources: {
+      requests: {
+        cpu: '8',
+        memory: '32Gi',
+      },
+      limits: {
+        cpu: '16',
+        memory: '64Gi',
+      },
+    },
+  },
+  'db.m.8xlarge': {
+    resources: {
+      requests: {
+        cpu: '16',
+        memory: '64Gi',
+      },
+      limits: {
+        cpu: '32',
+        memory: '128Gi',
+      },
+    },
+  },
+  'db.m.12xlarge': {
+    resources: {
+      requests: {
+        cpu: '24',
+        memory: '96Gi',
+      },
+      limits: {
+        cpu: '48',
+        memory: '192Gi',
+      },
+    },
+  },
+  'db.m.16xlarge': {
+    resources: {
+      requests: {
+        cpu: '32',
+        memory: '128Gi',
+      },
+      limits: {
+        cpu: '64',
+        memory: '256Gi',
+      },
+    },
+  },
+  'db.m.24xlarge': {
+    resources: {
+      requests: {
+        cpu: '48',
+        memory: '192Gi',
+      },
+      limits: {
+        cpu: '96',
+        memory: '384Gi',
+      },
+    },
+  },
+  'db.r.large': {
+    resources: {
+      requests: {
+        cpu: '1',
+        memory: '8Gi',
+      },
+      limits: {
+        cpu: '2',
+        memory: '16Gi',
+      },
+    },
+  },
+  'db.r.xlarge': {
+    resources: {
+      requests: {
+        cpu: '2',
+        memory: '16Gi',
+      },
+      limits: {
+        cpu: '4',
+        memory: '32Gi',
+      },
+    },
+  },
+  'db.r.2xlarge': {
+    resources: {
+      requests: {
+        cpu: '4',
+        memory: '32Gi',
+      },
+      limits: {
+        cpu: '8',
+        memory: '64Gi',
+      },
+    },
+  },
+  'db.r.4xlarge': {
+    resources: {
+      requests: {
+        cpu: '8',
+        memory: '96Gi',
+      },
+      limits: {
+        cpu: '16',
+        memory: '192Gi',
+      },
+    },
+  },
+  'db.r.8xlarge': {
+    resources: {
+      requests: {
+        cpu: '16',
+        memory: '128Gi',
+      },
+      limits: {
+        cpu: '32',
+        memory: '256Gi',
+      },
+    },
+  },
+  'db.r.12xlarge': {
+    resources: {
+      requests: {
+        cpu: '24',
+        memory: '192Gi',
+      },
+      limits: {
+        cpu: '48',
+        memory: '384Gi',
+      },
+    },
+  },
+  'db.r.16xlarge': {
+    resources: {
+      requests: {
+        cpu: '32',
+        memory: '256Gi',
+      },
+      limits: {
+        cpu: '64',
+        memory: '512Gi',
+      },
+    },
+  },
+  'db.r.24xlarge': {
+    resources: {
+      requests: {
+        cpu: '24',
+        memory: '384Gi',
+      },
+      limits: {
+        cpu: '96',
+        memory: '768Gi',
+      },
+    },
+  },
+}
+
+const machineList = [
+  'db.t.micro',
+  'db.t.small',
+  'db.t.medium',
+  'db.t.large',
+  'db.t.xlarge',
+  'db.t.2xlarge',
+  'db.m.small',
+  'db.m.large',
+  'db.m.xlarge',
+  'db.m.2xlarge',
+  'db.m.4xlarge',
+  'db.m.8xlarge',
+  'db.m.12xlarge',
+  'db.m.16xlarge',
+  'db.m.24xlarge',
+  'db.r.large',
+  'db.r.xlarge',
+  'db.r.2xlarge',
+  'db.r.4xlarge',
+  'db.r.8xlarge',
+  'db.r.12xlarge',
+  'db.r.16xlarge',
+  'db.r.24xlarge',
+]
+
 const modes = {
   ClickHouse: {
     availableModes: ['Standalone', 'Topology'],
@@ -397,8 +702,14 @@ function preSelectClusterIssuer({ getValue, model, watchDependency, commit, disc
   }
 }
 
-function hasMachineProfiles({ getValue, model }) {
+function hasMachineProfiles({ getValue, model, commit }) {
   const val = getValue(model, '/spec/admin/machineProfiles/machines')
+  commit('wizard/model$update', {
+    path: '/spec/admin/machineProfiles/machines',
+    value: sortMachines(val),
+    force: true,
+  })
+
   return !!val
 }
 
@@ -407,7 +718,7 @@ function isEnableProfiles({ watchDependency, getValue, discriminator }) {
   return getValue(discriminator, '/enableProfiles') || false
 }
 
-function onMachineProfilesToggle({ getValue, model, commit, discriminator }) {
+function onMachineProfilesToggle({ getValue, commit, discriminator }) {
   const toggle = getValue(discriminator, '/enableProfiles') || false
 
   if (!toggle) {
@@ -419,9 +730,16 @@ function onMachineProfilesToggle({ getValue, model, commit, discriminator }) {
   }
 }
 
-function getMachines({ watchDependency, getValue, model }, type) {
+function getMachines({ watchDependency, getValue, model, commit }, type) {
   watchDependency(`model#/spec/admin/machineProfiles/${type}`)
   const machines = getValue(model, `/spec/admin/machineProfiles/${type}`) || []
+
+  if (type === 'machines')
+    commit('wizard/model$update', {
+      path: '/spec/admin/machineProfiles/machines',
+      value: sortMachines(machines),
+      force: true,
+    })
 
   machines?.map((machine) => {
     machine.value = machine.id
@@ -430,6 +748,111 @@ function getMachines({ watchDependency, getValue, model }, type) {
   })
 
   return machines
+}
+
+function isKnownProfileToggled({ watchDependency, discriminator, getValue }) {
+  watchDependency('discriminator#/profileChoseSwitch')
+  const val = getValue(discriminator, '/profileChoseSwitch')
+  return val
+}
+
+function getKnownProfile({ getValue, model }) {
+  const machineProfiles = getValue(model, '/spec/admin/machineProfiles/machines')
+
+  // filtering machine list, if it's already in the model we don't need to show it
+  const filteredMachines = machineList.filter(
+    (machine) => !machineProfiles.some((m) => m.id === machine),
+  )
+  const mappedMachine = filteredMachines.map((item) => ({
+    text: item,
+    value: item.toLowerCase(),
+    subText: `CPU: ${machinesMap[item].resources.limits.cpu}, memory: ${machinesMap[item].resources.limits.memory}`,
+  }))
+  return mappedMachine
+}
+
+function setLimits({ getValue, temporaryModel, discriminator, watchDependency }, type) {
+  watchDependency('discriminator#/profile')
+  const pro = getValue(discriminator, '/profile') || ''
+  if (!pro) {
+    const input = getValue(temporaryModel, `/profile/limits/${type}`)
+    return input
+  }
+  const profileDetails = machinesMap[pro] || {}
+  const limits = profileDetails.resources?.limits || {}
+  return limits[type] || ''
+}
+
+function getProfileName({ watchDependency, getValue, discriminator }) {
+  watchDependency('discriminator#/profile')
+  const pro = getValue(discriminator, '/profile') || ''
+  if (!pro) return
+  return pro
+}
+
+function parseMemory(memory) {
+  const units = {
+    B: 1, // Base unit (Bytes)
+    KB: 1000, // 1 KB = 1000 B
+    Ki: 1000, // 1 Ki = 1000 B
+    K: 1024, // 1 K = 1024 B
+    M: 1024 * 1024, // 1 M = 1024 K
+    MB: 1024 * 1024, // 1 MB = 1024 K
+    Mi: 1000 * 1024, // 1 Mi = 1000 K
+    G: 1024 * 1024 * 1024, // 1 G = 1024 M
+    GB: 1024 * 1024 * 1024, // 1 GB = 1024 M
+    Gi: 1000 * 1000 * 1024, // 1 Gi = 1000 M
+    T: 1024 * 1024 * 1024 * 1024, // 1 T = 1024 G
+    TB: 1024 * 1024 * 1024 * 1024, // 1 TB = 1024 G
+    Ti: 1000 * 1000 * 1000 * 1024, // 1 Ti = 1000 G
+    P: 1024 * 1024 * 1024 * 1024 * 1024, // 1 P = 1024 T
+    PB: 1024 * 1024 * 1024 * 1024 * 1024, // 1 PB = 1024 T
+    Pi: 1000 * 1000 * 1000 * 1000 * 1024, // 1 Pi = 1000 T
+  }
+
+  // If memory is just a number, treat it as bytes
+  if (/^\d+$/.test(memory)) {
+    return parseInt(memory) // Assume raw bytes if no unit is given
+  }
+
+  // Extract number and unit from memory string
+  const match = memory.match(/^(\d+)(B|KB|Ki|K|M|MB|Mi|G|GB|Gi|T|TB|Ti|P|PB|Pi)?$/)
+  if (match) {
+    const value = parseInt(match[1])
+    const unit = match[2] || 'B' // Default to 'B' if no unit
+    return value * (units[unit] || 1)
+  }
+
+  return 0 // Default fallback for unexpected formats
+}
+
+function parseCPU(cpu) {
+  if (typeof cpu === 'number') return cpu // If already a number, return as is
+
+  const match = cpu.match(/^(\d+(\.\d+)?|m)$/)
+  if (!match) return 0 // Invalid format, return 0
+
+  if (cpu.endsWith('m')) {
+    return parseFloat(cpu) / 1000 // Convert '500m' to 0.5
+  }
+
+  return parseFloat(cpu) // Convert '1', '0.5' directly
+}
+
+function sortMachines(arr) {
+  return arr.sort((a, b) => {
+    const memA = parseMemory(a.limits.memory)
+    const memB = parseMemory(b.limits.memory)
+
+    if (memA !== memB) {
+      return memA - memB
+    }
+
+    const cpuA = parseCPU(a.limits.cpu)
+    const cpuB = parseCPU(b.limits.cpu)
+
+    return cpuA - cpuB
+  })
 }
 
 return {
@@ -462,4 +885,8 @@ return {
   isEnableProfiles,
   getMachines,
   onMachineProfilesToggle,
+  isKnownProfileToggled,
+  getKnownProfile,
+  setLimits,
+  getProfileName,
 }

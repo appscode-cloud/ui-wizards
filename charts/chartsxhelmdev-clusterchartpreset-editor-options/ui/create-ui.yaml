@@ -1324,40 +1324,50 @@ steps:
               $ref: discriminator#/enableProfiles
             type: switch
           - elements:
-            - fetch: getMachines|machines
-              label:
-                text: Available Machines
-              onChange: clearDefaultVersion|clickhouse
-              schema:
-                $ref: schema#/properties/spec/properties/admin/properties/machineProfiles/properties/available
-              type: multiselect
-            - fetch: getMachines|available
-              label:
-                text: Default Machine
-              schema:
-                $ref: schema#/properties/spec/properties/admin/properties/machineProfiles/properties/default
-              type: select
             - addFormLabel: MachineProfile
               element:
+                discriminator:
+                  profileChoseSwitch:
+                    default: false
+                    type: boolean
+                  profile:
+                    default: ''
+                    type: string
                 elements:
                 - label:
+                    text: Choose from well-known profiles
+                  schema:
+                    $ref: discriminator#/profileChoseSwitch
+                  type: switch
+                - fetch: getKnownProfile
+                  if: isKnownProfileToggled
+                  label:
+                    text: Profile
+                  schema:
+                    $ref: discriminator#/profile
+                  type: select
+                - computed: getProfileName
+                  label:
                     text: ID
                   schema:
                     $ref: schema#/properties/spec/properties/admin/properties/machineProfiles/properties/machines/items/properties/id
                   type: input
-                - label:
+                - computed: getProfileName
+                  label:
                     text: Name
                   schema:
                     $ref: schema#/properties/spec/properties/admin/properties/machineProfiles/properties/machines/items/properties/name
                   type: input
                 - elements:
-                  - label:
+                  - computed: setLimits|cpu
+                    label:
                       text: CPU Limits
                     required: true
                     schema:
                       $ref: schema#/properties/spec/properties/admin/properties/machineProfiles/properties/machines/items/properties/limits/properties/cpu
                     type: input
-                  - label:
+                  - computed: setLimits|memory
+                    label:
                       text: Memory Limits
                     required: true
                     schema:
@@ -1367,6 +1377,7 @@ steps:
                     $ref: schema#/properties/spec/properties/admin/properties/machineProfiles/properties/machines/items/properties/limits
                   type: single-step-form
                 type: single-step-form
+              hideDetailsButton: true
               label:
                 text: Machine Profiles
               schema:
@@ -1390,7 +1401,22 @@ steps:
                 path: limits
                 type: value
                 typeOfValue: object-array
+              temporaryPath: /profile
               type: single-step-form-array
+            - customClass: mt-10
+              fetch: getMachines|machines
+              label:
+                text: Available Machines 
+              onChange: clearDefaultVersion|clickhouse
+              schema:
+                $ref: schema#/properties/spec/properties/admin/properties/machineProfiles/properties/available
+              type: multiselect
+            - fetch: getMachines|available
+              label:
+                text: Default Machine
+              schema:
+                $ref: schema#/properties/spec/properties/admin/properties/machineProfiles/properties/default
+              type: select
             if: isEnableProfiles
             type: single-step-form
           hideForm: true
