@@ -65,8 +65,12 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "kubedbcom-pgpool-editor-options.labels" . | nindent 4 }}
-{{- if .Values.spec.annotations }}
   annotations:
+    app.kubernetes.io/cluster-tier: {{ .Values.spec.admin.clusterTier.default }}
+  {{- if .Values.spec.admin.machineProfiles.default }}
+    kubernetes.io/instance-type: {{ .Values.spec.admin.machineProfiles.default }}
+  {{- end }}
+{{- if .Values.spec.annotations }}
     {{- include "kubedbcom-pgpool-editor-options.annotations" . | nindent 4 }}
 {{- end }}
 spec:

@@ -67,6 +67,9 @@ metadata:
     {{- include "kubedbcom-clickhouse-editor-options.labels" . | nindent 4 }}
   annotations:
     app.kubernetes.io/cluster-tier: {{ .Values.spec.admin.clusterTier.default }}
+  {{- if .Values.spec.admin.machineProfiles.default }}
+    kubernetes.io/instance-type: {{ .Values.spec.admin.machineProfiles.default }}
+  {{- end }}
 {{- if .Values.spec.annotations }}
     {{- include "kubedbcom-clickhouse-editor-options.annotations" . | nindent 4 }}
 {{- end }}

@@ -69,8 +69,16 @@ metadata:
     kubedb.com/archiver: "true"
     kubedb.com/archiving-via: {{ .Values.spec.admin.archiver.via }}
 {{- end }}
-{{- if .Values.spec.annotations }}
   annotations:
+    app.kubernetes.io/cluster-tier: {{ .Values.spec.admin.clusterTier.default }}
+  {{- if .Values.spec.admin.machineProfiles.default }}
+    kubernetes.io/instance-type: {{ .Values.spec.admin.machineProfiles.default }}
+  {{- end }}
+  {{- if and (eq .Values.spec.backup.tool "KubeStash") (.Values.spec.admin.backup.enable.default) (eq .Values.spec.admin.backup.by "BackupBlueprint") }}
+    blueprint.kubestash.com/name: {{ .Values.metadata.resource.kind | lower }}-blueprint
+    blueprint.kubestash.com/namespace: kubedb
+  {{- end }}
+{{- if .Values.spec.annotations }}
     {{- include "kubedbcom-mariadb-editor-options.annotations" . | nindent 4 }}
 {{- end }}
 spec:
