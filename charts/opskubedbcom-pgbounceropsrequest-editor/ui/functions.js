@@ -97,12 +97,12 @@ async function getDbDetails({
   const version = storeGet('/route/params/version')
   const namespace = getValue(model, '/metadata/namespace')
   watchDependency('model#/metadata/namespace')
-  const name = getValue(model, '/spec/serverRef/name')
-  watchDependency('model#/spec/serverRef/name')
+  const name = getValue(model, '/spec/databaseRef/name')
+  watchDependency('model#/spec/databaseRef/name')
 
   if (namespace && name) {
     const resp = await axios.get(
-      `/clusters/${owner}/${cluster}/proxy/kubedb.com/${version}/namespaces/${namespace}/pgbouncers/${name}`,
+      `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1/namespaces/${namespace}/pgbouncers/${name}`,
     )
 
     setDiscriminatorValue('/dbDetails', resp.data || {})
@@ -283,7 +283,7 @@ function initNamespace({ route }) {
   return namespace || null
 }
 
-function initServerRef({ route, watchDependency }) {
+function initDatabaseRef({ route, watchDependency }) {
   watchDependency('model#/metadata/namespace')
   const { name } = route.query || {}
   return name
@@ -294,7 +294,7 @@ function asDatabaseOperation(route) {
 }
 
 function generateOpsRequestNameForClusterUI(getValue, model, route) {
-  const dbName = getValue(model, '/spec/serverRef/name')
+  const dbName = getValue(model, '/spec/databaseRef/name')
 
   const selectedType = getValue(model, '/spec/type')
   const lowerType = selectedType ? String(selectedType).toLowerCase() : ''
@@ -308,7 +308,7 @@ function generateOpsRequestNameForClusterUI(getValue, model, route) {
 
 function showAndInitName({ route, commit, getValue, model, watchDependency }) {
   watchDependency('model#/spec/type')
-  watchDependency('model#/spec/serverRef/name')
+  watchDependency('model#/spec/databaseRef/name')
   const ver = asDatabaseOperation(route)
 
   const selectedType = getValue(model, '/spec/type')
@@ -343,11 +343,11 @@ function showAndInitNamespace({ route, commit }) {
 
   return !ver
 }
-function showAndInitServerRef({ route, commit }) {
+function showAndInitDatabaseRef({ route, commit }) {
   const ver = asDatabaseOperation(route)
   if (ver) {
     commit('wizard/model$update', {
-      path: '/spec/serverRef/name',
+      path: '/spec/databaseRef/name',
       value: `${route.query.name}`,
       force: true,
     })
@@ -702,9 +702,10 @@ function getRequestTypeFromRoute({ route, model, discriminator, getValue, watchD
 
 function isDbDetailsLoading({ discriminator, model, getValue, watchDependency }) {
   watchDependency('discriminator#/dbDetails')
-  watchDependency('model#/spec/serverRef/name')
+  watchDependency('model#/spec/databaseRef/name')
   const dbDetails = getValue(discriminator, '/dbDetails')
-  const dbName = getValue(model, '/spec/serverRef/name')
+  const dbName = getValue(model, '/spec/databaseRef/name')
+  console.log(dbDetails, dbName)
 
   return !dbDetails || !dbName
 }
@@ -753,7 +754,7 @@ function isNamespaceDisabled({ route }) {
   return !!namespace
 }
 
-function isServerRefDisabled({ route }) {
+function isDatabaseRefDisabled({ route }) {
   const { name } = route.query || {}
   return !!name
 }
@@ -804,11 +805,11 @@ return {
   getDbTls,
   getDbType,
   initNamespace,
-  initServerRef,
+  initDatabaseRef,
   isRancherManaged,
   showAndInitName,
   showAndInitNamespace,
-  showAndInitServerRef,
+  showAndInitDatabaseRef,
   showConfigureOpsrequestLabel,
   showAndInitOpsRequestType,
 
@@ -836,7 +837,7 @@ return {
   setValueFromDbDetails,
   getAliasOptions,
   isNamespaceDisabled,
-  isServerRefDisabled,
+  isDatabaseRefDisabled,
   onNamespaceChange,
   onDbChange,
   setApplyToIfReady,
