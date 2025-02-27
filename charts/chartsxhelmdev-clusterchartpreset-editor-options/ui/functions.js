@@ -702,6 +702,8 @@ function preSelectClusterIssuer({ getValue, model, watchDependency, commit, disc
   }
 }
 
+// machine profiles stuffs
+
 let initialMachines = []
 function hasMachineProfiles({ getValue, model, commit }) {
   const val = getValue(model, '/spec/admin/machineProfiles/machines') || []
@@ -749,17 +751,16 @@ function getMachines({ watchDependency, getValue, model, commit, discriminator }
     force: true,
   })
 
-  machines?.map((machine) => {
-    machine.value = machine.id
-    machine.text = machine.id
-    return true
-  })
+  let mappedMachine = machines?.map((machine) => ({
+    text: machine.id,
+    value: machine.id,
+  }))
 
   const hasCustom = getValue(discriminator, '/useCustomProfile')
-  if (hasCustom) machines = [{ text: 'custom', value: 'custom' }, ...machines]
-  else machines = machines.filter((item) => item.value !== 'custom')
+  if (hasCustom) mappedMachine = [{ text: 'custom', value: 'custom' }, ...mappedMachine]
+  else mappedMachine = mappedMachine.filter((item) => item.value !== 'custom')
 
-  return machines
+  return mappedMachine
 }
 
 function setCustomAvlMachine({ getValue, discriminator, model, commit, watchDependency }) {
