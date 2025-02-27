@@ -1323,7 +1323,11 @@ steps:
             schema:
               $ref: discriminator#/enableProfiles
             type: switch
-          - elements:
+          - discriminator:
+              useCustomProfile:
+                default: false
+                type: boolean
+            elements:
             - addFormLabel: MachineProfile
               element:
                 discriminator:
@@ -1403,15 +1407,21 @@ steps:
                 typeOfValue: object-array
               temporaryPath: /profile
               type: single-step-form-array
+            - computed: hasCustomProfile
+              label:
+                text: Can users set their own custom CPU & memory resources?
+              schema:
+                $ref: discriminator#/useCustomProfile
+              type: switch
             - customClass: mt-10
-              fetch: getMachines|machines
+              computed: setCustomAvlMachine
+              fetch: getMachines
               label:
                 text: Available Machines
-              onChange: clearDefaultVersion|clickhouse
               schema:
                 $ref: schema#/properties/spec/properties/admin/properties/machineProfiles/properties/available
               type: multiselect
-            - fetch: getMachines|available
+            - fetch: getAvailableMachines
               label:
                 text: Default Machine
               schema:

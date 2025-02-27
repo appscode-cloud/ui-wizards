@@ -702,8 +702,10 @@ function preSelectClusterIssuer({ getValue, model, watchDependency, commit, disc
   }
 }
 
+let initialMachines = []
 function hasMachineProfiles({ getValue, model, commit }) {
   const val = getValue(model, '/spec/admin/machineProfiles/machines')
+  initialMachines = val
   commit('wizard/model$update', {
     path: '/spec/admin/machineProfiles/machines',
     value: sortMachines(val),
@@ -727,19 +729,25 @@ function onMachineProfilesToggle({ getValue, commit, discriminator }) {
       value: { available: [], default: '', machines: [] },
       force: true,
     })
+  } else {
+    commit('wizard/model$update', {
+      path: '/spec/admin/machineProfiles/machines',
+      value: initialMachines,
+      force: true,
+    })
   }
 }
 
-function getMachines({ watchDependency, getValue, model, commit }, type) {
-  watchDependency(`model#/spec/admin/machineProfiles/${type}`)
-  const machines = getValue(model, `/spec/admin/machineProfiles/${type}`) || []
+function getMachines({ watchDependency, getValue, model, commit, discriminator }) {
+  watchDependency('model#/spec/admin/machineProfiles/machines')
+  watchDependency('discriminator#/useCustomProfile')
+  let machines = getValue(model, '/spec/admin/machineProfiles/machines') || []
 
-  if (type === 'machines')
-    commit('wizard/model$update', {
-      path: '/spec/admin/machineProfiles/machines',
-      value: sortMachines(machines),
-      force: true,
-    })
+  commit('wizard/model$update', {
+    path: '/spec/admin/machineProfiles/machines',
+    value: sortMachines(machines),
+    force: true,
+  })
 
   machines?.map((machine) => {
     machine.value = machine.id
@@ -747,6 +755,27 @@ function getMachines({ watchDependency, getValue, model, commit }, type) {
     return true
   })
 
+  const hasCustom = getValue(discriminator, '/useCustomProfile')
+  if (hasCustom) machines = [{ text: 'custom', value: 'custom' }, ...machines]
+  else machines = machines.filter((item) => item.value !== 'custom')
+
+  return machines
+}
+
+function setCustomAvlMachine({ getValue, discriminator, model, commit, watchDependency }) {
+  watchDependency('discriminator#/useCustomProfile')
+  const hasCustom = getValue(discriminator, '/useCustomProfile')
+  let avl = getValue(model, '/spec/admin/machineProfiles/available') || []
+
+  if (hasCustom) avl = ['custom', ...avl]
+  else avl = avl.filter((item) => item !== 'custom')
+
+  return avl
+}
+
+function getAvailableMachines({ watchDependency, getValue, model }) {
+  watchDependency('model#/spec/admin/machineProfiles/available')
+  let machines = getValue(model, '/spec/admin/machineProfiles/available') || []
   return machines
 }
 
@@ -788,6 +817,12 @@ function getProfileName({ watchDependency, getValue, discriminator }) {
   const pro = getValue(discriminator, '/profile') || ''
   if (!pro) return
   return pro
+}
+
+function hasCustomProfile({ getValue, model }) {
+  const machines = getValue(model, '/spec/admin/machineProfiles/available')
+  const hasCustom = machines.includes((item) => item === 'custom')
+  return hasCustom
 }
 
 function parseMemory(memory) {
@@ -889,4 +924,7 @@ return {
   getKnownProfile,
   setLimits,
   getProfileName,
+  hasCustomProfile,
+  getAvailableMachines,
+  setCustomAvlMachine,
 }
