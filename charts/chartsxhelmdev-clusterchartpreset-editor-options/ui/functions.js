@@ -821,7 +821,7 @@ function getProfileName({ watchDependency, getValue, discriminator }) {
 
 function hasCustomProfile({ getValue, model }) {
   const machines = getValue(model, '/spec/admin/machineProfiles/available')
-  const hasCustom = machines.includes((item) => item === 'custom')
+  const hasCustom = machines.includes('custom')
   return hasCustom
 }
 
