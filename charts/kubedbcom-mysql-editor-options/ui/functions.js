@@ -389,11 +389,12 @@ function getMachineListForOptions({ model, getValue }) {
     array = available.map((machine) => {
       if (machine === 'custom') return { text: machine, value: machine }
       else {
-        let subText, text
+        let subText = '',
+          text = ''
         const machineData = machinesFromPreset.find((val) => val.id === machine)
         if (machineData) {
           subText = `CPU: ${machineData.limits.cpu}, Memory: ${machineData.limits.memory}`
-          text = machineData.name
+          text = machineData.name ? machineData.name : machineData.id
         }
         return { text, subText, value: machine }
       }
@@ -426,7 +427,8 @@ function setLimits({ model, getValue, commit, watchDependency }, resource, type)
   const machinesFromPreset = getValue(model, '/spec/admin/machineProfiles/machines')
   const available = getValue(model, '/spec/admin/machineProfiles/available')
 
-  let cpu, memory
+  let cpu = '',
+    memory = ''
   if (available.length && selectedMachine !== 'custom') {
     const machineData = machinesFromPreset.find((val) => val.id === selectedMachine)
     if (machineData) {
