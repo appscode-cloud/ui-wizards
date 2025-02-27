@@ -704,7 +704,7 @@ function preSelectClusterIssuer({ getValue, model, watchDependency, commit, disc
 
 let initialMachines = []
 function hasMachineProfiles({ getValue, model, commit }) {
-  const val = getValue(model, '/spec/admin/machineProfiles/machines')
+  const val = getValue(model, '/spec/admin/machineProfiles/machines') || []
   initialMachines = val
   commit('wizard/model$update', {
     path: '/spec/admin/machineProfiles/machines',
@@ -712,7 +712,7 @@ function hasMachineProfiles({ getValue, model, commit }) {
     force: true,
   })
 
-  return !!val
+  return !!val?.length
 }
 
 function isEnableProfiles({ watchDependency, getValue, discriminator }) {
