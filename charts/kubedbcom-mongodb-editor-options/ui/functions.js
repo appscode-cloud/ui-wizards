@@ -448,16 +448,21 @@ function getMachineListForOptions({ model, getValue }) {
   const machinesFromPreset = getValue(model, '/spec/admin/machineProfiles/machines')
   const available = getValue(model, '/spec/admin/machineProfiles/available')
   let array = []
-  if (machinesFromPreset.length) {
-    array = machinesFromPreset
-      ?.map((machine) => {
-        if (available.includes(machine.id)) {
-          const subText = `CPU: ${machine.limits.cpu}, Memory: ${machine.limits.memory}`
-          const text = machine.name ? `${machine.name} ` : `${machine.id} `
-          return { text, subText, value: machine.id }
+
+  if (available.length) {
+    array = available.map((machine) => {
+      if (machine === 'custom') return { text: machine, value: machine }
+      else {
+        let subText = '',
+          text = ''
+        const machineData = machinesFromPreset.find((val) => val.id === machine)
+        if (machineData) {
+          subText = `CPU: ${machineData.limits.cpu}, Memory: ${machineData.limits.memory}`
+          text = machineData.name ? machineData.name : machineData.id
         }
-      })
-      .filter((val) => !!val)
+        return { text, subText, value: machine }
+      }
+    })
   } else {
     array = machineList
       .map((machine) => {
@@ -478,23 +483,24 @@ function setLimits({ model, getValue, commit, watchDependency }, resource, type)
   const reqCommitPath = type
     ? `/spec/${type}/podResources/resources/limits/${resource}`
     : `/spec/podResources/resources/limits/${resource}`
-
   const comparePath = type
     ? `/spec/${type}/podResources/resources/requests/${resource}`
     : `/spec/podResources/resources/requests/${resource}`
 
+  const resourceValue = getValue(model, comparePath)
   const machinesFromPreset = getValue(model, '/spec/admin/machineProfiles/machines')
-  let cpu, memory
-  if (machinesFromPreset.length) {
-    machinesFromPreset.forEach((machine) => {
-      if (machine.id === selectedMachine) {
-        cpu = machine.limits.cpu
-        memory = machine.limits.memory
-      }
-    })
+  const available = getValue(model, '/spec/admin/machineProfiles/available')
+
+  let cpu = '',
+    memory = ''
+  if (available.length && selectedMachine !== 'custom') {
+    const machineData = machinesFromPreset.find((val) => val.id === selectedMachine)
+    if (machineData) {
+      cpu = machineData.limits.cpu
+      memory = machineData.limits.memory
+    }
   } else {
     if (selectedMachine === 'custom') {
-      const resourceValue = getValue(model, comparePath)
       cpu = resourceValue
       memory = resourceValue
     } else {
