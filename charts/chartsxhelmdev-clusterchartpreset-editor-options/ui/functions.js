@@ -758,7 +758,8 @@ function getMachines({ watchDependency, getValue, model, commit, discriminator }
 
   const hasCustom = getValue(discriminator, '/useCustomProfile')
   if (hasCustom) mappedMachine = [{ text: 'custom', value: 'custom' }, ...mappedMachine]
-  else mappedMachine = mappedMachine.filter((item) => item.value !== 'custom')
+  else if (hasCustom === false)
+    mappedMachine = mappedMachine.filter((item) => item.value !== 'custom')
 
   return mappedMachine
 }
