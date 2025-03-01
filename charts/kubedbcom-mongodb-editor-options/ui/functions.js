@@ -445,19 +445,34 @@ function isMachineNotCustom({ model, getValue, watchDependency }, path) {
 }
 
 function getMachineListForOptions({ model, getValue }) {
-  const machines = getValue(model, '/spec/admin/machineProfiles/machines')
+  const machinesFromPreset = getValue(model, '/spec/admin/machineProfiles/machines')
   const available = getValue(model, '/spec/admin/machineProfiles/available')
-  let array = machines
-    .map((machine) => {
-      if (available.includes(machine.id)) {
-        const text = machine.name
-          ? `${machine.name} (CPU: ${machine.limits.cpu}, Memory: ${machine.limits.memory})`
-          : `${machine.id} (CPU: ${machine.limits.cpu}, Memory: ${machine.limits.memory})`
-        return { text, value: machine.id }
+  let array = []
+
+  if (available.length) {
+    array = available.map((machine) => {
+      if (machine === 'custom') return { text: machine, value: machine }
+      else {
+        let subText = '',
+          text = ''
+        const machineData = machinesFromPreset.find((val) => val.id === machine)
+        if (machineData) {
+          subText = `CPU: ${machineData.limits.cpu}, Memory: ${machineData.limits.memory}`
+          text = machineData.name ? machineData.name : machineData.id
+        }
+        return { text, subText, value: machine }
       }
     })
-    .filter((val) => !!val)
-  array = [{ text: 'custom', value: 'custom' }, ...array]
+  } else {
+    array = machineList
+      .map((machine) => {
+        if (machine === 'custom') return { text: machine, value: machine }
+        const subText = `CPU: ${machines[machine].resources.limits.cpu}, Memory: ${machines[machine].resources.limits.memory}`
+        const text = machine
+        return { text, subText, value: machine }
+      })
+      .filter((val) => !!val)
+  }
   return array
 }
 
@@ -468,38 +483,31 @@ function setLimits({ model, getValue, commit, watchDependency }, resource, type)
   const reqCommitPath = type
     ? `/spec/${type}/podResources/resources/limits/${resource}`
     : `/spec/podResources/resources/limits/${resource}`
-
   const comparePath = type
     ? `/spec/${type}/podResources/resources/requests/${resource}`
     : `/spec/podResources/resources/requests/${resource}`
 
-  if (selectedMachine === 'custom') {
-    const val2 = getValue(model, comparePath)
-    if (resource === 'memory') {
-      commit('wizard/model$update', {
-        path: reqCommitPath,
-        value: val2,
-        force: true,
-      })
-      return val2
+  const resourceValue = getValue(model, comparePath)
+  const machinesFromPreset = getValue(model, '/spec/admin/machineProfiles/machines')
+  const available = getValue(model, '/spec/admin/machineProfiles/available')
+
+  let cpu = '',
+    memory = ''
+  if (available.length && selectedMachine !== 'custom') {
+    const machineData = machinesFromPreset.find((val) => val.id === selectedMachine)
+    if (machineData) {
+      cpu = machineData.limits.cpu
+      memory = machineData.limits.memory
+    }
+  } else {
+    if (selectedMachine === 'custom') {
+      cpu = resourceValue
+      memory = resourceValue
     } else {
-      commit('wizard/model$update', {
-        path: reqCommitPath,
-        value: val2,
-        force: true,
-      })
-      return val2
+      cpu = machines[selectedMachine].resources.limits.cpu
+      memory = machines[selectedMachine].resources.limits.memory
     }
   }
-
-  const machines = getValue(model, '/spec/admin/machineProfiles/machines')
-  let cpu, memory
-  machines.forEach((machine) => {
-    if (machine.id === selectedMachine) {
-      cpu = machine.limits.cpu
-      memory = machine.limits.memory
-    }
-  })
 
   if (resource === 'memory') {
     commit('wizard/model$update', {
