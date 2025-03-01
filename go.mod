@@ -9,14 +9,14 @@ require (
 	k8s.io/api v0.30.3
 	k8s.io/apimachinery v0.30.3
 	k8s.io/kube-openapi v0.0.0-20240726031636-6f6746feab9c
-	kmodules.xyz/client-go v0.30.45
+	kmodules.xyz/client-go v0.30.46
 	kmodules.xyz/monitoring-agent-api v0.30.3
 	kmodules.xyz/objectstore-api v0.29.1
 	kmodules.xyz/offshoot-api v0.30.1
 	kmodules.xyz/schema-checker v0.4.1
-	kubestash.dev/apimachinery v0.16.0-rc.0
+	kubestash.dev/apimachinery v0.16.0
 	stash.appscode.dev/apimachinery v0.39.0
-	x-helm.dev/apimachinery v0.0.16
+	x-helm.dev/apimachinery v0.0.17
 )
 
 require (
