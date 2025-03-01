@@ -251,7 +251,7 @@ manifests: gen-crds gen-values-schema
 .PHONY: gen
 gen: clientset manifests gen-chart-doc
 
-CHART_REGISTRY     ?= bytebuilders-ui
+CHART_REGISTRY     ?= appscode-charts-oci
 CHART_REGISTRY_URL ?= https://bundles.byte.builders/ui/
 CHART_VERSION      ?=
 APP_VERSION        ?= $(CHART_VERSION)
