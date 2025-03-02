@@ -5,10 +5,10 @@
 ## TL;DR;
 
 ```bash
-$ helm repo add bytebuilders-ui https://bundles.byte.builders/ui/
+$ helm repo add appscode https://charts.appscode.com/stable/
 $ helm repo update
-$ helm search repo bytebuilders-ui/kubedbcom-mariadb-editor-options --version=v0.13.0
-$ helm upgrade -i kubedbcom-mariadb-editor-options bytebuilders-ui/kubedbcom-mariadb-editor-options -n kube-system --create-namespace --version=v0.13.0
+$ helm search repo appscode/kubedbcom-mariadb-editor-options --version=v0.14.0
+$ helm upgrade -i kubedbcom-mariadb-editor-options appscode/kubedbcom-mariadb-editor-options -n kube-system --create-namespace --version=v0.14.0
 ```
 
 ## Introduction
@@ -24,7 +24,7 @@ This chart deploys a MariaDB Editor UI Options on a [Kubernetes](http://kubernet
 To install/upgrade the chart with the release name `kubedbcom-mariadb-editor-options`:
 
 ```bash
-$ helm upgrade -i kubedbcom-mariadb-editor-options bytebuilders-ui/kubedbcom-mariadb-editor-options -n kube-system --create-namespace --version=v0.13.0
+$ helm upgrade -i kubedbcom-mariadb-editor-options appscode/kubedbcom-mariadb-editor-options -n kube-system --create-namespace --version=v0.14.0
 ```
 
 The command deploys a MariaDB Editor UI Options on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
@@ -286,12 +286,12 @@ The following table lists the configurable parameters of the `kubedbcom-mariadb-
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm upgrade -i`. For example:
 
 ```bash
-$ helm upgrade -i kubedbcom-mariadb-editor-options bytebuilders-ui/kubedbcom-mariadb-editor-options -n kube-system --create-namespace --version=v0.13.0 --set metadata.resource.group=kubedb.com
+$ helm upgrade -i kubedbcom-mariadb-editor-options appscode/kubedbcom-mariadb-editor-options -n kube-system --create-namespace --version=v0.14.0 --set metadata.resource.group=kubedb.com
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
 installing the chart. For example:
 
 ```bash
-$ helm upgrade -i kubedbcom-mariadb-editor-options bytebuilders-ui/kubedbcom-mariadb-editor-options -n kube-system --create-namespace --version=v0.13.0 --values values.yaml
+$ helm upgrade -i kubedbcom-mariadb-editor-options appscode/kubedbcom-mariadb-editor-options -n kube-system --create-namespace --version=v0.14.0 --values values.yaml
 ```
