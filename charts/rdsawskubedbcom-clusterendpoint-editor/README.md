@@ -5,10 +5,10 @@
 ## TL;DR;
 
 ```bash
-$ helm repo add appscode-charts-oci https://bundles.byte.builders/ui/
+$ helm repo add appscode https://charts.appscode.com/stable/
 $ helm repo update
-$ helm search repo appscode-charts-oci/rdsawskubedbcom-clusterendpoint-editor --version=v0.13.0
-$ helm upgrade -i rdsawskubedbcom-clusterendpoint-editor appscode-charts-oci/rdsawskubedbcom-clusterendpoint-editor -n default --create-namespace --version=v0.13.0
+$ helm search repo appscode/rdsawskubedbcom-clusterendpoint-editor --version=v0.14.0
+$ helm upgrade -i rdsawskubedbcom-clusterendpoint-editor appscode/rdsawskubedbcom-clusterendpoint-editor -n default --create-namespace --version=v0.14.0
 ```
 
 ## Introduction
@@ -24,7 +24,7 @@ This chart deploys a ClusterEndpoint Editor on a [Kubernetes](http://kubernetes.
 To install/upgrade the chart with the release name `rdsawskubedbcom-clusterendpoint-editor`:
 
 ```bash
-$ helm upgrade -i rdsawskubedbcom-clusterendpoint-editor appscode-charts-oci/rdsawskubedbcom-clusterendpoint-editor -n default --create-namespace --version=v0.13.0
+$ helm upgrade -i rdsawskubedbcom-clusterendpoint-editor appscode/rdsawskubedbcom-clusterendpoint-editor -n default --create-namespace --version=v0.14.0
 ```
 
 The command deploys a ClusterEndpoint Editor on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
@@ -56,12 +56,12 @@ The following table lists the configurable parameters of the `rdsawskubedbcom-cl
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm upgrade -i`. For example:
 
 ```bash
-$ helm upgrade -i rdsawskubedbcom-clusterendpoint-editor appscode-charts-oci/rdsawskubedbcom-clusterendpoint-editor -n default --create-namespace --version=v0.13.0 --set apiVersion=rds.aws.kubedb.com/v1alpha1
+$ helm upgrade -i rdsawskubedbcom-clusterendpoint-editor appscode/rdsawskubedbcom-clusterendpoint-editor -n default --create-namespace --version=v0.14.0 --set apiVersion=rds.aws.kubedb.com/v1alpha1
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
 installing the chart. For example:
 
 ```bash
-$ helm upgrade -i rdsawskubedbcom-clusterendpoint-editor appscode-charts-oci/rdsawskubedbcom-clusterendpoint-editor -n default --create-namespace --version=v0.13.0 --values values.yaml
+$ helm upgrade -i rdsawskubedbcom-clusterendpoint-editor appscode/rdsawskubedbcom-clusterendpoint-editor -n default --create-namespace --version=v0.14.0 --values values.yaml
 ```
