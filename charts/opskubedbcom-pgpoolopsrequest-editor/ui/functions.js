@@ -105,9 +105,19 @@ async function getDbVersions({ axios, storeGet, getValue, discriminator }) {
   const cluster = storeGet('/route/params/cluster')
 
   const url = `/clusters/${owner}/${cluster}/proxy/charts.x-helm.dev/v1alpha1/clusterchartpresets/kubedb-ui-presets`
-  const kind = storeGet('/resource/layout/result/resource/kind')
+
+  let presets = storeGet('/kubedbuiPresets') || {}
+  if (!storeGet('/route/query/operation')) {
+    try {
+      const presetResp = await axios.get(url)
+      presets = presetResp.data?.spec?.values?.spec
+    } catch (e) {
+      console.log(e)
+      presets.status = String(e.status)
+    }
+  }
+
   try {
-    const presets = storeGet('/kubedbuiPresets') || {}
     const presetVersions = presets.admin?.databases?.Pgpool?.versions?.available || []
     const queryParams = {
       filter: {
