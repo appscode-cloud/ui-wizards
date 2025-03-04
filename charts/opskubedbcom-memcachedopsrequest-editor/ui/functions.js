@@ -618,7 +618,18 @@ async function getIssuerRefsName({ axios, storeGet, getValue, model, watchDepend
     const url = `/clusters/${owner}/${cluster}/proxy/cert-manager.io/v1/namespaces/${namespace}/issuers`
     return getIssuer(url)
   } else if (kind === 'ClusterIssuer') {
-    const presets = storeGet('/kubedbuiPresets')
+    const url = `/clusters/${owner}/${cluster}/proxy/charts.x-helm.dev/v1alpha1/clusterchartpresets/kubedb-ui-presets`
+
+    let presets = storeGet('/kubedbuiPresets') || {}
+    if (!storeGet('/route/query/operation')) {
+      try {
+        const presetResp = await axios.get(url)
+        presets = presetResp.data?.spec?.values?.spec
+      } catch (e) {
+        console.log(e)
+        presets.status = String(e.status)
+      }
+    }
     let clusterIssuers = presets.admin?.clusterIssuers?.available || []
     if (presets.status === '404') {
       const url = `/clusters/${owner}/${cluster}/proxy/cert-manager.io/v1/clusterissuers`
