@@ -739,7 +739,7 @@ function setValueFromDbDetails(
 function setResource({ discriminator, getValue, watchDependency, storeGet }, path) {
   watchDependency('discriminator#/dbDetails')
   const containers = getValue(discriminator, `/dbDetails${path}`) || []
-  const kind = storeGet('/resource/layout/result/resource/kind')
+  const kind = getValue(discriminator, '/dbDetails/kind')
   const resource = containers.filter((ele) => ele.name === kind.toLowerCase())
   return resource[0].resources
 }

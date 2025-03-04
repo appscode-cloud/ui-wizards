@@ -800,9 +800,9 @@ function onNamespaceChange({ commit }) {
   commit('wizard/model$delete', '/spec/type')
 }
 
-function onDbChange({ commit, axios, storeGet, model, getValue, watchDependency }) {
+function onDbChange({ commit, axios, storeGet, model, getValue, setDiscriminatorValue }) {
   commit('wizard/model$delete', '/spec/type')
-  getDbDetails({ axios, storeGet, model, getValue, watchDependency })
+  getDbDetails({ axios, storeGet, model, getValue, setDiscriminatorValue })
 }
 
 function setApplyToIfReady() {

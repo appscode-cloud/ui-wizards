@@ -735,7 +735,7 @@ function setValueFromDbDetails(
   return retValue || undefined
 }
 
-function setResource({ discriminator, getValue, watchDependency, storeGet }, path) {
+function setResource({ discriminator, getValue, watchDependency }, path) {
   watchDependency('discriminator#/dbDetails')
   const containers = getValue(discriminator, `/dbDetails${path}`) || []
   const resource = containers.filter((ele) => ele.name === 'mssql')
@@ -760,7 +760,7 @@ function onNamespaceChange({ commit }) {
   commit('wizard/model$delete', '/spec/type')
 }
 
-function onDbChange({ commit, storeGet, model, getValue, setDiscriminatorValue }) {
+function onDbChange({ commit, axios, storeGet, model, getValue, setDiscriminatorValue }) {
   commit('wizard/model$delete', '/spec/type')
   getDbDetails({ axios, storeGet, model, getValue, setDiscriminatorValue })
 }
