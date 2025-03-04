@@ -278,6 +278,7 @@ function getTimeDiffs(time) {
   if (diffInDays) timeDiff += `${diffInDays} ${diffInDays > 1 ? 'days' : 'day'} `
   if (diffInHours) timeDiff += `${diffInHours} ${diffInHours > 1 ? 'hours' : 'hour'} `
   if (diffInMinutes) timeDiff += `${diffInMinutes} ${diffInMinutes > 1 ? 'minutes' : 'minute'}`
+  if (!diffInMinutes) return 'Just now'
   return ` ${timeDiff} ago`
 }
 
