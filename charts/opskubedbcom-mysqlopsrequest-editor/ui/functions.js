@@ -143,7 +143,12 @@ async function getDbVersions({ axios, storeGet, getValue, discriminator }) {
     const found = sortedVersions.find((item) => item.metadata.name === ver)
 
     if (found) ver = found.spec?.version
-    const allowed = found?.spec?.updateConstraints?.allowlist || []
+
+    const isGroupRepl = !!getValue(discriminator, '/dbDetails/spec/topology')
+    const allowed = isGroupRepl
+      ? found?.spec?.updateConstraints?.allowlist.groupReplication
+      : found?.spec?.updateConstraints?.allowlist.standalone
+
     const limit = allowed.length ? allowed[0] : '0.0'
 
     // keep only non deprecated & kubedb-ui-presets & within constraints of current version
