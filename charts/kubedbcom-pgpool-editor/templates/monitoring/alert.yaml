@@ -109,31 +109,6 @@ spec:
         summary: Pgpool instance down (instance {{`{{`}} $labels.pod {{`}}`}})
         description: "Pgpool instance is down {{`{{`}} $labels.pod {{`}}`}}\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
     {{- end }}
-    
-    {{ if (include "kubedbcom-pgpool-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskUsageHigh.enabled .rules.diskUsageHigh.severity)) -}}
-    - alert: DiskUsageHigh
-      expr: (kubelet_volume_stats_used_bytes / on(persistentvolumeclaim) group_left(pod) (kubelet_volume_stats_capacity_bytes + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) )
-        * 100 > {{ .rules.diskUsageHigh.val }}
-      for: {{ .rules.diskUsageHigh.duration }}
-      labels:
-        severity: {{ .rules.diskUsageHigh.severity }}
-        {{- include "kubedbcom-pgpool-editor.alertLabels" $ | nindent 8 }}
-      annotations:
-        summary: Persistent Volume Usages in instance {{`{{`}} $labels.instance {{`}}`}}
-        description: "Persistent Volume Usages\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
-    {{- end }}
-    {{ if (include "kubedbcom-pgpool-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.diskAlmostFull.enabled .rules.diskAlmostFull.severity)) -}}
-    - alert: DiskAlmostFull
-      expr: (kubelet_volume_stats_used_bytes / on(persistentvolumeclaim) group_left(pod) (kubelet_volume_stats_capacity_bytes + on(persistentvolumeclaim) group_left(pod) kube_pod_spec_volumes_persistentvolumeclaims_info{pod=~"{{ $.Release.Name }}-.+$",namespace=~"{{ $.Release.Namespace }}"}) )
-        * 100 > {{ .rules.diskAlmostFull.val }}
-      for: {{ .rules.diskAlmostFull.duration }}
-      labels:
-        severity: {{ .rules.diskAlmostFull.severity }}
-        {{- include "kubedbcom-pgpool-editor.alertLabels" $ | nindent 8 }}
-      annotations:
-        summary: Persistent Volume Usages in instance {{`{{`}} $labels.instance {{`}}`}}
-        description: "Persistent Volume Usages\n  VALUE = {{`{{`}} $value {{`}}`}}\n  LABELS = {{`{{`}} $labels {{`}}`}}"
-    {{- end }}
   {{end -}}
   {{end -}}
 
