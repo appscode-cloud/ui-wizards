@@ -333,7 +333,135 @@ function returnFalse() {
   return false
 }
 
+function isValueExistInModel({ model, getValue }, path) {
+  const modelValue = getValue(model, path)
+  return !!modelValue
+}
+
+function showMonitoringSection({ watchDependency, discriminator, getValue }) {
+  watchDependency('discriminator#/enableMonitoring')
+  const configureStatus = getValue(discriminator, '/enableMonitoring')
+  return configureStatus
+}
+
+function onEnableMonitoringChange({ discriminator, getValue, commit }) {
+  const configureStatus = getValue(discriminator, '/enableMonitoring')
+  if (configureStatus) {
+    commit('wizard/model$update', {
+      path: '/resources/kubedbComMongoDB/spec/monitor',
+      value: {},
+      force: true,
+    })
+  } else {
+    commit('wizard/model$delete', '/resources/kubedbComMongoDB/spec/monitor')
+  }
+
+  // update alert value depend on monitoring profile
+  commit('wizard/model$update', {
+    path: '/form/alert/enabled',
+    value: configureStatus ? 'warning' : 'none',
+    force: true,
+  })
+}
+
+function showCustomizeExporterSection({ watchDependency, discriminator, getValue }) {
+  watchDependency('discriminator#/customizeExporter')
+  const configureStatus = getValue(discriminator, '/customizeExporter')
+  return configureStatus
+}
+
+function onCustomizeExporterChange({ discriminator, getValue, commit }) {
+  const configureStatus = getValue(discriminator, '/customizeExporter')
+  if (configureStatus) {
+    commit('wizard/model$update', {
+      path: '/resources/kubedbComMongoDB/spec/monitor/prometheus/exporter',
+      value: {},
+      force: true,
+    })
+  } else {
+    commit('wizard/model$delete', '/resources/kubedbComMongoDB/spec/monitor/prometheus/exporter')
+  }
+}
+
+function isEqualToModelPathValue({ model, getValue, watchDependency }, value, modelPath) {
+  const modelPathValue = getValue(model, modelPath)
+  watchDependency('model#' + modelPath)
+  return modelPathValue === value
+}
+
+function setMetadata({ storeGet, mode, commit }) {
+  const dbname = storeGet('/route/params/name') || ''
+  const namespace = storeGet('/route/query/namespace') || ''
+  if (mode === 'standalone-step') {
+    commit('wizard/model$update', {
+      path: '/metadata/release/name',
+      value: dbname,
+      force: true,
+    })
+    commit('wizard/model$update', {
+      path: '/metadata/release/namespace',
+      value: namespace,
+      force: true,
+    })
+  }
+}
+
+async function fetchJsons({ axios, itemCtx }) {
+  let ui = {}
+  let language = {}
+  let functions = {}
+  const { name, sourceRef, version, packageviewUrlPrefix } = itemCtx.chart
+
+  try {
+    ui = await axios.get(
+      `${packageviewUrlPrefix}/create-ui.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`,
+    )
+    language = await axios.get(
+      `${packageviewUrlPrefix}/language.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`,
+    )
+    const functionString = await axios.get(
+      `${packageviewUrlPrefix}/functions.js?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}`,
+    )
+    // declare evaluate the functionString to get the functions Object
+    const evalFunc = new Function(functionString.data || '')
+    functions = evalFunc()
+  } catch (e) {
+    console.log(e)
+  }
+
+  return {
+    ui: ui.data || {},
+    language: language.data || {},
+    functions,
+  }
+}
+
+function onAgentChange({ commit, model, getValue }) {
+  const agent = getValue(model, '/resources/kubedbComMongoDB/spec/monitor/agent')
+  if (agent === 'prometheus.io') {
+    commit('wizard/model$update', {
+      path: '/resources/monitoringCoreosComServiceMonitor/spec/endpoints',
+      value: [],
+      force: true,
+    })
+
+    onNamespaceChange({ commit, model, getValue })
+    onLabelChange({ commit, model, getValue })
+  } else {
+    commit('wizard/model$delete', '/resources/monitoringCoreosComServiceMonitor')
+  }
+}
+
 return {
+  onAgentChange,
+  fetchJsons,
+  setMetadata,
+  isEqualToModelPathValue,
+  isValueExistInModel,
+  showMonitoringSection,
+  onEnableMonitoringChange,
+  showCustomizeExporterSection,
+  onCustomizeExporterChange,
   initBackupData,
   isBackupDataLoadedTrue,
   setBackupType,
