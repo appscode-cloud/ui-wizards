@@ -715,7 +715,6 @@ function isDbDetailsLoading({ discriminator, model, getValue, watchDependency })
   watchDependency('model#/spec/databaseRef/name')
   const dbDetails = getValue(discriminator, '/dbDetails')
   const dbName = getValue(model, '/spec/databaseRef/name')
-  console.log(dbDetails, dbName)
 
   return !dbDetails || !dbName
 }
