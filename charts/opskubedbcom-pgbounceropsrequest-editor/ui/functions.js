@@ -747,9 +747,13 @@ function setValueFromDbDetails(
   return retValue || undefined
 }
 
-function setResource({ discriminator, getValue, watchDependency, storeGet }, path) {
+function setResource({ discriminator, getValue, watchDependency }, path) {
   watchDependency('discriminator#/dbDetails')
   const containers = getValue(discriminator, `/dbDetails${path}`) || []
+  // for standalone
+  if (!containers.length)
+    return getValue(discriminator, '/dbDetails/spec/podTemplate/spec/resources') || {}
+
   const kind = getValue(discriminator, '/dbDetails/kind')
   const resource = containers.filter((ele) => ele.name === kind.toLowerCase())
   return resource[0].resources
