@@ -120,7 +120,7 @@ resources:
             kind: HelmRepository
             name: appscode-charts-oci
             namespace: kubeops
-          version: v2024.9.30
+          version: v2025.2.10
       install:
         crds: CreateReplace
         createNamespace: true
@@ -151,7 +151,7 @@ resources:
             kind: HelmRepository
             name: appscode-charts-oci
             namespace: kubeops
-          version: v2024.9.30
+          version: v2025.2.10
       install:
         crds: CreateReplace
         createNamespace: true
@@ -321,6 +321,37 @@ resources:
         crds: CreateReplace
         remediation:
           retries: -1
+  helmToolkitFluxcdIoHelmRelease_secrets_store_csi_driver_provider_virtual_secrets: # +doc-gen:break
+    apiVersion: helm.toolkit.fluxcd.io/v2
+    kind: HelmRelease
+    metadata:
+      labels:
+        app.kubernetes.io/component: secrets-store-csi-driver-provider-virtual-secrets
+      name: secrets-store-csi-driver-provider-virtual-secrets
+      namespace: kubeops
+    spec:
+      chart:
+        spec:
+          chart: secrets-store-csi-driver-provider-virtual-secrets
+          sourceRef:
+            kind: HelmRepository
+            name: appscode-charts-oci
+            namespace: kubeops
+          version: v2025.3.14
+      install:
+        crds: CreateReplace
+        createNamespace: true
+        remediation:
+          retries: -1
+      interval: 5m
+      releaseName: secrets-store-csi-driver-provider-virtual-secrets
+      storageNamespace: kubeops
+      targetNamespace: kubeops
+      timeout: 30m
+      upgrade:
+        crds: CreateReplace
+        remediation:
+          retries: -1
   helmToolkitFluxcdIoHelmRelease_vault: # +doc-gen:break
     apiVersion: helm.toolkit.fluxcd.io/v2
     kind: HelmRelease
@@ -376,6 +407,37 @@ resources:
           retries: -1
       interval: 5m
       releaseName: vault-secrets-operator
+      storageNamespace: kubeops
+      targetNamespace: kubeops
+      timeout: 30m
+      upgrade:
+        crds: CreateReplace
+        remediation:
+          retries: -1
+  helmToolkitFluxcdIoHelmRelease_virtual_secrets_server: # +doc-gen:break
+    apiVersion: helm.toolkit.fluxcd.io/v2
+    kind: HelmRelease
+    metadata:
+      labels:
+        app.kubernetes.io/component: virtual-secrets-server
+      name: virtual-secrets-server
+      namespace: kubeops
+    spec:
+      chart:
+        spec:
+          chart: virtual-secrets-server
+          sourceRef:
+            kind: HelmRepository
+            name: appscode-charts-oci
+            namespace: kubeops
+          version: v2025.3.14
+      install:
+        crds: CreateReplace
+        createNamespace: true
+        remediation:
+          retries: -1
+      interval: 5m
+      releaseName: virtual-secrets-server
       storageNamespace: kubeops
       targetNamespace: kubeops
       timeout: 30m

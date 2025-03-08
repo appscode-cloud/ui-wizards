@@ -3770,6 +3770,7 @@ properties:
                           issuer:
                             enum:
                             - ca
+                            - none
                             type: string
                         required:
                         - ca
@@ -3873,6 +3874,15 @@ properties:
                   envoy:
                     properties:
                       image:
+                        type: string
+                      nodeSelector:
+                        additionalProperties:
+                          type: string
+                        type: object
+                      provisionerType:
+                        enum:
+                        - Deployment
+                        - DaemonSet
                         type: string
                       securityContext:
                         properties:
@@ -3981,6 +3991,7 @@ properties:
                         type: string
                     required:
                     - image
+                    - provisionerType
                     - service
                     - tag
                     type: object
@@ -5941,6 +5952,8 @@ properties:
                             properties:
                               email:
                                 type: string
+                              gatewayName:
+                                type: string
                               solver:
                                 enum:
                                 - Gateway
@@ -5948,6 +5961,7 @@ properties:
                                 type: string
                             required:
                             - email
+                            - gatewayName
                             - solver
                             type: object
                           ca:
