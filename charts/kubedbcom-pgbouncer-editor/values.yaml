@@ -7,52 +7,24 @@ form:
       database:
         enabled: warning
         rules:
-          postgresExporterError:
-            duration: 5m
-            enabled: true
-            severity: warning
-          postgresHighRollbackRate:
-            duration: 0m
-            enabled: true
-            severity: warning
-            val: 0.02
-          postgresInstanceDown:
+          pgbouncerDown:
             duration: 0m
             enabled: true
             severity: critical
-          postgresNotEnoughConnections:
-            duration: 2m
+          pgbouncerExporterLastScrapeError:
+            duration: 0m
             enabled: true
             severity: warning
-            val: 5
-          postgresReplicationLag:
+          pgbouncerLogPoolerError:
             duration: 0m
             enabled: true
             severity: critical
-            val: 30s
-          postgresRestarted:
-            duration: 0m
-            enabled: true
-            severity: critical
-            val: 60
-          postgresSlowQueries:
-            duration: 2m
+            val: 10
+          pgbouncerTooManyConnections:
+            duration: 1m
             enabled: true
             severity: warning
-          postgresSplitBrain:
-            duration: 0m
-            enabled: true
-            severity: critical
-          postgresTooManyConnections:
-            duration: 2m
-            enabled: true
-            severity: warning
-            val: 80
-          postgresTooManyLocksAcquired:
-            duration: 2m
-            enabled: true
-            severity: critical
-            val: 0.2
+            val: 70
       opsManager:
         enabled: warning
         rules:
@@ -79,66 +51,8 @@ form:
             duration: 1m
             enabled: true
             severity: critical
-      schemaManager:
-        enabled: warning
-        rules:
-          schemaExpired:
-            duration: 0m
-            enabled: true
-            severity: warning
-          schemaFailed:
-            duration: 0m
-            enabled: true
-            severity: warning
-          schemaInProgressForTooLong:
-            duration: 30m
-            enabled: true
-            severity: warning
-          schemaPendingForTooLong:
-            duration: 30m
-            enabled: true
-            severity: warning
-          schemaTerminatingForTooLong:
-            duration: 30m
-            enabled: true
-            severity: warning
-      stash:
-        enabled: warning
-        rules:
-          backupSessionFailed:
-            duration: 0m
-            enabled: true
-            severity: critical
-          backupSessionPeriodTooLong:
-            duration: 0m
-            enabled: true
-            severity: warning
-            val: 1800
-          noBackupSessionForTooLong:
-            duration: 0m
-            enabled: true
-            severity: warning
-            val: 18000
-          repositoryCorrupted:
-            duration: 5m
-            enabled: true
-            severity: critical
-          repositoryStorageRunningLow:
-            duration: 5m
-            enabled: true
-            severity: warning
-            val: 1.073741824e+10
-          restoreSessionFailed:
-            duration: 0m
-            enabled: true
-            severity: critical
-          restoreSessionPeriodTooLong:
-            duration: 0m
-            enabled: true
-            severity: warning
-            val: 1800
     labels:
-      release: kube-prometheus-stack
+      release: prometheus
 metadata:
   resource:
     group: kubedb.com

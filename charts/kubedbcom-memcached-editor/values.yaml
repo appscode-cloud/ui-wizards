@@ -1,3 +1,72 @@
+form:
+  alert:
+    additionalRuleLabels: {}
+    annotations: {}
+    enabled: warning
+    groups:
+      database:
+        enabled: warning
+        rules:
+          memcachedConnectionThrottled:
+            duration: 2m
+            enabled: true
+            severity: warning
+            val: 10
+          memcachedConnectionsNoneMinor:
+            duration: 2m
+            enabled: true
+            severity: warning
+          memcachedDown:
+            duration: 0m
+            enabled: true
+            severity: critical
+          memcachedEvictionsLimit:
+            duration: 0m
+            enabled: true
+            severity: critical
+            val: 10
+          memcachedItemsNoneMinor:
+            duration: 2m
+            enabled: true
+            severity: warning
+          memcachedMemoryLimit:
+            duration: 0m
+            enabled: true
+            severity: critical
+            val: 3.3554432e+07
+          memcachedServiceRespawn:
+            duration: 0m
+            enabled: true
+            severity: critical
+            val: 180
+      opsManager:
+        enabled: warning
+        rules:
+          opsRequestFailed:
+            duration: 0m
+            enabled: true
+            severity: critical
+          opsRequestOnProgress:
+            duration: 0m
+            enabled: true
+            severity: info
+          opsRequestStatusProgressingToLong:
+            duration: 30m
+            enabled: true
+            severity: critical
+      provisioner:
+        enabled: warning
+        rules:
+          appPhaseCritical:
+            duration: 15m
+            enabled: true
+            severity: warning
+          appPhaseNotReady:
+            duration: 1m
+            enabled: true
+            severity: critical
+    labels:
+      release: kube-prometheus-stack
 metadata:
   resource:
     group: kubedb.com

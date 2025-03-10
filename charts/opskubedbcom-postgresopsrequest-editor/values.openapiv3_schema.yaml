@@ -76,13 +76,20 @@ properties:
             type: string
         type: object
         x-kubernetes-map-type: atomic
+      forceFailOver:
+        properties:
+          candidates:
+            items:
+              type: string
+            type: array
+        type: object
       horizontalScaling:
         properties:
           replicas:
             format: int32
             type: integer
           standbyMode:
-            default: Warm
+            default: Hot
             enum:
             - Hot
             - Warm
@@ -94,7 +101,19 @@ properties:
             - Asynchronous
             type: string
         type: object
+      reconnectStandby:
+        properties:
+          readyTimeOut:
+            type: string
+        type: object
       restart:
+        type: object
+      setRaftKeyPair:
+        properties:
+          keyPair:
+            additionalProperties:
+              type: string
+            type: object
         type: object
       timeout:
         type: string
@@ -229,6 +248,9 @@ properties:
         - Reconfigure
         - ReconfigureTLS
         - RotateAuth
+        - ReconnectStandby
+        - ForceFailOver
+        - SetRaftKeyPair
         type: string
       updateVersion:
         properties:

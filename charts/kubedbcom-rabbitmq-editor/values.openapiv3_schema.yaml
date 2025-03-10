@@ -100,13 +100,10 @@ properties:
                             - warning
                             - info
                             type: string
-                          val:
-                            type: integer
                         required:
                         - duration
                         - enabled
                         - severity
-                        - val
                         type: object
                       rabbitmqHighConnectionChurn:
                         properties:
@@ -120,13 +117,10 @@ properties:
                             - warning
                             - info
                             type: string
-                          val:
-                            type: integer
                         required:
                         - duration
                         - enabled
                         - severity
-                        - val
                         type: object
                       rabbitmqInsufficientEstablishedErlangDistributionLinks:
                         properties:
@@ -140,13 +134,10 @@ properties:
                             - warning
                             - info
                             type: string
-                          val:
-                            type: integer
                         required:
                         - duration
                         - enabled
                         - severity
-                        - val
                         type: object
                       rabbitmqLowDiskWatermarkPredicted:
                         properties:
@@ -160,13 +151,10 @@ properties:
                             - warning
                             - info
                             type: string
-                          val:
-                            type: integer
                         required:
                         - duration
                         - enabled
                         - severity
-                        - val
                         type: object
                       rabbitmqPhaseCritical:
                         properties:
@@ -197,13 +185,10 @@ properties:
                             - warning
                             - info
                             type: string
-                          val:
-                            type: integer
                         required:
                         - duration
                         - enabled
                         - severity
-                        - val
                         type: object
                       rabbitmqTCPSocketsNearLimit:
                         properties:
@@ -217,13 +202,10 @@ properties:
                             - warning
                             - info
                             type: string
-                          val:
-                            type: integer
                         required:
                         - duration
                         - enabled
                         - severity
-                        - val
                         type: object
                       rabbitmqUnroutableMessages:
                         properties:
@@ -237,13 +219,10 @@ properties:
                             - warning
                             - info
                             type: string
-                          val:
-                            type: integer
                         required:
                         - duration
                         - enabled
                         - severity
-                        - val
                         type: object
                     required:
                     - diskAlmostFull
@@ -257,6 +236,77 @@ properties:
                     - rabbitmqQueueIsGrowing
                     - rabbitmqTCPSocketsNearLimit
                     - rabbitmqUnroutableMessages
+                    type: object
+                required:
+                - enabled
+                - rules
+                type: object
+              opsManager:
+                properties:
+                  enabled:
+                    enum:
+                    - none
+                    - critical
+                    - warning
+                    - info
+                    type: string
+                  rules:
+                    properties:
+                      opsRequestFailed:
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            enum:
+                            - critical
+                            - warning
+                            - info
+                            type: string
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        type: object
+                      opsRequestOnProgress:
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            enum:
+                            - critical
+                            - warning
+                            - info
+                            type: string
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        type: object
+                      opsRequestStatusProgressingToLong:
+                        properties:
+                          duration:
+                            type: string
+                          enabled:
+                            type: boolean
+                          severity:
+                            enum:
+                            - critical
+                            - warning
+                            - info
+                            type: string
+                        required:
+                        - duration
+                        - enabled
+                        - severity
+                        type: object
+                    required:
+                    - opsRequestFailed
+                    - opsRequestOnProgress
+                    - opsRequestStatusProgressingToLong
                     type: object
                 required:
                 - enabled
@@ -317,6 +367,7 @@ properties:
                 type: object
             required:
             - database
+            - opsManager
             - provisioner
             type: object
           labels:
