@@ -54,26 +54,15 @@ async function getDbs({ axios, storeGet, model, getValue, watchDependency }) {
   })
 }
 
-async function getDbDetails({
-  axios,
-  storeGet,
-  model,
-  getValue,
-  watchDependency,
-  setDiscriminatorValue,
-}) {
+async function getDbDetails({ axios, storeGet, model, getValue, setDiscriminatorValue }) {
   const owner = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
-
   const namespace = getValue(model, '/metadata/namespace')
-  watchDependency('model#/metadata/namespace')
   const name = getValue(model, '/spec/databaseRef/name')
-  watchDependency('model#/spec/databaseRef/name')
 
   if (namespace && name) {
-    const resp = await axios.get(
-      `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/zookeepers/${name}`,
-    )
+    const url = `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/zookeepers/${name}`
+    const resp = await axios.get(url)
 
     setDiscriminatorValue('/dbDetails', resp.data || {})
 
@@ -86,9 +75,19 @@ async function getDbVersions({ axios, storeGet, getValue, discriminator }) {
   const cluster = storeGet('/route/params/cluster')
 
   const url = `/clusters/${owner}/${cluster}/proxy/charts.x-helm.dev/v1alpha1/clusterchartpresets/kubedb-ui-presets`
-  const kind = storeGet('/resource/layout/result/resource/kind')
+
+  let presets = storeGet('/kubedbuiPresets') || {}
+  if (!storeGet('/route/query/operation')) {
+    try {
+      const presetResp = await axios.get(url)
+      presets = presetResp.data?.spec?.values?.spec
+    } catch (e) {
+      console.log(e)
+      presets.status = String(e.status)
+    }
+  }
+
   try {
-    const presets = storeGet('/kubedbuiPresets') || {}
     const presetVersions = presets.admin?.databases?.ZooKeeper?.versions?.available || []
     const queryParams = {
       filter: {
@@ -593,10 +592,10 @@ function setValueFromDbDetails(
   return retValue || undefined
 }
 
-function setResource({ discriminator, getValue, watchDependency, storeGet }, path) {
+function setResource({ discriminator, getValue, watchDependency }, path) {
   watchDependency('discriminator#/dbDetails')
   const containers = getValue(discriminator, `/dbDetails${path}`) || []
-  const kind = storeGet('/resource/layout/result/resource/kind')
+  const kind = getValue(discriminator, '/dbDetails/kind')
   const resource = containers.filter((ele) => ele.name === kind.toLowerCase())
   return resource[0].resources
 }
@@ -615,8 +614,9 @@ function onNamespaceChange({ commit }) {
   commit('wizard/model$delete', '/spec/type')
 }
 
-function onDbChange({ commit }) {
+function onDbChange({ commit, axios, storeGet, model, getValue, setDiscriminatorValue }) {
   commit('wizard/model$delete', '/spec/type')
+  getDbDetails({ axios, storeGet, model, getValue, setDiscriminatorValue })
 }
 
 function setApplyToIfReady() {

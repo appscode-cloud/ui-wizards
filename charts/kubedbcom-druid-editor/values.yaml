@@ -43,6 +43,21 @@ form:
             duration: 1m
             enabled: true
             severity: critical
+      opsManager:
+        enabled: warning
+        rules:
+          opsRequestFailed:
+            duration: 0m
+            enabled: true
+            severity: critical
+          opsRequestOnProgress:
+            duration: 0m
+            enabled: true
+            severity: info
+          opsRequestStatusProgressingToLong:
+            duration: 30m
+            enabled: true
+            severity: critical
       provisioner:
         enabled: warning
         rules:
@@ -102,6 +117,15 @@ resources:
       sourceRef:
         name: druid
         namespace: demo
+  certManagerIoIssuer_ca: # +doc-gen:break
+    apiVersion: cert-manager.io/v1
+    kind: Issuer
+    metadata:
+      name: druid-ca
+      namespace: demo
+    spec:
+      ca:
+        secretName: druid-ca
   kubedbComDruid: # +doc-gen:break
     apiVersion: kubedb.com/v1alpha2
     kind: Druid
@@ -180,3 +204,44 @@ resources:
       zookeeperRef:
         name: zk-cluster
         namespace: druid
+  monitoringCoreosComServiceMonitor: # +doc-gen:break
+    apiVersion: monitoring.coreos.com/v1
+    kind: ServiceMonitor
+    metadata:
+      name: druid
+      namespace: demo
+    spec:
+      endpoints:
+        - honorLabels: true
+          interval: 30s
+          path: /metrics
+          port: metrics
+      namespaceSelector:
+        matchNames:
+          - demo
+      selector:
+        matchLabels:
+          app.kubernetes.io/instance: druid
+          app.kubernetes.io/name: druids.kubedb.com
+  secret_auth: # +doc-gen:break
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: druid-auth
+      namespace: demo
+    stringData:
+      password: thisIs1StrongPassword
+      username: root
+    type: Opaque
+  secret_config: # +doc-gen:break
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: druid-config
+      namespace: demo
+    stringData:
+      druid.cnf: |
+        [mysqld]
+        max_connections = 200
+        read_buffer_size = 1048576
+    type: Opaque

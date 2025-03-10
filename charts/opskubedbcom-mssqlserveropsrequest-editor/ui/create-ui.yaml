@@ -71,9 +71,6 @@ steps:
       - description: options.Reconfigure.description
         text: options.Reconfigure.text
         value: Reconfigure
-      - description: options.ReconfigureTLS.description
-        text: options.ReconfigureTLS.text
-        value: ReconfigureTLS
       schema:
         $ref: schema#/properties/spec/properties/type
       type: radio
@@ -273,88 +270,6 @@ steps:
       if: ifRequestTypeEqualsTo|Reconfigure
       label:
         text: Reconfigure Form
-      type: single-step-form
-    - discriminator:
-        tlsOperation:
-          default: update
-          type: string
-      elements:
-      - computed: initTlsOperation
-        if: hasTlsField
-        label:
-          text: labels.tlsOperation
-        onChange: onTlsOperationChange
-        options:
-        - text: Update
-          value: update
-        - text: Rotate
-          value: rotate
-        - text: Remove
-          value: remove
-        schema:
-          $ref: discriminator#/properties/tlsOperation
-        type: radio
-      - if: returnFalse
-        schema:
-          $ref: schema#/properties/spec/properties/tls/properties/remove
-        type: switch
-      - if: returnFalse
-        schema:
-          $ref: schema#/properties/spec/properties/tls/properties/rotateCertificates
-        type: switch
-      - elements:
-        - computed: initIssuerRefApiGroup
-          disabled: true
-          label:
-            text: labels.api_group
-          schema:
-            $ref: schema#/properties/spec/properties/tls/properties/issuerRef/properties/apiGroup
-          type: input
-        - computed: setValueFromDbDetails|/spec/tls/issuerRef/kind
-          label:
-            text: labels.kind
-          options:
-          - text: Issuer
-            value: Issuer
-          - text: ClusterIssuer
-            value: ClusterIssuer
-          required: isIssuerRefRequired
-          schema:
-            $ref: schema#/properties/spec/properties/tls/properties/issuerRef/properties/kind
-          sortable: true
-          type: select
-        - allowUserDefinedOption: true
-          computed: setValueFromDbDetails|/spec/tls/issuerRef/name
-          fetch: getIssuerRefsName
-          label:
-            text: labels.name
-          required: isIssuerRefRequired
-          schema:
-            $ref: schema#/properties/spec/properties/tls/properties/issuerRef/properties/name
-          sortable: true
-          type: select
-        if: showIssuerRefAndCertificates
-        schema:
-          $ref: schema#/properties/spec/properties/tls/properties/issuerRef
-        type: single-step-form
-      - alias: reusable_certificates
-        chart:
-          name: uibytebuildersdev-component-certificates
-          version: v0.14.0
-        computed: setValueFromDbDetails|/spec/tls/certificates|/spec/tls/certificates
-        functionCallbacks:
-          getAliasOptions:
-            $ref: functions#/getAliasOptions
-        if: showIssuerRefAndCertificates
-        moduleResolver: fetchJsons
-        schema:
-          $ref: schema#/properties/spec/properties/tls/properties/certificates
-        type: reusable-element
-      if: ifRequestTypeEqualsTo|ReconfigureTLS
-      label:
-        text: labels.tls
-      schema:
-        $ref: schema#/properties/spec/properties/tls
       type: single-step-form
     - label:
         text: labels.timeout

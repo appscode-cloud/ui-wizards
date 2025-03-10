@@ -70,6 +70,21 @@ form:
             enabled: true
             severity: warning
             val: 10000
+      opsManager:
+        enabled: warning
+        rules:
+          opsRequestFailed:
+            duration: 0m
+            enabled: true
+            severity: critical
+          opsRequestOnProgress:
+            duration: 0m
+            enabled: true
+            severity: info
+          opsRequestStatusProgressingToLong:
+            duration: 30m
+            enabled: true
+            severity: critical
       provisioner:
         enabled: warning
         rules:
@@ -129,6 +144,15 @@ resources:
       sourceRef:
         name: zookeeper
         namespace: demo
+  certManagerIoIssuer_ca: # +doc-gen:break
+    apiVersion: cert-manager.io/v1
+    kind: Issuer
+    metadata:
+      name: zookeeper-ca
+      namespace: demo
+    spec:
+      ca:
+        secretName: zookeeper-ca
   coreKubestashComBackupBlueprint: # +doc-gen:break
     apiVersion: core.kubestash.com/v1alpha1
     kind: BackupBlueprint
@@ -353,3 +377,44 @@ resources:
           requests:
             storage: 100Mi
       version: 3.8.3
+  monitoringCoreosComServiceMonitor: # +doc-gen:break
+    apiVersion: monitoring.coreos.com/v1
+    kind: ServiceMonitor
+    metadata:
+      name: zookeeper
+      namespace: demo
+    spec:
+      endpoints:
+        - honorLabels: true
+          interval: 30s
+          path: /metrics
+          port: metrics
+      namespaceSelector:
+        matchNames:
+          - demo
+      selector:
+        matchLabels:
+          app.kubernetes.io/instance: zookeeper
+          app.kubernetes.io/name: zookeepers.kubedb.com
+  secret_auth: # +doc-gen:break
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: zookeeper-auth
+      namespace: demo
+    stringData:
+      password: thisIs1StrongPassword
+      username: root
+    type: Opaque
+  secret_config: # +doc-gen:break
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: zookeeper-config
+      namespace: demo
+    stringData:
+      zookeeper.cnf: |
+        [mysqld]
+        max_connections = 200
+        read_buffer_size = 1048576
+    type: Opaque
