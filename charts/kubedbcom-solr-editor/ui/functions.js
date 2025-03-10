@@ -3094,7 +3094,25 @@ async function addOrRemoveBinding({ commit, model, getValue, discriminator }) {
   }
 }
 
+function setMetadata({ storeGet, mode, commit }) {
+  const dbname = storeGet('/route/params/name') || ''
+  const namespace = storeGet('/route/query/namespace') || ''
+  if (mode === 'standalone-step') {
+    commit('wizard/model$update', {
+      path: '/metadata/release/name',
+      value: dbname,
+      force: true,
+    })
+    commit('wizard/model$update', {
+      path: '/metadata/release/namespace',
+      value: namespace,
+      force: true,
+    })
+  }
+}
+
 return {
+  setMetadata,
   handleUnit,
   isConsole,
   getNamespaces,
