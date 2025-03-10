@@ -7,16 +7,6 @@ form:
       database:
         enabled: warning
         rules:
-          diskAlmostFull:
-            duration: 1m
-            enabled: true
-            severity: critical
-            val: 95
-          diskUsageHigh:
-            duration: 1m
-            enabled: true
-            severity: warning
-            val: 80
           pgpoolBackendErrorMessageCount:
             duration: 0m
             enabled: true
@@ -55,6 +45,21 @@ form:
             enabled: true
             severity: warning
             val: 0.1
+      opsManager:
+        enabled: warning
+        rules:
+          opsRequestFailed:
+            duration: 0m
+            enabled: true
+            severity: critical
+          opsRequestOnProgress:
+            duration: 0m
+            enabled: true
+            severity: info
+          opsRequestStatusProgressingToLong:
+            duration: 30m
+            enabled: true
+            severity: critical
       provisioner:
         enabled: warning
         rules:
@@ -114,6 +119,15 @@ resources:
       sourceRef:
         name: pgpool
         namespace: demo
+  certManagerIoIssuer_ca: # +doc-gen:break
+    apiVersion: cert-manager.io/v1
+    kind: Issuer
+    metadata:
+      name: pgpool-ca
+      namespace: demo
+    spec:
+      ca:
+        secretName: pgpool-ca
   kubedbComPgpool: # +doc-gen:break
     apiVersion: kubedb.com/v1alpha2
     kind: Pgpool
@@ -160,3 +174,44 @@ resources:
             type: LoadBalancer
       syncUsers: true
       version: 4.5.0
+  monitoringCoreosComServiceMonitor: # +doc-gen:break
+    apiVersion: monitoring.coreos.com/v1
+    kind: ServiceMonitor
+    metadata:
+      name: pgpool
+      namespace: demo
+    spec:
+      endpoints:
+        - honorLabels: true
+          interval: 30s
+          path: /metrics
+          port: metrics
+      namespaceSelector:
+        matchNames:
+          - demo
+      selector:
+        matchLabels:
+          app.kubernetes.io/instance: pgpool
+          app.kubernetes.io/name: pgpools.kubedb.com
+  secret_auth: # +doc-gen:break
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: pgpool-auth
+      namespace: demo
+    stringData:
+      password: thisIs1StrongPassword
+      username: root
+    type: Opaque
+  secret_config: # +doc-gen:break
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: pgpool-config
+      namespace: demo
+    stringData:
+      pgpool.cnf: |
+        [mysqld]
+        max_connections = 200
+        read_buffer_size = 1048576
+    type: Opaque
