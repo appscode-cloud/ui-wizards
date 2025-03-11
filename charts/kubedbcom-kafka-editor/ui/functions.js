@@ -1338,7 +1338,44 @@ async function addOrRemoveBinding({ commit, model, getValue, discriminator }) {
   }
 }
 
+/****** Monitoring *********/
+
+function showMonitoringSection({ watchDependency, discriminator, getValue }) {
+  watchDependency('discriminator#/enableMonitoring')
+  const configureStatus = getValue(discriminator, '/enableMonitoring')
+  return configureStatus
+}
+
+function onEnableMonitoringChange({ discriminator, getValue, commit }) {
+  const configureStatus = getValue(discriminator, '/enableMonitoring')
+  if (configureStatus) {
+    commit('wizard/model$update', {
+      path: '/resources/kubedbComDruid/spec/monitor',
+      value: {},
+      force: true,
+    })
+  } else {
+    commit('wizard/model$delete', '/resources/kubedbComDruid/spec/monitor')
+  }
+
+  // update alert value depend on monitoring profile
+  commit('wizard/model$update', {
+    path: '/form/alert/enabled',
+    value: configureStatus ? 'warning' : 'none',
+    force: true,
+  })
+}
+
+function showCustomizeExporterSection({ watchDependency, discriminator, getValue }) {
+  watchDependency('discriminator#/customizeExporter')
+  const configureStatus = getValue(discriminator, '/customizeExporter')
+  return configureStatus
+}
+
 return {
+  showMonitoringSection,
+  onEnableMonitoringChange,
+  showCustomizeExporterSection,
   isRancherManaged,
   handleUnit,
   isConsole,
