@@ -436,6 +436,15 @@ steps:
         default: true
         type: boolean
     elements:
+    - label:
+        text: labels.to_update_exporter_resources
+      type: label-element
+    - customClass: mb-20
+      label:
+        text: labels.create_opsrequest
+      type: anchor
+      url:
+        function: getOpsRequestUrl|VerticalScaling
     - computed: isValueExistInModel|/resources/kubedbComProxySQL/spec/monitor
       label:
         text: labels.enable_monitoring
@@ -600,6 +609,12 @@ steps:
           $ref: discriminator#/customizeExporter
         type: switch
       - elements:
+        - if: returnFalse
+          label:
+            text: labels.resources
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComProxySQL/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/resources
+          type: resource-input-form
         - label:
             text: labels.security_context
           type: label-element
@@ -648,7 +663,7 @@ steps:
       type: single-step-form
     type: single-step-form
   id: monitoring
-  title: steps.6.label
+  title: steps.5.label
 - form:
     elements:
     - label:
