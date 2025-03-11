@@ -107,15 +107,23 @@ spec:
             - name: clickhouse
               resources:
                 {{- toYaml $res | nindent 16 }}
-          {{- include "common.placement" . | nindent 10 }}
+          {{- include "common.placement" $ | nindent 10 }}
     {{- end }}
 {{- else }}
   podTemplate:
     spec:
+      securityContext:
+        fsGroup: {{ .Values.spec.openshift.securityContext.runAsUser | default 101 }}
       containers:
         - name: clickhouse
           resources:
             {{- toYaml $res | nindent 12 }}
+          securityContext:
+            {{- include "container.securityContext" $ | nindent 12 }}
+      initContainers:
+        - name: clickhouse-init
+          securityContext:
+            {{- include "container.securityContext" . | nindent 12 }}
       {{- if .Values.spec.admin.clusterTier.placement.default }}
       podPlacementPolicy:
         name: {{ .Values.spec.admin.clusterTier.placement.default }}
@@ -157,4 +165,20 @@ spec:
 {{- if .Values.spec.configuration }}
   configSecret:
     name: {{ include "kubedbcom-clickhouse-editor-options.fullname" . }}-config
+{{- end }}
+{{- if (and .Values.spec.admin.monitoring .Values.spec.admin.monitoring.agent) }}
+  monitor:
+    agent: {{ .Values.spec.admin.monitoring.agent }}
+    prometheus:
+    {{- with .Values.spec.admin.monitoring.exporter }}
+      exporter:
+        resources:
+          {{- toYaml .resources | nindent 10 }}
+        securityContext:
+          {{- include "container.securityContext" $ | nindent 10 }}
+    {{- end }}
+      serviceMonitor:
+        interval: 30s
+        labels:
+          {{- toYaml .Values.spec.monitoring.serviceMonitor.labels | nindent 10 }}
 {{- end }}
