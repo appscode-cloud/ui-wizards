@@ -418,14 +418,104 @@ function showAndInitOpsRequestType({ route, commit }) {
 
 // vertical scaling
 function ifDbTypeEqualsTo({ discriminator, getValue, watchDependency, commit }, value, opsReqType) {
-  const verd = getDbType({
-    discriminator,
-    getValue,
-    watchDependency,
-  })
+  const verd = getDbType({ discriminator, getValue, watchDependency })
 
   clearOpsReqSpec(verd, opsReqType, commit)
   return value === verd
+}
+
+// machine profile stuffs
+let machinesFromPreset = []
+function hasMachine({ getValue, discriminator }) {
+  const dbDetails = getValue(discriminator, '/dbDetails')
+  const annotations = dbDetails?.metadata?.annotations || {}
+  return !!annotations['kubernetes.io/instance-type']
+}
+
+function getMachines({ storeGet }) {
+  const presets = storeGet('/kubedbuiPresets') || {}
+  const avlMachines = presets.admin?.machineProfiles?.available || []
+  let ret = []
+  if (avlMachines.length) {
+    ret = avlMachines.map((machine) => {
+      if (machine === 'custom') return { text: machine, value: machine }
+      else {
+        const machineData = machinesFromPreset.find((val) => val.id === machine)
+        if (machineData) {
+          const subText = `CPU: ${machineData.limits.cpu}, Memory: ${machineData.limits.memory}`
+          const text = machineData.name ? machineData.name : machineData.id
+          return { text, subText, value: machine }
+        } else return { text: machine, value: machine }
+      }
+    })
+  } else {
+    array = machineList
+      .map((machine) => {
+        if (machine === 'custom') return { text: machine, value: machine }
+        const subText = `CPU: ${machines[machine].resources.limits.cpu}, Memory: ${machines[machine].resources.limits.memory}`
+        const text = machine
+        return { text, subText, value: machine }
+      })
+      .filter((val) => !!val)
+  }
+  return ret
+}
+
+function setMachine({ getValue, discriminator, storeGet }, path) {
+  const dbDetails = getValue(discriminator, '/dbDetails')
+  const annotations = dbDetails?.metadata?.annotations || {}
+  const machine = annotations['kubernetes.io/instance-type']
+  machinesFromPreset = storeGet('/kubedbuiPresets')?.admin?.machineProfiles.machines || []
+
+  const resources = getValue(discriminator, `/dbDetails${path}`)
+
+  const found = machinesFromPreset.find(
+    (item) => JSON.stringify(item.limits) === JSON.stringify(resources.limits),
+  )
+
+  if (found) return found.id
+
+  const machinePresets = machinesFromPreset.find((item) => item.id === machine)
+  if (JSON.stringify(machinePresets.limits) === JSON.stringify(resources.limits)) return machine
+  else return 'custom'
+}
+
+function onMachineChange({ getValue, discriminator, commit }, path) {
+  let selectedMachine = ''
+  if (path.includes('standalone')) selectedMachine = getValue(discriminator, '/machine-standalone')
+  if (path.includes('replicaSet')) selectedMachine = getValue(discriminator, '/machine-replicaSet')
+  if (path.includes('mongos')) selectedMachine = getValue(discriminator, '/machine-mongos')
+  if (path.includes('shard')) selectedMachine = getValue(discriminator, '/machine-shard')
+  if (path.includes('configServer'))
+    selectedMachine = getValue(discriminator, '/machine-configServer')
+
+  let machine = null
+  if (path.includes('standalone') || path.includes('replicaSet')) {
+    machine = machinesFromPreset.find((item) => item.id === selectedMachine)
+  } else {
+    if (path.includes('shard'))
+      machine = machinesFromPreset.find((item) => item.id === selectedMachine)
+    else if (path.includes('configServer'))
+      machine = machinesFromPreset.find((item) => item.id === selectedMachine)
+    else if (path.includes('mongos'))
+      machine = machinesFromPreset.find((item) => item.id === selectedMachine)
+  }
+
+  if (machine) {
+    const obj = { limits: { ...machine.limits }, requests: { ...machine.limits } }
+
+    commit('wizard/model$update', {
+      path: path,
+      value: obj,
+      force: true,
+    })
+  }
+}
+
+function isMachineCustom({ watchDependency, getValue, discriminator }, path) {
+  watchDependency(`discriminator#${path}`)
+  const machine = getValue(discriminator, `${path}`)
+  return machine === 'custom'
 }
 
 // for config secret
@@ -889,4 +979,9 @@ return {
   onNamespaceChange,
   setApplyToIfReady,
   isVerticalScaleTopologyRequired,
+  hasMachine,
+  getMachines,
+  setMachine,
+  onMachineChange,
+  isMachineCustom,
 }
