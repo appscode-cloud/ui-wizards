@@ -458,7 +458,16 @@ steps:
         default: true
         type: boolean
     elements:
-    - computed: isValueExistInModel|/resources/KubedbComSinglestore/spec/monitor
+    - label:
+        text: labels.to_update_exporter_resources
+      type: label-element
+    - customClass: mb-20
+      label:
+        text: labels.create_opsrequest
+      type: anchor
+      url:
+        function: getOpsRequestUrl|VerticalScaling
+    - computed: isValueExistInModel|/resources/kubedbComSinglestore/spec/monitor
       label:
         text: labels.enable_monitoring
       onChange: onEnableMonitoringChange
@@ -485,15 +494,15 @@ steps:
           text: options.agent.prometheus_builtin.label
           value: prometheus.io/builtin
         schema:
-          $ref: schema#/properties/resources/properties/KubedbComSinglestore/properties/spec/properties/monitor/properties/agent
+          $ref: schema#/properties/resources/properties/kubedbComSinglestore/properties/spec/properties/monitor/properties/agent
         type: radio
       - elements:
         - label:
             text: labels.scrapping_interval
           schema:
-            $ref: schema#/properties/resources/properties/KubedbComSinglestore/properties/spec/properties/monitor/properties/prometheus/properties/serviceMonitor/properties/interval
+            $ref: schema#/properties/resources/properties/kubedbComSinglestore/properties/spec/properties/monitor/properties/prometheus/properties/serviceMonitor/properties/interval
           type: input
-        if: isEqualToModelPathValue|prometheus.io/operator|/resources/KubedbComSinglestore/spec/monitor/agent
+        if: isEqualToModelPathValue|prometheus.io/operator|/resources/kubedbComSinglestore/spec/monitor/agent
         label:
           text: labels.service_monitor_configuration
         show_label: true
@@ -588,14 +597,14 @@ steps:
           schema:
             $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec
           type: single-step-form
-        if: isEqualToModelPathValue|prometheus.io|/resources/KubedbComSinglestore/spec/monitor/agent
+        if: isEqualToModelPathValue|prometheus.io|/resources/kubedbComSinglestore/spec/monitor/agent
         label:
           text: labels.service_monitor
         schema:
           $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor
         show_label: true
         type: single-step-form
-      - if: isEqualToModelPathValue|prometheus.io|/resources/KubedbComSinglestore/spec/monitor/agent
+      - if: isEqualToModelPathValue|prometheus.io|/resources/kubedbComSinglestore/spec/monitor/agent
         individualItemDisabilityCheck: disableLableChecker
         isArray: true
         keys:
@@ -622,10 +631,11 @@ steps:
           $ref: discriminator#/customizeExporter
         type: switch
       - elements:
-        - label:
+        - disabled: true
+          label:
             text: labels.resources
           schema:
-            $ref: schema#/properties/resources/properties/KubedbComSinglestore/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/resources
+            $ref: schema#/properties/resources/properties/kubedbComSinglestore/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/resources
           type: resource-input-form
         - label:
             text: labels.security_context
@@ -633,30 +643,30 @@ steps:
         - label:
             text: labels.run_as_user
           schema:
-            $ref: schema#/properties/resources/properties/KubedbComSinglestore/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/securityContext/properties/runAsUser
+            $ref: schema#/properties/resources/properties/kubedbComSinglestore/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/securityContext/properties/runAsUser
           type: input
         - customClass: mb-0
           label:
             text: labels.run_as_group
           schema:
-            $ref: schema#/properties/resources/properties/KubedbComSinglestore/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/securityContext/properties/runAsGroup
+            $ref: schema#/properties/resources/properties/kubedbComSinglestore/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/securityContext/properties/runAsGroup
           type: input
         - label:
             text: labels.port
           schema:
-            $ref: schema#/properties/resources/properties/KubedbComSinglestore/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/port
+            $ref: schema#/properties/resources/properties/kubedbComSinglestore/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/port
           type: input
         - element:
             label:
               isSubsection: true
               text: labels.args
             schema:
-              $ref: schema#/properties/resources/properties/KubedbComSinglestore/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/args/items
+              $ref: schema#/properties/resources/properties/kubedbComSinglestore/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/args/items
             type: input
           label:
             text: labels.args
           schema:
-            $ref: schema#/properties/resources/properties/KubedbComSinglestore/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/args
+            $ref: schema#/properties/resources/properties/kubedbComSinglestore/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/args
           type: list-input-form
         - alias: reusable_env
           chart:
@@ -667,15 +677,10 @@ steps:
               $ref: schema#/properties/metadata/properties/release/properties/namespace
           moduleResolver: fetchJsons
           schema:
-            $ref: schema#/properties/resources/properties/KubedbComSinglestore/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env
+            $ref: schema#/properties/resources/properties/kubedbComSinglestore/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env
           type: reusable-element
         if: showCustomizeExporterSection
         type: single-step-form
-      - computed: setMetadata
-        if: returnFalse
-        schema:
-          $ref: schema#/properties/metadata/properties/release/properties/name
-        type: input
       if: showMonitoringSection
       type: single-step-form
     type: single-step-form
