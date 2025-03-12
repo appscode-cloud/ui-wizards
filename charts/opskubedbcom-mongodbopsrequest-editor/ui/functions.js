@@ -732,11 +732,6 @@ function ifDbTypeEqualsTo({ discriminator, getValue, watchDependency, commit }, 
 
 // machine profile stuffs
 let machinesFromPreset = []
-function hasMachine({ getValue, discriminator }) {
-  const dbDetails = getValue(discriminator, '/dbDetails')
-  const annotations = dbDetails?.metadata?.annotations || {}
-  return !!annotations['kubernetes.io/instance-type']
-}
 
 function getMachines({ storeGet }) {
   const presets = storeGet('/kubedbuiPresets') || {}
@@ -795,17 +790,7 @@ function onMachineChange({ getValue, discriminator, commit }, path, valPath) {
   if (path.includes('configServer'))
     selectedMachine = getValue(discriminator, '/machine-configServer')
 
-  let machine = null
-  if (path.includes('standalone') || path.includes('replicaSet')) {
-    machine = machinesFromPreset.find((item) => item.id === selectedMachine)
-  } else {
-    if (path.includes('shard'))
-      machine = machinesFromPreset.find((item) => item.id === selectedMachine)
-    else if (path.includes('configServer'))
-      machine = machinesFromPreset.find((item) => item.id === selectedMachine)
-    else if (path.includes('mongos'))
-      machine = machinesFromPreset.find((item) => item.id === selectedMachine)
-  }
+  const machine = machinesFromPreset.find((item) => item.id === selectedMachine)
 
   if (machine) {
     const obj = { limits: { ...machine?.limits }, requests: { ...machine?.limits } }
@@ -816,7 +801,7 @@ function onMachineChange({ getValue, discriminator, commit }, path, valPath) {
       force: true,
     })
   } else {
-    const val = getValue(discriminator, `/dbDetails${valPath}`)
+    const val = getValue(discriminator, `/dbDetails${valPath}`) || {}
     commit('wizard/model$update', {
       path: path,
       value: val,
@@ -1292,7 +1277,6 @@ return {
   onNamespaceChange,
   setApplyToIfReady,
   isVerticalScaleTopologyRequired,
-  hasMachine,
   getMachines,
   setMachine,
   onMachineChange,
