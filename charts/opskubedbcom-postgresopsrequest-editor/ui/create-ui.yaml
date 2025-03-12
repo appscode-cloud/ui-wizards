@@ -101,8 +101,22 @@ steps:
       type: single-step-form
     - elements:
       - elements:
-        - elements:
-          - computed: setValueFromDbDetails|/spec/podTemplate/spec/resources|/spec/verticalScaling/postgres/resources
+        - discriminator:
+            machine:
+              default: ""
+              type: string
+          elements:
+          - computed: setMachine|/spec/podTemplate/spec/resources
+            customClass: mt-20
+            disableUnselect: true
+            fetch: getMachines
+            label: 
+              text: Machine Profile
+            onChange: onMachineChange|/spec/verticalScaling/postgres/resources|/spec/podTemplate/spec/resources
+            schema:
+              $ref: discriminator#/machine
+            type: select
+          - if: isMachineCustom
             label:
               text: labels.resources
             schema:
