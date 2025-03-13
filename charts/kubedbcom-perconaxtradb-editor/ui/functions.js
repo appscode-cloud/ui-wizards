@@ -2830,7 +2830,7 @@ function getOpsRequestUrl({ storeGet, model, getValue, mode }, reqType) {
   if (mode === 'standalone-step')
     return `${pathPrefix}?namespace=${namespace}&applyAction=create-opsrequest-${reqType.toLowerCase()}`
   else
-    return `${domain}/console/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/druidopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=VerticalScaling`
+    return `${domain}/console/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/perconaxtradbopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=VerticalScaling`
 }
 
 return {
