@@ -94,18 +94,32 @@ steps:
         text: Horizontal Scaling Form
       type: single-step-form
     - elements:
-      - elements:
-        - label:
-            text: Node Selection Policy
+      - discriminator:
+          machine:
+            default: ""
+            type: string
+        elements:
+        - computed: setMachine|/spec/podTemplate/spec/resources
+          customClass: mt-20
+          disableUnselect: true
+          fetch: getMachines
+          label: 
+            text: Machine Profile
+          onChange: onMachineChange|/spec/verticalScaling/memcached/resources|/spec/podTemplate/spec/resources
           schema:
-            $ref: schema#/properties/spec/properties/verticalScaling/properties/memcached/properties/nodeSelectionPolicy
-          type: input
-        - computed: setResource|/spec/podTemplate/spec/resources
+            $ref: discriminator#/machine
+          type: select
+        - if: isMachineCustom
           label:
             text: labels.resources
           schema:
             $ref: schema#/properties/spec/properties/verticalScaling/properties/memcached/properties/resources
           type: resource-input-form
+        - label:
+            text: Node Selection Policy
+          schema:
+            $ref: schema#/properties/spec/properties/verticalScaling/properties/memcached/properties/nodeSelectionPolicy
+          type: input
         - elements:
           - label:
               text: key
