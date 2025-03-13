@@ -348,12 +348,12 @@ function onEnableMonitoringChange({ discriminator, getValue, commit }) {
   const configureStatus = getValue(discriminator, '/enableMonitoring')
   if (configureStatus) {
     commit('wizard/model$update', {
-      path: '/resources/kubedbComMongoDB/spec/monitor',
+      path: '/resources/kubedbComZooKeeper/spec/monitor',
       value: {},
       force: true,
     })
   } else {
-    commit('wizard/model$delete', '/resources/kubedbComMongoDB/spec/monitor')
+    commit('wizard/model$delete', '/resources/kubedbComZooKeeper/spec/monitor')
   }
 
   // update alert value depend on monitoring profile
@@ -374,12 +374,12 @@ function onCustomizeExporterChange({ discriminator, getValue, commit }) {
   const configureStatus = getValue(discriminator, '/customizeExporter')
   if (configureStatus) {
     commit('wizard/model$update', {
-      path: '/resources/kubedbComMongoDB/spec/monitor/prometheus/exporter',
+      path: '/resources/kubedbComZooKeeper/spec/monitor/prometheus/exporter',
       value: {},
       force: true,
     })
   } else {
-    commit('wizard/model$delete', '/resources/kubedbComMongoDB/spec/monitor/prometheus/exporter')
+    commit('wizard/model$delete', '/resources/kubedbComZooKeeper/spec/monitor/prometheus/exporter')
   }
 }
 
@@ -437,7 +437,7 @@ async function fetchJsons({ axios, itemCtx }) {
 }
 
 function onAgentChange({ commit, model, getValue }) {
-  const agent = getValue(model, '/resources/kubedbComMongoDB/spec/monitor/agent')
+  const agent = getValue(model, '/resources/kubedbComZooKeeper/spec/monitor/agent')
   if (agent === 'prometheus.io') {
     commit('wizard/model$update', {
       path: '/resources/monitoringCoreosComServiceMonitor/spec/endpoints',
