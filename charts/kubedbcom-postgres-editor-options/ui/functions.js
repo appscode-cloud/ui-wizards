@@ -1008,18 +1008,7 @@ function getAdminOptions({ getValue, model, watchDependency, axios, storeGet, co
   return options
 }
 
-function showArchiver({ watchDependency, getValue, model, commit }) {
-  watchDependency('model#/spec/mode')
-  const dbmode = getValue(model, '/spec/mode')
-
-  if (dbmode === 'Standalone') {
-    commit('wizard/model$update', {
-      path: '/spec/admin/archiver/enable/default',
-      value: false,
-      force: true,
-    })
-    return false
-  }
+function showArchiver({ getValue, model }) {
   return checkIfFeatureOn({ getValue, model }, 'archiver')
 }
 
