@@ -452,7 +452,27 @@ function onAgentChange({ commit, model, getValue }) {
   }
 }
 
+function getOpsRequestUrl({ storeGet, model, getValue, mode }, reqType) {
+  const cluster = storeGet('/route/params/cluster')
+  const domain = storeGet('/domain') || ''
+  const owner = storeGet('/route/params/user')
+  const dbname = getValue(model, '/metadata/release/name')
+  const group = getValue(model, '/metadata/resource/group')
+  const kind = getValue(model, '/metadata/resource/kind')
+  const namespace = getValue(model, '/metadata/release/namespace')
+  const resource = getValue(model, '/metadata/resource/name')
+  const version = getValue(model, '/metadata/resource/version')
+  const routeRootPath = storeGet('/route/path')
+  const pathPrefix = `${domain}/db${routeRootPath}`
+
+  if (mode === 'standalone-step')
+    return `${pathPrefix}?namespace=${namespace}&applyAction=create-opsrequest-${reqType.toLowerCase()}`
+  else
+    return `${domain}/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/zookeeperopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=${reqType}`
+}
+
 return {
+  getOpsRequestUrl,
   onAgentChange,
   fetchJsons,
   setMetadata,
