@@ -107,8 +107,22 @@ steps:
         text: Horizontal Scaling Form
       type: single-step-form
     - elements:
-      - elements:
-        - computed: setValueFromDbDetails|/spec/podTemplate/spec/resources|/spec/verticalScaling/redis/resources
+      - discriminator:
+          machine:
+            default: ""
+            type: string
+        elements:
+        - computed: setMachine|/spec/podTemplate/spec/resources
+          customClass: mt-20
+          disableUnselect: true
+          fetch: getMachines
+          label: 
+            text: Machine Profile
+          onChange: onMachineChange|/spec/verticalScaling/redis/resources|/spec/podTemplate/spec/resources
+          schema:
+            $ref: discriminator#/machine
+          type: select
+        - if: isMachineCustom
           label:
             text: labels.resources
           schema:
