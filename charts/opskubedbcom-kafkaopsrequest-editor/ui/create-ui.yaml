@@ -120,18 +120,32 @@ steps:
         text: Horizontal Scaling Form
       type: single-step-form
     - elements:
-      - elements:
-        - label:
-            text: Node Selection Policy
+      - discriminator:
+          machine-broker:
+            default: ""
+            type: string
+        elements:
+        - computed: setMachine|/spec/topology/broker/resources
+          customClass: mt-20
+          disableUnselect: true
+          fetch: getMachines
+          label: 
+            text: Machine Profile
+          onChange: onMachineChange|/spec/verticalScaling/broker/resources|/spec/topology/broker/resources
           schema:
-            $ref: schema#/properties/spec/properties/verticalScaling/properties/broker/properties/nodeSelectionPolicy
-          type: input
-        - computed: setResource|/spec/topology/broker/podTemplate/spec/containers
+            $ref: discriminator#/machine-broker
+          type: select
+        - if: isMachineCustom|/machine-broker
           label:
             text: labels.resources
           schema:
             $ref: schema#/properties/spec/properties/verticalScaling/properties/broker/properties/resources
           type: resource-input-form
+        - label:
+            text: Node Selection Policy
+          schema:
+            $ref: schema#/properties/spec/properties/verticalScaling/properties/broker/properties/nodeSelectionPolicy
+          type: input
         - elements:
           - label:
               text: key
@@ -156,18 +170,32 @@ steps:
           $ref: schema#/properties/spec/properties/verticalScaling/properties/broker
         show_label: true
         type: single-step-form
-      - elements:
-        - label:
-            text: Node Selection Policy
+      - discriminator:
+          machine-controller:
+            default: ""
+            type: string
+        elements:
+        - computed: setMachine|/spec/topology/controller/resources
+          customClass: mt-20
+          disableUnselect: true
+          fetch: getMachines
+          label: 
+            text: Machine Profile
+          onChange: onMachineChange|/spec/verticalScaling/controller/resources|/spec/topology/controller/resources
           schema:
-            $ref: schema#/properties/spec/properties/verticalScaling/properties/controller/properties/nodeSelectionPolicy
-          type: input
-        - computed: setResource|/spec/topology/controller/podTemplate/spec/containers
+            $ref: discriminator#/machine-controller
+          type: select
+        - if: isMachineCustom|/machine-controller
           label:
             text: labels.resources
           schema:
             $ref: schema#/properties/spec/properties/verticalScaling/properties/controller/properties/resources
           type: resource-input-form
+        - label:
+            text: Node Selection Policy
+          schema:
+            $ref: schema#/properties/spec/properties/verticalScaling/properties/controller/properties/nodeSelectionPolicy
+          type: input
         - elements:
           - label:
               text: key
@@ -192,18 +220,32 @@ steps:
           $ref: schema#/properties/spec/properties/verticalScaling/properties/controller
         show_label: true
         type: single-step-form
-      - elements:
-        - label:
-            text: Node Selection Policy
+      - discriminator:
+          machine-node:
+            default: ""
+            type: string
+        elements:
+        - computed: setMachine|/spec/podTemplate/spec/containers
+          customClass: mt-20
+          disableUnselect: true
+          fetch: getMachines
+          label: 
+            text: Machine Profile
+          onChange: onMachineChange|/spec/verticalScaling/node/resources|/spec/podTemplate/spec/containers
           schema:
-            $ref: schema#/properties/spec/properties/verticalScaling/properties/node/properties/nodeSelectionPolicy
-          type: input
-        - computed: setResource|/spec/podTemplate/spec/containers
+            $ref: discriminator#/machine-node
+          type: select
+        - if: isMachineCustom|/machine-node
           label:
             text: labels.resources
           schema:
             $ref: schema#/properties/spec/properties/verticalScaling/properties/node/properties/resources
           type: resource-input-form
+        - label:
+            text: Node Selection Policy
+          schema:
+            $ref: schema#/properties/spec/properties/verticalScaling/properties/node/properties/nodeSelectionPolicy
+          type: input
         - elements:
           - label:
               text: key

@@ -770,9 +770,10 @@ function onMachineChange({ getValue, discriminator, commit }, path, valPath) {
 
   const machine = machinesFromPreset.find((item) => item.id === selectedMachine)
 
-  if (machine) {
-    const obj = { limits: { ...machine?.limits }, requests: { ...machine?.limits } }
-
+  if (selectedMachine !== 'custom') {
+    let obj = {}
+    if (machine) obj = { limits: { ...machine?.limits }, requests: { ...machine?.limits } }
+    else obj = machines[selectedMachine]?.resources
     commit('wizard/model$update', {
       path: path,
       value: obj,
