@@ -982,47 +982,58 @@ function getMachines({ storeGet }) {
   return arr
 }
 
-function setMachine({ getValue, discriminator, storeGet }, path) {
+function setMachine({ getValue, discriminator, storeGet }, type) {
   const dbDetails = getValue(discriminator, '/dbDetails')
   const annotations = dbDetails?.metadata?.annotations || {}
-  const machine = annotations['kubernetes.io/instance-type']
+  let machine = ''
+  if (type === 'node') machine = annotations['kubernetes.io/instance-type']
+  else machine = annotations[`kubernetes.io/instance-type_${type}`]
+
   machinesFromPreset = storeGet('/kubedbuiPresets')?.admin?.machineProfiles?.machines || []
 
-  const res = getValue(discriminator, `/dbDetails${path}`) || []
-
-  const found = machinesFromPreset.find(
-    (item) => JSON.stringify(item.limits) === JSON.stringify(res[0]?.resources?.limits),
-  )
-  if (found) return found.id
-
   const machinePresets = machinesFromPreset.find((item) => item.id === machine)
-  if (JSON.stringify(machinePresets?.limits) === JSON.stringify(res[0]?.resources?.limits))
-    return machine
+  if (machinePresets) return machine
   else return 'custom'
 }
 
-function onMachineChange({ getValue, discriminator, commit }, path, valPath) {
-  const selectedMachine = getValue(discriminator, '/machine')
+function onMachineChange({ getValue, discriminator, commit, model }, type, valPath) {
+  let selectedMachine = ''
+  selectedMachine = getValue(discriminator, '/machine')
   const machine = machinesFromPreset.find((item) => item.id === selectedMachine)
 
+  let obj = {}
   if (selectedMachine !== 'custom') {
-    let obj = {}
     if (machine) obj = { limits: { ...machine?.limits }, requests: { ...machine?.limits } }
     else obj = machines[selectedMachine]?.resources
+  } else {
+    const val = getValue(discriminator, `/dbDetails${valPath}`) || {}
+    obj = Array.isArray(val) ? val[0]?.resources : { ...val }
+  }
+
+  const path = `/spec/verticalScaling/${type}/resources`
+  if (Object.keys(obj).length)
     commit('wizard/model$update', {
       path: path,
       value: obj,
       force: true,
     })
-  } else {
-    const val = getValue(discriminator, `/dbDetails${valPath}`) || {}
 
+  // update metadata.annotations
+  const annotations = getValue(model, '/metadata/annotations') || {}
+
+  if (type === 'node') {
+    if (selectedMachine === 'custom') delete annotations['kubernetes.io/instance-type']
+    else annotations['kubernetes.io/instance-type'] = selectedMachine
+  } else {
+    if (selectedMachine === 'custom') delete annotations[`kubernetes.io/instance-type_${type}`]
+    else annotations[`kubernetes.io/instance-type_${type}`] = selectedMachine
+  }
+  if (machinesFromPreset.length)
     commit('wizard/model$update', {
-      path: path,
-      value: val[0]?.resources,
+      path: '/metadata/annotations',
+      value: annotations,
       force: true,
     })
-  }
 }
 
 function isMachineCustom({ watchDependency, getValue, discriminator }) {
