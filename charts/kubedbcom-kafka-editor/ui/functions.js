@@ -1338,7 +1338,30 @@ async function addOrRemoveBinding({ commit, model, getValue, discriminator }) {
   }
 }
 
+/****** Monitoring *********/
+
+function showCustomizeExporterSection({ watchDependency, discriminator, getValue }) {
+  watchDependency('discriminator#/customizeExporter')
+  const configureStatus = getValue(discriminator, '/customizeExporter')
+  return configureStatus
+}
+
+function onCustomizeExporterChange({ discriminator, getValue, commit }) {
+  const configureStatus = getValue(discriminator, '/customizeExporter')
+  if (configureStatus) {
+    commit('wizard/model$update', {
+      path: '/resources/kubedbComKafka/spec/monitor/prometheus/exporter',
+      value: {},
+      force: true,
+    })
+  } else {
+    commit('wizard/model$delete', '/resources/kubedbComKafka/spec/monitor/prometheus/exporter')
+  }
+}
+
 return {
+  onCustomizeExporterChange,
+  showCustomizeExporterSection,
   isRancherManaged,
   handleUnit,
   isConsole,

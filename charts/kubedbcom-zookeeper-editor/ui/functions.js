@@ -333,7 +333,155 @@ function returnFalse() {
   return false
 }
 
+function isValueExistInModel({ model, getValue }, path) {
+  const modelValue = getValue(model, path)
+  return !!modelValue
+}
+
+function showMonitoringSection({ watchDependency, discriminator, getValue }) {
+  watchDependency('discriminator#/enableMonitoring')
+  const configureStatus = getValue(discriminator, '/enableMonitoring')
+  return configureStatus
+}
+
+function onEnableMonitoringChange({ discriminator, getValue, commit }) {
+  const configureStatus = getValue(discriminator, '/enableMonitoring')
+  if (configureStatus) {
+    commit('wizard/model$update', {
+      path: '/resources/kubedbComZooKeeper/spec/monitor',
+      value: {},
+      force: true,
+    })
+  } else {
+    commit('wizard/model$delete', '/resources/kubedbComZooKeeper/spec/monitor')
+  }
+
+  // update alert value depend on monitoring profile
+  commit('wizard/model$update', {
+    path: '/form/alert/enabled',
+    value: configureStatus ? 'warning' : 'none',
+    force: true,
+  })
+}
+
+function showCustomizeExporterSection({ watchDependency, discriminator, getValue }) {
+  watchDependency('discriminator#/customizeExporter')
+  const configureStatus = getValue(discriminator, '/customizeExporter')
+  return configureStatus
+}
+
+function onCustomizeExporterChange({ discriminator, getValue, commit }) {
+  const configureStatus = getValue(discriminator, '/customizeExporter')
+  if (configureStatus) {
+    commit('wizard/model$update', {
+      path: '/resources/kubedbComZooKeeper/spec/monitor/prometheus/exporter',
+      value: {},
+      force: true,
+    })
+  } else {
+    commit('wizard/model$delete', '/resources/kubedbComZooKeeper/spec/monitor/prometheus/exporter')
+  }
+}
+
+function isEqualToModelPathValue({ model, getValue, watchDependency }, value, modelPath) {
+  const modelPathValue = getValue(model, modelPath)
+  watchDependency('model#' + modelPath)
+  return modelPathValue === value
+}
+
+function setMetadata({ storeGet, mode, commit }) {
+  const dbname = storeGet('/route/params/name') || ''
+  const namespace = storeGet('/route/query/namespace') || ''
+  if (mode === 'standalone-step') {
+    commit('wizard/model$update', {
+      path: '/metadata/release/name',
+      value: dbname,
+      force: true,
+    })
+    commit('wizard/model$update', {
+      path: '/metadata/release/namespace',
+      value: namespace,
+      force: true,
+    })
+  }
+}
+
+async function fetchJsons({ axios, itemCtx }) {
+  let ui = {}
+  let language = {}
+  let functions = {}
+  const { name, sourceRef, version, packageviewUrlPrefix } = itemCtx.chart
+
+  try {
+    ui = await axios.get(
+      `${packageviewUrlPrefix}/create-ui.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`,
+    )
+    language = await axios.get(
+      `${packageviewUrlPrefix}/language.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`,
+    )
+    const functionString = await axios.get(
+      `${packageviewUrlPrefix}/functions.js?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}`,
+    )
+    // declare evaluate the functionString to get the functions Object
+    const evalFunc = new Function(functionString.data || '')
+    functions = evalFunc()
+  } catch (e) {
+    console.log(e)
+  }
+
+  return {
+    ui: ui.data || {},
+    language: language.data || {},
+    functions,
+  }
+}
+
+function onAgentChange({ commit, model, getValue }) {
+  const agent = getValue(model, '/resources/kubedbComZooKeeper/spec/monitor/agent')
+  if (agent === 'prometheus.io') {
+    commit('wizard/model$update', {
+      path: '/resources/monitoringCoreosComServiceMonitor/spec/endpoints',
+      value: [],
+      force: true,
+    })
+
+    onNamespaceChange({ commit, model, getValue })
+    onLabelChange({ commit, model, getValue })
+  } else {
+    commit('wizard/model$delete', '/resources/monitoringCoreosComServiceMonitor')
+  }
+}
+
+function getOpsRequestUrl({ storeGet, model, getValue, mode }, reqType) {
+  const cluster = storeGet('/route/params/cluster')
+  const domain = storeGet('/domain') || ''
+  const owner = storeGet('/route/params/user')
+  const dbname = getValue(model, '/metadata/release/name')
+  const group = getValue(model, '/metadata/resource/group')
+  const kind = getValue(model, '/metadata/resource/kind')
+  const namespace = getValue(model, '/metadata/release/namespace')
+  const resource = getValue(model, '/metadata/resource/name')
+  const version = getValue(model, '/metadata/resource/version')
+  const routeRootPath = storeGet('/route/path')
+  const pathPrefix = `${domain}/db${routeRootPath}`
+
+  if (mode === 'standalone-step')
+    return `${pathPrefix}?namespace=${namespace}&applyAction=create-opsrequest-${reqType.toLowerCase()}`
+  else
+    return `${domain}/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/zookeeperopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=${reqType}`
+}
+
 return {
+  getOpsRequestUrl,
+  onAgentChange,
+  fetchJsons,
+  setMetadata,
+  isEqualToModelPathValue,
+  isValueExistInModel,
+  showMonitoringSection,
+  onEnableMonitoringChange,
+  showCustomizeExporterSection,
+  onCustomizeExporterChange,
   initBackupData,
   isBackupDataLoadedTrue,
   setBackupType,
