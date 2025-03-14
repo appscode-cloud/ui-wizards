@@ -774,69 +774,59 @@ function getMachines({ storeGet }) {
   return arr
 }
 
-function setMachine({ getValue, discriminator, storeGet }, path) {
+function setMachine({ getValue, discriminator, storeGet }, type) {
   const dbDetails = getValue(discriminator, '/elasticsearchDetails')
   const annotations = dbDetails?.metadata?.annotations || {}
-  const machine = annotations['kubernetes.io/instance-type']
+  let machine = ''
+  if (type === 'data' || type === 'node') machine = annotations['kubernetes.io/instance-type']
+  else machine = annotations[`kubernetes.io/instance-type_${type}`]
+  console.log(annotations)
+
   machinesFromPreset = storeGet('/kubedbuiPresets')?.admin?.machineProfiles?.machines || []
 
-  const res = getValue(discriminator, `/elasticsearchDetails${path}`) || []
-
-  const found = machinesFromPreset.find((item) => {
-    return (
-      JSON.stringify(item.limits) ===
-      JSON.stringify(Array.isArray(res) ? res[0]?.resources?.limits : res?.limits)
-    )
-  })
-
-  if (found) return found.id
-
   const machinePresets = machinesFromPreset.find((item) => item.id === machine)
-  if (
-    JSON.stringify(machinePresets?.limits) ===
-    JSON.stringify(Array.isArray(res) ? res[0]?.resources?.limits : res?.limits)
-  )
-    return machine
+  if (machinePresets) return machine
   else return 'custom'
 }
 
-function onMachineChange({ getValue, discriminator, commit }, path, valPath) {
+function onMachineChange({ getValue, discriminator, commit, model }, type, valPath) {
   let selectedMachine = ''
-  if (path.includes('master')) selectedMachine = getValue(discriminator, '/machine-master')
-  if (path.includes('data')) selectedMachine = getValue(discriminator, '/machine-data')
-  if (path.includes('ingest')) selectedMachine = getValue(discriminator, '/machine-ingest')
-  if (path.includes('ml')) selectedMachine = getValue(discriminator, '/machine-ml')
-  if (path.includes('transform')) selectedMachine = getValue(discriminator, '/machine-transform')
-  if (path.includes('dataCold')) selectedMachine = getValue(discriminator, '/machine-dataCold')
-  if (path.includes('dataContent'))
-    selectedMachine = getValue(discriminator, '/machine-dataContent')
-  if (path.includes('dataFrozen')) selectedMachine = getValue(discriminator, '/machine-dataFrozen')
-  if (path.includes('dataHot')) selectedMachine = getValue(discriminator, '/machine-dataHot')
-  if (path.includes('dataWarm')) selectedMachine = getValue(discriminator, '/machine-dataWarm')
-  if (path.includes('node')) selectedMachine = getValue(discriminator, '/machine-node')
-
+  selectedMachine = getValue(discriminator, `/machine-${type}`)
   const machine = machinesFromPreset.find((item) => item.id === selectedMachine)
 
   let obj = {}
   if (selectedMachine !== 'custom') {
     if (machine) obj = { limits: { ...machine?.limits }, requests: { ...machine?.limits } }
     else obj = machines[selectedMachine]?.resources
-
-    commit('wizard/model$update', {
-      path: path,
-      value: obj,
-      force: true,
-    })
   } else {
     const val = getValue(discriminator, `/elasticsearchDetails${valPath}`) || {}
-    const obj = Array.isArray(val) ? val[0]?.resources : val
+    obj = Array.isArray(val) ? val[0]?.resources : { ...val }
+  }
 
+  const path = `/spec/verticalScaling/${type}/resources`
+  if (Object.keys(obj).length)
     commit('wizard/model$update', {
       path: path,
       value: obj,
       force: true,
     })
+
+  // update metadata.annotations
+  const annotations = getValue(model, '/metadata/annotations') || {}
+
+  if (type === 'data' || type === 'node') {
+    if (selectedMachine === 'custom') delete annotations['kubernetes.io/instance-type']
+    else annotations['kubernetes.io/instance-type'] = selectedMachine
+  } else {
+    if (selectedMachine === 'custom') delete annotations[`kubernetes.io/instance-type_${type}`]
+    else annotations[`kubernetes.io/instance-type_${type}`] = selectedMachine
   }
+  if (machinesFromPreset.length)
+    commit('wizard/model$update', {
+      path: '/metadata/annotations',
+      value: annotations,
+      force: true,
+    })
 }
 
 function isMachineCustom({ watchDependency, getValue, discriminator }, path) {
