@@ -156,8 +156,22 @@ steps:
         text: Horizontal Scaling Form
       type: single-step-form
     - elements:
-      - elements:
-        - computed: setValueFromDbDetails|/spec/podTemplate/spec/resources|/spec/verticalScaling/standalone/resources
+      - discriminator:
+          machine-standalone:
+            default: ""
+            type: string
+        elements:
+        - computed: setMachine|standalone
+          customClass: mt-20
+          disableUnselect: true
+          fetch: getMachines
+          label: 
+            text: Machine Profile
+          onChange: onMachineChange|standalone|/spec/podTemplate/spec/resources
+          schema:
+            $ref: discriminator#/machine-standalone
+          type: select
+        - if: isMachineCustom|/machine-standalone
           label:
             text: labels.resources
           schema:
@@ -204,8 +218,22 @@ steps:
           $ref: schema#/properties/spec/properties/verticalScaling/properties/standalone
         show_label: true
         type: single-step-form
-      - elements:
-        - computed: setValueFromDbDetails|/spec/podTemplate/spec/resources|/spec/verticalScaling/replicaSet/resources
+      - discriminator:
+          machine-replicaSet:
+            default: ""
+            type: string
+        elements:
+        - computed: setMachine|replicaSet
+          customClass: mt-20
+          disableUnselect: true
+          fetch: getMachines
+          label: 
+            text: Machine Profile
+          onChange: onMachineChange|replicaSet|/spec/podTemplate/spec/resources
+          schema:
+            $ref: discriminator#/machine-replicaSet
+          type: select
+        - if: isMachineCustom|/machine-replicaSet
           label:
             text: labels.resources
           schema:
@@ -253,8 +281,22 @@ steps:
         show_label: true
         type: single-step-form
       - elements:
-        - elements:
-          - computed: setValueFromDbDetails|/spec/shardTopology/configServer/podTemplate/spec/resources|/spec/verticalScaling/configServer/resources
+        - discriminator:
+            machine-configServer:
+              default: ""
+              type: string
+          elements:
+          - computed: setMachine|configServer
+            customClass: mt-20
+            disableUnselect: true
+            fetch: getMachines
+            label: 
+              text: Machine Profile
+            onChange: onMachineChange|configServer|/spec/shardTopology/configServer/podTemplate/spec/resources
+            schema:
+              $ref: discriminator#/machine-configServer
+            type: select
+          - if: isMachineCustom|/machine-configServer
             label:
               text: labels.resources
             schema:
@@ -300,8 +342,22 @@ steps:
             $ref: schema#/properties/spec/properties/verticalScaling/properties/configServer
           show_label: true
           type: single-step-form
-        - elements:
-          - computed: setValueFromDbDetails|/spec/shardTopology/mongos/podTemplate/spec/resources|/spec/verticalScaling/mongos/resources
+        - discriminator:
+            machine-mongos:
+              default: ""
+              type: string
+          elements:
+          - computed: setMachine|mongos
+            customClass: mt-20
+            disableUnselect: true
+            fetch: getMachines
+            label: 
+              text: Machine Profile
+            onChange: onMachineChange|mongos|/spec/shardTopology/mongos/podTemplate/spec/resources
+            schema:
+              $ref: discriminator#/machine-mongos
+            type: select
+          - if: isMachineCustom|/machine-mongos
             label:
               text: labels.resources
             schema:
@@ -347,8 +403,22 @@ steps:
             $ref: schema#/properties/spec/properties/verticalScaling/properties/mongos
           show_label: true
           type: single-step-form
-        - elements:
-          - computed: setValueFromDbDetails|/spec/shardTopology/shard/podTemplate/spec/resources|/spec/verticalScaling/shard/resources
+        - discriminator:
+            machine-shard:
+              default: ""
+              type: string
+          elements:
+          - computed: setMachine|shard
+            customClass: mt-20
+            disableUnselect: true
+            fetch: getMachines
+            label: 
+              text: Machine Profile
+            onChange: onMachineChange|shard|/spec/shardTopology/shard/podTemplate/spec/resources
+            schema:
+              $ref: discriminator#/machine-shard
+            type: select
+          - if: isMachineCustom|/machine-shard
             label:
               text: labels.resources
             schema:
