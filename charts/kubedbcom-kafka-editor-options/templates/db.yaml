@@ -2,6 +2,10 @@
 {{- $res := dict -}}
 {{- $controller_res := dict -}}
 {{- $broker_res := dict -}}
+
+{{- $profile_anno := "" -}}
+{{- $broker_profile_anno := "" -}}
+
 {{- if eq .Values.spec.mode "Topology" }}
   {{- $controller_res = .Values.spec.topology.controller.podResources.resources -}}
   {{- if and .Values.spec.topology.controller.podResources.machine (hasKey $machines .Values.spec.topology.controller.podResources.machine) }}
@@ -10,6 +14,7 @@
   {{- range .Values.spec.admin.machineProfiles.machines }}
     {{- if and $.Values.spec.topology.controller.podResources.machine (eq .id $.Values.spec.topology.controller.podResources.machine) }}
       {{- $controller_res  = dict "requests" .limits "limits" .limits }}
+      {{- $profile_anno = .id }}
     {{- end }}
   {{- end }}
   {{- $broker_res = .Values.spec.topology.broker.podResources.resources -}}
@@ -19,6 +24,7 @@
   {{- range .Values.spec.admin.machineProfiles.machines }}
     {{- if and $.Values.spec.topology.broker.podResources.machine (eq .id $.Values.spec.topology.broker.podResources.machine) }}
       {{- $broker_res  = dict "requests" .limits "limits" .limits }}
+      {{- $broker_profile_anno = .id }}
     {{- end }}
   {{- end }}
 {{- else }}
@@ -29,6 +35,7 @@
   {{- range .Values.spec.admin.machineProfiles.machines }}
     {{- if and $.Values.spec.podResources.machine (eq .id $.Values.spec.podResources.machine) }}
       {{- $res  = dict "requests" .limits "limits" .limits }}
+      {{- $profile_anno = .id }}
     {{- end }}
   {{- end }}
 {{- end }}
@@ -87,8 +94,11 @@ metadata:
     {{- include "kubedbcom-kafka-editor-options.labels" . | nindent 4 }}
   annotations:
     app.kubernetes.io/cluster-tier: {{ .Values.spec.admin.clusterTier.default }}
-  {{- if .Values.spec.admin.machineProfiles.default }}
-    kubernetes.io/instance-type: {{ .Values.spec.admin.machineProfiles.default }}
+  {{- if $profile_anno }}
+    kubernetes.io/instance-type: {{ $profile_anno }}
+  {{- end }}
+  {{- if $broker_profile_anno }}
+    kubernetes.io/instance-type_broker: {{ $broker_profile_anno }}
   {{- end }}
 {{- if .Values.spec.annotations }}
     {{- include "kubedbcom-kafka-editor-options.annotations" . | nindent 4 }}

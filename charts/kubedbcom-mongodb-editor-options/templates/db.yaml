@@ -5,6 +5,13 @@
 {{- $mongos_res := dict -}}
 {{- $arbiter_res := dict -}}
 {{- $hidden_res := dict -}}
+
+{{- $profile_anno := "" -}}
+{{- $configServer_profile_anno := "" -}}
+{{- $mongos_profile_anno := "" -}}
+{{- $arbiter_profile_anno := "" -}}
+{{- $hidden_profile_anno := "" -}}
+
 {{- if eq .Values.spec.mode "Sharded" }}
   {{- $shard_res = .Values.spec.shardTopology.shard.podResources.resources -}}
   {{- if and .Values.spec.shardTopology.shard.podResources.machine (hasKey $machines .Values.spec.shardTopology.shard.podResources.machine) }}
@@ -13,6 +20,7 @@
   {{- range .Values.spec.admin.machineProfiles.machines }}
     {{- if and $.Values.spec.shardTopology.shard.podResources.machine (eq .id $.Values.spec.shardTopology.shard.podResources.machine) }}
       {{- $shard_res  = dict "requests" .limits "limits" .limits }}
+      {{- $profile_anno = .id }}
     {{- end }}
   {{- end }}
   {{- $configServer_res = .Values.spec.shardTopology.configServer.podResources.resources -}}
@@ -22,6 +30,7 @@
   {{- range .Values.spec.admin.machineProfiles.machines }}
     {{- if and $.Values.spec.shardTopology.configServer.podResources.machine (eq .id $.Values.spec.shardTopology.configServer.podResources.machine) }}
       {{- $configServer_res  = dict "requests" .limits "limits" .limits }}
+      {{- $configServer_profile_anno = .id }}
     {{- end }}
   {{- end }}
   {{- $mongos_res = .Values.spec.shardTopology.mongos.podResources.resources -}}
@@ -31,6 +40,7 @@
   {{- range .Values.spec.admin.machineProfiles.machines }}
     {{- if and $.Values.spec.shardTopology.mongos.podResources.machine (eq .id $.Values.spec.shardTopology.mongos.podResources.machine) }}
       {{- $mongos_res  = dict "requests" .limits "limits" .limits }}
+      {{- $mongos_profile_anno = .id }}
     {{- end }}
   {{- end }}
 {{- else }}
@@ -41,6 +51,7 @@
   {{- range .Values.spec.admin.machineProfiles.machines }}
     {{- if and $.Values.spec.podResources.machine (eq .id $.Values.spec.podResources.machine) }}
       {{- $res  = dict "requests" .limits "limits" .limits }}
+      {{- $profile_anno = .id }}
     {{- end }}
   {{- end }}
 {{- end }}
@@ -52,6 +63,7 @@
   {{- range .Values.spec.admin.machineProfiles.machines }}
     {{- if and $.Values.spec.arbiter.podResources.machine (eq .id $.Values.spec.arbiter.podResources.machine) }}
       {{- $arbiter_res  = dict "requests" .limits "limits" .limits }}
+      {{- $arbiter_profile_anno = .id }}
     {{- end }}
   {{- end }}
 {{- end }}
@@ -59,6 +71,7 @@
   {{- $hidden_res = .Values.spec.hidden.podResources.resources -}}
   {{- if and .Values.spec.hidden.podResources.machine (hasKey $machines .Values.spec.hidden.podResources.machine) }}
     {{- $hidden_res = get (get $machines .Values.spec.hidden.podResources.machine) "resources" }}
+    {{- $hidden_profile_anno = .id }}
   {{- end }}
   {{- range .Values.spec.admin.machineProfiles.machines }}
     {{- if and $.Values.spec.hidden.podResources.machine (eq .id $.Values.spec.hidden.podResources.machine) }}
@@ -124,8 +137,20 @@ metadata:
 {{- end }}
   annotations:
     app.kubernetes.io/cluster-tier: {{ .Values.spec.admin.clusterTier.default }}
-  {{- if .Values.spec.admin.machineProfiles.default }}
-    kubernetes.io/instance-type: {{ .Values.spec.admin.machineProfiles.default }}
+  {{- if $profile_anno }}
+    kubernetes.io/instance-type: {{ $profile_anno }}
+  {{- end }}
+  {{- if $configServer_profile_anno }}
+    kubernetes.io/instance-type_configServer: {{ $configServer_profile_anno }}
+  {{- end }}
+  {{- if $mongos_profile_anno }}
+    kubernetes.io/instance-type_mongos: {{ $mongos_profile_anno }}
+  {{- end }}
+  {{- if $arbiter_profile_anno }}
+    kubernetes.io/instance-type_arbiter: {{ $arbiter_profile_anno }}
+  {{- end }}
+  {{- if $hidden_profile_anno }}
+    kubernetes.io/instance-type_hidden: {{ $hidden_profile_anno }}
   {{- end }}
   {{- if and (eq .Values.spec.backup.tool "KubeStash") (.Values.spec.admin.backup.enable.default) (eq .Values.spec.admin.backup.by "BackupBlueprint") }}
     blueprint.kubestash.com/name: {{ .Values.metadata.resource.kind | lower }}-blueprint

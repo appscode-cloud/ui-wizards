@@ -2,6 +2,10 @@
 {{- $res := dict -}}
 {{- $aggregator_res := dict -}}
 {{- $leaf_res := dict -}}
+
+{{- $profile_anno := "" -}}
+{{- $leaf_profile_anno := "" -}}
+
 {{- if eq .Values.spec.mode "Topology" }}
   {{- $aggregator_res = .Values.spec.topology.aggregator.podResources.resources -}}
   {{- if and .Values.spec.topology.aggregator.podResources.machine (hasKey $machines .Values.spec.topology.aggregator.podResources.machine) }}
@@ -10,11 +14,13 @@
   {{- range .Values.spec.admin.machineProfiles.machines }}
     {{- if and $.Values.spec.topology.aggregator.podResources.machine (eq .id $.Values.spec.topology.aggregator.podResources.machine) }}
       {{- $aggregator_res  = dict "requests" .limits "limits" .limits }}
+      {{- $profile_anno = .id }}
     {{- end }}
   {{- end }}
   {{- $leaf_res = .Values.spec.topology.leaf.podResources.resources -}}
   {{- if and .Values.spec.topology.leaf.podResources.machine (hasKey $machines .Values.spec.topology.leaf.podResources.machine) }}
     {{- $leaf_res = get (get $machines .Values.spec.topology.leaf.podResources.machine) "resources" }}
+    {{- $leaf_profile_anno = .id }}
   {{- end }}
   {{- range .Values.spec.admin.machineProfiles.machines }}
     {{- if and $.Values.spec.topology.leaf.podResources.machine (eq .id $.Values.spec.topology.leaf.podResources.machine) }}
@@ -29,6 +35,7 @@
   {{- range .Values.spec.admin.machineProfiles.machines }}
     {{- if and $.Values.spec.podResources.machine (eq .id $.Values.spec.podResources.machine) }}
       {{- $res  = dict "requests" .limits "limits" .limits }}
+      {{- $profile_anno = .id }}
     {{- end }}
   {{- end }}
 {{- end }}
@@ -87,8 +94,11 @@ metadata:
     {{- include "kubedbcom-singlestore-editor-options.labels" . | nindent 4 }}
   annotations:
     app.kubernetes.io/cluster-tier: {{ .Values.spec.admin.clusterTier.default }}
-  {{- if .Values.spec.admin.machineProfiles.default }}
-    kubernetes.io/instance-type: {{ .Values.spec.admin.machineProfiles.default }}
+  {{- if $profile_anno }}
+    kubernetes.io/instance-type: {{ $profile_anno }}
+  {{- end }}
+  {{- if $leaf_profile_anno }}
+    kubernetes.io/instance-type_leaf : {{ $leaf_profile_anno }}
   {{- end }}
 {{- if .Values.spec.annotations }}
     {{- include "kubedbcom-singlestore-editor-options.annotations" . | nindent 4 }}
