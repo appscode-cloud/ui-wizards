@@ -3,6 +3,11 @@
 {{- $data_res := dict -}}
 {{- $master_res := dict -}}
 {{- $ingest_res := dict -}}
+
+{{- $profile_anno := "" -}}
+{{- $master_profile_anno := "" -}}
+{{- $ingest_profile_anno := "" -}}
+
 {{- if eq .Values.spec.mode "Topology" }}
   {{- $data_res = .Values.spec.topology.data.podResources.resources -}}
   {{- if and .Values.spec.topology.data.podResources.machine (hasKey $machines .Values.spec.topology.data.podResources.machine) }}
@@ -11,6 +16,7 @@
   {{- range .Values.spec.admin.machineProfiles.machines }}
     {{- if and $.Values.spec.topology.data.podResources.machine (eq .id $.Values.spec.topology.data.podResources.machine) }}
       {{- $data_res  = dict "requests" .limits "limits" .limits }}
+      {{- $profile_anno = .id }}
     {{- end }}
   {{- end }}
   {{- $master_res = .Values.spec.topology.master.podResources.resources -}}
@@ -20,6 +26,7 @@
   {{- range .Values.spec.admin.machineProfiles.machines }}
     {{- if and $.Values.spec.topology.master.podResources.machine (eq .id $.Values.spec.topology.master.podResources.machine) }}
       {{- $master_res  = dict "requests" .limits "limits" .limits }}
+      {{- $master_profile_anno = .id }}
     {{- end }}
   {{- end }}
   {{- $ingest_res = .Values.spec.topology.ingest.podResources.resources -}}
@@ -29,6 +36,7 @@
   {{- range .Values.spec.admin.machineProfiles.machines }}
     {{- if and $.Values.spec.topology.ingest.podResources.machine (eq .id $.Values.spec.topology.ingest.podResources.machine) }}
       {{- $ingest_res  = dict "requests" .limits "limits" .limits }}
+      {{- $ingest_profile_anno = .id }}
     {{- end }}
   {{- end }}
 {{- else }}
@@ -39,6 +47,7 @@
   {{- range .Values.spec.admin.machineProfiles.machines }}
     {{- if and $.Values.spec.podResources.machine (eq .id $.Values.spec.podResources.machine) }}
       {{- $res  = dict "requests" .limits "limits" .limits }}
+      {{- $profile_anno = .id }}
     {{- end }}
   {{- end }}
 {{- end }}
@@ -97,8 +106,14 @@ metadata:
     {{- include "kubedbcom-elasticsearch-editor-options.labels" . | nindent 4 }}
   annotations:
     app.kubernetes.io/cluster-tier: {{ .Values.spec.admin.clusterTier.default }}
-  {{- if .Values.spec.admin.machineProfiles.default }}
-    kubernetes.io/instance-type: {{ .Values.spec.admin.machineProfiles.default }}
+  {{- if $profile_anno }}
+    kubernetes.io/instance-type: {{ $profile_anno }}
+  {{- end }}
+  {{- if $master_profile_anno }}
+    kubernetes.io/instance-type_master: {{ $master_profile_anno }}
+  {{- end }}
+  {{- if $ingest_profile_anno }}
+    kubernetes.io/instance-type_ingest: {{ $ingest_profile_anno }}
   {{- end }}
 {{- if .Values.spec.annotations }}
     {{- include "kubedbcom-elasticsearch-editor-options.annotations" . | nindent 4 }}
