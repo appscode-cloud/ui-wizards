@@ -1,4 +1,5 @@
 {{- $machines := .Files.Get "data/machines.yaml" | fromYaml -}}
+{{- $profiles := "" -}}
 {{- $res := .Values.spec.podResources.resources -}}
 {{- if and .Values.spec.podResources.machine (hasKey $machines .Values.spec.podResources.machine) }}
   {{- $res = get (get $machines .Values.spec.podResources.machine) "resources" }}
@@ -6,6 +7,7 @@
 {{- range .Values.spec.admin.machineProfiles.machines }}
   {{- if and $.Values.spec.podResources.machine (eq .id $.Values.spec.podResources.machine) }}
     {{- $res  = dict "requests" .limits "limits" .limits }}
+    {{- $profiles = .id -}}
   {{- end }}
 {{- end }}
 
@@ -67,9 +69,9 @@ metadata:
 {{- end }}
   annotations:
     app.kubernetes.io/cluster-tier: {{ .Values.spec.admin.clusterTier.default }}
-  {{- if .Values.spec.admin.machineProfiles.default }}
-    kubernetes.io/instance-type: {{ .Values.spec.admin.machineProfiles.default }}
-  {{- end }}
+    {{- if $profiles }}
+    kubernetes.io/instance-type: {{ printf "%s" $profiles }}
+    {{- end -}}
   {{- if and (eq .Values.spec.backup.tool "KubeStash") (.Values.spec.admin.backup.enable.default) (eq .Values.spec.admin.backup.by "BackupBlueprint") }}
     blueprint.kubestash.com/name: {{ .Values.metadata.resource.kind | lower }}-blueprint
     blueprint.kubestash.com/namespace: kubedb

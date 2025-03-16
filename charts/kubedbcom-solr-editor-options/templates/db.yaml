@@ -1,8 +1,10 @@
 {{- $machines := .Files.Get "data/machines.yaml" | fromYaml -}}
+{{- $profiles := dict -}}
 {{- $res := dict -}}
 {{- $overseer_res := dict -}}
 {{- $data_res := dict -}}
 {{- $coordinator_res := dict -}}
+
 {{- if eq .Values.spec.mode "Topology" }}
   {{- $overseer_res = .Values.spec.topology.overseer.podResources.resources -}}
   {{- if and .Values.spec.topology.overseer.podResources.machine (hasKey $machines .Values.spec.topology.overseer.podResources.machine) }}
@@ -11,6 +13,7 @@
   {{- range .Values.spec.admin.machineProfiles.machines }}
     {{- if and $.Values.spec.topology.overseer.podResources.machine (eq .id $.Values.spec.topology.overseer.podResources.machine) }}
       {{- $overseer_res  = dict "requests" .limits "limits" .limits }}
+      {{- $_ := set $profiles "overseer" .id -}}
     {{- end }}
   {{- end }}
   {{- $data_res = .Values.spec.topology.data.podResources.resources -}}
@@ -20,6 +23,7 @@
   {{- range .Values.spec.admin.machineProfiles.machines }}
     {{- if and $.Values.spec.topology.data.podResources.machine (eq .id $.Values.spec.topology.data.podResources.machine) }}
       {{- $data_res  = dict "requests" .limits "limits" .limits }}
+      {{- $_ := set $profiles "data" .id -}}
     {{- end }}
   {{- end }}
   {{- $coordinator_res = .Values.spec.topology.coordinator.podResources.resources -}}
@@ -29,6 +33,7 @@
   {{- range .Values.spec.admin.machineProfiles.machines }}
     {{- if and $.Values.spec.topology.coordinator.podResources.machine (eq .id $.Values.spec.topology.coordinator.podResources.machine) }}
       {{- $coordinator_res  = dict "requests" .limits "limits" .limits }}
+      {{- $_ := set $profiles "coordinator" .id -}}
     {{- end }}
   {{- end }}
 {{- else }}
@@ -39,6 +44,7 @@
   {{- range .Values.spec.admin.machineProfiles.machines }}
     {{- if and $.Values.spec.podResources.machine (eq .id $.Values.spec.podResources.machine) }}
       {{- $res  = dict "requests" .limits "limits" .limits }}
+      {{- $_ := set $profiles "combined" .id -}}
     {{- end }}
   {{- end }}
 {{- end }}
@@ -97,9 +103,9 @@ metadata:
     {{- include "kubedbcom-solr-editor-options.labels" . | nindent 4 }}
   annotations:
     app.kubernetes.io/cluster-tier: {{ .Values.spec.admin.clusterTier.default }}
-  {{- if .Values.spec.admin.machineProfiles.default }}
-    kubernetes.io/instance-type: {{ .Values.spec.admin.machineProfiles.default }}
-  {{- end }}
+    {{- if $profiles }}
+    kubernetes.io/instance-type: {{ printf "'%s'" ($profiles | toJson) }}
+    {{- end -}}
 {{- if .Values.spec.annotations }}
     {{- include "kubedbcom-solr-editor-options.annotations" . | nindent 4 }}
 {{- end }}
