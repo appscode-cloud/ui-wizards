@@ -1,4 +1,5 @@
 {{- $machines := .Files.Get "data/machines.yaml" | fromYaml -}}
+{{- $profiles := "" -}}
 {{- $res := dict -}}
 {{- $res = .Values.spec.podResources.resources -}}
 {{- if and .Values.spec.podResources.machine (hasKey $machines .Values.spec.podResources.machine) }}
@@ -7,6 +8,7 @@
 {{- range .Values.spec.admin.machineProfiles.machines }}
   {{- if and $.Values.spec.podResources.machine (eq .id $.Values.spec.podResources.machine) }}
     {{- $res  = dict "requests" .limits "limits" .limits }}
+    {{- $profiles = .id -}}
   {{- end }}
 {{- end }}
 
@@ -64,9 +66,9 @@ metadata:
     {{- include "kubedbcom-redis-editor-options.labels" . | nindent 4 }}
   annotations:
     app.kubernetes.io/cluster-tier: {{ .Values.spec.admin.clusterTier.default }}
-  {{- if .Values.spec.admin.machineProfiles.default }}
-    kubernetes.io/instance-type: {{ .Values.spec.admin.machineProfiles.default }}
-  {{- end }}
+    {{- if $profiles }}
+    kubernetes.io/instance-type: {{ printf "%s" $profiles }}
+    {{- end -}}
 {{- if .Values.spec.annotations }}
     {{- include "kubedbcom-redis-editor-options.annotations" . | nindent 4 }}
 {{- end }}

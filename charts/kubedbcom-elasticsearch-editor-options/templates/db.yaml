@@ -1,4 +1,5 @@
 {{- $machines := .Files.Get "data/machines.yaml" | fromYaml -}}
+{{- $profiles := dict -}}
 {{- $res := dict -}}
 {{- $data_res := dict -}}
 {{- $master_res := dict -}}
@@ -11,6 +12,7 @@
   {{- range .Values.spec.admin.machineProfiles.machines }}
     {{- if and $.Values.spec.topology.data.podResources.machine (eq .id $.Values.spec.topology.data.podResources.machine) }}
       {{- $data_res  = dict "requests" .limits "limits" .limits }}
+      {{- $_ := set $profiles "data" .id -}}
     {{- end }}
   {{- end }}
   {{- $master_res = .Values.spec.topology.master.podResources.resources -}}
@@ -20,6 +22,7 @@
   {{- range .Values.spec.admin.machineProfiles.machines }}
     {{- if and $.Values.spec.topology.master.podResources.machine (eq .id $.Values.spec.topology.master.podResources.machine) }}
       {{- $master_res  = dict "requests" .limits "limits" .limits }}
+      {{- $_ := set $profiles "master" .id -}}
     {{- end }}
   {{- end }}
   {{- $ingest_res = .Values.spec.topology.ingest.podResources.resources -}}
@@ -29,6 +32,7 @@
   {{- range .Values.spec.admin.machineProfiles.machines }}
     {{- if and $.Values.spec.topology.ingest.podResources.machine (eq .id $.Values.spec.topology.ingest.podResources.machine) }}
       {{- $ingest_res  = dict "requests" .limits "limits" .limits }}
+      {{- $_ := set $profiles "ingest" .id -}}
     {{- end }}
   {{- end }}
 {{- else }}
@@ -39,6 +43,7 @@
   {{- range .Values.spec.admin.machineProfiles.machines }}
     {{- if and $.Values.spec.podResources.machine (eq .id $.Values.spec.podResources.machine) }}
       {{- $res  = dict "requests" .limits "limits" .limits }}
+      {{- $_ := set $profiles "combined" .id -}}
     {{- end }}
   {{- end }}
 {{- end }}
@@ -97,9 +102,9 @@ metadata:
     {{- include "kubedbcom-elasticsearch-editor-options.labels" . | nindent 4 }}
   annotations:
     app.kubernetes.io/cluster-tier: {{ .Values.spec.admin.clusterTier.default }}
-  {{- if .Values.spec.admin.machineProfiles.default }}
-    kubernetes.io/instance-type: {{ .Values.spec.admin.machineProfiles.default }}
-  {{- end }}
+    {{- if $profiles }}
+    kubernetes.io/instance-type: {{ printf "'%s'" ($profiles | toJson) }}
+    {{- end -}}
 {{- if .Values.spec.annotations }}
     {{- include "kubedbcom-elasticsearch-editor-options.annotations" . | nindent 4 }}
 {{- end }}

@@ -1,4 +1,5 @@
 {{- $machines := .Files.Get "data/machines.yaml" | fromYaml -}}
+{{- $profiles := dict -}}
 {{- $res := dict -}}
 {{- $aggregator_res := dict -}}
 {{- $leaf_res := dict -}}
@@ -10,6 +11,7 @@
   {{- range .Values.spec.admin.machineProfiles.machines }}
     {{- if and $.Values.spec.topology.aggregator.podResources.machine (eq .id $.Values.spec.topology.aggregator.podResources.machine) }}
       {{- $aggregator_res  = dict "requests" .limits "limits" .limits }}
+      {{- $_ := set $profiles "aggregator" .id -}}
     {{- end }}
   {{- end }}
   {{- $leaf_res = .Values.spec.topology.leaf.podResources.resources -}}
@@ -19,6 +21,7 @@
   {{- range .Values.spec.admin.machineProfiles.machines }}
     {{- if and $.Values.spec.topology.leaf.podResources.machine (eq .id $.Values.spec.topology.leaf.podResources.machine) }}
       {{- $leaf_res  = dict "requests" .limits "limits" .limits }}
+      {{- $_ := set $profiles "leaf" .id -}}
     {{- end }}
   {{- end }}
 {{- else }}
@@ -29,6 +32,7 @@
   {{- range .Values.spec.admin.machineProfiles.machines }}
     {{- if and $.Values.spec.podResources.machine (eq .id $.Values.spec.podResources.machine) }}
       {{- $res  = dict "requests" .limits "limits" .limits }}
+      {{- $_ := set $profiles "combined" .id -}}
     {{- end }}
   {{- end }}
 {{- end }}
@@ -87,9 +91,9 @@ metadata:
     {{- include "kubedbcom-singlestore-editor-options.labels" . | nindent 4 }}
   annotations:
     app.kubernetes.io/cluster-tier: {{ .Values.spec.admin.clusterTier.default }}
-  {{- if .Values.spec.admin.machineProfiles.default }}
-    kubernetes.io/instance-type: {{ .Values.spec.admin.machineProfiles.default }}
-  {{- end }}
+    {{- if $profiles }}
+    kubernetes.io/instance-type: {{ printf "'%s'" ($profiles | toJson) }}
+    {{- end -}}
 {{- if .Values.spec.annotations }}
     {{- include "kubedbcom-singlestore-editor-options.annotations" . | nindent 4 }}
 {{- end }}
