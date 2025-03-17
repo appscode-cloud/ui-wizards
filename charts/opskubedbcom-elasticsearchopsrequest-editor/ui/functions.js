@@ -409,7 +409,7 @@ async function getDbDetails({ axios, storeGet, model, getValue, setDiscriminator
       resp.data.spec.authPlugin = selectedVersion?.spec?.authPlugin || ''
     }
 
-    setDiscriminatorValue('/elasticsearchDetails', resp.data || {})
+    setDiscriminatorValue('/dbDetails', resp.data || {})
 
     return resp.data || {}
   } else return {}
@@ -454,7 +454,7 @@ async function getDbVersions({ axios, storeGet, getValue, discriminator }) {
 
     const sortedVersions = resources.sort((a, b) => versionCompare(a.spec.version, b.spec.version))
 
-    let ver = getValue(discriminator, '/elasticsearchDetails/spec/version') || '0'
+    let ver = getValue(discriminator, '/dbDetails/spec/version') || '0'
     const found = sortedVersions.find((item) => item.metadata.name === ver)
 
     if (found) ver = found.spec?.version
@@ -581,18 +581,18 @@ function onRequestTypeChange({ model, getValue, commit }) {
 }
 
 function getDbTls({ discriminator, getValue, watchDependency }) {
-  watchDependency('discriminator#/elasticsearchDetails')
-  const elasticsearchDetails = getValue(discriminator, '/elasticsearchDetails')
+  watchDependency('discriminator#/dbDetails')
+  const dbDetails = getValue(discriminator, '/dbDetails')
 
-  const { spec } = elasticsearchDetails || {}
+  const { spec } = dbDetails || {}
   return (spec && spec.tls) || undefined
 }
 
 function getDbType({ discriminator, getValue, watchDependency }) {
-  watchDependency('discriminator#/elasticsearchDetails')
-  const elasticsearchDetails = getValue(discriminator, '/elasticsearchDetails')
+  watchDependency('discriminator#/dbDetails')
+  const dbDetails = getValue(discriminator, '/dbDetails')
 
-  const { spec } = elasticsearchDetails || {}
+  const { spec } = dbDetails || {}
   const { topology } = spec || {}
   let verd = ''
   if (topology) {
@@ -740,7 +740,7 @@ function ifDbTypeEqualsTo({ discriminator, getValue, watchDependency, commit }, 
 // machine profile stuffs
 let machinesFromPreset = []
 function hasMachine({ getValue, discriminator }) {
-  const dbDetails = getValue(discriminator, '/elasticsearchDetails')
+  const dbDetails = getValue(discriminator, '/dbDetails')
   const annotations = dbDetails?.metadata?.annotations || {}
   return !!annotations['kubernetes.io/instance-type']
 }
@@ -775,7 +775,7 @@ function getMachines({ storeGet }) {
 }
 
 function setMachine({ getValue, discriminator, storeGet }, type) {
-  const dbDetails = getValue(discriminator, '/elasticsearchDetails')
+  const dbDetails = getValue(discriminator, '/dbDetails')
   const annotations = dbDetails?.metadata?.annotations || {}
   const instance = annotations['kubernetes.io/instance-type']
   const parsedInstance = instance ? JSON.parse(instance) : {}
@@ -798,7 +798,7 @@ function onMachineChange({ getValue, discriminator, commit, model }, type, valPa
     if (machine) obj = { limits: { ...machine?.limits }, requests: { ...machine?.limits } }
     else obj = machines[selectedMachine]?.resources
   } else {
-    const val = getValue(discriminator, `/elasticsearchDetails${valPath}`) || {}
+    const val = getValue(discriminator, `/dbDetails${valPath}`) || {}
     obj = Array.isArray(val) ? val[0]?.resources : { ...val }
   }
 
@@ -837,19 +837,19 @@ function isMachineCustom({ watchDependency, getValue, discriminator }, path) {
 }
 
 function isAuthPluginNotEqualTo({ discriminator, getValue, watchDependency }, value) {
-  watchDependency('discriminator#/elasticsearchDetails')
-  const elasticsearchDetails = getValue(discriminator, '/elasticsearchDetails')
+  watchDependency('discriminator#/dbDetails')
+  const dbDetails = getValue(discriminator, '/dbDetails')
 
-  const authPlugin = elasticsearchDetails?.spec?.authPlugin || ''
+  const authPlugin = dbDetails?.spec?.authPlugin || ''
 
   return authPlugin && authPlugin !== value
 }
 
 function isAuthPluginEqualTo({ discriminator, getValue, watchDependency }, value) {
-  watchDependency('discriminator#/elasticsearchDetails')
-  const elasticsearchDetails = getValue(discriminator, '/elasticsearchDetails')
+  watchDependency('discriminator#/dbDetails')
+  const dbDetails = getValue(discriminator, '/dbDetails')
 
-  const authPlugin = elasticsearchDetails?.spec?.authPlugin || ''
+  const authPlugin = dbDetails?.spec?.authPlugin || ''
 
   return authPlugin === value
 }
@@ -1021,7 +1021,7 @@ function initIssuerRefApiGroup({ getValue, model, watchDependency, discriminator
   watchDependency('model#/spec/tls/issuerRef/kind')
 
   if (kind) {
-    const apiGroup = getValue(discriminator, '/elasticsearchDetails/spec/tls/issuerRef/apiGroup')
+    const apiGroup = getValue(discriminator, '/dbDetails/spec/tls/issuerRef/apiGroup')
     if (apiGroup) return apiGroup
     return 'cert-manager.io'
   } else return undefined
@@ -1126,12 +1126,12 @@ function isIssuerRefRequired({ discriminator, getValue, watchDependency }) {
 // ************************************** Set db details *****************************************
 
 function isDbDetailsLoading({ discriminator, model, getValue, watchDependency }) {
-  watchDependency('discriminator#/elasticsearchDetails')
+  watchDependency('discriminator#/dbDetails')
   watchDependency('model#/spec/databaseRef/name')
-  const elasticsearchDetails = getValue(discriminator, '/elasticsearchDetails')
+  const dbDetails = getValue(discriminator, '/dbDetails')
   const dbName = getValue(model, '/spec/databaseRef/name')
 
-  return !elasticsearchDetails || !dbName
+  return !dbDetails || !dbName
 }
 
 function setValueFromDbDetails(
@@ -1139,8 +1139,8 @@ function setValueFromDbDetails(
   path,
   commitPath,
 ) {
-  watchDependency('discriminator#/elasticsearchDetails')
-  const retValue = getValue(discriminator, `/elasticsearchDetails${path}`)
+  watchDependency('discriminator#/dbDetails')
+  const retValue = getValue(discriminator, `/dbDetails${path}`)
 
   if (commitPath) {
     const tlsOperation = getValue(discriminator, '/tlsOperation')
@@ -1162,9 +1162,9 @@ function setValueFromDbDetails(
 }
 
 function disableOpsRequest({ itemCtx, discriminator, getValue, watchDependency }) {
-  watchDependency('discriminator#/elasticsearchDetails')
+  watchDependency('discriminator#/dbDetails')
   if (itemCtx.value === 'ReconfigureTLS') {
-    const dbDetails = getValue(discriminator, '/elasticsearchDetails')
+    const dbDetails = getValue(discriminator, '/dbDetails')
     const { issuerRef } = dbDetails?.spec?.tls || {}
     return !issuerRef
   }
@@ -1172,29 +1172,26 @@ function disableOpsRequest({ itemCtx, discriminator, getValue, watchDependency }
 }
 
 function hasResourceValue({ discriminator, getValue, watchDependency }, node) {
-  watchDependency('discriminator#/elasticsearchDetails')
-  const nodeResource = getValue(
-    discriminator,
-    `/elasticsearchDetails/spec/topology/${node}/resources`,
-  )
+  watchDependency('discriminator#/dbDetails')
+  const nodeResource = getValue(discriminator, `/dbDetails/spec/topology/${node}/resources`)
   return !!nodeResource
 }
 
 function hasVolumeExpansion({ discriminator, getValue, watchDependency }, node) {
-  watchDependency('discriminator#/elasticsearchDetails')
+  watchDependency('discriminator#/dbDetails')
   const nodeStorage = getValue(
     discriminator,
-    `/elasticsearchDetails/spec/topology/${node}/storage/resources/requests/storage`,
+    `/dbDetails/spec/topology/${node}/storage/resources/requests/storage`,
   )
   return !!nodeStorage
 }
 
 function getAliasOptions({ discriminator, getValue, watchDependency }) {
-  watchDependency('discriminator#/elasticsearchDetails')
+  watchDependency('discriminator#/dbDetails')
 
-  const enableSSL = getValue(discriminator, '/elasticsearchDetails/spec/enableSSL')
-  const authPlugin = getValue(discriminator, '/elasticsearchDetails/spec/authPlugin')
-  const monitor = getValue(discriminator, '/elasticsearchDetails/spec/monitor')
+  const enableSSL = getValue(discriminator, '/dbDetails/spec/enableSSL')
+  const authPlugin = getValue(discriminator, '/dbDetails/spec/authPlugin')
+  const monitor = getValue(discriminator, '/dbDetails/spec/monitor')
 
   // always include transport cert alias
   const aliases = ['transport']
