@@ -765,10 +765,9 @@ function getMachines({ storeGet }) {
 function setMachine({ getValue, discriminator, storeGet }, type) {
   const dbDetails = getValue(discriminator, '/dbDetails')
   const annotations = dbDetails?.metadata?.annotations || {}
-  let machine = ''
-  if (type === 'standalone' || type === 'replicaSet' || type === 'shard')
-    machine = annotations['kubernetes.io/instance-type']
-  else machine = annotations[`kubernetes.io/instance-type_${type}`]
+  const instance = annotations['kubernetes.io/instance-type']
+  const parsedInstance = instance ? JSON.parse(instance) : {}
+  const machine = parsedInstance[type] || 'custom'
 
   machinesFromPreset = storeGet('/kubedbuiPresets')?.admin?.machineProfiles?.machines || []
 
@@ -792,7 +791,7 @@ function onMachineChange({ getValue, discriminator, commit, model }, type, valPa
   }
 
   const path = `/spec/verticalScaling/${type}/resources`
-  if (Object.keys(obj).length)
+  if (obj && Object.keys(obj).length)
     commit('wizard/model$update', {
       path: path,
       value: obj,
@@ -801,14 +800,11 @@ function onMachineChange({ getValue, discriminator, commit, model }, type, valPa
 
   // update metadata.annotations
   const annotations = getValue(model, '/metadata/annotations') || {}
-
-  if (type === 'standalone' || type === 'replicaSet' || type === 'shard') {
-    if (selectedMachine === 'custom') delete annotations['kubernetes.io/instance-type']
-    else annotations['kubernetes.io/instance-type'] = selectedMachine
-  } else {
-    if (selectedMachine === 'custom') delete annotations[`kubernetes.io/instance-type_${type}`]
-    else annotations[`kubernetes.io/instance-type_${type}`] = selectedMachine
-  }
+  const instance = annotations['kubernetes.io/instance-type']
+  const parsedInstance = instance ? JSON.parse(instance) : {}
+  if (selectedMachine === 'custom') delete parsedInstance[type]
+  else parsedInstance[type] = selectedMachine
+  annotations['kubernetes.io/instance-type'] = JSON.stringify(parsedInstance)
 
   if (machinesFromPreset.length)
     commit('wizard/model$update', {
@@ -816,6 +812,9 @@ function onMachineChange({ getValue, discriminator, commit, model }, type, valPa
       value: annotations,
       force: true,
     })
+
+  if (parsedInstance && Object.keys(parsedInstance).length === 0)
+    commit('wizard/model$delete', '/metadata/annotations')
 }
 
 function isMachineCustom({ watchDependency, getValue, discriminator }, path) {
