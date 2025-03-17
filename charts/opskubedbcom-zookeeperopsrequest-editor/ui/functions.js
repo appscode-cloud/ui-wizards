@@ -982,7 +982,7 @@ function getMachines({ storeGet }) {
   return arr
 }
 
-function setMachine({ getValue, discriminator, storeGet }, type) {
+function setMachine({ getValue, discriminator, storeGet }) {
   const dbDetails = getValue(discriminator, '/dbDetails')
   const annotations = dbDetails?.metadata?.annotations || {}
   const instance = annotations['kubernetes.io/instance-type']
