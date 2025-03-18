@@ -780,7 +780,7 @@ function setMachine({ getValue, discriminator, storeGet }, type) {
   const instance = annotations['kubernetes.io/instance-type']
   let parsedInstance = {}
   try {
-    parsedInstance = JSON.parse(instance)
+    if (instance) parsedInstance = JSON.parse(instance)
   } catch (e) {
     console.log(e)
     parsedInstance = {}
@@ -822,7 +822,7 @@ function onMachineChange({ getValue, discriminator, commit, model }, type, valPa
   const instance = annotations['kubernetes.io/instance-type']
   let parsedInstance = {}
   try {
-    parsedInstance = JSON.parse(instance)
+    if (instance) parsedInstance = JSON.parse(instance)
   } catch (e) {
     console.log(e)
     parsedInstance = {}
