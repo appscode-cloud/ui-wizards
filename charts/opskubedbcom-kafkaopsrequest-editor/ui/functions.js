@@ -740,7 +740,13 @@ function setMachine({ getValue, discriminator, storeGet }, type) {
   const dbDetails = getValue(discriminator, '/dbDetails')
   const annotations = dbDetails?.metadata?.annotations || {}
   const instance = annotations['kubernetes.io/instance-type']
-  const parsedInstance = instance ? JSON.parse(instance) : {}
+  let parsedInstance = {}
+  try {
+    parsedInstance = JSON.parse(instance)
+  } catch (e) {
+    console.log(e)
+    parsedInstance = {}
+  }
   const machine = parsedInstance[type] || 'custom'
 
   machinesFromPreset = storeGet('/kubedbuiPresets')?.admin?.machineProfiles?.machines || []
@@ -776,7 +782,13 @@ function onMachineChange({ getValue, discriminator, commit, model }, type, valPa
   // update metadata.annotations
   const annotations = getValue(model, '/metadata/annotations') || {}
   const instance = annotations['kubernetes.io/instance-type']
-  const parsedInstance = instance ? JSON.parse(instance) : {}
+  let parsedInstance = {}
+  try {
+    parsedInstance = JSON.parse(instance)
+  } catch (e) {
+    console.log(e)
+    parsedInstance = {}
+  }
   if (selectedMachine === 'custom') delete parsedInstance[type]
   else parsedInstance[type] = selectedMachine
   annotations['kubernetes.io/instance-type'] = JSON.stringify(parsedInstance)
