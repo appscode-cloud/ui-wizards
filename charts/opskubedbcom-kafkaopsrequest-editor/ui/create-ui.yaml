@@ -120,18 +120,37 @@ steps:
         text: Horizontal Scaling Form
       type: single-step-form
     - elements:
-      - elements:
-        - label:
-            text: Node Selection Policy
+      - discriminator:
+          machine-broker:
+            default: ""
+            type: string
+        elements:
+        - computed: setMachine|broker
+          customClass: mt-20
+          disableUnselect: true
+          fetch: getMachines
+          label: 
+            text: Machine Profile
+          onChange: onMachineChange|broker|/spec/topology/broker/resources
           schema:
-            $ref: schema#/properties/spec/properties/verticalScaling/properties/broker/properties/nodeSelectionPolicy
-          type: input
-        - computed: setResource|/spec/topology/broker/podTemplate/spec/containers
+            $ref: discriminator#/machine-broker
+          type: select
+        - if: isMachineCustom|/machine-broker
           label:
             text: labels.resources
           schema:
             $ref: schema#/properties/spec/properties/verticalScaling/properties/broker/properties/resources
           type: resource-input-form
+        - label:
+            text: Node Selection Policy
+          options:
+          - text: LabelSelector
+            value: LabelSelector
+          - text: Taint
+            value: Taint
+          schema:
+            $ref: schema#/properties/spec/properties/verticalScaling/properties/broker/properties/nodeSelectionPolicy
+          type: select
         - elements:
           - label:
               text: key
@@ -156,18 +175,37 @@ steps:
           $ref: schema#/properties/spec/properties/verticalScaling/properties/broker
         show_label: true
         type: single-step-form
-      - elements:
-        - label:
-            text: Node Selection Policy
+      - discriminator:
+          machine-controller:
+            default: ""
+            type: string
+        elements:
+        - computed: setMachine|controller
+          customClass: mt-20
+          disableUnselect: true
+          fetch: getMachines
+          label: 
+            text: Machine Profile
+          onChange: onMachineChange|controller|/spec/topology/controller/resources
           schema:
-            $ref: schema#/properties/spec/properties/verticalScaling/properties/controller/properties/nodeSelectionPolicy
-          type: input
-        - computed: setResource|/spec/topology/controller/podTemplate/spec/containers
+            $ref: discriminator#/machine-controller
+          type: select
+        - if: isMachineCustom|/machine-controller
           label:
             text: labels.resources
           schema:
             $ref: schema#/properties/spec/properties/verticalScaling/properties/controller/properties/resources
           type: resource-input-form
+        - label:
+            text: Node Selection Policy
+          options:
+          - text: LabelSelector
+            value: LabelSelector
+          - text: Taint
+            value: Taint
+          schema:
+            $ref: schema#/properties/spec/properties/verticalScaling/properties/controller/properties/nodeSelectionPolicy
+          type: select
         - elements:
           - label:
               text: key
@@ -192,18 +230,37 @@ steps:
           $ref: schema#/properties/spec/properties/verticalScaling/properties/controller
         show_label: true
         type: single-step-form
-      - elements:
-        - label:
-            text: Node Selection Policy
+      - discriminator:
+          machine-combined:
+            default: ""
+            type: string
+        elements:
+        - computed: setMachine|combined
+          customClass: mt-20
+          disableUnselect: true
+          fetch: getMachines
+          label: 
+            text: Machine Profile
+          onChange: onMachineChange|combined|/spec/podTemplate/spec/containers
           schema:
-            $ref: schema#/properties/spec/properties/verticalScaling/properties/node/properties/nodeSelectionPolicy
-          type: input
-        - computed: setResource|/spec/podTemplate/spec/containers
+            $ref: discriminator#/machine-combined
+          type: select
+        - if: isMachineCustom|/machine-combined
           label:
             text: labels.resources
           schema:
             $ref: schema#/properties/spec/properties/verticalScaling/properties/node/properties/resources
           type: resource-input-form
+        - label:
+            text: Node Selection Policy
+          options:
+          - text: LabelSelector
+            value: LabelSelector
+          - text: Taint
+            value: Taint
+          schema:
+            $ref: schema#/properties/spec/properties/verticalScaling/properties/node/properties/nodeSelectionPolicy
+          type: select
         - elements:
           - label:
               text: key

@@ -1,3 +1,309 @@
+const machines = {
+  'db.t.micro': {
+    resources: {
+      requests: {
+        cpu: '250m',
+        memory: '512Mi',
+      },
+      limits: {
+        cpu: '500m',
+        memory: '1Gi',
+      },
+    },
+  },
+  'db.t.small': {
+    resources: {
+      requests: {
+        cpu: '1',
+        memory: '1Gi',
+      },
+      limits: {
+        cpu: '2',
+        memory: '2Gi',
+      },
+    },
+  },
+  'db.t.medium': {
+    resources: {
+      requests: {
+        cpu: '1',
+        memory: '2Gi',
+      },
+      limits: {
+        cpu: '2',
+        memory: '4Gi',
+      },
+    },
+  },
+  'db.t.large': {
+    resources: {
+      requests: {
+        cpu: '1',
+        memory: '4Gi',
+      },
+      limits: {
+        cpu: '2',
+        memory: '8Gi',
+      },
+    },
+  },
+  'db.t.xlarge': {
+    resources: {
+      requests: {
+        cpu: '2',
+        memory: '8Gi',
+      },
+      limits: {
+        cpu: '4',
+        memory: '16Gi',
+      },
+    },
+  },
+  'db.t.2xlarge': {
+    resources: {
+      requests: {
+        cpu: '4',
+        memory: '16Gi',
+      },
+      limits: {
+        cpu: '8',
+        memory: '32Gi',
+      },
+    },
+  },
+  'db.m.small': {
+    resources: {
+      requests: {
+        cpu: '500m',
+        memory: '912680550',
+      },
+      limits: {
+        cpu: '1',
+        memory: '1825361100',
+      },
+    },
+  },
+  'db.m.large': {
+    resources: {
+      requests: {
+        cpu: '1',
+        memory: '4Gi',
+      },
+      limits: {
+        cpu: '2',
+        memory: '8Gi',
+      },
+    },
+  },
+  'db.m.xlarge': {
+    resources: {
+      requests: {
+        cpu: '2',
+        memory: '8Gi',
+      },
+      limits: {
+        cpu: '4',
+        memory: '16Gi',
+      },
+    },
+  },
+  'db.m.2xlarge': {
+    resources: {
+      requests: {
+        cpu: '4',
+        memory: '16Gi',
+      },
+      limits: {
+        cpu: '8',
+        memory: '32Gi',
+      },
+    },
+  },
+  'db.m.4xlarge': {
+    resources: {
+      requests: {
+        cpu: '8',
+        memory: '32Gi',
+      },
+      limits: {
+        cpu: '16',
+        memory: '64Gi',
+      },
+    },
+  },
+  'db.m.8xlarge': {
+    resources: {
+      requests: {
+        cpu: '16',
+        memory: '64Gi',
+      },
+      limits: {
+        cpu: '32',
+        memory: '128Gi',
+      },
+    },
+  },
+  'db.m.12xlarge': {
+    resources: {
+      requests: {
+        cpu: '24',
+        memory: '96Gi',
+      },
+      limits: {
+        cpu: '48',
+        memory: '192Gi',
+      },
+    },
+  },
+  'db.m.16xlarge': {
+    resources: {
+      requests: {
+        cpu: '32',
+        memory: '128Gi',
+      },
+      limits: {
+        cpu: '64',
+        memory: '256Gi',
+      },
+    },
+  },
+  'db.m.24xlarge': {
+    resources: {
+      requests: {
+        cpu: '48',
+        memory: '192Gi',
+      },
+      limits: {
+        cpu: '96',
+        memory: '384Gi',
+      },
+    },
+  },
+  'db.r.large': {
+    resources: {
+      requests: {
+        cpu: '1',
+        memory: '8Gi',
+      },
+      limits: {
+        cpu: '2',
+        memory: '16Gi',
+      },
+    },
+  },
+  'db.r.xlarge': {
+    resources: {
+      requests: {
+        cpu: '2',
+        memory: '16Gi',
+      },
+      limits: {
+        cpu: '4',
+        memory: '32Gi',
+      },
+    },
+  },
+  'db.r.2xlarge': {
+    resources: {
+      requests: {
+        cpu: '4',
+        memory: '32Gi',
+      },
+      limits: {
+        cpu: '8',
+        memory: '64Gi',
+      },
+    },
+  },
+  'db.r.4xlarge': {
+    resources: {
+      requests: {
+        cpu: '8',
+        memory: '96Gi',
+      },
+      limits: {
+        cpu: '16',
+        memory: '192Gi',
+      },
+    },
+  },
+  'db.r.8xlarge': {
+    resources: {
+      requests: {
+        cpu: '16',
+        memory: '128Gi',
+      },
+      limits: {
+        cpu: '32',
+        memory: '256Gi',
+      },
+    },
+  },
+  'db.r.12xlarge': {
+    resources: {
+      requests: {
+        cpu: '24',
+        memory: '192Gi',
+      },
+      limits: {
+        cpu: '48',
+        memory: '384Gi',
+      },
+    },
+  },
+  'db.r.16xlarge': {
+    resources: {
+      requests: {
+        cpu: '32',
+        memory: '256Gi',
+      },
+      limits: {
+        cpu: '64',
+        memory: '512Gi',
+      },
+    },
+  },
+  'db.r.24xlarge': {
+    resources: {
+      requests: {
+        cpu: '24',
+        memory: '384Gi',
+      },
+      limits: {
+        cpu: '96',
+        memory: '768Gi',
+      },
+    },
+  },
+}
+
+const machineList = [
+  'custom',
+  'db.t.micro',
+  'db.t.small',
+  'db.t.medium',
+  'db.t.large',
+  'db.t.xlarge',
+  'db.t.2xlarge',
+  'db.m.small',
+  'db.m.large',
+  'db.m.xlarge',
+  'db.m.2xlarge',
+  'db.m.4xlarge',
+  'db.m.8xlarge',
+  'db.m.12xlarge',
+  'db.m.16xlarge',
+  'db.m.24xlarge',
+  'db.r.large',
+  'db.r.xlarge',
+  'db.r.2xlarge',
+  'db.r.4xlarge',
+  'db.r.8xlarge',
+  'db.r.12xlarge',
+  'db.r.16xlarge',
+  'db.r.24xlarge',
+]
+
 async function fetchJsons({ axios, itemCtx }) {
   let ui = {}
   let language = {}
@@ -393,6 +699,112 @@ function ifDbTypeEqualsTo({ discriminator, getValue, watchDependency, commit }, 
   return value === verd
 }
 
+// machine profile stuffs
+let machinesFromPreset = []
+
+function getMachines({ storeGet }) {
+  const presets = storeGet('/kubedbuiPresets') || {}
+  const avlMachines = presets.admin?.machineProfiles?.available || []
+  let arr = []
+  if (avlMachines.length) {
+    arr = avlMachines.map((machine) => {
+      if (machine === 'custom') return { text: machine, value: machine }
+      else {
+        const machineData = machinesFromPreset.find((val) => val.id === machine)
+        if (machineData) {
+          const subText = `CPU: ${machineData.limits.cpu}, Memory: ${machineData.limits.memory}`
+          const text = machineData.name ? machineData.name : machineData.id
+          return { text, subText, value: machine }
+        } else return { text: machine, value: machine }
+      }
+    })
+  } else {
+    arr = machineList
+      .map((machine) => {
+        if (machine === 'custom') return { text: machine, value: machine }
+        const subText = `CPU: ${machines[machine].resources.limits.cpu}, Memory: ${machines[machine].resources.limits.memory}`
+        const text = machine
+        return { text, subText, value: machine }
+      })
+      .filter((val) => !!val)
+  }
+  return arr
+}
+
+function setMachine({ getValue, discriminator, storeGet }, type) {
+  const dbDetails = getValue(discriminator, '/dbDetails')
+  const annotations = dbDetails?.metadata?.annotations || {}
+  const instance = annotations['kubernetes.io/instance-type']
+  let parsedInstance = {}
+  try {
+    if (instance) parsedInstance = JSON.parse(instance)
+  } catch (e) {
+    console.log(e)
+    parsedInstance = {}
+  }
+  const machine = parsedInstance[type] || 'custom'
+
+  machinesFromPreset = storeGet('/kubedbuiPresets')?.admin?.machineProfiles?.machines || []
+
+  const machinePresets = machinesFromPreset.find((item) => item.id === machine)
+  if (machinePresets) return machine
+  else return 'custom'
+}
+
+function onMachineChange({ getValue, discriminator, commit, model }, type, valPath) {
+  let selectedMachine = ''
+  selectedMachine = getValue(discriminator, `/machine-${type}`)
+  const machine = machinesFromPreset.find((item) => item.id === selectedMachine)
+
+  let obj = {}
+  if (selectedMachine !== 'custom') {
+    if (machine) obj = { limits: { ...machine?.limits }, requests: { ...machine?.limits } }
+    else obj = machines[selectedMachine]?.resources
+  } else {
+    const val = getValue(discriminator, `/dbDetails${valPath}`) || {}
+    obj = Array.isArray(val) ? val[0]?.resources : { ...val }
+  }
+
+  const path = `/spec/verticalScaling/${type === 'combined' ? 'node' : type}/resources`
+
+  if (obj && Object.keys(obj).length)
+    commit('wizard/model$update', {
+      path: path,
+      value: obj,
+      force: true,
+    })
+
+  // update metadata.annotations
+  const annotations = getValue(model, '/metadata/annotations') || {}
+  const instance = annotations['kubernetes.io/instance-type']
+  let parsedInstance = {}
+  try {
+    if (instance) parsedInstance = JSON.parse(instance)
+  } catch (e) {
+    console.log(e)
+    parsedInstance = {}
+  }
+  if (selectedMachine === 'custom') delete parsedInstance[type]
+  else parsedInstance[type] = selectedMachine
+  annotations['kubernetes.io/instance-type'] = JSON.stringify(parsedInstance)
+
+  if (machinesFromPreset.length)
+    commit('wizard/model$update', {
+      path: '/metadata/annotations',
+      value: annotations,
+      force: true,
+    })
+
+  if (parsedInstance && Object.keys(parsedInstance).length === 0)
+    commit('wizard/model$delete', '/metadata/annotations')
+}
+
+function isMachineCustom({ watchDependency, getValue, discriminator }, path) {
+  watchDependency(`discriminator#${path}`)
+  const machine = getValue(discriminator, `${path}`)
+  return machine === 'custom'
+}
+
 // for config secret
 async function getConfigSecrets({ storeGet, axios, model, getValue, watchDependency }) {
   const owner = storeGet('/route/params/user')
@@ -751,7 +1163,7 @@ function setResource({ discriminator, getValue, watchDependency, storeGet }, pat
   const containers = getValue(discriminator, `/dbDetails${path}`) || []
   const kind = getValue(discriminator, '/dbDetails/kind')
   const resource = containers.filter((ele) => ele.name === kind.toLowerCase())
-  return resource[0].resources
+  return resource[0]?.resources
 }
 
 function getAliasOptions() {
@@ -852,4 +1264,8 @@ return {
   onDbChange,
   setApplyToIfReady,
   isVerticalScaleTopologyRequired,
+  getMachines,
+  setMachine,
+  onMachineChange,
+  isMachineCustom,
 }

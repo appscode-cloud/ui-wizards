@@ -96,8 +96,22 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/horizontalScaling
       type: single-step-form
-    - elements:
-      - computed: setValueFromDbDetails|/spec/podTemplate/spec/resources|/spec/verticalScaling/proxysql/resources
+    - discriminator:
+        machine:
+          default: ""
+          type: string
+      elements:
+      - computed: setMachine
+        customClass: mt-20
+        disableUnselect: true
+        fetch: getMachines
+        label: 
+          text: Machine Profile
+        onChange: onMachineChange|proxysql|/spec/podTemplate/spec/resources
+        schema:
+          $ref: discriminator#/machine
+        type: select
+      - if: isMachineCustom
         label:
           text: labels.resources
         schema:

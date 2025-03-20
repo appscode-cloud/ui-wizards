@@ -1,13 +1,13 @@
 steps:
 - form:
     discriminator:
-      elasticsearchDetails:
+      dbDetails:
         type: object
     elements:
     - computed: getDbDetails
       if: returnFalse
       schema:
-        $ref: discriminator#/properties/elasticsearchDetails
+        $ref: discriminator#/properties/dbDetails
       type: input
     - if: showAndInitName
       label:
@@ -172,8 +172,22 @@ steps:
       type: single-step-form
     - elements:
       - elements:
-        - elements:
-          - computed: setValueFromDbDetails|/spec/topology/master/resources|/spec/verticalScaling/master/resources
+        - discriminator:
+            machine-master:
+              default: ""
+              type: string
+          elements:
+          - computed: setMachine|master
+            customClass: mt-20
+            disableUnselect: true
+            fetch: getMachines
+            label: 
+              text: Machine Profile
+            onChange: onMachineChange|master|/spec/topology/master/resources
+            schema:
+              $ref: discriminator#/machine-master
+            type: select
+          - if: isMachineCustom|/machine-master
             label:
               text: labels.resources
             schema:
@@ -220,8 +234,22 @@ steps:
             $ref: schema#/properties/spec/properties/verticalScaling/properties/master
           show_label: true
           type: single-step-form
-        - elements:
-          - computed: setValueFromDbDetails|/spec/topology/data/resources|/spec/verticalScaling/data/resources
+        - discriminator:
+            machine-data:
+              default: ""
+              type: string
+          elements:
+          - computed: setMachine|data
+            customClass: mt-20
+            disableUnselect: true
+            fetch: getMachines
+            label: 
+              text: Machine Profile
+            onChange: onMachineChange|data|/spec/topology/data/resources
+            schema:
+              $ref: discriminator#/machine-data
+            type: select
+          - if: isMachineCustom|/machine-data
             label:
               text: labels.resources
             schema:
@@ -268,8 +296,22 @@ steps:
             $ref: schema#/properties/spec/properties/verticalScaling/properties/data
           show_label: true
           type: single-step-form
-        - elements:
-          - computed: setValueFromDbDetails|/spec/topology/ingest/resources|/spec/verticalScaling/ingest/resources
+        - discriminator:
+            machine-ingest:
+              default: ""
+              type: string
+          elements:
+          - computed: setMachine|ingest
+            customClass: mt-20
+            disableUnselect: true
+            fetch: getMachines
+            label: 
+              text: Machine Profile
+            onChange: onMachineChange|ingest|/spec/topology/ingest/resources
+            schema:
+              $ref: discriminator#/machine-ingest
+            type: select
+          - if: isMachineCustom|/machine-ingest
             label:
               text: labels.resources
             schema:
@@ -316,8 +358,22 @@ steps:
             $ref: schema#/properties/spec/properties/verticalScaling/properties/ingest
           show_label: true
           type: single-step-form
-        - elements:
-          - computed: setValueFromDbDetails|/spec/topology/ml/resources|/spec/verticalScaling/ml/resources
+        - discriminator:
+            machine-ml:
+              default: ""
+              type: string
+          elements:
+          - computed: setMachine|ml
+            customClass: mt-20
+            disableUnselect: true
+            fetch: getMachines
+            label: 
+              text: Machine Profile
+            onChange: onMachineChange|ml|/spec/topology/ml/resources
+            schema:
+              $ref: discriminator#/machine-ml
+            type: select
+          - if: isMachineCustom|/machine-ml
             label:
               text: labels.resources
             schema:
@@ -364,8 +420,22 @@ steps:
             $ref: schema#/properties/spec/properties/verticalScaling/properties/ml
           show_label: true
           type: single-step-form
-        - elements:
-          - computed: setValueFromDbDetails|/spec/topology/transform/resources|/spec/verticalScaling/transform/resources
+        - discriminator:
+            machine-transform:
+              default: ""
+              type: string
+          elements:
+          - computed: setMachine|transform
+            customClass: mt-20
+            disableUnselect: true
+            fetch: getMachines
+            label: 
+              text: Machine Profile
+            onChange: onMachineChange|transform|/spec/topology/transform/resources
+            schema:
+              $ref: discriminator#/machine-transform
+            type: select
+          - if: isMachineCustom|/machine-transform
             label:
               text: labels.resources
             schema:
@@ -412,8 +482,22 @@ steps:
             $ref: schema#/properties/spec/properties/verticalScaling/properties/transform
           show_label: true
           type: single-step-form
-        - elements:
-          - computed: setValueFromDbDetails|/spec/topology/dataCold/resources|/spec/verticalScaling/dataCold/resources
+        - discriminator:
+            machine-dataCold:
+              default: ""
+              type: string
+          elements:
+          - computed: setMachine|dataCold
+            customClass: mt-20
+            disableUnselect: true
+            fetch: getMachines
+            label: 
+              text: Machine Profile
+            onChange: onMachineChange|dataCold|/spec/topology/dataCold/resources
+            schema:
+              $ref: discriminator#/machine-dataCold
+            type: select
+          - if: isMachineCustom|/machine-dataCold
             label:
               text: labels.resources
             schema:
@@ -460,8 +544,22 @@ steps:
             $ref: schema#/properties/spec/properties/verticalScaling/properties/dataCold
           show_label: true
           type: single-step-form
-        - elements:
-          - computed: setValueFromDbDetails|/spec/topology/dataContent/resources|/spec/verticalScaling/dataContent/resources
+        - discriminator:
+            machine-dataContent:
+              default: ""
+              type: string
+          elements:
+          - computed: setMachine|dataContent
+            customClass: mt-20
+            disableUnselect: true
+            fetch: getMachines
+            label: 
+              text: Machine Profile
+            onChange: onMachineChange|dataContent|/spec/topology/dataContent/resources
+            schema:
+              $ref: discriminator#/machine-dataContent
+            type: select
+          - if: isMachineCustom|/machine-dataContent
             label:
               text: labels.resources
             schema:
@@ -508,8 +606,22 @@ steps:
             $ref: schema#/properties/spec/properties/verticalScaling/properties/dataCold
           show_label: true
           type: single-step-form
-        - elements:
-          - computed: setValueFromDbDetails|/spec/topology/dataFrozen/resources|/spec/verticalScaling/dataFrozen/resources
+        - discriminator:
+            machine-dataFrozen:
+              default: ""
+              type: string
+          elements:
+          - computed: setMachine|dataFrozen
+            customClass: mt-20
+            disableUnselect: true
+            fetch: getMachines
+            label: 
+              text: Machine Profile
+            onChange: onMachineChange|dataFrozen|/spec/topology/dataFrozen/resources
+            schema:
+              $ref: discriminator#/machine-dataFrozen
+            type: select
+          - if: isMachineCustom|/machine-dataFrozen
             label:
               text: labels.resources
             schema:
@@ -556,8 +668,22 @@ steps:
             $ref: schema#/properties/spec/properties/verticalScaling/properties/dataFrozen
           show_label: true
           type: single-step-form
-        - elements:
-          - computed: setValueFromDbDetails|/spec/topology/dataHot/resources|/spec/verticalScaling/dataHot/resources
+        - discriminator:
+            machine-dataHot:
+              default: ""
+              type: string
+          elements:
+          - computed: setMachine|dataHot
+            customClass: mt-20
+            disableUnselect: true
+            fetch: getMachines
+            label: 
+              text: Machine Profile
+            onChange: onMachineChange|dataHot|/spec/topology/dataHot/resources
+            schema:
+              $ref: discriminator#/machine-dataHot
+            type: select
+          - if: isMachineCustom|/machine-dataHot
             label:
               text: labels.resources
             schema:
@@ -604,8 +730,22 @@ steps:
             $ref: schema#/properties/spec/properties/verticalScaling/properties/dataHot
           show_label: true
           type: single-step-form
-        - elements:
-          - computed: setValueFromDbDetails|/spec/topology/dataWarm/resources|/spec/verticalScaling/dataWarm/resources
+        - discriminator:
+            machine-dataWarm:
+              default: ""
+              type: string
+          elements:
+          - computed: setMachine|dataWarm
+            customClass: mt-20
+            disableUnselect: true
+            fetch: getMachines
+            label: 
+              text: Machine Profile
+            onChange: onMachineChange|dataWarm|/spec/topology/dataWarm/resources
+            schema:
+              $ref: discriminator#/machine-dataWarm
+            type: select
+          - if: isMachineCustom|/machine-dataWarm
             label:
               text: labels.resources
             schema:
@@ -656,8 +796,22 @@ steps:
         schema:
           $ref: schema#/properties/spec/properties/verticalScaling
         type: single-step-form
-      - elements:
-        - computed: setValueFromDbDetails|/spec/podTemplate/spec/resources|/spec/verticalScaling/node/resources
+      - discriminator:
+          machine-combined:
+            default: ""
+            type: string
+        elements:
+        - computed: setMachine|combined
+          customClass: mt-20
+          disableUnselect: true
+          fetch: getMachines
+          label: 
+            text: Machine Profile
+          onChange: onMachineChange|combined|/spec/podTemplate/spec/resources
+          schema:
+            $ref: discriminator#/machine-combined
+          type: select
+        - if: isMachineCustom|/machine-combined
           label:
             text: labels.resources
           schema:
