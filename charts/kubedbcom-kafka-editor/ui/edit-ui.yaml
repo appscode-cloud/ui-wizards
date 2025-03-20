@@ -319,14 +319,18 @@ steps:
       type: anchor
       url:
         function: getOpsRequestUrl|VerticalScaling
-    - computed: returnTrue
+    - computed: isValueExistInModel|/resources/kubedbComKafka/spec/monitor
       label:
         text: labels.enable_monitoring
       onChange: onEnableMonitoringChange
       schema:
         $ref: discriminator#/enableMonitoring
       type: switch
-    - elements:
+    - discriminator:
+        customizeExporter:
+          default: true
+          type: boolean
+      elements:
       - hasDescription: true
         label:
           text: labels.agent
@@ -469,6 +473,66 @@ steps:
           schema:
             $ref: schema#/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/metadata/properties/labels/additionalProperties
           type: input
+      - label:
+          text: labels.exporter_configuration
+        type: label-element
+      - label:
+          text: labels.customize_exporter
+        onChange: onCustomizeExporterChange
+        schema:
+          $ref: discriminator#/customizeExporter
+        type: switch
+      - elements:
+        - if: returnFalse
+          label:
+            text: labels.resources
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComKafka/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/resources
+          type: resource-input-form
+        - label:
+            text: labels.security_context
+          type: label-element
+        - label:
+            text: labels.run_as_user
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComKafka/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/securityContext/properties/runAsUser
+          type: input
+        - customClass: mb-0
+          label:
+            text: labels.run_as_group
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComKafka/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/securityContext/properties/runAsGroup
+          type: input
+        - label:
+            text: labels.port
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComKafka/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/port
+          type: input
+        - element:
+            label:
+              isSubsection: true
+              text: labels.args
+            schema:
+              $ref: schema#/properties/resources/properties/kubedbComKafka/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/args/items
+            type: input
+          label:
+            text: labels.args
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComKafka/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/args
+          type: list-input-form
+        - alias: reusable_env
+          chart:
+            name: uibytebuildersdev-component-env
+            version: v0.14.0
+          dataContext:
+            namespace:
+              $ref: schema#/properties/metadata/properties/release/properties/namespace
+          moduleResolver: fetchJsons
+          schema:
+            $ref: schema#/properties/resources/properties/kubedbComKafka/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env
+          type: reusable-element
+        if: showCustomizeExporterSection
+        type: single-step-form
       if: showMonitoringSection
       type: single-step-form
     type: single-step-form
