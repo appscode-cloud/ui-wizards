@@ -11,6 +11,8 @@
     {{- $profiles = .id -}}
   {{- end }}
 {{- end }}
+{{- $init_res := dict "limits" (dict "memory" "512Mi") "requests" (dict "cpu" "200m" "memory" "256Mi") -}}
+{{- $sidecar_res := dict "limits" (dict "memory" "256Mi") "requests" (dict "cpu" "200m" "memory" "256Mi") -}}
 
 {{- define "common.placement" -}}
 
@@ -108,11 +110,15 @@ spec:
             {{- include "container.securityContext" . | nindent 12 }}
           {{- if eq .Values.spec.mode "Sentinel" }}
         - name: rd-coordinator
+          resources:
+            {{- toYaml $sidecar_res | nindent 12 }}
           securityContext:
             {{- include "container.securityContext" . | nindent 12 }}
           {{- end }}
       initContainers:
         - name: redis-init
+          resources:
+            {{- toYaml $init_res | nindent 12 }}
           securityContext:
             {{- include "container.securityContext" . | nindent 12 }}
       {{- include "common.placement" . | nindent 6 }}

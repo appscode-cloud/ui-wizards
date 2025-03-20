@@ -10,6 +10,8 @@
     {{- $profiles = .id -}}
   {{- end }}
 {{- end }}
+{{- $init_res := dict "limits" (dict "memory" "512Mi") "requests" (dict "cpu" "200m" "memory" "256Mi") -}}
+{{- $sidecar_res := dict "limits" (dict "memory" "256Mi") "requests" (dict "cpu" "200m" "memory" "256Mi") -}}
 
 {{- define "common.placement" -}}
 
@@ -92,6 +94,17 @@ spec:
         - name: perconaxtradb
           resources:
             {{- toYaml $res | nindent 12 }}
+        - name: px-coordinator
+          resources:
+            {{- toYaml $sidecar_res | nindent 12 }}
+          securityContext:
+            {{- include "container.securityContext" . | nindent 12 }}
+      initContainers:
+        - name: px-init
+          resources:
+            {{- toYaml $init_res | nindent 12 }}
+          securityContext:
+            {{- include "container.securityContext" . | nindent 12 }}
       {{- include "common.placement" . | nindent 6 }}
   deletionPolicy: {{ .Values.spec.deletionPolicy }}
 {{- if .Values.spec.authSecret.name }}
