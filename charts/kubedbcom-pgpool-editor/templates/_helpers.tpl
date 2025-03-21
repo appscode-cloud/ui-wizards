@@ -113,3 +113,15 @@ Alert Enabled
 {{- end -}}
 {{- if (and $sev (le $sev $result) $enabled) -}}{{ (mustLast .) }}{{- end -}}
 {{- end }}
+
+{{- define "container.securityContext" -}}
+allowPrivilegeEscalation: false
+capabilities:
+  drop:
+  - ALL
+runAsGroup: 0
+runAsNonRoot: true
+runAsUser: {{ $.Values.spec.openshift.securityContext.runAsUser | default 70 }}
+seccompProfile:
+  type: RuntimeDefault
+{{- end }}
