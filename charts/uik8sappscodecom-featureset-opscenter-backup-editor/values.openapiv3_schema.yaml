@@ -465,7 +465,11 @@ properties:
                             type: boolean
                           prometheus:
                             type: boolean
+                          secrets-store:
+                            type: boolean
                           stash:
+                            type: boolean
+                          virtual-secrets:
                             type: boolean
                         required:
                         - ace
@@ -479,7 +483,9 @@ properties:
                         - license-proxyserver
                         - metrics
                         - prometheus
+                        - secrets-store
                         - stash
+                        - virtual-secrets
                         type: object
                       enabled:
                         type: boolean
@@ -1044,8 +1050,6 @@ properties:
                         properties:
                           bypassValidatingWebhookXray:
                             type: boolean
-                          ca:
-                            type: string
                           enableMutatingWebhook:
                             type: boolean
                           enableValidatingWebhook:
@@ -1077,7 +1081,6 @@ properties:
                             format: int32
                             type: integer
                         required:
-                        - ca
                         - enableMutatingWebhook
                         - enableValidatingWebhook
                         - groupPriorityMinimum
@@ -1794,6 +1797,8 @@ properties:
                                   properties:
                                     name:
                                       type: string
+                                    request:
+                                      type: string
                                   required:
                                   - name
                                   type: object
@@ -1934,6 +1939,8 @@ properties:
                           runAsUser:
                             format: int64
                             type: integer
+                          seLinuxChangePolicy:
+                            type: string
                           seLinuxOptions:
                             properties:
                               level:
@@ -1960,6 +1967,8 @@ properties:
                               type: integer
                             type: array
                             x-kubernetes-list-type: atomic
+                          supplementalGroupsPolicy:
+                            type: string
                           sysctls:
                             items:
                               properties:
@@ -1984,91 +1993,6 @@ properties:
                               runAsUserName:
                                 type: string
                             type: object
-                        type: object
-                      rbacproxy:
-                        properties:
-                          registry:
-                            type: string
-                          repository:
-                            type: string
-                          securityContext:
-                            properties:
-                              allowPrivilegeEscalation:
-                                type: boolean
-                              appArmorProfile:
-                                properties:
-                                  localhostProfile:
-                                    type: string
-                                  type:
-                                    type: string
-                                required:
-                                - type
-                                type: object
-                              capabilities:
-                                properties:
-                                  add:
-                                    items:
-                                      type: string
-                                    type: array
-                                    x-kubernetes-list-type: atomic
-                                  drop:
-                                    items:
-                                      type: string
-                                    type: array
-                                    x-kubernetes-list-type: atomic
-                                type: object
-                              privileged:
-                                type: boolean
-                              procMount:
-                                type: string
-                              readOnlyRootFilesystem:
-                                type: boolean
-                              runAsGroup:
-                                format: int64
-                                type: integer
-                              runAsNonRoot:
-                                type: boolean
-                              runAsUser:
-                                format: int64
-                                type: integer
-                              seLinuxOptions:
-                                properties:
-                                  level:
-                                    type: string
-                                  role:
-                                    type: string
-                                  type:
-                                    type: string
-                                  user:
-                                    type: string
-                                type: object
-                              seccompProfile:
-                                properties:
-                                  localhostProfile:
-                                    type: string
-                                  type:
-                                    type: string
-                                required:
-                                - type
-                                type: object
-                              windowsOptions:
-                                properties:
-                                  gmsaCredentialSpec:
-                                    type: string
-                                  gmsaCredentialSpecName:
-                                    type: string
-                                  hostProcess:
-                                    type: boolean
-                                  runAsUserName:
-                                    type: string
-                                type: object
-                            type: object
-                          tag:
-                            type: string
-                        required:
-                        - registry
-                        - repository
-                        - tag
                         type: object
                       registryFQDN:
                         type: string
@@ -2126,7 +2050,6 @@ properties:
                     - imagePullPolicy
                     - monitoring
                     - operator
-                    - rbacproxy
                     - registryFQDN
                     - replicaCount
                     - security
