@@ -46,11 +46,9 @@ type KubedbcomFerretdbEditorOptionsSpecSpec struct {
 	Annotations map[string]string `json:"annotations"`
 	// +optional
 	Labels         map[string]string  `json:"labels"`
-	Mode           GeneralMode        `json:"mode"`
-	Replicas       int                `json:"replicas"`
-	Backend        FerretDBBackend    `json:"backend"`
+	Mode           FerretDBMode       `json:"mode"`
+	Server         FerretDBServer     `json:"server"`
 	Persistence    Persistence        `json:"persistence"`
-	PodResources   PodResources       `json:"podResources"`
 	AuthSecret     AuthSecret         `json:"authSecret"`
 	DeletionPolicy DeletionPolicy     `json:"deletionPolicy"`
 	Configuration  string             `json:"configuration"`
@@ -61,11 +59,18 @@ type KubedbcomFerretdbEditorOptionsSpecSpec struct {
 	Openshift Openshift `json:"openshift"`
 }
 
-type FerretDBBackend struct {
-	ObjectReference   `json:",inline"`
-	ExternallyManaged bool `json:"externallyManaged"`
+// +kubebuilder:validation:Enum=PrimaryOnly;PrimaryAndSecondary
+type FerretDBMode string
+
+type FerretDBServer struct {
+	Primary   FerretNode `json:"primary"`
+	Secondary FerretNode `json:"secondary"`
 }
 
+type FerretNode struct {
+	Replicas     int          `json:"replicas"`
+	PodResources PodResources `json:"podResources"`
+}
 type FerretdbAlertsSpecForm struct {
 	Alert alerts.PostgresAlert `json:"alert"`
 }

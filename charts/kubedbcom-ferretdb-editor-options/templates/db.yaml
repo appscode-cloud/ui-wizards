@@ -75,14 +75,6 @@ metadata:
 {{- end }}
 spec:
   version: {{ .Values.spec.admin.databases.FerretDB.versions.default | quote }}
-  replicas: {{ (eq .Values.spec.mode "Replicaset") | ternary .Values.spec.replicas 1 }}
-  backend:
-    externallyManaged: {{ .Values.spec.backend.externallyManaged }}
-{{- if .Values.spec.backend.externallyManaged }}
-    postgresRef:
-      name: {{ .Values.spec.backend.name }}
-      namespace: {{ .Values.spec.backend.namespace }}
-{{- end }}
   storageType: Durable
   storage:
     storageClassName: {{ .Values.spec.admin.storageClasses.default }}
@@ -91,17 +83,20 @@ spec:
     resources:
       requests:
         storage: {{ .Values.spec.persistence.size }}
-  podTemplate:
-    spec:
-      securityContext:
-        fsGroup: {{ .Values.spec.openshift.securityContext.runAsUser | default 1000 }}
-      containers:
-        - name: ferretdb
-          resources:
-            {{- toYaml $res | nindent 12 }}
+  server:
+    primary:
+      replicas: {{ (eq .Values.spec.mode "Replicaset") | ternary .Values.spec.replicas 1 }}
+      podTemplate:
+        spec:
           securityContext:
-            {{- include "container.securityContext" $ | nindent 12 }}
-      {{- include "common.placement" . | nindent 6 }}
+            fsGroup: {{ .Values.spec.openshift.securityContext.runAsUser | default 1000 }}
+          containers:
+            - name: ferretdb
+              resources:
+                {{- toYaml $res | nindent 16 }}
+              securityContext:
+                {{- include "container.securityContext" $ | nindent 16 }}
+          {{- include "common.placement" . | nindent 10 }}
   deletionPolicy: {{ .Values.spec.deletionPolicy }}
 {{- if .Values.spec.authSecret.name }}
   authSecret:
