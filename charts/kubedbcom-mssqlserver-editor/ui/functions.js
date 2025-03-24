@@ -2631,7 +2631,7 @@ function isVariantAvailable({ storeGet }) {
 }
 
 function showScheduleBackup({ storeGet }) {
-  const operationQuery = storeGet('/route/query/operation') || ''
+  const operationQuery = storeGet('/route/params/actions') || ''
   const isBackupOperation = operationQuery === 'edit-self-backupconfiguration' ? true : false
   return !isBackupOperation
 }
@@ -2650,7 +2650,7 @@ function isConsole({ storeGet, commit }) {
       value: dbName,
       force: true,
     })
-    const operation = storeGet('/route/query/operation') || ''
+    const operation = storeGet('/route/params/actions') || ''
     if (operation.length) {
       const splitOp = operation.split('-')
       if (splitOp.length > 2) autoscaleType = splitOp[2]
@@ -2676,7 +2676,7 @@ function isConsole({ storeGet, commit }) {
 }
 
 function isKubedb({ storeGet }) {
-  return !!storeGet('/route/query/operation')
+  return !!storeGet('/route/params/actions')
 }
 
 function showOpsRequestOptions({ model, getValue, watchDependency, storeGet, discriminator }) {
@@ -2881,7 +2881,7 @@ function ifScalingTypeEqualsTo(
     'model#/resources/autoscalingKubedbComMSSQLServerAutoscaler/spec/databaseRef/name',
   )
 
-  const operation = storeGet('/route/query/operation') || ''
+  const operation = storeGet('/route/params/actions') || ''
   if (operation.length) {
     const splitOp = operation.split('-')
     if (splitOp.length > 2) autoscaleType = splitOp[2]
