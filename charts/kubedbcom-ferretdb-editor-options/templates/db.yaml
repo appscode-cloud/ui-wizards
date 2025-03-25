@@ -85,7 +85,7 @@ spec:
         storage: {{ .Values.spec.persistence.size }}
   server:
     primary:
-      replicas: {{ (eq .Values.spec.mode "Replicaset") | ternary .Values.spec.replicas 1 }}
+      replicas: {{v.Values.spec.server.primary.replicas }}
       podTemplate:
         spec:
           securityContext:
@@ -97,6 +97,21 @@ spec:
               securityContext:
                 {{- include "container.securityContext" $ | nindent 16 }}
           {{- include "common.placement" . | nindent 10 }}
+  {{ if .Values.spec.server.secondary }}
+    secondary:
+      replicas: {{v.Values.spec.server.secondary.replicas }}
+      podTemplate:
+        spec:
+          securityContext:
+            fsGroup: {{ .Values.spec.openshift.securityContext.runAsUser | default 1000 }}
+          containers:
+            - name: ferretdb
+              resources:
+                {{- toYaml $res | nindent 16 }}
+              securityContext:
+                {{- include "container.securityContext" $ | nindent 16 }}
+          {{- include "common.placement" . | nindent 10 }}
+  {{- end }}
   deletionPolicy: {{ .Values.spec.deletionPolicy }}
 {{- if .Values.spec.authSecret.name }}
   authSecret:
