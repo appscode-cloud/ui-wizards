@@ -303,28 +303,24 @@ const machineList = [
   'db.r.16xlarge',
   'db.r.24xlarge',
 ]
+
 const modeDetails = {
-  Standalone: {
-    description: 'Single node FerretDB without high availability',
-    text: 'Standalone',
+  PrimaryOnly: {
+    description: 'To connect with the postgres primary only',
+    text: 'PrimaryOnly',
   },
-  Replicaset: {
-    description: 'FerretDB Replicaset for high availability.',
-    text: 'Replicaset',
+  PrimaryAndSecondary: {
+    description: 'To connect with both postgres primary & secondaries',
+    text: 'PrimaryAndSecondary',
   },
 }
 
 function isEqualToModelPathValue({ model, getValue, watchDependency }, value, modelPath) {
   const modelPathValue = getValue(model, modelPath)
   watchDependency('model#' + modelPath)
-  return modelPathValue === value
-}
+  console.log(modelPathValue, value)
 
-function showStorageSizeField({ model, getValue, watchDependency }) {
-  const modelPathValue = getValue(model, '/spec/mode')
-  watchDependency('model#/spec/mode')
-  const validType = ['Standalone', 'Replicaset']
-  return validType.includes(modelPathValue)
+  return modelPathValue === value
 }
 
 function onModeChange({ model, getValue, commit }) {
@@ -778,6 +774,7 @@ function getAdminOptions({ getValue, model, watchDependency, commit }, type) {
       })) || []
     )
   }
+
   return options
 }
 
@@ -919,6 +916,7 @@ function returnFalse() {
 
 function isMachineCustom({ model, getValue, watchDependency }, path) {
   const fullpath = path ? `/spec/${path}/podResources/machine` : '/spec/podResources/machine'
+  log
   const modelPathValue = getValue(model, fullpath)
   watchDependency(`model#${fullpath}`)
   return modelPathValue === 'custom'
@@ -1157,7 +1155,6 @@ return {
   isVariantAvailable,
   showAuthPasswordField,
   isEqualToModelPathValue,
-  showStorageSizeField,
   onModeChange,
   getMachineListForOptions,
   setLimits,
