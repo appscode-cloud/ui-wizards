@@ -82,11 +82,18 @@ steps:
       if: ifRequestTypeEqualsTo|UpdateVersion
       type: single-step-form
     - elements:
-      - computed: setValueFromDbDetails|/spec/replicas
+      - computed: setValueFromDbDetails|/spec/server/primary/replicas
         label:
-          text: Node
+          text: Primary Replicas
         schema:
-          $ref: schema#/properties/spec/properties/horizontalScaling/properties/primary
+          $ref: schema#/properties/spec/properties/horizontalScaling/properties/primary/properties/replicas
+        type: input
+      - computed: setValueFromDbDetails|/spec/server/secondary/replicas
+        if: ferretTypeEqualsTo|secondary
+        label:
+          text: Secondary Replicas
+        schema:
+          $ref: schema#/properties/spec/properties/horizontalScaling/properties/secondary/properties/replicas
         type: input
       if: ifRequestTypeEqualsTo|HorizontalScaling
       label:
