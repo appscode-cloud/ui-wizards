@@ -1952,6 +1952,12 @@ function handleUnit({ commit, model, getValue }, path, type = 'bound') {
   }
 }
 
+function ferretTypeEqualsTo({ getValue, model }, param) {
+  const dbDetails = getValue(model, '/resources/kubedbComFerretDB')
+  const type = dbDetails.spec?.server?.secondary ? 'secondary' : 'primary'
+  return param === type
+}
+
 return {
   isRancherManaged,
   handleUnit,
@@ -2072,4 +2078,5 @@ return {
   getOpsRequestUrl,
   onRefChange,
   getAppBindings,
+  ferretTypeEqualsTo,
 }

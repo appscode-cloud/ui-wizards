@@ -317,8 +317,8 @@ const modes = {
     default: 'Topology',
   },
   FerretDB: {
-    availableModes: ['Standalone', 'Replicaset'],
-    default: 'Replicaset',
+    availableModes: ['PrimaryOnly', 'PrimaryAndSecondary'],
+    default: 'PrimaryAndSecondary',
   },
   Kafka: {
     availableModes: ['Combined', 'Topology'],

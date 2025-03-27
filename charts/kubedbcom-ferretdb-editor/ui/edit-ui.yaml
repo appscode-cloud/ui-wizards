@@ -51,7 +51,7 @@ steps:
       type: radio
     - elements:
       - elements:
-        - computed: setTrigger|autoscalingKubedbComFerretDBAutoscaler/spec/compute/ferretdb/trigger
+        - computed: setTrigger|autoscalingKubedbComFerretDBAutoscaler/spec/compute/primary/trigger
           label:
             text: Trigger
           options:
@@ -104,16 +104,83 @@ steps:
             $ref: schema#/properties/resources/properties/autoscalingKubedbComFerretDBAutoscaler/properties/spec/properties/compute/properties/primary/properties/maxAllowed
           show_label: true
           type: single-step-form
-        - fetch: setControlledResources|ferretdb
+        - fetch: setControlledResources|primary
           label:
             text: Controlled Resources
           schema:
             $ref: schema#/properties/resources/properties/autoscalingKubedbComFerretDBAutoscaler/properties/spec/properties/compute/properties/primary/properties/controlledResources
           type: multiselect
         label:
-          text: FerretDB
+          text: Primary
         schema:
           $ref: schema#/properties/resources/properties/autoscalingKubedbComFerretDBAutoscaler/properties/spec/properties/compute/properties/primary
+        show_label: true
+        type: single-step-form
+      - elements:
+        - computed: setTrigger|autoscalingKubedbComFerretDBAutoscaler/spec/compute/secondary/trigger
+          label:
+            text: Trigger
+          options:
+          - "On"
+          - "Off"
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComFerretDBAutoscaler/properties/spec/properties/compute/properties/secondary/properties/trigger
+          type: select
+        - label:
+            text: Pod LifeTime Threshold
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComFerretDBAutoscaler/properties/spec/properties/compute/properties/secondary/properties/podLifeTimeThreshold
+          type: input
+        - label:
+            text: Resource Diff Percentage
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComFerretDBAutoscaler/properties/spec/properties/compute/properties/secondary/properties/resourceDiffPercentage
+          type: input
+        - elements:
+          - label:
+              text: cpu
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComFerretDBAutoscaler/properties/spec/properties/compute/properties/secondary/properties/minAllowed/properties/cpu
+            type: input
+          - label:
+              text: memory
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComFerretDBAutoscaler/properties/spec/properties/compute/properties/secondary/properties/minAllowed/properties/memory
+            type: input
+          label:
+            text: Min Allowed
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComFerretDBAutoscaler/properties/spec/properties/compute/properties/secondary/properties/minAllowed
+          show_label: true
+          type: single-step-form
+        - elements:
+          - label:
+              text: cpu
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComFerretDBAutoscaler/properties/spec/properties/compute/properties/secondary/properties/maxAllowed/properties/cpu
+            type: input
+          - label:
+              text: memory
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComFerretDBAutoscaler/properties/spec/properties/compute/properties/secondary/properties/maxAllowed/properties/memory
+            type: input
+          label:
+            text: Max Allowed
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComFerretDBAutoscaler/properties/spec/properties/compute/properties/secondary/properties/maxAllowed
+          show_label: true
+          type: single-step-form
+        - fetch: setControlledResources|secondary
+          label:
+            text: Controlled Resources
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComFerretDBAutoscaler/properties/spec/properties/compute/properties/secondary/properties/controlledResources
+          type: multiselect
+        if: ferretTypeEqualsTo|secondary
+        label:
+          text: Secondary
+        schema:
+          $ref: schema#/properties/resources/properties/autoscalingKubedbComFerretDBAutoscaler/properties/spec/properties/compute/properties/secondary
         show_label: true
         type: single-step-form
       - elements:

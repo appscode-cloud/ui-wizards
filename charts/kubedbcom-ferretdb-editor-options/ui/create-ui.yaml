@@ -26,40 +26,75 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/mode
       type: radio
-    - if: isEqualToModelPathValue|Replicaset|/spec/mode
-      label:
-        text: labels.replicaset.number
-      schema:
-        $ref: schema#/properties/spec/properties/replicas
-      type: input
     - elements:
+      - label:
+          text: labels.replicaset.number
+        schema:
+          $ref: schema#/properties/spec/properties/server/properties/primary/properties/replicas
+        type: input
       - computed: setMachineToCustom
         fetch: getMachineListForOptions
         label:
           text: Machine
         schema:
-          $ref: schema#/properties/spec/properties/podResources/properties/machine
+          $ref: schema#/properties/spec/properties/server/properties/primary/properties/podResources/properties/machine
         type: select
       - computed: setLimits|cpu
         disabled: isMachineNotCustom
-        if: isMachineCustom
+        if: isMachineCustom|server/primary
         label:
           text: labels.cpu
         onChange: setRequests|cpu
         schema:
-          $ref: schema#/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
+          $ref: schema#/properties/spec/properties/server/properties/primary/properties/podResources/properties/resources/properties/requests/properties/cpu
         type: input
       - computed: setLimits|memory
         disabled: isMachineNotCustom
-        if: isMachineCustom
+        if: isMachineCustom|server/primary
         label:
           text: labels.memory
         onChange: setRequests|memory
         schema:
-          $ref: schema#/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
+          $ref: schema#/properties/spec/properties/server/properties/primary/properties/podResources/properties/resources/properties/requests/properties/memory
         type: input
       label:
-        text: labels.machine_profile
+        text: Primary
+      show_label: true
+      type: single-step-form
+    - elements:
+      - label:
+          text: labels.replicaset.number
+        schema:
+          $ref: schema#/properties/spec/properties/server/properties/secondary/properties/replicas
+        type: input
+      - computed: setMachineToCustom
+        fetch: getMachineListForOptions
+        label:
+          text: Machine
+        schema:
+          $ref: schema#/properties/spec/properties/server/properties/secondary/properties/podResources/properties/machine
+        type: select
+      - computed: setLimits|cpu
+        disabled: isMachineNotCustom
+        if: isMachineCustom|server/secondary
+        label:
+          text: labels.cpu
+        onChange: setRequests|cpu
+        schema:
+          $ref: schema#/properties/spec/properties/server/properties/secondary/properties/podResources/properties/resources/properties/requests/properties/cpu
+        type: input
+      - computed: setLimits|memory
+        disabled: isMachineNotCustom
+        if: isMachineCustom|server/secondary
+        label:
+          text: labels.memory
+        onChange: setRequests|memory
+        schema:
+          $ref: schema#/properties/spec/properties/server/properties/secondary/properties/podResources/properties/resources/properties/requests/properties/memory
+        type: input
+      if: isEqualToModelPathValue|PrimaryAndSecondary|/spec/mode
+      label:
+        text: Secondary
       show_label: true
       type: single-step-form
     - fetch: getAdminOptions|storageClasses
@@ -68,8 +103,7 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/admin/properties/storageClasses/properties/default
       type: select
-    - if: showStorageSizeField
-      label:
+    - label:
         text: labels.storage.size
       schema:
         $ref: schema#/properties/spec/properties/persistence/properties/size
@@ -148,21 +182,6 @@ steps:
           value: DoNotTerminate
         schema:
           $ref: schema#/properties/spec/properties/deletionPolicy
-        type: select
-      - label:
-          text: labels.backend.external
-        schema:
-          $ref: schema#/properties/spec/properties/backend/properties/externallyManaged
-        type: switch
-      - fetch: getAppBindings|postgres
-        if: isExternallyManaged|backend
-        label:
-          text: labels.backend.postgres
-        onChange: onRefChange|backend
-        refresh: true
-        required: true
-        schema:
-          $ref: discriminator#/backend
         type: select
       - label:
           text: Provide Authentication Credentials?

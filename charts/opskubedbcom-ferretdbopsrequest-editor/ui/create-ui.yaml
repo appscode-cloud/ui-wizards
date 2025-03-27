@@ -82,11 +82,18 @@ steps:
       if: ifRequestTypeEqualsTo|UpdateVersion
       type: single-step-form
     - elements:
-      - computed: setValueFromDbDetails|/spec/replicas
+      - computed: setValueFromDbDetails|/spec/server/primary/replicas
         label:
-          text: Node
+          text: Primary Replicas
         schema:
-          $ref: schema#/properties/spec/properties/horizontalScaling/properties/primary
+          $ref: schema#/properties/spec/properties/horizontalScaling/properties/primary/properties/replicas
+        type: input
+      - computed: setValueFromDbDetails|/spec/server/secondary/replicas
+        if: ferretTypeEqualsTo|secondary
+        label:
+          text: Secondary Replicas
+        schema:
+          $ref: schema#/properties/spec/properties/horizontalScaling/properties/secondary/properties/replicas
         type: input
       if: ifRequestTypeEqualsTo|HorizontalScaling
       label:
@@ -94,23 +101,23 @@ steps:
       type: single-step-form
     - elements:
       - discriminator:
-          machine:
+          machine-primary:
             default: ""
             type: string
         elements:
-        - computed: setMachine
+        - computed: setMachine|primary
           customClass: mt-20
           disableUnselect: true
           fetch: getMachines
           label:
             text: Machine Profile
-          onChange: onMachineChange|node|/spec/podTemplate/spec/containers
+          onChange: onMachineChange|primary|/spec/server/primary/podTemplate/spec/containers
           schema:
-            $ref: discriminator#/machine
+            $ref: discriminator#/machine-primary
           type: select
-        - if: isMachineCustom
-          label:
+        - label:
             text: labels.resources
+          if: isMachineCustom|/machine-primary
           schema:
             $ref: schema#/properties/spec/properties/verticalScaling/properties/primary/properties/resources
           type: resource-input-form
@@ -142,9 +149,64 @@ steps:
           show_label: true
           type: single-step-form
         label:
-          text: Node
+          text: Primary
         schema:
           $ref: schema#/properties/spec/properties/verticalScaling/properties/primary
+        show_label: true
+        type: single-step-form
+      - discriminator:
+          machine-secondary:
+            default: ""
+            type: string
+        elements:
+        - computed: setMachine|secondary
+          customClass: mt-20
+          disableUnselect: true
+          fetch: getMachines
+          label:
+            text: Machine Profile
+          onChange: onMachineChange|secondary|/spec/server/secondary/podTemplate/spec/containers
+          schema:
+            $ref: discriminator#/machine-secondary
+          type: select
+        - label:
+            text: labels.resources
+          if: isMachineCustom|/machine-secondary
+          schema:
+            $ref: schema#/properties/spec/properties/verticalScaling/properties/secondary/properties/resources
+          type: resource-input-form
+        - label:
+            text: Node Selection Policy
+          options:
+          - text: LabelSelector
+            value: LabelSelector
+          - text: Taint
+            value: Taint
+          schema:
+            $ref: schema#/properties/spec/properties/verticalScaling/properties/secondary/properties/nodeSelectionPolicy
+          type: select
+        - elements:
+          - label:
+              text: key
+            schema:
+              $ref: schema#/properties/spec/properties/verticalScaling/properties/secondary/properties/topology/properties/key
+            type: input
+          - label:
+              text: value
+            schema:
+              $ref: schema#/properties/spec/properties/verticalScaling/properties/secondary/properties/topology/properties/value
+            type: input
+          label:
+            text: Topology
+          schema:
+            $ref: schema#/properties/spec/properties/verticalScaling/properties/secondary/properties/topology
+          show_label: true
+          type: single-step-form
+        if: ferretTypeEqualsTo|secondary
+        label:
+          text: Secondary
+        schema:
+          $ref: schema#/properties/spec/properties/verticalScaling/properties/secondary
         show_label: true
         type: single-step-form
       if: ifRequestTypeEqualsTo|VerticalScaling

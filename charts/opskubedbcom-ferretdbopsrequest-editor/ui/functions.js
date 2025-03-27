@@ -731,10 +731,18 @@ function getMachines({ storeGet }) {
   return arr
 }
 
-function setMachine({ getValue, discriminator, storeGet }) {
+function setMachine({ getValue, discriminator, storeGet }, type) {
   const dbDetails = getValue(discriminator, '/dbDetails')
   const annotations = dbDetails?.metadata?.annotations || {}
-  const machine = annotations['kubernetes.io/instance-type'] || 'custom'
+  const instance = annotations['kubernetes.io/instance-type']
+  let parsedInstance = {}
+  try {
+    if (instance) parsedInstance = JSON.parse(instance)
+  } catch (e) {
+    console.log(e)
+    parsedInstance = {}
+  }
+  const machine = parsedInstance[type] || 'custom'
 
   machinesFromPreset = storeGet('/kubedbuiPresets')?.admin?.machineProfiles?.machines || []
 
@@ -745,7 +753,7 @@ function setMachine({ getValue, discriminator, storeGet }) {
 
 function onMachineChange({ getValue, discriminator, commit, model }, type, valPath) {
   let selectedMachine = ''
-  selectedMachine = getValue(discriminator, '/machine')
+  selectedMachine = getValue(discriminator, `/machine-${type}`)
   const machine = machinesFromPreset.find((item) => item.id === selectedMachine)
 
   let obj = {}
@@ -757,7 +765,7 @@ function onMachineChange({ getValue, discriminator, commit, model }, type, valPa
     obj = Array.isArray(val) ? val[0]?.resources : { ...val }
   }
 
-  const path = `/spec/verticalScaling/${type}/resources`
+  const path = `/spec/verticalScaling/${type === 'combined' ? 'node' : type}/resources`
 
   if (obj && Object.keys(obj).length)
     commit('wizard/model$update', {
@@ -768,22 +776,39 @@ function onMachineChange({ getValue, discriminator, commit, model }, type, valPa
 
   // update metadata.annotations
   const annotations = getValue(model, '/metadata/annotations') || {}
-  if (selectedMachine === 'custom') commit('wizard/model$delete', '/metadata/annotations')
-  else {
-    annotations['kubernetes.io/instance-type'] = selectedMachine
-    if (machinesFromPreset.length)
-      commit('wizard/model$update', {
-        path: '/metadata/annotations',
-        value: annotations,
-        force: true,
-      })
+  const instance = annotations['kubernetes.io/instance-type']
+  let parsedInstance = {}
+  try {
+    if (instance) parsedInstance = JSON.parse(instance)
+  } catch (e) {
+    console.log(e)
+    parsedInstance = {}
   }
+  if (selectedMachine === 'custom') delete parsedInstance[type]
+  else parsedInstance[type] = selectedMachine
+  annotations['kubernetes.io/instance-type'] = JSON.stringify(parsedInstance)
+
+  if (machinesFromPreset.length)
+    commit('wizard/model$update', {
+      path: '/metadata/annotations',
+      value: annotations,
+      force: true,
+    })
+
+  if (parsedInstance && Object.keys(parsedInstance).length === 0)
+    commit('wizard/model$delete', '/metadata/annotations')
 }
 
-function isMachineCustom({ watchDependency, getValue, discriminator }) {
-  watchDependency('discriminator#/machine')
-  const machine = getValue(discriminator, '/machine')
+function isMachineCustom({ watchDependency, getValue, discriminator }, path) {
+  watchDependency(`discriminator#${path}`)
+  const machine = getValue(discriminator, `${path}`)
   return machine === 'custom'
+}
+
+function ferretTypeEqualsTo({ getValue, discriminator }, param) {
+  const dbDetails = getValue(discriminator, '/dbDetails')
+  const type = dbDetails.spec?.server?.secondary ? 'secondary' : 'primary'
+  return param === type
 }
 
 // for config secret
@@ -1203,4 +1228,5 @@ return {
   setMachine,
   onMachineChange,
   isMachineCustom,
+  ferretTypeEqualsTo,
 }
