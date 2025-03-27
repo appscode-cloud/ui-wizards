@@ -318,8 +318,6 @@ const modeDetails = {
 function isEqualToModelPathValue({ model, getValue, watchDependency }, value, modelPath) {
   const modelPathValue = getValue(model, modelPath)
   watchDependency('model#' + modelPath)
-  console.log(modelPathValue, value)
-
   return modelPathValue === value
 }
 
@@ -916,7 +914,6 @@ function returnFalse() {
 
 function isMachineCustom({ model, getValue, watchDependency }, path) {
   const fullpath = path ? `/spec/${path}/podResources/machine` : '/spec/podResources/machine'
-  log
   const modelPathValue = getValue(model, fullpath)
   watchDependency(`model#${fullpath}`)
   return modelPathValue === 'custom'
