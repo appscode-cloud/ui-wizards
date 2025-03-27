@@ -1,11 +1,11 @@
 {{- $machines := .Files.Get "data/machines.yaml" | fromYaml -}}
 {{- $profiles := "" -}}
-{{- $res := .Values.spec.podResources.resources -}}
-{{- if and .Values.spec.podResources.machine (hasKey $machines .Values.spec.podResources.machine) }}
-  {{- $res = get (get $machines .Values.spec.podResources.machine) "resources" }}
+{{- $res := .Values.spec.server.primary.podResources.resources -}}
+{{- if and .Values.spec.server.primary.podResources.machine (hasKey $machines .Values.spec.server.primary.podResources.machine) }}
+  {{- $res = get (get $machines .Values.spec.server.primary.podResources.machine) "resources" }}
 {{- end }}
 {{- range .Values.spec.admin.machineProfiles.machines }}
-  {{- if and $.Values.spec.podResources.machine (eq .id $.Values.spec.podResources.machine) }}
+  {{- if and $.Values.spec.server.primary.podResources.machine (eq .id $.Values.spec.server.primary.podResources.machine) }}
     {{- $res  = dict "requests" .limits "limits" .limits }}
     {{- $profiles = .id -}}
   {{- end }}
@@ -85,7 +85,7 @@ spec:
         storage: {{ .Values.spec.persistence.size }}
   server:
     primary:
-      replicas: {{v.Values.spec.server.primary.replicas }}
+      replicas: {{ .Values.spec.server.primary.replicas }}
       podTemplate:
         spec:
           securityContext:
@@ -99,7 +99,7 @@ spec:
           {{- include "common.placement" . | nindent 10 }}
   {{ if .Values.spec.server.secondary }}
     secondary:
-      replicas: {{v.Values.spec.server.secondary.replicas }}
+      replicas: {{ .Values.spec.server.secondary.replicas }}
       podTemplate:
         spec:
           securityContext:
