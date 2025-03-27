@@ -30,6 +30,41 @@ steps:
       - label:
           text: labels.replicaset.number
         schema:
+          $ref: schema#/properties/spec/properties/server/properties/primary/properties/replicas
+        type: input
+      - computed: setMachineToCustom
+        fetch: getMachineListForOptions
+        label:
+          text: Machine
+        schema:
+          $ref: schema#/properties/spec/properties/server/properties/primary/properties/podResources/properties/machine
+        type: select
+      - computed: setLimits|cpu
+        disabled: isMachineNotCustom
+        if: isMachineCustom|server/primary
+        label:
+          text: labels.cpu
+        onChange: setRequests|cpu
+        schema:
+          $ref: schema#/properties/spec/properties/server/properties/primary/properties/podResources/properties/resources/properties/requests/properties/cpu
+        type: input
+      - computed: setLimits|memory
+        disabled: isMachineNotCustom
+        if: isMachineCustom|server/primary
+        label:
+          text: labels.memory
+        onChange: setRequests|memory
+        schema:
+          $ref: schema#/properties/spec/properties/server/properties/primary/properties/podResources/properties/resources/properties/requests/properties/memory
+        type: input
+      label:
+        text: Primary
+      show_label: true
+      type: single-step-form
+    - elements:
+      - label:
+          text: labels.replicaset.number
+        schema:
           $ref: schema#/properties/spec/properties/server/properties/secondary/properties/replicas
         type: input
       - computed: setMachineToCustom
@@ -58,39 +93,9 @@ steps:
           $ref: schema#/properties/spec/properties/server/properties/secondary/properties/podResources/properties/resources/properties/requests/properties/memory
         type: input
       if: isEqualToModelPathValue|PrimaryAndSecondary|/spec/mode
-      type: single-step-form
-    - elements:
-      - label:
-          text: labels.replicaset.number
-        schema:
-          $ref: schema#/properties/spec/properties/server/properties/primary/properties/replicas
-        type: input
-      - computed: setMachineToCustom
-        fetch: getMachineListForOptions
-        label:
-          text: Machine
-        schema:
-          $ref: schema#/properties/spec/properties/server/properties/primary/properties/podResources/properties/machine
-        type: select
-      - computed: setLimits|cpu
-        disabled: isMachineNotCustom
-        if: isMachineCustom|server/primary
-        label:
-          text: labels.cpu
-        onChange: setRequests|cpu
-        schema:
-          $ref: schema#/properties/spec/properties/server/properties/primary/properties/podResources/properties/resources/properties/requests/properties/cpu
-        type: input
-      - computed: setLimits|memory
-        disabled: isMachineNotCustom
-        if: isMachineCustom|server/primary
-        label:
-          text: labels.memory
-        onChange: setRequests|memory
-        schema:
-          $ref: schema#/properties/spec/properties/server/properties/primary/properties/podResources/properties/resources/properties/requests/properties/memory
-        type: input
-      if: isEqualToModelPathValue|PrimaryOnly|/spec/mode
+      label:
+        text: Secondary
+      show_label: true
       type: single-step-form
     - fetch: getAdminOptions|storageClasses
       label:
