@@ -5,10 +5,10 @@
 ## TL;DR;
 
 ```bash
-$ helm repo add appscode-charts-oci https://bundles.byte.builders/ui/
+$ helm repo add appscode https://charts.appscode.com/stable/
 $ helm repo update
-$ helm search repo appscode-charts-oci/opskubedbcom-singlestoreopsrequest-editor --version=v0.14.0
-$ helm upgrade -i opskubedbcom-singlestoreopsrequest-editor appscode-charts-oci/opskubedbcom-singlestoreopsrequest-editor -n default --create-namespace --version=v0.14.0
+$ helm search repo appscode/opskubedbcom-singlestoreopsrequest-editor --version=v0.15.0
+$ helm upgrade -i opskubedbcom-singlestoreopsrequest-editor appscode/opskubedbcom-singlestoreopsrequest-editor -n default --create-namespace --version=v0.15.0
 ```
 
 ## Introduction
@@ -24,7 +24,7 @@ This chart deploys a SinglestoreOpsRequest Editor on a [Kubernetes](http://kuber
 To install/upgrade the chart with the release name `opskubedbcom-singlestoreopsrequest-editor`:
 
 ```bash
-$ helm upgrade -i opskubedbcom-singlestoreopsrequest-editor appscode-charts-oci/opskubedbcom-singlestoreopsrequest-editor -n default --create-namespace --version=v0.14.0
+$ helm upgrade -i opskubedbcom-singlestoreopsrequest-editor appscode/opskubedbcom-singlestoreopsrequest-editor -n default --create-namespace --version=v0.15.0
 ```
 
 The command deploys a SinglestoreOpsRequest Editor on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
@@ -56,12 +56,12 @@ The following table lists the configurable parameters of the `opskubedbcom-singl
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm upgrade -i`. For example:
 
 ```bash
-$ helm upgrade -i opskubedbcom-singlestoreopsrequest-editor appscode-charts-oci/opskubedbcom-singlestoreopsrequest-editor -n default --create-namespace --version=v0.14.0 --set apiVersion=ops.kubedb.com/v1alpha1
+$ helm upgrade -i opskubedbcom-singlestoreopsrequest-editor appscode/opskubedbcom-singlestoreopsrequest-editor -n default --create-namespace --version=v0.15.0 --set apiVersion=ops.kubedb.com/v1alpha1
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
 installing the chart. For example:
 
 ```bash
-$ helm upgrade -i opskubedbcom-singlestoreopsrequest-editor appscode-charts-oci/opskubedbcom-singlestoreopsrequest-editor -n default --create-namespace --version=v0.14.0 --values values.yaml
+$ helm upgrade -i opskubedbcom-singlestoreopsrequest-editor appscode/opskubedbcom-singlestoreopsrequest-editor -n default --create-namespace --version=v0.15.0 --values values.yaml
 ```
