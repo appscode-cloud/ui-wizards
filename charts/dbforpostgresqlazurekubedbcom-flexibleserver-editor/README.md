@@ -5,10 +5,10 @@
 ## TL;DR;
 
 ```bash
-$ helm repo add appscode-charts-oci https://bundles.byte.builders/ui/
+$ helm repo add appscode https://charts.appscode.com/stable/
 $ helm repo update
-$ helm search repo appscode-charts-oci/dbforpostgresqlazurekubedbcom-flexibleserver-editor --version=v0.14.0
-$ helm upgrade -i dbforpostgresqlazurekubedbcom-flexibleserver-editor appscode-charts-oci/dbforpostgresqlazurekubedbcom-flexibleserver-editor -n default --create-namespace --version=v0.14.0
+$ helm search repo appscode/dbforpostgresqlazurekubedbcom-flexibleserver-editor --version=v0.15.0
+$ helm upgrade -i dbforpostgresqlazurekubedbcom-flexibleserver-editor appscode/dbforpostgresqlazurekubedbcom-flexibleserver-editor -n default --create-namespace --version=v0.15.0
 ```
 
 ## Introduction
@@ -24,7 +24,7 @@ This chart deploys a FlexibleServer Editor on a [Kubernetes](http://kubernetes.i
 To install/upgrade the chart with the release name `dbforpostgresqlazurekubedbcom-flexibleserver-editor`:
 
 ```bash
-$ helm upgrade -i dbforpostgresqlazurekubedbcom-flexibleserver-editor appscode-charts-oci/dbforpostgresqlazurekubedbcom-flexibleserver-editor -n default --create-namespace --version=v0.14.0
+$ helm upgrade -i dbforpostgresqlazurekubedbcom-flexibleserver-editor appscode/dbforpostgresqlazurekubedbcom-flexibleserver-editor -n default --create-namespace --version=v0.15.0
 ```
 
 The command deploys a FlexibleServer Editor on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
@@ -56,12 +56,12 @@ The following table lists the configurable parameters of the `dbforpostgresqlazu
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm upgrade -i`. For example:
 
 ```bash
-$ helm upgrade -i dbforpostgresqlazurekubedbcom-flexibleserver-editor appscode-charts-oci/dbforpostgresqlazurekubedbcom-flexibleserver-editor -n default --create-namespace --version=v0.14.0 --set apiVersion=dbforpostgresql.azure.kubedb.com/v1alpha1
+$ helm upgrade -i dbforpostgresqlazurekubedbcom-flexibleserver-editor appscode/dbforpostgresqlazurekubedbcom-flexibleserver-editor -n default --create-namespace --version=v0.15.0 --set apiVersion=dbforpostgresql.azure.kubedb.com/v1alpha1
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
 installing the chart. For example:
 
 ```bash
-$ helm upgrade -i dbforpostgresqlazurekubedbcom-flexibleserver-editor appscode-charts-oci/dbforpostgresqlazurekubedbcom-flexibleserver-editor -n default --create-namespace --version=v0.14.0 --values values.yaml
+$ helm upgrade -i dbforpostgresqlazurekubedbcom-flexibleserver-editor appscode/dbforpostgresqlazurekubedbcom-flexibleserver-editor -n default --create-namespace --version=v0.15.0 --values values.yaml
 ```
