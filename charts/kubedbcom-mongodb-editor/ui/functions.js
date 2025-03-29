@@ -2564,7 +2564,7 @@ function isVariantAvailable({ storeGet }) {
 }
 
 function showScheduleBackup({ storeGet }) {
-  const operationQuery = storeGet('/route/query/operation') || ''
+  const operationQuery = storeGet('/route/params/actions') || ''
   const isBackupOperation = operationQuery === 'edit-self-backupconfiguration' ? true : false
   return !isBackupOperation
 }
@@ -2574,7 +2574,7 @@ function showScheduleBackup({ storeGet }) {
 let autoscaleType = ''
 let dbDetails = {}
 function isKubedb({ storeGet }) {
-  return !!storeGet('/route/query/operation')
+  return !!storeGet('/route/params/actions')
 }
 
 function showOpsRequestOptions({ model, getValue, watchDependency, storeGet, discriminator }) {
