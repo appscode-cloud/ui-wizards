@@ -278,15 +278,20 @@ async function setReleaseNameAndNamespaceAndInitializeValues({
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
     const clusterset = storeGet('route/params/clusterset')
+    const spoke = storeGet('/route/params/spoke')
 
     const {
       name: chartName,
       sourceRef,
       version: chartVersion,
     } = getFeatureSetPropertyValue(storeGet, getValue, '/spec/chart')
-    const url =
+    let url =
       `/clusters/${owner}/${cluster}/helm/packageview/values?name=${chartName}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${chartVersion}&format=json` +
       (clusterset ? `&clusterset=${clusterset}` : '')
+    if (spoke)
+      url =
+        `/clusters/${owner}/${spoke}/helm/packageview/values?name=${chartName}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${chartVersion}&format=json` +
+        (clusterset ? `&clusterset=${clusterset}` : '')
     const { data } = await axios.get(url)
     const { resources: resourcesDefaultValues } = data || {}
 
@@ -437,14 +442,14 @@ async function getDatabaseTypes({
       isFetching = 'pending'
 
       const clusterset = getRoute.fullPath.includes('/clustersets/')
-          ? getRoute.fullPath.split('/clustersets/')[1].split('/')[0]
-          : null;
+        ? getRoute.fullPath.split('/clustersets/')[1].split('/')[0]
+        : null
 
       const url = clusterset
-          ? `/clusters/${owner}/${cluster}/db-status?clusterset=${clusterset}`
-          : `/clusters/${owner}/${cluster}/db-status`;
+        ? `/clusters/${owner}/${cluster}/db-status?clusterset=${clusterset}`
+        : `/clusters/${owner}/${cluster}/db-status`
 
-      const resp = await axios.get(url);
+      const resp = await axios.get(url)
 
       data = resp?.data
       isFetching = 'success'
