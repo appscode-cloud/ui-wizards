@@ -264,15 +264,18 @@ async function setReleaseNameAndNamespaceAndInitializeValues({
     // get resources default values when featureset is installed
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
+    const spoke = storeGet('/route/params/spoke')
 
     const {
       name: chartName,
       sourceRef,
       version: chartVersion,
     } = getFeatureSetPropertyValue(storeGet, getValue, '/spec/chart')
-    const { data } = await axios.get(
-      `/clusters/${owner}/${cluster}/helm/packageview/values?name=${chartName}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${chartVersion}&format=json`,
-    )
+
+    let url = `/clusters/${owner}/${cluster}/helm/packageview/values?name=${chartName}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${chartVersion}&format=json`
+    if (spoke)
+      url = `/clusters/${owner}/${spoke}/helm/packageview/values?name=${chartName}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${chartVersion}&format=json`
+    const { data } = await axios.get(url)
     const { resources: resourcesDefaultValues } = data || {}
 
     Object.keys(resourcesDefaultValues || {}).forEach((key) => {
