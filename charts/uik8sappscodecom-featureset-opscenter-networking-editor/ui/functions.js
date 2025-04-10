@@ -288,15 +288,18 @@ async function setReleaseNameAndNamespaceAndInitializeValues({
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
     const clusterset = storeGet('route/params/clusterset')
+    const spoke = storeGet('/route/params/spoke')
 
     const {
       name: chartName,
       sourceRef,
       version: chartVersion,
     } = getFeatureSetPropertyValue(storeGet, getValue, '/spec/chart')
-    const url =
+    let url =
       `/clusters/${owner}/${cluster}/helm/packageview/values?name=${chartName}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${chartVersion}&format=json` +
       (clusterset ? `&clusterset=${clusterset}` : '')
+    if (spoke)
+      url = `/clusters/${owner}/${spoke}/helm/packageview/values?name=${chartName}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${chartVersion}&format=json`
     const { data } = await axios.get(url)
     const { resources: resourcesDefaultValues } = data || {}
 

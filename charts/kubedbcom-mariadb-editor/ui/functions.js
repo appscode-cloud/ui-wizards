@@ -1745,7 +1745,7 @@ async function initBackupData({ commit, storeGet, axios, getValue, model, setDis
   // check db backup is enabled or not
   backupConfigurationsFromStore = storeGet('/backup/backupConfigurations')
   const configs = objectCopy(backupConfigurationsFromStore)
-  const { name, cluster, user, group, resource } = storeGet('/route/params')
+  const { name, cluster, user, group, resource, spoke } = storeGet('/route/params')
   const namespace = storeGet('/route/query/namespace')
   const kind = storeGet('/resource/layout/result/resource/kind')
   dbResource = getValue(model, '/resources/kubedbComMariaDB')
@@ -1763,7 +1763,10 @@ async function initBackupData({ commit, storeGet, axios, getValue, model, setDis
     const sourceName = editorDetails?.sourceRef?.name
     const chartVersion = editorDetails?.version
 
-    const url = `/clusters/${user}/${cluster}/helm/packageview/values?name=${chartName}&sourceApiGroup=${sourceApiGroup}&sourceKind=${sourceKind}&sourceNamespace=${sourceNamespace}&sourceName=${sourceName}&version=${chartVersion}&format=json`
+    let url = `/clusters/${user}/${cluster}/helm/packageview/values?name=${chartName}&sourceApiGroup=${sourceApiGroup}&sourceKind=${sourceKind}&sourceNamespace=${sourceNamespace}&sourceName=${sourceName}&version=${chartVersion}&format=json`
+
+    if (spoke)
+      url = `/clusters/${user}/${spoke}/helm/packageview/values?name=${chartName}&sourceApiGroup=${sourceApiGroup}&sourceKind=${sourceKind}&sourceNamespace=${sourceNamespace}&sourceName=${sourceName}&version=${chartVersion}&format=json`
 
     const resp = await axios.get(url)
 
