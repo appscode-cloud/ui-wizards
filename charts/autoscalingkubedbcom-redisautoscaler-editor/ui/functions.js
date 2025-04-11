@@ -5,7 +5,7 @@ function isConsole({ storeGet, commit }) {
   const isKube = isKubedb({ storeGet })
 
   if (isKube) {
-    const dbName = storeGet('/route/query/name') || ''
+    const dbName = storeGet('/route/params/name') || ''
     commit('wizard/model$update', {
       path: '/spec/databaseRef/name',
       value: dbName,
@@ -97,7 +97,7 @@ async function getDbDetails({ axios, storeGet, getValue, model }) {
   const cluster = storeGet('/route/params/cluster') || ''
   const namespace =
     storeGet('/route/query/namespace') || getValue(model, '/metadata/namespace') || ''
-  const name = storeGet('/route/query/name') || getValue(model, '/spec/databaseRef/name') || ''
+  const name = storeGet('/route/params/name') || getValue(model, '/spec/databaseRef/name') || ''
 
   if (namespace && name) {
     try {

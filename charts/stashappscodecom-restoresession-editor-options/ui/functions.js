@@ -140,7 +140,7 @@ let databaseToTypeMap = {}
 
 async function fetchDatabases({ axios, storeGet, model, getValue, watchDependency, commit }) {
   const owner = storeGet('/route/params/user')
-  const name = storeGet('/route/query/name')
+  const name = storeGet('/route/params/name')
   const cluster = storeGet('/route/params/cluster')
   const namespace = getValue(model, '/metadata/release/namespace')
   watchDependency('model#/metadata/release/namespace')
@@ -168,11 +168,10 @@ async function fetchDatabases({ axios, storeGet, model, getValue, watchDependenc
 
       const mappedResources = resources
         .filter((item) => {
-          if(item?.spec?.appRef) {
-            const appRef = (item.spec?.appRef?.apiGroup) || "";
-            return appRef === "kubedb.com" || appRef === "kubevault.com";
-          }
-          else return true
+          if (item?.spec?.appRef) {
+            const appRef = item.spec?.appRef?.apiGroup || ''
+            return appRef === 'kubedb.com' || appRef === 'kubevault.com'
+          } else return true
         })
         .map((item) => {
           const apiVersion = item.apiVersion || ''
@@ -187,8 +186,8 @@ async function fetchDatabases({ axios, storeGet, model, getValue, watchDependenc
               name,
               namespace,
             },
-          };
-        });
+          }
+        })
       // update database to type map
       databaseToTypeMap = {}
       resources.forEach((rs) => {

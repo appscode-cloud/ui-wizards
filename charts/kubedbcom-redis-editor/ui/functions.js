@@ -2234,7 +2234,7 @@ function isConsole({ storeGet, commit }) {
   const isKube = isKubedb({ storeGet })
 
   if (isKube) {
-    const dbName = storeGet('/route/query/name') || ''
+    const dbName = storeGet('/route/params/name') || ''
     commit('wizard/model$update', {
       path: '/resources/autoscalingKubedbComRedisAutoscaler/spec/databaseRef/name',
       value: dbName,
@@ -2333,7 +2333,7 @@ async function getDbDetails({ commit, setDiscriminatorValue, axios, storeGet, ge
     getValue(model, '/resources/autoscalingKubedbComRedisAutoscaler/metadata/namespace') ||
     ''
   const name =
-    storeGet('/route/query/name') ||
+    storeGet('/route/params/name') ||
     getValue(model, '/resources/autoscalingKubedbComRedisAutoscaler/spec/databaseRef/name') ||
     ''
 
