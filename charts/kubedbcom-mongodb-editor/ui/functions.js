@@ -2594,7 +2594,7 @@ async function getDbDetails({ axios, storeGet, getValue, model, setDiscriminator
 
   const namespace =
     storeGet('/route/query/namespace') || getValue(model, '/metadata/namespace') || ''
-  const name = storeGet('/route/query/name') || getValue(model, '/spec/databaseRef/name') || ''
+  const name = storeGet('/route/params/name') || getValue(model, '/spec/databaseRef/name') || ''
 
   if (namespace && name) {
     try {

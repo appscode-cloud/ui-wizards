@@ -2116,7 +2116,7 @@ function isConsole({ storeGet, commit }) {
   const isKube = isKubedb({ storeGet })
 
   if (isKube) {
-    const dbName = storeGet('/route/query/name') || ''
+    const dbName = storeGet('/route/params/name') || ''
     commit('wizard/model$update', {
       path: '/resources/autoscalingKubedbComMySQLAutoscaler/spec/databaseRef/name',
       value: dbName,

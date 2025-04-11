@@ -9,12 +9,10 @@ async function init({ storeGet, axios, setDiscriminatorValue, commit }) {
   const namespace = storeGet('/route/query/namespace')
   const name = storeGet('/route/params/name')
   const url = `/clusters/${owner}/${cluster}/proxy/core.kubestash.com/v1alpha1/namespaces/${namespace}/backupconfigurations`
-  console.log(url)
 
   try {
     const resp = await axios.get(url)
     const items = resp.data.items
-    console.log(items)
 
     backups = items
     items.forEach((ele) => {
@@ -23,7 +21,6 @@ async function init({ storeGet, axios, setDiscriminatorValue, commit }) {
         options.push({ text: tx, value: ele.metadata.name })
       }
     })
-    console.log(options)
   } catch (e) {
     console.log(e)
   }
