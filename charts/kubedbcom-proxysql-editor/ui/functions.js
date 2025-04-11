@@ -745,13 +745,13 @@ function isConsole({ storeGet, commit }) {
   const isKube = isKubedb({ storeGet })
 
   if (isKube) {
-    const dbName = storeGet('/route/query/name') || ''
+    const dbName = storeGet('/route/params/name') || ''
     commit('wizard/model$update', {
       path: '/resources/autoscalingKubedbComProxySQLAutoscaler/spec/databaseRef/name',
       value: dbName,
       force: true,
     })
-    const operation = storeGet('/route/query/operation') || ''
+    const operation = storeGet('/route/params/actions') || ''
     if (operation.length) {
       const splitOp = operation.split('-')
       if (splitOp.length > 2) autoscaleType = splitOp[2]
@@ -777,7 +777,7 @@ function isConsole({ storeGet, commit }) {
 }
 
 function isKubedb({ storeGet }) {
-  return !!storeGet('/route/query/operation')
+  return !!storeGet('/route/params/actions')
 }
 
 function isRancherManaged({ storeGet }) {
@@ -850,7 +850,7 @@ async function getDbDetails({ commit, setDiscriminatorValue, axios, storeGet, ge
     getValue(model, '/resources/autoscalingKubedbComProxySQLAutoscaler/metadata/namespace') ||
     ''
   const name =
-    storeGet('/route/query/name') ||
+    storeGet('/route/params/name') ||
     getValue(model, '/resources/autoscalingKubedbComProxySQLAutoscaler/spec/databaseRef/name') ||
     ''
 
@@ -975,7 +975,7 @@ function ifScalingTypeEqualsTo(
   watchDependency('discriminator#/autoscalingType')
   watchDependency('model#/resources/autoscalingKubedbComProxySQLAutoscaler/spec/databaseRef/name')
 
-  const operation = storeGet('/route/query/operation') || ''
+  const operation = storeGet('/route/params/actions') || ''
   if (operation.length) {
     const splitOp = operation.split('-')
     if (splitOp.length > 2) autoscaleType = splitOp[2]

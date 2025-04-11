@@ -7,16 +7,18 @@ async function init({ storeGet, axios, setDiscriminatorValue, commit }) {
   const owner = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
   const namespace = storeGet('/route/query/namespace')
-  const name = storeGet('/route/query/name')
+  const name = storeGet('/route/params/name')
   const url = `/clusters/${owner}/${cluster}/proxy/core.kubestash.com/v1alpha1/namespaces/${namespace}/backupconfigurations`
+
   try {
     const resp = await axios.get(url)
     const items = resp.data.items
+
     backups = items
     items.forEach((ele) => {
       if (ele.spec?.target.name === name && ele.spec?.target.namespace === namespace) {
-        const name = `${ele.metadata.namespace}/${ele.metadata.name}`
-        options.push({ text: name, value: ele.metadata.name })
+        const tx = `${ele.metadata.namespace}/${ele.metadata.name}`
+        options.push({ text: tx, value: ele.metadata.name })
       }
     })
   } catch (e) {

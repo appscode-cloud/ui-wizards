@@ -143,7 +143,7 @@ function initNamespace({ route }) {
 
 function initVaultRef({ route, watchDependency }) {
   watchDependency('model#/metadata/namespace')
-  const { name } = route.query || {}
+  const { name } = route.params || {}
   return name
 }
 
@@ -414,7 +414,7 @@ function isNamespaceDisabled({ route }) {
 }
 
 function isVaultRefDisabled({ route }) {
-  const { name } = route.query || {}
+  const { name } = route.params || {}
   return !!name
 }
 

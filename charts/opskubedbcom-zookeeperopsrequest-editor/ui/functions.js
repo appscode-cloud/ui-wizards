@@ -315,7 +315,7 @@ function isRancherManaged({ storeGet }) {
 }
 
 async function getNamespaces({ axios, storeGet }) {
-  if (storeGet('/route/query/operation')) return []
+  if (storeGet('/route/params/actions')) return []
   const owner = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
 
@@ -335,7 +335,7 @@ async function getNamespaces({ axios, storeGet }) {
 }
 
 async function getDbs({ axios, storeGet, model, getValue, watchDependency }) {
-  if (storeGet('/route/query/operation')) return []
+  if (storeGet('/route/params/actions')) return []
   const owner = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
 
@@ -363,8 +363,8 @@ async function getDbs({ axios, storeGet, model, getValue, watchDependency }) {
 async function getDbDetails({ axios, storeGet, model, getValue, setDiscriminatorValue }) {
   const owner = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
-  const namespace = getValue(model, '/metadata/namespace')
-  const name = getValue(model, '/spec/databaseRef/name')
+  const namespace = storeGet('/route/query/namespace') || getValue(model, '/metadata/namespace')
+  const name = storeGet('/route/params/name') || getValue(model, '/spec/databaseRef/name')
 
   if (namespace && name) {
     const url = `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/zookeepers/${name}`
@@ -383,7 +383,7 @@ async function getDbVersions({ axios, storeGet, getValue, discriminator }) {
   const url = `/clusters/${owner}/${cluster}/proxy/charts.x-helm.dev/v1alpha1/clusterchartpresets/kubedb-ui-presets`
 
   let presets = storeGet('/kubedbuiPresets') || {}
-  if (!storeGet('/route/query/operation')) {
+  if (!storeGet('/route/params/actions')) {
     try {
       const presetResp = await axios.get(url)
       presets = presetResp.data?.spec?.values?.spec
@@ -561,12 +561,12 @@ function initNamespace({ route }) {
 
 function initDatabaseRef({ route, watchDependency }) {
   watchDependency('model#/metadata/namespace')
-  const { name } = route.query || {}
+  const { name } = route.params || {}
   return name
 }
 
 function asDatabaseOperation(route) {
-  return !!route.query.operation
+  return !!route.params.actions
 }
 
 function generateOpsRequestNameForClusterUI(getValue, model, route) {
@@ -594,7 +594,7 @@ function showAndInitName({ route, commit, getValue, model, watchDependency }) {
     // For kubedb-ui
     commit('wizard/model$update', {
       path: '/metadata/name',
-      value: `${route.query.name}-${Math.floor(Date.now() / 1000)}-${lowerType}`,
+      value: `${route.params.name}-${Math.floor(Date.now() / 1000)}-${lowerType}`,
       force: true,
     })
   } else {
@@ -624,7 +624,7 @@ function showAndInitDatabaseRef({ route, commit }) {
   if (ver) {
     commit('wizard/model$update', {
       path: '/spec/databaseRef/name',
-      value: `${route.query.name}`,
+      value: `${route.params.name}`,
       force: true,
     })
   }
@@ -647,7 +647,7 @@ function showAndInitOpsRequestType({ route, commit }) {
     reconfigure: 'Reconfigure',
   }
   if (ver) {
-    const operation = route.query.operation
+    const operation = route.params.actions
     const match = /^(.*)-opsrequest-(.*)$/.exec(operation)
     const opstype = match[2]
     commit('wizard/model$update', {
@@ -912,7 +912,7 @@ function isNamespaceDisabled({ route }) {
 }
 
 function isDatabaseRefDisabled({ route }) {
-  const { name } = route.query || {}
+  const { name } = route.params || {}
   return !!name
 }
 
