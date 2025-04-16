@@ -1563,9 +1563,11 @@ function getOpsRequestUrl({ storeGet, model, getValue, mode }, reqType) {
   const version = getValue(model, '/metadata/resource/version')
   const routeRootPath = storeGet('/route/path')
   const pathPrefix = `${domain}/db${routeRootPath}`
+  const pathSplit = pathPrefix.split('/').slice(0, -1).join('/')
+  const pathConstructedForKubedb =
+    pathSplit + `/create-opsrequest-${reqType.toLowerCase()}?namespace=${namespace}`
 
-  if (mode === 'standalone-step')
-    return `${pathPrefix}?namespace=${namespace}&applyAction=create-opsrequest-${reqType.toLowerCase()}`
+  if (mode === 'standalone-step') return pathConstructedForKubedb
   else
     return `${domain}/console/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/mariadbopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=VerticalScaling`
 }

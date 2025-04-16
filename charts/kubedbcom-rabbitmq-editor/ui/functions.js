@@ -1518,12 +1518,12 @@ function getOpsRequestUrl({ storeGet, model, getValue, mode }, reqType) {
   const resource = getValue(model, '/metadata/resource/name')
   const version = getValue(model, '/metadata/resource/version')
   const routeRootPath = storeGet('/route/path')
-  const pathPrefix = `${domain}${routeRootPath}${
-    routeRootPath.split('/').pop() !== 'operations' ? '/operations' : ''
-  }`
+  const pathPrefix = `${domain}/db${routeRootPath}`
+  const pathSplit = pathPrefix.split('/').slice(0, -1).join('/')
+  const pathConstructedForKubedb =
+    pathSplit + `/create-opsrequest-${reqType.toLowerCase()}?namespace=${namespace}`
 
-  if (mode === 'standalone-step')
-    return `${pathPrefix}?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=${reqType}&showOpsRequestModal=true`
+  if (mode === 'standalone-step') return pathConstructedForKubedb
   else
     return `${domain}/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/rabbitmqopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=VerticalScaling`
 }
