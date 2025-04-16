@@ -1525,7 +1525,7 @@ function getOpsRequestUrl({ storeGet, model, getValue, mode }, reqType) {
 
   if (mode === 'standalone-step') return pathConstructedForKubedb
   else
-    return `${domain}/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/pgpoolopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=VerticalScaling`
+    return `${domain}/console/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/pgpoolopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=VerticalScaling`
 }
 
 const getAppbinding = async ({ axios, storeGet, getValue, watchDependency, rootModel }) => {

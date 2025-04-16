@@ -2521,7 +2521,7 @@ function getOpsRequestUrl({ storeGet, model, getValue, mode }, reqType) {
 
   if (mode === 'standalone-step') return pathConstructedForKubedb
   else
-    return `${domain}/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/solropsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=${reqType}`
+    return `${domain}/console/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/solropsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=${reqType}`
 }
 
 function getCreateNameSpaceUrl({ model, getValue, storeGet }) {
