@@ -2541,7 +2541,7 @@ function isVariantAvailable({ storeGet }) {
 }
 
 function showScheduleBackup({ storeGet }) {
-  const operationQuery = storeGet('/route/query/operation') || ''
+  const operationQuery = storeGet('/route/params/actions') || ''
   const isBackupOperation = operationQuery === 'edit-self-backupconfiguration' ? true : false
   return !isBackupOperation
 }
@@ -2554,13 +2554,13 @@ function isConsole({ storeGet, commit }) {
   const isKube = isKubedb({ storeGet })
 
   if (isKube) {
-    const dbName = storeGet('/route/query/name') || ''
+    const dbName = storeGet('/route/params/name') || ''
     commit('wizard/model$update', {
       path: '/resources/autoscalingKubedbComSinglestoreAutoscaler/spec/databaseRef/name',
       value: dbName,
       force: true,
     })
-    const operation = storeGet('/route/query/operation') || ''
+    const operation = storeGet('/route/params/actions') || ''
     if (operation.length) {
       const splitOp = operation.split('-')
       if (splitOp.length > 2) autoscaleType = splitOp[2]
@@ -2586,7 +2586,7 @@ function isConsole({ storeGet, commit }) {
 }
 
 function isKubedb({ storeGet }) {
-  return !!storeGet('/route/query/operation')
+  return !!storeGet('/route/params/actions')
 }
 
 function showOpsRequestOptions({ model, getValue, watchDependency, storeGet, discriminator }) {
@@ -2657,7 +2657,7 @@ async function getDbDetails({ commit, setDiscriminatorValue, axios, storeGet, ge
     getValue(model, '/resources/autoscalingKubedbComSinglestoreAutoscaler/metadata/namespace') ||
     ''
   const name =
-    storeGet('/route/query/name') ||
+    storeGet('/route/params/name') ||
     getValue(model, '/resources/autoscalingKubedbComSinglestoreAutoscaler/spec/databaseRef/name') ||
     ''
 
@@ -2791,7 +2791,7 @@ function ifScalingTypeEqualsTo(
     'model#/resources/autoscalingKubedbComSinglestoreAutoscaler/spec/databaseRef/name',
   )
 
-  const operation = storeGet('/route/query/operation') || ''
+  const operation = storeGet('/route/params/actions') || ''
   if (operation.length) {
     const splitOp = operation.split('-')
     if (splitOp.length > 2) autoscaleType = splitOp[2]
@@ -2961,9 +2961,11 @@ function getOpsRequestUrl({ storeGet, model, getValue, mode }, reqType) {
   const version = getValue(model, '/metadata/resource/version')
   const routeRootPath = storeGet('/route/path')
   const pathPrefix = `${domain}/db${routeRootPath}`
+  const pathSplit = pathPrefix.split('/').slice(0, -1).join('/')
+  const pathConstructedForKubedb =
+    pathSplit + `/create-opsrequest-${reqType.toLowerCase()}?namespace=${namespace}`
 
-  if (mode === 'standalone-step')
-    return `${pathPrefix}?namespace=${namespace}&applyAction=create-opsrequest-${reqType.toLowerCase()}`
+  if (mode === 'standalone-step') return pathConstructedForKubedb
   else
     return `${domain}/console/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/singlestoreopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=VerticalScaling`
 }
