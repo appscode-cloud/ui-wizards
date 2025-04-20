@@ -69,6 +69,9 @@ type AdminOptions struct {
 	Monitoring Monitoring `json:"monitoring"`
 	Alert      Alert      `json:"alert"`
 
+	AuthCredential      AuthCredential `json:"authCredential"`
+	CustomConfiguration bool           `json:"customConfiguration"`
+
 	DeletionPolicy      ToggleProfileOnString  `json:"deletionPolicy"`
 	Backup              BackupProfile          `json:"backup"`
 	Archiver            ArchiverProfile        `json:"archiver"`
@@ -152,6 +155,11 @@ type Machine struct {
 	Id     string            `json:"id"`
 	Name   string            `json:"name,omitempty"`
 	Limits core.ResourceList `json:"limits"`
+}
+
+type AuthCredential struct {
+	Customize     bool `json:"customize"`
+	ReferExisting bool `json:"referExisting"`
 }
 
 type LeftPanel struct {
