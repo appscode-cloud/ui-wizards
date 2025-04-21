@@ -299,13 +299,15 @@ steps:
         schema:
           $ref: schema#/properties/spec/properties/deletionPolicy
         type: select
-      - label:
+      - computed: getDefaultValue|spec/admin/customConfiguration
+        label:
           text: Provide Authentication Credentials?
         onChange: onAuthChange
         schema:
           $ref: discriminator#/createAuthSecret
         type: switch
-      - if: showReferSecret
+      - computed: getDefaultValue|spec/admin/authCredential/referExisting
+        if: showReferSecret
         label:
           text: Refer existing Secret ?
         onChange: onAuthChange

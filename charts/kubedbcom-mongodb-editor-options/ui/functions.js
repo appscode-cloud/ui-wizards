@@ -1293,6 +1293,11 @@ function getDefault({ getValue, model }, type) {
   return val
 }
 
+function getDefaultValue({ getValue, model }, path) {
+  const val = getValue(model, `/${path}`) || ''
+  return val
+}
+
 function convertToISO(input) {
   const iso8601Regex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$/
   if (iso8601Regex.test(input)) {
@@ -1433,6 +1438,7 @@ function setMiliSeconds({ model, getValue, commit }) {
 }
 
 return {
+  getDefaultValue,
   showSecretDropdown,
   showReferSecret,
   getReferSecrets,
