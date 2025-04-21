@@ -321,7 +321,7 @@ function getTasks({ watchDependency, model, getValue }) {
 }
 
 function databaseSelected({ storeGet, watchDependency, getValue, discriminator }) {
-  isKube = storeGet('/route/query/operation')
+  isKube = storeGet('/route/params/actions')
   if (isKube) return true
   watchDependency('discriminator#/database')
   const target = getValue(discriminator, '/database') || {}
