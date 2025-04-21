@@ -1280,7 +1280,13 @@ function showReferSecret({ discriminator, getValue, watchDependency }) {
   return !!modelPathValue
 }
 
+function getDefaultValue({ getValue, model }, path) {
+  const val = getValue(model, `/${path}`) || ''
+  return val
+}
+
 return {
+  getDefaultValue,
   isRancherManaged,
   showSecretDropdown,
   showReferSecret,
