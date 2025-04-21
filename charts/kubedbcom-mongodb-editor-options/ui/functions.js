@@ -360,6 +360,12 @@ function showReferSecret({ discriminator, getValue, watchDependency }) {
   return !!modelPathValue
 }
 
+function showReferSecretSwitch({ model, getValue, watchDependency, discriminator }) {
+  const modelPathValue = getValue(model, '/spec/admin/authCredential/referExisting')
+  watchDependency('discriminator#/createAuthSecret')
+  return !!modelPathValue && showReferSecret({ discriminator, getValue, watchDependency })
+}
+
 function isEqualToModelPathValue({ model, getValue, watchDependency }, value, modelPath) {
   const modelPathValue = getValue(model, modelPath)
   watchDependency('model#' + modelPath)
@@ -1252,6 +1258,14 @@ function onAuthChange({ commit }) {
   })
 }
 
+function onReferSecretChange({ commit }) {
+  commit('wizard/model$update', {
+    path: '/spec/authSecret/name',
+    value: '',
+    force: true,
+  })
+}
+
 function showAdditionalSettings({ watchDependency }) {
   watchDependency('discriminator#/bundleApiLoaded')
   return features.length
@@ -1290,6 +1304,11 @@ async function checkHostnameOrIP({ commit, model, getValue }) {
 
 function getDefault({ getValue, model }, type) {
   const val = getValue(model, `/spec/admin/${type}/default`) || ''
+  return val
+}
+
+function getDefaultValue({ getValue, model }, path) {
+  const val = getValue(model, `/${path}`) || ''
   return val
 }
 
@@ -1433,6 +1452,9 @@ function setMiliSeconds({ model, getValue, commit }) {
 }
 
 return {
+  onReferSecretChange,
+  showReferSecretSwitch,
+  getDefaultValue,
   showSecretDropdown,
   showReferSecret,
   getReferSecrets,
