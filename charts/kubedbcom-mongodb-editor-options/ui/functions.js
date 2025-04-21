@@ -360,6 +360,12 @@ function showReferSecret({ discriminator, getValue, watchDependency }) {
   return !!modelPathValue
 }
 
+function showReferSecretSwitch({ model, getValue, watchDependency, discriminator }) {
+  const modelPathValue = getValue(model, '/spec/admin/authCredential/referExisting')
+  watchDependency('discriminator#/createAuthSecret')
+  return !!modelPathValue && showReferSecret({ discriminator, getValue, watchDependency })
+}
+
 function isEqualToModelPathValue({ model, getValue, watchDependency }, value, modelPath) {
   const modelPathValue = getValue(model, modelPath)
   watchDependency('model#' + modelPath)
@@ -1438,6 +1444,7 @@ function setMiliSeconds({ model, getValue, commit }) {
 }
 
 return {
+  showReferSecretSwitch,
   getDefaultValue,
   showSecretDropdown,
   showReferSecret,
