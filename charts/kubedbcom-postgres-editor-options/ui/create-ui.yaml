@@ -152,16 +152,17 @@ steps:
         schema:
           $ref: schema#/properties/spec/properties/deletionPolicy
         type: select
-      - label:
+      - if: getDefaultValue|spec/admin/authCredential/customize
+        label:
           text: Provide Authentication Credentials?
         onChange: onAuthChange
         schema:
           $ref: discriminator#/createAuthSecret
         type: switch
-      - if: showReferSecret
+      - if: showReferSecretSwitch
         label:
-          text: Refer existing Secret ?
-        onChange: onAuthChange
+          text: Refer existing Secret?
+        onChange: onReferSecretChange
         schema:
           $ref: discriminator#/referSecret
         type: switch
@@ -172,13 +173,14 @@ steps:
         schema:
           $ref: schema#/properties/spec/properties/authSecret/properties/name
         type: select
-      - if: showAuthPasswordField
+      - if: showReferSecret
         label:
-          text: labels.authSecret.password
+          text: labels.password
         schema:
           $ref: schema#/properties/spec/properties/authSecret/properties/password
-        type: input
-      - computed: isConfigAvailable
+        type: input   
+      - if: getDefaultValue|spec/admin/customConfiguration
+        computed: isConfigAvailable
         label:
           text: Configure Database?
         onChange: clearConfiguration
