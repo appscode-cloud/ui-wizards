@@ -1258,6 +1258,14 @@ function onAuthChange({ commit }) {
   })
 }
 
+function onReferSecretChange({ commit }) {
+  commit('wizard/model$update', {
+    path: '/spec/authSecret/name',
+    value: '',
+    force: true,
+  })
+}
+
 function showAdditionalSettings({ watchDependency }) {
   watchDependency('discriminator#/bundleApiLoaded')
   return features.length
@@ -1444,6 +1452,7 @@ function setMiliSeconds({ model, getValue, commit }) {
 }
 
 return {
+  onReferSecretChange,
   showReferSecretSwitch,
   getDefaultValue,
   showSecretDropdown,
