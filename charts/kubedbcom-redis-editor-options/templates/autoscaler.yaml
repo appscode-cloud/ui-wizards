@@ -1,3 +1,49 @@
+{{- $hasMachines := gt (len .Values.spec.admin.machineProfiles.machines) 0 }}
+{{- $hasAvailable := gt (len .Values.spec.admin.machineProfiles.available) 0 }}
+{{- $commonCompute := dict
+  "trigger" "Off"
+  "podLifeTimeThreshold" "10m"
+  "resourceDiffPercentage" 20
+}}
+{{- if $hasMachines }}
+  {{- $_ := set $commonCompute "minAllowed" (dict
+    "cpu" (index .Values.spec.admin.machineProfiles.machines 0).limits.cpu
+    "memory" (index .Values.spec.admin.machineProfiles.machines 0).limits.memory
+  ) }}
+  {{- $_ = set $commonCompute "maxAllowed" (dict
+    "cpu" (index .Values.spec.admin.machineProfiles.machines (sub (len .Values.spec.admin.machineProfiles.machines) 1)).limits.cpu
+    "memory" (index .Values.spec.admin.machineProfiles.machines (sub (len .Values.spec.admin.machineProfiles.machines) 1)).limits.memory
+  ) }}
+{{- else }}
+  {{- $_ := set $commonCompute "minAllowed" (dict
+    "cpu" "400m"
+    "memory" "400Mi"
+  ) }}
+  {{- $_ = set $commonCompute "maxAllowed" (dict
+    "cpu" "1"
+    "memory" "2Gi"
+  ) }}
+{{- end }}
+
+{{- define "minmax-profiles" -}}
+  {{- $instanceType := ternary "sentinel" (ternary "cluster" "standalone" (eq .Values.spec.mode "Cluster")) (eq .Values.spec.mode "Sentinel") }}
+  {{- $validMachines := list }}
+  {{- range $machine := .Values.spec.admin.machineProfiles.available }}
+    {{- if ne $machine "custom" }}
+      {{- $validMachines = append $validMachines $machine }}
+    {{- end }}
+  {{- end }}
+  {{- $instanceStr := "" }}
+  {{- if gt (len $validMachines) 0 }}
+    {{- $minMachine := index $validMachines 0 }}
+    {{- $maxMachine := index $validMachines (sub (len $validMachines) 1) }}
+    {{- $instanceStr = printf "%s,%s" $minMachine $maxMachine }}
+  {{- else }}
+    {{- $instanceStr = "{}" }}
+  {{- end }}
+  {{- $instanceStr -}}
+{{- end }}
+
 apiVersion: autoscaling.kubedb.com/v1alpha1
 kind: RedisAutoscaler
 metadata:
@@ -5,6 +51,10 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "kubedbcom-redis-editor-options.labels" . | nindent 4 }}
+  {{- if $hasAvailable }}
+  annotations:
+    kubernetes.io/instance-type: {{ printf "%s" (include "minmax-profiles" .) | quote }}
+  {{- end }}
 spec:
   databaseRef:
     name: {{ include "kubedbcom-redis-editor-options.fullname" . }}
@@ -14,21 +64,18 @@ spec:
   compute:
 {{- if eq .Values.spec.mode "Cluster" }}
     cluster:
-{{- else if eq .Values.spec.mode "Standalone" }}
-    standalone:
-{{- else }}
+      {{- $commonCompute | toYaml | nindent 6 }}
+{{- else if eq .Values.spec.mode "Sentinel" }}
     sentinel:
+      {{- $commonCompute | toYaml | nindent 6 }}
+{{- else }}
+    standalone:
+      {{- $commonCompute | toYaml | nindent 6 }}
 {{- end }}
-      trigger: "Off"
-      podLifeTimeThreshold: 10m
-      resourceDiffPercentage: 20
-      minAllowed:
-        cpu: 400m
-        memory: 400Mi
-      maxAllowed:
-        cpu: 1
-        memory: 2Gi
 {{- if eq .Values.spec.admin.deployment.default "Dedicated" }}
     nodeTopology:
       name: {{ .Values.spec.admin.clusterTier.nodeTopology.default }}
-{{- end}}
+{{- else if $hasAvailable }}
+    nodeTopology:
+      name: kubedb-ui-machine-profiles
+{{- end }}
