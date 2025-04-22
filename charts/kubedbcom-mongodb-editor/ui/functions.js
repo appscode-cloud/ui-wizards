@@ -2572,7 +2572,7 @@ function showScheduleBackup({ storeGet }) {
   return !isBackupOperation
 }
 
-//////////////////// Auto scaler /////////////////
+//////////////////// Autoscaler /////////////////
 
 let autoscaleType = ''
 let dbDetails = {}
@@ -2868,6 +2868,12 @@ function getOpsRequestUrl({ storeGet, model, getValue, mode }, reqType) {
     return `${domain}/console/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/mongodbopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=VerticalScaling`
 }
 
+function hasNoAnnotations({ model, getValue }) {
+  const annotations = getValue(model, '/resources/kubedbComMongoDB/metadata/annotations')
+  const instance = annotations['kubernetes.io/instance-type']
+  return !instance
+}
+
 return {
   getOpsRequestUrl,
   handleUnit,
@@ -3035,4 +3041,5 @@ return {
   onBackupTypeChange,
   isBindingAlreadyOn,
   addOrRemoveBinding,
+  hasNoAnnotations,
 }
