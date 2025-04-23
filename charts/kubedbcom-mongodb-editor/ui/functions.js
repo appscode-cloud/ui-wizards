@@ -2868,6 +2868,30 @@ function getOpsRequestUrl({ storeGet, model, getValue, mode }, reqType) {
     return `${domain}/console/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/mongodbopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=VerticalScaling`
 }
 
+async function fetchTopologyMachines({ axios, getValue, storeGet, model, setDiscriminatorValue }) {
+  const annotations = getValue(
+    model,
+    '/resources/autoscalingKubedbComMongoDBAutoscaler/metadata/annotations',
+  )
+  const instance = annotations['kubernetes.io/instance-type']
+
+  const user = storeGet('/route/params/user')
+  const cluster = storeGet('/route/params/cluster')
+  if (instance) {
+    try {
+      const url = `/clusters/${user}/${cluster}/proxy/node.k8s.appscode.com/v1alpha1/nodetopologies/kubedb-ui-machine-profiles`
+      const resp = await axios.get(url)
+
+      const nodeGroups = resp.data?.spec?.nodeGroups || []
+      setDiscriminatorValue('/topologyMachines', nodeGroups)
+      return nodeGroups
+    } catch (e) {
+      console.log(e)
+      return []
+    }
+  }
+}
+
 function setAllowedMachine({ model, getValue }, type, minmax) {
   const annotations = getValue(
     model,
@@ -2890,33 +2914,16 @@ function setAllowedMachine({ model, getValue }, type, minmax) {
   else return mx
 }
 
-async function getMachines({ model, getValue, storeGet, axios }) {
-  const annotations = getValue(
-    model,
-    '/resources/autoscalingKubedbComMongoDBAutoscaler/metadata/annotations',
-  )
-  const instance = annotations['kubernetes.io/instance-type']
+async function getMachines({ getValue, discriminator }) {
+  const nodeGroups = getValue(discriminator, '/topologyMachines')
 
-  const user = storeGet('/route/params/user')
-  const cluster = storeGet('/route/params/cluster')
-  if (instance) {
-    try {
-      const url = `/clusters/${user}/${cluster}/proxy/node.k8s.appscode.com/v1alpha1/nodetopologies/kubedb-ui-machine-profiles`
-      const resp = await axios.get(url)
+  const machines = nodeGroups?.map((item) => {
+    const subText = `CPU: ${item.allocatable.cpu}, Memory: ${item.allocatable.memory}`
+    const text = item.topologyValue
+    return { text, subText, value: item.topologyValue }
+  })
 
-      const nodeGroups = resp.data?.spec?.nodeGroups || []
-      const machines = nodeGroups.map((item) => {
-        const subText = `CPU: ${item.allocatable.cpu}, Memory: ${item.allocatable.memory}`
-        const text = item.topologyValue
-        return { text, subText, value: item.topologyValue }
-      })
-
-      return machines
-    } catch (e) {
-      console.log(e)
-      return []
-    }
-  }
+  return machines
 }
 
 function hasAnnotations({ model, getValue }, type) {
@@ -3123,4 +3130,5 @@ return {
   hasAnnotations,
   hasNoAnnotations,
   isMachineCustom,
+  fetchTopologyMachines,
 }

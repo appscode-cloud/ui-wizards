@@ -1185,6 +1185,11 @@ steps:
       if: returnFalse
       type: input
     - elements:
+      - fetch: fetchTopologyMachines
+        if: returnFalse
+        schema:
+          $ref: discriminator#/topologyMachines
+        type: input
       - elements:
         - computed: setTrigger|autoscalingKubedbComMongoDBAutoscaler/spec/compute/standalone/trigger
           label:
@@ -1328,16 +1333,16 @@ steps:
             $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/replicaSet/properties/resourceDiffPercentage
           type: input
         - discriminator:
-            minAllowedMachine-replicaset:
+            minAllowedMachine-replicaSet:
               type: string
           elements:
-          - computed: setAllowedMachine|replicaset|min
+          - computed: setAllowedMachine|replicaSet|min
             fetch: getMachines
-            if: hasAnnotations|replicaset
+            if: hasAnnotations|replicaSet
             label:
               text: Min Allowed Profile
             schema:
-              $ref: discriminator#/properties/minAllowedMachine-replicaset
+              $ref: discriminator#/properties/minAllowedMachine-replicaSet
             type: select
           - elements:
             - label:
@@ -1350,7 +1355,7 @@ steps:
               schema:
                 $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/replicaSet/properties/minAllowed/properties/memory
               type: input
-            if: isMachineCustom|/minAllowedMachine-replicaset
+            if: isMachineCustom|/minAllowedMachine-replicaSet
             type: single-step-form
           label:
             text: Min Allowed
@@ -1359,16 +1364,16 @@ steps:
           show_label: true
           type: single-step-form
         - discriminator:
-            maxAllowedMachine-replicaset:
+            maxAllowedMachine-replicaSet:
               type: string
           elements:
-          - computed: setAllowedMachine|replicaset|max
+          - computed: setAllowedMachine|replicaSet|max
             fetch: getMachines
-            if: hasAnnotations|replicaset
+            if: hasAnnotations|replicaSet
             label:
               text: Max Allowed Profile
             schema:
-              $ref: discriminator#/properties/maxAllowedMachine-replicaset
+              $ref: discriminator#/properties/maxAllowedMachine-replicaSet
             type: select
           - elements:
             - label:
@@ -1381,7 +1386,7 @@ steps:
               schema:
                 $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/replicaSet/properties/maxAllowed/properties/memory
               type: input
-            if: isMachineCustom|/maxAllowedMachine-replicaset
+            if: isMachineCustom|/maxAllowedMachine-replicaSet
             type: single-step-form
           label:
             text: Max Allowed
