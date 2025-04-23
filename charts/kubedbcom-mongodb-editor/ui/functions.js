@@ -2868,8 +2868,85 @@ function getOpsRequestUrl({ storeGet, model, getValue, mode }, reqType) {
     return `${domain}/console/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/mongodbopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=VerticalScaling`
 }
 
+function setAllowedMachine({ model, getValue }, type, minmax) {
+  const annotations = getValue(
+    model,
+    '/resources/autoscalingKubedbComMongoDBAutoscaler/metadata/annotations',
+  )
+  const instance = annotations['kubernetes.io/instance-type']
+  let parsedInstance = {}
+  try {
+    if (instance) parsedInstance = JSON.parse(instance)
+  } catch (e) {
+    console.log(e)
+    parsedInstance = {}
+  }
+
+  const machine = parsedInstance[type] || 'custom'
+  const mx = machine?.includes(',') ? machine.split(',')[1] : ''
+  const mn = machine?.includes(',') ? machine.split(',')[0] : ''
+
+  if (minmax === 'min') return mn
+  else return mx
+}
+
+async function getMachines({ model, getValue, storeGet, axios }) {
+  const annotations = getValue(
+    model,
+    '/resources/autoscalingKubedbComMongoDBAutoscaler/metadata/annotations',
+  )
+  const instance = annotations['kubernetes.io/instance-type']
+
+  const user = storeGet('/route/params/user')
+  const cluster = storeGet('/route/params/cluster')
+  if (instance) {
+    try {
+      const url = `/clusters/${user}/${cluster}/proxy/node.k8s.appscode.com/v1alpha1/nodetopologies/kubedb-ui-machine-profiles`
+      const resp = await axios.get(url)
+
+      const nodeGroups = resp.data?.spec?.nodeGroups || []
+      const machines = nodeGroups.map((item) => {
+        const subText = `CPU: ${item.allocatable.cpu}, Memory: ${item.allocatable.memory}`
+        const text = item.topologyValue
+        return { text, subText, value: item.topologyValue }
+      })
+
+      return machines
+    } catch (e) {
+      console.log(e)
+      return []
+    }
+  }
+}
+
+function hasAnnotations({ model, getValue }, type) {
+  const annotations = getValue(
+    model,
+    '/resources/autoscalingKubedbComMongoDBAutoscaler/metadata/annotations',
+  )
+  const instance = annotations['kubernetes.io/instance-type']
+  let parsedInstance = {}
+  try {
+    if (instance) parsedInstance = JSON.parse(instance)
+  } catch (e) {
+    console.log(e)
+    parsedInstance = {}
+  }
+
+  return !!parsedInstance[type]
+}
+
+function isMachineCustom({ watchDependency, getValue, discriminator }, path) {
+  watchDependency(`discriminator#${path}`)
+  const machine = getValue(discriminator, `${path}`)
+  return machine === 'custom'
+}
+
 function hasNoAnnotations({ model, getValue }) {
-  const annotations = getValue(model, '/resources/kubedbComMongoDB/metadata/annotations')
+  const annotations = getValue(
+    model,
+    '/resources/autoscalingKubedbComMongoDBAutoscaler/metadata/annotations',
+  )
   const instance = annotations['kubernetes.io/instance-type']
   return !instance
 }
@@ -3041,5 +3118,9 @@ return {
   onBackupTypeChange,
   isBindingAlreadyOn,
   addOrRemoveBinding,
+  getMachines,
+  setAllowedMachine,
+  hasAnnotations,
   hasNoAnnotations,
+  isMachineCustom,
 }
