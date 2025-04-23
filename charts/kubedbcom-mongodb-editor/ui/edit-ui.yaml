@@ -1205,36 +1205,62 @@ steps:
           schema:
             $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/standalone/properties/resourceDiffPercentage
           type: input
-        - elements:
-          - label:
-              text: cpu
+        - discriminator:
+            minAllowedMachine-standalone:
+              type: string
+          elements:
+          - computed: setAllowedMachine|standalone|min
+            fetch: getMachines
+            if: hasAnnotations|standalone
+            label:
+              text: Min Allowed Profile
             schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/standalone/properties/minAllowed/properties/cpu
-            type: input
-          - label:
-              text: Memory
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/standalone/properties/minAllowed/properties/memory
-            type: input
-          if: hasNoAnnotations
+              $ref: discriminator#/properties/minAllowedMachine-standalone
+            type: select
+          - elements:
+            - label:
+                text: cpu
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/standalone/properties/minAllowed/properties/cpu
+              type: input
+            - label:
+                text: Memory
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/standalone/properties/minAllowed/properties/memory
+              type: input
+            if: isMachineCustom|/maxAllowedMachine-standalone
+            type: single-step-form
           label:
             text: Min Allowed
           schema:
             $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/standalone/properties/minAllowed
           show_label: true
           type: single-step-form
-        - elements:
-          - label:
-              text: cpu
+        - discriminator:
+            maxAllowedMachine-standalone:
+              type: string
+          elements:
+          - computed: setAllowedMachine|standalone|max
+            fetch: getMachines
+            if: hasAnnotations|standalone
+            label:
+              text: Max Allowed Profile
             schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/standalone/properties/maxAllowed/properties/cpu
-            type: input
-          - label:
-              text: Memory
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/standalone/properties/maxAllowed/properties/memory
-            type: input
-          if: hasNoAnnotations
+              $ref: discriminator#/properties/maxAllowedMachine
+            type: select
+          - elements:
+            - label:
+                text: cpu
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/standalone/properties/maxAllowed/properties/cpu
+              type: input
+            - label:
+                text: Memory
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/standalone/properties/maxAllowed/properties/memory
+              type: input
+            if: isMachineCustom|/maxAllowedMachine-standalone
+            type: single-step-form
           label:
             text: Max Allowed
           schema:
@@ -1301,36 +1327,62 @@ steps:
           schema:
             $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/replicaSet/properties/resourceDiffPercentage
           type: input
-        - elements:
-          - label:
-              text: cpu
+        - discriminator:
+            minAllowedMachine-replicaset:
+              type: string
+          elements:
+          - computed: setAllowedMachine|replicaset|min
+            fetch: getMachines
+            if: hasAnnotations|replicaset
+            label:
+              text: Min Allowed Profile
             schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/replicaSet/properties/minAllowed/properties/cpu
-            type: input
-          - label:
-              text: memory
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/replicaSet/properties/minAllowed/properties/memory
-            type: input
-          if: hasNoAnnotations
+              $ref: discriminator#/properties/minAllowedMachine-replicaset
+            type: select
+          - elements:
+            - label:
+                text: cpu
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/replicaSet/properties/minAllowed/properties/cpu
+              type: input
+            - label:
+                text: memory
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/replicaSet/properties/minAllowed/properties/memory
+              type: input
+            if: isMachineCustom|/minAllowedMachine-replicaset
+            type: single-step-form
           label:
             text: Min Allowed
           schema:
             $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/replicaSet/properties/minAllowed
           show_label: true
           type: single-step-form
-        - elements:
-          - label:
-              text: cpu
+        - discriminator:
+            maxAllowedMachine-replicaset:
+              type: string
+          elements:
+          - computed: setAllowedMachine|replicaset|max
+            fetch: getMachines
+            if: hasAnnotations|replicaset
+            label:
+              text: Max Allowed Profile
             schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/replicaSet/properties/maxAllowed/properties/cpu
-            type: input
-          - label:
-              text: memory
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/replicaSet/properties/maxAllowed/properties/memory
-            type: input
-          if: hasNoAnnotations
+              $ref: discriminator#/properties/maxAllowedMachine-replicaset
+            type: select
+          - elements:
+            - label:
+                text: cpu
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/replicaSet/properties/maxAllowed/properties/cpu
+              type: input
+            - label:
+                text: memory
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/replicaSet/properties/maxAllowed/properties/memory
+              type: input
+            if: isMachineCustom|/maxAllowedMachine-replicaset
+            type: single-step-form
           label:
             text: Max Allowed
           schema:
@@ -1398,36 +1450,62 @@ steps:
             schema:
               $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/shard/properties/resourceDiffPercentage
             type: input
-          - elements:
-            - label:
-                text: cpu
+          - discriminator:
+              minAllowedMachine-shard:
+                type: string
+            elements:
+            - computed: setAllowedMachine|shard|min
+              fetch: getMachines
+              if: hasAnnotations|shard
+              label:
+                text: Min Allowed Profile
               schema:
-                $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/shard/properties/minAllowed/properties/cpu
-              type: input
-            - label:
-                text: memory
-              schema:
-                $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/shard/properties/minAllowed/properties/memory
-              type: input
-            if: hasNoAnnotations
+                $ref: discriminator#/properties/minAllowedMachine-shard
+              type: select
+            - elements:
+              - label:
+                  text: cpu
+                schema:
+                  $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/shard/properties/minAllowed/properties/cpu
+                type: input
+              - label:
+                  text: memory
+                schema:
+                  $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/shard/properties/minAllowed/properties/memory
+                type: input
+              if: isMachineCustom|/minAllowedMachine-shard
+              type: single-step-form
             label:
               text: Min Allowed
             schema:
               $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/shard/properties/minAllowed
             show_label: true
             type: single-step-form
-          - elements:
-            - label:
-                text: cpu
+          - discriminator:
+              maxAllowedMachine-shard:
+                type: string
+            elements:
+            - computed: setAllowedMachine|shard|max
+              fetch: getMachines
+              if: hasAnnotations|shard
+              label:
+                text: Max Allowed Profile
               schema:
-                $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/shard/properties/maxAllowed/properties/cpu
-              type: input
-            - label:
-                text: memory
-              schema:
-                $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/shard/properties/maxAllowed/properties/memory
-              type: input
-            if: hasNoAnnotations
+                $ref: discriminator#/properties/maxAllowedMachine-shard
+              type: select
+            - elements:
+              - label:
+                  text: cpu
+                schema:
+                  $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/shard/properties/maxAllowed/properties/cpu
+                type: input
+              - label:
+                  text: memory
+                schema:
+                  $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/shard/properties/maxAllowed/properties/memory
+                type: input
+              if: isMachineCustom|/maxAllowedMachine-shard
+              type: single-step-form
             label:
               text: Max Allowed
             schema:
@@ -1493,36 +1571,62 @@ steps:
             schema:
               $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/configServer/properties/resourceDiffPercentage
             type: input
-          - elements:
-            - label:
-                text: cpu
+          - discriminator:
+              minAllowedMachine-configServer:
+                type: string
+            elements:
+            - computed: setAllowedMachine|configServer|min
+              fetch: getMachines
+              if: hasAnnotations|configServer
+              label:
+                text: Min Allowed Profile
               schema:
-                $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/configServer/properties/minAllowed/properties/cpu
-              type: input
-            - label:
-                text: memory
-              schema:
-                $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/configServer/properties/minAllowed/properties/memory
-              type: input
-            if: hasNoAnnotations
+                $ref: discriminator#/properties/minAllowedMachine-configServer
+              type: select
+            - elements:
+              - label:
+                  text: cpu
+                schema:
+                  $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/configServer/properties/minAllowed/properties/cpu
+                type: input
+              - label:
+                  text: memory
+                schema:
+                  $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/configServer/properties/minAllowed/properties/memory
+                type: input
+              if: isMachineCustom|/minAllowedMachine-configServer
+              type: single-step-form
             label:
               text: Min Allowed
             schema:
               $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/configServer/properties/minAllowed
             show_label: true
             type: single-step-form
-          - elements:
-            - label:
-                text: cpu
+          - discriminator:
+              maxAllowedMachine-configServer:
+                type: string
+            elements:
+            - computed: setAllowedMachine|configServer|max
+              fetch: getMachines
+              if: hasAnnotations|configServer
+              label:
+                text: Max Allowed Profile
               schema:
-                $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/configServer/properties/maxAllowed/properties/cpu
-              type: input
-            - label:
-                text: memory
-              schema:
-                $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/configServer/properties/maxAllowed/properties/memory
-              type: input
-            if: hasNoAnnotations
+                $ref: discriminator#/properties/maxAllowedMachine-configServer
+              type: select
+            - elements:
+              - label:
+                  text: cpu
+                schema:
+                  $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/configServer/properties/maxAllowed/properties/cpu
+                type: input
+              - label:
+                  text: memory
+                schema:
+                  $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/configServer/properties/maxAllowed/properties/memory
+                type: input
+              if: isMachineCustom|/maxAllowedMachine-configServer
+              type: single-step-form
             label:
               text: Max Allowed
             schema:
@@ -1599,7 +1703,6 @@ steps:
               schema:
                 $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/arbiter/properties/minAllowed/properties/memory
               type: input
-            if: hasNoAnnotations
             label:
               text: Min Allowed
             schema:
@@ -1617,7 +1720,6 @@ steps:
               schema:
                 $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/arbiter/properties/maxAllowed/properties/memory
               type: input
-            if: hasNoAnnotations
             label:
               text: Max Allowed
             schema:
@@ -1657,6 +1759,7 @@ steps:
               $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/arbiter/properties/inMemoryStorage
             show_label: true
             type: single-step-form
+          hideForm: true
           label:
             text: Arbiter
           schema:
@@ -1694,7 +1797,6 @@ steps:
               schema:
                 $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/hidden/properties/minAllowed/properties/memory
               type: input
-            if: hasNoAnnotations
             label:
               text: Min Allowed
             schema:
@@ -1712,7 +1814,6 @@ steps:
               schema:
                 $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/hidden/properties/maxAllowed/properties/memory
               type: input
-            if: hasNoAnnotations
             label:
               text: Max Allowed
             schema:
@@ -1752,6 +1853,7 @@ steps:
               $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/hidden/properties/inMemoryStorage
             show_label: true
             type: single-step-form
+          hideForm: true
           label:
             text: Hidden
           schema:
@@ -1778,36 +1880,62 @@ steps:
             schema:
               $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/mongos/properties/resourceDiffPercentage
             type: input
-          - elements:
-            - label:
-                text: cpu
+          - discriminator:
+              minAllowedMachine-mongos:
+                type: string
+            elements:
+            - computed: setAllowedMachine|mongos|min
+              fetch: getMachines
+              if: hasAnnotations|mongos
+              label:
+                text: Min Allowed Profile
               schema:
-                $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/mongos/properties/minAllowed/properties/cpu
-              type: input
-            - label:
-                text: memory
-              schema:
-                $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/mongos/properties/minAllowed/properties/memory
-              type: input
-            if: hasNoAnnotations
+                $ref: discriminator#/properties/minAllowedMachine-mongos
+              type: select
+            - elements:
+              - label:
+                  text: cpu
+                schema:
+                  $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/mongos/properties/minAllowed/properties/cpu
+                type: input
+              - label:
+                  text: memory
+                schema:
+                  $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/mongos/properties/minAllowed/properties/memory
+                type: input
+              if: isMachineCustom|/minAllowedMachine-mongos
+              type: single-step-form
             label:
               text: Min Allowed
             schema:
               $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/mongos/properties/minAllowed
             show_label: true
             type: single-step-form
-          - elements:
-            - label:
-                text: cpu
+          - discriminator:
+              maxAllowedMachine-mongos:
+                type: string
+            elements:
+            - computed: setAllowedMachine|mongos|max
+              fetch: getMachines
+              if: hasAnnotations|mongos
+              label:
+                text: Max Allowed Profile
               schema:
-                $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/mongos/properties/maxAllowed/properties/cpu
-              type: input
-            - label:
-                text: memory
-              schema:
-                $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/mongos/properties/maxAllowed/properties/memory
-              type: input
-            if: hasNoAnnotations
+                $ref: discriminator#/properties/maxAllowedMachine-mongos
+              type: select
+            - elements:
+              - label:
+                  text: cpu
+                schema:
+                  $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/mongos/properties/maxAllowed/properties/cpu
+                type: input
+              - label:
+                  text: memory
+                schema:
+                  $ref: schema#/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/mongos/properties/maxAllowed/properties/memory
+                type: input
+              if: isMachineCustom|/maxAllowedMachine-mongos
+              type: single-step-form
             label:
               text: Max Allowed
             schema:
