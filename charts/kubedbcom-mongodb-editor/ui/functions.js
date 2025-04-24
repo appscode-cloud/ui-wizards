@@ -2906,7 +2906,7 @@ function setAllowedMachine({ model, getValue }, type, minmax) {
     parsedInstance = {}
   }
 
-  const machine = parsedInstance[type] || 'custom'
+  const machine = parsedInstance[type] || ''
   const mx = machine?.includes(',') ? machine.split(',')[1] : ''
   const mn = machine?.includes(',') ? machine.split(',')[0] : ''
 
@@ -2950,6 +2950,34 @@ function hasAnnotations({ model, getValue }, type) {
 
 function hasNoAnnotations({ model, getValue }) {
   return !hasAnnotations({ model, getValue })
+}
+
+function updateAnnotations({ model, getValue, discriminator, commit }, type) {
+  const annoPath = '/resources/autoscalingKubedbComMongoDBAutoscaler/metadata/annotations'
+  const annotations = getValue(model, annoPath)
+  const instance = annotations['kubernetes.io/instance-type']
+  let parsedInstance = {}
+  try {
+    if (instance) parsedInstance = JSON.parse(instance)
+  } catch (e) {
+    console.log(e)
+    parsedInstance = {}
+  }
+
+  const minMachine = getValue(discriminator, `/allowedMachine-${type}-min`)
+  const maxMachine = getValue(discriminator, `/allowedMachine-${type}-max`)
+  const minMaxMachine = `${minMachine},${maxMachine}`
+
+  parsedInstance[type] = minMaxMachine
+  const instanceString = JSON.stringify(parsedInstance)
+  annotations['kubernetes.io/instance-type'] = instanceString
+
+  if (minMachine && maxMachine && instance !== instanceString)
+    commit('wizard/model$update', {
+      path: annoPath,
+      value: { ...annotations },
+      force: true,
+    })
 }
 
 return {
@@ -3124,4 +3152,5 @@ return {
   hasAnnotations,
   hasNoAnnotations,
   fetchTopologyMachines,
+  updateAnnotations,
 }
