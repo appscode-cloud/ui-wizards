@@ -2914,8 +2914,16 @@ function setAllowedMachine({ model, getValue }, type, minmax) {
   else return mx
 }
 
-async function getMachines({ getValue, discriminator }) {
-  const nodeGroups = getValue(discriminator, '/topologyMachines')
+async function getMachines({ getValue, watchDependency, discriminator }, type, minmax) {
+  const depends = minmax === 'min' ? 'max' : 'min'
+  const dependantPath = `/allowedMachine-${type}-${depends}`
+
+  watchDependency(`discriminator#${dependantPath}`)
+  const dependantMachine = getValue(discriminator, dependantPath)
+
+  const nodeGroups = getValue(discriminator, '/topologyMachines') || []
+
+  const dependantIndex = nodeGroups?.findIndex((item) => item.topologyValue === dependantMachine)
 
   const machines = nodeGroups?.map((item) => {
     const subText = `CPU: ${item.allocatable.cpu}, Memory: ${item.allocatable.memory}`
@@ -2923,7 +2931,11 @@ async function getMachines({ getValue, discriminator }) {
     return { text, subText, value: item.topologyValue }
   })
 
-  return machines
+  const filteredMachine = machines?.filter((item, ind) =>
+    minmax === 'min' ? ind <= dependantIndex : ind >= dependantIndex,
+  )
+
+  return dependantIndex === -1 ? machines : filteredMachine
 }
 
 function hasAnnotations({ model, getValue }, type) {
@@ -2932,30 +2944,12 @@ function hasAnnotations({ model, getValue }, type) {
     '/resources/autoscalingKubedbComMongoDBAutoscaler/metadata/annotations',
   )
   const instance = annotations['kubernetes.io/instance-type']
-  let parsedInstance = {}
-  try {
-    if (instance) parsedInstance = JSON.parse(instance)
-  } catch (e) {
-    console.log(e)
-    parsedInstance = {}
-  }
 
-  return !!parsedInstance[type]
-}
-
-function isMachineCustom({ watchDependency, getValue, discriminator }, path) {
-  watchDependency(`discriminator#${path}`)
-  const machine = getValue(discriminator, `${path}`)
-  return machine === 'custom'
+  return !!instance
 }
 
 function hasNoAnnotations({ model, getValue }) {
-  const annotations = getValue(
-    model,
-    '/resources/autoscalingKubedbComMongoDBAutoscaler/metadata/annotations',
-  )
-  const instance = annotations['kubernetes.io/instance-type']
-  return !instance
+  return !hasAnnotations({ model, getValue })
 }
 
 return {
@@ -3129,6 +3123,5 @@ return {
   setAllowedMachine,
   hasAnnotations,
   hasNoAnnotations,
-  isMachineCustom,
   fetchTopologyMachines,
 }
