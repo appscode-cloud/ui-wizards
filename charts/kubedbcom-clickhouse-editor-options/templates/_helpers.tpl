@@ -125,3 +125,78 @@ runAsUser: {{ $.Values.spec.openshift.securityContext.runAsUser | default 101 }}
 seccompProfile:
   type: RuntimeDefault
 {{- end }}
+
+
+
+
+
+
+
+
+{{- define "resource-profiles" -}}
+{{- $machines := .Files.Get "data/machines.yaml" | fromYaml -}}
+{{- $profiles := dict -}}
+
+{{- $res := dict -}}
+{{- $clickHouseKeeper_res := dict -}}
+{{- $cluster_res := list }}
+
+{{- if eq .Values.spec.mode "Topology" }}
+
+  {{- $cluster_res = .Values.spec.podResources.resources -}}
+
+  {{- if and .Values.spec.podResources.machine (hasKey $machines .Values.spec.podResources.machine) }}
+    {{- $cluster_res = get (get $machines .Values.spec.podResources.machine) "resources" }}
+  {{- end }}
+
+  {{- range .Values.spec.admin.machineProfiles.machines }}
+    {{- if and $.Values.spec.podResources.machine (eq .id $.Values.spec.podResources.machine) }}
+      {{- $cluster_res = dict "requests" .limits "limits" .limits }}
+      {{- $_ := set $profiles "cluster" .id }}
+    {{- end }}
+  {{- end }}
+
+  {{- $clickHouseKeeper_res = .Values.spec.topology.clickHouseKeeper.podResources.resources -}}
+
+  {{- if and .Values.spec.topology.clickHouseKeeper.podResources.machine (hasKey $machines .Values.spec.topology.clickHouseKeeper.podResources.machine) }}
+    {{- $clickHouseKeeper_res = get (get $machines .Values.spec.topology.clickHouseKeeper.podResources.machine) "resources" }}
+  {{- end }}
+
+  {{- range .Values.spec.admin.machineProfiles.machines }}
+    {{- if and $.Values.spec.topology.clickHouseKeeper.podResources.machine (eq .id $.Values.spec.topology.clickHouseKeeper.podResources.machine) }}
+      {{- $clickHouseKeeper_res = dict "requests" .limits "limits" .limits }}
+      {{- $_ := set $profiles "clickHouseKeeper" .id }}
+    {{- end }}
+  {{- end }}
+{{- else }}
+
+  {{- $res = .Values.spec.podResources.resources -}}
+
+  {{- if and .Values.spec.podResources.machine (hasKey $machines .Values.spec.podResources.machine) }}
+    {{- $res = get (get $machines .Values.spec.podResources.machine) "resources" }}
+  {{- end }}
+
+  {{- range .Values.spec.admin.machineProfiles.machines }}
+    {{- if and $.Values.spec.podResources.machine (eq .id $.Values.spec.podResources.machine) }}
+      {{- $res = dict "requests" .limits "limits" .limits }}
+      {{- if eq $.Values.spec.mode "Replicaset" }}
+        {{- $_ := set $profiles "replicaSet" .id }}
+      {{- end }}
+      {{- if eq $.Values.spec.mode "Standalone" }}
+        {{- $_ := set $profiles "standalone" .id }}
+      {{- end }}
+    {{- end }}
+  {{- end }}
+
+{{- end }}
+
+{{- $init_res := dict "limits" (dict "memory" "512Mi") "requests" (dict "cpu" "200m" "memory" "256Mi") -}}
+{{- $sidecar_res := dict "limits" (dict "memory" "256Mi") "requests" (dict "cpu" "200m" "memory" "256Mi") -}}
+
+{{- $_ := set . "cluster_res" $cluster_res -}}
+{{- $_ := set . "clickHouseKeeper_res" $clickHouseKeeper_res -}}
+{{- $_ = set . "init_res" $init_res -}}
+{{- $_ = set . "sidecar_res" $sidecar_res -}}
+
+{{- $profiles | toJson -}}
+{{- end -}}

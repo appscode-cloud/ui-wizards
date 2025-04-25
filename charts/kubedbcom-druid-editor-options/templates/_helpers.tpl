@@ -125,3 +125,96 @@ runAsUser: {{ $.Values.spec.openshift.securityContext.runAsUser | default 1000 }
 seccompProfile:
   type: RuntimeDefault
 {{- end }}
+
+{{- define "resource-profiles" -}}
+{{- $machines := .Files.Get "data/machines.yaml" | fromYaml -}}
+{{- $profiles := dict -}}
+
+{{- $coordinators_res := dict -}}
+{{- $overlords_res := dict -}}
+{{- $middleManagers_res := dict -}}
+{{- $historicals_res := dict -}}
+{{- $brokers_res := dict -}}
+{{- $routers_res := dict -}}
+
+{{- $coordinators_res = .Values.spec.topology.coordinators.podResources.resources -}}
+{{- if and .Values.spec.topology.coordinators.podResources.machine (hasKey $machines .Values.spec.topology.coordinators.podResources.machine) }}
+  {{- $coordinators_res = get (get $machines .Values.spec.topology.coordinators.podResources.machine) "resources" }}
+{{- end }}
+{{- range .Values.spec.admin.machineProfiles.machines }}
+  {{- if and $.Values.spec.topology.coordinators.podResources.machine (eq .id $.Values.spec.topology.coordinators.podResources.machine) }}
+    {{- $coordinators_res  = dict "requests" .limits "limits" .limits }}
+    {{- $_ := set $profiles "coordinators" .id }}
+  {{- end }}
+{{- end }}
+
+{{- $overlords_res = .Values.spec.topology.overlords.podResources.resources -}}
+{{- if and .Values.spec.topology.overlords.podResources.machine (hasKey $machines .Values.spec.topology.overlords.podResources.machine) }}
+  {{- $overlords_res = get (get $machines .Values.spec.topology.overlords.podResources.machine) "resources" }}
+{{- end }}
+{{- range .Values.spec.admin.machineProfiles.machines }}
+  {{- if and $.Values.spec.topology.overlords.podResources.machine (eq .id $.Values.spec.topology.overlords.podResources.machine) }}
+    {{- $overlords_res  = dict "requests" .limits "limits" .limits }}
+    {{- $_ := set $profiles "overlords" .id }}
+  {{- end }}
+{{- end }}
+
+{{- $middleManagers_res = .Values.spec.topology.middleManagers.podResources.resources -}}
+{{- if and .Values.spec.topology.middleManagers.podResources.machine (hasKey $machines .Values.spec.topology.middleManagers.podResources.machine) }}
+  {{- $middleManagers_res = get (get $machines .Values.spec.topology.middleManagers.podResources.machine) "resources" }}
+{{- end }}
+{{- range .Values.spec.admin.machineProfiles.machines }}
+  {{- if and $.Values.spec.topology.middleManagers.podResources.machine (eq .id $.Values.spec.topology.middleManagers.podResources.machine) }}
+    {{- $middleManagers_res  = dict "requests" .limits "limits" .limits }}
+    {{- $_ := set $profiles "middleManagers" .id }}
+  {{- end }}
+{{- end }}
+
+{{- $historicals_res = .Values.spec.topology.historicals.podResources.resources -}}
+{{- if and .Values.spec.topology.historicals.podResources.machine (hasKey $machines .Values.spec.topology.historicals.podResources.machine) }}
+  {{- $historicals_res = get (get $machines .Values.spec.topology.historicals.podResources.machine) "resources" }}
+{{- end }}
+{{- range .Values.spec.admin.machineProfiles.machines }}
+  {{- if and $.Values.spec.topology.historicals.podResources.machine (eq .id $.Values.spec.topology.historicals.podResources.machine) }}
+    {{- $historicals_res  = dict "requests" .limits "limits" .limits }}
+    {{- $_ := set $profiles "historicals" .id }}
+  {{- end }}
+{{- end }}
+
+{{- $brokers_res = .Values.spec.topology.brokers.podResources.resources -}}
+{{- if and .Values.spec.topology.brokers.podResources.machine (hasKey $machines .Values.spec.topology.brokers.podResources.machine) }}
+  {{- $brokers_res = get (get $machines .Values.spec.topology.brokers.podResources.machine) "resources" }}
+{{- end }}
+{{- range .Values.spec.admin.machineProfiles.machines }}
+  {{- if and $.Values.spec.topology.brokers.podResources.machine (eq .id $.Values.spec.topology.brokers.podResources.machine) }}
+    {{- $brokers_res  = dict "requests" .limits "limits" .limits }}
+    {{- $_ := set $profiles "brokers" .id }}
+  {{- end }}
+{{- end }}
+
+{{- $routers_res = .Values.spec.topology.routers.podResources.resources -}}
+{{- if and .Values.spec.topology.routers.podResources.machine (hasKey $machines .Values.spec.topology.routers.podResources.machine) }}
+  {{- $routers_res = get (get $machines .Values.spec.topology.routers.podResources.machine) "resources" }}
+{{- end }}
+{{- range .Values.spec.admin.machineProfiles.machines }}
+  {{- if and $.Values.spec.topology.routers.podResources.machine (eq .id $.Values.spec.topology.routers.podResources.machine) }}
+    {{- $routers_res  = dict "requests" .limits "limits" .limits }}
+    {{- $_ := set $profiles "routers" .id }}
+  {{- end }}
+{{- end }}
+
+
+{{- $init_res := dict "limits" (dict "memory" "512Mi") "requests" (dict "cpu" "200m" "memory" "256Mi") -}}
+{{- $sidecar_res := dict "limits" (dict "memory" "256Mi") "requests" (dict "cpu" "200m" "memory" "256Mi") -}}
+
+{{- $_ := set . "coordinators_res" $coordinators_res -}}
+{{- $_ := set . "overlords_res" $overlords_res -}}
+{{- $_ := set . "middleManagers_res" $middleManagers_res -}}
+{{- $_ := set . "historicals_res" $historicals_res -}}
+{{- $_ := set . "brokers_res" $brokers_res -}}
+{{- $_ := set . "routers_res" $routers_res -}}
+{{- $_ = set . "init_res" $init_res -}}
+{{- $_ = set . "sidecar_res" $sidecar_res -}}
+
+{{- $profiles | toJson -}}
+{{- end -}}
