@@ -125,3 +125,68 @@ runAsUser: {{ $.Values.spec.openshift.securityContext.runAsUser | default 1001 }
 seccompProfile:
   type: RuntimeDefault
 {{- end }}
+
+{{- define "resource-profiles" -}}
+{{- $machines := .Files.Get "data/machines.yaml" | fromYaml -}}
+{{- $profiles := dict -}}
+
+{{- $res := dict -}}
+{{- $broker_res := dict -}}
+{{- $controller_res := dict -}}
+
+{{- if eq .Values.spec.mode "Topology" }}
+  {{- $broker_res = .Values.spec.topology.broker.podResources.resources -}}
+
+  {{- if and .Values.spec.topology.broker.podResources.machine (hasKey $machines .Values.spec.topology.broker.podResources.machine) }}
+    {{- $broker_res = get (get $machines .Values.spec.topology.broker.podResources.machine) "resources" }}
+  {{- end }}
+
+  {{- range .Values.spec.admin.machineProfiles.machines }}
+    {{- if and $.Values.spec.topology.broker.podResources.machine (eq .id $.Values.spec.topology.broker.podResources.machine) }}
+      {{- $broker_res = dict "requests" .limits "limits" .limits }}
+      {{- $_ := set $profiles "broker" .id }}
+    {{- end }}
+  {{- end }}
+
+
+  {{- $controller_res = .Values.spec.topology.controller.podResources.resources -}}
+
+  {{- if and .Values.spec.topology.controller.podResources.machine (hasKey $machines .Values.spec.topology.controller.podResources.machine) }}
+    {{- $controller_res = get (get $machines .Values.spec.topology.controller.podResources.machine) "resources" }}
+  {{- end }}
+
+  {{- range .Values.spec.admin.machineProfiles.machines }}
+    {{- if and $.Values.spec.topology.controller.podResources.machine (eq .id $.Values.spec.topology.controller.podResources.machine) }}
+      {{- $controller_res = dict "requests" .limits "limits" .limits }}
+      {{- $_ := set $profiles "controller" .id }}
+    {{- end }}
+  {{- end }}
+
+{{- else }}
+
+  {{- $res = .Values.spec.podResources.resources -}}
+
+  {{- if and .Values.spec.podResources.machine (hasKey $machines .Values.spec.podResources.machine) }}
+    {{- $res = get (get $machines .Values.spec.podResources.machine) "resources" }}
+  {{- end }}
+
+  {{- range .Values.spec.admin.machineProfiles.machines }}
+    {{- if and $.Values.spec.podResources.machine (eq .id $.Values.spec.podResources.machine) }}
+      {{- $res  = dict "requests" .limits "limits" .limits }}
+      {{- $_ := set $profiles "combined" .id }}
+    {{- end }}
+  {{- end }}
+{{- end }}
+
+{{- $init_res := dict "limits" (dict "memory" "512Mi") "requests" (dict "cpu" "200m" "memory" "256Mi") -}}
+{{- $sidecar_res := dict "limits" (dict "memory" "256Mi") "requests" (dict "cpu" "200m" "memory" "256Mi") -}}
+
+
+{{- $_ := set . "res" $res -}}
+{{- $_ = set . "broker_res" $broker_res -}}
+{{- $_ = set . "controller_res" $controller_res -}}
+{{- $_ = set . "init_res" $init_res -}}
+{{- $_ = set . "sidecar_res" $sidecar_res -}}
+
+{{- $profiles | toJson -}}
+{{- end -}}

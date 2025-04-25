@@ -1,3 +1,54 @@
+{{- $hasMachines := gt (len .Values.spec.admin.machineProfiles.machines) 0 }}
+{{- $hasAvailable := gt (len .Values.spec.admin.machineProfiles.available) 0 }}
+{{- $commonCompute := dict
+  "trigger" "Off"
+  "podLifeTimeThreshold" "10m"
+  "resourceDiffPercentage" 20
+}}
+{{- if $hasMachines }}
+  {{- $_ := set $commonCompute "minAllowed" (dict
+    "cpu" (index .Values.spec.admin.machineProfiles.machines 0).limits.cpu
+    "memory" (index .Values.spec.admin.machineProfiles.machines 0).limits.memory
+  ) }}
+  {{- $_ = set $commonCompute "maxAllowed" (dict
+    "cpu" (index .Values.spec.admin.machineProfiles.machines (sub (len .Values.spec.admin.machineProfiles.machines) 1)).limits.cpu
+    "memory" (index .Values.spec.admin.machineProfiles.machines (sub (len .Values.spec.admin.machineProfiles.machines) 1)).limits.memory
+  ) }}
+{{- else }}
+  {{- $_ := set $commonCompute "minAllowed" (dict
+    "cpu" "400m"
+    "memory" "400Mi"
+  ) }}
+  {{- $_ = set $commonCompute "maxAllowed" (dict
+    "cpu" "1"
+    "memory" "2Gi"
+  ) }}
+{{- end }}
+
+{{- define "minmax-profiles" -}}
+  {{- $instanceType := ternary "topology" "node" (eq .Values.spec.mode "Topology") }}
+  {{- $validMachines := list }}
+  {{- range $machine := .Values.spec.admin.machineProfiles.available }}
+    {{- if ne $machine "custom" }}
+      {{- $validMachines = append $validMachines $machine }}
+    {{- end }}
+  {{- end }}
+  {{- $instanceMap := dict }}
+  {{- if gt (len $validMachines) 0 }}
+    {{- $minMachine := index $validMachines 0 }}
+    {{- $maxMachine := index $validMachines (sub (len $validMachines) 1) }}
+    {{- if eq .Values.spec.mode "Topology" }}
+      {{- $_ := set $instanceMap "aggregator" (printf "%s,%s" $minMachine $maxMachine) }}
+      {{- $_ = set $instanceMap "leaf" (printf "%s,%s" $minMachine $maxMachine) }}
+    {{- else }}
+      {{- $_ := set $instanceMap $instanceType (printf "%s,%s" $minMachine $maxMachine) }}
+    {{- end }}
+    {{- $instanceMap | toJson | trim -}}
+  {{- else }}
+    {{- "{}" | toJson | trim -}}
+  {{- end }}
+{{- end }}
+
 apiVersion: autoscaling.kubedb.com/v1alpha1
 kind: SinglestoreAutoscaler
 metadata:
@@ -5,6 +56,10 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "kubedbcom-singlestore-editor-options.labels" . | nindent 4 }}
+  {{- if $hasAvailable }}
+  annotations:
+    kubernetes.io/instance-type: {{ printf "'%s'" (include "minmax-profiles" . | fromJson | toJson) }}
+  {{- end }}
 spec:
   databaseRef:
     name: {{ include "kubedbcom-singlestore-editor-options.fullname" . }}
@@ -12,23 +67,19 @@ spec:
     timeout: 10m
     apply: IfReady
   compute:
-{{- if eq .Values.spec.mode "Sharded" }}
-    shard:
-{{- else if eq .Values.spec.mode "Replicaset" }}
-    replicaSet:
+{{- if eq .Values.spec.mode "Topology" }}
+    aggregator:
+      {{- $commonCompute | toYaml | nindent 6 }}
+    leaf:
+      {{- $commonCompute | toYaml | nindent 6 }}
 {{- else }}
-    standalone:
+    node:
+      {{- $commonCompute | toYaml | nindent 6 }}
 {{- end }}
-      trigger: "Off"
-      podLifeTimeThreshold: 10m
-      resourceDiffPercentage: 20
-      minAllowed:
-        cpu: 400m
-        memory: 400Mi
-      maxAllowed:
-        cpu: 1
-        memory: 2Gi
 {{- if eq .Values.spec.admin.deployment.default "Dedicated" }}
     nodeTopology:
       name: {{ .Values.spec.admin.clusterTier.nodeTopology.default }}
-{{- end}}
+{{- else if $hasAvailable }}
+    nodeTopology:
+      name: kubedb-ui-machine-profiles
+{{- end }}

@@ -1,54 +1,7 @@
-{{- $machines := .Files.Get "data/machines.yaml" | fromYaml -}}
 {{- $profiles := dict -}}
-{{- $res := dict -}}
-{{- $data_res := dict -}}
-{{- $master_res := dict -}}
-{{- $ingest_res := dict -}}
-{{- if eq .Values.spec.mode "Topology" }}
-  {{- $data_res = .Values.spec.topology.data.podResources.resources -}}
-  {{- if and .Values.spec.topology.data.podResources.machine (hasKey $machines .Values.spec.topology.data.podResources.machine) }}
-    {{- $data_res = get (get $machines .Values.spec.topology.data.podResources.machine) "resources" }}
-  {{- end }}
-  {{- range .Values.spec.admin.machineProfiles.machines }}
-    {{- if and $.Values.spec.topology.data.podResources.machine (eq .id $.Values.spec.topology.data.podResources.machine) }}
-      {{- $data_res  = dict "requests" .limits "limits" .limits }}
-      {{- $_ := set $profiles "data" .id -}}
-    {{- end }}
-  {{- end }}
-  {{- $master_res = .Values.spec.topology.master.podResources.resources -}}
-  {{- if and .Values.spec.topology.master.podResources.machine (hasKey $machines .Values.spec.topology.master.podResources.machine) }}
-    {{- $master_res = get (get $machines .Values.spec.topology.master.podResources.machine) "resources" }}
-  {{- end }}
-  {{- range .Values.spec.admin.machineProfiles.machines }}
-    {{- if and $.Values.spec.topology.master.podResources.machine (eq .id $.Values.spec.topology.master.podResources.machine) }}
-      {{- $master_res  = dict "requests" .limits "limits" .limits }}
-      {{- $_ := set $profiles "master" .id -}}
-    {{- end }}
-  {{- end }}
-  {{- $ingest_res = .Values.spec.topology.ingest.podResources.resources -}}
-  {{- if and .Values.spec.topology.ingest.podResources.machine (hasKey $machines .Values.spec.topology.ingest.podResources.machine) }}
-    {{- $ingest_res = get (get $machines .Values.spec.topology.ingest.podResources.machine) "resources" }}
-  {{- end }}
-  {{- range .Values.spec.admin.machineProfiles.machines }}
-    {{- if and $.Values.spec.topology.ingest.podResources.machine (eq .id $.Values.spec.topology.ingest.podResources.machine) }}
-      {{- $ingest_res  = dict "requests" .limits "limits" .limits }}
-      {{- $_ := set $profiles "ingest" .id -}}
-    {{- end }}
-  {{- end }}
-{{- else }}
-  {{- $res = .Values.spec.podResources.resources -}}
-  {{- if and .Values.spec.podResources.machine (hasKey $machines .Values.spec.podResources.machine) }}
-    {{- $res = get (get $machines .Values.spec.podResources.machine) "resources" }}
-  {{- end }}
-  {{- range .Values.spec.admin.machineProfiles.machines }}
-    {{- if and $.Values.spec.podResources.machine (eq .id $.Values.spec.podResources.machine) }}
-      {{- $res  = dict "requests" .limits "limits" .limits }}
-      {{- $_ := set $profiles "combined" .id -}}
-    {{- end }}
-  {{- end }}
-{{- end }}
-{{- $init_res := dict "limits" (dict "memory" "512Mi") "requests" (dict "cpu" "200m" "memory" "256Mi") -}}
-{{- $sidecar_res := dict "limits" (dict "memory" "256Mi") "requests" (dict "cpu" "200m" "memory" "256Mi") -}}
+{{- with $ctx := . -}}
+{{- $profiles = include "resource-profiles" $ctx | fromJson -}}
+{{- end -}}
 
 {{- define "common.placement" -}}
 
@@ -105,7 +58,7 @@ metadata:
   annotations:
     app.kubernetes.io/cluster-tier: {{ .Values.spec.admin.clusterTier.default }}
     {{- if $profiles }}
-    kubernetes.io/instance-type: {{ printf "'%s'" ($profiles | toJson) }}
+    kubernetes.io/instance-type: {{ printf "'%s'" (include "resource-profiles" . | fromJson | toJson) }}
     {{- end -}}
 {{- if .Values.spec.annotations }}
     {{- include "kubedbcom-elasticsearch-editor-options.annotations" . | nindent 4 }}
@@ -127,7 +80,7 @@ spec:
       containers:
         - name: elasticsearch
           resources:
-            {{- toYaml $res | nindent 12 }}
+            {{- toYaml .res | nindent 12 }}
       {{- include "common.placement" . | nindent 6 }}
 {{- else }}
   topology:
@@ -138,7 +91,7 @@ spec:
           containers:
             - name: elasticsearch
               resources:
-                {{- toYaml $master_res | nindent 16 }}
+                {{- toYaml .master_res | nindent 16 }}
           {{- include "common.placement" . | nindent 10 }}
       storage:
         storageClassName: {{ .Values.spec.admin.storageClasses.default }}
@@ -154,7 +107,7 @@ spec:
           containers:
             - name: elasticsearch
               resources:
-                {{- toYaml $data_res | nindent 16 }}
+                {{- toYaml .data_res | nindent 16 }}
           {{- include "common.placement" . | nindent 10 }}
       storage:
         storageClassName: {{ .Values.spec.admin.storageClasses.default }}
@@ -170,7 +123,7 @@ spec:
           containers:
             - name: elasticsearch
               resources:
-                {{- toYaml $ingest_res | nindent 16 }}
+                {{- toYaml .ingest_res | nindent 16 }}
           {{- include "common.placement" . | nindent 10 }}
       storage:
         storageClassName: {{ .Values.spec.admin.storageClasses.default }}
