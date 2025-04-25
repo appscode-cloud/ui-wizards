@@ -1,18 +1,7 @@
-{{- $machines := .Files.Get "data/machines.yaml" | fromYaml -}}
 {{- $profiles := "" -}}
-{{- $res := dict -}}
-{{- $res = .Values.spec.podResources.resources -}}
-{{- if and .Values.spec.podResources.machine (hasKey $machines .Values.spec.podResources.machine) }}
-  {{- $res = get (get $machines .Values.spec.podResources.machine) "resources" }}
-{{- end }}
-{{- range .Values.spec.admin.machineProfiles.machines }}
-  {{- if and $.Values.spec.podResources.machine (eq .id $.Values.spec.podResources.machine) }}
-    {{- $res  = dict "requests" .limits "limits" .limits }}
-    {{- $profiles = .id -}}
-  {{- end }}
-{{- end }}
-{{- $init_res := dict "limits" (dict "memory" "512Mi") "requests" (dict "cpu" "200m" "memory" "256Mi") -}}
-{{- $sidecar_res := dict "limits" (dict "memory" "256Mi") "requests" (dict "cpu" "200m" "memory" "256Mi") -}}
+{{- with $ctx := . -}}
+{{- $profiles = include "resource-profiles" $ctx | fromJson -}}
+{{- end -}}
 
 {{- define "common.placement" -}}
 
@@ -69,7 +58,7 @@ metadata:
   annotations:
     app.kubernetes.io/cluster-tier: {{ .Values.spec.admin.clusterTier.default }}
     {{- if $profiles }}
-    kubernetes.io/instance-type: {{ printf "%s" $profiles }}
+    kubernetes.io/instance-type: {{ printf "%s" (include "resource-profiles" .) }}
     {{- end -}}
 {{- if .Values.spec.annotations }}
     {{- include "kubedbcom-redis-editor-options.annotations" . | nindent 4 }}
@@ -105,20 +94,20 @@ spec:
       containers:
         - name: redis
           resources:
-            {{- toYaml $res | nindent 12 }}
+            {{- toYaml .res | nindent 12 }}
           securityContext:
             {{- include "container.securityContext" . | nindent 12 }}
           {{- if eq .Values.spec.mode "Sentinel" }}
         - name: rd-coordinator
           resources:
-            {{- toYaml $sidecar_res | nindent 12 }}
+            {{- toYaml .sidecar_res | nindent 12 }}
           securityContext:
             {{- include "container.securityContext" . | nindent 12 }}
           {{- end }}
       initContainers:
         - name: redis-init
           resources:
-            {{- toYaml $init_res | nindent 12 }}
+            {{- toYaml .init_res | nindent 12 }}
           securityContext:
             {{- include "container.securityContext" . | nindent 12 }}
       {{- include "common.placement" . | nindent 6 }}

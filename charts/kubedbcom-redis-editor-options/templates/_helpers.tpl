@@ -125,3 +125,29 @@ runAsUser: {{ $.Values.spec.openshift.securityContext.runAsUser | default 999 }}
 seccompProfile:
   type: RuntimeDefault
 {{- end }}
+
+
+{{- define "resource-profiles" -}}
+{{- $machines := .Files.Get "data/machines.yaml" | fromYaml -}}
+{{- $profiles := "" -}}
+{{- $res := dict -}}
+{{- $res = .Values.spec.podResources.resources -}}
+{{- if and .Values.spec.podResources.machine (hasKey $machines .Values.spec.podResources.machine) }}
+  {{- $res = get (get $machines .Values.spec.podResources.machine) "resources" }}
+{{- end }}
+{{- range .Values.spec.admin.machineProfiles.machines }}
+  {{- if and $.Values.spec.podResources.machine (eq .id $.Values.spec.podResources.machine) }}
+    {{- $res  = dict "requests" .limits "limits" .limits }}
+    {{- $profiles = .id -}}
+  {{- end }}
+{{- end }}
+{{- $init_res := dict "limits" (dict "memory" "512Mi") "requests" (dict "cpu" "200m" "memory" "256Mi") -}}
+{{- $sidecar_res := dict "limits" (dict "memory" "256Mi") "requests" (dict "cpu" "200m" "memory" "256Mi") -}}
+
+
+{{- $_ := set . "res" $res -}}
+{{- $_ = set . "init_res" $init_res -}}
+{{- $_ = set . "sidecar_res" $sidecar_res -}}
+
+{{- $profiles | toJson -}}
+{{- end -}}

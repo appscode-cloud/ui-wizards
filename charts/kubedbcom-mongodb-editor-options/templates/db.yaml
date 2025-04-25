@@ -1,86 +1,7 @@
-{{- $machines := .Files.Get "data/machines.yaml" | fromYaml -}}
 {{- $profiles := dict -}}
-{{- $res := dict -}}
-{{- $shard_res := dict -}}
-{{- $configServer_res := dict -}}
-{{- $mongos_res := dict -}}
-{{- $arbiter_res := dict -}}
-{{- $hidden_res := dict -}}
-
-{{- if eq .Values.spec.mode "Sharded" }}
-  {{- $shard_res = .Values.spec.shardTopology.shard.podResources.resources -}}
-  {{- if and .Values.spec.shardTopology.shard.podResources.machine (hasKey $machines .Values.spec.shardTopology.shard.podResources.machine) }}
-    {{- $shard_res = get (get $machines .Values.spec.shardTopology.shard.podResources.machine) "resources" }}
-  {{- end }}
-  {{- range .Values.spec.admin.machineProfiles.machines }}
-    {{- if and $.Values.spec.shardTopology.shard.podResources.machine (eq .id $.Values.spec.shardTopology.shard.podResources.machine) }}
-      {{- $shard_res  = dict "requests" .limits "limits" .limits }}
-      {{- $_ := set $profiles "shard" .id -}}
-    {{- end }}
-  {{- end }}
-  {{- $configServer_res = .Values.spec.shardTopology.configServer.podResources.resources -}}
-  {{- if and .Values.spec.shardTopology.configServer.podResources.machine (hasKey $machines .Values.spec.shardTopology.configServer.podResources.machine) }}
-    {{- $configServer_res = get (get $machines .Values.spec.shardTopology.configServer.podResources.machine) "resources" }}
-  {{- end }}
-  {{- range .Values.spec.admin.machineProfiles.machines }}
-    {{- if and $.Values.spec.shardTopology.configServer.podResources.machine (eq .id $.Values.spec.shardTopology.configServer.podResources.machine) }}
-      {{- $configServer_res  = dict "requests" .limits "limits" .limits }}
-      {{- $_ := set $profiles "configServer" .id -}}
-    {{- end }}
-  {{- end }}
-  {{- $mongos_res = .Values.spec.shardTopology.mongos.podResources.resources -}}
-  {{- if and .Values.spec.shardTopology.mongos.podResources.machine (hasKey $machines .Values.spec.shardTopology.mongos.podResources.machine) }}
-    {{- $mongos_res = get (get $machines .Values.spec.shardTopology.mongos.podResources.machine) "resources" }}
-  {{- end }}
-  {{- range .Values.spec.admin.machineProfiles.machines }}
-    {{- if and $.Values.spec.shardTopology.mongos.podResources.machine (eq .id $.Values.spec.shardTopology.mongos.podResources.machine) }}
-      {{- $mongos_res  = dict "requests" .limits "limits" .limits }}
-      {{- $_ := set $profiles "mongos" .id -}}
-    {{- end }}
-  {{- end }}
-{{- else }}
-  {{- $res = .Values.spec.podResources.resources -}}
-  {{- if and .Values.spec.podResources.machine (hasKey $machines .Values.spec.podResources.machine) }}
-    {{- $res = get (get $machines .Values.spec.podResources.machine) "resources" }}
-  {{- end }}
-  {{- range .Values.spec.admin.machineProfiles.machines }}
-    {{- if and $.Values.spec.podResources.machine (eq .id $.Values.spec.podResources.machine) }}
-      {{- $res  = dict "requests" .limits "limits" .limits }}
-      {{- if eq $.Values.spec.mode "Replicaset" -}}
-        {{- $_ := set $profiles "replicaSet" .id -}}
-      {{- end -}}
-      {{- if eq $.Values.spec.mode "Standalone" -}}
-        {{- $_ := set $profiles "standalone" .id -}}
-      {{- end -}}
-    {{- end }}
-  {{- end }}
-{{- end }}
-{{- if .Values.spec.arbiter.enabled }}
-  {{- $arbiter_res = .Values.spec.arbiter.podResources.resources -}}
-  {{- if and .Values.spec.arbiter.podResources.machine (hasKey $machines .Values.spec.arbiter.podResources.machine) }}
-    {{- $arbiter_res = get (get $machines .Values.spec.arbiter.podResources.machine) "resources" }}
-  {{- end }}
-  {{- range .Values.spec.admin.machineProfiles.machines }}
-    {{- if and $.Values.spec.arbiter.podResources.machine (eq .id $.Values.spec.arbiter.podResources.machine) }}
-      {{- $arbiter_res  = dict "requests" .limits "limits" .limits }}
-      {{- $_ := set $profiles "arbiter" .id -}}
-    {{- end }}
-  {{- end }}
-{{- end }}
-{{- if .Values.spec.hidden.enabled }}
-  {{- $hidden_res = .Values.spec.hidden.podResources.resources -}}
-  {{- if and .Values.spec.hidden.podResources.machine (hasKey $machines .Values.spec.hidden.podResources.machine) }}
-    {{- $hidden_res = get (get $machines .Values.spec.hidden.podResources.machine) "resources" }}
-    {{- $_ := set $profiles "hidden" .id -}}
-  {{- end }}
-  {{- range .Values.spec.admin.machineProfiles.machines }}
-    {{- if and $.Values.spec.hidden.podResources.machine (eq .id $.Values.spec.hidden.podResources.machine) }}
-      {{- $hidden_res  = dict "requests" .limits "limits" .limits }}
-    {{- end }}
-  {{- end }}
-{{- end }}
-{{- $init_res := dict "limits" (dict "memory" "512Mi") "requests" (dict "cpu" "200m" "memory" "256Mi") -}}
-{{- $sidecar_res := dict "limits" (dict "memory" "256Mi") "requests" (dict "cpu" "200m" "memory" "256Mi") -}}
+{{- with $ctx := . -}}
+{{- $profiles = include "resource-profiles" $ctx | fromJson -}}
+{{- end -}}
 
 {{- define "common.placement" -}}
 {{- if .Values.spec.admin.clusterTier.placement.default }}
@@ -140,7 +61,7 @@ metadata:
   annotations:
     app.kubernetes.io/cluster-tier: {{ .Values.spec.admin.clusterTier.default }}
     {{- if $profiles }}
-    kubernetes.io/instance-type: {{ printf "'%s'" ($profiles | toJson) }}
+    kubernetes.io/instance-type: {{ printf "'%s'" (include "resource-profiles" . | fromJson | toJson) }}
     {{- end -}}
   {{- if and (eq .Values.spec.backup.tool "KubeStash") (.Values.spec.admin.backup.enable.default) (eq .Values.spec.admin.backup.by "BackupBlueprint") }}
     blueprint.kubestash.com/name: {{ .Values.metadata.resource.kind | lower }}-blueprint
@@ -183,18 +104,18 @@ spec:
           containers:
             - name: mongodb
               resources:
-                {{- toYaml $configServer_res | nindent 16 }}
+                {{- toYaml .configServer_res | nindent 16 }}
               securityContext:
                 {{- include "container.securityContext" . | nindent 16 }}
             - name: replication-mode-detector
               resources:
-                {{- toYaml $sidecar_res | nindent 16 }}
+                {{- toYaml .sidecar_res | nindent 16 }}
               securityContext:
                 {{- include "container.securityContext" . | nindent 16 }}
           initContainers:
             - name: copy-config
               resources:
-                {{- toYaml $init_res | nindent 16 }}
+                {{- toYaml .init_res | nindent 16 }}
               securityContext:
                 {{- include "container.securityContext" . | nindent 16 }}
           {{- include "common.placement" . | nindent 10 }}
@@ -212,13 +133,13 @@ spec:
           containers:
             - name: mongodb
               resources:
-                {{- toYaml $mongos_res | nindent 16 }}
+                {{- toYaml .mongos_res | nindent 16 }}
               securityContext:
                 {{- include "container.securityContext" . | nindent 16 }}
           initContainers:
             - name: copy-config
               resources:
-                {{- toYaml $init_res | nindent 16 }}
+                {{- toYaml .init_res | nindent 16 }}
               securityContext:
                 {{- include "container.securityContext" . | nindent 16 }}
           {{- include "common.placement" . | nindent 10 }}
@@ -232,18 +153,18 @@ spec:
           containers:
             - name: mongodb
               resources:
-                {{- toYaml $shard_res | nindent 16 }}
+                {{- toYaml .shard_res | nindent 16 }}
               securityContext:
                 {{- include "container.securityContext" . | nindent 16 }}
             - name: replication-mode-detector
               resources:
-                {{- toYaml $sidecar_res | nindent 16 }}
+                {{- toYaml .sidecar_res | nindent 16 }}
               securityContext:
                 {{- include "container.securityContext" . | nindent 16 }}
           initContainers:
             - name: copy-config
               resources:
-                {{- toYaml $init_res | nindent 16 }}
+                {{- toYaml .init_res | nindent 16 }}
               securityContext:
                 {{- include "container.securityContext" . | nindent 16 }}
           {{- include "common.placement" . | nindent 10 }}
@@ -260,20 +181,20 @@ spec:
       containers:
         - name: mongodb
           resources:
-            {{- toYaml $res | nindent 12 }}
+            {{- toYaml .res | nindent 12 }}
           securityContext:
             {{- include "container.securityContext" . | nindent 12 }}
           {{- if eq .Values.spec.mode "Replicaset" }}
         - name: replication-mode-detector
           resources:
-            {{- toYaml $sidecar_res | nindent 16 }}
+            {{- toYaml .sidecar_res | nindent 12 }}
           securityContext:
             {{- include "container.securityContext" . | nindent 12 }}
           {{- end }}
       initContainers:
         - name: copy-config
           resources:
-            {{- toYaml $init_res | nindent 12 }}
+            {{- toYaml .init_res | nindent 12 }}
           securityContext:
             {{- include "container.securityContext" . | nindent 12 }}
       {{- include "common.placement" . | nindent 6 }}
@@ -285,13 +206,13 @@ spec:
         containers:
           - name: mongodb
             resources:
-              {{- toYaml $arbiter_res | nindent 14 }}
+              {{- toYaml .arbiter_res | nindent 14 }}
             securityContext:
               {{- include "container.securityContext" . | nindent 14 }}
         initContainers:
           - name: copy-config
             resources:
-              {{- toYaml $init_res | nindent 14 }}
+              {{- toYaml .init_res | nindent 14 }}
             securityContext:
               {{- include "container.securityContext" . | nindent 14 }}
         {{- include "common.placement" . | nindent 8 }}
@@ -304,13 +225,13 @@ spec:
         containers:
           - name: mongodb
             resources:
-              {{- toYaml $hidden_res | nindent 14 }}
+              {{- toYaml .hidden_res | nindent 14 }}
             securityContext:
               {{- include "container.securityContext" . | nindent 14 }}
         initContainers:
           - name: copy-config
             resources:
-              {{- toYaml $init_res | nindent 14 }}
+              {{- toYaml .init_res | nindent 14 }}
             securityContext:
               {{- include "container.securityContext" . | nindent 14 }}
         {{- include "common.placement" . | nindent 8 }}
