@@ -129,23 +129,38 @@ seccompProfile:
 
 {{- define "resource-profiles" -}}
 {{- $machines := .Files.Get "data/machines.yaml" | fromYaml -}}
-{{- $profiles := "" -}}
+{{- $profiles := dict -}}
 {{- $res := dict -}}
-{{- $res = .Values.spec.podResources.resources -}}
-{{- if and .Values.spec.podResources.machine (hasKey $machines .Values.spec.podResources.machine) }}
-  {{- $res = get (get $machines .Values.spec.podResources.machine) "resources" }}
+{{- $secondary_res := dict -}}
+{{- $res = .Values.spec.server.primary.podResources.resources -}}
+{{- if and .Values.spec.server.primary.podResources.machine (hasKey $machines .Values.spec.server.primary.podResources.machine) }}
+  {{- $res = get (get $machines .Values.spec.server.primary.podResources.machine) "resources" }}
 {{- end }}
 {{- range .Values.spec.admin.machineProfiles.machines }}
-  {{- if and $.Values.spec.podResources.machine (eq .id $.Values.spec.podResources.machine) }}
+  {{- if and $.Values.spec.server.primary.podResources.machine (eq .id $.Values.spec.server.primary.podResources.machine) }}
     {{- $res  = dict "requests" .limits "limits" .limits }}
-    {{- $profiles = .id -}}
+    {{- $_ := set $profiles "primary" .id -}}
   {{- end }}
 {{- end }}
+
+{{- if eq .Values.spec.mode "PrimaryAndSecondary" }}
+  {{- $secondary_res = .Values.spec.server.secondary.podResources.resources -}}
+  {{- if and .Values.spec.server.secondary.podResources.machine (hasKey $machines .Values.spec.server.secondary.podResources.machine) }}
+    {{- $secondary_res = get (get $machines .Values.spec.server.secondary.podResources.machine) "resources" }}
+  {{- end }}
+  {{- range .Values.spec.admin.machineProfiles.machines }}
+    {{- if and $.Values.spec.server.secondary.podResources.machine (eq .id $.Values.spec.server.secondary.podResources.machine) }}
+      {{- $secondary_res  = dict "requests" .limits "limits" .limits }}
+      {{- $_ := set $profiles "secondary" .id -}}
+    {{- end }}
+  {{- end }}
+{{- end  }}
 {{- $init_res := dict "limits" (dict "memory" "512Mi") "requests" (dict "cpu" "200m" "memory" "256Mi") -}}
 {{- $sidecar_res := dict "limits" (dict "memory" "256Mi") "requests" (dict "cpu" "200m" "memory" "256Mi") -}}
 
 
 {{- $_ := set . "res" $res -}}
+{{- $_ = set . "secondary_res" $secondary_res -}}
 {{- $_ = set . "init_res" $init_res -}}
 {{- $_ = set . "sidecar_res" $sidecar_res -}}
 

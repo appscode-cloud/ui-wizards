@@ -58,7 +58,7 @@ metadata:
   annotations:
     app.kubernetes.io/cluster-tier: {{ .Values.spec.admin.clusterTier.default }}
     {{- if $profiles }}
-    kubernetes.io/instance-type: {{ printf "%s" (include "resource-profiles" .) }}
+    kubernetes.io/instance-type: {{ printf "'%s'" (include "resource-profiles" . | fromJson | toJson) }}
     {{- end -}}
 {{- if .Values.spec.annotations }}
     {{- include "kubedbcom-ferretdb-editor-options.annotations" . | nindent 4 }}
@@ -83,7 +83,7 @@ spec:
           containers:
             - name: ferretdb
               resources:
-                {{- toYaml res | nindent 16 }}
+                {{- toYaml .res | nindent 16 }}
               securityContext:
                 {{- include "container.securityContext" $ | nindent 16 }}
           {{- include "common.placement" . | nindent 10 }}
@@ -97,7 +97,7 @@ spec:
           containers:
             - name: ferretdb
               resources:
-                {{- toYaml secondary_res | nindent 16 }}
+                {{- toYaml .secondary_res | nindent 16 }}
               securityContext:
                 {{- include "container.securityContext" $ | nindent 16 }}
           {{- include "common.placement" . | nindent 10 }}
