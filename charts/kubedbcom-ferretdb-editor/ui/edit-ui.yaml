@@ -49,7 +49,16 @@ steps:
       schema:
         $ref: discriminator#/properties/autoscalingType
       type: radio
-    - elements:
+    - discriminator:
+        topologyMachines:
+          default: []
+          type: array
+      elements:
+      - fetch: fetchTopologyMachines
+        if: returnFalse
+        schema:
+          $ref: discriminator#/topologyMachines
+        type: input
       - elements:
         - computed: setTrigger|autoscalingKubedbComFerretDBAutoscaler/spec/compute/primary/trigger
           label:
@@ -70,39 +79,50 @@ steps:
           schema:
             $ref: schema#/properties/resources/properties/autoscalingKubedbComFerretDBAutoscaler/properties/spec/properties/compute/properties/primary/properties/resourceDiffPercentage
           type: input
-        - elements:
-          - label:
-              text: cpu
+        - discriminator:
+            allowedMachine-primary-min:
+              type: string
+            allowedMachine-primary-max:
+              type: string
+          elements:
+          - computed: setAllowedMachine|primary|min
+            disableUnselect: true
+            fetch: getMachines|primary|min
+            if: hasAnnotations
+            label:
+              text: Min Allowed Profile
+            onChange: onMachineChange|primary
             schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComFerretDBAutoscaler/properties/spec/properties/compute/properties/primary/properties/minAllowed/properties/cpu
-            type: input
-          - label:
-              text: memory
+              $ref: discriminator#/properties/allowedMachine-primary-min
+            type: select
+          - elements:
+            - label:
+                text: cpu
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComFerretDBAutoscaler/properties/spec/properties/compute/properties/primary/properties/minAllowed/properties/cpu
+              type: input
+            - label:
+                text: memory
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComFerretDBAutoscaler/properties/spec/properties/compute/properties/primary/properties/minAllowed/properties/memory
+              type: input
+            if: hasNoAnnotations
+            label:
+              text: Min Allowed
             schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComFerretDBAutoscaler/properties/spec/properties/compute/properties/primary/properties/minAllowed/properties/memory
-            type: input
-          label:
-            text: Min Allowed
-          schema:
-            $ref: schema#/properties/resources/properties/autoscalingKubedbComFerretDBAutoscaler/properties/spec/properties/compute/properties/primary/properties/minAllowed
-          show_label: true
-          type: single-step-form
-        - elements:
-          - label:
-              text: cpu
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComFerretDBAutoscaler/properties/spec/properties/compute/properties/primary/properties/minAllowed
+            show_label: true
+            type: single-step-form
+          - computed: setAllowedMachine|primary|max
+            disableUnselect: true
+            fetch: getMachines|primary|max
+            if: hasAnnotations
+            label:
+              text: Max Allowed Profile
+            onChange: onMachineChange|primary
             schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComFerretDBAutoscaler/properties/spec/properties/compute/properties/primary/properties/maxAllowed/properties/cpu
-            type: input
-          - label:
-              text: memory
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComFerretDBAutoscaler/properties/spec/properties/compute/properties/primary/properties/maxAllowed/properties/memory
-            type: input
-          label:
-            text: Max Allowed
-          schema:
-            $ref: schema#/properties/resources/properties/autoscalingKubedbComFerretDBAutoscaler/properties/spec/properties/compute/properties/primary/properties/maxAllowed
-          show_label: true
+              $ref: discriminator#/properties/allowedMachine-primary-max
+            type: select
           type: single-step-form
         - fetch: setControlledResources|primary
           label:
@@ -136,39 +156,68 @@ steps:
           schema:
             $ref: schema#/properties/resources/properties/autoscalingKubedbComFerretDBAutoscaler/properties/spec/properties/compute/properties/secondary/properties/resourceDiffPercentage
           type: input
-        - elements:
-          - label:
-              text: cpu
+        - discriminator:
+            allowedMachine-secondary-min:
+              type: string
+            allowedMachine-secondary-max:
+              type: string
+          elements:
+          - computed: setAllowedMachine|secondary|min
+            disableUnselect: true
+            fetch: getMachines|secondary|min
+            if: hasAnnotations
+            label:
+              text: Min Allowed Profile
+            onChange: onMachineChange|secondary
             schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComFerretDBAutoscaler/properties/spec/properties/compute/properties/secondary/properties/minAllowed/properties/cpu
-            type: input
-          - label:
-              text: memory
+              $ref: discriminator#/properties/allowedMachine-secondary-min
+            type: select
+          - elements:
+            - label:
+                text: cpu
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComFerretDBAutoscaler/properties/spec/properties/compute/properties/secondary/properties/minAllowed/properties/cpu
+              type: input
+            - label:
+                text: memory
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComFerretDBAutoscaler/properties/spec/properties/compute/properties/secondary/properties/minAllowed/properties/memory
+              type: input
+            if: hasNoAnnotations
+            label:
+              text: Min Allowed
             schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComFerretDBAutoscaler/properties/spec/properties/compute/properties/secondary/properties/minAllowed/properties/memory
-            type: input
-          label:
-            text: Min Allowed
-          schema:
-            $ref: schema#/properties/resources/properties/autoscalingKubedbComFerretDBAutoscaler/properties/spec/properties/compute/properties/secondary/properties/minAllowed
-          show_label: true
-          type: single-step-form
-        - elements:
-          - label:
-              text: cpu
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComFerretDBAutoscaler/properties/spec/properties/compute/properties/secondary/properties/minAllowed
+            show_label: true
+            type: single-step-form
+          - computed: setAllowedMachine|secondary|max
+            disableUnselect: true
+            fetch: getMachines|secondary|max
+            if: hasAnnotations
+            label:
+              text: Max Allowed Profile
+            onChange: onMachineChange|secondary
             schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComFerretDBAutoscaler/properties/spec/properties/compute/properties/secondary/properties/maxAllowed/properties/cpu
-            type: input
-          - label:
-              text: memory
+              $ref: discriminator#/properties/allowedMachine-secondary-max
+            type: select
+          - elements:
+            - label:
+                text: cpu
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComFerretDBAutoscaler/properties/spec/properties/compute/properties/secondary/properties/maxAllowed/properties/cpu
+              type: input
+            - label:
+                text: memory
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComFerretDBAutoscaler/properties/spec/properties/compute/properties/secondary/properties/maxAllowed/properties/memory
+              type: input
+            if: hasNoAnnotations
+            label:
+              text: Max Allowed
             schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComFerretDBAutoscaler/properties/spec/properties/compute/properties/secondary/properties/maxAllowed/properties/memory
-            type: input
-          label:
-            text: Max Allowed
-          schema:
-            $ref: schema#/properties/resources/properties/autoscalingKubedbComFerretDBAutoscaler/properties/spec/properties/compute/properties/secondary/properties/maxAllowed
-          show_label: true
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComFerretDBAutoscaler/properties/spec/properties/compute/properties/secondary/properties/maxAllowed
+            show_label: true
+            type: single-step-form
           type: single-step-form
         - fetch: setControlledResources|secondary
           label:
@@ -202,6 +251,7 @@ steps:
           schema:
             $ref: schema#/properties/resources/properties/autoscalingKubedbComFerretDBAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/scaleDownDiffPercentage
           type: input
+        if: hasNoAnnotations
         label:
           text: NodeTopology
         schema:

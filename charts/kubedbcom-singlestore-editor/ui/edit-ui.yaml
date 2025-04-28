@@ -182,7 +182,16 @@ steps:
       schema:
         $ref: discriminator#/properties/autoscalingType
       type: radio
-    - elements:
+    - discriminator:
+        topologyMachines:
+          default: []
+          type: array
+      elements:
+      - fetch: fetchTopologyMachines
+        if: returnFalse
+        schema:
+          $ref: discriminator#/topologyMachines
+        type: input
       - elements:
         - computed: setTrigger|autoscalingKubedbComSinglestoreAutoscaler/spec/compute/aggregator/trigger
           label:
@@ -203,39 +212,68 @@ steps:
           schema:
             $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/aggregator/properties/resourceDiffPercentage
           type: input
-        - elements:
-          - label:
-              text: cpu
+        - discriminator:
+            allowedMachine-aggregator-min:
+              type: string
+            allowedMachine-aggregator-max:
+              type: string
+          elements:
+          - computed: setAllowedMachine|aggregator|min
+            disableUnselect: true
+            fetch: getMachines|aggregator|min
+            if: hasAnnotations
+            label:
+              text: Min Allowed Profile
+            onChange: onMachineChange|aggregator
             schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/aggregator/properties/minAllowed/properties/cpu
-            type: input
-          - label:
-              text: memory
+              $ref: discriminator#/properties/allowedMachine-aggregator-min
+            type: select
+          - elements:
+            - label:
+                text: cpu
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/aggregator/properties/minAllowed/properties/cpu
+              type: input
+            - label:
+                text: memory
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/aggregator/properties/minAllowed/properties/memory
+              type: input
+            if: hasNoAnnotations
+            label:
+              text: Min Allowed
             schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/aggregator/properties/minAllowed/properties/memory
-            type: input
-          label:
-            text: Min Allowed
-          schema:
-            $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/aggregator/properties/minAllowed
-          show_label: true
-          type: single-step-form
-        - elements:
-          - label:
-              text: cpu
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/aggregator/properties/minAllowed
+            show_label: true
+            type: single-step-form
+          - computed: setAllowedMachine|aggregator|max
+            disableUnselect: true
+            fetch: getMachines|aggregator|max
+            if: hasAnnotations
+            label:
+              text: Max Allowed Profile
+            onChange: onMachineChange|aggregator
             schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/aggregator/properties/maxAllowed/properties/cpu
-            type: input
-          - label:
-              text: memory
+              $ref: discriminator#/properties/allowedMachine-aggregator-max
+            type: select
+          - elements:
+            - label:
+                text: cpu
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/aggregator/properties/maxAllowed/properties/cpu
+              type: input
+            - label:
+                text: memory
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/aggregator/properties/maxAllowed/properties/memory
+              type: input
+            if: hasNoAnnotations
+            label:
+              text: Max Allowed
             schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/aggregator/properties/maxAllowed/properties/memory
-            type: input
-          label:
-            text: Max Allowed
-          schema:
-            $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/aggregator/properties/maxAllowed
-          show_label: true
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/aggregator/properties/maxAllowed
+            show_label: true
+            type: single-step-form
           type: single-step-form
         - fetch: setControlledResources|aggregator
           label:
@@ -270,39 +308,68 @@ steps:
           schema:
             $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/leaf/properties/resourceDiffPercentage
           type: input
-        - elements:
-          - label:
-              text: cpu
+        - discriminator:
+            allowedMachine-leaf-min:
+              type: string
+            allowedMachine-leaf-max:
+              type: string
+          elements:
+          - computed: setAllowedMachine|leaf|min
+            disableUnselect: true
+            fetch: getMachines|leaf|min
+            if: hasAnnotations
+            label:
+              text: Min Allowed Profile
+            onChange: onMachineChange|leaf
             schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/leaf/properties/minAllowed/properties/cpu
-            type: input
-          - label:
-              text: memory
+              $ref: discriminator#/properties/allowedMachine-leaf-min
+            type: select
+          - elements:
+            - label:
+                text: cpu
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/leaf/properties/minAllowed/properties/cpu
+              type: input
+            - label:
+                text: memory
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/leaf/properties/minAllowed/properties/memory
+              type: input
+            if: hasNoAnnotations
+            label:
+              text: Min Allowed
             schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/leaf/properties/minAllowed/properties/memory
-            type: input
-          label:
-            text: Min Allowed
-          schema:
-            $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/leaf/properties/minAllowed
-          show_label: true
-          type: single-step-form
-        - elements:
-          - label:
-              text: cpu
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/leaf/properties/minAllowed
+            show_label: true
+            type: single-step-form
+          - computed: setAllowedMachine|leaf|max
+            disableUnselect: true
+            fetch: getMachines|leaf|max
+            if: hasAnnotations
+            label:
+              text: Max Allowed Profile
+            onChange: onMachineChange|leaf
             schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/leaf/properties/maxAllowed/properties/cpu
-            type: input
-          - label:
-              text: memory
+              $ref: discriminator#/properties/allowedMachine-leaf-max
+            type: select
+          - elements:
+            - label:
+                text: cpu
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/leaf/properties/maxAllowed/properties/cpu
+              type: input
+            - label:
+                text: memory
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/leaf/properties/maxAllowed/properties/memory
+              type: input
+            if: hasNoAnnotations
+            label:
+              text: Max Allowed
             schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/leaf/properties/maxAllowed/properties/memory
-            type: input
-          label:
-            text: Max Allowed
-          schema:
-            $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/leaf/properties/maxAllowed
-          show_label: true
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/leaf/properties/maxAllowed
+            show_label: true
+            type: single-step-form
           type: single-step-form
         - fetch: setControlledResources|leaf
           label:
@@ -337,39 +404,68 @@ steps:
           schema:
             $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/node/properties/resourceDiffPercentage
           type: input
-        - elements:
-          - label:
-              text: cpu
+        - discriminator:
+            allowedMachine-node-min:
+              type: string
+            allowedMachine-node-max:
+              type: string
+          elements:
+          - computed: setAllowedMachine|node|min
+            disableUnselect: true
+            fetch: getMachines|node|min
+            if: hasAnnotations
+            label:
+              text: Min Allowed Profile
+            onChange: onMachineChange|node
             schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/node/properties/minAllowed/properties/cpu
-            type: input
-          - label:
-              text: memory
+              $ref: discriminator#/properties/allowedMachine-node-min
+            type: select
+          - elements:
+            - label:
+                text: cpu
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/node/properties/minAllowed/properties/cpu
+              type: input
+            - label:
+                text: memory
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/node/properties/minAllowed/properties/memory
+              type: input
+            if: hasNoAnnotations
+            label:
+              text: Min Allowed
             schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/node/properties/minAllowed/properties/memory
-            type: input
-          label:
-            text: Min Allowed
-          schema:
-            $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/node/properties/minAllowed
-          show_label: true
-          type: single-step-form
-        - elements:
-          - label:
-              text: cpu
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/node/properties/minAllowed
+            show_label: true
+            type: single-step-form
+          - computed: setAllowedMachine|node|max
+            disableUnselect: true
+            fetch: getMachines|node|max
+            if: hasAnnotations
+            label:
+              text: Max Allowed Profile
+            onChange: onMachineChange|node
             schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/node/properties/maxAllowed/properties/cpu
-            type: input
-          - label:
-              text: memory
+              $ref: discriminator#/properties/allowedMachine-node-max
+            type: select
+          - elements:
+            - label:
+                text: cpu
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/node/properties/maxAllowed/properties/cpu
+              type: input
+            - label:
+                text: memory
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/node/properties/maxAllowed/properties/memory
+              type: input
+            if: hasNoAnnotations
+            label:
+              text: Max Allowed
             schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/node/properties/maxAllowed/properties/memory
-            type: input
-          label:
-            text: Max Allowed
-          schema:
-            $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/node/properties/maxAllowed
-          show_label: true
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/node/properties/maxAllowed
+            show_label: true
+            type: single-step-form
           type: single-step-form
         - fetch: setControlledResources|node
           label:
@@ -403,6 +499,7 @@ steps:
           schema:
             $ref: schema#/properties/resources/properties/autoscalingKubedbComSinglestoreAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/scaleDownDiffPercentage
           type: input
+        if: hasNoAnnotations
         label:
           text: NodeTopology
         schema:

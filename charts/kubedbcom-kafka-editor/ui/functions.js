@@ -1362,11 +1362,7 @@ function onCustomizeExporterChange({ discriminator, getValue, commit }) {
 }
 
 async function fetchTopologyMachines({ axios, getValue, storeGet, model, setDiscriminatorValue }) {
-  const annotations = getValue(
-    model,
-    '/resources/autoscalingKubedbComKafkaAutoscaler/metadata/annotations',
-  )
-  const instance = annotations['kubernetes.io/instance-type']
+  const instance = hasAnnotations({ model, getValue })
 
   const user = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
@@ -1409,6 +1405,7 @@ function setAllowedMachine({ model, getValue }, type, minmax) {
 }
 
 async function getMachines({ getValue, watchDependency, discriminator }, type, minmax) {
+  watchDependency('discriminator#/topologyMachines')
   const depends = minmax === 'min' ? 'max' : 'min'
   const dependantPath = `/allowedMachine-${type}-${depends}`
 
