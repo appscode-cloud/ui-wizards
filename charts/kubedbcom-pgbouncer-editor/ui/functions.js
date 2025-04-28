@@ -1954,11 +1954,7 @@ function handleUnit({ commit, model, getValue }, path, type = 'bound') {
 }
 
 async function fetchTopologyMachines({ axios, getValue, storeGet, model, setDiscriminatorValue }) {
-  const annotations = getValue(
-    model,
-    '/resources/autoscalingKubedbComMongoDBAutoscaler/metadata/annotations',
-  )
-  const instance = annotations['kubernetes.io/instance-type']
+  const instance = hasAnnotations({ model, getValue })
 
   const user = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
@@ -1977,31 +1973,22 @@ async function fetchTopologyMachines({ axios, getValue, storeGet, model, setDisc
   }
 }
 
-function setAllowedMachine({ model, getValue }, type, minmax) {
+function setAllowedMachine({ model, getValue }, minmax) {
   const annotations = getValue(
     model,
-    '/resources/autoscalingKubedbComMongoDBAutoscaler/metadata/annotations',
+    '/resources/autoscalingKubedbComPgBouncerAutoscaler/metadata/annotations',
   )
   const instance = annotations['kubernetes.io/instance-type']
-  let parsedInstance = {}
-  try {
-    if (instance) parsedInstance = JSON.parse(instance)
-  } catch (e) {
-    console.log(e)
-    parsedInstance = {}
-  }
-
-  const machine = parsedInstance[type] || ''
-  const mx = machine?.includes(',') ? machine.split(',')[1] : ''
-  const mn = machine?.includes(',') ? machine.split(',')[0] : ''
+  const mx = instance?.includes(',') ? instance.split(',')[1] : ''
+  const mn = instance?.includes(',') ? instance.split(',')[0] : ''
 
   if (minmax === 'min') return mn
   else return mx
 }
 
-async function getMachines({ getValue, watchDependency, discriminator }, type, minmax) {
+async function getMachines({ getValue, watchDependency, discriminator }, minmax) {
   const depends = minmax === 'min' ? 'max' : 'min'
-  const dependantPath = `/allowedMachine-${type}-${depends}`
+  const dependantPath = `/allowedMachine-${depends}`
 
   watchDependency(`discriminator#${dependantPath}`)
   const dependantMachine = getValue(discriminator, dependantPath)
@@ -2023,10 +2010,10 @@ async function getMachines({ getValue, watchDependency, discriminator }, type, m
   return dependantIndex === -1 ? machines : filteredMachine
 }
 
-function hasAnnotations({ model, getValue }, type) {
+function hasAnnotations({ model, getValue }) {
   const annotations = getValue(
     model,
-    '/resources/autoscalingKubedbComMongoDBAutoscaler/metadata/annotations',
+    '/resources/autoscalingKubedbComPgBouncerAutoscaler/metadata/annotations',
   )
   const instance = annotations['kubernetes.io/instance-type']
 
@@ -2038,33 +2025,23 @@ function hasNoAnnotations({ model, getValue }) {
 }
 
 function onMachineChange({ model, getValue, discriminator, commit }, type) {
-  const annoPath = '/resources/autoscalingKubedbComMongoDBAutoscaler/metadata/annotations'
+  const annoPath = '/resources/autoscalingKubedbComPgBouncerAutoscaler/metadata/annotations'
   const annotations = getValue(model, annoPath)
   const instance = annotations['kubernetes.io/instance-type']
-  let parsedInstance = {}
-  try {
-    if (instance) parsedInstance = JSON.parse(instance)
-  } catch (e) {
-    console.log(e)
-    parsedInstance = {}
-  }
 
-  const minMachine = getValue(discriminator, `/allowedMachine-${type}-min`)
-  const maxMachine = getValue(discriminator, `/allowedMachine-${type}-max`)
+  const minMachine = getValue(discriminator, '/allowedMachine-min')
+  const maxMachine = getValue(discriminator, '/allowedMachine-max')
   const minMaxMachine = `${minMachine},${maxMachine}`
-
-  parsedInstance[type] = minMaxMachine
-  const instanceString = JSON.stringify(parsedInstance)
-  annotations['kubernetes.io/instance-type'] = instanceString
+  annotations['kubernetes.io/instance-type'] = minMaxMachine
 
   const machines = getValue(discriminator, `/topologyMachines`) || []
   const minMachineObj = machines.find((item) => item.topologyValue === minMachine)
   const maxMachineObj = machines.find((item) => item.topologyValue === maxMachine)
   const minMachineAllocatable = minMachineObj?.allocatable
   const maxMachineAllocatable = maxMachineObj?.allocatable
-  const allowedPath = `/resources/autoscalingKubedbComMongoDBAutoscaler/spec/compute/${type}`
+  const allowedPath = `/resources/autoscalingKubedbComPgBouncerAutoscaler/spec/compute/${type}`
 
-  if (minMachine && maxMachine && instance !== instanceString) {
+  if (minMachine && maxMachine && instance !== minMaxMachine) {
     commit('wizard/model$update', {
       path: `${allowedPath}/maxAllowed`,
       value: maxMachineAllocatable,
