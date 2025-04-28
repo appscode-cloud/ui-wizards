@@ -125,3 +125,68 @@ runAsUser: {{ $.Values.spec.openshift.securityContext.runAsUser | default 999 }}
 seccompProfile:
   type: RuntimeDefault
 {{- end }}
+
+{{- define "resource-profiles" -}}
+{{- $machines := .Files.Get "data/machines.yaml" | fromYaml -}}
+{{- $profiles := dict -}}
+
+{{- $res := dict -}}
+{{- $aggregator_res := dict -}}
+{{- $leaf_res := dict -}}
+
+{{- if eq .Values.spec.mode "Topology" }}
+  {{- $aggregator_res = .Values.spec.topology.aggregator.podResources.resources -}}
+
+  {{- if and .Values.spec.topology.aggregator.podResources.machine (hasKey $machines .Values.spec.topology.aggregator.podResources.machine) }}
+    {{- $aggregator_res = get (get $machines .Values.spec.topology.aggregator.podResources.machine) "resources" }}
+  {{- end }}
+
+  {{- range .Values.spec.admin.machineProfiles.machines }}
+    {{- if and $.Values.spec.topology.aggregator.podResources.machine (eq .id $.Values.spec.topology.aggregator.podResources.machine) }}
+      {{- $aggregator_res = dict "requests" .limits "limits" .limits }}
+      {{- $_ := set $profiles "aggregator" .id }}
+    {{- end }}
+  {{- end }}
+
+
+  {{- $leaf_res = .Values.spec.topology.leaf.podResources.resources -}}
+
+  {{- if and .Values.spec.topology.leaf.podResources.machine (hasKey $machines .Values.spec.topology.leaf.podResources.machine) }}
+    {{- $leaf_res = get (get $machines .Values.spec.topology.leaf.podResources.machine) "resources" }}
+  {{- end }}
+
+  {{- range .Values.spec.admin.machineProfiles.machines }}
+    {{- if and $.Values.spec.topology.leaf.podResources.machine (eq .id $.Values.spec.topology.leaf.podResources.machine) }}
+      {{- $leaf_res = dict "requests" .limits "limits" .limits }}
+      {{- $_ := set $profiles "leaf" .id }}
+    {{- end }}
+  {{- end }}
+
+{{- else }}
+
+  {{- $res = .Values.spec.podResources.resources -}}
+
+  {{- if and .Values.spec.podResources.machine (hasKey $machines .Values.spec.podResources.machine) }}
+    {{- $res = get (get $machines .Values.spec.podResources.machine) "resources" }}
+  {{- end }}
+
+  {{- range .Values.spec.admin.machineProfiles.machines }}
+    {{- if and $.Values.spec.podResources.machine (eq .id $.Values.spec.podResources.machine) }}
+      {{- $res  = dict "requests" .limits "limits" .limits }}
+      {{- $_ := set $profiles "standalone" .id }}
+    {{- end }}
+  {{- end }}
+{{- end }}
+
+{{- $init_res := dict "limits" (dict "memory" "512Mi") "requests" (dict "cpu" "200m" "memory" "256Mi") -}}
+{{- $sidecar_res := dict "limits" (dict "memory" "256Mi") "requests" (dict "cpu" "200m" "memory" "256Mi") -}}
+
+
+{{- $_ := set . "res" $res -}}
+{{- $_ = set . "aggregator_res" $aggregator_res -}}
+{{- $_ = set . "leaf_res" $leaf_res -}}
+{{- $_ = set . "init_res" $init_res -}}
+{{- $_ = set . "sidecar_res" $sidecar_res -}}
+
+{{- $profiles | toJson -}}
+{{- end -}}
