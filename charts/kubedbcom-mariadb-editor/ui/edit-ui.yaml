@@ -939,103 +939,144 @@ steps:
       schema:
         $ref: discriminator#/properties/autoscalingType
       type: radio
-    - elements:
+    - discriminator:
+        topologyMachines:
+          default: []
+          type: array
+      elements:
+      - fetch: fetchTopologyMachines
+        if: returnFalse
+        schema:
+          $ref: discriminator#/topologyMachines
+        type: input    
       - elements:
         - elements:
-          - computed: setTrigger|autoscalingKubedbComMariaDBAutoscaler/spec/compute/mariadb/trigger
-            label:
-              text: Trigger
-            options:
-            - "On"
-            - "Off"
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/compute/properties/mariadb/properties/trigger
-            type: select
-          - label:
-              text: Pod LifeTime Threshold
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/compute/properties/mariadb/properties/podLifeTimeThreshold
-            type: input
-          - label:
-              text: Resource Diff Percentage
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/compute/properties/mariadb/properties/resourceDiffPercentage
-            type: input
           - elements:
-            - label:
-                text: cpu
+            - computed: setTrigger|autoscalingKubedbComMariaDBAutoscaler/spec/compute/mariadb/trigger
+              label:
+                text: Trigger
+              options:
+              - "On"
+              - "Off"
               schema:
-                $ref: schema#/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/compute/properties/mariadb/properties/minAllowed/properties/cpu
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/compute/properties/mariadb/properties/trigger
+              type: select
+            - label:
+                text: Pod LifeTime Threshold
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/compute/properties/mariadb/properties/podLifeTimeThreshold
               type: input
             - label:
-                text: memory
+                text: Resource Diff Percentage
               schema:
-                $ref: schema#/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/compute/properties/mariadb/properties/minAllowed/properties/memory
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/compute/properties/mariadb/properties/resourceDiffPercentage
               type: input
-            label:
-              text: Min Allowed
+            - discriminator:
+                allowedMachine-min:
+                  type: string
+                allowedMachine-max:
+                  type: string
+              elements:
+              - computed: setAllowedMachine|min
+                disableUnselect: true
+                fetch: getMachines|min
+                if: hasAnnotations
+                label:
+                  text: Min Allowed Profile
+                onChange: onMachineChange|mariadb
+                schema:
+                  $ref: discriminator#/properties/allowedMachine-min
+                type: select
+              - elements:
+                - label:
+                    text: cpu
+                  schema:
+                    $ref: schema#/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/compute/properties/mariadb/properties/minAllowed/properties/cpu
+                  type: input
+                - label:
+                    text: memory
+                  schema:
+                    $ref: schema#/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/compute/properties/mariadb/properties/minAllowed/properties/memory
+                  type: input
+                if: hasNoAnnotations
+                label:
+                  text: Min Allowed
+                schema:
+                  $ref: schema#/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/compute/properties/mariadb/properties/minAllowed
+                show_label: true
+                type: single-step-form
+              - computed: setAllowedMachine|max
+                disableUnselect: true
+                fetch: getMachines|max
+                if: hasAnnotations
+                label:
+                  text: Max Allowed Profile
+                onChange: onMachineChange|mariadb
+                schema:
+                  $ref: discriminator#/properties/allowedMachine-max
+                type: select
+              - elements:
+                - label:
+                    text: cpu
+                  schema:
+                    $ref: schema#/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/compute/properties/mariadb/properties/maxAllowed/properties/cpu
+                  type: input
+                - label:
+                    text: memory
+                  schema:
+                    $ref: schema#/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/compute/properties/mariadb/properties/maxAllowed/properties/memory
+                  type: input
+                if: hasNoAnnotations
+                label:
+                  text: Max Allowed
+                schema:
+                  $ref: schema#/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/compute/properties/mariadb/properties/maxAllowed
+                show_label: true
+                type: single-step-form
+              type: single-step-form
+            - fetch: setControlledResources|mariadb
+              label:
+                text: Controlled Resources
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/compute/properties/mariadb/properties/controlledResources
+              type: multiselect
             schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/compute/properties/mariadb/properties/minAllowed
-            show_label: true
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/compute/properties/mariadb
             type: single-step-form
-          - elements:
-            - label:
-                text: cpu
-              schema:
-                $ref: schema#/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/compute/properties/mariadb/properties/maxAllowed/properties/cpu
-              type: input
-            - label:
-                text: memory
-              schema:
-                $ref: schema#/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/compute/properties/mariadb/properties/maxAllowed/properties/memory
-              type: input
-            label:
-              text: Max Allowed
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/compute/properties/mariadb/properties/maxAllowed
-            show_label: true
-            type: single-step-form
-          - fetch: setControlledResources|mariadb
-            label:
-              text: Controlled Resources
-            schema:
-              $ref: schema#/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/compute/properties/mariadb/properties/controlledResources
-            type: multiselect
+          label:
+            text: Mariadb
           schema:
             $ref: schema#/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/compute/properties/mariadb
+          show_label: true
           type: single-step-form
-        label:
-          text: Mariadb
-        schema:
-          $ref: schema#/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/compute/properties/mariadb
-        show_label: true
+        - elements:
+          - fetch: fetchNodeTopology
+            label:
+              text: Select NodeTopology
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/name
+            type: select
+          - if: isNodeTopologySelected
+            label:
+              text: ScaleUp Diff Percentage
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/scaleUpDiffPercentage
+            type: input
+          - if: isNodeTopologySelected
+            label:
+              text: ScaleDown Diff Percentage
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/scaleDownDiffPercentage
+            type: input
+          label:
+            text: NodeTopology
+          schema:
+            $ref: schema#/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/compute/properties/nodeTopology
+          if: hasNoAnnotations
+          show_label: true
+          type: single-step-form
+        if: ifScalingTypeEqualsTo|compute
         type: single-step-form
-      - elements:
-        - fetch: fetchNodeTopology
-          label:
-            text: Select NodeTopology
-          schema:
-            $ref: schema#/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/name
-          type: select
-        - if: isNodeTopologySelected
-          label:
-            text: ScaleUp Diff Percentage
-          schema:
-            $ref: schema#/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/scaleUpDiffPercentage
-          type: input
-        - if: isNodeTopologySelected
-          label:
-            text: ScaleDown Diff Percentage
-          schema:
-            $ref: schema#/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/scaleDownDiffPercentage
-          type: input
-        label:
-          text: NodeTopology
-        schema:
-          $ref: schema#/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/compute/properties/nodeTopology
-        show_label: true
-        type: single-step-form
-      if: ifScalingTypeEqualsTo|compute
       type: single-step-form
     - elements:
       - label:
