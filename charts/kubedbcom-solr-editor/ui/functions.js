@@ -199,15 +199,15 @@ function returnStringYes() {
   return 'yes'
 }
 
-function isDedicatedModeSelected({ model, getValue, watchDependency }) {
+function isTopology({ model, getValue, watchDependency }) {
   watchDependency('model#/resources/kubedbComSolr/spec/topology')
-  isDedicatedSelected = getValue(model, '/resources/kubedbComSolr/spec/topology')
+  const topo = getValue(model, '/resources/kubedbComSolr/spec/topology')
 
-  return !!isDedicatedSelected
+  return !!topo
 }
 
-function isCombinedModeSelected({ model, getValue, watchDependency }) {
-  return !isDedicatedSelected({ model, getValue, watchDependency })
+function isNotTopology({ model, getValue, watchDependency }) {
+  return !isTopology({ model, getValue, watchDependency })
 }
 
 function isDiscriminatorEqualTo(
@@ -627,8 +627,8 @@ function isNotCombinedMode({ discriminator, getValue, watchDependency }) {
 }
 
 function setDatabaseMode({ model, getValue }) {
-  isDedicatedSelected = getValue(model, '/resources/kubedbComSolr/spec/topology')
-  if (isDedicatedSelected) {
+  isTopology = getValue(model, '/resources/kubedbComSolr/spec/topology')
+  if (isTopology) {
     return 'Dedicated'
   } else {
     return 'Combined'
@@ -3113,6 +3113,143 @@ function setMetadata({ storeGet, mode, commit }) {
   }
 }
 
+async function fetchTopologyMachines({ axios, getValue, storeGet, model, setDiscriminatorValue }) {
+  const instance = hasAnnotations({ model, getValue })
+
+  const user = storeGet('/route/params/user')
+  const cluster = storeGet('/route/params/cluster')
+  if (instance) {
+    try {
+      const url = `/clusters/${user}/${cluster}/proxy/node.k8s.appscode.com/v1alpha1/nodetopologies/kubedb-ui-machine-profiles`
+      const resp = await axios.get(url)
+
+      const nodeGroups = resp.data?.spec?.nodeGroups || []
+      setDiscriminatorValue('/topologyMachines', nodeGroups)
+      return nodeGroups
+    } catch (e) {
+      console.log(e)
+      return []
+    }
+  }
+}
+
+function setAllowedMachine({ model, getValue }, type, minmax) {
+  const annoType = type === 'node' ? 'combined' : type
+  const annotations = getValue(
+    model,
+    '/resources/autoscalingKubedbComSolrAutoscaler/metadata/annotations',
+  )
+  const instance = annotations['kubernetes.io/instance-type']
+  let parsedInstance = {}
+  try {
+    if (instance) parsedInstance = JSON.parse(instance)
+  } catch (e) {
+    console.log(e)
+    parsedInstance = {}
+  }
+
+  let machine = ''
+
+  // checkpoint for standalone and replicaset where only one key available
+  if (Object.keys(parsedInstance).length === 1)
+    machine = parsedInstance[Object.keys(parsedInstance)[0]]
+  else machine = parsedInstance[annoType] || ''
+  const mx = machine?.includes(',') ? machine.split(',')[1] : ''
+  const mn = machine?.includes(',') ? machine.split(',')[0] : ''
+
+  if (minmax === 'min') return mn
+  else return mx
+}
+
+async function getMachines({ getValue, watchDependency, discriminator }, type, minmax) {
+  watchDependency('discriminator#/topologyMachines')
+  const depends = minmax === 'min' ? 'max' : 'min'
+  const dependantPath = `/allowedMachine-${type}-${depends}`
+
+  watchDependency(`discriminator#${dependantPath}`)
+  const dependantMachine = getValue(discriminator, dependantPath)
+
+  const nodeGroups = getValue(discriminator, '/topologyMachines') || []
+
+  const dependantIndex = nodeGroups?.findIndex((item) => item.topologyValue === dependantMachine)
+
+  const machines = nodeGroups?.map((item) => {
+    const subText = `CPU: ${item.allocatable.cpu}, Memory: ${item.allocatable.memory}`
+    const text = item.topologyValue
+    return { text, subText, value: item.topologyValue }
+  })
+
+  const filteredMachine = machines?.filter((item, ind) =>
+    minmax === 'min' ? ind <= dependantIndex : ind >= dependantIndex,
+  )
+
+  return dependantIndex === -1 ? machines : filteredMachine
+}
+
+function hasAnnotations({ model, getValue }, type) {
+  const annotations = getValue(
+    model,
+    '/resources/autoscalingKubedbComSolrAutoscaler/metadata/annotations',
+  )
+  const instance = annotations['kubernetes.io/instance-type']
+
+  return !!instance
+}
+
+function hasNoAnnotations({ model, getValue }) {
+  return !hasAnnotations({ model, getValue })
+}
+
+function onMachineChange({ model, getValue, discriminator, commit }, type) {
+  const annoPath = '/resources/autoscalingKubedbComSolrAutoscaler/metadata/annotations'
+  const annoType = type === 'node' ? 'combined' : type
+  const annotations = getValue(model, annoPath)
+  const instance = annotations['kubernetes.io/instance-type']
+  let parsedInstance = {}
+  try {
+    if (instance) parsedInstance = JSON.parse(instance)
+  } catch (e) {
+    console.log(e)
+    parsedInstance = {}
+  }
+
+  const minMachine = getValue(discriminator, `/allowedMachine-${type}-min`)
+  const maxMachine = getValue(discriminator, `/allowedMachine-${type}-max`)
+  const minMaxMachine = `${minMachine},${maxMachine}`
+
+  // checkpoint for standalone and replicaset where only one key available
+  if (Object.keys(parsedInstance).length === 1)
+    parsedInstance[Object.keys(parsedInstance)[0]] = minMaxMachine
+  else parsedInstance[annoType] = minMaxMachine
+  const instanceString = JSON.stringify(parsedInstance)
+  annotations['kubernetes.io/instance-type'] = instanceString
+
+  const machines = getValue(discriminator, `/topologyMachines`) || []
+  const minMachineObj = machines.find((item) => item.topologyValue === minMachine)
+  const maxMachineObj = machines.find((item) => item.topologyValue === maxMachine)
+  const minMachineAllocatable = minMachineObj?.allocatable
+  const maxMachineAllocatable = maxMachineObj?.allocatable
+  const allowedPath = `/resources/autoscalingKubedbComSolrAutoscaler/spec/compute/${type}`
+
+  if (minMachine && maxMachine && instance !== instanceString) {
+    commit('wizard/model$update', {
+      path: `${allowedPath}/maxAllowed`,
+      value: maxMachineAllocatable,
+      force: true,
+    })
+    commit('wizard/model$update', {
+      path: `${allowedPath}/minAllowed`,
+      value: minMachineAllocatable,
+      force: true,
+    })
+    commit('wizard/model$update', {
+      path: annoPath,
+      value: annotations,
+      force: true,
+    })
+  }
+}
+
 return {
   setMetadata,
   handleUnit,
@@ -3159,8 +3296,8 @@ return {
   unNamespacedResourceNames,
   returnTrue,
   returnStringYes,
-  isDedicatedModeSelected,
-  isCombinedModeSelected,
+  isTopology,
+  isNotTopology,
   isDiscriminatorEqualTo,
   isAuthPluginNotSearchGuard,
   showInternalUsersAndRolesMapping,
@@ -3292,4 +3429,10 @@ return {
   setStorageClass,
   isBindingAlreadyOn,
   addOrRemoveBinding,
+  getMachines,
+  setAllowedMachine,
+  hasAnnotations,
+  hasNoAnnotations,
+  fetchTopologyMachines,
+  onMachineChange,
 }
