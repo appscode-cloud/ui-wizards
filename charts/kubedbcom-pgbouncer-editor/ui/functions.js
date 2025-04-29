@@ -1987,6 +1987,7 @@ function setAllowedMachine({ model, getValue }, minmax) {
 }
 
 async function getMachines({ getValue, watchDependency, discriminator }, minmax) {
+  watchDependency('discriminator#/topologyMachines')
   const depends = minmax === 'min' ? 'max' : 'min'
   const dependantPath = `/allowedMachine-${depends}`
 

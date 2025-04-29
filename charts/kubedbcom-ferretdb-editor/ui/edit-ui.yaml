@@ -123,6 +123,24 @@ steps:
             schema:
               $ref: discriminator#/properties/allowedMachine-primary-max
             type: select
+          - elements:
+            - label:
+                text: cpu
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComFerretDBAutoscaler/properties/spec/properties/compute/properties/primary/properties/maxAllowed/properties/cpu
+              type: input
+            - label:
+                text: memory
+              schema:
+                $ref: schema#/properties/resources/properties/autoscalingKubedbComFerretDBAutoscaler/properties/spec/properties/compute/properties/primary/properties/maxAllowed/properties/memory
+              type: input
+            if: hasNoAnnotations
+            label:
+              text: Max Allowed
+            schema:
+              $ref: schema#/properties/resources/properties/autoscalingKubedbComFerretDBAutoscaler/properties/spec/properties/compute/properties/primary/properties/maxAllowed
+            show_label: true
+            type: single-step-form
           type: single-step-form
         - fetch: setControlledResources|primary
           label:
