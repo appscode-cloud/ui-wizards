@@ -68,8 +68,17 @@ spec:
     timeout: 10m
     apply: IfReady
   compute:
-    solr:
+{{- if eq .Values.spec.mode "Topology" }}
+    overseer:
       {{- $commonCompute | toYaml | nindent 6 }}
+    coordinator:
+      {{- $commonCompute | toYaml | nindent 6 }}
+    data:
+      {{- $commonCompute | toYaml | nindent 6 }}
+{{- else }}
+    node:
+      {{- $commonCompute | toYaml | nindent 6 }}
+{{- end }}
 {{- if eq .Values.spec.admin.deployment.default "Dedicated" }}
     nodeTopology:
       name: {{ .Values.spec.admin.clusterTier.nodeTopology.default }}

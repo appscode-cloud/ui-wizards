@@ -148,17 +148,6 @@ seccompProfile:
   {{- end }}
 {{- end }}
 
-{{- $overlords_res = .Values.spec.topology.overlords.podResources.resources -}}
-{{- if and .Values.spec.topology.overlords.podResources.machine (hasKey $machines .Values.spec.topology.overlords.podResources.machine) }}
-  {{- $overlords_res = get (get $machines .Values.spec.topology.overlords.podResources.machine) "resources" }}
-{{- end }}
-{{- range .Values.spec.admin.machineProfiles.machines }}
-  {{- if and $.Values.spec.topology.overlords.podResources.machine (eq .id $.Values.spec.topology.overlords.podResources.machine) }}
-    {{- $overlords_res  = dict "requests" .limits "limits" .limits }}
-    {{- $_ := set $profiles "overlords" .id }}
-  {{- end }}
-{{- end }}
-
 {{- $middleManagers_res = .Values.spec.topology.middleManagers.podResources.resources -}}
 {{- if and .Values.spec.topology.middleManagers.podResources.machine (hasKey $machines .Values.spec.topology.middleManagers.podResources.machine) }}
   {{- $middleManagers_res = get (get $machines .Values.spec.topology.middleManagers.podResources.machine) "resources" }}
@@ -192,27 +181,14 @@ seccompProfile:
   {{- end }}
 {{- end }}
 
-{{- $routers_res = .Values.spec.topology.routers.podResources.resources -}}
-{{- if and .Values.spec.topology.routers.podResources.machine (hasKey $machines .Values.spec.topology.routers.podResources.machine) }}
-  {{- $routers_res = get (get $machines .Values.spec.topology.routers.podResources.machine) "resources" }}
-{{- end }}
-{{- range .Values.spec.admin.machineProfiles.machines }}
-  {{- if and $.Values.spec.topology.routers.podResources.machine (eq .id $.Values.spec.topology.routers.podResources.machine) }}
-    {{- $routers_res  = dict "requests" .limits "limits" .limits }}
-    {{- $_ := set $profiles "routers" .id }}
-  {{- end }}
-{{- end }}
-
 
 {{- $init_res := dict "limits" (dict "memory" "512Mi") "requests" (dict "cpu" "200m" "memory" "256Mi") -}}
 {{- $sidecar_res := dict "limits" (dict "memory" "256Mi") "requests" (dict "cpu" "200m" "memory" "256Mi") -}}
 
 {{- $_ := set . "coordinators_res" $coordinators_res -}}
-{{- $_ := set . "overlords_res" $overlords_res -}}
 {{- $_ := set . "middleManagers_res" $middleManagers_res -}}
 {{- $_ := set . "historicals_res" $historicals_res -}}
 {{- $_ := set . "brokers_res" $brokers_res -}}
-{{- $_ := set . "routers_res" $routers_res -}}
 {{- $_ = set . "init_res" $init_res -}}
 {{- $_ = set . "sidecar_res" $sidecar_res -}}
 

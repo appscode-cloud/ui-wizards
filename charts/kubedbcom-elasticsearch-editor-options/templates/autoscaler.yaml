@@ -80,15 +80,6 @@ spec:
     node:
       {{- $commonCompute | toYaml | nindent 6 }}
 {{- end }}
-      trigger: "Off"
-      podLifeTimeThreshold: 10m
-      resourceDiffPercentage: 20
-      minAllowed:
-        cpu: 400m
-        memory: 400Mi
-      maxAllowed:
-        cpu: 1
-        memory: 2Gi
 {{- if eq .Values.spec.admin.deployment.default "Dedicated" }}
     nodeTopology:
       name: {{ .Values.spec.admin.clusterTier.nodeTopology.default }}

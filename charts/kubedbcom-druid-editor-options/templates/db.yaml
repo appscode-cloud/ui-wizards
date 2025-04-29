@@ -139,36 +139,6 @@ spec:
                 {{- toYaml .init_res | nindent 16 }}
               securityContext:
                 {{- include "container.securityContext" . | nindent 16 }}
-    overlords:
-      replicas: {{ .Values.spec.topology.overlords.replicas }}
-      podTemplate:
-        spec:
-          containers:
-            - name: druid
-              resources:
-              {{- toYaml .overlords_res | nindent 14 }}
-              securityContext:
-                {{- include "container.securityContext" . | nindent 16 }}
-          initContainers:
-            - name: init-druid
-              resources:
-                {{- toYaml .init_res | nindent 16 }}
-              securityContext:
-                {{- include "container.securityContext" . | nindent 16 }}
-    routers:
-      replicas: {{ .Values.spec.topology.routers.replicas }}
-      podTemplate:
-        spec:
-          containers:
-            - name: druid
-              resources:
-              {{- toYaml .routers_res | nindent 14 }}
-          initContainers:
-            - name: init-druid
-              resources:
-                {{- toYaml .init_res | nindent 16 }}
-              securityContext:
-                {{- include "container.securityContext" . | nindent 16 }}
   deepStorage:
     type: {{ .Values.spec.deepStorage.type }}
     configSecret:
