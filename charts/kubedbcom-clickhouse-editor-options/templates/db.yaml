@@ -82,20 +82,6 @@ spec:
       node:
         host: {{ .Values.spec.topology.clickHouseKeeper.host }}
         port: {{ .Values.spec.topology.clickHouseKeeper.port }}
-        podTemplate:
-          spec:
-            containers:
-              - name: clickhouse-keeper
-                resources:
-                    {{- toYaml .clickHouseKeeper_res | nindent 16 }}
-                  securityContext:
-                    {{- include "container.securityContext" . | nindent 16 }}
-            initContainers:
-              - name: clickhouse-keeper-init
-                resources:
-                  {{- toYaml .init_res | nindent 16 }}
-                securityContext:
-                  {{- include "container.securityContext" . | nindent 16 }}
     cluster:
     {{- range .Values.spec.topology.cluster }}
     - name: {{ .name }}
@@ -114,15 +100,15 @@ spec:
           containers:
             - name: clickhouse
               resources:
-                {{- toYaml .cluster_res | nindent 16 }}
+                {{- toYaml $.cluster_res | nindent 16 }}
               securityContext:
-                {{- include "container.securityContext" . | nindent 16 }}
+                {{- include "container.securityContext" $ | nindent 16 }}
           initContainers:
             - name: clickhouse-init
               resources:
-                {{- toYaml .init_res | nindent 16 }}
+                {{- toYaml $.init_res | nindent 16 }}
               securityContext:
-                {{- include "container.securityContext" . | nindent 16 }}
+                {{- include "container.securityContext" $ | nindent 16 }}
           {{- include "common.placement" $ | nindent 10 }}
     {{- end }}
 {{- else }}

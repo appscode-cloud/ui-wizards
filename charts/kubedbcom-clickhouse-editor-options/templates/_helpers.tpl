@@ -138,7 +138,6 @@ seccompProfile:
 {{- $profiles := dict -}}
 
 {{- $res := dict -}}
-{{- $clickHouseKeeper_res := dict -}}
 {{- $cluster_res := list }}
 
 {{- if eq .Values.spec.mode "Topology" }}
@@ -153,19 +152,6 @@ seccompProfile:
     {{- if and $.Values.spec.podResources.machine (eq .id $.Values.spec.podResources.machine) }}
       {{- $cluster_res = dict "requests" .limits "limits" .limits }}
       {{- $_ := set $profiles "cluster" .id }}
-    {{- end }}
-  {{- end }}
-
-  {{- $clickHouseKeeper_res = .Values.spec.topology.clickHouseKeeper.podResources.resources -}}
-
-  {{- if and .Values.spec.topology.clickHouseKeeper.podResources.machine (hasKey $machines .Values.spec.topology.clickHouseKeeper.podResources.machine) }}
-    {{- $clickHouseKeeper_res = get (get $machines .Values.spec.topology.clickHouseKeeper.podResources.machine) "resources" }}
-  {{- end }}
-
-  {{- range .Values.spec.admin.machineProfiles.machines }}
-    {{- if and $.Values.spec.topology.clickHouseKeeper.podResources.machine (eq .id $.Values.spec.topology.clickHouseKeeper.podResources.machine) }}
-      {{- $clickHouseKeeper_res = dict "requests" .limits "limits" .limits }}
-      {{- $_ := set $profiles "clickHouseKeeper" .id }}
     {{- end }}
   {{- end }}
 {{- else }}
@@ -193,8 +179,8 @@ seccompProfile:
 {{- $init_res := dict "limits" (dict "memory" "512Mi") "requests" (dict "cpu" "200m" "memory" "256Mi") -}}
 {{- $sidecar_res := dict "limits" (dict "memory" "256Mi") "requests" (dict "cpu" "200m" "memory" "256Mi") -}}
 
-{{- $_ := set . "cluster_res" $cluster_res -}}
-{{- $_ := set . "clickHouseKeeper_res" $clickHouseKeeper_res -}}
+{{- $_ := set . "res" $res -}}
+{{- $_ = set . "cluster_res" $cluster_res -}}
 {{- $_ = set . "init_res" $init_res -}}
 {{- $_ = set . "sidecar_res" $sidecar_res -}}
 
