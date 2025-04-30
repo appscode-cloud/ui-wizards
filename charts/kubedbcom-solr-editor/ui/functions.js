@@ -3134,7 +3134,6 @@ async function fetchTopologyMachines({ axios, getValue, storeGet, model, setDisc
 }
 
 function setAllowedMachine({ model, getValue }, type, minmax) {
-  const annoType = type === 'node' ? 'combined' : type
   const annotations = getValue(
     model,
     '/resources/autoscalingKubedbComSolrAutoscaler/metadata/annotations',
@@ -3148,12 +3147,7 @@ function setAllowedMachine({ model, getValue }, type, minmax) {
     parsedInstance = {}
   }
 
-  let machine = ''
-
-  // checkpoint for standalone and replicaset where only one key available
-  if (Object.keys(parsedInstance).length === 1)
-    machine = parsedInstance[Object.keys(parsedInstance)[0]]
-  else machine = parsedInstance[annoType] || ''
+  const machine = parsedInstance[type] || ''
   const mx = machine?.includes(',') ? machine.split(',')[1] : ''
   const mn = machine?.includes(',') ? machine.split(',')[0] : ''
 
@@ -3202,7 +3196,6 @@ function hasNoAnnotations({ model, getValue }) {
 
 function onMachineChange({ model, getValue, discriminator, commit }, type) {
   const annoPath = '/resources/autoscalingKubedbComSolrAutoscaler/metadata/annotations'
-  const annoType = type === 'node' ? 'combined' : type
   const annotations = getValue(model, annoPath)
   const instance = annotations['kubernetes.io/instance-type']
   let parsedInstance = {}
@@ -3217,10 +3210,7 @@ function onMachineChange({ model, getValue, discriminator, commit }, type) {
   const maxMachine = getValue(discriminator, `/allowedMachine-${type}-max`)
   const minMaxMachine = `${minMachine},${maxMachine}`
 
-  // checkpoint for standalone and replicaset where only one key available
-  if (Object.keys(parsedInstance).length === 1)
-    parsedInstance[Object.keys(parsedInstance)[0]] = minMaxMachine
-  else parsedInstance[annoType] = minMaxMachine
+  parsedInstance[type] = minMaxMachine
   const instanceString = JSON.stringify(parsedInstance)
   annotations['kubernetes.io/instance-type'] = instanceString
 
