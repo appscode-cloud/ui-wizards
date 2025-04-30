@@ -190,10 +190,10 @@ seccompProfile:
     {{- if and $.Values.spec.podResources.machine (eq .id $.Values.spec.podResources.machine) }}
       {{- $res = dict "requests" .limits "limits" .limits }}
       {{- if eq $.Values.spec.mode "Replicaset" }}
-        {{- $_ := set $profiles "replicaSet" .id }}
+        {{- $_ := set $profiles "node" .id }}
       {{- end }}
       {{- if eq $.Values.spec.mode "Standalone" }}
-        {{- $_ := set $profiles "standalone" .id }}
+        {{- $_ := set $profiles "node" .id }}
       {{- end }}
     {{- end }}
   {{- end }}

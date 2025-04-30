@@ -173,7 +173,7 @@ seccompProfile:
   {{- range .Values.spec.admin.machineProfiles.machines }}
     {{- if and $.Values.spec.podResources.machine (eq .id $.Values.spec.podResources.machine) }}
       {{- $res  = dict "requests" .limits "limits" .limits }}
-      {{- $_ := set $profiles "standalone" .id }}
+      {{- $_ := set $profiles "node" .id }}
     {{- end }}
   {{- end }}
 {{- end }}
