@@ -948,7 +948,7 @@ steps:
         if: returnFalse
         schema:
           $ref: discriminator#/topologyMachines
-        type: input    
+        type: input
       - elements:
         - elements:
           - elements:
@@ -972,9 +972,9 @@ steps:
                 $ref: schema#/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/compute/properties/mariadb/properties/resourceDiffPercentage
               type: input
             - discriminator:
-                allowedMachine-min:
-                  type: string
                 allowedMachine-max:
+                  type: string
+                allowedMachine-min:
                   type: string
               elements:
               - computed: setAllowedMachine|min
@@ -1068,11 +1068,11 @@ steps:
             schema:
               $ref: schema#/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/scaleDownDiffPercentage
             type: input
+          if: hasNoAnnotations
           label:
             text: NodeTopology
           schema:
             $ref: schema#/properties/resources/properties/autoscalingKubedbComMariaDBAutoscaler/properties/spec/properties/compute/properties/nodeTopology
-          if: hasNoAnnotations
           show_label: true
           type: single-step-form
         if: ifScalingTypeEqualsTo|compute
