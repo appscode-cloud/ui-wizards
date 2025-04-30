@@ -3147,12 +3147,7 @@ function setAllowedMachine({ model, getValue }, type, minmax) {
     parsedInstance = {}
   }
 
-  let machine = ''
-
-  // checkpoint for standalone and replicaset where only one key available
-  if (Object.keys(parsedInstance).length === 1)
-    machine = parsedInstance[Object.keys(parsedInstance)[0]]
-  else machine = parsedInstance[type] || ''
+  const machine = parsedInstance[type] || ''
   const mx = machine?.includes(',') ? machine.split(',')[1] : ''
   const mn = machine?.includes(',') ? machine.split(',')[0] : ''
 
@@ -3215,10 +3210,7 @@ function onMachineChange({ model, getValue, discriminator, commit }, type) {
   const maxMachine = getValue(discriminator, `/allowedMachine-${type}-max`)
   const minMaxMachine = `${minMachine},${maxMachine}`
 
-  // checkpoint for standalone and replicaset where only one key available
-  if (Object.keys(parsedInstance).length === 1)
-    parsedInstance[Object.keys(parsedInstance)[0]] = minMaxMachine
-  else parsedInstance[type] = minMaxMachine
+  parsedInstance[type] = minMaxMachine
   const instanceString = JSON.stringify(parsedInstance)
   annotations['kubernetes.io/instance-type'] = instanceString
 
