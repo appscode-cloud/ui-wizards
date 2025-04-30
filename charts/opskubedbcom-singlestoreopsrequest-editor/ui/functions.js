@@ -765,7 +765,7 @@ function onMachineChange({ getValue, discriminator, commit, model }, type, valPa
     obj = Array.isArray(val) ? val[0]?.resources : { ...val }
   }
 
-  const path = `/spec/verticalScaling/${type === 'combined' ? 'node' : type}/resources`
+  const path = `/spec/verticalScaling/${type}/resources`
 
   if (obj && Object.keys(obj).length)
     commit('wizard/model$update', {
