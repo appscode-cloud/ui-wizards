@@ -3265,7 +3265,6 @@ async function fetchTopologyMachines({ axios, getValue, storeGet, model, setDisc
 }
 
 function setAllowedMachine({ model, getValue }, type, minmax) {
-  const annoType = type === 'node' ? 'combined' : type
   const annotations = getValue(
     model,
     '/resources/autoscalingKubedbComElasticsearchAutoscaler/metadata/annotations',
@@ -3279,7 +3278,7 @@ function setAllowedMachine({ model, getValue }, type, minmax) {
     parsedInstance = {}
   }
 
-  const machine = parsedInstance[annoType] || ''
+  const machine = parsedInstance[type] || ''
   const mx = machine?.includes(',') ? machine.split(',')[1] : ''
   const mn = machine?.includes(',') ? machine.split(',')[0] : ''
 
@@ -3328,7 +3327,6 @@ function hasNoAnnotations({ model, getValue }) {
 
 function onMachineChange({ model, getValue, discriminator, commit }, type) {
   const annoPath = '/resources/autoscalingKubedbComElasticsearchAutoscaler/metadata/annotations'
-  const annoType = type === 'node' ? 'combined' : type
   const annotations = getValue(model, annoPath)
   const instance = annotations['kubernetes.io/instance-type']
   let parsedInstance = {}
@@ -3343,7 +3341,7 @@ function onMachineChange({ model, getValue, discriminator, commit }, type) {
   const maxMachine = getValue(discriminator, `/allowedMachine-${type}-max`)
   const minMaxMachine = `${minMachine},${maxMachine}`
 
-  parsedInstance[annoType] = minMaxMachine
+  parsedInstance[type] = minMaxMachine
   const instanceString = JSON.stringify(parsedInstance)
   annotations['kubernetes.io/instance-type'] = instanceString
 
