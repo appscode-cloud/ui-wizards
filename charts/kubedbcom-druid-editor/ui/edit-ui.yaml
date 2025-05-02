@@ -1,6 +1,127 @@
 steps:
 - form:
     discriminator:
+      repoInitialSelectionStatus:
+        type: string
+      scheduleBackup:
+        default: "yes"
+        type: string
+    elements:
+    - computed: initScheduleBackupForEdit
+      if: showScheduleBackup
+      label:
+        text: labels.backup.title
+      onChange: onScheduleBackupChange
+      options:
+      - text: options.yesOrNo.yes.text
+        value: "yes"
+      - text: options.yesOrNo.no.text
+        value: "no"
+      schema:
+        $ref: discriminator#/properties/scheduleBackup
+      type: radio
+    - discriminator:
+        backupType:
+          type: string
+        isBackupDataLoaded:
+          default: false
+          type: boolean
+      elements:
+      - computed: initBackupData
+        if: returnFalse
+        type: input
+      - computed: setBackupType
+        fetch: getTypes
+        hasDescription: true
+        if: isBackupDataLoadedTrue
+        label:
+          text: Select Backup Type
+        onChange: onBackupTypeChange
+        schema:
+          $ref: discriminator#/backupType
+        type: radio
+      - discriminator:
+          backupConfigContext:
+            type: string
+          config:
+            type: string
+          paused:
+            default: false
+            type: boolean
+          schedule:
+            type: string
+        elements:
+        - fetch: getContext
+          label:
+            text: Select Context
+          onChange: onContextChange
+          required: true
+          schema:
+            $ref: discriminator#/backupConfigContext
+          type: select
+        - fetch: getConfigList
+          if: showConfigList
+          label:
+            text: Select BackupConfig
+          onChange: onConfigChange
+          required: true
+          schema:
+            $ref: discriminator#/config
+          type: select
+        - computed: getDefaultSchedule|/resources/coreKubestashComBackupConfiguration/spec/sessions
+          if: showSchedule
+          label:
+            text: Schedule
+          onChange: onInputChangeSchedule|/resources/coreKubestashComBackupConfiguration/spec/sessions|schedule
+          required: true
+          schema:
+            $ref: discriminator#/schedule
+          type: input
+        - if: showPause
+          label:
+            text: Paused
+          schema:
+            $ref: schema#/properties/resources/properties/coreKubestashComBackupConfiguration/properties/spec/properties/paused
+          type: switch
+        if: isBackupType|BackupConfig
+        type: single-step-form
+      - discriminator:
+          blueprintEnabled:
+            default: false
+            type: boolean
+        elements:
+        - computed: setBlueprintSwitch
+          label:
+            text: Enable Backup Blueprint
+          onChange: onBlueprintChange
+          schema:
+            $ref: discriminator#/blueprintEnabled
+          type: switch
+        if: isBackupType|BackupBlueprint
+        type: single-step-form
+      - discriminator:
+          archiverEnabled:
+            default: false
+            type: boolean
+        elements:
+        - computed: setArchiverSwitch
+          label:
+            text: Enable Archiver
+          onChange: onArchiverChange
+          schema:
+            $ref: discriminator#/archiverEnabled
+          type: switch
+        if: isBackupType|Archiver
+        type: single-step-form
+      if: showBackupForm
+      label:
+        text: Backup Form
+      type: single-step-form
+    type: single-step-form
+  id: backupconfiguration
+  title: Backup Configuration
+- form:
+    discriminator:
       dbDetails:
         default: false
         type: boolean
@@ -509,7 +630,7 @@ steps:
       type: single-step-form
     type: single-step-form
   id: compute-autoscaler
-  title: steps.0.label
+  title: Comput
 - form:
     discriminator:
       dbDetails:
@@ -743,7 +864,7 @@ steps:
       type: single-step-form
     type: single-step-form
   id: storage-autoscaler
-  title: steps.1.label
+  title: Storage
 - form:
     discriminator:
       binding:
@@ -993,5 +1114,5 @@ steps:
       type: single-step-form
     type: single-step-form
   id: monitoring
-  title: steps.5.label
+  title: Monitoring
 type: multi-step-form
