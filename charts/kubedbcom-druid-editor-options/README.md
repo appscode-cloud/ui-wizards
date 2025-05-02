@@ -7,8 +7,8 @@
 ```bash
 $ helm repo add appscode https://charts.appscode.com/stable/
 $ helm repo update
-$ helm search repo appscode/kubedbcom-druid-editor-options --version=v0.16.0
-$ helm upgrade -i kubedbcom-druid-editor-options appscode/kubedbcom-druid-editor-options -n kube-system --create-namespace --version=v0.16.0
+$ helm search repo appscode/kubedbcom-druid-editor-options --version=v0.17.0
+$ helm upgrade -i kubedbcom-druid-editor-options appscode/kubedbcom-druid-editor-options -n kube-system --create-namespace --version=v0.17.0
 ```
 
 ## Introduction
@@ -24,7 +24,7 @@ This chart deploys a Druid Editor UI Options on a [Kubernetes](http://kubernetes
 To install/upgrade the chart with the release name `kubedbcom-druid-editor-options`:
 
 ```bash
-$ helm upgrade -i kubedbcom-druid-editor-options appscode/kubedbcom-druid-editor-options -n kube-system --create-namespace --version=v0.16.0
+$ helm upgrade -i kubedbcom-druid-editor-options appscode/kubedbcom-druid-editor-options -n kube-system --create-namespace --version=v0.17.0
 ```
 
 The command deploys a Druid Editor UI Options on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
@@ -74,6 +74,14 @@ The following table lists the configurable parameters of the `kubedbcom-druid-ed
 | spec.topology.coordinators.podResources.machine                               |                                                                                                                                                                           | <code>""</code>                                                                       |
 | spec.topology.coordinators.podResources.resources.requests.cpu                |                                                                                                                                                                           | <code>500m</code>                                                                     |
 | spec.topology.coordinators.podResources.resources.requests.memory             |                                                                                                                                                                           | <code>1Gi</code>                                                                      |
+| spec.topology.overlords.replicas                                              |                                                                                                                                                                           | <code>2</code>                                                                        |
+| spec.topology.overlords.podResources.machine                                  |                                                                                                                                                                           | <code>""</code>                                                                       |
+| spec.topology.overlords.podResources.resources.requests.cpu                   |                                                                                                                                                                           | <code>500m</code>                                                                     |
+| spec.topology.overlords.podResources.resources.requests.memory                |                                                                                                                                                                           | <code>1Gi</code>                                                                      |
+| spec.topology.routers.replicas                                                |                                                                                                                                                                           | <code>2</code>                                                                        |
+| spec.topology.routers.podResources.machine                                    |                                                                                                                                                                           | <code>""</code>                                                                       |
+| spec.topology.routers.podResources.resources.requests.cpu                     |                                                                                                                                                                           | <code>500m</code>                                                                     |
+| spec.topology.routers.podResources.resources.requests.memory                  |                                                                                                                                                                           | <code>1Gi</code>                                                                      |
 | spec.deepStorage.type                                                         | s3;google;azure;hdfs                                                                                                                                                      | <code>s3</code>                                                                       |
 | spec.deepStorage.configSecret                                                 |                                                                                                                                                                           | <code></code>                                                                         |
 | spec.metadataStorage.type                                                     | MySQL;Postgres                                                                                                                                                            | <code>MySQL</code>                                                                    |
@@ -126,6 +134,9 @@ The following table lists the configurable parameters of the `kubedbcom-druid-ed
 | spec.admin.monitoring.exporter.resources                                      |                                                                                                                                                                           | <code>{"limits":{"memory":"256Mi"},"requests":{"cpu":"100m","memory":"128Mi"}}</code> |
 | spec.admin.monitoring.toggle                                                  |                                                                                                                                                                           | <code>true</code>                                                                     |
 | spec.admin.alert.toggle                                                       |                                                                                                                                                                           | <code>true</code>                                                                     |
+| spec.admin.authCredential.customize                                           |                                                                                                                                                                           | <code>true</code>                                                                     |
+| spec.admin.authCredential.referExisting                                       |                                                                                                                                                                           | <code>true</code>                                                                     |
+| spec.admin.customConfiguration                                                |                                                                                                                                                                           | <code>true</code>                                                                     |
 | spec.admin.deletionPolicy.default                                             |                                                                                                                                                                           | <code>WipeOut</code>                                                                  |
 | spec.admin.deletionPolicy.toggle                                              |                                                                                                                                                                           | <code>true</code>                                                                     |
 | spec.admin.backup.enable.default                                              |                                                                                                                                                                           | <code>true</code>                                                                     |
@@ -205,12 +216,12 @@ The following table lists the configurable parameters of the `kubedbcom-druid-ed
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm upgrade -i`. For example:
 
 ```bash
-$ helm upgrade -i kubedbcom-druid-editor-options appscode/kubedbcom-druid-editor-options -n kube-system --create-namespace --version=v0.16.0 --set metadata.resource.group=kubedb.com
+$ helm upgrade -i kubedbcom-druid-editor-options appscode/kubedbcom-druid-editor-options -n kube-system --create-namespace --version=v0.17.0 --set metadata.resource.group=kubedb.com
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
 installing the chart. For example:
 
 ```bash
-$ helm upgrade -i kubedbcom-druid-editor-options appscode/kubedbcom-druid-editor-options -n kube-system --create-namespace --version=v0.16.0 --values values.yaml
+$ helm upgrade -i kubedbcom-druid-editor-options appscode/kubedbcom-druid-editor-options -n kube-system --create-namespace --version=v0.17.0 --values values.yaml
 ```
