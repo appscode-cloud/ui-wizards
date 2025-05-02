@@ -7,8 +7,8 @@
 ```bash
 $ helm repo add appscode https://charts.appscode.com/stable/
 $ helm repo update
-$ helm search repo appscode/kubedbcom-ferretdb-editor-options --version=v0.16.0
-$ helm upgrade -i kubedbcom-ferretdb-editor-options appscode/kubedbcom-ferretdb-editor-options -n kube-system --create-namespace --version=v0.16.0
+$ helm search repo appscode/kubedbcom-ferretdb-editor-options --version=v0.17.0
+$ helm upgrade -i kubedbcom-ferretdb-editor-options appscode/kubedbcom-ferretdb-editor-options -n kube-system --create-namespace --version=v0.17.0
 ```
 
 ## Introduction
@@ -24,7 +24,7 @@ This chart deploys a FerretDB Editor UI Options on a [Kubernetes](http://kuberne
 To install/upgrade the chart with the release name `kubedbcom-ferretdb-editor-options`:
 
 ```bash
-$ helm upgrade -i kubedbcom-ferretdb-editor-options appscode/kubedbcom-ferretdb-editor-options -n kube-system --create-namespace --version=v0.16.0
+$ helm upgrade -i kubedbcom-ferretdb-editor-options appscode/kubedbcom-ferretdb-editor-options -n kube-system --create-namespace --version=v0.17.0
 ```
 
 The command deploys a FerretDB Editor UI Options on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
@@ -108,7 +108,10 @@ The following table lists the configurable parameters of the `kubedbcom-ferretdb
 | spec.admin.monitoring.agent                                                   | Name of monitoring agent (one of "prometheus.io", "prometheus.io/operator", "prometheus.io/builtin")                                                                      | <code>prometheus.io/operator</code>                                                   |
 | spec.admin.monitoring.exporter.resources                                      |                                                                                                                                                                           | <code>{"limits":{"memory":"256Mi"},"requests":{"cpu":"100m","memory":"128Mi"}}</code> |
 | spec.admin.monitoring.toggle                                                  |                                                                                                                                                                           | <code>true</code>                                                                     |
-| spec.admin.alerts.toggle                                                      |                                                                                                                                                                           | <code>false</code>                                                                    |
+| spec.admin.alert.toggle                                                       |                                                                                                                                                                           | <code>false</code>                                                                    |
+| spec.admin.authCredential.customize                                           |                                                                                                                                                                           | <code>true</code>                                                                     |
+| spec.admin.authCredential.referExisting                                       |                                                                                                                                                                           | <code>true</code>                                                                     |
+| spec.admin.customConfiguration                                                |                                                                                                                                                                           | <code>true</code>                                                                     |
 | spec.admin.deletionPolicy.default                                             |                                                                                                                                                                           | <code>WipeOut</code>                                                                  |
 | spec.admin.deletionPolicy.toggle                                              |                                                                                                                                                                           | <code>true</code>                                                                     |
 | spec.admin.backup.enable.default                                              |                                                                                                                                                                           | <code>false</code>                                                                    |
@@ -244,12 +247,12 @@ The following table lists the configurable parameters of the `kubedbcom-ferretdb
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm upgrade -i`. For example:
 
 ```bash
-$ helm upgrade -i kubedbcom-ferretdb-editor-options appscode/kubedbcom-ferretdb-editor-options -n kube-system --create-namespace --version=v0.16.0 --set metadata.resource.group=kubedb.com
+$ helm upgrade -i kubedbcom-ferretdb-editor-options appscode/kubedbcom-ferretdb-editor-options -n kube-system --create-namespace --version=v0.17.0 --set metadata.resource.group=kubedb.com
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
 installing the chart. For example:
 
 ```bash
-$ helm upgrade -i kubedbcom-ferretdb-editor-options appscode/kubedbcom-ferretdb-editor-options -n kube-system --create-namespace --version=v0.16.0 --values values.yaml
+$ helm upgrade -i kubedbcom-ferretdb-editor-options appscode/kubedbcom-ferretdb-editor-options -n kube-system --create-namespace --version=v0.17.0 --values values.yaml
 ```
