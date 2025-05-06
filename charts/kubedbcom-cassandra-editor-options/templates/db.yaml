@@ -1,0 +1,181 @@
+{{- $profiles := "" -}}
+{{- with $ctx := . -}}
+{{- $profiles = include "resource-profiles" $ctx | fromJson -}}
+{{- end -}}
+
+{{- define "common.placement" -}}
+
+{{- if .Values.spec.admin.clusterTier.placement.default }}
+podPlacementPolicy:
+  name: {{ .Values.spec.admin.clusterTier.placement.default }}
+{{- end }}
+
+nodeSelector:
+  kubernetes.io/os: linux
+{{- if .Values.spec.admin.nodeSelector }}
+{{- toYaml .Values.spec.admin.nodeSelector | nindent 2 }}
+{{- end }}
+{{- if eq .Values.spec.admin.deployment.default "Dedicated" }}
+  app: cassandras.kubedb.com
+  instance: {{ include "kubedbcom-cassandra-editor-options.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  nodepool: {{ .Values.spec.admin.clusterTier.nodeTopology.default }}
+{{- end }}
+
+{{- if or .Values.spec.admin.tolerations (eq .Values.spec.admin.deployment.default "Dedicated") }}
+tolerations:
+{{- if .Values.spec.admin.tolerations }}
+{{- toYaml .Values.spec.admin.tolerations | nindent 2 }}
+{{- end }}
+{{- if eq .Values.spec.admin.deployment.default "Dedicated" }}
+  - key: app
+    operator: "Equal"
+    value: "cassandras.kubedb.com"
+    effect: "NoSchedule"
+  - key: instance
+    operator: "Equal"
+    value: {{ include "kubedbcom-cassandra-editor-options.fullname" . }}
+    effect: "NoSchedule"
+  - key: namespace
+    operator: "Equal"
+    value: {{ .Release.Namespace }}
+    effect: "NoSchedule"
+  - key: nodepool
+    operator: "Equal"
+    value: {{ .Values.spec.admin.clusterTier.nodeTopology.default }}
+    effect: "NoSchedule"
+{{- end }}
+{{- end }}
+{{- end }}
+
+apiVersion: kubedb.com/v1alpha2
+kind: Cassandra
+metadata:
+  name: {{ include "kubedbcom-cassandra-editor-options.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kubedbcom-cassandra-editor-options.labels" . | nindent 4 }}
+{{- if .Values.spec.admin.archiver.enable.default }}
+    kubedb.com/archiver: "true"
+    kubedb.com/archiving-via: {{ .Values.spec.admin.archiver.via }}
+{{- end }}
+  annotations:
+    app.kubernetes.io/cluster-tier: {{ .Values.spec.admin.clusterTier.default }}
+    {{- if $profiles }}
+    kubernetes.io/instance-type: {{ printf "%s" (include "resource-profiles" .) }}
+    {{- end -}}
+  {{- if and (eq .Values.spec.backup.tool "KubeStash") (.Values.spec.admin.backup.enable.default) (eq .Values.spec.admin.backup.by "BackupBlueprint") }}
+    blueprint.kubestash.com/name: {{ .Values.metadata.resource.kind | lower }}-blueprint
+    blueprint.kubestash.com/namespace: kubedb
+  {{- end }}
+{{- if .Values.spec.annotations }}
+    {{- include "kubedbcom-cassandra-editor-options.annotations" . | nindent 4 }}
+{{- end }}
+spec:
+  version: {{ .Values.spec.admin.databases.Cassandra.versions.default | quote }}
+{{- if .Values.spec.authSecret.name }}
+  authSecret:
+    name: {{ .Values.spec.authSecret.name }}
+{{- end }}
+{{- if eq .Values.spec.mode "Topology" }}
+  topology:
+    rack:
+      {{- range .Values.spec.topology.racks }}
+      - name: {{ . | quote }}
+        replicas: {{ $.Values.spec.replicas }}
+        storage:
+          accessModes:
+          - ReadWriteOnce
+          resources:
+            requests:
+              storage: {{ $.Values.spec.persistence.size }}
+          storageClassName: {{ $.Values.spec.admin.storageClasses.default }}
+        storageType: Durable
+        podTemplate:
+          spec:
+            securityContext:
+              fsGroup: {{ $.Values.spec.openshift.securityContext.runAsUser | default 999 }}
+            containers:
+              - name: cassandra
+                resources:
+                  {{- toYaml $.res | nindent 18 }}
+                securityContext:
+                  {{- include "container.securityContext" $ | nindent 18 }}
+            initContainers:
+              - name: cassandra-init
+                resources:
+                  {{- toYaml $.init_res | nindent 18 }}
+                securityContext:
+                  {{- include "container.securityContext" $ | nindent 18 }}
+            {{- include "common.placement" $ | nindent 12 }}
+      {{- end }}
+{{- else }}
+  replicas: 1
+  storage:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: {{ .Values.spec.persistence.size }}
+    storageClassName: {{ .Values.spec.admin.storageClasses.default }}
+  storageType: Durable
+  podTemplate:
+    spec:
+      securityContext:
+        fsGroup: {{ .Values.spec.openshift.securityContext.runAsUser | default 999 }}
+      containers:
+        - name: cassandra
+          resources:
+            {{- toYaml .res | nindent 12 }}
+          securityContext:
+            {{- include "container.securityContext" . | nindent 12 }}
+      initContainers:
+        - name: cassandra-init
+          resources:
+            {{- toYaml .init_res | nindent 12 }}
+          securityContext:
+            {{- include "container.securityContext" . | nindent 12 }}
+      {{- include "common.placement" . | nindent 6 }}
+{{- end }}
+  deletionPolicy: {{ .Values.spec.deletionPolicy }}
+{{- if .Values.spec.authSecret.name }}
+  authSecret:
+    name: {{ .Values.spec.authSecret.name }}
+{{- end }}
+{{- if .Values.spec.authSecret.password }}
+  authSecret:
+    name: {{ include "kubedbcom-cassandra-editor-options.fullname" . }}-auth
+{{- end }}
+{{- if .Values.spec.configuration }}
+  configSecret:
+    name: {{ include "kubedbcom-cassandra-editor-options.fullname" . }}-config
+{{- end }}
+{{- if .Values.spec.admin.tls.default }}
+  tls:
+    issuerRef:
+      apiGroup: "cert-manager.io"
+      kind: ClusterIssuer
+      name: {{ .Values.spec.admin.clusterIssuers.default }}
+  requireSSL: true
+{{- end }}
+{{- if (and .Values.spec.admin.monitoring .Values.spec.admin.monitoring.agent) }}
+  monitor:
+    agent: {{ .Values.spec.admin.monitoring.agent }}
+    prometheus:
+    {{- with .Values.spec.admin.monitoring.exporter }}
+      exporter:
+        resources:
+          {{- toYaml .resources | nindent 10 }}
+        securityContext:
+          {{- include "container.securityContext" $ | nindent 10 }}
+    {{- end }}
+      serviceMonitor:
+        interval: 30s
+        labels:
+          {{- toYaml .Values.spec.monitoring.serviceMonitor.labels | nindent 10 }}
+{{- end }}
+{{- if (and .Values.spec.init .Values.spec.init.archiver .Values.spec.init.archiver.recoveryTimestamp) }}
+  init:
+    archiver:
+      {{- toYaml .Values.spec.init.archiver | nindent 6 }}
+{{- end }}
