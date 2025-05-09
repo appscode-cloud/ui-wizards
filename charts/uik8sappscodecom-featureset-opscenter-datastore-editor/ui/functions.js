@@ -397,6 +397,7 @@ function isKubedbSelected({ getValue, discriminator, watchDependency, commit, st
 }
 
 let allAvailableTypes = [
+  'Cassandra',
   'ClickHouse',
   'Druid',
   'Elasticsearch',
