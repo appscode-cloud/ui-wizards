@@ -80,10 +80,6 @@ spec:
             {{- toYaml .res | nindent 12 }}
           securityContext:
             {{- include "container.securityContext" $ | nindent 12 }}
-      initContainers:
-        - name: pgbouncer-init
-          securityContext:
-            {{- include "container.securityContext" . | nindent 12 }}
       {{- include "common.placement" . | nindent 6 }}
   database:
     {{- toYaml .Values.spec.database | nindent 4 }}
