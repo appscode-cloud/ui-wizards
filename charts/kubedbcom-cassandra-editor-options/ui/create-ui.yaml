@@ -27,7 +27,7 @@ steps:
         $ref: schema#/properties/spec/properties/mode
       type: radio
     - label:
-        text: labels.cluster.replicas
+        text: labels.replicaset.number
       schema:
         $ref: schema#/properties/spec/properties/replicas
       type: input
@@ -66,15 +66,18 @@ steps:
       - element:
           label:
             isSubsection: true
-            text: racks
+            text: Racks
           schema:
             $ref: schema#/properties/spec/properties/topology/properties/racks/items
           type: input
         label:
-          text: racks
+          text: Racks
         schema:
           $ref: schema#/properties/spec/properties/topology/properties/racks
-        type: list-input-form      
+        type: list-input-form
+      label:
+        text: Topology
+      show_label: true
       if : isEqualToModelPathValue|Topology|/spec/mode
       type: single-step-form
     - fetch: getAdminOptions|storageClasses
