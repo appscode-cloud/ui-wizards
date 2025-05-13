@@ -1171,7 +1171,7 @@ async function checkHostnameOrIP({ commit, model, getValue }) {
   if (tls && expose) {
     if (hostName) {
       commit('wizard/model$update', {
-        path: '/spec/hostname',
+        path: '/spec/hostName',
         value: hostName,
         force: true,
       })
@@ -1184,7 +1184,7 @@ async function checkHostnameOrIP({ commit, model, getValue }) {
     }
   } else {
     commit('wizard/model$update', {
-      path: '/spec/hostname',
+      path: '/spec/hostName',
       value: '',
       force: true,
     })
