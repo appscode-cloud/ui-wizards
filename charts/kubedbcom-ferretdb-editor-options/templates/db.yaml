@@ -121,9 +121,8 @@ spec:
       apiGroup: "cert-manager.io"
       kind: ClusterIssuer
       name: {{ .Values.spec.admin.clusterIssuers.default }}
-  sslMode: requireSSL
   {{- if .Values.spec.admin.expose.default }}
-  certificates:
+    certificates:
     - alias: server
       {{- if .Values.spec.hostname }}
       dnsNames:
@@ -133,6 +132,7 @@ spec:
         - {{ .Values.spec.ip }}
       {{- end }}
   {{- end }}
+  sslMode: requireSSL
 {{- end }}
 {{- if (and .Values.spec.admin.monitoring .Values.spec.admin.monitoring.agent) }}
   monitor:
