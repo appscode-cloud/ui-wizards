@@ -874,19 +874,30 @@ function onArchiverChange({ model, getValue, commit }) {
 
   const stClass = getValue(model, '/spec/admin/storageClasses/default')
   const found = archiverMap.find((item) => item.storageClass === stClass)
+  const via = getValue(model, '/spec/admin/archiver/via')
 
-  if (isArchiverOn && found?.annotation)
-    commit('wizard/model$update', {
-      path: '/spec/archiverName',
-      value: found.annotation,
-      force: true,
-    })
-  else
+  if (!isArchiverOn) {
     commit('wizard/model$update', {
       path: '/spec/archiverName',
       value: '',
       force: true,
     })
+  } else {
+    if (via === 'VolumeSnapshotter') {
+      commit('wizard/model$update', {
+        path: '/spec/archiverName',
+        value: found.annotation,
+        force: true,
+      })
+    } else {
+      const kind = getValue(model, '/metadata/resource/kind')
+      commit('wizard/model$update', {
+        path: '/spec/archiverName',
+        value: kind.toLowerCase(),
+        force: true,
+      })
+    }
+  }
 }
 
 function showArchiverAlert({ watchDependency, model, getValue, commit }) {
@@ -896,28 +907,22 @@ function showArchiverAlert({ watchDependency, model, getValue, commit }) {
   if (mode === 'Standalone') return false
 
   const via = getValue(model, '/spec/admin/archiver/via')
-  const stClass = getValue(model, '/spec/admin/storageClasses/default')
-  const found = archiverMap.find((item) => item.storageClass === stClass)
-  const show = !found?.annotation
 
   if (via === 'VolumeSnapshotter') {
     // toggle archiver to false when storageClass annotation not found
-    if (show)
+    const stClass = getValue(model, '/spec/admin/storageClasses/default')
+    const found = archiverMap.find((item) => item.storageClass === stClass)
+    const show = !found?.annotation
+    if (show) {
       commit('wizard/model$update', {
         path: '/spec/admin/archiver/enable/default',
         value: false,
         force: true,
       })
-    else onArchiverChange({ model, getValue, commit })
-  } else {
-    const kind = getValue(model, '/metadata/resource/kind')
-    commit('wizard/model$update', {
-      path: '/spec/archiverName',
-      value: kind.toLowerCase(),
-      force: true,
-    })
-  }
-  return show
+      return true
+    } else onArchiverChange({ model, getValue, commit })
+  } else onArchiverChange({ model, getValue, commit })
+  return false
 }
 
 function checkIfFeatureOn({ getValue, model }, type) {
