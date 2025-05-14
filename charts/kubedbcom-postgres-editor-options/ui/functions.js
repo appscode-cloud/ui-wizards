@@ -1060,7 +1060,8 @@ function showArchiverAlert({ watchDependency, model, getValue, commit }) {
 
   const stClass = getValue(model, '/spec/admin/storageClasses/default')
   const found = archiverMap.find((item) => item.storageClass === stClass)
-  const show = !found?.annotation
+  const via = getValue(model, '/spec/admin/archiver/via')
+  const show = !found?.annotation && via === 'VolumeSnapshotter'
 
   // toggle archiver to false when storageClass annotation not found
   if (show)
