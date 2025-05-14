@@ -895,20 +895,28 @@ function showArchiverAlert({ watchDependency, model, getValue, commit }) {
   const mode = getValue(model, '/spec/mode')
   if (mode === 'Standalone') return false
 
+  const via = getValue(model, '/spec/admin/archiver/via')
   const stClass = getValue(model, '/spec/admin/storageClasses/default')
   const found = archiverMap.find((item) => item.storageClass === stClass)
-  const via = getValue(model, '/spec/admin/archiver/via')
-  const show = !found?.annotation && via === 'VolumeSnapshotter'
+  const show = !found?.annotation
 
-  // toggle archiver to false when storageClass annotation not found
-  if (show)
+  if (via === 'VolumeSnapshotter') {
+    // toggle archiver to false when storageClass annotation not found
+    if (show)
+      commit('wizard/model$update', {
+        path: '/spec/admin/archiver/enable/default',
+        value: false,
+        force: true,
+      })
+    else onArchiverChange({ model, getValue, commit })
+  } else {
+    const kind = getValue(model, '/metadata/resource/kind')
     commit('wizard/model$update', {
-      path: '/spec/admin/archiver/enable/default',
-      value: false,
+      path: '/spec/archiverName',
+      value: kind.toLowerCase(),
       force: true,
     })
-  else onArchiverChange({ model, getValue, commit })
-
+  }
   return show
 }
 
