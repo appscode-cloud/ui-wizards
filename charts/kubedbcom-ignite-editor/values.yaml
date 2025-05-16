@@ -1,0 +1,285 @@
+metadata:
+  resource:
+    group: kubedb.com
+    version: v1alpha2
+    name: ignites
+    kind: Ignite
+    scope: Namespaced
+  release:
+    name: RELEASE-NAME
+    namespace: default
+resources:
+  certManagerIoIssuer_ca: # +doc-gen:break
+    apiVersion: cert-manager.io/v1
+    kind: Issuer
+    metadata:
+      name: ignite-ca
+      namespace: demo
+    spec:
+      ca:
+        secretName: ignite-ca
+  coreKubestashComBackupBlueprint: # +doc-gen:break
+    apiVersion: core.kubestash.com/v1alpha1
+    kind: BackupBlueprint
+    metadata:
+      name: ignite
+      namespace: demo
+    spec:
+      backupConfigurationTemplate:
+        backends:
+          - name: ignite-backend
+            retentionPolicy:
+              name: ignite-retention-policy
+              namespace: demo
+            storageRef:
+              name: ignite-storage
+              namespace: demo
+        sessions:
+          - addon:
+              jobTemplate:
+                spec:
+                  containerSecurityContext:
+                    allowPrivilegeEscalation: false
+                    capabilities:
+                      drop:
+                        - ALL
+                    runAsGroup: 0
+                    runAsNonRoot: true
+                    runAsUser: 70
+                    seccompProfile:
+                      type: RuntimeDefault
+                  nodeSelector:
+                    kubernetes.io/os: linux
+              name: ignite-addon
+              tasks:
+                - name: logical-backup
+            name: ignite-frequent-backup
+            repositories:
+              - backend: ignite-backend
+                directory: /mongo-repo
+                encryptionSecret:
+                  name: ignite-encryption-secret
+                  namespace: demo
+                name: ignite-repo
+            scheduler:
+              failedJobsHistoryLimit: 4
+              jobTemplate:
+                backoffLimit: 2
+                template:
+                  spec:
+                    containerSecurityContext:
+                      allowPrivilegeEscalation: false
+                      capabilities:
+                        drop:
+                          - ALL
+                      runAsGroup: 0
+                      runAsNonRoot: true
+                      runAsUser: 70
+                      seccompProfile:
+                        type: RuntimeDefault
+                    nodeSelector:
+                      kubernetes.io/os: linux
+              schedule: 0 */2 * * *
+              successfulJobsHistoryLimit: 2
+            sessionHistoryLimit: 3
+      usagePolicy:
+        allowedNamespaces:
+          from: Same
+  coreKubestashComBackupConfiguration: # +doc-gen:break
+    apiVersion: core.kubestash.com/v1alpha1
+    kind: BackupConfiguration
+    metadata:
+      name: ignite
+      namespace: demo
+    spec:
+      backends:
+        - name: ignite-backend
+          retentionPolicy:
+            name: ignite-retention-policy
+            namespace: demo
+          storageRef:
+            name: ignite-storage
+            namespace: demo
+      sessions:
+        - addon:
+            jobTemplate:
+              spec:
+                containerSecurityContext:
+                  allowPrivilegeEscalation: false
+                  capabilities:
+                    drop:
+                      - ALL
+                  runAsGroup: 0
+                  runAsNonRoot: true
+                  runAsUser: 70
+                  seccompProfile:
+                    type: RuntimeDefault
+                nodeSelector:
+                  kubernetes.io/os: linux
+            name: ignite-addon
+            tasks:
+              - name: logical-backup
+          name: ignite-frequent-backup
+          repositories:
+            - backend: ignite-backend
+              directory: /mongo-repo
+              encryptionSecret:
+                name: ignite-encryption-secret
+                namespace: demo
+              name: ignite-repo
+          scheduler:
+            failedJobsHistoryLimit: 4
+            jobTemplate:
+              backoffLimit: 2
+              template:
+                spec:
+                  containerSecurityContext:
+                    allowPrivilegeEscalation: false
+                    capabilities:
+                      drop:
+                        - ALL
+                    runAsGroup: 0
+                    runAsNonRoot: true
+                    runAsUser: 70
+                    seccompProfile:
+                      type: RuntimeDefault
+                  nodeSelector:
+                    kubernetes.io/os: linux
+            schedule: 0 */2 * * *
+            successfulJobsHistoryLimit: 2
+          sessionHistoryLimit: 3
+      target:
+        apiGroup: kubedb.com
+        kind: Ignite
+        name: ignite
+        namespace: demo
+  coreKubestashComRestoreSession: # +doc-gen:break
+    apiVersion: core.kubestash.com/v1alpha1
+    kind: RestoreSession
+    metadata:
+      name: ignite
+      namespace: demo
+    spec:
+      addon:
+        containerRuntimeSettings:
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            runAsGroup: 0
+            runAsNonRoot: true
+            runAsUser: 70
+            seccompProfile:
+              type: RuntimeDefault
+        jobTemplate:
+          spec:
+            nodeSelector:
+              kubernetes.io/os: linux
+            securityContext:
+              runAsGroup: 0
+              runAsUser: 70
+        name: ignite-addon
+        tasks:
+          - name: logical-backup-restore
+      dataSource:
+        encryptionSecret:
+          name: ignite-encryption-secret
+          namespace: demo
+        repository: ignite-repo
+        snapshot: latest
+      target:
+        apiGroup: kubedb.com
+        kind: Ignite
+        name: ignite
+        namespace: demo
+  kubedbComIgnite: # +doc-gen:break
+    apiVersion: kubedb.com/v1alpha2
+    kind: Ignite
+    metadata:
+      name: ignite
+      namespace: ignite
+    spec:
+      deletionPolicy: Halt
+      podTemplate:
+        spec:
+          containers:
+            - name: ignite
+              resources:
+                requests:
+                  cpu: 700m
+                  memory: 1200Mi
+          nodeSelector:
+            app: kubedb
+            component: ignite-database
+            instance: ignite
+          tolerations:
+            - effect: NoSchedule
+              key: app
+              operator: Equal
+              value: kubedb
+            - effect: NoSchedule
+              key: instance
+              operator: Equal
+              value: ignite
+            - effect: NoSchedule
+              key: component
+              operator: Equal
+              value: ignite-database
+            - effect: NoSchedule
+              key: nodepool_type
+              operator: Equal
+              value: n2-standard-2
+      replicas: 3
+      serviceTemplates:
+        - alias: primary
+          spec:
+            type: LoadBalancer
+      storage:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 100Mi
+      version: 3.8.3
+  monitoringCoreosComServiceMonitor: # +doc-gen:break
+    apiVersion: monitoring.coreos.com/v1
+    kind: ServiceMonitor
+    metadata:
+      name: ignite
+      namespace: demo
+    spec:
+      endpoints:
+        - honorLabels: true
+          interval: 30s
+          path: /metrics
+          port: metrics
+      namespaceSelector:
+        matchNames:
+          - demo
+      selector:
+        matchLabels:
+          app.kubernetes.io/instance: ignite
+          app.kubernetes.io/name: ignites.kubedb.com
+  secret_auth: # +doc-gen:break
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: ignite-auth
+      namespace: demo
+    stringData:
+      password: thisIs1StrongPassword
+      username: root
+    type: Opaque
+  secret_config: # +doc-gen:break
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: ignite-config
+      namespace: demo
+    stringData:
+      ignite.cnf: |
+        [mysqld]
+        max_connections = 200
+        read_buffer_size = 1048576
+    type: Opaque
