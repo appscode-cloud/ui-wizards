@@ -1246,6 +1246,58 @@ function isVerticalScaleTopologyRequired(
   }
 }
 
+function checkVolume({ model, discriminator, getValue }) {
+  const volume = getValue(discriminator, '/dbDetails/spec/storage/resources/requests/storage')
+  const input = getValue(model, '/spec/volumeExpansion/replicaSet')
+
+  try {
+    const sizeInBytes = parseSize(volume)
+    const inputSizeInBytes = parseSize(input)
+    console.log(sizeInBytes)
+
+    if (inputSizeInBytes >= sizeInBytes) return true
+    else return 'Cannot expand to lower volume!'
+  } catch (err) {
+    return err.message || 'Invalid'
+  }
+}
+
+function parseSize(sizeStr) {
+  const units = {
+    '': 1,
+    B: 1,
+    K: 1e3,
+    KB: 1e3,
+    M: 1e6,
+    MB: 1e6,
+    G: 1e9,
+    GB: 1e9,
+    T: 1e12,
+    TB: 1e12,
+    KI: 1024,
+    KIB: 1024,
+    MI: 1024 ** 2,
+    MIB: 1024 ** 2,
+    GI: 1024 ** 3,
+    GIB: 1024 ** 3,
+    TI: 1024 ** 4,
+    TIB: 1024 ** 4,
+  }
+
+  const match = String(sizeStr)
+    .toUpperCase()
+    .trim()
+    .match(/^([\d.]+)\s*([A-Z]+)?B?$/)
+  if (!match) throw new Error(`Invalid size format: ${sizeStr}`)
+
+  const value = parseFloat(match[1])
+  const unit = (match[2] || '').toUpperCase()
+
+  if (!(unit in units)) throw new Error(`Unrecognized unit: ${unit}`)
+
+  return value * units[unit]
+}
+
 return {
   isRancherManaged,
   fetchJsons,
@@ -1301,4 +1353,5 @@ return {
   setMachine,
   onMachineChange,
   isMachineCustom,
+  checkVolume,
 }
