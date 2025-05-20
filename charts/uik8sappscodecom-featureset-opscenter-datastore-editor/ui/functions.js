@@ -402,6 +402,7 @@ let allAvailableTypes = [
   'Druid',
   'Elasticsearch',
   'FerretDB',
+  'Ignite',
   'Kafka',
   'MariaDB',
   'Memcached',
