@@ -476,7 +476,7 @@ steps:
         label:
           text: labels.standalone
         customValidation:
-          regex: checkVolume
+          regex: checkVolume|/spec/storage/resources/requests/storage|/spec/volumeExpansion/standalone
         schema:
           $ref: schema#/properties/spec/properties/volumeExpansion/properties/standalone
         type: input
@@ -496,7 +496,7 @@ steps:
         label:
           text: labels.replicaSet
         customValidation:
-          regex: checkVolume
+          regex: checkVolume|/spec/storage/resources/requests/storage|/spec/volumeExpansion/replicaSet
         schema:
           $ref: schema#/properties/spec/properties/volumeExpansion/properties/replicaSet
         type: input
@@ -504,12 +504,16 @@ steps:
         - computed: setValueFromDbDetails|/spec/shardTopology/configServer/storage/resources/requests/storage
           label:
             text: labels.configServer
+          customValidation:
+            regex: checkVolume|/spec/shardTopology/configServer/storage/resources/requests/storage|/spec/volumeExpansion/configServer
           schema:
             $ref: schema#/properties/spec/properties/volumeExpansion/properties/configServer
           type: input
         - computed: setValueFromDbDetails|/spec/shardTopology/shard/storage/resources/requests/storage
           label:
             text: labels.shard
+          customValidation:
+            regex: checkVolume|/spec/shardTopology/shard/storage/resources/requests/storage|/spec/volumeExpansion/shard
           schema:
             $ref: schema#/properties/spec/properties/volumeExpansion/properties/shard
           type: input
