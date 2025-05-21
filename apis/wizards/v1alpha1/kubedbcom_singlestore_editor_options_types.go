@@ -46,7 +46,7 @@ type KubedbcomSinglestoreEditorOptionsSpecSpec struct {
 	Annotations map[string]string `json:"annotations"`
 	// +optional
 	Labels         map[string]string   `json:"labels"`
-	Mode           SinglestoreMode     `json:"mode"`
+	Mode           DoubleMode          `json:"mode"`
 	Topology       SinglestoreTopology `json:"topology"`
 	LicenseSecret  LicenseSecret       `json:"licenseSecret"`
 	Persistence    Persistence         `json:"persistence"`
@@ -60,9 +60,6 @@ type KubedbcomSinglestoreEditorOptionsSpecSpec struct {
 	// +optional
 	Openshift Openshift `json:"openshift"`
 }
-
-// +kubebuilder:validation:Enum=Standalone;Topology
-type SinglestoreMode string
 
 type SinglestoreTopology struct {
 	Aggregator *SinglestoreNode `json:"aggregator"`

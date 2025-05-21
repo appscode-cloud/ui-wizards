@@ -54,6 +54,9 @@ type Archiver struct {
 // +kubebuilder:validation:Enum=Standalone;Replicaset
 type GeneralMode string
 
+// +kubebuilder:validation:Enum=Standalone;Topology
+type DoubleMode string
+
 type AuthSecret struct {
 	// +optional
 	Name string `json:"name"`

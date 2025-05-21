@@ -1,0 +1,56 @@
+{{- if and (eq .Values.spec.backup.tool "KubeStash") (.Values.spec.admin.backup.enable.default) (eq .Values.spec.admin.backup.by "BackupConfiguration") -}}
+
+apiVersion: core.kubestash.com/v1alpha1
+kind: BackupConfiguration
+metadata:
+  name: {{ include "kubedbcom-cassandra-editor-options.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kubedbcom-cassandra-editor-options.labels" . | nindent 4 }}
+spec:
+  target:
+    apiGroup: kubedb.com
+    kind: Cassandra
+    name: {{ include "kubedbcom-cassandra-editor-options.fullname" . }}
+    namespace: {{ .Release.Namespace }}
+  backends:
+    - name: default-backend
+      storageRef:
+        name: {{ .Values.spec.backup.kubestash.storageRef.name }}
+        namespace: {{ .Values.spec.backup.kubestash.storageRef.namespace }}
+      retentionPolicy:
+        name: {{ .Values.spec.backup.kubestash.retentionPolicy.name }}
+        namespace: {{ .Values.spec.backup.kubestash.retentionPolicy.namespace }}
+  sessions:
+    - name: full-backup
+      sessionHistoryLimit: 3
+      scheduler:
+        schedule: {{ .Values.spec.backup.kubestash.schedule | quote }}
+        jobTemplate:
+          template:
+            spec:
+              containerSecurityContext:
+                {{- include "container.securityContext" . | nindent 16 }}
+              nodeSelector:
+                kubernetes.io/os: linux
+          backoffLimit: 2
+        successfulJobsHistoryLimit: 2
+        failedJobsHistoryLimit: 4
+      repositories:
+        - name: {{ include "kubedbcom-cassandra-editor-options.fullname" . }}
+          backend: default-backend
+          directory: {{ .Release.Namespace }}/{{ include "kubedbcom-cassandra-editor-options.fullname" . }}
+          encryptionSecret:
+            name: {{ .Values.spec.backup.kubestash.encryptionSecret.name }}
+            namespace: {{ .Values.spec.backup.kubestash.encryptionSecret.namespace }}
+      addon:
+        name: cassandra-addon
+        tasks:
+          - name: logical-backup
+        jobTemplate:
+          spec:
+            containerSecurityContext:
+              {{- include "container.securityContext" . | nindent 14 }}
+            nodeSelector:
+              kubernetes.io/os: linux
+{{- end }}

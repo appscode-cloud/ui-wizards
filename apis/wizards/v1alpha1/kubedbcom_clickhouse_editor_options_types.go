@@ -44,7 +44,7 @@ type KubedbcomClickhouseEditorOptionsSpecSpec struct {
 	Annotations map[string]string `json:"annotations"`
 	// +optional
 	Labels         map[string]string  `json:"labels"`
-	Mode           ClickHouseMode     `json:"mode"`
+	Mode           DoubleMode         `json:"mode"`
 	Topology       ClickHouseTopology `json:"topology"`
 	Persistence    Persistence        `json:"persistence"`
 	PodResources   PodResources       `json:"podResources"`
@@ -57,9 +57,6 @@ type KubedbcomClickhouseEditorOptionsSpecSpec struct {
 	// +optional
 	Openshift Openshift `json:"openshift"`
 }
-
-// +kubebuilder:validation:Enum=Standalone;Topology
-type ClickHouseMode string
 
 type ClickHouseTopology struct {
 	Cluster          []ClickHouseClusterSpec `json:"cluster"`
