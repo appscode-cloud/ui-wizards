@@ -122,7 +122,7 @@ spec:
             {{- toYaml .res | nindent 12 }}
           securityContext:
             {{- include "container.securityContext" . | nindent 12 }}
-          {{- if eq .Values.spec.mode "GroupReplication" }}
+          {{- if ne .Values.spec.mode "Standalone" }}
         - name: mysql-coordinator
           resources:
             {{- toYaml .sidecar_res | nindent 12 }}

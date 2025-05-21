@@ -45,16 +45,20 @@ type KubedbcomFerretdbEditorOptionsSpecSpec struct {
 	// +optional
 	Annotations map[string]string `json:"annotations"`
 	// +optional
-	Labels         map[string]string  `json:"labels"`
-	Mode           FerretDBMode       `json:"mode"`
-	Server         FerretDBServer     `json:"server"`
-	Persistence    Persistence        `json:"persistence"`
-	AuthSecret     AuthSecret         `json:"authSecret"`
-	DeletionPolicy DeletionPolicy     `json:"deletionPolicy"`
-	Configuration  string             `json:"configuration"`
-	Admin          AdminOptions       `json:"admin"`
-	Backup         BackupToolSpec     `json:"backup"`
-	Monitoring     MonitoringOperator `json:"monitoring"`
+	Labels         map[string]string `json:"labels"`
+	Mode           FerretDBMode      `json:"mode"`
+	Server         FerretDBServer    `json:"server"`
+	Persistence    Persistence       `json:"persistence"`
+	AuthSecret     AuthSecret        `json:"authSecret"`
+	DeletionPolicy DeletionPolicy    `json:"deletionPolicy"`
+	Configuration  string            `json:"configuration"`
+	// +optional
+	HostName string `json:"hostName"`
+	// +optional
+	IP         string             `json:"ip"`
+	Admin      AdminOptions       `json:"admin"`
+	Backup     BackupToolSpec     `json:"backup"`
+	Monitoring MonitoringOperator `json:"monitoring"`
 	// +optional
 	Openshift Openshift `json:"openshift"`
 }

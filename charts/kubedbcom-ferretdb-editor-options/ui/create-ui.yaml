@@ -296,9 +296,11 @@ steps:
         if: isToggleOn|monitoring
         type: single-step-form
       - elements:
-        - if: isToggleOn|tls
+        - computed: checkHostnameOrIP
+          if: isToggleOn|tls
           label:
             text: Enable TLS?
+          onChange: checkHostnameOrIP
           schema:
             $ref: schema#/properties/spec/properties/admin/properties/tls/properties/default
           type: switch
@@ -312,8 +314,10 @@ steps:
           type: select
         type: single-step-form
       - elements:
-        - label:
+        - computed: checkHostnameOrIP
+          label:
             text: Expose via Gateway?
+          onChange: checkHostnameOrIP
           schema:
             $ref: schema#/properties/spec/properties/admin/properties/expose/properties/default
           type: switch

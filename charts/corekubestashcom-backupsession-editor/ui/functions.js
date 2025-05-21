@@ -16,7 +16,7 @@ async function init({ storeGet, axios, setDiscriminatorValue, commit }) {
 
     backups = items
     items.forEach((ele) => {
-      if (ele.spec?.target.name === name && ele.spec?.target.namespace === namespace) {
+      if (ele.spec?.target?.name === name && ele.spec?.target?.namespace === namespace) {
         const tx = `${ele.metadata.namespace}/${ele.metadata.name}`
         options.push({ text: tx, value: ele.metadata.name })
       }

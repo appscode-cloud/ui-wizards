@@ -634,6 +634,8 @@ let clusterIssuers = []
 let nodetopologiesShared = []
 let nodetopologiesDedicated = []
 let features = []
+let hostName = ''
+let ip = ''
 async function initBundle({ commit, model, getValue, axios, storeGet, setDiscriminatorValue }) {
   const owner = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
@@ -642,6 +644,7 @@ async function initBundle({ commit, model, getValue, axios, storeGet, setDiscrim
   let db = getValue(model, '/metadata/resource/kind')
   db = db.toLowerCase()
   let url = `clusters/${owner}/${cluster}/db-bundle?type=features,common,versions&db-singular=${db}`
+  const gatewayinfosurl = `/clusters/${owner}/${cluster}/proxy/meta.k8s.appscode.com/v1alpha1/gatewayinfos/${namespace}`
   const annotationUrl = `clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}`
 
   try {
@@ -665,6 +668,9 @@ async function initBundle({ commit, model, getValue, axios, storeGet, setDiscrim
         force: true,
       })
     }
+    const gatewayinfosResp = await axios.get(gatewayinfosurl)
+    hostName = gatewayinfosResp.data?.spec?.hostName
+    ip = gatewayinfosResp.data?.spec?.ip
   } catch (e) {
     console.log(e)
   }
@@ -1159,7 +1165,39 @@ function onReferSecretChange({ commit }) {
   })
 }
 
+async function checkHostnameOrIP({ commit, model, getValue }) {
+  const tls = getValue(model, '/spec/admin/tls/default')
+  const expose = getValue(model, '/spec/admin/expose/default')
+  if (tls && expose) {
+    if (hostName) {
+      commit('wizard/model$update', {
+        path: '/spec/hostName',
+        value: hostName,
+        force: true,
+      })
+    } else {
+      commit('wizard/model$update', {
+        path: '/spec/ip',
+        value: ip,
+        force: true,
+      })
+    }
+  } else {
+    commit('wizard/model$update', {
+      path: '/spec/hostName',
+      value: '',
+      force: true,
+    })
+    commit('wizard/model$update', {
+      path: '/spec/ip',
+      value: '',
+      force: true,
+    })
+  }
+}
+
 return {
+  checkHostnameOrIP,
   showReferSecretSwitch,
   onReferSecretChange,
   getDefaultValue,
