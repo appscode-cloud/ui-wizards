@@ -1,54 +1,5 @@
+apiVersion: core.kubestash.com/v1alpha1
+kind: BackupConfiguration
 metadata:
-  resource:
-    group: core.kubestash.com
-    version: v1alpha1
-    name: backupconfigurations
-    kind: BackupConfiguration
-    scope: Namespaced
-  release:
-    name: RELEASE-NAME
-    namespace: default
-resources:
-  coreKubestashComBackupConfiguration: # +doc-gen:break
-    apiVersion: core.kubestash.com/v1alpha1
-    kind: BackupConfiguration
-    metadata:
-      name: backup-app
-      namespace: demo
-    spec:
-      backends:
-        - name: default-backend
-          retentionPolicy:
-            name: keep-1wk
-            namespace: stash
-          storageRef:
-            name: default
-            namespace: stash
-      sessions:
-        - addon:
-            name: mysql-addon
-            tasks:
-              - name: logical-backup
-          name: full-backup
-          repositories:
-            - backend: default-backend
-              directory: demo/backup-app
-              encryptionSecret:
-                name: default-encryption-secret
-                namespace: stash
-              name: backup-app
-          scheduler:
-            jobTemplate:
-              backoffLimit: 1
-              template:
-                controller: {}
-                metadata: {}
-                spec:
-                  resources: {}
-            schedule: '*/30 * * * *'
-          sessionHistoryLimit: 2
-      target:
-        apiGroup: kubedb.com
-        kind: MySQL
-        name: backup-app
-        namespace: demo
+  name: backupconfiguration
+  namespace: default

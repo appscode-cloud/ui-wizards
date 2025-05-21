@@ -1,37 +1,5 @@
+apiVersion: core.kubestash.com/v1alpha1
+kind: RestoreSession
 metadata:
-  resource:
-    group: core.kubestash.com
-    version: v1alpha1
-    name: restoresessions
-    kind: RestoreSession
-    scope: Namespaced
-  release:
-    name: RELEASE-NAME
-    namespace: default
-resources:
-  coreKubestashComRestoreSession: # +doc-gen:break
-    apiVersion: core.kubestash.com/v1alpha1
-    kind: RestoreSession
-    metadata:
-      name: restore-app
-      namespace: demo
-    spec:
-      addon:
-        jobTemplate:
-          spec:
-            securityContext:
-              runAsUser: 1001880000
-        name: mongodb-addon
-        tasks:
-          - name: logical-backup-restore
-      dataSource:
-        encryptionSecret:
-          name: encrypt-secret
-          namespace: demo
-        repository: full-repo
-        snapshot: full-repo-mg-backup-full-mongo-1723451040
-      target:
-        apiGroup: kubedb.com
-        kind: MongoDB
-        name: app
-        namespace: demo
+  name: restoresession
+  namespace: default
