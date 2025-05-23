@@ -98,9 +98,11 @@ type ClusterTierProfile struct {
 
 type DatabaseProfiles struct {
 	ClickHouse    *DatabaseProfile `json:"ClickHouse,omitempty"`
+	Cassandra     *DatabaseProfile `json:"Cassandra,omitempty"`
 	Druid         *DatabaseProfile `json:"Druid,omitempty"`
 	Elasticsearch *DatabaseProfile `json:"Elasticsearch,omitempty"`
 	FerretDB      *DatabaseProfile `json:"FerretDB,omitempty"`
+	Ignite        *DatabaseProfile `json:"Ignite,omitempty"`
 	Kafka         *DatabaseProfile `json:"Kafka,omitempty"`
 	MariaDB       *DatabaseProfile `json:"MariaDB,omitempty"`
 	Memcached     *DatabaseProfile `json:"Memcached,omitempty"`
