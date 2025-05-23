@@ -1246,6 +1246,50 @@ function isVerticalScaleTopologyRequired(
   }
 }
 
+function checkVolume({ model, discriminator, getValue }, initpath, path) {
+  const volume = getValue(discriminator, `/dbDetails${initpath}`)
+  const input = getValue(model, path)
+
+  try {
+    const sizeInBytes = parseSize(volume)
+    const inputSizeInBytes = parseSize(input)
+
+    if (inputSizeInBytes >= sizeInBytes) return true
+    else return 'Cannot expand to lower volume!'
+  } catch (err) {
+    return err.message || 'Invalid'
+  }
+}
+
+function parseSize(sizeStr) {
+  const units = {
+    '': 1,
+    K: 1e3,
+    M: 1e6,
+    G: 1e9,
+    T: 1e12,
+    P: 1e15,
+    E: 1e18,
+    Ki: 1024,
+    Mi: 1024 ** 2,
+    Gi: 1024 ** 3,
+    Ti: 1024 ** 4,
+    Pi: 1024 ** 5,
+    Ei: 1024 ** 6,
+  }
+
+  const match = String(sizeStr).match(/^([0-9]+(?:\.[0-9]*)?)\s*([A-Za-z]*)$/)
+  if (!match) throw new Error('Invalid size format')
+
+  const value = parseFloat(match[1])
+  const unit = match[2]
+
+  if (!(unit in units))
+    throw new Error('Unrecognized unit. Available units are K, Ki, M, Mi, G, Gi etc')
+
+  return value * units[unit]
+}
+
 return {
   isRancherManaged,
   fetchJsons,
@@ -1301,4 +1345,5 @@ return {
   setMachine,
   onMachineChange,
   isMachineCustom,
+  checkVolume,
 }
