@@ -938,6 +938,11 @@ func (in *DatabaseProfiles) DeepCopyInto(out *DatabaseProfiles) {
 		*out = new(DatabaseProfile)
 		(*in).DeepCopyInto(*out)
 	}
+	if in.Cassandra != nil {
+		in, out := &in.Cassandra, &out.Cassandra
+		*out = new(DatabaseProfile)
+		(*in).DeepCopyInto(*out)
+	}
 	if in.Druid != nil {
 		in, out := &in.Druid, &out.Druid
 		*out = new(DatabaseProfile)
@@ -950,6 +955,11 @@ func (in *DatabaseProfiles) DeepCopyInto(out *DatabaseProfiles) {
 	}
 	if in.FerretDB != nil {
 		in, out := &in.FerretDB, &out.FerretDB
+		*out = new(DatabaseProfile)
+		(*in).DeepCopyInto(*out)
+	}
+	if in.Ignite != nil {
+		in, out := &in.Ignite, &out.Ignite
 		*out = new(DatabaseProfile)
 		(*in).DeepCopyInto(*out)
 	}
