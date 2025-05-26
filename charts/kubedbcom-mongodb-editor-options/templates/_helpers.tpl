@@ -115,18 +115,30 @@ Alert Enabled
 {{- end }}
 
 {{- define "container.securityContext" -}}
+{{- $version := .Values.spec.admin.databases.MongoDB.versions.default }}
 allowPrivilegeEscalation: false
 capabilities:
   drop:
   - ALL
 runAsGroup: 0
-runAsNonRoot: true
+{{- if hasPrefix "percona-" $version }}
+runAsUser: 1001
+{{- else }}
 runAsUser: {{ $.Values.spec.openshift.securityContext.runAsUser | default 999 }}
+{{- end }}
+runAsNonRoot: true
 seccompProfile:
   type: RuntimeDefault
 {{- end }}
 
 
+{{- define "container.fsGroup" -}}
+{{- if hasPrefix "percona-" .Values.spec.admin.databases.MongoDB.versions.default }}
+fsGroup: {{ .Values.spec.openshift.securityContext.runAsUser | default 1001 }}
+{{- else }}
+fsGroup: {{ .Values.spec.openshift.securityContext.runAsUser | default 999 }}
+{{- end }}
+{{- end }}
 
 
 

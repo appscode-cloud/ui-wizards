@@ -100,7 +100,7 @@ spec:
       podTemplate:
         spec:
           securityContext:
-            fsGroup: {{ .Values.spec.openshift.securityContext.runAsUser | default 999 }}
+            {{- include "container.fsGroup" . | nindent 12 }}
           containers:
             - name: mongodb
               resources:
@@ -129,7 +129,7 @@ spec:
       podTemplate:
         spec:
           securityContext:
-            fsGroup: {{ .Values.spec.openshift.securityContext.runAsUser | default 999 }}
+            {{- include "container.fsGroup" . | nindent 12 }}
           containers:
             - name: mongodb
               resources:
@@ -149,7 +149,7 @@ spec:
       podTemplate:
         spec:
           securityContext:
-            fsGroup: {{ .Values.spec.openshift.securityContext.runAsUser | default 999 }}
+            {{- include "container.fsGroup" . | nindent 12 }}
           containers:
             - name: mongodb
               resources:
@@ -177,7 +177,7 @@ spec:
   podTemplate:
     spec:
       securityContext:
-        fsGroup: {{ .Values.spec.openshift.securityContext.runAsUser | default 999 }}
+        {{- include "container.fsGroup" . | nindent 8 }}
       containers:
         - name: mongodb
           resources:
