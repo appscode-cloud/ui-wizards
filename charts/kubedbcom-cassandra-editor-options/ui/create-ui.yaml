@@ -64,16 +64,20 @@ steps:
       type: single-step-form
     - elements:
       - element:
+          validationRuleObject:
+            regex: ^[A-Za-z][A-Za-z0-9]*$
+            errorText: The value must start with a letter and contain only letters and numbers
           label:
             isSubsection: true
-            text: Racks
+            text: Rack names
           schema:
             $ref: schema#/properties/spec/properties/topology/properties/racks/items
           type: input
         label:
-          text: Racks
+          text: Rack name
         schema:
           $ref: schema#/properties/spec/properties/topology/properties/racks
+        required: true
         type: list-input-form
       if: isEqualToModelPathValue|Topology|/spec/mode
       label:
