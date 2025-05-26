@@ -25,7 +25,7 @@ spec:
     rules:
     {{ if (include "kubedbcom-cassandra-editor.alertEnabled" (list $.Values.form.alert.enabled .enabled .rules.cassandraDown.enabled .rules.cassandraDown.severity)) -}}
     - alert: CassandraDown
-      expr: (count(up{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} == 0) OR vector(0) ) > {{.rules.cassandraDown.val}}
+      expr: (count(up{job="{{ $app }}-stats",namespace="{{ $.Release.Namespace }}"} == 0) OR vector(0) ) > {{.rules.cassandraDown.duration}}
       for: {{ .rules.cassandraDown.duration }}
       labels:
         severity: {{ .rules.cassandraDown.severity }}
