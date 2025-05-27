@@ -1451,6 +1451,80 @@ function setMiliSeconds({ model, getValue, commit }) {
   }
 }
 
+function isTlsOn({ getValue, model, watchDependency }) {
+  watchDependency('model#/spec/admin/tls/default')
+  const tls = getValue(model, '/spec/admin/tls/default')
+  return tls
+}
+
+function isHorizonsOn({ getValue, discriminator, watchDependency }) {
+  watchDependency('discriminator#/enableHorizons')
+  const horizon = getValue(discriminator, '/enableHorizons')
+  return horizon
+}
+
+function showReplicas({ getValue, model, discriminator, watchDependency }) {
+  return !(
+    !isTlsOn({ getValue, model, watchDependency }) ||
+    !isHorizonsOn({ getValue, discriminator, watchDependency })
+  )
+}
+
+function onHorizonsChange({ getValue, commit, discriminator }) {
+  const val = getValue(discriminator, '/enableHorizons')
+  if (!val) {
+    commit({
+      path: '/spec/replicaSet/horizons',
+      value: [],
+      force: true,
+    })
+  }
+}
+
+function updateCertificates({ getValue, model, commit }) {
+  const horizons = getValue(model, '/spec/replicaSet/horizons')
+  const length = horizons?.length || 0
+
+  const common = length < 2 ? '' : getCommonPostfix(horizons)
+  const dnsNames = [common, ...horizons]
+  const certificates = [{ alias: 'server', dnsNames }]
+  if (common)
+    commit('wizard/model$update', {
+      path: '/tls/certificates',
+      value: certificates,
+      force: true,
+    })
+}
+
+function getCommonPostfix(strings) {
+  if (strings.length === 0) return ''
+
+  const reversedParts = strings.map((str) => str.split('.').reverse())
+  const first = reversedParts[0]
+
+  const commonParts = []
+
+  for (let i = 0; i < first.length; i++) {
+    const part = first[i]
+    if (reversedParts.every((parts) => parts[i] === part)) {
+      commonParts.push(part)
+    } else {
+      break
+    }
+  }
+
+  return commonParts.length ? commonParts.reverse().join('.') : ''
+}
+
+function isHorizonsValid({ getValue, model, commit }) {
+  const horizons = getValue(model, '/spec/replicaSet/horizons')
+  const length = horizons?.length || 0
+  const replicas = getValue(model, '/spec/replicaSet/replicas') || 0
+
+  if (length !== replicas) return 'Horizons count and Replicas should be equal'
+  return true
+}
+
 return {
   onReferSecretChange,
   showReferSecretSwitch,
@@ -1514,4 +1588,10 @@ return {
   onArchiverChange,
   showArchiverAlert,
   showArchiver,
+  isTlsOn,
+  isHorizonsOn,
+  showReplicas,
+  updateCertificates,
+  onHorizonsChange,
+  isHorizonsValid,
 }

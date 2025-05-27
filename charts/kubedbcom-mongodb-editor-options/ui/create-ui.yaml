@@ -26,7 +26,11 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/mode
       type: radio
-    - elements:
+    - discriminator:
+        enableHorizons:
+          default: false
+          type: boolean
+      elements:
       - label:
           text: labels.replicaset.name
         schema:
@@ -37,6 +41,28 @@ steps:
         schema:
           $ref: schema#/properties/spec/properties/replicaSet/properties/replicas
         type: input
+      - if: isTlsOn
+        label:
+          text: Do you want to access mongodb+srv style dns?
+        onChange: onHorizonsChange
+        schema:
+          $ref: discriminator#/enableHorizons
+        type: switch
+      - element:
+          label:
+            text: Horizons
+          schema:
+            $ref: schema#/properties/spec/properties/replicaSet/properties/horizons/items
+          type: input
+        if: isHorizonsOn
+        label:
+          text: Horizons
+        onChange: updateCertificates
+        schema:
+          $ref: schema#/properties/spec/properties/replicaSet/properties/horizons
+        validationRuleObject:
+          func: isHorizonsValid
+        type: list-input-form
       if: isEqualToModelPathValue|Replicaset|/spec/mode
       schema:
         $ref: schema#/properties/spec/properties/replicaSet
