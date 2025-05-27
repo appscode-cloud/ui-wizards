@@ -64,20 +64,21 @@ steps:
       type: single-step-form
     - elements:
       - element:
-          validationRuleObject:
-            regex: ^[A-Za-z][A-Za-z0-9_-]*[A-Za-z0-9]$
-            errorText: The value must start with a letter, can include letters, numbers, hyphens (-), and underscores (_).
           label:
             isSubsection: true
             text: Rack names
           schema:
             $ref: schema#/properties/spec/properties/topology/properties/racks/items
           type: input
+          validationRuleObject:
+            errorText: The value must start with a letter, can include letters, numbers,
+              hyphens (-), and underscores (_).
+            regex: ^[A-Za-z][A-Za-z0-9_-]*[A-Za-z0-9]$
         label:
           text: Rack name
+        required: true
         schema:
           $ref: schema#/properties/spec/properties/topology/properties/racks
-        required: true
         type: list-input-form
       if: isEqualToModelPathValue|Topology|/spec/mode
       label:
