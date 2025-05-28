@@ -1450,6 +1450,7 @@ function setMiliSeconds({ model, getValue, commit }) {
   }
 }
 
+// horizon stuffs
 function isTlsOn({ getValue, model, watchDependency }) {
   watchDependency('model#/spec/admin/tls/default')
   watchDependency('model#/spec/admin/expose/default')
@@ -1465,13 +1466,6 @@ function isHorizonsOn({ getValue, discriminator, watchDependency }) {
   return horizon
 }
 
-function showReplicas({ getValue, model, discriminator, watchDependency }) {
-  return !(
-    !isTlsOn({ getValue, model, watchDependency }) ||
-    !isHorizonsOn({ getValue, discriminator, watchDependency })
-  )
-}
-
 function onHorizonsChange({ getValue, commit, discriminator }) {
   const val = getValue(discriminator, '/enableHorizons')
   if (!val) {
@@ -1483,8 +1477,8 @@ function onHorizonsChange({ getValue, commit, discriminator }) {
   }
 }
 
-function updateCertificates({ getValue, model, commit }) {
-  const horizons = getValue(model, '/spec/replicaSet/horizons')
+function updateSuffix({ getValue, model, commit }) {
+  const horizons = getValue(model, '/spec/replicaSet/horizons') || []
   const length = horizons?.length || 0
 
   const replicas = getValue(model, '/spec/replicaSet/replicas') || 0
@@ -1518,14 +1512,14 @@ function getCommonPostfix(strings) {
 }
 
 function isHorizonsValid({ getValue, model }) {
-  const horizons = getValue(model, '/spec/replicaSet/horizons')
+  const horizons = getValue(model, '/spec/replicaSet/horizons') || []
   const length = horizons?.length || 0
   const replicas = getValue(model, '/spec/replicaSet/replicas') || 0
 
   if (length !== replicas) return 'Horizons count and Replicas should be equal'
 
   const common = getCommonPostfix(horizons)
-  if (!common) return 'Horizons must have a common dot(.) seperated suffix'
+  if (!common) return 'Horizons must have a common dot (.) seperated suffix'
   return true
 }
 
@@ -1594,8 +1588,7 @@ return {
   showArchiver,
   isTlsOn,
   isHorizonsOn,
-  showReplicas,
-  updateCertificates,
+  updateSuffix,
   onHorizonsChange,
   isHorizonsValid,
 }
