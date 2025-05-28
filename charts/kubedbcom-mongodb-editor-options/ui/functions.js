@@ -1441,7 +1441,6 @@ function setMiliSeconds({ model, getValue, commit }) {
   const recoveryTimestampArray = recoveryTimestamp?.split('.')
   if (recoveryTimestampArray.length === 1) return
   if (recoveryTimestampMiliSec !== '000Z') {
-    console.log(recoveryTimestampArray[0] + '.' + recoveryTimestampMiliSec.slice(0, -1))
     commit('wizard/model$update', {
       path: `/spec/init/archiver/recoveryTimestamp`,
       value: recoveryTimestampArray[0] + '.' + recoveryTimestampMiliSec.slice(0, -1),
@@ -1453,8 +1452,11 @@ function setMiliSeconds({ model, getValue, commit }) {
 
 function isTlsOn({ getValue, model, watchDependency }) {
   watchDependency('model#/spec/admin/tls/default')
+  watchDependency('model#/spec/admin/expose/default')
+
   const tls = getValue(model, '/spec/admin/tls/default')
-  return tls
+  const expose = getValue(model, '/spec/admin/expose/default')
+  return tls && expose
 }
 
 function isHorizonsOn({ getValue, discriminator, watchDependency }) {
@@ -1485,13 +1487,12 @@ function updateCertificates({ getValue, model, commit }) {
   const horizons = getValue(model, '/spec/replicaSet/horizons')
   const length = horizons?.length || 0
 
-  const common = length < 2 ? '' : getCommonPostfix(horizons)
-  const dnsNames = [common, ...horizons]
-  const certificates = [{ alias: 'server', dnsNames }]
+  const replicas = getValue(model, '/spec/replicaSet/replicas') || 0
+  const common = length === replicas ? getCommonPostfix(horizons) : ''
   if (common)
     commit('wizard/model$update', {
-      path: '/tls/certificates',
-      value: certificates,
+      path: '/spec/hostName',
+      value: common,
       force: true,
     })
 }
@@ -1516,12 +1517,15 @@ function getCommonPostfix(strings) {
   return commonParts.length ? commonParts.reverse().join('.') : ''
 }
 
-function isHorizonsValid({ getValue, model, commit }) {
+function isHorizonsValid({ getValue, model }) {
   const horizons = getValue(model, '/spec/replicaSet/horizons')
   const length = horizons?.length || 0
   const replicas = getValue(model, '/spec/replicaSet/replicas') || 0
 
   if (length !== replicas) return 'Horizons count and Replicas should be equal'
+
+  const common = getCommonPostfix(horizons)
+  if (!common) return 'Horizons must have a common dot(.) seperated suffix'
   return true
 }
 
