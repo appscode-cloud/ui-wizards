@@ -1441,7 +1441,6 @@ function setMiliSeconds({ model, getValue, commit }) {
   const recoveryTimestampArray = recoveryTimestamp?.split('.')
   if (recoveryTimestampArray.length === 1) return
   if (recoveryTimestampMiliSec !== '000Z') {
-    console.log(recoveryTimestampArray[0] + '.' + recoveryTimestampMiliSec.slice(0, -1))
     commit('wizard/model$update', {
       path: `/spec/init/archiver/recoveryTimestamp`,
       value: recoveryTimestampArray[0] + '.' + recoveryTimestampMiliSec.slice(0, -1),
@@ -1449,6 +1448,79 @@ function setMiliSeconds({ model, getValue, commit }) {
     })
     recoveryTimestampMiliSec = '000Z'
   }
+}
+
+// horizon stuffs
+function isTlsOn({ getValue, model, watchDependency }) {
+  watchDependency('model#/spec/admin/tls/default')
+  watchDependency('model#/spec/admin/expose/default')
+
+  const tls = getValue(model, '/spec/admin/tls/default')
+  const expose = getValue(model, '/spec/admin/expose/default')
+  return tls && expose
+}
+
+function isHorizonsOn({ getValue, discriminator, watchDependency }) {
+  watchDependency('discriminator#/enableHorizons')
+  const horizon = getValue(discriminator, '/enableHorizons')
+  return horizon
+}
+
+function onHorizonsChange({ getValue, commit, discriminator }) {
+  const val = getValue(discriminator, '/enableHorizons')
+  if (!val) {
+    commit({
+      path: '/spec/replicaSet/horizons',
+      value: [],
+      force: true,
+    })
+  }
+}
+
+function updateSuffix({ getValue, model, commit }) {
+  const horizons = getValue(model, '/spec/replicaSet/horizons') || []
+  const length = horizons?.length || 0
+
+  const replicas = getValue(model, '/spec/replicaSet/replicas') || 0
+  const common = length === replicas ? getCommonPostfix(horizons) : ''
+  if (common)
+    commit('wizard/model$update', {
+      path: '/spec/hostName',
+      value: common,
+      force: true,
+    })
+}
+
+function getCommonPostfix(strings) {
+  if (strings.length === 0) return ''
+
+  const reversedParts = strings.map((str) => str.split('.').reverse())
+  const first = reversedParts[0]
+
+  const commonParts = []
+
+  for (let i = 0; i < first.length; i++) {
+    const part = first[i]
+    if (reversedParts.every((parts) => parts[i] === part)) {
+      commonParts.push(part)
+    } else {
+      break
+    }
+  }
+
+  return commonParts.length ? commonParts.reverse().join('.') : ''
+}
+
+function isHorizonsValid({ getValue, model }) {
+  const horizons = getValue(model, '/spec/replicaSet/horizons') || []
+  const length = horizons?.length || 0
+  const replicas = getValue(model, '/spec/replicaSet/replicas') || 0
+
+  if (length !== replicas) return 'Horizons count and Replicas should be equal'
+
+  const common = getCommonPostfix(horizons)
+  if (!common) return 'Horizons must have a common dot (.) seperated suffix'
+  return true
 }
 
 return {
@@ -1514,4 +1586,9 @@ return {
   onArchiverChange,
   showArchiverAlert,
   showArchiver,
+  isTlsOn,
+  isHorizonsOn,
+  updateSuffix,
+  onHorizonsChange,
+  isHorizonsValid,
 }
