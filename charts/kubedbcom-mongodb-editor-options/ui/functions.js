@@ -1477,18 +1477,27 @@ function onHorizonsChange({ getValue, commit, discriminator }) {
   }
 }
 
-function updateSuffix({ getValue, model, commit }) {
+function updateSuffix({ getValue, model, commit, watchDependency, discriminator }) {
   const horizons = getValue(model, '/spec/replicaSet/horizons') || []
   const length = horizons?.length || 0
 
   const replicas = getValue(model, '/spec/replicaSet/replicas') || 0
-  const common = length === replicas ? getCommonPostfix(horizons) : ''
-  if (common)
+
+  if (replicas !== length && isHorizonsOn({ getValue, discriminator, watchDependency }))
     commit('wizard/model$update', {
       path: '/spec/hostName',
-      value: common,
+      value: '',
       force: true,
     })
+  else {
+    const common = getCommonPostfix(horizons)
+    if (common)
+      commit('wizard/model$update', {
+        path: '/spec/hostName',
+        value: common,
+        force: true,
+      })
+  }
 }
 
 function getCommonPostfix(strings) {
@@ -1511,12 +1520,13 @@ function getCommonPostfix(strings) {
   return commonParts.length ? commonParts.reverse().join('.') : ''
 }
 
-function isHorizonsValid({ getValue, model }) {
+function isHorizonsValid({ getValue, model, watchDependency }) {
+  watchDependency('model#/spec/replicaSet/replicas')
   const horizons = getValue(model, '/spec/replicaSet/horizons') || []
   const length = horizons?.length || 0
   const replicas = getValue(model, '/spec/replicaSet/replicas') || 0
 
-  if (length !== replicas) return 'Horizons count and Replicas should be equal'
+  if (length !== replicas) return `Horizons count need to be equal to ${replicas}`
 
   const common = getCommonPostfix(horizons)
   if (!common) return 'Horizons must have a common dot (.) seperated suffix'

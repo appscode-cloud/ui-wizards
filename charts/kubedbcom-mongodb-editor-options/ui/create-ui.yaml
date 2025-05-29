@@ -38,6 +38,7 @@ steps:
         type: input
       - label:
           text: labels.replicaset.number
+        onChange: updateSuffix
         schema:
           $ref: schema#/properties/spec/properties/replicaSet/properties/replicas
         type: input
@@ -48,9 +49,16 @@ steps:
         schema:
           $ref: discriminator#/enableHorizons
         type: switch
+      - alertInfo:
+          show: true
+          type: neutral
+        if: isHorizonsOn
+        label:
+          text: Horizons count should be equal to Replica Number.
+        type: label-element
       - element:
           label:
-            text: Horizons
+            text: Add a new horizon dns for pod
           schema:
             $ref: schema#/properties/spec/properties/replicaSet/properties/horizons/items
           type: input
