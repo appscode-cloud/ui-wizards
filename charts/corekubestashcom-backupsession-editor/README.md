@@ -45,18 +45,22 @@ The command removes all the Kubernetes components associated with the chart and 
 
 The following table lists the configurable parameters of the `corekubestashcom-backupsession-editor` chart and their default values.
 
-|     Parameter      | Description |                 Default                  |
-|--------------------|-------------|------------------------------------------|
-| apiVersion         |             | <code>core.kubestash.com/v1alpha1</code> |
-| kind               |             | <code>BackupSession</code>               |
-| metadata.name      |             | <code>backupsession</code>               |
-| metadata.namespace |             | <code>default</code>                     |
+|                Parameter                | Description |                                                                                                                            Default                                                                                                                             |
+|-----------------------------------------|-------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| metadata.resource.group                 |             | <code>core.kubestash.com</code>                                                                                                                                                                                                                                |
+| metadata.resource.version               |             | <code>v1alpha1</code>                                                                                                                                                                                                                                          |
+| metadata.resource.name                  |             | <code>backupsessions</code>                                                                                                                                                                                                                                    |
+| metadata.resource.kind                  |             | <code>BackupSession</code>                                                                                                                                                                                                                                     |
+| metadata.resource.scope                 |             | <code>Namespaced</code>                                                                                                                                                                                                                                        |
+| metadata.release.name                   |             | <code>RELEASE-NAME</code>                                                                                                                                                                                                                                      |
+| metadata.release.namespace              |             | <code>default</code>                                                                                                                                                                                                                                           |
+| resources.coreKubestashComBackupSession |             | <code>{"apiVersion":"core.kubestash.com/v1alpha1","kind":"BackupSession","metadata":{"name":"backup-app","namespace":"demo"},"spec":{"invoker":{"apiGroup":"core.kubestash.com","kind":"BackupConfiguration","name":"ace-db"},"session":"full-backup"}}</code> |
 
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm upgrade -i`. For example:
 
 ```bash
-$ helm upgrade -i corekubestashcom-backupsession-editor appscode/corekubestashcom-backupsession-editor -n default --create-namespace --version=v0.18.0 --set apiVersion=core.kubestash.com/v1alpha1
+$ helm upgrade -i corekubestashcom-backupsession-editor appscode/corekubestashcom-backupsession-editor -n default --create-namespace --version=v0.18.0 --set metadata.resource.group=core.kubestash.com
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
