@@ -68,6 +68,11 @@ spec:
   backend:
     replicas: {{ .Values.spec.backend.replicas }}
     podTemplate:
+      {{- if $profiles }}
+      metadata:
+        annotations:
+          kubernetes.io/instance-type: {{ get (include "resource-profiles" . | fromJson) "backend" | quote }}
+      {{- end }}
       spec:
         securityContext:
           fsGroup: {{ .Values.spec.openshift.securityContext.runAsUser | default 999 }}
@@ -76,7 +81,7 @@ spec:
             resources:
               {{- toYaml .backend_res | nindent 14 }}
             securityContext:
-              {{- include "postgres.securityContext" $ | nindent 14 }}
+              {{- include "container.securityContext" $ | nindent 14 }}
         {{- include "common.placement" . | nindent 8 }}
     storageType: Durable
     storage:

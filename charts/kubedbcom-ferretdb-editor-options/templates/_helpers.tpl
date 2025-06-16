@@ -126,18 +126,6 @@ seccompProfile:
   type: RuntimeDefault
 {{- end }}
 
-{{- define "postgres.securityContext" -}}
-allowPrivilegeEscalation: false
-capabilities:
-  drop:
-  - ALL
-runAsGroup: 0
-runAsNonRoot: true
-runAsUser: {{ $.Values.spec.openshift.securityContext.runAsUser | default 999 }}
-seccompProfile:
-  type: RuntimeDefault
-{{- end }}
-
 {{- define "resource-profiles" -}}
 {{- $machines := .Files.Get "data/machines.yaml" | fromYaml -}}
 {{- $profiles := dict -}}
@@ -169,8 +157,8 @@ seccompProfile:
 {{- end  }}
 
 {{- $backend_res = .Values.spec.backend.podResources.resources -}}
-{{- if and .Values.spec.server.secondary.podResources.machine (hasKey $machines .Values.spec.server.secondary.podResources.machine) }}
-  {{- $secondary_res = get (get $machines .Values.spec.server.secondary.podResources.machine) "resources" }}
+{{- if and .Values.spec.backend.podResources.machine (hasKey $machines .Values.spec.backend.podResources.machine) }}
+  {{- $backend_res = get (get $machines .Values.spec.backend.podResources.machine) "resources" }}
 {{- end }}
 {{- range .Values.spec.admin.machineProfiles.machines }}
   {{- if and $.Values.spec.backend.podResources.machine (eq .id $.Values.spec.backend.podResources.machine) }}
@@ -185,6 +173,7 @@ seccompProfile:
 
 {{- $_ := set . "res" $res -}}
 {{- $_ = set . "secondary_res" $secondary_res -}}
+{{- $_ = set . "backend_res" $backend_res -}}
 {{- $_ = set . "init_res" $init_res -}}
 {{- $_ = set . "sidecar_res" $sidecar_res -}}
 
