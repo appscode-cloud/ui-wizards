@@ -27,14 +27,22 @@ spec:
 
   deletionPolicy: WipeOut
 
-  persistence:
-    size: 2Gi
+  backend:
+    replicas: 3
+    podResources:
+      machine: "db.t.large"
+      resources:
+        requests:
+          cpu: 500m
+          memory: 1Gi
+    persistence:
+      size: 2Gi
 
   server:
     primary:
       replicas: 1
       podResources:
-        machine: ""
+        machine: "db.t.medium"
 
         resources:
           requests:
@@ -43,7 +51,7 @@ spec:
     secondary:
       replicas: 2
       podResources:
-        machine: ""
+        machine: "db.t.micro"
 
         resources:
           requests:
@@ -158,6 +166,31 @@ spec:
       machines: []
       available: []
       default: ""
+
+#    machineProfiles:
+#      machines:
+#        - id: db.t.micro
+#          name: Small
+#          limits:
+#            cpu: 1
+#            memory: 1Gi
+#        - id: db.t.small
+#          name: Small
+#          limits:
+#            cpu: 2
+#            memory: 2Gi
+#        - id: db.t.medium
+#          name: Medium
+#          limits:
+#            cpu: 3
+#            memory: 4Gi
+#        - id: db.t.large
+#          name: Large
+#          limits:
+#            cpu: 4
+#            memory: 8Gi
+#      available: ["custom", "db.t.micro", "db.t.medium", "db.t.large"]
+#      default: "db.t.medium"
 
   backup:
     tool: ""

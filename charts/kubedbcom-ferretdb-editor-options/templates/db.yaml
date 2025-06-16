@@ -65,14 +65,27 @@ metadata:
 {{- end }}
 spec:
   version: {{ .Values.spec.admin.databases.FerretDB.versions.default | quote }}
-  storageType: Durable
-  storage:
-    storageClassName: {{ .Values.spec.admin.storageClasses.default }}
-    accessModes:
-    - ReadWriteOnce
-    resources:
-      requests:
-        storage: {{ .Values.spec.persistence.size }}
+  backend:
+    replicas: {{ .Values.spec.backend.replicas }}
+    podTemplate:
+      spec:
+        securityContext:
+          fsGroup: {{ .Values.spec.openshift.securityContext.runAsUser | default 999 }}
+        containers:
+          - name: postgres
+            resources:
+              {{- toYaml .backend_res | nindent 14 }}
+            securityContext:
+              {{- include "postgres.securityContext" $ | nindent 14 }}
+        {{- include "common.placement" . | nindent 8 }}
+    storageType: Durable
+    storage:
+      storageClassName: {{ .Values.spec.admin.storageClasses.default }}
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: {{ .Values.spec.backend.persistence.size }}
   server:
     primary:
       replicas: {{ .Values.spec.server.primary.replicas }}

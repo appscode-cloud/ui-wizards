@@ -126,12 +126,24 @@ seccompProfile:
   type: RuntimeDefault
 {{- end }}
 
+{{- define "postgres.securityContext" -}}
+allowPrivilegeEscalation: false
+capabilities:
+  drop:
+  - ALL
+runAsGroup: 0
+runAsNonRoot: true
+runAsUser: {{ $.Values.spec.openshift.securityContext.runAsUser | default 999 }}
+seccompProfile:
+  type: RuntimeDefault
+{{- end }}
 
 {{- define "resource-profiles" -}}
 {{- $machines := .Files.Get "data/machines.yaml" | fromYaml -}}
 {{- $profiles := dict -}}
 {{- $res := dict -}}
 {{- $secondary_res := dict -}}
+{{- $backend_res := dict -}}
 {{- $res = .Values.spec.server.primary.podResources.resources -}}
 {{- if and .Values.spec.server.primary.podResources.machine (hasKey $machines .Values.spec.server.primary.podResources.machine) }}
   {{- $res = get (get $machines .Values.spec.server.primary.podResources.machine) "resources" }}
@@ -155,6 +167,18 @@ seccompProfile:
     {{- end }}
   {{- end }}
 {{- end  }}
+
+{{- $backend_res = .Values.spec.backend.podResources.resources -}}
+{{- if and .Values.spec.server.secondary.podResources.machine (hasKey $machines .Values.spec.server.secondary.podResources.machine) }}
+  {{- $secondary_res = get (get $machines .Values.spec.server.secondary.podResources.machine) "resources" }}
+{{- end }}
+{{- range .Values.spec.admin.machineProfiles.machines }}
+  {{- if and $.Values.spec.backend.podResources.machine (eq .id $.Values.spec.backend.podResources.machine) }}
+    {{- $backend_res  = dict "requests" .limits "limits" .limits }}
+    {{- $_ := set $profiles "backend" .id -}}
+  {{- end }}
+{{- end }}
+
 {{- $init_res := dict "limits" (dict "memory" "512Mi") "requests" (dict "cpu" "200m" "memory" "256Mi") -}}
 {{- $sidecar_res := dict "limits" (dict "memory" "256Mi") "requests" (dict "cpu" "200m" "memory" "256Mi") -}}
 

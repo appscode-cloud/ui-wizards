@@ -48,7 +48,7 @@ type KubedbcomFerretdbEditorOptionsSpecSpec struct {
 	Labels         map[string]string `json:"labels"`
 	Mode           FerretDBMode      `json:"mode"`
 	Server         FerretDBServer    `json:"server"`
-	Persistence    Persistence       `json:"persistence"`
+	Backend        FerretDBBackend   `json:"backend"`
 	AuthSecret     AuthSecret        `json:"authSecret"`
 	DeletionPolicy DeletionPolicy    `json:"deletionPolicy"`
 	Configuration  string            `json:"configuration"`
@@ -74,6 +74,12 @@ type FerretDBServer struct {
 type FerretNode struct {
 	Replicas     int          `json:"replicas"`
 	PodResources PodResources `json:"podResources"`
+}
+
+type FerretDBBackend struct {
+	Replicas     int          `json:"replicas"`
+	PodResources PodResources `json:"podResources"`
+	Persistence  Persistence  `json:"persistence"`
 }
 type FerretdbAlertsSpecForm struct {
 	Alert alerts.PostgresAlert `json:"alert"`
