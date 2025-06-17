@@ -1,0 +1,254 @@
+# Default values for kubedbcom-cassandra-editor-options.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+metadata:
+  resource:
+    group: kubedb.com
+    kind: Cassandra
+    name: cassandras
+    scope: Namespaced
+    version: v1alpha2
+  release:
+    # Release name
+    name: ""
+    # Release namespace
+    namespace: ""
+
+spec:
+  # Annotations to add to the database custom resource
+  annotations: {}
+
+  # Labels to add to all the template objects
+  labels: {}
+
+  # Standalone, Topology
+  mode: Standalone
+  replicas: 1
+
+  topology:
+    racks: []
+
+  deletionPolicy: WipeOut
+
+  persistence:
+    size: 2Gi
+  podResources:
+    machine: ""
+
+    resources:
+      requests:
+        cpu: 500m
+        memory: 1Gi
+
+  authSecret:
+    name: ""
+
+    password: ""
+  configuration: ""
+
+  archiverName: ""
+  init:
+    archiver:
+      recoveryTimestamp: null
+      encryptionSecret:
+        name: ""
+        namespace: ""
+      fullDBRepository:
+        name: ""
+        namespace: ""
+      manifestRepository:
+        name: ""
+        namespace: ""
+
+  openshift:
+    securityContext:
+      runAsUser: null
+
+  admin:
+    deployment:
+      default: Shared
+      toggle: true
+    clusterTier:
+      default: "GeneralPurpose"
+      toggle: true
+      nodeTopology:
+        available: []
+        default: ""
+        toggle: true
+      placement:
+        available: []
+        default: ""
+        toggle: true
+
+    showPreview: false
+    leftPanel:
+      showInsights: true
+      showVaultInfo: true
+      showOperations: true
+      showBackup: true
+      showBackupLegacy: false
+      showSecurity: false
+
+    nodeSelector: {}
+    tolerations: []
+
+    databases:
+      Cassandra:
+        versions:
+          available: []
+          default: ""
+          toggle: true
+        mode:
+          available: ["Standalone", "Topology"]
+          default: "Topology"
+          toggle: true
+    storageClasses:
+      available: []
+      default: ""
+      toggle: true
+
+    tls:
+      default: false
+      toggle: true
+    clusterIssuers:
+      available: []
+      default: ""
+      toggle: true
+    expose:
+      default: false
+      toggle: true
+
+    monitoring:
+      # Name of monitoring agent (one of "prometheus.io", "prometheus.io/operator", "prometheus.io/builtin")
+      agent: prometheus.io/operator
+      exporter:
+        resources: # +doc-gen:break
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            memory: 256Mi
+      toggle: true
+    alert:
+      toggle: true
+
+    authCredential:
+      customize: true
+      referExisting: true
+    customConfiguration: true
+
+    deletionPolicy:
+      default: WipeOut
+      toggle: true
+    backup:
+      enable:
+        default: true
+        toggle: true
+      by: BackupConfiguration
+      via: Restic
+    archiver:
+      enable:
+        default: false
+        toggle: true
+      via: Restic
+    pointInTimeRecovery:
+      default: false
+      toggle: true
+
+    machineProfiles:
+      machines: []
+      available: []
+      default: ""
+
+  backup:
+    tool: ""
+    toggle: true
+    kubestash:
+      schedule: ""
+      storageRef:
+        name: ""
+        namespace: ""
+      retentionPolicy:
+        name: ""
+        namespace: ""
+      encryptionSecret:
+        name: ""
+        namespace: ""
+  monitoring:
+    serviceMonitor:
+      # Specify the labels for ServiceMonitor.
+      # Prometheus crd will select ServiceMonitor using these labels.
+      # Only usable when monitoring agent is `prometheus.io/webhook server`.
+      labels: {}
+
+form:
+  alert:
+    ## Enable PrometheusRule alerts
+    enabled: warning
+
+    ## Labels for default rules
+    labels: # +doc-gen:break
+      release: kube-prometheus-stack
+
+    ## Annotations for default rules
+    annotations: {}
+
+    ## Additional labels for PrometheusRule alerts
+    additionalRuleLabels: {}
+
+    ## Prefix for runbook URLs. Use this to override the first part of the runbookURLs that is common to all rules.
+    # runbookUrl: "https://runbooks.prometheus-operator.dev/runbooks"
+
+    groups:
+      database:
+        enabled: warning
+        rules:
+          # Specifies the alert configuration for database is in NotReady phase, that means the database is not accepting connections, read/write are hampered.
+          cassandraDown:
+            enabled: true
+            duration: "1m"
+            severity: critical
+          # Specifies the alert configuration for recently respawned(restarted).
+          cassandraServiceRespawn:
+            enabled: true
+            duration: "1m"
+            val: 180
+            severity: critical
+          cassandraConnectionTimeouts:
+            enabled: true
+            duration: "1m"
+            val: 100
+            severity: warning
+          cassandraDroppedMessages:
+            enabled: true
+            duration: "1m"
+            severity: warning
+            val: 1
+          cassandraHighReadLatency:
+            enabled: true
+            duration: "1m"
+            severity: warning
+            val: 7000
+          cassandraHighWriteLatency:
+            enabled: true
+            duration: "1m"
+            val: 7000
+            severity: warning
+          # High memory usage
+          cassandraMemoryLimit:
+            enabled: true
+            duration: "1m"
+            val: 33554432  # 32MB
+            severity: critical
+      provisioner:
+        enabled: warning
+        rules:
+          appPhaseNotReady:
+            enabled: true
+            duration: "1m"
+            severity: critical
+          appPhaseCritical:
+            enabled: true
+            duration: "5m"
+            severity: warning

@@ -74,8 +74,9 @@ type KubedbcomMongodbEditorOptionsSpecSpec struct {
 type MongoDBMode string
 
 type MongoDBReplicaSet struct {
-	Name     string `json:"name"`
-	Replicas int    `json:"replicas"`
+	Name     string   `json:"name"`
+	Replicas int      `json:"replicas"`
+	Horizons []string `json:"horizons"`
 }
 
 type MongoDBShard struct {

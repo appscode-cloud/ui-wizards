@@ -92,6 +92,13 @@ spec:
 {{- if eq .Values.spec.mode "Replicaset" }}
   replicaSet:
     name: {{ .Values.spec.replicaSet.name }}
+  {{- if .Values.spec.replicaSet.horizons }}
+  horizons:
+    pods:
+    {{- range .Values.spec.replicaSet.horizons }}
+    - {{ . }}
+    {{- end }}
+  {{- end }}
 {{- end }}
 {{- if eq .Values.spec.mode "Sharded" }}
   shardTopology:
@@ -100,7 +107,7 @@ spec:
       podTemplate:
         spec:
           securityContext:
-            fsGroup: {{ .Values.spec.openshift.securityContext.runAsUser | default 999 }}
+            {{- include "container.fsGroup" . | nindent 12 }}
           containers:
             - name: mongodb
               resources:
@@ -129,7 +136,7 @@ spec:
       podTemplate:
         spec:
           securityContext:
-            fsGroup: {{ .Values.spec.openshift.securityContext.runAsUser | default 999 }}
+            {{- include "container.fsGroup" . | nindent 12 }}
           containers:
             - name: mongodb
               resources:
@@ -149,7 +156,7 @@ spec:
       podTemplate:
         spec:
           securityContext:
-            fsGroup: {{ .Values.spec.openshift.securityContext.runAsUser | default 999 }}
+            {{- include "container.fsGroup" . | nindent 12 }}
           containers:
             - name: mongodb
               resources:
@@ -177,7 +184,7 @@ spec:
   podTemplate:
     spec:
       securityContext:
-        fsGroup: {{ .Values.spec.openshift.securityContext.runAsUser | default 999 }}
+        {{- include "container.fsGroup" . | nindent 8 }}
       containers:
         - name: mongodb
           resources:
@@ -263,12 +270,17 @@ spec:
     {{- if .Values.spec.admin.expose.default }}
     certificates:
       - alias: server
-        {{- if .Values.spec.hostname }}
+        {{- if or .Values.spec.replicaSet.horizons .Values.spec.hostName }}
         dnsNames:
-          - {{ .Values.spec.hostname }}
+        {{- range .Values.spec.replicaSet.horizons }}
+        - {{ . }}
+        {{- end }}
+        {{- if .Values.spec.hostName }}
+        - {{ .Values.spec.hostName }}
+        {{- end }}
         {{- else if .Values.spec.ip }}
         ipAddresses:
-          - {{ .Values.spec.ip }}
+        - {{ .Values.spec.ip }}
         {{- end }}
     {{- end }}
   clusterAuthMode: x509

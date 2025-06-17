@@ -17,14 +17,19 @@ spec:
       openAPIV3Schema:
         properties:
           apiVersion:
-            description: 'APIVersion defines the versioned schema of this representation
-              of an object. Servers should convert recognized schemas to the latest
-              internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
             type: string
           kind:
-            description: 'Kind is a string value representing the REST resource this
-              object represents. Servers may infer this from the endpoint the client
-              submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
             type: string
           metadata:
             type: object
@@ -40,9 +45,9 @@ spec:
                       is normally CamelCase and singular.
                     type: string
                   name:
-                    description: 'Name is the plural name of the resource to serve.  It
-                      must match the name of the CustomResourceDefinition-registration
-                      too: plural.group and it must be all lowercase.'
+                    description: |-
+                      Name is the plural name of the resource to serve.  It must match the name of the CustomResourceDefinition-registration
+                      too: plural.group and it must be all lowercase.
                     type: string
                   scope:
                     description: ResourceScope is an enum defining the different scopes
@@ -59,11 +64,21 @@ spec:
                     type: string
                   caBundle:
                     type: string
+                  cloudServiceAuthMode:
+                    type: string
                   displayName:
                     type: string
                   hubClusterID:
                     type: string
                   managerID:
+                    type: string
+                  mode:
+                    description: ENUM(prod,qa,staging,dev)
+                    enum:
+                    - prod
+                    - qa
+                    - staging
+                    - dev
                     type: string
                   name:
                     type: string
@@ -100,11 +115,14 @@ spec:
                             to let you inspect or modify the referred object.
                           properties:
                             name:
-                              description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names'
+                              description: |-
+                                Name of the referent.
+                                More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
                               type: string
                             namespace:
-                              description: 'Namespace of the referent. More info:
-                                https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/'
+                              description: |-
+                                Namespace of the referent.
+                                More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/
                               type: string
                           required:
                           - name
@@ -120,9 +138,9 @@ spec:
                               is normally CamelCase and singular.
                             type: string
                           name:
-                            description: 'Name is the plural name of the resource
-                              to serve.  It must match the name of the CustomResourceDefinition-registration
-                              too: plural.group and it must be all lowercase.'
+                            description: |-
+                              Name is the plural name of the resource to serve.  It must match the name of the CustomResourceDefinition-registration
+                              too: plural.group and it must be all lowercase.
                             type: string
                           scope:
                             description: ResourceScope is an enum defining the different
@@ -158,11 +176,14 @@ spec:
                             to let you inspect or modify the referred object.
                           properties:
                             name:
-                              description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names'
+                              description: |-
+                                Name of the referent.
+                                More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
                               type: string
                             namespace:
-                              description: 'Namespace of the referent. More info:
-                                https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/'
+                              description: |-
+                                Namespace of the referent.
+                                More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/
                               type: string
                           required:
                           - name
@@ -185,11 +206,14 @@ spec:
                             to let you inspect or modify the referred object.
                           properties:
                             name:
-                              description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names'
+                              description: |-
+                                Name of the referent.
+                                More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
                               type: string
                             namespace:
-                              description: 'Namespace of the referent. More info:
-                                https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/'
+                              description: |-
+                                Namespace of the referent.
+                                More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/
                               type: string
                           required:
                           - name
@@ -205,9 +229,9 @@ spec:
                               is normally CamelCase and singular.
                             type: string
                           name:
-                            description: 'Name is the plural name of the resource
-                              to serve.  It must match the name of the CustomResourceDefinition-registration
-                              too: plural.group and it must be all lowercase.'
+                            description: |-
+                              Name is the plural name of the resource to serve.  It must match the name of the CustomResourceDefinition-registration
+                              too: plural.group and it must be all lowercase.
                             type: string
                           scope:
                             description: ResourceScope is an enum defining the different
@@ -257,9 +281,9 @@ spec:
                                       gateway service.
                                     type: string
                                   nodePort:
-                                    description: The port on each node on which this
-                                      gateway service is exposed when type is NodePort
-                                      or LoadBalancer.
+                                    description: |-
+                                      The port on each node on which this gateway service is exposed when type is
+                                      NodePort or LoadBalancer.
                                     format: int32
                                     type: integer
                                   port:
@@ -281,24 +305,23 @@ spec:
                         items:
                           properties:
                             alias:
-                              description: Alias represents the identifier of the
-                                service. This should match the db ui chart name
+                              description: |-
+                                Alias represents the identifier of the service.
+                                This should match the db ui chart name
                               type: string
                             helmRelease:
-                              description: HelmRelease is the name of the helm release
-                                used to deploy this ui The name format is typically
-                                <alias>-<db-name>
+                              description: |-
+                                HelmRelease is the name of the helm release used to deploy this ui
+                                The name format is typically <alias>-<db-name>
                               properties:
                                 name:
                                   default: ""
-                                  description: 'Name of the referent. This field is
-                                    effectively required, but due to backwards compatibility
-                                    is allowed to be empty. Instances of this type
-                                    with an empty value here are almost certainly
-                                    wrong. TODO: Add other useful fields. apiVersion,
-                                    kind, uid? More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
-                                    TODO: Drop `kubebuilder:default` when controller-gen
-                                    doesn''t need it https://github.com/kubernetes-sigs/kubebuilder/issues/3896.'
+                                  description: |-
+                                    Name of the referent.
+                                    This field is effectively required, but due to backwards compatibility is
+                                    allowed to be empty. Instances of this type with an empty value here are
+                                    almost certainly wrong.
+                                    More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
                                   type: string
                               type: object
                               x-kubernetes-map-type: atomic
@@ -316,9 +339,9 @@ spec:
                                     service.
                                   type: string
                                 nodePort:
-                                  description: The port on each node on which this
-                                    gateway service is exposed when type is NodePort
-                                    or LoadBalancer.
+                                  description: |-
+                                    The port on each node on which this gateway service is exposed when type is
+                                    NodePort or LoadBalancer.
                                   format: int32
                                   type: integer
                                 port:
@@ -350,11 +373,14 @@ spec:
                             to let you inspect or modify the referred object.
                           properties:
                             name:
-                              description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names'
+                              description: |-
+                                Name of the referent.
+                                More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
                               type: string
                             namespace:
-                              description: 'Namespace of the referent. More info:
-                                https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/'
+                              description: |-
+                                Namespace of the referent.
+                                More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/
                               type: string
                           required:
                           - name
@@ -370,9 +396,9 @@ spec:
                               is normally CamelCase and singular.
                             type: string
                           name:
-                            description: 'Name is the plural name of the resource
-                              to serve.  It must match the name of the CustomResourceDefinition-registration
-                              too: plural.group and it must be all lowercase.'
+                            description: |-
+                              Name is the plural name of the resource to serve.  It must match the name of the CustomResourceDefinition-registration
+                              too: plural.group and it must be all lowercase.
                             type: string
                           scope:
                             description: ResourceScope is an enum defining the different
@@ -396,11 +422,14 @@ spec:
                             to let you inspect or modify the referred object.
                           properties:
                             name:
-                              description: 'Name of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names'
+                              description: |-
+                                Name of the referent.
+                                More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
                               type: string
                             namespace:
-                              description: 'Namespace of the referent. More info:
-                                https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/'
+                              description: |-
+                                Namespace of the referent.
+                                More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/
                               type: string
                           required:
                           - name
@@ -416,9 +445,9 @@ spec:
                               is normally CamelCase and singular.
                             type: string
                           name:
-                            description: 'Name is the plural name of the resource
-                              to serve.  It must match the name of the CustomResourceDefinition-registration
-                              too: plural.group and it must be all lowercase.'
+                            description: |-
+                              Name is the plural name of the resource to serve.  It must match the name of the CustomResourceDefinition-registration
+                              too: plural.group and it must be all lowercase.
                             type: string
                           scope:
                             description: ResourceScope is an enum defining the different

@@ -422,6 +422,8 @@ steps:
           schema:
             $ref: schema#/properties/spec/properties/volumeExpansion/properties/historicals
           type: input
+          validationRuleObject:
+            func: checkVolume|/spec/topology/historicals/storage/resources/requests/storage|/spec/volumeExpansion/historicals
         label:
           text: Historicals
         show_label: true
@@ -433,6 +435,8 @@ steps:
           schema:
             $ref: schema#/properties/spec/properties/volumeExpansion/properties/middleManagers
           type: input
+          validationRuleObject:
+            func: checkVolume|/spec/topology/middleManagers/storage/resources/requests/storage|/spec/volumeExpansion/middleManagers
         label:
           text: Middle Managers
         show_label: true
@@ -615,7 +619,7 @@ steps:
       - alias: reusable_certificates
         chart:
           name: uibytebuildersdev-component-certificates
-          version: v0.17.0
+          version: v0.18.0
         computed: setValueFromDbDetails|/spec/tls/certificates|/spec/tls/certificates
         functionCallbacks:
           getAliasOptions:

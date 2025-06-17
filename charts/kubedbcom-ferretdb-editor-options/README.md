@@ -7,8 +7,8 @@
 ```bash
 $ helm repo add appscode https://charts.appscode.com/stable/
 $ helm repo update
-$ helm search repo appscode/kubedbcom-ferretdb-editor-options --version=v0.17.0
-$ helm upgrade -i kubedbcom-ferretdb-editor-options appscode/kubedbcom-ferretdb-editor-options -n kube-system --create-namespace --version=v0.17.0
+$ helm search repo appscode/kubedbcom-ferretdb-editor-options --version=v0.18.0
+$ helm upgrade -i kubedbcom-ferretdb-editor-options appscode/kubedbcom-ferretdb-editor-options -n kube-system --create-namespace --version=v0.18.0
 ```
 
 ## Introduction
@@ -24,7 +24,7 @@ This chart deploys a FerretDB Editor UI Options on a [Kubernetes](http://kuberne
 To install/upgrade the chart with the release name `kubedbcom-ferretdb-editor-options`:
 
 ```bash
-$ helm upgrade -i kubedbcom-ferretdb-editor-options appscode/kubedbcom-ferretdb-editor-options -n kube-system --create-namespace --version=v0.17.0
+$ helm upgrade -i kubedbcom-ferretdb-editor-options appscode/kubedbcom-ferretdb-editor-options -n kube-system --create-namespace --version=v0.18.0
 ```
 
 The command deploys a FerretDB Editor UI Options on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
@@ -58,7 +58,11 @@ The following table lists the configurable parameters of the `kubedbcom-ferretdb
 | spec.labels                                                                   | Labels to add to all the template objects                                                                                                                                 | <code>{}</code>                                                                       |
 | spec.mode                                                                     | PrimaryOnly, PrimaryAndSecondary                                                                                                                                          | <code>PrimaryAndSecondary</code>                                                      |
 | spec.deletionPolicy                                                           |                                                                                                                                                                           | <code>WipeOut</code>                                                                  |
-| spec.persistence.size                                                         |                                                                                                                                                                           | <code>2Gi</code>                                                                      |
+| spec.backend.replicas                                                         |                                                                                                                                                                           | <code>3</code>                                                                        |
+| spec.backend.podResources.machine                                             |                                                                                                                                                                           | <code>""</code>                                                                       |
+| spec.backend.podResources.resources.requests.cpu                              |                                                                                                                                                                           | <code>500m</code>                                                                     |
+| spec.backend.podResources.resources.requests.memory                           |                                                                                                                                                                           | <code>1Gi</code>                                                                      |
+| spec.backend.persistence.size                                                 |                                                                                                                                                                           | <code>2Gi</code>                                                                      |
 | spec.server.primary.replicas                                                  |                                                                                                                                                                           | <code>1</code>                                                                        |
 | spec.server.primary.podResources.machine                                      |                                                                                                                                                                           | <code>""</code>                                                                       |
 | spec.server.primary.podResources.resources.requests.cpu                       |                                                                                                                                                                           | <code>500m</code>                                                                     |
@@ -70,6 +74,8 @@ The following table lists the configurable parameters of the `kubedbcom-ferretdb
 | spec.authSecret.name                                                          |                                                                                                                                                                           | <code>""</code>                                                                       |
 | spec.authSecret.password                                                      |                                                                                                                                                                           | <code>""</code>                                                                       |
 | spec.configuration                                                            |                                                                                                                                                                           | <code>""</code>                                                                       |
+| spec.hostName                                                                 |                                                                                                                                                                           | <code>""</code>                                                                       |
+| spec.ip                                                                       |                                                                                                                                                                           | <code>""</code>                                                                       |
 | spec.openshift.securityContext.runAsUser                                      |                                                                                                                                                                           | <code>null</code>                                                                     |
 | spec.admin.deployment.default                                                 |                                                                                                                                                                           | <code>Shared</code>                                                                   |
 | spec.admin.deployment.toggle                                                  |                                                                                                                                                                           | <code>true</code>                                                                     |
@@ -247,12 +253,12 @@ The following table lists the configurable parameters of the `kubedbcom-ferretdb
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm upgrade -i`. For example:
 
 ```bash
-$ helm upgrade -i kubedbcom-ferretdb-editor-options appscode/kubedbcom-ferretdb-editor-options -n kube-system --create-namespace --version=v0.17.0 --set metadata.resource.group=kubedb.com
+$ helm upgrade -i kubedbcom-ferretdb-editor-options appscode/kubedbcom-ferretdb-editor-options -n kube-system --create-namespace --version=v0.18.0 --set metadata.resource.group=kubedb.com
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
 installing the chart. For example:
 
 ```bash
-$ helm upgrade -i kubedbcom-ferretdb-editor-options appscode/kubedbcom-ferretdb-editor-options -n kube-system --create-namespace --version=v0.17.0 --values values.yaml
+$ helm upgrade -i kubedbcom-ferretdb-editor-options appscode/kubedbcom-ferretdb-editor-options -n kube-system --create-namespace --version=v0.18.0 --values values.yaml
 ```

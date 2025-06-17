@@ -57,7 +57,6 @@ properties:
           SessionPersistence defines and configures session persistence
           for the backend.
 
-
           Support: Extended
         properties:
           absoluteTimeout:
@@ -66,7 +65,6 @@ properties:
               session. Once the AbsoluteTimeout duration has elapsed, the
               session becomes invalid.
 
-
               Support: Extended
             pattern: ^([0-9]{1,5}(h|m|s|ms)){1,4}$
             type: string
@@ -74,7 +72,6 @@ properties:
             description: |-
               CookieConfig provides configuration settings that are specific
               to cookie-based session persistence.
-
 
               Support: Core
             properties:
@@ -87,19 +84,15 @@ properties:
                   attributes, while a session cookie is deleted when the current
                   session ends.
 
-
                   When set to "Permanent", AbsoluteTimeout indicates the
                   cookie's lifetime via the Expires or Max-Age cookie attributes
                   and is required.
-
 
                   When set to "Session", AbsoluteTimeout indicates the
                   absolute lifetime of the cookie tracked by the gateway and
                   is optional.
 
-
                   Support: Core for "Session" type
-
 
                   Support: Extended for "Permanent" type
                 enum:
@@ -113,7 +106,6 @@ properties:
               Once the session has been idle for more than the specified
               IdleTimeout duration, the session becomes invalid.
 
-
               Support: Extended
             pattern: ^([0-9]{1,5}(h|m|s|ms)){1,4}$
             type: string
@@ -123,7 +115,6 @@ properties:
               which may be reflected in the cookie or the header. Users
               should avoid reusing session names to prevent unintended
               consequences, such as rejection or unpredictable behavior.
-
 
               Support: Implementation-specific
             maxLength: 128
@@ -135,9 +126,7 @@ properties:
               the use a header or cookie. Defaults to cookie based session
               persistence.
 
-
               Support: Core for "Cookie" type
-
 
               Support: Extended for "Header" type
             enum:
@@ -147,8 +136,8 @@ properties:
         type: object
         x-kubernetes-validations:
         - message: AbsoluteTimeout must be specified when cookie lifetimeType is Permanent
-          rule: '!has(self.cookieConfig.lifetimeType) || self.cookieConfig.lifetimeType
-            != ''Permanent'' || has(self.absoluteTimeout)'
+          rule: '!has(self.cookieConfig) || !has(self.cookieConfig.lifetimeType) ||
+            self.cookieConfig.lifetimeType != ''Permanent'' || has(self.absoluteTimeout)'
       targetRefs:
         description: |-
           TargetRef identifies an API object to apply policy to.

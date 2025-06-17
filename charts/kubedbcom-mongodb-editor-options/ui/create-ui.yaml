@@ -26,7 +26,11 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/mode
       type: radio
-    - elements:
+    - discriminator:
+        enableHorizons:
+          default: false
+          type: boolean
+      elements:
       - label:
           text: labels.replicaset.name
         schema:
@@ -34,9 +38,39 @@ steps:
         type: input
       - label:
           text: labels.replicaset.number
+        onChange: updateSuffix
         schema:
           $ref: schema#/properties/spec/properties/replicaSet/properties/replicas
         type: input
+      - if: isTlsOn
+        label:
+          text: Do you want to access mongodb+srv style dns?
+        onChange: onHorizonsChange
+        schema:
+          $ref: discriminator#/enableHorizons
+        type: switch
+      - alertInfo:
+          show: true
+          type: neutral
+        if: isHorizonsOn
+        label:
+          text: Horizons count should be equal to Replica Number.
+        type: label-element
+      - element:
+          label:
+            text: Add a new horizon dns for pod
+          schema:
+            $ref: schema#/properties/spec/properties/replicaSet/properties/horizons/items
+          type: input
+        if: isHorizonsOn
+        label:
+          text: Horizons
+        onChange: updateSuffix
+        schema:
+          $ref: schema#/properties/spec/properties/replicaSet/properties/horizons
+        type: list-input-form
+        validationRuleObject:
+          func: isHorizonsValid
       if: isEqualToModelPathValue|Replicaset|/spec/mode
       schema:
         $ref: schema#/properties/spec/properties/replicaSet

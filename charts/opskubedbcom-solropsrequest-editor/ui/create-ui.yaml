@@ -351,6 +351,8 @@ steps:
           schema:
             $ref: schema#/properties/spec/properties/volumeExpansion/properties/coordinator
           type: input
+          validationRuleObject:
+            func: checkVolume|/spec/topology/coordinator/storage/resources/requests/storage|/spec/volumeExpansion/coordinator
         if: ifDbTypeEqualsTo|Topology|VolumeExpansion
         label:
           text: Coordinator
@@ -363,6 +365,8 @@ steps:
           schema:
             $ref: schema#/properties/spec/properties/volumeExpansion/properties/data
           type: input
+          validationRuleObject:
+            func: checkVolume|/spec/topology/data/storage/resources/requests/storage|/spec/volumeExpansion/data
         if: ifDbTypeEqualsTo|Topology|VolumeExpansion
         label:
           text: Data
@@ -375,6 +379,8 @@ steps:
           schema:
             $ref: schema#/properties/spec/properties/volumeExpansion/properties/overseer
           type: input
+          validationRuleObject:
+            func: checkVolume|/spec/topology/overseer/storage/resources/requests/storage|/spec/volumeExpansion/overseer
         if: ifDbTypeEqualsTo|Topology|VolumeExpansion
         label:
           text: Overseer
@@ -387,6 +393,8 @@ steps:
           schema:
             $ref: schema#/properties/spec/properties/volumeExpansion/properties/node
           type: input
+          validationRuleObject:
+            func: checkVolume|/spec/storage/resources/requests/storage|/spec/volumeExpansion/node
         if: ifDbTypeEqualsTo|Combined|VolumeExpansion
         label:
           text: Node
@@ -570,7 +578,7 @@ steps:
       - alias: reusable_certificates
         chart:
           name: uibytebuildersdev-component-certificates
-          version: v0.17.0
+          version: v0.18.0
         computed: setValueFromDbDetails|/spec/tls/certificates|/spec/tls/certificates
         functionCallbacks:
           getAliasOptions:

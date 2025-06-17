@@ -874,6 +874,8 @@ steps:
         schema:
           $ref: schema#/properties/spec/properties/volumeExpansion/properties/node
         type: input
+        validationRuleObject:
+          func: checkVolume|/spec/storage/resources/requests/storage|/spec/volumeExpansion/node
       - label:
           text: Mode
         options:
@@ -893,6 +895,8 @@ steps:
           schema:
             $ref: schema#/properties/spec/properties/volumeExpansion/properties/master
           type: input
+          validationRuleObject:
+            func: checkVolume|/spec/topology/master/storage/resources/requests/storage|/spec/volumeExpansion/master
         - computed: setValueFromDbDetails|/spec/topology/data/storage/resources/requests/storage
           if: hasVolumeExpansion|data
           label:
@@ -900,6 +904,8 @@ steps:
           schema:
             $ref: schema#/properties/spec/properties/volumeExpansion/properties/data
           type: input
+          validationRuleObject:
+            func: checkVolume|/spec/topology/data/storage/resources/requests/storage|/spec/volumeExpansion/data
         - computed: setValueFromDbDetails|/spec/topology/ingest/storage/resources/requests/storage
           if: hasVolumeExpansion|ingest
           label:
@@ -907,6 +913,8 @@ steps:
           schema:
             $ref: schema#/properties/spec/properties/volumeExpansion/properties/ingest
           type: input
+          validationRuleObject:
+            func: checkVolume|/spec/topology/ingest/storage/resources/requests/storage|/spec/volumeExpansion/ingest
         - computed: setValueFromDbDetails|/spec/topology/ml/storage/resources/requests/storage
           if: hasVolumeExpansion|ml
           label:
@@ -914,6 +922,8 @@ steps:
           schema:
             $ref: schema#/properties/spec/properties/volumeExpansion/properties/ml
           type: input
+          validationRuleObject:
+            func: checkVolume|/spec/topology/ml/storage/resources/requests/storage|/spec/volumeExpansion/ml
         - computed: setValueFromDbDetails|/spec/topology/transform/storage/resources/requests/storage
           if: hasVolumeExpansion|transform
           label:
@@ -921,6 +931,8 @@ steps:
           schema:
             $ref: schema#/properties/spec/properties/volumeExpansion/properties/transform
           type: input
+          validationRuleObject:
+            func: checkVolume|/spec/topology/transform/storage/resources/requests/storage|/spec/volumeExpansion/transform
         - computed: setValueFromDbDetails|/spec/topology/dataCold/storage/resources/requests/storage
           if: hasVolumeExpansion|dataCold
           label:
@@ -928,6 +940,8 @@ steps:
           schema:
             $ref: schema#/properties/spec/properties/volumeExpansion/properties/dataCold
           type: input
+          validationRuleObject:
+            func: checkVolume|/spec/topology/dataCold/storage/resources/requests/storage|/spec/volumeExpansion/dataCold
         - computed: setValueFromDbDetails|/spec/topology/dataContent/storage/resources/requests/storage
           if: hasVolumeExpansion|dataContent
           label:
@@ -935,6 +949,8 @@ steps:
           schema:
             $ref: schema#/properties/spec/properties/volumeExpansion/properties/dataContent
           type: input
+          validationRuleObject:
+            func: checkVolume|/spec/topology/dataContent/storage/resources/requests/storage|/spec/volumeExpansion/dataContent
         - computed: setValueFromDbDetails|/spec/topology/dataFrozen/storage/resources/requests/storage
           if: hasVolumeExpansion|dataFrozen
           label:
@@ -942,6 +958,8 @@ steps:
           schema:
             $ref: schema#/properties/spec/properties/volumeExpansion/properties/dataFrozen
           type: input
+          validationRuleObject:
+            func: checkVolume|/spec/topology/dataFrozen/storage/resources/requests/storage|/spec/volumeExpansion/dataFrozen
         - computed: setValueFromDbDetails|/spec/topology/dataHot/storage/resources/requests/storage
           if: hasVolumeExpansion|dataHot
           label:
@@ -949,6 +967,8 @@ steps:
           schema:
             $ref: schema#/properties/spec/properties/volumeExpansion/properties/dataHot
           type: input
+          validationRuleObject:
+            func: checkVolume|/spec/topology/dataHot/storage/resources/requests/storage|/spec/volumeExpansion/dataHot
         - computed: setValueFromDbDetails|/spec/topology/dataWarm/storage/resources/requests/storage
           if: hasVolumeExpansion|dataWarm
           label:
@@ -956,6 +976,8 @@ steps:
           schema:
             $ref: schema#/properties/spec/properties/volumeExpansion/properties/dataWarm
           type: input
+          validationRuleObject:
+            func: checkVolume|/spec/topology/dataWarm/storage/resources/requests/storage|/spec/volumeExpansion/dataWarm
         if: ifDbTypeEqualsTo|topology|VolumeExpansion
         label:
           text: labels.storage.size
@@ -1128,7 +1150,7 @@ steps:
       - alias: reusable_certificates
         chart:
           name: uibytebuildersdev-component-certificates
-          version: v0.17.0
+          version: v0.18.0
         computed: setValueFromDbDetails|/spec/tls/certificates|/spec/tls/certificates
         functionCallbacks:
           getAliasOptions:
