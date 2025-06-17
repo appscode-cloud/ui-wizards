@@ -107,11 +107,15 @@ spec:
             {{- include "common.placement" . | nindent 6 }}
       mode: {{ .Values.spec.innoDBCluster.mode }}
 {{- else if eq .Values.spec.mode "RemoteReplica" }}
-  remoteReplica:
-    {{- .Values.spec.remoteReplica | toYaml | nindent 4 }}
+  topology:
+    mode: RemoteReplica
+    remoteReplica:
+      {{- .Values.spec.remoteReplica | toYaml | nindent 6 }}
 {{- else if eq .Values.spec.mode "SemiSync" }}
-  semiSync:
-    {{- .Values.spec.semiSync | toYaml | nindent 4 }}
+  topology:
+    mode: SemiSync
+    semiSync:
+      {{- .Values.spec.semiSync | toYaml | nindent 6 }}
 {{- end }}
   storageType: Durable
   storage:
