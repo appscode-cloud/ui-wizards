@@ -39,7 +39,7 @@ steps:
         schema:
           $ref: schema#/properties/spec/properties/server/properties/primary/properties/podResources/properties/machine
         type: select
-      - computed: setLimits|cpu
+      - computed: setLimits|cpu|server/primary
         disabled: isMachineNotCustom
         if: isMachineCustom|server/primary
         label:
@@ -48,7 +48,7 @@ steps:
         schema:
           $ref: schema#/properties/spec/properties/server/properties/primary/properties/podResources/properties/resources/properties/requests/properties/cpu
         type: input
-      - computed: setLimits|memory
+      - computed: setLimits|memory|server/primary
         disabled: isMachineNotCustom
         if: isMachineCustom|server/primary
         label:
@@ -74,7 +74,7 @@ steps:
         schema:
           $ref: schema#/properties/spec/properties/server/properties/secondary/properties/podResources/properties/machine
         type: select
-      - computed: setLimits|cpu
+      - computed: setLimits|cpu|server/secondary
         disabled: isMachineNotCustom
         if: isMachineCustom|server/secondary
         label:
@@ -83,7 +83,7 @@ steps:
         schema:
           $ref: schema#/properties/spec/properties/server/properties/secondary/properties/podResources/properties/resources/properties/requests/properties/cpu
         type: input
-      - computed: setLimits|memory
+      - computed: setLimits|memory|server/secondary
         disabled: isMachineNotCustom
         if: isMachineCustom|server/secondary
         label:
@@ -103,11 +103,46 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/admin/properties/storageClasses/properties/default
       type: select
-    - label:
-        text: labels.storage.size
-      schema:
-        $ref: schema#/properties/spec/properties/persistence/properties/size
-      type: input
+    - elements:
+      - label:
+          text: labels.storage.size
+        schema:
+          $ref: schema#/properties/spec/properties/backend/properties/persistence/properties/size
+        type: input
+      - label:
+          text: labels.replicaset.number
+        schema:
+          $ref: schema#/properties/spec/properties/backend/properties/replicas
+        type: input
+      - computed: setMachineToCustom
+        fetch: getMachineListForOptions
+        label:
+          text: Machine
+        schema:
+          $ref: schema#/properties/spec/properties/backend/properties/podResources/properties/machine
+        type: select
+      - computed: setLimits|cpu|backend
+        disabled: isMachineNotCustom
+        if: isMachineCustom|backend
+        label:
+          text: labels.cpu
+        onChange: setRequests|cpu
+        schema:
+          $ref: schema#/properties/spec/properties/backend/properties/podResources/properties/resources/properties/requests/properties/cpu
+        type: input
+      - computed: setLimits|memory|backend
+        disabled: isMachineNotCustom
+        if: isMachineCustom|backend
+        label:
+          text: labels.memory
+        onChange: setRequests|memory
+        schema:
+          $ref: schema#/properties/spec/properties/backend/properties/podResources/properties/resources/properties/requests/properties/memory
+        type: input
+      label:
+        text: Backend
+      show_label: true
+      type: single-step-form
     - accordion: true
       description:
         text: Configure Credentials, Deployment Mode etc.
