@@ -317,6 +317,14 @@ const modeDetails = {
     description: 'InnoDBCluster for high availability.',
     text: 'InnoDBCluster',
   },
+  RemoteReplica: {
+    description: 'RemoteReplica for connecting to an external MySQL instance.',
+    text: 'RemoteReplica',
+  },
+  SemiSync: {
+    description: 'SemiSync for semi-synchronous replication.',
+    text: 'SemiSync',
+  },
 }
 
 function isEqualToModelPathValue({ model, getValue, watchDependency }, value, modelPath) {
@@ -1340,6 +1348,45 @@ function onReferSecretChange({ commit }) {
   })
 }
 
+async function getAppBindings({ commit, axios, storeGet, model, getValue }) {
+  const namespace = getValue(model, '/metadata/release/namespace')
+  const owner = storeGet('/route/params/user')
+  const cluster = storeGet('/route/params/cluster')
+
+  const queryParams = {
+    filter: {
+      items: {
+        metadata: { name: null },
+        spec: { type: null },
+      },
+    },
+  }
+  try {
+    const resp = await axios.get(
+      `/clusters/${owner}/${cluster}/proxy/appcatalog.appscode.com/v1alpha1/appbindings`,
+      {
+        params: queryParams,
+      },
+    )
+
+    const resources = (resp && resp.data && resp.data.items) || []
+
+    const fileredResources = resources
+      .filter((item) => item.spec?.type === 'kubedb.com/mysql')
+      .map((item) => {
+        const name = (item.metadata && item.metadata.name) || ''
+        return {
+          text: `${namespace}/${name}`,
+          value: { name, namespace },
+        }
+      })
+    return fileredResources
+  } catch (e) {
+    console.log(e)
+    return []
+  }
+}
+
 return {
   showReferSecretSwitch,
   onReferSecretChange,
@@ -1395,4 +1442,5 @@ return {
   onArchiverChange,
   showArchiverAlert,
   showArchiver,
+  getAppBindings,
 }

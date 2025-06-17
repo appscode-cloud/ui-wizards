@@ -31,6 +31,16 @@ steps:
         schema:
           $ref: schema#/properties/spec/properties/replicas
         type: input
+      - label:
+          text: Mode
+        options:
+          - text: Single-Primary
+            value: Single-Primary
+          - text: Multi-Primary
+            value: Multi-Primary
+        schema:
+          $ref: schema#/properties/spec/properties/groupReplication/properties/mode
+        type: select
       if: isEqualToModelPathValue|GroupReplication|/spec/mode
       type: single-step-form
     - elements:
@@ -44,7 +54,45 @@ steps:
         schema:
           $ref: schema#/properties/spec/properties/innoDBCluster/properties/router/properties/replicas
         type: input
+      - label:
+          text: Mode
+        options:
+          - text: Single-Primary
+            value: Single-Primary
+          - text: Multi-Primary
+            value: Multi-Primary
+        schema:
+          $ref: schema#/properties/spec/properties/innoDBCluster/properties/mode
+        type: select
       if: isEqualToModelPathValue|InnoDBCluster|/spec/mode
+      type: single-step-form
+    - elements:
+      - fetch: getAppBindings
+        label:
+          text: RemoteReplica SourceRef
+        schema:
+          $ref: schema#/properties/spec/properties/remoteReplica/properties/sourceRef
+        type: select
+      if: isEqualToModelPathValue|RemoteReplica|/spec/mode
+      type: single-step-form
+    - elements:
+      - fetch: getAppBindings
+        label:
+          text: RemoteReplica SourceRef
+        schema:
+          $ref: schema#/properties/spec/properties/remoteReplica/properties/sourceRef
+        type: select
+      - label:
+          text: Errant Transaction Recovery Policy
+        options:
+          - text: Clone
+            value: Clone
+          - text: PseudoTransaction
+            value: PseudoTransaction
+        schema:
+          $ref: schema#/properties/spec/properties/semiSync/errantTransactionRecoveryPolicy
+        type: select
+      if: isEqualToModelPathValue|SemiSync|/spec/mode
       type: single-step-form
     - elements:
       - computed: setMachineToCustom

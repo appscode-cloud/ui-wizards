@@ -341,7 +341,13 @@ const modes = {
     default: 'Replicaset',
   },
   MySQL: {
-    availableModes: ['Standalone', 'GroupReplication', 'InnoDBCluster'],
+    availableModes: [
+      'Standalone',
+      'GroupReplication',
+      'InnoDBCluster',
+      'RemoteReplica',
+      'SemiSync',
+    ],
     default: 'GroupReplication',
   },
   PerconaXtraDB: {
