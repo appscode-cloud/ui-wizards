@@ -1144,7 +1144,7 @@ function convertToISO(input) {
   const date = new Date(input)
 
   if (isNaN(date.getTime())) {
-    throw new Error('Invalid date format')
+    return null
   }
 
   return date.toISOString()
@@ -1165,9 +1165,8 @@ function getComponentLogStats(snapshot) {
       }
     }
   }
-
-  if (components['wal'] && components['wal'].logStats) {
-    return components['wal'].logStats
+  if (components['log'] && components['log'].logStats) {
+    return components['log'].logStats
   }
 
   return null
@@ -1218,7 +1217,7 @@ async function setPointInTimeRecovery({ commit, axios, storeGet, discriminator, 
     })
 
     const resp = getComponentLogStats(snapshotsResp.data)
-    const recoveryTimestampArray = convertToISO(resp?.end).split('.')
+    const recoveryTimestampArray = convertToISO(resp?.end)?.split('.')
 
     if (recoveryTimestampArray.length === 2) {
       recoveryTimestampMiliSec = recoveryTimestampArray[1]
@@ -1226,17 +1225,17 @@ async function setPointInTimeRecovery({ commit, axios, storeGet, discriminator, 
 
     commit('wizard/model$update', {
       path: `/spec/init/archiver/recoveryTimestamp`,
-      value: convertToISO(resp?.end).slice(0, -1),
+      value: convertToISO(resp?.end)?.slice(0, -1),
       force: true,
     })
     commit('wizard/model$update', {
       path: `/minDate`,
-      value: convertToISO(resp?.start).slice(0, -1),
+      value: convertToISO(resp?.start)?.slice(0, -1),
       force: true,
     })
     commit('wizard/model$update', {
       path: `/maxDate`,
-      value: convertToISO(resp?.end).slice(0, -1),
+      value: convertToISO(resp?.end)?.slice(0, -1),
       force: true,
     })
   } catch (e) {
@@ -1264,7 +1263,6 @@ function setMiliSeconds({ model, getValue, commit }) {
   const recoveryTimestampArray = recoveryTimestamp?.split('.')
   if (recoveryTimestampArray.length === 1) return
   if (recoveryTimestampMiliSec !== '000Z') {
-    console.log(recoveryTimestampArray[0] + '.' + recoveryTimestampMiliSec.slice(0, -1))
     commit('wizard/model$update', {
       path: `/spec/init/archiver/recoveryTimestamp`,
       value: recoveryTimestampArray[0] + '.' + recoveryTimestampMiliSec.slice(0, -1),
