@@ -2978,7 +2978,7 @@ func (in *KubedbcomMysqlEditorOptionsSpecSpec) DeepCopyInto(out *KubedbcomMysqlE
 	in.GroupReplication.DeepCopyInto(&out.GroupReplication)
 	in.InnoDBCluster.DeepCopyInto(&out.InnoDBCluster)
 	out.RemoteReplica = in.RemoteReplica
-	in.SemiSync.DeepCopyInto(&out.SemiSync)
+	out.SemiSync = in.SemiSync
 	out.Persistence = in.Persistence
 	in.PodResources.DeepCopyInto(&out.PodResources)
 	out.AuthSecret = in.AuthSecret
@@ -4761,11 +4761,6 @@ func (in *MySQLRouter) DeepCopy() *MySQLRouter {
 func (in *MySQLSemiSync) DeepCopyInto(out *MySQLSemiSync) {
 	*out = *in
 	out.SourceTimeout = in.SourceTimeout
-	if in.ErrantTransactionRecoveryPolicy != nil {
-		in, out := &in.ErrantTransactionRecoveryPolicy, &out.ErrantTransactionRecoveryPolicy
-		*out = new(ErrantTransactionRecoveryPolicy)
-		**out = **in
-	}
 	return
 }
 

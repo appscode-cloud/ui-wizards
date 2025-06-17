@@ -18,7 +18,6 @@ package v1alpha1
 
 import (
 	alerts "go.appscode.dev/alerts/apis/alerts/v1alpha1"
-	core "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	api "x-helm.dev/apimachinery/apis/releases/v1alpha1"
 )
@@ -95,12 +94,12 @@ type MySQLRouter struct {
 }
 
 type MySQLRemoteReplica struct {
-	SourceRef core.ObjectReference `json:"sourceRef,omitempty"`
+	SourceRef ObjectReference `json:"sourceRef"`
 }
 type MySQLSemiSync struct {
-	SourceWaitForReplicaCount       int                              `json:"sourceWaitForReplicaCount,omitempty"`
-	SourceTimeout                   metav1.Duration                  `json:"sourceTimeout,omitempty"`
-	ErrantTransactionRecoveryPolicy *ErrantTransactionRecoveryPolicy `json:"errantTransactionRecoveryPolicy"`
+	SourceWaitForReplicaCount       int                             `json:"sourceWaitForReplicaCount"`
+	SourceTimeout                   metav1.Duration                 `json:"sourceTimeout"`
+	ErrantTransactionRecoveryPolicy ErrantTransactionRecoveryPolicy `json:"errantTransactionRecoveryPolicy"`
 }
 
 // +kubebuilder:validation:Enum= Clone;PseudoTransaction
