@@ -18,6 +18,7 @@ package v1alpha1
 
 import (
 	alerts "go.appscode.dev/alerts/apis/alerts/v1alpha1"
+	core "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	api "x-helm.dev/apimachinery/apis/releases/v1alpha1"
 )
@@ -50,12 +51,18 @@ type KubedbcomMysqlEditorOptionsSpecSpec struct {
 	// +optional
 	Replicas int `json:"replicas,omitempty"`
 	// +optional
-	InnoDBCluster  MySQLInnoDBCluster `json:"innoDBCluster,omitempty"`
-	Persistence    Persistence        `json:"persistence"`
-	PodResources   PodResources       `json:"podResources"`
-	AuthSecret     AuthSecret         `json:"authSecret"`
-	DeletionPolicy DeletionPolicy     `json:"deletionPolicy"`
-	Configuration  string             `json:"configuration"`
+	GroupReplication MySQLGroupReplication `json:"groupReplication,omitempty"`
+	// +optional
+	InnoDBCluster MySQLInnoDBCluster `json:"innoDBCluster,omitempty"`
+	// +optional
+	RemoteReplica MySQLRemoteReplica `json:"remoteReplica,omitempty"`
+	// +optional
+	SemiSync       MySQLSemiSync  `json:"semiSync,omitempty"`
+	Persistence    Persistence    `json:"persistence"`
+	PodResources   PodResources   `json:"podResources"`
+	AuthSecret     AuthSecret     `json:"authSecret"`
+	DeletionPolicy DeletionPolicy `json:"deletionPolicy"`
+	Configuration  string         `json:"configuration"`
 	// +optional
 	ArchiverName string             `json:"archiverName"`
 	Init         InitDatabase       `json:"init"`
@@ -66,15 +73,45 @@ type KubedbcomMysqlEditorOptionsSpecSpec struct {
 	Openshift Openshift `json:"openshift"`
 }
 
+type MySQLGroupReplication struct {
+	Mode *MySQLGroupMode `json:"mode"`
+}
+
+// +kubebuilder:validation:Enum=Single-Primary;Multi-Primary
+type MySQLGroupMode string
+
+const (
+	MySQLGroupModeSinglePrimary MySQLGroupMode = "Single-Primary"
+	MySQLGroupModeMultiPrimary  MySQLGroupMode = "Multi-Primary"
+)
+
 type MySQLInnoDBCluster struct {
-	Router MySQLRouter `json:"router"`
+	Router MySQLRouter     `json:"router"`
+	Mode   *MySQLGroupMode `json:"mode"`
 }
 
 type MySQLRouter struct {
 	Replicas int `json:"replicas"`
 }
 
-// +kubebuilder:validation:Enum=Standalone;GroupReplication;InnoDBCluster
+type MySQLRemoteReplica struct {
+	SourceRef core.ObjectReference `json:"sourceRef,omitempty"`
+}
+type MySQLSemiSync struct {
+	SourceWaitForReplicaCount       int                              `json:"sourceWaitForReplicaCount,omitempty"`
+	SourceTimeout                   metav1.Duration                  `json:"sourceTimeout,omitempty"`
+	ErrantTransactionRecoveryPolicy *ErrantTransactionRecoveryPolicy `json:"errantTransactionRecoveryPolicy"`
+}
+
+// +kubebuilder:validation:Enum= Clone;PseudoTransaction
+type ErrantTransactionRecoveryPolicy string
+
+const (
+	ErrantTransactionRecoveryPolicyClone             ErrantTransactionRecoveryPolicy = "Clone"
+	ErrantTransactionRecoveryPolicyPseudoTransaction ErrantTransactionRecoveryPolicy = "PseudoTransaction"
+)
+
+// +kubebuilder:validation:Enum=Standalone;GroupReplication;InnoDBCluster;RemoteReplica;SemiSync
 type MysqlMode string
 
 type MysqlAlertsSpecForm struct {

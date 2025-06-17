@@ -85,6 +85,8 @@ spec:
   replicas: {{ .Values.spec.replicas }}
   topology:
     mode: GroupReplication
+    group:
+      mode: {{ .Values.spec.groupReplication.mode }}
 {{- else if eq .Values.spec.mode "InnoDBCluster" }}
   replicas: {{ .Values.spec.replicas }}
   topology:
@@ -103,6 +105,13 @@ spec:
                 securityContext:
                   {{- include "container.securityContext" . | nindent 20 }}
             {{- include "common.placement" . | nindent 6 }}
+      mode: {{ .Values.spec.innoDBCluster.mode }}
+{{- else if eq .Values.spec.mode "RemoteReplica" }}
+  remoteReplica:
+    {{- .Values.spec.remoteReplica | toYaml | nindent 4 }}
+{{- else if eq .Values.spec.mode "SemiSync" }}
+  semiSync:
+    {{- .Values.spec.semiSync | toYaml | nindent 4 }}
 {{- end }}
   storageType: Durable
   storage:

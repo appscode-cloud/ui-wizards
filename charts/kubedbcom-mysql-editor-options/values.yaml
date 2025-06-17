@@ -22,12 +22,27 @@ spec:
   # Labels to add to all the template objects
   labels: {}
 
-  # Standalone, GroupReplication, InnoDBCluster
+  # Standalone, GroupReplication, InnoDBCluster, RemoteReplica, SemiSync
   mode: GroupReplication
   replicas: 3
+
+  groupReplication:
+    mode: Single-Primary
+
   innoDBCluster:
     router:
       replicas: 3
+    mode: Single-Primary
+
+  remoteReplica:
+    sourceRef:
+      name: ""
+      namespace: ""
+
+  semiSync:
+    sourceWaitForReplicaCount: 1
+    sourceTimeout: 24h
+    errantTransactionRecoveryPolicy: PseudoTransaction
 
   deletionPolicy: WipeOut
 
