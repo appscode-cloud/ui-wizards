@@ -54,7 +54,7 @@ type KubedbcomMysqlEditorOptionsSpecSpec struct {
 	// +optional
 	InnoDBCluster MySQLInnoDBCluster `json:"innoDBCluster,omitempty"`
 	// +optional
-	RemoteReplica MySQLRemoteReplica `json:"remoteReplica,omitempty"`
+	RemoteReplica RemoteReplica `json:"remoteReplica,omitempty"`
 	// +optional
 	SemiSync       MySQLSemiSync  `json:"semiSync,omitempty"`
 	Persistence    Persistence    `json:"persistence"`
@@ -93,9 +93,6 @@ type MySQLRouter struct {
 	Replicas int `json:"replicas"`
 }
 
-type MySQLRemoteReplica struct {
-	SourceRef ObjectReference `json:"sourceRef"`
-}
 type MySQLSemiSync struct {
 	SourceWaitForReplicaCount       int                             `json:"sourceWaitForReplicaCount"`
 	SourceTimeout                   metav1.Duration                 `json:"sourceTimeout"`

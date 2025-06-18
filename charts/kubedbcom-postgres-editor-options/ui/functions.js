@@ -309,7 +309,7 @@ const modeDetails = {
     description: 'Single node Postgres without high availability.',
     text: 'Standalone',
   },
-  Replicaset: {
+  Cluster: {
     description: 'Postgres HA Cluster for high availability.',
     text: 'HA Cluster',
   },

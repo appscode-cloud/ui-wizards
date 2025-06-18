@@ -26,7 +26,7 @@
 {{- end }}
 
 {{- define "minmax-profiles" -}}
-  {{- $instanceType := ternary "Standalone" "Replicaset" (eq .Values.spec.mode "Standalone") }}
+  {{- $instanceType := ternary "Standalone" "Cluster" (eq .Values.spec.mode "Standalone") }}
   {{- $validMachines := list }}
   {{- range $machine := .Values.spec.admin.machineProfiles.available }}
     {{- if ne $machine "custom" }}

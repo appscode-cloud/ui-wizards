@@ -45,14 +45,18 @@ type KubedbcomPostgresEditorOptionsSpecSpec struct {
 	// +optional
 	Annotations map[string]string `json:"annotations"`
 	// +optional
-	Labels         map[string]string `json:"labels"`
-	Mode           GeneralMode       `json:"mode"`
-	Replicas       int               `json:"replicas"`
-	DeletionPolicy DeletionPolicy    `json:"deletionPolicy"`
-	Persistence    Persistence       `json:"persistence"`
-	PodResources   PodResources      `json:"podResources"`
-	AuthSecret     AuthSecret        `json:"authSecret"`
-	Configuration  string            `json:"configuration"`
+	Labels   map[string]string `json:"labels"`
+	Mode     PostgresMode      `json:"mode"`
+	Replicas int               `json:"replicas"`
+	// +optional
+	RemoteReplica  *RemoteReplica         `json:"remoteReplica,omitempty"`
+	StandbyMode    *PostgresStandbyMode   `json:"standbyMode"`
+	StreamingMode  *PostgresStreamingMode `json:"streamingMode"`
+	DeletionPolicy DeletionPolicy         `json:"deletionPolicy"`
+	Persistence    Persistence            `json:"persistence"`
+	PodResources   PodResources           `json:"podResources"`
+	AuthSecret     AuthSecret             `json:"authSecret"`
+	Configuration  string                 `json:"configuration"`
 	// +optional
 	ArchiverName string             `json:"archiverName"`
 	Init         InitDatabase       `json:"init"`
@@ -62,6 +66,25 @@ type KubedbcomPostgresEditorOptionsSpecSpec struct {
 	// +optional
 	Openshift Openshift `json:"openshift"`
 }
+
+// +kubebuilder:validation:Enum=Standalone;Cluster;RemoteReplica
+type PostgresMode string
+
+// +kubebuilder:validation:Enum=Hot;Warm
+type PostgresStandbyMode string
+
+const (
+	HotPostgresStandbyMode  PostgresStandbyMode = "Hot"
+	WarmPostgresStandbyMode PostgresStandbyMode = "Warm"
+)
+
+// +kubebuilder:validation:Enum=Synchronous;Asynchronous
+type PostgresStreamingMode string
+
+const (
+	SynchronousPostgresStreamingMode  PostgresStreamingMode = "Synchronous"
+	AsynchronousPostgresStreamingMode PostgresStreamingMode = "Asynchronous"
+)
 
 type PostgresAlertsSpecForm struct {
 	Alert alerts.PostgresAlert `json:"alert"`

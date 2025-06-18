@@ -83,9 +83,16 @@ spec:
   authSecret:
     name: {{ .Values.spec.authSecret.name }}
 {{- end }}
-{{- if eq .Values.spec.mode "Replicaset" }}
+  mode: {{ .Values.spec.mode }}
+{{- if eq .Values.spec.mode "Cluster" }}
   replicas: {{ .Values.spec.replicas }}
-{{- else }}
+  standbyMode: {{ .Values.spec.standbyMode }}
+  streamingMode: {{ .Values.spec.streamingMode }}
+{{- else if eq .Values.spec.mode "RemoteReplica" }}
+  replicas: {{ .Values.spec.replicas }}
+  remoteReplica:
+    {{ .Values.spec.remoteReplica | toYaml | nindent 4 }}
+{{- else if eq .Values.spec.mode "Standalone" }}
   replicas: 1
 {{- end }}
   podTemplate:
@@ -98,7 +105,7 @@ spec:
             {{- toYaml .res | nindent 12 }}
           securityContext:
             {{- include "container.securityContext" . | nindent 12 }}
-          {{- if eq .Values.spec.mode "Replicaset" }}
+          {{- if ne .Values.spec.mode "Standalone" }}
         - name: pg-coordinator
           resources:
             {{- toYaml .sidecar_res | nindent 12 }}
