@@ -33,6 +33,15 @@ steps:
         $ref: schema#/properties/spec/properties/replicas
       type: input
     - elements:
+      - fetch: getAppBindings
+        label:
+          text: RemoteReplica SourceRef
+        schema:
+          $ref: schema#/properties/spec/properties/remoteReplica/properties/sourceRef
+        type: select
+      if: EqualToDatabaseMode|RemoteReplica
+      type: single-step-form
+    - elements:
       - computed: setMachineToCustom
         customClass: mt-10
         fetch: getMachineListForOptions
@@ -279,6 +288,28 @@ steps:
         schema:
           $ref: schema#/properties/spec/properties/admin/properties/clusterTier/properties/nodeTopology/properties/default
         type: select
+      - if: EqualToDatabaseMode|Cluster
+        label:
+          text: Standby Mode
+        options:
+        - text: Hot
+          value: Hot
+        - text: Warm
+          value: Warm
+        schema:
+          $ref: schema#/properties/spec/properties/standbyMode
+        type: select
+      - if: EqualToDatabaseMode|Cluster
+        label:
+          text: Streaming Mode
+        options:
+        - text: Synchronous
+          value: Synchronous
+        - text: Asynchronous
+          value: Asynchronous
+        schema:
+          $ref: schema#/properties/spec/properties/streamingMode
+        type: select 
       hideForm: true
       label:
         text: Advanced Configuration

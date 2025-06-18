@@ -313,6 +313,10 @@ const modeDetails = {
     description: 'Postgres HA Cluster for high availability.',
     text: 'HA Cluster',
   },
+  RemoteReplica: {
+    description: 'Postgres Remote Replica for disaster recovery.',
+    text: 'RemoteReplica',
+  },
 }
 
 function isRancherManaged({ storeGet }) {
@@ -1533,6 +1537,45 @@ function onReferSecretChange({ commit }) {
   })
 }
 
+async function getAppBindings({ commit, axios, storeGet, model, getValue }) {
+  const owner = storeGet('/route/params/user')
+  const cluster = storeGet('/route/params/cluster')
+
+  const queryParams = {
+    filter: {
+      items: {
+        metadata: { name: null, namespace: null },
+        spec: { type: null },
+      },
+    },
+  }
+  try {
+    const resp = await axios.get(
+      `/clusters/${owner}/${cluster}/proxy/appcatalog.appscode.com/v1alpha1/appbindings`,
+      {
+        params: queryParams,
+      },
+    )
+
+    const resources = (resp && resp.data && resp.data.items) || []
+
+    const fileredResources = resources
+      .filter((item) => item.spec?.type === 'kubedb.com/postgres')
+      .map((item) => {
+        const name = (item.metadata && item.metadata.name) || ''
+        const namespace = (item.metadata && item.metadata.namespace) || ''
+        return {
+          text: `${namespace}/${name}`,
+          value: { name, namespace },
+        }
+      })
+    return fileredResources
+  } catch (e) {
+    console.log(e)
+    return []
+  }
+}
+
 return {
   showReferSecretSwitch,
   onReferSecretChange,
@@ -1604,4 +1647,5 @@ return {
   onArchiverChange,
   showArchiverAlert,
   showArchiver,
+  getAppBindings,
 }
