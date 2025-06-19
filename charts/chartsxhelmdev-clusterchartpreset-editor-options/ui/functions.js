@@ -363,8 +363,8 @@ const modes = {
     default: 'Replicaset',
   },
   Postgres: {
-    availableModes: ['Standalone', 'Replicaset'],
-    default: 'Replicaset',
+    availableModes: ['Standalone', 'Cluster', 'RemoteReplica'],
+    default: 'Cluster',
   },
   ProxySQL: {
     availableModes: ['Standalone', 'Replicaset'],

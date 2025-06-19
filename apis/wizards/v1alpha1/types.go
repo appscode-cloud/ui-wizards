@@ -65,6 +65,10 @@ type AuthSecret struct {
 	Password string `json:"password"`
 }
 
+type RemoteReplica struct {
+	SourceRef ObjectReference `json:"sourceRef"`
+}
+
 type Openshift struct {
 	// +optional
 	SecurityContext SecurityContext `json:"securityContext"`
