@@ -314,7 +314,7 @@ const modeDetails = {
     text: 'HA Cluster',
   },
   RemoteReplica: {
-    description: 'Postgres Remote Replica for disaster recovery.',
+    description: 'RemoteReplica for connecting into an external Postgres instance.',
     text: 'RemoteReplica',
   },
 }
