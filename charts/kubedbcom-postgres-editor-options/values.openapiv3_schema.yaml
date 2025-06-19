@@ -2207,7 +2207,8 @@ properties:
       mode:
         enum:
         - Standalone
-        - Replicaset
+        - Cluster
+        - RemoteReplica
         type: string
       monitoring:
         properties:
@@ -2315,8 +2316,35 @@ properties:
         - machine
         - resources
         type: object
+      remoteReplica:
+        properties:
+          sourceRef:
+            description: ObjectReference contains enough information to let you inspect
+              or modify the referred object.
+            properties:
+              name:
+                type: string
+              namespace:
+                type: string
+            required:
+            - name
+            - namespace
+            type: object
+        required:
+        - sourceRef
+        type: object
       replicas:
         type: integer
+      standbyMode:
+        enum:
+        - Hot
+        - Warm
+        type: string
+      streamingMode:
+        enum:
+        - Synchronous
+        - Asynchronous
+        type: string
     required:
     - admin
     - authSecret
@@ -2329,6 +2357,8 @@ properties:
     - persistence
     - podResources
     - replicas
+    - standbyMode
+    - streamingMode
     type: object
 required:
 - form
