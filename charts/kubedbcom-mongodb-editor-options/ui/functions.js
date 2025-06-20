@@ -1312,19 +1312,14 @@ function getDefaultValue({ getValue, model }, path) {
   return val
 }
 
-function convertToISO(input) {
-  const iso8601Regex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$/
-  if (iso8601Regex.test(input)) {
-    return input
-  }
-
+function convertToLocal(input) {
   const date = new Date(input)
 
   if (isNaN(date.getTime())) {
-    throw null
+    return null
   }
 
-  return date.toISOString()
+  return date.toString()
 }
 
 function getComponentLogStats(snapshot) {
@@ -1350,7 +1345,6 @@ function getComponentLogStats(snapshot) {
   return null
 }
 
-let recoveryTimestampMiliSec = '000Z'
 async function setPointInTimeRecovery({ commit, axios, storeGet, discriminator, getValue }) {
   const owner = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
@@ -1395,25 +1389,20 @@ async function setPointInTimeRecovery({ commit, axios, storeGet, discriminator, 
     })
 
     const resp = getComponentLogStats(snapshotsResp.data)
-    const recoveryTimestampArray = convertToISO(resp?.end)?.split('.')
-
-    if (recoveryTimestampArray.length === 2) {
-      recoveryTimestampMiliSec = recoveryTimestampArray[1]
-    }
 
     commit('wizard/model$update', {
       path: `/spec/init/archiver/recoveryTimestamp`,
-      value: convertToISO(resp?.end)?.slice(0, -1),
+      value: convertToLocal(resp?.end),
       force: true,
     })
     commit('wizard/model$update', {
       path: `/minDate`,
-      value: convertToISO(resp?.start)?.slice(0, -1),
+      value: convertToLocal(resp?.start),
       force: true,
     })
     commit('wizard/model$update', {
       path: `/maxDate`,
-      value: convertToISO(resp?.end)?.slice(0, -1),
+      value: convertToLocal(resp?.end),
       force: true,
     })
   } catch (e) {
@@ -1433,20 +1422,6 @@ async function setPointInTimeRecovery({ commit, axios, storeGet, discriminator, 
       force: true,
     })
     console.log(e)
-  }
-}
-
-function setMiliSeconds({ model, getValue, commit }) {
-  const recoveryTimestamp = getValue(model, '/spec/init/archiver/recoveryTimestamp')
-  const recoveryTimestampArray = recoveryTimestamp?.split('.')
-  if (recoveryTimestampArray.length === 1) return
-  if (recoveryTimestampMiliSec !== '000Z') {
-    commit('wizard/model$update', {
-      path: `/spec/init/archiver/recoveryTimestamp`,
-      value: recoveryTimestampArray[0] + '.' + recoveryTimestampMiliSec.slice(0, -1),
-      force: true,
-    })
-    recoveryTimestampMiliSec = '000Z'
   }
 }
 
@@ -1541,7 +1516,6 @@ return {
   showReferSecret,
   getReferSecrets,
   isConfigAvailable,
-  setMiliSeconds,
   setPointInTimeRecovery,
   checkHostnameOrIP,
   isRancherManaged,
