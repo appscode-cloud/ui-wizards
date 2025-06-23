@@ -422,10 +422,14 @@ function setLimits({ model, getValue, commit, watchDependency }, resource, type)
   }
 }
 
-function setRequests({ getValue, model, commit }, resource) {
-  const modelPath = `/spec/podResources/resources/requests/${resource}`
+function setRequests({ getValue, model, commit }, resource, type) {
+  const modelPath = type
+    ? `/spec/${type}/podResources/resources/requests/${resource}`
+    : `/spec/podResources/resources/requests/${resource}`
   const val = getValue(model, modelPath)
-  commitPath = `/spec/podResources/resources/limits/${resource}`
+  commitPath = type
+    ? `/spec/${type}/podResources/resources/limits/${resource}`
+    : `/spec/podResources/resources/limits/${resource}`
   commit('wizard/model$update', {
     path: commitPath,
     value: val,
