@@ -893,7 +893,6 @@ function sortMachines(arr) {
 
     const cpuA = parseCPU(a.limits.cpu)
     const cpuB = parseCPU(b.limits.cpu)
-    console.log(cpuA, cpuB)
 
     return cpuA - cpuB
   })
