@@ -836,33 +836,33 @@ function hasCustomProfile({ getValue, model }) {
 function parseMemory(memory) {
   const units = {
     B: 1, // Base unit (Bytes)
+    K: 1000, // 1 K = 1000 B
     KB: 1000, // 1 KB = 1000 B
-    Ki: 1000, // 1 Ki = 1000 B
-    K: 1024, // 1 K = 1024 B
-    M: 1024 * 1024, // 1 M = 1024 K
-    MB: 1024 * 1024, // 1 MB = 1024 K
-    Mi: 1000 * 1024, // 1 Mi = 1000 K
-    G: 1024 * 1024 * 1024, // 1 G = 1024 M
-    GB: 1024 * 1024 * 1024, // 1 GB = 1024 M
-    Gi: 1000 * 1000 * 1024, // 1 Gi = 1000 M
-    T: 1024 * 1024 * 1024 * 1024, // 1 T = 1024 G
-    TB: 1024 * 1024 * 1024 * 1024, // 1 TB = 1024 G
-    Ti: 1000 * 1000 * 1000 * 1024, // 1 Ti = 1000 G
-    P: 1024 * 1024 * 1024 * 1024 * 1024, // 1 P = 1024 T
-    PB: 1024 * 1024 * 1024 * 1024 * 1024, // 1 PB = 1024 T
-    Pi: 1000 * 1000 * 1000 * 1000 * 1024, // 1 Pi = 1000 T
+    Ki: 1024, // 1 Ki = 1024 B
+    M: 1000 * 1000, // 1 M = 1000 K
+    MB: 1000 * 1000, // 1 MB = 1000 KB
+    Mi: 1024 * 1024, // 1 Mi = 1024 Ki
+    G: 1000 * 1000 * 1000, // 1 G = 1000 M
+    GB: 1000 * 1000 * 1000, // 1 GB = 1000 MB
+    Gi: 1024 * 1024 * 1024, // 1 Gi = 1024 Mi
+    T: 1000 * 1000 * 1000 * 1000, // 1 T = 1000 G
+    TB: 1000 * 1000 * 1000 * 1000, // 1 TB = 1000 GB
+    Ti: 1024 * 1024 * 1024 * 1024, // 1 Ti = 1024 Gi
+    P: 1000 * 1000 * 1000 * 1000 * 1000, // 1 P = 1000 T
+    PB: 1000 * 1000 * 1000 * 1000 * 1000, // 1 PB = 1000 TB
+    Pi: 1024 * 1024 * 1024 * 1024 * 1024, // 1 Pi = 1024 Ti
   }
 
-  // If memory is just a number, treat it as bytes
-  if (/^\d+$/.test(memory)) {
-    return parseInt(memory) // Assume raw bytes if no unit is given
+  // If memory is just a number (int or float), treat it as bytes
+  if (/^\d+(\.\d+)?$/.test(memory)) {
+    return parseFloat(memory)
   }
 
-  // Extract number and unit from memory string
-  const match = memory.match(/^(\d+)(B|KB|Ki|K|M|MB|Mi|G|GB|Gi|T|TB|Ti|P|PB|Pi)?$/)
+  // Match float or int followed by optional unit
+  const match = memory.match(/^(\d+(?:\.\d+)?)(B|KB|Ki|K|M|MB|Mi|G|GB|Gi|T|TB|Ti|P|PB|Pi)?$/)
   if (match) {
-    const value = parseInt(match[1])
-    const unit = match[2] || 'B' // Default to 'B' if no unit
+    const value = parseFloat(match[1])
+    const unit = match[2] || 'B'
     return value * (units[unit] || 1)
   }
 
