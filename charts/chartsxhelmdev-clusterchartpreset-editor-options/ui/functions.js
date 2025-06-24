@@ -872,7 +872,7 @@ function parseMemory(memory) {
 function parseCPU(cpu) {
   if (typeof cpu === 'number') return cpu // If already a number, return as is
 
-  const match = cpu.match(/^(\d+(\.\d+)?|m)$/)
+  const match = cpu.match(/^(\d+(?:\.\d+)?)(m)?$/)
   if (!match) return 0 // Invalid format, return 0
 
   if (cpu.endsWith('m')) {
@@ -893,6 +893,7 @@ function sortMachines(arr) {
 
     const cpuA = parseCPU(a.limits.cpu)
     const cpuB = parseCPU(b.limits.cpu)
+    console.log(cpuA, cpuB)
 
     return cpuA - cpuB
   })
