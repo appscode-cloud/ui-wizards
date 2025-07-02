@@ -16,8 +16,8 @@ nodeSelector:
 {{- toYaml .Values.spec.admin.nodeSelector | nindent 2 }}
 {{- end }}
 {{- if eq .Values.spec.admin.deployment.default "Dedicated" }}
-  app: ignites.kubedb.com
-  instance: {{ include "kubedbcom-ignite-editor-options.fullname" . }}
+  app: hazelcasts.kubedb.com
+  instance: {{ include "kubedbcom-hazelcast-editor-options.fullname" . }}
   namespace: {{ .Release.Namespace }}
   nodepool: {{ .Values.spec.admin.clusterTier.nodeTopology.default }}
 {{- end }}
@@ -30,11 +30,11 @@ tolerations:
 {{- if eq .Values.spec.admin.deployment.default "Dedicated" }}
   - key: app
     operator: "Equal"
-    value: "ignites.kubedb.com"
+    value: "hazelcasts.kubedb.com"
     effect: "NoSchedule"
   - key: instance
     operator: "Equal"
-    value: {{ include "kubedbcom-ignite-editor-options.fullname" . }}
+    value: {{ include "kubedbcom-hazelcast-editor-options.fullname" . }}
     effect: "NoSchedule"
   - key: namespace
     operator: "Equal"
@@ -49,12 +49,12 @@ tolerations:
 {{- end }}
 
 apiVersion: kubedb.com/v1alpha2
-kind: Ignite
+kind: Hazelcast
 metadata:
-  name: {{ include "kubedbcom-ignite-editor-options.fullname" . }}
+  name: {{ include "kubedbcom-hazelcast-editor-options.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "kubedbcom-ignite-editor-options.labels" . | nindent 4 }}
+    {{- include "kubedbcom-hazelcast-editor-options.labels" . | nindent 4 }}
 {{- if .Values.spec.admin.archiver.enable.default }}
     kubedb.com/archiver: "true"
     kubedb.com/archiving-via: {{ .Values.spec.admin.archiver.via }}
@@ -69,10 +69,10 @@ metadata:
     blueprint.kubestash.com/namespace: kubedb
   {{- end }}
 {{- if .Values.spec.annotations }}
-    {{- include "kubedbcom-ignite-editor-options.annotations" . | nindent 4 }}
+    {{- include "kubedbcom-hazelcast-editor-options.annotations" . | nindent 4 }}
 {{- end }}
 spec:
-  version: {{ .Values.spec.admin.databases.Ignite.versions.default | quote }}
+  version: {{ .Values.spec.admin.databases.Hazelcast.versions.default | quote }}
 {{- if .Values.spec.authSecret.name }}
   authSecret:
     name: {{ .Values.spec.authSecret.name }}
@@ -89,15 +89,15 @@ spec:
   podTemplate:
     spec:
       securityContext:
-        fsGroup: {{ .Values.spec.openshift.securityContext.runAsUser | default 70 }}
+        fsGroup: {{ .Values.spec.openshift.securityContext.runAsUser | default 65534 }}
       containers:
-        - name: ignite
+        - name: hazelcast
           resources:
             {{- toYaml .res | nindent 12 }}
           securityContext:
             {{- include "container.securityContext" . | nindent 12 }}
       initContainers:
-        - name: ignite-init
+        - name: hazelcast-init
           resources:
             {{- toYaml .init_res | nindent 12 }}
           securityContext:
@@ -110,11 +110,11 @@ spec:
 {{- end }}
 {{- if .Values.spec.authSecret.password }}
   authSecret:
-    name: {{ include "kubedbcom-ignite-editor-options.fullname" . }}-auth
+    name: {{ include "kubedbcom-hazelcast-editor-options.fullname" . }}-auth
 {{- end }}
 {{- if .Values.spec.configuration }}
   configSecret:
-    name: {{ include "kubedbcom-ignite-editor-options.fullname" . }}-config
+    name: {{ include "kubedbcom-hazelcast-editor-options.fullname" . }}-config
 {{- end }}
 {{- if .Values.spec.admin.tls.default }}
   tls:
