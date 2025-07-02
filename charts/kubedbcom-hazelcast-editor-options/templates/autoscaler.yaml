@@ -1,0 +1,73 @@
+{{- $hasMachines := gt (len .Values.spec.admin.machineProfiles.machines) 0 }}
+{{- $hasAvailable := gt (len .Values.spec.admin.machineProfiles.available) 0 }}
+{{- $commonCompute := dict
+  "trigger" "Off"
+  "podLifeTimeThreshold" "10m"
+  "resourceDiffPercentage" 20
+}}
+{{- if $hasMachines }}
+  {{- $_ := set $commonCompute "minAllowed" (dict
+    "cpu" (index .Values.spec.admin.machineProfiles.machines 0).limits.cpu
+    "memory" (index .Values.spec.admin.machineProfiles.machines 0).limits.memory
+  ) }}
+  {{- $_ = set $commonCompute "maxAllowed" (dict
+    "cpu" (index .Values.spec.admin.machineProfiles.machines (sub (len .Values.spec.admin.machineProfiles.machines) 1)).limits.cpu
+    "memory" (index .Values.spec.admin.machineProfiles.machines (sub (len .Values.spec.admin.machineProfiles.machines) 1)).limits.memory
+  ) }}
+{{- else }}
+  {{- $_ := set $commonCompute "minAllowed" (dict
+    "cpu" "400m"
+    "memory" "400Mi"
+  ) }}
+  {{- $_ = set $commonCompute "maxAllowed" (dict
+    "cpu" "1"
+    "memory" "2Gi"
+  ) }}
+{{- end }}
+
+{{- define "minmax-profiles" -}}
+  {{- $instanceType := ternary "replicaset" "standalone" (eq .Values.spec.mode "Replicaset") }}
+  {{- $validMachines := list }}
+  {{- range $machine := .Values.spec.admin.machineProfiles.available }}
+    {{- if ne $machine "custom" }}
+      {{- $validMachines = append $validMachines $machine }}
+    {{- end }}
+  {{- end }}
+  {{- $instanceStr := "" }}
+  {{- if gt (len $validMachines) 0 }}
+    {{- $minMachine := index $validMachines 0 }}
+    {{- $maxMachine := index $validMachines (sub (len $validMachines) 1) }}
+    {{- $instanceStr = printf "%s,%s" $minMachine $maxMachine }}
+  {{- else }}
+    {{- $instanceStr = "{}" }}
+  {{- end }}
+  {{- $instanceStr -}}
+{{- end }}
+
+apiVersion: autoscaling.kubedb.com/v1alpha1
+kind: HazelcastAutoscaler
+metadata:
+  name: {{ include "kubedbcom-hazelcast-editor-options.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kubedbcom-hazelcast-editor-options.labels" . | nindent 4 }}
+  {{- if $hasAvailable }}
+  annotations:
+    kubernetes.io/instance-type: {{ printf "%s" (include "minmax-profiles" .) | quote }}
+  {{- end }}
+spec:
+  databaseRef:
+    name: {{ include "kubedbcom-hazelcast-editor-options.fullname" . }}
+  opsRequestOptions:
+    timeout: 10m
+    apply: IfReady
+  compute:
+    hazelcast:
+      {{- $commonCompute | toYaml | nindent 6 }}
+{{- if eq .Values.spec.admin.deployment.default "Dedicated" }}
+    nodeTopology:
+      name: {{ .Values.spec.admin.clusterTier.nodeTopology.default }}
+{{- else if $hasAvailable }}
+    nodeTopology:
+      name: kubedb-ui-machine-profiles
+{{- end}}
