@@ -1,0 +1,13 @@
+{{- if .Values.spec.admin.expose.default }}
+apiVersion: catalog.appscode.com/v1alpha1
+kind: OracleBinding
+metadata:
+  name: {{ include "kubedbcom-oracle-editor-options.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kubedbcom-oracle-editor-options.labels" . | nindent 4 }}
+spec:
+  sourceRef:
+    name: {{ include "kubedbcom-oracle-editor-options.fullname" . }}
+    namespace: {{ .Release.Namespace }}
+{{- end }}

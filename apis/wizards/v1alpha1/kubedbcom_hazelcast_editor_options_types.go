@@ -21,25 +21,25 @@ import (
 	api "x-helm.dev/apimachinery/apis/releases/v1alpha1"
 )
 
-// KubedbcomIgniteEditorOptions defines the schama for Ignite Editor UI Options.
+// KubedbcomHazelcastEditorOptions defines the schama for Hazelcast Editor UI Options.
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
 // +kubebuilder:object:root=true
-// +kubebuilder:resource:path=kubedbcomigniteeditoroptionss,singular=kubedbcomigniteeditoroptions
-type KubedbcomIgniteEditorOptions struct {
+// +kubebuilder:resource:path=kubedbcomhazelcasteditoroptionss,singular=kubedbcomhazelcasteditoroptions
+type KubedbcomHazelcastEditorOptions struct {
 	metav1.TypeMeta   `json:",inline,omitempty"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	Spec              KubedbcomIgniteEditorOptionsSpec `json:"spec,omitempty"`
+	Spec              KubedbcomHazelcastEditorOptionsSpec `json:"spec,omitempty"`
 }
 
-// KubedbcomIgniteEditorOptionsSpec is the schema for Ignite profile values file
-type KubedbcomIgniteEditorOptionsSpec struct {
+// KubedbcomHazelcastEditorOptionsSpec is the schema for Hazelcast profile values file
+type KubedbcomHazelcastEditorOptionsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
-	Spec         KubedbcomIgniteEditorOptionsSpecSpec `json:"spec"`
+	Spec         KubedbcomHazelcastEditorOptionsSpecSpec `json:"spec"`
 }
 
-type KubedbcomIgniteEditorOptionsSpecSpec struct {
+type KubedbcomHazelcastEditorOptionsSpecSpec struct {
 	// +optional
 	Annotations map[string]string `json:"annotations"`
 	// +optional
@@ -61,10 +61,10 @@ type KubedbcomIgniteEditorOptionsSpecSpec struct {
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
-// KubedbcomIgniteEditorOptionsList is a list of KubedbcomIgniteEditorOptionss
-type KubedbcomIgniteEditorOptionsList struct {
+// KubedbcomHazelcastEditorOptionsList is a list of KubedbcomHazelcastEditorOptionss
+type KubedbcomHazelcastEditorOptionsList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	// Items is a list of KubedbcomIgniteEditorOptions CRD objects
-	Items []KubedbcomIgniteEditorOptions `json:"items,omitempty"`
+	// Items is a list of KubedbcomHazelcastEditorOptions CRD objects
+	Items []KubedbcomHazelcastEditorOptions `json:"items,omitempty"`
 }

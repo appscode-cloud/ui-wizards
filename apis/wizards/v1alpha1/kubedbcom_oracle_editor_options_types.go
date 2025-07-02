@@ -21,25 +21,25 @@ import (
 	api "x-helm.dev/apimachinery/apis/releases/v1alpha1"
 )
 
-// KubedbcomIgniteEditorOptions defines the schama for Ignite Editor UI Options.
+// KubedbcomOracleEditorOptions defines the schama for Oracle Editor UI Options.
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
 // +kubebuilder:object:root=true
-// +kubebuilder:resource:path=kubedbcomigniteeditoroptionss,singular=kubedbcomigniteeditoroptions
-type KubedbcomIgniteEditorOptions struct {
+// +kubebuilder:resource:path=kubedbcomoracleeditoroptionss,singular=kubedbcomoracleeditoroptions
+type KubedbcomOracleEditorOptions struct {
 	metav1.TypeMeta   `json:",inline,omitempty"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
-	Spec              KubedbcomIgniteEditorOptionsSpec `json:"spec,omitempty"`
+	Spec              KubedbcomOracleEditorOptionsSpec `json:"spec,omitempty"`
 }
 
-// KubedbcomIgniteEditorOptionsSpec is the schema for Ignite profile values file
-type KubedbcomIgniteEditorOptionsSpec struct {
+// KubedbcomOracleEditorOptionsSpec is the schema for Oracle profile values file
+type KubedbcomOracleEditorOptionsSpec struct {
 	api.Metadata `json:"metadata,omitempty"`
-	Spec         KubedbcomIgniteEditorOptionsSpecSpec `json:"spec"`
+	Spec         KubedbcomOracleEditorOptionsSpecSpec `json:"spec"`
 }
 
-type KubedbcomIgniteEditorOptionsSpecSpec struct {
+type KubedbcomOracleEditorOptionsSpecSpec struct {
 	// +optional
 	Annotations map[string]string `json:"annotations"`
 	// +optional
@@ -61,10 +61,10 @@ type KubedbcomIgniteEditorOptionsSpecSpec struct {
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
-// KubedbcomIgniteEditorOptionsList is a list of KubedbcomIgniteEditorOptionss
-type KubedbcomIgniteEditorOptionsList struct {
+// KubedbcomOracleEditorOptionsList is a list of KubedbcomOracleEditorOptionss
+type KubedbcomOracleEditorOptionsList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	// Items is a list of KubedbcomIgniteEditorOptions CRD objects
-	Items []KubedbcomIgniteEditorOptions `json:"items,omitempty"`
+	// Items is a list of KubedbcomOracleEditorOptions CRD objects
+	Items []KubedbcomOracleEditorOptions `json:"items,omitempty"`
 }
