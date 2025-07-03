@@ -78,7 +78,7 @@ properties:
         x-kubernetes-map-type: atomic
       horizontalScaling:
         properties:
-          node:
+          hazelcast:
             format: int32
             type: integer
         type: object
@@ -193,13 +193,12 @@ properties:
         type: object
       type:
         enum:
-        - Upgrade
         - UpdateVersion
         - HorizontalScaling
         - VerticalScaling
         - VolumeExpansion
-        - Restart
         - Reconfigure
+        - Restart
         - ReconfigureTLS
         - RotateAuth
         type: string
@@ -210,7 +209,7 @@ properties:
         type: object
       verticalScaling:
         properties:
-          node:
+          hazelcast:
             properties:
               nodeSelectionPolicy:
                 type: string
@@ -261,17 +260,17 @@ properties:
         type: object
       volumeExpansion:
         properties:
-          mode:
-            enum:
-            - Offline
-            - Online
-            type: string
-          node:
+          hazelcast:
             anyOf:
             - type: integer
             - type: string
             pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
             x-kubernetes-int-or-string: true
+          mode:
+            enum:
+            - Offline
+            - Online
+            type: string
         required:
         - mode
         type: object

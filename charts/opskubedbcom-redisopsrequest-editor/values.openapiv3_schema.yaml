@@ -37,6 +37,24 @@ properties:
     type: object
   spec:
     properties:
+      announce:
+        properties:
+          shards:
+            items:
+              properties:
+                endpoints:
+                  items:
+                    type: string
+                  type: array
+              type: object
+            type: array
+          type:
+            default: hostname
+            enum:
+            - ip
+            - hostname
+            type: string
+        type: object
       apply:
         default: IfReady
         enum:
@@ -233,6 +251,7 @@ properties:
         - ReconfigureTLS
         - ReplaceSentinel
         - RotateAuth
+        - Announce
         type: string
       updateVersion:
         properties:
