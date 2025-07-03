@@ -471,15 +471,28 @@ function isConfigureDb({ getValue, discriminator, watchDependency }, value) {
 async function FetchDbVersions({ watchDependency, getValue, discriminator }, db) {
   watchDependency(`discriminator#/allDbVersions`)
   data = getValue(discriminator, `allDbVersions/${db}Version`)
+  if (!data?.includes('Remove all')) data?.unshift('Remove all')
+  if (!data?.includes('Select all')) data?.unshift('Select all')
   return data
 }
 
-function clearDefaultVersion({ commit }, db) {
-  commit('wizard/model$update', {
-    path: `/spec/admin/databases/${db}/versions/default`,
-    value: '',
-    force: true,
-  })
+function clearDefaultVersion({ commit, model, getValue, discriminator }, db) {
+  const data = getValue(model, `/spec/admin/databases/${db}/versions/available`)
+  if (data?.includes('Select all')) {
+    versions = getValue(discriminator, `allDbVersions/${db}Version`)
+    commit('wizard/model$update', {
+      path: `/spec/admin/databases/${db}/versions/available`,
+      value: versions,
+      force: true,
+    })
+  }
+  if (data?.includes('Remove all')) {
+    commit('wizard/model$update', {
+      path: `/spec/admin/databases/${db}/versions/available`,
+      value: [],
+      force: true,
+    })
+  }
 }
 
 function clearDefaultMode({ commit }, db) {
