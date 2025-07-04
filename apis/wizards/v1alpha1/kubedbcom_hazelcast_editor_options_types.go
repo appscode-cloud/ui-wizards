@@ -44,11 +44,12 @@ type KubedbcomHazelcastEditorOptionsSpecSpec struct {
 	Annotations map[string]string `json:"annotations"`
 	// +optional
 	Labels map[string]string `json:"labels"`
-	Mode   GeneralMode       `json:"mode"`
+	Mode   HazelcastMode     `json:"mode"`
 	// +optional
 	Replicas       int                `json:"replicas,omitempty"`
 	Persistence    Persistence        `json:"persistence"`
 	PodResources   PodResources       `json:"podResources"`
+	LicenseSecret  LicenseSecret      `json:"licenseSecret"`
 	AuthSecret     AuthSecret         `json:"authSecret"`
 	DeletionPolicy DeletionPolicy     `json:"deletionPolicy"`
 	Configuration  string             `json:"configuration"`
@@ -58,6 +59,9 @@ type KubedbcomHazelcastEditorOptionsSpecSpec struct {
 	// +optional
 	Openshift Openshift `json:"openshift"`
 }
+
+// +kubebuilder:validation:Enum=Combined;Topology
+type HazelcastMode string
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 

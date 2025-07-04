@@ -43,8 +43,9 @@ type KubedbcomOracleEditorOptionsSpecSpec struct {
 	// +optional
 	Annotations map[string]string `json:"annotations"`
 	// +optional
-	Labels map[string]string `json:"labels"`
-	Mode   GeneralMode       `json:"mode"`
+	Labels    map[string]string `json:"labels"`
+	Mode      OracleMode        `json:"mode"`
+	DataGuard *DataGuardSpec    `json:"dataGuard,omitempty"`
 	// +optional
 	Replicas       int                `json:"replicas,omitempty"`
 	Persistence    Persistence        `json:"persistence"`
@@ -57,6 +58,63 @@ type KubedbcomOracleEditorOptionsSpecSpec struct {
 	Monitoring     MonitoringOperator `json:"monitoring"`
 	// +optional
 	Openshift Openshift `json:"openshift"`
+}
+
+// +kubebuilder:validation:Enum=Standalone;DataGuard
+type OracleMode string
+
+const (
+	OracleModeStandalone OracleMode = "Standalone"
+	OracleModeDataGuard  OracleMode = "DataGuard"
+)
+
+type DataGuardSpec struct {
+	ProtectionMode    ProtectionMode  `json:"protectionMode,omitempty"`
+	SyncMode          SyncMode        `json:"syncMode,omitempty"`
+	StandbyType       StandbyType     `json:"standbyType,omitempty"`
+	ApplyLagThreshold *int32          `json:"applyLagThreshold,omitempty"`
+	Observer          *OracleObserver `json:"observer,omitempty"`
+}
+
+// +kubebuilder:validation:Enum=MaximumAvailability;MaximumPerformance;MaximumProtection
+type ProtectionMode string
+
+const (
+	// ProtectionModeMaximumAvailability provides high availability with possible trade-offs in performance.
+	ProtectionModeMaximumAvailability ProtectionMode = "MaximumAvailability"
+
+	// ProtectionModeMaximumPerformance optimizes for speed with reduced redundancy.
+	ProtectionModeMaximumPerformance ProtectionMode = "MaximumPerformance"
+
+	// ProtectionModeMaximumProtection ensures maximum data durability at the cost of performance.
+	ProtectionModeMaximumProtection ProtectionMode = "MaximumProtection"
+)
+
+// +kubebuilder:validation:Enum=SYNC;ASYNC
+type SyncMode string
+
+const (
+	// SyncModeSync indicates synchronous replication (strong consistency).
+	SyncModeSync SyncMode = "SYNC"
+
+	// SyncModeAsync indicates asynchronous replication (eventual consistency).
+	SyncModeAsync SyncMode = "ASYNC"
+)
+
+// +kubebuilder:validation:Enum=PHYSICAL;LOGICAL
+type StandbyType string
+
+const (
+	// StandbyTypePhysical indicates a physical standby (block-level replication).
+	StandbyTypePhysical StandbyType = "PHYSICAL"
+
+	// StandbyTypeLogical indicates a logical standby (SQL-level replication).
+	StandbyTypeLogical StandbyType = "LOGICAL"
+)
+
+type OracleObserver struct {
+	Persistence  Persistence  `json:"persistence"`
+	PodResources PodResources `json:"podResources"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

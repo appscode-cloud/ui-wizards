@@ -140,11 +140,13 @@ seccompProfile:
     {{- $profiles = .id -}}
   {{- end }}
 {{- end }}
-{{- $init_res := dict "limits" (dict "memory" "512Mi") "requests" (dict "cpu" "200m" "memory" "256Mi") -}}
 
+{{- $init_res := dict "limits" (dict "memory" "512Mi") "requests" (dict "cpu" "200m" "memory" "256Mi") -}}
+{{- $sidecar_res := dict "limits" (dict "memory" "256Mi") "requests" (dict "cpu" "200m" "memory" "256Mi") -}}
 
 {{- $_ := set . "res" $res -}}
 {{- $_ = set . "init_res" $init_res -}}
+{{- $_ = set . "sidecar_res" $sidecar_res -}}
 
 {{- $profiles | toJson -}}
 {{- end -}}
