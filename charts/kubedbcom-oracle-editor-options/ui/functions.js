@@ -303,7 +303,7 @@ const machineList = [
   'db.r.16xlarge',
   'db.r.24xlarge',
 ]
-
+let archiverMap = []
 const modeDetails = {
   Standalone: {
     description: 'Single node Oracle without high availability.',
@@ -1311,6 +1311,74 @@ function onReferSecretChange({ commit }) {
   })
 }
 
+function showArchiver({ watchDependency, getValue, model, commit }) {
+  watchDependency('model#/spec/mode')
+  const dbmode = getValue(model, '/spec/mode')
+
+  if (dbmode === 'Standalone') {
+    commit('wizard/model$update', {
+      path: '/spec/admin/archiver/enable/default',
+      value: false,
+      force: true,
+    })
+    return false
+  }
+  return checkIfFeatureOn({ getValue, model }, 'archiver')
+}
+
+async function checkHostnameOrIP({ commit, model, getValue }) {
+  const tls = getValue(model, '/spec/admin/tls/default')
+  const expose = getValue(model, '/spec/admin/expose/default')
+  if (tls && expose) {
+    if (hostName) {
+      commit('wizard/model$update', {
+        path: '/spec/hostName',
+        value: hostName,
+        force: true,
+      })
+    } else {
+      commit('wizard/model$update', {
+        path: '/spec/ip',
+        value: ip,
+        force: true,
+      })
+    }
+  } else {
+    commit('wizard/model$update', {
+      path: '/spec/hostName',
+      value: '',
+      force: true,
+    })
+    commit('wizard/model$update', {
+      path: '/spec/ip',
+      value: '',
+      force: true,
+    })
+  }
+}
+
+function showArchiverAlert({ watchDependency, model, getValue, commit }) {
+  watchDependency('model#/spec/admin/storageClasses/default')
+
+  const mode = getValue(model, '/spec/mode')
+  if (mode === 'Standalone') return false
+
+  const stClass = getValue(model, '/spec/admin/storageClasses/default')
+  const found = archiverMap.find((item) => item.storageClass === stClass)
+  const show = !found?.annotation
+
+  // toggle archiver to false when storageClass annotation not found
+  if (show)
+    commit('wizard/model$update', {
+      path: '/spec/admin/archiver/enable/default',
+      value: false,
+      force: true,
+    })
+  else onArchiverChange({ model, getValue, commit })
+
+  return show
+}
+
 return {
   showReferSecretSwitch,
   onReferSecretChange,
@@ -1332,7 +1400,6 @@ return {
   showAlerts,
   getNodeTopology,
   clearArbiterHidden,
-  returnFalse,
   showHidden,
   isConfigDatabaseOn,
   notEqualToDatabaseMode,
@@ -1374,4 +1441,7 @@ return {
   setBackup,
   showAdditionalSettings,
   getDefault,
+  showArchiver,
+  checkHostnameOrIP,
+  showArchiverAlert,
 }
