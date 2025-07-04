@@ -22,21 +22,37 @@ spec:
   # Labels to add to all the template objects
   labels: {}
 
-  # Standalone, Replicaset
-  mode: Replicaset
+  # Standalone, DataGuard
+  mode: DataGuard
   replicas: 3
+
+  dataGuard:
+    applyLagThreshold: 0
+    observer:
+      persistence:
+        size: 2Gi
+      podResources:
+        machine: ""
+
+        resources:
+          requests:
+            cpu: 500m
+            memory: 2Gi
+    protectionMode: MaximumProtection
+    standbyType: PHYSICAL
+    syncMode: SYNC
 
   deletionPolicy: WipeOut
 
   persistence:
-    size: 2Gi
+    size: 4Gi
   podResources:
     machine: ""
 
     resources:
       requests:
-        cpu: 500m
-        memory: 1Gi
+        cpu: 3
+        memory: 4Gi
 
   authSecret:
     name: ""

@@ -130,6 +130,7 @@ seccompProfile:
 {{- $machines := .Files.Get "data/machines.yaml" | fromYaml -}}
 {{- $profiles := "" -}}
 {{- $res := dict -}}
+{{- $observer_res := dict -}}
 {{- $res = .Values.spec.podResources.resources -}}
 {{- if and .Values.spec.podResources.machine (hasKey $machines .Values.spec.podResources.machine) }}
   {{- $res = get (get $machines .Values.spec.podResources.machine) "resources" }}
@@ -140,11 +141,25 @@ seccompProfile:
     {{- $profiles = .id -}}
   {{- end }}
 {{- end }}
-{{- $init_res := dict "limits" (dict "memory" "512Mi") "requests" (dict "cpu" "200m" "memory" "256Mi") -}}
 
+{{- $observer_res = .Values.spec.dataGuard.observer.podResources.resources -}}
+{{- if and .Values.spec.dataGuard.observer.podResources.machine (hasKey $machines .Values.spec.dataGuard.observer.podResources.machine) }}
+  {{- $observer_res = get (get $machines .Values.spec.dataGuard.observer.podResources.machine) "resources" }}
+{{- end }}
+{{- range .Values.spec.admin.machineProfiles.machines }}
+  {{- if and $.Values.spec.dataGuard.observer.podResources.machine (eq .id $.Values.spec.dataGuard.observer.podResources.machine) }}
+    {{- $observer_res  = dict "requests" .limits "limits" .limits }}
+    {{- $_ := set $profiles "observer" .id -}}
+  {{- end }}
+{{- end }}
+
+{{- $init_res := dict "limits" (dict "memory" "512Mi") "requests" (dict "cpu" "200m" "memory" "256Mi") -}}
+{{- $sidecar_res := dict "limits" (dict "memory" "256Mi") "requests" (dict "cpu" "200m" "memory" "256Mi") -}}
 
 {{- $_ := set . "res" $res -}}
 {{- $_ = set . "init_res" $init_res -}}
+{{- $_ = set . "sidecar_res" $sidecar_res -}}
+{{- $_ = set . "observer_res" $observer_res -}}
 
 {{- $profiles | toJson -}}
 {{- end -}}
