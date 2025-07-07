@@ -102,6 +102,7 @@ type DatabaseProfiles struct {
 	Druid         *DatabaseProfile `json:"Druid,omitempty"`
 	Elasticsearch *DatabaseProfile `json:"Elasticsearch,omitempty"`
 	FerretDB      *DatabaseProfile `json:"FerretDB,omitempty"`
+	Hazelcast     *DatabaseProfile `json:"Hazelcast,omitempty"`
 	Ignite        *DatabaseProfile `json:"Ignite,omitempty"`
 	Kafka         *DatabaseProfile `json:"Kafka,omitempty"`
 	MariaDB       *DatabaseProfile `json:"MariaDB,omitempty"`
@@ -109,6 +110,7 @@ type DatabaseProfiles struct {
 	MongoDB       *DatabaseProfile `json:"MongoDB,omitempty"`
 	MSSQLServer   *DatabaseProfile `json:"MSSQLServer,omitempty"`
 	MySQL         *DatabaseProfile `json:"MySQL,omitempty"`
+	Oracle        *DatabaseProfile `json:"Oracle,omitempty"`
 	PerconaXtraDB *DatabaseProfile `json:"PerconaXtraDB,omitempty"`
 	PgBouncer     *DatabaseProfile `json:"PgBouncer,omitempty"`
 	Pgpool        *DatabaseProfile `json:"Pgpool,omitempty"`

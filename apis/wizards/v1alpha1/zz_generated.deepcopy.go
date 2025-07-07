@@ -984,6 +984,11 @@ func (in *DatabaseProfiles) DeepCopyInto(out *DatabaseProfiles) {
 		*out = new(DatabaseProfile)
 		(*in).DeepCopyInto(*out)
 	}
+	if in.Hazelcast != nil {
+		in, out := &in.Hazelcast, &out.Hazelcast
+		*out = new(DatabaseProfile)
+		(*in).DeepCopyInto(*out)
+	}
 	if in.Ignite != nil {
 		in, out := &in.Ignite, &out.Ignite
 		*out = new(DatabaseProfile)
@@ -1016,6 +1021,11 @@ func (in *DatabaseProfiles) DeepCopyInto(out *DatabaseProfiles) {
 	}
 	if in.MySQL != nil {
 		in, out := &in.MySQL, &out.MySQL
+		*out = new(DatabaseProfile)
+		(*in).DeepCopyInto(*out)
+	}
+	if in.Oracle != nil {
+		in, out := &in.Oracle, &out.Oracle
 		*out = new(DatabaseProfile)
 		(*in).DeepCopyInto(*out)
 	}
