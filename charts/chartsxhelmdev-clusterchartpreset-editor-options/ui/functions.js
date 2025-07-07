@@ -304,6 +304,10 @@ const machineList = [
 ]
 
 const modes = {
+  Cassandra: {
+    availableModes: ['Standalone', 'Topology'],
+    default: 'Topology',
+  },
   ClickHouse: {
     availableModes: ['Standalone', 'Topology'],
     default: 'Topology',
@@ -323,6 +327,14 @@ const modes = {
   Kafka: {
     availableModes: ['Combined', 'Topology'],
     default: 'Topology',
+  },
+  Hazelcast: {
+    availableModes: ['Combined', 'Topology'],
+    default: 'Topology',
+  },
+  Ignite: {
+    availableModes: ['Standalone', 'Replicaset'],
+    default: 'Replicaset',
   },
   MSSQLServer: {
     availableModes: ['Standalone', 'Topology'],
@@ -349,6 +361,10 @@ const modes = {
       'SemiSync',
     ],
     default: 'GroupReplication',
+  },
+  Oracle: {
+    availableModes: ['Standalone', 'DataGuard'],
+    default: 'DataGuard',
   },
   PerconaXtraDB: {
     availableModes: ['Replicaset'],
