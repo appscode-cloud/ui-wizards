@@ -1,0 +1,172 @@
+{{- $profiles := "" -}}
+{{- with $ctx := . -}}
+{{- $profiles = include "resource-profiles" $ctx | fromJson -}}
+{{- end -}}
+
+{{- define "common.placement" -}}
+
+{{- if .Values.spec.admin.clusterTier.placement.default }}
+podPlacementPolicy:
+  name: {{ .Values.spec.admin.clusterTier.placement.default }}
+{{- end }}
+
+nodeSelector:
+  kubernetes.io/os: linux
+{{- if .Values.spec.admin.nodeSelector }}
+{{- toYaml .Values.spec.admin.nodeSelector | nindent 2 }}
+{{- end }}
+{{- if eq .Values.spec.admin.deployment.default "Dedicated" }}
+  app: oracles.kubedb.com
+  instance: {{ include "kubedbcom-oracle-editor-options.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  nodepool: {{ .Values.spec.admin.clusterTier.nodeTopology.default }}
+{{- end }}
+
+{{- if or .Values.spec.admin.tolerations (eq .Values.spec.admin.deployment.default "Dedicated") }}
+tolerations:
+{{- if .Values.spec.admin.tolerations }}
+{{- toYaml .Values.spec.admin.tolerations | nindent 2 }}
+{{- end }}
+{{- if eq .Values.spec.admin.deployment.default "Dedicated" }}
+  - key: app
+    operator: "Equal"
+    value: "oracles.kubedb.com"
+    effect: "NoSchedule"
+  - key: instance
+    operator: "Equal"
+    value: {{ include "kubedbcom-oracle-editor-options.fullname" . }}
+    effect: "NoSchedule"
+  - key: namespace
+    operator: "Equal"
+    value: {{ .Release.Namespace }}
+    effect: "NoSchedule"
+  - key: nodepool
+    operator: "Equal"
+    value: {{ .Values.spec.admin.clusterTier.nodeTopology.default }}
+    effect: "NoSchedule"
+{{- end }}
+{{- end }}
+{{- end }}
+
+apiVersion: kubedb.com/v1alpha2
+kind: Oracle
+metadata:
+  name: {{ include "kubedbcom-oracle-editor-options.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "kubedbcom-oracle-editor-options.labels" . | nindent 4 }}
+{{- if .Values.spec.admin.archiver.enable.default }}
+    kubedb.com/archiver: "true"
+    kubedb.com/archiving-via: {{ .Values.spec.admin.archiver.via }}
+{{- end }}
+  annotations:
+    app.kubernetes.io/cluster-tier: {{ .Values.spec.admin.clusterTier.default }}
+    {{- if $profiles }}
+    kubernetes.io/instance-type: {{ printf "%s" (include "resource-profiles" .) }}
+    {{- end -}}
+  {{- if and (eq .Values.spec.backup.tool "KubeStash") (.Values.spec.admin.backup.enable.default) (eq .Values.spec.admin.backup.by "BackupBlueprint") }}
+    blueprint.kubestash.com/name: {{ .Values.metadata.resource.kind | lower }}-blueprint
+    blueprint.kubestash.com/namespace: kubedb
+  {{- end }}
+{{- if .Values.spec.annotations }}
+    {{- include "kubedbcom-oracle-editor-options.annotations" . | nindent 4 }}
+{{- end }}
+spec:
+  version: {{ .Values.spec.admin.databases.Oracle.versions.default | quote }}
+{{- if .Values.spec.authSecret.name }}
+  authSecret:
+    name: {{ .Values.spec.authSecret.name }}
+{{- end }}
+  edition: enterprise
+  mode: {{ .Values.spec.mode }}
+  replicas: {{ (eq .Values.spec.mode "DataGuard") | ternary .Values.spec.replicas 1 }}
+{{- if eq .Values.spec.mode "DataGuard" }}
+  dataGuard:
+    applyLagThreshold: {{ .Values.spec.dataGuard.protectionMode }}
+    fastStartFailover:
+      fastStartFailoverThreshold: 15
+    observer:
+      storage:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: {{ .Values.spec.persistence.size }}
+        storageClassName: {{ .Values.spec.admin.storageClasses.default }}
+      storageType: Durable
+      podTemplate:
+        spec:
+          securityContext:
+            fsGroup: {{ .Values.spec.openshift.securityContext.runAsUser | default 54321 }}
+          containers:
+            - name: observer
+              resources:
+                {{- toYaml .observer_res | nindent 16 }}
+              securityContext:
+                {{- include "container.securityContext" . | nindent 16 }}
+          initContainers:
+            - name: observer-init
+              resources:
+                {{- toYaml .init_res | nindent 16 }}
+              securityContext:
+                {{- include "container.securityContext" . | nindent 16 }}
+          {{- include "common.placement" . | nindent 10 }}
+    protectionMode: {{ .Values.spec.dataGuard.protectionMode }}
+    standbyType: {{ .Values.spec.dataGuard.standbyType }}
+    syncMode: {{ .Values.spec.dataGuard.syncMode }}
+    transportLagThreshold: 0
+{{- end}}
+  storage:
+    accessModes:
+    - ReadWriteOnce
+    resources:
+      requests:
+        storage: {{ .Values.spec.persistence.size }}
+    storageClassName: {{ .Values.spec.admin.storageClasses.default }}
+  storageType: Durable
+  podTemplate:
+    spec:
+      securityContext:
+        fsGroup: {{ .Values.spec.openshift.securityContext.runAsUser | default 54321 }}
+      containers:
+        - name: oracle
+          resources:
+            {{- toYaml .res | nindent 12 }}
+          securityContext:
+            {{- include "container.securityContext" . | nindent 12 }}
+          {{- if ne .Values.spec.mode "Standalone" }}
+        - name: oracle-coordinator
+          resources:
+            {{- toYaml .sidecar_res | nindent 12 }}
+          securityContext:
+            {{- include "container.securityContext" . | nindent 12 }}
+          {{- end }}
+      initContainers:
+        - name: oracle-init
+          resources:
+            {{- toYaml .init_res | nindent 12 }}
+          securityContext:
+            {{- include "container.securityContext" . | nindent 12 }}
+      {{- include "common.placement" . | nindent 6 }}
+  deletionPolicy: {{ .Values.spec.deletionPolicy }}
+{{- if .Values.spec.authSecret.name }}
+  authSecret:
+    name: {{ .Values.spec.authSecret.name }}
+{{- end }}
+{{- if .Values.spec.authSecret.password }}
+  authSecret:
+    name: {{ include "kubedbcom-oracle-editor-options.fullname" . }}-auth
+{{- end }}
+{{- if .Values.spec.configuration }}
+  configSecret:
+    name: {{ include "kubedbcom-oracle-editor-options.fullname" . }}-config
+{{- end }}
+{{- if .Values.spec.admin.tls.default }}
+  tls:
+    issuerRef:
+      apiGroup: "cert-manager.io"
+      kind: ClusterIssuer
+      name: {{ .Values.spec.admin.clusterIssuers.default }}
+  requireSSL: true
+{{- end }}
+

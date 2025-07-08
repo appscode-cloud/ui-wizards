@@ -1,5 +1,285 @@
-apiVersion: kubedb.com/v1alpha2
-kind: Hazelcast
 metadata:
-  name: hazelcast
-  namespace: default
+  resource:
+    group: kubedb.com
+    version: v1alpha2
+    name: hazelcasts
+    kind: Hazelcast
+    scope: Namespaced
+  release:
+    name: RELEASE-NAME
+    namespace: default
+resources:
+  certManagerIoIssuer_ca: # +doc-gen:break
+    apiVersion: cert-manager.io/v1
+    kind: Issuer
+    metadata:
+      name: hazelcast-ca
+      namespace: demo
+    spec:
+      ca:
+        secretName: hazelcast-ca
+  coreKubestashComBackupBlueprint: # +doc-gen:break
+    apiVersion: core.kubestash.com/v1alpha1
+    kind: BackupBlueprint
+    metadata:
+      name: hazelcast
+      namespace: demo
+    spec:
+      backupConfigurationTemplate:
+        backends:
+          - name: hazelcast-backend
+            retentionPolicy:
+              name: hazelcast-retention-policy
+              namespace: demo
+            storageRef:
+              name: hazelcast-storage
+              namespace: demo
+        sessions:
+          - addon:
+              jobTemplate:
+                spec:
+                  containerSecurityContext:
+                    allowPrivilegeEscalation: false
+                    capabilities:
+                      drop:
+                        - ALL
+                    runAsGroup: 0
+                    runAsNonRoot: true
+                    runAsUser: 999
+                    seccompProfile:
+                      type: RuntimeDefault
+                  nodeSelector:
+                    kubernetes.io/os: linux
+              name: hazelcast-addon
+              tasks:
+                - name: logical-backup
+            name: hazelcast-frequent-backup
+            repositories:
+              - backend: hazelcast-backend
+                directory: /mongo-repo
+                encryptionSecret:
+                  name: hazelcast-encryption-secret
+                  namespace: demo
+                name: hazelcast-repo
+            scheduler:
+              failedJobsHistoryLimit: 4
+              jobTemplate:
+                backoffLimit: 2
+                template:
+                  spec:
+                    containerSecurityContext:
+                      allowPrivilegeEscalation: false
+                      capabilities:
+                        drop:
+                          - ALL
+                      runAsGroup: 0
+                      runAsNonRoot: true
+                      runAsUser: 999
+                      seccompProfile:
+                        type: RuntimeDefault
+                    nodeSelector:
+                      kubernetes.io/os: linux
+              schedule: 0 */2 * * *
+              successfulJobsHistoryLimit: 2
+            sessionHistoryLimit: 3
+      usagePolicy:
+        allowedNamespaces:
+          from: Same
+  coreKubestashComBackupConfiguration: # +doc-gen:break
+    apiVersion: core.kubestash.com/v1alpha1
+    kind: BackupConfiguration
+    metadata:
+      name: hazelcast
+      namespace: demo
+    spec:
+      backends:
+        - name: hazelcast-backend
+          retentionPolicy:
+            name: hazelcast-retention-policy
+            namespace: demo
+          storageRef:
+            name: hazelcast-storage
+            namespace: demo
+      sessions:
+        - addon:
+            jobTemplate:
+              spec:
+                containerSecurityContext:
+                  allowPrivilegeEscalation: false
+                  capabilities:
+                    drop:
+                      - ALL
+                  runAsGroup: 0
+                  runAsNonRoot: true
+                  runAsUser: 999
+                  seccompProfile:
+                    type: RuntimeDefault
+                nodeSelector:
+                  kubernetes.io/os: linux
+            name: hazelcast-addon
+            tasks:
+              - name: logical-backup
+          name: hazelcast-frequent-backup
+          repositories:
+            - backend: hazelcast-backend
+              directory: /mongo-repo
+              encryptionSecret:
+                name: hazelcast-encryption-secret
+                namespace: demo
+              name: hazelcast-repo
+          scheduler:
+            failedJobsHistoryLimit: 4
+            jobTemplate:
+              backoffLimit: 2
+              template:
+                spec:
+                  containerSecurityContext:
+                    allowPrivilegeEscalation: false
+                    capabilities:
+                      drop:
+                        - ALL
+                    runAsGroup: 0
+                    runAsNonRoot: true
+                    runAsUser: 999
+                    seccompProfile:
+                      type: RuntimeDefault
+                  nodeSelector:
+                    kubernetes.io/os: linux
+            schedule: 0 */2 * * *
+            successfulJobsHistoryLimit: 2
+          sessionHistoryLimit: 3
+      target:
+        apiGroup: kubedb.com
+        kind: Hazelcast
+        name: hazelcast
+        namespace: demo
+  coreKubestashComRestoreSession: # +doc-gen:break
+    apiVersion: core.kubestash.com/v1alpha1
+    kind: RestoreSession
+    metadata:
+      name: hazelcast
+      namespace: demo
+    spec:
+      addon:
+        containerRuntimeSettings:
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            runAsGroup: 0
+            runAsNonRoot: true
+            runAsUser: 999
+            seccompProfile:
+              type: RuntimeDefault
+        jobTemplate:
+          spec:
+            nodeSelector:
+              kubernetes.io/os: linux
+            securityContext:
+              runAsGroup: 0
+              runAsUser: 999
+        name: hazelcast-addon
+        tasks:
+          - name: logical-backup-restore
+      dataSource:
+        encryptionSecret:
+          name: hazelcast-encryption-secret
+          namespace: demo
+        repository: hazelcast-repo
+        snapshot: latest
+      target:
+        apiGroup: kubedb.com
+        kind: Hazelcast
+        name: hazelcast
+        namespace: demo
+  kubedbComHazelcast: # +doc-gen:break
+    apiVersion: kubedb.com/v1alpha2
+    kind: Hazelcast
+    metadata:
+      name: hazelcast
+      namespace: hazelcast
+    spec:
+      deletionPolicy: Halt
+      podTemplate:
+        spec:
+          containers:
+            - name: hazelcast
+              resources:
+                requests:
+                  cpu: 700m
+                  memory: 1200Mi
+          nodeSelector:
+            app: kubedb
+            component: hazelcast-database
+            instance: hazelcast
+          tolerations:
+            - effect: NoSchedule
+              key: app
+              operator: Equal
+              value: kubedb
+            - effect: NoSchedule
+              key: instance
+              operator: Equal
+              value: hazelcast
+            - effect: NoSchedule
+              key: component
+              operator: Equal
+              value: hazelcast-database
+            - effect: NoSchedule
+              key: nodepool_type
+              operator: Equal
+              value: n2-standard-2
+      replicas: 3
+      serviceTemplates:
+        - alias: primary
+          spec:
+            type: LoadBalancer
+      storage:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 100Mi
+      version: 3.8.3
+  monitoringCoreosComServiceMonitor: # +doc-gen:break
+    apiVersion: monitoring.coreos.com/v1
+    kind: ServiceMonitor
+    metadata:
+      name: hazelcast
+      namespace: demo
+    spec:
+      endpoints:
+        - honorLabels: true
+          interval: 30s
+          path: /metrics
+          port: metrics
+      namespaceSelector:
+        matchNames:
+          - demo
+      selector:
+        matchLabels:
+          app.kubernetes.io/instance: hazelcast
+          app.kubernetes.io/name: hazelcasts.kubedb.com
+  secret_auth: # +doc-gen:break
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: hazelcast-auth
+      namespace: demo
+    stringData:
+      password: thisIs1StrongPassword
+      username: root
+    type: Opaque
+  secret_config: # +doc-gen:break
+    apiVersion: v1
+    kind: Secret
+    metadata:
+      name: hazelcast-config
+      namespace: demo
+    stringData:
+      hazelcast.cnf: |
+        [mysqld]
+        max_connections = 200
+        read_buffer_size = 1048576
+    type: Opaque

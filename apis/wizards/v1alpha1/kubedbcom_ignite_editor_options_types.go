@@ -59,10 +59,6 @@ type KubedbcomIgniteEditorOptionsSpecSpec struct {
 	Openshift Openshift `json:"openshift"`
 }
 
-type IgniteTopology struct {
-	Racks []string `json:"racks,omitempty"`
-}
-
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
 // KubedbcomIgniteEditorOptionsList is a list of KubedbcomIgniteEditorOptionss
