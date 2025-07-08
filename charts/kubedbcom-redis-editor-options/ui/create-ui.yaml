@@ -122,6 +122,48 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/persistence/properties/size
       type: input
+    - if: isEqualToModelPathValue|Cluster|/spec/mode
+      elements:
+        - type: select
+          label:
+            text: Type
+          schema:
+            $ref: schema#/properties/spec/properties/cluster/properties/announce/properties/type
+          options:
+            - ip
+            - hostname
+        - addFormLabel: Shards
+          element:
+            elements:
+            - schema:
+                $ref: schema#/properties/spec/properties/cluster/properties/announce/properties/shards/items/properties/endpoints
+              element: 
+                label:
+                  text: Endpoints
+                type: input
+                schema:
+                  $ref: schema#/properties/spec/properties/cluster/properties/announce/properties/shards/items/properties/endpoints/items
+              type: list-input-form
+            type: single-step-form
+          label:
+            text: Shards
+          schema:
+            $ref: schema#/properties/spec/properties/cluster/properties/announce/properties/shards
+          tableContents:
+          - inTableColumn: true
+            label:
+              text: Endpoints
+            path: endpoints
+            type: value
+            typeOfValue: string
+          type: single-step-form-array
+      label:
+        text: Announce
+      show_label: true
+      hideForm: true
+      schema:
+        $ref: schema#/properties/spec/properties/cluster/properties/announce
+      type: single-step-form
     - accordion: true
       description:
         text: Configure Credentials, Deployment Mode etc.
