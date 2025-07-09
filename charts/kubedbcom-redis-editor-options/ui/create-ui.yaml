@@ -145,7 +145,8 @@ steps:
             - ip
             - hostname
         - addFormLabel: Shards
-          required: true
+          validationRuleObject:
+            func: isAnnounceValid
           element:
             elements:
             - schema:
@@ -156,8 +157,6 @@ steps:
                 type: input
                 schema:
                   $ref: schema#/properties/spec/properties/cluster/properties/announce/properties/shards/items/properties/endpoints/items
-              # validationRuleObject:
-              #   func: isAnnounceValid
               type: list-input-form
               label:
                 text: Endpoints

@@ -1320,7 +1320,7 @@ function isAnnounceValid({ getValue, model, watchDependency }) {
 
   const shards = getValue(model, '/spec/cluster/announce/shards') || []
   const shardsLength = shards?.length || 0
-  console.log({ shards, master })
+
   if (shardsLength !== master) return `Shards Length should be equal to master(${master})`
   return true
 }
