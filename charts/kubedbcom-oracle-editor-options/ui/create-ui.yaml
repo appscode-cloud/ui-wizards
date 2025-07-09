@@ -246,7 +246,6 @@ steps:
           type: boolean
       elements:
       - computed: setBackup
-        # if: isToggleOn|backup
         if: returnFalse
         label:
           text: Enable Backup?
@@ -254,7 +253,8 @@ steps:
         schema:
           $ref: discriminator#/backup
         type: switch
-      - elements:
+      - disabled: true
+        elements:
         - disabled: showArchiverAlert
           label:
             text: Enable Archiver?
@@ -269,13 +269,10 @@ steps:
           label:
             text: The selected StorageClass does not support Archiver
           type: label-element
-        # if: showArchiver
         if: returnFalse
-        disabled: true
         type: single-step-form
       - elements:
         - computed: checkHostnameOrIP
-          # if: isToggleOn|tls
           if: returnFalse
           label:
             text: Enable TLS?

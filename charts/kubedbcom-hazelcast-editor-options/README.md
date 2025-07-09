@@ -7,8 +7,8 @@
 ```bash
 $ helm repo add appscode https://charts.appscode.com/stable/
 $ helm repo update
-$ helm search repo appscode/kubedbcom-hazelcast-editor-options --version=v0.19.0
-$ helm upgrade -i kubedbcom-hazelcast-editor-options appscode/kubedbcom-hazelcast-editor-options -n kube-system --create-namespace --version=v0.19.0
+$ helm search repo appscode/kubedbcom-hazelcast-editor-options --version=v0.20.0
+$ helm upgrade -i kubedbcom-hazelcast-editor-options appscode/kubedbcom-hazelcast-editor-options -n kube-system --create-namespace --version=v0.20.0
 ```
 
 ## Introduction
@@ -24,7 +24,7 @@ This chart deploys a Hazelcast Editor UI Options on a [Kubernetes](http://kubern
 To install/upgrade the chart with the release name `kubedbcom-hazelcast-editor-options`:
 
 ```bash
-$ helm upgrade -i kubedbcom-hazelcast-editor-options appscode/kubedbcom-hazelcast-editor-options -n kube-system --create-namespace --version=v0.19.0
+$ helm upgrade -i kubedbcom-hazelcast-editor-options appscode/kubedbcom-hazelcast-editor-options -n kube-system --create-namespace --version=v0.20.0
 ```
 
 The command deploys a Hazelcast Editor UI Options on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
@@ -58,7 +58,7 @@ The following table lists the configurable parameters of the `kubedbcom-hazelcas
 | spec.labels                                       | Labels to add to all the template objects                                                                                                                                 | <code>{}</code>                                                                       |
 | spec.mode                                         | Combined, Topology                                                                                                                                                        | <code>Topology</code>                                                                 |
 | spec.replicas                                     |                                                                                                                                                                           | <code>3</code>                                                                        |
-| spec.licenseSecret                                |                                                                                                                                                                           | <code>""</code>                                                                       |
+| spec.licenseSecret.name                           |                                                                                                                                                                           | <code>""</code>                                                                       |
 | spec.deletionPolicy                               |                                                                                                                                                                           | <code>WipeOut</code>                                                                  |
 | spec.persistence.size                             |                                                                                                                                                                           | <code>2Gi</code>                                                                      |
 | spec.podResources.machine                         |                                                                                                                                                                           | <code>""</code>                                                                       |
@@ -138,12 +138,12 @@ The following table lists the configurable parameters of the `kubedbcom-hazelcas
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm upgrade -i`. For example:
 
 ```bash
-$ helm upgrade -i kubedbcom-hazelcast-editor-options appscode/kubedbcom-hazelcast-editor-options -n kube-system --create-namespace --version=v0.19.0 --set metadata.resource.group=kubedb.com
+$ helm upgrade -i kubedbcom-hazelcast-editor-options appscode/kubedbcom-hazelcast-editor-options -n kube-system --create-namespace --version=v0.20.0 --set metadata.resource.group=kubedb.com
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
 installing the chart. For example:
 
 ```bash
-$ helm upgrade -i kubedbcom-hazelcast-editor-options appscode/kubedbcom-hazelcast-editor-options -n kube-system --create-namespace --version=v0.19.0 --values values.yaml
+$ helm upgrade -i kubedbcom-hazelcast-editor-options appscode/kubedbcom-hazelcast-editor-options -n kube-system --create-namespace --version=v0.20.0 --values values.yaml
 ```
