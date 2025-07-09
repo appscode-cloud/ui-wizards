@@ -2026,11 +2026,29 @@ properties:
         type: object
       cluster:
         properties:
+          announce:
+            properties:
+              shards:
+                items:
+                  properties:
+                    endpoints:
+                      items:
+                        type: string
+                      type: array
+                  type: object
+                type: array
+              type:
+                enum:
+                - ip
+                - hostname
+                type: string
+            type: object
           master:
             type: integer
           replicas:
             type: integer
         required:
+        - announce
         - master
         - replicas
         type: object

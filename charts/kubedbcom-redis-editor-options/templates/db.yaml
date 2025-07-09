@@ -72,6 +72,17 @@ spec:
   cluster:
     shards: {{ .Values.spec.cluster.master }}
     replicas: {{ .Values.spec.cluster.replicas }}
+    {{- if .Values.spec.cluster.announce.shards }}
+    announce:
+      type: {{ .Values.spec.cluster.announce.type }}
+      shards:
+      {{- range .Values.spec.cluster.announce.shards }}
+        - endpoints:
+          {{- range .endpoints }}
+          - {{ . }}
+          {{- end }}
+      {{- end }}
+    {{- end }}
 {{- else if eq .Values.spec.mode "Sentinel" }}
   mode: Sentinel
   replicas: {{ .Values.spec.replicas }}

@@ -65,8 +65,26 @@ type KubedbcomRedisEditorOptionsSpecSpec struct {
 }
 
 type RedisCluster struct {
-	Master   int `json:"master"`
-	Replicas int `json:"replicas"`
+	Master   int           `json:"master"`
+	Replicas int           `json:"replicas"`
+	Announce RedisAnnounce `json:"announce"`
+}
+
+type RedisAnnounce struct {
+	Type   RedisPreferredEndpointType `json:"type,omitempty"`
+	Shards []RedisAnnounceShard       `json:"shards,omitempty"`
+}
+
+// +kubebuilder:validation:Enum=ip;hostname
+type RedisPreferredEndpointType string
+
+const (
+	PreferredEndpointTypeIP       RedisPreferredEndpointType = "ip"
+	PreferredEndpointTypeHostname RedisPreferredEndpointType = "hostname"
+)
+
+type RedisAnnounceShard struct {
+	Endpoints []string `json:"endpoints,omitempty"`
 }
 
 type NamespacedName struct {
