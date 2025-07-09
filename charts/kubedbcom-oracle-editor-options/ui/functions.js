@@ -309,9 +309,9 @@ const modeDetails = {
     description: 'Single node Oracle without high availability.',
     text: 'Standalone',
   },
-  Replicaset: {
-    description: 'Replicaset cluster mode for high availability.',
-    text: 'Replicaset Cluster',
+  DataGuard: {
+    description: 'Oracle Data Guard for high availability, data protection, and disaster recovery',
+    text: 'DataGuard',
   },
 }
 

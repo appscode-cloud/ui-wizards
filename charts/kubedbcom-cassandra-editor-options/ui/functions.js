@@ -310,7 +310,7 @@ const modeDetails = {
     text: 'Standalone',
   },
   Topology: {
-    description: 'Topology cluster mode for high availability.',
+    description: 'Cassandra cluster with dedicated node-role.',
     text: 'Topology Cluster',
   },
 }
