@@ -41,6 +41,9 @@ steps:
         createSentinel:
           default: true
           type: boolean
+        announce:
+          default: false
+          type: boolean
       elements:
       - label:
           text: labels.sentinel_section
@@ -122,22 +125,32 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/persistence/properties/size
       type: input
-    - if: isEqualToModelPathValue|Cluster|/spec/mode
+    - type: switch
+      if: isEqualToModelPathValue|Cluster|/spec/mode
+      computed: setAnnounce
+      schema:
+        $ref: discriminator#/announce
+      label:
+        text: Enable Announce?
+      onChange: setAnnounce
+    - if: showAnnounce
       elements:
         - type: select
           label:
             text: Type
+          required: true
           schema:
             $ref: schema#/properties/spec/properties/cluster/properties/announce/properties/type
           options:
             - ip
             - hostname
         - addFormLabel: Shards
+          required: true
           element:
             elements:
             - schema:
                 $ref: schema#/properties/spec/properties/cluster/properties/announce/properties/shards/items/properties/endpoints
-              element: 
+              element:
                 label:
                   text: Endpoints
                 type: input
@@ -158,11 +171,12 @@ steps:
             path: endpoints
             type: value
             typeOfValue: string
+          newItemValidator: validateEndpoints
+          temporaryPath: /endpoints
           type: single-step-form-array
       label:
         text: Announce
       show_label: true
-      hideForm: true
       schema:
         $ref: schema#/properties/spec/properties/cluster/properties/announce
       type: single-step-form

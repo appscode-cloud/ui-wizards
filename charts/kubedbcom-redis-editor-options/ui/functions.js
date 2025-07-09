@@ -1299,7 +1299,52 @@ function onReferSecretChange({ commit }) {
   })
 }
 
+function setAnnounce({ commit }) {
+  commit('wizard/model$update', {
+    path: '/spec/cluster/announce',
+    value: null,
+    force: true,
+  })
+}
+
+function showAnnounce({ getValue, discriminator, watchDependency }) {
+  watchDependency('discriminator#/announce')
+  const isAnnounceEnable = getValue(discriminator, '/announce')
+  return isAnnounceEnable
+}
+
+function isAnnounceValid({ getValue, model, watchDependency }) {
+  watchDependency('model#/spec/cluster/master')
+
+  const master = getValue(model, '/spec/cluster/master') || 0
+
+  const shards = getValue(model, '/spec/cluster/announce/shards') || []
+  const shardsLength = shards?.length || 0
+  console.log({ shards, master })
+  if (shardsLength !== master) return `Shards Length should be equal to master(${master})`
+  return true
+}
+
+function validateEndpoints({ getValue, model, watchDependency, storeGet }) {
+  watchDependency('model#/spec/cluster/replicas')
+
+  const replicas = getValue(model, '/spec/cluster/replicas') || 0
+
+  const endpoints = storeGet('/wizard/temporaryModel/endpoints')
+  const endpointsObject = Object.values(endpoints)
+  const length = Object.keys(endpointsObject?.[0])?.length
+  if (length !== replicas)
+    return { isInvalid: true, message: `Endpoints length should be equal to replicas(${replicas})` }
+  else {
+    return {}
+  }
+}
+
 return {
+  validateEndpoints,
+  isAnnounceValid,
+  showAnnounce,
+  setAnnounce,
   showReferSecretSwitch,
   onReferSecretChange,
   getDefaultValue,
