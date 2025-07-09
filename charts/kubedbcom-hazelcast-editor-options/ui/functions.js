@@ -305,13 +305,13 @@ const machineList = [
 ]
 
 const modeDetails = {
-  Standalone: {
-    description: 'Single node Hazelcast without high availability.',
-    text: 'Standalone',
+  Combined: {
+    description: 'Hazelcast cluster with all node-role enabled.',
+    text: 'Combined Cluster',
   },
-  Replicaset: {
-    description: 'Replicaset cluster mode for high availability.',
-    text: 'Replicaset Cluster',
+  Topology: {
+    description: 'Hazelcast cluster with dedicated node-role.',
+    text: 'Topology Cluster',
   },
 }
 

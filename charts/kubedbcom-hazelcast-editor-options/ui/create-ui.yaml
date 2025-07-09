@@ -75,6 +75,13 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/persistence/properties/size
       type: input
+    - fetch: getSecrets
+      label:
+        text: labels.licenseSecret
+      refresh: true
+      schema:
+        $ref: schema#/properties/spec/properties/licenseSecret/properties/name
+      type: select
     - accordion: true
       description:
         text: Configure Credentials, Deployment Mode etc.
@@ -246,7 +253,8 @@ steps:
           type: boolean
       elements:
       - computed: setBackup
-        if: isToggleOn|backup
+        # if: isToggleOn|backup
+        if: returnFalse
         label:
           text: Enable Backup?
         onChange: onBackupSwitch
@@ -268,7 +276,8 @@ steps:
           label:
             text: The selected StorageClass does not support Archiver
           type: label-element
-        if: showArchiver
+        # if: showArchiver
+        if: returnFalse
         type: single-step-form
       - elements:
         - computed: checkHostnameOrIP
