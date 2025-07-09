@@ -38,11 +38,11 @@ steps:
         $ref: schema#/properties/spec/properties/cluster/properties/replicas
       type: input
     - discriminator:
-        createSentinel:
-          default: true
-          type: boolean
         announce:
           default: false
+          type: boolean
+        createSentinel:
+          default: true
           type: boolean
       elements:
       - label:
@@ -125,62 +125,60 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/persistence/properties/size
       type: input
-    - type: switch
+    - computed: setAnnounce
       if: isEqualToModelPathValue|Cluster|/spec/mode
-      computed: setAnnounce
-      schema:
-        $ref: discriminator#/announce
       label:
         text: Announce Redis Endpoints ?
       onChange: setAnnounce
-    - if: showAnnounce
-      elements:
-        - type: select
-          label:
-            text: Type
-          required: true
-          schema:
-            $ref: schema#/properties/spec/properties/cluster/properties/announce/properties/type
-          options:
-            - ip
-            - hostname
-        - addFormLabel: Shards
-          required: true
-          element:
-            elements:
-            - schema:
-                $ref: schema#/properties/spec/properties/cluster/properties/announce/properties/shards/items/properties/endpoints
-              element:
-                label:
-                  text: Endpoints
-                type: input
-                schema:
-                  $ref: schema#/properties/spec/properties/cluster/properties/announce/properties/shards/items/properties/endpoints/items
-              # validationRuleObject:
-              #   func: isAnnounceValid
-              type: list-input-form
+      schema:
+        $ref: discriminator#/announce
+      type: switch
+    - elements:
+      - label:
+          text: Type
+        options:
+        - ip
+        - hostname
+        required: true
+        schema:
+          $ref: schema#/properties/spec/properties/cluster/properties/announce/properties/type
+        type: select
+      - addFormLabel: Shards
+        element:
+          elements:
+          - element:
               label:
                 text: Endpoints
-            type: single-step-form
-          label:
-            text: Shards
-          schema:
-            $ref: schema#/properties/spec/properties/cluster/properties/announce/properties/shards
-          tableContents:
-          - inTableColumn: true
+              schema:
+                $ref: schema#/properties/spec/properties/cluster/properties/announce/properties/shards/items/properties/endpoints/items
+              type: input
             label:
               text: Endpoints
-            path: endpoints
-            type: value
-            typeOfValue: string
-          newItemValidator: validateEndpoints
-          temporaryPath: /endpoints
-          type: single-step-form-array
+            schema:
+              $ref: schema#/properties/spec/properties/cluster/properties/announce/properties/shards/items/properties/endpoints
+            type: list-input-form
+          type: single-step-form
+        label:
+          text: Shards
+        newItemValidator: validateEndpoints
+        required: true
+        schema:
+          $ref: schema#/properties/spec/properties/cluster/properties/announce/properties/shards
+        tableContents:
+        - inTableColumn: true
+          label:
+            text: Endpoints
+          path: endpoints
+          type: value
+          typeOfValue: string
+        temporaryPath: /endpoints
+        type: single-step-form-array
+      if: showAnnounce
       label:
         text: Announce
-      show_label: true
       schema:
         $ref: schema#/properties/spec/properties/cluster/properties/announce
+      show_label: true
       type: single-step-form
     - accordion: true
       description:
