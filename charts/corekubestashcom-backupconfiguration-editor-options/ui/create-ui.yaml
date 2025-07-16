@@ -8,9 +8,36 @@ steps:
     - computed: init
       if: returnFalse
       type: label-element
+    - fetch: getNamespaces
+      label:
+        text: Namespace
+      schema:
+        $ref: schema#/properties/metadata/properties/release/properties/namespace
+      type: select
+    - label:
+        text: Name
+      schema:
+        $ref: schema#/properties/metadata/properties/release/properties/name
+      type: input
     - elements:
       - fetch: getNamespaces
-        hasGroup: isRancherManaged
+        label:
+          text: Namespace
+        schema:
+          $ref: schema#/properties/spec/properties/backend/properties/storageRef/properties/namespace
+        type: select
+      - fetch: getNames|storageRef
+        label:
+          text: name
+        schema:
+          $ref: schema#/properties/spec/properties/backend/properties/storageRef/properties/name
+        type: select
+      label:
+        text: Storage Ref
+      show_label: true
+      type: single-step-form
+    - elements:
+      - fetch: getNamespaces
         label:
           text: Namespace
         schema:
@@ -25,105 +52,197 @@ steps:
       label:
         text: Retention Policy
       show_label: true
-      schema:
-      $ref: schema#/properties/spec/properties/backend/properties/retentionPolicy
       type: single-step-form
-    - addFormLabel: Session
-      element:
-        elements:
-        - label:
-            text: Session Name
+    - elements:
+      - isArray: true
+        keys:
+          label:
+            text: labels.labels.key
+        label:
+          text: labels.labels.label
+        schema:
+          $ref: schema#/properties/spec/properties/labels
+        type: key-value-input-form
+        values:
+          label:
+            text: labels.labels.value
           schema:
-            $ref: schema#/properties/spec/properties/sessions/items/properties/sessionName
+            $ref: schema#/properties/spec/properties/labels/additionalProperties
           type: input
-        - label:
-            text: Schedule
+      - isArray: true
+        keys:
+          label:
+            text: labels.annotations.key
+        label:
+          text: labels.annotations.label
+        schema:
+          $ref: schema#/properties/spec/properties/annotations
+        type: key-value-input-form
+        values:
+          label:
+            text: labels.annotations.value
           schema:
-            $ref: schema#/properties/spec/properties/sessions/items/properties/schedule
+            $ref: schema#/properties/spec/properties/annotations/additionalProperties
           type: input
-        - elements:
+      hideForm: true
+      label:
+        text: Labels & Annotations
+      show_label: true
+      type: single-step-form
+    - elements:
+      - addFormLabel: Session
+        element:
+          elements:
           - label:
-              text: Security Context
+              text: Session Name
             schema:
-              $ref: schema#/properties/spec/properties/sessions/items/properties/addon/properties/jobTemplate/properties/securityContext
+              $ref: schema#/properties/spec/properties/sessions/items/properties/sessionName
             type: input
-          - fetch: getAddon
-            label:
-              text: Name
-            onChange: clearTasks
+          - label:
+              text: Schedule
             schema:
-              $ref: schema#/properties/spec/properties/sessions/items/properties/addon/properties/name
-            type: select
-          - addFormLabel: Task
-            element:
-              elements:
-              - fetch: getTaskNames
-                label:
-                  text: Name
-                schema:
-                  $ref: schema#/properties/spec/properties/sessions/items/properties/addon/properties/tasks/items/properties/name
-                type: select
-              - label:
-                  text: Params
-                schema:
-                  $ref: schema#/properties/spec/properties/sessions/items/properties/addon/properties/tasks/items/properties/params
-                type: editor
-              type: single-step-form
-            label:
-              text: Tasks
-            resetDependencyPath: /session/addon/name
-            resetOnChange: true
-            schema:
-              $ref: schema#/properties/spec/properties/sessions/items/properties/addon/properties/tasks
-            tableContents:
-            - inTableColumn: true
+              $ref: schema#/properties/spec/properties/sessions/items/properties/schedule
+            type: input
+          - elements:
+            - label:
+                text: Security Context
+              required: true
+              schema:
+                $ref: schema#/properties/jobTemplate/properties/securityContext
+              type: input
+            - fetch: getAddon
               label:
                 text: Name
-              path: name
-              type: value
-              typeOfValue: string
-            - inTableColumn: true
+              onChange: clearTasks
+              schema:
+                $ref: schema#/properties/spec/properties/sessions/items/properties/addon/properties/name
+              type: select
+            - addFormLabel: Task
+              element:
+                elements:
+                - fetch: getTaskNames
+                  label:
+                    text: Name
+                  schema:
+                    $ref: schema#/properties/spec/properties/sessions/items/properties/addon/properties/tasks/items/properties/name
+                  type: select
+                - label:
+                    text: Params
+                  schema:
+                    $ref: schema#/properties/spec/properties/sessions/items/properties/addon/properties/tasks/items/properties/params
+                  type: editor
+                type: single-step-form
               label:
-                text: Params
-              path: params
-              type: value
-              typeOfValue: string
-            type: single-step-form-array
-          label:
-            text: Addon
-          schema:
-            $ref: schema#/properties/spec/properties/sessions/items/properties/addon
-          show_label: true
+                text: Tasks
+              resetDependencyPath: /session/addon/name
+              resetOnChange: true
+              schema:
+                $ref: schema#/properties/spec/properties/sessions/items/properties/addon/properties/tasks
+              tableContents:
+              - inTableColumn: true
+                label:
+                  text: Name
+                path: name
+                type: value
+                typeOfValue: string
+              - inTableColumn: true
+                label:
+                  text: Params
+                path: params
+                type: value
+                typeOfValue: string
+              type: single-step-form-array
+            label:
+              text: Addon
+            schema:
+              $ref: schema#/items/properties/addon
+            show_label: true
+            type: single-step-form
+          - elements:
+            - fetch: getNamespaces
+              label:
+                text: Namespace
+              required: true
+              schema:
+                $ref: schema#/properties/namespace
+              type: select
+            - fetch: getEncryptionSecretNames
+              label:
+                text: Name
+              required: true
+              schema:
+                $ref: schema#/properties/name
+              type: select
+            label:
+              text: Encryption Secret
+            schema:
+              $ref: schema#/items/properties/encryptionSecret
+            show_label: true
+            type: single-step-form
+          - label:
+              text: Repo Name
+            required: true
+            schema:
+              $ref: schema#/items/properties/repoName
+            type: input
           type: single-step-form
-          schema:
-            $ref: schema#/properties/spec/properties/sessions/items/properties/repoName
-          type: input
-        type: single-step-form
+        label:
+          text: Session
+        schema:
+          $ref: schema#/properties/spec/properties/sessions
+        tableContents:
+        - inTableColumn: true
+          label:
+            text: Repo Name
+          path: repoName
+          type: value
+          typeOfValue: string
+        - inTableColumn: true
+          label:
+            text: Schedule
+          path: schedule
+          type: value
+          typeOfValue: string
+        - inTableColumn: true
+          label:
+            text: Session Name
+          path: sessionName
+          type: value
+          typeOfValue: string
+        temporaryPath: /session
+        type: single-step-form-array
+      type: single-step-form
+    - elements:
+      - fetch: getApiGroup
+        label:
+          text: Api Group
+        schema:
+          $ref: schema#/properties/spec/properties/target/properties/apiGroup
+        type: select
+      - fetch: getKinds
+        label:
+          text: Kind
+        onChange: setVersion
+        schema:
+          $ref: schema#/properties/spec/properties/target/properties/kind
+        type: select
+      - fetch: getNamespaces
+        label:
+          text: Namespace
+        schema:
+          $ref: schema#/properties/spec/properties/target/properties/namespace
+        type: select
+      - fetch: getTargetName
+        label:
+          text: Name
+        schema:
+          $ref: schema#/properties/spec/properties/target/properties/name
+        type: select
+      hideForm: true
       label:
-        text: Session
-      schema:
-        $ref: schema#/properties/spec/properties/sessions
-      tableContents:
-      - inTableColumn: true
-        label:
-          text: Repo Name
-        path: repoName
-        type: value
-        typeOfValue: string
-      - inTableColumn: true
-        label:
-          text: Schedule
-        path: schedule
-        type: value
-        typeOfValue: string
-      - inTableColumn: true
-        label:
-          text: Session Name
-        path: sessionName
-        type: value
-        typeOfValue: string
-      temporaryPath: /session
-      type: single-step-form-array
+        text: Target
+      show_label: true
+      type: single-step-form
     type: single-step-form
   id: options
   title: steps.0.label
