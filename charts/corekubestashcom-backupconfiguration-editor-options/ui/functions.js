@@ -275,12 +275,11 @@ async function getData({ axios, route }, type) {
 
 function showTarget({ route, commit, storeGet }) {
   const params = route.params || {}
-  console.log(params)
-
-  const query = route.query || {}
   const { group, name } = params
-  const kind = storeGet('/resource/layout/result/resource/kind') || ''
+  const query = route.query || {}
   const namespace = query.namespace || ''
+  const kind = storeGet('/resource/layout/result/resource/kind') || ''
+
   if (group === 'kubedb.com') {
     const target = {
       apiGroup: 'kubedb.com',
