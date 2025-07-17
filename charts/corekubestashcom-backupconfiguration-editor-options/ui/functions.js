@@ -64,34 +64,6 @@ function getNamespaces({ watchDependency }) {
   return namespaces
 }
 
-async function getNames({ storeGet, getValue, model, axios, watchDependency }, type) {
-  watchDependency(`model#/spec/backend/${type}/namespace`)
-
-  const namespace = getValue(model, `/spec/backend/${type}/namespace`)
-  const params = storeGet('/route/params')
-  const { user, cluster } = params
-
-  let url = `/clusters/${user}/${cluster}/proxy/storage.kubestash.com/v1alpha1/namespaces/${namespace}/retentionpolicies`
-  if (type === 'storageRef') {
-    url = `/clusters/${user}/${cluster}/proxy/storage.kubestash.com/v1alpha1/namespaces/${namespace}/backupstorages`
-  }
-
-  if (namespace) {
-    try {
-      const resp = await axios.get(url)
-      const items = resp.data?.items
-      let options = []
-      items.forEach((ele) => {
-        options.push(ele.metadata?.name)
-      })
-      return options
-    } catch (e) {
-      console.log(e)
-    }
-  }
-  return []
-}
-
 async function getAddon({ storeGet, axios }) {
   const params = storeGet('/route/params')
   const { user, cluster } = params
@@ -279,6 +251,52 @@ async function fetchJsons({ axios, itemCtx }) {
   }
 }
 
+async function getData({ axios, route }, type) {
+  const user = route.params.user
+  const cluster = route.params.cluster
+  url = `/clusters/${user}/${cluster}/proxy/storage.kubestash.com/v1alpha1/${
+    type === 'retentionPolicy' ? 'retentionpolicies' : 'backupstorages'
+  }`
+  try {
+    const data = await axios.get(url)
+    const items = data.data?.items || []
+    const options = items.map((item) => {
+      return {
+        text: `${item.metadata.namespace}/${item.metadata.name}`,
+        value: { name: item.metadata.name, namespace: item.metadata.namespace },
+      }
+    })
+    return options || []
+  } catch (e) {
+    console.log(e)
+    return []
+  }
+}
+
+function showTarget({ route, commit, storeGet }) {
+  const params = route.params || {}
+  console.log(params)
+
+  const query = route.query || {}
+  const { group, name } = params
+  const kind = storeGet('/resource/layout/result/resource/kind') || ''
+  const namespace = query.namespace || ''
+  if (group === 'kubedb.com') {
+    const target = {
+      apiGroup: 'kubedb.com',
+      kind: kind,
+      namespace: namespace,
+      name: name,
+    }
+    commit('wizard/model$update', {
+      path: '/spec/target',
+      value: target,
+      force: true,
+    })
+  }
+  return group !== 'kubedb.com'
+}
+
 function returnFalse() {
   return false
 }
@@ -293,9 +311,10 @@ return {
   getTaskNames,
   getAddon,
   init,
-  getNames,
   returnFalse,
   fetchJsons,
   getNamespaces,
   clearTasks,
+  showTarget,
+  getData,
 }

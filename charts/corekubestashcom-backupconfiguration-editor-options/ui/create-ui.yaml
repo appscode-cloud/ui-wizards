@@ -19,40 +19,18 @@ steps:
       schema:
         $ref: schema#/properties/metadata/properties/release/properties/name
       type: input
-    - elements:
-      - fetch: getNamespaces
-        label:
-          text: Namespace
-        schema:
-          $ref: schema#/properties/spec/properties/backend/properties/storageRef/properties/namespace
-        type: select
-      - fetch: getNames|storageRef
-        label:
-          text: name
-        schema:
-          $ref: schema#/properties/spec/properties/backend/properties/storageRef/properties/name
-        type: select
+    - fetch: getData|storageRef
       label:
         text: Storage Ref
-      show_label: true
-      type: single-step-form
-    - elements:
-      - fetch: getNamespaces
-        label:
-          text: Namespace
-        schema:
-          $ref: schema#/properties/spec/properties/backend/properties/retentionPolicy/properties/namespace
-        type: select
-      - fetch: getNames|retentionPolicy
-        label:
-          text: name
-        schema:
-          $ref: schema#/properties/spec/properties/backend/properties/retentionPolicy/properties/name
-        type: select
+      schema:
+        $ref: schema#/properties/spec/properties/backend/properties/storageRef
+      type: select
+    - fetch: getData|retentionPolicy
       label:
         text: Retention Policy
-      show_label: true
-      type: single-step-form
+      schema:
+        $ref: schema#/properties/spec/properties/backend/properties/retentionPolicy
+      type: select
     - elements:
       - isArray: true
         keys:
@@ -221,12 +199,14 @@ steps:
       - fetch: getApiGroup
         label:
           text: Api Group
+        required: true
         schema:
           $ref: schema#/properties/spec/properties/target/properties/apiGroup
         type: select
       - fetch: getKinds
         label:
           text: Kind
+        required: true
         onChange: setVersion
         schema:
           $ref: schema#/properties/spec/properties/target/properties/kind
@@ -234,15 +214,18 @@ steps:
       - fetch: getNamespaces
         label:
           text: Namespace
+        required: true
         schema:
           $ref: schema#/properties/spec/properties/target/properties/namespace
         type: select
       - fetch: getTargetName
         label:
           text: Name
+        required: true
         schema:
           $ref: schema#/properties/spec/properties/target/properties/name
         type: select
+      if: showTarget
       hideForm: true
       label:
         text: Target
