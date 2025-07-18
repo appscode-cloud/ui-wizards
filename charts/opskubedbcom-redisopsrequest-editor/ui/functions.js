@@ -691,14 +691,26 @@ function showAndInitOpsRequestType({ route, commit }) {
 }
 
 // vertical scaling
-function ifDbTypeEqualsTo({ discriminator, getValue, watchDependency, commit }, value, opsReqType) {
+function ifDbTypeEqualsTo({ discriminator, getValue, watchDependency }, value) {
   const verd = getDbType({
     discriminator,
     getValue,
     watchDependency,
   })
+  console.log(value)
 
-  return value === verd
+  return value.includes(verd)
+}
+
+function setReplicas({ discriminator, getValue, watchDependency }) {
+  const verd = getDbType({
+    discriminator,
+    getValue,
+    watchDependency,
+  })
+  const dbDetails = getValue(discriminator, '/dbDetails')
+  if (verd === 'Sentinel') return dbDetails?.spec?.replicas
+  else return dbDetails?.spec?.cluster?.replicas
 }
 
 // machine profile stuffs
@@ -1287,4 +1299,5 @@ return {
   onMachineChange,
   isMachineCustom,
   checkVolume,
+  setReplicas,
 }
