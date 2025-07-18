@@ -72,7 +72,7 @@ spec:
   cluster:
     shards: {{ .Values.spec.cluster.master }}
     replicas: {{ .Values.spec.cluster.replicas }}
-    {{- if .Values.spec.cluster.announce.shards }}
+    {{- if and .Values.spec.cluster.announce .Values.spec.cluster.announce.shards }}
     announce:
       type: {{ .Values.spec.cluster.announce.type }}
       shards:

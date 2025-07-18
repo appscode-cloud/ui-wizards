@@ -37,9 +37,11 @@ spec:
         tasks:
         {{- range .addon.tasks }}
           - name: {{ .name }}
+            {{- if .params }}
             params: {{ .params }}
+            {{- end }}
         {{- end }}
-        {{- if .addon.jobTemplate.securityContext }}
+        {{- if and .addon.jobTemplate .addon.jobTemplate.securityContext }}
         jobTemplate:
           spec:
             securityContext:

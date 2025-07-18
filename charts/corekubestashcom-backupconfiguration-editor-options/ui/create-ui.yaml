@@ -9,7 +9,6 @@ steps:
       if: returnFalse
       type: label-element
     - fetch: getNamespaces
-      hasGroup: isRancherManaged
       label:
         text: Namespace
       schema:
@@ -20,42 +19,18 @@ steps:
       schema:
         $ref: schema#/properties/metadata/properties/release/properties/name
       type: input
-    - elements:
-      - fetch: getNamespaces
-        hasGroup: isRancherManaged
-        label:
-          text: Namespace
-        schema:
-          $ref: schema#/properties/spec/properties/backend/properties/storageRef/properties/namespace
-        type: select
-      - fetch: getNames|storageRef
-        label:
-          text: name
-        schema:
-          $ref: schema#/properties/spec/properties/backend/properties/storageRef/properties/name
-        type: select
+    - fetch: getData|storageRef
       label:
         text: Storage Ref
-      show_label: true
-      type: single-step-form
-    - elements:
-      - fetch: getNamespaces
-        hasGroup: isRancherManaged
-        label:
-          text: Namespace
-        schema:
-          $ref: schema#/properties/spec/properties/backend/properties/retentionPolicy/properties/namespace
-        type: select
-      - fetch: getNames|retentionPolicy
-        label:
-          text: name
-        schema:
-          $ref: schema#/properties/spec/properties/backend/properties/retentionPolicy/properties/name
-        type: select
+      schema:
+        $ref: schema#/properties/spec/properties/backend/properties/storageRef
+      type: select
+    - fetch: getData|retentionPolicy
       label:
         text: Retention Policy
-      show_label: true
-      type: single-step-form
+      schema:
+        $ref: schema#/properties/spec/properties/backend/properties/retentionPolicy
+      type: select
     - elements:
       - isArray: true
         keys:
@@ -98,26 +73,30 @@ steps:
           elements:
           - label:
               text: Session Name
+            required: true
             schema:
-              $ref: schema#/properties/spec/properties/sessions/items/properties/sessionName
+              $ref: schema#/items/properties/sessionName
             type: input
           - label:
               text: Schedule
+            required: true
             schema:
-              $ref: schema#/properties/spec/properties/sessions/items/properties/schedule
+              $ref: schema#/items/properties/schedule
             type: input
           - elements:
             - label:
                 text: Security Context
               schema:
-                $ref: schema#/properties/spec/properties/sessions/items/properties/addon/properties/jobTemplate/properties/securityContext
+                $ref: schema#/properties/jobTemplate/properties/securityContext
+              inputType: number
               type: input
             - fetch: getAddon
               label:
                 text: Name
               onChange: clearTasks
+              required: true
               schema:
-                $ref: schema#/properties/spec/properties/sessions/items/properties/addon/properties/name
+                $ref: schema#/items/properties/addon/properties/name
               type: select
             - addFormLabel: Task
               element:
@@ -125,21 +104,23 @@ steps:
                 - fetch: getTaskNames
                   label:
                     text: Name
+                  required: true
                   schema:
-                    $ref: schema#/properties/spec/properties/sessions/items/properties/addon/properties/tasks/items/properties/name
+                    $ref: schema#/items/properties/name
                   type: select
                 - label:
                     text: Params
                   schema:
-                    $ref: schema#/properties/spec/properties/sessions/items/properties/addon/properties/tasks/items/properties/params
+                    $ref: schema#/items/properties/params
                   type: editor
                 type: single-step-form
               label:
                 text: Tasks
               resetDependencyPath: /session/addon/name
               resetOnChange: true
+              required: true
               schema:
-                $ref: schema#/properties/spec/properties/sessions/items/properties/addon/properties/tasks
+                $ref: schema#/properties/tasks
               tableContents:
               - inTableColumn: true
                 label:
@@ -157,33 +138,35 @@ steps:
             label:
               text: Addon
             schema:
-              $ref: schema#/properties/spec/properties/sessions/items/properties/addon
+              $ref: schema#/items/properties/addon
             show_label: true
             type: single-step-form
           - elements:
             - fetch: getNamespaces
-              hasGroup: isRancherManaged
               label:
                 text: Namespace
+              required: true
               schema:
-                $ref: schema#/properties/spec/properties/sessions/items/properties/encryptionSecret/properties/namespace
+                $ref: schema#/properties/namespace
               type: select
             - fetch: getEncryptionSecretNames
               label:
                 text: Name
+              required: true
               schema:
-                $ref: schema#/properties/spec/properties/sessions/items/properties/encryptionSecret/properties/name
+                $ref: schema#/items/properties/encryptionSecret/properties/name
               type: select
             label:
               text: Encryption Secret
             schema:
-              $ref: schema#/properties/spec/properties/sessions/items/properties/encryptionSecret
+              $ref: schema#/items/properties/encryptionSecret
             show_label: true
             type: single-step-form
           - label:
               text: Repo Name
+            required: true
             schema:
-              $ref: schema#/properties/spec/properties/sessions/items/properties/repoName
+              $ref: schema#/items/properties/repoName
             type: input
           type: single-step-form
         label:
@@ -216,29 +199,33 @@ steps:
       - fetch: getApiGroup
         label:
           text: Api Group
+        required: true
         schema:
           $ref: schema#/properties/spec/properties/target/properties/apiGroup
         type: select
       - fetch: getKinds
         label:
           text: Kind
+        required: true
         onChange: setVersion
         schema:
           $ref: schema#/properties/spec/properties/target/properties/kind
         type: select
       - fetch: getNamespaces
-        hasGroup: isRancherManaged
         label:
           text: Namespace
+        required: true
         schema:
           $ref: schema#/properties/spec/properties/target/properties/namespace
         type: select
       - fetch: getTargetName
         label:
           text: Name
+        required: true
         schema:
           $ref: schema#/properties/spec/properties/target/properties/name
         type: select
+      if: showTarget
       hideForm: true
       label:
         text: Target
