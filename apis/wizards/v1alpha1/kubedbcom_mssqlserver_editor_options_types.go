@@ -70,7 +70,7 @@ type MSSQLServerTopology struct {
 	AvailabilityGroup *MSSQLServerAGSpec `json:"availabilityGroup"`
 }
 
-// +kubebuilder:validation:Enum=Developer;Express;Standard;Enterprise;EnterpriseCore;Custom
+// +kubebuilder:validation:Enum=Developer;Express;Standard;Evaluation;Enterprise;EnterpriseCore;Custom
 type MSSQLServerPID string
 
 type MSSQLServerAGSpec struct {
