@@ -7,8 +7,8 @@
 ```bash
 $ helm repo add appscode https://charts.appscode.com/stable/
 $ helm repo update
-$ helm search repo appscode/corekubestashcom-restoresession-editor-options --version=v0.20.0
-$ helm upgrade -i corekubestashcom-restoresession-editor-options appscode/corekubestashcom-restoresession-editor-options -n kube-system --create-namespace --version=v0.20.0
+$ helm search repo appscode/corekubestashcom-restoresession-editor-options --version=v0.21.0
+$ helm upgrade -i corekubestashcom-restoresession-editor-options appscode/corekubestashcom-restoresession-editor-options -n kube-system --create-namespace --version=v0.21.0
 ```
 
 ## Introduction
@@ -24,7 +24,7 @@ This chart deploys a KubeStash RestoreSession Editor UI Options on a [Kubernetes
 To install/upgrade the chart with the release name `corekubestashcom-restoresession-editor-options`:
 
 ```bash
-$ helm upgrade -i corekubestashcom-restoresession-editor-options appscode/corekubestashcom-restoresession-editor-options -n kube-system --create-namespace --version=v0.20.0
+$ helm upgrade -i corekubestashcom-restoresession-editor-options appscode/corekubestashcom-restoresession-editor-options -n kube-system --create-namespace --version=v0.21.0
 ```
 
 The command deploys a KubeStash RestoreSession Editor UI Options on the Kubernetes cluster in the default configuration. The [configuration](#configuration) section lists the parameters that can be configured during installation.
@@ -58,7 +58,7 @@ The following table lists the configurable parameters of the `corekubestashcom-r
 | spec.labels                                | Labels to add to all the template objects          | <code>{}</code>                 |
 | spec.dataSource.repository.name            |                                                    | <code>""</code>                 |
 | spec.dataSource.repository.namespace       |                                                    | <code>""</code>                 |
-| spec.dataSource.snapshot                   |                                                    | <code>latest</code>             |
+| spec.dataSource.snapshot                   |                                                    | <code>""</code>                 |
 | spec.dataSource.encryptionSecret.name      |                                                    | <code>""</code>                 |
 | spec.dataSource.encryptionSecret.namespace |                                                    | <code>"stash"</code>            |
 | spec.addon.name                            |                                                    | <code>""</code>                 |
@@ -72,12 +72,12 @@ The following table lists the configurable parameters of the `corekubestashcom-r
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm upgrade -i`. For example:
 
 ```bash
-$ helm upgrade -i corekubestashcom-restoresession-editor-options appscode/corekubestashcom-restoresession-editor-options -n kube-system --create-namespace --version=v0.20.0 --set metadata.resource.group=core.kubestash.com
+$ helm upgrade -i corekubestashcom-restoresession-editor-options appscode/corekubestashcom-restoresession-editor-options -n kube-system --create-namespace --version=v0.21.0 --set metadata.resource.group=core.kubestash.com
 ```
 
 Alternatively, a YAML file that specifies the values for the parameters can be provided while
 installing the chart. For example:
 
 ```bash
-$ helm upgrade -i corekubestashcom-restoresession-editor-options appscode/corekubestashcom-restoresession-editor-options -n kube-system --create-namespace --version=v0.20.0 --values values.yaml
+$ helm upgrade -i corekubestashcom-restoresession-editor-options appscode/corekubestashcom-restoresession-editor-options -n kube-system --create-namespace --version=v0.21.0 --values values.yaml
 ```
