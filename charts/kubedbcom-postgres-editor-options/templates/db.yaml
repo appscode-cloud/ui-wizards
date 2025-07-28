@@ -49,7 +49,11 @@ tolerations:
 {{- end }}
 
 {{- $pgv := (split "." .Values.spec.admin.databases.Postgres.versions.default)._0 | atoi -}}
+{{- if .Values.spec.admin.gitOps.enable.default }}
+apiVersion: gitops.kubedb.com/v1alpha1
+{{ else }}
 apiVersion: kubedb.com/v1
+{{- end }}
 kind: Postgres
 metadata:
   name: {{ include "kubedbcom-postgres-editor-options.fullname" . }}

@@ -48,7 +48,11 @@ tolerations:
 {{- end }}
 {{- end }}
 
+{{- if .Values.spec.admin.gitOps.enable.default }}
+apiVersion: gitops.kubedb.com/v1alpha1
+{{ else }}
 apiVersion: kubedb.com/v1alpha2
+{{- end }}
 kind: ClickHouse
 metadata:
   name: {{ include "kubedbcom-clickhouse-editor-options.fullname" . }}

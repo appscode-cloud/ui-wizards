@@ -348,6 +348,78 @@ resources:
         kind: Singlestore
         name: singlestore
         namespace: demo
+  gitopsKubedbComSinglestore: # +doc-gen:break
+    apiVersion: gitops.kubedb.com/v1alpha1
+    kind: Singlestore
+    metadata:
+      name: singlestore
+      namespace: sdb
+    spec:
+      deletionPolicy: Halt
+      licenseSecret:
+        name: license-secret
+      serviceTemplates:
+        - alias: primary
+          spec:
+            type: LoadBalancer
+      storageType: Durable
+      topology:
+        aggregator:
+          podTemplate:
+            spec:
+              containers:
+                - name: singlestore
+                  resources:
+                    requests:
+                      cpu: 600m
+                      memory: 1200Mi
+              nodeSelector:
+                app: kubedb
+                component: sdb-database
+                instance: sdb
+              tolerations:
+                - effect: NoSchedule
+                  key: app
+                  operator: Equal
+                  value: kubedb
+                - effect: NoSchedule
+                  key: instance
+                  operator: Equal
+                  value: sdb
+                - effect: NoSchedule
+                  key: component
+                  operator: Equal
+                  value: sdb-database
+                - effect: NoSchedule
+                  key: nodepool_type
+                  operator: Equal
+                  value: n2-standard-2
+          replicas: 3
+          storage:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 1Gi
+            storageClassName: standard-rwo
+        leaf:
+          podTemplate:
+            spec:
+              containers:
+                - name: singlestore
+                  resources:
+                    requests:
+                      cpu: 700m
+                      memory: 1400Mi
+          replicas: 2
+          storage:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 10Gi
+            storageClassName: standard-rwo
+      version: 8.1.32
   kubedbComSinglestore: # +doc-gen:break
     apiVersion: kubedb.com/v1alpha2
     kind: Singlestore
