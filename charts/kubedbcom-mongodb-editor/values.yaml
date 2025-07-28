@@ -421,6 +421,63 @@ resources:
         kind: MongoDB
         name: mongodb
         namespace: demo
+  gitopsKubedbComMongoDB: # +doc-gen:break
+    apiVersion: gitops.kubedb.com/v1alpha1
+    kind: MongoDB
+    metadata:
+      name: mongodb
+      namespace: demo
+    spec:
+      authSecret:
+        name: mongodb-auth
+      configSecret:
+        name: mongodb-config
+      deletionPolicy: WipeOut
+      init:
+        waitForInitialRestore: true
+      monitor:
+        agent: prometheus.io
+        prometheus:
+          exporter:
+            resources:
+              limits:
+                cpu: 100m
+                memory: 128Mi
+              requests:
+                cpu: 100m
+                memory: 128Mi
+      shardTopology:
+        configServer:
+          configSecret:
+            name: mongodb-configserver-config
+          replicas: 3
+          storage:
+            resources:
+              requests:
+                storage: 1Gi
+            storageClassName: standard
+        mongos:
+          configSecret:
+            name: mongodb-mongos-config
+          replicas: 2
+        shard:
+          configSecret:
+            name: mongodb-shard-config
+          replicas: 3
+          shards: 2
+          storage:
+            resources:
+              requests:
+                storage: 1Gi
+            storageClassName: standard
+      sslMode: requireSSL
+      storageType: Durable
+      tls:
+        issuerRef:
+          apiGroup: cert-manager.io
+          kind: Issuer
+          name: mongo-ca
+      version: 4.2.3
   kubedbComMongoDB: # +doc-gen:break
     apiVersion: kubedb.com/v1
     kind: MongoDB

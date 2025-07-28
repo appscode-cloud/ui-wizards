@@ -77,6 +77,7 @@ type AdminOptions struct {
 	Archiver            ArchiverProfile        `json:"archiver"`
 	PointInTimeRecovery ToggleProfileOnBoolean `json:"pointInTimeRecovery"`
 
+	GitOps          GitOpsProfile   `json:"gitOps"`
 	MachineProfiles MachineProfiles `json:"machineProfiles"`
 }
 
@@ -159,6 +160,10 @@ type Machine struct {
 	Id     string            `json:"id"`
 	Name   string            `json:"name,omitempty"`
 	Limits core.ResourceList `json:"limits"`
+}
+
+type GitOpsProfile struct {
+	Enable ToggleProfileOnBoolean `json:"enable"`
 }
 
 type AuthCredential struct {

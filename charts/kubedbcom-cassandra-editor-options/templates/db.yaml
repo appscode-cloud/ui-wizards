@@ -48,7 +48,11 @@ tolerations:
 {{- end }}
 {{- end }}
 
+{{- if .Values.spec.admin.gitOps.enable.default }}
+apiVersion: gitops.kubedb.com/v1alpha1
+{{ else }}
 apiVersion: kubedb.com/v1alpha2
+{{- end }}
 kind: Cassandra
 metadata:
   name: {{ include "kubedbcom-cassandra-editor-options.fullname" . }}

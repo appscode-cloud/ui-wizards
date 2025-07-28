@@ -323,6 +323,36 @@ resources:
         kind: MSSQLServer
         name: sqlserver-ag
         namespace: demo
+  gitopsKubedbComMSSQLServer: # +doc-gen:break
+    apiVersion: gitops.kubedb.com/v1alpha1
+    kind: MSSQLServer
+    metadata:
+      name: sqlserver-ag
+      namespace: sample
+    spec:
+      deletionPolicy: Delete
+      internalAuth:
+        endpointCert:
+          issuerRef:
+            apiGroup: cert-manager.io
+            kind: Issuer
+            name: sqlserver-ag-ca
+      replicas: 3
+      storage:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi
+        storageClassName: standard
+      storageType: Durable
+      topology:
+        availabilityGroup:
+          databases:
+            - AgDB1
+            - AgDB2
+        mode: AvailabilityGroup
+      version: 2022-cu12
   kubedbComMSSQLServer: # +doc-gen:break
     apiVersion: kubedb.com/v1alpha2
     kind: MSSQLServer
