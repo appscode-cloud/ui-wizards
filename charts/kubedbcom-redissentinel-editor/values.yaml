@@ -18,6 +18,42 @@ resources:
     spec:
       ca:
         secretName: redis-ca
+  gitopsKubedbComRedisSentinel: # +doc-gen:break
+    apiVersion: gitops.kubedb.com/v1alpha1
+    kind: RedisSentinel
+    metadata:
+      name: redissentinel
+      namespace: demo
+    spec:
+      authSecret:
+        name: redissentinel-auth
+      deletionPolicy: WipeOut
+      monitor:
+        agent: prometheus.io
+        prometheus:
+          exporter:
+            resources:
+              limits:
+                cpu: 100m
+                memory: 128Mi
+              requests:
+                cpu: 100m
+                memory: 128Mi
+      replicas: 3
+      storage:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi
+        storageClassName: standard
+      storageType: Durable
+      tls:
+        issuerRef:
+          apiGroup: cert-manager.io
+          kind: Issuer
+          name: redis-ca
+      version: 6.2.5
   kubedbComRedisSentinel: # +doc-gen:break
     apiVersion: kubedb.com/v1
     kind: RedisSentinel

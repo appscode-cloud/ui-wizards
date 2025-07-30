@@ -201,6 +201,55 @@ resources:
     spec:
       ca:
         secretName: ferretdb-ca
+  gitopsKubedbComFerretDB: # +doc-gen:break
+    apiVersion: gitops.kubedb.com/v1alpha1
+    kind: FerretDB
+    metadata:
+      name: ferret
+      namespace: demo
+    spec:
+      authSecret:
+        externallyManaged: false
+      deletionPolicy: WipeOut
+      monitor:
+        agent: prometheus.io/builtin
+      podTemplate:
+        spec:
+          containers:
+            - name: ferretdb
+              resources:
+                requests:
+                  cpu: 400m
+                  memory: 1200Mi
+          nodeSelector:
+            app: kubedb
+            component: ferretdb-database
+            instance: ferretdb
+          tolerations:
+            - effect: NoSchedule
+              key: app
+              operator: Equal
+              value: kubedb
+            - effect: NoSchedule
+              key: instance
+              operator: Equal
+              value: ferretdb
+            - effect: NoSchedule
+              key: component
+              operator: Equal
+              value: ferretdb-database
+            - effect: NoSchedule
+              key: nodepool_type
+              operator: Equal
+              value: n2-standard-2
+      sslMode: disabled
+      storage:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 500Mi
+      version: 1.18.0
   kubedbComFerretDB: # +doc-gen:break
     apiVersion: kubedb.com/v1alpha2
     kind: FerretDB

@@ -140,6 +140,52 @@ resources:
     spec:
       ca:
         secretName: proxysql-ca
+  gitopsKubedbComProxySQL: # +doc-gen:break
+    apiVersion: gitops.kubedb.com/v1alpha1
+    kind: ProxySQL
+    metadata:
+      name: proxysql
+      namespace: demo
+    spec:
+      authSecret:
+        name: proxysql-auth
+      configSecret:
+        name: proxysql-config
+      deletionPolicy: WipeOut
+      monitor:
+        agent: prometheus.io
+        prometheus:
+          serviceMonitor:
+            interval: 30s
+            labels:
+              release: prometheus-stack
+      podTemplate:
+        spec:
+          args:
+            - --character-set-server=utf8mb4
+          env:
+            - name: MYSQL_DATABASE
+              value: mdDB
+          resources:
+            requests:
+              cpu: 250m
+              memory: 1Gi
+      replicas: 1
+      tls:
+        certificates:
+          - alias: server
+            dnsNames:
+              - localhost
+            ipAddresses:
+              - 127.0.0.1
+            subject:
+              organizations:
+                - kubedb:server
+        issuerRef:
+          apiGroup: cert-manager.io
+          kind: Issuer
+          name: proxysql-ca
+      version: 10.5.8
   kubedbComProxySQL: # +doc-gen:break
     apiVersion: kubedb.com/v1
     kind: ProxySQL
