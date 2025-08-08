@@ -428,6 +428,65 @@ resources:
         kind: MariaDB
         name: mariadb
         namespace: demo
+  gitopsKubedbComMariaDB: # +doc-gen:break
+    apiVersion: gitops.kubedb.com/v1alpha1
+    kind: MariaDB
+    metadata:
+      name: mariadb
+      namespace: demo
+    spec:
+      authSecret:
+        name: mariadb-auth
+      configSecret:
+        name: mariadb-config
+      deletionPolicy: WipeOut
+      monitor:
+        agent: prometheus.io
+        prometheus:
+          exporter:
+            resources:
+              limits:
+                cpu: 100m
+                memory: 128Mi
+              requests:
+                cpu: 100m
+                memory: 128Mi
+      podTemplate:
+        spec:
+          args:
+            - --character-set-server=utf8mb4
+          env:
+            - name: MYSQL_DATABASE
+              value: mdDB
+          resources:
+            requests:
+              cpu: 250m
+              memory: 1Gi
+      replicas: 1
+      requireSSL: true
+      storage:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi
+        storageClassName: standard
+      storageType: Durable
+      tls:
+        certificates:
+          - alias: server
+            dnsNames:
+              - localhost
+            ipAddresses:
+              - 127.0.0.1
+            subject:
+              organizations:
+                - kubedb:server
+        issuerRef:
+          apiGroup: cert-manager.io
+          kind: Issuer
+          name: mariadb-ca
+      version: 10.5.8
   kubedbComMariaDB: # +doc-gen:break
     apiVersion: kubedb.com/v1
     kind: MariaDB

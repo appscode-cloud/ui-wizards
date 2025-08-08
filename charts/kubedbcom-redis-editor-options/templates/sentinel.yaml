@@ -1,5 +1,9 @@
 {{ if and (eq .Values.spec.mode "Sentinel") ( eq .Values.spec.sentinelRef.name "" ) }}
+{{- if .Values.spec.admin.gitOps.enable.default }}
+apiVersion: gitops.kubedb.com/v1
+{{ else }}
 apiVersion: kubedb.com/v1
+{{- end }}
 kind: RedisSentinel
 metadata:
   name: {{ include "kubedbcom-redis-editor-options.fullname" . }}-sentinel
