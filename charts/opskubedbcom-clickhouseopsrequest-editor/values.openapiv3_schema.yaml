@@ -53,6 +53,22 @@ properties:
             type: object
             x-kubernetes-map-type: atomic
         type: object
+      configuration:
+        properties:
+          applyConfig:
+            additionalProperties:
+              type: string
+            type: object
+          configSecret:
+            properties:
+              name:
+                default: ""
+                type: string
+            type: object
+            x-kubernetes-map-type: atomic
+          removeCustomConfig:
+            type: boolean
+        type: object
       databaseRef:
         properties:
           name:
@@ -60,6 +76,19 @@ properties:
             type: string
         type: object
         x-kubernetes-map-type: atomic
+      horizontalScaling:
+        properties:
+          cluster:
+            items:
+              properties:
+                clusterName:
+                  type: string
+                replicas:
+                  format: int32
+                  type: integer
+              type: object
+            type: array
+        type: object
       restart:
         type: object
       timeout:
@@ -68,7 +97,16 @@ properties:
         enum:
         - Restart
         - VerticalScaling
+        - HorizontalScaling
+        - UpdateVersion
+        - VolumeExpansion
+        - Reconfigure
         type: string
+      updateVersion:
+        properties:
+          targetVersion:
+            type: string
+        type: object
       verticalScaling:
         properties:
           cluster:
@@ -174,6 +212,22 @@ properties:
                 - value
                 type: object
             type: object
+        type: object
+      volumeExpansion:
+        properties:
+          mode:
+            enum:
+            - Offline
+            - Online
+            type: string
+          node:
+            anyOf:
+            - type: integer
+            - type: string
+            pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+            x-kubernetes-int-or-string: true
+        required:
+        - mode
         type: object
     required:
     - databaseRef

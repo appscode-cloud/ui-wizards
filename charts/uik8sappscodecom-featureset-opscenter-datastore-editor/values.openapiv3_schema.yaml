@@ -3789,19 +3789,49 @@ properties:
                         type: object
                       recommendationEngine:
                         properties:
-                          genRotateTLSRecommendationBeforeExpiryDay:
-                            type: integer
-                          genRotateTLSRecommendationBeforeExpiryMonth:
-                            type: integer
-                          genRotateTLSRecommendationBeforeExpiryYear:
-                            type: integer
-                          recommendationResyncPeriod:
+                          deadline:
+                            properties:
+                              enable:
+                                type: boolean
+                              maxEvaluationPeriod:
+                                type: string
+                            required:
+                            - enable
+                            - maxEvaluationPeriod
+                            type: object
+                          resyncPeriod:
                             type: string
+                          rotateAuth:
+                            properties:
+                              genRecommendationBeforeExpiryDay:
+                                type: integer
+                              genRecommendationBeforeExpiryMonth:
+                                type: integer
+                              genRecommendationBeforeExpiryYear:
+                                type: integer
+                            required:
+                            - genRecommendationBeforeExpiryDay
+                            - genRecommendationBeforeExpiryMonth
+                            - genRecommendationBeforeExpiryYear
+                            type: object
+                          rotateTLS:
+                            properties:
+                              genRecommendationBeforeExpiryDay:
+                                type: integer
+                              genRecommendationBeforeExpiryMonth:
+                                type: integer
+                              genRecommendationBeforeExpiryYear:
+                                type: integer
+                            required:
+                            - genRecommendationBeforeExpiryDay
+                            - genRecommendationBeforeExpiryMonth
+                            - genRecommendationBeforeExpiryYear
+                            type: object
                         required:
-                        - genRotateTLSRecommendationBeforeExpiryDay
-                        - genRotateTLSRecommendationBeforeExpiryMonth
-                        - genRotateTLSRecommendationBeforeExpiryYear
-                        - recommendationResyncPeriod
+                        - deadline
+                        - resyncPeriod
+                        - rotateAuth
+                        - rotateTLS
                         type: object
                       registryFQDN:
                         type: string
@@ -7537,6 +7567,42 @@ properties:
                         - mode
                         - versions
                         type: object
+                      Hazelcast:
+                        properties:
+                          mode:
+                            properties:
+                              available:
+                                items:
+                                  type: string
+                                type: array
+                              default:
+                                type: string
+                              toggle:
+                                type: boolean
+                            required:
+                            - available
+                            - default
+                            - toggle
+                            type: object
+                          versions:
+                            properties:
+                              available:
+                                items:
+                                  type: string
+                                type: array
+                              default:
+                                type: string
+                              toggle:
+                                type: boolean
+                            required:
+                            - available
+                            - default
+                            - toggle
+                            type: object
+                        required:
+                        - mode
+                        - versions
+                        type: object
                       Ignite:
                         properties:
                           mode:
@@ -7754,6 +7820,42 @@ properties:
                         - versions
                         type: object
                       MySQL:
+                        properties:
+                          mode:
+                            properties:
+                              available:
+                                items:
+                                  type: string
+                                type: array
+                              default:
+                                type: string
+                              toggle:
+                                type: boolean
+                            required:
+                            - available
+                            - default
+                            - toggle
+                            type: object
+                          versions:
+                            properties:
+                              available:
+                                items:
+                                  type: string
+                                type: array
+                              default:
+                                type: string
+                              toggle:
+                                type: boolean
+                            required:
+                            - available
+                            - default
+                            - toggle
+                            type: object
+                        required:
+                        - mode
+                        - versions
+                        type: object
+                      Oracle:
                         properties:
                           mode:
                             properties:
