@@ -108,6 +108,72 @@ resources:
     spec:
       ca:
         secretName: pgbouncer-ca
+  gitopsKubedbComPgBouncer: # +doc-gen:break
+    apiVersion: gitops.kubedb.com/v1alpha1
+    kind: PgBouncer
+    metadata:
+      name: pgbouncer
+      namespace: demo
+    spec:
+      authSecret:
+        name: pgbouncer-auth
+      configSecret:
+        name: pgbouncer-config
+      connectionPool:
+        adminUsers:
+          - rakib
+        authType: md5
+        authUser: rakib
+        defaultPoolSize: 20
+        maxClientConnections: 20
+        maxDBConnections: 0
+        maxUserConnections: 0
+        minPoolSize: 0
+        poolMode: session
+        port: 5432
+        reservePoolSize: 5
+        statsPeriodSeconds: 60
+      database:
+        databaseName: postgres
+        databaseRef:
+          name: postgres
+          namespace: demo
+        syncUsers: true
+      deletionPolicy: WipeOut
+      monitor:
+        agent: prometheus.io
+        prometheus:
+          serviceMonitor:
+            interval: 30s
+            labels:
+              release: prometheus-stack
+      podTemplate:
+        spec:
+          args:
+            - --character-set-server=utf8mb4
+          env:
+            - name: MYSQL_DATABASE
+              value: mdDB
+          resources:
+            requests:
+              cpu: 250m
+              memory: 1Gi
+      replicas: 3
+      tls:
+        certificates:
+          - alias: server
+            dnsNames:
+              - localhost
+            ipAddresses:
+              - 127.0.0.1
+            subject:
+              organizations:
+                - kubedb:server
+        issuerRef:
+          apiGroup: cert-manager.io
+          kind: Issuer
+          name: pgbouncer-ca
+      version: 1.17.0
   kubedbComPgBouncer: # +doc-gen:break
     apiVersion: kubedb.com/v1
     kind: PgBouncer

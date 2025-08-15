@@ -443,6 +443,69 @@ resources:
         kind: MySQL
         name: mysql
         namespace: demo
+  gitopsKubedbComMySQL: # +doc-gen:break
+    apiVersion: gitops.kubedb.com/v1alpha1
+    kind: MySQL
+    metadata:
+      name: mysql
+      namespace: demo
+    spec:
+      authSecret:
+        name: mysql-auth
+      configSecret:
+        name: mysql-config
+      deletionPolicy: Halt
+      monitor:
+        agent: prometheus.io
+        prometheus:
+          exporter:
+            resources:
+              limits:
+                cpu: 100m
+                memory: 128Mi
+              requests:
+                cpu: 100m
+                memory: 128Mi
+      podTemplate:
+        spec:
+          args:
+            - --character-set-server=utf8mb4
+          env:
+            - name: MYSQL_DATABASE
+              value: myDB
+          resources:
+            requests:
+              cpu: 250m
+              memory: 1Gi
+      replicas: 3
+      requireSSL: true
+      storage:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi
+        storageClassName: standard
+      storageType: Durable
+      tls:
+        certificates:
+          - alias: server
+            dnsNames:
+              - localhost
+            ipAddresses:
+              - 127.0.0.1
+            subject:
+              organizations:
+                - kubedb:server
+        issuerRef:
+          apiGroup: cert-manager.io
+          kind: Issuer
+          name: mysql-ca
+      topology:
+        group:
+          name: dc002fc3-c412-4d18-b1d4-66c1fbfbbc9b
+        mode: GroupReplication
+      version: 8.0.23-v1
   kubedbComMySQL: # +doc-gen:break
     apiVersion: kubedb.com/v1
     kind: MySQL

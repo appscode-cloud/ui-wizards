@@ -48,7 +48,11 @@ tolerations:
 {{- end }}
 {{- end }}
 
+{{- if .Values.spec.admin.gitOps.enable.default }}
+apiVersion: gitops.kubedb.com/v1alpha1
+{{ else }}
 apiVersion: kubedb.com/v1
+{{- end }}
 kind: Memcached
 metadata:
   name: {{ include "kubedbcom-memcached-editor-options.fullname" . }}

@@ -414,6 +414,59 @@ resources:
         kind: Postgres
         name: postgres
         namespace: demo
+  gitopsKubedbComPostgres: # +doc-gen:break
+    apiVersion: gitops.kubedb.com/v1alpha1
+    kind: Postgres
+    metadata:
+      name: postgres
+      namespace: demo
+    spec:
+      authSecret:
+        name: postgres-auth
+      clientAuthMode: scram
+      configSecret:
+        name: postgres-config
+      deletionPolicy: WipeOut
+      init:
+        waitForInitialRestore: true
+      leaderElection:
+        electionTick: 10
+        heartbeatTick: 1
+        maximumLagBeforeFailover: 33554432
+        period: 100ms
+      monitor:
+        agent: prometheus.io
+        prometheus:
+          exporter:
+            resources:
+              limits:
+                cpu: 100m
+                memory: 128Mi
+              requests:
+                cpu: 100m
+                memory: 128Mi
+      podTemplate:
+        spec:
+          containerSecurityContext:
+            privileged: false
+            runAsGroup: 0
+            runAsUser: 999
+      sslMode: verify-full
+      standbyMode: Hot
+      storage:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi
+        storageClassName: standard
+      storageType: Durable
+      tls:
+        issuerRef:
+          apiGroup: cert-manager.io
+          kind: Issuer
+          name: postgres-ca
+      version: 13.2-debian
   kubedbComPostgres: # +doc-gen:break
     apiVersion: kubedb.com/v1
     kind: Postgres
