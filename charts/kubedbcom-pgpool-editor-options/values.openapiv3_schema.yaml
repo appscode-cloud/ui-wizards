@@ -355,22 +355,14 @@ properties:
         - namespace
         type: object
       resource:
-        description: ResourceID identifies a resource
         properties:
           group:
             type: string
           kind:
-            description: Kind is the serialized kind of the resource.  It is normally
-              CamelCase and singular.
             type: string
           name:
-            description: 'Name is the plural name of the resource to serve.  It must
-              match the name of the CustomResourceDefinition-registration too: plural.group
-              and it must be all lowercase.'
             type: string
           scope:
-            description: ResourceScope is an enum defining the different scopes available
-              to a custom resource
             type: string
           version:
             type: string
@@ -406,8 +398,6 @@ properties:
                 type: object
               via:
                 default: Restic
-                description: Driver specifies the name of underlying tool that is
-                  being used to upload the backed up data.
                 enum:
                 - Restic
                 - WalG
@@ -447,8 +437,6 @@ properties:
                 type: object
               via:
                 default: Restic
-                description: Driver specifies the name of underlying tool that is
-                  being used to upload the backed up data.
                 enum:
                 - Restic
                 - WalG
@@ -1416,6 +1404,21 @@ properties:
             - default
             - toggle
             type: object
+          gitOps:
+            properties:
+              enable:
+                properties:
+                  default:
+                    type: boolean
+                  toggle:
+                    type: boolean
+                required:
+                - default
+                - toggle
+                type: object
+            required:
+            - enable
+            type: object
           leftPanel:
             properties:
               showBackup:
@@ -1458,8 +1461,6 @@ properties:
                         - type: string
                         pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
                         x-kubernetes-int-or-string: true
-                      description: ResourceList is a set of (resource name, quantity)
-                        pairs.
                       type: object
                     name:
                       type: string
@@ -1484,22 +1485,11 @@ properties:
               exporter:
                 properties:
                   resources:
-                    description: Compute Resources required by the sidecar container.
                     properties:
                       claims:
-                        description: "Claims lists the names of resources, defined\
-                          \ in spec.resourceClaims, that are used by this container.\
-                          \ \n This is an alpha field and requires enabling the DynamicResourceAllocation\
-                          \ feature gate. \n This field is immutable. It can only\
-                          \ be set for containers."
                         items:
-                          description: ResourceClaim references one entry in PodSpec.ResourceClaims.
                           properties:
                             name:
-                              description: Name must match the name of one entry in
-                                pod.spec.resourceClaims of the Pod where this field
-                                is used. It makes that resource available inside a
-                                container.
                               type: string
                           required:
                           - name
@@ -1515,8 +1505,6 @@ properties:
                           - type: string
                           pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
                           x-kubernetes-int-or-string: true
-                        description: 'Limits describes the maximum amount of compute
-                          resources allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
                         type: object
                       requests:
                         additionalProperties:
@@ -1525,11 +1513,6 @@ properties:
                           - type: string
                           pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
                           x-kubernetes-int-or-string: true
-                        description: 'Requests describes the minimum amount of compute
-                          resources required. If Requests is omitted for a container,
-                          it defaults to Limits if that is explicitly specified, otherwise
-                          to an implementation-defined value. Requests cannot exceed
-                          Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
                         type: object
                     type: object
                 type: object
@@ -1583,40 +1566,17 @@ properties:
             type: object
           tolerations:
             items:
-              description: The pod this Toleration is attached to tolerates any taint
-                that matches the triple <key,value,effect> using the matching operator
-                <operator>.
               properties:
                 effect:
-                  description: Effect indicates the taint effect to match. Empty means
-                    match all taint effects. When specified, allowed values are NoSchedule,
-                    PreferNoSchedule and NoExecute.
                   type: string
                 key:
-                  description: Key is the taint key that the toleration applies to.
-                    Empty means match all taint keys. If the key is empty, operator
-                    must be Exists; this combination means to match all values and
-                    all keys.
                   type: string
                 operator:
-                  description: Operator represents a key's relationship to the value.
-                    Valid operators are Exists and Equal. Defaults to Equal. Exists
-                    is equivalent to wildcard for value, so that a pod can tolerate
-                    all taints of a particular category.
                   type: string
                 tolerationSeconds:
-                  description: TolerationSeconds represents the period of time the
-                    toleration (which must be of effect NoExecute, otherwise this
-                    field is ignored) tolerates the taint. By default, it is not set,
-                    which means tolerate the taint forever (do not evict). Zero and
-                    negative values will be treated as 0 (evict immediately) by the
-                    system.
                   format: int64
                   type: integer
                 value:
-                  description: Value is the taint value the toleration matches to.
-                    If the operator is Exists, the value should be empty, otherwise
-                    just a regular string.
                   type: string
               type: object
             type: array
@@ -1632,6 +1592,7 @@ properties:
         - deletionPolicy
         - deployment
         - expose
+        - gitOps
         - leftPanel
         - machineProfiles
         - monitoring
@@ -1657,8 +1618,6 @@ properties:
           kubestash:
             properties:
               encryptionSecret:
-                description: ObjectReference contains enough information to let you
-                  inspect or modify the referred object.
                 properties:
                   name:
                     type: string
@@ -1669,8 +1628,6 @@ properties:
                 - namespace
                 type: object
               retentionPolicy:
-                description: ObjectReference contains enough information to let you
-                  inspect or modify the referred object.
                 properties:
                   name:
                     type: string
@@ -1683,8 +1640,6 @@ properties:
               schedule:
                 type: string
               storageRef:
-                description: ObjectReference contains enough information to let you
-                  inspect or modify the referred object.
                 properties:
                   name:
                     type: string
@@ -1779,20 +1734,11 @@ properties:
             - db.r.24xlarge
             type: string
           resources:
-            description: ResourceRequirements describes the compute resource requirements.
             properties:
               claims:
-                description: "Claims lists the names of resources, defined in spec.resourceClaims,\
-                  \ that are used by this container. \n This is an alpha field and\
-                  \ requires enabling the DynamicResourceAllocation feature gate.\
-                  \ \n This field is immutable. It can only be set for containers."
                 items:
-                  description: ResourceClaim references one entry in PodSpec.ResourceClaims.
                   properties:
                     name:
-                      description: Name must match the name of one entry in pod.spec.resourceClaims
-                        of the Pod where this field is used. It makes that resource
-                        available inside a container.
                       type: string
                   required:
                   - name
@@ -1808,8 +1754,6 @@ properties:
                   - type: string
                   pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
                   x-kubernetes-int-or-string: true
-                description: 'Limits describes the maximum amount of compute resources
-                  allowed. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
                 type: object
               requests:
                 additionalProperties:
@@ -1818,10 +1762,6 @@ properties:
                   - type: string
                   pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
                   x-kubernetes-int-or-string: true
-                description: 'Requests describes the minimum amount of compute resources
-                  required. If Requests is omitted for a container, it defaults to
-                  Limits if that is explicitly specified, otherwise to an implementation-defined
-                  value. Requests cannot exceed Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/'
                 type: object
             type: object
         required:
@@ -1829,8 +1769,6 @@ properties:
         - resources
         type: object
       postgresRef:
-        description: ObjectReference contains enough information to let you inspect
-          or modify the referred object.
         properties:
           name:
             type: string

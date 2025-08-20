@@ -374,6 +374,67 @@ resources:
         kind: Redis
         name: redis
         namespace: demo
+  gitopsKubedbComRedis: # +doc-gen:break
+    apiVersion: gitops.kubedb.com/v1alpha1
+    kind: Redis
+    metadata:
+      name: redis
+      namespace: demo
+    spec:
+      authSecret:
+        name: redis-auth
+      cluster:
+        replicas: 3
+        shards: 2
+      configSecret:
+        name: redis-config
+      deletionPolicy: WipeOut
+      init:
+        waitForInitialRestore: true
+      mode: Cluster
+      monitor:
+        agent: prometheus.io
+        prometheus:
+          exporter:
+            resources:
+              limits:
+                cpu: 100m
+                memory: 128Mi
+              requests:
+                cpu: 100m
+                memory: 128Mi
+      replicas: 3
+      storage:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi
+        storageClassName: standard
+      tls:
+        issuerRef:
+          apiGroup: cert-manager.io
+          kind: Issuer
+          name: redis-ca
+      version: 6.2.5
+  gitopsKubedbComRedisSentinel_sentinel: # +doc-gen:break
+    apiVersion: gitops.kubedb.com/v1alpha1
+    kind: RedisSentinel
+    metadata:
+      name: sentinel
+      namespace: demo
+    spec:
+      deletionPolicy: WipeOut
+      replicas: 3
+      storage:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi
+        storageClassName: standard
+      storageType: Durable
+      version: 6.2.5
   kubedbComRedis: # +doc-gen:break
     apiVersion: kubedb.com/v1
     kind: Redis
