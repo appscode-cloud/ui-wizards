@@ -43,49 +43,21 @@ steps:
           text: labels.clickHouseKeeper
         show_label: true
         type: single-step-form
-      - addFormLabel: labels.cluster.cluster
-        element:
-          elements:
-          - label:
-              text: labels.cluster.name
-            schema:
-              $ref: schema#/properties/spec/properties/topology/properties/cluster/items/properties/name
-            type: input
-          - label:
-              text: labels.cluster.replicas
-            schema:
-              $ref: schema#/properties/spec/properties/topology/properties/cluster/items/properties/replicas
-            type: input
-          - label:
-              text: labels.cluster.shards
-            schema:
-              $ref: schema#/properties/spec/properties/topology/properties/cluster/items/properties/shards
-            type: input
-          type: single-step-form
+      - elements:
+        - label:
+            text: labels.cluster.replicas
+          schema:
+            $ref: schema#/properties/spec/properties/topology/properties/cluster/properties/replicas
+          type: input
+        - label:
+            text: labels.cluster.shards
+          schema:
+            $ref: schema#/properties/spec/properties/topology/properties/cluster/properties/shards
+          type: input
         label:
           text: labels.cluster.cluster
-        schema:
-          $ref: schema#/properties/spec/properties/topology/properties/cluster
-        tableContents:
-        - inTableColumn: true
-          label:
-            text: labels.cluster.name
-          path: name
-          type: value
-          typeOfValue: string
-        - inTableColumn: true
-          label:
-            text: labels.cluster.replicas
-          path: replicas
-          type: value
-          typeOfValue: string
-        - inTableColumn: true
-          label:
-            text: labels.cluster.shards
-          path: shards
-          type: value
-          typeOfValue: string
-        type: single-step-form-array
+        show_label: true
+        type: single-step-form
       if: isEqualToModelPathValue|Topology|/spec/mode
       type: single-step-form
     - elements:
