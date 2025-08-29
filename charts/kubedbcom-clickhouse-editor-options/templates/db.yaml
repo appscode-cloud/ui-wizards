@@ -87,10 +87,8 @@ spec:
         host: {{ .Values.spec.topology.clickHouseKeeper.host }}
         port: {{ .Values.spec.topology.clickHouseKeeper.port }}
     cluster:
-    {{- range .Values.spec.topology.cluster }}
-    - name: {{ .name }}
-      shards: {{ .shards }}
-      replicas: {{ .replicas }}
+      shards: {{ .Values.spec.topology.cluster.shards }}
+      replicas: {{ .Values.spec.topology.cluster.replicas }}
       storageType: Durable
       storage:
         storageClassName: {{ $.Values.spec.admin.storageClasses.default }}
@@ -104,17 +102,16 @@ spec:
           containers:
             - name: clickhouse
               resources:
-                {{- toYaml $.cluster_res | nindent 16 }}
+                {{- toYaml .cluster_res | nindent 16 }}
               securityContext:
                 {{- include "container.securityContext" $ | nindent 16 }}
           initContainers:
             - name: clickhouse-init
               resources:
-                {{- toYaml $.init_res | nindent 16 }}
+                {{- toYaml .init_res | nindent 16 }}
               securityContext:
                 {{- include "container.securityContext" $ | nindent 16 }}
           {{- include "common.placement" $ | nindent 10 }}
-    {{- end }}
 {{- else }}
   podTemplate:
     spec:

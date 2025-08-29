@@ -56,92 +56,49 @@ resources:
             host: clickhouse-keeper.click-keeper
             port: 2181
         cluster:
-          - name: click1
-            podTemplate:
-              spec:
-                containers:
-                  - name: clickhouse
-                    resources:
-                      limits:
-                        cpu: 500m
-                        memory: 1Gi
-                nodeSelector:
-                  app: clickhouses.kubedb.com
-                  instance: hello
-                  namespace: default
-                  nodepool: standard-bsv2-family
-                podPlacementPolicy:
-                  name: default
-                tolerations:
-                  - effect: NoSchedule
-                    key: app
-                    operator: Equal
-                    value: clickhouses.kubedb.com
-                  - effect: NoSchedule
-                    key: instance
-                    operator: Equal
-                    value: hello
-                  - effect: NoSchedule
-                    key: namespace
-                    operator: Equal
-                    value: default
-                  - effect: NoSchedule
-                    key: nodepool
-                    operator: Equal
-                    value: standard-bsv2-family
-            replicas: 3
-            shards: 2
-            storage:
-              accessModes:
-                - ReadWriteOnce
-              resources:
-                requests:
-                  storage: 10Gi
-              storageClassName: default
-            storageType: Durable
-          - name: click2
-            podTemplate:
-              spec:
-                containers:
-                  - name: clickhouse
-                    resources:
-                      limits:
-                        cpu: 500m
-                        memory: 1Gi
-                nodeSelector:
-                  app: clickhouses.kubedb.com
-                  instance: hello
-                  namespace: default
-                  nodepool: standard-bsv2-family
-                podPlacementPolicy:
-                  name: default
-                tolerations:
-                  - effect: NoSchedule
-                    key: app
-                    operator: Equal
-                    value: clickhouses.kubedb.com
-                  - effect: NoSchedule
-                    key: instance
-                    operator: Equal
-                    value: hello
-                  - effect: NoSchedule
-                    key: namespace
-                    operator: Equal
-                    value: default
-                  - effect: NoSchedule
-                    key: nodepool
-                    operator: Equal
-                    value: standard-bsv2-family
-            replicas: 2
-            shards: 1
-            storage:
-              accessModes:
-                - ReadWriteOnce
-              resources:
-                requests:
-                  storage: 10Gi
-              storageClassName: default
-            storageType: Durable
+          name: click1
+          podTemplate:
+            spec:
+              containers:
+                - name: clickhouse
+                  resources:
+                    limits:
+                      cpu: 500m
+                      memory: 1Gi
+              nodeSelector:
+                app: clickhouses.kubedb.com
+                instance: hello
+                namespace: default
+                nodepool: standard-bsv2-family
+              podPlacementPolicy:
+                name: default
+              tolerations:
+                - effect: NoSchedule
+                  key: app
+                  operator: Equal
+                  value: clickhouses.kubedb.com
+                - effect: NoSchedule
+                  key: instance
+                  operator: Equal
+                  value: hello
+                - effect: NoSchedule
+                  key: namespace
+                  operator: Equal
+                  value: default
+                - effect: NoSchedule
+                  key: nodepool
+                  operator: Equal
+                  value: standard-bsv2-family
+          replicas: 3
+          shards: 2
+          storage:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 10Gi
+            storageClassName: default
+          storageType: Durable
       deletionPolicy: WipeOut
       serviceTemplates:
         - alias: primary
