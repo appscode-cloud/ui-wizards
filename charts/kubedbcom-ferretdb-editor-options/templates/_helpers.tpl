@@ -126,6 +126,18 @@ seccompProfile:
   type: RuntimeDefault
 {{- end }}
 
+{{- define "postgres.securityContext" -}}
+allowPrivilegeEscalation: false
+capabilities:
+  drop:
+  - ALL
+runAsGroup: 0
+runAsNonRoot: true
+runAsUser: {{ $.Values.spec.openshift.securityContext.runAsUser | default 999 }}
+seccompProfile:
+  type: RuntimeDefault
+{{- end }}
+
 {{- define "resource-profiles" -}}
 {{- $machines := .Files.Get "data/machines.yaml" | fromYaml -}}
 {{- $profiles := dict -}}

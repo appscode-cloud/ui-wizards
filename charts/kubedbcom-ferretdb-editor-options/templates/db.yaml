@@ -85,7 +85,20 @@ spec:
             resources:
               {{- toYaml .backend_res | nindent 14 }}
             securityContext:
-              {{- include "container.securityContext" $ | nindent 14 }}
+              {{- include "postgres.securityContext" . | nindent 14 }}
+        {{- if gt (int .Values.spec.backend.replicas) 1 }}
+          - name: pg-coordinator
+            resources:
+              {{- toYaml .sidecar_res | nindent 14 }}
+            securityContext:
+              {{- include "postgres.securityContext" . | nindent 14 }}
+        {{- end }}
+        initContainers:
+          - name: postgres-init-container
+            resources:
+              {{- toYaml .init_res | nindent 14 }}
+            securityContext:
+              {{- include "postgres.securityContext" . | nindent 14 }}
         {{- include "common.placement" . | nindent 8 }}
     storageType: Durable
     storage:
