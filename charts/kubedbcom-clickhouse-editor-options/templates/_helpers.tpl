@@ -139,19 +139,29 @@ seccompProfile:
 
 {{- $res := dict -}}
 {{- $cluster_res := list }}
+{{- $keeper_res := list }}
 
 {{- if eq .Values.spec.mode "Topology" }}
 
   {{- $cluster_res = .Values.spec.podResources.resources -}}
+  {{- $keeper_res = .Values.spec.topology.clickHouseKeeper.spec.podResources.resources -}}
 
   {{- if and .Values.spec.podResources.machine (hasKey $machines .Values.spec.podResources.machine) }}
     {{- $cluster_res = get (get $machines .Values.spec.podResources.machine) "resources" }}
+  {{- end }}
+
+  {{- if and .Values.spec.topology.clickHouseKeeper.spec.podResources.machine (hasKey $machines .Values.spec.topology.clickHouseKeeper.spec.podResources.machine) }}
+    {{- $keeper_res = get (get $machines .Values.spec.topology.clickHouseKeeper.spec.podResources.machine) "resources" }}
   {{- end }}
 
   {{- range .Values.spec.admin.machineProfiles.machines }}
     {{- if and $.Values.spec.podResources.machine (eq .id $.Values.spec.podResources.machine) }}
       {{- $cluster_res = dict "requests" .limits "limits" .limits }}
       {{- $_ := set $profiles "cluster" .id }}
+    {{- end }}
+    {{- if and $.Values.spec.topology.clickHouseKeeper.spec.podResources.machine (eq .id $.Values.spec.topology.clickHouseKeeper.spec.podResources.machine) }}
+      {{- $keeper_res = dict "requests" .limits "limits" .limits }}
+      {{- $_ := set $profiles "keeper" .id }}
     {{- end }}
   {{- end }}
 {{- else }}
@@ -181,6 +191,7 @@ seccompProfile:
 
 {{- $_ := set . "res" $res -}}
 {{- $_ = set . "cluster_res" $cluster_res -}}
+{{- $_ = set . "keeper_res" $keeper_res -}}
 {{- $_ = set . "init_res" $init_res -}}
 {{- $_ = set . "sidecar_res" $sidecar_res -}}
 
