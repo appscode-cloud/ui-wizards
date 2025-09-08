@@ -1255,7 +1255,14 @@ function onReferSecretChange({ commit }) {
   })
 }
 
+function isExternallyManaged({ getValue, model, watchDependency }, expected) {
+  watchDependency('model#/spec/topology/clickHouseKeeper/externallyManaged')
+  const val = getValue(model, 'spec/topology/clickHouseKeeper/externallyManaged')
+  return (val && expected === 'true') || (!val && expected === 'false')
+}
+
 return {
+  isExternallyManaged,
   showReferSecretSwitch,
   onReferSecretChange,
   getDefaultValue,

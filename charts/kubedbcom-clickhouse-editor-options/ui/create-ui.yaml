@@ -28,22 +28,6 @@ steps:
       type: radio
     - elements:
       - elements:
-        - customClass: mt-10
-          label:
-            text: labels.host
-          schema:
-            $ref: schema#/properties/spec/properties/topology/properties/clickHouseKeeper/properties/host
-          type: input
-        - label:
-            text: labels.port
-          schema:
-            $ref: schema#/properties/spec/properties/topology/properties/clickHouseKeeper/properties/port
-          type: input
-        label:
-          text: labels.clickHouseKeeper
-        show_label: true
-        type: single-step-form
-      - elements:
         - label:
             text: labels.cluster.replicas
           schema:
@@ -104,6 +88,76 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/persistence/properties/size
       type: input
+    - type: switch
+      label:
+        text: Externally Managed?
+      schema:
+        $ref: schema#/properties/spec/properties/topology/properties/clickHouseKeeper/properties/externallyManaged
+    - elements:
+      - customClass: mt-10
+        label:
+          text: labels.host
+        schema:
+          $ref: schema#/properties/spec/properties/topology/properties/clickHouseKeeper/properties/node/properties/host
+        type: input
+      - label:
+          text: labels.port
+        schema:
+          $ref: schema#/properties/spec/properties/topology/properties/clickHouseKeeper/properties/node/properties/port
+        type: input
+      label:
+        text: Node
+      show_label: true
+      if: isExternallyManaged|true
+      type: single-step-form
+    - elements:
+      - customClass: mt-10
+        label:
+          text: Size
+        schema:
+          $ref: schema#/properties/spec/properties/topology/properties/clickHouseKeeper/properties/spec/properties/persistence/properties/size
+        type: input
+      - label:
+          text: Replicas
+        schema:
+          $ref: schema#/properties/spec/properties/topology/properties/clickHouseKeeper/properties/spec/properties/replicas
+        type: input
+      - elements:
+        - computed: setMachineToCustom
+          customClass: mt-10
+          fetch: getMachineListForOptions
+          label:
+            text: labels.machine
+          schema:
+            $ref: schema#/properties/spec/properties/topology/properties/clickHouseKeeper/properties/spec/properties/podResources/properties/machine
+          type: select
+        - computed: setLimits|cpu|topology/clickHouseKeeper/spec
+          disabled: isMachineNotCustom|topology/clickHouseKeeper/spec
+          if: isMachineCustom|topology/clickHouseKeeper/spec
+          label:
+            text: labels.cpu
+          onChange: setRequests|cpu
+          schema:
+            $ref: schema#/properties/spec/properties/topology/properties/clickHouseKeeper/properties/spec/properties/podResources/properties/resources/properties/requests/properties/cpu
+          type: input
+        - computed: setLimits|memory|topology/clickHouseKeeper/spec
+          disabled: isMachineNotCustom|topology/clickHouseKeeper/spec
+          if: isMachineCustom|topology/clickHouseKeeper/spec
+          label:
+            text: labels.memory
+          onChange: setRequests|memory
+          schema:
+            $ref: schema#/properties/spec/properties/topology/properties/clickHouseKeeper/properties/spec/properties/podResources/properties/resources/properties/requests/properties/memory
+          type: input
+        label:
+          text: labels.machine_profile
+        show_label: true
+        type: single-step-form
+      label:
+        text: Spec
+      show_label: true
+      if: isExternallyManaged|false
+      type: single-step-form
     - accordion: true
       description:
         text: Configure Credentials, Deployment Mode etc.

@@ -26,8 +26,21 @@ spec:
   mode: Standalone
   topology:
     clickHouseKeeper:
-      host: clickhouse-keeper.click-keeper
-      port: 2181
+      externallyManaged: false
+      node:
+        host: clickhouse-keeper.click-keeper
+        port: 2181
+      spec:
+        persistence:
+          size: 2Gi
+        podResources:
+          machine: ""
+
+          resources:
+            requests:
+              cpu: 500m
+              memory: 1Gi
+        replicas: 2
     cluster:
       replicas: 3
       shards: 2
