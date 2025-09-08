@@ -83,9 +83,35 @@ spec:
 {{- if eq .Values.spec.mode "Topology" }}
   clusterTopology:
     clickHouseKeeper:
+    {{- if .Values.spec.topology.clickHouseKeeper.externallyManaged }}
       node:
-        host: {{ .Values.spec.topology.clickHouseKeeper.host }}
-        port: {{ .Values.spec.topology.clickHouseKeeper.port }}
+        host: {{ .Values.spec.topology.clickHouseKeeper.node.host }}
+        port: {{ .Values.spec.topology.clickHouseKeeper.node.port }}
+    {{- else }}
+      spec:
+        storage:
+          storageClassName: {{ $.Values.spec.admin.storageClasses.default }}
+          accessModes:
+          - ReadWriteOnce
+          resources:
+            requests:
+              storage: {{ $.Values.spec.topology.clickHouseKeeper.spec.persistence.size }}
+        podTemplate:
+          spec:
+            containers:
+              - name: clickhouse-keeper
+                resources:
+                  {{- toYaml .keeper_res | nindent 18 }}
+                securityContext:
+                  {{- include "container.securityContext" $ | nindent 18 }}
+            initContainers:
+              - name: clickhouse-init
+                resources:
+                  {{- toYaml .init_res | nindent 18 }}
+                securityContext:
+                  {{- include "container.securityContext" $ | nindent 18 }}
+            {{- include "common.placement" $ | nindent 12 }}
+    {{- end }}
     cluster:
       shards: {{ .Values.spec.topology.cluster.shards }}
       replicas: {{ .Values.spec.topology.cluster.replicas }}
