@@ -314,6 +314,11 @@ export const useFunc = (model) => {
     model,
     store.state,
   )
+  async function fetchJsons({ axios, itemCtx }) {
+    let ui = {}
+    let language = {}
+    let functions = {}
+    const { name, sourceRef, version, packageviewUrlPrefix } = itemCtx.chart
 
   getDbDetails()
   showAndInitOpsRequestType()
