@@ -88,11 +88,11 @@ steps:
       schema:
         $ref: schema#/properties/spec/properties/persistence/properties/size
       type: input
-    - type: switch
-      label:
+    - label:
         text: Externally Managed?
       schema:
         $ref: schema#/properties/spec/properties/topology/properties/clickHouseKeeper/properties/externallyManaged
+      type: switch
     - elements:
       - customClass: mt-10
         label:
@@ -105,10 +105,10 @@ steps:
         schema:
           $ref: schema#/properties/spec/properties/topology/properties/clickHouseKeeper/properties/node/properties/port
         type: input
+      if: isExternallyManaged|true
       label:
         text: Node
       show_label: true
-      if: isExternallyManaged|true
       type: single-step-form
     - elements:
       - customClass: mt-10
@@ -153,10 +153,10 @@ steps:
           text: labels.machine_profile
         show_label: true
         type: single-step-form
+      if: isExternallyManaged|false
       label:
         text: Spec
       show_label: true
-      if: isExternallyManaged|false
       type: single-step-form
     - accordion: true
       description:
