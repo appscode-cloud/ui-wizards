@@ -1,0 +1,1106 @@
+steps:
+- form:
+    discriminator:
+      dbDetails:
+        type: object
+    elements:
+    - computed: getDbDetails
+      if: returnFalse
+      schema:
+        $ref: discriminator#/properties/dbDetails
+      type: input
+    - if: showAndInitName
+      label:
+        text: labels.op_req_name
+      required: true
+      schema:
+        $ref: schema#/properties/metadata/properties/name
+      type: input
+    - computed: initNamespace
+      disabled: isNamespaceDisabled
+      fetch: getNamespaces
+      hasGroup: isRancherManaged
+      if: showAndInitNamespace
+      label:
+        text: labels.namespace
+      onChange: onNamespaceChange
+      required: true
+      schema:
+        $ref: schema#/properties/metadata/properties/namespace
+      type: select
+    - computed: initDatabaseRef
+      disabled: isDatabaseRefDisabled
+      fetch: getDbs
+      if: showAndInitDatabaseRef
+      label:
+        text: labels.databaseRef
+      onChange: onDbChange
+      refresh: true
+      required: true
+      schema:
+        $ref: schema#/properties/spec/properties/databaseRef/properties/name
+      type: select
+    - if: showConfigureOpsrequestLabel
+      label:
+        text: labels.config_ops_request
+      type: label-element
+    - computed: getRequestTypeFromRoute
+      disabled: isDbDetailsLoading
+      hasDescription: true
+      if: showAndInitOpsRequestType
+      individualItemDisabilityCheck: disableOpsRequest
+      label:
+        text: labels.ops_request_type
+      onChange: onRequestTypeChange
+      options:
+      - description: options.UpdateVersion.description
+        text: options.UpdateVersion.text
+        value: UpdateVersion
+      - description: options.HorizontalScaling.description
+        text: options.HorizontalScaling.text
+        value: HorizontalScaling
+      - description: options.VerticalScaling.description
+        text: options.VerticalScaling.text
+        value: VerticalScaling
+      - description: options.VolumeExpansion.description
+        text: options.VolumeExpansion.text
+        value: VolumeExpansion
+      - description: options.Restart.description
+        text: options.Restart.text
+        value: Restart
+      - description: options.Reconfigure.description
+        text: options.Reconfigure.text
+        value: Reconfigure
+      - description: options.ReconfigureTLS.description
+        text: options.ReconfigureTLS.text
+        value: ReconfigureTLS
+      schema:
+        $ref: schema#/properties/spec/properties/type
+      type: radio
+    - elements:
+      - computed: setValueFromDbDetails|/spec/version
+        fetch: getDbVersions
+        label:
+          text: labels.targetVersion
+        schema:
+          $ref: schema#/properties/spec/properties/updateVersion/properties/targetVersion
+        type: select
+      if: ifRequestTypeEqualsTo|UpdateVersion
+      type: single-step-form
+    - elements:
+      - computed: setValueFromDbDetails|/spec/replicas
+        if: ifDbTypeEqualsTo|replicaSet|horizontalScaling
+        label:
+          text: labels.replicas
+        schema:
+          $ref: schema#/properties/spec/properties/horizontalScaling/properties/replicas
+        type: input
+      - elements:
+        - elements:
+          - label:
+              text: labels.configServer
+            type: label-element
+          - computed: setValueFromDbDetails|/spec/shardTopology/configServer/replicas
+            label:
+              text: labels.replicas
+            schema:
+              $ref: schema#/properties/spec/properties/horizontalScaling/properties/configServer/properties/replicas
+            type: input
+          label:
+            text: Config Server horizontal Scaling
+          schema:
+            $ref: schema#/properties/spec/properties/horizontalScaling/properties/configServer
+          type: single-step-form
+        - elements:
+          - label:
+              text: labels.mongos
+            type: label-element
+          - computed: setValueFromDbDetails|/spec/shardTopology/mongos/replicas
+            label:
+              text: labels.replicas
+            schema:
+              $ref: schema#/properties/spec/properties/horizontalScaling/properties/mongos/properties/replicas
+            type: input
+          label:
+            text: Mongos horizontal Scaling
+          schema:
+            $ref: schema#/properties/spec/properties/horizontalScaling/properties/mongos
+          type: single-step-form
+        - elements:
+          - label:
+              text: labels.shard
+            type: label-element
+          - computed: setValueFromDbDetails|/spec/shardTopology/shard/replicas
+            label:
+              text: labels.replicas
+            schema:
+              $ref: schema#/properties/spec/properties/horizontalScaling/properties/shard/properties/replicas
+            type: input
+          - computed: setValueFromDbDetails|/spec/shardTopology/shard/shards
+            label:
+              text: labels.shards
+            schema:
+              $ref: schema#/properties/spec/properties/horizontalScaling/properties/shard/properties/shards
+            type: input
+          label:
+            text: Shard horizontal Scaling
+          schema:
+            $ref: schema#/properties/spec/properties/horizontalScaling/properties/shard
+          type: single-step-form
+        if: ifDbTypeEqualsTo|sharded|horizontalScaling
+        label:
+          text: 'Sharded horizontal scaling '
+        type: single-step-form
+      if: ifRequestTypeEqualsTo|HorizontalScaling
+      label:
+        text: Horizontal Scaling Form
+      type: single-step-form
+    - elements:
+      - discriminator:
+          machine-standalone:
+            default: ""
+            type: string
+        elements:
+        - computed: setMachine|standalone
+          customClass: mt-20
+          disableUnselect: true
+          fetch: getMachines
+          label:
+            text: Machine Profile
+          onChange: onMachineChange|standalone|/spec/podTemplate/spec/resources
+          schema:
+            $ref: discriminator#/machine-standalone
+          type: select
+        - if: isMachineCustom|/machine-standalone
+          label:
+            text: labels.resources
+          schema:
+            $ref: schema#/properties/spec/properties/verticalScaling/properties/standalone/properties/resources
+          type: resource-input-form
+        - label:
+            text: labels.node_selection_policy
+          options:
+          - text: LabelSelector
+            value: LabelSelector
+          - text: Taint
+            value: Taint
+          schema:
+            $ref: schema#/properties/spec/properties/verticalScaling/properties/standalone/properties/nodeSelectionPolicy
+          type: select
+        - discriminator:
+            topologyKey-standalone:
+              default: ""
+              type: string
+            topologyValue-standalone:
+              default: ""
+              type: string
+          elements:
+          - label:
+              text: labels.key
+            required: isVerticalScaleTopologyRequired|standalone
+            schema:
+              $ref: discriminator#/topologyKey-standalone
+            type: input
+          - label:
+              text: labels.value
+            required: isVerticalScaleTopologyRequired|standalone
+            schema:
+              $ref: discriminator#/topologyValue-standalone
+            type: input
+          label:
+            text: labels.topology
+          show_label: true
+          type: single-step-form
+        if: ifDbTypeEqualsTo|standalone|verticalScaling
+        label:
+          text: Standalone vertical scaling
+        schema:
+          $ref: schema#/properties/spec/properties/verticalScaling/properties/standalone
+        show_label: true
+        type: single-step-form
+      - discriminator:
+          machine-replicaSet:
+            default: ""
+            type: string
+        elements:
+        - computed: setMachine|replicaSet
+          customClass: mt-20
+          disableUnselect: true
+          fetch: getMachines
+          label:
+            text: Machine Profile
+          onChange: onMachineChange|replicaSet|/spec/podTemplate/spec/resources
+          schema:
+            $ref: discriminator#/machine-replicaSet
+          type: select
+        - if: isMachineCustom|/machine-replicaSet
+          label:
+            text: labels.resources
+          schema:
+            $ref: schema#/properties/spec/properties/verticalScaling/properties/replicaSet/properties/resources
+          type: resource-input-form
+        - label:
+            text: labels.node_selection_policy
+          options:
+          - text: LabelSelector
+            value: LabelSelector
+          - text: Taint
+            value: Taint
+          schema:
+            $ref: schema#/properties/spec/properties/verticalScaling/properties/replicaSet/properties/nodeSelectionPolicy
+          type: select
+        - discriminator:
+            topologyKey-replicaSet:
+              default: ""
+              type: string
+            topologyValue-replicaSet:
+              default: ""
+              type: string
+          elements:
+          - label:
+              text: labels.key
+            required: isVerticalScaleTopologyRequired|replicaSet
+            schema:
+              $ref: discriminator#/topologyKey-replicaSet
+            type: input
+          - label:
+              text: labels.value
+            required: isVerticalScaleTopologyRequired|replicaSet
+            schema:
+              $ref: discriminator#/topologyValue-replicaSet
+            type: input
+          label:
+            text: labels.topology
+          show_label: true
+          type: single-step-form
+        if: ifDbTypeEqualsTo|replicaSet|verticalScaling
+        label:
+          text: Replicaset vertical scaling
+        schema:
+          $ref: schema#/properties/spec/properties/verticalScaling/properties/replicaSet
+        show_label: true
+        type: single-step-form
+      - elements:
+        - discriminator:
+            machine-configServer:
+              default: ""
+              type: string
+          elements:
+          - computed: setMachine|configServer
+            customClass: mt-20
+            disableUnselect: true
+            fetch: getMachines
+            label:
+              text: Machine Profile
+            onChange: onMachineChange|configServer|/spec/shardTopology/configServer/podTemplate/spec/resources
+            schema:
+              $ref: discriminator#/machine-configServer
+            type: select
+          - if: isMachineCustom|/machine-configServer
+            label:
+              text: labels.resources
+            schema:
+              $ref: schema#/properties/spec/properties/verticalScaling/properties/configServer/properties/resources
+            type: resource-input-form
+          - label:
+              text: labels.node_selection_policy
+            options:
+            - text: LabelSelector
+              value: LabelSelector
+            - text: Taint
+              value: Taint
+            schema:
+              $ref: schema#/properties/spec/properties/verticalScaling/properties/configServer/properties/nodeSelectionPolicy
+            type: select
+          - discriminator:
+              topologyKey-configServer:
+                default: ""
+                type: string
+              topologyValue-configServer:
+                default: ""
+                type: string
+            elements:
+            - label:
+                text: labels.key
+              required: isVerticalScaleTopologyRequired|configServer
+              schema:
+                $ref: discriminator#/topologyKey-configServer
+              type: input
+            - label:
+                text: labels.value
+              required: isVerticalScaleTopologyRequired|configServer
+              schema:
+                $ref: discriminator#/topologyValue-configServer
+              type: input
+            label:
+              text: labels.topology
+            show_label: true
+            type: single-step-form
+          label:
+            text: Config Server Vertical Scaling
+          schema:
+            $ref: schema#/properties/spec/properties/verticalScaling/properties/configServer
+          show_label: true
+          type: single-step-form
+        - discriminator:
+            machine-mongos:
+              default: ""
+              type: string
+          elements:
+          - computed: setMachine|mongos
+            customClass: mt-20
+            disableUnselect: true
+            fetch: getMachines
+            label:
+              text: Machine Profile
+            onChange: onMachineChange|mongos|/spec/shardTopology/mongos/podTemplate/spec/resources
+            schema:
+              $ref: discriminator#/machine-mongos
+            type: select
+          - if: isMachineCustom|/machine-mongos
+            label:
+              text: labels.resources
+            schema:
+              $ref: schema#/properties/spec/properties/verticalScaling/properties/mongos/properties/resources
+            type: resource-input-form
+          - label:
+              text: labels.node_selection_policy
+            options:
+            - text: LabelSelector
+              value: LabelSelector
+            - text: Taint
+              value: Taint
+            schema:
+              $ref: schema#/properties/spec/properties/verticalScaling/properties/mongos/properties/nodeSelectionPolicy
+            type: select
+          - discriminator:
+              topologyKey-mongos:
+                default: ""
+                type: string
+              topologyValue-mongos:
+                default: ""
+                type: string
+            elements:
+            - label:
+                text: labels.key
+              required: isVerticalScaleTopologyRequired|mongos
+              schema:
+                $ref: discriminator#/topologyKey-mongos
+              type: input
+            - label:
+                text: labels.value
+              required: isVerticalScaleTopologyRequired|mongos
+              schema:
+                $ref: discriminator#/topologyValue-mongos
+              type: input
+            label:
+              text: labels.topology
+            show_label: true
+            type: single-step-form
+          label:
+            text: Mongos Vertical Scaling
+          schema:
+            $ref: schema#/properties/spec/properties/verticalScaling/properties/mongos
+          show_label: true
+          type: single-step-form
+        - discriminator:
+            machine-shard:
+              default: ""
+              type: string
+          elements:
+          - computed: setMachine|shard
+            customClass: mt-20
+            disableUnselect: true
+            fetch: getMachines
+            label:
+              text: Machine Profile
+            onChange: onMachineChange|shard|/spec/shardTopology/shard/podTemplate/spec/resources
+            schema:
+              $ref: discriminator#/machine-shard
+            type: select
+          - if: isMachineCustom|/machine-shard
+            label:
+              text: labels.resources
+            schema:
+              $ref: schema#/properties/spec/properties/verticalScaling/properties/shard/properties/resources
+            type: resource-input-form
+          - label:
+              text: labels.node_selection_policy
+            options:
+            - text: LabelSelector
+              value: LabelSelector
+            - text: Taint
+              value: Taint
+            schema:
+              $ref: schema#/properties/spec/properties/verticalScaling/properties/shard/properties/nodeSelectionPolicy
+            type: select
+          - discriminator:
+              topologyKey-shard:
+                default: ""
+                type: string
+              topologyValue-shard:
+                default: ""
+                type: string
+            elements:
+            - label:
+                text: labels.key
+              required: isVerticalScaleTopologyRequired|shard
+              schema:
+                $ref: discriminator#/topologyKey-shard
+              type: input
+            - label:
+                text: labels.value
+              required: isVerticalScaleTopologyRequired|shard
+              schema:
+                $ref: discriminator#/topologyValue-shard
+              type: input
+            label:
+              text: labels.topology
+            show_label: true
+            type: single-step-form
+          label:
+            text: Shard Vertical Scaling
+          schema:
+            $ref: schema#/properties/spec/properties/verticalScaling/properties/shard
+          show_label: true
+          type: single-step-form
+        if: ifDbTypeEqualsTo|sharded|verticalScaling
+        label:
+          text: 'Sharded vertical scaling '
+        type: single-step-form
+      if: ifRequestTypeEqualsTo|VerticalScaling
+      type: single-step-form
+    - elements:
+      - computed: setValueFromDbDetails|/spec/storage/resources/requests/storage
+        if: ifDbTypeEqualsTo|standalone|volumeExpansion
+        label:
+          text: labels.standalone
+        schema:
+          $ref: schema#/properties/spec/properties/volumeExpansion/properties/standalone
+        type: input
+        validationRuleObject:
+          func: checkVolume|/spec/storage/resources/requests/storage|/spec/volumeExpansion/standalone
+      - label:
+          text: Mode
+        options:
+        - text: Offline
+          value: Offline
+        - text: Online
+          value: Online
+        required: true
+        schema:
+          $ref: schema#/properties/spec/properties/volumeExpansion/properties/mode
+        type: select
+      - computed: setValueFromDbDetails|/spec/storage/resources/requests/storage
+        if: ifDbTypeEqualsTo|replicaSet|volumeExpansion
+        label:
+          text: labels.replicaSet
+        schema:
+          $ref: schema#/properties/spec/properties/volumeExpansion/properties/replicaSet
+        type: input
+        validationRuleObject:
+          func: checkVolume|/spec/storage/resources/requests/storage|/spec/volumeExpansion/replicaSet
+      - elements:
+        - computed: setValueFromDbDetails|/spec/shardTopology/configServer/storage/resources/requests/storage
+          label:
+            text: labels.configServer
+          schema:
+            $ref: schema#/properties/spec/properties/volumeExpansion/properties/configServer
+          type: input
+          validationRuleObject:
+            func: checkVolume|/spec/shardTopology/configServer/storage/resources/requests/storage|/spec/volumeExpansion/configServer
+        - computed: setValueFromDbDetails|/spec/shardTopology/shard/storage/resources/requests/storage
+          label:
+            text: labels.shard
+          schema:
+            $ref: schema#/properties/spec/properties/volumeExpansion/properties/shard
+          type: input
+          validationRuleObject:
+            func: checkVolume|/spec/shardTopology/shard/storage/resources/requests/storage|/spec/volumeExpansion/shard
+        if: ifDbTypeEqualsTo|sharded|volumeExpansion
+        label:
+          text: Sharded volume expansion
+        type: single-step-form
+      if: ifRequestTypeEqualsTo|VolumeExpansion
+      label:
+        text: Volume Expansion Form
+      type: single-step-form
+    - elements:
+      - discriminator:
+          reconfigurationType:
+            type: string
+        elements:
+        - label:
+            text: labels.reconfigurationType
+          onChange: onReconfigurationTypeChange|standalone
+          options:
+          - text: Select New Config Secret
+            value: selectNewConfigSecret
+          - text: Apply Config
+            value: applyConfig
+          - text: Remove
+            value: remove
+          required: true
+          schema:
+            $ref: discriminator#/properties/reconfigurationType
+          type: radio
+        - elements:
+          - add_new_button:
+              label: labels.createConfig
+              target: _blank
+              url:
+                function: createSecretUrl
+            computed: setValueFromDbDetails|/spec/configSecret/name
+            fetch: getConfigSecrets
+            label:
+              text: labels.configSecret
+            refresh: true
+            required: true
+            schema:
+              $ref: schema#/properties/spec/properties/configuration/properties/standalone/properties/configSecret/properties/name
+            type: select
+          if: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
+          label:
+            text: Standalone configuration config secret
+          schema:
+            $ref: schema#/properties/spec/properties/configuration/properties/standalone/properties/configSecret
+          type: single-step-form
+        - addFormLabel: labels.applyConfig.label
+          element:
+            discriminator:
+              configArray:
+                emitAs: standalone/applyConfig
+                type: array
+            elements:
+            - label:
+                text: labels.applyConfig.key
+              required: true
+              schema:
+                $ref: discriminator#/properties/configArray/items/properties/key
+              type: input
+            - label:
+                text: labels.applyConfig.value
+              required: true
+              schema:
+                $ref: discriminator#/properties/configArray/items/properties/value
+              type: editor
+            type: single-step-form
+          if: ifReconfigurationTypeEqualsTo|applyConfig
+          label:
+            text: labels.applyConfig.label
+          onChange: onApplyconfigChange|standalone
+          required: true
+          schema:
+            $ref: discriminator#/properties/standalone/applyConfig
+          tableContents:
+          - inTableColumn: true
+            label:
+              text: labels.applyConfig.key
+            path: key
+            type: value
+            typeOfValue: string
+          - inTableColumn: true
+            label:
+              text: labels.applyConfig.value
+            path: value
+            type: value
+            typeOfValue: code
+          type: single-step-form-array
+        - if: returnFalse
+          label:
+            text: labels.removeCustomConfig
+          schema:
+            $ref: schema#/properties/spec/properties/configuration/properties/standalone/properties/removeCustomConfig
+          type: switch
+        if: ifDbTypeEqualsTo|standalone|configuration
+        label:
+          text: labels.standalone
+        schema:
+          $ref: schema#/properties/spec/properties/configuration/properties/standalone
+        show_label: true
+        type: single-step-form
+      - discriminator:
+          reconfigurationType:
+            type: string
+        elements:
+        - label:
+            text: labels.reconfigurationType
+          onChange: onReconfigurationTypeChange|replicaSet
+          options:
+          - text: Select New Config Secret
+            value: selectNewConfigSecret
+          - text: Apply Config
+            value: applyConfig
+          - text: Remove
+            value: remove
+          required: true
+          schema:
+            $ref: discriminator#/properties/reconfigurationType
+          type: radio
+        - elements:
+          - add_new_button:
+              label: labels.createConfig
+              target: _blank
+              url:
+                function: createSecretUrl
+            computed: setValueFromDbDetails|/spec/configSecret/name
+            fetch: getConfigSecrets
+            label:
+              text: labels.configSecret
+            refresh: true
+            required: true
+            schema:
+              $ref: schema#/properties/spec/properties/configuration/properties/replicaSet/properties/configSecret/properties/name
+            type: select
+          if: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
+          label:
+            text: Replica Set configuration config secret
+          schema:
+            $ref: schema#/properties/spec/properties/configuration/properties/replicaSet/properties/configSecret
+          type: single-step-form
+        - addFormLabel: labels.applyConfig.label
+          element:
+            discriminator:
+              configArray:
+                emitAs: replicaSet/applyConfig
+                type: array
+            elements:
+            - label:
+                text: labels.applyConfig.key
+              required: true
+              schema:
+                $ref: discriminator#/properties/configArray/items/properties/key
+              type: input
+            - label:
+                text: labels.applyConfig.value
+              required: true
+              schema:
+                $ref: discriminator#/properties/configArray/items/properties/value
+              type: editor
+            type: single-step-form
+          if: ifReconfigurationTypeEqualsTo|applyConfig
+          label:
+            text: labels.applyConfig.label
+          onChange: onApplyconfigChange|replicaSet
+          required: true
+          schema:
+            $ref: discriminator#/properties/replicaSet/applyConfig
+          tableContents:
+          - inTableColumn: true
+            label:
+              text: labels.applyConfig.key
+            path: key
+            type: value
+            typeOfValue: string
+          - inTableColumn: true
+            label:
+              text: labels.applyConfig.value
+            path: value
+            type: value
+            typeOfValue: code
+          type: single-step-form-array
+        - if: returnFalse
+          label:
+            text: labels.removeCustomConfig
+          schema:
+            $ref: schema#/properties/spec/properties/configuration/properties/replicaSet/properties/removeCustomConfig
+          type: switch
+        if: ifDbTypeEqualsTo|replicaSet|configuration
+        label:
+          text: labels.replicaSet
+        schema:
+          $ref: schema#/properties/spec/properties/configuration/properties/replicaSet
+        show_label: true
+        type: single-step-form
+      - elements:
+        - discriminator:
+            reconfigurationType-configServer:
+              type: string
+          elements:
+          - label:
+              text: labels.reconfigurationType
+            onChange: onReconfigurationTypeChange|configServer|true
+            options:
+            - text: Select New Config Secret
+              value: selectNewConfigSecret
+            - text: Apply Config
+              value: applyConfig
+            - text: Remove
+              value: remove
+            schema:
+              $ref: discriminator#/properties/reconfigurationType-configServer
+            type: radio
+          - elements:
+            - add_new_button:
+                label: labels.createConfig
+                target: _blank
+                url:
+                  function: createSecretUrl
+              computed: setValueFromDbDetails|/spec/shardTopology/configServer/configSecret/name
+              fetch: getConfigSecrets
+              label:
+                text: labels.configSecret
+              refresh: true
+              required: true
+              schema:
+                $ref: schema#/properties/spec/properties/configuration/properties/configServer/properties/configSecret/properties/name
+              type: select
+            if: ifReconfigurationTypeEqualsTo|selectNewConfigSecret|configServer|true
+            schema:
+              $ref: schema#/properties/spec/properties/configuration/properties/configServer/properties/configSecret
+            type: single-step-form
+          - addFormLabel: labels.applyConfig.label
+            element:
+              discriminator:
+                configArray:
+                  emitAs: configServer/applyConfig
+                  type: array
+              elements:
+              - label:
+                  text: labels.applyConfig.key
+                required: true
+                schema:
+                  $ref: discriminator#/properties/configArray/items/properties/key
+                type: input
+              - label:
+                  text: labels.applyConfig.value
+                required: true
+                schema:
+                  $ref: discriminator#/properties/configArray/items/properties/value
+                type: editor
+              type: single-step-form
+            if: ifReconfigurationTypeEqualsTo|applyConfig|configServer|true
+            label:
+              text: labels.applyConfig.label
+            onChange: onApplyconfigChange|configServer
+            required: true
+            schema:
+              $ref: discriminator#/properties/configServer/applyConfig
+            tableContents:
+            - inTableColumn: true
+              label:
+                text: labels.applyConfig.key
+              path: key
+              type: value
+              typeOfValue: string
+            - inTableColumn: true
+              label:
+                text: labels.applyConfig.value
+              path: value
+              type: value
+              typeOfValue: code
+            type: single-step-form-array
+          - if: returnFalse
+            label:
+              text: labels.removeCustomConfig
+            schema:
+              $ref: schema#/properties/spec/properties/configuration/properties/configServer/properties/removeCustomConfig
+            type: switch
+          label:
+            text: labels.configServer
+          schema:
+            $ref: schema#/properties/spec/properties/configuration/properties/configServer
+          show_label: true
+          type: single-step-form
+        - discriminator:
+            reconfigurationType-mongos:
+              type: string
+          elements:
+          - label:
+              text: labels.reconfigurationType
+            onChange: onReconfigurationTypeChange|mongos|true
+            options:
+            - text: Select New Config Secret
+              value: selectNewConfigSecret
+            - text: Apply Config
+              value: applyConfig
+            - text: Remove
+              value: remove
+            schema:
+              $ref: discriminator#/properties/reconfigurationType-mongos
+            type: radio
+          - elements:
+            - add_new_button:
+                label: labels.createConfig
+                target: _blank
+                url:
+                  function: createSecretUrl
+              computed: setValueFromDbDetails|/spec/shardTopology/mongos/configSecret/name
+              fetch: getConfigSecrets
+              label:
+                text: labels.configSecret
+              refresh: true
+              required: true
+              schema:
+                $ref: schema#/properties/spec/properties/configuration/properties/mongos/properties/configSecret/properties/name
+              type: select
+            if: ifReconfigurationTypeEqualsTo|selectNewConfigSecret|mongos|true
+            schema:
+              $ref: schema#/properties/spec/properties/configuration/properties/mongos/properties/configSecret
+            type: single-step-form
+          - addFormLabel: labels.applyConfig.label
+            element:
+              discriminator:
+                configArray:
+                  emitAs: mongos/applyConfig
+                  type: array
+              elements:
+              - label:
+                  text: labels.applyConfig.key
+                required: true
+                schema:
+                  $ref: discriminator#/properties/configArray/items/properties/key
+                type: input
+              - label:
+                  text: labels.applyConfig.value
+                required: true
+                schema:
+                  $ref: discriminator#/properties/configArray/items/properties/value
+                type: editor
+              type: single-step-form
+            if: ifReconfigurationTypeEqualsTo|applyConfig|mongos|true
+            label:
+              text: labels.applyConfig.label
+            onChange: onApplyconfigChange|mongos
+            required: true
+            schema:
+              $ref: discriminator#/properties/mongos/applyConfig
+            tableContents:
+            - inTableColumn: true
+              label:
+                text: labels.applyConfig.key
+              path: key
+              type: value
+              typeOfValue: string
+            - inTableColumn: true
+              label:
+                text: labels.applyConfig.value
+              path: value
+              type: value
+              typeOfValue: code
+            type: single-step-form-array
+          - if: returnFalse
+            label:
+              text: labels.removeCustomConfig
+            schema:
+              $ref: schema#/properties/spec/properties/configuration/properties/mongos/properties/removeCustomConfig
+            type: switch
+          label:
+            text: labels.mongos
+          schema:
+            $ref: schema#/properties/spec/properties/configuration/properties/mongos
+          show_label: true
+          type: single-step-form
+        - discriminator:
+            reconfigurationType-shard:
+              type: string
+          elements:
+          - label:
+              text: labels.reconfigurationType
+            onChange: onReconfigurationTypeChange|shard|true
+            options:
+            - text: Select New Config Secret
+              value: selectNewConfigSecret
+            - text: Apply Config
+              value: applyConfig
+            - text: Remove
+              value: remove
+            schema:
+              $ref: discriminator#/properties/reconfigurationType-shard
+            type: radio
+          - elements:
+            - add_new_button:
+                label: labels.createConfig
+                target: _blank
+                url:
+                  function: createSecretUrl
+              computed: setValueFromDbDetails|/spec/shardTopology/shard/configSecret/name
+              fetch: getConfigSecrets
+              label:
+                text: labels.configSecret
+              refresh: true
+              required: true
+              schema:
+                $ref: schema#/properties/spec/properties/configuration/properties/shard/properties/configSecret/properties/name
+              type: select
+            if: ifReconfigurationTypeEqualsTo|selectNewConfigSecret|shard|true
+            schema:
+              $ref: schema#/properties/spec/properties/configuration/properties/shard/properties/configSecret
+            type: single-step-form
+          - addFormLabel: labels.applyConfig.label
+            element:
+              discriminator:
+                configArray:
+                  emitAs: shard/applyConfig
+                  type: array
+              elements:
+              - label:
+                  text: labels.applyConfig.key
+                required: true
+                schema:
+                  $ref: discriminator#/properties/configArray/items/properties/key
+                type: input
+              - label:
+                  text: labels.applyConfig.value
+                required: true
+                schema:
+                  $ref: discriminator#/properties/configArray/items/properties/value
+                type: editor
+              type: single-step-form
+            if: ifReconfigurationTypeEqualsTo|applyConfig|shard|true
+            label:
+              text: labels.applyConfig.label
+            onChange: onApplyconfigChange|shard
+            required: true
+            schema:
+              $ref: discriminator#/properties/shard/applyConfig
+            tableContents:
+            - inTableColumn: true
+              label:
+                text: labels.applyConfig.key
+              path: key
+              type: value
+              typeOfValue: string
+            - inTableColumn: true
+              label:
+                text: labels.applyConfig.value
+              path: value
+              type: value
+              typeOfValue: code
+            type: single-step-form-array
+          - if: returnFalse
+            label:
+              text: labels.removeCustomConfig
+            schema:
+              $ref: schema#/properties/spec/properties/configuration/properties/shard/properties/removeCustomConfig
+            type: switch
+          label:
+            text: labels.shard
+          schema:
+            $ref: schema#/properties/spec/properties/configuration/properties/shard
+          show_label: true
+          type: single-step-form
+        if: ifDbTypeEqualsTo|sharded|configuration
+        label:
+          text: Sharded Reconfigure form
+        show_label: true
+        type: single-step-form
+      if: ifRequestTypeEqualsTo|Reconfigure
+      label:
+        text: Reconfigure Form
+      type: single-step-form
+    - discriminator:
+        tlsOperation:
+          default: update
+          type: string
+      elements:
+      - computed: initTlsOperation
+        if: hasTlsField
+        label:
+          text: labels.tlsOperation
+        onChange: onTlsOperationChange
+        options:
+        - text: Update
+          value: update
+        - text: Rotate
+          value: rotate
+        - text: Remove
+          value: remove
+        schema:
+          $ref: discriminator#/properties/tlsOperation
+        type: radio
+      - if: returnFalse
+        schema:
+          $ref: schema#/properties/spec/properties/tls/properties/remove
+        type: switch
+      - if: returnFalse
+        schema:
+          $ref: schema#/properties/spec/properties/tls/properties/rotateCertificates
+        type: switch
+      - elements:
+        - computed: initIssuerRefApiGroup
+          disabled: true
+          label:
+            text: labels.api_group
+          schema:
+            $ref: schema#/properties/spec/properties/tls/properties/issuerRef/properties/apiGroup
+          type: input
+        - computed: setValueFromDbDetails|/spec/tls/issuerRef/kind
+          label:
+            text: labels.kind
+          options:
+          - text: Issuer
+            value: Issuer
+          - text: ClusterIssuer
+            value: ClusterIssuer
+          required: isIssuerRefRequired
+          schema:
+            $ref: schema#/properties/spec/properties/tls/properties/issuerRef/properties/kind
+          type: select
+        - allowUserDefinedOption: true
+          computed: setValueFromDbDetails|/spec/tls/issuerRef/name
+          fetch: getIssuerRefsName
+          label:
+            text: labels.name
+          required: isIssuerRefRequired
+          schema:
+            $ref: schema#/properties/spec/properties/tls/properties/issuerRef/properties/name
+          type: select
+        if: showIssuerRefAndCertificates
+        schema:
+          $ref: schema#/properties/spec/properties/tls/properties/issuerRef
+        type: single-step-form
+      - alias: reusable_certificates
+        chart:
+          name: uibytebuildersdev-component-certificates
+          version: v0.23.0
+        computed: setValueFromDbDetails|/spec/tls/certificates|/spec/tls/certificates
+        functionCallbacks:
+          getAliasOptions:
+            $ref: functions#/getAliasOptions
+        if: showIssuerRefAndCertificates
+        moduleResolver: fetchJsons
+        schema:
+          $ref: schema#/properties/spec/properties/tls/properties/certificates
+        type: reusable-element
+      if: ifRequestTypeEqualsTo|ReconfigureTLS
+      label:
+        text: labels.tls
+      schema:
+        $ref: schema#/properties/spec/properties/tls
+      type: single-step-form
+    - label:
+        text: labels.timeout
+      options:
+      - text: 5 minutes
+        value: 5m
+      - text: 10 minutes
+        value: 10m
+      - text: 30 minutes
+        value: 30m
+      - text: 1 hour
+        value: 1h
+      - text: 2 hours
+        value: 2h
+      - text: 5 hours
+        value: 5h
+      - text: 10 hours
+        value: 10h
+      schema:
+        $ref: schema#/properties/spec/properties/timeout
+      type: select
+    - computed: setApplyToIfReady
+      label:
+        text: labels.apply
+      options:
+      - text: IfReady (OpsRequest will be applied if database is ready)
+        value: IfReady
+      - text: Always (OpsRequest will always be applied)
+        value: Always
+      schema:
+        $ref: schema#/properties/spec/properties/apply
+      type: radio
+    type: single-step-form
+  id: basic
+  title: steps.0.label
+type: multi-step-form
