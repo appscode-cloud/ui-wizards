@@ -1,17 +1,7 @@
 type: multi-step-form
 step:
   - type: single-step-form
-    id: 'basic'
     elements:
-      # - type: input
-      #   if:
-      #     type: function
-      #     name: returnFalse
-      #   init:
-      #     type: func
-      #     value: getDbDetails
-      #   schema: temp/properties/dbDetails
-      #   label: ''
       # - type: input
       #   if:
       #     type: function
@@ -97,93 +87,91 @@ step:
       #   init:
       #     type: func
       #     value: getRequestTypeFromRoute
+      - type: block-layout
+        showLabels: false
+        if:
+          type: function
+          name: ifRequestTypeEqualsTo|UpdateVersion
+        elements:
+          - type: select
+            schema: 
+              schema/properties/spec/properties/updateVersion/properties/targetVersion
+            label: Target Version
+            loader: getDbVersions
+            init:
+              type: func
+              value: setValueFromDbDetails
       # - type: block-layout
+      #   label: Horizontal Scaling Form
+      #   showLabels: true
       #   if:
       #     type: function
       #     name: ifRequestTypeEqualsTo|UpdateVersion
       #   elements:
-      #     - type: select
+      #     - type: input
       #       schema: 
-      #         schema/properties/spec/properties/updateVersion/properties/targetVersion
-      #       label: targetVersion
-      #       loader: getDbVersions
+      #         schema#/properties/spec/properties/horizontalScaling/properties/replicas
+      #       label: replicas
       #       init:
       #         type: func
-      #         value: setValueFromDbDetails|/spec/version
-      - type: block-layout
-        label: Horizontal Scaling Form
-        showLabels: true
-        if:
-          type: function
-          name: getDbDetails
-        elements:
-          - type: input
-            schema: 
-              schema#/properties/spec/properties/horizontalScaling/properties/replicas
-            label: replicas
-            init:
-              type: func
-              value: getDbDetails
-            if:
-              type: function
-              name: getDbDetails
-          # - type: block-layout
-          #   label: Sharded horizontal scaling
-          #   if:
-          #     type: function
-          #     name: ifDbTypeEqualsTo|sharded|horizontalScaling
-          #   elements:
-          #     - type: block-layout
-          #       label: Config Server horizontal Scaling
-          #       elements:
-          #         - type: label
-          #           label: configServer
-          #           schema: 
-          #             schema#/properties/spec/properties/horizontalScaling/properties/configServer
-          #         - type: input
-          #           schema: 
-          #             schema#/properties/spec/properties/horizontalScaling/properties/configServer/properties/replicas
-          #           label: replicas
-          #           init:
-          #             type: func
-          #             value: 
-          #               setValueFromDbDetails|/spec/shardTopology/configServer/replicas
-          #     - type: block-layout
-          #       label: Mongos horizontal Scaling
-          #       elements:
-          #         - type: label
-          #           label: mongos
-          #           schema: 
-          #             schema#/properties/spec/properties/horizontalScaling/properties/mongos
-          #         - type: input
-          #           schema: 
-          #             schema#/properties/spec/properties/horizontalScaling/properties/mongos/properties/replicas
-          #           label: replicas
-          #           init:
-          #             type: func
-          #             value: 
-          #               setValueFromDbDetails|/spec/shardTopology/mongos/replicas
-          #     - type: block-layout
-          #       label: Shard horizontal Scaling
-          #       elements:
-          #         - type: label
-          #           label: shard
-          #           schema: 
-          #             schema#/properties/spec/properties/horizontalScaling/properties/shard
-          #         - type: input
-          #           schema: 
-          #             schema#/properties/spec/properties/horizontalScaling/properties/shard/properties/replicas
-          #           label: replicas
-          #           init:
-          #             type: func
-          #             value: setValueFromDbDetails|/spec/shardTopology/shard/replicas
-          #         - type: input
-          #           schema: 
-          #             schema#/properties/spec/properties/horizontalScaling/properties/shard/properties/shards
-          #           label: shards
-          #           init:
-          #             type: func
-          #             value: setValueFromDbDetails|/spec/shardTopology/shard/shards
+      #         value: getDbDetails
+      # - type: block-layout
+      #   label: Sharded horizontal scaling
+      #   if:
+      #     type: function
+      #     name: ifDbTypeEqualsTo|sharded|horizontalScaling
+      #   elements:
+      #     - type: block-layout
+      #       label: Config Server horizontal Scaling
+      #       elements:
+      #         - type: label
+      #           label: configServer
+      #           schema: 
+      #             schema#/properties/spec/properties/horizontalScaling/properties/configServer
+      #         - type: input
+      #           schema: 
+      #             schema#/properties/spec/properties/horizontalScaling/properties/configServer/properties/replicas
+      #           label: replicas
+      #           init:
+      #             type: func
+      #             value: 
+      #               setValueFromDbDetails|/spec/shardTopology/configServer/replicas
+      #     - type: block-layout
+      #       label: Mongos horizontal Scaling
+      #       elements:
+      #         - type: label
+      #           label: mongos
+      #           schema: 
+      #             schema#/properties/spec/properties/horizontalScaling/properties/mongos
+      #         - type: input
+      #           schema: 
+      #             schema#/properties/spec/properties/horizontalScaling/properties/mongos/properties/replicas
+      #           label: replicas
+      #           init:
+      #             type: func
+      #             value: 
+      #               setValueFromDbDetails|/spec/shardTopology/mongos/replicas
+      #     - type: block-layout
+      #       label: Shard horizontal Scaling
+      #       elements:
+      #         - type: label
+      #           label: shard
+      #           schema: 
+      #             schema#/properties/spec/properties/horizontalScaling/properties/shard
+      #         - type: input
+      #           schema: 
+      #             schema#/properties/spec/properties/horizontalScaling/properties/shard/properties/replicas
+      #           label: replicas
+      #           init:
+      #             type: func
+      #             value: setValueFromDbDetails|/spec/shardTopology/shard/replicas
+      #         - type: input
+      #           schema: 
+      #             schema#/properties/spec/properties/horizontalScaling/properties/shard/properties/shards
+      #           label: shards
+      #           init:
+      #             type: func
+      #             value: setValueFromDbDetails|/spec/shardTopology/shard/shards
       # - type: block-layout
       #   if:
       #     type: function
@@ -506,45 +494,45 @@ step:
       #           init:
       #             type: func
       #             value: setValueFromDbDetails|/spec/tls/issuerRef/name
-      #     - type: block-layout
-      #       if:
-      #         type: function
-      #         name: showIssuerRefAndCertificates
-      #       label: TLS Certificates
-      #       elements:
-      #         - type: input
-      #           label: Certificates
-      #           schema: 'schema#/properties/spec/properties/tls/properties/certificates'
-      #           init:
-      #             type: func
-      #             value: 
-      #               setValueFromDbDetails|/spec/tls/certificates|/spec/tls/certificates
-      # - type: select
-      #   label: timeout
-      #   schema: 'schema#/properties/spec/properties/timeout'
-      #   options:
-      #     - text: 5 minutes
-      #       value: 5m
-      #     - text: 10 minutes
-      #       value: 10m
-      #     - text: 30 minutes
-      #       value: 30m
-      #     - text: 1 hour
-      #       value: 1h
-      #     - text: 2 hours
-      #       value: 2h
-      #     - text: 5 hours
-      #       value: 5h
-      #     - text: 10 hours
-      #       value: 10h
-      # - type: radio
-      #   label: apply
-      #   schema: 'schema#/properties/spec/properties/apply'
-      #   init:
-      #     type: func
-      #     value: setApplyToIfReady
-      #   options:
-      #     - text: IfReady (OpsRequest will be applied if database is ready)
-      #       value: IfReady
-      #     - text: Always (OpsRequest will always be applied)
-      #       value: Always
+      #     # - type: block-layout
+      #     #   if:
+      #     #     type: function
+      #     #     name: showIssuerRefAndCertificates
+      #     #   label: TLS Certificates
+      #     #   elements:
+      #     #     - type: input
+      #     #       label: Certificates
+      #     #       schema: 'schema#/properties/spec/properties/tls/properties/certificates'
+      #     #       init:
+      #     #         type: func
+      #     #         value: 
+      #     #           setValueFromDbDetails|/spec/tls/certificates|/spec/tls/certificates
+      - type: select
+        label: Timeout
+        schema: 'schema/properties/spec/properties/timeout'
+        options:
+          - text: 5 minutes
+            value: 5m
+          - text: 10 minutes
+            value: 10m
+          - text: 30 minutes
+            value: 30m
+          - text: 1 hour
+            value: 1h
+          - text: 2 hours
+            value: 2h
+          - text: 5 hours
+            value: 5h
+          - text: 10 hours
+            value: 10h
+      - type: radio
+        label: apply
+        schema: 'schema/properties/spec/properties/apply'
+        init:
+          type: func
+          value: setApplyToIfReady
+        options:
+          - text: IfReady (OpsRequest will be applied if database is ready)
+            value: IfReady
+          - text: Always (OpsRequest will always be applied)
+            value: Always
