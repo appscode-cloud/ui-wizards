@@ -2,91 +2,92 @@ type: multi-step-form
 step:
   - type: single-step-form
     elements:
-      # - type: input
-      #   if:
-      #     type: function
-      #     name: showAndInitName
-      #   schema: schema/properties/metadata/properties/name
-      #   label: op_req_name
-      #   validation:
-      #     type: required
-      # - init:
-      #     type: func
-      #     value: initNamespace
-      #   if:
-      #     type: function
-      #     name: showAndInitNamespace
-      #   disable: isNamespaceDisabled
-      #   loader: getNamespaces
-      #   label: Namespace
-      #   watcher:
-      #     paths:
-      #       - schema/properties/metadata/properties/namespace
-      #     func: onNamespaceChange
-      #   validation:
-      #     type: required
-      #   type: select
-      #   hasGroup: true
-      #   schema: 'schema#/properties/metadata/properties/namespace'
-      # - type: select
-      #   schema: 'schema#/properties/spec/properties/databaseRef/properties/name'
-      #   validation:
-      #     type: required
-      #   refresh: true
-      #   watcher:
-      #     paths:
-      #       - 'schema#/properties/spec/properties/databaseRef/properties/name'
-      #     func: onDbChange
-      #   label: databaseRef
-      #   if:
-      #     type: function
-      #     name: showAndInitDatabaseRef
-      #   loader: getDbs
-      #   disable: isDatabaseRefDisabled
-      #   init:
-      #     type: func
-      #     value: initDatabaseRef
-      # - type: label
-      #   if:
-      #     type: function
-      #     name: showConfigureOpsrequestLabel
-      #   label: config_ops_request
-      # - type: radio
-      #   schema: schema/properties/spec/properties/type
-      #   options:
-      #     - description: options.UpdateVersion.description
-      #       text: options.UpdateVersion.text
-      #       value: UpdateVersion
-      #     - description: options.HorizontalScaling.description
-      #       text: options.HorizontalScaling.text
-      #       value: HorizontalScaling
-      #     - description: options.VerticalScaling.description
-      #       text: options.VerticalScaling.text
-      #       value: VerticalScaling
-      #     - description: options.VolumeExpansion.description
-      #       text: options.VolumeExpansion.text
-      #       value: VolumeExpansion
-      #     - description: options.Restart.description
-      #       text: options.Restart.text
-      #       value: Restart
-      #     - description: options.Reconfigure.description
-      #       text: options.Reconfigure.text
-      #       value: Reconfigure
-      #     - description: options.ReconfigureTLS.description
-      #       text: options.ReconfigureTLS.text
-      #       value: ReconfigureTLS
-      #   watcher:
-      #     paths:
-      #       - schema/properties/spec/properties/type
-      #     func: onRequestTypeChange
-      #   label: ops_request_type
-      #   if:
-      #     type: function
-      #     name: showAndInitOpsRequestType
-      #   disable: isDbDetailsLoading
-      #   init:
-      #     type: func
-      #     value: getRequestTypeFromRoute
+      - type: input
+        if:
+          type: function
+          name: showAndInitName
+        schema: schema/properties/metadata/properties/name
+        label: op_req_name
+        validation:
+          type: required
+      - init:
+          type: func
+          value: initNamespace
+        if:
+          type: function
+          name: showAndInitNamespace
+        disable: isNamespaceDisabled
+        loader: getNamespaces
+        label: Namespace
+        watcher:
+          paths:
+            - schema/properties/metadata/properties/namespace
+          func: onNamespaceChange
+        validation:
+          type: required
+        type: select
+        hasGroup: true
+        schema: 'schema/properties/metadata/properties/namespace'
+      - type: select
+        schema: 'schema#/properties/spec/properties/databaseRef/properties/name'
+        validation:
+          type: required
+        refresh: true
+        watcher:
+          paths:
+            - 'schema#/properties/spec/properties/databaseRef/properties/name'
+          func: onDbChange
+        label: Database Ref
+        if:
+          type: function
+          name: showAndInitDatabaseRef
+        loader: getDbs
+        disable: isDatabaseRefDisabled
+        init:
+          type: func
+          value: initDatabaseRef
+      - type: label-element
+        if:
+          type: function
+          name: showConfigureOpsrequestLabel
+        label: config_ops_request
+      - type: radio
+        isHorizontal: true
+        schema: schema/properties/spec/properties/type
+        options:
+          - description: Update your database to any version
+            text: Update Version
+            value: UpdateVersion
+          - description: Scale up or down pod count
+            text: Horizontal Scaling
+            value: HorizontalScaling
+          - description: Manage your CPU resources
+            text: Vertical Scaling
+            value: VerticalScaling
+          - description: Manage your database size
+            text: Volume Expansion
+            value: VolumeExpansion
+          - description: Restart your database
+            text: Restart
+            value: Restart
+          - description: Reconfigure your database
+            text: Reconfigure
+            value: Reconfigure
+          - description: Reconfigure your database tls configuration
+            text: Reconfigure TLS
+            value: ReconfigureTLS
+        init:
+          type: func
+          value: getRequestTypeFromRoute
+        disable: isDbDetailsLoading
+        if:
+          type: function
+          name: showAndInitOpsRequestType
+        label: Type of Ops Request
+        watcher:
+          paths:
+            - schema/properties/spec/properties/type
+          func: onRequestTypeChange
       - type: block-layout
         showLabels: false
         if:
@@ -101,77 +102,69 @@ step:
             init:
               type: func
               value: setValueFromDbDetails
-      # - type: block-layout
-      #   label: Horizontal Scaling Form
-      #   showLabels: true
-      #   if:
-      #     type: function
-      #     name: ifRequestTypeEqualsTo|UpdateVersion
-      #   elements:
-      #     - type: input
-      #       schema: 
-      #         schema#/properties/spec/properties/horizontalScaling/properties/replicas
-      #       label: replicas
-      #       init:
-      #         type: func
-      #         value: getDbDetails
-      # - type: block-layout
-      #   label: Sharded horizontal scaling
-      #   if:
-      #     type: function
-      #     name: ifDbTypeEqualsTo|sharded|horizontalScaling
-      #   elements:
-      #     - type: block-layout
-      #       label: Config Server horizontal Scaling
-      #       elements:
-      #         - type: label
-      #           label: configServer
-      #           schema: 
-      #             schema#/properties/spec/properties/horizontalScaling/properties/configServer
-      #         - type: input
-      #           schema: 
-      #             schema#/properties/spec/properties/horizontalScaling/properties/configServer/properties/replicas
-      #           label: replicas
-      #           init:
-      #             type: func
-      #             value: 
-      #               setValueFromDbDetails|/spec/shardTopology/configServer/replicas
-      #     - type: block-layout
-      #       label: Mongos horizontal Scaling
-      #       elements:
-      #         - type: label
-      #           label: mongos
-      #           schema: 
-      #             schema#/properties/spec/properties/horizontalScaling/properties/mongos
-      #         - type: input
-      #           schema: 
-      #             schema#/properties/spec/properties/horizontalScaling/properties/mongos/properties/replicas
-      #           label: replicas
-      #           init:
-      #             type: func
-      #             value: 
-      #               setValueFromDbDetails|/spec/shardTopology/mongos/replicas
-      #     - type: block-layout
-      #       label: Shard horizontal Scaling
-      #       elements:
-      #         - type: label
-      #           label: shard
-      #           schema: 
-      #             schema#/properties/spec/properties/horizontalScaling/properties/shard
-      #         - type: input
-      #           schema: 
-      #             schema#/properties/spec/properties/horizontalScaling/properties/shard/properties/replicas
-      #           label: replicas
-      #           init:
-      #             type: func
-      #             value: setValueFromDbDetails|/spec/shardTopology/shard/replicas
-      #         - type: input
-      #           schema: 
-      #             schema#/properties/spec/properties/horizontalScaling/properties/shard/properties/shards
-      #           label: shards
-      #           init:
-      #             type: func
-      #             value: setValueFromDbDetails|/spec/shardTopology/shard/shards
+      - type: block-layout
+        elements:
+          - type: input
+            label: Replicas
+            schema: schema/properties/spec/properties/horizontalScaling/properties/replicas
+            if:
+              name: ifDbTypeEqualsTo|replicaSet|horizontalScaling
+              type: function
+            init:
+              type: func
+              value: setValueFromDbDetails
+          - type: block-layout
+            elements:
+              - type: block-layout
+                label: Config Server horizontal Scaling
+                elements:
+                  - type: label-element
+                    label: configServer
+                  - type: input
+                    label: Replicas
+                    schema: schema/properties/spec/properties/horizontalScaling/properties/configServer/properties/replicas
+                    init:
+                      type: func
+                      value: setValueFromDbDetails
+              - type: block-layout
+                label: Mongo Horizontal Scaling
+                elements:
+                  - type: label-element
+                    label: Mongos
+                  - init: 
+                      type: func
+                      value: setValueFromDbDetails
+                    label: Replicas
+                    schema: schema/properties/spec/properties/horizontalScaling/properties/mongos/properties/replicas
+                    type: input
+              - type: block-layout
+                label: Shard horizontal Scaling
+                elements:
+                  - type: label-element
+                    label: Shard
+                  - init: 
+                      type: func
+                      value: setValueFromDbDetails
+                    label: Replicas
+                    schema: schema/properties/spec/properties/horizontalScaling/properties/shard/properties/replicas
+                    type: input
+                  - init: 
+                      type: func
+                      value: setValueFromDbDetails
+                    label: Shards
+                    schema: schema#/properties/spec/properties/horizontalScaling/properties/shard/properties/shards
+                    type: input
+            if:
+              name: ifDbTypeEqualsTo|sharded|horizontalScaling
+              type: function
+            label: 'Sharded horizontal scaling'
+        label: Horizontal Scaling Form
+        if: 
+          type: function
+          name: ifRequestTypeEqualsTo|HorizontalScaling
+        
+
+        
       # - type: block-layout
       #   if:
       #     type: function
