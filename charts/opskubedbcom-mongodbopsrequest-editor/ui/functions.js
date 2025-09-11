@@ -1,5 +1,4 @@
-const { ref, computed, axios, watch, useOperator, store, useRoute, commit } =
-  window.vueHelpers || {}
+const { axios, useOperator, store } = window.vueHelpers || {}
 const machines = {
   'db.t.micro': {
     resources: {
@@ -307,104 +306,106 @@ const machineList = [
 ]
 
 export const useFunc = (model) => {
-  const { route } = useRoute()
+  const route = store.state?.route
 
-  const { getValue, storeGet, discriminator, setDiscriminatorValue } = useOperator(model)
+  const { getValue, storeGet, discriminator, setDiscriminatorValue, commit } = useOperator(
+    model,
+    store.state,
+  )
+
   getDbDetails()
-  // showAndInitOpsRequestType()
-  // async function fetchJsons({ axios, itemCtx }) {
-  //   let ui = {}
-  //   let language = {}
-  //   let functions = {}
-  //   const { name, sourceRef, version, packageviewUrlPrefix } = itemCtx.chart
+  showAndInitOpsRequestType()
+  async function fetchJsons({ axios, itemCtx }) {
+    let ui = {}
+    let language = {}
+    let functions = {}
+    const { name, sourceRef, version, packageviewUrlPrefix } = itemCtx.chart
 
-  //   try {
-  //     ui = await axios.get(
-  //       `${packageviewUrlPrefix}/create-ui.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`,
-  //     )
-  //     language = await axios.get(
-  //       `${packageviewUrlPrefix}/language.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`,
-  //     )
-  //     const functionString = await axios.get(
-  //       `${packageviewUrlPrefix}/functions.js?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}`,
-  //     )
-  //     // declare evaluate the functionString to get the functions Object
-  //     const evalFunc = new Function(functionString.data || '')
-  //     functions = evalFunc()
-  //   } catch (e) {
-  //     console.log(e)
-  //   }
+    try {
+      ui = await axios.get(
+        `${packageviewUrlPrefix}/create-ui.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`,
+      )
+      language = await axios.get(
+        `${packageviewUrlPrefix}/language.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`,
+      )
+      const functionString = await axios.get(
+        `${packageviewUrlPrefix}/functions.js?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}`,
+      )
+      // declare evaluate the functionString to get the functions Object
+      const evalFunc = new Function(functionString.data || '')
+      functions = evalFunc()
+    } catch (e) {
+      console.log(e)
+    }
 
-  //   return {
-  //     ui: ui.data || {},
-  //     language: language.data || {},
-  //     functions,
-  //   }
-  // }
+    return {
+      ui: ui.data || {},
+      language: language.data || {},
+      functions,
+    }
+  }
 
   function returnFalse() {
     return false
   }
 
   // function isRancherManaged({ storeGet }) {
-  //   const managers = storeGet(store.state,'/cluster/clusterDefinition/result/clusterManagers')
+  //   const managers = storeGet('/cluster/clusterDefinition/result/clusterManagers')
   //   const found = managers.find((item) => item === 'Rancher')
   //   return !!found
   // }
 
-  // async function getNamespaces({ axios, storeGet }) {
-  //   if (storeGet(store.state,'/route/params/actions')) return []
-  //   const owner = storeGet(store.state,'/route/params/user')
-  //   const cluster = storeGet(store.state,'/route/params/cluster')
+  async function getNamespaces() {
+    if (storeGet('/route/params/actions')) return []
+    const owner = storeGet('/route/params/user')
+    const cluster = storeGet('/route/params/cluster')
 
-  //   const resp = await axios.get(`/clusters/${owner}/${cluster}/proxy/core/v1/namespaces`, {
-  //     params: { filter: { items: { metadata: { name: null } } } },
-  //   })
+    const resp = await axios.get(`/clusters/${owner}/${cluster}/proxy/core/v1/namespaces`, {
+      params: { filter: { items: { metadata: { name: null } } } },
+    })
 
-  //   const resources = (resp && resp.data && resp.data.items) || []
+    const resources = (resp && resp.data && resp.data.items) || []
 
-  //   return resources.map((item) => {
-  //     const name = (item.metadata && item.metadata.name) || ''
-  //     return {
-  //       text: name,
-  //       value: name,
-  //     }
-  //   })
-  // }
+    return resources.map((item) => {
+      const name = (item.metadata && item.metadata.name) || ''
+      return {
+        text: name,
+        value: name,
+      }
+    })
+  }
 
-  // async function getDbs({ axios, storeGet, model, getValue, watchDependency }) {
-  //   if (storeGet(store.state,'/route/params/actions')) return []
-  //   const owner = storeGet(store.state,'/route/params/user')
-  //   const cluster = storeGet(store.state,'/route/params/cluster')
+  async function getDbs() {
+    if (storeGet('/route/params/actions')) return []
+    const owner = storeGet('/route/params/user')
+    const cluster = storeGet('/route/params/cluster')
 
-  //   const namespace = getValue(model, '/metadata/namespace')
-  //   watchDependency('model#/metadata/namespace')
+    const namespace = getValue(model, '/metadata/namespace')
+    // watchDependency('model#/metadata/namespace')
 
-  //   const resp = await axios.get(
-  //     `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/mongodbs`,
-  //     {
-  //       params: { filter: { items: { metadata: { name: null } } } },
-  //     },
-  //   )
+    const resp = await axios.get(
+      `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/mongodbs`,
+      {
+        params: { filter: { items: { metadata: { name: null } } } },
+      },
+    )
 
-  //   const resources = (resp && resp.data && resp.data.items) || []
+    const resources = (resp && resp.data && resp.data.items) || []
 
-  //   return resources.map((item) => {
-  //     const name = (item.metadata && item.metadata.name) || ''
-  //     return {
-  //       text: name,
-  //       value: name,
-  //     }
-  //   })
-  // }
+    return resources.map((item) => {
+      const name = (item.metadata && item.metadata.name) || ''
+      return {
+        text: name,
+        value: name,
+      }
+    })
+  }
 
   async function getDbDetails() {
-    const owner = storeGet(store.state, '/route/params/user')
-    const cluster = storeGet(store.state, '/route/params/cluster')
-    const namespace =
-      storeGet(store.state, '/route/query/namespace') || getValue(model, '/metadata/namespace')
-    const name =
-      storeGet(store.state, '/route/params/name') || getValue(model, '/spec/databaseRef/name')
+    const owner = storeGet('/route/params/user')
+    const cluster = storeGet('/route/params/cluster')
+    const namespace = storeGet('/route/query/namespace') || getValue(model, '/metadata/namespace')
+    const name = storeGet('/route/params/name') || getValue(model, '/spec/databaseRef/name')
 
     if (namespace && name) {
       const url = `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/mongodbs/${name}`
@@ -417,11 +418,11 @@ export const useFunc = (model) => {
   }
 
   async function getDbVersions() {
-    const owner = storeGet(store.state, '/route/params/user')
-    const cluster = storeGet(store.state, '/route/params/cluster')
+    const owner = storeGet('/route/params/user')
+    const cluster = storeGet('/route/params/cluster')
     const url = `/clusters/${owner}/${cluster}/proxy/charts.x-helm.dev/v1alpha1/clusterchartpresets/kubedb-ui-presets`
-    let presets = storeGet(store.state, '/kubedbuiPresets') || {}
-    if (!storeGet(store.state, '/route/params/actions')) {
+    let presets = storeGet('/kubedbuiPresets') || {}
+    if (!storeGet('/route/params/actions')) {
       try {
         const presetResp = await axios.get(url)
         presets = presetResp.data?.spec?.values?.spec
@@ -532,27 +533,28 @@ export const useFunc = (model) => {
 
   function ifRequestTypeEqualsTo(type) {
     const selectedType = getValue(model, '/spec/type')
-    console.log({ selectedType, type })
-    return true
+    // watchDependency('model#/spec/type')
+
+    return selectedType === type
   }
 
-  // function onRequestTypeChange({ model, getValue, commit }) {
-  //   const selectedType = getValue(model, '/spec/type')
-  //   const reqTypeMapping = {
-  //     Upgrade: 'updateVersion',
-  //     UpdateVersion: 'updateVersion',
-  //     HorizontalScaling: 'horizontalScaling',
-  //     VerticalScaling: 'verticalScaling',
-  //     VolumeExpansion: 'volumeExpansion',
-  //     Restart: 'restart',
-  //     Reconfigure: 'configuration',
-  //     ReconfigureTLS: 'tls',
-  //   }
+  function onRequestTypeChange({ model, getValue, commit }) {
+    const selectedType = getValue(model, '/spec/type')
+    const reqTypeMapping = {
+      Upgrade: 'updateVersion',
+      UpdateVersion: 'updateVersion',
+      HorizontalScaling: 'horizontalScaling',
+      VerticalScaling: 'verticalScaling',
+      VolumeExpansion: 'volumeExpansion',
+      Restart: 'restart',
+      Reconfigure: 'configuration',
+      ReconfigureTLS: 'tls',
+    }
 
-  //   Object.keys(reqTypeMapping).forEach((key) => {
-  //     if (key !== selectedType) commit('wizard/model$delete', `/spec/${reqTypeMapping[key]}`)
-  //   })
-  // }
+    Object.keys(reqTypeMapping).forEach((key) => {
+      if (key !== selectedType) commit('wizard/model$delete', `/spec/${reqTypeMapping[key]}`)
+    })
+  }
 
   // function getDbTls({ discriminator, getValue, watchDependency }) {
   //   watchDependency('discriminator#/dbDetails')
@@ -562,23 +564,23 @@ export const useFunc = (model) => {
   //   return spec.tls || undefined
   // }
 
-  // function getDbType({ discriminator, getValue, watchDependency }) {
-  //   watchDependency('discriminator#/dbDetails')
-  //   const dbDetails = getValue(discriminator, '/dbDetails')
+  function getDbType() {
+    // watchDependency('discriminator#/dbDetails')
+    const dbDetails = getValue(discriminator, '/dbDetails')
 
-  //   const { spec } = dbDetails || {}
-  //   const { shardTopology, replicaSet } = spec || {}
-  //   let verd = ''
-  //   if (shardTopology) {
-  //     verd = 'sharded'
-  //   } else {
-  //     if (replicaSet) {
-  //       verd = 'replicaSet'
-  //     } else verd = 'standalone'
-  //   }
+    const { spec } = dbDetails || {}
+    const { shardTopology, replicaSet } = spec || {}
+    let verd = ''
+    if (shardTopology) {
+      verd = 'sharded'
+    } else {
+      if (replicaSet) {
+        verd = 'replicaSet'
+      } else verd = 'standalone'
+    }
 
-  //   return verd
-  // }
+    return verd
+  }
 
   // function disableOpsRequest({ itemCtx, discriminator, getValue, watchDependency }) {
   //   if (itemCtx.value === 'HorizontalScaling') {
@@ -593,111 +595,115 @@ export const useFunc = (model) => {
   //   } else return false
   // }
 
-  // function initNamespace({ route }) {
-  //   const { namespace } = route.query || {}
-  //   return namespace || null
-  // }
+  function initNamespace() {
+    const { namespace } = route.query || {}
+    return namespace || null
+  }
 
-  // function initDatabaseRef({ route, watchDependency }) {
-  //   watchDependency('model#/metadata/namespace')
-  //   const { name } = route.params || {}
-  //   return name
-  // }
+  function initDatabaseRef() {
+    // watchDependency('model#/metadata/namespace')
+    const { name } = route.params || {}
+    return name
+  }
 
-  // function clearOpsReqSpec(verd, opsReqType, commit) {
-  //   if (
-  //     opsReqType === 'verticalScaling' ||
-  //     opsReqType === 'horizontalScaling' ||
-  //     opsReqType === 'volumeExpansion' ||
-  //     opsReqType === 'configuration'
-  //   ) {
-  //     if (verd === 'sharded') {
-  //       commit('wizard/model$delete', `/spec/${opsReqType}/replicaSet`)
-  //       commit('wizard/model$delete', `/spec/${opsReqType}/replicas`)
-  //       commit('wizard/model$delete', `/spec/${opsReqType}/standalone`)
-  //     } else if (verd === 'standalone') {
-  //       commit('wizard/model$delete', `/spec/${opsReqType}/replicaSet`)
-  //       commit('wizard/model$delete', `/spec/${opsReqType}/configServer`)
-  //       commit('wizard/model$delete', `/spec/${opsReqType}/mongos`)
-  //       commit('wizard/model$delete', `/spec/${opsReqType}/shard`)
-  //     } else {
-  //       commit('wizard/model$delete', `/spec/${opsReqType}/standalone`)
-  //       commit('wizard/model$delete', `/spec/${opsReqType}/configServer`)
-  //       commit('wizard/model$delete', `/spec/${opsReqType}/mongos`)
-  //       commit('wizard/model$delete', `/spec/${opsReqType}/shard`)
-  //     }
-  //   }
-  // }
+  function clearOpsReqSpec(verd, opsReqType) {
+    if (
+      opsReqType === 'verticalScaling' ||
+      opsReqType === 'horizontalScaling' ||
+      opsReqType === 'volumeExpansion' ||
+      opsReqType === 'configuration'
+    ) {
+      if (verd === 'sharded') {
+        commit('wizard/model$delete', `/spec/${opsReqType}/replicaSet`)
+        commit('wizard/model$delete', `/spec/${opsReqType}/replicas`)
+        commit('wizard/model$delete', `/spec/${opsReqType}/standalone`)
+      } else if (verd === 'standalone') {
+        commit('wizard/model$delete', `/spec/${opsReqType}/replicaSet`)
+        commit('wizard/model$delete', `/spec/${opsReqType}/configServer`)
+        commit('wizard/model$delete', `/spec/${opsReqType}/mongos`)
+        commit('wizard/model$delete', `/spec/${opsReqType}/shard`)
+      } else {
+        commit('wizard/model$delete', `/spec/${opsReqType}/standalone`)
+        commit('wizard/model$delete', `/spec/${opsReqType}/configServer`)
+        commit('wizard/model$delete', `/spec/${opsReqType}/mongos`)
+        commit('wizard/model$delete', `/spec/${opsReqType}/shard`)
+      }
+    }
+  }
 
   function asDatabaseOperation() {
     return !!route.params.actions
   }
 
-  // function generateOpsRequestNameForClusterUI(getValue, model, route) {
-  //   const dbName = getValue(model, '/spec/databaseRef/name')
+  function generateOpsRequestNameForClusterUI(getValue, model, route) {
+    const dbName = getValue(model, '/spec/databaseRef/name')
 
-  //   const selectedType = getValue(model, '/spec/type')
-  //   const lowerType = selectedType ? String(selectedType).toLowerCase() : ''
+    const selectedType = getValue(model, '/spec/type')
+    const lowerType = selectedType ? String(selectedType).toLowerCase() : ''
 
-  //   const resources = route.params.resource || ''
-  //   const resource = resources.slice(0, -1)
+    const resources = route.params.resource || ''
+    const resource = resources.slice(0, -1)
 
-  //   const opsName = dbName ? dbName : resource
-  //   return `${opsName}-${Math.floor(Date.now() / 1000)}${lowerType ? '-' + lowerType : ''}`
-  // }
+    const opsName = dbName ? dbName : resource
+    return `${opsName}-${Math.floor(Date.now() / 1000)}${lowerType ? '-' + lowerType : ''}`
+  }
 
-  // function showAndInitName({ route, commit, getValue, model, watchDependency }) {
-  //   watchDependency('model#/spec/type')
-  //   watchDependency('model#/spec/databaseRef/name')
-  //   const ver = asDatabaseOperation(route)
+  function showAndInitName() {
+    // watchDependency('model#/spec/type')
+    // watchDependency('model#/spec/databaseRef/name')
+    const ver = asDatabaseOperation()
 
-  //   const selectedType = getValue(model, '/spec/type')
-  //   const lowerType = selectedType ? String(selectedType).toLowerCase() : ''
+    const selectedType = getValue(model, '/spec/type')
+    const lowerType = selectedType ? String(selectedType).toLowerCase() : ''
 
-  //   if (ver) {
-  //     // For kubedb-ui
-  //     commit('wizard/model$update', {
-  //       path: '/metadata/name',
-  //       value: `${route.params.name}-${Math.floor(Date.now() / 1000)}-${lowerType}`,
-  //       force: true,
-  //     })
-  //   } else {
-  //     // For cluster-ui
-  //     commit('wizard/model$update', {
-  //       path: '/metadata/name',
-  //       value: generateOpsRequestNameForClusterUI(getValue, model, route),
-  //       force: true,
-  //     })
-  //   }
-  //   return !ver
-  // }
-  // function showAndInitNamespace({ route, commit }) {
-  //   const ver = asDatabaseOperation(route)
-  //   if (ver) {
-  //     commit('wizard/model$update', {
-  //       path: '/metadata/namespace',
-  //       value: `${route.query.namespace}`,
-  //       force: true,
-  //     })
-  //   }
+    if (ver) {
+      // For kubedb-ui
+      commit('wizard/model$update', {
+        path: '/metadata/name',
+        value: `${route.params.name}-${Math.floor(Date.now() / 1000)}-${lowerType}`,
+        force: true,
+      })
+    } else {
+      // For cluster-ui
+      commit('wizard/model$update', {
+        path: '/metadata/name',
+        value: generateOpsRequestNameForClusterUI(getValue, model, route),
+        force: true,
+      })
+    }
+    return !ver
+  }
 
-  //   return !ver
-  // }
-  // function showAndInitDatabaseRef({ route, commit }) {
-  //   const ver = asDatabaseOperation(route)
-  //   if (ver) {
-  //     commit('wizard/model$update', {
-  //       path: '/spec/databaseRef/name',
-  //       value: `${route.params.name}`,
-  //       force: true,
-  //     })
-  //   }
+  function showAndInitNamespace() {
+    const ver = asDatabaseOperation()
+    if (ver) {
+      commit('wizard/model$update', {
+        path: '/metadata/namespace',
+        value: `${route.query.namespace}`,
+        force: true,
+      })
+    }
 
-  //   return !ver
-  // }
-  // function showConfigureOpsrequestLabel({ route }) {
-  //   return !asDatabaseOperation(route)
-  // }
+    return !ver
+  }
+
+  function showAndInitDatabaseRef() {
+    const ver = asDatabaseOperation()
+    if (ver) {
+      commit('wizard/model$update', {
+        path: '/spec/databaseRef/name',
+        value: `${route.params.name}`,
+        force: true,
+      })
+    }
+
+    return !ver
+  }
+
+  function showConfigureOpsrequestLabel() {
+    return !asDatabaseOperation()
+  }
+
   function showAndInitOpsRequestType() {
     const ver = asDatabaseOperation()
     const opMap = {
@@ -725,22 +731,18 @@ export const useFunc = (model) => {
   }
 
   // // vertical scaling
-  // function ifDbTypeEqualsTo() {
-  //   // { discriminator, getValue, watchDependency, commit },
-  //   // value,
-  //   // opsReqType,
-  //   return true
-  //   const verd = getDbType({ discriminator, getValue, watchDependency })
+  function ifDbTypeEqualsTo(value, opsReqType) {
+    const verd = getDbType()
 
-  //   clearOpsReqSpec(verd, opsReqType, commit)
-  //   return value === verd
-  // }
+    clearOpsReqSpec(verd, opsReqType)
+    return value === verd
+  }
 
   // // machine profile stuffs
   // let machinesFromPreset = []
 
   // function getMachines({ storeGet }) {
-  //   const presets = storeGet(store.state,'/kubedbuiPresets') || {}
+  //   const presets = storeGet('/kubedbuiPresets') || {}
   //   const avlMachines = presets.admin?.machineProfiles?.available || []
   //   let arr = []
   //   if (avlMachines.length) {
@@ -781,7 +783,7 @@ export const useFunc = (model) => {
   //   }
   //   const machine = parsedInstance[type] || 'custom'
 
-  //   machinesFromPreset = storeGet(store.state,'/kubedbuiPresets')?.admin?.machineProfiles?.machines || []
+  //   machinesFromPreset = storeGet('/kubedbuiPresets')?.admin?.machineProfiles?.machines || []
 
   //   const machinePresets = machinesFromPreset.find((item) => item.id === machine)
   //   if (machinePresets) return machine
@@ -844,8 +846,8 @@ export const useFunc = (model) => {
 
   // // for config secret
   // async function getConfigSecrets({ storeGet, axios, model, getValue, watchDependency }) {
-  //   const owner = storeGet(store.state,'/route/params/user')
-  //   const cluster = storeGet(store.state,'/route/params/cluster')
+  //   const owner = storeGet('/route/params/user')
+  //   const cluster = storeGet('/route/params/cluster')
   //   const namespace = getValue(model, '/metadata/namespace')
   //   watchDependency('model#/metadata/namespace')
 
@@ -872,10 +874,10 @@ export const useFunc = (model) => {
   // }
 
   // function createSecretUrl({ storeGet }) {
-  //   const user = storeGet(store.state,'/route/params/user')
-  //   const cluster = storeGet(store.state,'/route/params/cluster')
+  //   const user = storeGet('/route/params/user')
+  //   const cluster = storeGet('/route/params/cluster')
 
-  //   const domain = storeGet(store.state,'/domain') || ''
+  //   const domain = storeGet('/domain') || ''
   //   if (domain.includes('bb.test')) {
   //     return `http://console.bb.test:5990/${user}/kubernetes/${cluster}/core/v1/secrets/create`
   //   } else {
@@ -895,8 +897,8 @@ export const useFunc = (model) => {
   //   storeGet,
   //   { namespace, group, version, resource },
   // ) {
-  //   const owner = storeGet(store.state,'/route/params/user')
-  //   const cluster = storeGet(store.state,'/route/params/cluster')
+  //   const owner = storeGet('/route/params/user')
+  //   const cluster = storeGet('/route/params/cluster')
 
   //   const url = `/clusters/${owner}/${cluster}/proxy/${group}/${version}/namespaces/${namespace}/${resource}`
 
@@ -917,8 +919,8 @@ export const useFunc = (model) => {
   //   return ans
   // }
   // async function getResourceList(axios, storeGet, { group, version, resource }) {
-  //   const owner = storeGet(store.state,'/route/params/user')
-  //   const cluster = storeGet(store.state,'/route/params/cluster')
+  //   const owner = storeGet('/route/params/user')
+  //   const cluster = storeGet('/route/params/cluster')
 
   //   const url = `/clusters/${owner}/${cluster}/proxy/${group}/${version}/${resource}`
 
@@ -1072,8 +1074,8 @@ export const useFunc = (model) => {
   // }
 
   // async function getIssuerRefsName({ axios, storeGet, getValue, model, watchDependency }) {
-  //   const owner = storeGet(store.state,'/route/params/user')
-  //   const cluster = storeGet(store.state,'/route/params/cluster')
+  //   const owner = storeGet('/route/params/user')
+  //   const cluster = storeGet('/route/params/cluster')
   //   watchDependency('model#/spec/tls/issuerRef/kind')
   //   watchDependency('model#/metadata/namespace')
   //   const kind = getValue(model, '/spec/tls/issuerRef/kind')
@@ -1085,8 +1087,8 @@ export const useFunc = (model) => {
   //   } else if (kind === 'ClusterIssuer') {
   //     const url = `/clusters/${owner}/${cluster}/proxy/charts.x-helm.dev/v1alpha1/clusterchartpresets/kubedb-ui-presets`
 
-  //     let presets = storeGet(store.state,'/kubedbuiPresets') || {}
-  //     if (!storeGet(store.state,'/route/params/actions')) {
+  //     let presets = storeGet('/kubedbuiPresets') || {}
+  //     if (!storeGet('/route/params/actions')) {
   //       try {
   //         const presetResp = await axios.get(url)
   //         presets = presetResp.data?.spec?.values?.spec
@@ -1163,65 +1165,64 @@ export const useFunc = (model) => {
   //   return !hasTls
   // }
 
-  // function getRequestTypeFromRoute({ route, model, discriminator, getValue, watchDependency }) {
-  //   const isDbloading = isDbDetailsLoading({ discriminator, model, getValue, watchDependency })
-  //   const { query } = route || {}
-  //   const { requestType } = query || {}
-  //   return isDbloading ? '' : requestType || ''
-  // }
+  function getRequestTypeFromRoute() {
+    const isDbloading = isDbDetailsLoading()
+    const { query } = route || {}
+    const { requestType } = query || {}
+    return isDbloading ? '' : requestType || ''
+  }
 
-  // function isDbDetailsLoading({ discriminator, model, getValue, watchDependency }) {
-  //   watchDependency('discriminator#/dbDetails')
-  //   watchDependency('model#/spec/databaseRef/name')
-  //   const dbDetails = getValue(discriminator, '/dbDetails')
-  //   const dbName = getValue(model, '/spec/databaseRef/name')
+  function isDbDetailsLoading() {
+    // watchDependency('discriminator#/dbDetails')
+    // watchDependency('model#/spec/databaseRef/name')
+    const dbDetails = getValue(discriminator, '/dbDetails')
+    const dbName = getValue(model, '/spec/databaseRef/name')
 
-  //   return !dbDetails || !dbName
-  // }
+    return !dbDetails || !dbName
+  }
 
-  function setValueFromDbDetails() {
-    // const retValue = getValue(discriminator, `/dbDetails${path}`)
+  function setValueFromDbDetails(path, commitPath) {
+    const retValue = getValue(discriminator, `/dbDetails${path}`)
 
-    // if (commitPath) {
-    //   const tlsOperation = getValue(discriminator, '/tlsOperation')
+    if (commitPath) {
+      const tlsOperation = getValue(discriminator, '/tlsOperation')
 
-    //   // computed called when tls fields is not visible
-    //   if (commitPath.includes('/spec/tls') && tlsOperation !== 'update') return undefined
+      // computed called when tls fields is not visible
+      if (commitPath.includes('/spec/tls') && tlsOperation !== 'update') return undefined
 
-    //   // direct model update required for reusable element.
-    //   // computed property is not applicable for reusable element
-    //   // commit('wizard/model$update', {
-    //   //   path: commitPath,
-    //   //   value: retValue,
-    //   //   force: true,
-    //   // })
-    // }
-    return ''
-    // return retValue || undefined
+      // direct model update required for reusable element.
+      // computed property is not applicable for reusable element
+      commit('wizard/model$update', {
+        path: commitPath,
+        value: retValue,
+        force: true,
+      })
+    }
+    return retValue || undefined
   }
 
   // function getAliasOptions() {
   //   return ['server', 'client', 'metrics-exporter']
   // }
 
-  // function isNamespaceDisabled({ route }) {
-  //   const { namespace } = route.query || {}
-  //   return !!namespace
-  // }
+  function isNamespaceDisabled() {
+    const { namespace } = route.query || {}
+    return !!namespace
+  }
 
-  // function isDatabaseRefDisabled({ route }) {
-  //   const { name } = route.params || {}
-  //   return !!name
-  // }
+  function isDatabaseRefDisabled() {
+    const { name } = route.params || {}
+    return !!name
+  }
 
-  // function onNamespaceChange({ commit }) {
-  //   commit('wizard/model$delete', '/spec/type')
-  // }
+  function onNamespaceChange() {
+    commit('wizard/model$delete', '/spec/type')
+  }
 
-  // function onDbChange({ commit, axios, storeGet, model, getValue, setDiscriminatorValue }) {
-  //   commit('wizard/model$delete', '/spec/type')
-  //   getDbDetails({ axios, storeGet, model, getValue, setDiscriminatorValue })
-  // }
+  function onDbChange() {
+    commit('wizard/model$delete', '/spec/type')
+    getDbDetails()
+  }
 
   function setApplyToIfReady() {
     return 'IfReady'
@@ -1297,26 +1298,26 @@ export const useFunc = (model) => {
 
   return {
     // isRancherManaged,
-    // fetchJsons,
+    fetchJsons,
     returnFalse,
-    // getNamespaces,
-    // getDbs,
+    getNamespaces,
+    getDbs,
     getDbDetails,
     getDbVersions,
     ifRequestTypeEqualsTo,
-    // onRequestTypeChange,
+    onRequestTypeChange,
     // getDbTls,
-    // getDbType,
+    getDbType,
     // disableOpsRequest,
-    // initNamespace,
-    // initDatabaseRef,
-    // clearOpsReqSpec,
-    // showAndInitName,
-    // showAndInitNamespace,
-    // showAndInitDatabaseRef,
-    // showConfigureOpsrequestLabel,
+    initNamespace,
+    initDatabaseRef,
+    clearOpsReqSpec,
+    showAndInitName,
+    showAndInitNamespace,
+    showAndInitDatabaseRef,
+    showConfigureOpsrequestLabel,
     showAndInitOpsRequestType,
-    // ifDbTypeEqualsTo,
+    ifDbTypeEqualsTo,
     // getConfigSecrets,
     // createSecretUrl,
     // isEqualToValueFromType,
@@ -1334,14 +1335,14 @@ export const useFunc = (model) => {
     // onTlsOperationChange,
     // showIssuerRefAndCertificates,
     // isIssuerRefRequired,
-    // getRequestTypeFromRoute,
-    // isDbDetailsLoading,
+    getRequestTypeFromRoute,
+    isDbDetailsLoading,
     setValueFromDbDetails,
     // getAliasOptions,
-    // isNamespaceDisabled,
-    // isDatabaseRefDisabled,
-    // onDbChange,
-    // onNamespaceChange,
+    isNamespaceDisabled,
+    isDatabaseRefDisabled,
+    onDbChange,
+    onNamespaceChange,
     setApplyToIfReady,
     // isVerticalScaleTopologyRequired,
     // getMachines,
