@@ -1,36 +1,69 @@
-steps:
-- form:
-    discriminator:
-      backup:
-        type: string
-      initApi:
-        default: false
-        type: boolean
-      selectedSessions:
-        type: Array
-    elements:
-    - computed: init
-      if: returnFalse
-      type: label-element
-    - fetch: getOptions
-      if: isApiResolved
-      label:
-        text: Select Backup
-      onChange: clearModel
-      required: true
-      schema:
-        $ref: discriminator#/backup
-      type: select
-    - fetch: getSessionOptions
-      if: isBackupSelected
-      label:
-        text: Select Sessions
-      onChange: buildObject
-      required: true
-      schema:
-        $ref: discriminator#/selectedSessions
-      type: multiselect
-    type: single-step-form
-  id: basic
-  title: steps.0.label
 type: multi-step-form
+step:
+  - type: single-step-form
+    id: basic
+    elements:
+      - type: select
+        label: Select Backup
+        loader: test
+        options:
+         - test-mongo
+         - mongo-demo
+         - mongo-replica
+        refresh: true
+        schema: backup
+        validation:
+          type: required
+      - type: select
+        label: Select Sessions
+        multiple: true
+        loader: test
+        refresh: true
+        options:
+          - text: Full-backup
+            value: full-backup
+          - text: Recent-backup
+            value: recent-backup
+          - text: Partial-backup
+            value: partial-backup
+        schema: selectedSessions
+        validation:
+          type: required
+
+
+# steps:
+# - form:
+#     discriminator:
+#       backup:
+#         type: string
+#       initApi:
+#         default: false
+#         type: boolean
+#       selectedSessions:
+#         type: Array
+#     elements:
+#     - computed: init
+#       if: returnFalse
+#       type: label-element
+#     - fetch: getOptions
+#       if: isApiResolved
+#       label:
+#         text: Select Backup
+#       onChange: clearModel
+#       required: true
+#       schema:
+#         $ref: discriminator#/backup
+#       type: select
+#     - fetch: getSessionOptions
+#       if: isBackupSelected
+#       label:
+#         text: Select Sessions
+#       onChange: buildObject
+#       required: true
+#       schema:
+#         $ref: discriminator#/selectedSessions
+#       type: multiselect
+#     type: single-step-form
+#   id: basic
+#   title: steps.0.label
+# type: multi-step-form

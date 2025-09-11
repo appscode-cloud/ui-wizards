@@ -113,3 +113,7 @@ return {
   init,
   returnFalse,
 }
+const { ref, computed,store } = window.vueHelpers || {}
+export const useFunc = (model) => {
+  
+}
