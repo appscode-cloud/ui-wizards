@@ -1,5 +1,12 @@
 // *************************      common functions ********************************************
 // eslint-disable-next-line no-empty-pattern
+const { ref, computed, axios, watch, useOperator, store } = window.vueHelpers || {}
+
+export const useFunc = (model) => {
+  const { getValue, setDiscriminatorValue, commit, storeGet, discriminator } = useOperator(
+    model,
+    store.state,
+  )
 async function fetchJsons({ axios, itemCtx }) {
   let ui = {}
   let language = {}
@@ -36,7 +43,7 @@ function disableLableChecker({ itemCtx }) {
   else return false
 }
 
-function isEqualToModelPathValue({ model, getValue, watchDependency }, value, modelPath) {
+function isEqualToModelPathValue( value, modelPath) {
   const modelPathValue = getValue(model, modelPath)
   watchDependency('model#' + modelPath)
   return modelPathValue === value
