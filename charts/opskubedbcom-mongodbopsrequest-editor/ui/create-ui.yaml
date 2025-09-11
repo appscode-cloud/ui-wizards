@@ -392,6 +392,91 @@ step:
                         validation:
                           type: custom
                           name: isVerticalScaleTopologyRequired|shard
+
+
+
+
+
+
+      - type: block-layout
+        if:
+          type: function
+          name: ifRequestTypeEqualsTo|VolumeExpansion
+        label: Volume Expansion Form
+        elements:
+          - type: input
+            label: Standalone
+            schema: schema/properties/spec/properties/volumeExpansion/properties/standalone
+            init:
+              type: func
+              # value: setValueFromDbDetails|/spec/storage/resources/requests/storage
+              value: setValueFromDbDetails
+            if:
+              type: function
+              name: ifDbTypeEqualsTo|standalone|volumeExpansion
+            validation:
+              type: custom
+              name: checkVolume|/spec/storage/resources/requests/storage|/spec/volumeExpansion/standalone
+
+          - type: select
+            label: Mode
+            schema: schema/properties/spec/properties/volumeExpansion/properties/mode
+            options:
+              - text: Offline
+                value: Offline
+              - text: Online
+                value: Online
+            validation:
+              type: required
+
+          - type: input
+            label: ReplicaSet
+            schema: schema/properties/spec/properties/volumeExpansion/properties/replicaSet
+            init:
+              type: func
+              # value: setValueFromDbDetails|/spec/storage/resources/requests/storage
+              value: setValueFromDbDetails
+            if:
+              type: function
+              name: ifDbTypeEqualsTo|replicaSet|volumeExpansion
+            validation:
+              type: custom
+              name: checkVolume|/spec/storage/resources/requests/storage|/spec/volumeExpansion/replicaSet
+
+          - type: block-layout
+            label: Sharded volume expansion
+            if:
+              type: function
+              name: ifDbTypeEqualsTo|sharded|volumeExpansion
+            elements:
+              - type: input
+                label: Config Server
+                schema: schema/properties/spec/properties/volumeExpansion/properties/configServer
+                init:
+                  type: func
+                  # value: setValueFromDbDetails|/spec/shardTopology/configServer/storage/resources/requests/storage
+                  value: setValueFromDbDetails
+                validation:
+                  type: custom
+                  name: checkVolume|/spec/shardTopology/configServer/storage/resources/requests/storage|/spec/volumeExpansion/configServer
+
+              - type: input
+                label: Shard
+                schema: schema/properties/spec/properties/volumeExpansion/properties/shard
+                init:
+                  type: func
+                  # value: setValueFromDbDetails|/spec/shardTopology/shard/storage/resources/requests/storage
+                  value: setValueFromDbDetails
+                validation:
+                  type: custom
+                  name: checkVolume|/spec/shardTopology/shard/storage/resources/requests/storage|/spec/volumeExpansion/shard
+
+
+
+
+
+
+
       - type: select
         label: Timeout
         schema: 'schema/properties/spec/properties/timeout'
