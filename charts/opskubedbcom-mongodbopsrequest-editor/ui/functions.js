@@ -345,29 +345,29 @@ export const useFunc = (model) => {
       console.log(e)
     }
 
-  //   try {
-  //     ui = await axios.get(
-  //       `${packageviewUrlPrefix}/create-ui.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`,
-  //     )
-  //     language = await axios.get(
-  //       `${packageviewUrlPrefix}/language.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`,
-  //     )
-  //     const functionString = await axios.get(
-  //       `${packageviewUrlPrefix}/functions.js?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}`,
-  //     )
-  //     // declare evaluate the functionString to get the functions Object
-  //     const evalFunc = new Function(functionString.data || '')
-  //     functions = evalFunc()
-  //   } catch (e) {
-  //     console.log(e)
-  //   }
+    try {
+      ui = await axios.get(
+        `${packageviewUrlPrefix}/create-ui.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`,
+      )
+      language = await axios.get(
+        `${packageviewUrlPrefix}/language.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`,
+      )
+      const functionString = await axios.get(
+        `${packageviewUrlPrefix}/functions.js?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}`,
+      )
+      // declare evaluate the functionString to get the functions Object
+      const evalFunc = new Function(functionString.data || '')
+      functions = evalFunc()
+    } catch (e) {
+      console.log(e)
+    }
 
-  //   return {
-  //     ui: ui.data || {},
-  //     language: language.data || {},
-  //     functions,
-  //   }
-  // }
+    return {
+      ui: ui.data || {},
+      language: language.data || {},
+      functions,
+    }
+  }
 
   function returnFalse() {
     return false
@@ -384,20 +384,20 @@ export const useFunc = (model) => {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
 
-  //   const resp = await axios.get(`/clusters/${owner}/${cluster}/proxy/core/v1/namespaces`, {
-  //     params: { filter: { items: { metadata: { name: null } } } },
-  //   })
+    const resp = await axios.get(`/clusters/${owner}/${cluster}/proxy/core/v1/namespaces`, {
+      params: { filter: { items: { metadata: { name: null } } } },
+    })
 
-  //   const resources = (resp && resp.data && resp.data.items) || []
+    const resources = (resp && resp.data && resp.data.items) || []
 
-  //   return resources.map((item) => {
-  //     const name = (item.metadata && item.metadata.name) || ''
-  //     return {
-  //       text: name,
-  //       value: name,
-  //     }
-  //   })
-  // }
+    return resources.map((item) => {
+      const name = (item.metadata && item.metadata.name) || ''
+      return {
+        text: name,
+        value: name,
+      }
+    })
+  }
 
   async function getDbs() {
     if (storeGet('/route/params/actions')) return []
@@ -407,23 +407,23 @@ export const useFunc = (model) => {
     const namespace = getValue(model, '/metadata/namespace')
     // watchDependency('model#/metadata/namespace')
 
-  //   const resp = await axios.get(
-  //     `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/mongodbs`,
-  //     {
-  //       params: { filter: { items: { metadata: { name: null } } } },
-  //     },
-  //   )
+    const resp = await axios.get(
+      `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/mongodbs`,
+      {
+        params: { filter: { items: { metadata: { name: null } } } },
+      },
+    )
 
-  //   const resources = (resp && resp.data && resp.data.items) || []
+    const resources = (resp && resp.data && resp.data.items) || []
 
-  //   return resources.map((item) => {
-  //     const name = (item.metadata && item.metadata.name) || ''
-  //     return {
-  //       text: name,
-  //       value: name,
-  //     }
-  //   })
-  // }
+    return resources.map((item) => {
+      const name = (item.metadata && item.metadata.name) || ''
+      return {
+        text: name,
+        value: name,
+      }
+    })
+  }
 
   async function getDbDetails() {
     const owner = storeGet('/route/params/user')
@@ -584,9 +584,9 @@ export const useFunc = (model) => {
   //   return spec.tls || undefined
   // }
 
-  // function getDbType({ discriminator, getValue, watchDependency }) {
-  //   watchDependency('discriminator#/dbDetails')
-  //   const dbDetails = getValue(discriminator, '/dbDetails')
+  function getDbType() {
+    // watchDependency('discriminator#/dbDetails')
+    const dbDetails = getValue(discriminator, '/dbDetails')
 
   function disableOpsRequest() {
     if (itemCtx.value === 'HorizontalScaling') {
@@ -595,8 +595,8 @@ export const useFunc = (model) => {
         getValue,
       })
 
-  //   return verd
-  // }
+    return verd
+  }
 
   function initNamespace() {
     const { namespace } = route.query || {}
@@ -638,26 +638,26 @@ export const useFunc = (model) => {
     return !!route.params.actions
   }
 
-  // function generateOpsRequestNameForClusterUI(getValue, model, route) {
-  //   const dbName = getValue(model, '/spec/databaseRef/name')
+  function generateOpsRequestNameForClusterUI(getValue, model, route) {
+    const dbName = getValue(model, '/spec/databaseRef/name')
 
-  //   const selectedType = getValue(model, '/spec/type')
-  //   const lowerType = selectedType ? String(selectedType).toLowerCase() : ''
+    const selectedType = getValue(model, '/spec/type')
+    const lowerType = selectedType ? String(selectedType).toLowerCase() : ''
 
-  //   const resources = route.params.resource || ''
-  //   const resource = resources.slice(0, -1)
+    const resources = route.params.resource || ''
+    const resource = resources.slice(0, -1)
 
-  //   const opsName = dbName ? dbName : resource
-  //   return `${opsName}-${Math.floor(Date.now() / 1000)}${lowerType ? '-' + lowerType : ''}`
-  // }
+    const opsName = dbName ? dbName : resource
+    return `${opsName}-${Math.floor(Date.now() / 1000)}${lowerType ? '-' + lowerType : ''}`
+  }
 
   function showAndInitName() {
     // watchDependency('model#/spec/type')
     // watchDependency('model#/spec/databaseRef/name')
     const ver = asDatabaseOperation()
 
-  //   const selectedType = getValue(model, '/spec/type')
-  //   const lowerType = selectedType ? String(selectedType).toLowerCase() : ''
+    const selectedType = getValue(model, '/spec/type')
+    const lowerType = selectedType ? String(selectedType).toLowerCase() : ''
 
     if (ver) {
       // For kubedb-ui
@@ -808,7 +808,7 @@ export const useFunc = (model) => {
     }
     const machine = parsedInstance[type] || 'custom'
 
-  //   machinesFromPreset = storeGet(store.state,'/kubedbuiPresets')?.admin?.machineProfiles?.machines || []
+  //   machinesFromPreset = storeGet('/kubedbuiPresets')?.admin?.machineProfiles?.machines || []
 
     const machinePresets = machinesFromPreset.find((item) => item.id === machine)
     if (machinePresets) return machine
@@ -902,7 +902,7 @@ export const useFunc = (model) => {
     const user = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
 
-  //   const domain = storeGet(store.state,'/domain') || ''
+  //   const domain = storeGet('/domain') || ''
   //   if (domain.includes('bb.test')) {
   //     return `http://console.bb.test:5990/${user}/kubernetes/${cluster}/core/v1/secrets/create`
   //   } else {
@@ -1091,8 +1091,8 @@ export const useFunc = (model) => {
   //   } else if (kind === 'ClusterIssuer') {
   //     const url = `/clusters/${owner}/${cluster}/proxy/charts.x-helm.dev/v1alpha1/clusterchartpresets/kubedb-ui-presets`
 
-  //     let presets = storeGet(store.state,'/kubedbuiPresets') || {}
-  //     if (!storeGet(store.state,'/route/params/actions')) {
+  //     let presets = storeGet('/kubedbuiPresets') || {}
+  //     if (!storeGet('/route/params/actions')) {
   //       try {
   //         const presetResp = await axios.get(url)
   //         presets = presetResp.data?.spec?.values?.spec
@@ -1178,8 +1178,8 @@ export const useFunc = (model) => {
     const dbDetails = getValue(discriminator, '/dbDetails')
     const dbName = getValue(model, '/spec/databaseRef/name')
 
-  //   return !dbDetails || !dbName
-  // }
+    return !dbDetails || !dbName
+  }
 
   function setValueFromDbDetails(path, commitPath) {
     const retValue = getValue(discriminator, `/dbDetails${path}`)
@@ -1316,24 +1316,24 @@ export const useFunc = (model) => {
     isRancherManaged,
     fetchJsons,
     returnFalse,
-    // getNamespaces,
-    // getDbs,
+    getNamespaces,
+    getDbs,
     getDbDetails,
     getDbVersions,
     ifRequestTypeEqualsTo,
-    // onRequestTypeChange,
+    onRequestTypeChange,
     // getDbTls,
-    // getDbType,
+    getDbType,
     // disableOpsRequest,
-    // initNamespace,
-    // initDatabaseRef,
-    // clearOpsReqSpec,
-    // showAndInitName,
-    // showAndInitNamespace,
-    // showAndInitDatabaseRef,
-    // showConfigureOpsrequestLabel,
+    initNamespace,
+    initDatabaseRef,
+    clearOpsReqSpec,
+    showAndInitName,
+    showAndInitNamespace,
+    showAndInitDatabaseRef,
+    showConfigureOpsrequestLabel,
     showAndInitOpsRequestType,
-    // ifDbTypeEqualsTo,
+    ifDbTypeEqualsTo,
     // getConfigSecrets,
     // createSecretUrl,
     // isEqualToValueFromType,
@@ -1351,14 +1351,14 @@ export const useFunc = (model) => {
     // onTlsOperationChange,
     // showIssuerRefAndCertificates,
     // isIssuerRefRequired,
-    // getRequestTypeFromRoute,
-    // isDbDetailsLoading,
+    getRequestTypeFromRoute,
+    isDbDetailsLoading,
     setValueFromDbDetails,
     // getAliasOptions,
-    // isNamespaceDisabled,
-    // isDatabaseRefDisabled,
-    // onDbChange,
-    // onNamespaceChange,
+    isNamespaceDisabled,
+    isDatabaseRefDisabled,
+    onDbChange,
+    onNamespaceChange,
     setApplyToIfReady,
     // isVerticalScaleTopologyRequired,
     // getMachines,
