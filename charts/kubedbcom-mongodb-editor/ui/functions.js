@@ -1,12 +1,14 @@
 // *************************      common functions ********************************************
 // eslint-disable-next-line no-empty-pattern
 const { ref, computed, axios, watch, useOperator, store } = window.vueHelpers || {}
-
+const prometheusOpt = ref(false)
 export const useFunc = (model) => {
   const { getValue, setDiscriminatorValue, commit, storeGet, discriminator } = useOperator(
     model,
     store.state,
   )
+
+  model.value['temp/enableMonitoring'] = true
   async function fetchJsons({ axios, itemCtx }) {
     let ui = {}
     let language = {}
@@ -43,11 +45,14 @@ export const useFunc = (model) => {
     else return false
   }
 
-  function isEqualToModelPathValue(value, modelPath) {
-    window.console.log('isEqualToModelPathValue',value,modelPath)
+  function isEqualToModelPathValue(value) {
+    const modelPath = 'resources/kubedbComMongoDB/spec/monitor/agent'
     const modelPathValue = getValue(model, modelPath)
+    window.console.log('isEqualToModelPathValue', modelPathValue)
     // watchDependency('model#' + modelPath)
     return modelPathValue === value
+
+    return prometheusOpt.value === 'Prometheus-Operator'
   }
 
   async function getResources({ axios, storeGet }, group, version, resource) {
@@ -2072,8 +2077,8 @@ export const useFunc = (model) => {
   }
 
   function onAgentChange() {
-    window.console.log('onAgentChange')
     const agent = getValue(model, '/resources/kubedbComMongoDB/spec/monitor/agent')
+    console.log('onAgentChange ', agent)
     if (agent === 'prometheus.io') {
       commit('wizard/model$update', {
         path: '/resources/monitoringCoreosComServiceMonitor/spec/endpoints',
