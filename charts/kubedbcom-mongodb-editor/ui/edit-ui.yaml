@@ -2538,10 +2538,8 @@ step:
       schema: schema/properties/toggleMonitoring
     - type: radio
       label: Select a Monitoring Method
-      watcher:
-       func: onAgentChange
-       paths:
-         - schema/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/agent
+      schema: schema/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/agent
+      isHorizontal: true
       options:
       - text: Prometheus Operator
         value: Prometheus-Operator
@@ -2553,23 +2551,16 @@ step:
         value: Custom Scrapper
         description: Inject metric exporter sidecar and add Prometheus annotations to
           the..
-      schema: schema/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/agent
-      isHorizontal: true
-    - label: hello world
+      init:
+        type: func
+        value: setMonitoringModel
+    - label: ServiceMonitor Configuration
       schema: schema/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/serviceMonitor/properties/interval
       type: input 
       if: 
         type: function
         name: isEqualToModelPathValue|Prometheus-Operator
         
-    - type: block-layout
-      label: ServiceMonitor Configuration
-      showLabels: true
-      hideBlock: false
-      elements:
-      - type: input
-        label: Scrapping Interval
-        schema: schema/properties/userinfo/properties/scrapInterval
     - type: label-element
       label: Exporter Configuration
       schema: ''

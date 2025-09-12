@@ -1677,6 +1677,10 @@ export const useFunc = (model) => {
     return 'BackupConfig'
   }
 
+  function setMonitoringModel(){
+    return 'Prometheus-Operator'
+  }
+
   async function getTypes() {
     const arr = [
       {
@@ -3203,5 +3207,6 @@ export const useFunc = (model) => {
     hasNoAnnotations,
     fetchTopologyMachines,
     onMachineChange,
+    setMonitoringModel
   }
 }
