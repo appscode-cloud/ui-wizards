@@ -88,6 +88,8 @@ step:
           paths:
             - schema/properties/spec/properties/type
           func: onRequestTypeChange
+
+# UpdateVersion
       - type: block-layout
         showLabels: false
         if:
@@ -95,15 +97,14 @@ step:
           name: ifRequestTypeEqualsTo|UpdateVersion
         elements:
           - type: select
-            schema: 
-              schema/properties/spec/properties/updateVersion/properties/targetVersion
             label: Target Version
-            loader: getDbVersions
             init:
               type: func
               value: setValueFromDbDetails|/spec/version
+            loader: getDbVersions
+            schema: schema/properties/spec/properties/updateVersion/properties/targetVersion
 
-
+# Horizontal Scale
       - type: block-layout
         label: Horizontal Scaling Form
         if:
@@ -111,20 +112,20 @@ step:
           name: ifRequestTypeEqualsTo|HorizontalScaling
         elements:
           - type: input
+            label: Replicas
             if:
               type: function
               name: ifDbTypeEqualsTo|replicaSet|horizontalScaling
-            label: Replicas
             init:
               type: func
               value: setValueFromDbDetails|/spec/replicas
             schema: schema/properties/spec/properties/horizontalScaling/properties/replicas
           - type: block-layout
+            label: 'Sharded horizontal scaling'
+            showLabels: true
             if:
               name: ifDbTypeEqualsTo|sharded|horizontalScaling
               type: function
-            label: 'Sharded horizontal scaling'
-            showLabels: true
             elements:
               - type: block-layout
                 showLabels: true
@@ -144,80 +145,78 @@ step:
                 elements:
                   - type: label-element
                     label: Mongos
-                  - init: 
+                  - type: input
+                    label: Replicas
+                    init:
                       type: func
                       value: setValueFromDbDetails|/spec/shardTopology/mongos/replicas
-                    label: Replicas
                     schema: schema/properties/spec/properties/horizontalScaling/properties/mongos/properties/replicas
-                    type: input
               - type: block-layout
                 # label: Shard horizontal Scaling
                 showLabels: true
                 elements:
                   - type: label-element
                     label: Shard
-                  - init: 
+                  - type: input
+                    label: Replicas
+                    init: 
                       type: func
                       value: setValueFromDbDetails|/spec/shardTopology/shard/replicas
-                    label: Replicas
                     schema: schema/properties/spec/properties/horizontalScaling/properties/shard/properties/replicas
-                    type: input
-                  - init: 
+                  - type: input
+                    label: Shards
+                    init: 
                       type: func
                       value: setValueFromDbDetails|/spec/shardTopology/shard/shards
-                    label: Shards
                     schema: schema#/properties/spec/properties/horizontalScaling/properties/shard/properties/shards
-                    type: input
-            
-
-
-
+                    
+# vertical Scale           
       - type: block-layout
         if:
           type: function
           name: ifRequestTypeEqualsTo|VerticalScaling
         elements:
           - type: block-layout
+            showLabels: true
+            label: Standalone Vertical Scaling
             if:
               type: function
               name: ifDbTypeEqualsTo|standalone|verticalScaling
-            label: Standalone Vertical Scaling
-            showLabels: true
             elements:
               - type: machine-compare
+                label: Resources
                 if:
                   type: function
                   name: isMachineCustom|/machine-standalone
+                loader: getMachines
                 init:
                   type: func
                   value: setMachine|standalone                
-                loader: getMachines
-                label: Resources
                 schema: schema/properties/spec/properties/verticalScaling/properties/standalone/properties/resources
               - type: select
                 label: Node Selection Policy
-                schema: schema/properties/spec/properties/verticalScaling/properties/standalone/properties/nodeSelectionPolicy
                 options:
                   - text: LabelSelector
                     value: LabelSelector
                   - text: Taint
                     value: Taint
+                schema: schema/properties/spec/properties/verticalScaling/properties/standalone/properties/nodeSelectionPolicy
               - type: block-layout
                 label: Topology
                 showLabels: true
                 elements:
                   - type: input
                     label: Key
-                    schema: discriminator/topologyKey-standalone
                     validation:
                       type: custom
                       name: isVerticalScaleTopologyRequired|standalone
+                    schema: discriminator/topologyKey-standalone
                   - type: input
                     label: Value
-                    schema: discriminator/topologyValue-standalone
                     validation:
                       type: custom
                       name: isVerticalScaleTopologyRequired|standalone
+                    schema: discriminator/topologyValue-standalone
 
           - type: block-layout
             if:
@@ -392,29 +391,27 @@ step:
                           type: custom
                           name: isVerticalScaleTopologyRequired|shard
 
-
-
+# Volume Expansion
       - type: block-layout
+        label: Volume Expansion Form
         if:
           type: function
           name: ifRequestTypeEqualsTo|VolumeExpansion
-        label: Volume Expansion Form
         elements:
           - type: input
             label: Standalone
-            schema: schema/properties/spec/properties/volumeExpansion/properties/standalone
-            init:
-              type: func
-              value: setValueFromDbDetails|/spec/storage/resources/requests/storage
             if:
               type: function
               name: ifDbTypeEqualsTo|standalone|volumeExpansion
+            init:
+              type: func
+              value: setValueFromDbDetails|/spec/storage/resources/requests/storage
             validation:
               type: custom
               name: checkVolume|/spec/storage/resources/requests/storage|/spec/volumeExpansion/standalone
+            schema: schema/properties/spec/properties/volumeExpansion/properties/standalone
           - type: select
             label: Mode
-            schema: schema/properties/spec/properties/volumeExpansion/properties/mode
             options:
               - text: Offline
                 value: Offline
@@ -422,84 +419,46 @@ step:
                 value: Online
             validation:
               type: required
+            schema: schema/properties/spec/properties/volumeExpansion/properties/mode
           - type: input
             label: ReplicaSet
-            schema: schema/properties/spec/properties/volumeExpansion/properties/replicaSet
-            init:
-              type: func
-              value: setValueFromDbDetails|/spec/storage/resources/requests/storage
             if:
               type: function
               name: ifDbTypeEqualsTo|replicaSet|volumeExpansion
+            init:
+              type: func
+              value: setValueFromDbDetails|/spec/storage/resources/requests/storage
             validation:
               type: custom
               name: checkVolume|/spec/storage/resources/requests/storage|/spec/volumeExpansion/replicaSet
+            schema: schema/properties/spec/properties/volumeExpansion/properties/replicaSet
           - type: block-layout
             label: Sharded volume expansion
+            showLabels: true
             if:
               type: function
               name: ifDbTypeEqualsTo|sharded|volumeExpansion
             elements:
               - type: input
                 label: Config Server
-                schema: schema/properties/spec/properties/volumeExpansion/properties/configServer
                 init:
                   type: func
                   value: setValueFromDbDetails|/spec/shardTopology/configServer/storage/resources/requests/storage
                 validation:
                   type: custom
                   name: checkVolume|/spec/shardTopology/configServer/storage/resources/requests/storage|/spec/volumeExpansion/configServer
+                schema: schema/properties/spec/properties/volumeExpansion/properties/configServer
               - type: input
                 label: Shard
-                schema: schema/properties/spec/properties/volumeExpansion/properties/shard
                 init:
                   type: func
                   value: setValueFromDbDetails|/spec/shardTopology/shard/storage/resources/requests/storage
                 validation:
                   type: custom
                   name: checkVolume|/spec/shardTopology/shard/storage/resources/requests/storage|/spec/volumeExpansion/shard
+                schema: schema/properties/spec/properties/volumeExpansion/properties/shard
 
-
-      # - type: block-layout
-      #   label: Reconfigure Form
-      #   if:
-      #     name: ifRequestTypeEqualsTo|Reconfigure
-      #     type: function
-      #   elements:
-      #     - type: block-layout
-      #       if:
-      #         name: ifDbTypeEqualsTo|standalone|configuration
-      #         type: function
-      #       label: Standalone
-      #       showLabels: true
-      #       elements:
-      #         - label: reconfigurationType
-      #           type: radio
-      #           options: 
-      #           - text: Select New Config Secret
-      #             value: selectNewConfigSecret
-      #           - text: Apply Config
-      #             value: applyConfig
-      #           - text: Remove
-      #             value: remove
-      #           schema: temp/properties/reconfigurationType
-      #           watcher:
-      #             func: onReconfigurationTypeChange|standalone
-      #             paths:
-      #               - temp/properties/reconfigurationType
-      #           validation: 
-      #             type: required
-      #         - type: block-layout
-      #           label: Standalone configuration config secret
-      #           if:
-      #             name: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
-      #             type: function
-      #           elements:
-      #             - 
-
-
-
-
+# common
       - type: select
         label: Timeout
         schema: 'schema/properties/spec/properties/timeout'
