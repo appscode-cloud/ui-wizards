@@ -2538,6 +2538,10 @@ step:
       schema: schema/properties/toggleMonitoring
     - type: radio
       label: Select a Monitoring Method
+      watcher:
+       func: onAgentChange
+       paths:
+         - schema/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/agent
       options:
       - text: Prometheus Operator
         value: Prometheus Operator
@@ -2549,8 +2553,15 @@ step:
         value: Custom Scrapper
         description: Inject metric exporter sidecar and add Prometheus annotations to
           the..
-      schema: schema/properties/userinfo/properties/gender
+      schema: schema/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/agent
       isHorizontal: true
+    - label: hello world
+      schema: schema/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/serviceMonitor/properties/interval
+      type: input 
+      # if: 
+      #   type: function
+      #   name: isEqualToModelPathValue
+        
     - type: block-layout
       label: ServiceMonitor Configuration
       showLabels: true
@@ -2614,8 +2625,8 @@ step:
         schema: select
         options:
         - mongo-actions-test-key
-      - type: select
-        label: Secret Key
-        schema: select
-        options:
+      # - type: select
+      #   label: Secret Key
+      #   schema: select
+      #   options:
     
