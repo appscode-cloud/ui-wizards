@@ -101,73 +101,77 @@ step:
             loader: getDbVersions
             init:
               type: func
-              # value: setValueFromDbDetails|/spec/version
-              value: setValueFromDbDetails
+              value: setValueFromDbDetails|/spec/version
+
+
       - type: block-layout
+        label: Horizontal Scaling Form
+        if:
+          type: function
+          name: ifRequestTypeEqualsTo|HorizontalScaling
         elements:
           - type: input
-            label: Replicas
-            schema: schema/properties/spec/properties/horizontalScaling/properties/replicas
             if:
               type: function
               name: ifDbTypeEqualsTo|replicaSet|horizontalScaling
+            label: Replicas
             init:
               type: func
-              # value: setValueFromDbDetails|/spec/replicas
-              value: setValueFromDbDetails
+              value: setValueFromDbDetails|/spec/replicas
+            schema: schema/properties/spec/properties/horizontalScaling/properties/replicas
           - type: block-layout
+            if:
+              name: ifDbTypeEqualsTo|sharded|horizontalScaling
+              type: function
+            label: 'Sharded horizontal scaling'
+            showLabels: true
             elements:
               - type: block-layout
-                label: Config Server horizontal Scaling
+                showLabels: true
+                # label: Config Server horizontal Scaling
                 elements:
                   - type: label-element
-                    label: configServer
+                    label: Config Server
                   - type: input
                     label: Replicas
                     schema: schema/properties/spec/properties/horizontalScaling/properties/configServer/properties/replicas
                     init:
                       type: func
-                      # value: setValueFromDbDetails|/spec/shardTopology/configServer/replicas
-                      value: setValueFromDbDetails
+                      value: setValueFromDbDetails|/spec/shardTopology/configServer/replicas
               - type: block-layout
-                label: Mongo Horizontal Scaling
+                showLabels: true
+                # label: Mongo Horizontal Scaling
                 elements:
                   - type: label-element
                     label: Mongos
                   - init: 
                       type: func
-                      # value: setValueFromDbDetails|/spec/shardTopology/mongos/replicas
-                      value: setValueFromDbDetails
+                      value: setValueFromDbDetails|/spec/shardTopology/mongos/replicas
                     label: Replicas
                     schema: schema/properties/spec/properties/horizontalScaling/properties/mongos/properties/replicas
                     type: input
               - type: block-layout
-                label: Shard horizontal Scaling
+                # label: Shard horizontal Scaling
+                showLabels: true
                 elements:
                   - type: label-element
                     label: Shard
                   - init: 
                       type: func
-                      # value: setValueFromDbDetails|/spec/shardTopology/shard/replicas
-                      value: setValueFromDbDetails
+                      value: setValueFromDbDetails|/spec/shardTopology/shard/replicas
                     label: Replicas
                     schema: schema/properties/spec/properties/horizontalScaling/properties/shard/properties/replicas
                     type: input
                   - init: 
                       type: func
-                      # value: setValueFromDbDetails|/spec/shardTopology/shard/shards
-                      value: setValueFromDbDetails
+                      value: setValueFromDbDetails|/spec/shardTopology/shard/shards
                     label: Shards
                     schema: schema#/properties/spec/properties/horizontalScaling/properties/shard/properties/shards
                     type: input
-            if:
-              name: ifDbTypeEqualsTo|sharded|horizontalScaling
-              type: function
-            label: 'Sharded horizontal scaling'
-        label: Horizontal Scaling Form
-        if: 
-          type: function
-          name: ifRequestTypeEqualsTo|HorizontalScaling
+            
+
+
+
       - type: block-layout
         if:
           type: function
@@ -181,13 +185,12 @@ step:
             showLabels: true
             elements:
               - type: machine-compare
-                init:
-                  type: func
-                  # value: setMachine|standalone                
-                  value: setMachine                
                 if:
                   type: function
                   name: isMachineCustom|/machine-standalone
+                init:
+                  type: func
+                  value: setMachine|standalone                
                 loader: getMachines
                 label: Resources
                 schema: schema/properties/spec/properties/verticalScaling/properties/standalone/properties/resources
@@ -226,8 +229,7 @@ step:
               - type: machine-compare
                 init:
                   type: func
-                  # value: setMachine|replicaSet
-                  value: setMachine
+                  value: setMachine|replicaSet
                 loader: getMachines
                 if:
                   type: function
@@ -277,8 +279,7 @@ step:
                     loader: getMachines
                     init:
                       type: func
-                      # value: setMachine|configServer
-                      value: setMachine
+                      value: setMachine|configServer
                     label: Resources
                     schema: schema/properties/spec/properties/verticalScaling/properties/configServer/properties/resources
                   - type: select
@@ -313,8 +314,7 @@ step:
                     loader: getMachines
                     init:
                       type: func
-                      # value: setMachine|mongos
-                      value: setMachine
+                      value: setMachine|mongos
                     if:
                       type: function
                       name: isMachineCustom|/machine-mongos
@@ -361,8 +361,7 @@ step:
                     loader: getMachines
                     init:
                       type: func
-                      # value: setMachine|shard
-                      value: setMachine
+                      value: setMachine|shard
                     if:
                       type: function
                       name: isMachineCustom|/machine-shard
@@ -395,9 +394,6 @@ step:
 
 
 
-
-
-
       - type: block-layout
         if:
           type: function
@@ -409,15 +405,13 @@ step:
             schema: schema/properties/spec/properties/volumeExpansion/properties/standalone
             init:
               type: func
-              # value: setValueFromDbDetails|/spec/storage/resources/requests/storage
-              value: setValueFromDbDetails
+              value: setValueFromDbDetails|/spec/storage/resources/requests/storage
             if:
               type: function
               name: ifDbTypeEqualsTo|standalone|volumeExpansion
             validation:
               type: custom
               name: checkVolume|/spec/storage/resources/requests/storage|/spec/volumeExpansion/standalone
-
           - type: select
             label: Mode
             schema: schema/properties/spec/properties/volumeExpansion/properties/mode
@@ -428,21 +422,18 @@ step:
                 value: Online
             validation:
               type: required
-
           - type: input
             label: ReplicaSet
             schema: schema/properties/spec/properties/volumeExpansion/properties/replicaSet
             init:
               type: func
-              # value: setValueFromDbDetails|/spec/storage/resources/requests/storage
-              value: setValueFromDbDetails
+              value: setValueFromDbDetails|/spec/storage/resources/requests/storage
             if:
               type: function
               name: ifDbTypeEqualsTo|replicaSet|volumeExpansion
             validation:
               type: custom
               name: checkVolume|/spec/storage/resources/requests/storage|/spec/volumeExpansion/replicaSet
-
           - type: block-layout
             label: Sharded volume expansion
             if:
@@ -454,25 +445,57 @@ step:
                 schema: schema/properties/spec/properties/volumeExpansion/properties/configServer
                 init:
                   type: func
-                  # value: setValueFromDbDetails|/spec/shardTopology/configServer/storage/resources/requests/storage
-                  value: setValueFromDbDetails
+                  value: setValueFromDbDetails|/spec/shardTopology/configServer/storage/resources/requests/storage
                 validation:
                   type: custom
                   name: checkVolume|/spec/shardTopology/configServer/storage/resources/requests/storage|/spec/volumeExpansion/configServer
-
               - type: input
                 label: Shard
                 schema: schema/properties/spec/properties/volumeExpansion/properties/shard
                 init:
                   type: func
-                  # value: setValueFromDbDetails|/spec/shardTopology/shard/storage/resources/requests/storage
-                  value: setValueFromDbDetails
+                  value: setValueFromDbDetails|/spec/shardTopology/shard/storage/resources/requests/storage
                 validation:
                   type: custom
                   name: checkVolume|/spec/shardTopology/shard/storage/resources/requests/storage|/spec/volumeExpansion/shard
 
 
-
+      # - type: block-layout
+      #   label: Reconfigure Form
+      #   if:
+      #     name: ifRequestTypeEqualsTo|Reconfigure
+      #     type: function
+      #   elements:
+      #     - type: block-layout
+      #       if:
+      #         name: ifDbTypeEqualsTo|standalone|configuration
+      #         type: function
+      #       label: Standalone
+      #       showLabels: true
+      #       elements:
+      #         - label: reconfigurationType
+      #           type: radio
+      #           options: 
+      #           - text: Select New Config Secret
+      #             value: selectNewConfigSecret
+      #           - text: Apply Config
+      #             value: applyConfig
+      #           - text: Remove
+      #             value: remove
+      #           schema: temp/properties/reconfigurationType
+      #           watcher:
+      #             func: onReconfigurationTypeChange|standalone
+      #             paths:
+      #               - temp/properties/reconfigurationType
+      #           validation: 
+      #             type: required
+      #         - type: block-layout
+      #           label: Standalone configuration config secret
+      #           if:
+      #             name: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
+      #             type: function
+      #           elements:
+      #             - 
 
 
 
