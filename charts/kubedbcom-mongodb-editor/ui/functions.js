@@ -44,7 +44,7 @@ export const useFunc = (model) => {
   }
 
   function isEqualToModelPathValue(value, modelPath) {
-    window.console.log('isEqualToModelPathValue')
+    window.console.log('isEqualToModelPathValue',value,modelPath)
     const modelPathValue = getValue(model, modelPath)
     // watchDependency('model#' + modelPath)
     return modelPathValue === value
