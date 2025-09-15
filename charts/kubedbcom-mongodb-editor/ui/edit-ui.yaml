@@ -2545,7 +2545,7 @@ step:
         value: Prometheus-Operator
         description: Inject metric exporter sidecar and creates a ServiceMonitor
       - text: Custom ServiceMonitor
-        value: Custom ServiceMonitor
+        value: Custom-ServiceMonitor
         description: Injects the metric exporter sidecar and let you customize
       - text: Custom Scrapper
         value: Custom Scrapper
@@ -2560,6 +2560,19 @@ step:
       if: 
         type: function
         name: isEqualToModelPathValue|Prometheus-Operator
+    - type: block-layout
+      label: Service Monitor
+      showLabels: true
+      if:
+        type: function
+        name: isEqualToModelPathValue|Custom-ServiceMonitor
+      elements:
+         - type: array-item-form
+           label: Endpoints
+           schema: schema/properties/arrayitem/properties/tada
+           init:
+             type: static
+             value: []
         
     - type: label-element
       label: Exporter Configuration
