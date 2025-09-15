@@ -526,7 +526,6 @@ steps:
         text: Volume Expansion Form
       type: single-step-form
 
-
     - elements:
       - discriminator:
           reconfigurationType:
@@ -547,9 +546,6 @@ steps:
             $ref: discriminator#/properties/reconfigurationType
           type: radio
         - elements:
- 
-
- 
           - add_new_button:
               label: labels.createConfig
               target: _blank
@@ -564,16 +560,13 @@ steps:
             schema:
               $ref: schema#/properties/spec/properties/configuration/properties/standalone/properties/configSecret/properties/name
             type: select
- 
           if: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
+
           label:
             text: Standalone configuration config secret
           schema:
             $ref: schema#/properties/spec/properties/configuration/properties/standalone/properties/configSecret
-          type: single-step-form
-      
-
-
+          type: single-step-form      
         - addFormLabel: labels.applyConfig.label
           element:
             discriminator:
@@ -628,6 +621,7 @@ steps:
           $ref: schema#/properties/spec/properties/configuration/properties/standalone
         show_label: true
         type: single-step-form
+
       - discriminator:
           reconfigurationType:
             type: string
@@ -661,6 +655,7 @@ steps:
             schema:
               $ref: schema#/properties/spec/properties/configuration/properties/replicaSet/properties/configSecret/properties/name
             type: select
+   
           if: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
           label:
             text: Replica Set configuration config secret
@@ -714,6 +709,7 @@ steps:
           schema:
             $ref: schema#/properties/spec/properties/configuration/properties/replicaSet/properties/removeCustomConfig
           type: switch
+    
         if: ifDbTypeEqualsTo|replicaSet|configuration
         label:
           text: labels.replicaSet
@@ -721,11 +717,14 @@ steps:
           $ref: schema#/properties/spec/properties/configuration/properties/replicaSet
         show_label: true
         type: single-step-form
+
+
       - elements:
         - discriminator:
             reconfigurationType-configServer:
               type: string
           elements:
+
           - label:
               text: labels.reconfigurationType
             onChange: onReconfigurationTypeChange|configServer|true
@@ -739,6 +738,7 @@ steps:
             schema:
               $ref: discriminator#/properties/reconfigurationType-configServer
             type: radio
+
           - elements:
             - add_new_button:
                 label: labels.createConfig
@@ -758,6 +758,7 @@ steps:
             schema:
               $ref: schema#/properties/spec/properties/configuration/properties/configServer/properties/configSecret
             type: single-step-form
+
           - addFormLabel: labels.applyConfig.label
             element:
               discriminator:
@@ -799,18 +800,21 @@ steps:
               type: value
               typeOfValue: code
             type: single-step-form-array
+
           - if: returnFalse
             label:
               text: labels.removeCustomConfig
             schema:
               $ref: schema#/properties/spec/properties/configuration/properties/configServer/properties/removeCustomConfig
             type: switch
+
           label:
             text: labels.configServer
           schema:
             $ref: schema#/properties/spec/properties/configuration/properties/configServer
           show_label: true
           type: single-step-form
+
         - discriminator:
             reconfigurationType-mongos:
               type: string
@@ -828,6 +832,7 @@ steps:
             schema:
               $ref: discriminator#/properties/reconfigurationType-mongos
             type: radio
+
           - elements:
             - add_new_button:
                 label: labels.createConfig
@@ -847,6 +852,7 @@ steps:
             schema:
               $ref: schema#/properties/spec/properties/configuration/properties/mongos/properties/configSecret
             type: single-step-form
+
           - addFormLabel: labels.applyConfig.label
             element:
               discriminator:
@@ -900,6 +906,7 @@ steps:
             $ref: schema#/properties/spec/properties/configuration/properties/mongos
           show_label: true
           type: single-step-form
+
         - discriminator:
             reconfigurationType-shard:
               type: string
@@ -989,11 +996,14 @@ steps:
             $ref: schema#/properties/spec/properties/configuration/properties/shard
           show_label: true
           type: single-step-form
+
         if: ifDbTypeEqualsTo|sharded|configuration
         label:
           text: Sharded Reconfigure form
         show_label: true
         type: single-step-form
+    
+    
       if: ifRequestTypeEqualsTo|Reconfigure
       label:
         text: Reconfigure Form
@@ -1061,6 +1071,7 @@ steps:
         schema:
           $ref: schema#/properties/spec/properties/tls/properties/issuerRef
         type: single-step-form
+
       - alias: reusable_certificates
         chart:
           name: uibytebuildersdev-component-certificates
