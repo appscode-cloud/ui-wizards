@@ -561,7 +561,7 @@ export const useFunc = (model) => {
     const dbDetails = getValue(discriminator, '/dbDetails')
 
     const { spec } = dbDetails || {}
-    return spec.tls || undefined
+    return spec?.tls || undefined
   }
 
   function getDbType() {
@@ -989,8 +989,9 @@ export const useFunc = (model) => {
     let path = '/reconfigurationType'
     if (isShard) path += `-${property}`
     const reconfigurationType = getValue(discriminator, path)
+
     const watchPath = `discriminator#${path}`
-    watchDependency(watchPath)
+    // watchDependency(watchPath)
     return reconfigurationType === value
   }
 
@@ -1015,6 +1016,7 @@ export const useFunc = (model) => {
   }
 
   function onReconfigurationTypeChange(property, isShard) {
+    console.log({ property })
     setDiscriminatorValue(`/${property}/applyConfig`, [])
     let path = '/reconfigurationType'
     if (isShard) path += `-${property}`
@@ -1043,7 +1045,7 @@ export const useFunc = (model) => {
 
   function initIssuerRefApiGroup() {
     const kind = getValue(model, '/spec/tls/issuerRef/kind')
-    watchDependency('model#/spec/tls/issuerRef/kind')
+    // watchDependency('model#/spec/tls/issuerRef/kind')
 
     if (kind) {
       return 'cert-manager.io'
@@ -1126,7 +1128,7 @@ export const useFunc = (model) => {
 
   function showIssuerRefAndCertificates() {
     const tlsOperation = getValue(discriminator, '/tlsOperation')
-    watchDependency('discriminator#/tlsOperation')
+    // watchDependency('discriminator#/tlsOperation')
     const verd = tlsOperation !== 'remove' && tlsOperation !== 'rotate'
 
     return verd
@@ -1163,7 +1165,6 @@ export const useFunc = (model) => {
 
     if (commitPath) {
       const tlsOperation = getValue(discriminator, '/tlsOperation')
-
       // computed called when tls fields is not visible
       if (commitPath.includes('/spec/tls') && tlsOperation !== 'update') return undefined
 
