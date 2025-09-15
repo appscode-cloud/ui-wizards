@@ -2,6 +2,7 @@ type: multi-step-form
 step:
   - type: single-step-form
     elements:
+# common
       - type: input
         if:
           type: function
@@ -88,7 +89,6 @@ step:
           paths:
             - schema/properties/spec/properties/type
           func: onRequestTypeChange
-
 # UpdateVersion
       - type: block-layout
         showLabels: false
@@ -103,7 +103,6 @@ step:
               value: setValueFromDbDetails|/spec/version
             loader: getDbVersions
             schema: schema/properties/spec/properties/updateVersion/properties/targetVersion
-
 # Horizontal Scale
       - type: block-layout
         label: Horizontal Scaling Form
@@ -169,7 +168,6 @@ step:
                       type: func
                       value: setValueFromDbDetails|/spec/shardTopology/shard/shards
                     schema: schema#/properties/spec/properties/horizontalScaling/properties/shard/properties/shards
-                    
 # vertical Scale           
       - type: block-layout
         if:
@@ -390,7 +388,6 @@ step:
                         validation:
                           type: custom
                           name: isVerticalScaleTopologyRequired|shard
-
 # Volume Expansion
       - type: block-layout
         label: Volume Expansion Form
@@ -457,6 +454,465 @@ step:
                   type: custom
                   name: checkVolume|/spec/shardTopology/shard/storage/resources/requests/storage|/spec/volumeExpansion/shard
                 schema: schema/properties/spec/properties/volumeExpansion/properties/shard
+# Reconfigure
+      - type: block-layout
+        label: Reconfigure Form
+        showLabels: true
+        if:
+          name: ifRequestTypeEqualsTo|Reconfigure
+          type: function
+        elements:
+          - type: block-layout
+            label: Standalone
+            showLabels: false
+            if:
+              name: ifDbTypeEqualsTo|standalone|configuration
+              type: function
+            elements:
+              - type: radio
+                label: Reconfigure Type
+                validation: 
+                  type: required
+                options: 
+                - text: Select New Config Secret
+                  value: selectNewConfigSecret
+                - text: Apply Config
+                  value: applyConfig
+                - text: Remove
+                  value: remove                  
+                watcher:
+                  func: onReconfigurationTypeChange|standalone
+                  paths:
+                    - temp/properties/reconfigurationType
+                schema: temp/properties/reconfigurationType
+              - type: block-layout
+                if:
+                  name: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
+                  type: function
+                label: Standalone configuration config secret
+                showLabels: false
+                elements:
+                - type: select
+                  # add_new_button
+                  label: Config Secret
+                  if:
+                    name: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
+                    type: function
+                  schema:  schema/properties/spec/properties/configuration/properties/standalone/properties/configSecret/properties/name
+                  validation: 
+                    type: required
+                  refresh: true
+                  loader: getConfigSecrets
+                  init: 
+                    type: func
+                    value: setValueFromDbDetails|/spec/configSecret/name
+              - type: array-object-form
+                label: Apply Config
+                schema: temp/properties/standalone/applyConfig
+                validation: 
+                  type: required
+                watcher:
+                  func: onApplyconfigChange|standalone
+                  paths:
+                    - temp/properties/standalone/applyConfig
+                if:
+                  name: ifReconfigurationTypeEqualsTo|applyConfig
+                  type: function
+                elements:
+                  - type: input 
+                    label: key
+                    validation: 
+                      type: required
+                    schema: temp/properties/configArray/items/properties/key
+                  - type: textarea
+                    label: value
+                    validation: 
+                      type: required
+                    schema:  temp/properties/configArray/items/properties/value
+              - type: switch
+                schema:  schema/properties/spec/properties/configuration/properties/standalone/properties/removeCustomConfig
+                label: Remove CustomConfig
+                if:
+                  name: returnFalse
+                  type: function
+          - type: block-layout
+            label: Replica Set
+            showLabels: true
+            if:
+              name: ifDbTypeEqualsTo|replicaSet|configuration
+              type: function
+            elements:
+              - type: radio
+                label: Reconfigure Type
+                validation: 
+                  type: required
+                options:
+                - text: Select New Config Secret
+                  value: selectNewConfigSecret
+                - text: Apply Config
+                  value: applyConfig
+                - text: Remove
+                  value: remove
+                schema: temp/properties/reconfigurationType
+                watcher:
+                  func: onReconfigurationTypeChange|replicaSet
+                  paths:
+                    - temp/properties/reconfigurationType
+              - type: block-layout
+                label: Replica Set configuration config secret
+                if:
+                  name: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
+                  type: function
+                elements:
+                  - type: select
+                    # add new button
+                    schema: schema/properties/spec/properties/configuration/properties/replicaSet/properties/configSecret/properties/name
+                    validation: 
+                      type: required
+                    refresh: true
+                    label: Config Secret
+                    loader: getConfigSecrets
+                    init:
+                      type: func
+                      value: setValueFromDbDetails|/spec/configSecret/name
+              - type: array-object-form
+                label: ApplyConfig
+                schema: temp/properties/replicaSet/applyConfig
+                validation: 
+                  type: required
+                if:
+                  name: ifReconfigurationTypeEqualsTo|applyConfig
+                  type: function
+                elements:
+                  - type: input
+                    label: key
+                    validation: 
+                      type: required
+                    schema: temp/properties/configArray/items/properties/key
+                  - type: textarea
+                    label: value
+                    validation: 
+                      type: required
+                    schema: temp/properties/configArray/items/properties/value
+              - type: switch
+                schema: schema/properties/spec/properties/configuration/properties/replicaSet/properties/removeCustomConfig
+                label: Remove CustomConfig
+                if:
+                  name: returnFalse
+                  type: function
+          - elements:
+            - type: block-layout
+              label: Config Server
+              showLabels: true
+              elements:
+                - type: radio
+                  label: Reconfigure Type
+                  validation:
+                    type: required
+                  schema: temp/properties/reconfigurationType-configServer
+                  options:
+                    - text: Select New Config Secret
+                      value: selectNewConfigSecret
+                    - text: Apply Config
+                      value: applyConfig
+                    - text: Remove
+                      value: remove
+                  watcher:
+                    func: onReconfigurationTypeChange|configServer|true
+                    paths:
+                      - temp/properties/reconfigurationType-configServer
+
+                - type: block-layout
+                  if:
+                    name: ifReconfigurationTypeEqualsTo|selectNewConfigSecret|configServer|true
+                    type: function
+                  elements:
+                    - type: select
+                      label: Config Secret
+                      schema: schema/properties/spec/properties/configuration/properties/configServer/properties/configSecret/properties/name
+                      validation:
+                        type: required
+                      init:
+                        type: func
+                        value: setValueFromDbDetails|/spec/shardTopology/configServer/configSecret/name
+                      loader: getConfigSecrets
+                      refresh: true
+                      # add_new_button:
+                      #   label: Create Config
+                      #   target: _blank
+                      #   url:
+                      #     function: createSecretUrl
+
+                - type: array-object-form
+                  label: Apply Config
+                  schema: temp/properties/configServer/applyConfig
+                  validation:
+                    type: required
+                  if:
+                    name: ifReconfigurationTypeEqualsTo|applyConfig|configServer|true
+                    type: function
+                  watcher:
+                    func: onApplyconfigChange|configServer
+                    paths:
+                      - temp/properties/configServer/applyConfig
+                  elements:
+                    - type: input
+                      label: Key
+                      schema: temp/properties/configArray/items/properties/key
+                      validation:
+                        type: required
+                    - type: textarea
+                      label: Value
+                      schema: temp/properties/configArray/items/properties/value
+                      validation:
+                        type: required
+
+                - type: switch
+                  label: Remove CustomConfig
+                  schema: schema/properties/spec/properties/configuration/properties/configServer/properties/removeCustomConfig
+                  if:
+                    name: returnFalse
+                    type: function
+
+            - type: block-layout
+              label: Mongos
+              showLabels: true
+              elements:
+                - type: radio
+                  label: Reconfigure Type
+                  validation:
+                    type: required
+                  schema: temp/properties/reconfigurationType-mongos
+                  options:
+                    - text: Select New Config Secret
+                      value: selectNewConfigSecret
+                    - text: Apply Config
+                      value: applyConfig
+                    - text: Remove
+                      value: remove
+                  watcher:
+                    func: onReconfigurationTypeChange|mongos|true
+                    paths:
+                      - temp/properties/reconfigurationType-mongos
+
+                - type: block-layout
+                  if:
+                    name: ifReconfigurationTypeEqualsTo|selectNewConfigSecret|mongos|true
+                    type: function
+                  elements:
+                    - type: select
+                      label: Config Secret
+                      schema: schema/properties/spec/properties/configuration/properties/mongos/properties/configSecret/properties/name
+                      validation:
+                        type: required
+                      init:
+                        type: func
+                        value: setValueFromDbDetails|/spec/shardTopology/mongos/configSecret/name
+                      loader: getConfigSecrets
+                      refresh: true
+                      # add_new_button:
+                      #   label: Create Config
+                      #   target: _blank
+                      #   url:
+                      #     function: createSecretUrl
+
+                - type: array-object-form
+                  label: Apply Config
+                  schema: temp/properties/mongos/applyConfig
+                  validation:
+                    type: required
+                  if:
+                    name: ifReconfigurationTypeEqualsTo|applyConfig|mongos|true
+                    type: function
+                  watcher:
+                    func: onApplyconfigChange|mongos
+                    paths:
+                      - temp/properties/mongos/applyConfig
+                  elements:
+                    - type: input
+                      label: Key
+                      schema: temp/properties/configArray/items/properties/key
+                      validation:
+                        type: required
+                    - type: textarea
+                      label: Value
+                      schema: temp/properties/configArray/items/properties/value
+                      validation:
+                        type: required
+                - type: switch
+                  label: Remove CustomConfig
+                  schema: schema/properties/spec/properties/configuration/properties/mongos/properties/removeCustomConfig
+                  if:
+                    name: returnFalse
+                    type: function
+
+            - type: block-layout
+              label: Shard
+              showLabels: true
+              elements:
+                - type: radio
+                  label: Reconfigure Type
+                  validation:
+                    type: required
+                  schema: temp/properties/reconfigurationType-shard
+                  options:
+                    - text: Select New Config Secret
+                      value: selectNewConfigSecret
+                    - text: Apply Config
+                      value: applyConfig
+                    - text: Remove
+                      value: remove
+                  watcher:
+                    func: onReconfigurationTypeChange|shard|true
+                    paths:
+                      - temp/properties/reconfigurationType-shard
+
+                - type: block-layout
+                  if:
+                    name: ifReconfigurationTypeEqualsTo|selectNewConfigSecret|shard|true
+                    type: function
+                  elements:
+                    - type: select
+                      label: Config Secret
+                      schema: schema/properties/spec/properties/configuration/properties/shard/properties/configSecret/properties/name
+                      validation:
+                        type: required
+                      init:
+                        type: func
+                        value: setValueFromDbDetails|/spec/shardTopology/shard/configSecret/name
+                      loader: getConfigSecrets
+                      refresh: true
+                      # add_new_button:
+                      #   label: Create Config
+                      #   target: _blank
+                      #   url:
+                      #     function: createSecretUrl
+
+                - type: array-object-form
+                  label: Apply Config
+                  schema: temp/properties/shard/applyConfig
+                  validation:
+                    type: required
+                  if:
+                    name: ifReconfigurationTypeEqualsTo|applyConfig|shard|true
+                    type: function
+                  watcher:
+                    func: onApplyconfigChange|shard
+                    paths:
+                      - temp/properties/shard/applyConfig
+                  elements:
+                    - type: input
+                      label: Key
+                      schema: temp/properties/configArray/items/properties/key
+                      validation:
+                        type: required
+                    - type: textarea
+                      label: Value
+                      schema: temp/properties/configArray/items/properties/value
+                      validation:
+                        type: required
+
+                - type: switch
+                  label: Remove CustomConfig
+                  schema: schema/properties/spec/properties/configuration/properties/shard/properties/removeCustomConfig
+                  if:
+                    name: returnFalse
+                    type: function
+
+            type: block-layout
+            label: Sharded Reconfigure form
+            showLabels: true
+            if:
+              name: ifDbTypeEqualsTo|sharded|configuration
+              type: function
+
+# Reconfigure TLS
+      # - type: block-layout
+      #   label: TLS
+      #   showLabels: true
+      #   if:
+      #     name: ifRequestTypeEqualsTo|ReconfigureTLS
+      #     type: function
+      #   elements:
+      #     - type: radio
+      #       label: TLS Operation
+      #       schema: temp/properties/tlsOperation
+      #       options:
+      #         - text: Update
+      #           value: update
+      #         - text: Rotate
+      #           value: rotate
+      #         - text: Remove
+      #           value: remove
+      #       init:
+      #         type: func
+      #         value: initTlsOperation
+      #       if:
+      #         name: hasTlsField
+      #         type: function
+      #       watcher:
+      #         func: onTlsOperationChange
+      #         paths:
+      #           - temp/properties/tlsOperation
+
+      #     - type: switch
+      #       label: remove
+      #       schema: schema/properties/spec/properties/tls/properties/remove
+      #       if:
+      #         name: returnFalse
+      #         type: function
+
+      #     - type: switch
+      #       label: rotateCertificates
+      #       schema: schema/properties/spec/properties/tls/properties/rotateCertificates
+      #       if:
+      #         name: returnFalse
+      #         type: function
+
+      #     - type: block-layout
+      #       label: Issuer Reference
+      #       if:
+      #         name: showIssuerRefAndCertificates
+      #         type: function
+      #       elements:
+      #         - type: input
+      #           label: API Group
+      #           schema: schema/properties/spec/properties/tls/properties/issuerRef/properties/apiGroup
+      #           init:
+      #             type: func
+      #             value: initIssuerRefApiGroup
+      #           disable: true
+      #         - type: select
+      #           label: Kind
+      #           schema: schema/properties/spec/properties/tls/properties/issuerRef/properties/kind
+      #           options:
+      #             - text: Issuer
+      #               value: Issuer
+      #             - text: ClusterIssuer
+      #               value: ClusterIssuer
+      #           validation:
+      #             type: custom
+      #             name: isIssuerRefRequired
+      #           init:
+      #             type: func
+      #             value: setValueFromDbDetails|/spec/tls/issuerRef/kind
+
+      #         - type: select
+      #           label: Name
+      #           schema: schema/properties/spec/properties/tls/properties/issuerRef/properties/name
+      #           loader: getIssuerRefsName
+      #           # allowUserDefinedOption: true
+      #           validation:
+      #             type: custom
+      #             name: isIssuerRefRequired
+      #           init:
+      #             type: func
+      #             value: setValueFromDbDetails|/spec/tls/issuerRef/name
+
+
+
+
+
 
 # common
       - type: select
@@ -488,3 +944,7 @@ step:
             value: IfReady
           - text: Always (OpsRequest will always be applied)
             value: Always
+
+
+
+
