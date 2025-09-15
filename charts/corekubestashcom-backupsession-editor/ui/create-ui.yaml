@@ -4,28 +4,32 @@ step:
     id: basic
     elements:
       - type: select
+        if:
+          type: function
+          name: isApiResolved
+        schema: temp/backup
         label: Select Backup
-        loader: test
-        options:
-         - test-mongo
-         - mongo-demo
-         - mongo-replica
+        watcher:
+          paths: 
+            - temp/backup
+          func: clearModel
+        loader: getOptions
         refresh: true
-        schema: backup
         validation:
           type: required
       - type: select
+        if:
+          type: function
+          name: isBackupSelected
+        schema: temp/selectedSessions
         label: Select Sessions
         multiple: true
-        loader: test
+        watcher:
+          paths:
+            - temp/selectedSessions
+          func: buildObject
+        loader: getSessionOptions
         refresh: true
-        options:
-          - text: Full-backup
-            value: full-backup
-          - text: Recent-backup
-            value: recent-backup
-          - text: Partial-backup
-            value: partial-backup
         schema: selectedSessions
         validation:
           type: required
