@@ -1042,6 +1042,7 @@ export const useFunc = (model) => {
   }
 
   function onReconfigurationTypeChange(property, isShard) {
+    console.log({ property })
     setDiscriminatorValue(`/${property}/applyConfig`, [])
     let path = '/reconfigurationType'
     if (isShard) path += `-${property}`
