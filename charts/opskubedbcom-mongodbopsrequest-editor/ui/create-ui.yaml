@@ -4,57 +4,59 @@ step:
     elements:
 # common
       - type: input
+        label: op_req_name
         if:
           type: function
           name: showAndInitName
-        schema: schema/properties/metadata/properties/name
-        label: op_req_name
         validation:
           type: required
-      - init:
-          type: func
-          value: initNamespace
+        schema: schema/properties/metadata/properties/name
+      - type: select
+        label: Namespace
         if:
           type: function
           name: showAndInitNamespace
+        init:
+          type: func
+          value: initNamespace
         disable: isNamespaceDisabled
         loader: getNamespaces
-        label: Namespace
         watcher:
           paths:
             - schema/properties/metadata/properties/namespace
           func: onNamespaceChange
         validation:
           type: required
-        type: select
         hasGroup: true
         schema: 'schema/properties/metadata/properties/namespace'
       - type: select
-        schema: 'schema#/properties/spec/properties/databaseRef/properties/name'
-        validation:
-          type: required
-        refresh: true
-        watcher:
-          paths:
-            - 'schema#/properties/spec/properties/databaseRef/properties/name'
-          func: onDbChange
         label: Database Ref
         if:
           type: function
           name: showAndInitDatabaseRef
         loader: getDbs
-        disable: isDatabaseRefDisabled
         init:
           type: func
           value: initDatabaseRef
+        validation:
+          type: required
+        disable: isDatabaseRefDisabled
+        refresh: true
+        watcher:
+          paths:
+            - 'schema/properties/spec/properties/databaseRef/properties/name'
+          func: onDbChange
+        schema: 'schema/properties/spec/properties/databaseRef/properties/name'
       - type: label-element
+        label: config_ops_request
         if:
           type: function
           name: showConfigureOpsrequestLabel
-        label: config_ops_request
       - type: radio
-        isHorizontal: true
-        schema: schema/properties/spec/properties/type
+        label: Type of Ops Request
+        if:
+          type: function
+          name: showAndInitOpsRequestType
         options:
           - description: Update your database to any version
             text: Update Version
@@ -81,14 +83,12 @@ step:
           type: func
           value: getRequestTypeFromRoute
         disable: isDbDetailsLoading
-        if:
-          type: function
-          name: showAndInitOpsRequestType
-        label: Type of Ops Request
         watcher:
           paths:
             - schema/properties/spec/properties/type
           func: onRequestTypeChange
+        isHorizontal: true
+        schema: schema/properties/spec/properties/type
 # UpdateVersion
       - type: block-layout
         showLabels: false
@@ -139,8 +139,8 @@ step:
                       type: func
                       value: setValueFromDbDetails|/spec/shardTopology/configServer/replicas
               - type: block-layout
-                showLabels: true
                 # label: Mongo Horizontal Scaling
+                showLabels: true
                 elements:
                   - type: label-element
                     label: Mongos
@@ -175,8 +175,8 @@ step:
           name: ifRequestTypeEqualsTo|VerticalScaling
         elements:
           - type: block-layout
-            showLabels: true
             label: Standalone Vertical Scaling
+            showLabels: true
             if:
               type: function
               name: ifDbTypeEqualsTo|standalone|verticalScaling
@@ -217,21 +217,21 @@ step:
                     schema: discriminator/topologyValue-standalone
 
           - type: block-layout
+            label: ReplicaSet Vertical Scaling
             if:
               type: function
               name: ifDbTypeEqualsTo|replicaSet|verticalScaling
-            label: ReplicaSet Vertical Scaling
             showLabels: true
             elements:
               - type: machine-compare
+                label: Resources
+                if:
+                  type: function
+                  name: isMachineCustom|/machine-replicaSet
                 init:
                   type: func
                   value: setMachine|replicaSet
                 loader: getMachines
-                if:
-                  type: function
-                  name: isMachineCustom|/machine-replicaSet
-                label: Resources
                 schema: schema/properties/spec/properties/verticalScaling/properties/replicaSet/properties/resources
               - type: select
                 label: Node Selection Policy
@@ -247,16 +247,16 @@ step:
                 elements:
                   - type: input
                     label: Key
-                    schema: discriminator/topologyKey-replicaSet
                     validation:
                       type: custom
                       name: isVerticalScaleTopologyRequired|replicaSet
+                    schema: discriminator/topologyKey-replicaSet
                   - type: input
                     label: Value
-                    schema: discriminator/topologyValue-replicaSet
                     validation:
                       type: custom
                       name: isVerticalScaleTopologyRequired|replicaSet
+                    schema: discriminator/topologyValue-replicaSet
 
           - type: block-layout
             if:
@@ -270,6 +270,7 @@ step:
                 showLabels: true
                 elements:
                   - type: machine-compare
+                    label: Resources
                     if:
                       type: function
                       name: isMachineCustom|/machine-configServer
@@ -277,76 +278,74 @@ step:
                     init:
                       type: func
                       value: setMachine|configServer
-                    label: Resources
                     schema: schema/properties/spec/properties/verticalScaling/properties/configServer/properties/resources
                   - type: select
                     label: Node Selection Policy
-                    schema: schema/properties/spec/properties/verticalScaling/properties/configServer/properties/nodeSelectionPolicy
                     options:
                       - text: LabelSelector
                         value: LabelSelector
                       - text: Taint
                         value: Taint
+                    schema: schema/properties/spec/properties/verticalScaling/properties/configServer/properties/nodeSelectionPolicy
                   - type: block-layout
                     label: Topology
                     showLabels: true
                     elements:
                       - type: input
                         label: Key
-                        schema: discriminator/topologyKey-configServer
                         validation:
                           type: custom
                           name: isVerticalScaleTopologyRequired|configServer
+                        schema: discriminator/topologyKey-configServer
                       - type: input
                         label: Value
-                        schema: discriminator/topologyValue-configServer
                         validation:
                           type: custom
                           name: isVerticalScaleTopologyRequired|configServer
+                        schema: discriminator/topologyValue-configServer
               - type: block-layout
                 label: Mongos Vertical Scaling
                 showLabels: true
                 elements:
                   - type: machine-compare
+                    label: Resources
+                    if:
+                      type: function
+                      name: isMachineCustom|/machine-mongos
                     loader: getMachines
                     init:
                       type: func
                       value: setMachine|mongos
-                    if:
-                      type: function
-                      name: isMachineCustom|/machine-mongos
-                    label: Resources
                     schema: schema/properties/spec/properties/verticalScaling/properties/mongos/properties/resources
                   - type: select
                     label: Node Selection Policy
-                    schema: schema/properties/spec/properties/verticalScaling/properties/mongos/properties/nodeSelectionPolicy
                     options:
                       - text: LabelSelector
                         value: LabelSelector
                       - text: Taint
                         value: Taint
+                    schema: schema/properties/spec/properties/verticalScaling/properties/mongos/properties/nodeSelectionPolicy
                   - type: block-layout
                     label: Topology
                     showLabels: true
                     elements:
                       - type: input
                         label: Key
-                        schema: discriminator/topologyKey-mongos
                         validation:
                           type: custom
                           name: isVerticalScaleTopologyRequired|mongos
+                        schema: discriminator/topologyKey-mongos
                       - type: input
                         label: Value
-                        schema: discriminator/topologyValue-mongos
                         validation:
                           type: custom
                           name: isVerticalScaleTopologyRequired|mongos
+                        schema: discriminator/topologyValue-mongos
               - type: block-layout
                 label: Shard Vertical Scaling
                 showLabels: true
                 elements:
                   - type: select
-                    schema: discriminator/machine-shard
                     label: Machine Profile
                     customClass: mt-20
                     disableUnselect: true
@@ -354,40 +353,41 @@ step:
                       paths:
                         - schema/properties/spec/properties/verticalScaling/properties/shard/properties/resources
                       func: onMachineChange|shard|/spec/shardTopology/shard/podTemplate/spec/resources
+                    schema: discriminator/machine-shard
                   - type: machine-compare
+                    label: Resources
+                    if:
+                      type: function
+                      name: isMachineCustom|/machine-shard
                     loader: getMachines
                     init:
                       type: func
                       value: setMachine|shard
-                    if:
-                      type: function
-                      name: isMachineCustom|/machine-shard
-                    label: Resources
                     schema: schema/properties/spec/properties/verticalScaling/properties/shard/properties/resources
                   - type: select
                     label: Node Selection Policy
-                    schema: schema/properties/spec/properties/verticalScaling/properties/shard/properties/nodeSelectionPolicy
                     options:
                       - text: LabelSelector
                         value: LabelSelector
                       - text: Taint
                         value: Taint
+                    schema: schema/properties/spec/properties/verticalScaling/properties/shard/properties/nodeSelectionPolicy
                   - type: block-layout
                     label: Topology
                     showLabels: true
                     elements:
                       - type: input
                         label: Key
-                        schema: discriminator/topologyKey-shard
                         validation:
                           type: custom
                           name: isVerticalScaleTopologyRequired|shard
+                        schema: discriminator/topologyKey-shard
                       - type: input
                         label: Value
-                        schema: discriminator/topologyValue-shard
                         validation:
                           type: custom
                           name: isVerticalScaleTopologyRequired|shard
+                        schema: discriminator/topologyValue-shard
 # Volume Expansion
       - type: block-layout
         label: Volume Expansion Form
@@ -471,8 +471,6 @@ step:
             elements:
               - type: radio
                 label: Reconfigure Type
-                validation: 
-                  type: required
                 options: 
                 - text: Select New Config Secret
                   value: selectNewConfigSecret
@@ -484,13 +482,15 @@ step:
                   func: onReconfigurationTypeChange|standalone
                   paths:
                     - temp/properties/reconfigurationType
+                validation: 
+                  type: required
                 schema: temp/properties/reconfigurationType
               - type: block-layout
+                label: Standalone configuration config secret
+                showLabels: false
                 if:
                   name: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
                   type: function
-                label: Standalone configuration config secret
-                showLabels: false
                 elements:
                 - type: select
                   # add_new_button
@@ -498,26 +498,26 @@ step:
                   if:
                     name: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
                     type: function
-                  schema:  schema/properties/spec/properties/configuration/properties/standalone/properties/configSecret/properties/name
-                  validation: 
-                    type: required
-                  refresh: true
                   loader: getConfigSecrets
                   init: 
                     type: func
                     value: setValueFromDbDetails|/spec/configSecret/name
+                  refresh: true
+                  validation: 
+                    type: required
+                  schema:  schema/properties/spec/properties/configuration/properties/standalone/properties/configSecret/properties/name
               - type: array-object-form
                 label: Apply Config
-                schema: temp/properties/standalone/applyConfig
+                if:
+                  name: ifReconfigurationTypeEqualsTo|applyConfig
+                  type: function
                 validation: 
                   type: required
                 watcher:
                   func: onApplyconfigChange|standalone
                   paths:
                     - temp/properties/standalone/applyConfig
-                if:
-                  name: ifReconfigurationTypeEqualsTo|applyConfig
-                  type: function
+                schema: temp/properties/standalone/applyConfig
                 elements:
                   - type: input 
                     label: key
@@ -825,95 +825,152 @@ step:
             if:
               name: ifDbTypeEqualsTo|sharded|configuration
               type: function
-
 # Reconfigure TLS
-      # - type: block-layout
-      #   label: TLS
-      #   showLabels: true
-      #   if:
-      #     name: ifRequestTypeEqualsTo|ReconfigureTLS
-      #     type: function
-      #   elements:
-      #     - type: radio
-      #       label: TLS Operation
-      #       schema: temp/properties/tlsOperation
-      #       options:
-      #         - text: Update
-      #           value: update
-      #         - text: Rotate
-      #           value: rotate
-      #         - text: Remove
-      #           value: remove
-      #       init:
-      #         type: func
-      #         value: initTlsOperation
-      #       if:
-      #         name: hasTlsField
-      #         type: function
-      #       watcher:
-      #         func: onTlsOperationChange
-      #         paths:
-      #           - temp/properties/tlsOperation
+      - type: block-layout
+        label: TLS
+        showLabels: true
+        if:
+          name: ifRequestTypeEqualsTo|ReconfigureTLS
+          type: function
+        elements:
+          - type: radio
+            label: TLS Operation
+            if:
+              name: hasTlsField
+              type: function
+            options:
+              - text: Update
+                value: update
+              - text: Rotate
+                value: rotate
+              - text: Remove
+                value: remove
+            init:
+              type: func
+              value: initTlsOperation
+            watcher:
+              func: onTlsOperationChange
+              paths:
+                - temp/properties/tlsOperation
+            schema: temp/properties/tlsOperation
+          - type: switch
+            label: remove
+            if:
+              name: returnFalse
+              type: function
+            schema: schema/properties/spec/properties/tls/properties/remove
+          - type: switch
+            label: rotateCertificates
+            schema: schema/properties/spec/properties/tls/properties/rotateCertificates
+            if:
+              name: returnFalse
+              type: function
+          - type: block-layout
+            label: Issuer Reference
+            if:
+              name: showIssuerRefAndCertificates
+              type: function
+            elements:
+              - type: input
+                label: API Group
+                init:
+                  type: func
+                  value: initIssuerRefApiGroup
+                disable: true
+                schema: schema/properties/spec/properties/tls/properties/issuerRef/properties/apiGroup
+              - type: select
+                label: Kind
+                options:
+                  - text: Issuer
+                    value: Issuer
+                  - text: ClusterIssuer
+                    value: ClusterIssuer
+                init:
+                  type: func
+                  value: setValueFromDbDetails|/spec/tls/issuerRef/kind
+                validation:
+                  type: custom
+                  name: isIssuerRefRequired
+                schema: schema/properties/spec/properties/tls/properties/issuerRef/properties/kind
 
-      #     - type: switch
-      #       label: remove
-      #       schema: schema/properties/spec/properties/tls/properties/remove
-      #       if:
-      #         name: returnFalse
-      #         type: function
-
-      #     - type: switch
-      #       label: rotateCertificates
-      #       schema: schema/properties/spec/properties/tls/properties/rotateCertificates
-      #       if:
-      #         name: returnFalse
-      #         type: function
-
-      #     - type: block-layout
-      #       label: Issuer Reference
-      #       if:
-      #         name: showIssuerRefAndCertificates
-      #         type: function
-      #       elements:
-      #         - type: input
-      #           label: API Group
-      #           schema: schema/properties/spec/properties/tls/properties/issuerRef/properties/apiGroup
-      #           init:
-      #             type: func
-      #             value: initIssuerRefApiGroup
-      #           disable: true
-      #         - type: select
-      #           label: Kind
-      #           schema: schema/properties/spec/properties/tls/properties/issuerRef/properties/kind
-      #           options:
-      #             - text: Issuer
-      #               value: Issuer
-      #             - text: ClusterIssuer
-      #               value: ClusterIssuer
-      #           validation:
-      #             type: custom
-      #             name: isIssuerRefRequired
-      #           init:
-      #             type: func
-      #             value: setValueFromDbDetails|/spec/tls/issuerRef/kind
-
-      #         - type: select
-      #           label: Name
-      #           schema: schema/properties/spec/properties/tls/properties/issuerRef/properties/name
-      #           loader: getIssuerRefsName
-      #           # allowUserDefinedOption: true
-      #           validation:
-      #             type: custom
-      #             name: isIssuerRefRequired
-      #           init:
-      #             type: func
-      #             value: setValueFromDbDetails|/spec/tls/issuerRef/name
-
-
-
-
-
-
+              - type: select
+                label: Name
+                loader: getIssuerRefsName
+                init:
+                  type: func
+                  value: setValueFromDbDetails|/spec/tls/issuerRef/name
+                # allowUserDefinedOption: true
+                validation:
+                  type: custom
+                  name: isIssuerRefRequired
+                schema: schema/properties/spec/properties/tls/properties/issuerRef/properties/name
+          - type: block-layout
+            label: Certificates
+            if:
+              name: showIssuerRefAndCertificates
+              type: function
+            loader: setValueFromDbDetails|/spec/tls/certificates|/spec/tls/certificates
+            elements:
+              - type: select
+                label: Alias
+                loader: fetchAliasOptions
+                disable: disableAlias
+                schema: schema/properties/spec/properties/tls/properties/certificates/items/properties/alias
+              - type: input
+                label: Secret Name
+                schema: schema/properties/spec/properties/tls/properties/certificates/items/properties/secretName
+              - type: input
+                label: Duration
+                schema: schema/properties/spec/properties/tls/properties/certificates/items/properties/duration
+              - type: input
+                label: Renew Before
+                schema: schema/properties/spec/properties/tls/properties/certificates/items/properties/renewBefore
+              - type: block-layout
+                label: Subject
+                showLabels: true
+                elements:
+                  - type: array-object-form
+                    label: Organizations
+                    schema: schema#/items/properties/subject/properties/organizations
+                    elements:
+                      - type: input
+                        label: organization
+                        schema: schema#/items/properties/subject/properties/organizations/items
+                  - type: array-object-form
+                    label: countries
+                    schema: schema#/items/properties/subject/properties/countries
+                    elements:
+                      - type: input
+                        label: country
+                        schema: schema#/items/properties/subject/properties/countries/items
+                  - type: array-object-form
+                    label: organizational_units
+                    schema: schema#/items/properties/subject/properties/organizationalUnits
+                    elements:
+                      - type: input
+                        label: organizational_unit
+                        schema: schema#/items/properties/subject/properties/organizationalUnits/items
+                  - type: array-object-form
+                    label: provinces
+                    schema: schema#/items/properties/subject/properties/provinces
+                    elements:
+                      - type: input
+                        label: province
+                        schema: schema#/items/properties/subject/properties/provinces/items
+              - type: array-object-form
+                label: DNS Names
+                schema: schema#/items/properties/dnsNames
+                elements:
+                  - type: input
+                    label: dns name
+                    schema: schema#/items/properties/dnsNames/items
+              - type: array-object-form
+                label: ip Addresses
+                schema: schema#/items/properties/ipAddresses
+                elements:
+                  - type: input
+                    label: ip Address
+                    schema: schema#/items/properties/ipAddresses/items
 # common
       - type: select
         label: Timeout
