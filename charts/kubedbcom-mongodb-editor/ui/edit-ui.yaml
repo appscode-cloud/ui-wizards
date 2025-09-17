@@ -2567,12 +2567,22 @@ step:
         type: function
         name: isEqualToModelPathValue|Custom-ServiceMonitor
       elements:
-         - type: array-item-form
-           label: Endpoints
-           schema: schema/properties/arrayitem/properties/tada
-           init:
-             type: static
-             value: []   
+          - type: array-object-form
+            label: New Endpoint
+            schema: schema/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/endpoints
+            elements:
+               - type: switch
+                 label: Honor labels
+                 schema: schema/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/endpoints/items/properties/honorLabels
+               - type: input
+                 label: Interval
+                 schema: schema/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/endpoints/items/properties/interval
+               - type: input
+                 label: Path
+                 schema: schema/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/endpoints/items/properties/path
+               - type: input
+                 label: Port
+                 schema: schema/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/endpoints/items/properties/port
     - type: object-item
       schema: schema/properties/resources/properties/monitoringComServiceMonitor/properties/metadata/properties/labels
       label : Labels 
