@@ -2876,7 +2876,7 @@ export const useFunc = (model) => {
     }
   }
 
-  function getOpsRequestUrl({ storeGet, model, getValue, mode }, reqType) {
+  function getOpsRequestUrl(reqType) {
     const cluster = storeGet('/route/params/cluster')
     const domain = storeGet('/domain') || ''
     const owner = storeGet('/route/params/user')
