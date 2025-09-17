@@ -9,6 +9,7 @@ export const useFunc = (model) => {
   )
 
   model.value['temp/enableMonitoring'] = true
+  model.value['temp/customizeExporter'] = true
   async function fetchJsons({ axios, itemCtx }) {
     let ui = {}
     let language = {}
