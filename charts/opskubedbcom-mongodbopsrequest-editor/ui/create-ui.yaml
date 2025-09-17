@@ -121,14 +121,13 @@ step:
             schema: schema/properties/spec/properties/horizontalScaling/properties/replicas
           - type: block-layout
             label: 'Sharded horizontal scaling'
-            showLabels: true
             if:
               name: ifDbTypeEqualsTo|sharded|horizontalScaling
               type: function
             elements:
               - type: block-layout
-                showLabels: true
-                # label: Config Server horizontal Scaling
+                label: Config Server horizontal Scaling
+                showLabels: false
                 elements:
                   - type: label-element
                     label: Config Server
@@ -139,8 +138,8 @@ step:
                       type: func
                       value: setValueFromDbDetails|/spec/shardTopology/configServer/replicas
               - type: block-layout
-                # label: Mongo Horizontal Scaling
-                showLabels: true
+                label: Mongo Horizontal Scaling
+                showLabels: false
                 elements:
                   - type: label-element
                     label: Mongos
@@ -151,8 +150,8 @@ step:
                       value: setValueFromDbDetails|/spec/shardTopology/mongos/replicas
                     schema: schema/properties/spec/properties/horizontalScaling/properties/mongos/properties/replicas
               - type: block-layout
-                # label: Shard horizontal Scaling
-                showLabels: true
+                label: Shard horizontal Scaling
+                showLabels: false
                 elements:
                   - type: label-element
                     label: Shard
@@ -167,7 +166,7 @@ step:
                     init: 
                       type: func
                       value: setValueFromDbDetails|/spec/shardTopology/shard/shards
-                    schema: schema#/properties/spec/properties/horizontalScaling/properties/shard/properties/shards
+                    schema: schema/properties/spec/properties/horizontalScaling/properties/shard/properties/shards
 # vertical Scale           
       - type: block-layout
         if:
@@ -176,20 +175,21 @@ step:
         elements:
           - type: block-layout
             label: Standalone Vertical Scaling
-            showLabels: true
+            showLabels: false
             if:
               type: function
               name: ifDbTypeEqualsTo|standalone|verticalScaling
             elements:
               - type: machine-compare
                 label: Resources
-                if:
-                  type: function
-                  name: isMachineCustom|/machine-standalone
                 loader: getMachines
                 init:
                   type: func
                   value: setMachine|standalone                
+                watcher:
+                  func: onMachineChange
+                  paths:
+                    - schema/properties/spec/properties/verticalScaling/properties/standalone/properties/resources
                 schema: schema/properties/spec/properties/verticalScaling/properties/standalone/properties/resources
               - type: select
                 label: Node Selection Policy
@@ -208,30 +208,30 @@ step:
                     validation:
                       type: custom
                       name: isVerticalScaleTopologyRequired|standalone
-                    schema: discriminator/topologyKey-standalone
+                    schema: temp/topologyKey-standalone
                   - type: input
                     label: Value
                     validation:
                       type: custom
                       name: isVerticalScaleTopologyRequired|standalone
-                    schema: discriminator/topologyValue-standalone
+                    schema: temp/topologyValue-standalone
 
           - type: block-layout
             label: ReplicaSet Vertical Scaling
             if:
               type: function
               name: ifDbTypeEqualsTo|replicaSet|verticalScaling
-            showLabels: true
             elements:
               - type: machine-compare
                 label: Resources
-                if:
-                  type: function
-                  name: isMachineCustom|/machine-replicaSet
                 init:
                   type: func
                   value: setMachine|replicaSet
                 loader: getMachines
+                watcher:
+                  func: onMachineChange
+                  paths:
+                    - schema/properties/spec/properties/verticalScaling/properties/replicaSet/properties/resources
                 schema: schema/properties/spec/properties/verticalScaling/properties/replicaSet/properties/resources
               - type: select
                 label: Node Selection Policy
@@ -250,20 +250,20 @@ step:
                     validation:
                       type: custom
                       name: isVerticalScaleTopologyRequired|replicaSet
-                    schema: discriminator/topologyKey-replicaSet
+                    schema: temp/topologyKey-replicaSet
                   - type: input
                     label: Value
                     validation:
                       type: custom
                       name: isVerticalScaleTopologyRequired|replicaSet
-                    schema: discriminator/topologyValue-replicaSet
+                    schema: temp/topologyValue-replicaSet
 
           - type: block-layout
             if:
               type: function
               name: ifDbTypeEqualsTo|sharded|verticalScaling
             label: Sharded Vertical Scaling
-            showLabels: true
+            showLabels: false
             elements:
               - type: block-layout
                 label: Config Server Vertical Scaling
@@ -271,13 +271,14 @@ step:
                 elements:
                   - type: machine-compare
                     label: Resources
-                    if:
-                      type: function
-                      name: isMachineCustom|/machine-configServer
                     loader: getMachines
                     init:
                       type: func
                       value: setMachine|configServer
+                    watcher:
+                      func: onMachineChange
+                      paths:
+                        - schema/properties/spec/properties/verticalScaling/properties/configServer/properties/resources
                     schema: schema/properties/spec/properties/verticalScaling/properties/configServer/properties/resources
                   - type: select
                     label: Node Selection Policy
@@ -296,26 +297,27 @@ step:
                         validation:
                           type: custom
                           name: isVerticalScaleTopologyRequired|configServer
-                        schema: discriminator/topologyKey-configServer
+                        schema: temp/topologyKey-configServer
                       - type: input
                         label: Value
                         validation:
                           type: custom
                           name: isVerticalScaleTopologyRequired|configServer
-                        schema: discriminator/topologyValue-configServer
+                        schema: temp/topologyValue-configServer
               - type: block-layout
                 label: Mongos Vertical Scaling
                 showLabels: true
                 elements:
                   - type: machine-compare
                     label: Resources
-                    if:
-                      type: function
-                      name: isMachineCustom|/machine-mongos
                     loader: getMachines
                     init:
                       type: func
                       value: setMachine|mongos
+                    watcher:
+                      func: onMachineChange
+                      paths:
+                        - schema/properties/spec/properties/verticalScaling/properties/mongos/properties/resources
                     schema: schema/properties/spec/properties/verticalScaling/properties/mongos/properties/resources
                   - type: select
                     label: Node Selection Policy
@@ -334,35 +336,27 @@ step:
                         validation:
                           type: custom
                           name: isVerticalScaleTopologyRequired|mongos
-                        schema: discriminator/topologyKey-mongos
+                        schema: temp/topologyKey-mongos
                       - type: input
                         label: Value
                         validation:
                           type: custom
                           name: isVerticalScaleTopologyRequired|mongos
-                        schema: discriminator/topologyValue-mongos
+                        schema: temp/topologyValue-mongos
               - type: block-layout
                 label: Shard Vertical Scaling
                 showLabels: true
                 elements:
-                  - type: select
-                    label: Machine Profile
-                    customClass: mt-20
-                    disableUnselect: true
-                    watcher:
-                      paths:
-                        - schema/properties/spec/properties/verticalScaling/properties/shard/properties/resources
-                      func: onMachineChange|shard|/spec/shardTopology/shard/podTemplate/spec/resources
-                    schema: discriminator/machine-shard
                   - type: machine-compare
                     label: Resources
-                    if:
-                      type: function
-                      name: isMachineCustom|/machine-shard
                     loader: getMachines
                     init:
                       type: func
                       value: setMachine|shard
+                    watcher:
+                      func: onMachineChange
+                      paths:
+                        - schema/properties/spec/properties/verticalScaling/properties/shard/properties/resources
                     schema: schema/properties/spec/properties/verticalScaling/properties/shard/properties/resources
                   - type: select
                     label: Node Selection Policy
@@ -381,13 +375,13 @@ step:
                         validation:
                           type: custom
                           name: isVerticalScaleTopologyRequired|shard
-                        schema: discriminator/topologyKey-shard
+                        schema: temp/topologyKey-shard
                       - type: input
                         label: Value
                         validation:
                           type: custom
                           name: isVerticalScaleTopologyRequired|shard
-                        schema: discriminator/topologyValue-shard
+                        schema: temp/topologyValue-shard
 # Volume Expansion
       - type: block-layout
         label: Volume Expansion Form
@@ -431,7 +425,6 @@ step:
             schema: schema/properties/spec/properties/volumeExpansion/properties/replicaSet
           - type: block-layout
             label: Sharded volume expansion
-            showLabels: true
             if:
               type: function
               name: ifDbTypeEqualsTo|sharded|volumeExpansion
@@ -457,14 +450,12 @@ step:
 # Reconfigure
       - type: block-layout
         label: Reconfigure Form
-        showLabels: true
         if:
           name: ifRequestTypeEqualsTo|Reconfigure
           type: function
         elements:
           - type: block-layout
             label: Standalone
-            showLabels: false
             if:
               name: ifDbTypeEqualsTo|standalone|configuration
               type: function
@@ -486,7 +477,7 @@ step:
                   type: required
                 schema: temp/properties/reconfigurationType
               - type: block-layout
-                label: Standalone configuration config secret
+                label: Standalone config secret
                 showLabels: false
                 if:
                   name: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
@@ -537,7 +528,6 @@ step:
                   type: function
           - type: block-layout
             label: Replica Set
-            showLabels: true
             if:
               name: ifDbTypeEqualsTo|replicaSet|configuration
               type: function
@@ -559,7 +549,7 @@ step:
                   paths:
                     - temp/properties/reconfigurationType
               - type: block-layout
-                label: Replica Set configuration config secret
+                label: Replica Set config secret
                 if:
                   name: ifReconfigurationTypeEqualsTo|selectNewConfigSecret
                   type: function
@@ -600,7 +590,8 @@ step:
                 if:
                   name: returnFalse
                   type: function
-          - elements:
+          - type: block-layout
+            elements:
             - type: block-layout
               label: Config Server
               showLabels: true
@@ -673,7 +664,6 @@ step:
                   if:
                     name: returnFalse
                     type: function
-
             - type: block-layout
               label: Mongos
               showLabels: true
@@ -694,7 +684,6 @@ step:
                     func: onReconfigurationTypeChange|mongos|true
                     paths:
                       - temp/properties/reconfigurationType-mongos
-
                 - type: block-layout
                   if:
                     name: ifReconfigurationTypeEqualsTo|selectNewConfigSecret|mongos|true
@@ -715,7 +704,6 @@ step:
                       #   target: _blank
                       #   url:
                       #     function: createSecretUrl
-
                 - type: array-object-form
                   label: Apply Config
                   schema: temp/properties/mongos/applyConfig
@@ -745,7 +733,6 @@ step:
                   if:
                     name: returnFalse
                     type: function
-
             - type: block-layout
               label: Shard
               showLabels: true
@@ -787,7 +774,6 @@ step:
                       #   target: _blank
                       #   url:
                       #     function: createSecretUrl
-
                 - type: array-object-form
                   label: Apply Config
                   schema: temp/properties/shard/applyConfig
@@ -811,24 +797,19 @@ step:
                       schema: temp/properties/configArray/items/properties/value
                       validation:
                         type: required
-
                 - type: switch
                   label: Remove CustomConfig
                   schema: schema/properties/spec/properties/configuration/properties/shard/properties/removeCustomConfig
                   if:
                     name: returnFalse
                     type: function
-
-            type: block-layout
             label: Sharded Reconfigure form
-            showLabels: true
             if:
               name: ifDbTypeEqualsTo|sharded|configuration
               type: function
 # Reconfigure TLS
       - type: block-layout
         label: TLS
-        showLabels: true
         if:
           name: ifRequestTypeEqualsTo|ReconfigureTLS
           type: function
@@ -867,6 +848,7 @@ step:
               type: function
           - type: block-layout
             label: Issuer Reference
+            showLabels: true
             if:
               name: showIssuerRefAndCertificates
               type: function
@@ -892,14 +874,12 @@ step:
                   type: custom
                   name: isIssuerRefRequired
                 schema: schema/properties/spec/properties/tls/properties/issuerRef/properties/kind
-
               - type: select
                 label: Name
                 loader: getIssuerRefsName
                 init:
                   type: func
                   value: setValueFromDbDetails|/spec/tls/issuerRef/name
-                # allowUserDefinedOption: true
                 validation:
                   type: custom
                   name: isIssuerRefRequired
@@ -931,46 +911,46 @@ step:
                 elements:
                   - type: array-object-form
                     label: Organizations
-                    schema: schema#/items/properties/subject/properties/organizations
+                    schema: schema/items/properties/subject/properties/organizations
                     elements:
                       - type: input
                         label: organization
-                        schema: schema#/items/properties/subject/properties/organizations/items
+                        schema: schema/items/properties/subject/properties/organizations/items
                   - type: array-object-form
                     label: countries
-                    schema: schema#/items/properties/subject/properties/countries
+                    schema: schema/items/properties/subject/properties/countries
                     elements:
                       - type: input
                         label: country
-                        schema: schema#/items/properties/subject/properties/countries/items
+                        schema: schema/items/properties/subject/properties/countries/items
                   - type: array-object-form
                     label: organizational_units
-                    schema: schema#/items/properties/subject/properties/organizationalUnits
+                    schema: schema/items/properties/subject/properties/organizationalUnits
                     elements:
                       - type: input
                         label: organizational_unit
-                        schema: schema#/items/properties/subject/properties/organizationalUnits/items
+                        schema: schema/items/properties/subject/properties/organizationalUnits/items
                   - type: array-object-form
                     label: provinces
-                    schema: schema#/items/properties/subject/properties/provinces
+                    schema: schema/items/properties/subject/properties/provinces
                     elements:
                       - type: input
                         label: province
-                        schema: schema#/items/properties/subject/properties/provinces/items
+                        schema: schema/items/properties/subject/properties/provinces/items
               - type: array-object-form
                 label: DNS Names
-                schema: schema#/items/properties/dnsNames
+                schema: schema/items/properties/dnsNames
                 elements:
                   - type: input
                     label: dns name
-                    schema: schema#/items/properties/dnsNames/items
+                    schema: schema/items/properties/dnsNames/items
               - type: array-object-form
                 label: ip Addresses
-                schema: schema#/items/properties/ipAddresses
+                schema: schema/items/properties/ipAddresses
                 elements:
                   - type: input
                     label: ip Address
-                    schema: schema#/items/properties/ipAddresses/items
+                    schema: schema/items/properties/ipAddresses/items
 # common
       - type: select
         label: Timeout
@@ -1001,7 +981,3 @@ step:
             value: IfReady
           - text: Always (OpsRequest will always be applied)
             value: Always
-
-
-
-
