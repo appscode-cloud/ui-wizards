@@ -63,7 +63,8 @@ export const useFunc = (model) => {
 
   function isApiResolved() {
     // watchDependency('discriminator#/initApi')
-    const initApi = getValue(discriminator, '/initApi')
+    const initApi = getValue({}, '/initApi') 
+    console.log('initApi', initApi)
     // return initApi
     return true
   }
@@ -71,6 +72,7 @@ export const useFunc = (model) => {
   function isBackupSelected() {
     // watchDependency('discriminator#/backup')
     const backup = getValue(discriminator, '/backup')
+    console.log('backup', backup)
     // return backup
     return true
   }
