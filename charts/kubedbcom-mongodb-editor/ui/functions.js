@@ -49,14 +49,13 @@ export const useFunc = (model) => {
   function isEqualToModelPathValue(value) {
     const modelPath = 'resources/kubedbComMongoDB/spec/monitor/agent'
     const modelPathValue = getValue(model, modelPath)
-    window.console.log('isEqualToModelPathValue', modelPathValue)
     // watchDependency('model#' + modelPath)
     return modelPathValue === value
 
     return prometheusOpt.value === 'Prometheus-Operator'
   }
 
-  async function getResources({ axios, storeGet }, group, version, resource) {
+  async function getResources(group, version, resource) {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
 
@@ -69,7 +68,7 @@ export const useFunc = (model) => {
       )
 
       const resources = (resp && resp.data && resp.data.items) || []
-
+      window.console.log('getResources',resource)
       resources.map((item) => {
         const name = (item.metadata && item.metadata.name) || ''
         item.text = name
@@ -2078,12 +2077,11 @@ export const useFunc = (model) => {
   }
 
   function returnFalse() {
-    return false
+    return true
   }
 
   function onAgentChange() {
     const agent = getValue(model, '/resources/kubedbComMongoDB/spec/monitor/agent')
-    console.log('onAgentChange ', agent)
     if (agent === 'prometheus.io') {
       commit('wizard/model$update', {
         path: '/resources/monitoringCoreosComServiceMonitor/spec/endpoints',
