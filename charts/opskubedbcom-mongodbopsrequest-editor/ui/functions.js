@@ -305,6 +305,8 @@ const machineList = [
   'db.r.24xlarge',
 ]
 
+let machinesFromPreset = []
+
 export const useFunc = (model) => {
   const route = store.state?.route
 
@@ -746,23 +748,39 @@ export const useFunc = (model) => {
     let arr = []
     if (avlMachines.length) {
       arr = avlMachines.map((machine) => {
-        if (machine === 'custom') return { text: machine, value: machine }
+        if (machine === 'custom') return { text: machine, value: { machine } }
         else {
           const machineData = machinesFromPreset.find((val) => val.id === machine)
           if (machineData) {
-            const subText = `CPU: ${machineData.limits.cpu}, Memory: ${machineData.limits.memory}`
+            // const subText = `CPU: ${machineData.limits.cpu}, Memory: ${machineData.limits.memory}`
             const text = machineData.name ? machineData.name : machineData.id
-            return { text, subText, value: machine }
-          } else return { text: machine, value: machine }
+            return {
+              text,
+              // subText,
+              value: {
+                machine: text,
+                cpu: machineData.limits.cpu,
+                memory: machineData.limits.memory,
+              },
+            }
+          } else return { text: machine, value: { machine } }
         }
       })
     } else {
       arr = machineList
         .map((machine) => {
-          if (machine === 'custom') return { text: machine, value: machine }
-          const subText = `CPU: ${machines[machine].resources.limits.cpu}, Memory: ${machines[machine].resources.limits.memory}`
+          if (machine === 'custom') return { text: machine, value: { machine } }
+          // const subText = `CPU: ${machines[machine].resources.limits.cpu}, Memory: ${machines[machine].resources.limits.memory}`
           const text = machine
-          return { text, subText, value: machine }
+          return {
+            text,
+            // subText,
+            value: {
+              machine: text,
+              cpu: machines[machine].resources.limits.cpu,
+              memory: machines[machine].resources.limits.memory,
+            },
+          }
         })
         .filter((val) => !!val)
     }
@@ -786,7 +804,7 @@ export const useFunc = (model) => {
 
     const machinePresets = machinesFromPreset.find((item) => item.id === machine)
     if (machinePresets) return machine
-    else return 'custom'
+    else return { machine: 'custom' }
   }
 
   function onMachineChange(type, valPath) {
