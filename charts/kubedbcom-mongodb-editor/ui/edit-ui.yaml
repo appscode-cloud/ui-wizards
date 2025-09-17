@@ -2565,12 +2565,16 @@ step:
         func: onAgentChange
         paths:
           - schema/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/agent
-    - label: ServiceMonitor Configuration
-      schema: schema/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/serviceMonitor/properties/interval
-      type: input 
+    - type: block-layout
+      label: ServiceMonitor Configuration  
+      showLabels: true 
       if: 
         type: function
-        name: isEqualToModelPathValue|Prometheus-Operator
+        name: isEqualToModelPathValue|Prometheus-Operator|/resources/kubedbComMongoDB/spec/monitor/agent
+      elements:
+        - label: Scrapping Interval
+          schema: schema/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/serviceMonitor/properties/interval
+          type: input 
     - type: block-layout
       label: Service Monitor
       showLabels: true
