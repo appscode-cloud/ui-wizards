@@ -2614,6 +2614,9 @@ step:
           value: 
             name: riyad 
             age: 10
+        if: 
+          type: function
+          name: returnFalse
       if:
         type: function
         name: isEqualToModelPathValue|Custom-ServiceMonitor     
@@ -2633,7 +2636,11 @@ step:
       schema: ''
     - type: switch
       label: Customize Exporter Sidecar
-      schema: schema/properties/toggleExporterSidecar
+      schema: temp/properties/customizeExporter
+      watcher:
+        func: onCustomizeExporterChange
+        paths: 
+          - temp/properties/customizeExporter
     - type: label-element
       label: Security Context
       schema: ''
