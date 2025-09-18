@@ -646,7 +646,8 @@ export const useFunc = (model) => {
 
   /****** Monitoring *********/
 
-  function showMonitoringSection({ watchDependency, discriminator, getValue }) {
+  function showMonitoringSection() {
+    return true
     watchDependency('discriminator#/enableMonitoring')
     const configureStatus = getValue(discriminator, '/enableMonitoring')
     return configureStatus
@@ -2078,7 +2079,7 @@ export const useFunc = (model) => {
   }
 
   function returnFalse() {
-    return true
+    return false
   }
 
   function onAgentChange() {

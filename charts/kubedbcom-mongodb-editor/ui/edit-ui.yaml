@@ -2543,176 +2543,187 @@ step:
         func: onEnableMonitoringChange
         paths:
           - temp/properties/enableMonitoring
-    - type: radio
-      label: Select a Monitoring Method
-      schema: schema/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/agent
-      isHorizontal: true
-      options:
-      - text: Prometheus Operator
-        value: Prometheus-Operator
-        description: Inject metric exporter sidecar and creates a ServiceMonitor
-      - text: Custom ServiceMonitor
-        value: Custom-ServiceMonitor
-        description: Injects the metric exporter sidecar and let you customize
-      - text: Custom Scrapper
-        value: Custom-Scrapper
-        description: Inject metric exporter sidecar and add Prometheus annotations to
-          the..
-      init:
-        type: func
-        value: setMonitoringModel
-      watcher:
-        func: onAgentChange
-        paths:
-          - schema/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/agent
     - type: block-layout
-      label: ServiceMonitor Configuration  
-      showLabels: true 
-      if: 
+      label: Backup form 
+      showLabels: false
+      if:
         type: function
-        name: isEqualToModelPathValue|Prometheus-Operator|/resources/kubedbComMongoDB/spec/monitor/agent
+        name: showMonitoringSection
       elements:
-        - label: Scrapping Interval
-          schema: schema/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/serviceMonitor/properties/interval
-          type: input 
-    - type: block-layout
-      label: Service Monitor
-      showLabels: true
-      if:
-        type: function
-        name: isEqualToModelPathValue|Custom-ServiceMonitor
-      elements:
-      - type: array-object-form
-        label: New Endpoint
-        schema: schema/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/endpoints
-        elements:
-        - type: switch
-          label: Honor labels
-          schema: honorLabels
-        - type: input
-          label: Interval
-          schema: interval
-        - type: input
-          label: Path
-          schema: path
-        - type: input
-          label: Port
-          schema: port
-      - type: select
-        multiple: true
-        label: Match Namespaces
-        schema: schema/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/namespaceSelector/properties/matchNames
-        loader: getResources|core|v1|namespaces
-        if: 
-          type: function
-          name: returnFalse
-      - type: object-item
-        schema: schema/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/selector
-        label : Labels 
-        init: 
-          type: static
-          value: 
-            name: riyad 
-            age: 10
-        if: 
-          type: function
-          name: returnFalse
-      if:
-        type: function
-        name: isEqualToModelPathValue|Custom-ServiceMonitor     
-    - type: object-item
-      schema: schema/properties/resources/properties/monitoringComServiceMonitor/properties/metadata/properties/labels
-      label : Labels 
-      init: 
-        type: static
-        value: 
-          name: riyad 
-          age: 10
-      if:
-        type: function
-        name: isEqualToModelPathValue|Custom-ServiceMonitor 
-    - type: label-element
-      label: Exporter Configuration
-      schema: ''
-    - type: switch
-      label: Customize Exporter Sidecar
-      schema: temp/properties/customizeExporter
-      watcher:
-        func: onCustomizeExporterChange
-        paths: 
-          - temp/properties/customizeExporter
-    - type: block-layout
-      label: 2nd Parameters 
-      showLabels: false 
-      if:
-        type: function
-        name: showCustomizeExporterSection
-      elements:
-        - type: horizontal-layout
-          label: Resources
+        - type: radio
+          label: Select a Monitoring Method
+          schema: schema/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/agent
+          isHorizontal: true
+          options:
+          - text: Prometheus Operator
+            value: Prometheus-Operator
+            description: Inject metric exporter sidecar and creates a ServiceMonitor
+          - text: Custom ServiceMonitor
+            value: Custom-ServiceMonitor
+            description: Injects the metric exporter sidecar and let you customize
+          - text: Custom Scrapper
+            value: Custom-Scrapper
+            description: Inject metric exporter sidecar and add Prometheus annotations to
+              the..
+          init:
+            type: func
+            value: setMonitoringModel
+          watcher:
+            func: onAgentChange
+            paths:
+              - schema/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/agent
+        - type: block-layout
+          label: ServiceMonitor Configuration  
+          showLabels: true 
+          if: 
+            type: function
+            name: isEqualToModelPathValue|Prometheus-Operator|/resources/kubedbComMongoDB/spec/monitor/agent
+          elements:
+            - label: Scrapping Interval
+              schema: schema/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/serviceMonitor/properties/interval
+              type: input 
+        - type: block-layout
+          label: Service Monitor
           showLabels: true
+          if:
+            type: function
+            name: isEqualToModelPathValue|Custom-ServiceMonitor
           elements:
+          - type: array-object-form
+            label: New Endpoint
+            schema: schema/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/endpoints
+            elements:
+            - type: switch
+              label: Honor labels
+              schema: honorLabels
             - type: input
-              label: CPU Requests
-              schema: schema/properties/resources/properties/requests/additionalProperties/cpu
+              label: Interval
+              schema: interval
             - type: input
-              label: CPU Limits
-              schema: schema/properties/resources/properties/limits/additionalProperties/cpu
+              label: Path
+              schema: path
             - type: input
-              label: Memory Requests
-              schema: schema/properties/resources/properties/requests/additionalProperties/memory
-            - type: input
-              label: Memory Limits
-              schema: schema/properties/resources/properties/limits/additionalProperties/memory
-        - type: label-element
-          label: Security Context
-          schema: ''
-        - type: input
-          schema:  schema/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/securityContext/properties/runAsUser
-          label: Run as User
-        - type: input
-          schema: schema/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/securityContext/properties/runAsGroup
-          label: Run as Group
-        - type: input
-          schema: schema/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/port
-          label: Port
-        - type: array-item-form
-          label: Args
-          schema: schema/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/args
-          element:
-            type: input
-            label: name
-            schema: schema/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/args/items
-        - type: array-object-form
-          label: New Environment Variable
-          schema: schema/properties/userinfo/properties/obj
-          elements:
-          - type: input
-            label: Name
-            schema: name
-            validation:
-              type: required
-          - type: radio
-            label: Value From
-            schema: radio
-            options:
-            - Input
-            - Secret
-            - ConfigMap
-          - type: input
-            label: Value
-            schema: schema/properties/temp
+              label: Port
+              schema: port
           - type: select
-            label: Secret Name
-            schema: select
-            options:
-            - mongo-actions-test-key
-    - type: input 
-      label: ''
-      schema: schema/properties/metadata/properties/release/properties/name
-      init: 
-       type: func 
-       value: setMetadata 
+            multiple: true
+            label: Match Namespaces
+            schema: schema/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/namespaceSelector/properties/matchNames
+            loader: getResources|core|v1|namespaces
+            if: 
+              type: function
+              name: returnFalse
+          - type: object-item
+            schema: schema/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/selector
+            label : Labels 
+            init: 
+              type: static
+              value: 
+                name: riyad 
+                age: 10
+            if: 
+              type: function
+              name: returnFalse
+          if:
+            type: function
+            name: isEqualToModelPathValue|Custom-ServiceMonitor     
+        - type: object-item
+          schema: schema/properties/resources/properties/monitoringComServiceMonitor/properties/metadata/properties/labels
+          label : Labels 
+          init: 
+            type: static
+            value: 
+              name: riyad 
+              age: 10
+          if:
+            type: function
+            name: isEqualToModelPathValue|Custom-ServiceMonitor 
+        - type: label-element
+          label: Exporter Configuration
+          schema: ''
+        - type: switch
+          label: Customize Exporter Sidecar
+          schema: temp/properties/customizeExporter
+          watcher:
+            func: onCustomizeExporterChange
+            paths: 
+              - temp/properties/customizeExporter
+        - type: block-layout
+          label: 2nd Parameters 
+          showLabels: false 
+          if:
+            type: function
+            name: showCustomizeExporterSection
+          elements:
+            - type: horizontal-layout
+              label: Resources
+              showLabels: true
+              elements:
+                - type: input
+                  label: CPU Requests
+                  schema: schema/properties/resources/properties/requests/additionalProperties/cpu
+                - type: input
+                  label: CPU Limits
+                  schema: schema/properties/resources/properties/limits/additionalProperties/cpu
+                - type: input
+                  label: Memory Requests
+                  schema: schema/properties/resources/properties/requests/additionalProperties/memory
+                - type: input
+                  label: Memory Limits
+                  schema: schema/properties/resources/properties/limits/additionalProperties/memory
+            - type: label-element
+              label: Security Context
+              schema: ''
+            - type: input
+              schema:  schema/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/securityContext/properties/runAsUser
+              label: Run as User
+            - type: input
+              schema: schema/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/securityContext/properties/runAsGroup
+              label: Run as Group
+            - type: input
+              schema: schema/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/port
+              label: Port
+            - type: array-item-form
+              label: Args
+              schema: schema/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/args
+              element:
+                type: input
+                label: name
+                schema: schema/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/args/items
+            - type: array-object-form
+              label: New Environment Variable
+              schema: schema/properties/userinfo/properties/obj
+              elements:
+              - type: input
+                label: Name
+                schema: name
+                validation:
+                  type: required
+              - type: radio
+                label: Value From
+                schema: radio
+                options:
+                - Input
+                - Secret
+                - ConfigMap
+              - type: input
+                label: Value
+                schema: schema/properties/temp
+              - type: select
+                label: Secret Name
+                schema: select
+                options:
+                - mongo-actions-test-key
+        - type: input 
+          label: 'label'
+          schema: schema/properties/metadata/properties/release/properties/name
+          init: 
+           type: func 
+           value: setMetadata 
+          if:
+            type: function
+            name: returnFalse
+      
       # - type: select
       #   label: Secret Key
       #   schema: select
