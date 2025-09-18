@@ -2641,65 +2641,78 @@ step:
         func: onCustomizeExporterChange
         paths: 
           - temp/properties/customizeExporter
-    - type: horizontal-layout
-      label: Resources
-      showLabels: true
+    - type: block-layout
+      label: 2nd Parameters 
+      showLabels: false 
+      if:
+        type: function
+        name: showCustomizeExporterSection
       elements:
+        - type: horizontal-layout
+          label: Resources
+          showLabels: true
+          elements:
+            - type: input
+              label: CPU Requests
+              schema: schema/properties/resources/properties/requests/additionalProperties/cpu
+            - type: input
+              label: CPU Limits
+              schema: schema/properties/resources/properties/limits/additionalProperties/cpu
+            - type: input
+              label: Memory Requests
+              schema: schema/properties/resources/properties/requests/additionalProperties/memory
+            - type: input
+              label: Memory Limits
+              schema: schema/properties/resources/properties/limits/additionalProperties/memory
+        - type: label-element
+          label: Security Context
+          schema: ''
         - type: input
-          label: CPU Requests
-          schema: schema/properties/resources/properties/requests/additionalProperties/cpu
+          schema:  schema/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/securityContext/properties/runAsUser
+          label: Run as User
         - type: input
-          label: CPU Limits
-          schema: schema/properties/resources/properties/limits/additionalProperties/cpu
+          schema: schema/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/securityContext/properties/runAsGroup
+          label: Run as Group
         - type: input
-          label: Memory Requests
-          schema: schema/properties/resources/properties/requests/additionalProperties/memory
-        - type: input
-          label: Memory Limits
-          schema: schema/properties/resources/properties/limits/additionalProperties/memory
-    - type: label-element
-      label: Security Context
-      schema: ''
-    - type: input
-      schema:  schema/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/securityContext/properties/runAsUser
-      label: Run as User
-    - type: input
-      schema: schema/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/securityContext/properties/runAsGroup
-      label: Run as Group
-    - type: input
-      schema: schema/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/port
-      label: Port
-    - type: array-item-form
-      label: Args
-      schema: schema/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/args
-      element:
-        type: input
-        label: name
-        schema: schema/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/args/items
-    - type: array-object-form
-      label: New Environment Variable
-      schema: schema/properties/userinfo/properties/obj
-      elements:
-      - type: input
-        label: Name
-        schema: name
-        validation:
-          type: required
-      - type: radio
-        label: Value From
-        schema: radio
-        options:
-        - Input
-        - Secret
-        - ConfigMap
-      - type: input
-        label: Value
-        schema: schema/properties/temp
-      - type: select
-        label: Secret Name
-        schema: select
-        options:
-        - mongo-actions-test-key
+          schema: schema/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/port
+          label: Port
+        - type: array-item-form
+          label: Args
+          schema: schema/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/args
+          element:
+            type: input
+            label: name
+            schema: schema/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/args/items
+        - type: array-object-form
+          label: New Environment Variable
+          schema: schema/properties/userinfo/properties/obj
+          elements:
+          - type: input
+            label: Name
+            schema: name
+            validation:
+              type: required
+          - type: radio
+            label: Value From
+            schema: radio
+            options:
+            - Input
+            - Secret
+            - ConfigMap
+          - type: input
+            label: Value
+            schema: schema/properties/temp
+          - type: select
+            label: Secret Name
+            schema: select
+            options:
+            - mongo-actions-test-key
+    - type: input 
+      label: ''
+      schema: schema/properties/metadata/properties/release/properties/name
+      init: 
+       type: func 
+       value: setMetadata 
       # - type: select
       #   label: Secret Key
       #   schema: select

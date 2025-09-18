@@ -672,8 +672,8 @@ export const useFunc = (model) => {
     })
   }
 
-  function showCustomizeExporterSection({ watchDependency, discriminator, getValue }) {
-    watchDependency('discriminator#/customizeExporter')
+  function showCustomizeExporterSection() {
+   // watchDependency('discriminator#/customizeExporter')
     const configureStatus = getValue(discriminator, '/customizeExporter')
     return configureStatus
   }
