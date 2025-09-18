@@ -2641,20 +2641,33 @@ step:
         func: onCustomizeExporterChange
         paths: 
           - temp/properties/customizeExporter
-    - type: label-element
+    - type: horizontal-layout
       label: Resources
-      schema : ''
+      showLabels: true
+      elements:
+        - type: input
+          label: CPU Requests
+          schema: schema/properties/resources/properties/requests/additionalProperties/cpu
+        - type: input
+          label: CPU Limits
+          schema: schema/properties/resources/properties/limits/additionalProperties/cpu
+        - type: input
+          label: Memory Requests
+          schema: schema/properties/resources/properties/requests/additionalProperties/memory
+        - type: input
+          label: Memory Limits
+          schema: schema/properties/resources/properties/limits/additionalProperties/memory
     - type: label-element
       label: Security Context
       schema: ''
     - type: input
-      schema: schema/properties/userNo
+      schema:  schema/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/securityContext/properties/runAsUser
       label: Run as User
     - type: input
-      schema: schema/properties/groupNo
+      schema: schema/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/securityContext/properties/runAsGroup
       label: Run as Group
     - type: input
-      schema: schema/properties/portNo
+      schema: schema/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/port
       label: Port
     - type: label-element
       label: Args
