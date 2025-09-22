@@ -1288,7 +1288,27 @@ export const useFunc = (model) => {
     return value * units[unit]
   }
 
+  function fetchAliasOptions() {
+    return getAliasOptions ? getAliasOptions() : []
+  }
+
+  function validateNewCertificates({ itemCtx }) {
+    const addedAliases = (model && model.map((item) => item.alias)) || []
+
+    if (addedAliases.includes(itemCtx.alias) && itemCtx.isCreate) {
+      return { isInvalid: true, message: 'Alias already exists' }
+    }
+    return {}
+  }
+
+  function disableAlias() {
+    return !!(model && model.alias)
+  }
+
   return {
+    fetchAliasOptions,
+    validateNewCertificates,
+    disableAlias,
     isRancherManaged,
     fetchJsons,
     returnFalse,
