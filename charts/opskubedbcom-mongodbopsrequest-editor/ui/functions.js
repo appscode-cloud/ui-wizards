@@ -540,7 +540,7 @@ export const useFunc = (model) => {
     return selectedType === type
   }
 
-  function onRequestTypeChange({ model, getValue, commit }) {
+  function onRequestTypeChange() {
     const selectedType = getValue(model, '/spec/type')
     const reqTypeMapping = {
       Upgrade: 'updateVersion',
@@ -904,6 +904,7 @@ export const useFunc = (model) => {
   }
 
   function isEqualToValueFromType(value) {
+    console.log('x')
     // watchDependency('discriminator#/valueFromType')
     const valueFrom = getValue(discriminator, '/valueFromType')
     return valueFrom === value
@@ -1237,7 +1238,7 @@ export const useFunc = (model) => {
         value: { key, value },
         force: true,
       })
-      return true
+      return ''
     } else {
       commit('wizard/model$delete', path)
       return false
@@ -1305,7 +1306,51 @@ export const useFunc = (model) => {
     return !!(model && model.alias)
   }
 
+  function namespaceWatcherFunctions() {
+    getDbs()
+    initDatabaseRef()
+    getConfigSecrets()
+    resourceNames()
+    getIssuerRefsName()
+    onNamespaceChange()
+  }
+
+  function requestTypeWatcherFunctions() {
+    onRequestTypeChange()
+    ifRequestTypeEqualsTo()
+    showAndInitName()
+  }
+
+  function databaseRefWatcherFunctions() {
+    onDbChange()
+    showAndInitName()
+    isDbDetailsLoading()
+  }
+
+  function IssuerRefWatcherFunctions() {
+    initIssuerRefApiGroup()
+    getIssuerRefsName()
+  }
+
+  function tlsOperationWatcherFunction() {
+    showIssuerRefAndCertificates()
+    onTlsOperationChange()
+  }
+
+  function dbDetailsWatcherFunction() {
+    console.log('x')
+    getDbTls()
+    getDbType()
+    isDbDetailsLoading()
+  }
+
   return {
+    dbDetailsWatcherFunction,
+    tlsOperationWatcherFunction,
+    namespaceWatcherFunctions,
+    requestTypeWatcherFunctions,
+    databaseRefWatcherFunctions,
+    IssuerRefWatcherFunctions,
     fetchAliasOptions,
     validateNewCertificates,
     disableAlias,
