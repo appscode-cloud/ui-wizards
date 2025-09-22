@@ -912,6 +912,7 @@ export const useFunc = (model) => {
   }
 
   function isEqualToValueFromType(value) {
+    console.log('x')
     // watchDependency('discriminator#/valueFromType')
     const valueFrom = getValue(discriminator, '/valueFromType')
     return valueFrom === value
@@ -1309,7 +1310,51 @@ export const useFunc = (model) => {
     return !!(model && model.alias)
   }
 
+  function namespaceWatcherFunctions() {
+    getDbs()
+    initDatabaseRef()
+    getConfigSecrets()
+    resourceNames()
+    getIssuerRefsName()
+    onNamespaceChange()
+  }
+
+  function requestTypeWatcherFunctions() {
+    onRequestTypeChange()
+    ifRequestTypeEqualsTo()
+    showAndInitName()
+  }
+
+  function databaseRefWatcherFunctions() {
+    onDbChange()
+    showAndInitName()
+    isDbDetailsLoading()
+  }
+
+  function IssuerRefWatcherFunctions() {
+    initIssuerRefApiGroup()
+    getIssuerRefsName()
+  }
+
+  function tlsOperationWatcherFunction() {
+    showIssuerRefAndCertificates()
+    onTlsOperationChange()
+  }
+
+  function dbDetailsWatcherFunction() {
+    console.log('x')
+    getDbTls()
+    getDbType()
+    isDbDetailsLoading()
+  }
+
   return {
+    dbDetailsWatcherFunction,
+    tlsOperationWatcherFunction,
+    namespaceWatcherFunctions,
+    requestTypeWatcherFunctions,
+    databaseRefWatcherFunctions,
+    IssuerRefWatcherFunctions,
     fetchAliasOptions,
     validateNewCertificates,
     disableAlias,
