@@ -3,46 +3,85 @@ step:
   - type: single-step-form
     id: options
     elements:
-      - type: select
-        schema: temp/properties/repository
-        label: Repository
-        watcher:
-          paths: 
-            - temp/properties/repository
-          func: onRepoChange
-        loader: getRepositories
-        # options:
-        #   - text: Full-backup
-        #     value: full-backup
-        #   - text: Recent-backup
-        #     value: recent-backup
-        #   - text: Partial-backup
-        #     value: partial-backup
-        refresh: true
-        validation:
-          type: required
-      - type: select
-        schema: temp/selectedSessions
-        label: Snapshot
-        watcher:
-          paths:
-            - temp/selectedSessions
-          func: buildObject
-        loader: getSnapshots
-        # options:
-        #   - text: Full-backup
-        #     value: full-backup
-        #   - text: Recent-backup
-        #     value: recent-backup
-        #   - text: Partial-backup
-        #     value: partial-backup
-        refresh: true
-        schema: selectedSessions
-        validation:
-          type: required
-      - type: textarea
-        label: Additional Parameters
-        schema: textarea
+        - type: select
+          label: Select Namespace
+          if:
+            type: function
+            name: isConsole
+          loader: fetchNamespaces
+          hasGroup: true
+          schema: schema/properties/metadata/properties/release/properties/namespace
+        - type: input
+          if:
+            name: returnFalse
+            type: function
+          init: 
+            type: func
+            name: init
+        - type: input
+          label: Name
+          if:
+            type: function
+            name: isConsole
+          schema: schema/properties/metadata/properties/release/properties/name
+        - type: block-layout
+          showLabels: false
+          schema: schema/properties/spec
+          elements:
+            - type: input
+              if: 
+                name: returnFalse
+                type: function
+              init: 
+                type: func
+                name: initMetadata
+            - type: block-layout
+              schema: schema/properties/spec/properties/dataSource
+              elements: 
+                - type: select
+                  label: Repository
+                  loader: getRepositories
+                  watcher: 
+                    func: onRepoChange
+                    paths: 
+                      - temp/properties/repository
+                  validation: 
+                    type: required
+                  schema: temp/properties/repository
+                - type: select
+                  label: Snapshot
+                  loader: getSnapshots
+                  schema: schema/properties/spec/properties/dataSource/properties/snapshot
+            - type: block-layout
+              label: Target
+              hideBlock: true
+              if: 
+                type: function
+                name: isConsole
+              schema: schema/properties/spec/properties/target
+              showLabels: true
+              elements:
+                - type: select
+                  label: Api Group
+                  loader: getApiGroup
+                  schema: schema/properties/spec/properties/target/properties/apiGroup
+                - type: select
+                  label: Kind
+                  loader: getKinds
+                  watcher: 
+                    func: setVersion
+                    paths: 
+                      - schema/properties/spec/properties/target/properties/kind
+                  schema: schema/properties/spec/properties/target/properties/kind
+                - type: select
+                  label: Namespace
+                  loader: fetchNamespaces
+                  hasGroup: true
+                  schema: schema/properties/spec/properties/target/properties/namespace
+                - type: select
+                  label: Name
+                  loader: getTargetName
+                  schema: schema/properties/spec/properties/target/properties/name  
 
 
 # steps:
@@ -55,6 +94,89 @@ step:
 #         nameSpaceApi:
 #           default: false
 #           type: boolean
+
+#       elements:
+#         - type: select
+#           label: Select Namespace
+#           if:
+#             type: function
+#             name: isConsole
+#           loader: fetchNamespaces
+#           hasGroup: true
+#           schema: schema/properties/metadata/properties/release/properties/namespace
+#         - type: input
+#           if:
+#             name: returnFalse
+#             type: function
+#           init: 
+#             type: func
+#             name: init
+#         - type: input
+#           label: Name
+#           if:
+#             type: function
+#             name: isConsole
+#           schema: schema/properties/metadata/properties/release/properties/name
+#         - type: block-layout
+#           showLabels: false
+#           schema: schema/properties/spec
+#           elements:
+#             - type: input
+#               if: 
+#                 name: returnFalse
+#                 type: function
+#               init: 
+#                 type: func
+#                 name: initMetadata
+#             - type: block-layout
+#               elements: 
+#                 - type: select
+#                   label: Repository
+#                   loader: getRepositories
+#                   watcher: 
+#                     func: onRepoChange
+#                     paths: 
+#                       - temp/properties/repository
+#                   validation: 
+#                     type: required
+#                   schema: temp/properties/repository
+#                 - type: select
+#                   label: Snapshot
+#                   loader: getSnapshots
+#                   schema: schema/properties/spec/properties/dataSource/properties/snapshot
+#             - type: block-layout
+#               label: Target
+#               hideBlock: true
+#               if: 
+#                 type: function
+#                 name: isConsole
+#               schema: schema/properties/spec/properties/target
+#               showLabels: true
+#               elements:
+#                 - type: select
+#                   label: Api Group
+#                   loader: getApiGroup
+#                   schema: schema/properties/spec/properties/target/properties/apiGroup
+#                 - type: select
+#                   label: Kind
+#                   loader: getKinds
+#                   watcher: 
+#                     func: setVersion
+#                     paths: 
+#                       - schema/properties/spec/properties/target/properties/kind
+#                   schema: schema/properties/spec/properties/target/properties/kind
+#                 - type: select
+#                   label: Namespace
+#                   loader: fetchNamespaces
+#                   hasGroup: true
+#                   schema: schema/properties/spec/properties/target/properties/namespace
+#                 - type: select
+#                   label: Name
+#                   loader: getTargetName
+#                   schema: schema/properties/spec/properties/target/properties/name       
+          
+
+
 #       elements:
 #       - fetch: fetchNamespaces
 #         hasGroup: isRancherManaged
@@ -64,19 +186,23 @@ step:
 #         schema:
 #           $ref: schema#/properties/metadata/properties/release/properties/namespace
 #         type: select
+
 #       - computed: init
 #         if: returnFalse
 #         type: input
+
 #       - if: isConsole
 #         label:
 #           text: labels.name
 #         schema:
 #           $ref: schema#/properties/metadata/properties/release/properties/name
 #         type: input
+
 #       - elements:
 #         - computed: initMetadata
 #           if: returnFalse
 #           type: input
+
 #         - discriminator:
 #             repository:
 #               type: object
@@ -91,6 +217,7 @@ step:
 #             schema:
 #               $ref: discriminator#/properties/repository
 #             type: select
+
 #           - disableUnselect: true
 #             fetch: getSnapshots
 #             label:
@@ -99,6 +226,7 @@ step:
 #             schema:
 #               $ref: schema#/properties/spec/properties/dataSource/properties/snapshot
 #             type: select
+
 #           schema:
 #             $ref: schema#/properties/spec/properties/dataSource
 #           type: single-step-form
@@ -134,6 +262,7 @@ step:
 #             schema:
 #               $ref: schema#/properties/spec/properties/target/properties/apiGroup
 #             type: select
+
 #           - fetch: getKinds
 #             label:
 #               text: Kind
@@ -141,6 +270,7 @@ step:
 #             schema:
 #               $ref: schema#/properties/spec/properties/target/properties/kind
 #             type: select
+
 #           - fetch: fetchNamespaces
 #             hasGroup: isRancherManaged
 #             label:
@@ -148,12 +278,14 @@ step:
 #             schema:
 #               $ref: schema#/properties/spec/properties/target/properties/namespace
 #             type: select
+
 #           - fetch: getTargetName
 #             label:
 #               text: Name
 #             schema:
 #               $ref: schema#/properties/spec/properties/target/properties/name
 #             type: select
+
 #           hideForm: true
 #           if: isConsole
 #           label:
@@ -162,9 +294,12 @@ step:
 #             $ref: schema#/properties/spec/properties/target
 #           show_label: true
 #           type: single-step-form
+        
+        
 #         schema:
 #           $ref: schema#/properties/spec
 #         type: single-step-form
+     
 #       type: single-step-form
 #     type: single-step-form
 #   id: options
