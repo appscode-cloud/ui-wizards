@@ -8,6 +8,14 @@ step:
         if:
           type: function
           name: showAndInitName
+        watcher:
+          paths:
+            - temp/properties/valueFromType
+          func: isEqualToValueFromType        
+        # watcher:
+        #   paths:
+        #     - temp/dbDetails
+        #   func: dbDetailsWatcherFunction        
         validation:
           type: required
         schema: schema/properties/metadata/properties/name
@@ -24,7 +32,7 @@ step:
         watcher:
           paths:
             - schema/properties/metadata/properties/namespace
-          func: onNamespaceChange
+          func: namespaceWatcherFunctions 
         validation:
           type: required
         hasGroup: true
@@ -45,7 +53,7 @@ step:
         watcher:
           paths:
             - schema/properties/spec/properties/databaseRef/properties/name
-          func: onDbChange
+          func: databaseRefWatcherFunctions
         schema: schema/properties/spec/properties/databaseRef/properties/name
       - type: label-element
         label: config_ops_request
@@ -86,7 +94,7 @@ step:
         watcher:
           paths:
             - schema/properties/spec/properties/type
-          func: onRequestTypeChange
+          func: requestTypeWatcherFunctions
         isHorizontal: true
         schema: schema/properties/spec/properties/type
 # UpdateVersion
@@ -837,7 +845,7 @@ step:
               type: func
               value: initTlsOperation
             watcher:
-              func: onTlsOperationChange
+              func: tlsOperationWatcherFunction
               paths:
                 - temp/properties/tlsOperation
             schema: temp/properties/tlsOperation
@@ -880,6 +888,10 @@ step:
                 validation:
                   type: custom
                   name: isIssuerRefRequired
+                watcher:
+                  paths:
+                    - schema/properties/spec/properties/tls/properties/issuerRef/properties/kind
+                  func: IssuerRefWatcherFunctions
                 schema: schema/properties/spec/properties/tls/properties/issuerRef/properties/kind
               - type: select
                 label: Name
