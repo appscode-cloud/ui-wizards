@@ -41,6 +41,7 @@ step:
                 - type: select
                   label: Repository
                   loader: getRepositories
+                  refresh: true
                   watcher: 
                     func: onRepoChange
                     paths: 
@@ -51,7 +52,32 @@ step:
                 - type: select
                   label: Snapshot
                   loader: getSnapshots
+                  refresh: true
                   schema: schema/properties/spec/properties/dataSource/properties/snapshot
+            - type: block-layout
+              schema: schema/properties/spec/properties/addon
+              elements:
+                - type: input
+                  if: 
+                    name: returnFalse
+                    type: function
+                  init: 
+                    type: func
+                    name: setSecurityContext
+                - type: select
+                  label: Name
+                  loader: getAddons
+                  if: 
+                    type: function
+                    name: isConsole
+                  schema: schema/properties/spec/properties/addon/properties/name
+                - type: textarea
+                  label: Additional Parameters
+                  watcher: 
+                    func: onParameterChange
+                    paths: 
+                      - temp/properties/params
+                  schema: temp/properties/params
             - type: block-layout
               label: Target
               hideBlock: true
@@ -129,6 +155,7 @@ step:
 #                 type: func
 #                 name: initMetadata
 #             - type: block-layout
+#               schema: schema/properties/spec/properties/dataSource
 #               elements: 
 #                 - type: select
 #                   label: Repository
@@ -144,6 +171,29 @@ step:
 #                   label: Snapshot
 #                   loader: getSnapshots
 #                   schema: schema/properties/spec/properties/dataSource/properties/snapshot
+#             - type: block-layout
+#               schema: schema/properties/spec/properties/addon
+#               elements:
+#                 - type: select
+#                   label: Name
+#                   loader: getAddons
+#                   if: 
+#                     type: function
+#                     name: isConsole
+#                   schema: schema/properties/spec/properties/addon/properties/name
+#                 - type: textarea
+#                   label: Additional Parameters
+#                   watcher: 
+#                     func: onParameterChange
+#                     paths: temp/properties/params
+#                   schema: temp/properties/params
+#                 - type: input
+#                   if: 
+#                     name: returnFalse
+#                     type: function
+#                   init: 
+#                     type: func
+#                     name: setSecurityContext
 #             - type: block-layout
 #               label: Target
 #               hideBlock: true
@@ -243,6 +293,7 @@ step:
 #             schema:
 #               $ref: schema#/properties/spec/properties/addon/properties/name
 #             type: select
+
 #           - label:
 #               text: Additional Parameters
 #             onChange: onParameterChange
@@ -255,6 +306,7 @@ step:
 #           schema:
 #             $ref: schema#/properties/spec/properties/addon
 #           type: single-step-form
+
 #         - elements:
 #           - fetch: getApiGroup
 #             label:

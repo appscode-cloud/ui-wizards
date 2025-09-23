@@ -7,8 +7,6 @@ let backupNamespace = ''
 export const useFunc = (model) => {
     const route = store.state?.route
 
-    console.log('route', route)
-
   const { getValue, storeGet, discriminator, setDiscriminatorValue, commit } = useOperator(
     model,
     store.state,
@@ -63,7 +61,7 @@ export const useFunc = (model) => {
 
   function isApiResolved() {
     // watchDependency('discriminator#/initApi')
-    const initApi = getValue({}, '/initApi') 
+    const initApi = getValue(discriminator, '/initApi') 
     console.log('initApi', initApi)
     // return initApi
     return true
@@ -117,12 +115,7 @@ export const useFunc = (model) => {
     })
     setDiscriminatorValue('/selectedSessions', [])
   }
-  
-  // watch(someValue, (newVal, oldVal) => {
-  //   if (newVal !== oldVal) {
-  //     clearModel()
-  //   }
-  // })
+
 
 return {
   clearModel,

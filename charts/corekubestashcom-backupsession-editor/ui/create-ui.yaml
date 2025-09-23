@@ -3,50 +3,56 @@ step:
   - type: single-step-form
     id: basic
     elements:
+      - type: label-element
+        if: 
+          name: returnFalse
+          type: function
+        init: 
+          type: func
+          name: init
       - type: select
+        label: Select Backup
         if:
           type: function
           name: isApiResolved
-        schema: temp/backup
-        label: Select Backup
         watcher:
           paths: 
             - temp/backup
           func: clearModel
         loader: getOptions
-        options:
-          - text: Full-backup
-            value: full-backup
-          - text: Recent-backup
-            value: recent-backup
-          - text: Partial-backup
-            value: partial-backup
+        # options:
+        #   - text: Full-backup
+        #     value: full-backup
+        #   - text: Recent-backup
+        #     value: recent-backup
+        #   - text: Partial-backup
+        #     value: partial-backup
         refresh: true
         validation:
           type: required
+        schema: temp/backup
       - type: select
+        label: Select Sessions
         if:
           type: function
           name: isBackupSelected
-        schema: temp/selectedSessions
-        label: Select Sessions
         multiple: true
         watcher:
           paths:
             - temp/selectedSessions
           func: buildObject
         loader: getSessionOptions
-        options:
-          - text: Full-backup
-            value: full-backup
-          - text: Recent-backup
-            value: recent-backup
-          - text: Partial-backup
-            value: partial-backup
+        # options:
+        #   - text: Full-backup
+        #     value: full-backup
+        #   - text: Recent-backup
+        #     value: recent-backup
+        #   - text: Partial-backup
+        #     value: partial-backup
         refresh: true
-        schema: selectedSessions
         validation:
           type: required
+        schema: temp/selectedSessions
 
 
 # steps:

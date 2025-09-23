@@ -241,7 +241,7 @@ async function getSnapshots() {
   const repository = repo.name || ''
 
   const url = `/clusters/${user}/${cluster}/proxy/${core}/${version}/namespaces/${namespace}/snapshots`
-
+  console.log('namespace', namespace.value)
   try {
     if (namespace) {
       const resp = await axios.get(url)
@@ -324,7 +324,7 @@ async function getAddons() {
 }
 
 function getTasks() {
-  watchDependency('model#/spec/addon/name')
+  // watchDependency('model#/spec/addon/name')
   const addon = getValue(model, '/spec/addon/name')
   const addonDetails = addonList?.find((item) => item?.metadata?.name === addon)
   let tasks = addonDetails?.spec?.restoreTasks
@@ -335,7 +335,7 @@ function getTasks() {
 function databaseSelected() {
   isKube = storeGet('/route/params/actions')
   if (isKube) return true
-  watchDependency('discriminator#/database')
+  // watchDependency('discriminator#/database')
   const target = getValue(discriminator, '/database') || {}
   return !!target.name
 }
