@@ -1,4 +1,3 @@
-const { axios, useOperator, store } = window.vueHelpers || {}
 const machines = {
   'db.t.micro': {
     resources: {
@@ -305,46 +304,122 @@ const machineList = [
   'db.r.24xlarge',
 ]
 
-let machinesFromPreset = []
+async function fetchJsons({ axios, itemCtx }) {
+  let ui = {}
+  let language = {}
+  let functions = {}
+  const { name, sourceRef, version, packageviewUrlPrefix } = itemCtx.chart
 
-export const useFunc = (model) => {
-  const route = store.state?.route
+  try {
+    ui = await axios.get(
+      `${packageviewUrlPrefix}/create-ui.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`,
+    )
+    language = await axios.get(
+      `${packageviewUrlPrefix}/language.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`,
+    )
+    const functionString = await axios.get(
+      `${packageviewUrlPrefix}/functions.js?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}`,
+    )
+    // declare evaluate the functionString to get the functions Object
+    const evalFunc = new Function(functionString.data || '')
+    functions = evalFunc()
+  } catch (e) {
+    console.log(e)
+  }
 
-  const { getValue, storeGet, discriminator, setDiscriminatorValue, commit } = useOperator(
-    model,
-    store.state,
+  return {
+    ui: ui.data || {},
+    language: language.data || {},
+    functions,
+  }
+}
+
+function returnFalse() {
+  return false
+}
+
+function isRancherManaged({ storeGet }) {
+  const managers = storeGet('/cluster/clusterDefinition/result/clusterManagers')
+  const found = managers.find((item) => item === 'Rancher')
+  return !!found
+}
+
+async function getNamespaces({ axios, storeGet }) {
+  if (storeGet('/route/params/actions')) return []
+  const owner = storeGet('/route/params/user')
+  const cluster = storeGet('/route/params/cluster')
+
+  const resp = await axios.get(`/clusters/${owner}/${cluster}/proxy/core/v1/namespaces`, {
+    params: { filter: { items: { metadata: { name: null } } } },
+  })
+
+  const resources = (resp && resp.data && resp.data.items) || []
+
+  return resources.map((item) => {
+    const name = (item.metadata && item.metadata.name) || ''
+    return {
+      text: name,
+      value: name,
+    }
+  })
+}
+
+async function getDbs({ axios, storeGet, model, getValue, watchDependency }) {
+  if (storeGet('/route/params/actions')) return []
+  const owner = storeGet('/route/params/user')
+  const cluster = storeGet('/route/params/cluster')
+
+  const namespace = getValue(model, '/metadata/namespace')
+  watchDependency('model#/metadata/namespace')
+
+  const resp = await axios.get(
+    `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/postgreses`,
+    {
+      params: { filter: { items: { metadata: { name: null } } } },
+    },
   )
 
-  getDbDetails()
-  showAndInitOpsRequestType()
+  const resources = (resp && resp.data && resp.data.items) || []
 
-  async function fetchJsons({ axios, itemCtx }) {
-    let ui = {}
-    let language = {}
-    let functions = {}
-    const { name, sourceRef, version, packageviewUrlPrefix } = itemCtx.chart
+  return resources.map((item) => {
+    const name = (item.metadata && item.metadata.name) || ''
+    return {
+      text: name,
+      value: name,
+    }
+  })
+}
 
+async function getDbDetails({ axios, storeGet, model, getValue, setDiscriminatorValue }) {
+  const owner = storeGet('/route/params/user')
+  const cluster = storeGet('/route/params/cluster')
+  const namespace = storeGet('/route/query/namespace') || getValue(model, '/metadata/namespace')
+  const name = storeGet('/route/params/name') || getValue(model, '/spec/databaseRef/name')
+
+  if (namespace && name) {
+    const url = `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/postgreses/${name}`
+    const resp = await axios.get(url)
+
+    setDiscriminatorValue('/dbDetails', resp.data || {})
+
+    return resp.data || {}
+  } else return {}
+}
+
+async function getDbVersions({ axios, storeGet, getValue, discriminator }) {
+  const owner = storeGet('/route/params/user')
+  const cluster = storeGet('/route/params/cluster')
+
+  const url = `/clusters/${owner}/${cluster}/proxy/charts.x-helm.dev/v1alpha1/clusterchartpresets/kubedb-ui-presets`
+
+  let presets = storeGet('/kubedbuiPresets') || {}
+  if (!storeGet('/route/params/actions')) {
     try {
-      ui = await axios.get(
-        `${packageviewUrlPrefix}/create-ui.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`,
-      )
-      language = await axios.get(
-        `${packageviewUrlPrefix}/language.yaml?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}&format=json`,
-      )
-      const functionString = await axios.get(
-        `${packageviewUrlPrefix}/functions.js?name=${name}&sourceApiGroup=${sourceRef.apiGroup}&sourceKind=${sourceRef.kind}&sourceNamespace=${sourceRef.namespace}&sourceName=${sourceRef.name}&version=${version}`,
-      )
-      // declare evaluate the functionString to get the functions Object
-      const evalFunc = new Function(functionString.data || '')
-      functions = evalFunc()
+      const presetResp = await axios.get(url)
+      presets = presetResp.data?.spec?.values?.spec
     } catch (e) {
       console.log(e)
-    }
-
-    return {
-      ui: ui.data || {},
-      language: language.data || {},
-      functions,
+      presets.status = String(e.status)
     }
   }
 
@@ -387,37 +462,142 @@ export const useFunc = (model) => {
     // watchDependency('model#/metadata/namespace')
 
     const resp = await axios.get(
-      `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/postgreses`,
+      `/clusters/${owner}/${cluster}/proxy/catalog.kubedb.com/v1alpha1/postgresversions`,
       {
-        params: { filter: { items: { metadata: { name: null } } } },
+        params: queryParams,
       },
     )
 
     const resources = (resp && resp.data && resp.data.items) || []
 
-    return resources.map((item) => {
+    const sortedVersions = resources.sort((a, b) => versionCompare(a.spec.version, b.spec.version))
+
+    let ver = getValue(discriminator, '/dbDetails/spec/version') || '0'
+    const found = sortedVersions.find((item) => item.metadata.name === ver)
+
+    if (found) ver = found.spec?.version
+    const allowed = found?.spec?.updateConstraints?.allowlist || []
+    const limit = allowed.length ? allowed[0] : '0.0'
+
+    // keep only non deprecated & kubedb-ui-presets & within constraints of current version
+    // if presets.status is 404, it means no presets available, no need to filter with presets
+    const filteredPostgresVersions = sortedVersions.filter((item) => {
+      // default limit 0.0 means no restrictions, show all higher versions
+      if (limit === '0.0')
+        return (
+          !item.spec?.deprecated &&
+          (presets.status === '404' || presetVersions.includes(item.metadata?.name)) &&
+          versionCompare(item.spec?.version, ver) >= 0
+        )
+      // if limit doesn't have any operator, it's a single version
+      else if (!limit.match(/^(>=|<=|>|<)/))
+        return (
+          !item.spec?.deprecated &&
+          (presets.status === '404' || presetVersions.includes(item.metadata?.name)) &&
+          item.spec?.version === limit
+        )
+      // if limit has operator, check version with constraints
+      else
+        return (
+          !item.spec?.deprecated &&
+          (presets.status === '404' || presetVersions.includes(item.metadata?.name)) &&
+          isVersionWithinConstraints(item.spec?.version, limit)
+        )
+    })
+
+    return filteredPostgresVersions.map((item) => {
       const name = (item.metadata && item.metadata.name) || ''
+      const specVersion = (item.spec && item.spec.version) || ''
       return {
-        text: name,
+        text: `${name} (${specVersion})`,
         value: name,
       }
     })
+  } catch (e) {
+    console.log(e)
+    return []
+  }
+}
+
+function versionCompare(v1, v2) {
+  const arr1 = v1.split('.').map(Number)
+  const arr2 = v2.split('.').map(Number)
+
+  for (let i = 0; i < Math.max(arr1.length, arr2.length); i++) {
+    const num1 = arr1[i] || 0
+    const num2 = arr2[i] || 0
+
+    if (num1 > num2) return 1 // v1 is higher
+    if (num1 < num2) return -1 // v2 is higher
+  }
+  return 0 // versions are equal
+}
+
+function isVersionWithinConstraints(version, constraints) {
+  let constraintsArr = []
+  if (constraints.includes(',')) constraintsArr = constraints?.split(',')?.map((c) => c.trim())
+  else constraintsArr = [constraints]
+
+  for (let constraint of constraintsArr) {
+    let match = constraint.match(/^(>=|<=|>|<)/)
+    let operator = match ? match[0] : ''
+    let constraintVersion = constraint.replace(/^(>=|<=|>|<)/, '').trim()
+
+    let comparison = versionCompare(version, constraintVersion)
+    if (
+      (operator === '>=' && comparison < 0) ||
+      (operator === '<=' && comparison > 0) ||
+      (operator === '>' && comparison <= 0) ||
+      (operator === '<' && comparison >= 0)
+    )
+      return false
+  }
+  return true
+}
+
+function ifRequestTypeEqualsTo({ model, getValue, watchDependency }, type) {
+  const selectedType = getValue(model, '/spec/type')
+  watchDependency('model#/spec/type')
+
+  return selectedType === type
+}
+function onRequestTypeChange({ model, getValue, commit }) {
+  const selectedType = getValue(model, '/spec/type')
+  const reqTypeMapping = {
+    Upgrade: 'updateVersion',
+    UpdateVersion: 'updateVersion',
+    HorizontalScaling: 'horizontalScaling',
+    VerticalScaling: 'verticalScaling',
+    VolumeExpansion: 'volumeExpansion',
+    Restart: 'restart',
+    Reconfigure: 'configuration',
+    ReconfigureTLS: 'tls',
   }
 
-  async function getDbDetails() {
-    const owner = storeGet('/route/params/user')
-    const cluster = storeGet('/route/params/cluster')
-    const namespace = storeGet('/route/query/namespace') || getValue(model, '/metadata/namespace')
-    const name = storeGet('/route/params/name') || getValue(model, '/spec/databaseRef/name')
+  Object.keys(reqTypeMapping).forEach((key) => {
+    if (key !== selectedType) commit('wizard/model$delete', `/spec/${reqTypeMapping[key]}`)
+  })
+}
 
-    if (namespace && name) {
-      const url = `/clusters/${owner}/${cluster}/proxy/kubedb.com/v1alpha2/namespaces/${namespace}/postgreses/${name}`
-      const resp = await axios.get(url)
+function getDbTls({ discriminator, getValue, watchDependency }) {
+  watchDependency('discriminator#/dbDetails')
+  const dbDetails = getValue(discriminator, '/dbDetails')
 
-      setDiscriminatorValue('/dbDetails', resp.data || {})
+  const { spec } = dbDetails || {}
+  return spec?.tls || undefined
+}
 
-      return resp.data || {}
-    } else return {}
+function getDbType({ discriminator, getValue, watchDependency }) {
+  watchDependency('discriminator#/dbDetails')
+  const postgresDetails = getValue(discriminator, '/dbDetails')
+
+  const { spec } = postgresDetails || {}
+  const { standbyMode } = spec || {}
+
+  if (standbyMode) {
+    verd = 'cluster'
+  } else {
+    verd = 'standalone'
   }
 
   async function getDbVersions() {
@@ -486,52 +666,206 @@ export const useFunc = (model) => {
       })
       return filteredPostgresVersions.map((item) => {
         const name = (item.metadata && item.metadata.name) || ''
-        const specVersion = (item.spec && item.spec.version) || ''
-        return {
-          text: `${name} (${specVersion})`,
-          value: name,
-        }
+        item.text = name
+        item.value = name
+        return true
       })
+      return resources
     } catch (e) {
       console.log(e)
       return []
     }
   }
+}
 
-  function versionCompare(v1, v2) {
-    const arr1 = v1.split('.').map(Number)
-    const arr2 = v2.split('.').map(Number)
+function initTlsOperation() {
+  return 'update'
+}
+function onTlsOperationChange({ discriminator, getValue, commit }) {
+  const tlsOperation = getValue(discriminator, '/tlsOperation')
 
-    for (let i = 0; i < Math.max(arr1.length, arr2.length); i++) {
-      const num1 = arr1[i] || 0
-      const num2 = arr2[i] || 0
+  commit('wizard/model$delete', '/spec/tls')
 
-      if (num1 > num2) return 1 // v1 is higher
-      if (num1 < num2) return -1 // v2 is higher
-    }
-    return 0 // versions are equal
+  if (tlsOperation === 'rotate') {
+    commit('wizard/model$update', {
+      path: '/spec/tls/rotateCertificates',
+      value: true,
+      force: true,
+    })
+  } else if (tlsOperation === 'remove') {
+    commit('wizard/model$update', {
+      path: '/spec/tls/remove',
+      value: true,
+      force: true,
+    })
+  }
+}
+
+function showIssuerRefAndCertificates({ discriminator, getValue, watchDependency }) {
+  const tlsOperation = getValue(discriminator, '/tlsOperation')
+  watchDependency('discriminator#/tlsOperation')
+  const verd = tlsOperation !== 'remove' && tlsOperation !== 'rotate'
+
+  return verd
+}
+
+function isIssuerRefRequired({ discriminator, getValue, watchDependency }) {
+  const hasTls = hasTlsField({
+    discriminator,
+    getValue,
+    watchDependency,
+  })
+
+  return !hasTls
+}
+
+function getClientAuthModes({ getValue, watchDependency, discriminator }) {
+  watchDependency('discriminator#/dbDetails')
+  const dbDetails = getValue(discriminator, '/dbDetails')
+
+  const { spec } = dbDetails || {}
+  const { version } = spec || {}
+
+  watchDependency('discriminator#/tlsOperation')
+
+  const tlsOperation = getValue(discriminator, '/tlsOperation')
+
+  // major version section from version
+  const major = parseInt(version && version.split('.')[0])
+
+  const options = ['md5']
+
+  if (major >= 11) {
+    options.push('scram')
   }
 
-  function isVersionWithinConstraints(version, constraints) {
-    let constraintsArr = []
-    if (constraints.includes(',')) constraintsArr = constraints?.split(',')?.map((c) => c.trim())
-    else constraintsArr = [constraints]
+  if (tlsOperation !== 'remove') {
+    options.push('cert')
+  }
 
-    for (let constraint of constraintsArr) {
-      let match = constraint.match(/^(>=|<=|>|<)/)
-      let operator = match ? match[0] : ''
-      let constraintVersion = constraint.replace(/^(>=|<=|>|<)/, '').trim()
+  return options.map((item) => ({ text: item, value: item }))
+}
 
-      let comparison = versionCompare(version, constraintVersion)
-      if (
-        (operator === '>=' && comparison < 0) ||
-        (operator === '<=' && comparison > 0) ||
-        (operator === '>' && comparison <= 0) ||
-        (operator === '<' && comparison >= 0)
-      )
-        return false
-    }
+function getRequestTypeFromRoute({ route, model, discriminator, getValue, watchDependency }) {
+  const isDbloading = isDbDetailsLoading({ discriminator, model, getValue, watchDependency })
+  const { query } = route || {}
+  const { requestType } = query || {}
+  return isDbloading ? '' : requestType || ''
+}
+
+function isDbDetailsLoading({ discriminator, model, getValue, watchDependency }) {
+  watchDependency('discriminator#/dbDetails')
+  watchDependency('model#/spec/databaseRef/name')
+  const dbDetails = getValue(discriminator, '/dbDetails')
+  const dbName = getValue(model, '/spec/databaseRef/name')
+
+  return !dbDetails || !dbName
+}
+
+function setValueFromDbDetails(
+  { discriminator, getValue, watchDependency, commit },
+  path,
+  commitPath,
+) {
+  watchDependency('discriminator#/dbDetails')
+  const retValue = getValue(discriminator, `/dbDetails${path}`)
+
+  if (commitPath && retValue) {
+    const tlsOperation = getValue(discriminator, '/tlsOperation')
+
+    // computed called when tls fields is not visible
+    if (commitPath.includes('/spec/tls') && tlsOperation !== 'update') return undefined
+
+    // direct model update required for reusable element.
+    // computed property is not applicable for reusable element
+    commit('wizard/model$update', {
+      path: commitPath,
+      value: retValue,
+      force: true,
+    })
+  }
+
+  return retValue || undefined
+}
+
+function getAliasOptions() {
+  return ['server', 'client', 'metrics-exporter']
+}
+
+function isNamespaceDisabled({ route }) {
+  const { namespace } = route.query || {}
+  return !!namespace
+}
+
+function isDatabaseRefDisabled({ route }) {
+  const { name } = route.params || {}
+  return !!name
+}
+
+function onNamespaceChange({ commit }) {
+  commit('wizard/model$delete', '/spec/type')
+}
+
+function onDbChange({ commit, axios, storeGet, model, getValue, setDiscriminatorValue }) {
+  commit('wizard/model$delete', '/spec/type')
+  getDbDetails({ axios, storeGet, model, getValue, setDiscriminatorValue })
+}
+
+function setApplyToIfReady() {
+  return 'IfReady'
+}
+
+function isVerticalScaleTopologyRequired({ watchDependency, getValue, discriminator, commit }) {
+  watchDependency('discriminator#/topologyKey')
+  watchDependency('discriminator#/topologyValue')
+
+  const key = getValue(discriminator, '/topologyKey')
+  const value = getValue(discriminator, '/topologyValue')
+  const path = `/spec/verticalScaling/postgres/topology`
+
+  if (key || value) {
+    commit('wizard/model$update', {
+      path: path,
+      value: { key, value },
+      force: true,
+    })
     return true
+  } else {
+    commit('wizard/model$delete', path)
+    return false
+  }
+}
+
+function checkVolume({ model, discriminator, getValue }, initpath, path) {
+  const volume = getValue(discriminator, `/dbDetails${initpath}`)
+  const input = getValue(model, path)
+
+  try {
+    const sizeInBytes = parseSize(volume)
+    const inputSizeInBytes = parseSize(input)
+
+    if (inputSizeInBytes >= sizeInBytes) return true
+    else return 'Cannot expand to lower volume!'
+  } catch (err) {
+    return err.message || 'Invalid'
+  }
+}
+
+function parseSize(sizeStr) {
+  const units = {
+    '': 1,
+    K: 1e3,
+    M: 1e6,
+    G: 1e9,
+    T: 1e12,
+    P: 1e15,
+    E: 1e18,
+    Ki: 1024,
+    Mi: 1024 ** 2,
+    Gi: 1024 ** 3,
+    Ti: 1024 ** 4,
+    Pi: 1024 ** 5,
+    Ei: 1024 ** 6,
   }
 
   function ifRequestTypeEqualsTo(type) {
