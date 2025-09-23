@@ -904,7 +904,6 @@ export const useFunc = (model) => {
   }
 
   function isEqualToValueFromType(value) {
-    console.log('x')
     // watchDependency('discriminator#/valueFromType')
     const valueFrom = getValue(discriminator, '/valueFromType')
     return valueFrom === value
@@ -1338,7 +1337,6 @@ export const useFunc = (model) => {
   }
 
   function dbDetailsWatcherFunction() {
-    console.log('x')
     getDbTls()
     getDbType()
     isDbDetailsLoading()
