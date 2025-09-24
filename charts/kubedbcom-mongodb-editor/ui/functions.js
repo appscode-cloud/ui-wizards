@@ -8,16 +8,16 @@ export const useFunc = (model) => {
 
   /********** Initialize Discriminator **************/
 
-  model.value['temp/repoInitialSelectionStatus'] = ''
-  model.value['temp/scheduleBackup'] = 'yes'
-  model.value['temp/backupType'] = ''
-  model.value['temp/isBackupDataLoaded'] = false
-  model.value['temp/backupConfigContext'] = ''
-  model.value['temp/config'] = ''
-  model.value['temp/paused'] = false
-  model.value['temp/schedule'] = ''
-  model.value['temp/blueprintEnabled'] = false
-  model.value['temp/archiverEnabled'] = false
+  setDiscriminatorValue('repoInitialSelectionStatus', '')
+  setDiscriminatorValue('scheduleBackup', 'yes')
+  setDiscriminatorValue('backupType', '')
+  setDiscriminatorValue('isBackupDataLoaded', false)
+  setDiscriminatorValue('backupConfigContext', '')
+  setDiscriminatorValue('config', '')
+  setDiscriminatorValue('paused', false)
+  setDiscriminatorValue('schedule', '')
+  setDiscriminatorValue('blueprintEnabled', false)
+  setDiscriminatorValue('archiverEnabled', false)
 
   // *************************      common functions ********************************************
   // eslint-disable-next-line no-empty-pattern
@@ -1499,10 +1499,7 @@ export const useFunc = (model) => {
     })
   }
 
-  function onInputChangeSchedule(
-    modelPath = '/resources/coreKubestashComBackupConfiguration/spec/sessions',
-    discriminatorName = 'schedule',
-  ) {
+  function onInputChangeSchedule(modelPath, discriminatorName) {
     const value = getValue(discriminator, `/${discriminatorName}`)
     const session = getValue(model, modelPath) || []
     if (session.length) {
@@ -1536,9 +1533,9 @@ export const useFunc = (model) => {
     }
   }
 
-  function getDefaultSchedule() {
-    const modelPath = '/resources/coreKubestashComBackupConfiguration/spec/sessions'
+  function getDefaultSchedule(modelPath) {
     // watchDependency('discriminator#/config')
+    const config = getValue(discriminator, '/config') // only for computed behaviour
     const session = getValue(model, modelPath)
     return session?.length ? session[0]?.scheduler.schedule : ''
   }
@@ -1850,7 +1847,6 @@ export const useFunc = (model) => {
       value: configDetails,
       force: true,
     })
-    getDefaultSchedule()
   }
 
   function showPause() {
