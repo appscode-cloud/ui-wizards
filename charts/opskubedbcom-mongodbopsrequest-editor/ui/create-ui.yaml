@@ -29,10 +29,10 @@ step:
           value: initNamespace
         disable: isNamespaceDisabled
         loader: getNamespaces
-        watcher:
-          paths:
-            - schema/properties/metadata/properties/namespace
-          func: namespaceWatcherFunctions 
+        # watcher:
+        #   paths:
+        #     - schema/properties/metadata/properties/namespace
+        #   func: namespaceWatcherFunctions
         validation:
           type: required
         hasGroup: true
@@ -52,8 +52,8 @@ step:
         refresh: true
         watcher:
           paths:
-            - schema/properties/spec/properties/databaseRef/properties/name
-          func: databaseRefWatcherFunctions
+            - schema/properties/metadata/properties/namespace
+          func: getDbs
         schema: schema/properties/spec/properties/databaseRef/properties/name
       - type: label-element
         label: config_ops_request
@@ -91,10 +91,10 @@ step:
           type: func
           value: getRequestTypeFromRoute
         disable: isDbDetailsLoading
-        watcher:
-          paths:
-            - schema/properties/spec/properties/type
-          func: requestTypeWatcherFunctions
+        # watcher:
+        #   paths:
+        #     - schema/properties/spec/properties/type
+        #   func: requestTypeWatcherFunctions
         isHorizontal: true
         schema: schema/properties/spec/properties/type
 # UpdateVersion
@@ -848,10 +848,10 @@ step:
             init:
               type: func
               value: initTlsOperation
-            watcher:
-              func: tlsOperationWatcherFunction
-              paths:
-                - temp/properties/tlsOperation
+            # watcher:
+            #   func: tlsOperationWatcherFunction
+            #   paths:
+            #     - temp/properties/tlsOperation
             schema: temp/properties/tlsOperation
           - type: switch
             label: remove
@@ -892,10 +892,10 @@ step:
                 validation:
                   type: custom
                   name: isIssuerRefRequired
-                watcher:
-                  paths:
-                    - schema/properties/spec/properties/tls/properties/issuerRef/properties/kind
-                  func: IssuerRefWatcherFunctions
+                # watcher:
+                #   paths:
+                #     - schema/properties/spec/properties/tls/properties/issuerRef/properties/kind
+                #   func: IssuerRefWatcherFunctions
                 schema: schema/properties/spec/properties/tls/properties/issuerRef/properties/kind
               - type: select
                 label: Name
