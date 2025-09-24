@@ -7,15 +7,7 @@ step:
         label: op_req_name
         if:
           type: function
-          name: showAndInitName
-        # watcher:
-        #   paths:
-        #     - temp/properties/valueFromType
-        #   func: isEqualToValueFromType        
-        # watcher:
-        #   paths:
-        #     - temp/dbDetails
-        #   func: dbDetailsWatcherFunction        
+          name: showAndInitName        
         validation:
           type: required
         schema: schema/properties/metadata/properties/name
@@ -29,10 +21,6 @@ step:
           value: initNamespace
         disable: isNamespaceDisabled
         loader: getNamespaces
-        # watcher:
-        #   paths:
-        #     - schema/properties/metadata/properties/namespace
-        #   func: namespaceWatcherFunctions
         validation:
           type: required
         hasGroup: true
@@ -54,6 +42,10 @@ step:
           paths:
             - schema/properties/metadata/properties/namespace
           func: getDbs
+        # watcher:
+        #   paths:
+        #     - schema/properties/metadata/properties/namespace
+        #   func: initDatabaseRef
         schema: schema/properties/spec/properties/databaseRef/properties/name
       - type: label-element
         label: config_ops_request
@@ -91,10 +83,11 @@ step:
           type: func
           value: getRequestTypeFromRoute
         disable: isDbDetailsLoading
-        # watcher:
-        #   paths:
-        #     - schema/properties/spec/properties/type
-        #   func: requestTypeWatcherFunctions
+        watcher:
+          func: isDbDetailsLoading
+          paths:
+            - temp/dbDetails
+            - schema/properties/spec/properties/databaseRef/properties/name
         isHorizontal: true
         schema: schema/properties/spec/properties/type
 # UpdateVersion
@@ -576,6 +569,10 @@ step:
                     refresh: true
                     label: Config Secret
                     loader: getConfigSecrets
+                    watcher:
+                      func: getConfigSecrets
+                      paths:
+                        - schema/properties/metadata/properties/namespace
                     init:
                       type: func
                       value: setValueFromDbDetails|/spec/configSecret/name
@@ -630,7 +627,6 @@ step:
                     func: onReconfigurationTypeChange|configServer|true
                     paths:
                       - temp/properties/reconfigurationType-configServer
-
                 - type: block-layout
                   if:
                     name: ifReconfigurationTypeEqualsTo|selectNewConfigSecret|configServer|true
@@ -651,8 +647,6 @@ step:
                         target: _blank
                         url:
                           function: createSecretUrl
-
-
                 - type: array-object-form
                   label: Apply Config
                   schema: temp/properties/configServer/applyConfig
@@ -848,10 +842,6 @@ step:
             init:
               type: func
               value: initTlsOperation
-            # watcher:
-            #   func: tlsOperationWatcherFunction
-            #   paths:
-            #     - temp/properties/tlsOperation
             schema: temp/properties/tlsOperation
           - type: switch
             label: remove
@@ -877,6 +867,10 @@ step:
                 init:
                   type: func
                   value: initIssuerRefApiGroup
+                watcher:
+                  func: initIssuerRefApiGroup
+                  paths:
+                    - schema/properties/spec/properties/tls/properties/issuerRef/properties/kind
                 disable: true
                 schema: schema/properties/spec/properties/tls/properties/issuerRef/properties/apiGroup
               - type: select
@@ -892,14 +886,15 @@ step:
                 validation:
                   type: custom
                   name: isIssuerRefRequired
-                # watcher:
-                #   paths:
-                #     - schema/properties/spec/properties/tls/properties/issuerRef/properties/kind
-                #   func: IssuerRefWatcherFunctions
                 schema: schema/properties/spec/properties/tls/properties/issuerRef/properties/kind
               - type: select
                 label: Name
                 loader: getIssuerRefsName
+                watcher:
+                  func: getIssuerRefsName
+                  paths:
+                    - schema/properties/spec/properties/tls/properties/issuerRef/properties/kind
+                    - schema/properties/metadata/properties/namespace
                 init:
                   type: func
                   value: setValueFromDbDetails|/spec/tls/issuerRef/name
