@@ -8,8 +8,10 @@ export const useFunc = (model) => {
     store.state,
   )
 
-  model.value['temp/enableMonitoring'] = true
-  model.value['temp/customizeExporter'] = true
+  // model.value['temp/enableMonitoring'] = true
+  setDiscriminatorValue('/enableMonitoring', true)
+  // model.value['temp/customizeExporter'] = true
+  setDiscriminatorValue('/customizeExporter', true)
   async function fetchJsons({ axios, itemCtx }) {
     let ui = {}
     let language = {}
@@ -68,7 +70,7 @@ export const useFunc = (model) => {
       )
 
       const resources = (resp && resp.data && resp.data.items) || []
-      window.console.log('getResources',resource)
+      window.console.log('getResources', resource)
       resources.map((item) => {
         const name = (item.metadata && item.metadata.name) || ''
         item.text = name
@@ -647,14 +649,15 @@ export const useFunc = (model) => {
   /****** Monitoring *********/
 
   function showMonitoringSection() {
-    return true
-    watchDependency('discriminator#/enableMonitoring')
+    // watchDependency('discriminator#/enableMonitoring')
     const configureStatus = getValue(discriminator, '/enableMonitoring')
+    window.console.log('showMonitoringSection', configureStatus)
     return configureStatus
   }
 
-  function onEnableMonitoringChange({ discriminator, getValue, commit }) {
+  function onEnableMonitoringChange() {
     const configureStatus = getValue(discriminator, '/enableMonitoring')
+    window.console.log('onEnableMonitoringChange', configureStatus)
     if (configureStatus) {
       commit('wizard/model$update', {
         path: '/resources/kubedbComMongoDB/spec/monitor',
@@ -674,7 +677,7 @@ export const useFunc = (model) => {
   }
 
   function showCustomizeExporterSection() {
-   // watchDependency('discriminator#/customizeExporter')
+    // watchDependency('discriminator#/customizeExporter')
     const configureStatus = getValue(discriminator, '/customizeExporter')
     return configureStatus
   }
@@ -1679,7 +1682,7 @@ export const useFunc = (model) => {
     return 'BackupConfig'
   }
 
-  function setMonitoringModel(){
+  function setMonitoringModel() {
     return 'Prometheus-Operator'
   }
 
@@ -3208,6 +3211,6 @@ export const useFunc = (model) => {
     hasNoAnnotations,
     fetchTopologyMachines,
     onMachineChange,
-    setMonitoringModel
+    setMonitoringModel,
   }
 }
