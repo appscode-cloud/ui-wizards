@@ -1152,11 +1152,7 @@ export const useFunc = (model) => {
   }
 
   function isIssuerRefRequired() {
-    const hasTls = hasTlsField({
-      discriminator,
-      getValue,
-      watchDependency,
-    })
+    const hasTls = hasTlsField()
 
     return !hasTls
   }
