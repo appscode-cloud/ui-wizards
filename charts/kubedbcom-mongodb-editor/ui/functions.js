@@ -53,8 +53,6 @@ export const useFunc = (model) => {
     const modelPathValue = getValue(model, modelPath)
     // watchDependency('model#' + modelPath)
     return modelPathValue === value
-
-    return prometheusOpt.value === 'Prometheus-Operator'
   }
 
   async function getResources(group, version, resource) {
@@ -651,13 +649,11 @@ export const useFunc = (model) => {
   function showMonitoringSection() {
     // watchDependency('discriminator#/enableMonitoring')
     const configureStatus = getValue(discriminator, '/enableMonitoring')
-    window.console.log('showMonitoringSection', configureStatus)
     return configureStatus
   }
 
   function onEnableMonitoringChange() {
     const configureStatus = getValue(discriminator, '/enableMonitoring')
-    window.console.log('onEnableMonitoringChange', configureStatus)
     if (configureStatus) {
       commit('wizard/model$update', {
         path: '/resources/kubedbComMongoDB/spec/monitor',
@@ -1958,8 +1954,9 @@ export const useFunc = (model) => {
     })
   }
 
-  function isValueExistInModel({ model, getValue }, path) {
+  function isValueExistInModel(path) {
     const modelValue = getValue(model, path)
+    window.console.log('isValueExistInModel', modelValue)
     return !!modelValue
   }
 
