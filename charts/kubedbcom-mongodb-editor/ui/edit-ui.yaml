@@ -2693,30 +2693,34 @@ step:
                 type: input
                 label: name
                 schema: schema/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/args/items
-            - type: array-object-form
-              label: New Environment Variable
-              schema: schema/properties/userinfo/properties/obj
-              elements:
-              - type: input
-                label: Name
-                schema: name
-                validation:
-                  type: required
-              - type: radio
-                label: Value From
-                schema: radio
-                options:
-                - Input
-                - Secret
-                - ConfigMap
-              - type: input
-                label: Value
-                schema: schema/properties/temp
-              - type: select
-                label: Secret Name
-                schema: select
-                options:
-                - mongo-actions-test-key
+            - type: block-layout
+              label: Metadata
+              showLabels: true 
+              elements: 
+                - type: array-object-form
+                  label: New Environment Variable
+                  schema: schema/properties/userinfo/properties/obj
+                  elements:
+                  - type: input
+                    label: Name
+                    schema: name
+                    validation:
+                      type: required
+                  - type: radio
+                    label: Value From
+                    schema: radio
+                    options:
+                    - Input
+                    - Secret
+                    - ConfigMap
+                  - type: input
+                    label: Value
+                    schema: schema/properties/temp
+                  - type: select
+                    label: Secret Name
+                    schema: select
+                    options:
+                    - mongo-actions-test-key
         - type: input 
           label: 'label'
           schema: schema/properties/metadata/properties/release/properties/name
