@@ -2699,7 +2699,7 @@ step:
               elements: 
                 - type: array-object-form
                   label: New Environment Variable
-                  schema: schema/properties/userinfo/properties/obj
+                  schema: schema/properties/items
                   elements:
                   - type: input
                     label: Name
@@ -2708,11 +2708,21 @@ step:
                       type: required
                   - type: radio
                     label: Value From
-                    schema: radio
+                    schema: temp/properties/valueFromType
+                    init: 
+                      type: func 
+                      value: setValueFrom
                     options:
-                    - Input
-                    - Secret
-                    - ConfigMap
+                    - text: Input
+                      value: Input
+                    - text: Secret
+                      value: Secret
+                    - text: ConfigMap
+                      value: ConfigMap
+                    watcher:
+                      func: onValueFromChange
+                      paths:
+                        - temp/properties/valueFromType
                   - type: input
                     label: Value
                     schema: schema/properties/temp
