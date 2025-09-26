@@ -114,7 +114,6 @@ export const useFunc = (model) => {
   function isEqualToValueFromType(value) {
     //watchDependency('discriminator#/valueFromType')
     const valueFrom = getValue(discriminator, '/valueFromType')
-    window.console.log('isEqualToValueFromType', valueFrom, value)
     return valueFrom === value
   }
   function isNotShardModeSelected({ model, getValue, watchDependency }) {
