@@ -1,8 +1,6 @@
-steps:
-- form:
-    discriminator:
-      dbDetails:
-        type: object
+type: multi-step-form
+step:
+  - type: single-step-form
     elements:
 # common
       - type: input
@@ -474,131 +472,28 @@ steps:
           type: func
           value: setApplyToIfReady
         options:
-        - text: Update
-          value: update
-        - text: Rotate
-          value: rotate
-        - text: Remove
-          value: remove
-        schema:
-          $ref: discriminator#/properties/tlsOperation
-        type: radio
-      - if: returnFalse
-        schema:
-          $ref: schema#/properties/spec/properties/tls/properties/remove
-        type: switch
-      - if: returnFalse
-        schema:
-          $ref: schema#/properties/spec/properties/tls/properties/rotateCertificates
-        type: switch
-      - computed: setClientAuthMode
-        fetch: getClientAuthModes
-        label:
-          text: labels.client_auth_mode
-        schema:
-          $ref: schema#/properties/spec/properties/tls/properties/clientAuthMode
-        type: radio
-      - elements:
-        - computed: setSSLMode
-          label:
-            text: labels.ssl_mode
-          options:
-          - text: allow
-            value: allow
-          - text: prefer
-            value: prefer
-          - text: require
-            value: require
-          - text: verify-ca
-            value: verify-ca
-          - text: verify-full
-            value: verify-full
-          schema:
-            $ref: schema#/properties/spec/properties/tls/properties/sslMode
-          type: radio
-        - computed: initIssuerRefApiGroup
-          disabled: true
-          label:
-            text: labels.api_group
-          schema:
-            $ref: schema#/properties/spec/properties/tls/properties/issuerRef/properties/apiGroup
-          type: input
-        - computed: setValueFromDbDetails|/spec/tls/issuerRef/kind
-          label:
-            text: labels.kind
-          options:
-          - text: Issuer
-            value: Issuer
-          - text: ClusterIssuer
-            value: ClusterIssuer
-          required: isIssuerRefRequired
-          schema:
-            $ref: schema#/properties/spec/properties/tls/properties/issuerRef/properties/kind
-          type: select
-        - allowUserDefinedOption: true
-          computed: setValueFromDbDetails|/spec/tls/issuerRef/name
-          fetch: getIssuerRefsName
-          label:
-            text: labels.name
-          required: isIssuerRefRequired
-          schema:
-            $ref: schema#/properties/spec/properties/tls/properties/issuerRef/properties/name
-          type: select
-        if: showIssuerRefAndCertificates
-        schema:
-          $ref: schema#/properties/spec/properties/tls/properties/issuerRef
-        type: single-step-form
-      - alias: reusable_certificates
-        chart:
-          name: uibytebuildersdev-component-certificates
-          version: v0.25.0
-        computed: setValueFromDbDetails|/spec/tls/certificates|/spec/tls/certificates
-        functionCallbacks:
-          getAliasOptions:
-            $ref: functions#/getAliasOptions
-        if: showIssuerRefAndCertificates
-        moduleResolver: fetchJsons
-        schema:
-          $ref: schema#/properties/spec/properties/tls/properties/certificates
-        type: reusable-element
-      if: ifRequestTypeEqualsTo|ReconfigureTLS
-      label:
-        text: labels.tls
-      schema:
-        $ref: schema#/properties/spec/properties/tls
-      type: single-step-form
-    - label:
-        text: labels.timeout
-      options:
-      - text: 5 minutes
-        value: 5m
-      - text: 10 minutes
-        value: 10m
-      - text: 30 minutes
-        value: 30m
-      - text: 1 hour
-        value: 1h
-      - text: 2 hours
-        value: 2h
-      - text: 5 hours
-        value: 5h
-      - text: 10 hours
-        value: 10h
-      schema:
-        $ref: schema#/properties/spec/properties/timeout
-      type: select
-    - computed: setApplyToIfReady
-      label:
-        text: labels.apply
-      options:
-      - text: IfReady (OpsRequest will be applied if database is ready)
-        value: IfReady
-      - text: Always (OpsRequest will always be applied)
-        value: Always
-      schema:
-        $ref: schema#/properties/spec/properties/apply
-      type: radio
-    type: single-step-form
-  id: basic
-  title: steps.0.label
-type: multi-step-form
+          - text: 5 minutes
+            value: 5m
+          - text: 10 minutes
+            value: 10m
+          - text: 30 minutes
+            value: 30m
+          - text: 1 hour
+            value: 1h
+          - text: 2 hours
+            value: 2h
+          - text: 5 hours
+            value: 5h
+          - text: 10 hours
+            value: 10h
+      - type: radio
+        label: apply
+        schema: 'schema/properties/spec/properties/apply'
+        init:
+          type: func
+          value: setApplyToIfReady
+        options:
+          - text: IfReady (OpsRequest will be applied if database is ready)
+            value: IfReady
+          - text: Always (OpsRequest will always be applied)
+            value: Always
