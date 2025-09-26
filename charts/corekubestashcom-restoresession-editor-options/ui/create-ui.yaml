@@ -57,13 +57,6 @@ step:
             - type: block-layout
               schema: schema/properties/spec/properties/addon
               elements:
-                - type: input
-                  if: 
-                    name: returnFalse
-                    type: function
-                  init: 
-                    type: func
-                    name: setSecurityContext
                 - type: select
                   label: Name
                   loader: getAddons
@@ -78,6 +71,13 @@ step:
                     paths: 
                       - temp/properties/params
                   schema: temp/properties/params
+                - type: input
+                  if: 
+                    name: returnFalse
+                    type: function
+                  init: 
+                    type: func
+                    name: setSecurityContext
             - type: block-layout
               label: Target
               hideBlock: true
@@ -120,113 +120,6 @@ step:
 #         nameSpaceApi:
 #           default: false
 #           type: boolean
-
-#       elements:
-#         - type: select
-#           label: Select Namespace
-#           if:
-#             type: function
-#             name: isConsole
-#           loader: fetchNamespaces
-#           hasGroup: true
-#           schema: schema/properties/metadata/properties/release/properties/namespace
-#         - type: input
-#           if:
-#             name: returnFalse
-#             type: function
-#           init: 
-#             type: func
-#             name: init
-#         - type: input
-#           label: Name
-#           if:
-#             type: function
-#             name: isConsole
-#           schema: schema/properties/metadata/properties/release/properties/name
-#         - type: block-layout
-#           showLabels: false
-#           schema: schema/properties/spec
-#           elements:
-#             - type: input
-#               if: 
-#                 name: returnFalse
-#                 type: function
-#               init: 
-#                 type: func
-#                 name: initMetadata
-#             - type: block-layout
-#               schema: schema/properties/spec/properties/dataSource
-#               elements: 
-#                 - type: select
-#                   label: Repository
-#                   loader: getRepositories
-#                   watcher: 
-#                     func: onRepoChange
-#                     paths: 
-#                       - temp/properties/repository
-#                   validation: 
-#                     type: required
-#                   schema: temp/properties/repository
-#                 - type: select
-#                   label: Snapshot
-#                   loader: getSnapshots
-#                   schema: schema/properties/spec/properties/dataSource/properties/snapshot
-#             - type: block-layout
-#               schema: schema/properties/spec/properties/addon
-#               elements:
-#                 - type: select
-#                   label: Name
-#                   loader: getAddons
-#                   if: 
-#                     type: function
-#                     name: isConsole
-#                   schema: schema/properties/spec/properties/addon/properties/name
-#                 - type: textarea
-#                   label: Additional Parameters
-#                   watcher: 
-#                     func: onParameterChange
-#                     paths: temp/properties/params
-#                   schema: temp/properties/params
-#                 - type: input
-#                   if: 
-#                     name: returnFalse
-#                     type: function
-#                   init: 
-#                     type: func
-#                     name: setSecurityContext
-#             - type: block-layout
-#               label: Target
-#               hideBlock: true
-#               if: 
-#                 type: function
-#                 name: isConsole
-#               schema: schema/properties/spec/properties/target
-#               showLabels: true
-#               elements:
-#                 - type: select
-#                   label: Api Group
-#                   loader: getApiGroup
-#                   schema: schema/properties/spec/properties/target/properties/apiGroup
-#                 - type: select
-#                   label: Kind
-#                   loader: getKinds
-#                   watcher: 
-#                     func: setVersion
-#                     paths: 
-#                       - schema/properties/spec/properties/target/properties/kind
-#                   schema: schema/properties/spec/properties/target/properties/kind
-#                 - type: select
-#                   label: Namespace
-#                   loader: fetchNamespaces
-#                   hasGroup: true
-#                   schema: schema/properties/spec/properties/target/properties/namespace
-#                 - type: select
-#                   label: Name
-#                   loader: getTargetName
-#                   schema: schema/properties/spec/properties/target/properties/name       
-          
-
-
 #       elements:
 #       - fetch: fetchNamespaces
 #         hasGroup: isRancherManaged

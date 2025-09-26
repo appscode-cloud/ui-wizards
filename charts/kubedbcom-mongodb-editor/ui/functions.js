@@ -1,5 +1,14 @@
 // *************************      common functions ********************************************
 // eslint-disable-next-line no-empty-pattern
+
+const { ref, computed, axios, useOperator, store } = window.vueHelpers || {}
+export const useFunc = (model) => {
+    const route = store.state?.route
+
+  const { getValue, storeGet, discriminator, setDiscriminatorValue, commit } = useOperator(
+    model,
+    store.state,
+  )
 async function fetchJsons({ axios, itemCtx }) {
   let ui = {}
   let language = {}
@@ -3172,4 +3181,5 @@ return {
   hasNoAnnotations,
   fetchTopologyMachines,
   onMachineChange,
+}
 }
