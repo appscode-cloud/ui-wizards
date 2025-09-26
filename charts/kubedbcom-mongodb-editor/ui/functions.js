@@ -2184,7 +2184,7 @@ export const useFunc = (model) => {
     }
   }
 
-  async function getSecrets({ storeGet, axios, model, getValue, watchDependency }) {
+  async function getSecrets() {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
     const namespace = getValue(model, '/metadata/release/namespace')
@@ -2750,7 +2750,46 @@ export const useFunc = (model) => {
       )
     }
   }
+async function getConfigMapKeys({
+  storeGet,
+  axios,
+  getValue,
+  watchDependency,
+  rootModel,
+  reusableElementCtx,
+}) {
+  const owner = storeGet('/route/params/user')
+  const cluster = storeGet('/route/params/cluster')
+  const namespace = getValue(reusableElementCtx, '/dataContext/namespace')
+  const configMapName =
+    (rootModel &&
+      rootModel.valueFrom &&
+      rootModel.valueFrom.configMapKeyRef &&
+      rootModel.valueFrom.configMapKeyRef.name) ||
+    ''
+  // watchDependency('data#/namespace')
+  // watchDependency('rootModel#/valueFrom/configMapKeyRef/name')
 
+  if (!configMapName) return []
+
+  try {
+    const resp = await axios.get(
+      `/clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}/configmaps/${configMapName}`,
+    )
+
+    const configMaps = (resp && resp.data && resp.data.data) || {}
+
+    const configMapKeys = Object.keys(configMaps).map((item) => ({
+      text: item,
+      value: item,
+    }))
+
+    return configMapKeys
+  } catch (e) {
+    console.log(e)
+    return []
+  }
+}
   async function fetchNodeTopology({ axios, storeGet }) {
     const owner = storeGet('/route/params/user') || ''
     const cluster = storeGet('/route/params/cluster') || ''
@@ -3231,5 +3270,6 @@ export const useFunc = (model) => {
     setMonitoringModel,
     isEqualToValueFromType,
     onValueFromChange,
+    getConfigMapKeys,
   }
 }

@@ -2735,9 +2735,17 @@ step:
                       name: isEqualToValueFromType|Input
                       type: function
                   - type: select
-                    label: ConfigMap Key
+                    label: ConfigMap Name
                     schema: schema/items/properties/valueFrom/properties/configMapKeyRef/properties/name
                     loader: getResources|core|v1|configmaps
+                  - type: select
+                    label: ConfigMap Key
+                    schema: schema/items/properties/valueFrom/properties/configMapKeyRef/properties/key
+                    loader: getConfigMapKeys
+                  - type: select
+                    label: Secret Name
+                    schema: schema/items/properties/valueFrom/properties/secretKeyRef/properties/name
+                    loader: getSecrets 
         - type: input 
           label: 'label'
           schema: schema/properties/metadata/properties/release/properties/name
