@@ -1301,50 +1301,7 @@ export const useFunc = (model) => {
     return !!(model && model.alias)
   }
 
-  function namespaceWatcherFunctions() {
-    getDbs()
-    initDatabaseRef()
-    getConfigSecrets()
-    resourceNames()
-    getIssuerRefsName()
-    onNamespaceChange()
-  }
-
-  function requestTypeWatcherFunctions() {
-    onRequestTypeChange()
-    ifRequestTypeEqualsTo()
-    showAndInitName()
-  }
-
-  function databaseRefWatcherFunctions() {
-    onDbChange()
-    showAndInitName()
-    isDbDetailsLoading()
-  }
-
-  function IssuerRefWatcherFunctions() {
-    initIssuerRefApiGroup()
-    getIssuerRefsName()
-  }
-
-  function tlsOperationWatcherFunction() {
-    showIssuerRefAndCertificates()
-    onTlsOperationChange()
-  }
-
-  function dbDetailsWatcherFunction() {
-    getDbTls()
-    getDbType()
-    isDbDetailsLoading()
-  }
-
   return {
-    dbDetailsWatcherFunction,
-    tlsOperationWatcherFunction,
-    namespaceWatcherFunctions,
-    requestTypeWatcherFunctions,
-    databaseRefWatcherFunctions,
-    IssuerRefWatcherFunctions,
     fetchAliasOptions,
     validateNewCertificates,
     disableAlias,
