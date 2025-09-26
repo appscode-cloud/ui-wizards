@@ -12,6 +12,7 @@ export const useFunc = (model) => {
   setDiscriminatorValue('/enableMonitoring', true)
   // model.value['temp/customizeExporter'] = true
   setDiscriminatorValue('/customizeExporter', true)
+  setDiscriminatorValue('/valueFromType', 'Input')
   async function fetchJsons({ axios, itemCtx }) {
     let ui = {}
     let language = {}
@@ -81,6 +82,21 @@ export const useFunc = (model) => {
       return []
     }
   }
+  function onValueFromChange() {
+    window.console.log('onValueFromChange')
+    // const valueFrom = getValue(discriminator, '/valueFromType')
+    // if (valueFrom === 'input') {
+    //   if (isConfigMapTypeValueFrom({ rootModel })) updateModelValue('valueFrom/configMapKeyRef', true)
+    //   if (isSecretTypeValueFrom({ rootModel })) updateModelValue('valueFrom/secretKeyRef', true)
+    // } else if (valueFrom === 'secret') {
+    //   if (!isSecretTypeValueFrom({ rootModel })) updateModelValue('valueFrom/secretKeyRef', false, {})
+    //   if (isConfigMapTypeValueFrom({ rootModel })) updateModelValue('valueFrom/configMapKeyRef', true)
+    // } else if (valueFrom === 'configMap') {
+    //   if (!isConfigMapTypeValueFrom({ rootModel }))
+    //     updateModelValue('valueFrom/configMapKeyRef', false, {})
+    //   if (isSecretTypeValueFrom({ rootModel })) updateModelValue('valueFrom/secretKeyRef', true)
+    // }
+  }
 
   function isEqualToDiscriminatorPath(
     { discriminator, getValue, watchDependency },
@@ -95,7 +111,12 @@ export const useFunc = (model) => {
   function setValueFromModel({ getValue, model }, path) {
     return getValue(model, path)
   }
-
+  function isEqualToValueFromType(value) {
+    //watchDependency('discriminator#/valueFromType')
+    const valueFrom = getValue(discriminator, '/valueFromType')
+    window.console.log('isEqualToValueFromType', valueFrom, value)
+    return valueFrom === value
+  }
   function isNotShardModeSelected({ model, getValue, watchDependency }) {
     watchDependency('model#/resources/kubedbComMongoDB/spec')
     const hasShardTopology = getValue(model, '/resources/kubedbComMongoDB/spec/shardTopology')
@@ -1956,7 +1977,6 @@ export const useFunc = (model) => {
 
   function isValueExistInModel(path) {
     const modelValue = getValue(model, path)
-    window.console.log('isValueExistInModel', modelValue)
     return !!modelValue
   }
 
@@ -3209,5 +3229,7 @@ export const useFunc = (model) => {
     fetchTopologyMachines,
     onMachineChange,
     setMonitoringModel,
+    isEqualToValueFromType,
+    onValueFromChange,
   }
 }
