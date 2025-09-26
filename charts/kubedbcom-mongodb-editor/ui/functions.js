@@ -43,6 +43,8 @@ export const useFunc = (model) => {
     }
   }
 
+  
+
   function disableLableChecker({ itemCtx }) {
     const { key } = itemCtx
     if (key.startsWith('app.kubernetes.io') || key.includes('helm')) return true
@@ -182,7 +184,6 @@ export const useFunc = (model) => {
   }
 
   async function resourceNames(
-    { axios, getValue, model, watchDependency, storeGet },
     group,
     version,
     resource,

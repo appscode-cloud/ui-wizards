@@ -13,6 +13,7 @@ async function resourceNames(
     version,
     resource,
   })
+  window.console.log('resourceNames',resource)
 
   if (resource === 'secrets') {
     resources = resources.filter((item) => {
