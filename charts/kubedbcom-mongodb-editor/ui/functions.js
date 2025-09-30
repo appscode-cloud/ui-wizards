@@ -19,6 +19,14 @@ export const useFunc = (model) => {
   setDiscriminatorValue('blueprintEnabled', false)
   setDiscriminatorValue('archiverEnabled', false)
 
+  setDiscriminatorValue('binding', false)
+
+  // model.value['temp/enableMonitoring'] = true
+  setDiscriminatorValue('/enableMonitoring', true)
+  // model.value['temp/customizeExporter'] = true
+  setDiscriminatorValue('/customizeExporter', true)
+  setDiscriminatorValue('/valueFromType', 'Input')
+
   // *************************      common functions ********************************************
   // eslint-disable-next-line no-empty-pattern
   async function fetchJsons({ axios, itemCtx }) {
@@ -57,13 +65,14 @@ export const useFunc = (model) => {
     else return false
   }
 
-  function isEqualToModelPathValue({ model, getValue, watchDependency }, value, modelPath) {
+  function isEqualToModelPathValue(value) {
+    const modelPath = 'resources/kubedbComMongoDB/spec/monitor/agent'
     const modelPathValue = getValue(model, modelPath)
-    watchDependency('model#' + modelPath)
+    // watchDependency('model#' + modelPath)
     return modelPathValue === value
   }
 
-  async function getResources({ axios, storeGet }, group, version, resource) {
+  async function getResources(group, version, resource) {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
 
@@ -76,7 +85,7 @@ export const useFunc = (model) => {
       )
 
       const resources = (resp && resp.data && resp.data.items) || []
-
+      window.console.log('getResources', resource)
       resources.map((item) => {
         const name = (item.metadata && item.metadata.name) || ''
         item.text = name
@@ -88,6 +97,22 @@ export const useFunc = (model) => {
       console.log(e)
       return []
     }
+  }
+
+  function onValueFromChange() {
+    window.console.log('onValueFromChange')
+    // const valueFrom = getValue(discriminator, '/valueFromType')
+    // if (valueFrom === 'input') {
+    //   if (isConfigMapTypeValueFrom({ rootModel })) updateModelValue('valueFrom/configMapKeyRef', true)
+    //   if (isSecretTypeValueFrom({ rootModel })) updateModelValue('valueFrom/secretKeyRef', true)
+    // } else if (valueFrom === 'secret') {
+    //   if (!isSecretTypeValueFrom({ rootModel })) updateModelValue('valueFrom/secretKeyRef', false, {})
+    //   if (isConfigMapTypeValueFrom({ rootModel })) updateModelValue('valueFrom/configMapKeyRef', true)
+    // } else if (valueFrom === 'configMap') {
+    //   if (!isConfigMapTypeValueFrom({ rootModel }))
+    //     updateModelValue('valueFrom/configMapKeyRef', false, {})
+    //   if (isSecretTypeValueFrom({ rootModel })) updateModelValue('valueFrom/secretKeyRef', true)
+    // }
   }
 
   function isEqualToDiscriminatorPath(
@@ -102,6 +127,12 @@ export const useFunc = (model) => {
 
   function setValueFromModel({ getValue, model }, path) {
     return getValue(model, path)
+  }
+
+  function isEqualToValueFromType(value) {
+    //watchDependency('discriminator#/valueFromType')
+    const valueFrom = getValue(discriminator, '/valueFromType')
+    return valueFrom === value
   }
 
   function isNotShardModeSelected({ model, getValue, watchDependency }) {
@@ -169,12 +200,7 @@ export const useFunc = (model) => {
     return ans
   }
 
-  async function resourceNames(
-    { axios, getValue, model, watchDependency, storeGet },
-    group,
-    version,
-    resource,
-  ) {
+  async function resourceNames(group, version, resource) {
     const namespace = getValue(model, '/metadata/release/namespace')
     watchDependency('model#/metadata/release/namespace')
 
@@ -654,13 +680,13 @@ export const useFunc = (model) => {
 
   /****** Monitoring *********/
 
-  function showMonitoringSection({ watchDependency, discriminator, getValue }) {
-    watchDependency('discriminator#/enableMonitoring')
+  function showMonitoringSection() {
+    // watchDependency('discriminator#/enableMonitoring')
     const configureStatus = getValue(discriminator, '/enableMonitoring')
     return configureStatus
   }
 
-  function onEnableMonitoringChange({ discriminator, getValue, commit }) {
+  function onEnableMonitoringChange() {
     const configureStatus = getValue(discriminator, '/enableMonitoring')
     if (configureStatus) {
       commit('wizard/model$update', {
@@ -680,13 +706,14 @@ export const useFunc = (model) => {
     })
   }
 
-  function showCustomizeExporterSection({ watchDependency, discriminator, getValue }) {
-    watchDependency('discriminator#/customizeExporter')
+  function showCustomizeExporterSection() {
+    // watchDependency('discriminator#/customizeExporter')
     const configureStatus = getValue(discriminator, '/customizeExporter')
     return configureStatus
   }
 
-  function onCustomizeExporterChange({ discriminator, getValue, commit }) {
+  function onCustomizeExporterChange() {
+    window.console.log('onCustomizeExporterChange')
     const configureStatus = getValue(discriminator, '/customizeExporter')
     if (configureStatus) {
       commit('wizard/model$update', {
@@ -1396,7 +1423,7 @@ export const useFunc = (model) => {
   // backup form
   function showBackupForm() {
     const scheduleBackup = getValue(discriminator, '/scheduleBackup')
-
+    // watchDependency('discriminator#/scheduleBackup')
     if (scheduleBackup === 'yes') return true
     else return false
   }
@@ -1673,11 +1700,16 @@ export const useFunc = (model) => {
   }
 
   function isBackupDataLoadedTrue() {
+    // watchDependency('discriminator#/isBackupDataLoaded')
     return !!getValue(discriminator, '/isBackupDataLoaded')
   }
 
   async function setBackupType() {
     return 'BackupConfig'
+  }
+
+  function setMonitoringModel() {
+    return 'Prometheus-Operator'
   }
 
   async function getTypes() {
@@ -1729,6 +1761,7 @@ export const useFunc = (model) => {
   }
 
   function isBackupType(type) {
+    // watchDependency('discriminator#/backupType')
     const selectedType = getValue(discriminator, '/backupType')
 
     return selectedType === type
@@ -1850,17 +1883,22 @@ export const useFunc = (model) => {
   }
 
   function showPause() {
+    // watchDependency('discriminator#/backupConfigContext')
+    // watchDependency('discriminator#/config')
     const contex = getValue(discriminator, '/backupConfigContext')
     const configName = getValue(discriminator, '/config')
     return !!configName && contex === 'Modify'
   }
 
   function showConfigList() {
+    // watchDependency('discriminator#/backupConfigContext')
     const contex = getValue(discriminator, '/backupConfigContext')
     return contex === 'Modify' || contex === 'Delete'
   }
 
   function showSchedule() {
+    // watchDependency('discriminator#/backupConfigContext')
+    // watchDependency('discriminator#/config')
     const configName = getValue(discriminator, '/config')
     const contex = getValue(discriminator, '/backupConfigContext')
     if (contex === 'Create') return true
@@ -1946,7 +1984,7 @@ export const useFunc = (model) => {
     })
   }
 
-  function isValueExistInModel({ model, getValue }, path) {
+  function isValueExistInModel(path) {
     const modelValue = getValue(model, path)
     return !!modelValue
   }
@@ -2073,7 +2111,7 @@ export const useFunc = (model) => {
     return false
   }
 
-  function onAgentChange({ commit, model, getValue }) {
+  function onAgentChange() {
     const agent = getValue(model, '/resources/kubedbComMongoDB/spec/monitor/agent')
     if (agent === 'prometheus.io') {
       commit('wizard/model$update', {
@@ -2155,7 +2193,7 @@ export const useFunc = (model) => {
     }
   }
 
-  async function getSecrets({ storeGet, axios, model, getValue, watchDependency }) {
+  async function getSecrets() {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
     const namespace = getValue(model, '/metadata/release/namespace')
@@ -2721,7 +2759,46 @@ export const useFunc = (model) => {
       )
     }
   }
+  async function getConfigMapKeys({
+    storeGet,
+    axios,
+    getValue,
+    watchDependency,
+    rootModel,
+    reusableElementCtx,
+  }) {
+    const owner = storeGet('/route/params/user')
+    const cluster = storeGet('/route/params/cluster')
+    const namespace = getValue(reusableElementCtx, '/dataContext/namespace')
+    const configMapName =
+      (rootModel &&
+        rootModel.valueFrom &&
+        rootModel.valueFrom.configMapKeyRef &&
+        rootModel.valueFrom.configMapKeyRef.name) ||
+      ''
+    // watchDependency('data#/namespace')
+    // watchDependency('rootModel#/valueFrom/configMapKeyRef/name')
 
+    if (!configMapName) return []
+
+    try {
+      const resp = await axios.get(
+        `/clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}/configmaps/${configMapName}`,
+      )
+
+      const configMaps = (resp && resp.data && resp.data.data) || {}
+
+      const configMapKeys = Object.keys(configMaps).map((item) => ({
+        text: item,
+        value: item,
+      }))
+
+      return configMapKeys
+    } catch (e) {
+      console.log(e)
+      return []
+    }
+  }
   async function fetchNodeTopology({ axios, storeGet }) {
     const owner = storeGet('/route/params/user') || ''
     const cluster = storeGet('/route/params/cluster') || ''
@@ -2829,14 +2906,14 @@ export const useFunc = (model) => {
     return JSON.parse(temp)
   }
 
-  function isBindingAlreadyOn({ model, getValue }) {
+  function isBindingAlreadyOn() {
     const value = getValue(model, '/resources')
     const keys = Object.keys(value)
-    isExposeBinding = !!keys.find((str) => str === 'catalogAppscodeComMongoDBBinding')
+    const isExposeBinding = !!keys.find((str) => str === 'catalogAppscodeComMongoDBBinding')
     return isExposeBinding
   }
 
-  async function addOrRemoveBinding({ commit, model, getValue, discriminator }) {
+  async function addOrRemoveBinding() {
     const value = getValue(discriminator, `/binding`)
     const dbName = getValue(model, '/metadata/release/name')
     const dbNamespace = getValue(model, '/metadata/release/namespace')
@@ -2868,7 +2945,7 @@ export const useFunc = (model) => {
     }
   }
 
-  function getOpsRequestUrl({ storeGet, model, getValue, mode }, reqType) {
+  function getOpsRequestUrl(reqType) {
     const cluster = storeGet('/route/params/cluster')
     const domain = storeGet('/domain') || ''
     const owner = storeGet('/route/params/user')
@@ -3198,5 +3275,9 @@ export const useFunc = (model) => {
     hasNoAnnotations,
     fetchTopologyMachines,
     onMachineChange,
+    setMonitoringModel,
+    isEqualToValueFromType,
+    onValueFromChange,
+    getConfigMapKeys,
   }
 }
