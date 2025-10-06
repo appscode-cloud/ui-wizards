@@ -2737,7 +2737,7 @@ step:
                   - type: select
                     label: ConfigMap Name
                     schema: schema/items/properties/valueFrom/properties/configMapKeyRef/properties/name
-                    loader: getResources|core|v1|configmaps
+                    loader: resourceNames|core|v1|configmaps
                   - type: select
                     label: ConfigMap Key
                     schema: schema/items/properties/valueFrom/properties/configMapKeyRef/properties/key
@@ -2746,6 +2746,11 @@ step:
                     label: Secret Name
                     schema: schema/items/properties/valueFrom/properties/secretKeyRef/properties/name
                     loader: getSecrets 
+                  - type: select 
+                    label: Secret Key
+                    schema: schema/items/properties/valueFrom/properties/secretKeyRef/properties/key
+                    loader: getSecretKeys
+                      
         - type: input 
           label: 'label'
           schema: schema/properties/metadata/properties/release/properties/name
