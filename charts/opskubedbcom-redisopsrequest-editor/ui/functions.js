@@ -712,11 +712,15 @@ export const useFunc = (model) => {
   // machine profile stuffs
   function getMachines() {
     const presets = storeGet('/kubedbuiPresets') || {}
+    const dbDetails = getValue(discriminator, '/dbDetails')
+    const limits = dbDetails?.spec?.podTemplate?.spec?.resources?.limits || {}
+
     const avlMachines = presets.admin?.machineProfiles?.available || []
     let arr = []
     if (avlMachines.length) {
       arr = avlMachines.map((machine) => {
-        if (machine === 'custom') return { text: machine, value: { machine } }
+        if (machine === 'custom')
+          return { text: machine, value: { machine, cpu: limits.cpu, memory: limits.memory } }
         else {
           const machineData = machinesFromPreset.find((val) => val.id === machine)
           if (machineData) {
@@ -737,7 +741,8 @@ export const useFunc = (model) => {
     } else {
       arr = machineList
         .map((machine) => {
-          if (machine === 'custom') return { text: machine, value: { machine } }
+          if (machine === 'custom')
+            return { text: machine, value: { machine, cpu: limits.cpu, memory: limits.memory } }
           // const subText = `CPU: ${machines[machine].resources.limits.cpu}, Memory: ${machines[machine].resources.limits.memory}`
           const text = machine
           return {
@@ -757,6 +762,7 @@ export const useFunc = (model) => {
 
   function setMachine() {
     const dbDetails = getValue(discriminator, '/dbDetails')
+    const limits = dbDetails?.spec?.podTemplate?.spec?.resources?.limits || {}
     const annotations = dbDetails?.metadata?.annotations || {}
     const machine = annotations['kubernetes.io/instance-type'] || 'custom'
 
@@ -764,7 +770,7 @@ export const useFunc = (model) => {
 
     const machinePresets = machinesFromPreset.find((item) => item.id === machine)
     if (machinePresets) return { machine }
-    else return { machine: 'custom' }
+    else return { machine: 'custom', cpu: limits.cpu, memory: limits.memory }
   }
 
   function onMachineChange(type, valPath) {
