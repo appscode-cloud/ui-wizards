@@ -131,6 +131,7 @@ export const useFunc = (model) => {
 
   function isEqualToValueFromType(value) {
     //watchDependency('discriminator#/valueFromType')
+    console.log('discriminator', value)
     const valueFrom = getValue(discriminator, '/valueFromType')
     return valueFrom === value
   }
