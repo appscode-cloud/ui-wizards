@@ -2,16 +2,19 @@ type: multi-step-form
 step:
 - type: single-step-form
   id: options
-  loader: init #fix: must be computed
+  loader: init
   elements:
     - type: select
       label: Select Namespace
       schema: schema/properties/metadata/properties/release/properties/namespace
-      # hasGroup: isRancherManaged // should accept function
+      hasGroup: isRancherManaged
       if:
         type: function
         name: isConsole
-      loader: fetchNamespaces #fix: must be computed
+      loader:
+        name: fetchNamespaces
+        watchPaths:
+          - temp/properties/nameSpaceApi
     - type: input
       label: Name
       schema: schema/properties/metadata/properties/release/properties/name
@@ -20,7 +23,7 @@ step:
         name: isConsole
     - type: block-layout
       showLabels: false
-      loader: initMetadata #fix: must be computed
+      loader: initMetadata
       elements:
         - type: select
           label: Repository
@@ -35,7 +38,10 @@ step:
           label: Snapshot
           refresh: true
           schema: schema/properties/spec/properties/dataSource/properties/snapshot
-          loader: getSnapshots #fix: must be computed
+          loader:
+            name: getSnapshots
+            watchPaths:
+              - temp/properties/repository
           watcher:
             func: onRepoChange
             paths:
@@ -80,7 +86,7 @@ step:
         label: Namespace
         schema: schema/properties/spec/properties/target/properties/namespace
         loader: fetchNamespaces
-        # hasGroup: isRancherManaged  // should accept function
+        hasGroup: isRancherManaged
         watcher:
           func: fetchNamespaces
           paths:
@@ -88,4 +94,9 @@ step:
       - type: select
         label: Name
         schema: schema/properties/spec/properties/target/properties/name
-        loader: getTargetName #fix: must be computed
+        loader:
+          name: getTargetName
+          watchPaths:
+            - schema/properties/spec/properties/target/properties/apiGroup
+            - schema/properties/spec/properties/target/properties/namespace
+            - schema/properties/spec/properties/target/properties/kind
