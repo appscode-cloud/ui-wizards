@@ -1987,6 +1987,7 @@ export const useFunc = (model) => {
 
   function isValueExistInModel(path) {
     const modelValue = getValue(model, path)
+    console.log('isValueExistInModel',modelValue)
     return !!modelValue
   }
 
