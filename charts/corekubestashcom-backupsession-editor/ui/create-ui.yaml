@@ -3,7 +3,7 @@ step:
   - type: single-step-form
     id: basic
     # label: Basic Information
-    loader: init #computed
+    loader: init
     elements:
       - type: select
         label: Select Backup
@@ -28,7 +28,10 @@ step:
         if:
           type: function
           name: isBackupSelected
-        loader: getSessionOptions #computed
+        loader:
+          name: getSessionOptions
+          watchPaths:
+            - temp/properties/backup
         watcher:
           func: buildObject
           paths:
