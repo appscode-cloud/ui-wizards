@@ -3104,6 +3104,17 @@ export const useFunc = (model) => {
     }
   }
 
+  function setValueFrom({ rootModel }) {
+    console.log('setValueFrom',setValueFrom)
+  if (isConfigMapTypeValueFrom({ rootModel })) {
+    return 'configMap'
+  } else if (isSecretTypeValueFrom({ rootModel })) {
+    return 'secret'
+  } else {
+    return 'input'
+  }
+}
+
   return {
     getOpsRequestUrl,
     handleUnit,
@@ -3280,5 +3291,6 @@ export const useFunc = (model) => {
     isEqualToValueFromType,
     onValueFromChange,
     getConfigMapKeys,
+    setValueFrom,
   }
 }
