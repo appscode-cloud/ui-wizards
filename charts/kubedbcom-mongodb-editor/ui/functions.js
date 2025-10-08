@@ -45,13 +45,13 @@ function disableLableChecker({ itemCtx }) {
   else return false
 }
 
-function isEqualToModelPathValue({ model, getValue, watchDependency }, value, modelPath) {
+function isEqualToModelPathValue( value, modelPath) {
   const modelPathValue = getValue(model, modelPath)
-  watchDependency('model#' + modelPath)
+  // watchDependency('model#' + modelPath)
   return modelPathValue === value
 }
 
-async function getResources({ axios, storeGet }, group, version, resource) {
+async function getResources(group, version, resource) {
   const owner = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
 
@@ -79,11 +79,10 @@ async function getResources({ axios, storeGet }, group, version, resource) {
 }
 
 function isEqualToDiscriminatorPath(
-  { discriminator, getValue, watchDependency },
   value,
   discriminatorPath,
 ) {
-  watchDependency('discriminator#' + discriminatorPath)
+  // watchDependency('discriminator#' + discriminatorPath)
   const discriminatorValue = getValue(discriminator, discriminatorPath)
   return discriminatorValue === value
 }
@@ -92,13 +91,13 @@ function setValueFromModel({ getValue, model }, path) {
   return getValue(model, path)
 }
 
-function isNotShardModeSelected({ model, getValue, watchDependency }) {
-  watchDependency('model#/resources/kubedbComMongoDB/spec')
+function isNotShardModeSelected() {
+  // watchDependency('model#/resources/kubedbComMongoDB/spec')
   const hasShardTopology = getValue(model, '/resources/kubedbComMongoDB/spec/shardTopology')
   return !hasShardTopology
 }
 
-function isShardModeSelected({ model, getValue, watchDependency, commit }) {
+function isShardModeSelected() {
   const resp = !isNotShardModeSelected({ model, getValue, watchDependency })
   if (resp) {
     commit('wizard/model$delete', '/resources/kubedbComMongoDB/spec/configSecret')
@@ -107,7 +106,7 @@ function isShardModeSelected({ model, getValue, watchDependency, commit }) {
   return resp
 }
 
-async function getNamespacedResourceList(axios, storeGet, { namespace, group, version, resource }) {
+async function getNamespacedResourceList(axios, storeGet) {
   const owner = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
 
@@ -130,7 +129,7 @@ async function getNamespacedResourceList(axios, storeGet, { namespace, group, ve
   return ans
 }
 
-async function getResourceList(axios, storeGet, { group, version, resource }) {
+async function getResourceList(axios, storeGet) {
   const owner = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
 
@@ -154,13 +153,12 @@ async function getResourceList(axios, storeGet, { group, version, resource }) {
 }
 
 async function resourceNames(
-  { axios, getValue, model, watchDependency, storeGet },
   group,
   version,
   resource,
 ) {
   const namespace = getValue(model, '/metadata/release/namespace')
-  watchDependency('model#/metadata/release/namespace')
+  // watchDependency('model#/metadata/release/namespace')
 
   let resources = await getNamespacedResourceList(axios, storeGet, {
     namespace,
@@ -185,7 +183,7 @@ async function resourceNames(
   })
 }
 
-async function unNamespacedResourceNames({ axios, storeGet }, group, version, resource) {
+async function unNamespacedResourceNames(group, version, resource) {
   let resources = await getResourceList(axios, storeGet, {
     group,
     version,
@@ -217,7 +215,7 @@ function returnStringYes() {
 }
 
 // ************************* Basic Info **********************************************
-async function getMongoDbVersions({ axios, storeGet }, group, version, resource) {
+async function getMongoDbVersions(group, version, resource) {
   const owner = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
 
@@ -258,8 +256,8 @@ async function getMongoDbVersions({ axios, storeGet }, group, version, resource)
 }
 
 // ************************* Auth Secret Field ******************************************
-function showAuthPasswordField({ model, getValue, watchDependency }) {
-  watchDependency('model#/resources')
+function showAuthPasswordField() {
+  // watchDependency('model#/resources')
   const modelPathValue = getValue(model, '/resources')
   return !!(
     modelPathValue &&
@@ -270,13 +268,13 @@ function showAuthPasswordField({ model, getValue, watchDependency }) {
   )
 }
 
-function showAuthSecretField({ model, getValue, watchDependency }) {
-  watchDependency('model#/resources/kubedbComMongoDB/spec')
+function showAuthSecretField() {
+  // watchDependency('model#/resources/kubedbComMongoDB/spec')
   const modelPathValue = getValue(model, '/resources/kubedbComMongoDB/spec')
   return !!(modelPathValue && modelPathValue.authSecret && modelPathValue.authSecret.name)
 }
 
-function showNewSecretCreateField({ model, getValue, watchDependency, commit }) {
+function showNewSecretCreateField() {
   const resp =
     !showAuthSecretField({ model, getValue, watchDependency }) &&
     !showAuthPasswordField({ model, getValue, watchDependency })
@@ -296,22 +294,22 @@ function showNewSecretCreateField({ model, getValue, watchDependency, commit }) 
 }
 
 // ********************* Database Mode ***********************
-function isNotStandaloneMode({ discriminator, getValue, watchDependency }) {
-  watchDependency('discriminator#/activeDatabaseMode')
+function isNotStandaloneMode() {
+  // watchDependency('discriminator#/activeDatabaseMode')
   const mode = getValue(discriminator, '/activeDatabaseMode')
   return mode !== 'Standalone'
 }
 
-function showCommonStorageClassAndSizeField({ discriminator, getValue, watchDependency }) {
-  watchDependency('discriminator#/activeDatabaseMode')
+function showCommonStorageClassAndSizeField() {
+  // watchDependency('discriminator#/activeDatabaseMode')
   const mode = getValue(discriminator, '/activeDatabaseMode')
   const validType = ['Standalone', 'Replicaset']
   return validType.includes(mode)
 }
-function setDatabaseMode({ model, getValue, watchDependency }) {
+function setDatabaseMode() {
   const modelPathValue = getValue(model, '/resources/kubedbComMongoDB/spec')
 
-  watchDependency('model#/resources/kubedbComMongoDB/spec')
+  // watchDependency('model#/resources/kubedbComMongoDB/spec')
   if (modelPathValue.shardTopology) {
     return 'Sharded'
   } else if (modelPathValue.replicaSet) {
@@ -323,7 +321,6 @@ function setDatabaseMode({ model, getValue, watchDependency }) {
 
 let storageClassList = []
 async function getStorageClassNames(
-  { axios, storeGet, commit, model, getValue, watchDependency, discriminator },
   mode,
 ) {
   const owner = storeGet('/route/params/user')
@@ -358,7 +355,7 @@ async function getStorageClassNames(
   return resources
 }
 
-function setStorageClass({ getValue, commit, model, discriminator }) {
+function setStorageClass() {
   const deletionPolicy = getValue(model, 'resources/kubedbComMongoDB/spec/deletionPolicy') || ''
   const suffix = '-retain'
   let storageClass = ''
@@ -440,7 +437,7 @@ function setStorageClass({ getValue, commit, model, discriminator }) {
   }
 }
 
-function updateConfigServerStorageClass({ getValue, model, commit }) {
+function updateConfigServerStorageClass() {
   const storageClass =
     getValue(
       model,
@@ -453,7 +450,7 @@ function updateConfigServerStorageClass({ getValue, model, commit }) {
   })
 }
 
-function deleteDatabaseModePath({ discriminator, getValue, commit, model }) {
+function deleteDatabaseModePath() {
   const mode = getValue(discriminator, '/activeDatabaseMode')
   const modelSpec = getValue(model, '/resources/kubedbComMongoDB/spec')
   if (mode === 'Sharded') {
@@ -528,8 +525,8 @@ function deleteDatabaseModePath({ discriminator, getValue, commit, model }) {
   }
 }
 
-function isEqualToDatabaseMode({ getValue, watchDependency, discriminator }, value) {
-  watchDependency('discriminator#/activeDatabaseMode')
+function isEqualToDatabaseMode(value) {
+  // watchDependency('discriminator#/activeDatabaseMode')
   const mode = getValue(discriminator, '/activeDatabaseMode')
   return mode === value
 }
@@ -2589,9 +2586,9 @@ function isKubedb({ storeGet }) {
   return !!storeGet('/route/params/actions')
 }
 
-function showOpsRequestOptions({ model, getValue, watchDependency, storeGet, discriminator }) {
+function showOpsRequestOptions() {
   if (isKubedb({ storeGet }) === true) return true
-  watchDependency('model#/spec/databaseRef/name')
+  // watchDependency('model#/spec/databaseRef/name')
   return (
     !!getValue(model, '/spec/databaseRef/name') && !!getValue(discriminator, '/autoscalingType')
   )
@@ -2901,7 +2898,7 @@ async function fetchTopologyMachines({ axios, getValue, storeGet, model, setDisc
   }
 }
 
-function setAllowedMachine({ model, getValue }, type, minmax) {
+function setAllowedMachine(type, minmax) {
   const annotations = getValue(
     model,
     '/resources/autoscalingKubedbComMongoDBAutoscaler/metadata/annotations',
@@ -2923,12 +2920,12 @@ function setAllowedMachine({ model, getValue }, type, minmax) {
   else return mx
 }
 
-async function getMachines({ getValue, watchDependency, discriminator }, type, minmax) {
-  watchDependency('discriminator#/topologyMachines')
+async function getMachines(type, minmax) {
+  // watchDependency('discriminator#/topologyMachines')
   const depends = minmax === 'min' ? 'max' : 'min'
   const dependantPath = `/allowedMachine-${type}-${depends}`
 
-  watchDependency(`discriminator#${dependantPath}`)
+  // watchDependency(`discriminator#${dependantPath}`)
   const dependantMachine = getValue(discriminator, dependantPath)
 
   const nodeGroups = getValue(discriminator, '/topologyMachines') || []
@@ -2948,7 +2945,7 @@ async function getMachines({ getValue, watchDependency, discriminator }, type, m
   return dependantIndex === -1 ? machines : filteredMachine
 }
 
-function hasAnnotations({ model, getValue }, type) {
+function hasAnnotations( type) {
   const annotations = getValue(
     model,
     '/resources/autoscalingKubedbComMongoDBAutoscaler/metadata/annotations',
@@ -2958,11 +2955,11 @@ function hasAnnotations({ model, getValue }, type) {
   return !!instance
 }
 
-function hasNoAnnotations({ model, getValue }) {
+function hasNoAnnotations() {
   return !hasAnnotations({ model, getValue })
 }
 
-function onMachineChange({ model, getValue, discriminator, commit }, type) {
+function onMachineChange(type) {
   const annoPath = '/resources/autoscalingKubedbComMongoDBAutoscaler/metadata/annotations'
   const annotations = getValue(model, annoPath)
   const instance = annotations['kubernetes.io/instance-type']
