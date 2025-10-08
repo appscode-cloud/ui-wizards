@@ -189,19 +189,19 @@ step:
         - type: block-layout
           label: ServiceMonitor Configuration  
           showLabels: true 
-          # if: 
-          #   type: function
-          #   name: isEqualToModelPathValue|Prometheus-Operator|/resources/kubedbComMongoDB/spec/monitor/agent
-          # elements:
-          #   - label: Scrapping Interval
-          #     schema: schema/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/serviceMonitor/properties/interval
-          #     type: input 
+          if: 
+            type: function
+            name: isEqualToModelPathValue|Prometheus-Operator|/resources/kubedbComMongoDB/spec/monitor/agent
+          elements:
+            - label: Scrapping Interval
+              schema: schema/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/serviceMonitor/properties/interval
+              type: input 
         - type: block-layout
           label: Service Monitor
           showLabels: true
-          # if:
-          #   type: function
-          #   name: isEqualToModelPathValue|Custom-ServiceMonitor
+          if:
+            type: function
+            name: isEqualToModelPathValue|Custom-ServiceMonitor
           elements:
           - type: array-object-form
             label: New Endpoint
@@ -223,58 +223,58 @@ step:
             multiple: true
             label: Match Namespaces
             schema: schema/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/namespaceSelector/properties/matchNames
-            # loader: getResources|core|v1|namespaces
-            # if: 
-            #   type: function
-            #   name: returnFalse
+            loader: getResources|core|v1|namespaces
+            if: 
+              type: function
+              name: returnFalse
           - type: object-item
             schema: schema/properties/resources/properties/monitoringCoreosComServiceMonitor/properties/spec/properties/selector
             label : Labels 
-            # init: 
-            #   type: static
-            #   value: 
-            #     name: riyad 
-            #     age: 10
-            # if: 
-            #   type: function
-            #   name: returnFalse
-          # if:
-          #   type: function
-          #   name: isEqualToModelPathValue|Custom-ServiceMonitor     
+            init: 
+              type: static
+              value: 
+                name: riyad 
+                age: 10
+            if: 
+              type: function
+              name: returnFalse
+          if:
+            type: function
+            name: isEqualToModelPathValue|Custom-ServiceMonitor     
         - type: object-item
           schema: schema/properties/resources/properties/monitoringComServiceMonitor/properties/metadata/properties/labels
           label : Labels 
-          # init: 
-          #   type: static
-          #   value: 
-          #     name: riyad 
-          #     age: 10
-          # if:
-          #   type: function
-          #   name: isEqualToModelPathValue|Custom-ServiceMonitor 
+          init: 
+            type: static
+            value: 
+              name: riyad 
+              age: 10
+          if:
+            type: function
+            name: isEqualToModelPathValue|Custom-ServiceMonitor 
         - type: label-element
           label: Exporter Configuration
           schema: ''
         - type: switch
           label: Customize Exporter Sidecar
           schema: temp/properties/customizeExporter
-          # watcher:
-          #   func: onCustomizeExporterChange
-          #   paths: 
-          #     - temp/properties/customizeExporter
+          watcher:
+            func: onCustomizeExporterChange
+            paths: 
+              - temp/properties/customizeExporter
         - type: block-layout
           label: 2nd Parameters 
           showLabels: false 
-          # if:
-          #   type: function
-          #   name: showCustomizeExporterSection
+          if:
+            type: function
+            name: showCustomizeExporterSection
           elements:
             - type: horizontal-layout
               label: Resources
               showLabels: true
-              # if: 
-              #   type: function
-              #   name: returnFalse
+              if: 
+                type: function
+                name: returnFalse
               elements:
                 - type: input
                   label: CPU Requests
@@ -309,7 +309,7 @@ step:
                 schema: schema/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/args/items
             - type: block-layout
               label: Metadata
-              showLabels: true 
+              showLabels: false 
               elements: 
                 - type: array-object-form
                   label: New Environment Variable
@@ -323,9 +323,9 @@ step:
                   - type: radio
                     label: Value From
                     schema: temp/properties/valueFromType
-                    # init: 
-                    #   type: func 
-                    #   value: setValueFrom
+                    init: 
+                      type: func 
+                      value: setValueFrom
                     options:
                     - text: Input
                       value: Input

@@ -714,7 +714,6 @@ export const useFunc = (model) => {
   }
 
   function onCustomizeExporterChange() {
-    window.console.log('onCustomizeExporterChange')
     const configureStatus = getValue(discriminator, '/customizeExporter')
     if (configureStatus) {
       commit('wizard/model$update', {
