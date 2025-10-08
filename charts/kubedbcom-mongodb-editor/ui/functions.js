@@ -131,7 +131,7 @@ export const useFunc = (model) => {
 
   function isEqualToValueFromType(value) {
     //watchDependency('discriminator#/valueFromType')
-    console.log('discriminator', value)
+    console.log('isEqualToValueFromType', value)
     const valueFrom = getValue(discriminator, '/valueFromType')
     return valueFrom === value
   }
@@ -1986,7 +1986,6 @@ export const useFunc = (model) => {
 
   function isValueExistInModel(path) {
     const modelValue = getValue(model, path)
-    console.log('isValueExistInModel',modelValue)
     return !!modelValue
   }
 
@@ -2851,7 +2850,8 @@ export const useFunc = (model) => {
     return 'IfReady'
   }
 
-  function setMetadata({ storeGet, mode, commit }) {
+  function setMetadata() {
+    console.log('set metadata called')
     const dbname = storeGet('/route/params/name') || ''
     const namespace = storeGet('/route/query/namespace') || ''
     if (mode === 'standalone-step') {
