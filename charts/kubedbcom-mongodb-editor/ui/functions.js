@@ -21,9 +21,7 @@ export const useFunc = (model) => {
 
   setDiscriminatorValue('binding', false)
 
-  // model.value['temp/enableMonitoring'] = true
   setDiscriminatorValue('/enableMonitoring', true)
-  // model.value['temp/customizeExporter'] = true
   setDiscriminatorValue('/customizeExporter', true)
   setDiscriminatorValue('/valueFromType', 'Input')
 
@@ -2913,7 +2911,7 @@ export const useFunc = (model) => {
     return isExposeBinding
   }
 
-  async function addOrRemoveBinding() {
+  function addOrRemoveBinding() {
     const value = getValue(discriminator, `/binding`)
     const dbName = getValue(model, '/metadata/release/name')
     const dbNamespace = getValue(model, '/metadata/release/namespace')
@@ -2935,13 +2933,13 @@ export const useFunc = (model) => {
     }
 
     if (value) {
-      await commit('wizard/model$update', {
+      commit('wizard/model$update', {
         path: '/resources/catalogAppscodeComMongoDBBinding',
         value: bindingValues,
         force: true,
       })
     } else {
-      await commit('wizard/model$delete', '/resources/catalogAppscodeComMongoDBBinding')
+      commit('wizard/model$delete', '/resources/catalogAppscodeComMongoDBBinding')
     }
   }
 
