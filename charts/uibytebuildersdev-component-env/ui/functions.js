@@ -84,13 +84,11 @@ function getKeyOrValue({ itemCtx }) {
 }
 
 function setValueFrom({ rootModel }) {
-  window.console.log(rootModel)
   if (isConfigMapTypeValueFrom({ rootModel })) {
     return 'configMap'
   } else if (isSecretTypeValueFrom({ rootModel })) {
     return 'secret'
   } else {
-    console.log('input')
     return 'input'
   }
 }
