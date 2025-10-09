@@ -1,93 +1,36 @@
-type: multi-step-form
-step:
-  - type: single-step-form
-    id: basic
+steps:
+- form:
+    discriminator:
+      backup:
+        type: string
+      initApi:
+        default: false
+        type: boolean
+      selectedSessions:
+        type: Array
     elements:
-      - type: label-element
-        if: 
-          name: returnFalse
-          type: function
-        init: 
-          type: func
-          name: init
-      - type: select
-        label: Select Backup
-        if:
-          type: function
-          name: isApiResolved
-        watcher:
-          paths: 
-            - temp/backup
-          func: clearModel
-        loader: getOptions
-        # options:
-        #   - text: Full-backup
-        #     value: full-backup
-        #   - text: Recent-backup
-        #     value: recent-backup
-        #   - text: Partial-backup
-        #     value: partial-backup
-        refresh: true
-        validation:
-          type: required
-        schema: temp/backup
-      - type: select
-        label: Select Sessions
-        if:
-          type: function
-          name: isBackupSelected
-        multiple: true
-        watcher:
-          paths:
-            - temp/selectedSessions
-          func: buildObject
-        loader: getSessionOptions
-        # options:
-        #   - text: Full-backup
-        #     value: full-backup
-        #   - text: Recent-backup
-        #     value: recent-backup
-        #   - text: Partial-backup
-        #     value: partial-backup
-        refresh: true
-        validation:
-          type: required
-        schema: temp/selectedSessions
-
-
-# steps:
-# - form:
-#     discriminator:
-#       backup:
-#         type: string
-#       initApi:
-#         default: false
-#         type: boolean
-#       selectedSessions:
-#         type: Array
-#     elements:
-#     - computed: init
-#       if: returnFalse
-#       type: label-element
-#     - fetch: getOptions
-#       if: isApiResolved
-#       label:
-#         text: Select Backup
-#       onChange: clearModel
-#       required: true
-#       schema:
-#         $ref: discriminator#/backup
-#       type: select
-#     - fetch: getSessionOptions
-#       if: isBackupSelected
-#       label:
-#         text: Select Sessions
-#       onChange: buildObject
-#       required: true
-#       schema:
-#         $ref: discriminator#/selectedSessions
-#       type: multiselect
-#     type: single-step-form
-#   id: basic
-#   title: steps.0.label
-# type: multi-step-form
+    - computed: init
+      if: returnFalse
+      type: label-element
+    - fetch: getOptions
+      if: isApiResolved
+      label:
+        text: Select Backup
+      onChange: clearModel
+      required: true
+      schema:
+        $ref: discriminator#/backup
+      type: select
+    - fetch: getSessionOptions
+      if: isBackupSelected
+      label:
+        text: Select Sessions
+      onChange: buildObject
+      required: true
+      schema:
+        $ref: discriminator#/selectedSessions
+      type: multiselect
+    type: single-step-form
+  id: basic
+  title: steps.0.label
+type: multi-step-form

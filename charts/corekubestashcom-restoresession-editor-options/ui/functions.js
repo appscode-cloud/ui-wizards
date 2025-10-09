@@ -1,22 +1,10 @@
-const { ref, computed, axios, useOperator, store } = window.vueHelpers || {}
 let addonList = []
-
-export const useFunc = (model) => {
-    const route = store.state?.route
-
-    console.log('route', route)
-
-  const { getValue, storeGet, discriminator, setDiscriminatorValue, commit } = useOperator(
-    model,
-    store.state,
-  )
-
-function isConsole() {
+function isConsole({ storeGet }) {
   const group = storeGet('/route/params/group') || ''
   return group !== 'kubedb.com'
 }
 
-async function initMetadata() {
+async function initMetadata({ storeGet, commit, axios }) {
   const resource = storeGet('/resource') || {}
   const { group, kind } = resource?.layout?.result?.resource
   const name = storeGet('/route/params/name') || ''
@@ -57,7 +45,7 @@ async function initMetadata() {
   await getPreset({ axios, storeGet, commit })
 }
 
-async function getPreset() {
+async function getPreset({ axios, storeGet, commit }) {
   const user = storeGet('/route/params/user') || ''
   const cluster = storeGet('/route/params/cluster') || ''
   const url = `/clusters/${user}/${cluster}/proxy/charts.x-helm.dev/v1alpha1/clusterchartpresets/stash-presets`
@@ -74,13 +62,13 @@ async function getPreset() {
   }
 }
 
-function isRancherManaged() {
+function isRancherManaged({ storeGet }) {
   const managers = storeGet('/cluster/clusterDefinition/result/clusterManagers')
   const found = managers.find((item) => item === 'Rancher')
   return !!found
 }
 
-async function fetchNamespacesApi() {
+async function fetchNamespacesApi({ axios, storeGet }) {
   const params = storeGet('/route/params')
   const { user, cluster, group, version, resource } = params
   try {
@@ -121,14 +109,14 @@ async function fetchNamespacesApi() {
   return []
 }
 
-function setNamespace() {
+function setNamespace({ storeGet, model, getValue }) {
   const namespaceFromModel = getValue(model, '/metadata/release/namespace')
   const namespace = storeGet('/route/query/namespace') || namespaceFromModel || ''
   return namespace
 }
 
-async function getDbs() {
-  // watchDependency('model#/metadata/release/namespace')
+async function getDbs({ axios, storeGet, model, getValue, watchDependency }) {
+  watchDependency('model#/metadata/release/namespace')
   const namespace = getValue(model, '/metadata/release/namespace')
   const owner = storeGet('/route/params/user')
   const cluster = storeGet('/route/params/cluster')
@@ -161,7 +149,7 @@ async function getDbs() {
   })
 }
 
-function initTarget() {
+function initTarget({ getValue, discriminator, commit }) {
   const target = getValue(discriminator, '/database') || {}
   commit('wizard/model$update', {
     path: '/metadata/release/name',
@@ -175,7 +163,7 @@ function initTarget() {
   })
 }
 
-async function getRepositories() {
+async function getRepositories({ getValue, model, storeGet, axios }) {
   const user = storeGet('/route/params/user') || ''
   const cluster = storeGet('/route/params/cluster') || ''
   const namespace = storeGet('/route/query/namespace') || ''
@@ -221,7 +209,7 @@ async function getRepositories() {
   return []
 }
 
-function onRepoChange() {
+function onRepoChange({ getValue, discriminator, commit }) {
   const repo = getValue(discriminator, '/repository')
   commit('wizard/model$update', {
     path: '/spec/dataSource/repository',
@@ -230,8 +218,8 @@ function onRepoChange() {
   })
 }
 
-async function getSnapshots() {
-  // watchDependency('discriminator#/repository')
+async function getSnapshots({ watchDependency, discriminator, storeGet, getValue, axios }) {
+  watchDependency('discriminator#/repository')
   const user = storeGet('/route/params/user') || ''
   const cluster = storeGet('/route/params/cluster') || ''
   const core = 'storage.kubestash.com'
@@ -241,7 +229,7 @@ async function getSnapshots() {
   const repository = repo.name || ''
 
   const url = `/clusters/${user}/${cluster}/proxy/${core}/${version}/namespaces/${namespace}/snapshots`
-  console.log('namespace', namespace.value)
+
   try {
     if (namespace) {
       const resp = await axios.get(url)
@@ -294,7 +282,7 @@ function getTimeDiffs(time) {
   return ` ${timeDiff} ago`
 }
 
-async function getAddons() {
+async function getAddons({ storeGet, axios, commit }) {
   const user = storeGet('/route/params/user') || ''
   const cluster = storeGet('/route/params/cluster') || ''
   const url = `/clusters/${user}/${cluster}/proxy/addons.kubestash.com/v1alpha1/addons`
@@ -323,8 +311,8 @@ async function getAddons() {
   return []
 }
 
-function getTasks() {
-  // watchDependency('model#/spec/addon/name')
+function getTasks({ watchDependency, model, getValue }) {
+  watchDependency('model#/spec/addon/name')
   const addon = getValue(model, '/spec/addon/name')
   const addonDetails = addonList?.find((item) => item?.metadata?.name === addon)
   let tasks = addonDetails?.spec?.restoreTasks
@@ -332,10 +320,10 @@ function getTasks() {
   return tasks
 }
 
-function databaseSelected() {
+function databaseSelected({ storeGet, watchDependency, getValue, discriminator }) {
   isKube = storeGet('/route/params/actions')
   if (isKube) return true
-  // watchDependency('discriminator#/database')
+  watchDependency('discriminator#/database')
   const target = getValue(discriminator, '/database') || {}
   return !!target.name
 }
@@ -352,7 +340,7 @@ const securityContextMap = {
   ZooKeeper: 999,
 }
 
-async function setSecurityContext() {
+async function setSecurityContext({ storeGet, commit, axios }) {
   const namespace = storeGet('/route/query/namespace') || ''
   const user = storeGet('/route/params/user') || ''
   const cluster = storeGet('/route/params/cluster') || ''
@@ -397,19 +385,19 @@ let kindToResourceMap = {}
 let namespaces = []
 let version = ''
 
-function init() {
+function init({ watchDependency, model, getValue, storeGet, axios }) {
   getKindsApi({ watchDependency, model, getValue, storeGet, axios })
   namespaces = fetchNamespacesApi({ axios, storeGet })
 }
 
-function fetchNamespaces() {
-  // watchDependency('discriminator#/nameSpaceApi')
+function fetchNamespaces({ watchDependency }) {
+  watchDependency('discriminator#/nameSpaceApi')
   return namespaces
 }
 
-function setVersion() {
-  // watchDependency('model#/spec/target/apiGroup')
-  // watchDependency('model#/spec/target/kind')
+function setVersion({ getValue, model, watchDependency }) {
+  watchDependency('model#/spec/target/apiGroup')
+  watchDependency('model#/spec/target/kind')
   const apiGroup = getValue(model, `/spec/target/apiGroup`)
   const kind = getValue(model, `/spec/target/kind`)
   if (apiGroup === 'core') apiGroup = ''
@@ -422,7 +410,7 @@ function setVersion() {
   })
 }
 
-async function getKindsApi() {
+async function getKindsApi({ storeGet, axios }) {
   const params = storeGet('/route/params')
   const { user, cluster } = params
   let url = `/clusters/${user}/${cluster}/available-types?groups=core,apps,kubedb.com`
@@ -459,8 +447,8 @@ async function getKindsApi() {
   return []
 }
 
-function getKinds() {
-  // watchDependency(`model#/spec/target/apiGroup`)
+function getKinds({ watchDependency, getValue, model }) {
+  watchDependency(`model#/spec/target/apiGroup`)
   const apiGroup = getValue(model, `/spec/target/apiGroup`)
 
   if (apiGroup === 'core') return coreKind
@@ -472,10 +460,10 @@ function getApiGroup() {
   return ['core', 'apps', 'kubedb.com']
 }
 
-async function getTargetName() {
-  // watchDependency('model#/spec/target/apiGroup')
-  // watchDependency('model#/spec/target/namespace')
-  // watchDependency('model#/spec/target/kind')
+async function getTargetName({ watchDependency, getValue, model, axios, storeGet }) {
+  watchDependency('model#/spec/target/apiGroup')
+  watchDependency('model#/spec/target/namespace')
+  watchDependency('model#/spec/target/kind')
   const apiGroup = getValue(model, `/spec/target/apiGroup`)
   const namespace = getValue(model, `/spec/target/namespace`)
   const resource = getResourceName({ getValue, model })
@@ -497,14 +485,14 @@ async function getTargetName() {
   }
 }
 
-function getResourceName() {
+function getResourceName({ getValue, model }) {
   const apiGroup = getValue(model, `/spec/target/apiGroup`)
   const kind = getValue(model, `/spec/target/kind`)
   if (!kind || !apiGroup) return ''
   return kindToResourceMap[apiGroup][kind]
 }
 
-function onParameterChange() {
+function onParameterChange({ getValue, model, discriminator, commit }) {
   const tasks = getValue(model, '/spec/addon/tasks') || []
   const params = getValue(discriminator, '/params')
   tasks[0]['params'] = params
@@ -539,5 +527,4 @@ return {
   returnFalse,
   onParameterChange,
   setSecurityContext,
-}
 }
