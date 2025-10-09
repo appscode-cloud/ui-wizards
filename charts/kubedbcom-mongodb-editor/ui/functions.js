@@ -85,7 +85,6 @@ export const useFunc = (model) => {
       )
 
       const resources = (resp && resp.data && resp.data.items) || []
-      window.console.log('getResources', resource)
       resources.map((item) => {
         const name = (item.metadata && item.metadata.name) || ''
         item.text = name
@@ -100,7 +99,6 @@ export const useFunc = (model) => {
   }
 
   function onValueFromChange() {
-    window.console.log('onValueFromChange')
     // const valueFrom = getValue(discriminator, '/valueFromType')
     // if (valueFrom === 'input') {
     //   if (isConfigMapTypeValueFrom({ rootModel })) updateModelValue('valueFrom/configMapKeyRef', true)
@@ -131,7 +129,6 @@ export const useFunc = (model) => {
 
   function isEqualToValueFromType(value) {
     //watchDependency('discriminator#/valueFromType')
-    console.log('isEqualToValueFromType', value)
     const valueFrom = getValue(discriminator, '/valueFromType')
     return valueFrom === value
   }
@@ -2851,7 +2848,6 @@ export const useFunc = (model) => {
   }
 
   function setMetadata() {
-    console.log('set metadata called')
     const dbname = storeGet('/route/params/name') || ''
     const namespace = storeGet('/route/query/namespace') || ''
     if (mode === 'standalone-step') {
@@ -3105,15 +3101,14 @@ export const useFunc = (model) => {
   }
 
   function setValueFrom({ rootModel }) {
-    console.log('setValueFrom',setValueFrom)
-  if (isConfigMapTypeValueFrom({ rootModel })) {
-    return 'configMap'
-  } else if (isSecretTypeValueFrom({ rootModel })) {
-    return 'secret'
-  } else {
-    return 'input'
+    if (isConfigMapTypeValueFrom({ rootModel })) {
+      return 'configMap'
+    } else if (isSecretTypeValueFrom({ rootModel })) {
+      return 'secret'
+    } else {
+      return 'input'
+    }
   }
-}
 
   return {
     getOpsRequestUrl,
