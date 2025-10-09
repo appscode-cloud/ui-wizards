@@ -146,9 +146,9 @@ step:
     - type: anchor
       label: Create OpsRequest
       schema: schema/properties/userinfo/properties/link
-      init:
-        type: func
-        value: getOpsRequestUrl|VerticalScaling
+      # init:
+      #   type: func
+      #   value: getOpsRequestUrl|VerticalScaling
     - type: switch
       label: Enable Monitoring
       schema: temp/properties/enableMonitoring
@@ -240,9 +240,9 @@ step:
             if: 
               type: function
               name: returnFalse
-          # if:
-          #   type: function
-          #   name: isEqualToModelPathValue|Custom-ServiceMonitor     
+          if:
+            type: function
+            name: isEqualToModelPathValue|Custom-ServiceMonitor     
         - type: object-item
           schema: schema/properties/resources/properties/monitoringComServiceMonitor/properties/metadata/properties/labels
           label : Labels 
@@ -311,7 +311,7 @@ step:
                 schema: schema/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/args/items
             - type: block-layout
               label: Metadata
-              showLabels: true 
+              showLabels: false 
               elements: 
                 - type: array-object-form
                   label: New Environment Variable
@@ -325,9 +325,9 @@ step:
                   - type: radio
                     label: Value From
                     schema: temp/properties/valueFromType
-                    init: 
-                      type: func 
-                      value: setValueFrom
+                    # init: 
+                    #   type: func 
+                    #   value: setValueFrom
                     options:
                     - text: Input
                       value: Input
@@ -335,47 +335,42 @@ step:
                       value: Secret
                     - text: ConfigMap
                       value: ConfigMap
-                    watcher:
-                      func: onValueFromChange
-                      paths:
-                        - temp/properties/valueFromType
-                  - type: select
-                    label: Secret Name
-                    schema: select
-                    options:
-                    - mongo-actions-test-key
+                    # watcher:
+                    #   func: onValueFromChange
+                    #   paths:
+                    #     - temp/properties/valueFromType
                   - type: input 
                     label: Value 
                     schema: value
-                    if:
-                      name: isEqualToValueFromType|Input
-                      type: function
+                    # if:
+                    #   name: isEqualToValueFromType|Input
+                    #   type: function
                   - type: select
                     label: ConfigMap Name
                     schema: schema/items/properties/valueFrom/properties/configMapKeyRef/properties/name
-                    loader: getResources|core|v1|configmaps
+                    # loader: resourceNames|core|v1|configmaps
                   - type: select
                     label: ConfigMap Key
                     schema: schema/items/properties/valueFrom/properties/configMapKeyRef/properties/key
-                    loader: getConfigMapKeys
+                    # loader: getConfigMapKeys
                   - type: select
                     label: Secret Name
                     schema: schema/items/properties/valueFrom/properties/secretKeyRef/properties/name
-                    loader: getSecrets 
+                    # loader: getSecrets 
+                  - type: select
+                    label: Secret Key
+                    schema: schema/items/properties/valueFrom/properties/secretKeyRef/properties/key
+                    # loader: getSecretKeys 
+
         - type: input 
           label: 'label'
           schema: schema/properties/metadata/properties/release/properties/name
-          init: 
-           type: func 
-           value: setMetadata 
-          if:
-            type: function
-            name: returnFalse
-      
-      # - type: select
-      #   label: Secret Key
-      #   schema: select
-      #   options:
+          # init: 
+          #  type: func 
+          #  value: setMetadata 
+          # if:
+          #   type: function
+          #   name: returnFalse
   - type: single-step-form
     id: binding
     label: Gateway Binding
@@ -384,10 +379,10 @@ step:
       label: Expose Database
       schema: temp/properties/binding
       fullwidth: true
-      init:
-        type: func
-        value: isBindingAlreadyOn
-      watcher:
-        func: addOrRemoveBinding
-        paths:
-          - temp/properties/binding
+      # init:
+      #   type: func
+      #   value: isBindingAlreadyOn
+      # watcher:
+      #   func: addOrRemoveBinding
+      #   paths:
+      #     - temp/properties/binding
