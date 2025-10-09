@@ -25,6 +25,20 @@ export const useFunc = (model) => {
   setDiscriminatorValue('/customizeExporter', true)
   setDiscriminatorValue('/valueFromType', 'Input')
 
+  // Compute Autoscaler Discriminators
+  setDiscriminatorValue('/dbDetails', false)
+  setDiscriminatorValue('/topologyMachines', [])
+  setDiscriminatorValue('/allowedMachine-standalone-min', '')
+  setDiscriminatorValue('/allowedMachine-standalone-max', '')
+  setDiscriminatorValue('/allowedMachine-replicaSet-min', '')
+  setDiscriminatorValue('/allowedMachine-replicaSet-max', '')
+  setDiscriminatorValue('/allowedMachine-shard-min', '')
+  setDiscriminatorValue('/allowedMachine-shard-max', '')
+  setDiscriminatorValue('/allowedMachine-configServer-min', '')
+  setDiscriminatorValue('/allowedMachine-configServer-max', '')
+  setDiscriminatorValue('/allowedMachine-mongos-min', '')
+  setDiscriminatorValue('/allowedMachine-mongos-max', '')
+
   // *************************      common functions ********************************************
   // eslint-disable-next-line no-empty-pattern
   async function fetchJsons({ axios, itemCtx }) {
@@ -2630,19 +2644,19 @@ export const useFunc = (model) => {
 
   let autoscaleType = ''
   let dbDetails = {}
-  function isKubedb({ storeGet }) {
+  function isKubedb() {
     return !!storeGet('/route/params/actions')
   }
 
-  function showOpsRequestOptions({ model, getValue, watchDependency, storeGet, discriminator }) {
-    if (isKubedb({ storeGet }) === true) return true
-    watchDependency('model#/spec/databaseRef/name')
+  function showOpsRequestOptions() {
+    if (isKubedb() === true) return true
+    // watchDependency('model#/spec/databaseRef/name')
     return (
       !!getValue(model, '/spec/databaseRef/name') && !!getValue(discriminator, '/autoscalingType')
     )
   }
 
-  async function getDbDetails({ axios, storeGet, getValue, model, setDiscriminatorValue, commit }) {
+  async function getDbDetails() {
     const owner = storeGet('/route/params/user') || ''
     const cluster = storeGet('/route/params/cluster') || ''
 
@@ -2685,12 +2699,8 @@ export const useFunc = (model) => {
     })
   }
 
-  async function mongoTypeEqualsTo(
-    { watchDependency, getValue, commit, discriminator },
-    mongoType,
-    type,
-  ) {
-    watchDependency('discriminator#/dbDetails')
+  async function mongoTypeEqualsTo(mongoType, type) {
+    // watchDependency('discriminator#/dbDetails')
     autoscaleType = type
     const dbDetailsSuccess = getValue(discriminator, '/dbDetails')
 
@@ -2704,11 +2714,11 @@ export const useFunc = (model) => {
       if (replicaSet) verd = 'replicaSet'
       else verd = 'standalone'
     }
-    clearSpecModel({ commit }, verd)
+    clearSpecModel(verd)
     return mongoType === verd
   }
 
-  function clearSpecModel({ commit }, dbtype) {
+  function clearSpecModel(dbtype) {
     if (dbtype === 'standalone') {
       commit(
         'wizard/model$delete',
@@ -2794,7 +2804,7 @@ export const useFunc = (model) => {
       return []
     }
   }
-  async function fetchNodeTopology({ axios, storeGet }) {
+  async function fetchNodeTopology() {
     const owner = storeGet('/route/params/user') || ''
     const cluster = storeGet('/route/params/cluster') || ''
     const url = `/clusters/${owner}/${cluster}/proxy/node.k8s.appscode.com/v1alpha1/nodetopologies`
@@ -2812,10 +2822,10 @@ export const useFunc = (model) => {
     return []
   }
 
-  function isNodeTopologySelected({ watchDependency, model, getValue }) {
-    watchDependency(
-      'model#/resources/autoscalingKubedbComMongoDBAutoscaler/spec/compute/nodeTopology/name',
-    )
+  function isNodeTopologySelected() {
+    // watchDependency(
+    //   'model#/resources/autoscalingKubedbComMongoDBAutoscaler/spec/compute/nodeTopology/name',
+    // )
     const nodeTopologyName =
       getValue(
         model,
@@ -2824,7 +2834,7 @@ export const useFunc = (model) => {
     return !!nodeTopologyName.length
   }
 
-  function setControlledResources({ commit }, type) {
+  function setControlledResources(type) {
     const list = ['cpu', 'memory']
     const path = `/resources/autoscalingKubedbComMongoDBAutoscaler/spec/${type}/controlledResources`
     commit('wizard/model$update', {
@@ -2835,7 +2845,7 @@ export const useFunc = (model) => {
     return list
   }
 
-  function setTrigger({ model, getValue }, path) {
+  function setTrigger(path) {
     let value = getValue(model, `/resources/${path}`)
     if (value) return value
     return 'On'
@@ -2961,13 +2971,7 @@ export const useFunc = (model) => {
       return `${domain}/console/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/mongodbopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=VerticalScaling`
   }
 
-  async function fetchTopologyMachines({
-    axios,
-    getValue,
-    storeGet,
-    model,
-    setDiscriminatorValue,
-  }) {
+  async function fetchTopologyMachines() {
     const annotations = getValue(
       model,
       '/resources/autoscalingKubedbComMongoDBAutoscaler/metadata/annotations',
@@ -2983,15 +2987,16 @@ export const useFunc = (model) => {
 
         const nodeGroups = resp.data?.spec?.nodeGroups || []
         setDiscriminatorValue('/topologyMachines', nodeGroups)
-        return nodeGroups
+        // return nodeGroups
       } catch (e) {
         console.log(e)
-        return []
+        // return []
+        setDiscriminatorValue('/topologyMachines', [])
       }
     }
   }
 
-  function setAllowedMachine({ model, getValue }, type, minmax) {
+  function setAllowedMachine(type, minmax) {
     const annotations = getValue(
       model,
       '/resources/autoscalingKubedbComMongoDBAutoscaler/metadata/annotations',
@@ -3013,12 +3018,12 @@ export const useFunc = (model) => {
     else return mx
   }
 
-  async function getMachines({ getValue, watchDependency, discriminator }, type, minmax) {
-    watchDependency('discriminator#/topologyMachines')
+  async function getMachines(type, minmax) {
+    // watchDependency('discriminator#/topologyMachines')
     const depends = minmax === 'min' ? 'max' : 'min'
     const dependantPath = `/allowedMachine-${type}-${depends}`
 
-    watchDependency(`discriminator#${dependantPath}`)
+    // watchDependency(`discriminator#${dependantPath}`)
     const dependantMachine = getValue(discriminator, dependantPath)
 
     const nodeGroups = getValue(discriminator, '/topologyMachines') || []
@@ -3038,7 +3043,7 @@ export const useFunc = (model) => {
     return dependantIndex === -1 ? machines : filteredMachine
   }
 
-  function hasAnnotations({ model, getValue }, type) {
+  function hasAnnotations() {
     const annotations = getValue(
       model,
       '/resources/autoscalingKubedbComMongoDBAutoscaler/metadata/annotations',
@@ -3048,11 +3053,11 @@ export const useFunc = (model) => {
     return !!instance
   }
 
-  function hasNoAnnotations({ model, getValue }) {
-    return !hasAnnotations({ model, getValue })
+  function hasNoAnnotations() {
+    return !hasAnnotations()
   }
 
-  function onMachineChange({ model, getValue, discriminator, commit }, type) {
+  function onMachineChange(type) {
     const annoPath = '/resources/autoscalingKubedbComMongoDBAutoscaler/metadata/annotations'
     const annotations = getValue(model, annoPath)
     const instance = annotations['kubernetes.io/instance-type']
