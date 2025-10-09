@@ -83,7 +83,6 @@ export const useFunc = (model) => {
       )
 
       const resources = (resp && resp.data && resp.data.items) || []
-      window.console.log('getResources', resource)
       resources.map((item) => {
         const name = (item.metadata && item.metadata.name) || ''
         item.text = name
@@ -98,7 +97,6 @@ export const useFunc = (model) => {
   }
 
   function onValueFromChange() {
-    window.console.log('onValueFromChange')
     // const valueFrom = getValue(discriminator, '/valueFromType')
     // if (valueFrom === 'input') {
     //   if (isConfigMapTypeValueFrom({ rootModel })) updateModelValue('valueFrom/configMapKeyRef', true)
@@ -711,7 +709,6 @@ export const useFunc = (model) => {
   }
 
   function onCustomizeExporterChange() {
-    window.console.log('onCustomizeExporterChange')
     const configureStatus = getValue(discriminator, '/customizeExporter')
     if (configureStatus) {
       commit('wizard/model$update', {
@@ -2848,7 +2845,7 @@ export const useFunc = (model) => {
     return 'IfReady'
   }
 
-  function setMetadata({ storeGet, mode, commit }) {
+  function setMetadata() {
     const dbname = storeGet('/route/params/name') || ''
     const namespace = storeGet('/route/query/namespace') || ''
     if (mode === 'standalone-step') {
@@ -3101,6 +3098,16 @@ export const useFunc = (model) => {
     }
   }
 
+  function setValueFrom({ rootModel }) {
+    if (isConfigMapTypeValueFrom({ rootModel })) {
+      return 'configMap'
+    } else if (isSecretTypeValueFrom({ rootModel })) {
+      return 'secret'
+    } else {
+      return 'input'
+    }
+  }
+
   return {
     getOpsRequestUrl,
     handleUnit,
@@ -3277,5 +3284,6 @@ export const useFunc = (model) => {
     isEqualToValueFromType,
     onValueFromChange,
     getConfigMapKeys,
+    setValueFrom,
   }
 }
