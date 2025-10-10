@@ -1713,7 +1713,7 @@ export const useFunc = (model) => {
     return !!getValue(discriminator, '/isBackupDataLoaded')
   }
 
-  async function setBackupType() {
+  function setBackupType() {
     return 'BackupConfig'
   }
 
@@ -1721,7 +1721,7 @@ export const useFunc = (model) => {
     return 'Prometheus-Operator'
   }
 
-  async function getTypes() {
+  function getTypes() {
     const arr = [
       {
         description: 'Create, Delete or Modify BackupConfig',
@@ -2699,7 +2699,7 @@ export const useFunc = (model) => {
     })
   }
 
-  async function mongoTypeEqualsTo(mongoType, type) {
+  function mongoTypeEqualsTo(mongoType, type) {
     // watchDependency('discriminator#/dbDetails')
     autoscaleType = type
     const dbDetailsSuccess = getValue(discriminator, '/dbDetails')
@@ -3018,7 +3018,7 @@ export const useFunc = (model) => {
     else return mx
   }
 
-  async function getMachines(type, minmax) {
+  function getMachines(type, minmax) {
     // watchDependency('discriminator#/topologyMachines')
     const depends = minmax === 'min' ? 'max' : 'min'
     const dependantPath = `/allowedMachine-${type}-${depends}`

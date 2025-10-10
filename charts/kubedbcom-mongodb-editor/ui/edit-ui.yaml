@@ -377,25 +377,10 @@ step:
     id: compute-autoscaler
     loader: getDbDetails
     elements:
-    # - type: input
-    #   if:
-    #     name: returnFalse
-    #     type: function
-    #   init: 
-    #     type: func
-    #     value: getDbDetails 
-
     - type: block-layout
-      showLabels: true
-      hideBorder: true
+      showLabels: false
       loader: fetchTopologyMachines
       elements:
-        # - type: input
-        #   if:
-        #     name: returnFalse
-        #     type: function
-        #   loader: fetchTopologyMachines
-        #   schema: temp/topologyMachines
         # standalone mode
         - type: block-layout
           label: Standalone
@@ -423,8 +408,7 @@ step:
               label: Resource Diff Percentage
               schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/standalone/properties/resourceDiffPercentage
             - type: block-layout
-              showLabels: true
-              hideBorder: true
+              showLabels: false
               elements:
                 - type: select
                   label: Min Allowed Profile
@@ -541,11 +525,10 @@ step:
               label: Resource Diff Percentage
               schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/replicaSet/properties/resourceDiffPercentage
             - type: block-layout
-              showLabels: true
-              hideBorder: true
+              showLabels: false
               elements:
                 - type: select
-                  label: Min Alowed Profile
+                  label: Min Allowed Profile
                   disableUnselect: true
                   schema: temp/properties/allowedMachine-replicaSet-min
                   if:
@@ -632,10 +615,9 @@ step:
                 - type: input
                   label: Usage Threshold Percentage
                   schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/replicaSet/properties/inMemoryStorage/properties/usageThresholdPercentage
-       
         # type sharded
         - type: block-layout
-          showLabels: true
+          showLabels: false
           if:
             type: function
             name: mongoTypeEqualsTo|sharded|compute
@@ -663,8 +645,7 @@ step:
                   label: Resource Diff Percentage
                   schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/shard/properties/resourceDiffPercentage
                 - type: block-layout
-                  showLabels: true
-                  hideBorder: true
+                  showLabels: false
                   elements:
                     - type: select
                       label: Min Allowed Profile
@@ -778,8 +759,7 @@ step:
                   label: Resource Diff Percentage
                   schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/configServer/properties/resourceDiffPercentage
                 - type: block-layout
-                  showLabels: true
-                  hideBorder: true
+                  showLabels: false
                   elements:
                     - type: select
                       label: Min Allowed Profile
@@ -1031,8 +1011,7 @@ step:
                   label: Resource Diff Percentage
                   schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/mongos/properties/resourceDiffPercentage
                 - type: block-layout
-                  showLabels: true
-                  hideBorder: true
+                  showLabels: false
                   elements:
                     - type: select
                       label: Min Allowed Profile
@@ -1141,12 +1120,11 @@ step:
                 name: isNodeTopologySelected
               schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/scaleUpDiffPercentage
             - type: input
-              label: Scale Up DiffPercentage
+              label: Scale Down DiffPercentage
               if:
                 type: function
                 name: isNodeTopologySelected
               schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/nodeTopology/properties/scaleDownDiffPercentage
-
         - type: block-layout
           label: Ops Request Options
           showLabels: true
@@ -1197,6 +1175,325 @@ step:
               schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/opsRequestOptions/properties/apply
 
   - type: single-step-form
+    id: storage-autoscaler
+    loader: getDbDetails
+    elements:
+    - type: block-layout
+      showLabels: false
+      elements:
+        # standalone mode
+        - type: block-layout
+          label: Standalone
+          if:
+            type: function
+            name: mongoTypeEqualsTo|standalone|storage
+          showLabels: true
+          elements:
+            - type: select
+              label: Trigger
+              init:
+                type: func
+                value: setTrigger|autoscalingKubedbComMongoDBAutoscaler/spec/storage/standalone/trigger
+              options:
+                - text: 'On'
+                  value: 'On'
+                - text: 'Off'
+                  value: 'Off'
+              schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/standalone/properties/trigger
+            - type: select
+              label: Expansion Mode
+              options:
+                - text: Online
+                  value: Online
+                - text: Offline
+                  value: Offline
+              schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/standalone/properties/expansionMode
+            - type: input
+              label: UsageThreshold (%)
+              schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/standalone/properties/usageThreshold
+            - type: array-object-form
+              label: Scaling Rules
+              schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/standalone/properties/scalingRules
+              watcher:
+                func: handleUnit|autoscalingKubedbComMongoDBAutoscaler/spec/storage/standalone/scalingRules|scalingRules
+                paths:
+                  - schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/standalone/properties/scalingRules
+              elements:
+                - type: input
+                  label: AppliesUpto (In Storage units)
+                  schema: appliesUpto
+                - type: input
+                  label: Threshold (In %, Or In Storage Units)
+                  schema: threshold
+            - type: input
+              label: Scaling Threshold
+              schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/standalone/properties/scalingThreshold
+            - type: input
+              label: UpperBound
+              schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/standalone/properties/upperBound
+              watcher:
+                func: handleUnit|autoscalingKubedbComMongoDBAutoscaler/spec/storage/standalone/upperBound
+                paths:
+                  - schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/standalone/properties/upperBound
+        # replicaset mode
+        - type: block-layout
+          label: ReplicaSet
+          if:
+            type: function
+            name: mongoTypeEqualsTo|replicaSet|storage
+          showLabels: true
+          elements:
+            - type: select
+              label: Trigger
+              init:
+                type: func
+                value: setTrigger|autoscalingKubedbComMongoDBAutoscaler/spec/storage/replicaSet/trigger
+              options:
+                - text: 'On'
+                  value: 'On'
+                - text: 'Off'
+                  value: 'Off'
+              schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/replicaSet/properties/trigger
+            - type: select
+              label: Expansion Mode
+              options:
+                - text: Online
+                  value: Online
+                - text: Offline
+                  value: Offline
+              schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/replicaSet/properties/expansionMode
+            - type: input
+              label: UsageThreshold (%)
+              schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/replicaSet/properties/usageThreshold
+            - type: array-object-form
+              label: Scaling Rules
+              schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/replicaSet/properties/scalingRules
+              watcher:
+                func: handleUnit|autoscalingKubedbComMongoDBAutoscaler/spec/storage/replicaSet/scalingRules|scalingRules
+                paths:
+                  - schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/replicaSet/properties/scalingRules
+              elements:
+                - type: input
+                  label: AppliesUpto (In Storage units)
+                  schema: appliesUpto
+                - type: input
+                  label: Threshold (In %, Or In Storage Units)
+                  schema: threshold
+            - type: input
+              label: Scaling Threshold
+              schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/replicaSet/properties/scalingThreshold
+            - type: input
+              label: UpperBound
+              schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/replicaSet/properties/upperBound
+              watcher:
+                func: handleUnit|autoscalingKubedbComMongoDBAutoscaler/spec/storage/replicaSet/upperBound
+                paths:
+                  - schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/replicaSet/properties/upperBound
+        # sharded mode
+        - type: block-layout
+          showLabels: false
+          if:
+            type: function
+            name: mongoTypeEqualsTo|sharded|storage
+          elements:
+            - type: block-layout
+              label: Shard
+              showLabels: true
+              elements:
+                - type: select
+                  label: Trigger
+                  init:
+                    type: func
+                    value: setTrigger|autoscalingKubedbComMongoDBAutoscaler/spec/storage/shard/trigger
+                  options:
+                    - text: 'On'
+                      value: 'On'
+                    - text: 'Off'
+                      value: 'Off'
+                  schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/shard/properties/trigger
+                - type: select
+                  label: Expansion Mode
+                  options:
+                    - text: Online
+                      value: Online
+                    - text: Offline
+                      value: Offline
+                  schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/shard/properties/expansionMode
+                - type: input
+                  label: UsageThreshold (%)
+                  schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/shard/properties/usageThreshold
+                - type: array-object-form
+                  label: Scaling Rules
+                  schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/shard/properties/scalingRules
+                  watcher:
+                    func: handleUnit|autoscalingKubedbComMongoDBAutoscaler/spec/storage/shard/scalingRules|scalingRules
+                    paths:
+                      - schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/shard/properties/scalingRules
+                  elements:
+                    - type: input
+                      label: AppliesUpto (In Storage units)
+                      schema: appliesUpto
+                    - type: input
+                      label: Threshold (In %, Or In Storage Units)
+                      schema: threshold
+                - type: input
+                  label: UpperBound
+                  schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/shard/properties/upperBound
+                  watcher:
+                    func: handleUnit|autoscalingKubedbComMongoDBAutoscaler/spec/storage/shard/upperBound
+                    paths:
+                      - schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/shard/properties/upperBound
+                - type: input
+                  label: Scaling Threshold
+                  schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/shard/properties/scalingThreshold
+            - type: block-layout
+              label: Config Server
+              showLabels: true
+              elements:
+                - type: select
+                  label: Trigger
+                  init:
+                    type: func
+                    value: setTrigger|autoscalingKubedbComMongoDBAutoscaler/spec/storage/configServer/trigger
+                  options:
+                    - text: 'On'
+                      value: 'On'
+                    - text: 'Off'
+                      value: 'Off'
+                  schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/configServer/properties/trigger
+                - type: select
+                  label: Expansion Mode
+                  options:
+                    - text: Online
+                      value: Online
+                    - text: Offline
+                      value: Offline
+                  schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/configServer/properties/expansionMode
+                - type: input
+                  label: UsageThreshold (%)
+                  schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/configServer/properties/usageThreshold
+                - type: array-object-form
+                  label: Scaling Rules
+                  schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/configServer/properties/scalingRules
+                  watcher:
+                    func: handleUnit|autoscalingKubedbComMongoDBAutoscaler/spec/storage/configServer/scalingRules|scalingRules
+                    paths:
+                      - schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/configServer/properties/scalingRules
+                  elements:
+                    - type: input
+                      label: AppliesUpto (In Storage units)
+                      schema: appliesUpto
+                    - type: input
+                      label: Threshold (In %, Or In Storage Units)
+                      schema: threshold
+                - type: input
+                  label: UpperBound
+                  schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/configServer/properties/upperBound
+                  watcher:
+                    func: handleUnit|autoscalingKubedbComMongoDBAutoscaler/spec/storage/configServer/upperBound
+                    paths:
+                      - schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/configServer/properties/upperBound
+                - type: input
+                  label: Scaling Threshold
+                  schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/configServer/properties/scalingThreshold
+            - type: block-layout
+              label: Hidden
+              showLabels: true
+              elements:
+                - type: select
+                  label: Trigger
+                  init:
+                    type: func
+                    value: setTrigger|autoscalingKubedbComMongoDBAutoscaler/spec/storage/hidden/trigger
+                  options:
+                    - text: 'On'
+                      value: 'On'
+                    - text: 'Off'
+                      value: 'Off'
+                  schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/hidden/properties/trigger
+                - type: select
+                  label: Expansion Mode
+                  options:
+                    - text: Online
+                      value: Online
+                    - text: Offline
+                      value: Offline
+                  schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/hidden/properties/expansionMode
+                - type: input
+                  label: UsageThreshold (%)
+                  schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/hidden/properties/usageThreshold
+                - type: array-object-form
+                  label: Scaling Rules
+                  schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/hidden/properties/scalingRules
+                  watcher:
+                    func: handleUnit|autoscalingKubedbComMongoDBAutoscaler/spec/storage/hidden/scalingRules|scalingRules
+                    paths:
+                      - schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/hidden/properties/scalingRules
+                  elements:
+                    - type: input
+                      label: AppliesUpto (In Storage units)
+                      schema: appliesUpto
+                    - type: input
+                      label: Threshold (In %, Or In Storage Units)
+                      schema: threshold
+                - type: input
+                  label: UpperBound
+                  schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/hidden/properties/upperBound
+                  watcher:
+                    func: handleUnit|autoscalingKubedbComMongoDBAutoscaler/spec/storage/hidden/upperBound
+                    paths:
+                      - schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/hidden/properties/upperBound
+                - type: input
+                  label: Scaling Threshold
+                  schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/hidden/properties/scalingThreshold
+        - type: block-layout
+          label: Ops Request Options
+          showLabels: true
+          if:
+            type: function
+            name: showOpsRequestOptions
+          elements:
+            - type: block-layout
+              label: Readiness Criteria
+              showLabels: true
+              elements:
+                - type: input
+                  label: Objects Count Diff Percentage
+                  schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/opsRequestOptions/properties/readinessCriteria/properties/objectsCountDiffPercentage
+                - type: input
+                  label: Oplog Max Lag Seconds
+                  schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/opsRequestOptions/properties/readinessCriteria/properties/oplogMaxLagSeconds
+            - type: select
+              label: Timeout
+              schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/opsRequestOptions/properties/timeout
+              options:
+              - text: 5 minutes
+                value: 5m0s
+              - text: 10 minutes
+                value: 10m0s
+              - text: 30 minutes
+                value: 30m0s
+              - text: 1 hour
+                value: 1h0m
+              - text: 2 hours
+                value: 2h0m
+              - text: 5 hours
+                value: 5h0m
+              - text: 10 hours
+                value: 10h0m
+            - type: radio
+              label: Apply
+              init:
+                type: func
+                value: setApplyToIfReady
+              options:
+                - text: IfReady (OpsRequest will be applied if database is ready)
+                  value: IfReady
+                - text: Always (OpsRequest will always be applied)
+                  value: Always
+              schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/opsRequestOptions/properties/apply
+
+  - type: single-step-form
     id: binding
     label: Gateway Binding
     elements:
@@ -1204,10 +1501,10 @@ step:
       label: Expose Database
       schema: temp/properties/binding
       fullwidth: true
-      # init:
-      #   type: func
-      #   value: isBindingAlreadyOn
-      # watcher:
-      #   func: addOrRemoveBinding
-      #   paths:
-      #     - temp/properties/binding
+      init:
+        type: func
+        value: isBindingAlreadyOn
+      watcher:
+        func: addOrRemoveBinding
+        paths:
+          - temp/properties/binding
