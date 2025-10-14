@@ -111,7 +111,7 @@ step:
           type: function
           name: ifRequestTypeEqualsTo|HorizontalScaling
         elements:
-          - type: input
+          - type: input-compare
             label: Replicas
             if:
               type: function
@@ -132,7 +132,7 @@ step:
                 elements:
                   - type: label-element
                     label: Config Server
-                  - type: input
+                  - type: input-compare
                     label: Replicas
                     schema: schema/properties/spec/properties/horizontalScaling/properties/configServer/properties/replicas
                     init:
@@ -144,7 +144,7 @@ step:
                 elements:
                   - type: label-element
                     label: Mongos
-                  - type: input
+                  - type: input-compare
                     label: Replicas
                     init:
                       type: func
@@ -156,7 +156,7 @@ step:
                 elements:
                   - type: label-element
                     label: Shard
-                  - type: input
+                  - type: input-compare
                     label: Replicas
                     init: 
                       type: func
@@ -388,7 +388,7 @@ step:
           type: function
           name: ifRequestTypeEqualsTo|VolumeExpansion
         elements:
-          - type: input
+          - type: input-compare
             label: Standalone
             if:
               type: function
@@ -400,17 +400,7 @@ step:
               type: custom
               name: checkVolume|/spec/storage/resources/requests/storage|/spec/volumeExpansion/standalone
             schema: schema/properties/spec/properties/volumeExpansion/properties/standalone
-          - type: select
-            label: Mode
-            options:
-              - text: Offline
-                value: Offline
-              - text: Online
-                value: Online
-            validation:
-              type: required
-            schema: schema/properties/spec/properties/volumeExpansion/properties/mode
-          - type: input
+          - type: input-compare
             label: ReplicaSet
             if:
               type: function
@@ -428,7 +418,7 @@ step:
               type: function
               name: ifDbTypeEqualsTo|sharded|volumeExpansion
             elements:
-              - type: input
+              - type: input-compare
                 label: Config Server
                 init:
                   type: func
@@ -437,7 +427,7 @@ step:
                   type: custom
                   name: checkVolume|/spec/shardTopology/configServer/storage/resources/requests/storage|/spec/volumeExpansion/configServer
                 schema: schema/properties/spec/properties/volumeExpansion/properties/configServer
-              - type: input
+              - type: input-compare
                 label: Shard
                 init:
                   type: func
@@ -446,6 +436,16 @@ step:
                   type: custom
                   name: checkVolume|/spec/shardTopology/shard/storage/resources/requests/storage|/spec/volumeExpansion/shard
                 schema: schema/properties/spec/properties/volumeExpansion/properties/shard
+          - type: select
+            label: Mode
+            options:
+              - text: Offline
+                value: Offline
+              - text: Online
+                value: Online
+            validation:
+              type: required
+            schema: schema/properties/spec/properties/volumeExpansion/properties/mode
 # Reconfigure
       - type: block-layout
         label: Reconfigure Form
