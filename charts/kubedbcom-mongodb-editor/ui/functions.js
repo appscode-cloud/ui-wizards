@@ -23,7 +23,7 @@ export const useFunc = (model) => {
 
   setDiscriminatorValue('/enableMonitoring', true)
   setDiscriminatorValue('/customizeExporter', true)
-  setDiscriminatorValue('/valueFromType', 'Input')
+  setDiscriminatorValue('/valueFromType', 'input')
 
   // Compute Autoscaler Discriminators
   setDiscriminatorValue('/dbDetails', false)
@@ -77,8 +77,7 @@ export const useFunc = (model) => {
     else return false
   }
 
-  function isEqualToModelPathValue(value) {
-    const modelPath = 'resources/kubedbComMongoDB/spec/monitor/agent'
+  function isEqualToModelPathValue(value, modelPath) {
     const modelPathValue = getValue(model, modelPath)
     // watchDependency('model#' + modelPath)
     return modelPathValue === value
@@ -110,19 +109,56 @@ export const useFunc = (model) => {
     }
   }
 
+  function isConfigMapTypeValueFrom() {
+    const valueFrom = getValue(discriminator, '/valueFrom')
+    return !!(valueFrom && valueFrom.configMapKeyRef)
+  }
+
+  function isSecretTypeValueFrom() {
+    const valueFrom = getValue(discriminator, '/valueFrom')
+    return !!(valueFrom && valueFrom.secretKeyRef)
+  }
+
+  function isInputTypeValueFrom() {
+    return !isConfigMapTypeValueFrom() && !isSecretTypeValueFrom()
+  }
+
   function onValueFromChange() {
-    // const valueFrom = getValue(discriminator, '/valueFromType')
-    // if (valueFrom === 'input') {
-    //   if (isConfigMapTypeValueFrom({ rootModel })) updateModelValue('valueFrom/configMapKeyRef', true)
-    //   if (isSecretTypeValueFrom({ rootModel })) updateModelValue('valueFrom/secretKeyRef', true)
-    // } else if (valueFrom === 'secret') {
-    //   if (!isSecretTypeValueFrom({ rootModel })) updateModelValue('valueFrom/secretKeyRef', false, {})
-    //   if (isConfigMapTypeValueFrom({ rootModel })) updateModelValue('valueFrom/configMapKeyRef', true)
-    // } else if (valueFrom === 'configMap') {
-    //   if (!isConfigMapTypeValueFrom({ rootModel }))
-    //     updateModelValue('valueFrom/configMapKeyRef', false, {})
-    //   if (isSecretTypeValueFrom({ rootModel })) updateModelValue('valueFrom/secretKeyRef', true)
-    // }
+    const valueFrom = getValue(discriminator, '/valueFromType')
+    if (valueFrom === 'input') {
+      if (isConfigMapTypeValueFrom())
+        commit('wizard/model$update', {
+          path: 'temp/valueFrom/configMapKeyRef',
+          value: true,
+        })
+      if (isSecretTypeValueFrom())
+        commit('wizard/model$update', {
+          path: 'temp/valueFrom/secretKeyRef',
+          value: true,
+        })
+    } else if (valueFrom === 'secret') {
+      if (!isSecretTypeValueFrom())
+        commit('wizard/model$update', {
+          path: 'temp/valueFrom/secretKeyRef',
+          value: false,
+        })
+      if (isConfigMapTypeValueFrom())
+        commit('wizard/model$update', {
+          path: 'temp/valueFrom/configMapKeyRef',
+          value: true,
+        })
+    } else if (valueFrom === 'configMap') {
+      if (!isConfigMapTypeValueFrom())
+        commit('wizard/model$update', {
+          path: 'temp/valueFrom/configMapKeyRef',
+          value: false,
+        })
+      if (isSecretTypeValueFrom())
+        commit('wizard/model$update', {
+          path: 'temp/valueFrom/secretKeyRef',
+          value: true,
+        })
+    }
   }
 
   function isEqualToDiscriminatorPath(
@@ -212,7 +248,7 @@ export const useFunc = (model) => {
 
   async function resourceNames(group, version, resource) {
     const namespace = getValue(model, '/metadata/release/namespace')
-    watchDependency('model#/metadata/release/namespace')
+    // watchDependency('model#/metadata/release/namespace')
 
     let resources = await getNamespacedResourceList(axios, storeGet, {
       namespace,
@@ -1717,10 +1753,6 @@ export const useFunc = (model) => {
     return 'BackupConfig'
   }
 
-  function setMonitoringModel() {
-    return 'Prometheus-Operator'
-  }
-
   function getTypes() {
     const arr = [
       {
@@ -2206,7 +2238,7 @@ export const useFunc = (model) => {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
     const namespace = getValue(model, '/metadata/release/namespace')
-    watchDependency('model#/metadata/release/namespace')
+    // watchDependency('model#/metadata/release/namespace')
 
     try {
       const resp = await axios.get(
@@ -2232,6 +2264,36 @@ export const useFunc = (model) => {
         return true
       })
       return filteredSecrets
+    } catch (e) {
+      console.log(e)
+      return []
+    }
+  }
+
+  async function getSecretKeys() {
+    const owner = storeGet('/route/params/user')
+    const cluster = storeGet('/route/params/cluster')
+    // const namespace = getValue(reusableElementCtx, '/dataContext/namespace')
+    const namespace = getValue(model, '/metadata/release/namespace')
+    const secretName = getValue(discriminator, 'valueFrom/secretKeyRef/name') || ''
+    // watchDependency('data#/namespace')
+    // watchDependency('rootModel#/valueFrom/secretKeyRef/name')
+
+    if (!secretName) return []
+
+    try {
+      const resp = await axios.get(
+        `/clusters/${owner}/${cluster}/proxy/core/v1/namespaces/${namespace}/secrets/${secretName}`,
+      )
+
+      const secret = (resp && resp.data && resp.data.data) || {}
+
+      const secretKeys = Object.keys(secret).map((item) => ({
+        text: item,
+        value: item,
+      }))
+
+      return secretKeys
     } catch (e) {
       console.log(e)
       return []
@@ -2764,23 +2826,12 @@ export const useFunc = (model) => {
       )
     }
   }
-  async function getConfigMapKeys({
-    storeGet,
-    axios,
-    getValue,
-    watchDependency,
-    rootModel,
-    reusableElementCtx,
-  }) {
+  async function getConfigMapKeys() {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
-    const namespace = getValue(reusableElementCtx, '/dataContext/namespace')
-    const configMapName =
-      (rootModel &&
-        rootModel.valueFrom &&
-        rootModel.valueFrom.configMapKeyRef &&
-        rootModel.valueFrom.configMapKeyRef.name) ||
-      ''
+    // const namespace = getValue(reusableElementCtx, '/dataContext/namespace') // not supported
+    const namespace = getValue(model, '/metadata/release/namespace')
+    const configMapName = getValue(discriminator, 'valueFrom/configMapKeyRef/name') || ''
     // watchDependency('data#/namespace')
     // watchDependency('rootModel#/valueFrom/configMapKeyRef/name')
 
@@ -2966,6 +3017,9 @@ export const useFunc = (model) => {
     const pathConstructedForKubedb =
       pathSplit + `/create-opsrequest-${reqType.toLowerCase()}?namespace=${namespace}`
 
+    // TODO:- mode must be defined
+    const mode = 'standalone-step' // must removed
+
     if (mode === 'standalone-step') return pathConstructedForKubedb
     else
       return `${domain}/console/${owner}/kubernetes/${cluster}/ops.kubedb.com/v1alpha1/mongodbopsrequests/create?name=${dbname}&namespace=${namespace}&group=${group}&version=${version}&resource=${resource}&kind=${kind}&page=operations&requestType=VerticalScaling`
@@ -3103,10 +3157,10 @@ export const useFunc = (model) => {
     }
   }
 
-  function setValueFrom({ rootModel }) {
-    if (isConfigMapTypeValueFrom({ rootModel })) {
+  function setValueFrom() {
+    if (isConfigMapTypeValueFrom()) {
       return 'configMap'
-    } else if (isSecretTypeValueFrom({ rootModel })) {
+    } else if (isSecretTypeValueFrom()) {
       return 'secret'
     } else {
       return 'input'
@@ -3285,10 +3339,11 @@ export const useFunc = (model) => {
     hasNoAnnotations,
     fetchTopologyMachines,
     onMachineChange,
-    setMonitoringModel,
     isEqualToValueFromType,
     onValueFromChange,
     getConfigMapKeys,
     setValueFrom,
+    isInputTypeValueFrom,
+    getSecretKeys,
   }
 }
