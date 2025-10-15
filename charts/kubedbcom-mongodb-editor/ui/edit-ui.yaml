@@ -287,11 +287,13 @@ step:
             - type: array-item-form
               label: Args
               schema: schema/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/args
+              init: 
+                type: static
+                value: ['--compatible-mode']
               element:
-                # Form Builder issue : same if for all element
                 type: input
                 label: Args
-                schema: schema/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/args/items
+                schema: items
                 # isSubsection: true
             - type: block-layout
               label: Metadata
@@ -327,7 +329,7 @@ step:
                     label: Value 
                     schema: schema/properties/items/properties/value
                     if:
-                      name: isEqualToValueFromType|Input
+                      name: isEqualToValueFromType|input
                       type: function
                   - type: select
                     if:
@@ -366,6 +368,9 @@ step:
                   - type: select
                     label: Secret Key
                     schema: schema/items/properties/valueFrom/properties/secretKeyRef/properties/key
+                    if:
+                      type: function
+                      name: isEqualToValueFromType|secret
                     loader:
                       name: getSecretKeys
                       watchPaths:
