@@ -176,10 +176,14 @@ export const useFunc = (model) => {
     return getValue(model, path)
   }
 
-  function isEqualToValueFromType(value) {
+  function isEqualToValueFromType(index, value) {
     //watchDependency('discriminator#/valueFromType')
-    const valueFrom = getValue(discriminator, '/valueFromType')
-    return valueFrom === value
+    // const valueFrom = getValue(discriminator, '/valueFromType')
+    const valueFrom = getValue(
+      model,
+      '/resources/kubedbComMongoDB/spec/monitor/prometheus/exporter/env',
+    )
+    return valueFrom[index].valueFromType === value
   }
 
   // function isEqualToValueFromType(index, value) {
@@ -2283,7 +2287,7 @@ export const useFunc = (model) => {
     }
   }
 
-  async function getSecretKeys() {
+  async function getSecretKeys(index) {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
     // const namespace = getValue(reusableElementCtx, '/dataContext/namespace') // not supported
@@ -2843,7 +2847,7 @@ export const useFunc = (model) => {
       )
     }
   }
-  async function getConfigMapKeys() {
+  async function getConfigMapKeys(index) {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
     // const namespace = getValue(reusableElementCtx, '/dataContext/namespace') // not supported
