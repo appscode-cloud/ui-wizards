@@ -175,10 +175,14 @@ export const useFunc = (model) => {
     return getValue(model, path)
   }
 
-  function isEqualToValueFromType(value) {
+  function isEqualToValueFromType(index, value) {
     //watchDependency('discriminator#/valueFromType')
-    const valueFrom = getValue(discriminator, '/valueFromType')
-    return valueFrom === value
+    // const valueFrom = getValue(discriminator, '/valueFromType')
+    const valueFrom = getValue(
+      model,
+      '/resources/kubedbComMongoDB/spec/monitor/prometheus/exporter/env',
+    )
+    return valueFrom[index].valueFromType === value
   }
 
   function isNotShardModeSelected({ model, getValue, watchDependency }) {
@@ -2270,12 +2274,14 @@ export const useFunc = (model) => {
     }
   }
 
-  async function getSecretKeys() {
+  async function getSecretKeys(index) {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
-    // const namespace = getValue(reusableElementCtx, '/dataContext/namespace')
+    // const namespace = getValue(reusableElementCtx, '/dataContext/namespace') // not supported
     const namespace = getValue(model, '/metadata/release/namespace')
-    const secretName = getValue(discriminator, 'valueFrom/secretKeyRef/name') || ''
+    const env = getValue(model, '/resources/kubedbComMongoDB/spec/monitor/prometheus/exporter/env')
+    const secretName = env[index]?.items?.valueFrom?.secretKeyRef?.name || ''
+
     // watchDependency('data#/namespace')
     // watchDependency('rootModel#/valueFrom/secretKeyRef/name')
 
@@ -2826,12 +2832,14 @@ export const useFunc = (model) => {
       )
     }
   }
-  async function getConfigMapKeys() {
+  async function getConfigMapKeys(index) {
     const owner = storeGet('/route/params/user')
     const cluster = storeGet('/route/params/cluster')
     // const namespace = getValue(reusableElementCtx, '/dataContext/namespace') // not supported
     const namespace = getValue(model, '/metadata/release/namespace')
-    const configMapName = getValue(discriminator, 'valueFrom/configMapKeyRef/name') || ''
+    const env = getValue(model, '/resources/kubedbComMongoDB/spec/monitor/prometheus/exporter/env')
+    const configMapName = env[index]?.items?.valueFrom?.configMapKeyRef?.name || ''
+
     // watchDependency('data#/namespace')
     // watchDependency('rootModel#/valueFrom/configMapKeyRef/name')
 
