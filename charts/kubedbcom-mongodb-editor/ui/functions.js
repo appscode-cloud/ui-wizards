@@ -20,6 +20,7 @@ export const useFunc = (model) => {
   setDiscriminatorValue('archiverEnabled', false)
 
   setDiscriminatorValue('binding', false)
+  setDiscriminatorValue('hidePreviewFromWizard', undefined)
 
   setDiscriminatorValue('/enableMonitoring', true)
   setDiscriminatorValue('/customizeExporter', true)
@@ -1893,6 +1894,8 @@ export const useFunc = (model) => {
         force: true,
       })
     }
+    if (context === 'Delete') setDiscriminatorValue('hidePreviewFromWizard', true)
+    else setDiscriminatorValue('hidePreviewFromWizard', undefined)
   }
 
   function getConfigList() {
