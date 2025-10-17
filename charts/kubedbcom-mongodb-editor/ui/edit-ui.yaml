@@ -301,16 +301,16 @@ step:
               elements: 
                 - type: array-object-form
                   label: New Environment Variable
-                  schema: schema/properties/items
+                  schema: schema/properties/resources/properties/kubedbComMongoDB/properties/spec/properties/monitor/properties/prometheus/properties/exporter/properties/env
                   elements:
                   - type: input
                     label: Name
-                    schema: schema/properties/items/properties/name
+                    schema: items/properties/name
                     validation:
                       type: required
                   - type: radio
                     label: Value From
-                    schema: temp/properties/valueFromType
+                    schema: valueFromType
                     init: 
                       type: func 
                       value: setValueFrom
@@ -324,10 +324,10 @@ step:
                     watcher:
                       func: onValueFromChange
                       paths:
-                        - temp/properties/valueFromType
+                        - valueFromType
                   - type: input 
                     label: Value 
-                    schema: schema/properties/items/properties/value
+                    schema: value
                     if:
                       name: isEqualToValueFromType|input
                       type: function
@@ -336,7 +336,7 @@ step:
                       type: function
                       name: isEqualToValueFromType|configMap
                     label: ConfigMap Name
-                    schema: schema/items/properties/valueFrom/properties/configMapKeyRef/properties/name
+                    schema: items/properties/valueFrom/properties/configMapKeyRef/properties/name
                     loader:
                       name: resourceNames|core|v1|configmaps
                       watchPaths:
@@ -344,19 +344,19 @@ step:
                     # allowUserDefinedOption: true
                   - type: select
                     label: ConfigMap Key
-                    schema: schema/items/properties/valueFrom/properties/configMapKeyRef/properties/key
+                    schema: items/properties/valueFrom/properties/configMapKeyRef/properties/key
                     if:
                       type: function
                       name: isEqualToValueFromType|configMap
                     loader:
                       name: getConfigMapKeys
                       watchPaths:
-                        - temp/valueFrom/configMapKeyRef/name
+                        - valueFrom/configMapKeyRef/name
                         - schema/metadata/release/namespace
                     # allowUserDefinedOption: true
                   - type: select
                     label: Secret Name
-                    schema: schema/items/properties/valueFrom/properties/secretKeyRef/properties/name
+                    schema: items/properties/valueFrom/properties/secretKeyRef/properties/name
                     if:
                       type: function
                       name: isEqualToValueFromType|secret
@@ -367,14 +367,14 @@ step:
                     # allowUserDefinedOption: true
                   - type: select
                     label: Secret Key
-                    schema: schema/items/properties/valueFrom/properties/secretKeyRef/properties/key
+                    schema: items/properties/valueFrom/properties/secretKeyRef/properties/key
                     if:
                       type: function
                       name: isEqualToValueFromType|secret
                     loader:
                       name: getSecretKeys
                       watchPaths:
-                        - temp/valueFrom/secretKeyRef/name
+                        - valueFrom/secretKeyRef/name
                         - schema/metadata/release/namespace
                     # allowUserDefinedOption: true
 
