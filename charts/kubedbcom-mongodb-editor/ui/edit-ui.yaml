@@ -409,7 +409,7 @@ step:
             - type: input
               label: Pod LifeTime Threshold
               schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/standalone/properties/podLifeTimeThreshold
-            - type: input
+            - type: threshold-input
               label: Resource Diff Percentage
               schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/standalone/properties/resourceDiffPercentage
             - type: block-layout
@@ -497,10 +497,10 @@ step:
               showLabels: true
               # schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/standalone/properties/inMemoryStorage
               elements:
-                - type: input
+                - type: threshold-input
                   label: Scaling Factor Percentage
                   schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/standalone/properties/inMemoryStorage/properties/scalingFactorPercentage
-                - type: input
+                - type: threshold-input
                   label: Usage Threshold Percentage
                   schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/compute/properties/standalone/properties/inMemoryStorage/properties/usageThresholdPercentage
         #  replicaset mode
@@ -1143,7 +1143,7 @@ step:
               showLabels: true
               # schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/opsRequestOptions/properties/readinessCriteria
               elements:
-                - type: input
+                - type: threshold-input
                   label: Objects Count Diff Percentage
                   schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/opsRequestOptions/properties/readinessCriteria/properties/objectsCountDiffPercentage
                 - type: input
@@ -1216,20 +1216,9 @@ step:
             - type: input
               label: UsageThreshold (%)
               schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/standalone/properties/usageThreshold
-            - type: array-object-form
+            - type: scaling-rules
               label: Scaling Rules
               schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/standalone/properties/scalingRules
-              watcher:
-                func: handleUnit|autoscalingKubedbComMongoDBAutoscaler/spec/storage/standalone/scalingRules|scalingRules
-                paths:
-                  - schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/standalone/properties/scalingRules
-              elements:
-                - type: input
-                  label: AppliesUpto (In Storage units)
-                  schema: appliesUpto
-                - type: input
-                  label: Threshold (In %, Or In Storage Units)
-                  schema: threshold
             - type: input
               label: Scaling Threshold
               schema: schema/properties/resources/properties/autoscalingKubedbComMongoDBAutoscaler/properties/spec/properties/storage/properties/standalone/properties/scalingThreshold
