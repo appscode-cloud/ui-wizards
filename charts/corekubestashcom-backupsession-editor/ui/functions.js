@@ -62,34 +62,16 @@ function isBackupSelected({ getValue, discriminator, watchDependency }) {
   return backup
 }
 
-function buildObject({ getValue, discriminator, commit }) {
+function buildCommand({ getValue, discriminator, commit }) {
   const sessions = getValue(discriminator, '/selectedSessions')
-  const generatedObjects = sessions?.map((ele) => {
-    const timestamp = Math.floor(Date.now() / 1000)
-    return {
-      apiVersion: 'core.kubestash.com/v1alpha1',
-      kind: 'BackupSession',
-      metadata: {
-        labels: {
-          'kubestash.com/invoker-name': backupName,
-        },
-        name: `${backupName}-${ele}-${timestamp}`,
-        namespace: backupNamespace,
-      },
-      spec: {
-        invoker: {
-          apiGroup: 'core.kubestash.com',
-          kind: 'BackupConfiguration',
-          name: backupName,
-        },
-        session: ele,
-      },
-    }
+  let generatedCommand = `trigger ${backupName} -n ${backupNamespace}`
+  sessions?.forEach((ele) => {
+    generatedCommand += ` --sessions ${ele}`
   })
 
   commit('wizard/model$update', {
     path: '/resources/coreKubestashComBackupSession/',
-    value: generatedObjects,
+    value: generatedCommand,
     force: true,
   })
 }
@@ -107,7 +89,7 @@ return {
   clearModel,
   getSessionOptions,
   isBackupSelected,
-  buildObject,
+  buildCommand,
   isApiResolved,
   getOptions,
   init,
